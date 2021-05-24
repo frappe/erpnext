@@ -274,9 +274,9 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			closing_entry.db_set('error_message', '')
 			closing_entry.update_opening_entry()
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
-		message_log = frappe.message_log.pop()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
 		error_message = safe_load_json(message_log)
 
 		if closing_entry:
@@ -300,9 +300,9 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			closing_entry.db_set('error_message', '')
 			closing_entry.update_opening_entry(for_cancel=True)
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
-		message_log = frappe.message_log.pop()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
 		error_message = safe_load_json(message_log)
 
 		if closing_entry:
@@ -348,11 +348,9 @@ def job_already_enqueued(job_name):
 		return True
 
 def safe_load_json(message):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
-
 	try:
 		json_message = json.loads(message).get('message')
-	except JSONDecodeError:
+	except Exception:
 		json_message = message
 
 	return json_message
