@@ -8,7 +8,7 @@ from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import update_gl_entries_after
 
-def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
+def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False, posting_date=None, posting_time=None):
 	"""
 	Repost everything!
 	"""
@@ -25,11 +25,16 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 			union
 			select item_code, warehouse from `tabStock Ledger Entry`) a
 	""")
-	for d in item_warehouses:
+
+	count = len(item_warehouses)
+	for i, d in enumerate(item_warehouses):
+		print("{0}/{1}: Reposting SLE for {2}".format(i+1, count, d))
 		try:
-			repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin, allow_negative_stock)
+			repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin, allow_negative_stock,
+				posting_date=posting_date, posting_time=posting_time)
 			frappe.db.commit()
 		except:
+			print("ERROR on {0}".format(d))
 			frappe.db.rollback()
 
 	if allow_negative_stock:
@@ -37,10 +42,11 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 	frappe.db.auto_commit_on_many_writes = 0
 
 def repost_stock(item_code, warehouse, allow_zero_rate=False,
-	only_actual=False, only_bin=False, allow_negative_stock=False):
+	only_actual=False, only_bin=False, allow_negative_stock=False, posting_date=None, posting_time=None):
 
 	if not only_bin:
-		repost_actual_qty(item_code, warehouse, allow_zero_rate, allow_negative_stock)
+		repost_actual_qty(item_code, warehouse, allow_zero_rate, allow_negative_stock,
+			posting_date=posting_date, posting_time=posting_time)
 
 	if item_code and warehouse and not only_actual:
 		qty_dict = {
@@ -56,7 +62,8 @@ def repost_stock(item_code, warehouse, allow_zero_rate=False,
 
 		update_bin_qty(item_code, warehouse, qty_dict)
 
-def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False):		update_entries_after({ "item_code": item_code, "warehouse": warehouse },
+def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False, posting_date=None, posting_time=None):
+	update_entries_after({"item_code": item_code, "warehouse": warehouse, "posting_date": posting_date, "posting_time": posting_time},
 		allow_zero_rate=allow_zero_rate, allow_negative_stock=allow_negative_stock)
 
 def get_balance_qty_from_sle(item_code, warehouse):
