@@ -182,10 +182,20 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.rtn",
+   "fetch_if_empty": 1,
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "read_only": 1
+  },
+  {
    "fieldname": "total_exempt",
    "fieldtype": "Currency",
-   "label": "Total exempt",
-   "options": "Currency"
+   "in_list_view": 1,
+   "label": "Total Exempt",
+   "options": "Currency",
+   "reqd": 1
   },
   {
    "fieldname": "total",
@@ -193,18 +203,10 @@
    "label": "Total",
    "options": "Currency",
    "read_only": 1
-  },
-  {
-   "fetch_from": "customer.rtn",
-   "fetch_if_empty": 1,
-   "fieldname": "rtn",
-   "fieldtype": "Data",
-   "label": "RTN",
-   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-13 15:20:04.085358",
+ "modified": "2021-05-24 16:33:09.978351",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXC",

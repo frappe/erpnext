@@ -39,7 +39,7 @@
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "CN-CXP-.YYYY.-",
+   "options": "CN-CXC-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -205,7 +205,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-21 16:21:05.844860",
+ "modified": "2021-05-24 16:21:54.682032",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXC",

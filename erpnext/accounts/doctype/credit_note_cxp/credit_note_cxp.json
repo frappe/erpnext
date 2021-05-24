@@ -36,7 +36,7 @@
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "CN-CXC-.YYYY.-",
+   "options": "CN-CXP-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -169,18 +169,20 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "total_exempt",
-   "fieldtype": "Currency",
-   "label": "Total exempt",
-   "options": "Currency"
-  },
-  {
    "fetch_from": "supplier.rtn",
    "fetch_if_empty": 1,
    "fieldname": "rtn",
    "fieldtype": "Data",
    "label": "RTN",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Exempt",
+   "options": "Currency",
+   "reqd": 1
   },
   {
    "fieldname": "total",
@@ -191,7 +193,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-19 14:24:28.281545",
+ "modified": "2021-05-24 16:27:12.581548",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXP",

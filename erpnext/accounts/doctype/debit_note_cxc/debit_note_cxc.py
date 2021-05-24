@@ -64,6 +64,7 @@ class DebitNoteCXC(Document):
 		customer = frappe.get_doc("Customer", self.customer)
 		if customer:
 			customer.debit += self.total
+			customer.reamaining_balance += self.total
 			customer.save()
 	
 	def validate_status(self):
@@ -211,17 +212,3 @@ class DebitNoteCXC(Document):
 					if str(date) == str(sum_dates1):
 						frappe.msgprint(_("This CAI expires in {} days.".format(i)))
 						break
-
-@frappe.whitelist()
-def get_taxes(tax, base):
-	tx_base = 0
-	item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": tax})
-	for tax_template in item_tax_template:
-		tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_template.name})
-		for taxes in tax_details:
-			if taxes.tax_rate == 15:
-				tx_base = base * (tax.tax_rate/100)
-			elif taxes.tax_rate == 18:
-				tx_base = base * (tax.tax_rate/100)
-
-	return tx_base

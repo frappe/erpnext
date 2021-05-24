@@ -264,6 +264,7 @@ class SalesInvoice(SellingController):
 		customer = frappe.get_doc("Customer", self.customer)
 		if customer:
 			customer.debit += self.grand_total
+			customer.reamaining_balance += self.grand_total
 			customer.save()
 	
 	def discount_product(self):
