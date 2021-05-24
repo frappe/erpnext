@@ -267,6 +267,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 			break
 
 	if not batch_no:
+		table_html = ""
 		if batches:
 			table_html = """<table class="table table-striped table-bordered">
 			<tr>
