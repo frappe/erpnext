@@ -106,7 +106,7 @@ class ProductQuery:
 
 	def query_items(self, conditions, or_conditions, substitutions, start=0, with_attributes=False):
 		"""Build a query to fetch Website Items based on field filters."""
-		self.query_fields = (", ").join(self.fields)
+		self.query_fields = ", ".join(self.fields)
 
 		attribute_table = ", `tabItem Variant Attribute` iva" if with_attributes else ""
 
@@ -119,9 +119,9 @@ class ProductQuery:
 				{conditions}
 				{or_conditions}
 			limit {self.page_length} offset {start}
-		""",
-		tuple(substitutions),
-		as_dict=1)
+			""",
+			tuple(substitutions),
+			as_dict=1)
 
 	def query_items_with_attributes(self, attributes, start=0):
 		"""Build a query to fetch Website Items based on field & attribute filters."""
@@ -147,7 +147,7 @@ class ProductQuery:
 
 			all_items.append(set(items_dict.keys()))
 
-		result = [items_dict.get(item) for item in list(set.intersection(*all_items))]
+		result = [items_dict.get(item) for item in set.intersection(*all_items)]
 		return result
 
 	def build_fields_filters(self, filters):
@@ -192,11 +192,8 @@ class ProductQuery:
 
 		# Join the meta fields and default fields set
 		search_fields = default_fields.union(meta_fields)
-		try:
-			if frappe.db.count('Item', cache=True) > 50000:
-				search_fields.remove('description')
-		except KeyError:
-			pass
+		if frappe.db.count('Item', cache=True) > 50000:
+			search_fields.discard('description')
 
 		# Build or filters for query
 		search = '%{}%'.format(search_term)

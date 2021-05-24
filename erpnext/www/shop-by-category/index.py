@@ -4,7 +4,7 @@ from frappe import _
 sitemap = 1
 
 def get_context(context):
-	settings = frappe.get_doc("E Commerce Settings")
+	settings = frappe.get_cached_doc("E Commerce Settings")
 	context.categories_enabled = settings.enable_field_filters
 
 	if context.categories_enabled:
@@ -23,9 +23,9 @@ def get_slideshow(slideshow):
 		'rounded': 1,
 		'slider_name': "Categories"
 	}
-	slideshow = frappe.get_doc("Website Slideshow", slideshow)
+	slideshow = frappe.get_cached_doc("Website Slideshow", slideshow)
 	slides = slideshow.get({"doctype": "Website Slideshow Item"})
-	for index, slide in enumerate(slides):
+	for index, slide in enumerate(slides, start=1):
 		values[f"slide_{index + 1}_image"] = slide.image
 		values[f"slide_{index + 1}_title"] = slide.heading
 		values[f"slide_{index + 1}_subtitle"] = slide.description
@@ -41,7 +41,7 @@ def get_tabs(categories):
 	}
 
 	categorical_data = get_category_records(categories)
-	for index, tab in enumerate(categorical_data):
+	for index, tab in enumerate(categorical_data, start=1):
 		tab_values[f"tab_{index + 1}_title"] = frappe.unscrub(tab)
 		# pre-render cards for each tab
 		tab_values[f"tab_{index + 1}_content"] = frappe.render_template(
@@ -55,19 +55,24 @@ def get_category_records(categories):
 	for category in categories:
 		if category == "item_group":
 			categorical_data["item_group"] = frappe.db.sql("""
-				Select name, parent_item_group, is_group, image, route
-				from `tabItem Group`
-				where parent_item_group='All Item Groups'
-				and show_in_website=1""", as_dict=1)
+				Select
+					name, parent_item_group, is_group, image, route
+				from
+					`tabItem Group`
+				where
+					parent_item_group = 'All Item Groups'
+					and show_in_website = 1
+				""",
+				as_dict=1)
 		else:
 			doctype = frappe.unscrub(category)
 			fields = ["name"]
 			if frappe.get_meta(doctype, cached=True).get_field("image"):
 				fields += ["image"]
 
-			categorical_data[category] = frappe.db.sql("""
-				Select {fields}
-				from `tab{doctype}`""".format(doctype=doctype, fields=",".join(fields)), as_dict=1)
+			categorical_data[category] = frappe.db.sql(f"""
+				Select {",".join(fields)}
+				from `tab{doctype}`""", as_dict=1)
 
 	return categorical_data
 
