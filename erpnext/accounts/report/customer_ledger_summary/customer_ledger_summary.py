@@ -6,6 +6,7 @@ import frappe
 import erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate
+from erpnext.accounts.utils import get_account_currency
 from six import iteritems, itervalues
 
 class PartyLedgerSummaryReport(object):
@@ -24,8 +25,7 @@ class PartyLedgerSummaryReport(object):
 		self.filters.party_type = args.get("party_type")
 		self.party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
 
-		self.invoice_dr_or_cr = "debit" if self.filters.party_type in ["Customer", "Employee"] else "credit"
-		self.reverse_dr_or_cr = "credit" if self.filters.party_type in ["Customer", "Employee"] else "debit"
+		self.set_account_currency()
 
 		self.get_gl_entries()
 		self.get_return_invoices()
@@ -60,6 +60,13 @@ class PartyLedgerSummaryReport(object):
 			return_label = None
 
 		columns += [
+			{
+				"label": _("Currency"),
+				"fieldname": "currency",
+				"fieldtype": "Link",
+				"options": "Currency",
+				"width": 80
+			},
 			{
 				"label": _("Opening Balance"),
 				"fieldname": "opening_balance",
@@ -114,9 +121,39 @@ class PartyLedgerSummaryReport(object):
 
 		return columns
 
-	def get_data(self):
-		company_currency = frappe.get_cached_value('Company',  self.filters.get("company"),  "default_currency")
+	def set_account_currency(self):
+		self.filters["company_currency"] = frappe.get_cached_value('Company', self.filters.company, "default_currency")
+		self.filters["account_currency"] = self.filters["company_currency"]
 
+		if self.filters.get("account") or self.filters.get('party'):
+			account_currency = None
+
+			if self.filters.get("account"):
+				account_currency = get_account_currency(self.filters.account)
+			elif self.filters.get("party"):
+				gle_currency = frappe.db.get_value("GL Entry", {
+					"party_type": self.filters.party_type, "party": self.filters.party, "company": self.filters.company
+				}, "account_currency")
+
+				if gle_currency:
+					account_currency = gle_currency
+				else:
+					account_currency = (None if self.filters.party_type in ["Employee", "Student", "Shareholder", "Member",
+						"Letter of Credit"] else frappe.db.get_value(self.filters.party_type, self.filters.party, "default_currency"))
+
+			self.filters["account_currency"] = account_currency or self.filters.company_currency
+
+		self.base_invoice_dr_or_cr = "debit" if self.filters.party_type in ["Customer", "Employee"] else "credit"
+		self.base_reverse_dr_or_cr = "credit" if self.filters.party_type in ["Customer", "Employee"] else "debit"
+
+		if self.filters["account_currency"] == self.filters["company_currency"]:
+			self.invoice_dr_or_cr = "debit" if self.filters.party_type in ["Customer", "Employee"] else "credit"
+			self.reverse_dr_or_cr = "credit" if self.filters.party_type in ["Customer", "Employee"] else "debit"
+		else:
+			self.invoice_dr_or_cr = "debit_in_account_currency" if self.filters.party_type in ["Customer", "Employee"] else "credit_in_account_currency"
+			self.reverse_dr_or_cr = "credit_in_account_currency" if self.filters.party_type in ["Customer", "Employee"] else "debit_in_account_currency"
+
+	def get_data(self):
 		self.party_data = frappe._dict({})
 		for gle in self.gl_entries:
 			self.party_data.setdefault(gle.party, frappe._dict({
@@ -127,7 +164,7 @@ class PartyLedgerSummaryReport(object):
 				"paid_amount": 0,
 				"return_amount": 0,
 				"closing_balance": 0,
-				"currency": company_currency
+				"currency": self.filters.account_currency
 			}))
 
 			amount = gle.get(self.invoice_dr_or_cr) - gle.get(self.reverse_dr_or_cr)
@@ -173,7 +210,8 @@ class PartyLedgerSummaryReport(object):
 		self.gl_entries = frappe.db.sql("""
 			select
 				gle.posting_date, gle.party, gle.voucher_type, gle.voucher_no, gle.against_voucher_type,
-				gle.against_voucher, gle.debit, gle.credit, gle.is_opening {join_field}
+				gle.against_voucher, gle.debit, gle.credit, gle.debit_in_account_currency, gle.credit_in_account_currency,
+				gle.is_opening {join_field}
 			from `tabGL Entry` gle
 			{join}
 			where
@@ -196,6 +234,10 @@ class PartyLedgerSummaryReport(object):
 
 		if self.filters.get("account"):
 			conditions.append("account=%(account)s")
+		else:
+			accounts = [d.name for d in frappe.get_all("Account",
+				filters={"account_type": ('in', ['Receivable', 'Payable']), "company": self.filters.company})]
+			conditions.append("account in ({0})".format(", ".join([frappe.db.escape(d) for d in accounts])))
 
 		if self.filters.get("cost_center"):
 			conditions.append("cost_center=%(cost_center)s")
@@ -260,13 +302,20 @@ class PartyLedgerSummaryReport(object):
 			self.return_invoices = []
 
 	def get_party_adjustment_amounts(self):
+		self.party_adjustment_details = {}
+		self.party_adjustment_accounts = set()
+
+		if self.filters.account_currency != self.filters.company_currency:
+			return
+
 		conditions = self.prepare_conditions()
 		income_or_expense = "Expense Account" if self.filters.party_type in ["Customer", "Employee"] else "Income Account"
 		round_off_account = frappe.get_cached_value('Company', self.filters.company, "round_off_account")
 
 		gl_entries = frappe.db.sql("""
 			select
-				posting_date, account, party, voucher_type, voucher_no, debit, credit
+				posting_date, account, party, voucher_type, voucher_no,
+				debit, credit, debit_in_account_currency, credit_in_account_currency
 			from
 				`tabGL Entry`
 			where
@@ -282,8 +331,6 @@ class PartyLedgerSummaryReport(object):
 				)
 		""".format(conditions=conditions, income_or_expense=income_or_expense), self.filters, as_dict=True)
 
-		self.party_adjustment_details = {}
-		self.party_adjustment_accounts = set()
 		adjustment_voucher_entries = {}
 		for gle in gl_entries:
 			adjustment_voucher_entries.setdefault((gle.voucher_type, gle.voucher_no), [])

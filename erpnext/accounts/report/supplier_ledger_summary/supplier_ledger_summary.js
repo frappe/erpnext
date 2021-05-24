@@ -15,7 +15,7 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			"default": frappe.defaults.get_user_default("year_start_date"),
 			"reqd": 1,
 			"width": "60px"
 		},
@@ -23,7 +23,7 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
+			"default": frappe.defaults.get_user_default("year_end_date"),
 			"reqd": 1,
 			"width": "60px"
 		},
