@@ -43,43 +43,23 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
-	onload: function(frm) {
+	onload: function(frm,cdt,cdn) {
 		// add item, if previous view was item
 		var prev_route = frappe.get_prev_route();
 		if (prev_route[1] === 'Work Order') {
 			frm.set_value("manufacturing_staging", 1);
 			frm.set_value("material_request_type","Material Transfer");
-
+			frm.set_value("schedule_date",frappe.datetime.get_today());
 			frappe.call({
-				method: "erpnext.stock.doctype.material_request.material_request.get_wo_items",
+				method: "get_wo_items",
+				doc:frm.doc,
 				args:{
-					single_wo: 0,
 					work_order: prev_route[2]
 				},
-				freeze_message: "fetching item from work order",
 				callback: function(resp){
-					if(resp.message){
-						resp.message.map(item => {
-							var d = frm.add_child('items')
-							d.item_code = item.item_code;
-								d.item_name = item.item_name;
-								d.description = item.desc;
-								d.warehouse = frm.doc.set_warehouse;
-								d.uom = item.stock_uom;
-								//d.stock_uom = item.stock_uom;
-								d.cost_center = item.cost_center;
-								d.expense_account = item.expense_account
-								//d.warehouse = item.default_warehouse;
-								d.multi_order_qty = item.multi_order_qty;
-								d.conversion_factor = 1;
-								d.qty = item.qty;
-								d.production_item_name = item.production_item_name;
-								d.projected_qty = item.projected_qty;
-								d.actual_qty = item.actual_qty;
-								d.rate = item.valuation_rate;
-								d.min_order_qty = item.min_order_qty;
-								d.amount = item.valuation_rate * item.qty;
-						})
+					if (r.message === 'Item not found') {
+						frappe.throw(__(r.message));
+					} else {
 						frm.refresh_field('items')
 					}
 				}
@@ -303,36 +283,16 @@ frappe.ui.form.on('Material Request', {
 				values.company = frm.doc.company
 				if(!values) return;
 				frappe.call({
-					method: "erpnext.stock.doctype.material_request.material_request.get_wo_items",
+					method: "get_wo_items",
+					doc:frm.doc,
 					args: values,
 					callback: function(r) {
-						if (!r.message) {
-							frappe.throw(__("Item not found"));
-						} else {
+						
+						if (r.message === 'Item not found') {
 							erpnext.utils.remove_empty_first_row(frm, "items");
-							$.each(r.message, function(i, item) {
-								console.log(item)
-								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
-								d.item_code = item.item_code;
-								d.item_name = item.item_name;
-								d.description = item.desc;
-								d.warehouse = frm.doc.set_warehouse;
-								d.uom = item.stock_uom;
-								//d.stock_uom = item.stock_uom;
-								d.cost_center = item.cost_center;
-								d.expense_account = item.expense_account
-								//d.warehouse = item.default_warehouse;
-								d.multi_order_qty = item.multi_order_qty;
-								d.conversion_factor = 1;
-								d.qty = item.qty;
-								d.production_item_name = item.production_item_name;
-								d.projected_qty = item.projected_qty;
-								d.actual_qty = item.actual_qty;
-								d.rate = item.valuation_rate;
-								d.min_order_qty = item.min_order_qty;
-								d.amount = item.valuation_rate * item.qty;
-								// d.project = item.project;
-							});
+							refresh_field("items");
+							d.hide();
+							frappe.throw(__(r.message));
 						}
 						d.hide();
 						refresh_field("items");
