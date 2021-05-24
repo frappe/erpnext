@@ -122,6 +122,11 @@ class PaymentEntry(AccountsController):
 				if flt(d.allocated_amount) > flt(d.outstanding_amount):
 					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
 
+			# Check for negative outstanding invoices as well
+			if flt(d.allocated_amount) < 0:
+				if flt(d.allocated_amount) < flt(d.outstanding_amount):
+					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
+
 	def delink_advance_entry_references(self):
 		for reference in self.references:
 			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
@@ -791,7 +796,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 
 			outstanding_invoices.pop(idx - 1)
 			outstanding_invoices += invoice_ref_based_on_payment_terms[idx]
-	
+
 	return outstanding_invoices
 
 def get_orders_to_be_billed(posting_date, party_type, party,
