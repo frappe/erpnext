@@ -4,9 +4,11 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
+from frappe.utils import flt
 from erpnext.accounts.utils import get_stock_accounts
-from erpnext.accounts.utils import get_currency_precision
+from erpnext import get_default_currency
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
+from frappe.model.meta import get_field_precision
 
 def execute(filters=None):
 	if not erpnext.is_perpetual_inventory_enabled(filters.company):
@@ -19,23 +21,36 @@ def execute(filters=None):
 	return columns, data
 
 def get_data(report_filters):
+	report_filters = frappe._dict(report_filters)
 	data = []
 
-	filters = {
-		"company": report_filters.company,
-		"posting_date": ("<=", report_filters.as_on_date)
-	}
+	filters = {}
+	if report_filters.company:
+		filters["company"] = report_filters.company
 
-	currency_precision = get_currency_precision() or 2
+	if report_filters.from_date and report_filters.to_date:
+		filters["posting_date"] = ("between", [report_filters.from_date, report_filters.to_date])
+	elif report_filters.to_date:
+		filters["posting_date"] = ("<=", report_filters.to_date)
+	elif report_filters.from_date:
+		filters["posting_date"] = (">=", report_filters.from_date)
+
 	stock_ledger_entries = get_stock_ledger_data(report_filters, filters)
 	voucher_wise_gl_data = get_gl_data(report_filters, filters)
+
+	currency = frappe.get_cached_value('Company', report_filters.company, "default_currency") if report_filters.company\
+		else get_default_currency()
+
+	stock_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"), currency)
+	gl_precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), currency)
+	precision = max(stock_precision, gl_precision)
 
 	for d in stock_ledger_entries:
 		key = (d.voucher_type, d.voucher_no)
 		gl_data = voucher_wise_gl_data.get(key) or {}
 		d.account_value = gl_data.get("account_value", 0)
 		d.difference_value = (d.stock_value - d.account_value)
-		if abs(d.difference_value) > 0.1:
+		if flt(d.difference_value, precision):
 			data.append(d)
 
 	return data

@@ -9,7 +9,6 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			"fieldname": "company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"reqd": 1,
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
@@ -28,8 +27,13 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			}
 		},
 		{
-			"label": __("As On Date"),
-			"fieldname": "as_on_date",
+			"label": __("From Date"),
+			"fieldname": "from_date",
+			"fieldtype": "Date",
+		},
+		{
+			"label": __("To Date"),
+			"fieldname": "to_date",
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 		},
