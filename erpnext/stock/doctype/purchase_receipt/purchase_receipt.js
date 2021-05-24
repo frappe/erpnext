@@ -41,6 +41,8 @@ frappe.ui.form.on("Purchase Receipt", {
 			}
 		});
 
+		frm.set_df_property('supplied_items', 'cannot_add_rows', 1);
+
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {

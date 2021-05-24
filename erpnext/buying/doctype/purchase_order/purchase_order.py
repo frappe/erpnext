@@ -503,9 +503,10 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 @frappe.whitelist()
 def make_rm_stock_entry(purchase_order, rm_items):
+	rm_items_list = rm_items
 	if isinstance(rm_items, string_types):
 		rm_items_list = json.loads(rm_items)
-	else:
+	elif not rm_items:
 		frappe.throw(_("No Items available for transfer"))
 
 	if rm_items_list:
@@ -543,6 +544,8 @@ def make_rm_stock_entry(purchase_order, rm_items):
 							'qty': rm_item_data["qty"],
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],
+							'serial_no': rm_item_data.get('serial_no'),
+							'batch_no': rm_item_data.get('batch_no'),
 							'main_item_code': rm_item_data["item_code"],
 							'allow_alternative_item': item_wh.get(rm_item_code, {}).get('allow_alternative_item')
 						}
@@ -582,3 +585,57 @@ def update_status(status, name):
 def make_inter_company_sales_order(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
+
+@frappe.whitelist()
+def get_materials_from_supplier(purchase_order, po_details):
+	if isinstance(po_details, string_types):
+		po_details = json.loads(po_details)
+
+	doc = frappe.get_cached_doc('Purchase Order', purchase_order)
+	doc.initialized_fields()
+	doc.purchase_orders = [doc.name]
+	doc.get_available_materials()
+
+	if not doc.available_materials:
+		frappe.throw(_('Materials are already received against the purchase order {0}')
+			.format(purchase_order))
+
+	return make_return_stock_entry_for_subcontract(doc.available_materials, doc, po_details)
+
+def make_return_stock_entry_for_subcontract(available_materials, po_doc, po_details):
+	ste_doc = frappe.new_doc('Stock Entry')
+	ste_doc.purpose = 'Material Transfer'
+	ste_doc.purchase_order = po_doc.name
+	ste_doc.company = po_doc.company
+	ste_doc.is_return = 1
+
+	for key, value in available_materials.items():
+		if not value.qty:
+			continue
+
+		if value.batch_no:
+			for batch_no, qty in value.batch_no.items():
+				add_items_in_ste(ste_doc, value, value.qty, po_details, batch_no)
+		else:
+			add_items_in_ste(ste_doc, value, value.qty, po_details)
+
+	ste_doc.set_stock_entry_type()
+	ste_doc.calculate_rate_and_amount()
+
+	return ste_doc
+
+def add_items_in_ste(ste_doc, row, qty, po_details, batch_no=None):
+	item = ste_doc.append('items', row.item_details)
+
+	po_detail = list(set(row.po_details).intersection(po_details))
+	item.update({
+		'qty': qty,
+		'batch_no': batch_no,
+		'basic_rate': row.item_details['rate'],
+		'po_detail': po_detail[0] if po_detail else '',
+		's_warehouse': row.item_details['t_warehouse'],
+		't_warehouse': row.item_details['s_warehouse'],
+		'item_code': row.item_details['rm_item_code'],
+		'subcontracted_item': row.item_details['main_item_code'],
+		'serial_no': '\n'.join(row.serial_no) if row.serial_no else ''
+	})
