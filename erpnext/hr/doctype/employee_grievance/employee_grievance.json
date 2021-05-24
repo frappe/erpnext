@@ -7,11 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "raised_by",
+  "full_name",
   "designation",
-  "reports_to",
   "column_break_3",
   "date",
   "status",
+  "reports_to",
   "grievance_details_section",
   "grievance_against_party",
   "grievance_against",
@@ -21,12 +22,12 @@
   "associated_document",
   "section_break_14",
   "description",
-  "cause_of_grievance_section",
+  "investigation_details_section",
   "cause_of_grievance",
   "section_break_15",
   "is_applicable_for_pay_cut",
   "is_applicable_for_suspension",
-  "number_of_days_for_suspension",
+  "suspension_period_in_days",
   "column_break_20",
   "suspended_from",
   "suspended_to",
@@ -75,14 +76,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "cause_of_grievance_section",
-   "fieldtype": "Section Break",
-   "label": "Cause of Grievance"
-  },
-  {
    "fieldname": "cause_of_grievance",
    "fieldtype": "Text",
-   "label": "Cause of Grievance"
+   "label": "Cause of Grievance",
+   "mandatory_depends_on": "eval: doc.status == \"Investigated\" || doc.status ==  \"Resolved\""
   },
   {
    "fieldname": "resolution_details_section",
@@ -93,18 +90,21 @@
    "fieldname": "resolved_by",
    "fieldtype": "Link",
    "label": "Resolved by",
+   "mandatory_depends_on": "eval: doc.status == \"Resolved\"",
    "options": "User"
   },
   {
    "fieldname": "employee_responsible",
    "fieldtype": "Link",
    "label": "Employee Responsible ",
+   "mandatory_depends_on": "eval: doc.status == \"Resolved\"",
    "options": "Employee"
   },
   {
    "fieldname": "resolution_detail",
    "fieldtype": "Small Text",
-   "label": "Resolution Detail"
+   "label": "Resolution Detail",
+   "mandatory_depends_on": "eval: doc.status == \"Resolved\""
   },
   {
    "fieldname": "column_break_16",
@@ -113,7 +113,8 @@
   {
    "fieldname": "resolution_date",
    "fieldtype": "Date",
-   "label": "Resolution Date"
+   "label": "Resolution Date",
+   "mandatory_depends_on": "eval: doc.status == \"Resolved\""
   },
   {
    "default": "0",
@@ -128,7 +129,7 @@
    "fetch_from": "grievance_type.is_applicable_for_pay_cut",
    "fieldname": "is_applicable_for_pay_cut",
    "fieldtype": "Check",
-   "label": "Is Applicable for Pay-cut ",
+   "label": "Is Applicable for Pay Cut ",
    "read_only": 1
   },
   {
@@ -148,14 +149,14 @@
   {
    "fieldname": "suspended_from",
    "fieldtype": "Date",
-   "label": "Suspended from ",
+   "label": "Suspended From ",
    "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "suspended_to",
    "fieldtype": "Date",
-   "label": "Suspended to",
+   "label": "Suspended To",
    "no_copy": 1,
    "read_only": 1
   },
@@ -171,7 +172,7 @@
   {
    "fieldname": "unsuspended_on",
    "fieldtype": "Date",
-   "label": "Unsuspended on",
+   "label": "Unsuspended On",
    "no_copy": 1,
    "read_only": 1
   },
@@ -185,12 +186,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "grievance_type.number_of_days_for_suspension",
-   "fieldname": "number_of_days_for_suspension",
-   "fieldtype": "Int",
-   "label": "Number of days for Suspension"
-  },
-  {
    "fetch_from": "raised_by.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
@@ -202,7 +197,7 @@
    "fetch_from": "raised_by.reports_to",
    "fieldname": "reports_to",
    "fieldtype": "Link",
-   "label": "Reports to",
+   "label": "Reports To",
    "options": "Employee",
    "read_only": 1
   },
@@ -223,7 +218,7 @@
    "fieldname": "grievance_against_party",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Grievance Against Party ",
+   "label": "Grievance Against Party",
    "options": "DocType",
    "reqd": 1
   },
@@ -238,12 +233,30 @@
    "fieldtype": "Dynamic Link",
    "label": "Associated Document",
    "options": "associated_document_type"
+  },
+  {
+   "fetch_from": "grievance_type.suspension_period_in_days",
+   "fieldname": "suspension_period_in_days",
+   "fieldtype": "Int",
+   "label": "Suspension Period in Days"
+  },
+  {
+   "fieldname": "investigation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Investigation details"
+  },
+  {
+   "fetch_from": "raised_by.employee_name",
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-17 16:18:35.755201",
+ "modified": "2021-05-24 15:14:21.812126",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grievance",

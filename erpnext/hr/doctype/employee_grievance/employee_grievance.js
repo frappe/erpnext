@@ -13,16 +13,13 @@ frappe.ui.form.on('Employee Grievance', {
 			};
 		});
 		frm.set_query('associated_document_type', function() {
+			let ignore_module = ["Setup", "Core", "Integrations", "Automation", "Core", "Website",
+				"Utilities", "Event Streaming", "Social", "Chat", "Data Migration", "printing", "Desk", "Custom"];
 			return {
 				filters: {
-					name: ['in', [
-						"Salary Slip",
-						"Payroll",
-						"Employee Benefits",
-						"Expense Claim",
-						"Leave Encashment",
-						"Employee Incentive"
-					]]
+					istable: 0,
+					issingle: 0,
+					module: ["Not In", ignore_module]
 				}
 			};
 		});
@@ -36,22 +33,18 @@ frappe.ui.form.on('Employee Grievance', {
 			}
 
 			if (frm.doc.is_applicable_for_pay_cut) {
-				frm.add_custom_button(__("Apply Pay-cut"), function () {
-					frm.events.create_additional_salary(frm, );
+				frm.add_custom_button(__("Apply Pay Cut"), function () {
+					frm.events.create_additional_salary(frm);
 				});
 			}
 
-			if (frm.doc.suspended_from && frm.doc.suspended_to) {
+			if (frm.doc.suspended_from && frm.doc.suspended_to && !frm.doc.unsuspended_on) {
 				let suspended_from = frappe.datetime.global_date_format(frm.doc.suspended_from);
 				let suspended_to = frappe.datetime.global_date_format(frm.doc.suspended_to);
 
-				let message_line1 = "Employee: <b>"+ frm.doc.employee_responsible +"</b> is suspended from <b>"+ suspended_from+"</b> to <b>" +suspended_to + "</b>.";
-				let message_line2 = "Employee will be unsuspended automatically or you can do it manually by clicking on unsuspend Employee.";
+				let message =  __("Employee {0} is suspended from {1} to {2}. {0} will be unsuspended automatically on {2}.", [frm.doc.employee_responsible, suspended_from, suspended_to]);
 
-				let html = '<span class="indicator whitespace-nowrap orange"><span>';
-				html += message_line1;
-				html += '</span></span><br><span>';
-				html += message_line2+'</span>';
+				let html = '<span class="indicator whitespace-nowrap orange"><span>' + message;
 
 				frm.dashboard.set_headline_alert(html);
 				frm.dashboard.show();
@@ -65,36 +58,31 @@ frappe.ui.form.on('Employee Grievance', {
 	suspend_or_unsuspend_employee: function(frm, action) {
 		let message = '';
 		let method = '';
-		if (action === "suspend") {
-			method = "erpnext.hr.doctype.employee_grievance.employee_grievance.suspend_employee";
-			message =  __('Are you sure you want to Suspend');
-			message += " "+frm.doc.employee_responsible+'?';
-		} else if (action === "unsuspend") {
-			method = "erpnext.hr.doctype.employee_grievance.employee_grievance.unsuspend_employee";
-			message = __('Are you sure you want to Un-suspend');
-			message += " "+frm.doc.employee_responsible+'?';
+		if (action === 'suspend') {
+			method = 'erpnext.hr.doctype.employee_grievance.employee_grievance.suspend_employee';
+			message =  __('Are you sure you want to suspend the employee {0}', [frm.doc.employee_responsible]);
+		} else if (action === 'unsuspend') {
+			method = 'erpnext.hr.doctype.employee_grievance.employee_grievance.unsuspend_employee';
+			message = __('Are you sure you want to unsuspend the employee {0}', [frm.doc.employee_responsible]);
 		}
-
 		if (frm.doc.employee_responsible) {
-			frappe.msgprint({
-				title: __('Notification'),
-				message: message,
-				primary_action: {
-					label: __('Yes'),
-					action() {
-						frappe.call({
-							method: method,
-							args: {
-								name: frm.doc.name
-							},
-							callback: function () {
-								frm.refresh();
-								cur_dialog.hide();
-							}
-						});
-					}
+			frappe.confirm((message),
+				function() {
+					frappe.call({
+						method: method,
+						args: {
+							name: frm.doc.name
+						},
+						callback: function() {
+							frm.refresh();
+							cur_dialog.hide();
+						}
+					});
+				},
+				function() {
+					cur_dialog.hide();
 				}
-			});
+			);
 		}
 	},
 
