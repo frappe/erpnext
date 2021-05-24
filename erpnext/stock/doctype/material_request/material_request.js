@@ -292,8 +292,8 @@ frappe.ui.form.on('Material Request', {
 		var d = new frappe.ui.Dialog({
 			title: __("Get Items from Work Order"),
 			fields: [
-				{"fieldname":"schedule_start_from", "fieldtype":"Date", "label":__("Schedule Start From"),reqd:1, mandatory_depends_on:'eval:doc.single_wo===0',depends_on: 'eval:doc.single_wo===0'},
-				{"fieldname":"schedule_start_to", "fieldtype":"Date", "label":__("Schedule Start To"),reqd:1,mandatory_depends_on:'eval:doc.single_wo===0',depends_on: 'eval:doc.single_wo===0'},
+				{"fieldname":"schedule_start_from", "fieldtype":"Date", "label":__("Schedule Start From"),reqd:1, mandatory_depends_on:'eval:doc.schedule_start_to',depends_on: 'eval:doc.single_wo===0'},
+				{"fieldname":"schedule_start_to", "fieldtype":"Date", "label":__("Schedule Start To"),reqd:1,mandatory_depends_on:'eval:doc.schedule_start_from',depends_on: 'eval:doc.single_wo===0'},
 				{"fieldname":"item_to_manufacture", "fieldtype":"Link","label":__("Item To Manufacture"), options:"Item",depends_on: 'eval:doc.single_wo===0'},
 				{"fieldname":"work_order", "fieldtype":"Link", "label":__("Work Order"),options:"Work Order",depends_on: 'eval:doc.single_wo===1'},
 				{"fieldname":"single_wo", "fieldtype":"Check","label":__("Single Work Order")},
