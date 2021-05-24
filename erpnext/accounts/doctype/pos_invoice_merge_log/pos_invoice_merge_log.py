@@ -42,8 +42,9 @@ class POSInvoiceMergeLog(Document):
 				if return_against_status != "Consolidated":
 					# if return entry is not getting merged in the current pos closing and if it is not consolidated
 					bold_unconsolidated = frappe.bold("not Consolidated")
-					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}. ")
+					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}.")
 								.format(d.idx, bold_return_against, bold_pos_invoice, bold_unconsolidated))
+					msg += " "
 					msg += _("Original invoice should be consolidated before or along with the return invoice.")
 					msg += "<br><br>"
 					msg += _("You can add original invoice {} manually to proceed.").format(bold_return_against)
