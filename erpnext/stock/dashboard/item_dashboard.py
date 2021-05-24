@@ -134,7 +134,7 @@ def get_data(item_code=None, warehouse=None, item_group=None, brand=None,
 		"brand_filter": brand_filter,
 	}, 
 	"""
-	items = frappe.db.sql(SQL_query, as_dict=1, debug=1)
+	items = frappe.db.sql(SQL_query, as_dict=1, debug=0)
 	for item in items:
 		item.update({
 			'item_name': frappe.get_cached_value("Item", item.item_code, 'item_name'),
