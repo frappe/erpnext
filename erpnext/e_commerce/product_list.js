@@ -12,6 +12,7 @@ erpnext.ProductList = class {
 			this.products_section.addClass("hidden");
 		}
 
+		this.products_section.empty();
 		this.make();
 	}
 
