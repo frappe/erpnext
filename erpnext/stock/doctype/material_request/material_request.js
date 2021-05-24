@@ -56,10 +56,11 @@ frappe.ui.form.on('Material Request', {
 				args:{
 					work_order: prev_route[2]
 				},
-				callback: function(resp){
+				callback: function(r){
 					if (r.message === 'Item not found') {
 						frappe.throw(__(r.message));
-					} else {
+					} 
+					if(r.message > 0) {
 						frm.refresh_field('items')
 					}
 				}

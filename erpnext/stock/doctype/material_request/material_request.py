@@ -225,7 +225,7 @@ class MaterialRequest(BuyingController):
 		if not company:
 			company = frappe.get_value("Work Order", {"name": work_order},'company')
 		all_wo = []
-		wo_filter = {'company':self.company or company}
+		wo_filter = {'company':company}
 		if schedule_start_from and schedule_start_to:
 			wo_filter['planned_start_date'] = ['between',[schedule_start_from,schedule_start_to]]
 		if work_order:
@@ -309,7 +309,6 @@ class MaterialRequest(BuyingController):
 								"min_order_qty" : item.get('min_order_qty'),
 								"amount" : item.get('valuation_rate') * item.get('qty'),
 				})
-
 			return len(data_set)
 		if(len(all_wo_item) == 0):
 			self.set('items', [])
