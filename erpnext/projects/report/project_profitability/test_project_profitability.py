@@ -8,8 +8,8 @@ from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_
 from erpnext.projects.report.project_profitability.project_profitability import execute
 
 class TestProjectProfitability(unittest.TestCase):
-	@classmethod
-	def setUpClass(self):
+
+	def setUp(self):
 		emp = make_employee('test_employee_9@salary.com', company='_Test Company')
 		if not frappe.db.exists('Salary Component', 'Timesheet Component'):
 			frappe.get_doc({'doctype': 'Salary Component', 'salary_component': 'Timesheet Component'}).insert()
@@ -53,8 +53,7 @@ class TestProjectProfitability(unittest.TestCase):
 		fractional_cost = self.salary_slip.base_gross_pay * utilization
 		self.assertEqual(fractional_cost, row.fractional_cost)
 
-	@classmethod
-	def tearDownClass(self):
+	def tearDown(self):
 		frappe.get_doc("Sales Invoice", self.sales_invoice.name).cancel()
 		frappe.get_doc("Salary Slip", self.salary_slip.name).cancel()
 		frappe.get_doc("Timesheet", self.timesheet.name).cancel()
