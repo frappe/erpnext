@@ -84,8 +84,8 @@ $.extend(wishlist, {
 			const $wish_icon = $btn.find('.wish-icon');
 			let me = this;
 
-			if(frappe.session.user==="Guest") {
-				if(localStorage) {
+			if (frappe.session.user==="Guest") {
+				if (localStorage) {
 					localStorage.setItem("last_visited", window.location.pathname);
 				}
 				window.location.href = "/login";
@@ -137,7 +137,7 @@ $.extend(wishlist, {
 			failure_action: method to execute on failure,
 			async: make call asynchronously (true/false).	*/
 		if (frappe.session.user==="Guest") {
-			if(localStorage) {
+			if (localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);
 			}
 			window.location.href = "/login";

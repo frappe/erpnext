@@ -115,7 +115,7 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 			next_attribute = attribute
 			break
 
-	valid_options_for_attributes = frappe._dict({})
+	valid_options_for_attributes = frappe._dict()
 
 	for a in attribute_list:
 		valid_options_for_attributes[a] = set()

@@ -6,8 +6,15 @@
 }) -%}
 <div class="card h-100">
 	{% if image %}
-	<img class="card-img-top" src="{{ image }}" alt="{{ title }}">
+	<img class="card-img-top" src="{{ image }}" alt="{{ title }}" style="max-height: 200px;">
+	{% else %}
+	<div class="placeholder-div" style="max-height: 200px;">
+		<span class="placeholder">
+			{{ frappe.utils.get_abbr(title or '') }}
+		</span>
+	</div>
 	{% endif %}
+
 	<div class="card-body text-center text-muted small">
 		{{ title or '' }}
 	</div>

@@ -1,9 +1,5 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
-
-no_cache = 1
-
 import frappe
 from erpnext.utilities.product import get_price
 from erpnext.e_commerce.shopping_cart.cart import _set_price_list
@@ -32,6 +28,7 @@ def get_context(context):
 
 	context.items = items
 	context.settings = settings
+	context.no_cache = 1
 
 def get_stock_availability(item_code, warehouse):
 	stock_qty = frappe.utils.flt(
@@ -42,7 +39,7 @@ def get_stock_availability(item_code, warehouse):
 			},
 			"actual_qty")
 	)
-	return True if stock_qty else False
+	return bool(stock_qty)
 
 def get_wishlist_items():
 	if frappe.db.exists("Wishlist", frappe.session.user):
@@ -53,5 +50,5 @@ def get_wishlist_items():
 			from
 				`tabWishlist Items`
 			where
-				parent=%(user)s""" % {"user": frappe.db.escape(frappe.session.user)}, as_dict=1)
+				parent=%(user)s""", {"user": frappe.session.user}, as_dict=1)
 	return

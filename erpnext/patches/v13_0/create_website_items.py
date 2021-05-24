@@ -54,12 +54,12 @@ def execute():
 		for doctype in ("Website Item Group", "Item Website Specification"):
 			web_item, item = website_item.name, item.item_code
 			frappe.db.sql(f"""
-				Update `tab{doctype}`
+				Update
+					`tab{doctype}`
 				set
 					parenttype = 'Website Item',
 					parent = '{web_item}'
 				where
 					parenttype = 'Item'
 					and parent = '{item}'
-				"""
-			)
+				""")

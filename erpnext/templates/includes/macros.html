@@ -73,10 +73,10 @@
 
 {% if is_featured %}
 <div class="col-sm-{{ col_size*2 }} item-card">
-	<div class="card featured-item {{ align_items_class }}">
+	<div class="card featured-item {{ align_items_class }}" style="height: 360px;">
 		{% if image %}
 		<div class="row no-gutters">
-			<div class="col-md-6">
+			<div class="col-md-5 ml-4">
 				<img class="card-img" src="{{ image }}" alt="{{ title }}">
 			</div>
 			<div class="col-md-6">
@@ -92,7 +92,7 @@
 </div>
 {% else %}
 <div class="col-sm-{{ col_size }} item-card">
-	<div class="card {{ align_items_class }}">
+	<div class="card {{ align_items_class }}" style="height: 360px;">
 		{% if image %}
 			<div class="card-img-container">
 				<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
@@ -119,19 +119,17 @@
 	'text-left': align == 'Left' or is_featured,
 }) -%}
 <div class="card-body {{ align_class }}" style="width:100%">
-	<div style="margin-top: 16px; display: flex;">
+	<div class="mt-4">
 		<a href="/{{ item.route or '#' }}">
 			<div class="product-title">
 				{{ title or '' }}
-				{% if item.in_stock %}
-				<span class="indicator {{ item.in_stock }} card-indicator"></span>
-				{% endif %}
 			</div>
 		</a>
 	</div>
 	{% if is_featured %}
-		<div class="product-price">{{ item.formatted_price or '' }}</div>
-		<div class="product-description ellipsis">{{ description or '' }}</div>
+		<div class="product-description ellipsis text-muted" style="white-space: normal;">
+			{{ description or '' }}
+		</div>
 	{% else %}
 		<div class="product-category">{{ item.item_group or '' }}</div>
 	{% endif %}
