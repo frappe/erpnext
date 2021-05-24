@@ -528,8 +528,6 @@ class PurchaseInvoice(BuyingController):
 			d.debit_note_amount = flt(debit_note_amount[0][0]) if debit_note_amount else 0
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
-		if not self.grand_total:
-			return
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -629,7 +627,7 @@ class PurchaseInvoice(BuyingController):
 			and flt(d.base_tax_amount_after_discount_amount)]
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount):
+			if flt(item.base_net_amount) or item.name in voucher_wise_stock_value:
 				account_currency = get_account_currency(item.expense_account)
 				if item.item_code:
 					asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
