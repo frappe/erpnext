@@ -43,7 +43,6 @@ class TestProjectProfitability(unittest.TestCase):
 		self.assertEqual(self.salary_slip.total_working_days, row.total_working_days)
 
 		standard_working_hours = frappe.db.get_single_value("HR Settings", "standard_working_hours")
-		print("standard_working_hours", standard_working_hours)
 		utilization = timesheet.total_billed_hours/(self.salary_slip.total_working_days * standard_working_hours)
 		self.assertEqual(utilization, row.utilization)
 
