@@ -174,7 +174,8 @@ class Employee(NestedSet):
 			throw(_("Contract End Date must be greater than Date of Joining"))
 
 	def validated_suspension(self):
-		if self.status != "Suspended":
+		doc_before_save = self.get_doc_before_save()
+		if self.status != "Suspended" and doc_before_save.status == "Suspended":
 			grievance = frappe.get_all("Employee Grievance", filters={
 				"status": 'Resolved',
 				"employee_responsible": self.name,
@@ -187,11 +188,11 @@ class Employee(NestedSet):
 			if len(grievance):
 				self.db_set("status", "Suspended")
 				grievance = grievance[0]
-				frappe.throw(_("You are not allowed to change status, due to suspension from {0} to {1}. Reference: {2}").format(
-					bold(format_date(grievance.suspended_from, )),
+				frappe.throw(_("You are not allowed to change the status. The employee has been suspended from {0} to {1} due to Employee Grievance {2}").format(
+					bold(format_date(grievance.suspended_from)),
 					bold(format_date(grievance.suspended_to)),
 					bold(get_link_to_form("Employee Grievance", grievance.name))
-				))
+				), title=_("Not Allowed"))
 
 	def validate_email(self):
 		if self.company_email:
