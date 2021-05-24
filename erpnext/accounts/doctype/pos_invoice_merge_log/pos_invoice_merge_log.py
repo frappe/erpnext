@@ -42,8 +42,9 @@ class POSInvoiceMergeLog(Document):
 				if return_against_status != "Consolidated":
 					# if return entry is not getting merged in the current pos closing and if it is not consolidated
 					bold_unconsolidated = frappe.bold("not Consolidated")
-					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}. ")
+					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}.")
 								.format(d.idx, bold_return_against, bold_pos_invoice, bold_unconsolidated))
+					msg += " "
 					msg += _("Original invoice should be consolidated before or along with the return invoice.")
 					msg += "<br><br>"
 					msg += _("You can add original invoice {} manually to proceed.").format(bold_return_against)
@@ -274,9 +275,9 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			closing_entry.db_set('error_message', '')
 			closing_entry.update_opening_entry()
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
-		message_log = frappe.message_log.pop()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
 		error_message = safe_load_json(message_log)
 
 		if closing_entry:
@@ -300,9 +301,9 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			closing_entry.db_set('error_message', '')
 			closing_entry.update_opening_entry(for_cancel=True)
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
-		message_log = frappe.message_log.pop()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
 		error_message = safe_load_json(message_log)
 
 		if closing_entry:
@@ -348,11 +349,9 @@ def job_already_enqueued(job_name):
 		return True
 
 def safe_load_json(message):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
-
 	try:
 		json_message = json.loads(message).get('message')
-	except JSONDecodeError:
+	except Exception:
 		json_message = message
 
 	return json_message
