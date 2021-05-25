@@ -27,6 +27,10 @@ def get_data():
 			{
 				'label': _('Pricing'),
 				'items': ['Pricing Rule']
+			},
+			{
+				'label': _('Credit And Debit Notes'),
+				'items': ['Debit Note CXP', 'Credit Note CXP']
 			}
 		]
 	}

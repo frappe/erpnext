@@ -16,35 +16,36 @@ class CreditNoteCXC(Document):
 		self.calculate_total()
 		if self.docstatus == 1:
 			self.verificate_amount()
+			self.update_accounts_status()
 
 	def calculate_total(self):
+		if not self.get("references"):
+			frappe.throw(_(" Required references"))
 		total_reference = 0
 		for d in self.get("references"):
 			total_reference += d.total_amount
 			self.total_references = total_reference
 
-		if self.amount > self.total_references:
+		if self.total_exempt > self.total_references:
 			frappe.throw(_("Amount cannot be greater than the total references"))
-		
-		total_base = 0
-		if len(self.get("taxes")) > 0:			
-			for taxes_list in self.get("taxes"):
-				total_base += taxes_list.base_isv
-				if total_base > self.amount:
-					frappe.throw(_("Base tax cannot be greater than the amount"))
-			self.calculate_isv()
 
-		total = 0
-		if len(self.get("references")) > 0 and len(self.get("taxes")) > 1:
-			isv_total = self.isv_15 + self.isv_18
-			self.amount_total = self.amount + isv_total
-		else:
-			if self.isv_15 != None:
-				self.amount_total = self.amount + self.isv_15
-			elif self.isv_18 != None:
-				self.amount_total = self.amount + self.isv_18
-			elif self.isv_15 != None and self.isv_18 != None:
-				self.amount_total = self.amount
+		self.calculate_isv()
+		total_base = 0
+		if len(self.get("references")) > 0:
+			if self.total_exempt != None:
+				if not self.get("taxes"):
+					self.amount_total = self.total_exempt
+				else:
+					for taxes_list in self.get("taxes"):
+						total_base += taxes_list.base_isv
+						if self.total_exempt != None:
+							self.amount_total = total_base + self.total_exempt
+						else:
+							self.amount_total = total_base
+						if self.isv_15 != None:
+							self.amount_total = total_base + self.total_exempt + self.isv_15
+						elif self.isv_18 != None:
+							self.amount_total = total_base + self.total_exempt + self.isv_18
 	
 	def calculate_isv(self):
 		for taxes_list in self.get("taxes"):
@@ -77,17 +78,30 @@ class CreditNoteCXC(Document):
 				sales_invoice = frappe.get_doc("Sales Invoice", d.reference_name)
 				if amount_total > d.total_amount:
 					amount_total -= d.total_amount
+					if sales_invoice.outstanding_amount == d.total_amount:
+						sales_invoice.status = "Paid"
 					sales_invoice.outstanding_amount -= d.total_amount
 				else:
 					if amount_total <= d.total_amount:
+						if sales_invoice.outstanding_amount == amount_total:
+							sales_invoice.status = "Paid"
 						sales_invoice.outstanding_amount -= amount_total
 				sales_invoice.save()
 		else: 
 			for x in self.get("references"):
 				if amount_total <= x.total_amount:
 					sales_invoice = frappe.get_doc("Sales Invoice", x.reference_name)
+					if sales_invoice.outstanding_amount == self.amount_total:
+						sales_invoice.status = "Paid"
 					sales_invoice.outstanding_amount -= self.amount_total
 				sales_invoice.save()
+	
+	def update_accounts_status(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		if customer:
+			customer.credit += self.amount_total
+			customer.reamaining_balance += self.amount_total
+			customer.save()
 	
 	def assign_cai(self):
 		cai = frappe.get_all("CAI", ["initial_number", "final_number", "name_cai", "cai", "issue_deadline", "prefix"], filters = { "status": "Active", "prefix": self.naming_series})
