@@ -12,7 +12,7 @@ frappe.ui.form.on('Additional Item', {
                 frm: frm,
                 child_docname: "items",
                 warehouse_field: "source_warehouse",
-                child_doctype: "Work Order Item",
+                child_doctype: "Additional Items Details",
                 original_item_field: "original_item",
                 condition: (d) => {
                     if (d.allow_alternative_item) {return true;}
@@ -150,7 +150,7 @@ frappe.ui.form.on('Additional Item', {
 		})
 	},
 	work_order: function(frm){
-		set_filter_to_item(frm)
+		//set_filter_to_item(frm)
 		frappe.call({
 			doc: frm.doc,
 			method: 'get_job_card',
@@ -169,7 +169,7 @@ frappe.ui.form.on('Additional Item', {
 	},
 	refresh: function(frm){
 		if(frm.doc.work_order){
-			set_filter_to_item(frm)
+			//set_filter_to_item(frm)
 		}
 	}
 });
