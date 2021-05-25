@@ -260,7 +260,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 15:54:26.031242",
+ "modified": "2021-05-25 22:36:43.412022",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",
@@ -295,6 +295,15 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Admin",
+   "share": 1
   }
  ],
  "restrict_to_domain": "Vehicles",

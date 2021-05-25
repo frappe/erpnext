@@ -182,7 +182,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-25 15:31:11.677004",
+ "modified": "2021-05-25 22:35:14.836239",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Log",
@@ -231,6 +231,15 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Admin",
+   "share": 1
   }
  ],
  "sort_field": "date",

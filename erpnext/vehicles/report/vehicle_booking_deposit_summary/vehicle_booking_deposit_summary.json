@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "Hyundai South",
- "modified": "2021-03-19 15:49:02.105294",
+ "modified": "2021-05-25 22:31:29.751555",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Deposit Summary",
@@ -19,13 +19,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Sales User"
+   "role": "Sales Admin"
   },
   {
    "role": "Accounts User"
-  },
-  {
-   "role": "Sales User (Read Only)"
   }
  ]
 }

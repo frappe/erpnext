@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "Hyundai South",
- "modified": "2021-03-16 21:20:08.586121",
+ "modified": "2021-05-25 22:31:51.516407",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation Register",
@@ -26,6 +26,9 @@
   },
   {
    "role": "Accounts User"
+  },
+  {
+   "role": "Sales Admin"
   }
  ]
 }

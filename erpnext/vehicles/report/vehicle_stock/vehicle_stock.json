@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "Hyundai South",
- "modified": "2021-05-25 15:51:52.755516",
+ "modified": "2021-05-25 22:32:00.402430",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Stock",
@@ -23,6 +23,9 @@
   },
   {
    "role": "Accounts User"
+  },
+  {
+   "role": "Sales Admin"
   }
  ]
 }
