@@ -133,6 +133,7 @@ class PurchaseOrder(BuyingController):
 						d.material_request_item, "schedule_date")
 
 
+	@frappe.whitelist()
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
 
@@ -367,7 +368,6 @@ def make_purchase_receipt(source_name, target_doc=None):
 		"Purchase Order": {
 			"doctype": "Purchase Receipt",
 			"field_map": {
-				"per_billed": "per_billed",
 				"supplier_warehouse":"supplier_warehouse"
 			},
 			"validation": {

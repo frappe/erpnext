@@ -1,4 +1,6 @@
 {
+ "db_host": "127.0.0.1",
+ "db_port": 3306,
  "db_name": "test_frappe",
  "db_password": "test_frappe",
  "auto_email_id": "test@example.com",

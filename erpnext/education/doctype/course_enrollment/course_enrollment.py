@@ -41,7 +41,7 @@ class CourseEnrollment(Document):
 			frappe.throw(_("Student is already enrolled via Course Enrollment {0}").format(
 				get_link_to_form("Course Enrollment", enrollment)), title=_('Duplicate Entry'))
 
-	def add_quiz_activity(self, quiz_name, quiz_response, answers, score, status):
+	def add_quiz_activity(self, quiz_name, quiz_response, answers, score, status, time_taken):
 		result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
 		result_data = []
 		for key in answers:
@@ -66,7 +66,8 @@ class CourseEnrollment(Document):
 			"activity_date": frappe.utils.datetime.datetime.now(),
 			"result": result_data,
 			"score": score,
-			"status": status
+			"status": status,
+			"time_taken": time_taken
 			}).insert(ignore_permissions = True)
 
 	def add_activity(self, content_type, content):

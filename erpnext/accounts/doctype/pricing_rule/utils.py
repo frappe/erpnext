@@ -173,7 +173,7 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 		if parenttype in ["Customer Group", "Item Group", "Territory"]:
 			parent_field = "parent_{0}".format(frappe.scrub(parenttype))
 			root_name = frappe.db.get_list(parenttype,
-				{"is_group": 1, parent_field: ("is", "not set")}, "name", as_list=1)
+				{"is_group": 1, parent_field: ("is", "not set")}, "name", as_list=1, ignore_permissions=True)
 
 			if root_name and root_name[0][0]:
 				parent_groups.append(root_name[0][0])
@@ -471,7 +471,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 					if not d.get(pr_field): continue
 
-					if d.validate_applied_rule and doc.get(field) < d.get(pr_field):
+					if d.validate_applied_rule and doc.get(field) is not None and doc.get(field) < d.get(pr_field):
 						frappe.msgprint(_("User has not applied rule on the invoice {0}")
 							.format(doc.name))
 					else:

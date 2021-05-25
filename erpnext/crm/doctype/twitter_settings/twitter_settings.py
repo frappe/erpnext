@@ -11,6 +11,7 @@ from frappe.utils import get_url_to_form, get_link_to_form
 from tweepy.error import TweepError
 
 class TwitterSettings(Document):
+	@frappe.whitelist()
 	def get_authorize_url(self):
 		callback_url = "{0}/api/method/erpnext.crm.doctype.twitter_settings.twitter_settings.callback?".format(frappe.utils.get_url())
 		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"), callback_url)
@@ -21,12 +22,12 @@ class TwitterSettings(Document):
 			frappe.msgprint(_("Error! Failed to get request token."))
 			frappe.throw(_('Invalid {0} or {1}').format(frappe.bold("Consumer Key"), frappe.bold("Consumer Secret Key")))
 
-	
+
 	def get_access_token(self, oauth_token, oauth_verifier):
 		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
-		auth.request_token = { 
+		auth.request_token = {
 			'oauth_token' : oauth_token,
-			'oauth_token_secret' : oauth_verifier 
+			'oauth_token_secret' : oauth_verifier
 		}
 
 		try:
@@ -50,10 +51,10 @@ class TwitterSettings(Document):
 			frappe.throw(_('Invalid Consumer Key or Consumer Secret Key'))
 
 	def get_api(self, access_token, access_token_secret):
-		# authentication of consumer key and secret 
-		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret")) 
-		# authentication of access token and secret 
-		auth.set_access_token(access_token, access_token_secret) 
+		# authentication of consumer key and secret
+		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
+		# authentication of access token and secret
+		auth.set_access_token(access_token, access_token_secret)
 
 		return tweepy.API(auth)
 
@@ -64,7 +65,7 @@ class TwitterSettings(Document):
 		if media:
 			media_id = self.upload_image(media)
 			return self.send_tweet(text, media_id)
-	
+
 	def upload_image(self, media):
 		media = get_file_path(media)
 		api = self.get_api(self.access_token, self.access_token_secret)

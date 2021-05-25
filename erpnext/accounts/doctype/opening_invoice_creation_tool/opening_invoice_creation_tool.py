@@ -167,6 +167,7 @@ class OpeningInvoiceCreationTool(Document):
 
 		return invoice
 
+	@frappe.whitelist()
 	def make_invoices(self):
 		self.validate_company()
 		invoices = self.get_invoices()

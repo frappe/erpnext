@@ -204,11 +204,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	print_receipt() {
 		const frm = this.events.get_frm();
 		frappe.utils.print(
-			frm.doctype,
-			frm.docname,
+			this.doc.doctype,
+			this.doc.name,
 			frm.pos_print_format,
-			frm.doc.letter_head,
-			frm.doc.language || frappe.boot.lang
+			this.doc.letter_head,
+			this.doc.language || frappe.boot.lang
 		);
 	}
 

@@ -10,9 +10,11 @@
   "retirement_age",
   "emp_created_by",
   "column_break_4",
+  "standard_working_hours",
   "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
   "leave_settings",
+  "send_leave_notification",
   "leave_approval_notification_template",
   "leave_status_notification_template",
   "role_allowed_to_create_backdated_leave_application",
@@ -69,15 +71,19 @@
    "label": "Leave Settings"
   },
   {
+   "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_approval_notification_template",
    "fieldtype": "Link",
    "label": "Leave Approval Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
    "options": "Email Template"
   },
   {
+   "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_status_notification_template",
    "fieldtype": "Link",
    "label": "Leave Status Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
    "options": "Email Template"
   },
   {
@@ -132,13 +138,24 @@
    "fieldname": "automatically_allocate_leaves_based_on_leave_policy",
    "fieldtype": "Check",
    "label": "Automatically Allocate Leaves Based On Leave Policy"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_leave_notification",
+   "fieldtype": "Check",
+   "label": "Send Leave Notification"
+  },
+  {
+   "fieldname": "standard_working_hours",
+   "fieldtype": "Int",
+   "label": "Standard Working Hours"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-25 12:31:14.947865",
+ "modified": "2021-04-26 10:52:56.192773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

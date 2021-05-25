@@ -131,25 +131,25 @@ def get_report_summary(data):
 		{
 			"value": avg_completion,
 			"indicator": "Green" if avg_completion > 50 else "Red",
-			"label": "Average Completion",
+			"label": _("Average Completion"),
 			"datatype": "Percent",
 		},
 		{
 			"value": total,
 			"indicator": "Blue",
-			"label": "Total Tasks",
+			"label": _("Total Tasks"),
 			"datatype": "Int",
 		},
 		{
 			"value": completed,
 			"indicator": "Green",
-			"label": "Completed Tasks",
+			"label": _("Completed Tasks"),
 			"datatype": "Int",
 		},
 		{
 			"value": total_overdue,
 			"indicator": "Green" if total_overdue == 0 else "Red",
-			"label": "Overdue Tasks",
+			"label": _("Overdue Tasks"),
 			"datatype": "Int",
 		}
 	]

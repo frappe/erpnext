@@ -397,7 +397,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.update({
 			"payment_schedule": get_payment_terms("_Test Payment Term Template",
-				pi.posting_date, pi.grand_total)
+				pi.posting_date, pi.grand_total, pi.base_grand_total)
 		})
 
 		pi.save()
@@ -898,7 +898,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.submit_journal_entries = 1
 		acc_settings.save()
 
-		item = create_item("_Test Item for Deferred Accounting")
+		item = create_item("_Test Item for Deferred Accounting", is_purchase_item=True)
 		item.enable_deferred_expense = 1
 		item.deferred_expense_account = deferred_account
 		item.save()

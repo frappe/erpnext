@@ -1802,6 +1802,15 @@ class TestSalesInvoice(unittest.TestCase):
 		si.selling_price_list = "_Test Price List Rest of the World"
 		si.update_stock = 1
 		si.items[0].target_warehouse = 'Work In Progress - TCP1'
+
+		# Add stock to stores for succesful stock transfer
+		make_stock_entry(
+			target="Stores - TCP1",
+			company = "_Test Company with perpetual inventory",
+			qty=1,
+			basic_rate=100
+		)
+
 		add_taxes(si)
 		si.save()
 
@@ -1870,7 +1879,17 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_einvoice_submission_without_irn(self):
 		# init
-		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 1)
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 1
+		einvoice_settings.applicable_from = nowdate()
+		einvoice_settings.append('credentials', {
+			'company': '_Test Company',
+			'gstin': '27AAECE4835E1ZR',
+			'username': 'test',
+			'password': 'test'
+		})
+		einvoice_settings.save()
+
 		country = frappe.flags.country
 		frappe.flags.country = 'India'
 
@@ -1881,7 +1900,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		# reset
-		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 0)
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 0
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):

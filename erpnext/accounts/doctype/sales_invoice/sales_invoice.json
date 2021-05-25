@@ -118,6 +118,7 @@
   "in_words",
   "total_advance",
   "outstanding_amount",
+  "disable_rounded_total",
   "advances_section",
   "allocate_advances_automatically",
   "get_advances",
@@ -1109,6 +1110,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1120,6 +1122,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1168,6 +1171,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1180,6 +1184,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1945,6 +1950,13 @@
    "fieldtype": "Link",
    "label": "Set Target Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "depends_on": "grand_total",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
   }
  ],
  "icon": "fa fa-file-text",
@@ -1957,7 +1969,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-03-31 15:42:26.261540",
+ "modified": "2021-04-15 23:57:58.766651",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -66,6 +66,7 @@ class RequestforQuotation(BuyingController):
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 
+	@frappe.whitelist()
 	def get_supplier_email_preview(self, supplier):
 		"""Returns formatted email preview as string."""
 		rfq_suppliers = list(filter(lambda row: row.supplier == supplier, self.suppliers))

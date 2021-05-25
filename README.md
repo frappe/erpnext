@@ -5,7 +5,7 @@
         <p>ERP made simple</p>
     </p>
 
-[![Build Status](https://api.travis-ci.com/frappe/erpnext.svg?branch=develop)](https://travis-ci.com/frappe/erpnext)
+[![CI](https://github.com/frappe/erpnext/actions/workflows/ci-tests.yml/badge.svg?branch=develop)](https://github.com/frappe/erpnext/actions/workflows/ci-tests.yml)
 [![Open Source Helpers](https://www.codetriage.com/frappe/erpnext/badges/users.svg)](https://www.codetriage.com/frappe/erpnext)
 [![Coverage Status](https://coveralls.io/repos/github/frappe/erpnext/badge.svg?branch=develop)](https://coveralls.io/github/frappe/erpnext?branch=develop)
 
@@ -38,6 +38,10 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
 - [Discussion Forum](https://discuss.erpnext.com/)
 
 ---
+
+### Containerized Installation
+
+Use docker to deploy ERPNext in production or for development of [Frappe](https://github.com/frappe/frappe) apps. See https://github.com/frappe/frappe_docker for more details.
 
 ### Full Install
 

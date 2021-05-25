@@ -292,11 +292,14 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		cond = """(`tabProject`.customer = %s or
 			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
-	fields = get_fields("Project", ["name"])
+	fields = get_fields("Project", ["name", "project_name"])
+	searchfields = frappe.get_meta("Project").get_search_fields()
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	return frappe.db.sql("""select {fields} from `tabProject`
-		where `tabProject`.status not in ("Completed", "Cancelled")
-			and {cond} `tabProject`.name like %(txt)s {match_cond}
+		where
+			`tabProject`.status not in ("Completed", "Cancelled")
+			and {cond} {match_cond} {scond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc,
@@ -304,6 +307,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		limit {start}, {page_len}""".format(
 			fields=", ".join(['`tabProject`.{0}'.format(f) for f in fields]),
 			cond=cond,
+			scond=searchfields,
 			match_cond=get_match_cond(doctype),
 			start=start,
 			page_len=page_len), {
@@ -325,7 +329,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 			and status not in ("Stopped", "Closed") %(fcond)s
 			and (
 				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
-				or `tabDelivery Note`.grand_total = 0
+				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
 				or (
 					`tabDelivery Note`.is_return = 1
 					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
@@ -713,7 +717,9 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		return [(d,) for d in set(taxes)]
 
 
-def get_fields(doctype, fields=[]):
+def get_fields(doctype, fields=None):
+	if fields is None:
+		fields = []
 	meta = frappe.get_meta(doctype)
 	fields.extend(meta.get_search_fields())
 

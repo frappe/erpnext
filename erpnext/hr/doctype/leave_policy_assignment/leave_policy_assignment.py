@@ -36,6 +36,7 @@ class LeavePolicyAssignment(Document):
 			frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
 				.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
 
+	@frappe.whitelist()
 	def grant_leave_alloc_for_employee(self):
 		if self.leaves_allocated:
 			frappe.throw(_("Leave already have been assigned for this Leave Policy Assignment"))

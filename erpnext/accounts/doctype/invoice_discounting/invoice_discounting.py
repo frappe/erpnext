@@ -125,6 +125,7 @@ class InvoiceDiscounting(AccountsController):
 
 		make_gl_entries(gl_entries, cancel=(self.docstatus == 2), update_outstanding='No')
 
+	@frappe.whitelist()
 	def create_disbursement_entry(self):
 		je = frappe.new_doc("Journal Entry")
 		je.voucher_type = 'Journal Entry'
@@ -174,6 +175,7 @@ class InvoiceDiscounting(AccountsController):
 
 		return je
 
+	@frappe.whitelist()
 	def close_loan(self):
 		je = frappe.new_doc("Journal Entry")
 		je.voucher_type = 'Journal Entry'

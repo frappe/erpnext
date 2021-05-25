@@ -57,11 +57,12 @@ def prepare_invoice(invoice, progressive_number):
 	invoice.company_address_data = company_address
 
 	#Set invoice type
-	if invoice.is_return and invoice.return_against:
-		invoice.type_of_document = "TD04" #Credit Note (Nota di Credito)
-		invoice.return_against_unamended =  get_unamended_name(frappe.get_doc("Sales Invoice", invoice.return_against))
-	else:
-		invoice.type_of_document = "TD01" #Sales Invoice (Fattura)
+	if not invoice.type_of_document:
+		if invoice.is_return and invoice.return_against:
+			invoice.type_of_document = "TD04" #Credit Note (Nota di Credito)
+			invoice.return_against_unamended =  get_unamended_name(frappe.get_doc("Sales Invoice", invoice.return_against))
+		else:
+			invoice.type_of_document = "TD01" #Sales Invoice (Fattura)
 
 	#set customer information
 	invoice.customer_data = frappe.get_doc("Customer", invoice.customer)

@@ -175,22 +175,24 @@
   },
   {
    "fieldname": "deposit",
-   "oldfieldname": "debit",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Deposit"
+   "label": "Deposit",
+   "oldfieldname": "debit",
+   "options": "currency"
   },
   {
    "fieldname": "withdrawal",
-   "oldfieldname": "credit",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Withdrawal"
+   "label": "Withdrawal",
+   "oldfieldname": "credit",
+   "options": "currency"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-30 19:40:54.221070",
+ "modified": "2021-04-14 17:31:58.963529",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

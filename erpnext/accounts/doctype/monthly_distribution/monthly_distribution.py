@@ -8,6 +8,7 @@ from frappe.utils import (flt, add_months)
 from frappe.model.document import Document
 
 class MonthlyDistribution(Document):
+	@frappe.whitelist()
 	def get_months(self):
 		month_list = ['January','February','March','April','May','June','July','August','September',
 		'October','November','December']

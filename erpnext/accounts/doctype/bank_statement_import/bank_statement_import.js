@@ -239,6 +239,7 @@ frappe.ui.form.on("Bank Statement Import", {
 					"withdrawal",
 					"description",
 					"reference_number",
+					"bank_account"
 				],
 			},
 		});
@@ -531,44 +532,5 @@ frappe.ui.form.on("Bank Statement Import", {
 				${rows}
 			</table>
 		`);
-	},
-
-	show_missing_link_values(frm, missing_link_values) {
-		let can_be_created_automatically = missing_link_values.every(
-			(d) => d.has_one_mandatory_field
-		);
-
-		let html = missing_link_values
-			.map((d) => {
-				let doctype = d.doctype;
-				let values = d.missing_values;
-				return `
-					<h5>${doctype}</h5>
-					<ul>${values.map((v) => `<li>${v}</li>`).join("")}</ul>
-				`;
-			})
-			.join("");
-
-		if (can_be_created_automatically) {
-			// prettier-ignore
-			let message = __('There are some linked records which needs to be created before we can import your file. Do you want to create the following missing records automatically?');
-			frappe.confirm(message + html, () => {
-				frm.call("create_missing_link_values", {
-					missing_link_values,
-				}).then((r) => {
-					let records = r.message;
-					frappe.msgprint(__(
-						"Created {0} records successfully.", [
-							records.length,
-						]
-					));
-				});
-			});
-		} else {
-			frappe.msgprint(
-				// prettier-ignore
-				__('The following records needs to be created before we can import your file.') + html
-			);
-		}
 	},
 });

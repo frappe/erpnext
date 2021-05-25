@@ -15,6 +15,7 @@
  "hide_custom": 0,
  "icon": "hr",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "HR",
  "links": [
@@ -227,41 +228,11 @@
    "type": "Card Break"
   },
   {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Leave Application",
-   "link_to": "Leave Application",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Leave Allocation",
-   "link_to": "Leave Allocation",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Leave Type",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Leave Policy",
-   "link_to": "Leave Policy",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Leave Period",
-   "link_to": "Leave Period",
+   "label": "Holiday List",
+   "link_to": "Holiday List",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -280,8 +251,28 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Holiday List",
-   "link_to": "Holiday List",
+   "label": "Leave Period",
+   "link_to": "Leave Period",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Leave Type",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Leave Policy",
+   "link_to": "Leave Policy",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Leave Policy",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Leave Policy Assignment",
+   "link_to": "Leave Policy Assignment",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -290,8 +281,18 @@
    "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Compensatory Leave Request",
-   "link_to": "Compensatory Leave Request",
+   "label": "Leave Application",
+   "link_to": "Leave Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Employee",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Leave Allocation",
+   "link_to": "Leave Allocation",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -317,12 +318,12 @@
    "type": "Link"
   },
   {
-   "dependencies": "Leave Application",
+   "dependencies": "Employee",
    "hidden": 0,
-   "is_query_report": 1,
-   "label": "Employee Leave Balance",
-   "link_to": "Employee Leave Balance",
-   "link_type": "Report",
+   "is_query_report": 0,
+   "label": "Compensatory Leave Request",
+   "link_to": "Compensatory Leave Request",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
@@ -384,16 +385,6 @@
    "type": "Link"
   },
   {
-   "dependencies": "Attendance",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Monthly Attendance Sheet",
-   "link_to": "Monthly Attendance Sheet",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Expense Claims",
@@ -416,6 +407,15 @@
    "is_query_report": 0,
    "label": "Employee Advance",
    "link_to": "Employee Advance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Request",
+   "link_to": "Travel Request",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -465,6 +465,15 @@
    "type": "Card Break"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Driver",
+   "link_to": "Driver",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -512,6 +521,15 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Referral",
+   "link_to": "Employee Referral",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -537,6 +555,24 @@
    "is_query_report": 0,
    "label": "Staffing Plan",
    "link_to": "Staffing Plan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Appointment Letter",
+   "link_to": "Appointment Letter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Appointment Letter Template",
+   "link_to": "Appointment Letter Template",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -628,33 +664,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Reports",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Employee Birthday",
-   "link_to": "Employee Birthday",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Employees working on a holiday",
-   "link_to": "Employees working on a holiday",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Performance",
    "onboard": 0,
    "type": "Card Break"
@@ -702,7 +711,74 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee Tax and Benefits",
+   "label": "Key Reports",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Attendance",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Monthly Attendance Sheet",
+   "link_to": "Monthly Attendance Sheet",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Staffing Plan",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Recruitment Analytics",
+   "link_to": "Recruitment Analytics",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Employee",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Analytics",
+   "link_to": "Employee Analytics",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Employee",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Leave Balance",
+   "link_to": "Employee Leave Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Employee",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Leave Balance Summary",
+   "link_to": "Employee Leave Balance Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Employee Advance",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Advance Summary",
+   "link_to": "Employee Advance Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Other Reports",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -710,74 +786,44 @@
    "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee Tax Exemption Declaration",
-   "link_to": "Employee Tax Exemption Declaration",
-   "link_type": "DocType",
+   "label": "Employee Information",
+   "link_to": "Employee Information",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "dependencies": "Employee",
    "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax Exemption Proof Submission",
-   "link_to": "Employee Tax Exemption Proof Submission",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee, Payroll Period",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Other Income",
-   "link_to": "Employee Other Income",
-   "link_type": "DocType",
+   "is_query_report": 1,
+   "label": "Employee Birthday",
+   "link_to": "Employee Birthday",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "dependencies": "Employee",
    "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Benefit Application",
-   "link_to": "Employee Benefit Application",
-   "link_type": "DocType",
+   "is_query_report": 1,
+   "label": "Employees Working on a Holiday",
+   "link_to": "Employees working on a holiday",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
-   "dependencies": "Employee",
+   "dependencies": "Daily Work Summary",
    "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Benefit Claim",
-   "link_to": "Employee Benefit Claim",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax Exemption Category",
-   "link_to": "Employee Tax Exemption Category",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax Exemption Sub Category",
-   "link_to": "Employee Tax Exemption Sub Category",
-   "link_type": "DocType",
+   "is_query_report": 1,
+   "label": "Daily Work Summary Replies",
+   "link_to": "Daily Work Summary Replies",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2021-01-21 13:38:38.941001",
+ "modified": "2021-04-26 13:36:15.413819",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",

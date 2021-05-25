@@ -15,6 +15,7 @@
  "hide_custom": 0,
  "icon": "accounting",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Accounting",
  "links": [
@@ -625,9 +626,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bank Reconciliation",
-   "link_to": "bank-reconciliation",
-   "link_type": "Page",
+   "label": "Bank Reconciliation Tool",
+   "link_to": "Bank Reconciliation Tool",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
@@ -638,26 +639,6 @@
    "label": "Bank Reconciliation Statement",
    "link_to": "Bank Reconciliation Statement",
    "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank Statement Transaction Entry",
-   "link_to": "Bank Statement Transaction Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank Statement Settings",
-   "link_to": "Bank Statement Settings",
-   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
@@ -1071,7 +1052,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-03-04 00:38:35.349024",
+ "modified": "2021-05-12 11:48:01.905144",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

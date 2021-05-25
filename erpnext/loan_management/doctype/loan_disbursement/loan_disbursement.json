@@ -20,6 +20,10 @@
   "cost_center",
   "customer_details_section",
   "bank_account",
+  "disbursement_references_section",
+  "reference_date",
+  "column_break_17",
+  "reference_number",
   "amended_from"
  ],
  "fields": [
@@ -126,18 +130,38 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "disbursement_references_section",
+   "fieldtype": "Section Break",
+   "label": "Disbursement References"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_number",
+   "fieldtype": "Data",
+   "label": "Reference Number"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-06 10:04:30.882322",
+ "modified": "2021-04-19 18:09:32.175355",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -152,6 +176,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
