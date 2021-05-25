@@ -950,6 +950,23 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 	change_allocation: function () {
 		var me = this;
+
+		var call_change_allocation = function (vehicle_allocation) {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_allocation",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					vehicle_allocation: vehicle_allocation
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		}
+
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Allocation"),
 			fields: [
@@ -970,23 +987,12 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					default: me.frm.doc.delivery_period, bold: 1, get_query: () => me.delivery_period_query(true)},
 				{label: __("Allocation Code / Sr #"), fieldname: "title", fieldtype: "Data", read_only: 1},
 				{label: __("Allocation Period"), fieldname: "allocation_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
+				{label: __("Remove Allocation"), fieldname: "remove_alation", fieldtype: "Button", click: () => call_change_allocation('')}
 			]
 		});
 
 		dialog.set_primary_action(__("Change"), function () {
-			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_allocation",
-				args: {
-					vehicle_booking_order: me.frm.doc.name,
-					vehicle_allocation: dialog.get_value('vehicle_allocation')
-				},
-				callback: function (r) {
-					if (!r.exc) {
-						me.frm.reload_doc();
-						dialog.hide();
-					}
-				}
-			});
+			call_change_allocation(dialog.get_value('vehicle_allocation'));
 		});
 		dialog.show();
 	},

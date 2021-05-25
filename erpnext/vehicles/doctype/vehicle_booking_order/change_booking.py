@@ -67,9 +67,6 @@ def can_change_vehicle(vbo_doc, throw=False):
 
 @frappe.whitelist()
 def change_allocation(vehicle_booking_order, vehicle_allocation):
-	if not vehicle_allocation:
-		frappe.throw(_("Vehicle Allocation not provided"))
-
 	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
 	can_change_allocation(vbo_doc, throw=True)
 
