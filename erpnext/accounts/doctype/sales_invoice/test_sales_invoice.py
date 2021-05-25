@@ -798,15 +798,15 @@ class TestSalesInvoice(unittest.TestCase):
 		pos.insert()
 		pos.submit()
 
-		self.validate_pos_gl_entry(pos, pos, 60, validate_change_gl=False)
-
 		self.assertEqual(pos.grand_total, 100.0)
 		self.assertEqual(pos.change_amount, 10)
 
+		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
+
 		frappe.db.set_value('Accounts Settings', 'Accounts Settings', 'post_change_gl_entry', 1)
 
-	def validate_pos_gl_entry(self, si, pos, cash_amount, validate_change_gl=True):
-		if not validate_change_gl:
+	def validate_pos_gl_entry(self, si, pos, cash_amount, validate_without_change_gle=False):
+		if validate_without_change_gle:
 			cash_amount -= pos.change_amount
 
 		# check stock ledger entries
