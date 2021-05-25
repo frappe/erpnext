@@ -987,7 +987,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					default: me.frm.doc.delivery_period, bold: 1, get_query: () => me.delivery_period_query(true)},
 				{label: __("Allocation Code / Sr #"), fieldname: "title", fieldtype: "Data", read_only: 1},
 				{label: __("Allocation Period"), fieldname: "allocation_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
-				{label: __("Remove Allocation"), fieldname: "remove_alation", fieldtype: "Button", click: () => call_change_allocation('')}
+				{label: __("Remove Allocation"), fieldname: "remove_alation", fieldtype: "Button",
+					hidden: me.frm.doc.vehicle_allocation ? 0 : 1, click: () => call_change_allocation('')}
 			]
 		});
 

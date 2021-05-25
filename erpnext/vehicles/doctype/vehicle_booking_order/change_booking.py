@@ -71,7 +71,10 @@ def change_allocation(vehicle_booking_order, vehicle_allocation):
 	can_change_allocation(vbo_doc, throw=True)
 
 	if vehicle_allocation == vbo_doc.vehicle_allocation:
-		frappe.throw(_("Vehicle Allocation {0} is already selected in {1}").format(vehicle_allocation, vehicle_booking_order))
+		if vehicle_allocation:
+			frappe.throw(_("Vehicle Allocation {0} is already selected in {1}").format(vehicle_allocation, vehicle_booking_order))
+		else:
+			frappe.throw(_("{0} is already unallocated").format(vehicle_booking_order))
 
 	previous_allocation = vbo_doc.vehicle_allocation
 
