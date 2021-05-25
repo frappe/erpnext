@@ -97,7 +97,8 @@ frappe.ui.form.on('Payment Entry', {
 			return {
 				filters: {
 					"company": frm.doc.company,
-					"root_type": ["in", ["Asset", "Liability"]]
+					"root_type": ["in", ["Asset", "Liability"]],
+					"is_group": 0
 				}
 			}
 		});
