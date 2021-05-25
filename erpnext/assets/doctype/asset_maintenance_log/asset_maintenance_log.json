@@ -25,6 +25,7 @@
   "assign_to_name",
   "due_date",
   "completion_date",
+  "section_break_7",
   "description",
   "column_break_9",
   "actions_performed",
@@ -138,7 +139,7 @@
   {
    "fetch_from": "task.description",
    "fieldname": "description",
-   "fieldtype": "Read Only",
+   "fieldtype": "Text",
    "label": "Description",
    "read_only": 1
   },
@@ -147,7 +148,8 @@
    "fieldtype": "Section Break"
   },
   {
-   "allow_on_submit": 1,
+   "fetch_from": "task.description",
+   "fetch_if_empty": 1,
    "fieldname": "actions_performed",
    "fieldtype": "Text Editor",
    "label": "Actions performed"
@@ -168,12 +170,18 @@
    "in_preview": 1,
    "label": "Task Name",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Description"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 12:33:45.888124",
+ "modified": "2021-05-25 09:33:36.889087",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Log",
