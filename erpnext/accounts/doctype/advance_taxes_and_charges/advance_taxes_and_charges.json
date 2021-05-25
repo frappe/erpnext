@@ -1,70 +1,42 @@
 {
  "actions": [],
- "autoname": "hash",
- "creation": "2013-05-21 16:16:04",
+ "creation": "2020-09-12 22:26:19.594367",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "category",
   "add_deduct_tax",
   "charge_type",
   "row_id",
-  "included_in_print_rate",
-  "col_break1",
   "account_head",
+  "col_break_1",
   "description",
-  "section_break_10",
-  "rate",
+  "included_in_paid_amount",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "section_break_8",
+  "rate",
   "section_break_9",
   "tax_amount",
-  "tax_amount_after_discount_amount",
   "total",
-  "column_break_14",
+  "allocated_amount",
+  "column_break_13",
   "base_tax_amount",
   "base_total",
-  "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail"
+  "base_allocated_amount"
  ],
  "fields": [
   {
-   "default": "Total",
-   "fieldname": "category",
-   "fieldtype": "Select",
-   "label": "Consider Tax or Charge for",
-   "oldfieldname": "category",
-   "oldfieldtype": "Select",
-   "options": "Valuation and Total\nValuation\nTotal",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "default": "Add",
-   "fieldname": "add_deduct_tax",
-   "fieldtype": "Select",
-   "label": "Add or Deduct",
-   "oldfieldname": "add_deduct_tax",
-   "oldfieldtype": "Select",
-   "options": "Add\nDeduct",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
    "columns": 2,
-   "default": "On Net Total",
    "fieldname": "charge_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
    "oldfieldname": "charge_type",
    "oldfieldtype": "Select",
-   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity",
+   "options": "\nActual\nOn Paid Amount\nIncluded In Paid Amount\nOn Previous Row Amount\nOn Previous Row Total",
    "reqd": 1,
    "show_days": 1,
    "show_seconds": 1
@@ -80,22 +52,6 @@
    "show_seconds": 1
   },
   {
-   "default": "0",
-   "description": "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",
-   "fieldname": "included_in_print_rate",
-   "fieldtype": "Check",
-   "label": "Is this Tax included in Basic Rate?",
-   "report_hide": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "col_break1",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
    "columns": 2,
    "fieldname": "account_head",
    "fieldtype": "Link",
@@ -105,19 +61,16 @@
    "oldfieldtype": "Link",
    "options": "Account",
    "reqd": 1,
+   "search_index": 1,
    "show_days": 1,
    "show_seconds": 1
   },
   {
-   "default": ":Company",
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "oldfieldname": "cost_center",
-   "oldfieldtype": "Link",
-   "options": "Cost Center",
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break",
    "show_days": 1,
-   "show_seconds": 1
+   "show_seconds": 1,
+   "width": "50%"
   },
   {
    "fieldname": "description",
@@ -132,7 +85,31 @@
    "width": "300px"
   },
   {
-   "fieldname": "section_break_10",
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": ":Company",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "oldfieldname": "cost_center_other_charges",
+   "oldfieldtype": "Link",
+   "options": "Cost Center",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_8",
    "fieldtype": "Section Break",
    "show_days": 1,
    "show_seconds": 1
@@ -160,19 +137,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
-   "oldfieldname": "tax_amount",
-   "oldfieldtype": "Currency",
    "options": "currency",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "tax_amount_after_discount_amount",
-   "fieldtype": "Currency",
-   "label": "Tax Amount After Discount Amount",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
   },
@@ -182,15 +147,13 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total",
-   "oldfieldname": "total",
-   "oldfieldtype": "Currency",
    "options": "currency",
    "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
   },
   {
-   "fieldname": "column_break_14",
+   "fieldname": "column_break_13",
    "fieldtype": "Column Break",
    "show_days": 1,
    "show_seconds": 1
@@ -199,8 +162,9 @@
    "fieldname": "base_tax_amount",
    "fieldtype": "Currency",
    "label": "Amount (Company Currency)",
+   "oldfieldname": "tax_amount",
+   "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "print_hide": 1,
    "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
@@ -208,59 +172,57 @@
   {
    "fieldname": "base_total",
    "fieldtype": "Currency",
-   "hidden": 1,
    "label": "Total (Company Currency)",
+   "oldfieldname": "total",
+   "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "print_hide": 1,
+   "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
   },
   {
-   "fieldname": "base_tax_amount_after_discount_amount",
+   "fieldname": "add_deduct_tax",
+   "fieldtype": "Select",
+   "label": "Add Or Deduct",
+   "options": "Add\nDeduct",
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "included_in_paid_amount",
+   "fieldtype": "Check",
+   "label": "Included In Paid Amount",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "allocated_amount",
    "fieldtype": "Currency",
-   "label": "Tax Amount After Discount Amount",
+   "label": "Allocated Amount",
+   "options": "currency",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "base_allocated_amount",
+   "fieldtype": "Currency",
+   "label": "Allocated Amount (Company Currency)",
    "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "item_wise_tax_detail",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "label": "Item Wise Tax Detail ",
-   "oldfieldname": "item_wise_tax_detail",
-   "oldfieldtype": "Small Text",
-   "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break",
    "show_days": 1,
    "show_seconds": 1
   }
  ],
- "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-29 19:11:58.826078",
+ "modified": "2020-11-29 19:06:14.666460",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Purchase Taxes and Charges",
+ "name": "Advance Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+ "sort_order": "ASC"
 }

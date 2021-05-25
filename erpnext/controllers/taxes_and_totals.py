@@ -683,7 +683,6 @@ class calculate_taxes_and_totals(object):
 
 		self.calculate_paid_amount()
 
-
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:
 		return
