@@ -975,10 +975,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		# Check GLE for Payment Entry
 		expected_gle = [
-			['_Test Account Excise Duty - _TC', 6000, 0],
+			['_Test Account Excise Duty - _TC', 3000, 0],
 			['Cash - _TC', 0, 24000],
 			['Creditors - _TC', 24000, 0],
-			['TDS Payable - _TC', 0, 6000],
+			['TDS Payable - _TC', 0, 3000],
 		]
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -1000,10 +1000,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Check GLE for Purchase Invoice
 		# Zero net effect on final TDS Payable on invoice
 		expected_gle = [
-			['_Test Account Excise Duty - _TC', 0, 6000],
+			['_Test Account Excise Duty - _TC', 0, 3000],
 			['Cost of Goods Sold - _TC', 30000, 0],
 			['Creditors - _TC', 0, 24000],
-			['TDS Payable - _TC', 6000, 6000],
+			['TDS Payable - _TC', 6000, 3000],
 		]
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -1026,7 +1026,7 @@ def update_tax_witholding_category(company, account, date):
 		tds_category = frappe.get_doc('Tax Withholding Category', 'TDS - 194 - Dividends - Individual')
 		tds_category.append('rates', {
 			'fiscal_year': fiscal_year[0],
-			'tax_withholding_rate': 20,
+			'tax_withholding_rate': 10,
 			'single_threshold': 2500,
 			'cumulative_threshold': 0
 		})
