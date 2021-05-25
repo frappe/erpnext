@@ -150,12 +150,14 @@ class OpeningInvoiceCreationTool(Document):
 				frappe.throw(
 					_("Please set the Default Cost Center in {0} company.").format(frappe.bold(self.company))
 				)
-			rate = flt(row.outstanding_amount) / flt(row.qty)
+
+			qty = flt(row.qty) if flt(row.outstanding_amount) >= 0 else -1 * flt(row.qty)
+			rate = flt(row.outstanding_amount) / qty
 
 			return frappe._dict({
 				"uom": default_uom,
 				"rate": rate or 0.0,
-				"qty": row.qty,
+				"qty": qty,
 				"conversion_factor": 1.0,
 				"item_code": self.item_code,
 				"item_name": row.item_name or "Opening Invoice Item",
@@ -178,6 +180,7 @@ class OpeningInvoiceCreationTool(Document):
 		args = frappe._dict({
 			"items": [item],
 			"is_opening": "Yes",
+			"is_return": 1 if row.outstanding_amount < 0 else 0,
 			"set_posting_time": 1,
 			"company": self.company,
 			"due_date": row.due_date,
