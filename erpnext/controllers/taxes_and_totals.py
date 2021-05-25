@@ -819,16 +819,3 @@ class init_landed_taxes_and_totals(object):
 		for d in self.doc.get(self.tax_field):
 			d.amount = flt(d.amount, d.precision("amount"))
 			d.base_amount = flt(d.amount * flt(d.exchange_rate), d.precision("base_amount"))
-
-def get_advance_taxes(payment_entry_list):
-	taxes = []
-	if payment_entry_list:
-		taxes = frappe.db.sql(
-			"""
-				SELECT t.parent, t.add_deduct_tax, t.charge_type, t.rate,
-					t.account_head, t.cost_center, t.tax_amount, t.description
-				FROM `tabAdvance Taxes and Charges` t, `tabPayment Entry` p
-				WHERE t.parent = p.name AND t.parent in %s
-			""", (payment_entry_list, ), as_dict=1)
-
-	return taxes
