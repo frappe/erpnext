@@ -112,7 +112,7 @@ class PickList(Document):
 		return item_map.values()
 
 	def validate_for_qty(self):
-		if self.for_qty > 0:
+		if self.for_qty is not None and self.for_qty > 0:
 			return
 		frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
 
