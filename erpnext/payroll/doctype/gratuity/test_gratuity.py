@@ -29,7 +29,7 @@ class TestGratuity(unittest.TestCase):
 
 		rule = get_gratuity_rule("Rule Under Unlimited Contract on termination (UAE)")
 
-		gratuity = create_gratuity(pay_via_salary_slip = 1, employee=employee, rule=rule.name)
+		gratuity = create_gratuity(payment_method = "Additional Salary", employee=employee, rule=rule.name)
 
 		#work experience calculation
 		date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
@@ -65,7 +65,10 @@ class TestGratuity(unittest.TestCase):
 		rule = get_gratuity_rule("Rule Under Limited Contract (UAE)")
 		set_mode_of_payment_account()
 
-		gratuity = create_gratuity(expense_account = 'Payment Account - _TC', mode_of_payment='Cash', employee=employee)
+		gratuity = create_gratuity(
+			expense_account = 'Payment Account - _TC', mode_of_payment='Cash',
+			employee=employee, payment_method="Payment Entry"
+		)
 
 		#work experience calculation
 		date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
@@ -137,8 +140,8 @@ def create_gratuity(**args):
 	gratuity.employee = args.employee
 	gratuity.posting_date = getdate()
 	gratuity.gratuity_rule = args.rule or "Rule Under Limited Contract (UAE)"
-	gratuity.pay_via_salary_slip = args.pay_via_salary_slip or 0
-	if gratuity.pay_via_salary_slip:
+	gratuity.payment_method = args.payment_method
+	if gratuity.payment_method == "Additional Salary":
 		gratuity.payroll_date = getdate()
 		gratuity.salary_component = "Performance Bonus"
 	else:
