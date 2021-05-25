@@ -774,4 +774,8 @@ erpnext.patches.v12_0.add_document_type_field_for_italy_einvoicing
 erpnext.patches.v13_0.make_non_standard_user_type #13-04-2021
 erpnext.patches.v13_0.update_shipment_status
 erpnext.patches.v13_0.remove_attribute_field_from_item_variant_setting
+erpnext.patches.v12_0.add_ewaybill_validity_field
+erpnext.patches.v13_0.germany_make_custom_fields
+erpnext.patches.v13_0.germany_fill_debtor_creditor_number
 erpnext.patches.v13_0.set_pos_closing_as_failed
+erpnext.patches.v13_0.update_timesheet_changes

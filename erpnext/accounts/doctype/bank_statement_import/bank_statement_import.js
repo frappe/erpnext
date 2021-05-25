@@ -239,6 +239,7 @@ frappe.ui.form.on("Bank Statement Import", {
 					"withdrawal",
 					"description",
 					"reference_number",
+					"bank_account"
 				],
 			},
 		});
@@ -319,7 +320,7 @@ frappe.ui.form.on("Bank Statement Import", {
 			return;
 		}
 
-		frappe.require("/assets/js/data_import_tools.min.js", () => {
+		frappe.require("data_import_tools.bundle.js", () => {
 			frm.import_preview = new frappe.data_import.ImportPreview({
 				wrapper: frm.get_field("import_preview").$wrapper,
 				doctype: frm.doc.reference_doctype,

@@ -1,17 +1,17 @@
 frappe.provide('frappe.ui.form');
 
-frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
-	init: function(doctype, after_insert) {
+frappe.ui.form.CustomerQuickEntryForm = class CustomerQuickEntryForm extends frappe.ui.form.QuickEntryForm {
+	constructor(doctype, after_insert) {
+		super(doctype, after_insert);
 		this.skip_redirect_on_error = true;
-		this._super(doctype, after_insert);
-	},
+	}
 
-	render_dialog: function() {
+	render_dialog() {
 		this.mandatory = this.mandatory.concat(this.get_variant_fields());
-		this._super();
-	},
+		super.render_dialog();
+	}
 
-	get_variant_fields: function() {
+	get_variant_fields() {
 		var variant_fields = [{
 			fieldtype: "Section Break",
 			label: __("Primary Contact Details"),
@@ -77,5 +77,5 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		}];
 
 		return variant_fields;
-	},
-})
+	}
+}

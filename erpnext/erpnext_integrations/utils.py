@@ -28,7 +28,7 @@ def validate_webhooks_request(doctype,  hmac_key, secret_key='secret'):
 
 	return innerfn
 
-def get_webhook_address(connector_name, method, exclude_uri=False):
+def get_webhook_address(connector_name, method, exclude_uri=False, force_https=False):
 	endpoint = "erpnext.erpnext_integrations.connectors.{0}.{1}".format(connector_name, method)
 
 	if exclude_uri:
@@ -39,7 +39,11 @@ def get_webhook_address(connector_name, method, exclude_uri=False):
 	except RuntimeError:
 		url = "http://localhost:8000"
 
-	server_url = '{uri.scheme}://{uri.netloc}/api/method/{endpoint}'.format(uri=urlparse(url), endpoint=endpoint)
+	url_data = urlparse(url)
+	scheme = "https" if force_https else url_data.scheme
+	netloc = url_data.netloc
+
+	server_url = f"{scheme}://{netloc}/api/method/{endpoint}"
 
 	return server_url
 
