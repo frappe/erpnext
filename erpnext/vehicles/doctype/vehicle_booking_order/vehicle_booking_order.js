@@ -39,19 +39,11 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		this.frm.set_query('customer', erpnext.queries.customer);
 		this.frm.set_query('contact_person', () => {
-			frappe.dynamic_link = {
-				doc: this.frm.doc,
-				fieldname: me.frm.doc.customer_is_company ? 'company' : 'customer',
-				doctype: me.frm.doc.customer_is_company ? 'Company' : 'Customer'
-			};
+			me.set_customer_dynamic_link();
 			return erpnext.queries.contact_query(me.frm.doc);
 		});
 		this.frm.set_query('financer_contact_person', () => {
-			frappe.dynamic_link = {
-				doc: this.frm.doc,
-				fieldname: 'financer',
-				doctype: 'Customer'
-			};
+			me.set_financer_dynamic_link();
 			return erpnext.queries.contact_query(me.frm.doc);
 		});
 		this.frm.set_query('customer_address', () => {
@@ -646,13 +638,17 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	set_dynamic_link: function () {
+	set_dynamic_link: function (doc) {
+		if (!doc) {
+			doc = this.frm.doc;
+		}
+
 		var fieldname;
 		var doctype;
-		if (this.frm.doc.financer && this.frm.doc.finance_type === "Leased") {
+		if (doc.financer && doc.finance_type === "Leased") {
 			fieldname = 'financer';
 			doctype = 'Customer';
-		} else if (this.frm.doc.customer_is_company) {
+		} else if (doc.customer_is_company) {
 			fieldname = 'company';
 			doctype = 'Company';
 		} else {
@@ -660,9 +656,33 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			doctype = 'Customer';
 		}
 		frappe.dynamic_link = {
-			doc: this.frm.doc,
+			doc: doc,
 			fieldname: fieldname,
 			doctype: doctype
+		};
+	},
+
+	set_customer_dynamic_link: function (doc) {
+		if (!doc) {
+			doc = this.frm.doc;
+		}
+
+		frappe.dynamic_link = {
+			doc: doc,
+			fieldname: me.frm.doc.customer_is_company ? 'company' : 'customer',
+			doctype: me.frm.doc.customer_is_company ? 'Company' : 'Customer'
+		};
+	},
+
+	set_financer_dynamic_link: function (doc) {
+		if (!doc) {
+			doc = this.frm.doc;
+		}
+
+		frappe.dynamic_link = {
+			doc: doc,
+			fieldname: 'financer',
+			doctype: 'Customer'
 		};
 	},
 
@@ -1063,21 +1083,194 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	change_customer_details: function () {
 		var me = this;
 
-		frappe.confirm(__('Are you sure you want to update details from Customer Master(s)? This may change the Invoice Total.'),
-			function() {
+		var get_customer_details = function (keep_contact) {
+			var values = dialog.get_values(true);
+			if (values.customer || values.customer_is_company) {
 				frappe.call({
-					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_customer_details",
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_details",
 					args: {
-						vehicle_booking_order: me.frm.doc.name,
+						args: {
+							company: me.frm.doc.company,
+							item_code: me.frm.doc.item_code,
+							transaction_date: me.frm.doc.transaction_date,
+							customer: values.customer,
+							customer_is_company: values.customer_is_company,
+							financer: values.financer,
+							finance_type: values.finance_type,
+							customer_address: keep_contact ? values.customer_address : "",
+							contact_person: keep_contact ? values.contact_person : "",
+							financer_contact_person: keep_contact ? values.financer_contact_person : "",
+						},
+						get_withholding_tax: 0
 					},
 					callback: function (r) {
-						if (!r.exc) {
-							me.frm.reload_doc();
+						if (r.message && !r.exc) {
+							dialog.set_values(r.message);
 						}
 					}
 				});
 			}
-		)
+		};
+
+		var get_address_display = function () {
+			var values = dialog.get_values(true);
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_address_details",
+				args: {
+					address: cstr(values.customer_address),
+				},
+				callback: function (r) {
+					if (r.message && !r.exc) {
+						dialog.set_values(r.message);
+					}
+				}
+			});
+		};
+
+		var get_contact_details = function () {
+			var values = dialog.get_values(true);
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_contact_details",
+				args: {
+					args: {
+						customer: values.customer,
+						financer: values.financer,
+						finance_type: values.finance_type
+					},
+					customer_contact: values.contact_person,
+					financer_contact: values.financer_contact_person
+				},
+				callback: function (r) {
+					if (r.message && !r.exc) {
+						dialog.set_values(r.message);
+					}
+				}
+			});
+		};
+
+		var dialog = new frappe.ui.Dialog({
+			title: __("Update Customer Details"),
+			size: 'large',
+			fields: [
+				{label: __("Customer is {0}", [me.frm.doc.company]), fieldname: "customer_is_company", fieldtype: "Check",
+					default: me.frm.doc.customer_is_company, depends_on: "eval:!doc.customer",
+					change: () => get_customer_details()
+				},
+
+				{label: __("Customer (User)"), fieldname: "customer", fieldtype: "Link", options: "Customer",
+					default: me.frm.doc.customer, bold: 1,
+					depends_on: "eval:!doc.customer_is_company",
+					get_query: () => erpnext.queries.customer(),
+					change: () => get_customer_details()
+				},
+
+				{label: __("Lessee/User Name"), fieldname: "lessee_name", fieldtype: "Data",
+					default: me.frm.doc.lessee_name, read_only: 1},
+
+				{label: __("Customer Name"), fieldname: "customer_name", fieldtype: "Data",
+					default: me.frm.doc.customer_name, read_only: 1},
+
+				{fieldtype: 'Column Break'},
+
+				{label: __("Financer"), fieldname: "financer", fieldtype: "Link", options: "Customer",
+					default: me.frm.doc.financer,
+					get_query: () => erpnext.queries.customer(),
+					change: () => get_customer_details()
+				},
+
+				{label: __("Financer Name"), fieldname: "financer_name", fieldtype: "Data",
+					default: me.frm.doc.financer_name, read_only: 1},
+
+				{label: __("Finance Type"), fieldname: "finance_type", fieldtype: "Select", options: "\nFinanced\nLeased",
+					default: me.frm.doc.finance_type,
+					depends_on: "financer",
+					change: () => get_customer_details()
+				},
+
+				{fieldtype: 'Section Break'},
+
+				{label: __("Address"), fieldname: "customer_address", fieldtype: "Link", options: "Address",
+					default: me.frm.doc.customer_address,
+					get_query: () => {
+						var values = dialog.get_values(true);
+						me.set_dynamic_link(values);
+						return erpnext.queries.address_query(values);
+					},
+					change: () => get_address_display()
+				},
+
+				{fieldtype: 'Column Break'},
+
+				{label: __("Address Display"), fieldname: "address_display", fieldtype: "Small Text",
+					default: me.frm.doc.address_display, read_only: 1},
+
+				{fieldtype: 'Section Break'},
+
+				{label: __("Customer Contact Person"), fieldname: "contact_person", fieldtype: "Link", options: "Contact",
+					default: me.frm.doc.contact_person,
+					get_query: () => {
+						var values = dialog.get_values(true);
+						me.set_customer_dynamic_link(values);
+						return erpnext.queries.contact_query(values);
+					},
+					change: () => get_contact_details()
+				},
+
+				{label: __("Customer Contact Name"), fieldname: "contact_display", fieldtype: "Data",
+					default: me.frm.doc.contact_display, read_only: 1},
+
+				{label: __("Financer Contact Person"), fieldname: "financer_contact_person", fieldtype: "Link", options: "Contact",
+					default: me.frm.doc.financer_contact_person,
+					depends_on: "financer",
+					get_query: () => {
+						var values = dialog.get_values(true);
+						me.set_customer_dynamic_link(values);
+						return erpnext.queries.contact_query(values);
+					},
+					change: () => get_contact_details()
+				},
+
+				{label: __("Financer Contact Name"), fieldname: "financer_contact_display", fieldtype: "Data",
+					default: me.frm.doc.financer_contact_display, read_only: 1,
+					depends_on: "financer"},
+
+				{fieldtype: 'Column Break'},
+
+				{label: __("Contact Email"), fieldname: "contact_email", fieldtype: "Data",
+					default: me.frm.doc.contact_email, read_only: 1},
+
+				{label: __("Contact Mobile"), fieldname: "contact_mobile", fieldtype: "Data",
+					default: me.frm.doc.contact_mobile, read_only: 1},
+
+				{label: __("Contact Phone"), fieldname: "contact_phone", fieldtype: "Data",
+					default: me.frm.doc.contact_phone, read_only: 1},
+			]
+		});
+
+		dialog.set_primary_action(__("Change/Update"), function () {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_customer_details",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					customer_is_company: dialog.get_value('customer_is_company'),
+					customer: dialog.get_value('customer'),
+					financer: dialog.get_value('financer'),
+					finance_type: dialog.get_value('finance_type'),
+					customer_address: dialog.get_value('customer_address'),
+					contact_person: dialog.get_value('contact_person'),
+					financer_contact_person: dialog.get_value('financer_contact_person'),
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		});
+
+		get_customer_details(true);
+		dialog.show();
 	},
 
 	change_item: function () {

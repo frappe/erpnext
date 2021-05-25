@@ -147,6 +147,9 @@ class VehicleBookingOrder(AccountsController):
 		if self.finance_type and self.finance_type not in ['Financed', 'Leased']:
 			frappe.throw(_("Finance Type must be either 'Financed' or 'Leased'"))
 
+		if self.customer and self.financer and self.customer == self.financer:
+			frappe.throw(_("Customer and Financer cannot be the same"))
+
 	def validate_vehicle_item(self):
 		item = frappe.get_cached_doc("Item", self.item_code)
 		validate_vehicle_item(item)
@@ -666,7 +669,7 @@ def get_customer_details(args, get_withholding_tax=True):
 	out.update(get_customer_contact_details(args, out.contact_person, out.financer_contact_person))
 
 	# Withholding Tax
-	if get_withholding_tax and args.item_code:
+	if cint(get_withholding_tax) and args.item_code:
 		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
 

@@ -243,7 +243,7 @@
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
-   "label": "Contact Person",
+   "label": "Customer Contact Person",
    "options": "Contact"
   },
   {
@@ -892,12 +892,14 @@
    "label": "Terms and Conditions Details"
   },
   {
+   "depends_on": "financer",
    "fieldname": "financer_contact_person",
    "fieldtype": "Link",
    "label": "Financer Contact Person",
    "options": "Contact"
   },
   {
+   "depends_on": "financer",
    "fieldname": "financer_contact_display",
    "fieldtype": "Data",
    "label": "Financer Contact Name",
@@ -1032,7 +1034,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 14:19:14.331233",
+ "modified": "2021-05-25 19:17:37.582383",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

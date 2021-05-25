@@ -179,9 +179,23 @@ def can_change_color(vbo_doc, throw=False):
 
 
 @frappe.whitelist()
-def change_customer_details(vehicle_booking_order):
+def change_customer_details(vehicle_booking_order, customer_is_company=None, customer=None, financer=None,
+		finance_type=None, customer_address=None, contact_person=None, financer_contact_person=None):
 	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
 	can_change_customer_details(vbo_doc, throw=True)
+
+	# if previous customer is completely removed
+	if customer not in (vbo_doc.customer, vbo_doc.financer) and (not financer or financer not in (vbo_doc.customer, vbo_doc.financer)):
+		frappe.throw(_("Cannot remove the original Customer"))
+
+	customer_is_company = cint(customer_is_company)
+	vbo_doc.customer_is_company = customer_is_company
+	vbo_doc.customer = customer
+	vbo_doc.financer = financer
+	vbo_doc.finance_type = finance_type
+	vbo_doc.customer_address = customer_address
+	vbo_doc.contact_person = contact_person
+	vbo_doc.financer_contact_person = financer_contact_person
 
 	customer_details = get_customer_details(vbo_doc.as_dict(), get_withholding_tax=True)
 	for k, v in customer_details.items():
@@ -189,6 +203,7 @@ def change_customer_details(vehicle_booking_order):
 			vbo_doc.set(k, v)
 
 	vbo_doc.validate_customer()
+	vbo_doc.set_title()
 	vbo_doc.calculate_taxes_and_totals()
 	vbo_doc.validate_payment_schedule()
 	vbo_doc.update_payment_status()
