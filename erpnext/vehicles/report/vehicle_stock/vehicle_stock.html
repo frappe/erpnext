@@ -6,7 +6,7 @@
 }
 
 .print-format {
-	font-size: 7.5pt;
+	font-size: 7pt;
 }
 .print-format td, .print-format th {
 	vertical-align: middle !important;
@@ -58,6 +58,9 @@
 	</div>
 </div>
 
+{% var show_delivered_to = data.filter(d => d.delivered_to).length %}
+{% var total_colspan = show_delivered_to ? "8" : "7" %}
+
 <table class="table table-bordered">
 	<thead>
 		<tr>
@@ -66,6 +69,9 @@
 			<th class="text-center">{%= __("Variant") %}</th>
 			<th class="text-center">{%= __("Vehicle") %}</th>
 			<th class="text-center">{%= __("Customer") %}</th>
+			{% if show_delivered_to %}
+				<th class="text-center">{%= __("Delivered To") %}</th>
+			{% endif %}
 			<th class="text-center">{%= __("Reference") %}</th>
 			<th class="text-center">{%= __("Invoice") %}</th>
 			<th class="text-center">{%= __("Status") %}</th>
@@ -76,7 +82,7 @@
 			<tr>
 			{% if(data[i]["_isGroupTotal"]) { %}
 				<td></td>
-				<td colspan="7">
+				<td colspan="{%= total_colspan %}">
 					<b>{%= data[i].status %}</b>
 				</td>
 			{% } else { %}
@@ -122,7 +128,18 @@
 					{% } %}
 				</td>
 
-				<td>
+				{% if show_delivered_to %}
+					<td>
+						{% if(data[i].delivered_to) { %}
+							<div>{%= data[i].delivered_to %}</div>
+						{% } %}
+						{% if(data[i].delivered_to_contact) { %}
+							<div>Contact #: {%= data[i].delivered_to_contact %}</div>
+						{% } %}
+					</td>
+				{% endif %}
+
+				<td class="text-nowrap">
 					{% if(data[i].vehicle_booking_order) { %}
 						<div>{%= data[i].vehicle_booking_order %}</div>
 					{% } %}

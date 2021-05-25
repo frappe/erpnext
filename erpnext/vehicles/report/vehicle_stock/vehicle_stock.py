@@ -157,6 +157,9 @@ class VehicleStockReport(object):
 						d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
 						d.customer = vehicle_receipt_data.customer
 						d.customer_name = vehicle_receipt_data.customer_name
+						d.transporter = vehicle_receipt_data.transporter
+						d.transporter_name = vehicle_receipt_data.transporter_name or vehicle_receipt_data.transporter
+						d.lr_no = vehicle_receipt_data.lr_no
 
 			# Data from delivery
 			if d.delivery_dt and d.delivery_dn:
@@ -169,7 +172,9 @@ class VehicleStockReport(object):
 						d.unregistered = vehicle_delivery_data.vehicle_unregistered or d.unregistered
 						d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
 						d.customer = vehicle_delivery_data.customer
-						d.customer_name = vehicle_delivery_data.customer_name
+						d.customer_name = vehicle_delivery_data.booking_customer_name or vehicle_delivery_data.customer_name
+						d.delivered_to = vehicle_delivery_data.receiver_contact_display or vehicle_delivery_data.customer_name
+						d.delivered_to_contact = vehicle_delivery_data.receiver_contact_mobile or vehicle_delivery_data.receiver_contact_phone
 
 			# Booked Open Stock
 			if not d.vehicle_booking_order and d.vehicle in self.booking_by_vehicle_data:
@@ -213,6 +218,11 @@ class VehicleStockReport(object):
 					else:
 						d.status = "Dispatched"
 						d.status_color = "orange"
+
+			if d.invoice_status == "To Deliver":
+				d.invoice_status_color = "orange"
+			elif d.invoice_status == "Delivered":
+				d.invoice_status_color = "green"
 
 			# Mark Unregistered
 			d.license_plate = 'Unregistered' if d.unregistered else d.license_plate
@@ -368,8 +378,9 @@ class VehicleStockReport(object):
 		receipt_names = list(set([d.received_dn for d in self.data if d.received_dn and d.received_dt == "Vehicle Receipt"]))
 		if receipt_names:
 			data = frappe.db.sql("""
-				select name, vehicle_booking_order, supplier, customer, customer_name, supplier_delivery_note,
-					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered
+				select name, vehicle_booking_order, supplier, customer, customer_name,
+					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered,
+					transporter, transporter_name, lr_no
 				from `tabVehicle Receipt`
 				where docstatus = 1 and name in %s
 			""", [receipt_names], as_dict=1)
@@ -380,8 +391,9 @@ class VehicleStockReport(object):
 		delivery_names = list(set([d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Delivery"]))
 		if delivery_names:
 			data = frappe.db.sql("""
-				select name, vehicle_booking_order, customer, customer_name,
-					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered
+				select name, vehicle_booking_order, customer, customer_name, booking_customer_name,
+					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered,
+					receiver_contact_display, receiver_contact_mobile, receiver_contact_phone
 				from `tabVehicle Delivery`
 				where docstatus = 1 and name in %s
 			""", [delivery_names], as_dict=1)
@@ -445,17 +457,19 @@ class VehicleStockReport(object):
 	def get_columns(self):
 		return [
 			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
-			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
-			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
+			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
+			# {"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Chassis No"), "fieldname": "chassis_no", "fieldtype": "Data", "width": 150},
 			{"label": _("Engine No"), "fieldname": "engine_no", "fieldtype": "Data", "width": 115},
 			{"label": _("Color"), "fieldname": "color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 60},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
+			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
-			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
-			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
+			{"label": _("Delivered To"), "fieldname": "delivered_to", "fieldtype": "Data", "width": 110},
+			{"label": _("Transporter"), "fieldname": "transporter_name", "fieldtype": "Data", "width": 110},
+			{"label": _("Bilty"), "fieldname": "lr_no", "fieldtype": "Data", "width": 70},
 			{"label": _("Invoice"), "fieldname": "bill_no", "fieldtype": "Data", "width": 80},
 			{"label": _("Inv Status"), "fieldname": "invoice_status", "fieldtype": "Data", "width": 80},
 			{"label": _("Dispatched"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 85},
@@ -463,6 +477,7 @@ class VehicleStockReport(object):
 			{"label": _("Delivered"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 80},
 			{"label": _("Receipt Document"), "fieldname": "received_dn", "fieldtype": "Dynamic Link", "options": "received_dt", "width": 100},
 			{"label": _("Delivery Document"), "fieldname": "delivery_dn", "fieldtype": "Dynamic Link", "options": "delivery_dt", "width": 100},
+			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
 			{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 150},
 		]
 
