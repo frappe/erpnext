@@ -118,16 +118,20 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
+			if frappe.db.exists('Item', self.item_code):
+				is_variant = frappe.db.get_value('Item', self.item_code, ['variant_of'])
+			if is_variant:
+				variant_of = is_variant
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
-
+		
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and qty > work_order_qty
-			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
+			and exists (select name from `tabBOM` bom where bom.item= "%s"
 					and bom.is_active = 1) %s""" % \
-			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
-
+			(", ".join(["%s"] * len(so_list)), variant_of or "so_items.item_code", item_condition), tuple(so_list), as_dict=1)
+			
 		if self.item_code:
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
@@ -695,6 +699,10 @@ def get_sales_orders(self):
 		so_filter += "and so.status = %(sales_order_status)s"
 
 	if self.item_code:
+		if frappe.db.exists('Item', self.item_code):
+			is_variant = frappe.db.get_value('Item', self.item_code, ['variant_of'])
+			if is_variant:
+				variant_of = is_variant
 		item_filter += " and so_item.item_code = %(item)s"
 
 	open_so = frappe.db.sql("""
@@ -704,7 +712,7 @@ def get_sales_orders(self):
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
 			and so.company = %(company)s
 			and so_item.qty > so_item.work_order_qty {0} {1}
-			and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
+			and (exists (select name from `tabBOM` bom where bom.item=%(item_code)s
 					and bom.is_active = 1)
 				or exists (select name from `tabPacked Item` pi
 					where pi.parent = so.name and pi.parent_item = so_item.item_code
@@ -715,6 +723,7 @@ def get_sales_orders(self):
 			"to_date": self.to_date,
 			"customer": self.customer,
 			"project": self.project,
+			"item_code": variant_of or "so_item.item_code",
 			"item": self.item_code,
 			"company": self.company,
 			"sales_order_status": self.sales_order_status
