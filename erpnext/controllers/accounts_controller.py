@@ -368,6 +368,11 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
+					# Double check for cost center
+					# Items add via promotional scheme may not have cost center set
+					if hasattr(item, 'cost_center') and not item.get('cost_center'):
+						item.set('cost_center', self.get('cost_center') or erpnext.get_default_cost_center(self.company))
+
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
 						self.set_pricing_rule_details(item, ret)
@@ -1006,7 +1011,7 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-			print(grand_total, base_grand_total)
+
 			if total != flt(grand_total, self.precision("grand_total")) or \
 				base_total != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))

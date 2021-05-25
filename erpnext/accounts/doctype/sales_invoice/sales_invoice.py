@@ -125,6 +125,8 @@ class SalesInvoice(SellingController):
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		if not self.is_return:
 			self.validate_serial_numbers()
+		else:
+			self.timesheets = []
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -337,7 +339,7 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
-
+		self.unlink_sales_invoice_from_timesheets()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def update_status_updater_args(self):
@@ -393,6 +395,18 @@ class SalesInvoice(SellingController):
 		if validate_against_credit_limit:
 			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
+	def unlink_sales_invoice_from_timesheets(self):
+		for row in self.timesheets:
+			timesheet = frappe.get_doc('Timesheet', row.time_sheet)
+			for time_log in timesheet.time_logs:
+				if time_log.sales_invoice == self.name:
+					time_log.sales_invoice = None
+			timesheet.calculate_total_amounts()
+			timesheet.calculate_percentage_billed()
+			timesheet.flags.ignore_validate_update_after_submit = True
+			timesheet.set_status()
+			timesheet.db_update_all()
+
 	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
@@ -427,7 +441,7 @@ class SalesInvoice(SellingController):
 				timesheet.calculate_percentage_billed()
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
-				timesheet.save()
+				timesheet.db_update_all()
 
 	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
 		for data in timesheet.time_logs:
@@ -741,8 +755,10 @@ class SalesInvoice(SellingController):
 				self.append('timesheets', {
 						'time_sheet': data.parent,
 						'billing_hours': data.billing_hours,
-						'billing_amount': data.billing_amt,
-						'timesheet_detail': data.name
+						'billing_amount': data.billing_amount,
+						'timesheet_detail': data.name,
+						'activity_type': data.activity_type,
+						'description': data.description
 					})
 
 			self.calculate_billing_amount_for_timesheet()
@@ -1121,7 +1137,6 @@ class SalesInvoice(SellingController):
 		"""
 		self.set_serial_no_against_delivery_note()
 		self.validate_serial_against_delivery_note()
-		self.validate_serial_against_sales_invoice()
 
 	def set_serial_no_against_delivery_note(self):
 		for item in self.items:
@@ -1151,26 +1166,6 @@ class SalesInvoice(SellingController):
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
 				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
 					item.idx, item.qty, item.item_code, len(si_serial_nos)))
-
-	def validate_serial_against_sales_invoice(self):
-		""" check if serial number is already used in other sales invoice """
-		for item in self.items:
-			if not item.serial_no:
-				continue
-
-			for serial_no in item.serial_no.split("\n"):
-				serial_no_details = frappe.db.get_value("Serial No", serial_no,
-					["sales_invoice", "item_code"], as_dict=1)
-
-				if not serial_no_details:
-					continue
-
-				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
-					and self.name != serial_no_details.sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
-					if sales_invoice_company == self.company:
-						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}")
-							.format(serial_no, serial_no_details.sales_invoice))
 
 	def update_project(self):
 		if self.project:
