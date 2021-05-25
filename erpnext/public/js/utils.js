@@ -332,7 +332,8 @@ erpnext.utils.select_alternate_items = function(opts) {
 					in_list_view: 1,
 					read_only: 1,
 					label: __('Item Code')
-				}, {
+				}, 
+				{
 					fieldtype:'Link',
 					fieldname:"alternate_item",
 					options: 'Item',
@@ -355,6 +356,11 @@ erpnext.utils.select_alternate_items = function(opts) {
 								}
 							})
 						}
+						frappe.db.get_value('Item', {'item_code':item_code},['item_name','description'], resp => {
+							this.grid_row.on_grid_fields_dict.item_name.set_value(resp.item_name);
+							this.grid_row.on_grid_fields_dict.description.set_value(resp.description);
+						})
+							
 					},
 					get_query: (e) => {
 						return {
@@ -364,7 +370,20 @@ erpnext.utils.select_alternate_items = function(opts) {
 							}
 						};
 					}
-				}, {
+				}, 
+				{
+					fieldtype:'Data',
+					fieldname:"item_name",
+					in_list_view: 1,
+					label: __('Item Name'),
+				},
+				{
+					fieldtype:'Data',
+					fieldname:"description",
+					in_list_view: 1,
+					label: __('Description'),
+				},
+				{
 					fieldtype:'Link',
 					fieldname:"warehouse",
 					options: 'Warehouse',
