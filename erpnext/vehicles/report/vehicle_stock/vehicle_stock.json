@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "Hyundai South",
- "modified": "2021-03-18 22:15:47.429840",
+ "modified": "2021-05-25 15:51:52.755516",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Stock",
@@ -19,19 +19,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Vehicle Manager"
+   "role": "Vehicle Stock User"
   },
   {
    "role": "Accounts User"
-  },
-  {
-   "role": "Sales User"
-  },
-  {
-   "role": "Sales User (Read Only)"
-  },
-  {
-   "role": "Stock User"
   }
  ]
 }

@@ -114,7 +114,7 @@ data = {
 
 	],
 	'restricted_roles': [
-
+		'Vehicle Stock User',
 	],
 	'modules': [
 

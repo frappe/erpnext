@@ -61,7 +61,7 @@
   }
  ],
  "icon": "fa fa-cog",
- "modified": "2020-12-14 23:02:05.526987",
+ "modified": "2021-05-25 15:55:36.463460",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Withholding Tax Rule",
@@ -75,7 +75,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }

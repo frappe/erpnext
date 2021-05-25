@@ -585,7 +585,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-05-09 02:20:35.348183",
+ "modified": "2021-05-25 15:36:00.586866",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -601,6 +601,19 @@
    "read": 1,
    "report": 1,
    "role": "Vehicle Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Stock User",
    "share": 1,
    "write": 1
   },
