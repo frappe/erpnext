@@ -373,7 +373,7 @@ def get_item_warehouse(item, args, overwrite_warehouse, item_defaults=None, item
 	if not item_source_defaults:
 		item_source_defaults = get_item_source_defaults(item.name, args.company)
 	if not transaction_type_defaults:
-		transaction_type_defaults = get_transaction_type_defaults(args.transaction_type_name, args.company)
+		transaction_type_defaults = get_transaction_type_defaults(args.get('transaction_type_name'), args.company)
 
 	if overwrite_warehouse or not args.warehouse:
 		warehouse = (

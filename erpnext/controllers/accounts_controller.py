@@ -1830,10 +1830,18 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
-	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
+
+	if p_doc.get('set_warehouse'):
+		child_item.warehouse = p_doc.get('set_warehouse')
+	else:
+		warehouse_args = p_doc.as_dict()
+		warehouse_args.transaction_type_name = warehouse_args.get('transaction_type')
+		child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
+
 	if not child_item.warehouse:
-		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
+		frappe.throw(_("Cannot find {0} for item {1}. Please set the same in Item Master or Stock Settings.")
 			.format(frappe.bold("default warehouse"), frappe.bold(item.item_code)))
+
 	return child_item
 
 
