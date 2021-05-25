@@ -134,6 +134,7 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Employee",
    "options": "Employee"
   },
@@ -585,7 +586,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-05-25 15:36:00.586866",
+ "modified": "2021-05-25 16:12:48.601157",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

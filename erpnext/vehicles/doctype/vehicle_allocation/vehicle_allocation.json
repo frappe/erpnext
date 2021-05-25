@@ -205,7 +205,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-05-09 02:18:53.668731",
+ "modified": "2021-05-25 16:49:49.033701",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation",
@@ -243,13 +243,18 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts User",
-   "share": 1
+   "role": "Sales Admin",
+   "share": 1,
+   "write": 1
   },
   {
+   "email": 1,
+   "export": 1,
+   "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock User"
+   "role": "Accounts User",
+   "share": 1
   },
   {
    "email": 1,

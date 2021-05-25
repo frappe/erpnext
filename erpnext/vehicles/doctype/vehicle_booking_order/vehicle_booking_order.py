@@ -940,6 +940,9 @@ def get_next_document(vehicle_booking_order, doctype):
 
 
 def get_vehicle_receipt(source):
+	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_receive_vehicle
+
+	can_receive_vehicle(throw=True)
 	check_if_doc_exists("Vehicle Receipt", source.name)
 
 	target = frappe.new_doc("Vehicle Receipt")
@@ -949,6 +952,9 @@ def get_vehicle_receipt(source):
 
 
 def get_vehicle_delivery(source):
+	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_deliver_vehicle
+
+	can_deliver_vehicle(throw=True)
 	source.check_outstanding_payment_for_delivery()
 	check_if_doc_exists("Vehicle Delivery", source.name)
 
@@ -959,6 +965,9 @@ def get_vehicle_delivery(source):
 
 
 def get_vehicle_transfer_letter(source):
+	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_transfer_vehicle
+
+	can_transfer_vehicle(throw=True)
 	check_if_doc_exists("Vehicle Transfer Letter", source.name)
 
 	if not has_previous_doc("Vehicle Delivery", source):
@@ -971,6 +980,9 @@ def get_vehicle_transfer_letter(source):
 
 
 def get_vehicle_invoice_receipt(source):
+	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_receive_invoice
+
+	can_receive_invoice(throw=True)
 	check_if_doc_exists("Vehicle Invoice Receipt", source.name)
 
 	target = frappe.new_doc("Vehicle Invoice Receipt")
@@ -980,6 +992,9 @@ def get_vehicle_invoice_receipt(source):
 
 
 def get_vehicle_invoice_delivery(source):
+	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_deliver_invoice
+
+	can_deliver_invoice(throw=True)
 	check_if_doc_exists("Vehicle Invoice Delivery", source.name)
 
 	if not has_previous_doc("Vehicle Invoice Receipt", source):

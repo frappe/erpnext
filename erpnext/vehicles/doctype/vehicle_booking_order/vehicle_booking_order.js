@@ -212,17 +212,27 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			// Receive/Deliver Vehicle and Invoice
 			if (this.frm.doc.vehicle) {
 				if (this.frm.doc.delivery_status === "To Receive") {
-					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
+					if (this.can_change('vehicle_receipt')) {
+						this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
+					}
 				} else if (this.frm.doc.delivery_status === "To Deliver") {
-					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
+					if (this.can_change('vehicle_delivery')) {
+						this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
+					}
 				} else if (this.frm.doc.delivery_status === "Delivered" && !this.frm.doc.transfer_customer) {
-					this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'));
+					if (this.can_change('vehicle_transfer')) {
+						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'));
+					}
 				}
 
 				if (this.frm.doc.invoice_status === "To Receive") {
-					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
+					if (this.can_change('invoice_receipt')) {
+						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
+					}
 				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
-					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
+					if (this.can_change('invoice_delivery')) {
+						this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
+					}
 				}
 			}
 
@@ -233,46 +243,44 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			var change_priority_label = cint(this.frm.doc.priority) ? "Mark as Normal Priority" : "Mark as High Priority";
 
 			// Change Buttons
-			if (this.frm.doc.__onload && this.frm.doc.__onload.can_change) {
-				if (this.frm.doc.__onload.can_change.customer_details) {
-					this.frm.add_custom_button(__("Update Customer Details"), () => this.change_customer_details(),
-						__("Change"));
-				}
+			if (this.can_change('customer_details')) {
+				this.frm.add_custom_button(__("Update Customer Details"), () => this.change_customer_details(),
+					__("Change"));
+			}
 
-				if (this.frm.doc.__onload.can_change.allocation) {
-					this.frm.add_custom_button(__(select_allocation_label), () => this.change_allocation(),
-						this.frm.doc.vehicle_allocation ? __("Change") : null);
-				}
+			if (this.can_change('allocation')) {
+				this.frm.add_custom_button(__(select_allocation_label), () => this.change_allocation(),
+					this.frm.doc.vehicle_allocation ? __("Change") : null);
+			}
 
-				if (this.frm.doc.__onload.can_change.delivery_period) {
-					this.frm.add_custom_button(__(select_delivery_period_label), () => this.change_delivery_period(),
-						this.frm.doc.delivery_period ? __("Change") : null);
-				}
+			if (this.can_change('delivery_period')) {
+				this.frm.add_custom_button(__(select_delivery_period_label), () => this.change_delivery_period(),
+					this.frm.doc.delivery_period ? __("Change") : null);
+			}
 
-				if (this.frm.doc.__onload.can_change.color) {
-					this.frm.add_custom_button(__("Change Vehicle Color"), () => this.change_color(),
-						__("Change"));
-				}
+			if (this.can_change('color')) {
+				this.frm.add_custom_button(__("Change Vehicle Color"), () => this.change_color(),
+					__("Change"));
+			}
 
-				if (this.frm.doc.__onload.can_change.vehicle) {
-					this.frm.add_custom_button(__(select_vehicle_label), () => this.change_vehicle(),
-						this.frm.doc.vehicle ? __("Change") : null);
-				}
+			if (this.can_change('vehicle')) {
+				this.frm.add_custom_button(__(select_vehicle_label), () => this.change_vehicle(),
+					this.frm.doc.vehicle ? __("Change") : null);
+			}
 
-				if (this.frm.doc.__onload.can_change.payment_adjustment) {
-					this.frm.add_custom_button(__("Change Payment Adjustment"), () => this.change_payment_adjustment(),
-						__("Change"));
-				}
+			if (this.can_change('payment_adjustment')) {
+				this.frm.add_custom_button(__("Change Payment Adjustment"), () => this.change_payment_adjustment(),
+					__("Change"));
+			}
 
-				if (this.frm.doc.__onload.can_change.priority) {
-					this.frm.add_custom_button(__(change_priority_label), () => this.change_priority(),
-						__("Change"));
-				}
+			if (this.can_change('priority')) {
+				this.frm.add_custom_button(__(change_priority_label), () => this.change_priority(),
+					__("Change"));
+			}
 
-				if (this.frm.doc.__onload.can_change.item) {
-					this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.change_item(),
-						__("Change"));
-				}
+			if (this.can_change('item')) {
+				this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.change_item(),
+					__("Change"));
 			}
 
 			if (this.frm.doc.vehicle_allocation_required && !this.frm.doc.vehicle_allocation) {
@@ -292,6 +300,14 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			} else if (this.frm.doc.status === "To Deliver Invoice") {
 				this.frm.custom_buttons[__('Deliver Invoice')] && this.frm.custom_buttons[__('Deliver Invoice')].addClass('btn-primary');
 			}
+		}
+	},
+
+	can_change: function (what) {
+		if (this.frm.doc.__onload && this.frm.doc.__onload.can_change) {
+			return this.frm.doc.__onload.can_change[what];
+		} else {
+			return false;
 		}
 	},
 

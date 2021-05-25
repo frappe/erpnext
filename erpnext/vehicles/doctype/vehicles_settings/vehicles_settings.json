@@ -20,6 +20,7 @@
   "role_change_booking_after_vehicle_receipt",
   "role_change_booking_after_vehicle_delivery",
   "column_break_14",
+  "role_change_payment_adjustment",
   "maximum_payment_adjustment"
  ],
  "fields": [
@@ -107,11 +108,17 @@
    "fieldtype": "Link",
    "label": "Default Payment Terms Template",
    "options": "Payment Terms Template"
+  },
+  {
+   "fieldname": "role_change_payment_adjustment",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Change Booking Payment Adjustment",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-04-17 17:20:40.276040",
+ "modified": "2021-05-25 17:38:12.010515",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
