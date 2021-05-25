@@ -383,7 +383,7 @@ class WorkOrder(Document):
 			work_order_qty = 0.0
 			if plan_reference.item_reference == item_reference:
 				if self.docstatus == 1:
-					work_order_qty = cint(plan_reference.qty) / total_bundle_qty
+					work_order_qty = flt(plan_reference.qty) / total_bundle_qty
 				frappe.db.set_value('Sales Order Item',
 					plan_reference.sales_order_item, 'work_order_qty', work_order_qty)
 	
