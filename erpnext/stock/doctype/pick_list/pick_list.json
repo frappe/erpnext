@@ -71,8 +71,7 @@
    "description": "Qty of raw materials will be decided based on the qty of the Finished Goods Item",
    "fieldname": "for_qty",
    "fieldtype": "Float",
-   "label": "Qty of Finished Goods Item",
-   "read_only": 1
+   "label": "Qty of Finished Goods Item"
   },
   {
    "fieldname": "amended_from",
@@ -114,7 +113,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-17 11:38:41.932875",
+ "modified": "2021-05-25 16:51:37.210932",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
