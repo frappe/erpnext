@@ -88,4 +88,4 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	}
 };
 
-$.extend(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));

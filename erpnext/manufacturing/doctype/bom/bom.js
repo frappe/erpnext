@@ -405,7 +405,7 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 };
 
-$.extend(cur_frm.cscript, new erpnext.bom.BomController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({frm: cur_frm}));
 
 cur_frm.cscript.hour_rate = function(doc) {
 	erpnext.bom.calculate_op_cost(doc);

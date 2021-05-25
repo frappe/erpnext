@@ -1064,4 +1064,4 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 
 }
 
-$.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));

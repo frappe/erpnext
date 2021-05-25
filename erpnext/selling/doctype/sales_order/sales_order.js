@@ -104,7 +104,7 @@ frappe.ui.form.on("Sales Order Item", {
 
 erpnext.selling.SalesOrderController = class SalesOrderController extends erpnext.selling.SellingController {
 	onload(doc, dt, dn) {
-		super.onload();
+		super.onload(doc, dt, dn);
 	}
 
 	refresh(doc, dt, dn) {
@@ -744,4 +744,5 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		});
 	}
 };
-$.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
+
+extend_cscript(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
