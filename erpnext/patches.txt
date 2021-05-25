@@ -706,3 +706,4 @@ erpnext.patches.v12_0.set_item_tax_detail_before_discount
 erpnext.patches.v12_0.fix_party_in_vehicle_delivery_sle
 erpnext.patches.v12_0.set_variant_of_in_vehicle_transaction
 erpnext.patches.v12_0.update_stock_reconciliation_and_sle
+erpnext.patches.v12_0.rename_vehicle_bilty_field

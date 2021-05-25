@@ -424,9 +424,6 @@ class VehicleBookingOrder(AccountsController):
 		vehicle_receipt = vehicle_receipt[0] if vehicle_receipt else frappe._dict()
 		vehicle_delivery = vehicle_delivery[0] if vehicle_delivery else frappe._dict()
 
-		if vehicle_receipt and not vehicle_receipt.supplier_delivery_note:
-			frappe.throw(_("Supplier Delivery Note is mandatory for Vehicle Receipt against Vehicle Booking Order"))
-
 		if vehicle_delivery:
 			self.check_outstanding_payment_for_delivery()
 
@@ -438,7 +435,7 @@ class VehicleBookingOrder(AccountsController):
 
 		self.vehicle_received_date = vehicle_receipt.posting_date
 		self.vehicle_delivered_date = vehicle_delivery.posting_date
-		self.supplier_delivery_note = vehicle_receipt.supplier_delivery_note
+		self.lr_no = vehicle_receipt.lr_no
 
 		if not vehicle_receipt:
 			self.delivery_status = "To Receive"
@@ -452,7 +449,7 @@ class VehicleBookingOrder(AccountsController):
 				"vehicle_receipt": self.vehicle_receipt,
 				"vehicle_received_date": self.vehicle_received_date,
 				"vehicle_delivered_date": self.vehicle_delivered_date,
-				"supplier_delivery_note": self.supplier_delivery_note,
+				"lr_no": self.lr_no,
 				"delivery_status": self.delivery_status
 			})
 
@@ -488,7 +485,7 @@ class VehicleBookingOrder(AccountsController):
 			row.db_update()
 
 	def get_vehicle_receipts(self):
-		fields = ['name', 'posting_date', 'supplier_delivery_note', 'supplier', 'vehicle_booking_order']
+		fields = ['name', 'posting_date', 'lr_no', 'supplier', 'vehicle_booking_order']
 
 		vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle_booking_order": self.name, "docstatus": 1}, fields)
 

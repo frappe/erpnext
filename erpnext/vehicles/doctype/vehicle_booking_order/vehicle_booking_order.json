@@ -87,7 +87,7 @@
   "column_break_78",
   "bill_no",
   "bill_date",
-  "supplier_delivery_note",
+  "lr_no",
   "priority",
   "section_break_73",
   "vehicle_allocation",
@@ -683,13 +683,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "supplier_delivery_note",
-   "fieldtype": "Data",
-   "label": "Supplier Delivery Note",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "bill_no",
    "fieldtype": "Data",
    "label": "Supplier Invoice No",
@@ -1024,12 +1017,19 @@
    "no_copy": 1,
    "options": "Vehicle Color",
    "read_only": 1
+  },
+  {
+   "fieldname": "lr_no",
+   "fieldtype": "Data",
+   "label": "Transport Receipt No (Bilty)",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-09 02:16:54.714334",
+ "modified": "2021-05-25 13:27:49.815990",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

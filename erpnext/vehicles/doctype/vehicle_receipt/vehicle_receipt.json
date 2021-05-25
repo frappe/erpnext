@@ -33,7 +33,7 @@
   "driver",
   "driver_name",
   "column_break_23",
-  "supplier_delivery_note",
+  "lr_no",
   "vehicle_details_section",
   "variant_of",
   "variant_of_name",
@@ -120,13 +120,6 @@
    "label": "Remarks",
    "no_copy": 1,
    "print_hide": 1
-  },
-  {
-   "fieldname": "supplier_delivery_note",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Supplier Delivery Note"
   },
   {
    "fieldname": "column_break_11",
@@ -370,12 +363,19 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "lr_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transport Receipt No (Bilty)"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-18 15:09:19.399387",
+ "modified": "2021-05-25 13:27:27.781617",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",

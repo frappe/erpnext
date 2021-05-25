@@ -966,7 +966,7 @@ class AccountsController(TransactionBase):
 		fields = [
 			'remarks', 'remark', 'user_remark', 'user_remarks',
 			'cheque_no', 'reference_no',
-			'po_no', 'supplier_delivery_note'
+			'po_no', 'supplier_delivery_note', 'lr_no'
 		]
 		for f in fields:
 			if self.meta.has_field(f):
