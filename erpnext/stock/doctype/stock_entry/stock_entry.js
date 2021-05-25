@@ -783,8 +783,8 @@ frappe.ui.form.on('Landed Cost Taxes and Charges', {
 	}
 });
 
-erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
-	setup: function() {
+erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockController {
+	setup() {
 		var me = this;
 
 		this.setup_posting_date_time_check();
@@ -831,9 +831,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier' }
 		this.frm.set_query("supplier_address", erpnext.queries.address_query)
-	},
+	}
 
-	onload_post_render: function() {
+	onload_post_render() {
 		var me = this;
 		this.set_default_account(function() {
 			if(me.frm.doc.__islocal && me.frm.doc.company && !me.frm.doc.amended_from) {
@@ -842,9 +842,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		});
 
 		this.frm.get_field("items").grid.set_multiple_add("item_code", "qty");
-	},
+	}
 
-	refresh: function() {
+	refresh() {
 		var me = this;
 		erpnext.toggle_naming_series();
 		this.toggle_related_fields(this.frm.doc);
@@ -855,22 +855,22 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
-	},
+	}
 
-	scan_barcode: function() {
+	scan_barcode() {
 		let transaction_controller= new erpnext.TransactionController({frm:this.frm});
 		transaction_controller.scan_barcode();
-	},
+	}
 
-	on_submit: function() {
+	on_submit() {
 		this.clean_up();
-	},
+	}
 
-	after_cancel: function() {
+	after_cancel() {
 		this.clean_up();
-	},
+	}
 
-	set_default_account: function(callback) {
+	set_default_account(callback) {
 		var me = this;
 
 		if(this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
@@ -890,9 +890,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 			});
 		}
-	},
+	}
 
-	clean_up: function() {
+	clean_up() {
 		// Clear Work Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.work_order &&
 			in_list(["Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"],
@@ -900,13 +900,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			frappe.model.remove_from_locals("Work Order",
 				this.frm.doc.work_order);
 		}
-	},
+	}
 
-	fg_completed_qty: function() {
+	fg_completed_qty() {
 		this.get_items();
-	},
+	}
 
-	get_items: function() {
+	get_items() {
 		var me = this;
 		if(!this.frm.doc.fg_completed_qty || !this.frm.doc.bom_no)
 			frappe.throw(__("BOM and Manufacturing Quantity are required"));
@@ -922,9 +922,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 			});
 		}
-	},
+	}
 
-	work_order: function() {
+	work_order() {
 		var me = this;
 		this.toggle_enable_bom();
 		if(!me.frm.doc.work_order || me.frm.doc.job_card) {
@@ -957,13 +957,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 			}
 		});
-	},
+	}
 
-	toggle_enable_bom: function() {
+	toggle_enable_bom() {
 		this.frm.toggle_enable("bom_no", !!!this.frm.doc.work_order);
-	},
+	}
 
-	add_excise_button: function() {
+	add_excise_button() {
 		if(frappe.boot.sysdefaults.country === "India")
 			this.frm.add_custom_button(__("Excise Invoice"), function() {
 				var excise = frappe.model.make_new_doc_and_get_name('Journal Entry');
@@ -971,35 +971,35 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				excise.voucher_type = 'Excise Entry';
 				frappe.set_route('Form', 'Journal Entry', excise.name);
 			}, __('Create'));
-	},
+	}
 
-	items_add: function(doc, cdt, cdn) {
+	items_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "cost_center"]);
 
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
-	},
+	}
 
-	from_warehouse: function(doc) {
+	from_warehouse(doc) {
 		this.frm.trigger('set_tansit_warehouse');
 		this.set_warehouse_in_children(doc.items, "s_warehouse", doc.from_warehouse);
-	},
+	}
 
-	to_warehouse: function(doc) {
+	to_warehouse(doc) {
 		this.set_warehouse_in_children(doc.items, "t_warehouse", doc.to_warehouse);
-	},
+	}
 
-	set_warehouse_in_children: function(child_table, warehouse_field, warehouse) {
+	set_warehouse_in_children(child_table, warehouse_field, warehouse) {
 		let transaction_controller = new erpnext.TransactionController();
 		transaction_controller.autofill_warehouse(child_table, warehouse_field, warehouse);
-	},
+	}
 
-	items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
-	},
+	items_on_form_rendered(doc, grid_row) {
+		erpnext.setup_serial_or_batch_no();
+	}
 
-	toggle_related_fields: function(doc) {
+	toggle_related_fields(doc) {
 		this.frm.toggle_enable("from_warehouse", doc.purpose!='Material Receipt');
 		this.frm.toggle_enable("to_warehouse", doc.purpose!='Material Issue');
 
@@ -1026,12 +1026,12 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			doc.purpose!='Material Issue');
 
 		this.frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
-	},
+	}
 
-	supplier: function(doc) {
+	supplier(doc) {
 		erpnext.utils.get_party_details(this.frm, null, null, null);
 	}
-});
+};
 
 erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 	let get_warehouse_type_and_name = (item) => {
@@ -1064,4 +1064,4 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 
 }
 
-$.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));

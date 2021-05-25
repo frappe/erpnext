@@ -15,6 +15,7 @@
  "hide_custom": 0,
  "icon": "accounting",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Accounting",
  "links": [
@@ -437,22 +438,34 @@
    "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "DATEV Export",
-   "link_to": "DATEV",
+   "label": "Tax Detail",
+   "link_to": "Tax Detail",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
-    "dependencies": "GL Entry",
-    "hidden": 0,
-    "is_query_report": 1,
-    "label": "UAE VAT 201",
-    "link_to": "UAE VAT 201",
-    "link_type": "Report",
-    "onboard": 0,
-    "type": "Link"
-   },
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "DATEV Export",
+   "link_to": "DATEV",
+   "link_type": "Report",
+   "onboard": 0,
+   "only_for": "Germany",
+   "type": "Link"
+  },
+  {
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "UAE VAT 201",
+   "link_to": "UAE VAT 201",
+   "link_type": "Report",
+   "onboard": 0,
+   "only_for": "United Arab Emirates",
+   "type": "Link"
+  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -625,9 +638,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bank Reconciliation",
-   "link_to": "bank-reconciliation",
-   "link_type": "Page",
+   "label": "Bank Reconciliation Tool",
+   "link_to": "Bank Reconciliation Tool",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
@@ -638,26 +651,6 @@
    "label": "Bank Reconciliation Statement",
    "link_to": "Bank Reconciliation Statement",
    "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank Statement Transaction Entry",
-   "link_to": "Bank Statement Transaction Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank Statement Settings",
-   "link_to": "Bank Statement Settings",
-   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
@@ -703,6 +696,7 @@
    "is_query_report": 0,
    "label": "Goods and Services Tax (GST India)",
    "onboard": 0,
+   "only_for": "India",
    "type": "Card Break"
   },
   {
@@ -1071,7 +1065,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-03-04 00:38:35.349024",
+ "modified": "2021-05-13 13:44:56.249888",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

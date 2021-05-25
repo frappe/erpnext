@@ -15,10 +15,11 @@ app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 develop_version = '13.x.x-develop'
 
-app_include_js = "/assets/js/erpnext.min.js"
-app_include_css = "/assets/css/erpnext.css"
-web_include_js = "/assets/js/erpnext-web.min.js"
-web_include_css = "/assets/css/erpnext-web.css"
+app_include_js = "erpnext.bundle.js"
+app_include_css = "erpnext.bundle.css"
+web_include_js = "erpnext-web.bundle.js"
+web_include_css = "erpnext-web.bundle.css"
+email_css = "email_erpnext.bundle.css"
 
 doctype_js = {
 	"Address": "public/js/address.js",
@@ -426,7 +427,8 @@ regional_overrides = {
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
 		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries',
-		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields'
+		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields',
+		'erpnext.assets.doctype.asset.asset.get_depreciation_amount': 'erpnext.regional.india.utils.get_depreciation_amount'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data',

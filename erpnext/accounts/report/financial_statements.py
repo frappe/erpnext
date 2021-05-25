@@ -119,10 +119,10 @@ def validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year):
 
 def validate_dates(from_date, to_date):
 	if not from_date or not to_date:
-		frappe.throw("From Date and To Date are mandatory")
+		frappe.throw(_("From Date and To Date are mandatory"))
 
 	if to_date < from_date:
-		frappe.throw("To Date cannot be less than From Date")
+		frappe.throw(_("To Date cannot be less than From Date"))
 
 def get_months(start_date, end_date):
 	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
@@ -523,3 +523,11 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 			})
 
 	return columns
+
+def get_filtered_list_for_consolidated_report(filters, period_list):
+	filtered_summary_list = []
+	for period in period_list:
+		if period == filters.get('company'):
+			filtered_summary_list.append(period)
+
+	return filtered_summary_list

@@ -7,26 +7,30 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "auto_accounting_for_stock",
-  "acc_frozen_upto",
-  "frozen_accounts_modifier",
-  "determine_address_tax_category_from",
+  "accounts_transactions_settings_section",
   "over_billing_allowance",
   "role_allowed_to_over_bill",
-  "column_break_4",
-  "credit_controller",
-  "check_supplier_invoice_uniqueness",
   "make_payment_via_journal_entry",
+  "column_break_11",
+  "check_supplier_invoice_uniqueness",
   "unlink_payment_on_cancellation_of_invoice",
-  "unlink_advance_payment_on_cancelation_of_order",
-  "book_asset_depreciation_entry_automatically",
-  "add_taxes_from_item_tax_template",
   "automatically_fetch_payment_terms",
   "delete_linked_ledger_entries",
+  "book_asset_depreciation_entry_automatically",
+  "unlink_advance_payment_on_cancelation_of_order",
+  "tax_settings_section",
+  "determine_address_tax_category_from",
+  "column_break_19",
+  "add_taxes_from_item_tax_template",
+  "period_closing_settings_section",
+  "acc_frozen_upto",
+  "frozen_accounts_modifier",
+  "column_break_4",
+  "credit_controller",
   "deferred_accounting_settings_section",
-  "automatically_process_deferred_accounting_entry",
   "book_deferred_entries_based_on",
   "column_break_18",
+  "automatically_process_deferred_accounting_entry",
   "book_deferred_entries_via_journal_entry",
   "submit_journal_entries",
   "print_settings",
@@ -40,15 +44,6 @@
   "use_custom_cash_flow"
  ],
  "fields": [
-  {
-   "default": "1",
-   "description": "If enabled, the system will post accounting entries for inventory automatically",
-   "fieldname": "auto_accounting_for_stock",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Make Accounting Entry For Every Stock Movement"
-  },
   {
    "description": "Accounting entries are frozen up to this date. Nobody can create or modify entries except users with the role specified below",
    "fieldname": "acc_frozen_upto",
@@ -94,6 +89,7 @@
    "default": "0",
    "fieldname": "make_payment_via_journal_entry",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Make Payment via Journal Entry"
   },
   {
@@ -234,6 +230,29 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Over Bill ",
    "options": "Role"
+  },
+  {
+   "fieldname": "period_closing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Period Closing Settings"
+  },
+  {
+   "fieldname": "accounts_transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transactions Settings"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Settings"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -241,7 +260,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-11 18:52:05.601996",
+ "modified": "2021-04-30 15:25:10.381008",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

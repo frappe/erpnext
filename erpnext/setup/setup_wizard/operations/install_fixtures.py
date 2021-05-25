@@ -428,7 +428,6 @@ def install_post_company_fixtures(args=None):
 	frappe.local.flags.ignore_update_nsm = True
 	make_records(records[1:])
 	frappe.local.flags.ignore_update_nsm = False
-	
 	rebuild_tree("Department", "parent_department")
 
 

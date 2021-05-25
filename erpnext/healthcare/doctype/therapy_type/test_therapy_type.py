@@ -13,7 +13,7 @@ class TestTherapyType(unittest.TestCase):
 
 		therapy_type.disabled = 1
 		therapy_type.save()
-		self.assertEquals(frappe.db.get_value('Item', therapy_type.item, 'disabled'), 1)
+		self.assertEqual(frappe.db.get_value('Item', therapy_type.item, 'disabled'), 1)
 
 def create_therapy_type():
 	exercise = create_exercise_type()
