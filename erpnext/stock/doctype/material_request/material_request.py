@@ -97,6 +97,14 @@ class MaterialRequest(BuyingController):
 
 	def before_save(self):
 		self.set_status(update=True)
+		if self.manufacturing_staging == 1:
+			q = "select staging_material_request_warehouse from `tabStaging Details` where company = '{0}'".format(self.company)
+			staging_warehouse = frappe.db.sql(q, as_dict = True)
+			if len(staging_warehouse) > 0:
+				self.set_warehouse =  staging_warehouse[0].get('staging_material_request_warehouse')
+				if self.set_warehouse:
+					for item in self.items:
+						item.warehouse = self.set_warehouse
 
 	def before_submit(self):
 		self.set_status(update=True)
@@ -233,6 +241,7 @@ class MaterialRequest(BuyingController):
 		if item_to_manufacture:
 			wo_filter['production_item'] = item_to_manufacture
 		all_wo_item = frappe.db.get_all("Work Order",wo_filter, 'name')
+		
 		for item in all_wo_item:
 			all_wo.append(item)
 		
@@ -247,7 +256,6 @@ class MaterialRequest(BuyingController):
 						itm['qty'] = qty
 						itm['description'] = itm.get('description')
 						all_data.append(itm)
-		
 		c = {}
 		if len(all_data) > 0:
 			for d in all_data:
