@@ -42,7 +42,6 @@ frappe.ui.form.on('Material Request', {
 			}
 		});
 	},
-
 	onload: function(frm,cdt,cdn) {
 		// add item, if previous view was item
 		var prev_route = frappe.get_prev_route();
