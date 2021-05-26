@@ -598,6 +598,8 @@
   {
    "default": "0",
    "depends_on": "eval: doc.purpose=='Material Transfer' && !doc.outgoing_stock_entry",
+   "fetch_from": "stock_entry_type.add_to_transit",
+   "fetch_if_empty": 1,
    "fieldname": "add_to_transit",
    "fieldtype": "Check",
    "label": "Add to Transit",

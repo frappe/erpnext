@@ -35,6 +35,9 @@
                     </li>
                     {% endif %}
                     <li>{{ _('Event Link') }}: {{ frappe.utils.get_link_to_form(doc.doctype, doc.name) }}</li>
+                    {% if doc.is_mandatory %}
+                    <li>Note: This Training Event is mandatory</li>
+                    {% endif %}
                 </ul>
             </div>
         </td>
