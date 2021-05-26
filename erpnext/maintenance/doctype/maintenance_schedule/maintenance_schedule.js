@@ -70,7 +70,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 				this.frm.add_custom_button(__('Create Maintenance Visit'), function () {
 					let options = "";
 					
-					me.frm.call('get_pending_data', {data_type: "items"}).then(r =>{
+					me.frm.call('get_pending_data', {data_type: "items"}).then(r => {
 						options = r.message;
 						
 						let schedule_id = "";
@@ -108,7 +108,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 											item_name: field.value,
 											s_date: this.value,
 											data_type: "id"
-										}).then(r =>{
+										}).then(r => {
 										schedule_id = r.message;
 									});
 								}
