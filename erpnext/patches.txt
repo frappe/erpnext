@@ -781,3 +781,4 @@ erpnext.patches.v13_0.germany_fill_debtor_creditor_number
 erpnext.patches.v13_0.set_pos_closing_as_failed
 erpnext.patches.v13_0.update_timesheet_changes
 erpnext.patches.v13_0.set_training_event_attendance
+erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
