@@ -46,11 +46,11 @@
   "shop_by_category_section",
   "slideshow",
   "item_search_settings_section",
+  "redisearch_warning",
   "search_index_fields",
   "show_categories_in_search_autocomplete",
   "show_brand_line",
-  "is_redisearch_loaded",
-  "redisearch"
+  "is_redisearch_loaded"
  ],
  "fields": [
   {
@@ -339,17 +339,17 @@
    "label": "Is Redisearch Loaded"
   },
   {
-   "depends_on": "eval:doc.is_search_module_loaded",
-   "fieldname": "redisearch",
+   "depends_on": "eval:!doc.is_redisearch_loaded",
+   "fieldname": "redisearch_warning",
    "fieldtype": "Heading",
-   "label": "Redisearch",
-   "options": "Some heading"
+   "label": "Redisearch Warning",
+   "options": "Redisearch is not loaded. Please install the redisearch module to enable more robust search features."
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-26 20:00:35.399936",
+ "modified": "2021-05-26 22:41:34.400589",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
