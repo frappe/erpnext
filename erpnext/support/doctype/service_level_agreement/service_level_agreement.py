@@ -68,19 +68,23 @@ class ServiceLevelAgreement(Document):
 			frappe.throw(_("{0} is not enabled in {1}").format(frappe.bold("Track Service Level Agreement"),
 				get_link_to_form("Support Settings", "Support Settings")))
 
-		if self.default_service_level_agreement and frappe.db.exists("Service Level Agreement", \
-			{"document_type": self.document_type, "default_service_level_agreement": "1", "name": ["!=", self.name]}):
-
+		if self.default_service_level_agreement and frappe.db.exists("Service Level Agreement", {
+			"document_type": self.document_type,
+			"default_service_level_agreement": "1",
+			"name": ["!=", self.name]
+		}):
 			frappe.throw(_("Default Service Level Agreement for {0} already exists.").format(self.document_type))
 
 		if self.start_date and self.end_date:
 			self.validate_from_to_dates(self.start_date, self.end_date)
 
-		if self.entity_type and self.entity and frappe.db.exists("Service Level Agreement", {"entity_type": self.entity_type, \
-			"entity": self.entity, "name": ["!=", self.name]}):
-
-			frappe.throw(_("Service Level Agreement for {0} {1} already exists.").format(frappe.bold(self.entity_type), \
-				frappe.bold(self.entity)))
+		if self.entity_type and self.entity and frappe.db.exists("Service Level Agreement", {
+			"entity_type": self.entity_type,
+			"entity": self.entity,
+			"name": ["!=", self.name]
+		}):
+			frappe.throw(_("Service Level Agreement for {0} {1} already exists.").format(
+				frappe.bold(self.entity_type), frappe.bold(self.entity)))
 
 	def validate_status_field(self):
 		meta = frappe.get_meta(self.document_type)
@@ -381,7 +385,9 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 			time_left_today = time_diff_in_seconds(end_time, start_time)
 
 			# no time left for support today
-			if time_left_today <= 0: pass
+			if time_left_today <= 0:
+				pass
+
 			elif allotted_seconds:
 				if time_left_today >= allotted_seconds:
 					expected_time = datetime.combine(getdate(current_date_time), get_time(start_time))
@@ -589,7 +595,7 @@ def handle_hold_time(doc, meta, status):
 
 
 def get_service_level_agreement_fields():
-	return  [
+	return [
 		{
 			"collapsible": 1,
 			"fieldname": "service_level_section",

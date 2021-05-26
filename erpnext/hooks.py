@@ -228,7 +228,7 @@ standard_queries = {
 
 doc_events = {
 	"*": {
-		"validate": "erpnext.support.doctype.service_level_agreement.service_level_agreement.apply"
+		"validate": "erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 		"on_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.create_medical_record",
 		"on_update_after_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.update_medical_record",
 		"on_cancel": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.delete_medical_record"
@@ -337,7 +337,7 @@ scheduler_events = {
 		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
 		"erpnext.erpnext_integrations.connectors.shopify_connection.sync_old_orders",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
-    "erpnext.support.doctype.service_level_agreement.service_level_agreement.set_service_level_agreement_variance"
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.set_service_level_agreement_variance"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
