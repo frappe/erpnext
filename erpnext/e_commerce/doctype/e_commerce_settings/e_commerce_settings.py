@@ -7,14 +7,14 @@ from frappe.utils import cint, comma_and
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import get_datetime, get_datetime_str, now_datetime, unique
-
-from erpnext.e_commerce.website_item_indexing import create_website_items_index, ALLOWED_INDEXABLE_FIELDS_SET
+from erpnext.e_commerce.website_item_indexing import create_website_items_index, ALLOWED_INDEXABLE_FIELDS_SET, is_search_module_loaded
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
 class ECommerceSettings(Document):
 	def onload(self):
 		self.get("__onload").quotation_series = frappe.get_meta("Quotation").get_options("naming_series")
+		self.is_redisearch_loaded = is_search_module_loaded()
 
 	def validate(self):
 		if self.home_page_is_products:
