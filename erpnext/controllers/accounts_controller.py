@@ -225,7 +225,7 @@ class AccountsController(TransactionBase):
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year"):
-			date_field = ""
+			date_field = None
 			if self.meta.get_field("posting_date"):
 				date_field = "posting_date"
 			elif self.meta.get_field("transaction_date"):
