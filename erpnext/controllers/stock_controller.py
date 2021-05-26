@@ -508,7 +508,7 @@ def make_quality_inspections(doctype, docname, items):
 	inspections = []
 
 	for item in items:
-		if item.get("sample_size") > item.get("qty"):
+		if flt(item.get("sample_size")) > flt(item.get("qty")):
 			frappe.throw(_("{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})").format(
 				item_name=item.get("item_name"),
 				sample_size=item.get("sample_size"),
@@ -523,14 +523,14 @@ def make_quality_inspections(doctype, docname, items):
 			"reference_name": docname,
 			"item_code": item.get("item_code"),
 			"description": item.get("description"),
-			"sample_size": item.get("sample_size"),
+			"sample_size": flt(item.get("sample_size")),
 			"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
 			"batch_no": item.get("batch_no")
 		}).insert()
 		quality_inspection.save()
-		inspections.append(quality_inspection)
+		inspections.append(quality_inspection.name)
 
-	return [get_link_to_form("Quality Inspection", inspection.name) for inspection in inspections]
+	return inspections
 
 
 def is_reposting_pending():
