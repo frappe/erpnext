@@ -2039,11 +2039,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					},
 					freeze: true,
 					callback: function (r) {
-						if (r.message) {
-							frappe.msgprint({
-								message: __("Quality Inspections Created: {0}", [r.message.join(", ")]),
-								indicator: "green"
-							});
+						if (r.message.length > 0) {
+							if (r.message.length === 1) {
+								frappe.set_route("Form", "Quality Inspection", r.message[0]);
+							} else {
+								frappe.route_options = {
+									"reference_type": me.frm.doc.doctype,
+									"reference_name": me.frm.doc.name
+								};
+								frappe.set_route("List", "Quality Inspection");
+							}
 						}
 						dialog.hide();
 					}
