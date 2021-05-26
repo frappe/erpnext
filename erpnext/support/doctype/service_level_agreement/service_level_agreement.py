@@ -141,7 +141,7 @@ class ServiceLevelAgreement(Document):
 				}).insert(ignore_permissions=True)
 			else:
 				existing_field = meta.get_field(field.get("fieldname"))
-				self.reset_field_properties(existing_field, field)
+				self.reset_field_properties(existing_field, "DocField", field)
 
 	def create_custom_fields(self, meta, service_level_agreement_fields):
 		for field in service_level_agreement_fields:
@@ -162,9 +162,9 @@ class ServiceLevelAgreement(Document):
 				}).insert(ignore_permissions=True)
 			else:
 				existing_field = meta.get_field(field.get("fieldname"))
-				self.reset_field_properties(existing_field, field)
+				self.reset_field_properties(existing_field, "Custom Field", field)
 
-	def reset_field_properties(self, field, sla_field):
+	def reset_field_properties(self, field, field_dt, sla_field):
 		field = frappe.get_doc(field.doctype, field.name)
 		field.label = sla_field.get("label")
 		field.fieldname = sla_field.get("fieldname")
@@ -329,16 +329,22 @@ def update_status(doc, from_db, meta):
 			from_db.status == "Open" and not doc.first_responded_on:
 			doc.first_responded_on = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
-		if doc.status in ["Resolved", "Closed"] and from_db.status not in ["Resolved", "Closed"]:
-			if meta.has_field("resolution_date"):
-				doc.resolution_date = frappe.flags.current_time or now_datetime(doc.get("owner"))
+		if meta.has_field("service_level_agreement") and doc.service_level_agreement:
+			# mark sla status as fulfilled based on the configuration
+			fulfillment_statuses = [entry.status for entry in frappe.db.get_all("SLA Fulfilled On Status", filters={
+				"parent": doc.service_level_agreement
+			}, fields=["status"])]
 
-			if meta.has_field("agreement_status") and from_db.agreement_status == "Ongoing":
-				set_service_level_agreement_variance(doc.doctype, doc.name)
-				update_agreement_status(doc, meta)
+			if doc.status in fulfillment_statuses and from_db.status not in fulfillment_statuses:
+				if meta.has_field("resolution_date"):
+					doc.resolution_date = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
-			set_resolution_time(doc, meta)
-			set_user_resolution_time(doc, meta)
+				if meta.has_field("agreement_status") and from_db.agreement_status == "Ongoing":
+					set_service_level_agreement_variance(doc.doctype, doc.name)
+					update_agreement_status(doc, meta)
+
+				set_resolution_time(doc, meta)
+				set_user_resolution_time(doc, meta)
 
 		if doc.status == "Open" and from_db.status != "Open":
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config

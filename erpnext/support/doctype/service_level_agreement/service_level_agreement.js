@@ -22,6 +22,10 @@ frappe.ui.form.on('Service Level Agreement', {
 				frm.fields_dict.pause_sla_on.grid.update_docfield_property(
 					'status', 'options', [''].concat(allow_statuses)
 				);
+
+				frm.fields_dict.sla_fulfilled_on.grid.update_docfield_property(
+					'status', 'options', [''].concat(statuses)
+				);
 			});
 		}
 
@@ -30,10 +34,14 @@ frappe.ui.form.on('Service Level Agreement', {
 
 	onload: function(frm) {
 		frm.set_query("document_type", function() {
+			let invalid_doctypes = frappe.model.core_doctypes_list;
+			invalid_doctypes.push(frm.doc.doctype, 'Cost Center', 'Company');
+
 			return {
 				filters: [
 					['DocType', 'issingle', '=', 0],
-					['DocType', 'name', 'not in', frappe.model.core_doctypes_list],
+					['DocType', 'istable', '=', 0],
+					['DocType', 'name', 'not in', invalid_doctypes],
 					['DocType', 'module', 'not in', ["Email", "Core", "Custom", "Event Streaming", "Social", "Data Migration", "Geo", "Desk"]]
 				]
 			};

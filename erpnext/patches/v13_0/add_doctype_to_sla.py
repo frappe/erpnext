@@ -12,4 +12,8 @@ def execute():
 		rename_field('Service Level Agreement', 'enable', 'enabled')
 
 	for sla in frappe.get_all('Service Level Agreement'):
-		frappe.db.set_value('Service Level Agreement', sla.name, 'document_type', 'Issue')
+		agreement = frappe.get_doc('Service Level Agreement', sla.name)
+		agreement.document_type = 'Issue'
+		agreement.append('sla_fulfilled_on', {'status': 'Resolved'})
+		agreement.append('sla_fulfilled_on', {'status': 'Closed'})
+		agreement.save()

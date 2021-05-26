@@ -23,7 +23,8 @@
   "column_break_7",
   "end_date",
   "section_break_18",
-  "pause_sla_on_section",
+  "status_details",
+  "sla_fulfilled_on",
   "pause_sla_on",
   "response_and_resolution_time_section",
   "priorities",
@@ -147,7 +148,7 @@
   {
    "fieldname": "pause_sla_on",
    "fieldtype": "Table",
-   "label": "Pause SLA On",
+   "label": "SLA Paused On",
    "options": "Pause SLA On Status"
   },
   {
@@ -164,13 +165,19 @@
    "label": "Enabled"
   },
   {
-   "fieldname": "pause_sla_on_section",
+   "fieldname": "status_details",
    "fieldtype": "Section Break",
-   "label": "Pause SLA On"
+   "label": "Status Details"
+  },
+  {
+   "fieldname": "sla_fulfilled_on",
+   "fieldtype": "Table",
+   "label": "SLA Fulfilled On",
+   "options": "SLA Fulfilled On Status"
   }
  ],
  "links": [],
- "modified": "2020-11-09 23:52:04.126930",
+ "modified": "2021-05-26 21:14:48.520555",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
