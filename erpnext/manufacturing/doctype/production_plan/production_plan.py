@@ -561,7 +561,6 @@ def get_material_request_items(row, sales_order, company,
 			'item_name': row.item_name,
 			'quantity': required_qty,
 			'required_bom_qty': total_qty,
-			'description': row.description,
 			'stock_uom': row.get("stock_uom"),
 			'warehouse': warehouse or row.get('source_warehouse') \
 				or row.get('default_warehouse') or item_group_defaults.get("default_warehouse"),
@@ -766,7 +765,7 @@ def get_items_for_material_requests(doc, warehouses=None):
 		to_enable = frappe.bold(_("Ignore Existing Projected Quantity"))
 		warehouse = frappe.bold(doc.get('for_warehouse'))
 		message = _("As there are sufficient raw materials, Material Request is not required for Warehouse {0}.").format(warehouse) + "<br><br>"
-		message += _(" If you still want to proceed, please enable {0}.").format(to_enable)
+		message += _("If you still want to proceed, please enable {0}.").format(to_enable)
 
 		frappe.msgprint(message, title=_("Note"))
 

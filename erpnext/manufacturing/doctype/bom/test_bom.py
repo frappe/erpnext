@@ -223,7 +223,7 @@ class TestBOM(unittest.TestCase):
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
 		bom_items = sorted([d.item_code for d in bom.items if d.sourced_by_supplier != 1])
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
-		self.assertEquals(bom_items, supplied_items)
+		self.assertEqual(bom_items, supplied_items)
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

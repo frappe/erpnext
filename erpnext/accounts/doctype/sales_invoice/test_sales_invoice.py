@@ -933,12 +933,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"), si.name)
-		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"),
-			si.name)
-
-		# check if the serial number is already linked with any other Sales Invoice
-		_si = frappe.copy_doc(si.as_dict())
-		self.assertRaises(frappe.ValidationError, _si.insert)
 
 		return si
 
@@ -1879,7 +1873,17 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_einvoice_submission_without_irn(self):
 		# init
-		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 1)
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 1
+		einvoice_settings.applicable_from = nowdate()
+		einvoice_settings.append('credentials', {
+			'company': '_Test Company',
+			'gstin': '27AAECE4835E1ZR',
+			'username': 'test',
+			'password': 'test'
+		})
+		einvoice_settings.save()
+
 		country = frappe.flags.country
 		frappe.flags.country = 'India'
 
@@ -1890,7 +1894,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		# reset
-		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 0)
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 0
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):

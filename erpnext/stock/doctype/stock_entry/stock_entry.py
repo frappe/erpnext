@@ -76,6 +76,7 @@ class StockEntry(StockController):
 		self.validate_difference_account()
 		self.set_job_card_data()
 		self.set_purpose_for_stock_entry()
+		self.validate_duplicate_serial_no()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -398,8 +399,12 @@ class StockEntry(StockController):
 					and item_code = %s
 					and ifnull(s_warehouse,'')='' """ % (", ".join(["%s" * len(other_ste)]), "%s"), args)[0][0]
 			if fg_qty_already_entered and fg_qty_already_entered >= qty:
-				frappe.throw(_("Stock Entries already created for Work Order ")
-					+ self.work_order + ":" + ", ".join(other_ste), DuplicateEntryForWorkOrderError)
+				frappe.throw(
+					_("Stock Entries already created for Work Order {0}: {1}").format(
+						self.work_order, ", ".join(other_ste)
+					),
+					DuplicateEntryForWorkOrderError,
+				)
 
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
@@ -435,6 +440,7 @@ class StockEntry(StockController):
 			if transferred_serial_no:
 				d.serial_no = transferred_serial_no
 
+	@frappe.whitelist()
 	def get_stock_and_rate(self):
 		"""
 			Updates rate and availability of all the items.
@@ -581,6 +587,22 @@ class StockEntry(StockController):
 		if self.stock_entry_type and not self.purpose:
 			self.purpose = frappe.get_cached_value('Stock Entry Type',
 				self.stock_entry_type, 'purpose')
+
+	def validate_duplicate_serial_no(self):
+		warehouse_wise_serial_nos = {}
+
+		# In case of repack the source and target serial nos could be same
+		for warehouse in ['s_warehouse', 't_warehouse']:
+			serial_nos = []
+			for row in self.items:
+				if not (row.serial_no and row.get(warehouse)): continue
+
+				for sn in get_serial_nos(row.serial_no):
+					if sn in serial_nos:
+						frappe.throw(_('The serial no {0} has added multiple times in the stock entry {1}')
+							.format(frappe.bold(sn), self.name))
+
+					serial_nos.append(sn)
 
 	def validate_purchase_order(self):
 		"""Throw exception if more raw material is transferred against Purchase Order than in
