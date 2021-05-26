@@ -8,6 +8,37 @@ frappe.ui.form.on("Issue", {
 				}
 			};
 		});
+
+		frappe.db.get_value("Support Settings", {name: "Support Settings"},
+			["allow_resetting_service_level_agreement", "track_service_level_agreement"], (r) => {
+				if (r && r.track_service_level_agreement == "0") {
+					frm.set_df_property("service_level_section", "hidden", 1);
+				}
+				if (r && r.allow_resetting_service_level_agreement == "0") {
+					frm.set_df_property("reset_service_level_agreement", "hidden", 1);
+				}
+			});
+
+		// buttons
+		if (frm.doc.status !== "Closed") {
+			frm.add_custom_button(__("Close"), function() {
+				frm.set_value("status", "Closed");
+				frm.save();
+			});
+
+			frm.add_custom_button(__("Task"), function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.support.doctype.issue.issue.make_task",
+					frm: frm
+				});
+			}, __("Create"));
+
+		} else {
+			frm.add_custom_button(__("Reopen"), function() {
+				frm.set_value("status", "Open");
+				frm.save();
+			});
+		}
 	},
 
 	reset_service_level_agreement: function(frm) {

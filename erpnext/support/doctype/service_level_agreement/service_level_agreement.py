@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.core.utils import get_parent_doc
 from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
-	get_time_zone, to_timedelta, get_datetime_str, get_link_to_form
+	get_time_zone, to_timedelta, get_datetime_str, get_link_to_form, cint
 from datetime import datetime
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -711,8 +711,8 @@ def update_agreement_status(doc, meta):
 		doc.service_level_agreement and doc.agreement_status == "Ongoing":
 
 		if meta.has_field("response_by_variance") and meta.has_field("resolution_by_variance"):
-			if frappe.db.get_value(doc.doctype, doc.name, "response_by_variance") < 0 or \
-				frappe.db.get_value(doc.doctype, doc.name, "resolution_by_variance") < 0:
+			if cint(frappe.db.get_value(doc.doctype, doc.name, "response_by_variance")) < 0 or \
+				cint(frappe.db.get_value(doc.doctype, doc.name, "resolution_by_variance")) < 0:
 
 				doc.agreement_status = "Failed"
 			else:
