@@ -14,17 +14,17 @@
   "column_break_5",
   "company",
   "department",
-  "salary_component_and_amount_section",
+  "salary_details_section",
   "salary_component",
+  "type",
   "currency",
   "amount",
   "column_break_13",
-  "type",
   "is_recurring",
   "payroll_date",
   "from_date",
   "to_date",
-  "additional_salary_properties_and_references_section",
+  "properties_and_references_section",
   "deduct_full_tax_on_selected_payroll_date",
   "ref_doctype",
   "ref_docname",
@@ -184,27 +184,27 @@
    "label": "Employee Details"
   },
   {
-   "fieldname": "salary_component_and_amount_section",
-   "fieldtype": "Section Break",
-   "label": "Salary Component And Amount"
-  },
-  {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "additional_salary_properties_and_references_section",
-   "fieldtype": "Section Break",
-   "label": "Additional Salary Properties And References"
-  },
-  {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_details_section",
+   "fieldtype": "Section Break",
+   "label": "Salary Details"
+  },
+  {
+   "fieldname": "properties_and_references_section",
+   "fieldtype": "Section Break",
+   "label": "Properties and References"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-21 13:57:23.670851",
+ "modified": "2021-05-26 11:10:00.812698",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Additional Salary",
