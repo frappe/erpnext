@@ -5,7 +5,7 @@ import frappe
 import json
 from six import string_types
 from frappe import _, bold
-from frappe.utils import add_days, get_datetime, today
+from frappe.utils import add_days, today
 from frappe.model.document import Document
 
 class EmployeeGrievance(Document):
@@ -48,7 +48,7 @@ def create_additional_salary(doc):
 @frappe.whitelist()
 def unsuspend_employee(doc):
 	if isinstance(doc, string_types):
-		doc = json.loads(grievance)
+		doc = json.loads(doc)
 		doc = frappe._dict(doc)
 
 	frappe.db.set_value("Employee Grievance", doc.name, "unsuspended_on", today())
@@ -58,7 +58,7 @@ def unsuspend_employee(doc):
 @frappe.whitelist()
 def suspend_employee(doc):
 	if isinstance(doc, string_types):
-		doc = json.loads(grievance)
+		doc = json.loads(doc)
 		doc = frappe._dict(doc)
 
 	if not doc.suspension_period_in_days:
