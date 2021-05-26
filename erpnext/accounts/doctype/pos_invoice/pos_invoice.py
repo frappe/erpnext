@@ -218,8 +218,9 @@ class POSInvoice(SalesInvoice):
 		for d in self.get("items"):
 			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
 			if not is_stock_item:
-				frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice. ")
-					.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
+				if not frappe.db.exists('Product Bundle', d.item_code):
+					frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice. ")
+						.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
@@ -472,7 +473,7 @@ def get_bundle_availability(bundle_item_code, warehouse):
 	for item in product_bundle.items:
 		item_bin_qty = get_bin_qty(item.item_code, warehouse)
 
-		max_num_of_bundles = item_bin_qty / item.qty	# max number of bundles that can be created using the item_bin_qty
+		max_num_of_bundles = item_bin_qty / item.qty
 		if bundle_bin_qty > max_num_of_bundles:
 			bundle_bin_qty = max_num_of_bundles
 
