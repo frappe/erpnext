@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _, bold
-from frappe.utils import comma_and, add_days, get_datetime, today
+from frappe.utils import add_days, get_datetime, today
 from frappe.model.document import Document
 
 class EmployeeGrievance(Document):

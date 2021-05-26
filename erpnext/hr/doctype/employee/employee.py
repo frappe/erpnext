@@ -175,7 +175,7 @@ class Employee(NestedSet):
 
 	def validated_suspension(self):
 		doc_before_save = self.get_doc_before_save()
-		if self.status != "Suspended" and doc_before_save.status == "Suspended":
+		if doc_before_save and self.status != "Suspended" and doc_before_save.status == "Suspended":
 			grievance = frappe.get_all("Employee Grievance", filters={
 				"status": 'Resolved',
 				"employee_responsible": self.name,
@@ -185,7 +185,7 @@ class Employee(NestedSet):
 			}, fields = ["name", "suspended_from", "suspended_to"])
 
 
-			if len(grievance):
+			if grievance:
 				self.db_set("status", "Suspended")
 				grievance = grievance[0]
 				frappe.throw(_("You are not allowed to change the status. The employee has been suspended from {0} to {1} due to Employee Grievance {2}").format(
