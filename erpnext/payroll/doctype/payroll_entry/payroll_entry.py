@@ -52,49 +52,32 @@ class PayrollEntry(Document):
 			Returns list of active employees based on selected criteria
 			and for which salary structure exists
 		"""
-		cond = self.get_filter_condition()
-		cond += self.get_joining_relieving_condition()
+		self.check_mandatory()
+		filters = self.make_filters()
+		cond = get_filter_condition(filters)
+		cond += get_joining_relieving_condition(self.start_date, self.end_date)
 
 		condition = ''
 		if self.payroll_frequency:
 			condition = """and payroll_frequency = '%(payroll_frequency)s'"""% {"payroll_frequency": self.payroll_frequency}
 
-		sal_struct = frappe.db.sql_list("""
-			select
-				name from `tabSalary Structure`
-			where
-				docstatus = 1 and
-				is_active = 'Yes'
-				and company = %(company)s
-				and currency = %(currency)s and
-				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
-				{condition}""".format(condition=condition),
-			{"company": self.company, "currency": self.currency, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
-
+		sal_struct = get_sal_struct(self.company, self.currency, self.salary_slip_based_on_timesheet, condition)
 		if sal_struct:
 			cond += "and t2.salary_structure IN %(sal_struct)s "
 			cond += "and t2.payroll_payable_account = %(payroll_payable_account)s "
 			cond += "and %(from_date)s >= t2.from_date"
-			emp_list = frappe.db.sql("""
-				select
-					distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
-				from
-					`tabEmployee` t1, `tabSalary Structure Assignment` t2
-				where
-					t1.name = t2.employee
-					and t2.docstatus = 1
-			%s order by t2.from_date desc
-			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date, "payroll_payable_account": self.payroll_payable_account}, as_dict=True)
-
-			emp_list = self.remove_payrolled_employees(emp_list)
+			emp_list = get_emp_list(sal_struct, cond, self.end_date, self.payroll_payable_account)
+			emp_list = remove_payrolled_employees(emp_list, self.start_date, self.end_date)
 			return emp_list
 
-	def remove_payrolled_employees(self, emp_list):
-		for employee_details in emp_list:
-			if frappe.db.exists("Salary Slip", {"employee": employee_details.employee, "start_date": self.start_date, "end_date": self.end_date, "docstatus": 1}):
-				emp_list.remove(employee_details)
+	def make_filters(self):
+		filters = frappe._dict()
+		filters['company'] = self.company
+		filters['branch'] = self.branch
+		filters['department'] = self.department
+		filters['designation'] = self.designation
 
-		return emp_list
+		return filters
 
 	@frappe.whitelist()
 	def fill_employee_details(self):
@@ -121,23 +104,6 @@ class PayrollEntry(Document):
 		self.number_of_employees = len(self.employees)
 		if self.validate_attendance:
 			return self.validate_employee_attendance()
-
-	def get_filter_condition(self):
-		self.check_mandatory()
-
-		cond = ''
-		for f in ['company', 'branch', 'department', 'designation']:
-			if self.get(f):
-				cond += " and t1." + f + " = " + frappe.db.escape(self.get(f))
-
-		return cond
-
-	def get_joining_relieving_condition(self):
-		cond = """
-			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
-			and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
-		""" % {"start_date": self.start_date, "end_date": self.end_date}
-		return cond
 
 	def check_mandatory(self):
 		for fieldname in ['company', 'start_date', 'end_date']:
@@ -451,6 +417,53 @@ class PayrollEntry(Document):
 			marked_days = attendances[0][0]
 		return marked_days
 
+def get_sal_struct(company, currency, salary_slip_based_on_timesheet, condition):
+	return frappe.db.sql_list("""
+		select
+			name from `tabSalary Structure`
+		where
+			docstatus = 1 and
+			is_active = 'Yes'
+			and company = %(company)s
+			and currency = %(currency)s and
+			ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
+			{condition}""".format(condition=condition),
+		{"company": company, "currency": currency, "salary_slip_based_on_timesheet": salary_slip_based_on_timesheet})
+
+def get_filter_condition(filters):
+	cond = ''
+	for f in ['company', 'branch', 'department', 'designation']:
+		if filters.get(f):
+			cond += " and t1." + f + " = " + frappe.db.escape(filters.get(f))
+
+	return cond
+
+def get_joining_relieving_condition(start_date, end_date):
+	cond = """
+		and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
+		and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
+	""" % {"start_date": start_date, "end_date": end_date}
+	return cond
+
+def get_emp_list(sal_struct, cond, end_date, payroll_payable_account):
+	return frappe.db.sql("""
+			select
+				distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
+			from
+				`tabEmployee` t1, `tabSalary Structure Assignment` t2
+			where
+				t1.name = t2.employee
+				and t2.docstatus = 1
+		%s order by t2.from_date desc
+		""" % cond, {"sal_struct": tuple(sal_struct), "from_date": end_date, "payroll_payable_account": payroll_payable_account}, as_dict=True)
+
+def remove_payrolled_employees(emp_list, start_date, end_date):
+	for employee_details in emp_list:
+		if frappe.db.exists("Salary Slip", {"employee": employee_details.employee, "start_date": start_date, "end_date": end_date, "docstatus": 1}):
+			emp_list.remove(employee_details)
+
+	return emp_list
+
 @frappe.whitelist()
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	'''Returns dict of start and end dates for given payroll frequency based on start_date'''
@@ -639,39 +652,41 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 			'start': start, 'page_len': page_len
 		})
 
-def get_employee_with_existing_salary_slip(start_date, end_date, company):
-	return frappe.db.sql_list("""
-		select employee from `tabSalary Slip`
-		where
-			(start_date between %(start_date)s and %(end_date)s
-		or
-			end_date between %(start_date)s and %(end_date)s
-		or
-			%(start_date)s between start_date and end_date)
-		and company = %(company)s
-		and docstatus = 1
-	""", {'start_date': start_date, 'end_date': end_date, 'company': company})
+def get_employee_list(filters):
+	cond = get_filter_condition(filters)
+	cond += get_joining_relieving_condition(filters.start_date, filters.end_date)
+	condition = """and payroll_frequency = '%(payroll_frequency)s'"""% {"payroll_frequency": filters.payroll_frequency}
+	sal_struct = get_sal_struct(filters.company, filters.currency, filters.salary_slip_based_on_timesheet, condition)
+	if sal_struct:
+		cond += "and t2.salary_structure IN %(sal_struct)s "
+		cond += "and t2.payroll_payable_account = %(payroll_payable_account)s "
+		cond += "and %(from_date)s >= t2.from_date"
+		emp_list = get_emp_list(sal_struct, cond, filters.end_date, filters.payroll_payable_account)
+		emp_list = remove_payrolled_employees(emp_list, filters.start_date, filters.end_date)
+		return emp_list
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	filters = frappe._dict(filters)
 	conditions = []
-	exclude_employees = []
+	include_employees = []
 	emp_cond = ''
 	if filters.start_date and filters.end_date:
-		employee_list = get_employee_with_existing_salary_slip(filters.start_date, filters.end_date, filters.company)
+		employee_list = get_employee_list(filters)
 		emp = filters.get('employees')
+		include_employees = [employee.employee for employee in employee_list if employee.employee not in emp]
 		filters.pop('start_date')
 		filters.pop('end_date')
+		filters.pop('salary_slip_based_on_timesheet')
+		filters.pop('payroll_frequency')
+		filters.pop('payroll_payable_account')
+		filters.pop('currency')
 		if filters.employees is not None:
 			filters.pop('employees')
-		if employee_list:
-			exclude_employees.extend(employee_list)
-		if emp:
-			exclude_employees.extend(emp)
-		if exclude_employees:
-			emp_cond += 'and employee not in %(exclude_employees)s'
+
+		if include_employees:
+			emp_cond += 'and employee in %(include_employees)s'
 
 	return frappe.db.sql("""select name, employee_name from `tabEmployee`
 		where status = 'Active'
@@ -695,4 +710,4 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			'_txt': txt.replace("%", ""),
 			'start': start,
 			'page_len': page_len,
-			'exclude_employees': exclude_employees})
+			'include_employees': include_employees})

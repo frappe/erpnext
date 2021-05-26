@@ -49,11 +49,11 @@ class TestTaxExemption80GCertificate(unittest.TestCase):
 		certificate.insert()
 
 		# check company details
-		self.assertEquals(certificate.company_pan_number, 'BBBTI3374C')
-		self.assertEquals(certificate.company_80g_number, 'NQ.CIT(E)I2018-19/DEL-IE28615-27062018/10087')
+		self.assertEqual(certificate.company_pan_number, 'BBBTI3374C')
+		self.assertEqual(certificate.company_80g_number, 'NQ.CIT(E)I2018-19/DEL-IE28615-27062018/10087')
 
 		# check donation details
-		self.assertEquals(certificate.amount, donation.amount)
+		self.assertEqual(certificate.amount, donation.amount)
 
 		duplicate_certificate = create_80g_certificate(args)
 		# duplicate validation
@@ -83,9 +83,9 @@ class TestTaxExemption80GCertificate(unittest.TestCase):
 		certificate.get_payments()
 		certificate.insert()
 
-		self.assertEquals(len(certificate.payments), 1)
-		self.assertEquals(certificate.payments[0].amount, membership.amount)
-		self.assertEquals(certificate.payments[0].invoice_id, invoice.name)
+		self.assertEqual(len(certificate.payments), 1)
+		self.assertEqual(certificate.payments[0].amount, membership.amount)
+		self.assertEqual(certificate.payments[0].invoice_id, invoice.name)
 
 
 def create_80g_certificate(args):

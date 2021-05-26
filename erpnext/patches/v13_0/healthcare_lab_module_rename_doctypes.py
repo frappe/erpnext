@@ -38,16 +38,37 @@ def execute():
 			""".format(doctype), {'parentfield': parentfield})
 
 		# copy renamed child table fields (fields were already renamed in old doctype json, hence sql)
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_name = test_name""")
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_event = test_event""")
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_uom = test_uom""")
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_comment = test_comment""")
-		frappe.db.sql("""UPDATE `tabNormal Test Template` SET lab_test_event = test_event""")
-		frappe.db.sql("""UPDATE `tabNormal Test Template` SET lab_test_uom = test_uom""")
-		frappe.db.sql("""UPDATE `tabDescriptive Test Result` SET lab_test_particulars = test_particulars""")
-		frappe.db.sql("""UPDATE `tabLab Test Group Template` SET lab_test_template = test_template""")
-		frappe.db.sql("""UPDATE `tabLab Test Group Template` SET lab_test_description = test_description""")
-		frappe.db.sql("""UPDATE `tabLab Test Group Template` SET lab_test_rate = test_rate""")
+		rename_fields = {
+			'lab_test_name': 'test_name',
+			'lab_test_event': 'test_event',
+			'lab_test_uom': 'test_uom',
+			'lab_test_comment': 'test_comment'
+		}
+
+		for new, old in rename_fields.items():
+			if frappe.db.has_column('Normal Test Result', old):
+				frappe.db.sql("""UPDATE `tabNormal Test Result` SET {} = {}"""
+					.format(new, old))
+
+		if frappe.db.has_column('Normal Test Template', 'test_event'):
+			frappe.db.sql("""UPDATE `tabNormal Test Template` SET lab_test_event = test_event""")
+
+		if frappe.db.has_column('Normal Test Template', 'test_uom'):
+			frappe.db.sql("""UPDATE `tabNormal Test Template` SET lab_test_uom = test_uom""")
+
+		if frappe.db.has_column('Descriptive Test Result', 'test_particulars'):
+			frappe.db.sql("""UPDATE `tabDescriptive Test Result` SET lab_test_particulars = test_particulars""")
+
+		rename_fields = {
+			'lab_test_template': 'test_template',
+			'lab_test_description': 'test_description',
+			'lab_test_rate': 'test_rate'
+		}
+
+		for new, old in rename_fields.items():
+			if frappe.db.has_column('Lab Test Group Template', old):
+				frappe.db.sql("""UPDATE `tabLab Test Group Template` SET {} = {}"""
+					.format(new, old))
 
 		# rename field
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test')

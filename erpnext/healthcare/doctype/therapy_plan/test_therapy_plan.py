@@ -18,24 +18,24 @@ class TestTherapyPlan(unittest.TestCase):
 
 	def test_status(self):
 		plan = create_therapy_plan()
-		self.assertEquals(plan.status, 'Not Started')
+		self.assertEqual(plan.status, 'Not Started')
 
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company')
 		frappe.get_doc(session).submit()
-		self.assertEquals(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'In Progress')
+		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'In Progress')
 
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company')
 		frappe.get_doc(session).submit()
-		self.assertEquals(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'Completed')
+		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'Completed')
 
 		patient, medical_department, practitioner = create_healthcare_docs()
 		appointment = create_appointment(patient, practitioner, nowdate())		
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company', appointment.name)
 		session = frappe.get_doc(session)
 		session.submit()
-		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
+		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
 		session.cancel()
-		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Open')
+		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Open')
 
 	def test_therapy_plan_from_template(self):
 		patient = create_patient()
@@ -49,7 +49,7 @@ class TestTherapyPlan(unittest.TestCase):
 		si.save()
 
 		therapy_plan_template_amt = frappe.db.get_value('Therapy Plan Template', template, 'total_amount')
-		self.assertEquals(si.items[0].amount, therapy_plan_template_amt)
+		self.assertEqual(si.items[0].amount, therapy_plan_template_amt)
 
 
 def create_therapy_plan(template=None):
