@@ -13,29 +13,32 @@ frappe.ui.form.on('Employee Grievance', {
 			};
 		});
 		frm.set_query('associated_document_type', function() {
-			let ignore_module = ["Setup", "Core", "Integrations", "Automation", "Core", "Website",
-				"Utilities", "Event Streaming", "Social", "Chat", "Data Migration", "printing", "Desk", "Custom"];
+			let ignore_modules = ["Setup", "Core", "Integrations", "Automation", "Website",
+				"Utilities", "Event Streaming", "Social", "Chat", "Data Migration", "Printing", "Desk", "Custom"];
 			return {
 				filters: {
 					istable: 0,
 					issingle: 0,
-					module: ["Not In", ignore_module]
+					module: ["Not In", ignore_modules]
 				}
 			};
 		});
 	},
+
 	refresh: function(frm) {
 		if (!frm.doc.__islocal && frm.doc.status === "Resolved" && frm.doc.docstatus === 1) {
-			if (frm.doc.is_applicable_for_suspension && (!(frm.doc.suspended_from && frm.doc.suspended_to) && !frm.doc.unsuspended_on)) {
-				frm.add_custom_button(__("Suspend Employee"), function () {
-					frm.events.suspend_or_unsuspend_employee(frm, 'suspend');
-				});
-			}
+			if (frm.doc.employee_responsible) {
+				if (frm.doc.is_applicable_for_suspension && (!(frm.doc.suspended_from && frm.doc.suspended_to) && !frm.doc.unsuspended_on)) {
+					frm.add_custom_button(__("Suspend Employee"), function () {
+						frm.events.suspend_or_unsuspend_employee(frm, 'suspend');
+					});
+				}
 
-			if (frm.doc.is_applicable_for_pay_cut) {
-				frm.add_custom_button(__("Apply Pay Cut"), function () {
-					frm.events.create_additional_salary(frm);
-				});
+				if (frm.doc.is_applicable_for_pay_cut) {
+					frm.add_custom_button(__("Apply Pay Cut"), function () {
+						frm.events.create_additional_salary(frm);
+					});
+				}
 			}
 
 			if (frm.doc.suspended_from && frm.doc.suspended_to && !frm.doc.unsuspended_on) {
@@ -55,6 +58,7 @@ frappe.ui.form.on('Employee Grievance', {
 			}
 		}
 	},
+
 	suspend_or_unsuspend_employee: function(frm, action) {
 		let message = '';
 		let method = '';

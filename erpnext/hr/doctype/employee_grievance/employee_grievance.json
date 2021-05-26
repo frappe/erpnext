@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "raised_by",
-  "full_name",
+  "employee_name",
   "designation",
   "column_break_3",
   "date",
@@ -97,13 +97,12 @@
    "fieldname": "employee_responsible",
    "fieldtype": "Link",
    "label": "Employee Responsible ",
-   "mandatory_depends_on": "eval: doc.status == \"Resolved\"",
    "options": "Employee"
   },
   {
    "fieldname": "resolution_detail",
    "fieldtype": "Small Text",
-   "label": "Resolution Detail",
+   "label": "Resolution Details",
    "mandatory_depends_on": "eval: doc.status == \"Resolved\""
   },
   {
@@ -243,20 +242,20 @@
   {
    "fieldname": "investigation_details_section",
    "fieldtype": "Section Break",
-   "label": "Investigation details"
+   "label": "Investigation Details"
   },
   {
    "fetch_from": "raised_by.employee_name",
-   "fieldname": "full_name",
+   "fieldname": "employee_name",
    "fieldtype": "Data",
-   "label": "Full Name",
+   "label": "Employee Name",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-24 15:14:21.812126",
+ "modified": "2021-05-26 11:46:33.204632",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grievance",
