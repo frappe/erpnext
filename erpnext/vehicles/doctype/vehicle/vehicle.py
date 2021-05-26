@@ -21,6 +21,10 @@ class Vehicle(Document):
 		'warranty_expiry_date', 'amc_expiry_date', 'maintenance_status'
 	]
 
+	def __init__(self, *args, **kwargs):
+		super(Vehicle, self).__init__(*args, **kwargs)
+		self.via_stock_ledger = False
+
 	def autoname(self):
 		if self.flags.from_serial_no:
 			self.name = self.flags.from_serial_no
@@ -35,7 +39,9 @@ class Vehicle(Document):
 
 	def on_update(self):
 		self.update_vehicle_serial_no()
-		self.update_vehicle_booking_order()
+
+		if not self.via_stock_ledger and not self.flags.from_serial_no:
+			self.update_vehicle_booking_order()
 
 		self.db_set("last_odometer", get_vehicle_odometer(self.name))
 

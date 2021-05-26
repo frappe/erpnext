@@ -288,6 +288,7 @@ class SerialNo(StockController):
 			else:
 				vehicle_doc = frappe.get_doc("Vehicle", self.vehicle)
 
+			vehicle_doc.via_stock_ledger = self.via_stock_ledger
 			vehicle_doc.save(ignore_permissions=True)
 			self.vehicle = vehicle_doc.name
 
