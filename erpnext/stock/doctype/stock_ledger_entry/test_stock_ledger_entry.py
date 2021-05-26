@@ -81,6 +81,9 @@ class TestStockLedgerEntry(unittest.TestCase):
 			"posting_time": '14:00'
 		})
 		self.assertEqual(finished_item_sle.get("incoming_rate"), 540)
+		if finished_item_sle.get("incoming_rate") != 540:
+			print("FInished SLE: ", finished_item_sle)
+
 		self.assertEqual(finished_item_sle.get("valuation_rate"), 540)
 
 		# Reconciliation for _Test Item for Reposting at Stores on 12-04-2020: Qty = 50, Rate = 150

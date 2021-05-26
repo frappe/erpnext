@@ -75,10 +75,17 @@ jobs:
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
+
       - name: Run Tests
         run: ${{ matrix.RUN_COMMAND }}
         env:
           TYPE: ${{ matrix.TYPE }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
 
       - name: Coverage - Pull Request
         if: matrix.TYPE == 'server' && github.event_name == 'pull_request'
@@ -92,7 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
           COVERALLS_SERVICE_NAME: github
-          
+
       - name: Coverage - Push
         if: matrix.TYPE == 'server' && github.event_name == 'push'
         run: |
