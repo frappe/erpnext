@@ -54,6 +54,7 @@ frappe.ui.form.on('Employee Grievance', {
 
 				frm.add_custom_button(__("Unsuspend Employee"), function () {
 					frm.events.suspend_or_unsuspend_employee(frm, "unsuspend");
+					frm.refresh_fields();
 				});
 			}
 		}
@@ -75,7 +76,7 @@ frappe.ui.form.on('Employee Grievance', {
 					frappe.call({
 						method: method,
 						args: {
-							name: frm.doc.name
+							doc: frm.doc
 						},
 						callback: function() {
 							frm.refresh();

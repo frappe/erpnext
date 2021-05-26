@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "subject",
   "raised_by",
   "employee_name",
   "designation",
@@ -89,7 +90,7 @@
   {
    "fieldname": "resolved_by",
    "fieldtype": "Link",
-   "label": "Resolved by",
+   "label": "Resolved By",
    "mandatory_depends_on": "eval: doc.status == \"Resolved\"",
    "options": "User"
   },
@@ -250,18 +251,26 @@
    "fieldtype": "Data",
    "label": "Employee Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-26 11:46:33.204632",
+ "modified": "2021-05-26 13:41:05.271685",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grievance",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -270,10 +279,14 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "select": 1,
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -282,7 +295,9 @@
    "read": 1,
    "report": 1,
    "role": "HR Manager",
+   "select": 1,
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -298,7 +313,9 @@
    "write": 1
   }
  ],
+ "search_fields": "subject,raised_by,grievance_against_party",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "subject",
  "track_changes": 1
 }

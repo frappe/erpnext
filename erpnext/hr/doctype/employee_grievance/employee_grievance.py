@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 import frappe
+import json
+from six import string_types
 from frappe import _, bold
 from frappe.utils import add_days, get_datetime, today
 from frappe.model.document import Document
@@ -15,7 +17,7 @@ class EmployeeGrievance(Document):
 			)
 
 	def before_cancel(self):
-		if self.suspended_from and self.suspended_to:
+		if self.suspended_from and self.suspended_to and not self.unsuspended_on:
 			frappe.throw(_("You need to Unsuspend Employee before Cancellation"))
 
 @frappe.whitelist()
@@ -44,35 +46,41 @@ def create_additional_salary(doc):
 
 
 @frappe.whitelist()
-def unsuspend_employee(name):
-	frappe.db.set_value("Employee Grievance", name, "unsuspended_on", today())
-	employee_responsible = frappe.db.get_value("Employee Grievance", name, "employee_responsible")
-	frappe.db.set_value("Employee", employee_responsible, "status", "Active")
+def unsuspend_employee(doc):
+	if isinstance(doc, string_types):
+		doc = json.loads(grievance)
+		doc = frappe._dict(doc)
+
+	frappe.db.set_value("Employee Grievance", doc.name, "unsuspended_on", today())
+	frappe.db.set_value("Employee", doc.employee_responsible, "status", "Active")
 
 
 @frappe.whitelist()
-def suspend_employee(name):
-	employee_grievance = frappe.get_doc("Employee Grievance", name)
-	today_date = get_datetime(today())
-	days = employee_grievance.suspension_period_in_days
+def suspend_employee(doc):
+	if isinstance(doc, string_types):
+		doc = json.loads(grievance)
+		doc = frappe._dict(doc)
 
-	if not days:
-		frappe.throw(_("Grievance Type: {0} is not applicable for suspension").format(employee_grievance.grievance_type))
+	if not doc.suspension_period_in_days:
+		frappe.throw(_("Grievance Type: {0} is not applicable for suspension").format(doc.grievance_type))
 
-	frappe.db.set_value("Employee Grievance", name, {
+	frappe.db.set_value("Employee Grievance", doc.name, {
 		"suspended_from": today(),
-		"suspended_to": add_days(today_date, days),
+		"suspended_to": add_days(today(), doc.suspension_period_in_days),
 	})
 
-	frappe.db.set_value("Employee", employee_grievance.employee_responsible, "status", "Suspended")
+	frappe.db.set_value("Employee", doc.employee_responsible, "status", "Suspended")
+
 
 @frappe.whitelist()
 def check_and_unsuspend_employees():
 	data = frappe.get_all("Employee Grievance", filters={
 		"docstatus": 1,
-		"suspended_to": ('<=', today()),
-	}, fields = ["name", "suspended_to", "unsuspended_on"])
+		"suspended_to": ("<=", today()),
+		"unsuspended_on": ""
+	}, fields = ["name", "suspended_to"])
+
 	for d in data:
-		if d.suspended_to and not d.unsuspended_on:
+		if d.suspended_to:
 			unsuspend_employee(d.name)
 

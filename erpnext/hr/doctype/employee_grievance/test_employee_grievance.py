@@ -23,13 +23,13 @@ class TestEmployeeGrievance(unittest.TestCase):
 		self.assertEqual(pay_cut_doc.ref_doctype, "Employee Grievance")
 
 		# suspension
-		suspend_employee(grievance.name)
+		suspend_employee(grievance)
 		grievance.reload()
 		self.assertEqual(today(), get_date_str(grievance.suspended_from))
 		self.assertEqual(add_days(today(), 30), get_date_str(grievance.suspended_to))
 
 		# unsuspension
-		unsuspend_employee(grievance.name)
+		unsuspend_employee(grievance)
 		grievance.reload()
 		self.assertEqual(today(), get_date_str(grievance.unsuspended_on))
 
@@ -39,6 +39,7 @@ def create_employee_grievance():
 	emp_2 = make_employee("testculprit@example.com", company="_Test Company")
 
 	grievance = frappe.new_doc("Employee Grievance")
+	grievance.subject = "Test Employee Grievance"
 	grievance.raised_by = emp_1
 	grievance.date = today()
 	grievance.grievance_type = grievance_type
@@ -69,7 +70,7 @@ def create_grievance_type():
 	grievance_type.name="Employee Abuse"
 	grievance_type.is_applicable_for_pay_cut = 1
 	grievance_type.is_applicable_for_suspension = 1
-	grievance_type.number_of_days_for_suspension = 30
+	grievance_type.suspension_period_in_days = 30
 	grievance_type.description = "Test"
 
 	grievance_type.save()
