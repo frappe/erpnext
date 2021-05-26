@@ -124,7 +124,7 @@ class ProductionPlanReport(object):
 				if self.filters.include_subassembly_raw_materials else "(bom_item.qty / bom.quantity)")
 
 			raw_materials = frappe.db.sql(""" SELECT bom_item.parent, bom_item.item_code,
-					bom_item.item_name as raw_material_name, {0} as required_qty
+					bom_item.item_name as raw_material_name, {0} as required_qty_per_unit
 				FROM
 					`tabBOM` as bom, `tab{1}` as bom_item
 				WHERE
@@ -208,7 +208,7 @@ class ProductionPlanReport(object):
 		warehouses = self.mrp_warehouses or []
 		for d in self.raw_materials_dict.get(key):
 			if self.filters.based_on != "Work Order":
-				d.required_qty = d.required_qty * data.qty_to_manufacture
+				d.required_qty = d.required_qty_per_unit * data.qty_to_manufacture
 
 			if not warehouses:
 				warehouses = [data.warehouse]

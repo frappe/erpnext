@@ -19,7 +19,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Sales Order', 'Quality Inspection']
+				'items': ['Sales Order', 'Shipment', 'Quality Inspection']
 			},
 			{
 				'label': _('Returns'),

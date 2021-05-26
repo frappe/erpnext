@@ -10,15 +10,16 @@ app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
-app_logo_url = '/assets/erpnext/images/erp-icon.svg'
+app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 
 develop_version = '13.x.x-develop'
 
-app_include_js = "/assets/js/erpnext.min.js"
-app_include_css = "/assets/css/erpnext.css"
-web_include_js = "/assets/js/erpnext-web.min.js"
-web_include_css = "/assets/css/erpnext-web.css"
+app_include_js = "erpnext.bundle.js"
+app_include_css = "erpnext.bundle.css"
+web_include_js = "erpnext-web.bundle.js"
+web_include_css = "erpnext-web.bundle.css"
+email_css = "email_erpnext.bundle.css"
 
 doctype_js = {
 	"Address": "public/js/address.js",
@@ -46,6 +47,7 @@ notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
 leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
 filters_config = "erpnext.startup.filters.get_filters_config"
+additional_print_settings = "erpnext.controllers.print_settings.get_print_settings"
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
@@ -77,8 +79,8 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 
 website_context = {
-	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erp-icon.svg"
+	"favicon": 	"/assets/erpnext/images/erpnext-favicon.svg",
+	"splash_image": "/assets/erpnext/images/erpnext-logo.svg"
 }
 
 website_route_rules = [
@@ -194,6 +196,10 @@ sounds = [
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
 ]
 
+has_upload_permission = {
+	"Employee": "erpnext.hr.doctype.employee.employee.has_upload_permission"
+}
+
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -223,6 +229,9 @@ standard_queries = {
 doc_events = {
 	"*": {
 		"validate": "erpnext.support.doctype.service_level_agreement.service_level_agreement.apply"
+		"on_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.create_medical_record",
+		"on_update_after_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.update_medical_record",
+		"on_cancel": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.delete_medical_record"
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
@@ -256,7 +265,11 @@ doc_events = {
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
 			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction"
 		],
-		"on_trash": "erpnext.regional.check_deletion_permission"
+		"on_trash": "erpnext.regional.check_deletion_permission",
+		"validate": [
+			"erpnext.regional.india.utils.validate_document_name",
+			"erpnext.regional.india.utils.update_taxable_values"
+		]
 	},
 	"Purchase Invoice": {
 		"validate": [
@@ -272,16 +285,16 @@ doc_events = {
 	'Address': {
 		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code', 'erpnext.regional.india.utils.update_gst_category']
 	},
+	'Supplier': {
+		'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
+	},
 	('Sales Invoice', 'Sales Order', 'Delivery Note', 'Purchase Invoice', 'Purchase Order', 'Purchase Receipt'): {
 		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information",
+		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
-	},
-	"Lead": {
-		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
@@ -298,6 +311,8 @@ auto_cancel_exempted_doctypes= [
 	"Payment Entry",
 	"Inpatient Medication Entry"
 ]
+
+after_migrate = ["erpnext.setup.install.update_select_perm_after_install"]
 
 scheduler_events = {
 	"cron": {
@@ -321,6 +336,7 @@ scheduler_events = {
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
 		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
 		"erpnext.erpnext_integrations.connectors.shopify_connection.sync_old_orders",
+		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
     "erpnext.support.doctype.service_level_agreement.service_level_agreement.set_service_level_agreement_variance"
 	],
 	"daily": [
@@ -348,7 +364,8 @@ scheduler_events = {
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
-		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email"
+		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
+		"erpnext.non_profit.doctype.membership.membership.set_expired_status"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
@@ -358,13 +375,13 @@ scheduler_events = {
 		"erpnext.hr.utils.generate_leave_encashment",
 		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.hr.utils.grant_leaves_automatically",
-		"erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall.create_process_loan_security_shortfall",
-		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
+		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
+		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead"
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
-		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_demand_loans"
+		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_demand_loans"
 	]
 }
 
@@ -393,6 +410,15 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
+accounting_dimension_doctypes = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
+	"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
+	"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
+	"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
+	"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
+	"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
+	"Subscription Plan"
+]
+
 regional_overrides = {
 	'France': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'
@@ -402,9 +428,12 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data',
 		'erpnext.accounts.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
+		'erpnext.controllers.taxes_and_totals.get_regional_round_off_accounts': 'erpnext.regional.india.utils.get_regional_round_off_accounts',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
-		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries'
+		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries',
+		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields',
+		'erpnext.assets.doctype.asset.asset.get_depreciation_amount': 'erpnext.regional.india.utils.get_depreciation_amount'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data',
@@ -416,9 +445,6 @@ regional_overrides = {
 	'Italy': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.italy.utils.update_itemised_tax_data',
 		'erpnext.controllers.accounts_controller.validate_regional': 'erpnext.regional.italy.utils.sales_invoice_validate',
-	},
-	'Germany': {
-		'erpnext.controllers.accounts_controller.validate_regional': 'erpnext.regional.germany.accounts_controller.validate_regional',
 	}
 }
 user_privacy_documents = [
@@ -448,42 +474,43 @@ global_search_doctypes = {
 		{"doctype": "Sales Order", "index": 8},
 		{"doctype": "Quotation", "index": 9},
 		{"doctype": "Work Order", "index": 10},
-		{"doctype": "Purchase Receipt", "index": 11},
-		{"doctype": "Purchase Invoice", "index": 12},
-		{"doctype": "Delivery Note", "index": 13},
-		{"doctype": "Stock Entry", "index": 14},
-		{"doctype": "Material Request", "index": 15},
-		{"doctype": "Delivery Trip", "index": 16},
-		{"doctype": "Pick List", "index": 17},
-		{"doctype": "Salary Slip", "index": 18},
-		{"doctype": "Leave Application", "index": 19},
-		{"doctype": "Expense Claim", "index": 20},
-		{"doctype": "Payment Entry", "index": 21},
-		{"doctype": "Lead", "index": 22},
-		{"doctype": "Opportunity", "index": 23},
-		{"doctype": "Item Price", "index": 24},
-		{"doctype": "Purchase Taxes and Charges Template", "index": 25},
-		{"doctype": "Sales Taxes and Charges", "index": 26},
-		{"doctype": "Asset", "index": 27},
-		{"doctype": "Project", "index": 28},
-		{"doctype": "Task", "index": 29},
-		{"doctype": "Timesheet", "index": 30},
-		{"doctype": "Issue", "index": 31},
-		{"doctype": "Serial No", "index": 32},
-		{"doctype": "Batch", "index": 33},
-		{"doctype": "Branch", "index": 34},
-		{"doctype": "Department", "index": 35},
-		{"doctype": "Employee Grade", "index": 36},
-		{"doctype": "Designation", "index": 37},
-		{"doctype": "Job Opening", "index": 38},
-		{"doctype": "Job Applicant", "index": 39},
-		{"doctype": "Job Offer", "index": 40},
-		{"doctype": "Salary Structure Assignment", "index": 41},
-		{"doctype": "Appraisal", "index": 42},
-		{"doctype": "Loan", "index": 43},
-		{"doctype": "Maintenance Schedule", "index": 44},
-		{"doctype": "Maintenance Visit", "index": 45},
-		{"doctype": "Warranty Claim", "index": 46},
+		{"doctype": "Purchase Order", "index": 11},
+		{"doctype": "Purchase Receipt", "index": 12},
+		{"doctype": "Purchase Invoice", "index": 13},
+		{"doctype": "Delivery Note", "index": 14},
+		{"doctype": "Stock Entry", "index": 15},
+		{"doctype": "Material Request", "index": 16},
+		{"doctype": "Delivery Trip", "index": 17},
+		{"doctype": "Pick List", "index": 18},
+		{"doctype": "Salary Slip", "index": 19},
+		{"doctype": "Leave Application", "index": 20},
+		{"doctype": "Expense Claim", "index": 21},
+		{"doctype": "Payment Entry", "index": 22},
+		{"doctype": "Lead", "index": 23},
+		{"doctype": "Opportunity", "index": 24},
+		{"doctype": "Item Price", "index": 25},
+		{"doctype": "Purchase Taxes and Charges Template", "index": 26},
+		{"doctype": "Sales Taxes and Charges", "index": 27},
+		{"doctype": "Asset", "index": 28},
+		{"doctype": "Project", "index": 29},
+		{"doctype": "Task", "index": 30},
+		{"doctype": "Timesheet", "index": 31},
+		{"doctype": "Issue", "index": 32},
+		{"doctype": "Serial No", "index": 33},
+		{"doctype": "Batch", "index": 34},
+		{"doctype": "Branch", "index": 35},
+		{"doctype": "Department", "index": 36},
+		{"doctype": "Employee Grade", "index": 37},
+		{"doctype": "Designation", "index": 38},
+		{"doctype": "Job Opening", "index": 39},
+		{"doctype": "Job Applicant", "index": 40},
+		{"doctype": "Job Offer", "index": 41},
+		{"doctype": "Salary Structure Assignment", "index": 42},
+		{"doctype": "Appraisal", "index": 43},
+		{"doctype": "Loan", "index": 44},
+		{"doctype": "Maintenance Schedule", "index": 45},
+		{"doctype": "Maintenance Visit", "index": 46},
+		{"doctype": "Warranty Claim", "index": 47},
 	],
 	"Healthcare": [
 		{'doctype': 'Patient', 'index': 1},
@@ -585,4 +612,8 @@ global_search_doctypes = {
 		{'doctype': 'Hotel Room Package', 'index': 3},
 		{'doctype': 'Hotel Room Type', 'index': 4}
 	]
+}
+
+additional_timeline_content = {
+	'*': ['erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs']
 }

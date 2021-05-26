@@ -106,9 +106,9 @@
   "item_tax_section_break",
   "taxes",
   "inspection_criteria",
+  "quality_inspection_template",
   "inspection_required_before_purchase",
   "inspection_required_before_delivery",
-  "quality_inspection_template",
   "manufacturing",
   "default_bom",
   "is_sub_contracted_item",
@@ -521,8 +521,7 @@
    "fieldname": "has_variants",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "Has Variants",
-   "no_copy": 1
+   "label": "Has Variants"
   },
   {
    "default": "Item Attribute",
@@ -538,7 +537,6 @@
    "fieldtype": "Table",
    "hidden": 1,
    "label": "Attributes",
-   "no_copy": 1,
    "options": "Item Variant Attribute"
   },
   {
@@ -814,7 +812,6 @@
    "label": "Inspection Required before Delivery"
   },
   {
-   "depends_on": "eval:(doc.inspection_required_before_purchase || doc.inspection_required_before_delivery)",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
    "label": "Quality Inspection Template",
@@ -1057,6 +1054,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
@@ -1069,7 +1067,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-08-07 14:24:58.384992",
+ "modified": "2021-03-18 14:04:38.575519",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1121,6 +1119,15 @@
   {
    "read": 1,
    "role": "Manufacturing User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "All",
+   "select": 1,
+   "share": 1
   }
  ],
  "quick_entry": 1,

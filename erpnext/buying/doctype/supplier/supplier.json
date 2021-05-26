@@ -26,7 +26,6 @@
   "supplier_group",
   "supplier_type",
   "pan",
-  "language",
   "allow_purchase_invoice_creation_without_purchase_order",
   "allow_purchase_invoice_creation_without_purchase_receipt",
   "disabled",
@@ -57,6 +56,7 @@
   "website",
   "supplier_details",
   "column_break_30",
+  "language",
   "is_frozen"
  ],
  "fields": [
@@ -384,7 +384,7 @@
  "idx": 370,
  "image_field": "image",
  "links": [],
- "modified": "2020-06-17 23:18:20",
+ "modified": "2021-01-06 19:51:40.939087",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

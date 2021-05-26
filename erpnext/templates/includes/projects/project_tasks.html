@@ -3,7 +3,7 @@
 		<a class="no-decoration task-link {{ task.css_seen }}" href="/tasks?name={{ task.name }}">
 		<div class='row project-item'>
 			<div class='col-xs-9'>
-				<span class="indicator {{ "red" if task.status=="Open" else "green" if task.status=="Closed" else "darkgrey" }}" title="{{ task.status }}"  > {{ task.subject }}</span> 
+				<span class="indicator {{ "red" if task.status=="Open" else "green" if task.status=="Closed" else "gray" }}" title="{{ task.status }}"  > {{ task.subject }}</span>
 	 				<div class="small text-muted item-timestamp"
 	 					title="{{ frappe.utils.pretty_date(task.modified) }}">
 						{{ _("modified") }} {{ frappe.utils.pretty_date(task.modified) }}
@@ -16,9 +16,9 @@
 						</span>
 					{% else %}
 						<span class="avatar avatar-small standard-image" title="Assigned to {{ task.todo.owner }}">
-							
+
 						</span>
-					{% endif %}		
+					{% endif %}
 				{% endif %}	 </div>
 			<div class='col-xs-2'>
 				<span class="pull-right list-comment-count small {{ "text-extra-muted" if task.comment_count==0 else "text-muted" }}">

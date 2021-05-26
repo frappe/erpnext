@@ -260,6 +260,15 @@ def update_taxes_with_shipping_lines(taxes, shipping_lines, shopify_settings):
 	"""Shipping lines represents the shipping details,
 		each such shipping detail consists of a list of tax_lines"""
 	for shipping_charge in shipping_lines:
+		if shipping_charge.get("price"):
+			taxes.append({
+				"charge_type": _("Actual"),
+				"account_head": get_tax_account_head(shipping_charge),
+				"description": shipping_charge["title"],
+				"tax_amount": shipping_charge["price"],
+				"cost_center": shopify_settings.cost_center
+			})
+
 		for tax in shipping_charge.get("tax_lines"):
 			taxes.append({
 				"charge_type": _("Actual"),
@@ -326,13 +335,13 @@ def get_url(shopify_settings):
 
 	if not last_order_id:
 		if shopify_settings.sync_based_on == 'Date':
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&created_at_min={0}&since_id=0".format(
+			url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&created_at_min={0}&since_id=0".format(
 				get_datetime(shopify_settings.from_date)), shopify_settings)
 		else:
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(
+			url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&since_id={0}".format(
 				shopify_settings.from_order_id), shopify_settings)
 	else:
-		url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(last_order_id), shopify_settings)
+		url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&since_id={0}".format(last_order_id), shopify_settings)
 
 	return url
 

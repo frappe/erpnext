@@ -54,7 +54,11 @@ class TestCustomer(unittest.TestCase):
 		details = get_party_details("_Test Customer")
 
 		for key, value in iteritems(to_check):
-			self.assertEqual(value, details.get(key))
+			val = details.get(key)
+			if not val and not isinstance(val, list):
+				val = None
+
+			self.assertEqual(value, val)
 
 	def test_party_details_tax_category(self):
 		from erpnext.accounts.party import get_party_details

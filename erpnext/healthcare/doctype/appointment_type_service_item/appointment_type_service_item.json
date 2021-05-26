@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "creation": "2021-01-22 09:34:53.373105",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "medical_department",
+  "op_consulting_charge_item",
+  "op_consulting_charge",
+  "column_break_4",
+  "inpatient_visit_charge_item",
+  "inpatient_visit_charge"
+ ],
+ "fields": [
+  {
+   "fieldname": "medical_department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Medical Department",
+   "options": "Medical Department"
+  },
+  {
+   "fieldname": "op_consulting_charge_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Out Patient Consulting Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "op_consulting_charge",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Out Patient Consulting Charge"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "inpatient_visit_charge_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Inpatient Visit Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "inpatient_visit_charge",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Inpatient Visit Charge Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-01-22 09:35:26.503443",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Appointment Type Service Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

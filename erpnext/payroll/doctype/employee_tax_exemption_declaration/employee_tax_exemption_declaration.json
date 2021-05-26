@@ -14,6 +14,7 @@
   "column_break_2",
   "payroll_period",
   "company",
+  "currency",
   "amended_from",
   "section_break_8",
   "declarations",
@@ -92,6 +93,7 @@
    "fieldname": "total_declared_amount",
    "fieldtype": "Currency",
    "label": "Total Declared Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -102,12 +104,22 @@
    "fieldname": "total_exemption_amount",
    "fieldtype": "Currency",
    "label": "Total Exemption Amount",
+   "options": "currency",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.employee",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 22:49:43.829892",
+ "modified": "2021-03-31 22:39:59.237361",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Declaration",

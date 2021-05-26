@@ -7,12 +7,13 @@ from frappe import _
 from frappe.utils import flt, cint, getdate, now, date_diff
 from erpnext.stock.utils import add_additional_uom_columns
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-
+from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
 from six import iteritems
 
 def execute(filters=None):
+	is_reposting_item_valuation_in_progress()
 	if not filters: filters = {}
 
 	validate_filters(filters)
@@ -164,7 +165,7 @@ def get_stock_ledger_entries(filters, items):
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
-			sle.item_code as name, sle.voucher_no
+			sle.item_code as name, sle.voucher_no, sle.stock_value, sle.batch_no
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
@@ -192,7 +193,7 @@ def get_item_warehouse_map(filters, sle):
 
 		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
 
-		if d.voucher_type == "Stock Reconciliation":
+		if d.voucher_type == "Stock Reconciliation" and not d.batch_no:
 			qty_diff = flt(d.qty_after_transaction) - flt(qty_dict.bal_qty)
 		else:
 			qty_diff = flt(d.actual_qty)

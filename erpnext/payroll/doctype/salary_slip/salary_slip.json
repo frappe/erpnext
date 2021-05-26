@@ -18,6 +18,8 @@
   "journal_entry",
   "payroll_entry",
   "company",
+  "currency",
+  "exchange_rate",
   "letter_head",
   "section_break_10",
   "start_date",
@@ -38,6 +40,7 @@
   "column_break_20",
   "total_working_hours",
   "hour_rate",
+  "base_hour_rate",
   "section_break_26",
   "bank_name",
   "bank_account_no",
@@ -52,8 +55,10 @@
   "deductions",
   "totals",
   "gross_pay",
+  "base_gross_pay",
   "column_break_25",
   "total_deduction",
+  "base_total_deduction",
   "loan_repayment",
   "loans",
   "section_break_43",
@@ -63,10 +68,21 @@
   "total_loan_repayment",
   "net_pay_info",
   "net_pay",
+  "base_net_pay",
+  "year_to_date",
+  "base_year_to_date",
   "column_break_53",
   "rounded_total",
+  "base_rounded_total",
+  "month_to_date",
+  "base_month_to_date",
   "section_break_55",
   "total_in_words",
+  "column_break_69",
+  "base_total_in_words",
+  "leave_details_section",
+  "leave_details",
+  "section_break_75",
   "amended_from"
  ],
  "fields": [
@@ -205,9 +221,13 @@
   {
    "fieldname": "salary_structure",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Salary Structure",
    "options": "Salary Structure",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "depends_on": "eval:(!doc.salary_slip_based_on_timesheet)",
@@ -265,7 +285,7 @@
    "fieldname": "hour_rate",
    "fieldtype": "Currency",
    "label": "Hour Rate",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "print_hide_if_no_value": 1
   },
   {
@@ -347,23 +367,12 @@
    "fieldname": "gross_pay",
    "fieldtype": "Currency",
    "label": "Gross Pay",
-   "oldfieldname": "gross_pay",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "column_break_25",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "total_deduction",
-   "fieldtype": "Currency",
-   "label": "Total Deduction",
-   "oldfieldname": "total_deduction",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "read_only": 1
   },
   {
    "depends_on": "total_loan_repayment",
@@ -379,6 +388,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.docstatus != 0",
    "fieldname": "section_break_43",
    "fieldtype": "Section Break"
   },
@@ -416,13 +426,10 @@
    "label": "net pay info"
   },
   {
-   "description": "Gross Pay - Total Deduction - Loan Repayment",
    "fieldname": "net_pay",
    "fieldtype": "Currency",
    "label": "Net Pay",
-   "oldfieldname": "net_pay",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -434,21 +441,12 @@
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "label": "Rounded Total",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "section_break_55",
    "fieldtype": "Section Break"
-  },
-  {
-   "description": "Net Pay (in words) will be visible once you save the Salary Slip.",
-   "fieldname": "total_in_words",
-   "fieldtype": "Data",
-   "label": "Total in words",
-   "oldfieldname": "net_pay_in_words",
-   "oldfieldtype": "Data",
-   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -500,13 +498,140 @@
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:(doc.docstatus==1 || doc.salary_structure)",
+   "fetch_from": "salary_structure.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_deduction",
+   "fieldtype": "Currency",
+   "label": "Total Deduction",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_in_words",
+   "fieldtype": "Data",
+   "label": "Total in words",
+   "length": 240,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_75",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "base_hour_rate",
+   "fieldtype": "Currency",
+   "label": "Hour Rate (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide_if_no_value": 1
+  },
+  {
+   "fieldname": "base_gross_pay",
+   "fieldtype": "Currency",
+   "label": "Gross Pay (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "1.0",
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Exchange Rate",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_total_deduction",
+   "fieldtype": "Currency",
+   "label": "Total Deduction (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_net_pay",
+   "fieldtype": "Currency",
+   "label": "Net Pay (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "base_rounded_total",
+   "fieldtype": "Currency",
+   "label": "Rounded Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_in_words",
+   "fieldtype": "Data",
+   "label": "Total in words (Company Currency)",
+   "length": 240,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_69",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Total salary booked for this employee from the beginning of the year (payroll period or fiscal year) up to the current salary slip's end date.",
+   "fieldname": "year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "description": "Total salary booked for this employee from the beginning of the month up to the current salary slip's end date.",
+   "fieldname": "month_to_date",
+   "fieldtype": "Currency",
+   "label": "Month To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_month_to_date",
+   "fieldtype": "Currency",
+   "label": "Month To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_details_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Details"
+  },
+  {
+   "fieldname": "leave_details",
+   "fieldtype": "Table",
+   "label": "Leave Details",
+   "options": "Salary Slip Leave",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-11 17:37:54.274384",
+ "modified": "2021-03-31 22:44:09.772331",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

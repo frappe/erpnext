@@ -19,7 +19,7 @@
 	</thead>
 	<tbody>
 		{% for s in students %}
-		<tr 
+		<tr
 			{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} class="text-muted" {% } %}
 			data-student="{{s.student}}">
 
@@ -29,7 +29,7 @@
 			<td>
 				<span data-student="{{s.student}}" data-criteria="{{c.assessment_criteria}}" class="student-result-grade badge" >
 					{% if(s.assessment_details) { %}
-						{{s.assessment_details[c.assessment_criteria][1]}} 
+						{{s.assessment_details[c.assessment_criteria][1]}}
 					{% } %}
 				</span>
 				<input type="number" class="student-result-data" style="width:70%; float:right;"
@@ -61,7 +61,7 @@
 				{% } %}
 				</span>
 				<span data-student="{{s.student}}" class="total-result-link" style="width: 10%; display:{% if(!s.assessment_details) { %}None{% } %}; float:right;">
-					<a class="btn-open no-decoration" title="Open Link" href="#Form/Assessment Result/{% if(s.assessment_details) { %}{{s.name}}{% } %}">
+					<a class="btn-open no-decoration" title="Open Link" href="/app/Form/Assessment Result/{% if(s.assessment_details) { %}{{s.name}}{% } %}">
 						<i class="octicon octicon-arrow-right"></i>
 					</a>
 				</span>

@@ -12,20 +12,20 @@ frappe.treeview_settings["Healthcare Service Unit"] = {
 	get_tree_nodes: 'erpnext.healthcare.utils.get_children',
 	ignore_fields:["parent_healthcare_service_unit"],
 	onrender: function(node) {
-		if (node.data.occupied_out_of_vacant!==undefined){
-			$('<span class="balance-area pull-right text-muted small">'
+		if (node.data.occupied_out_of_vacant!==undefined) {
+			$('<span class="balance-area pull-right">'
 				+ " " + node.data.occupied_out_of_vacant
 				+ '</span>').insertBefore(node.$ul);
 		}
 		if (node.data && node.data.inpatient_occupancy!==undefined) {
-			if (node.data.inpatient_occupancy == 1){
-				if (node.data.occupancy_status == "Occupied"){
-					$('<span class="balance-area pull-right small">'
+			if (node.data.inpatient_occupancy == 1) {
+				if (node.data.occupancy_status == "Occupied") {
+					$('<span class="balance-area pull-right">'
 						+ " " + node.data.occupancy_status
 						+ '</span>').insertBefore(node.$ul);
 				}
-				if (node.data.occupancy_status == "Vacant"){
-					$('<span class="balance-area pull-right text-muted small">'
+				if (node.data.occupancy_status == "Vacant") {
+					$('<span class="balance-area pull-right">'
 						+ " " + node.data.occupancy_status
 						+ '</span>').insertBefore(node.$ul);
 				}

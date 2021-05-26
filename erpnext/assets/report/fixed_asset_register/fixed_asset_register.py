@@ -75,24 +75,23 @@ def get_data(filters):
 	for asset in assets_record:
 		asset_value = asset.gross_purchase_amount - flt(asset.opening_accumulated_depreciation) \
 			- flt(depreciation_amount_map.get(asset.name))
-		if asset_value:
-			row = {
-				"asset_id": asset.asset_id,
-				"asset_name": asset.asset_name,
-				"status": asset.status,
-				"department": asset.department,
-				"cost_center": asset.cost_center,
-				"vendor_name": pr_supplier_map.get(asset.purchase_receipt) or pi_supplier_map.get(asset.purchase_invoice),
-				"gross_purchase_amount": asset.gross_purchase_amount,
-				"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
-				"depreciated_amount": depreciation_amount_map.get(asset.asset_id) or 0.0,
-				"available_for_use_date": asset.available_for_use_date,
-				"location": asset.location,
-				"asset_category": asset.asset_category,
-				"purchase_date": asset.purchase_date,
-				"asset_value": asset_value
-			}
-			data.append(row)
+		row = {
+			"asset_id": asset.asset_id,
+			"asset_name": asset.asset_name,
+			"status": asset.status,
+			"department": asset.department,
+			"cost_center": asset.cost_center,
+			"vendor_name": pr_supplier_map.get(asset.purchase_receipt) or pi_supplier_map.get(asset.purchase_invoice),
+			"gross_purchase_amount": asset.gross_purchase_amount,
+			"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
+			"depreciated_amount": depreciation_amount_map.get(asset.asset_id) or 0.0,
+			"available_for_use_date": asset.available_for_use_date,
+			"location": asset.location,
+			"asset_category": asset.asset_category,
+			"purchase_date": asset.purchase_date,
+			"asset_value": asset_value
+		}
+		data.append(row)
 
 	return data
 

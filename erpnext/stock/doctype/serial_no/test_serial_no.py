@@ -12,7 +12,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 test_dependencies = ["Item"]
 test_records = frappe.get_test_records('Serial No')
@@ -38,21 +37,142 @@ class TestSerialNo(unittest.TestCase):
 		self.assertTrue(SerialNoCannotCannotChangeError, sr.save)
 
 	def test_inter_company_transfer(self):
-		set_perpetual_inventory(0, "_Test Company 1")
-		set_perpetual_inventory(0)
 		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
 
-		create_delivery_note(item_code="_Test Serialized Item With Series", qty=1, serial_no=serial_nos[0])
+		dn = create_delivery_note(item_code="_Test Serialized Item With Series", qty=1, serial_no=serial_nos[0])
+
+		serial_no = frappe.get_doc("Serial No", serial_nos[0])
+
+		# check Serial No details after delivery
+		self.assertEqual(serial_no.status, "Delivered")
+		self.assertEqual(serial_no.warehouse, None)
+		self.assertEqual(serial_no.company, "_Test Company")
+		self.assertEqual(serial_no.delivery_document_type, "Delivery Note")
+		self.assertEqual(serial_no.delivery_document_no, dn.name)
 
 		wh = create_warehouse("_Test Warehouse", company="_Test Company 1")
-		make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1, serial_no=serial_nos[0],
+		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1, serial_no=serial_nos[0],
 			company="_Test Company 1", warehouse=wh)
 
-		serial_no = frappe.db.get_value("Serial No", serial_nos[0], ["warehouse", "company"], as_dict=1)
+		serial_no.reload()
 
+		# check Serial No details after purchase in second company
+		self.assertEqual(serial_no.status, "Active")
 		self.assertEqual(serial_no.warehouse, wh)
 		self.assertEqual(serial_no.company, "_Test Company 1")
+		self.assertEqual(serial_no.purchase_document_type, "Purchase Receipt")
+		self.assertEqual(serial_no.purchase_document_no, pr.name)
+
+	def test_inter_company_transfer_intermediate_cancellation(self):
+		"""
+			Receive into and Deliver Serial No from one company.
+			Then Receive into and Deliver from second company.
+			Try to cancel intermediate receipts/deliveries to test if it is blocked.
+		"""
+		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
+
+		# check Serial No details after purchase in first company
+		self.assertEqual(sn_doc.status, "Active")
+		self.assertEqual(sn_doc.company, "_Test Company")
+		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(sn_doc.purchase_document_no, se.name)
+
+		dn = create_delivery_note(item_code="_Test Serialized Item With Series",
+			qty=1, serial_no=serial_nos[0])
+		sn_doc.reload()
+		# check Serial No details after delivery from **first** company
+		self.assertEqual(sn_doc.status, "Delivered")
+		self.assertEqual(sn_doc.company, "_Test Company")
+		self.assertEqual(sn_doc.warehouse, None)
+		self.assertEqual(sn_doc.delivery_document_no, dn.name)
+
+		# try cancelling the first Serial No Receipt, even though it is delivered
+		# block cancellation is Serial No is out of the warehouse
+		self.assertRaises(frappe.ValidationError, se.cancel)
+
+		# receive serial no in second company
+		wh = create_warehouse("_Test Warehouse", company="_Test Company 1")
+		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series",
+			qty=1, serial_no=serial_nos[0], company="_Test Company 1", warehouse=wh)
+		sn_doc.reload()
+
+		self.assertEqual(sn_doc.warehouse, wh)
+		# try cancelling the delivery from the first company
+		# block cancellation as Serial No belongs to different company
+		self.assertRaises(frappe.ValidationError, dn.cancel)
+
+		# deliver from second company
+		dn_2 = create_delivery_note(item_code="_Test Serialized Item With Series",
+			qty=1, serial_no=serial_nos[0], company="_Test Company 1", warehouse=wh)
+		sn_doc.reload()
+
+		# check Serial No details after delivery from **second** company
+		self.assertEqual(sn_doc.status, "Delivered")
+		self.assertEqual(sn_doc.company, "_Test Company 1")
+		self.assertEqual(sn_doc.warehouse, None)
+		self.assertEqual(sn_doc.delivery_document_no, dn_2.name)
+
+		# cannot cancel any intermediate document before last Delivery Note
+		self.assertRaises(frappe.ValidationError, se.cancel)
+		self.assertRaises(frappe.ValidationError, dn.cancel)
+		self.assertRaises(frappe.ValidationError, pr.cancel)
+
+	def test_inter_company_transfer_fallback_on_cancel(self):
+		"""
+			Test Serial No state changes on cancellation.
+			If Delivery cancelled, it should fall back on last Receipt in the same company.
+			If Receipt is cancelled, it should be Inactive in the same company.
+		"""
+		# Receipt in **first** company
+		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
+
+		# Delivery from first company
+		dn = create_delivery_note(item_code="_Test Serialized Item With Series",
+			qty=1, serial_no=serial_nos[0])
+
+		# Receipt in **second** company
+		wh = create_warehouse("_Test Warehouse", company="_Test Company 1")
+		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series",
+			qty=1, serial_no=serial_nos[0], company="_Test Company 1", warehouse=wh)
+
+		# Delivery from second company
+		dn_2 = create_delivery_note(item_code="_Test Serialized Item With Series",
+			qty=1, serial_no=serial_nos[0], company="_Test Company 1", warehouse=wh)
+		sn_doc.reload()
+
+		self.assertEqual(sn_doc.status, "Delivered")
+		self.assertEqual(sn_doc.company, "_Test Company 1")
+		self.assertEqual(sn_doc.delivery_document_no, dn_2.name)
+
+		dn_2.cancel()
+		sn_doc.reload()
+		# Fallback on Purchase Receipt if Delivery is cancelled
+		self.assertEqual(sn_doc.status, "Active")
+		self.assertEqual(sn_doc.company, "_Test Company 1")
+		self.assertEqual(sn_doc.warehouse, wh)
+		self.assertEqual(sn_doc.purchase_document_no, pr.name)
+
+		pr.cancel()
+		sn_doc.reload()
+		# Inactive in same company if Receipt cancelled
+		self.assertEqual(sn_doc.status, "Inactive")
+		self.assertEqual(sn_doc.company, "_Test Company 1")
+		self.assertEqual(sn_doc.warehouse, None)
+
+		dn.cancel()
+		sn_doc.reload()
+		# Fallback on Purchase Receipt in FIRST company if
+		# Delivery from FIRST company is cancelled
+		self.assertEqual(sn_doc.status, "Active")
+		self.assertEqual(sn_doc.company, "_Test Company")
+		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(sn_doc.purchase_document_no, se.name)
 
 	def tearDown(self):
 		frappe.db.rollback()

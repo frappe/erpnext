@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, cint
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
+from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data,
+	get_filtered_list_for_consolidated_report)
 
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
@@ -132,6 +133,10 @@ def get_report_summary(period_list, asset, liability, equity, provisional_profit
 	if filters.get('accumulated_values'):
 		period_list = [period_list[-1]]
 
+	# from consolidated financial statement
+	if filters.get('accumulated_in_group_company'):
+		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
+
 	for period in period_list:
 		key = period if consolidated else period.key
 		if asset:
@@ -147,7 +152,6 @@ def get_report_summary(period_list, asset, liability, equity, provisional_profit
 		{
 			"value": net_asset,
 			"label": "Total Asset",
-			"indicator": "Green",
 			"datatype": "Currency",
 			"currency": currency
 		},
@@ -155,14 +159,12 @@ def get_report_summary(period_list, asset, liability, equity, provisional_profit
 			"value": net_liability,
 			"label": "Total Liability",
 			"datatype": "Currency",
-			"indicator": "Red",
 			"currency": currency
 		},
 		{
 			"value": net_equity,
 			"label": "Total Equity",
 			"datatype": "Currency",
-			"indicator": "Blue",
 			"currency": currency
 		},
 		{

@@ -90,6 +90,50 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 0)
 		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
 
+	def test_update_remove_child_linked_to_mr(self):
+		"""Test impact on linked PO and MR on deleting/updating row."""
+		mr = make_material_request(qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.save()
+		po.submit()
+
+		first_item_of_po = po.get("items")[0]
+		existing_ordered_qty = get_ordered_qty() # 10
+		existing_requested_qty = get_requested_qty() # 0
+
+		# decrease ordered qty by 3 (10 -> 7) and add item
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': 7,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 2}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		mr.reload()
+
+		# requested qty increases as ordered qty decreases
+		self.assertEqual(get_requested_qty(), existing_requested_qty + 3) # 3
+		self.assertEqual(mr.items[0].ordered_qty, 7)
+
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty - 3) # 7
+
+		# delete first item linked to Material Request
+		trans_item = json.dumps([
+			{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 2}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		mr.reload()
+
+		# requested qty increases as ordered qty is 0 (deleted row)
+		self.assertEqual(get_requested_qty(), existing_requested_qty + 10) # 10
+		self.assertEqual(mr.items[0].ordered_qty, 0)
+
+		# ordered qty decreases as ordered qty is 0 (deleted row)
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty - 10) # 0
 
 	def test_update_child(self):
 		mr = make_material_request(qty=10)
@@ -120,7 +164,6 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
-
 	def test_update_child_adding_new_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
@@ -129,6 +172,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr = make_pr_against_po(po.name, 2)
 
 		po.load_from_db()
+		existing_ordered_qty = get_ordered_qty()
 		first_item_of_po = po.get("items")[0]
 
 		trans_item = json.dumps([
@@ -143,9 +187,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		update_child_qty_rate('Purchase Order', trans_item, po.name)
 
 		po.reload()
-		self.assertEquals(len(po.get('items')), 2)
+		self.assertEqual(len(po.get('items')), 2)
 		self.assertEqual(po.status, 'To Receive and Bill')
-
+		# ordered qty should increase on row addition
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 7)
 
 	def test_update_child_removing_item(self):
 		po = create_purchase_order(do_not_save=1)
@@ -156,6 +201,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.reload()
 		first_item_of_po = po.get("items")[0]
+		existing_ordered_qty = get_ordered_qty()
 		# add an item
 		trans_item = json.dumps([
 			{
@@ -168,6 +214,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		update_child_qty_rate('Purchase Order', trans_item, po.name)
 
 		po.reload()
+
+		# ordered qty should increase on row addition
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 7)
+
 		# check if can remove received item
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.get("items")[1].name}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Purchase Order', trans_item, po.name)
@@ -184,8 +234,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		update_child_qty_rate('Purchase Order', trans_item, po.name)
 
 		po.reload()
-		self.assertEquals(len(po.get('items')), 1)
+		self.assertEqual(len(po.get('items')), 1)
 		self.assertEqual(po.status, 'To Receive and Bill')
+
+		# ordered qty should decrease (back to initial) on row deletion
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
 	def test_update_child_perm(self):
 		po = create_purchase_order(item_code= "_Test Item", qty=4)
@@ -230,13 +283,15 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		new_item_with_tax = frappe.get_doc("Item", "Test Item with Tax")
 
-		new_item_with_tax.append("taxes", {
-			"item_tax_template": "Test Update Items Template",
-			"valid_from": nowdate()
-		})
-		new_item_with_tax.save()
+		if not frappe.db.exists("Item Tax",
+			{"item_tax_template": "Test Update Items Template - _TC", "parent": "Test Item with Tax"}):
+			new_item_with_tax.append("taxes", {
+				"item_tax_template": "Test Update Items Template - _TC",
+				"valid_from": nowdate()
+			})
+			new_item_with_tax.save()
 
-		tax_template = "_Test Account Excise Duty @ 10"
+		tax_template = "_Test Account Excise Duty @ 10 - _TC"
 		item =  "_Test Item Home Desktop 100"
 		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
 			item_doc = frappe.get_doc("Item", item)
@@ -287,7 +342,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.cancel()
 		po.delete()
 		new_item_with_tax.delete()
-		frappe.get_doc("Item Tax Template", "Test Update Items Template").delete()
+		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
 
 	def test_update_child_uom_conv_factor_change(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
@@ -379,6 +434,35 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 5)
+
+	def test_purchase_order_invoice_receipt_workflow(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt
+
+		po = create_purchase_order()
+		pi = make_pi_from_po(po.name)
+
+		pi.submit()
+
+		pr = make_purchase_receipt(pi.name)
+		pr.submit()
+
+		pi.load_from_db()
+
+		self.assertEqual(pi.per_received, 100.00)
+		self.assertEqual(pi.items[0].qty, pi.items[0].received_qty)
+
+		po.load_from_db()
+
+		self.assertEqual(po.per_received, 100.00)
+		self.assertEqual(po.per_billed, 100.00)
+
+		pr.cancel()
+
+		pi.load_from_db()
+		pi.cancel()
+
+		po.load_from_db()
+		po.cancel()
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -590,8 +674,8 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty"], as_dict=1)
 
-		self.assertEquals(bin2.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
-		self.assertEquals(bin2.projected_qty, bin1.projected_qty - 10)
+		self.assertEqual(bin2.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
+		self.assertEqual(bin2.projected_qty, bin1.projected_qty - 10)
 
 		# Create stock transfer
 		rm_item = [{"item_code":"_Test FG Item","rm_item_code":"_Test Item","item_name":"_Test Item",
@@ -606,7 +690,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin3.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
+		self.assertEqual(bin3.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
 
 		# close PO
 		po.update_status("Closed")
@@ -614,7 +698,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin4.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
+		self.assertEqual(bin4.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
 
 		# Re-open PO
 		po.update_status("Submitted")
@@ -622,7 +706,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin5.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
+		self.assertEqual(bin5.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
 
 		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item",
 			qty=40, basic_rate=100)
@@ -639,7 +723,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin6.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
+		self.assertEqual(bin6.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
 
 		# Cancel PR
 		pr.cancel()
@@ -647,7 +731,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin7.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
+		self.assertEqual(bin7.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
 
 		# Make Purchase Invoice
 		pi = make_pi_from_po(po.name)
@@ -659,7 +743,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin8.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
+		self.assertEqual(bin8.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
 
 		# Cancel PR
 		pi.cancel()
@@ -667,7 +751,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin9.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
+		self.assertEqual(bin9.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
 
 		# Cancel Stock Entry
 		se.cancel()
@@ -675,7 +759,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin10.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
+		self.assertEqual(bin10.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
 
 		# Cancel PO
 		po.reload()
@@ -684,7 +768,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
-		self.assertEquals(bin11.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
+		self.assertEqual(bin11.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
 
 	def test_exploded_items_in_subcontracted(self):
 		item_code = "_Test Subcontracted FG Item 1"
@@ -698,7 +782,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		exploded_items = sorted([d.item_code for d in bom.exploded_items if not d.get('sourced_by_supplier')])
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
-		self.assertEquals(exploded_items, supplied_items)
+		self.assertEqual(exploded_items, supplied_items)
 
 		po1 = create_purchase_order(item_code=item_code, qty=1,
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", include_exploded_items=0)
@@ -706,7 +790,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		supplied_items1 = sorted([d.rm_item_code for d in po1.supplied_items])
 		bom_items = sorted([d.item_code for d in bom.items if not d.get('sourced_by_supplier')])
 
-		self.assertEquals(supplied_items1, bom_items)
+		self.assertEqual(supplied_items1, bom_items)
 
 	def test_backflush_based_on_stock_entry(self):
 		item_code = "_Test Subcontracted FG Item 1"
@@ -723,7 +807,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		make_stock_entry(target="_Test Warehouse - _TC",
-			item_code="_Test Item Home Desktop 100", qty=10, basic_rate=100)
+			item_code="_Test Item Home Desktop 100", qty=20, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "Test Extra Item 1", qty=100, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",
@@ -756,8 +840,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		transferred_items = sorted([d.item_code for d in se.get('items') if se.purchase_order == po.name])
 		issued_items = sorted([d.rm_item_code for d in pr.get('supplied_items')])
 
-		self.assertEquals(transferred_items, issued_items)
-		self.assertEquals(pr.get('items')[0].rm_supp_cost, 2000)
+		self.assertEqual(transferred_items, issued_items)
+		self.assertEqual(pr.get('items')[0].rm_supp_cost, 2000)
 
 
 		transferred_rm_map = frappe._dict()

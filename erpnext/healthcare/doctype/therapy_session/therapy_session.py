@@ -41,9 +41,15 @@ class TherapySession(Document):
 
 	def on_submit(self):
 		self.update_sessions_count_in_therapy_plan()
-		insert_session_medical_record(self)
+
+	def on_update(self):
+		if self.appointment:
+			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Closed')
 
 	def on_cancel(self):
+		if self.appointment:
+			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
+
 		self.update_sessions_count_in_therapy_plan(on_cancel=True)
 
 	def update_sessions_count_in_therapy_plan(self, on_cancel=False):
@@ -135,23 +141,3 @@ def get_therapy_item(therapy, item):
 	item.reference_dt = 'Therapy Session'
 	item.reference_dn = therapy.name
 	return item
-
-
-def insert_session_medical_record(doc):
-	subject = frappe.bold(_('Therapy: ')) + cstr(doc.therapy_type) + '<br>'
-	if doc.therapy_plan:
-		subject += frappe.bold(_('Therapy Plan: ')) + cstr(doc.therapy_plan) + '<br>'
-	if doc.practitioner:
-		subject += frappe.bold(_('Healthcare Practitioner: ')) + doc.practitioner
-	subject += frappe.bold(_('Total Counts Targeted: ')) + cstr(doc.total_counts_targeted) + '<br>'
-	subject += frappe.bold(_('Total Counts Completed: ')) + cstr(doc.total_counts_completed) + '<br>'
-
-	medical_record = frappe.new_doc('Patient Medical Record')
-	medical_record.patient = doc.patient
-	medical_record.subject = subject
-	medical_record.status = 'Open'
-	medical_record.communication_date = doc.start_date
-	medical_record.reference_doctype = 'Therapy Session'
-	medical_record.reference_name = doc.name
-	medical_record.reference_owner = doc.owner
-	medical_record.save(ignore_permissions=True)

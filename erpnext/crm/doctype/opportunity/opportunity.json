@@ -54,6 +54,7 @@
   "campaign",
   "column_break1",
   "transaction_date",
+  "language",
   "amended_from",
   "lost_reasons"
  ],
@@ -419,12 +420,18 @@
    "fieldtype": "Duration",
    "label": "First Response Time",
    "read_only": 1
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Print Language",
+   "options": "Language"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2020-08-12 17:34:35.066961",
+ "modified": "2021-01-06 19:42:46.190051",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

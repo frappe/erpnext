@@ -50,6 +50,7 @@ class Item(WebsiteGenerator):
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 
+	@frappe.whitelist()
 	def set_asset_naming_series(self):
 		if not hasattr(self, '_asset_naming_series'):
 			from erpnext.assets.doctype.asset.asset import get_asset_naming_series
@@ -62,7 +63,7 @@ class Item(WebsiteGenerator):
 			if self.variant_of:
 				if not self.item_code:
 					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
-					self.item_code = make_variant_item_code(self.variant_of, template_item_name, self)
+					make_variant_item_code(self.variant_of, template_item_name, self)
 			else:
 				from frappe.model.naming import set_name_by_naming_series
 				set_name_by_naming_series(self)
@@ -177,7 +178,7 @@ class Item(WebsiteGenerator):
 		if not self.valuation_rate and self.standard_rate:
 			self.valuation_rate = self.standard_rate
 
-		if not self.valuation_rate:
+		if not self.valuation_rate and not self.is_customer_provided_item:
 			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
 
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -317,6 +318,7 @@ class Item(WebsiteGenerator):
 		context.search_link = '/product_search'
 
 		context.parents = get_parent_item_groups(self.item_group)
+		context.body_class = "product-page"
 
 		self.set_variant_context(context)
 		self.set_attribute_context(context)
@@ -672,13 +674,14 @@ class Item(WebsiteGenerator):
 		if not records: return
 		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
 
-		msg = _("The items {0} and {1} are present in the following {2} : <br>"
-			.format(frappe.bold(old_name), frappe.bold(new_name), document))
+		msg = _("The items {0} and {1} are present in the following {2} :").format(
+			frappe.bold(old_name), frappe.bold(new_name), document)
 
+		msg += ' <br>'
 		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
 
-		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
-			.format(frappe.bold(old_name)))
+		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}").format(
+			frappe.bold(old_name))
 
 		frappe.throw(_(msg), title=_("Merge not allowed"))
 
@@ -704,6 +707,7 @@ class Item(WebsiteGenerator):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
 
+	@frappe.whitelist()
 	def copy_specification_from_item_group(self):
 		self.set("website_specifications", [])
 		if self.item_group:
@@ -860,7 +864,7 @@ class Item(WebsiteGenerator):
 
 		rows = ''
 		for docname, attr_list in not_included.items():
-			link = "<a href='#Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
+			link = "<a href='/app/Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
 			rows += table_row(link, body(attr_list))
 
 		error_description = _('The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template.')
@@ -971,7 +975,7 @@ class Item(WebsiteGenerator):
 							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
 
 	def check_if_linked_document_exists(self, field):
-		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
+		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "POS Invoice Item", "Purchase Receipt Item",
 			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
 
 		# For "Is Stock Item", following doctypes is important

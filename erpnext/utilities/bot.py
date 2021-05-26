@@ -26,12 +26,12 @@ class FindItemBot(BotParser):
 					for warehouse in warehouses:
 						qty = frappe.db.get_value("Bin", {'item_code': item[0], 'warehouse': warehouse.name}, 'actual_qty')
 						if qty:
-							out.append(_('{0} units of [{1}](#Form/Item/{1}) found in [{2}](#Form/Warehouse/{2})').format(qty,
+							out.append(_('{0} units of [{1}](/app/Form/Item/{1}) found in [{2}](/app/Form/Warehouse/{2})').format(qty,
 								item[0], warehouse.name))
 							found = True
 
 					if not found:
-						out.append(_('[{0}](#Form/Item/{0}) is out of stock').format(item[0]))
+						out.append(_('[{0}](/app/Form/Item/{0}) is out of stock').format(item[0]))
 
 				return "\n\n".join(out)
 

@@ -126,7 +126,7 @@ class Appointment(Document):
 			add_assignemnt({
 				'doctype': self.doctype,
 				'name': self.name,
-				'assign_to': existing_assignee
+				'assign_to': [existing_assignee]
 			})
 			return
 		if self._assign:
@@ -139,7 +139,7 @@ class Appointment(Document):
 				add_assignemnt({
 					'doctype': self.doctype,
 					'name': self.name,
-					'assign_to': agent
+					'assign_to': [agent]
 				})
 			break
 

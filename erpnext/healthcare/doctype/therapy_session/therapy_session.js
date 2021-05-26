@@ -19,6 +19,15 @@ frappe.ui.form.on('Therapy Session', {
 				}
 			};
 		});
+
+		frm.set_query('appointment', function() {
+
+			return {
+				filters: {
+					'status': ['in', ['Open', 'Scheduled']]
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {

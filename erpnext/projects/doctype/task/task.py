@@ -30,10 +30,13 @@ class Task(NestedSet):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_parent_expected_end_date()
 		self.validate_parent_project_dates()
 		self.validate_progress()
 		self.validate_status()
 		self.update_depends_on()
+		self.validate_dependencies_for_template_task()
+		self.validate_completed_on()
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -43,6 +46,12 @@ class Task(NestedSet):
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("{0} can not be greater than {1}").format(frappe.bold("Actual Start Date"), \
 				frappe.bold("Actual End Date")))
+
+	def validate_parent_expected_end_date(self):
+		if self.parent_task:
+			parent_exp_end_date = frappe.db.get_value("Task", self.parent_task, "exp_end_date")
+			if parent_exp_end_date and getdate(self.get("exp_end_date")) > getdate(parent_exp_end_date):
+				frappe.throw(_("Expected End Date should be less than or equal to parent task's Expected End Date {0}.").format(getdate(parent_exp_end_date)))
 
 	def validate_parent_project_dates(self):
 		if not self.project or frappe.flags.in_test:
@@ -55,6 +64,8 @@ class Task(NestedSet):
 			validate_project_dates(getdate(expected_end_date), self, "act_start_date", "act_end_date", "Actual")
 
 	def validate_status(self):
+		if self.is_template and self.status != "Template":
+			self.status = "Template"
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
@@ -72,10 +83,32 @@ class Task(NestedSet):
 		if self.status == 'Completed':
 			self.progress = 100
 
+	def validate_dependencies_for_template_task(self):
+		if self.is_template:
+			self.validate_parent_template_task()
+			self.validate_depends_on_tasks()
+
+	def validate_parent_template_task(self):
+		if self.parent_task:
+			if not frappe.db.get_value("Task", self.parent_task, "is_template"):
+				parent_task_format = """<a href="#Form/Task/{0}">{0}</a>""".format(self.parent_task)
+				frappe.throw(_("Parent Task {0} is not a Template Task").format(parent_task_format))
+
+	def validate_depends_on_tasks(self):
+		if self.depends_on:
+			for task in self.depends_on:
+				if not frappe.db.get_value("Task", task.task, "is_template"):
+					dependent_task_format = """<a href="#Form/Task/{0}">{0}</a>""".format(task.task)
+					frappe.throw(_("Dependent Task {0} is not a Template Task").format(dependent_task_format))
+
+	def validate_completed_on(self):
+		if self.completed_on and getdate(self.completed_on) > getdate():
+			frappe.throw(_("Completed On cannot be greater than Today"))
+
 	def update_depends_on(self):
 		depends_on_tasks = self.depends_on_tasks or ""
 		for d in self.depends_on:
-			if d.task and not d.task in depends_on_tasks:
+			if d.task and d.task not in depends_on_tasks:
 				depends_on_tasks += d.task + ","
 		self.depends_on_tasks = depends_on_tasks
 
@@ -161,7 +194,7 @@ class Task(NestedSet):
 	def populate_depends_on(self):
 		if self.parent_task:
 			parent = frappe.get_doc('Task', self.parent_task)
-			if not self.name in [row.task for row in parent.depends_on]:
+			if self.name not in [row.task for row in parent.depends_on]:
 				parent.append("depends_on", {
 					"doctype": "Task Depends On",
 					"task": self.name,
@@ -196,17 +229,24 @@ def check_if_child_exists(name):
 @frappe.validate_and_sanitize_search_inputs
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	return frappe.db.sql(""" select name from `tabProject`
-			where %(key)s like %(txt)s
-				%(mcond)s
-			order by name
-			limit %(start)s, %(page_len)s""" % {
-				'key': searchfield,
-				'txt': frappe.db.escape('%' + txt + '%'),
-				'mcond':get_match_cond(doctype),
-				'start': start,
-				'page_len': page_len
-			})
+	meta = frappe.get_meta(doctype)
+	searchfields = meta.get_search_fields()
+	search_columns = ", " + ", ".join(searchfields) if searchfields else ''
+	search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
+
+	return frappe.db.sql(""" select name {search_columns} from `tabProject`
+		where %(key)s like %(txt)s
+			%(mcond)s
+			{search_condition}
+		order by name
+		limit %(start)s, %(page_len)s""".format(search_columns = search_columns,
+			search_condition=search_cond), {
+			'key': searchfield,
+			'txt': '%' + txt + '%',
+			'mcond':get_match_cond(doctype),
+			'start': start,
+			'page_len': page_len
+		})
 
 
 @frappe.whitelist()

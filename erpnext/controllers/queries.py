@@ -292,11 +292,14 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		cond = """(`tabProject`.customer = %s or
 			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
-	fields = get_fields("Project", ["name"])
+	fields = get_fields("Project", ["name", "project_name"])
+	searchfields = frappe.get_meta("Project").get_search_fields()
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	return frappe.db.sql("""select {fields} from `tabProject`
-		where `tabProject`.status not in ("Completed", "Cancelled")
-			and {cond} `tabProject`.name like %(txt)s {match_cond}
+		where
+			`tabProject`.status not in ("Completed", "Cancelled")
+			and {cond} {match_cond} {scond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc,
@@ -304,6 +307,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		limit {start}, {page_len}""".format(
 			fields=", ".join(['`tabProject`.{0}'.format(f) for f in fields]),
 			cond=cond,
+			scond=searchfields,
 			match_cond=get_match_cond(doctype),
 			start=start,
 			page_len=page_len), {
@@ -325,7 +329,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 			and status not in ("Stopped", "Closed") %(fcond)s
 			and (
 				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
-				or `tabDelivery Note`.grand_total = 0
+				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
 				or (
 					`tabDelivery Note`.is_return = 1
 					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
@@ -493,6 +497,41 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				'company': filters.get("company", "")
 			})
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters):
+	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
+	dimension_filters = get_dimension_filter_map()
+	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
+	query_filters = []
+
+	meta = frappe.get_meta(doctype)
+	if meta.is_tree:
+		query_filters.append(['is_group', '=', 0])
+
+	if meta.has_field('company'):
+		query_filters.append(['company', '=', filters.get('company')])
+
+	if txt:
+		query_filters.append([searchfield, 'LIKE', "%%%s%%" % txt])
+
+	if dimension_filters:
+		if dimension_filters['allow_or_restrict'] == 'Allow':
+			query_selector = 'in'
+		else:
+			query_selector = 'not in'
+
+		if len(dimension_filters['allowed_dimensions']) == 1:
+			dimensions = tuple(dimension_filters['allowed_dimensions'] * 2)
+		else:
+			dimensions = tuple(dimension_filters['allowed_dimensions'])
+
+		query_filters.append(['name', query_selector, dimensions])
+
+	output = frappe.get_all(doctype, filters=query_filters)
+	result = [d.name for d in output]
+
+	return [(d,) for d in set(result)]
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -622,6 +661,34 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
+def get_healthcare_service_units(doctype, txt, searchfield, start, page_len, filters):
+	query = """
+		select name
+		from `tabHealthcare Service Unit`
+		where
+			is_group = 0
+			and company = {company}
+			and name like {txt}""".format(
+				company = frappe.db.escape(filters.get('company')), txt = frappe.db.escape('%{0}%'.format(txt)))
+
+	if filters and filters.get('inpatient_record'):
+		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+		service_unit = get_current_healthcare_service_unit(filters.get('inpatient_record'))
+
+		# if the patient is admitted, then appointments should be allowed against the admission service unit,
+		# inspite of it being an Inpatient Occupancy service unit
+		if service_unit:
+			query += " and (allow_appointments = 1 or name = {service_unit})".format(service_unit = frappe.db.escape(service_unit))
+		else:
+			query += " and allow_appointments = 1"
+	else:
+		query += " and allow_appointments = 1"
+
+	return frappe.db.sql(query, filters)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 	item_doc = frappe.get_cached_doc('Item', filters.get('item_code'))
@@ -650,7 +717,9 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		return [(d,) for d in set(taxes)]
 
 
-def get_fields(doctype, fields=[]):
+def get_fields(doctype, fields=None):
+	if fields is None:
+		fields = []
 	meta = frappe.get_meta(doctype)
 	fields.extend(meta.get_search_fields())
 

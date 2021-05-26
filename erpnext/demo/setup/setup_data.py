@@ -134,7 +134,7 @@ def setup_employee():
 		salary_component = frappe.get_doc('Salary Component', d.name)
 		salary_component.append('accounts', dict(
 			company=erpnext.get_default_company(),
-			default_account=frappe.get_value('Account', dict(account_name=('like', 'Salary%')))
+			account=frappe.get_value('Account', dict(account_name=('like', 'Salary%')))
 		))
 		salary_component.save()
 

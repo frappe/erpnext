@@ -10,17 +10,20 @@
  "field_order": [
   "employee",
   "employee_name",
+  "currency",
   "max_benefits",
   "remaining_benefit",
   "column_break_2",
   "date",
   "payroll_period",
   "department",
+  "company",
   "amended_from",
   "section_break_4",
   "employee_benefits",
   "totals",
   "total_amount",
+  "column_break",
   "pro_rata_dispensed_amount"
  ],
  "fields": [
@@ -43,12 +46,14 @@
    "fieldname": "max_benefits",
    "fieldtype": "Currency",
    "label": "Max Benefits (Yearly)",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "remaining_benefit",
    "fieldtype": "Currency",
    "label": "Remaining Benefits (Yearly)",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -108,18 +113,41 @@
    "fieldname": "total_amount",
    "fieldtype": "Currency",
    "label": "Total Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "pro_rata_dispensed_amount",
    "fieldtype": "Currency",
    "label": "Dispensed Amount (Pro-rated)",
+   "options": "currency",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:(doc.docstatus==1 || doc.employee)",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 22:58:31.271922",
+ "modified": "2021-03-31 22:35:08.940087",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Application",

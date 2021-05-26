@@ -43,9 +43,8 @@ class JobOpening(WebsiteGenerator):
 			current_count = designation_counts['employee_count'] + designation_counts['job_openings']
 
 			if self.planned_vacancies <= current_count:
-				frappe.throw(_("Job Openings for designation {0} already open \
-					or hiring completed as per Staffing Plan {1}"
-					.format(self.designation, self.staffing_plan)))
+				frappe.throw(_("Job Openings for designation {0} already open or hiring completed as per Staffing Plan {1}").format(
+					self.designation, self.staffing_plan))
 
 	def get_context(self, context):
 		context.parents = [{'route': 'jobs', 'title': _('All Jobs') }]
@@ -56,7 +55,8 @@ def get_list_context(context):
 	context.get_list = get_job_openings
 
 def get_job_openings(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by=None):
-	fields = ['name', 'status', 'job_title', 'description']
+	fields = ['name', 'status', 'job_title', 'description', 'publish_salary_range',
+				'lower_range', 'upper_range', 'currency', 'job_application_route']
 
 	filters = filters or {}
 	filters.update({

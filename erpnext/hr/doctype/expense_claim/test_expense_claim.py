@@ -7,6 +7,7 @@ import unittest
 from frappe.utils import random_string, nowdate
 from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.hr.doctype.employee.test_employee import make_employee
 
 test_records = frappe.get_test_records('Expense Claim')
 test_dependencies = ['Employee']
@@ -19,35 +20,36 @@ class TestExpenseClaim(unittest.TestCase):
 		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
 		frappe.db.sql("update `tabExpense Claim` set project = '', task = ''")
 
-		frappe.get_doc({
+		project = frappe.get_doc({
 			"project_name": "_Test Project 1",
 			"doctype": "Project"
-		}).save()
+		})
+		project.save()
 
 		task = frappe.get_doc(dict(
 			doctype = 'Task',
 			subject = '_Test Project Task 1',
 			status = 'Open',
-			project = '_Test Project 1'
+			project = project.name
 		)).insert()
 
 		task_name = task.name
 		payable_account = get_payable_account(company_name)
 
-		make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", "_Test Project 1", task_name)
+		make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", project.name, task_name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_expense_claim"), 200)
 
-		expense_claim2 = make_expense_claim(payable_account, 600, 500, company_name, "Travel Expenses - _TC4","_Test Project 1", task_name)
+		expense_claim2 = make_expense_claim(payable_account, 600, 500, company_name, "Travel Expenses - _TC4", project.name, task_name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 700)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 700)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_expense_claim"), 700)
 
 		expense_claim2.cancel()
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_expense_claim"), 200)
 
 	def test_expense_claim_status(self):
 		payable_account = get_payable_account(company_name)
@@ -86,27 +88,55 @@ class TestExpenseClaim(unittest.TestCase):
 		])
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_rejected_expense_claim(self):
 		payable_account = get_payable_account(company_name)
 		expense_claim = frappe.get_doc({
-			 "doctype": "Expense Claim",
-			 "employee": "_T-Employee-00001",
-			 "payable_account": payable_account,
-			 "approval_status": "Rejected",
-			 "expenses":
-			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - _TC4", "amount": 300, "sanctioned_amount": 200 }]
+			"doctype": "Expense Claim",
+			"employee": "_T-Employee-00001",
+			"payable_account": payable_account,
+			"approval_status": "Rejected",
+			"expenses":
+				[{ "expense_type": "Travel", "default_account": "Travel Expenses - _TC4", "amount": 300, "sanctioned_amount": 200 }]
 		})
 		expense_claim.submit()
 
-		self.assertEquals(expense_claim.status, 'Rejected')
-		self.assertEquals(expense_claim.total_sanctioned_amount, 0.0)
+		self.assertEqual(expense_claim.status, 'Rejected')
+		self.assertEqual(expense_claim.total_sanctioned_amount, 0.0)
 
 		gl_entry = frappe.get_all('GL Entry', {'voucher_type': 'Expense Claim', 'voucher_no': expense_claim.name})
-		self.assertEquals(len(gl_entry), 0)
+		self.assertEqual(len(gl_entry), 0)
+
+	def test_expense_approver_perms(self):
+		user = "test_approver_perm_emp@example.com"
+		make_employee(user, "_Test Company")
+
+		# check doc shared
+		payable_account = get_payable_account("_Test Company")
+		expense_claim = make_expense_claim(payable_account, 300, 200, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+		expense_claim.expense_approver = user
+		expense_claim.save()
+		self.assertTrue(expense_claim.name in frappe.share.get_shared("Expense Claim", user))
+
+		# check shared doc revoked
+		expense_claim.reload()
+		expense_claim.expense_approver = "test@example.com"
+		expense_claim.save()
+		self.assertTrue(expense_claim.name not in frappe.share.get_shared("Expense Claim", user))
+
+		expense_claim.reload()
+		expense_claim.expense_approver = user
+		expense_claim.save()
+
+		frappe.set_user(user)
+		expense_claim.reload()
+		expense_claim.status = "Approved"
+		expense_claim.submit()
+		frappe.set_user("Administrator")
+
 
 def get_payable_account(company):
 	return frappe.get_cached_value('Company', company, 'default_payable_account')
@@ -126,23 +156,26 @@ def generate_taxes():
 
 def make_expense_claim(payable_account, amount, sanctioned_amount, company, account, project=None, task_name=None, do_not_submit=False, taxes=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"})
+	if not employee:
+		employee = make_employee("test_employee@expense_claim.com", company=company)
+
 	currency, cost_center = frappe.db.get_value('Company', company, ['default_currency', 'cost_center'])
 	expense_claim = {
-		 "doctype": "Expense Claim",
-		 "employee": employee,
-		 "payable_account": payable_account,
-		 "approval_status": "Approved",
-		 "company": company,
-		'currency': currency,
-		 "expenses": [{
+		"doctype": "Expense Claim",
+		"employee": employee,
+		"payable_account": payable_account,
+		"approval_status": "Approved",
+		"company": company,
+		"currency": currency,
+		"expenses": [{
 			"expense_type": "Travel",
 			"default_account": account,
 			"currency": currency,
 			"amount": amount,
 			"sanctioned_amount": sanctioned_amount,
 			"cost_center": cost_center
-			}]
-		}
+		}]
+	}
 	if taxes:
 		expense_claim.update(taxes)
 

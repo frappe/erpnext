@@ -17,6 +17,7 @@ from frappe.utils.nestedset import NestedSet
 from past.builtins import cmp
 import functools
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
@@ -66,16 +67,13 @@ class Company(NestedSet):
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
 
+	@frappe.whitelist()
 	def create_default_tax_template(self):
-		from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
-		create_sales_tax({
-			'country': self.country,
-			'company_name': self.name
-		})
+		setup_taxes_and_charges(self.name, self.country)
 
 	def validate_default_accounts(self):
 		accounts = [
-			["Default Bank Account", "default_bank_account"], ["Default Cash  Account", "default_cash_account"],
+			["Default Bank Account", "default_bank_account"], ["Default Cash Account", "default_cash_account"],
 			["Default Receivable Account", "default_receivable_account"], ["Default Payable Account", "default_payable_account"],
 			["Default Expense Account", "default_expense_account"], ["Default Income Account", "default_income_account"],
 			["Stock Received But Not Billed Account", "stock_received_but_not_billed"], ["Stock Adjustment Account", "stock_adjustment_account"],
@@ -89,8 +87,9 @@ class Company(NestedSet):
 					frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(account[1]), self.name))
 
 				if get_account_currency(self.get(account[1])) != self.default_currency:
-					frappe.throw(_("""{0} currency must be same as company's default currency.
-						Please select another account""").format(frappe.bold(account[0])))
+					error_message = _("{0} currency must be same as company's default currency. Please select another account.") \
+						.format(frappe.bold(account[0]))
+					frappe.throw(error_message)
 
 	def validate_currency(self):
 		if self.is_new():
@@ -389,8 +388,10 @@ class Company(NestedSet):
 		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
 		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
 
+		# delete tax templates
 		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
 		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
+		frappe.db.sql("delete from `tabItem Tax Template` where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
@@ -613,3 +614,12 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
 	else:
 		return None
+
+@frappe.whitelist()
+def create_transaction_deletion_request(company):
+	tdr = frappe.get_doc({
+		'doctype': 'Transaction Deletion Record',
+		'company': company
+	})
+	tdr.insert()
+	tdr.submit()

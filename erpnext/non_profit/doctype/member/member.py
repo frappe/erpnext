@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils import cint
+from frappe.utils import cint, get_link_to_form
 from frappe.integrations.utils import get_payment_gateway_controller
 from erpnext.non_profit.doctype.membership_type.membership_type import get_membership_type
 
@@ -18,8 +18,6 @@ class Member(Document):
 
 
 	def validate(self):
-		if self.email:
-			self.validate_email_type(self.email)
 		if self.email_id:
 			self.validate_email_type(self.email_id)
 
@@ -28,9 +26,10 @@ class Member(Document):
 		validate_email_address(email.strip(), True)
 
 	def setup_subscription(self):
-		membership_settings = frappe.get_doc("Membership Settings")
-		if not membership_settings.enable_razorpay:
-			frappe.throw("Please enable Razorpay to setup subscription")
+		non_profit_settings = frappe.get_doc('Non Profit Settings')
+		if not non_profit_settings.enable_razorpay_for_memberships:
+			frappe.throw('Please check Enable Razorpay for Memberships in {0} to setup subscription').format(
+				get_link_to_form('Non Profit Settings', 'Non Profit Settings'))
 
 		controller = get_payment_gateway_controller("Razorpay")
 		settings = controller.get_settings({})
@@ -42,7 +41,7 @@ class Member(Document):
 
 		subscription_details = {
 			"plan_id": plan_id,
-			"billing_frequency": cint(membership_settings.billing_frequency),
+			"billing_frequency": cint(non_profit_settings.billing_frequency),
 			"customer_notify": 1
 		}
 
@@ -54,17 +53,20 @@ class Member(Document):
 
 		return subscription
 
+	@frappe.whitelist()
 	def make_customer_and_link(self):
 		if self.customer:
 			frappe.msgprint(_("A customer is already linked to this Member"))
-		cust = create_customer(frappe._dict({
+
+		customer = create_customer(frappe._dict({
 			'fullname': self.member_name,
-			'email': self.email_id or self.user,
+			'email': self.email_id,
 			'phone': None
 		}))
 
-		self.customer = cust
+		self.customer = customer
 		self.save()
+		frappe.msgprint(_("Customer {0} has been created succesfully.").format(self.customer))
 
 
 def get_or_create_member(user_details):

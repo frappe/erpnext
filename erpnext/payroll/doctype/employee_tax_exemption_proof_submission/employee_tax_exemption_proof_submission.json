@@ -11,6 +11,7 @@
   "employee",
   "employee_name",
   "department",
+  "currency",
   "column_break_2",
   "submission_date",
   "payroll_period",
@@ -97,6 +98,7 @@
    "fieldname": "total_actual_amount",
    "fieldtype": "Currency",
    "label": "Total Actual Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -107,6 +109,7 @@
    "fieldname": "exemption_amount",
    "fieldtype": "Currency",
    "label": "Total Exemption Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -126,11 +129,20 @@
    "options": "Employee Tax Exemption Proof Submission",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.employee",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 22:53:10.412321",
+ "modified": "2021-03-31 22:41:13.723339",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Proof Submission",

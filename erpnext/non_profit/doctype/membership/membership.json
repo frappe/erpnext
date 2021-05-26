@@ -7,8 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "member",
+  "member_name",
   "membership_type",
   "column_break_3",
+  "company",
   "membership_status",
   "membership_validity_section",
   "from_date",
@@ -46,6 +48,8 @@
   {
    "fieldname": "membership_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Membership Status",
    "options": "New\nCurrent\nExpired\nPending\nCancelled"
   },
@@ -122,11 +126,25 @@
    "fieldtype": "Link",
    "label": "Invoice",
    "options": "Sales Invoice"
+  },
+  {
+   "fetch_from": "member.member_name",
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "label": "Member Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-19 14:28:11.532696",
+ "modified": "2021-02-19 14:33:44.925122",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
@@ -158,7 +176,9 @@
   }
  ],
  "restrict_to_domain": "Non Profit",
+ "search_fields": "member, member_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "member_name",
  "track_changes": 1
 }

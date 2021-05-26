@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.stock");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
 	onload: function(frm) {
@@ -26,6 +27,12 @@ frappe.ui.form.on("Stock Reconciliation", {
 		if (!frm.doc.expense_account) {
 			frm.trigger("set_expense_account");
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -213,8 +220,8 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 });
 
-erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
-	setup: function() {
+erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.stock.StockController {
+	setup() {
 		var me = this;
 
 		this.setup_posting_date_time_check();
@@ -242,17 +249,17 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				}
 			}
 		}
-	},
+	}
 
-	refresh: function() {
+	refresh() {
 		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();
 			}
 		}
-	},
+	}
 
-});
+};
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});

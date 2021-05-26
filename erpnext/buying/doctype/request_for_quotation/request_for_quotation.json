@@ -18,7 +18,6 @@
   "suppliers",
   "items_section",
   "items",
-  "link_to_mrs",
   "supplier_response_section",
   "salutation",
   "subject",
@@ -118,13 +117,6 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)",
-   "fieldname": "link_to_mrs",
-   "fieldtype": "Button",
-   "label": "Link to Material Requests"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
    "fieldname": "supplier_response_section",
    "fieldtype": "Section Break",
    "label": "Email Details"
@@ -260,7 +252,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-04 22:04:29.017134",
+ "modified": "2020-11-05 22:04:29.017134",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

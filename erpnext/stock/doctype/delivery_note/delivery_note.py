@@ -55,7 +55,7 @@ class DeliveryNote(SellingController):
 			'no_allowance': 1
 		}]
 		if cint(self.is_return):
-			self.status_updater.append({
+			self.status_updater.extend([{
 				'source_dt': 'Delivery Note Item',
 				'target_dt': 'Sales Order Item',
 				'join_field': 'so_detail',
@@ -69,9 +69,21 @@ class DeliveryNote(SellingController):
 					where name=`tabDelivery Note Item`.parent and is_return=1)""",
 				'second_source_extra_cond': """ and exists (select name from `tabSales Invoice`
 					where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)"""
-			})
+			},
+			{
+				'source_dt': 'Delivery Note Item',
+				'target_dt': 'Delivery Note Item',
+				'join_field': 'dn_detail',
+				'target_field': 'returned_qty',
+				'target_parent_dt': 'Delivery Note',
+				'target_parent_field': 'per_returned',
+				'target_ref_field': 'stock_qty',
+				'source_field': '-1 * stock_qty',
+				'percent_join_field_parent': 'return_against'
+			}
+		])
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
 			if self.get("print_without_amount"):
@@ -89,7 +101,7 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-		super(DeliveryNote, self).before_print()
+		super(DeliveryNote, self).before_print(settings)
 
 	def set_actual_qty(self):
 		for d in self.get('items'):
@@ -205,6 +217,7 @@ class DeliveryNote(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
 		self.make_gl_entries()
+		self.repost_future_sle_and_gle()
 
 	def on_cancel(self):
 		super(DeliveryNote, self).on_cancel()
@@ -222,7 +235,8 @@ class DeliveryNote(SellingController):
 		self.cancel_packing_slips()
 
 		self.make_gl_entries_on_cancel()
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.repost_future_sle_and_gle()
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -569,6 +583,70 @@ def make_packing_slip(source_name, target_doc=None):
 
 	return doclist
 
+@frappe.whitelist()
+def make_shipment(source_name, target_doc=None):
+	def postprocess(source, target):
+		user = frappe.db.get_value("User", frappe.session.user, ['email', 'full_name', 'phone', 'mobile_no'], as_dict=1)
+		target.pickup_contact_email = user.email
+		pickup_contact_display = '{}'.format(user.full_name)
+		if user:
+			if user.email:
+				pickup_contact_display += '<br>' + user.email
+			if user.phone:
+				pickup_contact_display += '<br>' + user.phone
+			if user.mobile_no and not user.phone:
+				pickup_contact_display += '<br>' + user.mobile_no
+		target.pickup_contact = pickup_contact_display
+
+		# As we are using session user details in the pickup_contact then pickup_contact_person will be session user
+		target.pickup_contact_person = frappe.session.user
+
+		contact = frappe.db.get_value("Contact", source.contact_person, ['email_id', 'phone', 'mobile_no'], as_dict=1)
+		delivery_contact_display = '{}'.format(source.contact_display)
+		if contact:
+			if contact.email_id:
+				delivery_contact_display += '<br>' + contact.email_id
+			if contact.phone:
+				delivery_contact_display += '<br>' + contact.phone
+			if contact.mobile_no and not contact.phone:
+				delivery_contact_display += '<br>' + contact.mobile_no
+		target.delivery_contact = delivery_contact_display
+
+		if source.shipping_address_name:
+			target.delivery_address_name = source.shipping_address_name
+			target.delivery_address = source.shipping_address
+		elif source.customer_address:
+			target.delivery_address_name = source.customer_address
+			target.delivery_address = source.address_display
+
+	doclist = get_mapped_doc("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Shipment",
+			"field_map": {
+				"grand_total": "value_of_goods",
+				"company": "pickup_company",
+				"company_address": "pickup_address_name",
+				"company_address_display": "pickup_address",
+				"customer": "delivery_customer",
+				"contact_person": "delivery_contact_name",
+				"contact_email": "delivery_contact_email"
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Delivery Note Item": {
+			"doctype": "Shipment Delivery Note",
+			"field_map": {
+				"name": "prevdoc_detail_docname",
+				"parent": "prevdoc_docname",
+				"parenttype": "prevdoc_doctype",
+				"base_amount": "grand_total"
+			}
+		}
+	}, target_doc, postprocess)
+
+	return doclist
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
@@ -586,7 +664,8 @@ def make_inter_company_purchase_receipt(source_name, target_doc=None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_transaction, get_inter_company_details
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_transaction,
+		get_inter_company_details, update_address, update_taxes, set_purchase_references)
 
 	if doctype == 'Delivery Note':
 		source_doc = frappe.get_doc(doctype, source_name)
@@ -604,6 +683,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		set_purchase_references(target)
 
 		if target.doctype == 'Purchase Receipt':
 			master_doctype = 'Purchase Taxes and Charges Template'
@@ -619,21 +699,35 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if target_doc.doctype == 'Purchase Receipt':
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
-			target_doc.supplier_address = source_doc.company_address
-			target_doc.shipping_address = source_doc.shipping_address_name or source_doc.customer_address
 			target_doc.buying_price_list = source_doc.selling_price_list
 			target_doc.is_internal_supplier = 1
 			target_doc.inter_company_reference = source_doc.name
+
+			# Invert the address on target doc creation
+			update_address(target_doc, 'supplier_address', 'address_display', source_doc.company_address)
+			update_address(target_doc, 'shipping_address', 'shipping_address_display', source_doc.customer_address)
+
+			update_taxes(target_doc, party=target_doc.supplier, party_type='Supplier', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.supplier_address,
+				company_address=target_doc.shipping_address)
 		else:
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.company_address = source_doc.supplier_address
-			target_doc.shipping_address_name = source_doc.shipping_address
 			target_doc.selling_price_list = source_doc.buying_price_list
 			target_doc.is_internal_customer = 1
 			target_doc.inter_company_reference = source_doc.name
 
-	doclist = get_mapped_doc(doctype, source_name,	{
+			# Invert the address on target doc creation
+			update_address(target_doc, 'company_address', 'company_address_display', source_doc.supplier_address)
+			update_address(target_doc, 'shipping_address_name', 'shipping_address', source_doc.shipping_address)
+			update_address(target_doc, 'customer_address', 'address_display', source_doc.shipping_address)
+
+			update_taxes(target_doc, party=target_doc.customer, party_type='Customer', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.customer_address,
+				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
+
+	doclist = get_mapped_doc(doctype, source_name, {
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
@@ -644,7 +738,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		doctype +" Item": {
 			"doctype": target_doctype + " Item",
 			"field_map": {
-				source_document_warehouse_field: target_document_warehouse_field
+				source_document_warehouse_field: target_document_warehouse_field,
+				'name': 'delivery_note_item',
+				'batch_no': 'batch_no',
+				'serial_no': 'serial_no'
 			},
 			"field_no_map": [
 				"warehouse"

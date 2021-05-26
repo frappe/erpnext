@@ -48,7 +48,7 @@ class CropCycle(Document):
 
 	def import_disease_tasks(self, disease, start_date):
 		disease_doc = frappe.get_doc('Disease', disease)
-		self.create_task(disease_doc.treatment_task, self.name, start_date)
+		self.create_task(disease_doc.treatment_task, self.project, start_date)
 
 	def create_project(self, period, crop_tasks):
 		project = frappe.get_doc({
@@ -71,6 +71,7 @@ class CropCycle(Document):
 				"exp_end_date": add_days(start_date, crop_task.get("end_day") - 1)
 			}).insert()
 
+	@frappe.whitelist()
 	def reload_linked_analysis(self):
 		linked_doctypes = ['Soil Texture', 'Soil Analysis', 'Plant Analysis']
 		required_fields = ['location', 'name', 'collection_datetime']
@@ -87,6 +88,7 @@ class CropCycle(Document):
 		frappe.publish_realtime("List of Linked Docs",
 								output, user=frappe.session.user)
 
+	@frappe.whitelist()
 	def append_to_child(self, obj_to_append):
 		for doctype in obj_to_append:
 			for doc_name in set(obj_to_append[doctype]):

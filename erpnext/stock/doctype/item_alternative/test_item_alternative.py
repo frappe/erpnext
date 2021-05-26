@@ -12,11 +12,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_rm_stock_entry
 import unittest
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestItemAlternative(unittest.TestCase):
 	def setUp(self):
-		set_perpetual_inventory(0)
 		make_items()
 
 	def test_alternative_item_for_subcontract_rm(self):

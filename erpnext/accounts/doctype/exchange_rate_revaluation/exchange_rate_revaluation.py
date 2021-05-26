@@ -27,6 +27,24 @@ class ExchangeRateRevaluation(Document):
 		if not (self.company and self.posting_date):
 			frappe.throw(_("Please select Company and Posting Date to getting entries"))
 
+	@frappe.whitelist()
+	def check_journal_entry_condition(self):
+		total_debit = frappe.db.get_value("Journal Entry Account", {
+			'reference_type': 'Exchange Rate Revaluation',
+			'reference_name': self.name,
+			'docstatus': 1
+		}, "sum(debit) as sum")
+
+		total_amt = 0
+		for d in self.accounts:
+			total_amt = total_amt + d.new_balance_in_base_currency
+
+		if total_amt != total_debit:
+			return True
+		
+		return False
+
+	@frappe.whitelist()
 	def get_accounts_data(self, account=None):
 		accounts = []
 		self.validate_mandatory()
@@ -95,6 +113,7 @@ class ExchangeRateRevaluation(Document):
 			message = _("No outstanding invoices found")
 		frappe.msgprint(message)
 
+	@frappe.whitelist()
 	def make_jv_entry(self):
 		if self.total_gain_loss == 0:
 			return

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee, make_salary_structure
 from erpnext.loan_management.doctype.loan.test_loan import create_loan_type, create_loan_accounts
 
 class TestLoanApplication(unittest.TestCase):
@@ -14,6 +14,7 @@ class TestLoanApplication(unittest.TestCase):
 		create_loan_type("Home Loan", 500000, 9.2, 0, 1, 0, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
 			'Interest Income Account - _TC', 'Penalty Income Account - _TC', 'Repay Over Number of Periods', 18)
 		self.applicant = make_employee("kate_loan@loan.com", "_Test Company")
+		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant, currency='INR')
 		self.create_loan_application()
 
 	def create_loan_application(self):
@@ -28,7 +29,6 @@ class TestLoanApplication(unittest.TestCase):
 			"company": "_Test Company"
 		})
 		loan_application.insert()
-
 
 	def test_loan_totals(self):
 		loan_application = frappe.get_doc("Loan Application", {"applicant":self.applicant})

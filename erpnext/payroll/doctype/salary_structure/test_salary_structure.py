@@ -94,7 +94,8 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 
 	def test_salary_structures_assignment(self):
-		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly")
+		company_currency = erpnext.get_default_currency()
+		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", currency=company_currency)
 		employee = "test_assign_stucture@salary.com"
 		employee_doc_name = make_employee(employee)
 		# clear the already assigned stuctures
@@ -107,8 +108,13 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(salary_structure_assignment.base, 5000)
 		self.assertEqual(salary_structure_assignment.variable, 200)
 
+	def test_multi_currency_salary_structure(self):
+		make_employee("test_muti_currency_employee@salary.com")
+		sal_struct = make_salary_structure("Salary Structure Multi Currency", "Monthly", currency='USD')
+		self.assertEqual(sal_struct.currency, 'USD')
+
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
-	test_tax=False, company=None):
+	test_tax=False, company=None, currency=erpnext.get_default_currency(), payroll_period=None):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 
@@ -120,7 +126,8 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 			"earnings": make_earning_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
 			"deductions": make_deduction_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
 			"payroll_frequency": payroll_frequency,
-			"payment_account": get_random("Account")
+			"payment_account": get_random("Account", filters={'account_currency': currency}),
+			"currency": currency
 		}
 		if other_details and isinstance(other_details, dict):
 			details.update(other_details)
@@ -134,25 +141,46 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 
 	if employee and not frappe.db.get_value("Salary Structure Assignment",
 		{'employee':employee, 'docstatus': 1}) and salary_structure_doc.docstatus==1:
-			create_salary_structure_assignment(employee, salary_structure, company=company)
+			create_salary_structure_assignment(employee, salary_structure, company=company, currency=currency,
+			payroll_period=payroll_period)
 
 	return salary_structure_doc
 
-def create_salary_structure_assignment(employee, salary_structure, from_date=None, company=None):
+def create_salary_structure_assignment(employee, salary_structure, from_date=None, company=None, currency=erpnext.get_default_currency(),
+	payroll_period=None):
+
 	if frappe.db.exists("Salary Structure Assignment", {"employee": employee}):
 		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""",(employee))
 
-	payroll_period = create_payroll_period()
-	create_tax_slab(payroll_period, allow_tax_exemption=True)
+	if not payroll_period:
+		payroll_period = create_payroll_period()
+
+	income_tax_slab = frappe.db.get_value("Income Tax Slab", {"currency": currency})
+
+	if not income_tax_slab:
+		income_tax_slab = create_tax_slab(payroll_period, allow_tax_exemption=True, currency=currency)
 
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
 	salary_structure_assignment.employee = employee
 	salary_structure_assignment.base = 50000
 	salary_structure_assignment.variable = 5000
-	salary_structure_assignment.from_date = from_date or add_days(nowdate(), -1)
+
+	if getdate(nowdate()).day == 1:
+		date = from_date or nowdate()
+	else:
+		date = from_date or add_days(nowdate(), -1)
+
+	salary_structure_assignment.from_date = date
 	salary_structure_assignment.salary_structure = salary_structure
+	salary_structure_assignment.currency = currency
+	salary_structure_assignment.payroll_payable_account = get_payable_account(company)
 	salary_structure_assignment.company = company or erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
-	salary_structure_assignment.income_tax_slab = "Tax Slab: _Test Payroll Period"
+	salary_structure_assignment.income_tax_slab = income_tax_slab
 	salary_structure_assignment.submit()
 	return salary_structure_assignment
+
+def get_payable_account(company=None):
+	if not company:
+		company = erpnext.get_default_company()
+	return frappe.db.get_value("Company", company, "default_payroll_payable_account")

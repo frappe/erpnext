@@ -11,3 +11,8 @@ class Donor(Document):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 
+	def validate(self):
+		from frappe.utils import validate_email_address
+		if self.email:
+			validate_email_address(self.email.strip(), True)
+

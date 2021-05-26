@@ -12,6 +12,8 @@
   "department",
   "column_break_3",
   "claim_date",
+  "currency",
+  "company",
   "benefit_type_and_amount",
   "earning_component",
   "max_amount_eligible",
@@ -76,6 +78,7 @@
    "fieldname": "max_amount_eligible",
    "fieldtype": "Currency",
    "label": "Max Amount Eligible",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -92,6 +95,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Claimed Amount",
+   "options": "currency",
    "reqd": 1
   },
   {
@@ -119,11 +123,28 @@
    "fieldname": "attachments",
    "fieldtype": "Attach",
    "label": "Attachments"
+  },
+  {
+   "depends_on": "eval: doc.employee",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 23:01:50.791676",
+ "modified": "2021-03-31 22:37:21.024625",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Claim",

@@ -11,6 +11,7 @@ from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
 from frappe.utils import cint, get_datetime, get_link_to_form
+from frappe.model.mapper import get_mapped_doc
 
 
 class DeliveryTrip(Document):
@@ -90,6 +91,7 @@ class DeliveryTrip(Document):
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
 		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
 
+	@frappe.whitelist()
 	def process_route(self, optimize):
 		"""
 		Estimate the arrival times for each stop in the Delivery Trip.
@@ -393,3 +395,15 @@ def get_driver_email(driver):
 	employee = frappe.db.get_value("Driver", driver, "employee")
 	email = frappe.db.get_value("Employee", employee, "prefered_email")
 	return {"email": email}
+
+@frappe.whitelist()
+def make_expense_claim(source_name, target_doc=None):
+	doc = get_mapped_doc("Delivery Trip", source_name,
+		{"Delivery Trip": {
+			"doctype": "Expense Claim",
+			"field_map": {
+				"name" : "delivery_trip"
+			}
+		}}, target_doc)
+
+	return doc

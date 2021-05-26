@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Salary Component', {
 	setup: function(frm) {
-		frm.set_query("default_account", "accounts", function(doc, cdt, cdn) {
+		frm.set_query("account", "accounts", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
 				filters: {

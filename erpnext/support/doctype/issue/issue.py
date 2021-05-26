@@ -69,6 +69,7 @@ class Issue(Document):
 		communication.ignore_mandatory = True
 		communication.save()
 
+	@frappe.whitelist()
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
@@ -111,11 +112,10 @@ class Issue(Document):
 			"comment_type": "Info",
 			"reference_doctype": "Issue",
 			"reference_name": replicated_issue.name,
-			"content": " - Split the Issue from <a href='#Form/Issue/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
+			"content": " - Split the Issue from <a href='/app/Form/Issue/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name
-
 
 def get_list_context(context=None):
 	return {

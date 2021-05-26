@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.asset");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on('Asset', {
 	onload: function(frm) {
@@ -32,13 +33,11 @@ frappe.ui.form.on('Asset', {
 			};
 		});
 
-		frm.set_query("cost_center", function() {
-			return {
-				"filters": {
-					"company": frm.doc.company,
-				}
-			};
-		});
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	setup: function(frm) {

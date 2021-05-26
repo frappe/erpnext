@@ -193,6 +193,34 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 200.0)
 		self.assertEqual(si.payment_schedule[1].paid_amount, 36.0)
 
+	def test_payment_entry_against_payment_terms_with_discount(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = 'Test Discount Template'
+
+		frappe.db.set_value('Company', si.company, 'default_discount_account', 'Write Off - _TC')
+
+		si.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 18
+		})
+		si.save()
+
+		si.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		pe.submit()
+		si.load_from_db()
+
+		self.assertEqual(pe.references[0].payment_term, '30 Credit Days with 10% Discount')
+		self.assertEqual(si.payment_schedule[0].payment_amount, 236.0)
+		self.assertEqual(si.payment_schedule[0].paid_amount, 212.40)
+		self.assertEqual(si.payment_schedule[0].outstanding, 0)
+		self.assertEqual(si.payment_schedule[0].discounted_amount, 23.6)
+
 
 	def test_payment_against_purchase_invoice_to_check_status(self):
 		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
@@ -591,6 +619,26 @@ def create_payment_terms_template():
 			}]
 		}).insert()
 
+def create_payment_terms_template_with_discount():
+
+	create_payment_term('30 Credit Days with 10% Discount')
+
+	if not frappe.db.exists('Payment Terms Template', 'Test Discount Template'):
+		payment_term_template = frappe.get_doc({
+			'doctype': 'Payment Terms Template',
+			'template_name': 'Test Discount Template',
+			'allocate_payment_based_on_payment_terms': 1,
+			'terms': [{
+				'doctype': 'Payment Terms Template Detail',
+				'payment_term': '30 Credit Days with 10% Discount',
+				'invoice_portion': 100,
+				'credit_days_based_on': 'Day(s) after invoice date',
+				'credit_days': 2,
+				'discount': 10,
+				'discount_validity_based_on': 'Day(s) after invoice date',
+				'discount_validity': 1
+			}]
+		}).insert()
 
 def create_payment_term(name):
 	if not frappe.db.exists('Payment Term', name):

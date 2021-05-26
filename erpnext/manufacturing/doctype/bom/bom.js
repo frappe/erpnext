@@ -29,7 +29,10 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item", function() {
 			return {
-				query: "erpnext.manufacturing.doctype.bom.bom.item_query"
+				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
+				filters: {
+					"is_stock_item": 1
+				}
 			};
 		});
 
@@ -134,7 +137,7 @@ frappe.ui.form.on("BOM", {
 			frm.set_intro(__('This is a Template BOM and will be used to make the work order for {0} of the item {1}',
 				[
 					`<a class="variants-intro">variants</a>`,
-					`<a href="#Form/Item/${frm.doc.item}">${frm.doc.item}</a>`,
+					`<a href="/app/item/${frm.doc.item}">${frm.doc.item}</a>`,
 				]), true);
 
 			frm.$wrapper.find(".variants-intro").on("click", () => {
@@ -357,16 +360,16 @@ frappe.ui.form.on("BOM", {
 	}
 });
 
-erpnext.bom.BomController = erpnext.TransactionController.extend({
-	conversion_rate: function(doc) {
+erpnext.bom.BomController = class BomController extends erpnext.TransactionController {
+	conversion_rate(doc) {
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		} else {
 			erpnext.bom.update_cost(doc);
 		}
-	},
+	}
 
-	item_code: function(doc, cdt, cdn){
+	item_code(doc, cdt, cdn){
 		var scrap_items = false;
 		var child = locals[cdt][cdn];
 		if (child.doctype == 'BOM Scrap Item') {
@@ -378,19 +381,19 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 		}
 
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
-	},
+	}
 
-	buying_price_list: function(doc) {
+	buying_price_list(doc) {
 		this.apply_price_list();
-	},
+	}
 
-	plc_conversion_rate: function(doc) {
+	plc_conversion_rate(doc) {
 		if (!this.in_apply_price_list) {
 			this.apply_price_list(null, true);
 		}
-	},
+	}
 
-	conversion_factor: function(doc, cdt, cdn) {
+	conversion_factor(doc, cdt, cdn) {
 		if (frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
@@ -399,10 +402,10 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 			this.toggle_conversion_factor(item);
 			this.frm.events.update_cost(this.frm);
 		}
-	},
-});
+	}
+};
 
-$.extend(cur_frm.cscript, new erpnext.bom.BomController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({frm: cur_frm}));
 
 cur_frm.cscript.hour_rate = function(doc) {
 	erpnext.bom.calculate_op_cost(doc);
@@ -411,7 +414,7 @@ cur_frm.cscript.hour_rate = function(doc) {
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
 
-cur_frm.cscript.bom_no	= function(doc, cdt, cdn) {
+cur_frm.cscript.bom_no = function(doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn, false);
 };
 
@@ -419,17 +422,22 @@ cur_frm.cscript.is_default = function(doc) {
 	if (doc.is_default) cur_frm.set_value("is_active", 1);
 };
 
-var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
+var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
+	if (!doc.company) {
+		frappe.throw({message: __("Please select a Company first."), title: __("Mandatory")});
+	}
+
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return frappe.call({
 			doc: doc,
 			method: "get_bom_material_detail",
 			args: {
-				'item_code': d.item_code,
-				'bom_no': d.bom_no != null ? d.bom_no: '',
+				"company": doc.company,
+				"item_code": d.item_code,
+				"bom_no": d.bom_no != null ? d.bom_no: '',
 				"scrap_items": scrap_items,
-				'qty': d.qty,
+				"qty": d.qty,
 				"stock_qty": d.stock_qty,
 				"include_item_in_manufacturing": d.include_item_in_manufacturing,
 				"uom": d.uom,
@@ -468,7 +476,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	}
 
 	if (d.bom_no) {
-		frappe.msgprint(__("You can not change rate if BOM mentioned agianst any item"));
+		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);

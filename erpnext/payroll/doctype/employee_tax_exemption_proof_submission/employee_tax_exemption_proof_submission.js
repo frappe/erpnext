@@ -54,5 +54,30 @@ frappe.ui.form.on('Employee Tax Exemption Proof Submission', {
 				});
 			});
 		}
-	}
+	},
+
+	currency: function(frm) {
+		frm.refresh_fields();
+	},
+
+	employee: function(frm) {
+		if (frm.doc.employee) {
+			frm.trigger('get_employee_currency');
+		}
+	},
+
+	get_employee_currency: function(frm) {
+		frappe.call({
+			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+			args: {
+				employee: frm.doc.employee,
+			},
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value('currency', r.message);
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
 });

@@ -140,7 +140,7 @@ frappe.ui.form.on("Company", {
 			doc: frm.doc,
 			freeze: true,
 			callback: function() {
-				frappe.msgprint(__("Default tax templates for sales and purchase are created."));
+				frappe.msgprint(__("Default tax templates for sales, purchase and items are created."));
 			}
 		})
 	},
@@ -169,9 +169,9 @@ frappe.ui.form.on("Company", {
 					return;
 				}
 				frappe.call({
-					method: "erpnext.setup.doctype.company.delete_company_transactions.delete_company_transactions",
+					method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
 					args: {
-						company_name: data.company_name
+						company: data.company_name
 					},
 					freeze: true,
 					callback: function(r, rt) {
@@ -259,6 +259,7 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
+		["default_discount_account", {}],
 		["discount_allowed_account", {"root_type": "Expense"}],
 		["discount_received_account", {"root_type": "Income"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],
@@ -274,7 +275,8 @@ erpnext.company.setup_queries = function(frm) {
 		["default_employee_advance_account", {"root_type": "Asset"}],
 		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
-		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}]
+		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],
+		["unrealized_profit_loss_account", {"root_type": "Liability"},]
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});

@@ -29,6 +29,7 @@ class LeaveControlPanel(Document):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
 		self.validate_from_to_dates('from_date', 'to_date')
 
+	@frappe.whitelist()
 	def allocate_leave(self):
 		self.validate_values()
 		leave_allocated_for = []

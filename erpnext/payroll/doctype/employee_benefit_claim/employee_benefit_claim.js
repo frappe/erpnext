@@ -12,5 +12,23 @@ frappe.ui.form.on('Employee Benefit Claim', {
 	},
 	employee: function(frm) {
 		frm.set_value("earning_component", null);
+		if (frm.doc.employee) {
+			frappe.call({
+				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+				args: {
+					employee: frm.doc.employee,
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_value('currency', r.message);
+					}
+				}
+			});
+		}
+		if (!frm.doc.earning_component) {
+			frm.doc.max_amount_eligible = null;
+			frm.doc.claimed_amount = null;
+		}
+		frm.refresh_fields();
 	}
 });

@@ -47,21 +47,22 @@ def get_data(filters):
 
 	for d in gl_entries:
 		asset_data = assets_details.get(d.against_voucher)
-		if not asset_data.get("accumulated_depreciation_amount"):
-			asset_data.accumulated_depreciation_amount = d.debit
-		else:
-			asset_data.accumulated_depreciation_amount += d.debit
+		if asset_data:
+			if not asset_data.get("accumulated_depreciation_amount"):
+				asset_data.accumulated_depreciation_amount = d.debit
+			else:
+				asset_data.accumulated_depreciation_amount += d.debit
 
-		row = frappe._dict(asset_data)
-		row.update({
-			"depreciation_amount": d.debit,
-			"depreciation_date": d.posting_date,
-			"amount_after_depreciation": (flt(row.gross_purchase_amount) -
-				flt(row.accumulated_depreciation_amount)),
-			"depreciation_entry": d.voucher_no
-		})
+			row = frappe._dict(asset_data)
+			row.update({
+				"depreciation_amount": d.debit,
+				"depreciation_date": d.posting_date,
+				"amount_after_depreciation": (flt(row.gross_purchase_amount) -
+					flt(row.accumulated_depreciation_amount)),
+				"depreciation_entry": d.voucher_no
+			})
 
-		data.append(row)
+			data.append(row)
 
 	return data
 

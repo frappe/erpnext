@@ -5,36 +5,44 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "item_defaults_section",
   "item_naming_by",
   "item_group",
   "stock_uom",
   "default_warehouse",
-  "sample_retention_warehouse",
   "column_break_4",
   "valuation_method",
+  "sample_retention_warehouse",
+  "use_naming_series",
+  "naming_series_prefix",
+  "section_break_9",
   "over_delivery_receipt_allowance",
-  "action_if_quality_inspection_is_not_submitted",
-  "show_barcode_field",
-  "clean_description_html",
-  "section_break_7",
+  "role_allowed_to_over_deliver_receive",
+  "column_break_12",
   "auto_insert_price_list_rate_if_missing",
   "allow_negative_stock",
-  "column_break_10",
+  "show_barcode_field",
+  "clean_description_html",
+  "action_if_quality_inspection_is_not_submitted",
+  "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
   "set_qty_in_transactions_based_on_serial_no_input",
+  "column_break_10",
+  "disable_serial_no_and_batch_selector",
   "auto_material_request",
   "auto_indent",
+  "column_break_27",
   "reorder_email_notify",
   "inter_warehouse_transfer_settings_section",
   "allow_from_dn",
+  "column_break_31",
   "allow_from_pr",
-  "freeze_stock_entries",
+  "control_historical_stock_transactions_section",
   "stock_frozen_upto",
   "stock_frozen_upto_days",
-  "stock_auth_role",
-  "batch_id_sb",
-  "use_naming_series",
-  "naming_series_prefix"
+  "column_break_26",
+  "role_allowed_to_create_edit_back_dated_transactions",
+  "stock_auth_role"
  ],
  "fields": [
   {
@@ -98,23 +106,24 @@
    "default": "1",
    "fieldname": "show_barcode_field",
    "fieldtype": "Check",
-   "label": "Show Barcode Field"
+   "label": "Show Barcode Field in Stock Transactions"
   },
   {
    "default": "1",
    "fieldname": "clean_description_html",
    "fieldtype": "Check",
-   "label": "Convert Item Description to Clean HTML"
+   "label": "Convert Item Description to Clean HTML in Transactions"
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Serialised and Batch Setting"
   },
   {
    "default": "0",
    "fieldname": "auto_insert_price_list_rate_if_missing",
    "fieldtype": "Check",
-   "label": "Auto Insert Price List Rate If Missing"
+   "label": "Auto Insert Item Price If Missing"
   },
   {
    "default": "0",
@@ -156,36 +165,30 @@
    "label": "Notify by Email on Creation of Automatic Material Request"
   },
   {
-   "fieldname": "freeze_stock_entries",
-   "fieldtype": "Section Break",
-   "label": "Freeze Stock Entries"
-  },
-  {
+   "description": "No stock transactions can be created or modified before this date.",
    "fieldname": "stock_frozen_upto",
    "fieldtype": "Date",
    "label": "Stock Frozen Upto"
   },
   {
+   "description": "Stock transactions that are older than the mentioned days cannot be modified.",
    "fieldname": "stock_frozen_upto_days",
    "fieldtype": "Int",
    "label": "Freeze Stocks Older Than (Days)"
   },
   {
+   "depends_on": "eval:(doc.stock_frozen_upto || doc.stock_frozen_upto_days)",
+   "description": "The users with this Role are allowed to create/modify a stock transaction, even though the transaction is frozen.",
    "fieldname": "stock_auth_role",
    "fieldtype": "Link",
    "label": "Role Allowed to Edit Frozen Stock",
    "options": "Role"
   },
   {
-   "fieldname": "batch_id_sb",
-   "fieldtype": "Section Break",
-   "label": "Batch Identification"
-  },
-  {
    "default": "0",
    "fieldname": "use_naming_series",
    "fieldtype": "Check",
-   "label": "Use Naming Series"
+   "label": "Have Default Naming Series for Batch ID?"
   },
   {
    "default": "BATCH-",
@@ -210,6 +213,57 @@
    "fieldname": "allow_from_pr",
    "fieldtype": "Check",
    "label": "Allow Material Transfer from Purchase Receipt to Purchase Invoice"
+  },
+  {
+   "description": "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",
+   "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Create/Edit Back-dated Transactions",
+   "options": "Role"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "control_historical_stock_transactions_section",
+   "fieldtype": "Section Break",
+   "label": "Control Historical Stock Transactions"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_serial_no_and_batch_selector",
+   "fieldtype": "Check",
+   "label": "Disable Serial No And Batch Selector"
+  },
+  {
+   "description": "Users with this role are allowed to over deliver/receive against orders above the allowance percentage",
+   "fieldname": "role_allowed_to_over_deliver_receive",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Over Deliver/Receive",
+   "options": "Role"
+  },
+  {
+   "fieldname": "item_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Item Defaults"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Stock Transactions Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -217,7 +271,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-11-23 15:26:54.225608",
+ "modified": "2021-04-30 17:27:42.709231",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

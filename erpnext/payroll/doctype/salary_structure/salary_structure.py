@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 
 from frappe.utils import flt, cint, cstr
 from frappe import _
@@ -88,24 +88,26 @@ class SalaryStructure(Document):
 		return employees
 
 	@frappe.whitelist()
-	def assign_salary_structure(self, company=None, grade=None, department=None, designation=None,employee=None,
-			from_date=None, base=None, variable=None, income_tax_slab=None):
-		employees = self.get_employees(company= company, grade= grade,department= department,designation= designation,name=employee)
+	def assign_salary_structure(self, grade=None, department=None, designation=None, employee=None,
+			payroll_payable_account=None, from_date=None, base=None, variable=None, income_tax_slab=None):
+		employees = self.get_employees(company= self.company, grade= grade,department= department,designation= designation,name=employee)
 
 		if employees:
 			if len(employees) > 20:
 				frappe.enqueue(assign_salary_structure_for_employees, timeout=600,
-					employees=employees, salary_structure=self,from_date=from_date,
-					base=base, variable=variable, income_tax_slab=income_tax_slab)
+					employees=employees, salary_structure=self,
+					payroll_payable_account=payroll_payable_account,
+					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 			else:
-				assign_salary_structure_for_employees(employees, self, from_date=from_date,
-					base=base, variable=variable, income_tax_slab=income_tax_slab)
+				assign_salary_structure_for_employees(employees, self,
+					payroll_payable_account=payroll_payable_account,
+					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 		else:
 			frappe.msgprint(_("No Employee Found"))
 
 
 
-def assign_salary_structure_for_employees(employees, salary_structure, from_date=None, base=None, variable=None, income_tax_slab=None):
+def assign_salary_structure_for_employees(employees, salary_structure, payroll_payable_account=None, from_date=None, base=None, variable=None, income_tax_slab=None):
 	salary_structures_assignments = []
 	existing_assignments_for = get_existing_assignments(employees, salary_structure, from_date)
 	count=0
@@ -115,7 +117,7 @@ def assign_salary_structure_for_employees(employees, salary_structure, from_date
 		count +=1
 
 		salary_structures_assignment = create_salary_structures_assignment(employee,
-			salary_structure, from_date, base, variable, income_tax_slab)
+			salary_structure, payroll_payable_account, from_date, base, variable, income_tax_slab)
 		salary_structures_assignments.append(salary_structures_assignment)
 		frappe.publish_progress(count*100/len(set(employees) - set(existing_assignments_for)), title = _("Assigning Structures..."))
 
@@ -123,11 +125,22 @@ def assign_salary_structure_for_employees(employees, salary_structure, from_date
 		frappe.msgprint(_("Structures have been assigned successfully"))
 
 
-def create_salary_structures_assignment(employee, salary_structure, from_date, base, variable, income_tax_slab=None):
+def create_salary_structures_assignment(employee, salary_structure, payroll_payable_account, from_date, base, variable, income_tax_slab=None):
+	if not payroll_payable_account:
+		payroll_payable_account = frappe.db.get_value('Company', salary_structure.company, 'default_payroll_payable_account')
+		if not payroll_payable_account:
+			frappe.throw(_('Please set "Default Payroll Payable Account" in Company Defaults'))
+	payroll_payable_account_currency = frappe.db.get_value('Account',  payroll_payable_account, 'account_currency')
+	company_curency = erpnext.get_company_currency(salary_structure.company)
+	if payroll_payable_account_currency != salary_structure.currency and payroll_payable_account_currency != company_curency:
+		frappe.throw(_("Invalid Payroll Payable Account. The account currency must be {0} or {1}").format(salary_structure.currency, company_curency))
+
 	assignment = frappe.new_doc("Salary Structure Assignment")
 	assignment.employee = employee
 	assignment.salary_structure = salary_structure.name
 	assignment.company = salary_structure.company
+	assignment.currency = salary_structure.currency
+	assignment.payroll_payable_account = payroll_payable_account
 	assignment.from_date = from_date
 	assignment.base = base
 	assignment.variable = variable
@@ -170,7 +183,8 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 			"doctype": "Salary Slip",
 			"field_map": {
 				"total_earning": "gross_pay",
-				"name": "salary_structure"
+				"name": "salary_structure",
+				"currency": "currency"
 			}
 		}
 	}, target_doc, postprocess, ignore_child_tables=True, ignore_permissions=ignore_permissions)
@@ -188,7 +202,8 @@ def get_employees(salary_structure):
 		filters={'salary_structure': salary_structure, 'docstatus': 1}, fields=['employee'])
 
 	if not employees:
-		frappe.throw(_("There's no Employee with Salary Structure: {0}. \
-			Assign {1} to an Employee to preview Salary Slip").format(salary_structure, salary_structure))
+		frappe.throw(_("There's no Employee with Salary Structure: {0}. Assign {1} to an Employee to preview Salary Slip").format(
+			salary_structure, salary_structure))
 
 	return list(set([d.employee for d in employees]))
+

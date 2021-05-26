@@ -11,11 +11,13 @@
   "employee_name",
   "department",
   "company",
+  "payroll_payable_account",
   "column_break_6",
   "designation",
   "salary_structure",
   "from_date",
   "income_tax_slab",
+  "currency",
   "section_break_7",
   "base",
   "column_break_9",
@@ -94,7 +96,7 @@
    "fieldname": "base",
    "fieldtype": "Currency",
    "label": "Base",
-   "options": "Company:company:default_currency"
+   "options": "currency"
   },
   {
    "fieldname": "column_break_9",
@@ -104,7 +106,7 @@
    "fieldname": "variable",
    "fieldtype": "Currency",
    "label": "Variable",
-   "options": "Company:company:default_currency"
+   "options": "currency"
   },
   {
    "fieldname": "amended_from",
@@ -116,15 +118,34 @@
    "read_only": 1
   },
   {
+   "depends_on": "salary_structure",
    "fieldname": "income_tax_slab",
    "fieldtype": "Link",
    "label": "Income Tax Slab",
    "options": "Income Tax Slab"
+  },
+  {
+   "depends_on": "eval:(doc.docstatus==1 || doc.salary_structure)",
+   "fetch_from": "salary_structure.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "employee",
+   "fieldname": "payroll_payable_account",
+   "fieldtype": "Link",
+   "label": "Payroll Payable Account",
+   "options": "Account"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 19:58:09.964692",
+ "modified": "2021-03-31 22:44:46.267974",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",

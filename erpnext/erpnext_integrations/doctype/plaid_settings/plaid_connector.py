@@ -20,7 +20,7 @@ class PlaidConnector():
 			client_id=self.settings.plaid_client_id,
 			secret=self.settings.get_password("plaid_secret"),
 			environment=self.settings.plaid_env,
-			api_version="2019-05-29"
+			api_version="2020-09-14"
 		)
 
 	def get_access_token(self, public_token):
@@ -30,13 +30,10 @@ class PlaidConnector():
 		access_token = response["access_token"]
 		return access_token
 
-	def get_link_token(self):
+	def get_token_request(self, update_mode=False):
 		country_codes = ["US", "CA", "FR", "IE", "NL", "ES", "GB"] if self.settings.enable_european_access else ["US", "CA"]
-		token_request = {
+		args = {
 			"client_name": self.client_name,
-			"client_id": self.settings.plaid_client_id,
-			"secret": self.settings.plaid_secret,
-			"products": self.products,
 			# only allow Plaid-supported languages and countries (LAST: Sep-19-2020)
 			"language": frappe.local.lang if frappe.local.lang in ["en", "fr", "es", "nl"] else "en",
 			"country_codes": country_codes,
@@ -44,6 +41,20 @@ class PlaidConnector():
 				"client_user_id": frappe.generate_hash(frappe.session.user, length=32)
 			}
 		}
+
+		if update_mode:
+			args["access_token"] = self.access_token
+		else:
+			args.update({
+				"client_id": self.settings.plaid_client_id,
+				"secret": self.settings.plaid_secret,
+				"products": self.products,
+			})
+		
+		return args
+
+	def get_link_token(self, update_mode=False):
+		token_request = self.get_token_request(update_mode)
 
 		try:
 			response = self.client.LinkToken.create(token_request)

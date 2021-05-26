@@ -1,4 +1,4 @@
-{% set qty_first=frappe.db.get_single_value("Print Settings", "print_uom_after_quantity") %}
+{% set qty_first=print_settings.print_uom_after_quantity %}
 {% if qty_first %}
 	{{ doc.get_formatted("qty", doc) }}
 	{% if (doc.uom and not doc.is_print_hide("uom")) %} {{ _(doc.uom) }}

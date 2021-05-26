@@ -15,6 +15,7 @@ from frappe.utils import add_months, formatdate, getdate, today
 
 class PlaidSettings(Document):
 	@staticmethod
+	@frappe.whitelist()
 	def get_link_token():
 		plaid = PlaidConnector()
 		return plaid.get_link_token()
@@ -166,7 +167,6 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 		related_bank = frappe.db.get_values("Bank Account", bank_account, ["bank", "integration_id"], as_dict=True)
 		access_token = frappe.db.get_value("Bank", related_bank[0].bank, "plaid_access_token")
 		account_id = related_bank[0].integration_id
-
 	else:
 		access_token = frappe.db.get_value("Bank", bank, "plaid_access_token")
 		account_id = None
@@ -205,8 +205,8 @@ def new_bank_transaction(transaction):
 				"date": getdate(transaction["date"]),
 				"status": status,
 				"bank_account": bank_account,
-				"debit": debit,
-				"credit": credit,
+				"deposit": debit,
+				"withdrawal": credit,
 				"currency": transaction["iso_currency_code"],
 				"transaction_id": transaction["transaction_id"],
 				"reference_number": transaction["payment_meta"]["reference_number"],
@@ -228,13 +228,23 @@ def new_bank_transaction(transaction):
 
 def automatic_synchronization():
 	settings = frappe.get_doc("Plaid Settings", "Plaid Settings")
-
 	if settings.enabled == 1 and settings.automatic_sync == 1:
-		plaid_accounts = frappe.get_all("Bank Account", filters={"integration_id": ["!=", ""]}, fields=["name", "bank"])
+		enqueue_synchronization()
 
-		for plaid_account in plaid_accounts:
-			frappe.enqueue(
-				"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.sync_transactions",
-				bank=plaid_account.bank,
-				bank_account=plaid_account.name
-			)
+@frappe.whitelist()
+def enqueue_synchronization():
+	plaid_accounts = frappe.get_all("Bank Account",
+		filters={"integration_id": ["!=", ""]},
+		fields=["name", "bank"])
+
+	for plaid_account in plaid_accounts:
+		frappe.enqueue(
+			"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.sync_transactions",
+			bank=plaid_account.bank,
+			bank_account=plaid_account.name
+		)
+
+@frappe.whitelist()
+def get_link_token_for_update(access_token):
+	plaid = PlaidConnector(access_token)
+	return plaid.get_link_token(update_mode=True)
