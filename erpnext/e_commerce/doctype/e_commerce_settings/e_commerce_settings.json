@@ -48,7 +48,9 @@
   "item_search_settings_section",
   "search_index_fields",
   "show_categories_in_search_autocomplete",
-  "show_brand_line"
+  "show_brand_line",
+  "is_redisearch_loaded",
+  "redisearch"
  ],
  "fields": [
   {
@@ -328,12 +330,26 @@
    "fieldname": "show_brand_line",
    "fieldtype": "Check",
    "label": "Show Brand Line"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_redisearch_loaded",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Redisearch Loaded"
+  },
+  {
+   "depends_on": "eval:doc.is_search_module_loaded",
+   "fieldname": "redisearch",
+   "fieldtype": "Heading",
+   "label": "Redisearch",
+   "options": "Some heading"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-05 13:41:11.483232",
+ "modified": "2021-05-26 20:00:35.399936",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",

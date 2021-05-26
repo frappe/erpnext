@@ -10,6 +10,26 @@ from redisearch import (
         TextField, TagField
 	)
 
+def is_search_module_loaded():
+    cache = frappe.cache()
+    out = cache.execute_command('MODULE LIST')
+
+    parsed_output = " ".join(
+        (" ".join([s.decode() for s in o if not isinstance(s, int)]) for o in out)
+    )
+
+    return "search" in parsed_output
+
+# Decorator for checking wether Redisearch is there or not
+def redisearch_decorator(function):
+    def wrapper(*args, **kwargs):
+        if is_search_module_loaded():
+            func = function(*args, **kwargs)
+            return func
+        return
+
+    return wrapper 
+
 def make_key(key):
 	return "{0}|{1}".format(frappe.conf.db_name, key).encode('utf-8')
 
@@ -28,6 +48,7 @@ ALLOWED_INDEXABLE_FIELDS_SET = {
 	'web_long_description'
 }
 
+@redisearch_decorator
 def create_website_items_index():
 	'''Creates Index Definition'''
 	# CREATE index
@@ -67,6 +88,7 @@ def to_search_field(field):
 
 	return TextField(field)
 
+@redisearch_decorator
 def insert_item_to_index(website_item_doc):
 	# Insert item to index
 	key = get_cache_key(website_item_doc.name)
@@ -78,6 +100,7 @@ def insert_item_to_index(website_item_doc):
 
 	insert_to_name_ac(website_item_doc.web_item_name, website_item_doc.name)
 
+@redisearch_decorator
 def insert_to_name_ac(web_name, doc_name):
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=frappe.cache())
 	ac.add_suggestions(Suggestion(web_name, payload=doc_name))
@@ -91,12 +114,14 @@ def create_web_item_map(website_item_doc):
 		web_item[f] = website_item_doc.get(f) or ''
 
 	return web_item
-	
+
+@redisearch_decorator
 def update_index_for_item(website_item_doc):
 	# Reinsert to Cache
 	insert_item_to_index(website_item_doc)
 	define_autocomplete_dictionary()
 
+@redisearch_decorator
 def delete_item_from_index(website_item_doc):
 	r = frappe.cache()
 	key = get_cache_key(website_item_doc.name)
@@ -110,12 +135,14 @@ def delete_item_from_index(website_item_doc):
 
 	return True
 
+@redisearch_decorator
 def delete_from_ac_dict(website_item_doc):
 	'''Removes this items's name from autocomplete dictionary'''
 	r = frappe.cache()
 	name_ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=r)
 	name_ac.delete(website_item_doc.web_item_name)
 
+@redisearch_decorator
 def define_autocomplete_dictionary():
 	"""Creates an autocomplete search dictionary for `name`.
 	   Also creats autocomplete dictionary for `categories` if 
@@ -150,6 +177,7 @@ def define_autocomplete_dictionary():
 
 	return True
 
+@redisearch_decorator
 def reindex_all_web_items():
 	items = frappe.get_all(
 		'Website Item', 
