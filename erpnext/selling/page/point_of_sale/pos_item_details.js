@@ -62,16 +62,16 @@ erpnext.PointOfSale.ItemDetails = class {
 		const rate_is_same = item && rate === item.rate;
 		
 		if (!item)
-			return false
+			return false;
 
 		if (item_code_is_same && batch_is_same && uom_is_same && rate_is_same)
-			return false
+			return false;
 
 		return true;
 	}
 
 	toggle_item_details_section(item) {
-		this.item_has_changed = this.has_item_has_changed(item)
+		this.item_has_changed = this.has_item_has_changed(item);
 
 		this.events.toggle_item_selector(this.item_has_changed);
 		this.toggle_component(this.item_has_changed);
