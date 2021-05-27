@@ -91,5 +91,5 @@ class DebitNoteCXP(Document):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
 			supplier.debit += self.amount_total
-			supplier.reamaining_balance += self.amount_total
+			supplier.remaining_balance += self.amount_total
 			supplier.save()
