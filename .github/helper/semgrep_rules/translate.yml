@@ -44,8 +44,8 @@ rules:
   pattern-either:
   - pattern: _(...) + _(...)
   - pattern: _("..." + "...")
-  - pattern-regex: '_\([^\)]*\\\s*'    # lines broken by `\`
-  - pattern-regex: '_\(\s*\n'          # line breaks allowed by python for using ( )
+  - pattern-regex: '[\s\.]_\([^\)]*\\\s*'    # lines broken by `\`
+  - pattern-regex: '[\s\.]_\(\s*\n'          # line breaks allowed by python for using ( )
   message: |
     Do not split strings inside translate function. Do not concatenate using translate functions.
     Please refer: https://frappeframework.com/docs/user/en/translations
