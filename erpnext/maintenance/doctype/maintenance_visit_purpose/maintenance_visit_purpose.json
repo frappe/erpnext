@@ -17,8 +17,7 @@
   "work_details",
   "work_done",
   "prevdoc_doctype",
-  "prevdoc_docname",
-  "prevdoc_detail_docname"
+  "prevdoc_docname"
  ],
  "fields": [
   {
@@ -90,44 +89,14 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Document Type",
-   "no_copy": 1,
-   "oldfieldname": "prevdoc_doctype",
-   "oldfieldtype": "Data",
-   "options": "DocType",
-   "print_hide": 1,
-   "print_width": "150px",
-   "read_only": 1,
-   "report_hide": 1,
-   "width": "150px"
+   "options": "DocType"
   },
   {
    "fieldname": "prevdoc_docname",
    "fieldtype": "Dynamic Link",
-   "label": "Against Document No",
-   "no_copy": 1,
-   "oldfieldname": "prevdoc_docname",
-   "oldfieldtype": "Data",
-   "options": "prevdoc_doctype",
-   "print_hide": 1,
-   "print_width": "160px",
-   "read_only": 1,
-   "report_hide": 1,
-   "width": "160px"
-  },
-  {
-   "fieldname": "prevdoc_detail_docname",
-   "fieldtype": "Link",
    "hidden": 1,
-   "label": "Against Document Detail No",
-   "no_copy": 1,
-   "oldfieldname": "prevdoc_detail_docname",
-   "oldfieldtype": "Data",
-   "options": "Maintenance Schedule Detail",
-   "print_hide": 1,
-   "print_width": "160px",
-   "read_only": 1,
-   "report_hide": 1,
-   "width": "160px"
+   "label": "Against Document No",
+   "options": "prevdoc_doctype"
   },
   {
    "fieldname": "column_break_3",
@@ -141,7 +110,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-21 11:16:52.025914",
+ "modified": "2021-05-27 17:47:21.474282",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit Purpose",
