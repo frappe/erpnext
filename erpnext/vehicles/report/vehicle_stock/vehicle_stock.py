@@ -191,6 +191,7 @@ class VehicleStockReport(object):
 				d.customer_name = booking_data.get('customer_name')
 				d.lessee_name = booking_data.get('lessee_name')
 				d.contact_number = booking_data.get('contact_mobile') or booking_data.get('contact_phone')
+				d.is_leased = booking_data.get('financer') and booking_data.get('finance_type') == "Leased"
 
 				d.delivery_period = booking_data.get('delivery_period')
 
@@ -414,7 +415,8 @@ class VehicleStockReport(object):
 
 		data = frappe.db.sql("""
 			select name, vehicle, vehicle_receipt,
-				customer, customer_name, lessee_name,
+				customer, financer, finance_type,
+				customer_name, lessee_name,
 				contact_mobile, contact_phone,
 				bill_no, invoice_status,
 				delivery_period

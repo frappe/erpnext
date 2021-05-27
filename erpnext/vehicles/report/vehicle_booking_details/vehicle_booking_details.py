@@ -71,8 +71,8 @@ class VehicleBookingDetailsReport(object):
 			d.vehicle_color = d.vehicle_color or d.color_1 or d.color_2 or d.color_3
 			d.booking_color = d.color_1 or d.color_2 or d.color_3
 
-			is_leased = d.financer and d.finance_type == "Leased"
-			d.tax_cnic_ntn = d.tax_id or d.tax_cnic if is_leased else d.tax_cnic or d.tax_id
+			d.is_leased = d.financer and d.finance_type == "Leased"
+			d.tax_cnic_ntn = d.tax_id or d.tax_cnic if d.is_leased else d.tax_cnic or d.tax_id
 			d.contact_number = d.contact_mobile or d.contact_phone
 
 			d.original_item_code = d.get('previous_item_code') or d.item_code

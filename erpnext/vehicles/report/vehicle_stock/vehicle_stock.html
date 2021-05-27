@@ -123,6 +123,9 @@
 					{% if(data[i].customer_name) { %}
 						<div>{%= data[i].customer_name %}</div>
 					{% } %}
+					{% if(data[i].lessee_name && data[i].is_leased) { %}
+						<div>Lessee: {%= data[i].lessee_name %}</div>
+					{% } %}
 					{% if(data[i].contact_number) { %}
 						<div>Contact #: {%= data[i].contact_number %}</div>
 					{% } %}
@@ -142,6 +145,9 @@
 				<td class="text-nowrap">
 					{% if(data[i].vehicle_booking_order) { %}
 						<div>{%= data[i].vehicle_booking_order %}</div>
+					{% } %}
+					{% if(data[i].delivery_period) { %}
+						<div>{%= data[i].delivery_period %}</div>
 					{% } %}
 					{% if(data[i].project) { %}
 						<div>{%= data[i].project %}</div>
