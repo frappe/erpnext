@@ -243,7 +243,7 @@ def validate_serial_no(sle, item_det):
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.db.get_value("Serial No", serial_no, ["name", "item_code", "batch_no", "sales_order",
 						"delivery_document_no", "delivery_document_type", "warehouse", "purchase_document_type",
-						"purchase_document_no", "company"], as_dict=1)
+						"purchase_document_no", "company", "status"], as_dict=1)
 
 					if sr.item_code!=sle.item_code:
 						if not allow_serial_nos_with_different_item(serial_no, sle):
@@ -265,6 +265,9 @@ def validate_serial_no(sle, item_det):
 						if sr.warehouse!=sle.warehouse:
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
+
+						if not sr.purchase_document_no:
+							frappe.throw(_("Serial No {0} not in stock").format(serial_no), SerialNoNotExistsError)
 
 						if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 
@@ -381,19 +384,6 @@ def has_serial_no_exists(sn, sle):
 
 	if sn.company != sle.company:
 		return False
-
-	status = False
-	if sn.purchase_document_no:
-		if (sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and
-			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]):
-			status = True
-
-		# If status is receipt then system will allow to in-ward the delivered serial no
-		if (status and sle.voucher_type == "Stock Entry" and frappe.db.get_value("Stock Entry",
-			sle.voucher_no, "purpose") in ("Material Receipt", "Material Transfer")):
-			status = False
-
-	return status
 
 def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	"""

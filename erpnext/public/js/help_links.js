@@ -644,14 +644,14 @@ frappe.help.help_links["List/Payment Request"] = [
 frappe.help.help_links["List/Asset"] = [
 	{
 		label: "Managing Fixed Assets",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/accounts/opening-balance/fixed_assets",
 	},
 ];
 
 frappe.help.help_links["List/Asset Category"] = [
 	{
 		label: "Asset Category",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/asset/asset-category",
 	},
 ];
 
@@ -663,7 +663,7 @@ frappe.help.help_links["List/Item"] = [
 	{ label: "Item", url: docsUrl + "user/manual/en/stock/item" },
 	{
 		label: "Item Price",
-		url: docsUrl + "user/manual/en/stock/item/item-price",
+		url: docsUrl + "user/manual/en/stock/item-price",
 	},
 	{
 		label: "Barcode",
@@ -672,25 +672,25 @@ frappe.help.help_links["List/Item"] = [
 	},
 	{
 		label: "Item Wise Taxation",
-		url: docsUrl + "user/manual/en/accounts/item-wise-taxation",
+		url: docsUrl + "user/manual/en/accounts/item-tax-template",
 	},
 	{
 		label: "Managing Fixed Assets",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/accounts/opening-balance/fixed_assets",
 	},
 	{
 		label: "Item Codification",
-		url: docsUrl + "user/manual/en/stock/item/item-codification",
+		url: docsUrl + "user/manual/en/stock/articles/item-codification",
 	},
 	{
 		label: "Item Variants",
-		url: docsUrl + "user/manual/en/stock/item/item-variants",
+		url: docsUrl + "user/manual/en/stock/item-variants",
 	},
 	{
 		label: "Item Valuation",
 		url:
 			docsUrl +
-			"user/manual/en/stock/item/item-valuation-fifo-and-moving-average",
+			"user/manual/en/stock/articles/item-valuation-fifo-and-moving-average",
 	},
 ];
 
@@ -698,7 +698,7 @@ frappe.help.help_links["Form/Item"] = [
 	{ label: "Item", url: docsUrl + "user/manual/en/stock/item" },
 	{
 		label: "Item Price",
-		url: docsUrl + "user/manual/en/stock/item/item-price",
+		url: docsUrl + "user/manual/en/stock/item-price",
 	},
 	{
 		label: "Barcode",
@@ -707,19 +707,19 @@ frappe.help.help_links["Form/Item"] = [
 	},
 	{
 		label: "Item Wise Taxation",
-		url: docsUrl + "user/manual/en/accounts/item-wise-taxation",
+		url: docsUrl + "user/manual/en/accounts/item-tax-template",
 	},
 	{
 		label: "Managing Fixed Assets",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/accounts/opening-balance/fixed_assets",
 	},
 	{
 		label: "Item Codification",
-		url: docsUrl + "user/manual/en/stock/item/item-codification",
+		url: docsUrl + "user/manual/en/stock/articles/item-codification",
 	},
 	{
 		label: "Item Variants",
-		url: docsUrl + "user/manual/en/stock/item/item-variants",
+		url: docsUrl + "user/manual/en/stock/item-variants",
 	},
 	{
 		label: "Item Valuation",
