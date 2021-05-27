@@ -16,6 +16,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_tra
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -955,11 +956,15 @@ class TestPurchaseInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 		from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 
+		# create a new supplier to test
+		supplier = create_supplier(supplier_name = '_Test TDS Advance Supplier',
+			tax_withholding_category = 'TDS - 194 - Dividends - Individual')
+
 		# Update tax withholding category with current fiscal year and rate details
 		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
 
 		# Create Purchase Order with TDS applied
-		po = create_purchase_order(do_not_save=1, rate=3000)
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000)
 		po.apply_tds = 1
 		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
@@ -976,8 +981,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Check GLE for Payment Entry
 		expected_gle = [
 			['_Test Account Excise Duty - _TC', 3000, 0],
-			['Cash - _TC', 0, 24000],
-			['Creditors - _TC', 24000, 0],
+			['Cash - _TC', 0, 27000],
+			['Creditors - _TC', 27000, 0],
 			['TDS Payable - _TC', 0, 3000],
 		]
 
@@ -1002,8 +1007,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		expected_gle = [
 			['_Test Account Excise Duty - _TC', 0, 3000],
 			['Cost of Goods Sold - _TC', 30000, 0],
-			['Creditors - _TC', 0, 24000],
-			['TDS Payable - _TC', 6000, 3000],
+			['Creditors - _TC', 0, 27000],
+			['TDS Payable - _TC', 3000, 3000],
 		]
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
