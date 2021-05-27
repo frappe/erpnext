@@ -1008,7 +1008,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
 			['_Test Account Excise Duty - _TC', 0, 3000],
 			['Creditors - _TC', 0, 27000],
-			['TDS Payable - _TC', 3000, 3000],
+			['TDS Payable - _TC', 0, 3000],
+			['TDS Payable - _TC', 3000, 0]
 		]
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
