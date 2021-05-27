@@ -17,70 +17,61 @@ class MaintenanceVisit(TransactionBase):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
-	def validate_mntc_date(self):
-		if self.maintenance_type == "Scheduled":
-			p = self.purposes
-			for i in p:
-				detail_ref = i.prevdoc_detail_docname
-			item_ref = frappe.db.get_value('Maintenance Schedule Detail', detail_ref , 'item_ref')
+	def validate_maintenance_date(self):
+		if self.maintenance_type == "Scheduled" and self.maintenance_schedule_detail:
+			item_ref = frappe.db.get_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'item_reference')
 			start_date, end_date = frappe.db.get_value('Maintenance Schedule Item', item_ref, ['start_date', 'end_date'])
 			if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(self.mntc_date) > get_datetime(end_date):
-				frappe.throw(_("Date must be between {0} and {1}").format(start_date,end_date))
+				frappe.throw(_("Date must be between {0} and {1}").format(start_date, end_date))
 
 	def validate(self):
 		self.validate_serial_no()
-		self.validate_mntc_date()
+		self.validate_maintenance_date()
 	
-	def get_schedule_datail_ref(self):
-		if self.maintenance_type == "Scheduled":
-			p = self.purposes
-			for i in p:
-				detail_ref = i.prevdoc_detail_docname
-			return detail_ref
-		
 	def update_completion_status(self):
-		detail_ref = self.get_schedule_datail_ref()
-		frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'completion_status', self.completion_status)
+		if self.maintenance_schedule_detail:
+			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'completion_status', self.completion_status)
 	
 	def update_actual_date(self):
-		detail_ref = self.get_schedule_datail_ref()
-		frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'actual_date', self.mntc_date)
+		if self.maintenance_schedule_detail:
+			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'actual_date', self.mntc_date)
 
 	def update_customer_issue(self, flag):
-		for d in self.get('purposes'):
-			if d.prevdoc_docname and d.prevdoc_doctype == 'Warranty Claim' :
-				if flag==1:
-					mntc_date = self.mntc_date
-					service_person = d.service_person
-					work_done = d.work_done
-					status = "Open"
-					if self.completion_status == 'Fully Completed':
-						status = 'Closed'
-					elif self.completion_status == 'Partially Completed':
-						status = 'Work In Progress'
-				else:
-					nm = frappe.db.sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.name))
-
-					if nm:
-						status = 'Work In Progress'
-						mntc_date = nm and nm[0][1] or ''
-						service_person = nm and nm[0][2] or ''
-						work_done = nm and nm[0][3] or ''
+		if not self.maintenance_schedule:
+			for d in self.get('purposes'):
+				if d.prevdoc_docname and d.prevdoc_doctype == 'Warranty Claim' :
+					if flag==1:
+						mntc_date = self.mntc_date
+						service_person = d.service_person
+						work_done = d.work_done
+						status = "Open"
+						if self.completion_status == 'Fully Completed':
+							status = 'Closed'
+						elif self.completion_status == 'Partially Completed':
+							status = 'Work In Progress'
 					else:
-						status = 'Open'
-						mntc_date = None
-						service_person = None
-						work_done = None
+						nm = frappe.db.sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.name))
 
-				wc_doc = frappe.get_doc('Warranty Claim', d.prevdoc_docname)
-				wc_doc.update({
-					'resolution_date': mntc_date,
-					'resolved_by': service_person,
-					'resolution_details': work_done,
-					'status': status
-				})
+						if nm:
+							status = 'Work In Progress'
+							mntc_date = nm and nm[0][1] or ''
+							service_person = nm and nm[0][2] or ''
+							work_done = nm and nm[0][3] or ''
+						else:
+							status = 'Open'
+							mntc_date = None
+							service_person = None
+							work_done = None
 
-				wc_doc.db_update()
+					wc_doc = frappe.get_doc('Warranty Claim', d.prevdoc_docname)
+					wc_doc.update({
+						'resolution_date': mntc_date,
+						'resolved_by': service_person,
+						'resolution_details': work_done,
+						'status': status
+					})
+
+					wc_doc.db_update()
 
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same sales order/ Warranty Claim"""
