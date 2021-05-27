@@ -101,15 +101,24 @@ frappe.ui.form.on('POS Closing Entry', {
 	},
 
 	before_save: function(frm) {
+		frm.set_value("grand_total", 0);
+		frm.set_value("net_total", 0);
+		frm.set_value("total_quantity", 0);
+		frm.set_value("taxes", []);
+
+		for (let row of frm.doc.payment_reconciliation) {
+			row.expected_amount = 0;
+		}
+
 		for (let row of frm.doc.pos_transactions) {
 			frappe.db.get_doc("POS Invoice", row.pos_invoice).then(doc => {
-				cur_frm.doc.grand_total -= flt(doc.grand_total);
-				cur_frm.doc.net_total -= flt(doc.net_total);
-				cur_frm.doc.total_quantity -= flt(doc.total_qty);
-				refresh_payments(doc, cur_frm, 1);
-				refresh_taxes(doc, cur_frm, 1);
-				refresh_fields(cur_frm);
-				set_html_data(cur_frm);
+				frm.doc.grand_total += flt(doc.grand_total);
+				frm.doc.net_total += flt(doc.net_total);
+				frm.doc.total_quantity += flt(doc.total_qty);
+				refresh_payments(doc, frm);
+				refresh_taxes(doc, frm);
+				refresh_fields(frm);
+				set_html_data(frm);
 			});
 		}
 	}
@@ -118,7 +127,7 @@ frappe.ui.form.on('POS Closing Entry', {
 frappe.ui.form.on('POS Closing Entry Detail', {
 	closing_amount: (frm, cdt, cdn) => {
 		const row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount))
+		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount));
 	}
 })
 
@@ -142,28 +151,28 @@ function add_to_pos_transaction(d, frm) {
 	})
 }
 
-function refresh_payments(d, frm, remove) {
+function refresh_payments(d, frm) {
 	d.payments.forEach(p => {
 		const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
 		if (payment) {
-			if (!remove) payment.expected_amount += flt(p.amount);
-			else payment.expected_amount -= flt(p.amount);
+			payment.expected_amount += flt(p.amount);
+			payment.difference = payment.closing_amount - payment.expected_amount;
 		} else {
 			frm.add_child("payment_reconciliation", {
 				mode_of_payment: p.mode_of_payment,
 				opening_amount: 0,
-				expected_amount: p.amount
+				expected_amount: p.amount,
+				closing_amount: 0
 			})
 		}
 	})
 }
 
-function refresh_taxes(d, frm, remove) {
+function refresh_taxes(d, frm) {
 	d.taxes.forEach(t => {
 		const tax = frm.doc.taxes.find(tx => tx.account_head === t.account_head && tx.rate === t.rate);
 		if (tax) {
-			if (!remove) tax.amount += flt(t.tax_amount);
-			else tax.amount -= flt(t.tax_amount);
+			tax.amount += flt(t.tax_amount);
 		} else {
 			frm.add_child("taxes", {
 				account_head: t.account_head,

@@ -724,6 +724,18 @@ frappe.form.link_formatters['Employee'] = function(value, doc) {
 	}
 }
 
+frappe.form.link_formatters['Project'] = function(value, doc) {
+	if (doc && value && doc.project_name && doc.project_name !== value && doc.project === value) {
+		return value + ': ' + doc.project_name;
+	} else if (!value && doc.doctype && doc.project_name) {
+		// format blank value in child table
+		return doc.project;
+	} else {
+		// if value is blank in report view or project name and name are the same, return as is
+		return value;
+	}
+};
+
 // add description on posting time
 $(document).on('app_ready', function() {
 	if(!frappe.datetime.is_timezone_same()) {

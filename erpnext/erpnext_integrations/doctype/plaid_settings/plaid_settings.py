@@ -183,11 +183,11 @@ def new_bank_transaction(transaction):
 	bank_account = frappe.db.get_value("Bank Account", dict(integration_id=transaction["account_id"]))
 
 	if float(transaction["amount"]) >= 0:
-		debit = float(transaction["amount"])
-		credit = 0
-	else:
 		debit = 0
-		credit = abs(float(transaction["amount"]))
+		credit = float(transaction["amount"])
+	else:
+		debit = abs(float(transaction["amount"]))
+		credit = 0
 
 	status = "Pending" if transaction["pending"] == "True" else "Settled"
 
