@@ -19,7 +19,7 @@ def set_can_change_onload(vbo_doc):
 		"vehicle_receipt": can_receive_vehicle(),
 		"vehicle_delivery": can_deliver_vehicle(),
 		"vehicle_transfer": can_transfer_vehicle(),
-		"invoice_recept": can_receive_invoice(),
+		"invoice_receipt": can_receive_invoice(),
 		"invoice_delivery": can_deliver_invoice(),
 		"allocation_assign": can_assign_allocation()
 	}
