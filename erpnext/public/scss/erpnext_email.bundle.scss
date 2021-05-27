@@ -1,14 +1,12 @@
-@import "../../../../frappe/frappe/public/less/variables.less";
-
 .panel-header {
-	background-color: @light-bg;
-	border: 1px solid @border-color;
+	background-color: var(--bg-color);
+	border: 1px solid var(--border-color);
 	border-radius: 3px 3px 0 0;
 }
 
 .panel-body {
-	background-color: #fff;
-	border: 1px solid @border-color;
+	background-color: white;
+	border: 1px solid var(--border-color);
 	border-top: none;
 	border-radius: 0 0 3px 3px;
 	overflow-wrap: break-word;
@@ -22,11 +20,11 @@
 }
 
 .sender-avatar-placeholder {
-	.sender-avatar;
+	@extend .sender-avatar;
 
 	line-height: 24px;
 	text-align: center;
-	color: @border-color;
-	border: 1px solid @border-color;
-	background-color: #fff;
+	color: var(--border-color);
+	border: 1px solid var(--border-color);
+	background-color: white;
 }

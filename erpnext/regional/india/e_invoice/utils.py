@@ -71,13 +71,14 @@ def validate_einvoice_fields(doc):
 
 def raise_document_name_too_long_error():
 	title = _('Document ID Too Long')
-	msg = _('As you have E-Invoicing enabled, to be able to generate IRN for this invoice, ')
-	msg += _('document id {} exceed 16 letters. ').format(bold(_('should not')))
+	msg = _('As you have E-Invoicing enabled, to be able to generate IRN for this invoice')
+	msg += ', '
+	msg += _('document id {} exceed 16 letters.').format(bold(_('should not')))
 	msg += '<br><br>'
-	msg += _('You must {} your {} in order to have document id of {} length 16. ').format(
+	msg += _('You must {} your {} in order to have document id of {} length 16.').format(
 		bold(_('modify')), bold(_('naming series')), bold(_('maximum'))
 	)
-	msg += _('Please account for ammended documents too. ')
+	msg += _('Please account for ammended documents too.')
 	frappe.throw(msg, title=title)
 
 def read_json(name):
@@ -847,6 +848,7 @@ class GSPConnector():
 			res = self.make_request('post', self.generate_ewaybill_url, headers, data)
 			if res.get('success'):
 				self.invoice.ewaybill = res.get('result').get('EwbNo')
+				self.invoice.eway_bill_validity = res.get('result').get('EwbValidTill')
 				self.invoice.eway_bill_cancelled = 0
 				self.invoice.update(args)
 				self.invoice.flags.updater_reference = {
@@ -944,6 +946,7 @@ class GSPConnector():
 
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')
+		self.invoice.eway_bill_validity = res.get('EwbValidTill')
 		self.invoice.ack_no = res.get('AckNo')
 		self.invoice.ack_date = res.get('AckDt')
 		self.invoice.signed_einvoice = dec_signed_invoice
@@ -960,6 +963,7 @@ class GSPConnector():
 			'label': _('IRN Generated')
 		}
 		self.update_invoice()
+
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype

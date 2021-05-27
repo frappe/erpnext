@@ -151,6 +151,7 @@
 		"context": true,
 		"before": true,
 		"beforeEach": true,
-		"onScan": true
+		"onScan": true,
+		"extend_cscript": true
 	}
 }

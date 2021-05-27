@@ -45,8 +45,8 @@ frappe.ui.form.on('Maintenance Schedule', {
 })
 
 // TODO commonify this code
-erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
-	refresh: function() {
+erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frappe.ui.form.Controller {
+	refresh() {
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		var me = this;
@@ -76,21 +76,21 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 				});
 			}, __('Create'));
 		}
-	},
+	}
 
-	start_date: function(doc, cdt, cdn) {
+	start_date(doc, cdt, cdn) {
 		this.set_no_of_visits(doc, cdt, cdn);
-	},
+	}
 
-	end_date: function(doc, cdt, cdn) {
+	end_date(doc, cdt, cdn) {
 		this.set_no_of_visits(doc, cdt, cdn);
-	},
+	}
 
-	periodicity: function(doc, cdt, cdn) {
+	periodicity(doc, cdt, cdn) {
 		this.set_no_of_visits(doc, cdt, cdn);
-	},
+	}
 
-	set_no_of_visits: function(doc, cdt, cdn) {
+	set_no_of_visits(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 
 		if (item.start_date && item.end_date && item.periodicity) {
@@ -112,8 +112,8 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 			var no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
 			frappe.model.set_value(item.doctype, item.name, "no_of_visits", no_of_visits);
 		}
-	},
-});
+	}
+};
 
-$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({frm: cur_frm}));
 
