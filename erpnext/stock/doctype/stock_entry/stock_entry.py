@@ -968,7 +968,9 @@ class StockEntry(StockController):
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.work_order and self.purpose == "Manufacture":
 				self.set_serial_nos(self.work_order)
-				work_order = frappe.get_doc('Work Order', self.work_order)
+
+			if self.purpose in ("Manufacture", "Repack"):
+				work_order = frappe.get_doc('Work Order', self.work_order) if self.work_order else frappe._dict()
 				add_additional_cost(self, work_order)
 
 			# add finished goods item
@@ -1268,7 +1270,7 @@ class StockEntry(StockController):
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 
-			for field in ["idx", "po_detail", "original_item", "description", "item_name"]:
+			for field in ["po_detail", "original_item", "description", "item_name"]:
 				if item_dict[d].get(field):
 					se_child.set(field, item_dict[d].get(field))
 
@@ -1520,22 +1522,29 @@ def get_work_order_details(work_order, company):
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
 	operating_cost_per_unit = 0
 	if work_order:
-		if not bom_no:
-			bom_no = work_order.bom_no
-
 		for d in work_order.get("operations"):
 			if flt(d.completed_qty):
 				operating_cost_per_unit += flt(d.actual_operating_cost) / flt(d.completed_qty)
 			elif work_order.qty:
 				operating_cost_per_unit += flt(d.planned_operating_cost) / flt(work_order.qty)
-
-	# Get operating cost from BOM if not found in work_order.
-	if not operating_cost_per_unit and bom_no:
+	elif bom_no:
 		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
 			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
+
+def get_additional_operating_costs(work_order=None, bom_no=None, use_multi_level_bom=0):
+	from erpnext.manufacturing.doctype.bom.bom import get_additional_operating_cost_per_unit
+
+	additional_costs = []
+
+	if work_order:
+		additional_costs = work_order.get("additional_costs")
+	elif bom_no:
+		additional_costs = get_additional_operating_cost_per_unit(bom_no, use_multi_level_bom)
+
+	return additional_costs
 
 def get_used_alternative_items(purchase_order=None, work_order=None):
 	cond = ""

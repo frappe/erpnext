@@ -397,16 +397,17 @@ frappe.ui.form.on("Work Order", {
 		}
 	},
 
+	skip_transfer: function (frm) {
+		frm.toggle_reqd("wip_warehouse", !frm.doc.skip_transfer);
+	},
+
 	qty: function(frm) {
 		frm.trigger('bom_no');
 	},
 
 	before_submit: function(frm) {
 		frm.toggle_reqd("fg_warehouse", true);
-
-		if (!frm.doc.skip_transfer) {
-			frm.toggle_reqd("wip_warehouse", true);
-		}
+		frm.toggle_reqd("wip_warehouse", !frm.doc.skip_transfer);
 
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
@@ -482,6 +483,11 @@ frappe.ui.form.on("Work Order Operation", {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
+});
+
+frappe.ui.form.on("Work Order Additional Cost", "rate", function(frm) {
+	erpnext.work_order.calculate_cost(frm.doc);
+	erpnext.work_order.calculate_total_cost(frm);
 });
 
 erpnext.work_order = {
@@ -564,7 +570,7 @@ erpnext.work_order = {
 		if (doc.operations){
 			var op = doc.operations;
 			doc.planned_operating_cost = 0.0;
-			for(var i=0;i<op.length;i++) {
+			for(let i=0;i<op.length;i++) {
 				var planned_operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
 				frappe.model.set_value('Work Order Operation', op[i].name,
 					"planned_operating_cost", planned_operating_cost);
@@ -572,11 +578,23 @@ erpnext.work_order = {
 			}
 			refresh_field('planned_operating_cost');
 		}
+
+		doc.additional_operating_cost = 0;
+		var additional_costs = doc.additional_costs || [];
+		for(let i=0; i < additional_costs.length; i++) {
+			var amount = flt(flt(additional_costs[i].rate) * flt(doc.qty), precision('amount', additional_costs[i]));
+
+			frappe.model.set_value(additional_costs[i].doctype, additional_costs[i].name, 'amount', amount);
+
+			doc.additional_operating_cost += amount;
+		}
 	},
 
 	calculate_total_cost: function(frm) {
 		let variable_cost = flt(frm.doc.actual_operating_cost) || flt(frm.doc.planned_operating_cost);
 		frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost));
+
+		frm.set_value("total_cost", frm.doc.total_operating_cost + flt(frm.doc.raw_material_cost));
 	},
 
 	set_default_warehouse: function(frm) {

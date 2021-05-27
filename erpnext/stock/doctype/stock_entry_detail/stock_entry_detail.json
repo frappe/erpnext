@@ -26,7 +26,6 @@
   "image",
   "image_view",
   "quantity_and_rate",
-  "set_basic_rate_manually",
   "qty",
   "uom",
   "retain_sample",
@@ -43,6 +42,7 @@
   "basic_rate",
   "additional_cost",
   "valuation_rate",
+  "set_basic_rate_manually",
   "column_break_36",
   "basic_amount",
   "amount",
@@ -83,9 +83,11 @@
   },
   {
    "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
   },
   {
+   "columns": 1,
    "fieldname": "s_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -100,6 +102,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "t_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -174,6 +177,7 @@
   },
   {
    "bold": 1,
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -184,8 +188,10 @@
   },
   {
    "bold": 1,
+   "columns": 1,
    "fieldname": "basic_rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Basic Rate (as per Stock UOM)",
    "oldfieldname": "incoming_rate",
    "oldfieldtype": "Currency",
@@ -209,8 +215,10 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Amount",
    "oldfieldname": "amount",
    "oldfieldtype": "Currency",
@@ -229,8 +237,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
@@ -588,7 +598,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-10 14:28:50.035782",
+ "modified": "2021-05-28 00:23:05.399189",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

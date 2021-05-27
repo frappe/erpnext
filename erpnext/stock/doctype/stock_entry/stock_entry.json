@@ -63,9 +63,10 @@
   "items",
   "get_stock_and_rate",
   "section_break_19",
-  "total_incoming_value",
-  "column_break_22",
   "total_outgoing_value",
+  "column_break_22",
+  "total_incoming_value",
+  "column_break_61",
   "value_difference",
   "additional_costs_section",
   "additional_costs",
@@ -370,6 +371,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.docstatus == 0",
    "fieldname": "get_stock_and_rate",
    "fieldtype": "Button",
    "label": "Update Rate and Availability",
@@ -683,12 +685,16 @@
   {
    "fieldname": "column_break_28",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_61",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-03-12 15:09:13.110004",
+ "modified": "2021-05-28 02:03:59.087917",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

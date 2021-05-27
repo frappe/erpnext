@@ -330,7 +330,7 @@ erpnext.bom.calculate_op_cost = function(doc) {
 	doc.operating_cost = 0.0;
 	doc.base_operating_cost = 0.0;
 
-	for(var i=0;i<op.length;i++) {
+	for(let i=0;i<op.length;i++) {
 		var operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
 		var base_operating_cost = flt(operating_cost * doc.conversion_rate, 2);
 		frappe.model.set_value('BOM Operation',op[i].name, "operating_cost", operating_cost);
@@ -339,7 +339,32 @@ erpnext.bom.calculate_op_cost = function(doc) {
 		doc.operating_cost += operating_cost;
 		doc.base_operating_cost += base_operating_cost;
 	}
-	refresh_field(['operating_cost', 'base_operating_cost']);
+
+	var additional_costs = doc.additional_costs || [];
+	doc.additional_operating_cost = 0.0;
+	doc.base_additional_operating_cost = 0.0;
+
+	for(let i = 0; i < additional_costs.length; ++i) {
+		var amount = flt(flt(additional_costs[i].rate) * flt(doc.quantity), precision('amount', additional_costs[i]));
+		var base_amount = flt(amount * flt(doc.conversion_rate), precision('base_amount', additional_costs[i]));
+
+		frappe.model.set_value(additional_costs[i].doctype, additional_costs[i].name, 'base_rate',
+			flt(additional_costs[i].rate) * flt(doc.conversion_rate));
+		frappe.model.set_value(additional_costs[i].doctype, additional_costs[i].name, 'amount', amount);
+		frappe.model.set_value(additional_costs[i].doctype, additional_costs[i].name, 'base_amount', base_amount);
+
+		doc.additional_operating_cost += amount;
+		doc.base_additional_operating_cost += base_amount;
+	}
+
+	doc.total_operating_cost = doc.operating_cost + doc.additional_operating_cost;
+	doc.base_total_operating_cost = doc.base_operating_cost + doc.base_additional_operating_cost;
+
+	refresh_field([
+		'operating_cost', 'base_operating_cost',
+		'additional_operating_cost', 'base_additional_operating_cost',
+		'total_operating_cost', 'base_total_operating_cost'
+	]);
 };
 
 // rm : raw material
@@ -463,6 +488,11 @@ frappe.ui.form.on("BOM Item", "item_code", function(frm, cdt, cdn) {
 });
 
 frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
+	erpnext.bom.calculate_op_cost(frm.doc);
+	erpnext.bom.calculate_total(frm.doc);
+});
+
+frappe.ui.form.on("BOM Additional Cost", "rate", function(frm) {
 	erpnext.bom.calculate_op_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
 });

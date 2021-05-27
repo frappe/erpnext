@@ -52,6 +52,7 @@ class WorkOrder(Document):
 		self.validate_sales_order()
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
+		self.calculate_raw_material_cost()
 		self.calculate_operating_cost()
 		self.calculate_total_cost()
 		self.validate_qty()
@@ -132,14 +133,22 @@ class WorkOrder(Document):
 			self.planned_operating_cost += flt(d.planned_operating_cost)
 			self.actual_operating_cost += flt(d.actual_operating_cost)
 
+		self.additional_operating_cost = 0.0
+		for d in self.get('additional_costs'):
+			d.amount = flt(flt(d.rate) * flt(self.qty), d.precision('amount'))
+			self.additional_operating_cost += d.amount
+
 		variable_cost = self.actual_operating_cost if self.actual_operating_cost \
 			else self.planned_operating_cost
 		self.total_operating_cost = flt(self.additional_operating_cost) + flt(variable_cost)
 
-	def calculate_total_cost(self):
-		bom_cost, bom_qty = frappe.db.get_value("BOM", self.bom_no, ["base_total_cost", "quantity"])
-		self.total_cost = bom_cost * flt(self.qty) / bom_qty if bom_qty else 0
+	def calculate_raw_material_cost(self):
+		bom_cost, bom_qty = frappe.db.get_value("BOM", self.bom_no, ["base_raw_material_cost", "quantity"])
+		self.raw_material_cost = bom_cost * flt(self.qty) / bom_qty if bom_qty else 0
 		self.total_raw_material_qty = sum([d.required_qty for d in self.required_items])
+
+	def calculate_total_cost(self):
+		self.total_cost = self.raw_material_cost + self.total_operating_cost
 		
 	def validate_work_order_against_so(self):
 		# already ordered qty
@@ -343,6 +352,8 @@ class WorkOrder(Document):
 
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
+		from erpnext.manufacturing.doctype.bom.bom import get_additional_operating_cost_per_unit
+
 		self.set('operations', [])
 
 		if not self.bom_no \
@@ -377,10 +388,17 @@ class WorkOrder(Document):
 						'operation': operation
 					})
 
+		# Additional costs
+		additional_costs = get_additional_operating_cost_per_unit(self.bom_no, self.use_multi_level_bom, bom_list=bom_list)
+		if additional_costs:
+			self.set('additional_costs', [])
+			for d in additional_costs:
+				self.append('additional_costs', d)
+
 		self.calculate_time()
 
 	def calculate_time(self):
-		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
+		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity", cache=1)
 
 		for d in self.get("operations"):
 			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * math.ceil(flt(self.qty) / flt(d.batch_size))
@@ -472,6 +490,7 @@ class WorkOrder(Document):
 
 	def get_items_and_operations_from_bom(self):
 		self.set_required_items()
+		self.calculate_raw_material_cost()
 		self.set_work_order_operations()
 		self.calculate_total_cost()
 

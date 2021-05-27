@@ -39,17 +39,23 @@
   "routing",
   "operations_section",
   "operations",
+  "operating_cost",
+  "base_operating_cost",
   "materials_section",
   "items",
   "total_raw_material_qty",
+  "additional_cost_section",
+  "additional_costs",
+  "additional_operating_cost",
+  "base_additional_operating_cost",
   "scrap_section",
   "scrap_items",
   "costing",
   "raw_material_cost",
   "base_raw_material_cost",
   "cb1",
-  "operating_cost",
-  "base_operating_cost",
+  "total_operating_cost",
+  "base_total_operating_cost",
   "column_break_44",
   "scrap_material_cost",
   "base_scrap_material_cost",
@@ -296,7 +302,6 @@
    "fieldtype": "Currency",
    "label": "Operating Cost",
    "options": "currency",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -304,7 +309,6 @@
    "fieldtype": "Currency",
    "label": "Raw Material Cost",
    "options": "currency",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -312,7 +316,6 @@
    "fieldtype": "Currency",
    "label": "Scrap Material Cost",
    "options": "currency",
-   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -326,7 +329,6 @@
    "force_currency_symbol": 1,
    "label": "Operating Cost (Company Currency)",
    "options": "Company:company:default_currency",
-   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -336,7 +338,6 @@
    "force_currency_symbol": 1,
    "label": "Raw Material Cost (Company Currency)",
    "options": "Company:company:default_currency",
-   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -346,7 +347,6 @@
    "label": "Scrap Material Cost(Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -355,7 +355,6 @@
    "in_list_view": 1,
    "label": "Total Cost",
    "options": "currency",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -368,7 +367,6 @@
    "force_currency_symbol": 1,
    "label": "Total Cost (Company Currency)",
    "options": "Company:company:default_currency",
-   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -548,13 +546,56 @@
    "fieldtype": "Float",
    "label": "Total Raw Material Qty",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "additional_costs",
+   "fieldname": "additional_cost_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Operating Costs"
+  },
+  {
+   "fieldname": "additional_costs",
+   "fieldtype": "Table",
+   "label": "Operating Cost Per Unit",
+   "options": "BOM Additional Cost"
+  },
+  {
+   "fieldname": "additional_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Additional Operating Cost",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_additional_operating_cost",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Additional Operating Cost (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Total Operating Cost",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_operating_cost",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total Operating Cost (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-14 00:44:06.930156",
+ "modified": "2021-05-28 00:34:12.938280",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

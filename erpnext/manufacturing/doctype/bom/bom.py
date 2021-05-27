@@ -511,6 +511,19 @@ class BOM(WebsiteGenerator):
 			self.operating_cost += flt(d.operating_cost)
 			self.base_operating_cost += flt(d.base_operating_cost)
 
+		self.additional_operating_cost = 0
+		self.base_additional_operating_cost = 0
+		for d in self.get('additional_costs'):
+			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
+			d.amount = flt(flt(d.rate) * flt(self.quantity), d.precision('amount'))
+			d.base_amount = flt(d.amount * flt(self.conversion_rate), d.precision('base_amount'))
+
+			self.additional_operating_cost += d.amount
+			self.base_additional_operating_cost += d.base_amount
+
+		self.total_operating_cost = self.operating_cost + self.additional_operating_cost
+		self.base_total_operating_cost = self.base_operating_cost + self.base_additional_operating_cost
+
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
@@ -863,15 +876,17 @@ def get_boms_in_bottom_up_order(bom_no=None):
 def add_additional_cost(stock_entry, work_order):
 	# Add non stock items cost in the additional cost
 	stock_entry.additional_costs = []
-	expenses_included_in_valuation = frappe.get_cached_value("Company", work_order.company,
-		"expenses_included_in_valuation")
+	company = work_order.company or stock_entry.company
+	expenses_included_in_valuation = frappe.get_cached_value("Company", company, "expenses_included_in_valuation")
 
 	add_non_stock_items_cost(stock_entry, work_order, expenses_included_in_valuation)
 	add_operations_cost(stock_entry, work_order, expenses_included_in_valuation)
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account):
-	bom = frappe.get_doc('BOM', work_order.bom_no)
-	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
+	bom_no = work_order.bom_no or stock_entry.bom_no
+	use_multi_level_bom = work_order.get('use_multi_level_bom') or stock_entry.get('use_multi_level_bom')
+	bom = frappe.get_doc('BOM', bom_no)
+	table = 'exploded_items' if use_multi_level_bom else 'items'
 
 	items = {}
 	for d in bom.get(table):
@@ -892,9 +907,9 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 		})
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
-	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit
-	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
+	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit, get_additional_operating_costs
 
+	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
 	if operating_cost_per_unit:
 		stock_entry.append('additional_costs', {
 			"expense_account": expense_account,
@@ -902,16 +917,33 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 			"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
 		})
 
-	if work_order and work_order.additional_operating_cost and work_order.qty:
-		additional_operating_cost_per_unit = \
-			flt(work_order.additional_operating_cost) / flt(work_order.qty)
+	additional_costs = get_additional_operating_costs(work_order, stock_entry.bom_no, stock_entry.use_multi_level_bom)
+	for d in additional_costs:
+		stock_entry.append('additional_costs', {
+			"expense_account": d.expense_account or expense_account,
+			"description": d.description or _("Additional Operating Cost"),
+			"amount": flt(d.rate) * flt(stock_entry.fg_completed_qty)
+		})
 
-		if additional_operating_cost_per_unit:
-			stock_entry.append('additional_costs', {
-				"expense_account": expense_account,
-				"description": "Additional Operating Cost",
-				"amount": additional_operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
-			})
+def get_additional_operating_cost_per_unit(bom_no, use_multi_level_bom=0, bom_list=None):
+	if not bom_list:
+		if use_multi_level_bom:
+			bom_list = frappe.get_doc("BOM", bom_no).traverse_tree()
+		else:
+			bom_list = [bom_no]
+
+	additional_costs = frappe.db.sql("""
+		select description, expense_account, sum(base_amount) as total_amount
+		from `tabBOM Additional Cost`
+		where parent in %s
+		group by description, expense_account
+	""", [bom_list], as_dict=1)
+
+	bom_qty = flt(frappe.db.get_value("BOM", bom_no, "quantity", cache=1))
+	for d in additional_costs:
+		d.rate = d.total_amount / bom_qty if bom_qty else 0
+
+	return additional_costs
 
 @frappe.whitelist()
 def get_bom_diff(bom1, bom2):

@@ -52,26 +52,31 @@
   "scrap_warehouse",
   "required_items_section",
   "required_items",
-  "section_break_47",
-  "total_cost",
-  "column_break_49",
   "total_raw_material_qty",
+  "operations_section",
+  "transfer_material_against",
+  "operations",
+  "section_break_22",
+  "planned_operating_cost",
+  "column_break_66",
+  "actual_operating_cost",
+  "additional_costs_section",
+  "additional_costs",
+  "additional_operating_cost",
+  "costing_section",
+  "raw_material_cost",
+  "column_break_24",
+  "total_operating_cost",
+  "column_break_49",
+  "total_cost",
   "time",
   "planned_start_date",
   "actual_start_date",
   "column_break_13",
   "planned_end_date",
   "actual_end_date",
-  "expected_delivery_date",
-  "operations_section",
-  "transfer_material_against",
-  "operations",
-  "section_break_22",
-  "planned_operating_cost",
-  "actual_operating_cost",
-  "additional_operating_cost",
-  "column_break_24",
-  "total_operating_cost"
+  "column_break_69",
+  "expected_delivery_date"
  ],
  "fields": [
   {
@@ -237,6 +242,7 @@
    "options": "fa fa-building"
   },
   {
+   "depends_on": "eval:!doc.skip_transfer",
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "Work-in-Progress Warehouse",
@@ -299,8 +305,7 @@
    "fieldname": "planned_end_date",
    "fieldtype": "Datetime",
    "label": "Planned End Date",
-   "no_copy": 1,
-   "read_only": 1
+   "no_copy": 1
   },
   {
    "fieldname": "actual_end_date",
@@ -361,7 +366,8 @@
    "fieldtype": "Currency",
    "label": "Additional Operating Cost",
    "no_copy": 1,
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_24",
@@ -521,10 +527,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_47",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "column_break_49",
    "fieldtype": "Column Break"
   },
@@ -533,13 +535,46 @@
    "fieldtype": "Float",
    "label": "Total Raw Material Qty",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "additional_costs",
+   "fieldname": "additional_costs_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Operating Costs"
+  },
+  {
+   "fieldname": "additional_costs",
+   "fieldtype": "Table",
+   "label": "Operating Cost Per Unit",
+   "options": "Work Order Additional Cost"
+  },
+  {
+   "fieldname": "column_break_66",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_69",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "costing_section",
+   "fieldtype": "Section Break",
+   "label": "Costing"
+  },
+  {
+   "fieldname": "raw_material_cost",
+   "fieldtype": "Currency",
+   "label": "Raw Material Cost",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-10 14:37:35.119815",
+ "modified": "2021-05-27 23:10:59.625746",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
