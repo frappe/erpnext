@@ -11,6 +11,9 @@ from frappe import _
 
 
 def setup_taxes_and_charges(company_name: str, country: str):
+	if not frappe.db.exists('Company', company_name):
+		frappe.throw(_('Company {} does not exist yet. Taxes setup aborted.').format(company_name))
+
 	file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'country_wise_tax.json')
 	with open(file_path, 'r') as json_file:
 		tax_data = json.load(json_file)
