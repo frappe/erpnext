@@ -59,7 +59,7 @@ class CreditNoteCXP(Document):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
 			supplier.credit += self.total
-			supplier.reamaining_balance += self.total
+			supplier.remaining_balance += self.total
 			supplier.save()
 	
 	def validate_status(self):

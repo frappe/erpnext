@@ -266,6 +266,13 @@ class SalesInvoice(SellingController):
 					doc.payment_amount += self.total_taxes_and_charges
 					doc.save()
 
+	def update_accounts_status(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		if customer:
+			customer.debit += self.grand_total
+			customer.remaining_balance += self.grand_total
+			customer.save()
+			
 	def discount_product(self):
 		total_discount = 0
 		for d in self.get('items'):
