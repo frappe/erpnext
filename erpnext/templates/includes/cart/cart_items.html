@@ -1,42 +1,86 @@
-{% for d in doc.items %}
-<tr data-name="{{ d.name }}">
-	<td>
-		<div class="item-title mb-1">
-			{{ d.item_name }}
-		</div>
-		<div class="item-subtitle">
-			{{ d.item_code }}
-		</div>
-		{%- set variant_of = frappe.db.get_value('Item', d.item_code, 'variant_of') %}
-		{% if variant_of %}
-		<span class="item-subtitle">
-			{{ _('Variant of') }} <a href="{{frappe.db.get_value('Item', variant_of, 'route')}}">{{ variant_of }}</a>
-		</span>
-		{% endif %}
-		<div class="mt-2 notes">
-			<textarea data-item-code="{{d.item_code}}" class="form-control" rows="2" placeholder="{{ _('Add notes') }}">{{d.additional_notes or ''}}</textarea>
-		</div>
-	</td>
-	<td class="text-right">
-		<div class="input-group number-spinner">
-			<span class="input-group-prepend d-none d-sm-inline-block">
-				<button class="btn cart-btn" data-dir="dwn">–</button>
-			</span>
-			<input class="form-control text-center cart-qty" value="{{ d.get_formatted('qty') }}" data-item-code="{{ d.item_code }}">
-			<span class="input-group-append d-none d-sm-inline-block">
-				<button class="btn cart-btn" data-dir="up">+</button>
+{% macro item_subtotal(item) %}
+	<div>
+		{{ item.get_formatted('amount') }}
+	</div>
+
+	{% if item.is_free_item %}
+		<div class="text-success mt-4">
+			<span style="
+				padding: 4px 8px;
+				border-radius: 4px;
+				border: 1px dashed">
+				{{ _('FREE') }}
 			</span>
 		</div>
-	</td>
-	{% if cart_settings.enable_checkout %}
-	<td class="text-right item-subtotal">
-		<div>
-			{{ d.get_formatted('amount') }}
-		</div>
+	{% else %}
 		<span class="item-rate">
-			{{ _('Rate:') }} {{ d.get_formatted('rate') }}
+			{{ _('Rate:') }} {{ item.get_formatted('rate') }}
 		</span>
-	</td>
 	{% endif %}
-</tr>
+{% endmacro %}
+
+{% for d in doc.items %}
+	<tr data-name="{{ d.name }}">
+		<td>
+			<div class="item-title mb-1 mr-3">
+				{{ d.item_name }}
+			</div>
+			<div class="item-subtitle mr-2">
+				{{ d.item_code }}
+			</div>
+			{%- set variant_of = frappe.db.get_value('Item', d.item_code, 'variant_of') %}
+			{% if variant_of %}
+			<span class="item-subtitle mr-2">
+				{{ _('Variant of') }} <a href="{{frappe.db.get_value('Item', variant_of, 'route')}}">{{ variant_of }}</a>
+			</span>
+			{% endif %}
+			<div class="mt-2 notes">
+				<textarea data-item-code="{{d.item_code}}" class="form-control" rows="2" placeholder="{{ _('Add notes') }}">
+					{{d.additional_notes or ''}}
+				</textarea>
+			</div>
+		</td>
+
+		<!-- Qty column -->
+		<td class="text-right">
+			<div class="input-group number-spinner mt-1 mb-4">
+				<span class="input-group-prepend d-sm-inline-block">
+					<button class="btn cart-btn" data-dir="dwn">–</button>
+				</span>
+				<input class="form-control text-center cart-qty" value="{{ d.get_formatted('qty') }}" data-item-code="{{ d.item_code }}">
+				<span class="input-group-append d-sm-inline-block">
+					<button class="btn cart-btn" data-dir="up">+</button>
+				</span>
+			</div>
+
+			<!-- Shown on mobile view, else hidden -->
+			{% if cart_settings.enable_checkout %}
+				<div class="text-right sm-item-subtotal">
+					{{ item_subtotal(d) }}
+				</div>
+			{% endif %}
+		</td>
+
+		<!-- Subtotal column -->
+		{% if cart_settings.enable_checkout %}
+			<td class="text-right item-subtotal column-sm-view">
+				{{ item_subtotal(d) }}
+			</td>
+		{% endif %}
+
+		<!-- Show close button irrespective except on free items -->
+		<td class="text-right">
+			{% if not d.is_free_item %}
+				<div class="ml-1 remove-cart-item column-sm-view" data-item-code="{{ d.item_code }}">
+					<span>
+						<svg class="icon sm remove-cart-item-logo"
+							width="18" height="18" viewBox="0 0 18 18"
+							xmlns="http://www.w3.org/2000/svg" id="icon-close">
+							<path fill-rule="evenodd" clip-rule="evenodd" d="M4.146 11.217a.5.5 0 1 0 .708.708l3.182-3.182 3.181 3.182a.5.5 0 1 0 .708-.708l-3.182-3.18 3.182-3.182a.5.5 0 1 0-.708-.708l-3.18 3.181-3.183-3.182a.5.5 0 0 0-.708.708l3.182 3.182-3.182 3.181z" stroke-width="0"></path>
+						</svg>
+					</span>
+				</div>
+			{% endif %}
+		</td>
+	</tr>
 {% endfor %}

@@ -18,6 +18,7 @@ $.extend(shopping_cart, {
 		shopping_cart.bind_place_order();
 		shopping_cart.bind_request_quotation();
 		shopping_cart.bind_change_qty();
+		shopping_cart.bind_remove_cart_item();
 		shopping_cart.bind_change_notes();
 		shopping_cart.bind_coupon_code();
 	},
@@ -151,6 +152,18 @@ $.extend(shopping_cart, {
 				additional_notes: notes
 			});
 		});
+	},
+
+	bind_remove_cart_item: function() {
+		$(".cart-items").on("click", ".remove-cart-item", (e) => {
+			const $remove_cart_item_btn = $(e.currentTarget);
+			var item_code = $remove_cart_item_btn.data("item-code");
+
+			shopping_cart.shopping_cart_update({
+				item_code: item_code,
+				qty: 0
+			});
+		})
 	},
 
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {
