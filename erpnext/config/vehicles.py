@@ -130,6 +130,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Vehicle Booking Summary",
+					"doctype": "Vehicle Booking Order",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Vehicle Booking Analytics",
 					"doctype": "Vehicle Booking Order",
 					"dependencies": ["Vehicle Booking Order"],
