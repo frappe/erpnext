@@ -231,11 +231,12 @@
  "is_submittable": 1,
  "links": [
   {
-   "link_doctype": "Maintenance Visit Purpose",
-   "link_fieldname": "prevdoc_docname"
+   "group": "Visits",
+   "link_doctype": "Maintenance Visit",
+   "link_fieldname": "maintenance_schedule"
   }
  ],
- "modified": "2021-04-21 11:27:05.744109",
+ "modified": "2021-05-27 16:05:10.746465",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
