@@ -189,7 +189,10 @@ class VehicleStockReport(object):
 			if d.vehicle_booking_order and d.vehicle_booking_order in self.booking_by_booking_data:
 				booking_data = self.booking_by_booking_data[d.vehicle_booking_order]
 				d.customer_name = booking_data.get('customer_name')
+				d.lessee_name = booking_data.get('lessee_name')
 				d.contact_number = booking_data.get('contact_mobile') or booking_data.get('contact_phone')
+
+				d.delivery_period = booking_data.get('delivery_period')
 
 				d.bill_no = booking_data.get('bill_no')
 				d.invoice_status = booking_data.get('invoice_status')
@@ -411,9 +414,10 @@ class VehicleStockReport(object):
 
 		data = frappe.db.sql("""
 			select name, vehicle, vehicle_receipt,
-				customer, customer_name,
+				customer, customer_name, lessee_name,
 				contact_mobile, contact_phone,
-				bill_no, invoice_status
+				bill_no, invoice_status,
+				delivery_period
 			from `tabVehicle Booking Order`
 			where docstatus = 1 and vehicle in %s
 		""", [vehicle_names], as_dict=1)
@@ -465,7 +469,9 @@ class VehicleStockReport(object):
 			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 60},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
+			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
+			{"label": _("Lessee/User Name"), "fieldname": "lessee_name", "fieldtype": "Data", "width": 130},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Delivered To"), "fieldname": "delivered_to", "fieldtype": "Data", "width": 110},
 			{"label": _("Transporter"), "fieldname": "transporter_name", "fieldtype": "Data", "width": 110},
