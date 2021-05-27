@@ -124,6 +124,7 @@ class AccountsController(TransactionBase):
 
 			if self.is_return:
 				self.validate_qty()
+				self.validate_rate()
 			else:
 				self.validate_deferred_start_and_end_date()
 

@@ -118,6 +118,7 @@ class StatusUpdater(Document):
 	def update_prevdoc_status(self):
 		self.update_qty()
 		self.validate_qty()
+		self.validate_rate()
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
@@ -151,6 +152,17 @@ class StatusUpdater(Document):
 
 			if update:
 				self.db_set('status', self.status, update_modified = update_modified)
+
+	def validate_rate(self):
+		for args in self.status_updater:
+			if "target_ref_field" not in args:
+				# if target_ref_field is not specified, the programmer does not need to validate rate
+				continue
+
+			# get unique transactions to update
+			for d in self.get_all_children():
+				if hasattr(d, 'rate') and d.rate < 0:
+					frappe.throw(_("For item {0}, rate must be a positive number.").format(d.item_code))
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
