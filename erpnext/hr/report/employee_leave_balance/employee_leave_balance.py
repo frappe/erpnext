@@ -10,7 +10,7 @@ from itertools import groupby
 
 def execute(filters=None):
 	if filters.to_date <= filters.from_date:
-		frappe.throw(_('"From date" can not be greater than or equal to "To date"'))
+		frappe.throw(_('"From Date" can not be greater than or equal to "To Date"'))
 
 	columns = get_columns()
 	data = get_data(filters)
@@ -66,8 +66,7 @@ def get_columns():
 	return columns
 
 def get_data(filters):
-	leave_types = frappe.db.sql_list("SELECT `name` FROM `tabLeave Type` ORDER BY `name` ASC")
-
+	leave_types = frappe.db.get_list('Leave Type', pluck='name', order_by='name')
 	conditions = get_conditions(filters)
 
 	user = frappe.session.user
@@ -115,8 +114,6 @@ def get_data(filters):
 
 				# not be shown on the basis of days left it create in user mind for carry_forward leave
 				row.closing_balance = (new_allocation + opening - (row.leaves_expired + leaves_taken))
-
-
 				row.indent = 1
 				data.append(row)
 
@@ -132,21 +129,34 @@ def get_conditions(filters):
 	if filters.get('company'):
 		conditions['company'] = filters.get('company')
 
+	if filters.get('department'):
+		conditions['department'] = filters.get('department')
+
 	return conditions
 
 def get_department_leave_approver_map(department=None):
-	conditions=''
-	if department:
-		conditions="and (department_name = '%(department)s' or parent_department = '%(department)s')"%{'department': department}
 
 	# get current department and all its child
-	department_list = frappe.db.sql_list(""" SELECT name FROM `tabDepartment` WHERE disabled=0 {0}""".format(conditions)) #nosec
-
+	department_list = frappe.get_list('Department',
+						filters={
+							'disabled': 0
+						},
+						or_filters={
+							'name': department,
+							'parent_department': department
+						},
+						fields=['name'],
+						pluck='name'
+					)
 	# retrieve approvers list from current department and from its subsequent child departments
-	approver_list = frappe.get_all('Department Approver', filters={
-		'parentfield': 'leave_approvers',
-		'parent': ('in', department_list)
-	}, fields=['parent', 'approver'], as_list=1)
+	approver_list = frappe.get_all('Department Approver',
+						filters={
+							'parentfield': 'leave_approvers',
+							'parent': ('in', department_list)
+						},
+						fields=['parent', 'approver'],
+						as_list=1
+					)
 
 	approvers = {}
 
