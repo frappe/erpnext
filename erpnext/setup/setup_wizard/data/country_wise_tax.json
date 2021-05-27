@@ -485,33 +485,32 @@
 			"SKR04 mit Kontonummern": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "Umsatzsteuer",
+						"tax_category": "Umsatzsteuer",
 						"taxes": [
 							{
 								"account_head": {
 									"account_name": "Umsatzsteuer 19%",
 									"account_number": "3806",
 									"tax_rate": 19.00
-								}
-							}
-						]
-					},
-					{
-						"title": "Umsatzsteuer 7%",
-						"taxes": [
+								},
+								"rate": 0.00
+							},
 							{
 								"account_head": {
 									"account_name": "Umsatzsteuer 7%",
 									"account_number": "3801",
 									"tax_rate": 7.00
-								}
+								},
+								"rate": 0.00
 							}
 						]
 					}
 				],
 				"purchase_tax_templates": [
 					{
-						"title": "Abziehbare Vorsteuer 19%",
+						"title": "Vorsteuer",
+						"tax_category": "Vorsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -519,25 +518,23 @@
 									"account_number": "1406",
 									"root_type": "Asset",
 									"tax_rate": 19.00
-								}
-							}
-						]
-					},
-					{
-						"title": "Abziehbare Vorsteuer 7%",
-						"taxes": [
+								},
+								"rate": 0.00
+							},
 							{
 								"account_head": {
 									"account_name": "Abziehbare Vorsteuer 7%",
 									"account_number": "1401",
 									"root_type": "Asset",
 									"tax_rate": 7.00
-								}
+								},
+								"rate": 0.00
 							}
 						]
 					},
 					{
 						"title": "Innergemeinschaftlicher Erwerb 19% Umsatzsteuer und 19% Vorsteuer",
+						"tax_category": "Innergemeinschaftlicher Erwerb 19%",
 						"taxes": [
 							{
 								"account_head": {
@@ -564,33 +561,32 @@
 			"SKR03 mit Kontonummern": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "Umsatzsteuer",
+						"tax_category": "Umsatzsteuer",
 						"taxes": [
 							{
 								"account_head": {
 									"account_name": "Umsatzsteuer 19%",
 									"account_number": "1776",
 									"tax_rate": 19.00
-								}
-							}
-						]
-					},
-					{
-						"title": "Umsatzsteuer 7%",
-						"taxes": [
+								},
+								"rate": 0.00
+							},
 							{
 								"account_head": {
 									"account_name": "Umsatzsteuer 7%",
 									"account_number": "1771",
 									"tax_rate": 7.00
-								}
+								},
+								"rate": 0.00
 							}
 						]
 					}
 				],
 				"purchase_tax_templates": [
 					{
-						"title": "Abziehbare Vorsteuer 19%",
+						"title": "Vorsteuer",
+						"tax_category": "Vorsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -598,20 +594,17 @@
 									"account_number": "1576",
 									"root_type": "Asset",
 									"tax_rate": 19.00
-								}
-							}
-						]
-					},
-					{
-						"title": "Abziehbare Vorsteuer 7%",
-						"taxes": [
+								},
+								"rate": 0.00
+							},
 							{
 								"account_head": {
 									"account_name": "Abziehbare Vorsteuer 7%",
 									"account_number": "1571",
 									"root_type": "Asset",
 									"tax_rate": 7.00
-								}
+								},
+								"rate": 0.00
 							}
 						]
 					}
@@ -620,33 +613,32 @@
 			"Standard with Numbers": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "Umsatzsteuer",
+						"tax_category": "Umsatzsteuer",
 						"taxes": [
 							{
 								"account_head": {
 									"account_name": "Umsatzsteuer 19%",
 									"account_number": "2301",
 									"tax_rate": 19.00
-								}
-							}
-						]
-					},
-					{
-						"title": "Umsatzsteuer 7%",
-						"taxes": [
+								},
+								"rate": 0.00
+							},
 							{
 								"account_head": {
 									"account_name": "Umsatzsteuer 7%",
 									"account_number": "2302",
 									"tax_rate": 7.00
-								}
+								},
+								"rate": 0.00
 							}
 						]
 					}
 				],
 				"purchase_tax_templates": [
 					{
-						"title": "Abziehbare Vorsteuer 19%",
+						"title": "Vorsteuer",
+						"tax_category": "Vorsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -654,20 +646,107 @@
 									"account_number": "1501",
 									"root_type": "Asset",
 									"tax_rate": 19.00
-								}
-							}
-						]
-					},
-					{
-						"title": "Abziehbare Vorsteuer 7%",
-						"taxes": [
+								},
+								"rate": 0.00
+							},
 							{
 								"account_head": {
 									"account_name": "Abziehbare Vorsteuer 7%",
 									"account_number": "1502",
 									"root_type": "Asset",
 									"tax_rate": 7.00
-								}
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "Umsatzsteuer 19%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19%",
+									"account_number": "2301",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7%",
+									"account_number": "2302",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Umsatzsteuer 7%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19%",
+									"account_number": "2301",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7%",
+									"account_number": "2302",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer 19%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_number": "1501",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_number": "1502",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer 7%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_number": "1501",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_number": "1502",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
 							}
 						]
 					}
@@ -676,13 +755,67 @@
 			"*": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "Umsatzsteuer",
+						"tax_category": "Umsatzsteuer",
 						"taxes": [
 							{
 								"account_head": {
 									"account_name": "Umsatzsteuer 19%",
 									"tax_rate": 19.00
-								}
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7%",
+									"tax_rate": 7.00
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Vorsteuer 19%",
+						"tax_category": "Vorsteuer",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19%",
+									"tax_rate": 19.00,
+									"root_type": "Asset"
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7%",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "Umsatzsteuer 19%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19%",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7%",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
 							}
 						]
 					},
@@ -690,36 +823,60 @@
 						"title": "Umsatzsteuer 7%",
 						"taxes": [
 							{
-								"account_head": {
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19%",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
 									"account_name": "Umsatzsteuer 7%",
 									"tax_rate": 7.00
-								}
-							}
-						]
-					}
-				],
-				"purchase_tax_templates": [
-					{
-						"title": "Abziehbare Vorsteuer 19%",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 19%",
-									"tax_rate": 19.00,
-									"root_type": "Asset"
-								}
+								},
+								"tax_rate": 7.00
 							}
 						]
 					},
 					{
-						"title": "Abziehbare Vorsteuer 7%",
+						"title": "Vorsteuer 19%",
 						"taxes": [
 							{
-								"account_head": {
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19%",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
 									"account_name": "Abziehbare Vorsteuer 7%",
 									"root_type": "Asset",
 									"tax_rate": 7.00
-								}
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer 7%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19%",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 7%",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
 							}
 						]
 					}
