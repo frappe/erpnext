@@ -22,7 +22,7 @@ def validate_company(company):
 		'allow_account_creation_against_child_company'])
 
 	if parent_company and (not allow_account_creation_against_child_company):
-		msg = _("{} is a child company. ").format(frappe.bold(company))
+		msg = _("{} is a child company.").format(frappe.bold(company)) + " "
 		msg += _("Please import accounts against parent company or enable {} in company master.").format(
 			frappe.bold('Allow Account Creation Against Child Company'))
 		frappe.throw(msg, title=_('Wrong Company'))
@@ -56,7 +56,7 @@ def get_file(file_name):
 	extension = extension.lstrip(".")
 
 	if extension not in ('csv',  'xlsx', 'xls'):
-		frappe.throw("Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload")
+		frappe.throw(_("Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload"))
 
 	return  file_doc, extension
 

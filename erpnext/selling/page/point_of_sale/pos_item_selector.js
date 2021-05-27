@@ -81,13 +81,26 @@ erpnext.PointOfSale.ItemSelector = class {
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 
+		let qty_to_display = actual_qty;
+
+		if (Math.round(qty_to_display) > 999) {
+			qty_to_display = Math.round(qty_to_display)/1000;
+			qty_to_display = qty_to_display.toFixed(1) + 'K';
+		}
+
 		function get_item_image_html() {
 			if (!me.hide_images && item_image) {
-				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
+						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
 						</div>`;
 			} else {
-				return `<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
+						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
 			}
 		}
 
@@ -95,13 +108,12 @@ erpnext.PointOfSale.ItemSelector = class {
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
-				title="Avaiable Qty: ${actual_qty}">
+				title="${item.item_name}">
 
 				${get_item_image_html()}
 
 				<div class="item-detail">
 					<div class="item-name">
-						<span class="indicator ${indicator_color}"></span>
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
 					<div class="item-rate">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>

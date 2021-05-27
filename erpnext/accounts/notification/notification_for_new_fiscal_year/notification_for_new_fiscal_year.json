@@ -1,5 +1,6 @@
 {
  "attach_print": 0,
+ "channel": "Email",
  "condition": "doc.auto_created",
  "creation": "2018-04-25 14:19:05.440361",
  "days_in_advance": 0,

@@ -116,22 +116,19 @@ def validate_filters(filters):
 		frappe.throw(_("Can not filter based on Payment Method, if grouped by Payment Method"))
 
 def get_conditions(filters):
-	conditions = "company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s".format(
-		company=filters.get("company"),
-		from_date=filters.get("from_date"),
-		to_date=filters.get("to_date"))
+	conditions = "company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s"
 
 	if filters.get("pos_profile"):
-		conditions += " AND pos_profile = %(pos_profile)s".format(pos_profile=filters.get("pos_profile"))
+		conditions += " AND pos_profile = %(pos_profile)s"
 	
 	if filters.get("owner"):
-		conditions += " AND owner = %(owner)s".format(owner=filters.get("owner"))
+		conditions += " AND owner = %(owner)s"
 	
 	if filters.get("customer"):
-		conditions += " AND customer = %(customer)s".format(customer=filters.get("customer"))
+		conditions += " AND customer = %(customer)s"
 	
 	if filters.get("is_return"):
-		conditions += " AND is_return = %(is_return)s".format(is_return=filters.get("is_return"))
+		conditions += " AND is_return = %(is_return)s"
 	
 	if filters.get("mode_of_payment"):
 		conditions += """

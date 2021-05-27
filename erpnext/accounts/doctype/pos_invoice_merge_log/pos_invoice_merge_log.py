@@ -13,8 +13,7 @@ from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
 import json
-
-from six import iteritems
+import six
 
 class POSInvoiceMergeLog(Document):
 	def validate(self):
@@ -43,8 +42,9 @@ class POSInvoiceMergeLog(Document):
 				if return_against_status != "Consolidated":
 					# if return entry is not getting merged in the current pos closing and if it is not consolidated
 					bold_unconsolidated = frappe.bold("not Consolidated")
-					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}. ")
+					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}.")
 								.format(d.idx, bold_return_against, bold_pos_invoice, bold_unconsolidated))
+					msg += " "
 					msg += _("Original invoice should be consolidated before or along with the return invoice.")
 					msg += "<br><br>"
 					msg += _("You can add original invoice {} manually to proceed.").format(bold_return_against)
@@ -57,11 +57,11 @@ class POSInvoiceMergeLog(Document):
 		sales = [d for d in pos_invoice_docs if d.get('is_return') == 0]
 
 		sales_invoice, credit_note = "", ""
-		if sales:
-			sales_invoice = self.process_merging_into_sales_invoice(sales)
-
 		if returns:
 			credit_note = self.process_merging_into_credit_note(returns)
+
+		if sales:
+			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
 		self.save() # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 
@@ -239,7 +239,7 @@ def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
 	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
-	if len(invoices) >= 1 and closing_entry:
+	if len(invoices) >= 10 and closing_entry:
 		closing_entry.set_status(update=True, status='Queued')
 		enqueue_job(create_merge_logs, invoice_by_customer=invoice_by_customer, closing_entry=closing_entry)
 	else:
@@ -252,36 +252,68 @@ def unconsolidate_pos_invoices(closing_entry):
 		pluck='name'
 	)
 
-	if len(merge_logs) >= 1:
+	if len(merge_logs) >= 10:
 		closing_entry.set_status(update=True, status='Queued')
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
 		cancel_merge_logs(merge_logs, closing_entry)
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
-	for customer, invoices in iteritems(invoice_by_customer):
-		merge_log = frappe.new_doc('POS Invoice Merge Log')
-		merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
-		merge_log.customer = customer
-		merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
+	try:
+		for customer, invoices in six.iteritems(invoice_by_customer):
+			merge_log = frappe.new_doc('POS Invoice Merge Log')
+			merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
+			merge_log.customer = customer
+			merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
 
-		merge_log.set('pos_invoices', invoices)
-		merge_log.save(ignore_permissions=True)
-		merge_log.submit()
+			merge_log.set('pos_invoices', invoices)
+			merge_log.save(ignore_permissions=True)
+			merge_log.submit()
 
-	if closing_entry:
-		closing_entry.set_status(update=True, status='Submitted')
-		closing_entry.update_opening_entry()
+		if closing_entry:
+			closing_entry.set_status(update=True, status='Submitted')
+			closing_entry.db_set('error_message', '')
+			closing_entry.update_opening_entry()
+
+	except Exception as e:
+		frappe.db.rollback()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
+		error_message = safe_load_json(message_log)
+
+		if closing_entry:
+			closing_entry.set_status(update=True, status='Failed')
+			closing_entry.db_set('error_message', error_message)
+		raise
+
+	finally:
+		frappe.db.commit()
+		frappe.publish_realtime('closing_process_complete', {'user': frappe.session.user})
 
 def cancel_merge_logs(merge_logs, closing_entry=None):
-	for log in merge_logs:
-		merge_log = frappe.get_doc('POS Invoice Merge Log', log)
-		merge_log.flags.ignore_permissions = True
-		merge_log.cancel()
+	try:
+		for log in merge_logs:
+			merge_log = frappe.get_doc('POS Invoice Merge Log', log)
+			merge_log.flags.ignore_permissions = True
+			merge_log.cancel()
 
-	if closing_entry:
-		closing_entry.set_status(update=True, status='Cancelled')
-		closing_entry.update_opening_entry(for_cancel=True)
+		if closing_entry:
+			closing_entry.set_status(update=True, status='Cancelled')
+			closing_entry.db_set('error_message', '')
+			closing_entry.update_opening_entry(for_cancel=True)
+
+	except Exception as e:
+		frappe.db.rollback()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
+		error_message = safe_load_json(message_log)
+
+		if closing_entry:
+			closing_entry.set_status(update=True, status='Submitted')
+			closing_entry.db_set('error_message', error_message)
+		raise
+
+	finally:
+		frappe.db.commit()
+		frappe.publish_realtime('closing_process_complete', {'user': frappe.session.user})
 
 def enqueue_job(job, **kwargs):
 	check_scheduler_status()
@@ -315,3 +347,11 @@ def job_already_enqueued(job_name):
 	enqueued_jobs = [d.get("job_name") for d in get_info()]
 	if job_name in enqueued_jobs:
 		return True
+
+def safe_load_json(message):
+	try:
+		json_message = json.loads(message).get('message')
+	except Exception:
+		json_message = message
+
+	return json_message
