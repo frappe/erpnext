@@ -242,7 +242,7 @@ erpnext.PointOfSale.Controller = class {
 				get_frm: () => this.frm,
 
 				cart_item_clicked: (item_code, batch_no, uom, rate) => {
-					const item_row = this.get_item_from_frm(item_code, batch_no, uom, rate)
+					const item_row = this.get_item_from_frm(item_code, batch_no, uom, rate);
 					this.item_details.toggle_item_details_section(item_row);
 				},
 
