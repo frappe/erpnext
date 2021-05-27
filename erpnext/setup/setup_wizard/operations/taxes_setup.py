@@ -102,6 +102,9 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 	if frappe.db.exists(doctype, {'title': template.get('title'), 'company': company_name}):
 		return
 
+	if template.get('tax_category'):
+		ensure_tax_category_exists(template.get('tax_category'))
+
 	for tax_row in template.get('taxes'):
 		account_data = tax_row.get('account_head')
 		tax_row_defaults = {
@@ -233,3 +236,10 @@ def get_or_create_tax_group(company_name, root_type):
 	tax_group_name = tax_group_account.name
 
 	return tax_group_name
+
+
+def ensure_tax_category_exists(name):
+	if not frappe.db.exists('Tax Category', name):
+		doc = frappe.new_doc('Tax Category')
+		doc.title = name
+		doc.save()
