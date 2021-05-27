@@ -57,16 +57,18 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		test = make_maintenance_visit(source_name = ms.name, item_name = "_Test Item", s_id = s_id)
 		visit = frappe.new_doc('Maintenance Visit')
 		visit = test
+		visit.maintenance_schedule = ms.name
+		visit.maintenance_schedule_detail = s_id
 		visit.completion_status = "Partially Completed"
-
 		visit.set('purposes', [{
 			'item_code': i.item_code,
 			'description': "test",
 			'work_done': "test",
+			'service_person': "Sales Team",
 			'prevdoc_docname' :ms.name,
 			'prevdoc_doctype': ms.doctype,
-			'prevdoc_detail_docname': s_id
 		}])
+		visit.save()
 		visit.submit()
 		ms = frappe.get_doc('Maintenance Schedule', ms.name)
 

@@ -34,7 +34,7 @@ class MaintenanceSchedule(TransactionBase):
 				count = count + 1
 				child.sales_person = d.sales_person
 				child.completion_status = "Pending"
-				child.item_ref = d.name
+				child.item_reference = d.name
 
 	@frappe.whitelist()
 	def validate_end_date_visits(self):
@@ -314,11 +314,12 @@ def update_serial_nos(s_id):
 def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=None):
 	from frappe.model.mapper import get_mapped_doc
 
-	def update_status(source, target, parent):
+	def update_status_and_detail(source, target, parent):
 		target.maintenance_type = "Scheduled"
+		target.maintenance_schedule = source.name
+		target.maintenance_schedule_detail = s_id
 		
-	def update_sid(source, target, parent):
-		target.prevdoc_detail_docname = s_id
+	def update_sales(source, target, parent):
 		sales_person = frappe.db.get_value('Maintenance Schedule Detail', s_id, 'sales_person')
 		target.service_person = sales_person
 		target.serial_no = ''
@@ -332,16 +333,12 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 			"validation": {
 				"docstatus": ["=", 1]
 			},
-			"postprocess": update_status
+			"postprocess": update_status_and_detail
 		},
 		"Maintenance Schedule Item": {
 			"doctype": "Maintenance Visit Purpose",
-			"field_map": {
-				"parent": "prevdoc_docname",
-				"parenttype": "prevdoc_doctype",
-			},
 			"condition": lambda doc: doc.item_name == item_name,
-			"postprocess": update_sid
+			"postprocess": update_sales
 		}
 	}, target_doc)
 
