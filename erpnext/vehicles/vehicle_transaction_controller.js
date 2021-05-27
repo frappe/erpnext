@@ -36,12 +36,6 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 			});
 		}
 
-		if (this.frm.fields_dict.receiver_contact) {
-			this.frm.set_query('receiver_contact', () => {
-				return erpnext.queries.contact_query(me.frm.doc);
-			});
-		}
-
 		if (this.frm.fields_dict.customer_address) {
 			this.frm.set_query('customer_address', () => {
 				return erpnext.queries.address_query(me.frm.doc);
