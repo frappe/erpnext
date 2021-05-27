@@ -27,7 +27,8 @@ class VehicleBookingSummaryReport(object):
 
 		self.count_fields = [
 			'qty_booked', 'qty_allocated', 'qty_priority',
-			'qty_vehicle_delivered', 'qty_vehicle_in_stock', 'qty_vehicle_received',
+			'qty_vehicle_received', 'qty_vehicle_delivered', 'qty_vehicle_in_stock',
+			'qty_invoice_received', 'qty_invoice_delivered', 'qty_invoice_in_hand',
 		]
 
 		self.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
@@ -60,7 +61,7 @@ class VehicleBookingSummaryReport(object):
 		self.booking_data = frappe.db.sql("""
 			select m.name as vehicle_booking_order, m.item_code,
 				m.supplier, m.delivery_period, alloc.allocation_period, alloc.is_additional, m.priority,
-				m.vehicle_delivered_date, m.vehicle_received_date,
+				m.vehicle_delivered_date, m.vehicle_received_date, m.invoice_delivered_date, m.invoice_received_date,
 				m.invoice_total, m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
 				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
 				item.variant_of, item.brand, item.item_group,
@@ -91,15 +92,25 @@ class VehicleBookingSummaryReport(object):
 			bucket = self.get_bucket(d)
 
 			bucket.qty_booked += 1
+
 			if cint(d.get('priority')):
 				bucket.qty_priority += 1
+
 			if d.get('vehicle_delivered_date'):
 				bucket.qty_vehicle_delivered += 1
+
 			if d.get('vehicle_received_date'):
 				bucket.qty_vehicle_received += 1
-
 				if not d.get('vehicle_delivered_date'):
 					bucket.qty_vehicle_in_stock += 1
+
+			if d.get('invoice_delivered_date'):
+				bucket.qty_invoice_delivered += 1
+
+			if d.get('invoice_received_date'):
+				bucket.qty_invoice_received += 1
+				if not d.get('invoice_delivered_date'):
+					bucket.qty_invoice_in_hand += 1
 
 			for f in self.sum_fields:
 				bucket[f] += flt(d.get(f))
@@ -315,8 +326,11 @@ class VehicleBookingSummaryReport(object):
 			{"label": _("Booked"), "fieldname": "qty_booked", "fieldtype": "Int", "width": 65},
 			{"label": _("Priority"), "fieldname": "qty_priority", "fieldtype": "Int", "width": 65},
 			{"label": _("V. Received"), "fieldname": "qty_vehicle_received", "fieldtype": "Int", "width": 85},
-			{"label": _("V. Delivered"), "fieldname": "qty_vehicle_delivered", "fieldtype": "Int", "width": 95},
+			{"label": _("V. Delivered"), "fieldname": "qty_vehicle_delivered", "fieldtype": "Int", "width": 90},
 			{"label": _("V. In Stock"), "fieldname": "qty_vehicle_in_stock", "fieldtype": "Int", "width": 85},
+			{"label": _("Inv. Received"), "fieldname": "qty_invoice_received", "fieldtype": "Int", "width": 95},
+			{"label": _("Inv. Delivered"), "fieldname": "qty_invoice_delivered", "fieldtype": "Int", "width": 99},
+			{"label": _("Inv. In Hand"), "fieldname": "qty_invoice_in_hand", "fieldtype": "Int", "width": 85},
 			{"label": _("Invoice Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 120},
 			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 120},
 			{"label": _("Payment Deposited"), "fieldname": "supplier_advance", "fieldtype": "Currency", "width": 120},

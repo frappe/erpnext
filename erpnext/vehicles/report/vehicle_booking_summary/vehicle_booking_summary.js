@@ -107,7 +107,7 @@ frappe.query_reports["Vehicle Booking Summary"] = {
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Allocation Period", "Group by Delivery Period", "Group by Variant", "Group by Model",
 				"Group by Item Group", "Group by Brand"],
-			default: "Ungrouped"
+			default: "Group by Delivery Period"
 		},
 		{
 			fieldname: "group_by_2",
