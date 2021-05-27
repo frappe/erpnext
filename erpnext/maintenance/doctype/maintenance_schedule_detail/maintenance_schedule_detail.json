@@ -18,7 +18,7 @@
   "completion_status",
   "section_break_10",
   "serial_no",
-  "item_ref"
+  "item_reference"
  ],
  "fields": [
   {
@@ -98,14 +98,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "item_ref",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Item Reference",
-   "options": "Maintenance Schedule Item",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
@@ -120,12 +112,20 @@
   {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "item_reference",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Reference",
+   "options": "Maintenance Schedule Item",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-21 11:07:29.524071",
+ "modified": "2021-05-27 16:07:25.905015",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",
