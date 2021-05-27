@@ -1,0 +1,48 @@
+{
+ "creation": "2021-05-25 15:14:09.090961",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_doctype",
+  "reference_name",
+  "net_total"
+ ],
+ "fields": [
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Name",
+   "options": "reference_doctype",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "reference_name.grand_total",
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Total",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-05-25 15:15:39.935190",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Withholding Reference",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

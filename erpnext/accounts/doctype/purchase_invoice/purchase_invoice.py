@@ -176,7 +176,7 @@ class PurchaseInvoice(BuyingController):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
 			supplier.debit += self.grand_total
-			supplier.reamaining_balance += self.grand_total
+			supplier.remaining_balance += self.grand_total
 			supplier.save()
 	
 	def create_remarks(self):
