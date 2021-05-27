@@ -1005,8 +1005,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Check GLE for Purchase Invoice
 		# Zero net effect on final TDS Payable on invoice
 		expected_gle = [
+			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
 			['_Test Account Excise Duty - _TC', 0, 3000],
-			['Cost of Goods Sold - _TC', 30000, 0],
 			['Creditors - _TC', 0, 27000],
 			['TDS Payable - _TC', 3000, 3000],
 		]
