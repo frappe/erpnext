@@ -99,9 +99,6 @@ class SalesInvoice(SellingController):
 		self.set_income_account_for_fixed_assets()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
-		if self.docstatus == 1:
-			self.update_accounts_status()
-
 		if cint(self.is_pos):
 			self.validate_pos()
 
@@ -232,6 +229,15 @@ class SalesInvoice(SellingController):
 		self.outstanding_amount = self.grand_total - self.total_advance
 		self.in_words = money_in_words(self.grand_total)
 
+		# if self.status == 'Draft' or self.docstatus == 1:
+		self.db_set('isv15', taxed15, update_modified=False)
+		self.db_set('isv18', taxed18, update_modified=False)
+		self.db_set('total_exonerated', exonerated, update_modified=False)
+		self.db_set('taxed_sales15', taxed_sales15, update_modified=False)
+		self.db_set('total_exempt', exempt, update_modified=False)
+		self.db_set('taxed_sales18', taxed_sales18, update_modified=False)
+		self.db_set('total_taxes_and_charges', taxed15 + taxed18, update_modified=False)
+
 	# def validate_camps(self):
 	# 	if not self.type_document:
 	# 		frappe.throw(_("Type Document is required."))
@@ -266,7 +272,7 @@ class SalesInvoice(SellingController):
 			customer.debit += self.grand_total
 			customer.remaining_balance += self.grand_total
 			customer.save()
-	
+			
 	def discount_product(self):
 		total_discount = 0
 		for d in self.get('items'):
@@ -413,6 +419,11 @@ class SalesInvoice(SellingController):
 
 	def before_naming(self):
 		if self.docstatus == 0:
+			self.assign_cai()
+			self.create_prefix_for_days()
+			self.create_daily_summary_series()
+
+		if self.status == 'Draft' and self.cai == None:
 			self.assign_cai()
 			self.create_prefix_for_days()
 			self.create_daily_summary_series()
