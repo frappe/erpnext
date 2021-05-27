@@ -1,5 +1,3 @@
-@import "frappe/public/scss/desk/variables";
-
 .erpnext-footer {
 	margin: 11px auto;
 	text-align: center;
@@ -141,7 +139,7 @@ body[data-route="pos"] {
 	}
 
 	.pos-payment-row {
-		border-bottom:1px solid $border-color;
+		border-bottom:1px solid var(--border-color);
 		margin: 2px 0px 5px 0px;
 		height: 60px;
 		margin-top: 0px;
@@ -154,7 +152,7 @@ body[data-route="pos"] {
 	}
 
 	.pos-keyboard-key, .delete-btn {
-		border: 1px solid $border-color;
+		border: 1px solid var(--border-color);
 		height:85px;
 		width:85px;
 		margin:10px 10px;
@@ -165,7 +163,7 @@ body[data-route="pos"] {
 	}
 
 	.numeric-keypad {
-		border: 1px solid $border-color;
+		border: 1px solid var(--border-color);
 		height:69px;
 		width:69px;
 		font-size:20px;
@@ -192,13 +190,13 @@ body[data-route="pos"] {
 		background-color: #fff;
 		margin-left:-4px;
 
-		@media (max-width: map-get($grid-breakpoints, "xl")) {
+		@media (max-width: var(--xl-width)) {
 			height: 45px;
 			width: 45px;
 			font-size: 14px;
 		}
 
-		@media (max-width: map-get($grid-breakpoints, "lg")) {
+		@media (max-width: var(--lg-width)) {
 			height: 40px;
 			width: 40px;
 		}
@@ -209,16 +207,16 @@ body[data-route="pos"] {
 
 		& > .row > button {
 			border: none;
-			border-right: 1px solid $border-color;
-			border-bottom: 1px solid $border-color;
+			border-right: 1px solid var(--border-color);
+			border-bottom: 1px solid var(--border-color);
 
 			&:first-child {
-				border-left: 1px solid $border-color;
+				border-left: 1px solid var(--border-color);
 			}
 		}
 
 		& > .row:first-child > button {
-			border-top: 1px solid $border-color;
+			border-top: 1px solid var(--border-color);
 		}
 	}
 
@@ -236,13 +234,13 @@ body[data-route="pos"] {
 	}
 
 	.list-row-head.pos-invoice-list {
-		border-top: 1px solid $border-color;
+		border-top: 1px solid var(--border-color);
 	}
 
 	.modal-dialog {
 		width: 750px;
 
-		@media (max-width: map-get($grid-breakpoints, 'md')) {
+		@media (max-width: var(--md-width)) {
 			width: auto;
 
 			.modal-content {
@@ -251,7 +249,7 @@ body[data-route="pos"] {
 		}
 	}
 
-	@media (max-width: map-get($grid-breakpoints, 'md')) {
+	@media (max-width: var(--md-width)) {
 		.amount-row h3 {
 			font-size: 15px;
 		}
@@ -291,7 +289,7 @@ body[data-route="pos"] {
 		padding: 9px 15px;
 		font-size: 12px;
 		margin: 0px;
-		border-bottom: 1px solid $border-color;
+		border-bottom: 1px solid var(--border-color);
 
 		.cell {
 			display: table-cell;
@@ -313,7 +311,7 @@ body[data-route="pos"] {
 
 	.pos-bill-header {
 		background-color: #f5f7fa;
-		border: 1px solid $border-color;
+		border: 1px solid var(--border-color);
 		padding: 13px 15px;
 	}
 
@@ -322,8 +320,8 @@ body[data-route="pos"] {
 	}
 
 	.totals-area {
-		border-right: 1px solid $border-color;
-		border-left: 1px solid $border-color;
+		border-right: 1px solid var(--border-color);
+		border-left: 1px solid var(--border-color);
 		margin-bottom: 15px;
 	}
 
@@ -334,10 +332,10 @@ body[data-route="pos"] {
 	.item-cart-items {
 		height: calc(100vh - 526px);
 		overflow: auto;
-		border: 1px solid $border-color;
+		border: 1px solid var(--border-color);
 		border-top: none;
 
-		@media (max-width: map-get($grid-breakpoints, 'md')) {
+		@media (max-width: var(--md-width)) {
 			height: 30vh;
 		}
 	}
@@ -359,12 +357,12 @@ body[data-route="pos"] {
 	}
 
 	.item-list {
-		border: 1px solid $border-color;
+		border: 1px solid var(--border-color);
 		border-top: none;
 		max-height: calc(100vh - 190px);
 		overflow: auto;
 
-		@media (max-width: map-get($grid-breakpoints, 'md')) {
+		@media (max-width: var(--md-width)) {
 			max-height: initial;
 		}
 
@@ -402,7 +400,7 @@ body[data-route="pos"] {
 		&> .pos-list-row {
 			border: none;
 
-			@media (max-width: map-get($grid-breakpoints, 'xl')) {
+			@media (max-width: var(--xl-width)) {
 				padding: 5px 15px;
 			}
 		}
@@ -428,7 +426,7 @@ body[data-route="pos"] {
 		cursor: pointer;
 	}
 
-	@media (max-width: map-get($grid-breakpoints, 'md')) {
+	@media (max-width: var(--md-width)) {
 		.page-actions {
 			max-width: 110px;
 		}
