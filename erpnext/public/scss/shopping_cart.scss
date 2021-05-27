@@ -184,6 +184,12 @@ body.product-page {
 	}
 }
 
+.list-image {
+	overflow: hidden;
+	max-height: 200px;
+	background-color: white;
+}
+
 .product-container {
 	@include card($padding: var(--padding-md));
 	min-height: 70vh;
@@ -415,7 +421,10 @@ body.product-page {
 	}
 }
 
-
+.total-discount {
+	font-size: var(--text-base);
+	color: var(--primary-color);
+}
 
 #page-cart {
 	.shopping-cart-header {
@@ -436,6 +445,10 @@ body.product-page {
 		}
 
 		.cart-table {
+			tr {
+				margin-bottom: 1rem;
+			}
+
 			th, tr, td {
 				border-color: var(--border-color);
 				border-width: 1px;
@@ -470,6 +483,16 @@ body.product-page {
 					font-weight: 500;
 				}
 
+				.sm-item-subtotal {
+					font-size: var(--text-base);
+					font-weight: 500;
+					display: none;
+
+					@include media-breakpoint-between(xs, md) {
+						display: unset !important;
+					}
+				}
+
 				.item-rate {
 					font-size: var(--text-md);
 					color: var(--text-muted);
@@ -483,8 +506,42 @@ body.product-page {
 			.cart-tax-items {
 				.item-grand-total {
 					font-size: 16px;
-					font-weight: 600;
+					font-weight: 700;
 					color: var(--text-color);
+				}
+			}
+
+			.column-sm-view {
+				@include media-breakpoint-between(xs, md) {
+					display: none !important;
+				}
+			}
+
+			.item-column {
+				width: 50%;
+				@include media-breakpoint-between(xs, md) {
+					width: 70%;
+				}
+			}
+
+			.remove-cart-item {
+				border-radius: 50%;
+				border: 1px solid var(--gray-100);
+				width: 22px;
+				height: 22px;
+				background-color: var(--gray-200);
+				float: right;
+			}
+
+			.remove-cart-item-logo {
+				margin-bottom: 6px;
+				margin-left: 1px;
+			}
+
+			.totals {
+				padding-right: 4rem;
+				@include media-breakpoint-between(xs, md) {
+					padding-right: 1rem;
 				}
 			}
 		}
@@ -497,12 +554,16 @@ body.product-page {
 
 		.number-spinner {
 			width: 75%;
+			min-width: 105px;
 			.cart-btn {
 				border: none;
-				background: var(--gray-100);
+				background: var(--primary-color);
+				color: white;
 				box-shadow: none;
+				width: 24px;
 				height: 28px;
 				align-items: center;
+				justify-content: center;
 				display: flex;
 			}
 
@@ -514,7 +575,7 @@ body.product-page {
 
 		.place-order-container {
 			.btn-place-order {
-				width: 62%;
+				float: right;
 			}
 		}
 	}
@@ -650,12 +711,12 @@ body.product-page {
 }
 
 .not-added {
-	color: var(--blue-500);
-	background-color: white;
+	color: var(--primary-color);
+	background-color: transparent;
 	border: 1px solid var(--blue-500);
 
 	&:hover {
-		background-color: var(--blue-500);
+		background-color: var(--primary-color);
 		color: white;
 	}
 }
@@ -792,4 +853,13 @@ body.product-page {
 }
 .placeholder {
 	font-size: 72px;
+}
+
+.modal-backdrop {
+	position: fixed;
+	top: 0;
+	right: 0;
+	left: 0;
+	background-color: var(--gray-100);
+	height: 100%;
 }

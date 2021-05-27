@@ -39,7 +39,7 @@ erpnext.ProductList = class {
 
 		if (image) {
 			return `
-				<div class="col-2 border text-center rounded product-image" style="overflow: hidden; max-height: 200px;">
+				<div class="col-2 border text-center rounded list-image">
 					<a class="product-link product-list-link" href="/${ item.route || '#' }">
 						<img itemprop="image" class="website-image h-100 w-100" alt="${ title }"
 							src="${ image }">
