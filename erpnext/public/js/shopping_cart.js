@@ -80,6 +80,7 @@ $.extend(shopping_cart, {
 			}
 			window.location.href = "/login";
 		} else {
+			shopping_cart.freeze();
 			return frappe.call({
 				type: "POST",
 				method: "erpnext.e_commerce.shopping_cart.cart.update_cart",
@@ -91,6 +92,7 @@ $.extend(shopping_cart, {
 				},
 				btn: opts.btn,
 				callback: function(r) {
+					shopping_cart.unfreeze();
 					shopping_cart.set_cart_count();
 					if(opts.callback)
 						opts.callback(r);
@@ -135,7 +137,6 @@ $.extend(shopping_cart, {
 	},
 
 	shopping_cart_update: function({item_code, qty, cart_dropdown, additional_notes}) {
-		frappe.freeze();
 		shopping_cart.update_cart({
 			item_code,
 			qty,
@@ -143,7 +144,6 @@ $.extend(shopping_cart, {
 			with_items: 1,
 			btn: this,
 			callback: function(r) {
-				frappe.unfreeze();
 				if(!r.exc) {
 					$(".cart-items").html(r.message.items);
 					$(".cart-tax-items").html(r.message.taxes);
@@ -196,6 +196,29 @@ $.extend(shopping_cart, {
 			});
 
 		});
-	}
+	},
 
+	freeze() {
+		if (window.location.pathname !== "/cart") return
+
+		if (!$('#freeze').length) {
+			let freeze = $('<div id="freeze" class="modal-backdrop fade"></div>')
+				.appendTo("body");
+
+			setTimeout(function() {
+				freeze.addClass("show");
+			}, 1);
+		} else {
+			$("#freeze").addClass("show");
+		}
+	},
+
+	unfreeze() {
+		if ($('#freeze').length) {
+			let freeze = $('#freeze').removeClass("show");
+			setTimeout(function() {
+				freeze.remove();
+			}, 1);
+		}
+	}
 });

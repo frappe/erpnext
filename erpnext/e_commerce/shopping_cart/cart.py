@@ -89,8 +89,14 @@ def place_order():
 
 	if not cint(cart_settings.allow_items_not_in_stock):
 		for item in sales_order.get("items"):
-			item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
-				item.item_code, ["website_warehouse", "is_stock_item"])
+			item.warehouse = frappe.db.get_value(
+				"Website Item",
+				{
+					"item_code": item.item_code
+				},
+				"website_warehouse"
+			)
+			is_stock_item = frappe.db.get_value("Item", item.item_code, "is_stock_item")
 
 			if is_stock_item:
 				item_stock = get_web_item_qty_in_stock(item.item_code, "website_warehouse")

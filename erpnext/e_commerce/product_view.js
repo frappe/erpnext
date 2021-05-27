@@ -79,7 +79,7 @@ erpnext.ProductView =  class {
 		let me = this;
 		this.prepare_product_area_wrapper("grid");
 
-		frappe.require('assets/js/e-commerce.min.js', function() {
+		frappe.require('/assets/js/e-commerce.min.js', function() {
 			new erpnext.ProductGrid({
 				items: items,
 				products_section: $("#products-grid-area"),
@@ -93,7 +93,7 @@ erpnext.ProductView =  class {
 		let me = this;
 		this.prepare_product_area_wrapper("list");
 
-		frappe.require('assets/js/e-commerce.min.js', function() {
+		frappe.require('/assets/js/e-commerce.min.js', function() {
 			new erpnext.ProductList({
 				items: items,
 				products_section: $("#products-list-area"),
@@ -304,10 +304,10 @@ erpnext.ProductView =  class {
 			}
 
 			let route_params = frappe.utils.get_query_params();
-			const query_string = get_query_string({
-				start: if_key_exists(route_params.start) || 0,
-				field_filters: JSON.stringify(if_key_exists(this.field_filters)),
-				attribute_filters: JSON.stringify(if_key_exists(this.attribute_filters)),
+			const query_string = me.get_query_string({
+				start: me.if_key_exists(route_params.start) || 0,
+				field_filters: JSON.stringify(me.if_key_exists(this.field_filters)),
+				attribute_filters: JSON.stringify(me.if_key_exists(this.attribute_filters)),
 			});
 			window.history.pushState('filters', '', `${location.pathname}?` + query_string);
 
@@ -380,26 +380,26 @@ erpnext.ProductView =  class {
 			$("#product-listing").prepend(sub_group_html);
 		}
 	}
-};
 
-function get_query_string(object) {
-	const url = new URLSearchParams();
-	for (let key in object) {
-		const value = object[key];
-		if (value) {
-			url.append(key, value);
+	get_query_string(object) {
+		const url = new URLSearchParams();
+		for (let key in object) {
+			const value = object[key];
+			if (value) {
+				url.append(key, value);
+			}
 		}
+		return url.toString();
 	}
-	return url.toString();
-}
 
-function if_key_exists(obj) {
-	let exists = false;
-	for (let key in obj) {
-		if (obj.hasOwnProperty(key) && obj[key]) {
-			exists = true;
-			break;
+	if_key_exists(obj) {
+		let exists = false;
+		for (let key in obj) {
+			if (obj.hasOwnProperty(key) && obj[key]) {
+				exists = true;
+				break;
+			}
 		}
+		return exists ? obj : undefined;
 	}
-	return exists ? obj : undefined;
 }

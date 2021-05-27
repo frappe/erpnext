@@ -21,7 +21,7 @@
 {% if doc.items %}
 <div class="cart-container">
 	<div class="row m-0">
-		<div class="col-md-8 frappe-card p-5">
+		<div class="col-md-8 frappe-card p-5 mb-4">
 			<div>
 				<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
 				<div class="cart-items-header">
@@ -30,11 +30,12 @@
 				<table class="table mt-3 cart-table">
 					<thead>
 						<tr>
-							<th width="60%">{{ _('Item') }}</th>
+							<th class="item-column">{{ _('Item') }}</th>
 							<th width="20%">{{ _('Quantity') }}</th>
 							{% if cart_settings.enable_checkout %}
-							<th width="20%" class="text-right">{{ _('Subtotal') }}</th>
+							<th width="20" class="text-right column-sm-view">{{ _('Subtotal') }}</th>
 							{% endif %}
+							<th width="10%" class="column-sm-view"></th>
 						</tr>
 					</thead>
 					<tbody class="cart-items">
@@ -47,31 +48,32 @@
 					{% endif %}
 				</table>
 			</div>
-			<div class="row">
-				<div class="col-4">
+
+			<div class="row mt-2">
+				<div class="col-3">
 					{% if cart_settings.enable_checkout %}
-					<a class="btn btn-outline-primary" href="/orders">
-						{{ _('See past orders') }}
-					</a>
+						<a class="btn btn-outline-primary" href="/orders">
+							{{ _('Past Orders') }}
+						</a>
 					{% else %}
-					<a class="btn btn-outline-primary" href="/quotations">
-						{{ _('See past quotations') }}
-					</a>
+						<a class="btn btn-outline-primary" href="/quotations">
+							{{ _('See past quotations') }}
+						</a>
 					{% endif %}
 				</div>
-				<div class="col-8">
+				<div class="col-9">
 					{% if doc.items %}
 					<div class="place-order-container">
 						<a class="btn btn-primary-light mr-2" href="/all-products">
-							{{ _("Continue Shopping") }}
+							{{ _('Back to Shop') }}
 						</a>
 						{% if cart_settings.enable_checkout %}
 							<button class="btn btn-primary btn-place-order" type="button">
-								{{ _("Place Order") }}
+								{{ _('Place Order') }}
 							</button>
 						{% else %}
 							<button class="btn btn-primary btn-request-for-quotation" type="button">
-								{{ _("Request for Quotation") }}
+								{{ _('Request for Quotation') }}
 							</button>
 						{% endif %}
 					</div>
