@@ -492,7 +492,7 @@ class StockEntry(StockController):
 			# get basic rate
 			if not d.bom_no:
 				if d.s_warehouse or force:
-					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate), self.precision("basic_rate", d))
+					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
 
@@ -504,8 +504,7 @@ class StockEntry(StockController):
 			if d.bom_no:
 				if not flt(d.basic_rate) and not d.allow_zero_valuation_rate and \
 					getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
-					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate),
-						self.precision("basic_rate", d))
+					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
 					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
@@ -575,8 +574,7 @@ class StockEntry(StockController):
 		for d in self.get("items"):
 			if d.transfer_qty:
 				d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
-				d.valuation_rate = flt(flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty)),
-					d.precision("valuation_rate"))
+				d.valuation_rate = d.amount / flt(d.transfer_qty)
 
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0

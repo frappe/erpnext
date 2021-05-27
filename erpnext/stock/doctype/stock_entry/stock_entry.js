@@ -485,8 +485,7 @@ frappe.ui.form.on('Stock Entry', {
 				precision("amount", item));
 
 			if (flt(item.transfer_qty)) {
-				item.valuation_rate = flt(flt(item.basic_rate) + (flt(item.additional_cost) / flt(item.transfer_qty)),
-					precision("valuation_rate", item));
+				item.valuation_rate = item.amount / flt(item.transfer_qty);
 			}
 		}
 
