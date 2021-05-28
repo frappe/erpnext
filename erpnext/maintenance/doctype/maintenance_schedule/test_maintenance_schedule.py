@@ -65,8 +65,6 @@ class TestMaintenanceSchedule(unittest.TestCase):
 			'description': "test",
 			'work_done': "test",
 			'service_person': "Sales Team",
-			'prevdoc_docname' :ms.name,
-			'prevdoc_doctype': ms.doctype,
 		}])
 		visit.save()
 		visit.submit()
