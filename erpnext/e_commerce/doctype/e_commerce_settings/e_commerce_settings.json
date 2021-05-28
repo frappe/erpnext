@@ -44,7 +44,13 @@
   "enable_attribute_filters",
   "filter_attributes",
   "shop_by_category_section",
-  "slideshow"
+  "slideshow",
+  "item_search_settings_section",
+  "redisearch_warning",
+  "search_index_fields",
+  "show_categories_in_search_autocomplete",
+  "show_brand_line",
+  "is_redisearch_loaded"
  ],
  "fields": [
   {
@@ -300,12 +306,53 @@
    "fieldname": "enable_reviews",
    "fieldtype": "Check",
    "label": "Enable Reviews and Ratings"
+  },
+  {
+   "fieldname": "search_index_fields",
+   "fieldtype": "Small Text",
+   "label": "Search Index Fields",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "item_search_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Search Settings"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_categories_in_search_autocomplete",
+   "fieldtype": "Check",
+   "label": "Show Categories in Search Autocomplete",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
+  },
+  {
+   "default": "0",
+   "description": "e.g. \"iPhone 12 by Apple\"",
+   "fieldname": "show_brand_line",
+   "fieldtype": "Check",
+   "label": "Show Brand Line",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_redisearch_loaded",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Redisearch Loaded"
+  },
+  {
+   "depends_on": "eval:!doc.is_redisearch_loaded",
+   "fieldname": "redisearch_warning",
+   "fieldtype": "HTML",
+   "label": "Redisearch Warning",
+   "options": "<p class=\"alert alert-warning\">Redisearch module not loaded. If you want to use advanced product search features, refer documentation <a class=\"alert-link\" href=\"https://frappeframework.com/docs/user/en/installation\" target=\"_blank\">here</a>.</p>"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-23 17:15:01.956630",
+ "modified": "2021-05-28 07:09:32.639710",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
