@@ -15,6 +15,8 @@ class CreditNoteCXP(Document):
 		self.calculate_total()
 		self.validate_status()
 		self.set_status()
+		if self.docstatus == 1:
+			self.update_accounts_status()
 		
 	def on_load(self):
 		self.validate_status()

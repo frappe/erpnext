@@ -144,6 +144,8 @@ class SalesInvoice(SellingController):
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.exonerated_value()
+		if self.docstatus == 1:
+			self.update_accounts_status()
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
