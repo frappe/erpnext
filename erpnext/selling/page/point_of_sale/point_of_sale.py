@@ -15,7 +15,6 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 	data = dict()
 	result = []
 
-	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 	warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
 
 	if not frappe.db.exists('Item Group', item_group):
@@ -96,10 +95,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			if allow_negative_stock:
-				item_stock_qty = frappe.db.sql("""select ifnull(sum(actual_qty), 0) from `tabBin` where item_code = %s""", item_code)[0][0]
-			else:
-				item_stock_qty = get_stock_availability(item_code, warehouse)
+			item_stock_qty = get_stock_availability(item_code, warehouse)
 
 			row = {}
 			row.update(item)
