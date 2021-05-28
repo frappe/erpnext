@@ -9,6 +9,7 @@ from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_w
 # For SEARCH -------
 from redisearch import AutoCompleter, Client, Query
 from erpnext.e_commerce.website_item_indexing import (
+	is_search_module_loaded,
 	WEBSITE_ITEM_INDEX, 
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
 	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
@@ -24,8 +25,15 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 def get_product_list(search=None, start=0, limit=12):
-	# limit = 12 because we show 12 items in the grid view
+	data = get_product_data(search, start, limit)
 
+	for item in data:
+		set_product_info_for_website(item)
+
+	return [get_item_for_list_in_html(r) for r in data]
+
+def get_product_data(search=None, start=0, limit=12):
+	# limit = 12 because we show 12 items in the grid view
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
 			I.description, I.web_long_description as website_description, I.is_stock_item,
@@ -48,24 +56,25 @@ def get_product_list(search=None, start=0, limit=12):
 	# order by
 	query += """ order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (cint(start), cint(limit))
 
-	data = frappe.db.sql(query, {
+	return frappe.db.sql(query, {
 		"search": search,
 		"today": nowdate()
 	}, as_dict=1)
 
-	for item in data:
-		set_product_info_for_website(item)
-
-	return [get_item_for_list_in_html(r) for r in data]
-
 @frappe.whitelist(allow_guest=True)
 def search(query, limit=10, fuzzy_search=True):
+	search_results = {"from_redisearch": True, "results": []}
+
+	if not is_search_module_loaded():
+		# Redisearch module not loaded
+		search_results["from_redisearch"] = False
+		search_results["results"] = get_product_data(query, 0, limit)
+		return search_results
+
 	if not query:
-		# TODO: return top searches
-		return []
+		return search_results
 
 	red = frappe.cache()
-
 	query = clean_up_query(query)
 
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
@@ -87,12 +96,12 @@ def search(query, limit=10, fuzzy_search=True):
 	print(f"Executing query: {q.query_string()}")
 
 	results = client.search(q)
-	results = list(map(convert_to_dict, results.docs))
+	search_results['results'] = list(map(convert_to_dict, results.docs))
 
 	# FOR DEBUGGING
-	print("SEARCH RESULTS ------------------\n ", results)
+	print("SEARCH RESULTS ------------------\n ", search_results)
 
-	return results
+	return search_results
 
 def clean_up_query(query):
 	return ''.join(c for c in query if c.isalnum() or c.isspace())
@@ -102,11 +111,19 @@ def convert_to_dict(redis_search_doc):
 
 @frappe.whitelist(allow_guest=True)
 def get_category_suggestions(query):
+	search_results = {"from_redisearch": True, "results": []}
+
+	if not is_search_module_loaded():
+		# Redisearch module not loaded
+		search_results["from_redisearch"] = False
+		return search_results
+
 	if not query:
-		# TODO: return top searches
-		return []
+		return search_results
 
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=frappe.cache())
 	suggestions = ac.get_suggestions(query, num=10)
 
-	return [s.string for s in suggestions]
+	search_results['results'] = [s.string for s in suggestions]
+	
+	return search_results
