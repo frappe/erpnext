@@ -23,7 +23,7 @@ class VehicleAllocation(Document):
 		self.title = get_allocation_title(self)
 
 	def validate_vehicle_item(self):
-		from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
+		from erpnext.vehicles.vehicle_booking_controller import validate_vehicle_item
 
 		item = frappe.get_cached_doc("Item", self.item_code)
 		validate_vehicle_item(item)

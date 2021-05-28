@@ -1,9 +1,9 @@
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt, cint
-from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import force_fields,\
-	get_customer_details, get_item_details, update_vehicle_booked, update_allocation_booked
-
+from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import update_vehicle_booked,\
+	update_allocation_booked
+from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details
 
 def set_can_change_onload(vbo_doc):
 	can_change = {
@@ -300,9 +300,9 @@ def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
 
 	vbo_doc.payment_adjustment = payment_adjustment
 
-	vbo_doc.calculate_outstanding_amount()
 	vbo_doc.update_payment_status()
 	vbo_doc.validate_amounts()
+	vbo_doc.validate_payment_adjustment()
 
 	save_vehicle_booking_for_update(vbo_doc)
 

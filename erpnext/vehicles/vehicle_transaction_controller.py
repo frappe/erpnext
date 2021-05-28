@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
 from erpnext.controllers.stock_controller import StockController
-from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
+from erpnext.vehicles.vehicle_booking_controller import validate_vehicle_item
 from erpnext.accounts.party import validate_party_frozen_disabled
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact

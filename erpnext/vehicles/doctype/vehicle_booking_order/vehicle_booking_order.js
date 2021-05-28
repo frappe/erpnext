@@ -20,10 +20,82 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		this._super();
 		this.set_customer_is_company_label();
 		this.set_dynamic_link();
-		this.set_finance_type_mandatory();
 		this.setup_notification();
 		this.add_create_buttons();
 		this.setup_dashboard();
+	},
+
+	setup_queries: function () {
+		this._super();
+
+		var me = this;
+
+		if (this.frm.fields_dict.allocation_period) {
+			this.frm.set_query("allocation_period", function () {
+				var filters = {
+					item_code: me.frm.doc.item_code,
+					supplier: me.frm.doc.supplier,
+					vehicle_color: me.frm.doc.color_1
+				}
+				if (me.frm.doc.delivery_period) {
+					filters['delivery_period'] = me.frm.doc.delivery_period;
+				}
+				return erpnext.queries.vehicle_allocation_period('allocation_period', filters);
+			});
+		}
+
+		if (this.frm.fields_dict.vehicle_allocation) {
+			this.frm.set_query("vehicle_allocation", () => me.allocation_query());
+		}
+	},
+
+	setup_route_options: function () {
+		this._super();
+
+		var allocation_field = this.frm.get_docfield("vehicle_allocation");
+		if (allocation_field) {
+			allocation_field.get_route_options_for_new_doc = () => this.allocation_route_options();
+		}
+	},
+
+	allocation_route_options: function() {
+		return {
+			"company": this.frm.doc.company,
+			"item_code": this.frm.doc.item_code,
+			"item_name": this.frm.doc.item_name,
+			"supplier": this.frm.doc.supplier,
+			"allocation_period": this.frm.doc.allocation_period || this.frm.doc.delivery_period,
+			"delivery_period": this.frm.doc.delivery_period
+		}
+	},
+
+	allocation_query: function(ignore_allocation_period, dialog) {
+		var filters = {
+			item_code: this.frm.doc.item_code,
+			supplier: this.frm.doc.supplier,
+			vehicle_color: this.frm.doc.color_1,
+			is_booked: 0,
+			docstatus: 1
+		}
+		if (!ignore_allocation_period && this.frm.doc.allocation_period) {
+			filters['allocation_period'] = this.frm.doc.allocation_period;
+		}
+
+		if (dialog) {
+			var delivery_period = dialog.get_value('delivery_period');
+			if (delivery_period) {
+				filters['delivery_period'] = dialog.get_value('delivery_period');
+			}
+		} else {
+			if (this.frm.doc.delivery_period) {
+				filters['delivery_period'] = this.frm.doc.delivery_period;
+			}
+		}
+
+		return {
+			query: "erpnext.controllers.queries.vehicle_allocation_query",
+			filters: filters
+		};
 	},
 
 	add_create_buttons: function () {
@@ -336,24 +408,6 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		this.get_customer_details();
 	},
 
-	financer: function () {
-		this.set_finance_type_mandatory();
-
-		if (this.frm.doc.finance_type) {
-			this.get_customer_details();
-		}
-
-		if (!this.frm.doc.financer) {
-			this.frm.set_value("finance_type", "");
-		}
-	},
-
-	finance_type: function () {
-		if (this.frm.doc.finance_type) {
-			this.get_customer_details();
-		}
-	},
-
 	customer_is_company: function () {
 		if (this.frm.doc.customer_is_company) {
 			this.frm.doc.customer = "";
@@ -364,6 +418,64 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		}
 
 		this.get_customer_details();
+	},
+
+	item_code: function () {
+		var me = this;
+		this.get_item_details(r => {
+			me.frm.set_value("vehicle_allocation", null);
+		});
+	},
+
+	vehicle_allocation_required: function () {
+		if (!this.frm.doc.vehicle_allocation_required) {
+			this.frm.set_value("vehicle_allocation", null);
+			this.frm.set_value("allocation_period", null);
+		}
+	},
+
+	vehicle_allocation: function () {
+		var me = this;
+		if (me.frm.doc.vehicle_allocation) {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation.get_allocation_details",
+				args: {
+					vehicle_allocation: this.frm.doc.vehicle_allocation,
+				},
+				callback: function (r) {
+					if (r.message && !r.exc) {
+						$.each(['delivery_period', 'allocation_period'], function (i, fn) {
+							if (r.message[fn]) {
+								me.frm.doc[fn] = r.message[fn];
+								me.frm.refresh_field(fn);
+								delete r.message[fn];
+							}
+						});
+
+						me.frm.set_value(r.message);
+					}
+				}
+			});
+		} else {
+			me.frm.set_value("allocation_title", "");
+		}
+	},
+
+	allocation_period: function () {
+		var me = this;
+
+		if (me.frm.doc.allocation_period) {
+			me.frm.set_value("vehicle_allocation", null);
+		}
+	},
+
+	delivery_period: function () {
+		this._super();
+
+		if (this.frm.doc.delivery_period) {
+			this.frm.set_value("vehicle_allocation", null);
+			this.frm.set_value("allocation_period", null);
+		}
 	},
 
 	make_payment_entry: function(party_type) {
@@ -564,7 +676,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			var values = dialog.get_values(true);
 			if (values.customer || values.customer_is_company) {
 				frappe.call({
-					method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_details",
+					method: "erpnext.vehicles.vehicle_booking_controller.get_customer_details",
 					args: {
 						args: {
 							company: me.frm.doc.company,
@@ -592,7 +704,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		var get_address_display = function () {
 			var values = dialog.get_values(true);
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_address_details",
+				method: "erpnext.vehicles.vehicle_booking_controller.get_address_details",
 				args: {
 					address: cstr(values.customer_address),
 				},
@@ -607,7 +719,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		var get_contact_details = function () {
 			var values = dialog.get_values(true);
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_contact_details",
+				method: "erpnext.vehicles.vehicle_booking_controller.get_customer_contact_details",
 				args: {
 					args: {
 						customer: values.customer,

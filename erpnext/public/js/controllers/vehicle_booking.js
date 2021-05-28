@@ -5,6 +5,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.setup_route_options();
+		this.set_finance_type_mandatory();
 	},
 
 	onload: function () {
@@ -16,6 +17,10 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 
 		if (this.frm.fields_dict.customer) {
 			this.frm.set_query('customer', erpnext.queries.customer);
+		}
+
+		if (this.frm.fields_dict.financer) {
+			this.frm.set_query('financer', erpnext.queries.customer);
 		}
 
 		if (this.frm.fields_dict.contact_person) {
@@ -55,26 +60,8 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 			});
 		}
 
-		if (this.frm.fields_dict.allocation_period) {
-			this.frm.set_query("allocation_period", function () {
-				var filters = {
-					item_code: me.frm.doc.item_code,
-					supplier: me.frm.doc.supplier,
-					vehicle_color: me.frm.doc.color_1
-				}
-				if (me.frm.doc.delivery_period) {
-					filters['delivery_period'] = me.frm.doc.delivery_period;
-				}
-				return erpnext.queries.vehicle_allocation_period('allocation_period', filters);
-			});
-		}
-
 		if (this.frm.fields_dict.delivery_period) {
 			this.frm.set_query("delivery_period", () => me.delivery_period_query());
-		}
-
-		if (this.frm.fields_dict.vehicle_allocation) {
-			this.frm.set_query("vehicle_allocation", () => me.allocation_query());
 		}
 
 		if (this.frm.fields_dict.vehicle) {
@@ -110,11 +97,6 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		if (vehicle_field) {
 			vehicle_field.get_route_options_for_new_doc = () => this.vehicle_route_options();
 		}
-
-		var allocation_field = this.frm.get_docfield("vehicle_allocation");
-		if (allocation_field) {
-			allocation_field.get_route_options_for_new_doc = () => this.allocation_route_options();
-		}
 	},
 
 	vehicle_query: function () {
@@ -124,35 +106,6 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 				delivery_document_no: ['is', 'not set'],
 				is_booked: 0
 			}
-		};
-	},
-
-	allocation_query: function(ignore_allocation_period, dialog) {
-		var filters = {
-			item_code: this.frm.doc.item_code,
-			supplier: this.frm.doc.supplier,
-			vehicle_color: this.frm.doc.color_1,
-			is_booked: 0,
-			docstatus: 1
-		}
-		if (!ignore_allocation_period && this.frm.doc.allocation_period) {
-			filters['allocation_period'] = this.frm.doc.allocation_period;
-		}
-
-		if (dialog) {
-			var delivery_period = dialog.get_value('delivery_period');
-			if (delivery_period) {
-				filters['delivery_period'] = dialog.get_value('delivery_period');
-			}
-		} else {
-			if (this.frm.doc.delivery_period) {
-				filters['delivery_period'] = this.frm.doc.delivery_period;
-			}
-		}
-
-		return {
-			query: "erpnext.controllers.queries.vehicle_allocation_query",
-			filters: filters
 		};
 	},
 
@@ -190,17 +143,6 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	allocation_route_options: function() {
-		return {
-			"company": this.frm.doc.company,
-			"item_code": this.frm.doc.item_code,
-			"item_name": this.frm.doc.item_name,
-			"supplier": this.frm.doc.supplier,
-			"allocation_period": this.frm.doc.allocation_period || this.frm.doc.delivery_period,
-			"delivery_period": this.frm.doc.delivery_period
-		}
-	},
-
 	set_customer_is_company_label: function() {
 		if (this.frm.doc.company) {
 			this.frm.fields_dict.customer_is_company.set_label(__("Customer is {0}", [this.frm.doc.company]));
@@ -208,7 +150,9 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 	},
 
 	set_finance_type_mandatory: function () {
-		this.frm.set_df_property('finance_type', 'reqd', this.frm.doc.financer ? 1 : 0);
+		if (this.frm.fields_dict.finance_type) {
+			this.frm.set_df_property('finance_type', 'reqd', this.frm.doc.financer ? 1 : 0);
+		}
 	},
 
 	set_dynamic_link: function (doc) {
@@ -261,12 +205,30 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		};
 	},
 
+	financer: function () {
+		this.set_finance_type_mandatory();
+
+		if (this.frm.doc.finance_type) {
+			this.get_customer_details();
+		}
+
+		if (!this.frm.doc.financer) {
+			this.frm.set_value("finance_type", "");
+		}
+	},
+
+	finance_type: function () {
+		if (this.frm.doc.finance_type) {
+			this.get_customer_details();
+		}
+	},
+
 	get_customer_details: function () {
 		var me = this;
 
 		if (me.frm.doc.company && (me.frm.doc.customer || me.frm.doc.customer_is_company)) {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_details",
+				method: "erpnext.vehicles.vehicle_booking_controller.get_customer_details",
 				args: {
 					args: {
 						company: me.frm.doc.company,
@@ -287,12 +249,12 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	item_code: function () {
+	get_item_details: function (callback) {
 		var me = this;
 
 		if (me.frm.doc.company && me.frm.doc.item_code) {
 			me.frm.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_item_details",
+				method: "erpnext.vehicles.vehicle_booking_controller.get_item_details",
 				child: me.frm.doc,
 				args: {
 					args: {
@@ -306,68 +268,27 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 				},
 				callback: function (r) {
 					if (!r.exc) {
-						me.frm.set_value("vehicle_allocation", null);
 						me.frm.trigger('vehicle_amount');
+						callback && callback(r);
 					}
 				}
 			});
 		}
 	},
 
-	vehicle_allocation_required: function () {
-		if (!this.frm.doc.vehicle_allocation_required) {
-			this.frm.set_value("vehicle_allocation", null);
-			this.frm.set_value("allocation_period", null);
-		}
-	},
-
-	vehicle_allocation: function () {
-		var me = this;
-		if (me.frm.doc.vehicle_allocation) {
-			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation.get_allocation_details",
-				args: {
-					vehicle_allocation: this.frm.doc.vehicle_allocation,
-				},
-				callback: function (r) {
-					if (r.message && !r.exc) {
-						$.each(['delivery_period', 'allocation_period'], function (i, fn) {
-							if (r.message[fn]) {
-								me.frm.doc[fn] = r.message[fn];
-								me.frm.refresh_field(fn);
-								delete r.message[fn];
-							}
-						});
-
-						me.frm.set_value(r.message);
-					}
-				}
-			});
-		} else {
-			me.frm.set_value("allocation_title", "");
-		}
+	item_code: function () {
+		this.get_item_details();
 	},
 
 	delivery_period: function () {
 		var me = this;
 
 		if (me.frm.doc.delivery_period) {
-			me.frm.set_value("vehicle_allocation", null);
-			me.frm.set_value("allocation_period", null);
-
 			frappe.db.get_value("Vehicle Allocation Period", me.frm.doc.delivery_period, "to_date", function (r) {
 				if (r) {
 					me.frm.set_value("delivery_date", r.to_date);
 				}
 			});
-		}
-	},
-
-	allocation_period: function () {
-		var me = this;
-
-		if (me.frm.doc.allocation_period) {
-			me.frm.set_value("vehicle_allocation", null);
 		}
 	},
 
@@ -434,7 +355,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		frappe.call({
-			method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_address_details",
+			method: "erpnext.vehicles.vehicle_booking_controller.get_address_details",
 			args: {
 				address: cstr(this.frm.doc.customer_address),
 			},
@@ -458,7 +379,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		frappe.call({
-			method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_contact_details",
+			method: "erpnext.vehicles.vehicle_booking_controller.get_customer_contact_details",
 			args: {
 				args: {
 					customer: me.frm.doc.customer,
@@ -550,7 +471,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 
 		if (me.frm.doc.company && me.frm.doc.item_code && me.frm.doc.vehicle_price_list) {
 			me.frm.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_vehicle_price",
+				method: "erpnext.vehicles.vehicle_booking_controller.get_vehicle_price",
 				child: me.frm.doc,
 				args: {
 					company: me.frm.doc.company,
