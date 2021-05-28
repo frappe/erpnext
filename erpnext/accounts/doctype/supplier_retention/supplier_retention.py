@@ -15,6 +15,7 @@ class SupplierRetention(Document):
 		self.calculate_percentage_and_references()
 		if self.docstatus == 1:
 			self.calculate_retention()
+			self.update_accounts_status()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
@@ -37,6 +38,13 @@ class SupplierRetention(Document):
 			sales_invoice = frappe.get_doc("Purchase Invoice", document.reference_name)
 			sales_invoice.outstanding_amount -= total
 			sales_invoice.save()
+	
+	def update_accounts_status(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.credit += self.total_withheld
+			supplier.remaining_balance += self.total_withheld
+			supplier.save()
 
 	def assign_cai(self):
 		cai = frappe.get_all("CAI", ["initial_number", "final_number", "name_cai", "cai", "issue_deadline", "prefix"], filters = { "status": "Active", "prefix": self.naming_series})
