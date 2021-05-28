@@ -346,13 +346,13 @@
    "fieldname": "redisearch_warning",
    "fieldtype": "HTML",
    "label": "Redisearch Warning",
-   "options": "<p class=\"alert alert-warning\">Redisearch module not loaded. If you want to use advanced product search features, refer documentation <a class=\"alert-link\">here</a>.</p>"
+   "options": "<p class=\"alert alert-warning\">Redisearch module not loaded. If you want to use advanced product search features, refer documentation <a class=\"alert-link\" href=\"https://frappeframework.com/docs/user/en/installation\" target=\"_blank\">here</a>.</p>"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-28 06:34:05.647427",
+ "modified": "2021-05-28 07:09:32.639710",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
