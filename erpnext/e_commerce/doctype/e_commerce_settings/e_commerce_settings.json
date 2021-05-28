@@ -310,7 +310,8 @@
   {
    "fieldname": "search_index_fields",
    "fieldtype": "Small Text",
-   "label": "Search Index Fields"
+   "label": "Search Index Fields",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
   },
   {
    "collapsible": 1,
@@ -322,14 +323,16 @@
    "default": "1",
    "fieldname": "show_categories_in_search_autocomplete",
    "fieldtype": "Check",
-   "label": "Show Categories in Search Autocomplete"
+   "label": "Show Categories in Search Autocomplete",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
   },
   {
    "default": "0",
    "description": "e.g. \"iPhone 12 by Apple\"",
    "fieldname": "show_brand_line",
    "fieldtype": "Check",
-   "label": "Show Brand Line"
+   "label": "Show Brand Line",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
   },
   {
    "default": "0",
@@ -341,15 +344,15 @@
   {
    "depends_on": "eval:!doc.is_redisearch_loaded",
    "fieldname": "redisearch_warning",
-   "fieldtype": "Heading",
+   "fieldtype": "HTML",
    "label": "Redisearch Warning",
-   "options": "Redisearch is not loaded. Please install the redisearch module to enable more robust search features."
+   "options": "<p class=\"alert alert-warning\">Redisearch module not loaded. If you want to use advanced product search features, refer documentation <a class=\"alert-link\">here</a>.</p>"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-26 22:41:34.400589",
+ "modified": "2021-05-28 06:34:05.647427",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
