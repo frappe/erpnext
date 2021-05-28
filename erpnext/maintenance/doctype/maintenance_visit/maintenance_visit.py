@@ -20,9 +20,10 @@ class MaintenanceVisit(TransactionBase):
 	def validate_maintenance_date(self):
 		if self.maintenance_type == "Scheduled" and self.maintenance_schedule_detail:
 			item_ref = frappe.db.get_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'item_reference')
-			start_date, end_date = frappe.db.get_value('Maintenance Schedule Item', item_ref, ['start_date', 'end_date'])
-			if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(self.mntc_date) > get_datetime(end_date):
-				frappe.throw(_("Date must be between {0} and {1}").format(start_date, end_date))
+			if item_ref:
+				start_date, end_date = frappe.db.get_value('Maintenance Schedule Item', item_ref, ['start_date', 'end_date'])
+				if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(self.mntc_date) > get_datetime(end_date):
+					frappe.throw(_("Date must be between {0} and {1}").format(start_date, end_date))
 
 	def validate(self):
 		self.validate_serial_no()

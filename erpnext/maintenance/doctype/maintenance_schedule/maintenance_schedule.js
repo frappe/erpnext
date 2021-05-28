@@ -67,7 +67,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 			let schedules = me.frm.doc.schedules;
 			let flag = schedules.some(schedule => schedule.completion_status === "Pending");
 			if (flag) {
-				this.frm.add_custom_button(__('Create Maintenance Visit'), function () {
+				this.frm.add_custom_button(__('Maintenance Visit'), function () {
 					let options = "";
 					
 					me.frm.call('get_pending_data', {data_type: "items"}).then(r => {
