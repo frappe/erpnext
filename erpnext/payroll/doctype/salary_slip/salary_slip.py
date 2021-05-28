@@ -493,8 +493,28 @@ class SalarySlip(TransactionBase):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
 
+		salary_structure_assignment = frappe.get_value(
+			"Salary Structure Assignment",
+			{
+				"employee": self.employee,
+				"salary_structure": self.salary_structure,
+				"from_date": ("<=", self.start_date),
+				"docstatus": 1,
+			},
+			order_by="from_date desc",
+		)
+
+		if not salary_structure_assignment:
+			frappe.throw(
+				_("Please assign a Salary Structure for Employee {0} "
+				"applicable from or before {1} first").format(
+					frappe.bold(self.employee_name),
+					frappe.bold(self.start_date)
+				)
+			)
+
 		data.update(frappe.get_doc("Salary Structure Assignment",
-			{"employee": self.employee, "salary_structure": self.salary_structure}).as_dict())
+			salary_structure_assignment).as_dict())
 
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
 		data.update(self.as_dict())
