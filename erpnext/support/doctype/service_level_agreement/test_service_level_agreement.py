@@ -111,10 +111,12 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 				"resolution_time_period": "Hour",
 			}
 		],
+		"sla_fulfilled_on": [
+			{"status": "Resolved"},
+			{"status": "Closed"}
+		],
 		"pause_sla_on": [
-			{
-				"status": "Replied"
-			}
+			{"status": "Replied"}
 		],
 		"support_and_resolution": [
 			{

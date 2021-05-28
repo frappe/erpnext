@@ -81,12 +81,11 @@
   {
    "fieldname": "support_and_resolution_section_break",
    "fieldtype": "Section Break",
-   "label": "Support Hours"
+   "label": "Working Hours"
   },
   {
    "fieldname": "support_and_resolution",
    "fieldtype": "Table",
-   "label": "Support and Resolution",
    "options": "Service Day",
    "reqd": 1
   },
@@ -173,11 +172,12 @@
    "fieldname": "sla_fulfilled_on",
    "fieldtype": "Table",
    "label": "SLA Fulfilled On",
-   "options": "SLA Fulfilled On Status"
+   "options": "SLA Fulfilled On Status",
+   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2021-05-26 21:14:48.520555",
+ "modified": "2021-05-28 10:39:09.877198",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
