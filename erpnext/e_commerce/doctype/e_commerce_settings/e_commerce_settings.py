@@ -7,13 +7,15 @@ import frappe
 from frappe.utils import cint, comma_and
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_datetime_str, now_datetime
+from frappe.utils import get_datetime, get_datetime_str, now_datetime, unique
+from erpnext.e_commerce.website_item_indexing import create_website_items_index, ALLOWED_INDEXABLE_FIELDS_SET, is_search_module_loaded
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
 class ECommerceSettings(Document):
 	def onload(self):
 		self.get("__onload").quotation_series = frappe.get_meta("Quotation").get_options("naming_series")
+		self.is_redisearch_loaded = is_search_module_loaded()
 
 	def validate(self):
 		if self.home_page_is_products:
@@ -24,6 +26,9 @@ class ECommerceSettings(Document):
 		self.validate_field_filters()
 		self.validate_attribute_filters()
 		self.validate_checkout()
+		self.validate_brand_check()
+		self.validate_search_index_fields()
+
 		if self.enabled:
 			self.validate_exchange_rates_exist()
 
@@ -50,6 +55,33 @@ class ECommerceSettings(Document):
 	def validate_checkout(self):
 		if self.enable_checkout and not self.payment_gateway_account:
 			self.enable_checkout = 0
+
+	def validate_search_index_fields(self):
+		if not self.search_index_fields:
+			return 
+		
+		# Clean up
+		# Remove whitespaces
+		fields = self.search_index_fields.replace(' ', '')
+		# Remove extra ',' and remove duplicates
+		fields = unique(fields.strip(',').split(','))
+
+		# All fields should be indexable
+		if not (set(fields).issubset(ALLOWED_INDEXABLE_FIELDS_SET)):
+			invalid_fields = list(set(fields).difference(ALLOWED_INDEXABLE_FIELDS_SET))
+			num_invalid_fields = len(invalid_fields)
+			invalid_fields = comma_and(invalid_fields)
+
+			if num_invalid_fields > 1:
+				frappe.throw(_("{0} are not valid options for Search Index Field.").format(frappe.bold(invalid_fields)))
+			else:
+				frappe.throw(_("{0} is not a valid option for Search Index Field.").format(frappe.bold(invalid_fields)))
+
+		self.search_index_fields = ','.join(fields)
+
+	def validate_brand_check(self):
+		if self.show_brand_line and not ("brand" in self.search_index_fields):
+			self.search_index_fields += ",brand"
 
 	def validate_exchange_rates_exist(self):
 		"""check if exchange rates exist for all Price List currencies (to company's currency)"""
@@ -101,6 +133,15 @@ class ECommerceSettings(Document):
 
 	def get_shipping_rules(self, shipping_territory):
 		return self.get_name_from_territory(shipping_territory, "shipping_rules", "shipping_rule")
+
+	def on_change(self):
+		old_doc = self.get_doc_before_save()
+		old_fields = old_doc.search_index_fields
+		new_fields = self.search_index_fields
+		
+		# if search index fields get changed
+		if not (new_fields == old_fields):
+			create_website_items_index()
 
 def validate_cart_settings(doc, method):
 	frappe.get_doc("E Commerce Settings", "E Commerce Settings").run_method("validate")
