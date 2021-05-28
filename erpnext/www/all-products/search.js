@@ -45,8 +45,18 @@ function populateRecentSearches() {
 }
 
 function populateResults(data) {
+    if (!data.message.from_redisearch) {
+        // Data not from redisearch
+    }
+
+    if (data.message.results.length === 0) {
+        results.innerHTML = 'No results';
+        return;
+    }
+
     html = ""
-    for (let res of data.message) {
+    search_results = data.message.results
+    for (let res of search_results) {
         html += `<li class="list-group-item list-group-item-action">
         <img class="item-thumb" src="${res.thumbnail || 'img/placeholder.png'}" />
         <a href="/${res.route}">${res.web_item_name} <span class="brand-line">${showBrandLine && res.brand ? "by " + res.brand : ""}</span></a>
@@ -56,13 +66,20 @@ function populateResults(data) {
 }
 
 function populateCategoriesList(data) {
-    if (data.length === 0) {
-        categoryList.innerHTML = 'Type something...';
+    if (!data.message.from_redisearch) {
+        // Data not from redisearch
+        categoryList.innerHTML = "Install Redisearch to enable autocompletions.";
+        return;
+    }
+
+    if (data.message.results.length === 0) {
+        categoryList.innerHTML = 'No results';
         return;
     }
 
     html = ""
-    for (let category of data.message) {
+    search_results = data.message.results
+    for (let category of search_results) {
         html += `<li>${category}</li>`
     }
 
