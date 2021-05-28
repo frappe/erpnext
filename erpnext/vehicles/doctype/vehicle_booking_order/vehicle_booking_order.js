@@ -1224,7 +1224,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					depends_on: "financer",
 					get_query: () => {
 						var values = dialog.get_values(true);
-						me.set_customer_dynamic_link(values);
+						me.set_financer_dynamic_link(values);
 						return erpnext.queries.contact_query(values);
 					},
 					change: () => get_contact_details()

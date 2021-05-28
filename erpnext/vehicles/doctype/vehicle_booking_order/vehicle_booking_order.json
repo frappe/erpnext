@@ -1034,7 +1034,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 19:17:37.582383",
+ "modified": "2021-05-28 11:24:45.101774",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
@@ -1086,11 +1086,6 @@
    "share": 1,
    "submit": 1,
    "write": 1
-  },
-  {
-   "read": 1,
-   "report": 1,
-   "role": "Stock User"
   },
   {
    "email": 1,
