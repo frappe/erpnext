@@ -25,10 +25,6 @@ frappe.ui.form.on('Bank', {
 			frm.add_custom_button(__('Refresh Plaid Link'), () => {
 				new erpnext.integrations.refreshPlaidLink(frm.doc.plaid_access_token);
 			});
-
-			frm.add_custom_button(__('Reset Plaid Link'), () => {
-				new erpnext.integrations.plaidLink(frm);
-			});
 		}
 	}
 });
