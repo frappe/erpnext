@@ -1,0 +1,736 @@
+{
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2021-05-28 11:23:33.725500",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image",
+  "title",
+  "naming_series",
+  "company",
+  "quotation_to",
+  "party_name",
+  "lessee_name",
+  "customer_name",
+  "column_break_6",
+  "financer",
+  "financer_name",
+  "column_break_9",
+  "amended_from",
+  "transaction_date",
+  "valid_till",
+  "customer_details_section",
+  "customer_category",
+  "tax_status",
+  "column_break_16",
+  "tax_cnic",
+  "passport_no",
+  "tax_id",
+  "tax_strn",
+  "address_and_contact_section",
+  "customer_address",
+  "address_display",
+  "col_break_33",
+  "address_line1",
+  "address_line2",
+  "city",
+  "state",
+  "column_break_15",
+  "contact_person",
+  "contact_display",
+  "financer_contact_person",
+  "financer_contact_display",
+  "column_break_27",
+  "contact_email",
+  "contact_mobile",
+  "contact_phone",
+  "vehicle_details_section",
+  "variant_of",
+  "variant_of_name",
+  "item_code",
+  "item_name",
+  "item_group",
+  "brand",
+  "vehicle_allocation_required",
+  "exempt_from_vehicle_withholding_tax",
+  "column_break_33",
+  "color",
+  "allocation_details_section",
+  "delivery_period",
+  "column_break_53",
+  "delivery_date",
+  "column_break_55",
+  "due_date",
+  "pricing_section",
+  "vehicle_amount",
+  "fni_amount",
+  "column_break_62",
+  "withholding_tax_amount",
+  "invoice_total",
+  "column_break_56",
+  "in_words",
+  "payment_schedule_section",
+  "payment_terms_template",
+  "payment_schedule",
+  "section_break_30",
+  "sales_team",
+  "terms_section_break",
+  "tc_name",
+  "terms",
+  "status_section",
+  "status",
+  "lost_reasons",
+  "column_break_72",
+  "order_lost_reason",
+  "more_info",
+  "vehicle_price_list",
+  "col_break_15",
+  "fni_price_list",
+  "column_break_89",
+  "supplier",
+  "supplier_name"
+ ],
+ "fields": [
+  {
+   "fetch_from": "item_code.image",
+   "fetch_if_empty": 1,
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "options": "image"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VQTN-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "quotation_to",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Quotation To",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "party_name",
+   "fieldtype": "Dynamic Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Party",
+   "options": "quotation_to",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.party_name && doc.customer_name != doc.party_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "financer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Financer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.financer_name != doc.financer",
+   "fetch_from": "financer.customer_name",
+   "fieldname": "financer_name",
+   "fieldtype": "Data",
+   "label": "Financer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
+   "no_copy": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "fieldname": "customer_category",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Customer Category",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.tax_status",
+   "fieldname": "tax_status",
+   "fieldtype": "Select",
+   "label": "Income Tax Status",
+   "options": "\nFiler\nNon Filer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer.tax_cnic",
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.passport_no",
+   "fieldname": "passport_no",
+   "fieldtype": "Data",
+   "label": "Passport Number",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.tax_id",
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax Id",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.tax_strn",
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "label": "STRN",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Link",
+   "label": "Customer Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Customer Address Display",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line 1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Address Line 2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "read_only": 1
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "Province",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Customer Contact Person",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "contact_display",
+   "fieldtype": "Data",
+   "label": "Customer Contact Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "financer",
+   "fieldname": "financer_contact_person",
+   "fieldtype": "Link",
+   "label": "Financer Contact Person",
+   "options": "Contact"
+  },
+  {
+   "depends_on": "financer",
+   "fieldname": "financer_contact_display",
+   "fieldtype": "Data",
+   "label": "Financer Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Variant Item Code",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Variant Item Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Brand",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.exempt_from_vehicle_withholding_tax",
+   "fieldname": "exempt_from_vehicle_withholding_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Exempt From Vehicle Withholding Tax",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "allocation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Details"
+  },
+  {
+   "bold": 1,
+   "fieldname": "delivery_period",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Delivery Period",
+   "no_copy": 1,
+   "options": "Vehicle Allocation Period",
+   "search_index": 1
+  },
+  {
+   "fieldname": "pricing_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Price"
+  },
+  {
+   "default": "0",
+   "fieldname": "vehicle_amount",
+   "fieldtype": "Currency",
+   "label": "Vehicle Retail Price",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "fni_amount",
+   "fieldtype": "Currency",
+   "label": "Freight and Insurance",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "withholding_tax_amount",
+   "fieldtype": "Currency",
+   "label": "Withholding Tax Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "invoice_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Invoice Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_56",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "in_words",
+   "fieldtype": "Data",
+   "label": "In Words",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "payment_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Schedule"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Payment Terms Template"
+  },
+  {
+   "fieldname": "payment_schedule",
+   "fieldtype": "Table",
+   "label": "Payment Schedule",
+   "options": "Payment Schedule"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break",
+   "label": "Sales Team"
+  },
+  {
+   "fieldname": "sales_team",
+   "fieldtype": "Table",
+   "label": "Sales Team",
+   "options": "Sales Team"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "terms_section_break",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions Details"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "vehicle_price_list",
+   "fieldtype": "Link",
+   "label": "Vehicle Price List",
+   "options": "Price List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fni_price_list",
+   "fieldtype": "Link",
+   "label": "Freight and Insurance Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_89",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nOpen\nLost\nBooked\nCancelled",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Quotation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.lessee_name != doc.party_name",
+   "fieldname": "lessee_name",
+   "fieldtype": "Data",
+   "label": "Lessee/User Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "valid_till",
+   "fieldtype": "Date",
+   "label": "Valid Till"
+  },
+  {
+   "bold": 1,
+   "fieldname": "color",
+   "fieldtype": "Link",
+   "label": "Color (1st Priority)",
+   "options": "Vehicle Color"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "lost_reasons",
+   "fieldtype": "Table MultiSelect",
+   "label": "Lost Reasons",
+   "options": "Quotation Lost Reason Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_72",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.status===\"Lost\"",
+   "fieldname": "order_lost_reason",
+   "fieldtype": "Small Text",
+   "label": "Detailed Reason",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery Due Date",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Payment Due Date",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.vehicle_allocation_required",
+   "fieldname": "vehicle_allocation_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Vehicle Allocation Required",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "image_field": "image",
+ "is_submittable": 1,
+ "modified": "2021-05-28 13:47:12.813056",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Quotation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "set_user_permissions": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
+  }
+ ],
+ "restrict_to_domain": "Vehicles",
+ "search_fields": "party_name,item_code,item_name,transaction_date,delivery_period",
+ "show_name_in_global_search": 1,
+ "sort_field": "transaction_date",
+ "sort_order": "DESC",
+ "timeline_field": "party_name",
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}

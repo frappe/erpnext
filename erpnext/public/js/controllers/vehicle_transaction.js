@@ -205,6 +205,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	},
 
 	get_contact_details: function (contact, prefix) {
+		var me = this;
 		frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_contact_details",
 			args: {

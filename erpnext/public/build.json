@@ -30,6 +30,8 @@
 		"public/js/payment/payments.js",
 		"public/js/controllers/taxes_and_totals.js",
 		"public/js/controllers/transaction.js",
+		"public/js/controllers/vehicle_booking.js",
+		"public/js/controllers/vehicle_transaction.js",
 		"public/js/pos/pos.html",
 		"public/js/pos/pos_bill_item.html",
 		"public/js/pos/pos_bill_item_new.html",

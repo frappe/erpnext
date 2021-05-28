@@ -1,8 +1,6 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-{% include 'erpnext/vehicles/vehicle_transaction_controller.js' %}
-
 frappe.provide("erpnext.vehicles");
 erpnext.vehicles.VehicleInvoiceReceiptController = erpnext.vehicles.VehicleTransactionController.extend({
 	setup_queries: function () {
