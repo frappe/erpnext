@@ -827,13 +827,12 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Tax Detail",
-   "options": "Tax Detail",
-   "reqd": 1
+   "options": "Tax Detail"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-15 15:54:26.553921",
+ "modified": "2021-05-21 12:28:34.587487",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

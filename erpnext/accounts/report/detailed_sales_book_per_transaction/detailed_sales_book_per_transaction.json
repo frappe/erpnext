@@ -1,0 +1,27 @@
+{
+ "add_total_row": 1,
+ "creation": "2021-05-07 14:57:11.099819",
+ "disable_prepared_report": 1,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2021-05-07 14:57:11.099819",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Detailed sales book per transaction",
+ "owner": "Administrator",
+ "prepared_report": 1,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Detailed sales book per transaction",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ]
+}

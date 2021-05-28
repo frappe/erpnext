@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "ACC-STA-PAY-.YYYY.-.#####",
  "creation": "2020-02-24 14:11:40.425150",
  "doctype": "DocType",
@@ -10,7 +9,6 @@
   "company_logo",
   "general_data",
   "patient_statement",
-  "type_document",
   "customer",
   "columna_general",
   "company",
@@ -61,13 +59,6 @@
    "fieldname": "general_data",
    "fieldtype": "Section Break",
    "label": "General Data"
-  },
-  {
-   "fieldname": "type_document",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Type Document",
-   "options": "GType Document"
   },
   {
    "fieldname": "customer",
@@ -139,8 +130,7 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-03-20 00:33:51.555664",
+ "modified": "2021-05-20 15:47:46.589398",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
