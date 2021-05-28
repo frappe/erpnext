@@ -353,6 +353,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 
 		if (me.frm.doc.delivery_period) {
 			me.frm.set_value("vehicle_allocation", null);
+			me.frm.set_value("allocation_period", null);
 
 			frappe.db.get_value("Vehicle Allocation Period", me.frm.doc.delivery_period, "to_date", function (r) {
 				if (r) {
@@ -534,6 +535,14 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 				me.frm.set_value("terms", r.message);
 			}
 		});
+	},
+
+	vehicle_price_list: function () {
+		this.get_vehicle_price();
+	},
+
+	fni_price_list: function () {
+		this.get_vehicle_price();
 	},
 
 	get_vehicle_price: function() {

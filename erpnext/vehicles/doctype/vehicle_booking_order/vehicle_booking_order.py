@@ -828,7 +828,7 @@ def get_item_details(args):
 	out.exempt_from_vehicle_withholding_tax = cint(item.exempt_from_vehicle_withholding_tax)
 
 	if out.vehicle_price_list:
-		out.update(get_vehicle_price(item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status, args.company))
+		out.update(get_vehicle_price(args.company, item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status))
 
 	if not args.tc_name:
 		out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
@@ -859,11 +859,13 @@ def get_vehicle_default_supplier(item_code, company):
 
 
 @frappe.whitelist()
-def get_vehicle_price(item_code, vehicle_price_list, fni_price_list, transaction_date, tax_status, company):
+def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=None, transaction_date=None, tax_status=None):
 	if not item_code:
 		frappe.throw(_("Variant Item Code is mandatory"))
 	if not vehicle_price_list:
 		frappe.throw(_("Vehicle Price List is mandatory for Vehicle Price"))
+	if not company:
+		frappe.throw(_("Company is mandatory"))
 
 	transaction_date = getdate(transaction_date)
 	item = frappe.get_cached_doc("Item", item_code)
