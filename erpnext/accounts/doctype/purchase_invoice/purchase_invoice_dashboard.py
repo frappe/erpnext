@@ -8,6 +8,7 @@ def get_data():
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Debit Note CXP': 'reference_name',
+			'Supplier Retention': 'reference_name',
 			'Payment Request': 'reference_name',
 			'Landed Cost Voucher': 'receipt_document',
 			'Purchase Invoice': 'return_against',
@@ -33,6 +34,10 @@ def get_data():
 			{
 				'label': _('Subscription'),
 				'items': ['Auto Repeat']
+			},
+			{
+				'label': _('Retention'),
+				'items': ['Supplier Retention']
 			},
 		]
 	}
