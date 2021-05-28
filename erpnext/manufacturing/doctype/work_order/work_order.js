@@ -76,9 +76,9 @@ frappe.ui.form.on("Work Order", {
 		frm.set_query("production_item", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query",
-				filters:[
-					['is_stock_item', '=',1]
-				]
+				filters: {
+					"is_stock_item": 1,
+				}
 			};
 		});
 
