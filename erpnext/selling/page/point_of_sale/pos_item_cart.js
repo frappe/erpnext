@@ -636,11 +636,21 @@ erpnext.PointOfSale.ItemCart = class {
 		function get_item_image_html() {
 			const { image, item_name } = item_data;
 			if (image) {
-				return `<div class="item-image"><img src="${image}" alt="${image}""></div>`;
+				return `
+					<div class="item-image">
+						<img
+							onerror="cur_pos.cart.handle_broken_image(this)"
+							src="${image}" alt="${frappe.get_abbr(item_name)}"">
+					</div>`;
 			} else {
 				return `<div class="item-image item-abbr">${frappe.get_abbr(item_name)}</div>`;
 			}
 		}
+	}
+
+	handle_broken_image($img) {
+		const item_abbr = $($img).attr('alt');
+		$($img).parent().replaceWith(`<div class="item-image item-abbr">${item_abbr}</div>`);
 	}
 
 	scroll_to_item($item) {
