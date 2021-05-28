@@ -29,6 +29,12 @@
   "disabled",
   "is_internal_customer",
   "represents_company",
+  "status_section",
+  "advances",
+  "pending_returns",
+  "debit",
+  "credit",
+  "remaining_balance",
   "allowed_to_transact_section",
   "companies",
   "currency_and_price_list",
@@ -485,12 +491,52 @@
    "fieldtype": "Select",
    "label": " Series",
    "options": "CUST-.YYYY.-"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Account Status"
+  },
+  {
+   "fieldname": "advances",
+   "fieldtype": "Currency",
+   "label": "Advances",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_returns",
+   "fieldtype": "Currency",
+   "label": "Pending Returns",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "label": "Credit",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "label": "Debit",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remaining_balance",
+   "fieldtype": "Currency",
+   "label": "Remaining Balance",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-03-02 11:40:21.325308",
+ "modified": "2021-05-17 10:50:56.663419",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

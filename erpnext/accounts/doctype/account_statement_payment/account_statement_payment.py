@@ -29,9 +29,6 @@ class AccountStatementPayment(Document):
 		if self.due_date is None:
 			frappe.throw(_("Mandatory Date field."))
 		
-		if self.type_document is None:
-			frappe.throw(_("Mandatory Type Document field."))
-		
 		if self.reason_for_sale is None:
 			frappe.throw(_("Mandatory Reason for sale field."))
 		
@@ -44,7 +41,6 @@ class AccountStatementPayment(Document):
 		doc = frappe.new_doc('Sales Invoice')
 		doc.customer = self.customer
 		doc.due_date = self.due_date
-		doc.type_document = self.type_document
 		doc.reason_for_sale = self.reason_for_sale
 		doc.patient_statement = self.patient_statement
 		doc.company = self.company

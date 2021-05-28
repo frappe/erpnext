@@ -983,3 +983,4 @@ DocType: Expense Claim Detail,Sanctioned Amount,importe sancionado
 DocType: GL Entry,Is Opening,Es apertura
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Row {0}: Debit entry can not be linked with a {1},Fila {0}: Débito no puede vincularse con {1}
 DocType: Employee,Short biography for website and other publications.,Breve biografía de la página web y otras publicaciones.
+DocType: Sales Invoice,Client Name,Nombre del cliente
