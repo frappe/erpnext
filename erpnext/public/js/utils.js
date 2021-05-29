@@ -857,7 +857,7 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 				<span class="indicator whitespace-nowrap ${time_to_respond.indicator}">
 					<span>Time to Respond: ${time_to_respond.diff_display}</span>
 				</span>
-			</div>`
+			</div>`;
 
 
 	if (apply_sla_for_resolution) {
@@ -871,10 +871,10 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 				<span class="indicator whitespace-nowrap ${time_to_resolve.indicator}">
 					<span>Time to Resolve: ${time_to_resolve.diff_display}</span>
 				</span>
-			</div>`
+			</div>`;
 	}
 
-	alert += '</div>'
+	alert += '</div>';
 
 	frm.dashboard.set_headline_alert(alert);
 }
