@@ -82,6 +82,12 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			options: "Brand"
 		},
 		{
+			fieldname: "vehicle",
+			label: __("Vehicle"),
+			fieldtype: "Link",
+			options: "Vehicle"
+		},
+		{
 			fieldname: "customer",
 			label: __("Customer (User)"),
 			fieldtype: "Link",

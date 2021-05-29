@@ -39,6 +39,7 @@ class VehicleBookingDetailsReport(object):
 			select m.name, m.transaction_date, m.vehicle_delivered_date,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic, m.supplier,
 				m.item_code, m.item_name, m.previous_item_code, item.variant_of, item.item_group, item.brand,
+				m.vehicle, m.vehicle_chassis_no, m.vehicle_engine_no,
 				m.allocation_period, m.delivery_period, m.priority, m.allocation_title,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				m.color_1, m.color_2, m.color_3, m.vehicle_color, m.previous_color,
@@ -220,6 +221,9 @@ class VehicleBookingDetailsReport(object):
 		if self.filters.brand:
 			conditions.append("item.brand = %(brand)s")
 
+		if self.filters.vehicle:
+			conditions.append("m.vehicle = %(vehicle)s")
+
 		if self.filters.customer:
 			conditions.append("m.customer = %(customer)s")
 
@@ -267,6 +271,9 @@ class VehicleBookingDetailsReport(object):
 			columns.append({"label": _("% Contribution"), "fieldtype": "Percent", "fieldname": "allocated_percentage", "width": 60})
 
 		columns += [
+			{"label": _("Chassis No"), "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "width": 150},
+			{"label": _("Engine No"), "fieldname": "vehicle_engine_no", "fieldtype": "Data", "width": 115},
+			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
 			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},

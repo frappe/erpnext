@@ -47,7 +47,7 @@ class VehicleAllocationRegisterReport(object):
 		booking_data = frappe.db.sql("""
 			select m.name as vehicle_booking_order, m.item_code, m.previous_item_code,
 				m.supplier, m.allocation_period, m.delivery_period, m.vehicle_allocation, m.priority,
-				m.transaction_date, m.vehicle_delivered_date, m.status,	
+				m.transaction_date, m.vehicle_delivered_date, m.status,
 				m.color_1, m.color_2, m.color_3, m.vehicle_color, m.previous_color,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
@@ -55,6 +55,7 @@ class VehicleAllocationRegisterReport(object):
 				m.invoice_total, m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
 				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
 				item.variant_of, item.item_group, item.brand,
+				m.vehicle, m.vehicle_chassis_no, m.vehicle_engine_no,
 				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
@@ -254,6 +255,12 @@ class VehicleAllocationRegisterReport(object):
 		if self.filters.brand:
 			conditions.append("item.brand = %(brand)s")
 
+		if self.filters.vehicle:
+			if cond_type == 'booking':
+				conditions.append("m.vehicle = %(vehicle)s")
+			else:
+				conditions.append("vbo.vehicle = %(vehicle)s")
+
 		if self.filters.customer:
 			if cond_type == 'booking':
 				conditions.append("m.customer = %(customer)s")
@@ -306,6 +313,9 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Delivery Date"), "fieldname": "vehicle_delivered_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Sales Person"), "fieldtype": "Data", "fieldname": "sales_person", "width": 150},
+			{"label": _("Chassis No"), "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "width": 150},
+			{"label": _("Engine No"), "fieldname": "vehicle_engine_no", "fieldtype": "Data", "width": 115},
+			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
 			{"label": _("Invoice Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 120},
 			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 120},

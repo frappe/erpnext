@@ -68,6 +68,7 @@ class VehicleStockReport(object):
 		return self.sle
 
 	def process_sle(self):
+		self.vehicle_stock_map = {}
 		vehicles_in_stock = {}
 		vehicles_delivered = []
 
@@ -78,8 +79,10 @@ class VehicleStockReport(object):
 		for sle in self.sle:
 			key = (sle.item_code, sle.serial_no)
 
-			# Item Code, Warehouse and Vehicle
 			vehicle_dict = vehicles_in_stock.setdefault(key, empty_vehicle_dict.copy())
+			self.vehicle_stock_map[key] = vehicle_dict
+
+			# Item Code, Warehouse and Vehicle
 			vehicle_dict.item_code = sle.item_code
 			vehicle_dict.vehicle = sle.serial_no
 			vehicle_dict.warehouse = sle.warehouse
@@ -351,7 +354,7 @@ class VehicleStockReport(object):
 		if self.filters.get('exclude_dispatched'):
 			return
 
-		vehicle_names = list(set([d.vehicle for d in self.data]))
+		vehicle_names = list(set([d.vehicle for d in self.vehicle_stock_map.values()]))
 
 		args = self.filters.copy()
 		item_conditions = self.get_item_conditions()
@@ -365,12 +368,16 @@ class VehicleStockReport(object):
 		if self.filters.to_date:
 			date_condition += " and v.dispatch_date <= %(to_date)s"
 
+		vehicle_condition = ""
+		if self.filters.vehicle:
+			vehicle_condition = " and v.name = %(vehicle)s"
+
 		self.dispatched_vehicles = frappe.db.sql("""
 			select v.name as vehicle, v.item_code, 0 as qty, v.dispatch_date
 			from `tabVehicle` v
 			inner join `tabItem` item on v.item_code = item.name
-			where ifnull(v.dispatch_date, '') != '' and ifnull(v.purchase_document_no, '') = '' {0} {1} {2}
-		""".format(item_conditions, exclude_condition, date_condition), args, as_dict=1)
+			where ifnull(v.dispatch_date, '') != '' {0} {1} {2} {3}
+		""".format(item_conditions, exclude_condition, date_condition, vehicle_condition), args, as_dict=1)
 
 		for d in self.dispatched_vehicles:
 			self.data.append(d)
@@ -457,6 +464,9 @@ class VehicleStockReport(object):
 				conditions.append("exists (select name from `tabWarehouse` wh \
 					where wh.lft >= {0} and wh.rgt <= {1} and `tabStock Ledger Entry`.warehouse = wh.name)"\
 					.format(warehouse_details.lft, warehouse_details.rgt))
+
+		if self.filters.vehicle:
+			conditions.append("serial_no = %(vehicle)s")
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
