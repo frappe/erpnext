@@ -830,7 +830,12 @@
 						"gst_state": ""
 					},
 					{
-						"title": "Reverse Charge",
+						"title": "Reverse Charge In-State",
+						"is_inter_state": 0,
+						"gst_state": ""
+					},
+					{
+						"title": "Reverse Charge Out-State",
 						"is_inter_state": 0,
 						"gst_state": ""
 					},
@@ -879,6 +884,24 @@
 									"account_name": "Input Tax IGST",
 									"tax_rate": 18.00
 								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 9.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 9.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 18.00
+								}
 							}
 						]
 					},
@@ -919,6 +942,24 @@
 								"tax_type": {
 									"account_name": "Input Tax IGST",
 									"tax_rate": 5.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 2.50
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 2.50
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 5.00
 								}
 							}
 						]
@@ -961,6 +1002,24 @@
 									"account_name": "Input Tax IGST",
 									"tax_rate": 12.0
 								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 6.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 6.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 12.00
+								}
 							}
 						]
 					},
@@ -1001,6 +1060,24 @@
 								"tax_type": {
 									"account_name": "Input Tax IGST",
 									"tax_rate": 28.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 14.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 14.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 28.00
 								}
 							}
 						]
@@ -1110,6 +1187,42 @@
 							}
 						],
 						"tax_category": "Out-State"
+					},
+					{
+						"title": "Input GST RCM In-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 9.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							},
+							{
+								"account_head": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 9.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							}
+						],
+						"tax_category": "Reverse Charge In-State"
+					},
+					{
+						"title": "Input GST RCM Out-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 18.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							}
+						],
+						"tax_category": "Reverse Charge Out-State"
 					}
 				],
 				"*": [

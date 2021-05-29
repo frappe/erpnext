@@ -698,6 +698,7 @@ def setup_gst_settings(company):
 	# Will only add default GST accounts if present
 	input_account_names = ['Input Tax CGST', 'Input Tax SGST', 'Input Tax IGST']
 	output_account_names = ['Output Tax CGST', 'Output Tax SGST', 'Output Tax IGST']
+	rcm_accounts = ['Input Tax CGST RCM', 'Input Tax SGST RCM', 'Input Tax IGST RCM']
 	gst_settings = frappe.get_single('GST Settings')
 	existing_account_list = []
 
@@ -706,44 +707,39 @@ def setup_gst_settings(company):
 			existing_account_list.append(account.get(key))
 
 	gst_accounts = frappe._dict(frappe.get_all("Account",
-		{'company': company, 'name': ('like', "%GST%")}, ['account_name', 'name'], as_list=1))
+		{'company': company, 'account_name': ('in', input_account_names +
+			output_account_names + rcm_accounts)}, ['account_name', 'name'], as_list=1))
 
-	all_input_account_exists = 0
-	all_output_account_exists = 0
-
-	for account in input_account_names:
-		if not gst_accounts.get(account):
-			all_input_account_exists = 1
-
-		# Check if already added in GST Settings
-		if gst_accounts.get(account) in existing_account_list:
-			all_input_account_exists = 1
-
-	for account in output_account_names:
-		if not gst_accounts.get(account):
-			all_output_account_exists = 1
-
-		# Check if already added in GST Settings
-		if gst_accounts.get(account) in existing_account_list:
-			all_output_account_exists = 1
-
-	if not all_input_account_exists:
-		gst_settings.append('gst_accounts', {
-			'company': company,
-			'cgst_account': gst_accounts.get(input_account_names[0]),
-			'sgst_account': gst_accounts.get(input_account_names[1]),
-			'igst_account': gst_accounts.get(input_account_names[2])
-		})
-
-	if not all_output_account_exists:
-		gst_settings.append('gst_accounts', {
-			'company': company,
-			'cgst_account': gst_accounts.get(output_account_names[0]),
-			'sgst_account': gst_accounts.get(output_account_names[1]),
-			'igst_account': gst_accounts.get(output_account_names[2])
-		})
+	add_accounts_in_gst_settings(company,  input_account_names, gst_accounts,
+		existing_account_list, gst_settings)
+	add_accounts_in_gst_settings(company, output_account_names, gst_accounts,
+		existing_account_list, gst_settings)
+	add_accounts_in_gst_settings(company, rcm_accounts, gst_accounts,
+		existing_account_list, gst_settings, is_reverse_charge=1)
 
 	gst_settings.save()
+
+def add_accounts_in_gst_settings(company, account_names, gst_accounts,
+	existing_account_list, gst_settings, is_reverse_charge=0):
+	accounts_not_added = 1
+
+	for account in account_names:
+		# Default Account Added does not exists
+		if not gst_accounts.get(account):
+			accounts_not_added = 0
+
+		# Check if already added in GST Settings
+		if gst_accounts.get(account) in existing_account_list:
+			accounts_not_added = 0
+
+	if accounts_not_added:
+		gst_settings.append('gst_accounts', {
+			'company': company,
+			'cgst_account': gst_accounts.get(account_names[0]),
+			'sgst_account': gst_accounts.get(account_names[1]),
+			'igst_account': gst_accounts.get(account_names[2]),
+			'is_reverse_charge_account': is_reverse_charge
+		})
 
 def set_salary_components(docs):
 	docs.extend([
@@ -797,7 +793,7 @@ def set_tax_withholding_category(company):
 					doc.append("rates", d.get('rates')[0])
 
 			doc.flags.ignore_permissions = True
-			doc.flags.ignore_validdate = True
+			doc.flags.ignore_validate = True
 			doc.flags.ignore_mandatory = True
 			doc.flags.ignore_links = True
 			doc.save()
