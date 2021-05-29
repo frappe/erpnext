@@ -81,7 +81,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		# check SLA custom fields created for leads
 		sla_fields = get_service_level_agreement_fields()
-		meta = frappe.get_meta(doctype)
+		meta = frappe.get_meta(doctype, cached=False)
 
 		for field in sla_fields:
 			self.assertTrue(meta.has_field(field.get("fieldname")))

@@ -154,6 +154,9 @@ class ServiceLevelAgreement(Document):
 				existing_field = meta.get_field(field.get("fieldname"))
 				self.reset_field_properties(existing_field, "DocField", field)
 
+		# to update meta and modified timestamp
+		frappe.get_doc('DocType', self.document_type).save(ignore_permissions=True)
+
 	def create_custom_fields(self, meta, service_level_agreement_fields):
 		for field in service_level_agreement_fields:
 			if not meta.has_field(field.get("fieldname")):
