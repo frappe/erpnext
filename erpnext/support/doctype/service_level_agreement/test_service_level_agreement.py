@@ -98,7 +98,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		# check default SLA for custom dt
 		default_sla = get_service_level_agreement(default_service_level_agreement=1, doctype=doctype.name)
-		self.assertEqual(sla.name, sla.name)
+		self.assertEqual(sla.name, default_sla.name)
 
 		# check SLA docfields created
 		sla_fields = get_service_level_agreement_fields()
@@ -136,7 +136,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 	def test_hold_time(self):
 		doctype = "Lead"
-		lead_sla = create_service_level_agreement(
+		create_service_level_agreement(
 			default_service_level_agreement=1,
 			holiday_list="__Test Holiday List",
 			entity_type=None, entity=None,
@@ -370,28 +370,30 @@ def create_custom_doctype():
 				"doctype": "DocType",
 				"module": "Support",
 				"custom": 1,
-				"fields": [{
-					"label": "Date",
-					"fieldname": "date",
-					"fieldtype": "Date"
-				},
-				{
-					"label": "Description",
-					"fieldname": "desc",
-					"fieldtype": "Long Text"
-				},
-				{
-					"label": "Email ID",
-					"fieldname": "email_id",
-					"fieldtype": "Link",
-					"options": "Customer"
-				},
-				{
-					"label": "Status",
-					"fieldname": "status",
-					"fieldtype": "Select",
-					"options": "Open\nReplied\nClosed"
-				}],
+				"fields": [
+					{
+						"label": "Date",
+						"fieldname": "date",
+						"fieldtype": "Date"
+					},
+					{
+						"label": "Description",
+						"fieldname": "desc",
+						"fieldtype": "Long Text"
+					},
+					{
+						"label": "Email ID",
+						"fieldname": "email_id",
+						"fieldtype": "Link",
+						"options": "Customer"
+					},
+					{
+						"label": "Status",
+						"fieldname": "status",
+						"fieldtype": "Select",
+						"options": "Open\nReplied\nClosed"
+					}
+				],
 				"permissions": [{
 					"role": "System Manager",
 					"read": 1,
