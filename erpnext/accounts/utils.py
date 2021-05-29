@@ -784,7 +784,7 @@ def get_children(doctype, parent, company, is_root=False):
 	return acc
 
 def create_payment_gateway_account(gateway, payment_channel="Email"):
-	from erpnext.setup.setup_wizard.operations.company_setup import create_bank_account
+	from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
 	if not company:
