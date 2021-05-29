@@ -166,7 +166,7 @@ class ServiceLevelAgreement(Document):
 				self.reset_field_properties(existing_field, "Custom Field", field)
 
 	def reset_field_properties(self, field, field_dt, sla_field):
-		field = frappe.get_doc(field.doctype, field.name)
+		field = frappe.get_doc(field_dt, {"fieldname": field.fieldname})
 		field.label = sla_field.get("label")
 		field.fieldname = sla_field.get("fieldname")
 		field.fieldtype = sla_field.get("fieldtype")
@@ -193,7 +193,7 @@ def check_agreement_status():
 
 
 def get_active_service_level_agreement_for(doctype, priority, customer=None, service_level_agreement=None):
-	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+	if doctype == "Issue" and not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 		return
 
 	filters = [
@@ -294,6 +294,11 @@ def apply(doc, method=None):
 	if not service_level_agreement:
 		return
 
+	if frappe.db.exists(doc.doctype, doc.name):
+		from_db = frappe.get_doc(doc.doctype, doc.name)
+	else:
+		from_db = frappe._dict({})
+
 	meta = frappe.get_meta(doc.doctype)
 
 	if meta.has_field("customer") and service_level_agreement.customer and doc.get("customer") and \
@@ -315,11 +320,6 @@ def apply(doc, method=None):
 
 	set_response_by_and_variance(doc, meta, start_date_time, priority)
 	set_resolution_by_and_variance(doc, meta, start_date_time, priority)
-
-	if frappe.db.exists(doc.doctype, doc.name):
-		from_db = frappe.get_doc(doc.doctype, doc.name)
-	else:
-		from_db = frappe._dict({})
 
 	update_status(doc, from_db, meta)
 

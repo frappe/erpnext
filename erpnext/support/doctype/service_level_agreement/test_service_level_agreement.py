@@ -5,12 +5,16 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+import datetime
+from frappe.utils import flt
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
+from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_service_level_agreement_fields
 
 class TestServiceLevelAgreement(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabService Level Agreement`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
+		frappe.db.sql("delete from `tabLead`")
 
 	def test_service_level_agreement(self):
 		# Default Service Level Agreement
@@ -60,9 +64,111 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		self.assertEqual(create_territory_service_level_agreement.entity, get_territory_service_level_agreement.entity)
 		self.assertEqual(create_territory_service_level_agreement.default_service_level_agreement, get_territory_service_level_agreement.default_service_level_agreement)
 
-def get_service_level_agreement(default_service_level_agreement=None, entity_type=None, entity=None):
+	def test_custom_field_creation_for_sla_on_standard_dt(self):
+		# Default Service Level Agreement
+		doctype = "Lead"
+		lead_sla = create_service_level_agreement(
+			default_service_level_agreement=1,
+			holiday_list="__Test Holiday List",
+			entity_type=None, entity=None,
+			response_time=14400, resolution_time=21600,
+			doctype=doctype
+		)
+
+		# check default SLA for lead
+		default_sla = get_service_level_agreement(default_service_level_agreement=1, doctype=doctype)
+		self.assertEqual(lead_sla.name, default_sla.name)
+
+		# check SLA custom fields created for leads
+		sla_fields = get_service_level_agreement_fields()
+		meta = frappe.get_meta(doctype)
+
+		for field in sla_fields:
+			self.assertTrue(meta.has_field(field.get("fieldname")))
+
+	def test_docfield_creation_for_sla_on_custom_dt(self):
+		doctype = create_custom_doctype()
+		sla = create_service_level_agreement(
+			default_service_level_agreement=1,
+			holiday_list="__Test Holiday List",
+			entity_type=None, entity=None,
+			response_time=14400, resolution_time=21600,
+			doctype=doctype.name
+		)
+
+		# check default SLA for custom dt
+		default_sla = get_service_level_agreement(default_service_level_agreement=1, doctype=doctype.name)
+		self.assertEqual(sla.name, sla.name)
+
+		# check SLA docfields created
+		sla_fields = get_service_level_agreement_fields()
+		meta = frappe.get_meta(doctype.name)
+
+		for field in sla_fields:
+			self.assertTrue(meta.has_field(field.get("fieldname")))
+
+	def test_sla_application(self):
+		# Default Service Level Agreement
+		doctype = "Lead"
+		lead_sla = create_service_level_agreement(
+			default_service_level_agreement=1,
+			holiday_list="__Test Holiday List",
+			entity_type=None, entity=None,
+			response_time=14400, resolution_time=21600,
+			doctype=doctype,
+			sla_fulfilled_on=[{"status": "Converted"}]
+		)
+
+		# make lead with default SLA
+		creation = datetime.datetime(2019, 3, 4, 12, 0)
+		lead = make_lead(creation=creation, index=1)
+
+		self.assertEqual(lead.service_level_agreement, lead_sla.name)
+		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
+		self.assertEqual(lead.resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
+
+		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 15, 0)
+		lead.reload()
+		lead.status = 'Converted'
+		lead.save()
+
+		self.assertEqual(lead.agreement_status, 'Fulfilled')
+
+	def test_hold_time(self):
+		doctype = "Lead"
+		lead_sla = create_service_level_agreement(
+			default_service_level_agreement=1,
+			holiday_list="__Test Holiday List",
+			entity_type=None, entity=None,
+			response_time=14400, resolution_time=21600,
+			doctype=doctype,
+			sla_fulfilled_on=[{"status": "Converted"}]
+		)
+
+		creation = datetime.datetime(2020, 3, 4, 4, 0)
+		lead = make_lead(creation, index=2)
+
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 4, 15)
+		lead.reload()
+		lead.status = 'Replied'
+		lead.save()
+
+		lead.reload()
+		self.assertEqual(lead.on_hold_since, frappe.flags.current_time)
+
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 5, 5)
+		lead.reload()
+		lead.status = 'Converted'
+		lead.save()
+
+		lead.reload()
+		self.assertEqual(flt(lead.total_hold_time, 2), 3000)
+		self.assertEqual(lead.resolution_by, datetime.datetime(2020, 3, 4, 16, 50))
+
+
+def get_service_level_agreement(default_service_level_agreement=None, entity_type=None, entity=None, doctype="Issue"):
 	if default_service_level_agreement:
-		filters = {"default_service_level_agreement": default_service_level_agreement}
+		filters = {"default_service_level_agreement": default_service_level_agreement, "document_type": doctype}
 	else:
 		filters = {"entity_type": entity_type, "entity": entity}
 
@@ -70,15 +176,21 @@ def get_service_level_agreement(default_service_level_agreement=None, entity_typ
 	return service_level_agreement
 
 def create_service_level_agreement(default_service_level_agreement, holiday_list, response_time, entity_type,
-	entity, resolution_time):
+	entity, resolution_time, doctype="Issue", sla_fulfilled_on=[]):
 
 	make_holiday_list()
 	make_priorities()
 
+	if not sla_fulfilled_on:
+		sla_fulfilled_on = [
+			{"status": "Resolved"},
+			{"status": "Closed"}
+		]
+
 	service_level_agreement = frappe.get_doc({
 		"doctype": "Service Level Agreement",
 		"enabled": 1,
-		"document_type": "Issue",
+		"document_type": doctype,
 		"service_level": "__Test Service Level",
 		"default_service_level_agreement": default_service_level_agreement,
 		"default_priority": "Medium",
@@ -111,10 +223,7 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 				"resolution_time_period": "Hour",
 			}
 		],
-		"sla_fulfilled_on": [
-			{"status": "Resolved"},
-			{"status": "Closed"}
-		],
+		"sla_fulfilled_on": sla_fulfilled_on,
 		"pause_sla_on": [
 			{"status": "Replied"}
 		],
@@ -254,3 +363,53 @@ def make_holiday_list():
 				},
 			]
 		}).insert()
+
+def create_custom_doctype():
+	if not frappe.db.exists("DocType", "Test SLA on Custom Dt"):
+		doc = frappe.get_doc({
+				"doctype": "DocType",
+				"module": "Support",
+				"custom": 1,
+				"fields": [{
+					"label": "Date",
+					"fieldname": "date",
+					"fieldtype": "Date"
+				},
+				{
+					"label": "Description",
+					"fieldname": "desc",
+					"fieldtype": "Long Text"
+				},
+				{
+					"label": "Email ID",
+					"fieldname": "email_id",
+					"fieldtype": "Link",
+					"options": "Customer"
+				},
+				{
+					"label": "Status",
+					"fieldname": "status",
+					"fieldtype": "Select",
+					"options": "Open\nReplied\nClosed"
+				}],
+				"permissions": [{
+					"role": "System Manager",
+					"read": 1,
+					"write": 1
+				}],
+				"name": "Test SLA on Custom Dt",
+			})
+		doc.insert()
+		return doc
+	else:
+		return frappe.get_doc("DocType", "Test SLA on Custom Dt")
+
+def make_lead(creation=None, index=0):
+	return frappe.get_doc({
+		"doctype": "Lead",
+		"email_id": "test_lead1@example{0}.com".format(index),
+		"lead_name": "_Test Lead {0}".format(index),
+		"status": "Open",
+		"creation": creation,
+		"service_level_agreement_creation": creation
+	}).insert(ignore_permissions=True)
