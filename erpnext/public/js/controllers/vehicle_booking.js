@@ -226,18 +226,21 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 	get_customer_details: function () {
 		var me = this;
 
-		if (me.frm.doc.company && (me.frm.doc.customer || me.frm.doc.customer_is_company)) {
+		if (me.frm.doc.company && (me.frm.doc.customer || me.frm.doc.customer_is_company || (me.frm.doc.quotation_to && me.frm.doc.party_name))) {
 			frappe.call({
 				method: "erpnext.vehicles.vehicle_booking_controller.get_customer_details",
 				args: {
 					args: {
+						doctype: me.frm.doc.doctype,
 						company: me.frm.doc.company,
 						customer: me.frm.doc.customer,
 						customer_is_company: me.frm.doc.customer_is_company,
+						quotation_to: me.frm.doc.quotation_to,
+						party_name: me.frm.doc.party_name,
 						financer: me.frm.doc.financer,
 						finance_type: me.frm.doc.finance_type,
+						transaction_date: me.frm.doc.transaction_date,
 						item_code: me.frm.doc.item_code,
-						transaction_date: me.frm.doc.transaction_date
 					}
 				},
 				callback: function (r) {
@@ -258,12 +261,17 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 				child: me.frm.doc,
 				args: {
 					args: {
+						doctype: me.frm.doc.doctype,
 						company: me.frm.doc.company,
 						item_code: me.frm.doc.item_code,
-						customer: me.frm.doc.customer,
-						supplier: me.frm.doc.supplier,
 						transaction_date: me.frm.doc.transaction_date,
-						vehicle_price_list: me.frm.doc.vehicle_price_list
+						vehicle_price_list: me.frm.doc.vehicle_price_list,
+						supplier: me.frm.doc.supplier,
+						customer: me.frm.doc.customer,
+						quotation_to: me.frm.doc.quotation_to,
+						party_name: me.frm.doc.party_name,
+						financer: me.frm.doc.financer,
+						finance_type: me.frm.doc.finance_type,
 					}
 				},
 				callback: function (r) {

@@ -101,7 +101,7 @@ class VehicleBookingController(AccountsController):
 		if self.get('finance_type') and self.get('finance_type') not in ['Financed', 'Leased']:
 			frappe.throw(_("Finance Type must be either 'Financed' or 'Leased'"))
 
-		customer = self.get('customer') or (self.get('quotation_to') == "Customer" and self.get('party_name'))
+		customer = (self.get('quotation_to') == "Customer" and self.get('party_name')) or self.get('customer')
 		if customer and self.financer and customer == self.financer:
 			frappe.throw(_("Customer and Financer cannot be the same"))
 
@@ -190,19 +190,13 @@ def get_customer_details(args, get_withholding_tax=True):
 	args = frappe._dict(args)
 	args.customer_is_company = cint(args.customer_is_company)
 
-	if not args.company:
-		frappe.throw(_("Company is mandatory"))
-	if not args.customer and not args.customer_is_company:
-		frappe.throw(_("Customer is mandatory"))
-	if args.customer and args.financer and args.customer == args.financer:
-		frappe.throw(_("Customer and Financer cannot be the same"))
-
 	out = frappe._dict()
 
 	if args.customer_is_company:
 		out.customer = None
 
 	# Determine company or customer and financer
+	validate_party_args(args)
 	party_type, party, financer = get_party_doc(args)
 	is_leased = financer and args.finance_type == "Leased"
 
@@ -211,6 +205,7 @@ def get_customer_details(args, get_withholding_tax=True):
 
 	# Tax IDs
 	out.update(get_party_tax_ids(args, party, financer))
+	out.tax_status = get_party_tax_status(args, party, financer)
 
 	# Additional information from custom fields
 	out.father_name = party.get('father_name')
@@ -229,8 +224,12 @@ def get_customer_details(args, get_withholding_tax=True):
 
 	# Withholding Tax
 	if cint(get_withholding_tax) and args.item_code:
+		tax_status = out.tax_status
+		if args.doctype == "Vehicle Quotation":
+			tax_status = tax_status or 'Filer'
+
+		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, tax_status, args.company)
 		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
-		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
 
 	default_payment_terms = frappe.get_cached_value("Vehicles Settings", None, "default_payment_terms")
 	if default_payment_terms:
@@ -239,9 +238,30 @@ def get_customer_details(args, get_withholding_tax=True):
 	return out
 
 
+def validate_party_args(args):
+	if not args.company:
+		frappe.throw(_("Company is mandatory"))
+	if not args.customer and not args.customer_is_company and not args.party_name:
+		frappe.throw(_("Customer is mandatory"))
+
+	customer = (args.quotation_to == "Customer" and args.party_name) or args.customer
+	if customer and args.financer and customer == args.financer:
+		frappe.throw(_("Customer and Financer cannot be the same"))
+
+
 def get_party_doc(args):
-	party_type = "Company" if args.customer_is_company else "Customer"
-	party_name = args.company if args.customer_is_company else args.customer
+	if args.customer_is_company:
+		party_type = "Company"
+		party_name = args.company
+	elif args.quotation_to and args.party_name:
+		if args.quotation_to not in ('Customer', 'Lead'):
+			frappe.throw(_("Quotation To must be either Customer or Lead"))
+
+		party_type = args.quotation_to
+		party_name = args.party_name
+	else:
+		party_type = "Customer"
+		party_name = args.customer
 
 	party = frappe.get_cached_doc(party_type, party_name)
 	financer = frappe.get_cached_doc("Customer", args.financer) if args.financer else frappe._dict()
@@ -254,10 +274,12 @@ def get_party_doc(args):
 def get_party_name_and_category(args, party, financer):
 	out = frappe._dict()
 
-	if party.doctype == "Customer":
-		out.customer_name = party.customer_name
-	else:
+	if party.doctype == "Company":
 		out.customer_name = args.company
+	elif party.doctype == "Lead":
+		out.customer_name = party.company_name or party.lead_name
+	else:
+		out.customer_name = party.customer_name
 
 	if financer:
 		out.financer_name = financer.customer_name
@@ -272,7 +294,13 @@ def get_party_name_and_category(args, party, financer):
 		out.financer_name = None
 
 	# Customer Category
-	if party.get('customer_type') == "Individual":
+	is_individual = False
+	if party.doctype == "Lead":
+		is_individual = not party.company_name
+	elif party.doctype == "Customer":
+		is_individual = party.get('customer_type') == "Individual"
+
+	if is_individual:
 		if args.financer:
 			out.customer_category = "Lease" if args.finance_type == "Leased" else "Finance"
 		else:
@@ -296,10 +324,13 @@ def get_party_tax_ids(args, party, financer):
 	out.tax_overseas_cnic = party.get('tax_overseas_cnic')
 	out.passport_no = party.get('passport_no')
 
-	is_leased = financer and args.finance_type == "Leased"
-	out.tax_status = financer.get('tax_status') if is_leased else party.get('tax_status')
-
 	return out
+
+
+def get_party_tax_status(args, party, financer):
+	is_leased = financer and args.finance_type == "Leased"
+	return financer.get('tax_status') if is_leased else party.get('tax_status')
+
 
 
 @frappe.whitelist()
@@ -356,6 +387,7 @@ def get_item_details(args):
 	validate_vehicle_item(item)
 
 	out.item_name = item.item_name
+	out.description = item.description
 	out.item_group = item.item_group
 	out.brand = item.brand
 
@@ -381,13 +413,18 @@ def get_item_details(args):
 	if fni_price_list_settings:
 		out.fni_price_list = fni_price_list_settings
 
-	if args.customer:
-		args.tax_status = frappe.get_cached_value("Customer", args.customer, "tax_status")
+	if args.customer or (args.quotation_to and args.party_name):
+		party_type, party, financer = get_party_doc(args)
+		args.tax_status = get_party_tax_status(args, party, financer)
+
+	tax_status = args.tax_status
+	if args.doctype == "Vehicle Quotation":
+		tax_status = tax_status or 'Filer'
 
 	out.exempt_from_vehicle_withholding_tax = cint(item.exempt_from_vehicle_withholding_tax)
 
 	if out.vehicle_price_list:
-		out.update(get_vehicle_price(args.company, item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status))
+		out.update(get_vehicle_price(args.company, item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, tax_status))
 
 	if not args.tc_name:
 		out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})

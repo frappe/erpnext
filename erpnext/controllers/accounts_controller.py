@@ -1405,7 +1405,13 @@ class AccountsController(TransactionBase):
 	def validate_payment_schedule_amount(self):
 		if self.doctype == 'Sales Invoice' and self.is_pos: return
 
-		rounding_fieldname = "invoice_total" if self.doctype == "Vehicle Booking Order" else "grand_total"
+		total_fieldname = "grand_total"
+		rounding_fieldname = "grand_total"
+		if self.get("rounded_total"):
+			total_fieldname = 'rounded_total'
+		elif self.get("invoice_total"):
+			total_fieldname = 'invoice_total'
+			rounding_fieldname = 'invoice_total'
 
 		if self.get("payment_schedule"):
 			total = 0
@@ -1413,8 +1419,7 @@ class AccountsController(TransactionBase):
 				total += flt(d.payment_amount)
 			total = flt(total, self.precision(rounding_fieldname))
 
-			grand_total = flt(self.get("rounded_total") or self.get('grand_total') or self.get('invoice_total'),
-				self.precision(rounding_fieldname))
+			grand_total = flt(self.get(total_fieldname), self.precision(rounding_fieldname))
 			if self.get("total_advance"):
 				grand_total -= self.get("total_advance")
 

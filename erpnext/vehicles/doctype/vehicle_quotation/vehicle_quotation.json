@@ -18,6 +18,7 @@
   "column_break_6",
   "financer",
   "financer_name",
+  "finance_type",
   "column_break_9",
   "amended_from",
   "transaction_date",
@@ -58,6 +59,8 @@
   "exempt_from_vehicle_withholding_tax",
   "column_break_33",
   "color",
+  "vehicle_description_section",
+  "description",
   "allocation_details_section",
   "delivery_period",
   "column_break_53",
@@ -553,8 +556,7 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
-   "options": "Supplier",
-   "reqd": 1
+   "options": "Supplier"
   },
   {
    "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
@@ -572,7 +574,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nOpen\nLost\nBooked\nCancelled",
+   "options": "Draft\nOpen\nBooked\nLost\nExpired\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -599,13 +601,15 @@
    "label": "Valid Till"
   },
   {
-   "bold": 1,
    "fieldname": "color",
    "fieldtype": "Link",
-   "label": "Color (1st Priority)",
+   "label": "Color",
+   "no_copy": 1,
    "options": "Vehicle Color"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:(doc.lost_reasons && doc.lost_reasons.length) || doc.order_lost_reason",
    "fieldname": "status_section",
    "fieldtype": "Section Break",
    "label": "Status"
@@ -658,12 +662,32 @@
    "hidden": 1,
    "label": "Vehicle Allocation Required",
    "read_only": 1
+  },
+  {
+   "depends_on": "financer",
+   "fieldname": "finance_type",
+   "fieldtype": "Select",
+   "label": "Finance Type",
+   "options": "\nFinanced\nLeased"
+  },
+  {
+   "fetch_from": "item_code.description",
+   "fetch_if_empty": 1,
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_description_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Description"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-28 13:47:12.813056",
+ "modified": "2021-05-28 20:04:48.638217",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",

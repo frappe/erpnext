@@ -13,10 +13,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Vehicle Quotation",
-				},
-				{
-					"type": "doctype",
 					"name": "Vehicle Booking Payment",
 					"description": _("Payments for Vehicle Booking."),
 					"dependencies": ["Vehicle Booking Order"],
@@ -26,6 +22,24 @@ def get_data():
 					"name": "Customer",
 					"onboard": 1,
 					"description": _("Customer List."),
+				},
+			]
+		},
+		{
+			"label": _("Pre Sales"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Vehicle Quotation",
+				},
+				{
+					"type": "doctype",
+					"name": "Opportunity",
+				},
+				{
+					"type": "doctype",
+					"name": "Lead",
+					"description": _("Lead List."),
 				},
 			]
 		},
