@@ -24,16 +24,19 @@ class ServiceLevelAgreement(Document):
 
 		for priority in self.priorities:
 			# Check if response and resolution time is set for every priority
-			if not priority.response_time or not priority.resolution_time:
-				frappe.throw(_("Set Response Time and Resolution Time for Priority {0} in row {1}.").format(priority.priority, priority.idx))
+			if not priority.response_time:
+				frappe.throw(_("Set Response Time for Priority {0} in row {1}.").format(priority.priority, priority.idx))
+
+			if self.apply_sla_for_resolution:
+				if not priority.resolution_time:
+					frappe.throw(_("Set Response Time for Priority {0} in row {1}.").format(priority.priority, priority.idx))
+
+				response = priority.response_time
+				resolution = priority.resolution_time
+				if response > resolution:
+					frappe.throw(_("Response Time for {0} priority in row {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
 
 			priorities.append(priority.priority)
-
-			response = priority.response_time
-			resolution = priority.resolution_time
-
-			if response > resolution:
-				frappe.throw(_("Response Time for {0} priority in row {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
 
 		# Check if repeated priority
 		if not len(set(priorities)) == len(priorities):
@@ -108,7 +111,7 @@ class ServiceLevelAgreement(Document):
 			return
 
 		service_level_agreement_fields = get_service_level_agreement_fields()
-		meta = frappe.get_meta(self.document_type)
+		meta = frappe.get_meta(self.document_type, cached=False)
 
 		if meta.custom:
 			self.create_docfields(meta, service_level_agreement_fields)
@@ -220,7 +223,7 @@ def get_active_service_level_agreement_for(doctype, priority, customer=None, ser
 	or_filters.append(["Service Level Agreement", "default_service_level_agreement", "=", 1])
 
 	agreement = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
-		fields=["name", "default_priority"])
+		fields=["name", "default_priority", "apply_sla_for_resolution"])
 
 	return agreement[0] if agreement else None
 
@@ -324,7 +327,8 @@ def set_sla_properties(doc, service_level_agreement):
 	start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
 
 	set_response_by_and_variance(doc, meta, start_date_time, priority)
-	set_resolution_by_and_variance(doc, meta, start_date_time, priority)
+	if service_level_agreement.apply_sla_for_resolution:
+		set_resolution_by_and_variance(doc, meta, start_date_time, priority)
 
 	update_status(doc, from_db, meta)
 
@@ -342,15 +346,19 @@ def update_status(doc, from_db, meta):
 			}, fields=["status"])]
 
 			if doc.status in fulfillment_statuses and from_db.status not in fulfillment_statuses:
-				if meta.has_field("resolution_date"):
+				apply_sla_for_resolution = frappe.db.get_value("Service Level Agreement", doc.service_level_agreement,
+					"apply_sla_for_resolution")
+
+				if apply_sla_for_resolution and meta.has_field("resolution_date"):
 					doc.resolution_date = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
 				if meta.has_field("agreement_status") and from_db.agreement_status == "Ongoing":
 					set_service_level_agreement_variance(doc.doctype, doc.name)
 					update_agreement_status(doc, meta)
 
-				set_resolution_time(doc, meta)
-				set_user_resolution_time(doc, meta)
+				if apply_sla_for_resolution:
+					set_resolution_time(doc, meta)
+					set_user_resolution_time(doc, meta)
 
 		if doc.status == "Open" and from_db.status != "Open":
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
@@ -439,6 +447,8 @@ def set_service_level_agreement_variance(doctype, doc=None):
 	for entry in frappe.get_all(doctype, filters=filters):
 		current_doc = frappe.get_doc(doctype, entry.name)
 		current_time = frappe.flags.current_time or now_datetime(current_doc.get("owner"))
+		apply_sla_for_resolution = frappe.db.get_value("Service Level Agreement", current_doc.service_level_agreement,
+			"apply_sla_for_resolution")
 
 		if not current_doc.first_responded_on: # first_responded_on set when first reply is sent to customer
 			variance = round(time_diff_in_seconds(current_doc.response_by, current_time), 2)
@@ -447,7 +457,7 @@ def set_service_level_agreement_variance(doctype, doc=None):
 			if variance < 0:
 				frappe.db.set_value(current_doc.doctype, current_doc.name, "agreement_status", "Failed", update_modified=False)
 
-		if not current_doc.get("resolution_date"): # resolution_date set when issue has been closed
+		if apply_sla_for_resolution and not current_doc.get("resolution_date"): # resolution_date set when issue has been closed
 			variance = round(time_diff_in_seconds(current_doc.resolution_by, current_time), 2)
 			frappe.db.set_value(current_doc.doctype, current_doc.name, "resolution_by_variance", variance, update_modified=False)
 
@@ -732,10 +742,21 @@ def update_agreement_status(doc, meta):
 	if meta.has_field("service_level_agreement") and meta.has_field("agreement_status") and \
 		doc.service_level_agreement and doc.agreement_status == "Ongoing":
 
-		if meta.has_field("response_by_variance") and meta.has_field("resolution_by_variance"):
-			if cint(frappe.db.get_value(doc.doctype, doc.name, "response_by_variance")) < 0 or \
-				cint(frappe.db.get_value(doc.doctype, doc.name, "resolution_by_variance")) < 0:
+		apply_sla_for_resolution = frappe.db.get_value("Service Level Agreement", doc.service_level_agreement,
+			"apply_sla_for_resolution")
 
+		# if SLA is applied for resolution check for response and resolution, else only response
+		if apply_sla_for_resolution:
+			if meta.has_field("response_by_variance") and meta.has_field("resolution_by_variance"):
+				if cint(frappe.db.get_value(doc.doctype, doc.name, "response_by_variance")) < 0 or \
+					cint(frappe.db.get_value(doc.doctype, doc.name, "resolution_by_variance")) < 0:
+
+					doc.agreement_status = "Failed"
+				else:
+					doc.agreement_status = "Fulfilled"
+		else:
+			if meta.has_field("response_by_variance") and \
+				cint(frappe.db.get_value(doc.doctype, doc.name, "response_by_variance")) < 0:
 				doc.agreement_status = "Failed"
 			else:
 				doc.agreement_status = "Fulfilled"

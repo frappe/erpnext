@@ -817,7 +817,7 @@ $(document).on('app_ready', function() {
 											'</div>'
 										);
 									} else {
-										set_time_to_resolve_and_response(frm);
+										set_time_to_resolve_and_response(frm, data.message.apply_sla_for_resolution);
 									}
 								}
 							});
@@ -843,29 +843,40 @@ $(document).on('app_ready', function() {
 	});
 });
 
-function set_time_to_resolve_and_response(frm) {
+function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 	frm.dashboard.clear_headline();
 
-	var time_to_respond = get_status(frm.doc.response_by_variance);
+	let time_to_respond = get_status(frm.doc.response_by_variance);
 	if (!frm.doc.first_responded_on && frm.doc.agreement_status === 'Ongoing') {
 		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
 	}
 
-	var time_to_resolve = get_status(frm.doc.resolution_by_variance);
-	if (!frm.doc.resolution_date && frm.doc.agreement_status === 'Ongoing') {
-		time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+	let alert = `
+		<div class="row">
+			<div class="col-xs-12 col-sm-6">
+				<span class="indicator whitespace-nowrap ${time_to_respond.indicator}">
+					<span>Time to Respond: ${time_to_respond.diff_display}</span>
+				</span>
+			</div>`
+
+
+	if (apply_sla_for_resolution) {
+		let time_to_resolve = get_status(frm.doc.resolution_by_variance);
+		if (!frm.doc.resolution_date && frm.doc.agreement_status === 'Ongoing') {
+			time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+		}
+
+		alert += `
+			<div class="col-xs-12 col-sm-6">
+				<span class="indicator whitespace-nowrap ${time_to_resolve.indicator}">
+					<span>Time to Resolve: ${time_to_resolve.diff_display}</span>
+				</span>
+			</div>`
 	}
 
-	frm.dashboard.set_headline_alert(
-		'<div class="row">' +
-			'<div class="col-xs-12 col-sm-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span>Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
-			'</div>' +
-			'<div class="col-xs-12 col-sm-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span>Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
-			'</div>' +
-		'</div>'
-	);
+	alert += '</div>'
+
+	frm.dashboard.set_headline_alert(alert);
 }
 
 function get_time_left(timestamp, agreement_status) {

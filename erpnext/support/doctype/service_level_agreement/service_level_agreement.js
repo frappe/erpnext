@@ -4,6 +4,7 @@
 frappe.ui.form.on('Service Level Agreement', {
 	refresh: function(frm) {
 		frm.trigger('fetch_status_fields');
+		frm.trigger('toggle_resolution_fields');
 	},
 
 	document_type: function(frm) {
@@ -26,7 +27,7 @@ frappe.ui.form.on('Service Level Agreement', {
 					'status', 'options', [''].concat(allow_statuses)
 				);
 
-				exclude_statuses = ['Open', 'Replied'];
+				exclude_statuses = ['Open'];
 				allow_statuses = statuses.filter((status) => !exclude_statuses.includes(status));
 				frm.fields_dict.sla_fulfilled_on.grid.update_docfield_property(
 					'status', 'options', [''].concat(allow_statuses)
@@ -35,6 +36,16 @@ frappe.ui.form.on('Service Level Agreement', {
 		}
 
 		frm.refresh_field('pause_sla_on');
+	},
+
+	apply_sla_for_resolution: function(frm) {
+		frm.trigger('toggle_resolution_fields');
+	},
+
+	toggle_resolution_fields: function(frm) {
+		frm.fields_dict.priorities.grid.set_column_disp('resolution_time', frm.doc.apply_sla_for_resolution);
+		frm.fields_dict.priorities.grid.toggle_reqd('resolution_time', frm.doc.apply_sla_for_resolution);
+		frm.fields_dict.priorities.grid.refresh();
 	},
 
 	onload: function(frm) {

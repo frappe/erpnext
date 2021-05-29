@@ -22,12 +22,12 @@
   "start_date",
   "column_break_7",
   "end_date",
-  "section_break_18",
+  "response_and_resolution_time_section",
+  "apply_sla_for_resolution",
+  "priorities",
   "status_details",
   "sla_fulfilled_on",
   "pause_sla_on",
-  "response_and_resolution_time_section",
-  "priorities",
   "support_and_resolution_section_break",
   "support_and_resolution"
  ],
@@ -140,11 +140,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_18",
-   "fieldtype": "Section Break",
-   "hide_border": 1
-  },
-  {
    "fieldname": "pause_sla_on",
    "fieldtype": "Table",
    "label": "SLA Paused On",
@@ -174,10 +169,16 @@
    "label": "SLA Fulfilled On",
    "options": "SLA Fulfilled On Status",
    "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_sla_for_resolution",
+   "fieldtype": "Check",
+   "label": "Apply SLA for Resolution Time"
   }
  ],
  "links": [],
- "modified": "2021-05-28 10:39:09.877198",
+ "modified": "2021-05-29 13:35:41.956849",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

@@ -102,7 +102,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		# check SLA docfields created
 		sla_fields = get_service_level_agreement_fields()
-		meta = frappe.get_meta(doctype.name)
+		meta = frappe.get_meta(doctype.name, cached=False)
 
 		for field in sla_fields:
 			self.assertTrue(meta.has_field(field.get("fieldname")))
@@ -176,7 +176,7 @@ def get_service_level_agreement(default_service_level_agreement=None, entity_typ
 	return service_level_agreement
 
 def create_service_level_agreement(default_service_level_agreement, holiday_list, response_time, entity_type,
-	entity, resolution_time, doctype="Issue", sla_fulfilled_on=[]):
+	entity, resolution_time, doctype="Issue", sla_fulfilled_on=[], apply_sla_for_resolution=1):
 
 	make_holiday_list()
 	make_priorities()
@@ -199,6 +199,7 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 		"entity": entity,
 		"start_date": frappe.utils.getdate(),
 		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100),
+		"apply_sla_for_resolution": 1,
 		"priorities": [
 			{
 				"priority": "Low",
