@@ -124,6 +124,9 @@ class ServiceLevelAgreement(Document):
 	def after_insert(self):
 		set_documents_with_active_service_level_agreement()
 
+	def on_update(self):
+		set_documents_with_active_service_level_agreement()
+
 	def create_docfields(self, meta, service_level_agreement_fields):
 		last_index = len(meta.fields)
 
@@ -726,13 +729,14 @@ def update_agreement_status_on_custom_status(doc):
 	# Update Agreement Fulfilled status using Custom Scripts for Custom Status
 
 	meta = frappe.get_meta(doc.doctype)
+	now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
 	if meta.has_field("first_responded_on") and not doc.first_responded_on:
 		# first_responded_on set when first reply is sent to customer
-		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_datetime(doc.get("owner"))), 2)
+		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_time), 2)
 
 	if meta.has_field("resolution_date") and not doc.resolution_date:
 		# resolution_date set when issue has been closed
-		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_datetime(doc.get("owner"))), 2)
+		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_time), 2)
 
 	if meta.has_field("agreement_status"):
 		doc.agreement_status = "Fulfilled" if doc.response_by_variance > 0 and doc.resolution_by_variance > 0 else "Failed"
@@ -777,15 +781,16 @@ def set_response_by_and_variance(doc, meta, start_date_time, priority):
 		doc.response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 
 	if meta.has_field("response_by_variance"):
-		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_datetime(doc.get("owner"))))
-
+		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_time), 2)
 
 def set_resolution_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("resolution_by"):
 		doc.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 
 	if meta.has_field("resolution_by_variance"):
-		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_datetime(doc.get("owner"))))
+		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_time), 2)
 
 
 def now_datetime(user):
