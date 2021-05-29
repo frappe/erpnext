@@ -173,10 +173,23 @@ class AccountsController(TransactionBase):
 			else:
 				self.validate_deferred_start_and_end_date()
 
+		self.validate_applies_to_item()
+		self.validate_service_person()
+
 		validate_regional(self)
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
 			update_pricing_rule_table(self)
+
+	def validate_applies_to_item(self):
+		if self.meta.has_field('applies_to_item') and self.meta.has_field('applies_to_item_name') and not self.get('applies_to_item'):
+			self.applies_to_item_name = ''
+
+	def validate_service_person(self):
+		if self.meta.has_field('service_advisor') and self.meta.has_field('service_advisor_name') and not self.get('service_advisor'):
+			self.service_advisor_name = ''
+		if self.meta.has_field('service_manager') and self.meta.has_field('service_manager_name') and not self.get('service_manager'):
+			self.service_manager_name = ''
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:

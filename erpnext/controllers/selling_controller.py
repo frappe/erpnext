@@ -57,7 +57,6 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
-		self.validate_applies_to_item()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -492,18 +491,6 @@ class SellingController(StockController):
 		if self.get('transaction_type'):
 			if not frappe.get_cached_value("Transaction Type", self.transaction_type, 'selling'):
 				frappe.throw(_("Transaction Type {0} is not allowed for sales transactions").format(frappe.bold(self.transaction_type)))
-
-	def validate_applies_to_item(self):
-		if self.meta.has_field('applies_to_item') and not self.get('applies_to_item'):
-			self.applies_to_item_name = ''
-
-		if self.meta.has_field('applies_to_vehicle') and not self.get('applies_to_vehicle'):
-			pass
-			# self.vehicle_license_plate = ''
-			# self.vehicle_chassis_no = ''
-			# self.vehicle_engine_no = ''
-			# self.vehicle_last_odometer = ''
-			# self.vehicle_color = ''
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

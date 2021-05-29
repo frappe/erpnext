@@ -80,6 +80,14 @@ frappe.ui.form.on("Project", {
 				return {filters: {is_insurance_company: 1}};
 			});
 		}
+
+		if(frm.fields_dict.applies_to_vehicle) {
+			frm.set_query("applies_to_vehicle", function(doc) {
+				if (doc.applies_to_item) {
+					return {filters: {item_code: doc.applies_to_item}};
+				}
+			});
+		}
 	},
 
 	refresh: function (frm) {
@@ -191,6 +199,22 @@ frappe.ui.form.on("Project", {
 					"item_name": frm.doc.applies_to_item_name
 				}
 			}
+		}
+	},
+
+	applies_to_item: function (frm) {
+		if (!frm.doc.applies_to_item) {
+			frm.set_value('applies_to_item_name', '');
+		}
+	},
+
+	applies_to_vehicle: function (frm) {
+		if (!frm.doc.applies_to_vehicle) {
+			frm.set_value('vehicle_license_plate', '');
+			frm.set_value('vehicle_chassis_no', '');
+			frm.set_value('vehicle_engine_no', '');
+			frm.set_value('vehicle_last_odometer', '');
+			frm.set_value('vehicle_color', '');
 		}
 	},
 

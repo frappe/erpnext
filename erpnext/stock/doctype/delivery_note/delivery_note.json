@@ -12,6 +12,8 @@
   "naming_series",
   "customer",
   "customer_name",
+  "received_by_type",
+  "received_by",
   "column_break1",
   "remarks",
   "po_no",
@@ -28,14 +30,13 @@
   "more_info",
   "transaction_type",
   "order_type",
+  "pick_list",
   "more_info_cb_1",
   "project",
-  "pick_list",
-  "source",
-  "campaign",
   "more_info_cb_2",
-  "received_by_type",
-  "received_by",
+  "source",
+  "more_info_cb_3",
+  "campaign",
   "tax_id",
   "tax_cnic",
   "tax_strn",
@@ -1288,7 +1289,6 @@
   {
    "fieldname": "pick_list",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
@@ -1648,6 +1648,7 @@
    "depends_on": "eval:doc.received_by || doc.docstatus == 0",
    "fieldname": "received_by_type",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Received By Type",
    "options": "DocType"
   },
@@ -1656,6 +1657,7 @@
    "depends_on": "received_by_type",
    "fieldname": "received_by",
    "fieldtype": "Dynamic Link",
+   "hidden": 1,
    "label": "Received By",
    "options": "received_by_type"
   },
@@ -1675,12 +1677,16 @@
   {
    "fieldname": "column_break_130",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_3",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2021-04-19 01:14:17.112387",
+ "modified": "2021-05-29 23:33:14.814398",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

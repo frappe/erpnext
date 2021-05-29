@@ -31,6 +31,7 @@
   "more_info",
   "transaction_type",
   "order_type",
+  "skip_delivery_note",
   "more_info_cb_1",
   "project",
   "inter_company_order_reference",
@@ -42,7 +43,6 @@
   "tax_id",
   "tax_cnic",
   "tax_strn",
-  "skip_delivery_note",
   "contact_info",
   "customer_address",
   "address_display",
@@ -1012,17 +1012,18 @@
    "oldfieldname": "source",
    "oldfieldtype": "Select",
    "options": "Lead Source",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "campaign",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Campaign",
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
    "options": "Campaign",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -1689,7 +1690,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2021-04-19 01:18:21.180716",
+ "modified": "2021-05-29 23:13:41.392034",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

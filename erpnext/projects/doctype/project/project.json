@@ -24,6 +24,7 @@
   "more_info_cb_1",
   "department",
   "more_info_cb_2",
+  "more_info_cb_3",
   "customer_details_section",
   "customer",
   "customer_name",
@@ -597,11 +598,15 @@
    "fieldtype": "Data",
    "label": "Bill To Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "more_info_cb_3",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2021-02-08 17:11:47.855142",
+ "modified": "2021-05-29 23:25:36.268490",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

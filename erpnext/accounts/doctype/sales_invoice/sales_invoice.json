@@ -41,10 +41,11 @@
   "campaign",
   "more_info_cb_2",
   "cost_center",
+  "more_info_cb_3",
+  "inter_company_invoice_reference",
   "tax_id",
   "tax_cnic",
   "tax_strn",
-  "inter_company_invoice_reference",
   "customer_group",
   "address_and_contact",
   "customer_address",
@@ -2163,12 +2164,16 @@
    "fieldname": "auto_select_batches",
    "fieldtype": "Button",
    "label": "Auto Select Batches (FIFO)"
+  },
+  {
+   "fieldname": "more_info_cb_3",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-04-19 01:09:44.617588",
+ "modified": "2021-05-29 23:32:45.091003",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

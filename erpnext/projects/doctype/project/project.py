@@ -36,6 +36,8 @@ class Project(Document):
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
+		self.validate_applies_to_item()
+		self.validate_service_person()
 
 	def on_update(self):
 		if 'Vehicles' in frappe.get_active_domains():
@@ -71,6 +73,16 @@ class Project(Document):
 				"vehicle_first_odometer": 0,
 				"vehicle_last_odometer": 0
 			})
+
+	def validate_applies_to_item(self):
+		if self.meta.has_field('applies_to_item') and self.meta.has_field('applies_to_item_name') and not self.get('applies_to_item'):
+			self.applies_to_item_name = ''
+
+	def validate_service_person(self):
+		if self.meta.has_field('service_advisor') and self.meta.has_field('service_advisor_name') and not self.get('service_advisor'):
+			self.service_advisor_name = ''
+		if self.meta.has_field('service_manager') and self.meta.has_field('service_manager_name') and not self.get('service_manager'):
+			self.service_manager_name = ''
 
 	def copy_from_template(self):
 		'''

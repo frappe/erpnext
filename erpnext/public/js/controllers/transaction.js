@@ -245,6 +245,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
+		var vehicle_field = me.frm.get_docfield("applies_to_vehicle");
+		if (vehicle_field) {
+			vehicle_field.get_route_options_for_new_doc = function () {
+				return {
+					"item_code": me.frm.doc.applies_to_item,
+					"item_name": me.frm.doc.applies_to_item_name
+				}
+			}
+		}
+
 		if (this.frm.doc.__onload && this.frm.doc.__onload.enable_dynamic_bundling) {
 			erpnext.bundling.setup_bundling(this.frm.doc.doctype);
 		}
@@ -1244,6 +1254,22 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
 				}
 			})
+		}
+	},
+
+	applies_to_item: function () {
+		if (!this.frm.doc.applies_to_item) {
+			this.frm.set_value('applies_to_item_name', '');
+		}
+	},
+
+	applies_to_vehicle: function () {
+		if (!this.frm.doc.applies_to_vehicle) {
+			this.frm.set_value('vehicle_license_plate', '');
+			this.frm.set_value('vehicle_chassis_no', '');
+			this.frm.set_value('vehicle_engine_no', '');
+			this.frm.set_value('vehicle_last_odometer', '');
+			this.frm.set_value('vehicle_color', '');
 		}
 	},
 

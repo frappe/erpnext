@@ -316,22 +316,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		refresh_field("incentives",row.name,row.parentfield);
 	},
 
-	applies_to_item: function () {
-		if (!this.frm.doc.applies_to_item) {
-			this.frm.set_value('applies_to_item_name', '');
-		}
-	},
-
-	applies_to_vehicle: function () {
-		if (!this.frm.doc.applies_to_vehicle) {
-			this.frm.set_value('vehicle_license_plate', '');
-			this.frm.set_value('vehicle_chassis_no', '');
-			this.frm.set_value('vehicle_engine_no', '');
-			this.frm.set_value('vehicle_last_odometer', '');
-			this.frm.set_value('vehicle_color', '');
-		}
-	},
-
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);

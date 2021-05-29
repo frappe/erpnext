@@ -107,17 +107,21 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		this.frm.set_query("item_code", "items", function() {
+			var filters = {};
+
 			if (me.frm.doc.is_subcontracted == "Yes") {
-				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'is_sub_contracted_item': 1 }
-				}
+				filters['is_sub_contracted_item'] = 1;
+			} else {
+				filters['is_purchase_item'] = 1;
 			}
-			else {
-				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_purchase_item': 1}
-				}
+
+			if (doc.applies_to_item) {
+				filters.applicable_to_item = doc.applies_to_item;
+			}
+
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: filters
 			}
 		});
 
@@ -165,6 +169,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
 			this.frm.set_query("item_tax_template", "items", function(doc, cdt, cdn) {
 				return me.set_query_for_item_tax_template(doc, cdt, cdn)
+			});
+		}
+
+		if(this.frm.fields_dict.applies_to_vehicle) {
+			this.frm.set_query("applies_to_vehicle", function(doc) {
+				if (doc.applies_to_item) {
+					return {filters: {item_code: doc.applies_to_item}};
+				}
 			});
 		}
 	},

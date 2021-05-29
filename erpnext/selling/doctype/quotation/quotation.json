@@ -28,6 +28,7 @@
   "supplier_quotation",
   "more_info_cb_2",
   "source",
+  "more_info_cb_3",
   "campaign",
   "opportunity",
   "enq_det",
@@ -915,7 +916,8 @@
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
    "options": "Campaign",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "source",
@@ -924,7 +926,8 @@
    "oldfieldname": "source",
    "oldfieldtype": "Select",
    "options": "Lead Source",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -972,7 +975,8 @@
    "fieldname": "supplier_quotation",
    "fieldtype": "Link",
    "label": "Supplier Quotation",
-   "options": "Supplier Quotation"
+   "options": "Supplier Quotation",
+   "read_only": 1
   },
   {
    "fieldname": "opportunity",
@@ -1369,13 +1373,17 @@
    "fieldtype": "Link",
    "label": "Insurance Surveyor Company",
    "options": "Insurance Surveyor Company"
+  },
+  {
+   "fieldname": "more_info_cb_3",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-05-28 13:04:57.300694",
+ "modified": "2021-05-29 23:13:13.952273",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
