@@ -2,6 +2,23 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Service Level Agreement', {
+	setup: function(frm) {
+		if (frm.doc.apply_sla_for_resolution) {
+			frm.get_field('priorities').grid.editable_fields = [
+				{fieldname: 'priority', columns: 1},
+				{fieldname: 'default_priority', columns: 1},
+				{fieldname: 'response_time', columns: 2},
+				{fieldname: 'resolution_time', columns: 2}
+			];
+		} else {
+			frm.get_field('priorities').grid.editable_fields = [
+				{fieldname: 'priority', columns: 1},
+				{fieldname: 'default_priority', columns: 1},
+				{fieldname: 'response_time', columns: 3},
+			];
+		}
+	},
+
 	refresh: function(frm) {
 		frm.trigger('fetch_status_fields');
 		frm.trigger('toggle_resolution_fields');
