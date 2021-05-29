@@ -103,6 +103,10 @@ class ServiceLevelAgreement(Document):
 		})
 
 	def before_insert(self):
+		# no need to set up SLA fields for Issue dt as they are standard fields in Issue
+		if self.document_type == "Issue":
+			return
+
 		service_level_agreement_fields = get_service_level_agreement_fields()
 		meta = frappe.get_meta(self.document_type)
 
@@ -200,22 +204,19 @@ def get_active_service_level_agreement_for(doctype, priority, customer=None, ser
 		["Service Level Agreement", "document_type", "=", doctype],
 		["Service Level Agreement", "enabled", "=", 1]
 	]
-
 	if priority:
 		filters.append(["Service Level Priority", "priority", "=", priority])
 
 	or_filters = []
-
-	if customer:
-		or_filters.append(
-			["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer)]]
-		)
-
 	if service_level_agreement:
 		or_filters = [
 			["Service Level Agreement", "name", "=", service_level_agreement],
 		]
 
+	if customer:
+		or_filters.append(
+			["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer)]]
+		)
 	or_filters.append(["Service Level Agreement", "default_service_level_agreement", "=", 1])
 
 	agreement = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
@@ -294,6 +295,10 @@ def apply(doc, method=None):
 	if not service_level_agreement:
 		return
 
+	set_sla_properties(doc, service_level_agreement)
+
+
+def set_sla_properties(doc, service_level_agreement):
 	if frappe.db.exists(doc.doctype, doc.name):
 		from_db = frappe.get_doc(doc.doctype, doc.name)
 	else:
@@ -359,25 +364,11 @@ def update_status(doc, from_db, meta):
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
 	expected_time = current_date_time
-	start_time = None
-	end_time = None
-
-	if parameter == "response":
-		allotted_seconds = service_level.get("response_time")
-	elif parameter == "resolution":
-		allotted_seconds = service_level.get("resolution_time")
-	else:
-		frappe.throw(_("{0} parameter is invalid").format(parameter))
-
+	start_time = end_time = None
 	expected_time_is_set = 0
 
-	support_days = {}
-	for service in service_level.get("support_and_resolution"):
-		support_days[service.workday] = frappe._dict({
-			"start_time": service.start_time,
-			"end_time": service.end_time,
-		})
-
+	allotted_seconds = get_allotted_seconds(parameter, service_level)
+	support_days = get_support_days(service_level)
 	holidays = get_holidays(service_level.get("holiday_list"))
 	weekdays = get_weekdays()
 
@@ -385,12 +376,14 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		current_weekday = weekdays[current_date_time.weekday()]
 
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
-			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) \
-				if getdate(current_date_time) == getdate(start_date_time) and get_time_in_timedelta(current_date_time.time()) > support_days[current_weekday].start_time \
-				else support_days[current_weekday].start_time
+			if getdate(current_date_time) == getdate(start_date_time) \
+				and get_time_in_timedelta(current_date_time.time()) > support_days[current_weekday].start_time:
+				start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day)
+			else:
+				start_time = support_days[current_weekday].start_time
+
 			end_time = support_days[current_weekday].end_time
 			time_left_today = time_diff_in_seconds(end_time, start_time)
-
 			# no time left for support today
 			if time_left_today <= 0:
 				pass
@@ -412,6 +405,28 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		current_date_time = expected_time
 
 	return current_date_time
+
+
+def get_allotted_seconds(parameter, service_level):
+	allotted_seconds = 0
+	if parameter == "response":
+		allotted_seconds = service_level.get("response_time")
+	elif parameter == "resolution":
+		allotted_seconds = service_level.get("resolution_time")
+	else:
+		frappe.throw(_("{0} parameter is invalid").format(parameter))
+
+	return allotted_seconds
+
+
+def get_support_days(service_level):
+	support_days = {}
+	for service in service_level.get("support_and_resolution"):
+		support_days[service.workday] = frappe._dict({
+			"start_time": service.start_time,
+			"end_time": service.end_time,
+		})
+	return support_days
 
 
 def set_service_level_agreement_variance(doctype, doc=None):
