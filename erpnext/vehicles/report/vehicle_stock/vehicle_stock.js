@@ -138,6 +138,12 @@ frappe.query_reports["Vehicle Stock"] = {
 			style['color'] = data.status_color;
 		}
 
+		if (column.fieldname === "delivery_period" && data.delivery_date) {
+			if (frappe.datetime.get_today() > data.delivery_date) {
+				style['color'] = 'red';
+			}
+		}
+
 		return default_formatter(value, row, column, data, {css: style});
 	}
 };

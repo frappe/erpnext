@@ -197,6 +197,7 @@ class VehicleStockReport(object):
 				d.is_leased = booking_data.get('financer') and booking_data.get('finance_type') == "Leased"
 
 				d.delivery_period = booking_data.get('delivery_period')
+				d.delivery_date = booking_data.get('delivery_date')
 
 				d.bill_no = booking_data.get('bill_no')
 				d.invoice_status = booking_data.get('invoice_status')
@@ -426,7 +427,7 @@ class VehicleStockReport(object):
 				customer_name, lessee_name,
 				contact_mobile, contact_phone,
 				bill_no, invoice_status,
-				delivery_period
+				delivery_period, delivery_date
 			from `tabVehicle Booking Order`
 			where docstatus = 1 and vehicle in %s
 		""", [vehicle_names], as_dict=1)
