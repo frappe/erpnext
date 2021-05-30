@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.stock import get_warehouse_account, get_company_default_inventory_account

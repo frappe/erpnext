@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from frappe.utils.nestedset import rebuild_tree
 

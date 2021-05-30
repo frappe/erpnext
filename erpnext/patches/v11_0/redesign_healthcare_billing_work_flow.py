@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from erpnext.domains.healthcare import data

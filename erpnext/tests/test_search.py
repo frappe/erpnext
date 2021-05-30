@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import unittest
 import frappe
 from frappe.contacts.address_and_contact import filter_dynamic_link_doctypes

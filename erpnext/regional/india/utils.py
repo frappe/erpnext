@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe, re, json
 from frappe import _
 import erpnext

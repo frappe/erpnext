@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from frappe.utils import getdate, flt
 from erpnext.setup.utils import get_exchange_rate

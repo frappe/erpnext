@@ -4,7 +4,6 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe, unittest
 
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item

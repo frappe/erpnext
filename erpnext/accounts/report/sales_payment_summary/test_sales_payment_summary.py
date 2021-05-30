@@ -1,7 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import get_mode_of_payments, get_mode_of_payment_details

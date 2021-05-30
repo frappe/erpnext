@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe, json
 from frappe.utils import nowdate
 from frappe.frappeclient import FrappeClient

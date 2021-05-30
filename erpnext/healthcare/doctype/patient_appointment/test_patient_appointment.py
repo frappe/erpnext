@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, ESS LLP and Contributors
 # See license.txt
-from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter

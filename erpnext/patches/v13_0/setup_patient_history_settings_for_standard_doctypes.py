@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from erpnext.healthcare.setup import setup_patient_history_settings
 

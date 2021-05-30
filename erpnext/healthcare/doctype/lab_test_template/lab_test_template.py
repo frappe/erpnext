@@ -2,7 +2,6 @@
 # Copyright (c) 2015, ESS and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe, json
 from frappe.model.document import Document
 from frappe.model.rename_doc import rename_doc

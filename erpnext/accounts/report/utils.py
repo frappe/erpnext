@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.setup.utils import get_exchange_rate

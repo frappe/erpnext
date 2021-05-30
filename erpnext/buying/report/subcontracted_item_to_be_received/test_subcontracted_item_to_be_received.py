@@ -2,7 +2,6 @@
 # Embedded file name: /Users/anuragmishra/frappe-develop/apps/erpnext/erpnext/buying/report/subcontracted_item_to_be_received/test_subcontracted_item_to_be_received.py
 # Compiled at: 2019-05-06 09:51:46
 # Decompiled by https://python-decompiler.com
-from __future__ import unicode_literals
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

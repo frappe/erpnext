@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt, add_to_date)

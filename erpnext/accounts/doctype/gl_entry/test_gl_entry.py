@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe, unittest
 from frappe.model.naming import parse_naming_series
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry

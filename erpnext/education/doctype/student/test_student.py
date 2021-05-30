@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and Contributors
 # See license.txt
-from __future__ import unicode_literals
 from frappe.test_runner import make_test_records
 from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
 from erpnext.education.doctype.course.test_course import make_course

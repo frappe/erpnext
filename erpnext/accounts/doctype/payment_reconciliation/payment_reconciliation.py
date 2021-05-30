@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import flt, today
 from frappe import msgprint, _

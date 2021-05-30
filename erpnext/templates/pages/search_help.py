@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe, requests
 from frappe import _
 from jinja2 import utils
