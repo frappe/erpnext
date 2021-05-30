@@ -10,6 +10,8 @@
   "company",
   "purpose",
   "reset_rate",
+  "column_break_5",
+  "remarks",
   "col1",
   "amended_from",
   "posting_date",
@@ -152,6 +154,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -244,13 +247,23 @@
    "fieldtype": "Link",
    "label": "Brand",
    "options": "Brand"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-05-19 23:00:38.763254",
+ "modified": "2021-05-30 16:06:18.924568",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",

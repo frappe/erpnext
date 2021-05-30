@@ -37,7 +37,10 @@
   "section_break_14",
   "quantity_difference",
   "column_break_16",
-  "amount_difference"
+  "amount_difference",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -245,10 +248,26 @@
   {
    "fieldname": "cb_13",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2021-05-18 17:52:28.311417",
+ "modified": "2021-05-30 15:40:23.466478",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

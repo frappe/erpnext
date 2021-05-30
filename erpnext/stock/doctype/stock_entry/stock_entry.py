@@ -776,6 +776,10 @@ class StockEntry(StockController):
 						"credit": -1 * amount # put it as negative credit instead of debit purposefully
 					}, item=d))
 
+		if self.get('cost_center'):
+			for gle in gl_entries:
+				gle.cost_center = self.get('cost_center')
+
 		return gl_entries
 
 	def update_work_order(self):

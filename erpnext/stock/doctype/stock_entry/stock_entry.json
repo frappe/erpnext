@@ -23,13 +23,16 @@
   "purchase_receipt_no",
   "column_break_14",
   "remarks",
-  "project",
   "col2",
   "company",
   "amended_from",
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "more_info",
+  "project",
+  "more_info_cb_1",
+  "cost_center",
   "sb1",
   "bom_no",
   "column_break_26",
@@ -79,7 +82,7 @@
   "letter_head",
   "column_break_64",
   "select_print_heading",
-  "more_info",
+  "status_section",
   "per_transferred",
   "col5",
   "total_amount",
@@ -538,8 +541,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break"
+   "label": "More Information"
   },
   {
    "fieldname": "is_opening",
@@ -689,12 +691,29 @@
   {
    "fieldname": "column_break_61",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status",
+   "oldfieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-05-28 02:21:00.241018",
+ "modified": "2021-05-30 16:04:23.911106",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
