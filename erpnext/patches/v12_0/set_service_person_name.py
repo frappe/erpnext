@@ -1,6 +1,10 @@
 import frappe
 
 def execute():
+	domain = 'Vehicles'
+	if domain not in frappe.get_active_domains():
+		return
+
 	doctypes = [
 		'Quotation',
 		'Sales Order',
