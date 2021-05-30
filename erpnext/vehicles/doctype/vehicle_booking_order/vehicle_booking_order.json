@@ -8,8 +8,11 @@
  "engine": "InnoDB",
  "field_order": [
   "image",
+  "vehicle_quotation",
+  "column_break_3",
   "title",
   "naming_series",
+  "section_break_6",
   "company",
   "customer",
   "lessee_name",
@@ -818,6 +821,7 @@
    "depends_on": "financer",
    "fieldname": "finance_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Finance Type",
    "options": "\nFinanced\nLeased"
   },
@@ -1029,12 +1033,28 @@
    "label": "Transport Receipt No (Bilty)",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_quotation",
+   "fieldtype": "Link",
+   "label": "Vehicle Quotation",
+   "no_copy": 1,
+   "options": "Vehicle Quotation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-28 11:24:45.101774",
+ "modified": "2021-05-30 14:45:17.374814",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

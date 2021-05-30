@@ -8,6 +8,7 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 		this._super();
 		this.set_dynamic_field_label();
 		this.set_default_valid_till();
+		this.add_create_buttons();
 	},
 
 	setup_queries: function () {
@@ -43,6 +44,22 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 		}
 	},
 
+	add_create_buttons: function () {
+		if(this.frm.doc.docstatus == 1 && this.frm.doc.status !== 'Lost') {
+			if(!this.frm.doc.valid_till || frappe.datetime.get_diff(this.frm.doc.valid_till, frappe.datetime.get_today()) >= 0) {
+				this.frm.add_custom_button(__('Vehicle Booking Order'), () => this.make_vehicle_booking_order(), __('Create'));
+			}
+
+			if(this.frm.doc.status !== "Ordered") {
+				this.frm.add_custom_button(__('Set as Lost'), () => {
+					this.frm.trigger('set_as_lost_dialog');
+				});
+			}
+
+			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+	},
+
 	quotation_to: function () {
 		this.set_dynamic_field_label();
 		this.frm.set_value("party_name", null);
@@ -63,6 +80,10 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 			this.frm.set_df_property("contact_person", "label", __("Party Contact Person"));
 		}
 	},
+
+	make_vehicle_booking_order: function () {
+
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.vehicles.VehicleQuotation({frm: cur_frm}));

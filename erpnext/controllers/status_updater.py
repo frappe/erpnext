@@ -34,6 +34,13 @@ status_map = {
 		["Ordered", "has_sales_order"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
+	"Vehicle Quotation": [
+		["Draft", None],
+		["Open", "eval:self.docstatus==1"],
+		["Lost", "eval:self.status=='Lost'"],
+		["Ordered", "has_vehicle_booking_order"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
 	"Sales Order": [
 		["Draft", None],
 		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_completed < 100 and self.docstatus == 1"],

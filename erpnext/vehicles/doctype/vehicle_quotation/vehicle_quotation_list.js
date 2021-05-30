@@ -3,8 +3,8 @@ frappe.listview_settings['Vehicle Quotation'] = {
 	get_indicator: function(doc) {
 		if(doc.status==="Open") {
 			return [__("Open"), "orange", "status,=,Open"];
-		} else if(doc.status==="Booked") {
-			return [__("Booked"), "green", "status,=,Ordered"];
+		} else if(doc.status==="Ordered") {
+			return [__("Ordered"), "green", "status,=,Ordered"];
 		} else if(doc.status==="Lost") {
 			return [__("Lost"), "darkgrey", "status,=,Lost"];
 		} else if(doc.status==="Expired") {

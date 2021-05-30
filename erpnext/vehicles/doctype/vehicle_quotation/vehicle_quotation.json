@@ -574,7 +574,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nOpen\nBooked\nLost\nExpired\nCancelled",
+   "options": "Draft\nOpen\nOrdered\nLost\nExpired\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -687,7 +687,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-28 20:04:48.638217",
+ "modified": "2021-05-30 14:26:14.007623",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",
