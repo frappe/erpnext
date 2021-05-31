@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, today, get_fullname, add_days, nowdate
+from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, get_fullname, add_days, nowdate
 from erpnext.hr.utils import set_employee_name, get_leave_period, share_doc_with_approver
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -84,7 +84,7 @@ class LeaveApplication(Document):
 
 	def validate_dates(self):
 		if frappe.db.get_single_value("HR Settings", "restrict_backdated_leave_application"):
-			if self.from_date and getdate(self.from_date) < getdate(today()):
+			if self.from_date and getdate(self.from_date) < getdate():
 				allowed_role = frappe.db.get_single_value("HR Settings", "role_allowed_to_create_backdated_leave_application")
 				if allowed_role not in frappe.get_roles():
 					frappe.throw(_("Only users with the {0} role can create backdated leave applications").format(allowed_role))
