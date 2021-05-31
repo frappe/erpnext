@@ -7,14 +7,50 @@ import itertools
 from datetime import timedelta
 
 import frappe
+from frappe import _
+from math import modf
 from frappe.model.document import Document
 from frappe.utils import cint, getdate, get_datetime
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
 from erpnext.hr.doctype.employee_checkin.employee_checkin import mark_attendance_and_link_log, calculate_working_hours
 from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from datetime import timedelta
 
 class ShiftType(Document):
+	def validate(self):
+
+		self.validate_overtime()
+		self.set_working_hours()
+
+	def set_working_hours(self):
+		end_time = self.end_time.split(":")
+		start_time = self.start_time.split(":")
+
+		shift_end = timedelta(hours = int(end_time[0]), minutes =  int(end_time[1]), seconds =  int(end_time[2]))
+		shift_start = timedelta(hours =int(start_time[0]), minutes = int(start_time[1]), seconds = int(start_time[2]))
+
+		if shift_end > shift_start:
+			time_difference = shift_end - shift_start
+		else:
+			# for night shift
+			time_difference = shift_start - shift_end
+
+		self.working_time_delta = str(time_difference)
+		time_difference = str(time_difference).split(":")
+
+		if int(time_difference[0]) or int(time_difference[1]):
+			self.standard_working_time = time_difference[0] + " Hours " + time_difference[1] + " Minutes"
+
+
+
+	def validate_overtime(self):
+		if not frappe.db.get_single_value("Payroll Settings", "fetch_standard_working_hours_from_shift_type") and self.allow_overtime:
+			frappe.throw(_('Please enable "Fetch Standard Working Hours from Shift Type" in payroll Settings for Overtime.'))
+
+		if frappe.db.get_single_value("Payroll Settings", "overtime_based_on") != "Attendance" and self.allow_overtime:
+			frappe.throw(_('Please set Overtime based on "Attendance" in payroll Settings for Overtime.'))
+
 	@frappe.whitelist()
 	def process_auto_attendance(self):
 		if not cint(self.enable_auto_attendance) or not self.process_attendance_after or not self.last_sync_of_checkin:
@@ -27,10 +63,17 @@ class ShiftType(Document):
 			'shift': self.name
 		}
 		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
+		from pprint import pprint
+		pprint(logs)
 		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start'])):
+
 			single_shift_logs = list(group)
 			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
+
+			print("_______>>>>>>>>>>>>>",attendance_status, working_hours, late_entry, early_exit, in_time, out_time)
+
 			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, in_time, out_time, self.name)
+
 		for employee in self.get_assigned_employee(self.process_attendance_after, True):
 			self.mark_absent_for_dates_with_no_attendance(employee)
 
@@ -41,8 +84,10 @@ class ShiftType(Document):
 			1. These logs belongs to an single shift, single employee and is not in a holiday date.
 			2. Logs are in chronological order
 		"""
+
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
+
 		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
 
@@ -51,8 +96,10 @@ class ShiftType(Document):
 
 		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
 			return 'Absent', total_working_hours, late_entry, early_exit, in_time, out_time
+
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
 			return 'Half Day', total_working_hours, late_entry, early_exit, in_time, out_time
+
 		return 'Present', total_working_hours, late_entry, early_exit, in_time, out_time
 
 	def mark_absent_for_dates_with_no_attendance(self, employee):

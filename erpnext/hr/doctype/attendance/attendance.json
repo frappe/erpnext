@@ -11,7 +11,6 @@
   "naming_series",
   "employee",
   "employee_name",
-  "working_hours",
   "status",
   "leave_type",
   "leave_application",
@@ -20,13 +19,22 @@
   "company",
   "department",
   "attendance_request",
-  "details_section",
+  "shift_details_section",
   "shift",
   "in_time",
   "out_time",
   "column_break_18",
+  "standard_working_time",
+  "standard_working_time_delta",
+  "working_time",
+  "working_timedelta",
   "late_entry",
   "early_exit",
+  "overtime_details_section",
+  "overtime_type",
+  "overtime_duration",
+  "column_break_27",
+  "overtime_duration_words",
   "amended_from"
  ],
  "fields": [
@@ -67,14 +75,6 @@
    "label": "Employee Name",
    "oldfieldname": "employee_name",
    "oldfieldtype": "Data",
-   "read_only": 1
-  },
-  {
-   "depends_on": "working_hours",
-   "fieldname": "working_hours",
-   "fieldtype": "Float",
-   "label": "Working Hours",
-   "precision": "1",
    "read_only": 1
   },
   {
@@ -125,6 +125,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "employee.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -146,7 +147,8 @@
    "fieldname": "shift",
    "fieldtype": "Link",
    "label": "Shift",
-   "options": "Shift Type"
+   "options": "Shift Type",
+   "read_only": 1
   },
   {
    "fieldname": "attendance_request",
@@ -178,11 +180,6 @@
    "label": "Early Exit"
   },
   {
-   "fieldname": "details_section",
-   "fieldtype": "Section Break",
-   "label": "Details"
-  },
-  {
    "depends_on": "shift",
    "fieldname": "in_time",
    "fieldtype": "Datetime",
@@ -199,13 +196,78 @@
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "overtime_type",
+   "fieldname": "overtime_details_section",
+   "fieldtype": "Section Break",
+   "label": "Overtime Details"
+  },
+  {
+   "depends_on": "overtime_type",
+   "fieldname": "overtime_type",
+   "fieldtype": "Link",
+   "label": "Overtime Type",
+   "options": "Overtime Type",
+   "read_only": 1
+  },
+  {
+   "description": "Shift duration for a day",
+   "fetch_from": "shift.standard_working_time",
+   "fieldname": "standard_working_time",
+   "fieldtype": "Data",
+   "label": " Standard Working Time",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shift.working_time_delta",
+   "fieldname": "standard_working_time_delta",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Standard Working Time(Delta)"
+  },
+  {
+   "depends_on": "working_time",
+   "fieldname": "working_time",
+   "fieldtype": "Data",
+   "label": "Total Working Time",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "working_timedelta",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Working Time(Delta)"
+  },
+  {
+   "fieldname": "overtime_duration_words",
+   "fieldtype": "Data",
+   "label": "Overtime Duration(Words)",
+   "read_only": 1
+  },
+  {
+   "default": "00:00:00",
+   "fieldname": "overtime_duration",
+   "fieldtype": "Time",
+   "label": "Overtime Duration"
+  },
+  {
+   "depends_on": "shift",
+   "fieldname": "shift_details_section",
+   "fieldtype": "Section Break",
+   "label": "Shift Details"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2021-05-26 16:44:33.219313",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

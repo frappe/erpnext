@@ -7,8 +7,8 @@ import frappe
 from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, get_datetime, formatdate
 from erpnext.hr.utils import validate_active_employee
+from frappe.utils import cstr, get_datetime, formatdate, getdate
 
 class Attendance(Document):
 	def validate(self):
@@ -19,6 +19,8 @@ class Attendance(Document):
 		self.validate_duplicate_record()
 		self.validate_employee_status()
 		self.check_leave_record()
+		self.set_overtime_type()
+		self.set_default_shift()
 
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
@@ -44,6 +46,13 @@ class Attendance(Document):
 	def validate_employee_status(self):
 		if frappe.db.get_value("Employee", self.employee, "status") == "Inactive":
 			frappe.throw(_("Cannot mark attendance for an Inactive employee {0}").format(self.employee))
+
+	def set_default_shift(self):
+		if not self.shift:
+			self.shift = get_shift_type(self.employee, self.attendance_date)
+
+	def set_overtime_type(self):
+		self.overtime_type = get_overtime_type(self.employee)
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""
@@ -79,6 +88,63 @@ class Attendance(Document):
 		 	self.employee)
 		if not emp:
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
+
+	def calculate_overtime_duration(self):
+		#this method is only for Calculation of overtime based on Attendance through Employee Checkins
+		overtime_duration = self.working_timedelta - self.standard_working_time_delta
+		self.overtime_duration = overtime_duration
+		overtime_duration = str(overtime_duration).split(':')
+		if int(overtime_duration[0]) or int(overtime_duration[1]):
+			self.overtime_duration_words = overtime_duration[0] + " Hours " + overtime_duration[1] + " Minutes"
+
+@frappe.whitelist()
+def get_shift_type(employee, attendance_date):
+	emp_shift = frappe.db.get_value("Employee", employee, "default_shift")
+
+	shift_assignment = frappe.db.sql('''SELECT name, shift_type
+		FROM
+			`tabShift Assignment`
+		WHERE
+			docstatus = 1
+			AND employee = %(employee)s AND start_date <= %(attendance_date)s
+			AND (end_date >= %(attendance_date)s OR end_date IS null)
+			AND status = "Active"
+		''', {
+			"employee": employee,
+			"attendance_date": attendance_date,
+		}, as_dict = 1)
+
+	if len(shift_assignment):
+		shift = shift_assignment[0].shift_type
+	else:
+		shift = emp_shift
+
+	return shift
+
+@frappe.whitelist()
+def get_overtime_type(employee):
+	overtime_based_on = frappe.db.get_single_value("Payroll Settings", "overtime_based_on")
+	if overtime_based_on == "Attendance":
+
+		emp_department = frappe.db.get_value("Employee", employee, "department")
+		if emp_department:
+			overtime_type = frappe.get_list("Overtime Type", filters={"party_type": "Department", "party": emp_department}, fields=['name'])
+			if len(overtime_type):
+				overtime_type = overtime_type[0].name
+
+		emp_grade = frappe.db.get_value("Employee", employee, "grade")
+		if emp_grade:
+			overtime_type = frappe.get_list("Overtime Type", filters={"party_type": "Employee Grade", "party": emp_grade},
+				fields=['name'])
+			if len(overtime_type):
+
+				overtime_type = overtime_type[0].name
+
+		overtime_type = frappe.get_list("Overtime Type", filters={"party_type": "Employee", "party": employee}, fields=['name'])
+		if len(overtime_type):
+			overtime_type = overtime_type[0].name
+
+		return overtime_type
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

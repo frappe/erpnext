@@ -19,9 +19,11 @@
   "password_policy",
   "section_break_12",
   "overtime_based_on",
+  "maximum_overtime_hours_allowed",
   "overtime_salary_component",
   "column_break_14",
-  "fetch_standard_working_hours_from_shift_type"
+  "fetch_standard_working_hours_from_shift_type",
+  "is_overtime_approval_required"
  ],
  "fields": [
   {
@@ -105,7 +107,8 @@
   },
   {
    "fieldname": "section_break_12",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Overtime Calculation"
   },
   {
    "default": "0",
@@ -124,13 +127,25 @@
    "fieldtype": "Select",
    "label": "Calculate Overtime Hours  Based On",
    "options": "Attendance\nTimesheet"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_overtime_approval_required",
+   "fieldtype": "Check",
+   "label": "Is Overtime Approval Required"
+  },
+  {
+   "description": "Overtime payment will not be given for more than the defined hours limit.",
+   "fieldname": "maximum_overtime_hours_allowed",
+   "fieldtype": "Int",
+   "label": "Maximum Overtime Hours Allowed For Payment "
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-10 12:56:08.161319",
+ "modified": "2021-05-26 15:56:25.313007",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",

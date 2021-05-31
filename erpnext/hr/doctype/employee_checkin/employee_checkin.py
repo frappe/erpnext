@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import now, cint, get_datetime
 from frappe.model.document import Document
+from datetime import timedelta
+from math import modf
 from frappe import _
 
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift
@@ -38,8 +40,12 @@ class EmployeeCheckin(Document):
 				self.shift_actual_end = shift_actual_timings[1]
 				self.shift_start = shift_actual_timings[2].start_datetime
 				self.shift_end = shift_actual_timings[2].end_datetime
-		else:
-			self.shift = None
+		elif frappe.db.get_value("Shift Type", shift_actual_timings[2].shift_type.name, "allow_overtime"):
+				#because after Actual time it takes check-in/out invalid
+				#if employee checkout late or check-in before before shift timing adding time buffer.
+				self.shift = shift_actual_timings[2].shift_type.name
+				self.shift_start = shift_actual_timings[2].start_datetime
+				self.shift_end = shift_actual_timings[2].end_datetime
 
 @frappe.whitelist()
 def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=None, log_type=None, skip_auto_attendance=0, employee_fieldname='attendance_device_id'):
@@ -56,7 +62,8 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	if not employee_field_value or not timestamp:
 		frappe.throw(_("'employee_field_value' and 'timestamp' are required."))
 
-	employee = frappe.db.get_values("Employee", {employee_fieldname: employee_field_value}, ["name", "employee_name", employee_fieldname], as_dict=True)
+	employee = frappe.db.get_values("Employee", {employee_fieldname: employee_field_value},
+		["name", "employee_name", employee_fieldname], as_dict=True)
 	if employee:
 		employee = employee[0]
 	else:
@@ -93,12 +100,21 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 	elif attendance_status in ('Present', 'Absent', 'Half Day'):
 		employee_doc = frappe.get_doc('Employee', employee)
 		if not frappe.db.exists('Attendance', {'employee':employee, 'attendance_date':attendance_date, 'docstatus':('!=', '2')}):
+
+			working_timedelta = '00:00:00'
+			working_time = None
+			working_time = modf(working_hours)
+			if working_time[1] or working_time[0]:
+				working_timedelta = timedelta(hours =int(working_time[1]), minutes = int(working_time[0] * 60))
+				working_time = str(int(working_time[1])) + ' Hours ' + str(int(working_time[0] * 60)) + ' Minutes'
+
 			doc_dict = {
 				'doctype': 'Attendance',
 				'employee': employee,
 				'attendance_date': attendance_date,
 				'status': attendance_status,
-				'working_hours': working_hours,
+				'working_time': working_time,
+				'working_timedelta': working_timedelta,
 				'company': employee_doc.company,
 				'shift': shift,
 				'late_entry': late_entry,
@@ -106,7 +122,11 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				'in_time': in_time,
 				'out_time': out_time
 			}
+
 			attendance = frappe.get_doc(doc_dict).insert()
+			if frappe.db.get_value("Shift type", shift, "allow_overtime"):
+				attendance.calculate_overtime_duration()
+			attendance.save()
 			attendance.submit()
 			frappe.db.sql("""update `tabEmployee Checkin`
 				set attendance = %s
@@ -121,10 +141,10 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 		frappe.throw(_('{} is an invalid Attendance Status.').format(attendance_status))
 
 
+
 def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 	"""Given a set of logs in chronological order calculates the total working hours based on the parameters.
 	Zero is returned for all invalid cases.
-
 	:param logs: The List of 'Employee Checkin'.
 	:param check_in_out_type: One of: 'Alternating entries as IN and OUT during the same shift', 'Strictly based on Log Type in Employee Checkin'
 	:param working_hours_calc_type: One of: 'First Check-in and Last Check-out', 'Every Valid Check-in and Check-out'

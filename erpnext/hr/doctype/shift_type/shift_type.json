@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "prompt",
  "creation": "2018-04-13 16:22:52.954783",
  "doctype": "DocType",
@@ -7,17 +8,22 @@
  "field_order": [
   "start_time",
   "end_time",
+  "standard_working_time",
+  "working_time_delta",
   "column_break_3",
   "holiday_list",
   "enable_auto_attendance",
+  "allow_overtime",
   "auto_attendance_settings_section",
   "determine_check_in_and_check_out",
   "working_hours_calculation_based_on",
+  "column_break_10",
   "begin_check_in_before_shift_start_time",
   "allow_check_out_after_shift_end_time",
-  "column_break_10",
+  "section_break_15",
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
+  "column_break_19",
   "process_attendance_after",
   "last_sync_of_checkin",
   "grace_period_settings_auto_attendance_section",
@@ -29,6 +35,7 @@
  ],
  "fields": [
   {
+   "default": "00:00:00",
    "fieldname": "start_time",
    "fieldtype": "Time",
    "in_list_view": 1,
@@ -36,6 +43,7 @@
    "reqd": 1
   },
   {
+   "default": "00:00:00",
    "fieldname": "end_time",
    "fieldtype": "Time",
    "in_list_view": 1,
@@ -84,6 +92,7 @@
   },
   {
    "default": "60",
+   "depends_on": "eval: doc.allow_overtime == 0",
    "description": "The time before the shift start time during which Employee Check-in is considered for attendance.",
    "fieldname": "begin_check_in_before_shift_start_time",
    "fieldtype": "Int",
@@ -121,6 +130,7 @@
   },
   {
    "default": "60",
+   "depends_on": "eval: doc.allow_overtime == 0",
    "description": "Time after the end of shift during which check-out is considered for attendance.",
    "fieldname": "allow_check_out_after_shift_end_time",
    "fieldtype": "Int",
@@ -156,9 +166,39 @@
    "fieldname": "last_sync_of_checkin",
    "fieldtype": "Datetime",
    "label": "Last Sync of Checkin"
+  },
+  {
+   "fieldname": "standard_working_time",
+   "fieldtype": "Data",
+   "label": "Standard Working Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "working_time_delta",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Working time(delta)"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_auto_attendance",
+   "description": "Overtime will be calculated and Overtime Duration will reflect in attendance records. Check Payroll Settings for more options.  ",
+   "fieldname": "allow_overtime",
+   "fieldtype": "Check",
+   "label": "Allow Overtime"
+  },
+  {
+   "depends_on": "enable_auto_attendance",
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-07-30 01:05:24.660666",
+ "links": [],
+ "modified": "2021-05-26 14:10:09.574202",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",
