@@ -12,23 +12,26 @@
   "organization_lead",
   "lead_details",
   "naming_series",
-  "lead_name",
+  "salutation",
   "company_name",
   "email_id",
   "col_break123",
   "lead_owner",
-  "status",
-  "salutation",
+  "lead_name",
   "designation",
+  "customer",
+  "image",
+  "column_break_17",
+  "status",
   "gender",
   "source",
-  "customer",
   "campaign_name",
-  "image",
   "section_break_12",
   "contact_by",
+  "lead_followup_detail",
   "column_break_14",
   "contact_date",
+  "column_break_22",
   "ends_on",
   "notes_section",
   "notes",
@@ -224,9 +227,9 @@
    "no_copy": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "notes_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Notes"
   },
   {
@@ -454,13 +457,27 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lead_followup_detail",
+   "fieldtype": "Table",
+   "label": "Lead Followup Detail",
+   "options": "Lead Followup Detail"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2021-01-06 19:39:58.748978",
+ "modified": "2021-05-27 16:42:55.453326",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
