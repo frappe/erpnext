@@ -93,19 +93,38 @@ class Lead(SellingController):
 		return frappe.db.get_value("Opportunity", {"party_name": self.name, "status": ["!=", "Lost"]})
 
 	def has_quotation(self):
-		return frappe.db.get_value("Quotation", {
+		quotation = frappe.db.get_value("Quotation", {
+			"quotation_to": "Lead",
 			"party_name": self.name,
 			"docstatus": 1,
 			"status": ["!=", "Lost"]
-
 		})
 
+		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
+			"quotation_to": "Lead",
+			"party_name": self.name,
+			"docstatus": 1,
+			"status": ["!=", "Lost"]
+		})
+
+		return quotation or vehicle_quotation
+
 	def has_lost_quotation(self):
-		return frappe.db.get_value("Quotation", {
+		quotation = frappe.db.get_value("Quotation", {
+			"quotation_to": "Lead",
 			"party_name": self.name,
 			"docstatus": 1,
 			"status": "Lost"
 		})
+
+		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
+			"quotation_to": "Lead",
+			"party_name": self.name,
+			"docstatus": 1,
+			"status": "Lost"
+		})
+
+		return quotation or vehicle_quotation
 
 	def set_lead_name(self):
 		if not self.lead_name:

@@ -3,7 +3,15 @@
 
 frappe.provide("erpnext.vehicles");
 
+{% include 'erpnext/selling/quotation_common.js' %}
+
 erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.extend({
+	setup: function () {
+		this.frm.custom_make_buttons = {
+			'Vehicle Booking Order': 'Vehicle Booking Order'
+		}
+	},
+
 	refresh: function () {
 		this._super();
 		this.set_dynamic_field_label();
@@ -82,7 +90,10 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 	},
 
 	make_vehicle_booking_order: function () {
-
+		frappe.model.open_mapped_doc({
+			method: "erpnext.vehicles.doctype.vehicle_quotation.vehicle_quotation.make_vehicle_booking_order",
+			frm: this.frm
+		});
 	}
 });
 

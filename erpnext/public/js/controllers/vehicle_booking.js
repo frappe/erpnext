@@ -68,6 +68,9 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 			this.frm.set_query("vehicle", () => me.vehicle_query());
 		}
 
+		if (this.frm.fields_dict.color) {
+			this.frm.set_query("color", () => me.color_query());
+		}
 		if (this.frm.fields_dict.color_1) {
 			this.frm.set_query("color_1", () => me.color_query());
 		}

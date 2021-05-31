@@ -26,6 +26,7 @@ class VehicleBookingOrder(VehicleBookingController):
 
 		self.ensure_supplier_is_not_blocked()
 		self.validate_color()
+		self.validate_vehicle_quotation()
 
 		self.calculate_outstanding_amount()
 		self.validate_payment_adjustment()
@@ -44,10 +45,12 @@ class VehicleBookingOrder(VehicleBookingController):
 		self.validate_color_mandatory()
 
 	def on_submit(self):
+		self.update_vehicle_quotation()
 		self.update_allocation_status()
 		self.update_vehicle_status()
 
 	def on_cancel(self):
+		self.update_vehicle_quotation()
 		self.update_allocation_status()
 		self.update_vehicle_status()
 		self.db_set('status', 'Cancelled')
@@ -162,6 +165,23 @@ class VehicleBookingOrder(VehicleBookingController):
 		# remove previous color if Draft or if current color and previous color are the same
 		if self.docstatus == 0 or (self.docstatus == 1 and self.previous_color == self.color_1):
 			self.previous_color = None
+
+	def validate_vehicle_quotation(self):
+		if self.vehicle_quotation:
+			quotation_company = frappe.db.get_value("Vehicle Quotation", self.vehicle_quotation, 'company')
+			if self.company != quotation_company:
+				frappe.throw(_("Company in Vehicle Quotation {0} does not match with Vehicle Booking Order")
+					.format(self.vehicle_quotation))
+
+	def update_vehicle_quotation(self):
+		if self.vehicle_quotation:
+			doc = frappe.get_doc("Vehicle Quotation", self.vehicle_quotation)
+			if doc.docstatus == 2:
+				frappe.throw(_("Vehicle Quotation {0} is cancelled").format(self.vehicle_quotation))
+
+			doc.set_status(update=True)
+			doc.notify_update()
+			doc.update_opportunity()
 
 	def update_vehicle_status(self):
 		if self.vehicle:

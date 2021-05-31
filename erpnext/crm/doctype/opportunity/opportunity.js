@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 {% include 'erpnext/selling/sales_common.js' %}
+{% include 'erpnext/selling/quotation_common.js' %}
 frappe.provide("erpnext.crm");
 
 cur_frm.email_field = "contact_email";
