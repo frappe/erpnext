@@ -60,8 +60,7 @@ class TestGSTR3BReport(unittest.TestCase):
 
 		output = json.loads(report.json_output)
 
-		self.assertEqual(output["sup_details"]["osup_det"]["iamt"], 36),
-		self.assertEqual(output["sup_details"]["osup_zero"]["iamt"], 18),
+		self.assertEqual(output["sup_details"]["osup_det"]["iamt"], 54)
 		self.assertEqual(output["inter_sup"]["unreg_details"][0]["iamt"], 18),
 		self.assertEqual(output["sup_details"]["osup_nil_exmp"]["txval"], 100),
 		self.assertEqual(output["inward_sup"]["isup_details"][0]["intra"], 250)
