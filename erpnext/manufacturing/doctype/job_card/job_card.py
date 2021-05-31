@@ -25,6 +25,7 @@ class JobCard(Document):
 		self.set_status()
 		self.validate_operation_id()
 		self.validate_sequence_id()
+		self.set_expected_and_actual_time()
 
 	def validate_time_logs(self):
 		self.total_completed_qty = 0.0
@@ -49,8 +50,11 @@ class JobCard(Document):
 
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
-	def get_overlap_for(self, args, check_next_available_slot=False):
+	def get_overlap_for(self, args, check_next_available_slot=False, doctype=None):
 		production_capacity = 1
+
+		if not doctype:
+			doctype = 'Job Card Time Log'
 
 		if self.workstation:
 			production_capacity = frappe.get_cached_value("Workstation",
@@ -67,14 +71,14 @@ class JobCard(Document):
 			extra_cond = " or (%(from_time)s <= jctl.from_time and %(to_time)s <= jctl.to_time)"
 
 		existing = frappe.db.sql("""select jc.name as name, jctl.to_time from
-			`tabJob Card Time Log` jctl, `tabJob Card` jc where jctl.parent = jc.name and
+			`tab{2}` jctl, `tabJob Card` jc where jctl.parent = jc.name and
 			(
 				(%(from_time)s > jctl.from_time and %(from_time)s < jctl.to_time) or
 				(%(to_time)s > jctl.from_time and %(to_time)s < jctl.to_time) or
 				(%(from_time)s <= jctl.from_time and %(to_time)s >= jctl.to_time) {0}
 			)
 			and jctl.name != %(name)s and jc.name != %(parent)s and jc.docstatus < 2 {1}
-			order by jctl.to_time desc limit 1""".format(extra_cond, validate_overlap_for),
+			order by jctl.to_time desc limit 1""".format(extra_cond, validate_overlap_for, doctype),
 			{
 				"from_time": args.from_time,
 				"to_time": args.to_time,
@@ -86,6 +90,10 @@ class JobCard(Document):
 
 		if existing and production_capacity > len(existing):
 			return
+
+		if not existing and doctype == 'Job Card Time Log':
+			self.get_overlap_for(args, doctype='Job Card Schedule Time',
+				check_next_available_slot=check_next_available_slot)
 
 		return existing[0] if existing else None
 
@@ -99,6 +107,27 @@ class JobCard(Document):
 
 			self.validate_overlap_for_workstation(args, row)
 			self.check_workstation_time(row)
+
+	def set_expected_and_actual_time(self):
+		# set expected start and end time
+		for doctype, time_fields in {'scheduled_time_logs': ['expected_start_time', 'expected_end_time'],
+			'time_logs': ['actual_start_time', 'actual_end_time']}.items():
+			if not self.get(doctype):
+				continue
+
+			time_list = []
+			for row in self.get(doctype):
+				for field in ['from_time', 'to_time']:
+					if row.get(field):
+						time_list.append(get_datetime(row.get(field)))
+
+			if time_list:
+				self.set(time_fields[0], min(time_list))
+				if time_fields[1] == 'actual_end_time' and not self.time_logs[-1].to_time:
+					self.set(time_fields[1], '')
+					return
+
+				self.set(time_fields[1], max(time_list))
 
 	def validate_overlap_for_workstation(self, args, row):
 		# get the last record based on the to time from the job card
@@ -159,10 +188,9 @@ class JobCard(Document):
 				get_time(workstation_doc.working_hours[0].start_time))
 
 	def update_time_logs(self, row):
-		self.append("time_logs", {
+		self.append("scheduled_time_logs", {
 			"from_time": row.planned_start_time,
 			"to_time": row.planned_end_time,
-			"completed_qty": 0,
 			"time_in_mins": time_diff_in_minutes(row.planned_end_time, row.planned_start_time),
 		})
 

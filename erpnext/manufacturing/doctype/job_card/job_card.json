@@ -27,12 +27,20 @@
   "employee_name",
   "status",
   "project",
+  "scheduled_time_section",
+  "scheduled_time_logs",
+  "section_break_24",
+  "expected_start_time",
+  "column_break_26",
+  "expected_end_time",
   "timing_detail",
   "time_logs",
   "section_break_13",
   "total_completed_qty",
   "total_time_in_mins",
   "column_break_15",
+  "actual_start_time",
+  "actual_end_time",
   "section_break_8",
   "items",
   "more_information",
@@ -115,7 +123,7 @@
   {
    "fieldname": "timing_detail",
    "fieldtype": "Section Break",
-   "label": "Timing Detail"
+   "label": "Actual Time"
   },
   {
    "fieldname": "employee",
@@ -314,11 +322,67 @@
    "label": "Quality Inspection",
    "no_copy": 1,
    "options": "Quality Inspection"
+  },
+  {
+   "fieldname": "scheduled_time_logs",
+   "fieldtype": "Table",
+   "label": "Scheduled Time Logs",
+   "no_copy": 1,
+   "options": "Job Card Schedule Time",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "scheduled_time_section",
+   "fieldtype": "Section Break",
+   "label": "Scheduled Time"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "expected_start_time",
+   "fieldtype": "Datetime",
+   "label": "Expected Start Time",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_end_time",
+   "fieldtype": "Datetime",
+   "label": "Expected End Time",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_start_time",
+   "fieldtype": "Datetime",
+   "label": "Actual Start Time",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_end_time",
+   "fieldtype": "Datetime",
+   "label": "Actual End Time",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-19 18:26:50.531664",
+ "modified": "2021-05-31 13:40:17.067179",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

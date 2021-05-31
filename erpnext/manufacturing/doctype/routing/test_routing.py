@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import unittest
 import frappe
+from frappe.utils import now
 from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -38,6 +39,11 @@ class TestRouting(unittest.TestCase):
 		for data in frappe.get_all("Job Card",
 			filters={"work_order": wo_doc.name}, order_by="sequence_id desc"):
 			job_card_doc = frappe.get_doc("Job Card", data.name)
+			job_card_doc.append('time_logs', {
+				'completed_qty': 10,
+				'from_time': now(),
+				'time_in_mins': 20
+			})
 			job_card_doc.time_logs[0].completed_qty = 10
 			if job_card_doc.sequence_id != 1:
 				self.assertRaises(OperationSequenceError, job_card_doc.save)
