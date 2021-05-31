@@ -1137,7 +1137,6 @@ class SalesInvoice(SellingController):
 		"""
 		self.set_serial_no_against_delivery_note()
 		self.validate_serial_against_delivery_note()
-		self.validate_serial_against_sales_invoice()
 
 	def set_serial_no_against_delivery_note(self):
 		for item in self.items:
@@ -1167,26 +1166,6 @@ class SalesInvoice(SellingController):
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
 				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
 					item.idx, item.qty, item.item_code, len(si_serial_nos)))
-
-	def validate_serial_against_sales_invoice(self):
-		""" check if serial number is already used in other sales invoice """
-		for item in self.items:
-			if not item.serial_no:
-				continue
-
-			for serial_no in item.serial_no.split("\n"):
-				serial_no_details = frappe.db.get_value("Serial No", serial_no,
-					["sales_invoice", "item_code"], as_dict=1)
-
-				if not serial_no_details:
-					continue
-
-				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
-					and self.name != serial_no_details.sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
-					if sales_invoice_company == self.company:
-						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}")
-							.format(serial_no, serial_no_details.sales_invoice))
 
 	def update_project(self):
 		if self.project:
