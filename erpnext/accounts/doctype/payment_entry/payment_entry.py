@@ -93,13 +93,13 @@ class PaymentEntry(AccountsController):
 			customer = frappe.get_doc("Customer", self.party)
 			if customer:
 				customer.credit += self.paid_amount
-				customer.remaining_balance += self.paid_amount
+				customer.remaining_balance -= self.paid_amount
 				customer.save()
 		elif self.party_type == "Supplier":
 			supplier = frappe.get_doc("Supplier", self.party)
 			if supplier:
 				supplier.credit += self.paid_amount
-				supplier.remaining_balance += self.paid_amount
+				supplier.remaining_balance -= self.paid_amount
 				supplier.save()
 
 	def validate_duplicate_entry(self):

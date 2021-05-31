@@ -40,6 +40,6 @@ class CustomerRetention(Document):
 		customer = frappe.get_doc("Customer", self.customer)
 		if customer:
 			customer.credit += self.total_withheld
-			customer.remaining_balance += self.total_withheld
+			customer.remaining_balance -= self.total_withheld
 			customer.save()
 

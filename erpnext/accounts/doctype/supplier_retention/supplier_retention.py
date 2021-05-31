@@ -43,7 +43,7 @@ class SupplierRetention(Document):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
 			supplier.credit += self.total_withheld
-			supplier.remaining_balance += self.total_withheld
+			supplier.remaining_balance -= self.total_withheld
 			supplier.save()
 
 	def assign_cai(self):
