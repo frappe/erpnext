@@ -4,35 +4,22 @@
 frappe.ui.form.on('Leave Policy Assignment', {
 	onload: function(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
-	},
 
-	refresh: function(frm) {
-		if (frm.doc.docstatus === 1 && frm.doc.leaves_allocated === 0) {
-			frm.add_custom_button(__("Grant Leave"), function() {
-
-				frappe.call({
-					doc: frm.doc,
-					method: "grant_leave_alloc_for_employee",
-					callback: function(r) {
-						let leave_allocations = r.message;
-						let msg = frm.events.get_success_message(leave_allocations);
-						frappe.msgprint(msg);
-						cur_frm.refresh();
-					}
-				});
-			});
-		}
-	},
-
-	get_success_message: function(leave_allocations) {
-		let msg = __("Leaves has been granted successfully");
-		msg += "<br><table class='table table-bordered'>";
-		msg += "<tr><th>"+__('Leave Type')+"</th><th>"+__("Leave Allocation")+"</th><th>"+__("Leaves Granted")+"</th><tr>";
-		for (let key in leave_allocations) {
-			msg += "<tr><th>"+key+"</th><td>"+leave_allocations[key]["name"]+"</td><td>"+leave_allocations[key]["leaves"]+"</td></tr>";
-		}
-		msg += "</table>";
-		return msg;
+		frm.set_query('leave_policy', function() {
+			return {
+				filters: {
+					"docstatus": 1
+				}
+			};
+		});
+		frm.set_query('leave_period', function() {
+			return {
+				filters: {
+					"is_active": 1,
+					"company": frm.doc.company
+				}
+			};
+		});
 	},
 
 	assignment_based_on: function(frm) {

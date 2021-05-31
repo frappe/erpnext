@@ -614,3 +614,12 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
 	else:
 		return None
+
+@frappe.whitelist()
+def create_transaction_deletion_request(company):
+	tdr = frappe.get_doc({
+		'doctype': 'Transaction Deletion Record',
+		'company': company
+	})
+	tdr.insert()
+	tdr.submit()

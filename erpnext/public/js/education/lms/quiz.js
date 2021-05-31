@@ -118,7 +118,7 @@ class Quiz {
 			quiz_response: this.get_selected(),
 			course: this.course,
 			program: this.program,
-			time_taken: this.is_time_bound ? this.time_taken : ""
+			time_taken: this.is_time_bound ? this.time_taken : 0
 		}).then(res => {
 			this.submit_btn.remove()
 			if (!res.message) {

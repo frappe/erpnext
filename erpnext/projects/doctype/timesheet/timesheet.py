@@ -14,6 +14,7 @@ from frappe.model.document import Document
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
+from erpnext.setup.utils import get_exchange_rate
 
 class OverlapError(frappe.ValidationError): pass
 class OverWorkLoggedError(frappe.ValidationError): pass
@@ -37,9 +38,9 @@ class Timesheet(Document):
 		self.total_hours = 0.0
 		self.total_billable_hours = 0.0
 		self.total_billed_hours = 0.0
-		self.total_billable_amount = 0.0
-		self.total_costing_amount = 0.0
-		self.total_billed_amount = 0.0
+		self.total_billable_amount = self.base_total_billable_amount = 0.0
+		self.total_costing_amount = self.base_total_costing_amount = 0.0
+		self.total_billed_amount = self.base_total_billed_amount = 0.0
 
 		for d in self.get("time_logs"):
 			self.update_billing_hours(d)
@@ -47,10 +48,13 @@ class Timesheet(Document):
 
 			self.total_hours += flt(d.hours)
 			self.total_costing_amount += flt(d.costing_amount)
-			if d.billable:
+			self.base_total_costing_amount += flt(d.base_costing_amount)
+			if d.is_billable:
 				self.total_billable_hours += flt(d.billing_hours)
 				self.total_billable_amount += flt(d.billing_amount)
+				self.base_total_billable_amount += flt(d.base_billing_amount)
 				self.total_billed_amount += flt(d.billing_amount) if d.sales_invoice else 0.0
+				self.base_total_billed_amount += flt(d.base_billing_amount) if d.sales_invoice else 0.0
 				self.total_billed_hours += flt(d.billing_hours) if d.sales_invoice else 0.0
 
 	def calculate_percentage_billed(self):
@@ -59,7 +63,7 @@ class Timesheet(Document):
 			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
 
 	def update_billing_hours(self, args):
-		if args.billable:
+		if args.is_billable:
 			if flt(args.billing_hours) == 0.0:
 				args.billing_hours = args.hours
 		else:
@@ -133,16 +137,20 @@ class Timesheet(Document):
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
 			self.validate_overlap(data)
-			self.validate_task_project()
+			self.set_project(data)
+			self.validate_project(data)
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single('Projects Settings')
 		self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
 		self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
 
-	def validate_task_project(self):
-		for log in self.time_logs:
-			log.project = log.project or frappe.db.get_value("Task", log.task, "project")
+	def set_project(self, data):
+		data.project = data.project or frappe.db.get_value("Task", data.task, "project")
+
+	def validate_project(self, data):
+		if self.parent_project and self.parent_project != data.project:
+			frappe.throw(_("Row {0}: Project must be same as the one set in the Timesheet: {1}.").format(data.idx, self.parent_project))
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
 		if not value or ignore_validation:
@@ -189,7 +197,7 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for data in self.time_logs:
-			if data.activity_type or data.billable:
+			if data.activity_type or data.is_billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
 				hours = data.billing_hours or 0
 				costing_hours = data.billing_hours or data.hours or 0
@@ -200,20 +208,29 @@ class Timesheet(Document):
 					data.costing_amount = data.costing_rate * costing_hours
 
 	def update_time_rates(self, ts_detail):
-		if not ts_detail.billable:
+		if not ts_detail.is_billable:
 			ts_detail.billing_rate = 0.0
 
 @frappe.whitelist()
-def get_projectwise_timesheet_data(project, parent=None, from_time=None, to_time=None):
+def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
 	condition = ''
+	if project:
+		condition += "and tsd.project = %(project)s"
 	if parent:
-		condition = "AND parent = %(parent)s"
+		condition += "AND tsd.parent = %(parent)s"
 	if from_time and to_time:
-		condition += "AND from_time BETWEEN %(from_time)s AND %(to_time)s"
+		condition += "AND CAST(tsd.from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
 
-	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt
-			from `tabTimesheet Detail` where parenttype = 'Timesheet' and docstatus=1 and project = %(project)s {0} and billable = 1
-			and sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
+	return frappe.db.sql("""SELECT tsd.name as name,
+				tsd.parent as parent, tsd.billing_hours as billing_hours,
+				tsd.billing_amount as billing_amount, tsd.activity_type as activity_type,
+				tsd.description as description, ts.currency as currency
+			FROM `tabTimesheet Detail` tsd
+			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent
+			WHERE tsd.parenttype = 'Timesheet'
+				and tsd.docstatus=1 {0}
+				and tsd.is_billable = 1
+				and tsd.sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -250,7 +267,7 @@ def get_timesheet_data(name, project):
 	}
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, item_code=None, customer=None):
+def make_sales_invoice(source_name, item_code=None, customer=None, currency=None):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc('Timesheet', source_name)
 
@@ -268,6 +285,9 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 	if customer:
 		target.customer = customer
 
+	if currency:
+		target.currency = currency
+
 	if item_code:
 		target.append('items', {
 			'item_code': item_code,
@@ -275,11 +295,16 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 			'rate': billing_rate
 		})
 
-	target.append('timesheets', {
-		'time_sheet': timesheet.name,
-		'billing_hours': hours,
-		'billing_amount': billing_amount
-	})
+	for time_log in timesheet.time_logs:
+		if time_log.is_billable:
+			target.append('timesheets', {
+				'time_sheet': timesheet.name,
+				'billing_hours': time_log.billing_hours,
+				'billing_amount': time_log.billing_amount,
+				'timesheet_detail': time_log.name,
+				'activity_type': time_log.activity_type,
+				'description': time_log.description
+			})
 
 	target.run_method("calculate_billing_amount_for_timesheet")
 	target.run_method("set_missing_values")
@@ -309,12 +334,17 @@ def set_missing_values(time_sheet, target):
 	})
 
 @frappe.whitelist()
-def get_activity_cost(employee=None, activity_type=None):
+def get_activity_cost(employee=None, activity_type=None, currency=None):
+	base_currency = frappe.defaults.get_global_default('currency')
 	rate = frappe.db.get_values("Activity Cost", {"employee": employee,
 		"activity_type": activity_type}, ["costing_rate", "billing_rate"], as_dict=True)
 	if not rate:
 		rate = frappe.db.get_values("Activity Type", {"activity_type": activity_type},
 			["costing_rate", "billing_rate"], as_dict=True)
+		if rate and currency and currency!=base_currency:
+			exchange_rate = get_exchange_rate(base_currency, currency)
+			rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
+			rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 
 	return rate[0] if rate else {}
 
