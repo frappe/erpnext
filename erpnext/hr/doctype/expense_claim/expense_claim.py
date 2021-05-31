@@ -86,7 +86,6 @@ class ExpenseClaim(AccountsController):
 		if self.is_paid:
 			update_reimbursed_amount(self)
 
-		self.set_status()
 		self.update_claimed_amount_in_employee_advance()
 
 	def update_claimed_amount_in_employee_advance(self):
