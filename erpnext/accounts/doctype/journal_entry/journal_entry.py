@@ -1192,12 +1192,16 @@ def get_average_party_exchange_rate_on_journal_entry(jv_name, party_type, party,
 	return res[0][0] if res else 1.0
 
 @frappe.whitelist()
-def get_average_exchange_rate(account):
+def get_average_exchange_rate(account, from_currency, to_currency, transaction_date):
+	from erpnext.setup.utils import get_exchange_rate
+
 	exchange_rate = 0
 	bank_balance_in_account_currency = get_balance_on(account)
-	if bank_balance_in_account_currency:
+	if bank_balance_in_account_currency > 0:
 		bank_balance_in_company_currency = get_balance_on(account, in_account_currency=False)
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
+	else:
+		exchange_rate = get_exchange_rate(from_currency, to_currency, transaction_date)
 
 	return exchange_rate
 

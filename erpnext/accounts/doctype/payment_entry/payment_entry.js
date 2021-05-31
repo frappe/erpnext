@@ -468,8 +468,9 @@ frappe.ui.form.on('Payment Entry', {
 			if (in_list(["Internal Transfer", "Pay"], frm.doc.payment_type)) {
 				var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
+					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_average_exchange_rate",
 					args: {
+						account: frm.doc.paid_from,
 						from_currency: frm.doc.paid_from_account_currency,
 						to_currency: company_currency,
 						transaction_date: frm.doc.posting_date
