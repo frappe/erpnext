@@ -81,8 +81,7 @@ def convert_to_presentation_currency(gl_entries, currency_info, company):
 	presentation_currency = currency_info['presentation_currency']
 	company_currency = currency_info['company_currency']
 
-	pl_accounts = [d.name for d in frappe.get_list('Account',
-		filters={'report_type': 'Profit and Loss', 'company': company})]
+	account_currencies = list(set(entry['account_currency'] for entry in gl_entries))
 
 	for entry in gl_entries:
 		account = entry['account']
@@ -92,10 +91,15 @@ def convert_to_presentation_currency(gl_entries, currency_info, company):
 		credit_in_account_currency = flt(entry['credit_in_account_currency'])
 		account_currency = entry['account_currency']
 
-		if account_currency != presentation_currency:
-			value = debit or credit
+		if len(account_currencies) == 1 and account_currency == presentation_currency:
+			if entry.get('debit'):
+				entry['debit'] = debit_in_account_currency
 
-			date = entry['posting_date'] if account in pl_accounts else currency_info['report_date']
+			if entry.get('credit'):
+				entry['credit'] = credit_in_account_currency
+		else:
+			value = debit or credit
+			date = currency_info['report_date']
 			converted_value = convert(value, presentation_currency, company_currency, date)
 
 			if entry.get('debit'):
@@ -103,13 +107,6 @@ def convert_to_presentation_currency(gl_entries, currency_info, company):
 
 			if entry.get('credit'):
 				entry['credit'] = converted_value
-
-		elif account_currency == presentation_currency:
-			if entry.get('debit'):
-				entry['debit'] = debit_in_account_currency
-
-			if entry.get('credit'):
-				entry['credit'] = credit_in_account_currency
 
 		converted_gl_list.append(entry)
 

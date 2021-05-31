@@ -6,7 +6,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "purpose"
+  "purpose",
+  "add_to_transit"
  ],
  "fields": [
   {
@@ -18,10 +19,17 @@
    "options": "\nMaterial Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.purpose == 'Material Transfer'",
+   "fieldname": "add_to_transit",
+   "fieldtype": "Check",
+   "label": "Add to Transit"
   }
  ],
  "links": [],
- "modified": "2020-08-10 23:24:37.160817",
+ "modified": "2021-05-21 11:27:01.144110",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
