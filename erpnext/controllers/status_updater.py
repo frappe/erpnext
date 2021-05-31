@@ -165,7 +165,7 @@ class StatusUpdater(Document):
 				self.db_set('status', self.status, update_modified = update_modified)
 
 	def add_status_comment(self, previous_status):
-		if self.status != previous_status and self.status not in ("Cancelled", "Partially Ordered", "Ordered", "Issued", "Transferred", "Draft"):
+		if self.status != previous_status and self.status not in ("Cancelled", "Draft"):
 			self.add_comment("Label", _(self.status))
 
 	def validate_qty(self):
