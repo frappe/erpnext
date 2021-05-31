@@ -203,8 +203,8 @@ class AccountsController(TransactionBase):
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
-		self.set_due_date()
 		self.set_payment_schedule()
+		self.set_due_date()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()
 
