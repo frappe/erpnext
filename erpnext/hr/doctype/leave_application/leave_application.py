@@ -4,8 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
-	comma_or, get_fullname, add_days, nowdate, get_datetime_str
+from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, get_fullname, add_days, nowdate
 from erpnext.hr.utils import set_employee_name, get_leave_period, share_doc_with_approver
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -85,7 +84,7 @@ class LeaveApplication(Document):
 
 	def validate_dates(self):
 		if frappe.db.get_single_value("HR Settings", "restrict_backdated_leave_application"):
-			if self.from_date and self.from_date < frappe.utils.today():
+			if self.from_date and getdate(self.from_date) < getdate():
 				allowed_role = frappe.db.get_single_value("HR Settings", "role_allowed_to_create_backdated_leave_application")
 				if allowed_role not in frappe.get_roles():
 					frappe.throw(_("Only users with the {0} role can create backdated leave applications").format(allowed_role))
@@ -248,9 +247,9 @@ class LeaveApplication(Document):
 				self.throw_overlap_error(d)
 
 	def throw_overlap_error(self, d):
-		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(self.employee,
-			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date'])) \
-			+ """ <b><a href="/app/Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
+		form_link = get_link_to_form("Leave Application", d.name)
+		msg = _("Employee {0} has already applied for {1} between {2} and {3} : {4}").format(self.employee,
+			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date']), form_link)
 		frappe.throw(msg, OverlapError)
 
 	def get_total_leaves_on_half_day(self):
@@ -356,7 +355,7 @@ class LeaveApplication(Document):
 
 			sender      	    = dict()
 			sender['email']     = frappe.get_doc('User', frappe.session.user).email
-			sender['full_name'] = frappe.utils.get_fullname(sender['email'])
+			sender['full_name'] = get_fullname(sender['email'])
 
 			try:
 				frappe.sendmail(
