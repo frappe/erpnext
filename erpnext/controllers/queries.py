@@ -830,7 +830,7 @@ def vehicle_color_query(doctype, txt, searchfield, start, page_len, filters):
 		where ({scond}) {fcond} {mcond} {item_condition}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			idx
+			idx desc
 		limit %(start)s, %(page_len)s
 	""".format(**{
 		'fields': ", ".join(fields),
