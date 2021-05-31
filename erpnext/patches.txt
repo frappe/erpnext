@@ -782,3 +782,4 @@ erpnext.patches.v13_0.set_pos_closing_as_failed
 erpnext.patches.v13_0.update_timesheet_changes
 erpnext.patches.v13_0.set_training_event_attendance
 erpnext.patches.v13_0.consider_rejected_quantity_for_purchase_invoice
+erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
