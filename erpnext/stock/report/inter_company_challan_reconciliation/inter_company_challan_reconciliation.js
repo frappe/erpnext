@@ -18,14 +18,14 @@ frappe.query_reports["Inter Company Challan Reconciliation"] = {
 			options:"Item",
 			reqd: 0
 		},
-		{
-			fieldname: "intercompany_item",
-			label: __("Intercompany Item"),
-			fieldtype: "Link",
-			options:"Item",
-			default: "",
-			reqd: 0
-		},
+		// {
+		// 	fieldname: "intercompany_item",
+		// 	label: __("Intercompany Item"),
+		// 	fieldtype: "Link",
+		// 	options:"Item",
+		// 	default: "",
+		// 	reqd: 0
+		// },
 		{
 			fieldname: "batch_no",
 			label: __("Batch Number"),
@@ -48,7 +48,14 @@ frappe.query_reports["Inter Company Challan Reconciliation"] = {
 			fieldtype: "Link",
 			options:"Stock Entry",
 			default: "",
-			reqd: 0
+			reqd: 0,
+			get_query: () => {
+				return {
+					filters: {
+						'stock_entry_type':"Send to Subcontractor"
+					}
+				};
+			}
 		},
 		{
 			fieldname: "from_date",

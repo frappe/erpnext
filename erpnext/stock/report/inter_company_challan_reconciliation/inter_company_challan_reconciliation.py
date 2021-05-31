@@ -150,8 +150,8 @@ def get_data(filters):
 			stock_details_filter={
 				"name":k.get('item_code')
 			}
-			if(filters.get('intercompany_item')):
-				stock_details_filter['intercompany_item'] = filters.get('intercompany_item')
+			# if(filters.get('intercompany_item')):
+			# 	stock_details_filter['intercompany_item'] = filters.get('intercompany_item')
 
 			item=frappe.db.get_all("Item",stock_details_filter,["intercompany_item"])
 			for j in doclst:
