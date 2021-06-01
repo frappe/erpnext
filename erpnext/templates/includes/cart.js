@@ -163,7 +163,7 @@ $.extend(shopping_cart, {
 				item_code: item_code,
 				qty: 0
 			});
-		})
+		});
 	},
 
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {

@@ -2,7 +2,16 @@
 {% extends "templates/web.html" %}
 
 {% block header %}
-<!-- <h2>{{ title }}</h2> -->
+<div class="row mb-6" style="width: 65vw">
+	<div class="mb-6 col-4 order-1">{{ title }}</div>
+
+	<div class="input-group mb-6 col-8 order-2">
+		<div class="dropdown w-100" id="dropdownMenuSearch">
+			<input type="search" name="query" id="search-box" class="form-control" placeholder="Search for products..." aria-label="Product" aria-describedby="button-addon2">
+			<!-- Results dropdown rendered in product_search.js -->
+		</div>
+	</div>
+</div>
 {% endblock header %}
 
 {% block script %}
@@ -19,7 +28,7 @@
 <div class="item-group-content" itemscope itemtype="http://schema.org/Product"
 	data-item-group="{{ name }}">
 	<div class="item-group-slideshow">
-		{% if slideshow %}<!-- slideshow -->
+		{% if slideshow %} <!-- slideshow -->
 			{{ web_block(
 				"Hero Slider",
 				values=slideshow,
@@ -28,8 +37,8 @@
 				add_bottom_padding=0,
 			) }}
 		{% endif %}
-		<h2 class="mt-3">{{ title }}</h2>
-		{% if description %}<!-- description -->
+
+		{% if description %} <!-- description -->
 		<div class="item-group-description text-muted mb-5" itemprop="description">{{ description or ""}}</div>
 		{% endif %}
 	</div>
