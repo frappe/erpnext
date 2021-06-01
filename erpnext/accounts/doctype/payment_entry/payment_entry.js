@@ -230,7 +230,7 @@ frappe.ui.form.on('Payment Entry', {
 		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
 		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
-			"difference_amount", "base_paid_amount_after_tax"], company_currency);
+			"difference_amount", "base_paid_amount_after_tax", "base_received_amount_after_tax"], company_currency);
 
 		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
 		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
@@ -238,11 +238,13 @@ frappe.ui.form.on('Payment Entry', {
 		var party_account_currency = frm.doc.payment_type=="Receive" ?
 			frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency;
 
-		frm.set_currency_labels(["total_allocated_amount", "unallocated_amount"], party_account_currency);
+		frm.set_currency_labels(["total_allocated_amount", "unallocated_amount",
+			"total_taxes_and_charges"], party_account_currency);
 
 		var currency_field = (frm.doc.payment_type=="Receive") ? "paid_from_account_currency" : "paid_to_account_currency"
 		frm.set_df_property("total_allocated_amount", "options", currency_field);
 		frm.set_df_property("unallocated_amount", "options", currency_field);
+		frm.set_df_property("total_taxes_and_charges", "options", currency_field);
 		frm.set_df_property("party_balance", "options", currency_field);
 
 		frm.set_currency_labels(["total_amount", "outstanding_amount", "allocated_amount"],
