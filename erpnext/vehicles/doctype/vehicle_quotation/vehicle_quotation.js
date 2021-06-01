@@ -15,7 +15,6 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 	refresh: function () {
 		this._super();
 		this.set_dynamic_field_label();
-		this.set_default_valid_till();
 		this.add_create_buttons();
 	},
 
@@ -41,17 +40,6 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 		});
 	},
 
-	set_default_valid_till: function () {
-		if (this.frm.doc.__islocal && !this.frm.doc.valid_till) {
-			var valid_days = frappe.boot.sysdefaults.quotation_valid_till;
-			if (valid_days) {
-				this.frm.set_value('valid_till', frappe.datetime.add_days(this.frm.doc.transaction_date, valid_days));
-			} else {
-				this.frm.set_value('valid_till', frappe.datetime.add_months(this.frm.doc.transaction_date, 1));
-			}
-		}
-	},
-
 	add_create_buttons: function () {
 		if(this.frm.doc.docstatus == 1 && this.frm.doc.status !== 'Lost') {
 			if(!this.frm.doc.valid_till || frappe.datetime.get_diff(this.frm.doc.valid_till, frappe.datetime.get_today()) >= 0) {
@@ -75,6 +63,40 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 
 	party_name: function () {
 		this.get_customer_details();
+	},
+
+	transaction_date: function () {
+		this._super();
+		this.set_valid_till();
+	},
+
+	quotation_validity_days: function () {
+		this.set_valid_till();
+	},
+
+	valid_till: function () {
+		this.set_quotation_validity_days();
+	},
+
+	set_valid_till: function() {
+		if (this.frm.doc.transaction_date) {
+			if (cint(this.frm.doc.quotation_validity_days) > 0) {
+				this.frm.doc.valid_till = frappe.datetime.add_days(this.frm.doc.transaction_date, cint(this.frm.doc.quotation_validity_days)-1);
+				this.frm.refresh_field('valid_till');
+			} else if (this.frm.doc.valid_till && cint(this.frm.doc.quotation_validity_days) == 0) {
+				this.set_quotation_validity_days();
+			}
+		}
+	},
+
+	set_quotation_validity_days: function () {
+		if (this.frm.doc.transaction_date && this.frm.doc.valid_till) {
+			var days = frappe.datetime.get_diff(this.frm.doc.valid_till, this.frm.doc.transaction_date) + 1;
+			if (days > 0) {
+				this.frm.doc.quotation_validity_days = days;
+				this.frm.refresh_field('quotation_validity_days');
+			}
+		}
 	},
 
 	set_dynamic_field_label: function() {

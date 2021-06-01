@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, cstr, getdate, today
+from frappe.utils import cint, flt, cstr, getdate, add_days
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
@@ -34,7 +34,7 @@ force_fields = [
 ]
 force_fields += address_fields
 
-force_if_not_empty_fields = []
+dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name']
 
 
 class VehicleBookingController(AccountsController):
@@ -68,12 +68,12 @@ class VehicleBookingController(AccountsController):
 	def set_missing_values(self, for_validate=False):
 		customer_details = get_customer_details(self.as_dict(), get_withholding_tax=False)
 		for k, v in customer_details.items():
-			if self.meta.has_field(k) and not self.get(k) or k in force_fields or (v and k in force_if_not_empty_fields):
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
 				self.set(k, v)
 
 		item_details = get_item_details(self.as_dict())
 		for k, v in item_details.items():
-			if self.meta.has_field(k) and not self.get(k) or k in force_fields or (v and k in force_if_not_empty_fields):
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
 				self.set(k, v)
 
 		self.set_vehicle_details()
@@ -230,10 +230,6 @@ def get_customer_details(args, get_withholding_tax=True):
 
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, tax_status, args.company)
 		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
-
-	default_payment_terms = frappe.get_cached_value("Vehicles Settings", None, "default_payment_terms")
-	if default_payment_terms:
-		out.payment_terms_template = default_payment_terms
 
 	return out
 
@@ -426,10 +422,26 @@ def get_item_details(args):
 	if out.vehicle_price_list:
 		out.update(get_vehicle_price(args.company, item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, tax_status))
 
+	if not args.payment_terms_template:
+		out.payment_terms_template = item.default_payment_terms
+		if not out.payment_terms_template:
+			out.payment_terms_template = frappe.get_cached_value("Vehicles Settings", None, "default_payment_terms")
+
 	if not args.tc_name:
-		out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
-		if not out.tc_name:
-			out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
+		if args.doctype == "Vehicle Quotation":
+			out.tc_name = item.default_quotation_terms
+			if not out.tc_name:
+				out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_quotation_terms")
+		else:
+			out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
+			if not out.tc_name:
+				out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
+
+	if args.doctype == "Vehicle Quotation":
+		if not cint(args.quotation_validity_days) and cint(item.quotation_validity_days):
+			out.quotation_validity_days = cint(item.quotation_validity_days)
+			if out.quotation_validity_days:
+				out.valid_till = add_days(getdate(args.transaction_date), out.quotation_validity_days - 1)
 
 	return out
 

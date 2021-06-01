@@ -9,8 +9,9 @@
   "fni_price_list",
   "company_contact",
   "column_break_3",
-  "default_booking_terms",
   "default_payment_terms",
+  "default_booking_terms",
+  "default_quotation_terms",
   "section_break_11",
   "vehicle_allocation_periodicity",
   "column_break_8",
@@ -114,11 +115,17 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Change Booking Payment Adjustment",
    "options": "Role"
+  },
+  {
+   "fieldname": "default_quotation_terms",
+   "fieldtype": "Link",
+   "label": "Default Quotation Terms and Condition",
+   "options": "Terms and Conditions"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-05-25 17:38:12.010515",
+ "modified": "2021-06-01 15:08:22.546268",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, nowdate, add_days, cint, date_diff
 from frappe.model.mapper import get_mapped_doc
 from erpnext.vehicles.vehicle_booking_controller import VehicleBookingController
 
@@ -37,6 +37,14 @@ class VehicleQuotation(VehicleBookingController):
 		self.title = self.customer_name
 
 	def validate_valid_till(self):
+		if cint(self.quotation_validity_days) < 0:
+			frappe.throw(_("Quotation Validity Days cannot be negative"))
+
+		if cint(self.quotation_validity_days):
+			self.valid_till = add_days(getdate(self.transaction_date), cint(self.quotation_validity_days) - 1)
+		if not cint(self.quotation_validity_days) and self.valid_till:
+			self.quotation_validity_days = date_diff(self.valid_till, self.transaction_date) + 1
+
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
 

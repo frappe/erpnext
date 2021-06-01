@@ -25,6 +25,7 @@
   "column_break_9",
   "amended_from",
   "transaction_date",
+  "quotation_validity_days",
   "valid_till",
   "customer_details_section",
   "customer_category",
@@ -702,12 +703,18 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "quotation_validity_days",
+   "fieldtype": "Int",
+   "label": "Validity Days"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-31 20:26:05.403252",
+ "modified": "2021-06-01 14:05:45.158964",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",

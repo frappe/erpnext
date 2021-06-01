@@ -44,8 +44,11 @@
   "asset_naming_series",
   "vehicle_details_section",
   "vehicle_engine_capacity",
+  "quotation_validity_days",
   "column_break_35",
   "vehicle_colors",
+  "default_payment_terms",
+  "default_quotation_terms",
   "column_break_37",
   "vehicle_allocation_required",
   "exempt_from_vehicle_withholding_tax",
@@ -1247,6 +1250,23 @@
    "label": "Allowed Colors",
    "no_copy": 1,
    "options": "Item Vehicle Color"
+  },
+  {
+   "fieldname": "default_payment_terms",
+   "fieldtype": "Link",
+   "label": "Default Payment Terms Template",
+   "options": "Payment Terms Template"
+  },
+  {
+   "fieldname": "default_quotation_terms",
+   "fieldtype": "Link",
+   "label": "Default Quotation Terms and Conditions",
+   "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "quotation_validity_days",
+   "fieldtype": "Int",
+   "label": "Quotation Validity Days"
   }
  ],
  "has_web_view": 1,
@@ -1254,7 +1274,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-03-25 20:33:27.057074",
+ "modified": "2021-06-01 14:06:00.456768",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
