@@ -335,6 +335,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "doc.received_amount",
    "fieldname": "base_received_amount",
    "fieldtype": "Currency",
    "label": "Received Amount (Company Currency)",
@@ -683,6 +684,7 @@
    "fieldname": "advance_tax_account",
    "fieldtype": "Link",
    "label": "Advance Tax Account",
+   "mandatory_depends_on": "doc.base_total_taxes_and_charges",
    "options": "Account"
   },
   {
@@ -692,6 +694,7 @@
    "options": "paid_to_account_currency"
   },
   {
+   "depends_on": "doc.received_amount",
    "fieldname": "base_received_amount_after_tax",
    "fieldtype": "Currency",
    "label": "Received Amount After Tax (Company Currency)",
@@ -701,7 +704,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-20 02:04:56.766124",
+ "modified": "2021-05-31 01:54:18.378910",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
