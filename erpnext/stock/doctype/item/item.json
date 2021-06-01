@@ -17,6 +17,7 @@
   "variant_of",
   "item_name",
   "item_group",
+  "intercompany_item",
   "is_item_from_hub",
   "allowed_in_wo_staging",
   "staging_multiple",
@@ -1082,6 +1083,12 @@
    "fieldtype": "Select",
    "label": "BOM Item Type",
    "options": "RM\nFG"
+  },
+  {
+   "fieldname": "intercompany_item",
+   "fieldtype": "Link",
+   "label": "Intercompany Item",
+   "options": "Item"
   }
  ],
  "has_web_view": 1,
@@ -1091,7 +1098,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-05-18 20:32:49.142635",
+ "modified": "2021-05-27 09:46:50.985792",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

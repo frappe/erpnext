@@ -92,7 +92,6 @@
    "label": "Consumed Qty",
    "oldfieldname": "consumed_qty",
    "oldfieldtype": "Currency",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -188,7 +187,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2021-05-31 08:51:56.882244",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",
