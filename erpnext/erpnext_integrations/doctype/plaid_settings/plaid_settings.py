@@ -90,9 +90,9 @@ def add_bank_accounts(response, bank, company):
 					"bank": bank["bank_name"],
 					"account": default_gl_account.account,
 					"account_name": account["name"],
-					"account_type": account["type"] or "",
-					"account_subtype": account["subtype"] or "",
-					"mask": account["mask"] or "",
+					"account_type": account.get("type", ""),
+					"account_subtype": account.get("subtype", ""),
+					"mask": account.get("mask", ""),
 					"integration_id": account["id"],
 					"is_company_account": 1,
 					"company": company
@@ -183,11 +183,11 @@ def new_bank_transaction(transaction):
 	bank_account = frappe.db.get_value("Bank Account", dict(integration_id=transaction["account_id"]))
 
 	if float(transaction["amount"]) >= 0:
-		debit = float(transaction["amount"])
-		credit = 0
-	else:
 		debit = 0
-		credit = abs(float(transaction["amount"]))
+		credit = float(transaction["amount"])
+	else:
+		debit = abs(float(transaction["amount"]))
+		credit = 0
 
 	status = "Pending" if transaction["pending"] == "True" else "Settled"
 
