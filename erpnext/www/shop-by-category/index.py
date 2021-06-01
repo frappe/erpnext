@@ -71,8 +71,12 @@ def get_category_records(categories):
 				fields += ["image"]
 
 			categorical_data[category] = frappe.db.sql(f"""
-				Select {",".join(fields)}
-				from `tab{doctype}`""", as_dict=1)
+				Select
+					{",".join(fields)}
+				from
+					`tab{doctype}`""",
+				as_dict=1
+			)
 
 	return categorical_data
 

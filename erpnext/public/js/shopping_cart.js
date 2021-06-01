@@ -199,7 +199,7 @@ $.extend(shopping_cart, {
 	},
 
 	freeze() {
-		if (window.location.pathname !== "/cart") return
+		if (window.location.pathname !== "/cart") return;
 
 		if (!$('#freeze').length) {
 			let freeze = $('<div id="freeze" class="modal-backdrop fade"></div>')

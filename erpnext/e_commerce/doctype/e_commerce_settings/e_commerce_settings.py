@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import cint, comma_and
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_datetime_str, now_datetime, unique
+from frappe.utils import unique
 from erpnext.e_commerce.website_item_indexing import create_website_items_index, ALLOWED_INDEXABLE_FIELDS_SET, is_search_module_loaded
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
@@ -58,13 +58,10 @@ class ECommerceSettings(Document):
 
 	def validate_search_index_fields(self):
 		if not self.search_index_fields:
-			return 
-		
-		# Clean up
-		# Remove whitespaces
+			return
+
 		fields = self.search_index_fields.replace(' ', '')
-		# Remove extra ',' and remove duplicates
-		fields = unique(fields.strip(',').split(','))
+		fields = unique(fields.strip(',').split(',')) # Remove extra ',' and remove duplicates
 
 		# All fields should be indexable
 		if not (set(fields).issubset(ALLOWED_INDEXABLE_FIELDS_SET)):
@@ -138,7 +135,7 @@ class ECommerceSettings(Document):
 		old_doc = self.get_doc_before_save()
 		old_fields = old_doc.search_index_fields
 		new_fields = self.search_index_fields
-		
+
 		# if search index fields get changed
 		if not (new_fields == old_fields):
 			create_website_items_index()

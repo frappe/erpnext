@@ -3,35 +3,19 @@
 
 {% block title %}{{ _('Products') }}{% endblock %}
 {% block header %}
-<div class="mb-6">{{ _('Products') }}</div>
+<div class="row mb-6" style="width: 65vw">
+	<div class="mb-6 col-4 order-1">{{ _('Products') }}</div>
+
+	<div class="input-group mb-6 col-8 order-2">
+		<div class="dropdown w-100" id="dropdownMenuSearch">
+			<input type="search" name="query" id="search-box" class="form-control" placeholder="Search for products..." aria-label="Product" aria-describedby="button-addon2">
+			<!-- Results dropdown rendered in product_search.js -->
+		</div>
+	</div>
+</div>
 {% endblock header %}
 
 {% block page_content %}
-<!-- Old Search -->
-<!-- <div class="row" style="display: none;">
-	<div class="col-8">
-		<div class="input-group input-group-sm mb-3">
-			<input type="search" class="form-control" placeholder="{{_('Search')}}"
-				aria-label="{{_('Product Search')}}" aria-describedby="product-search"
-				value="{{ frappe.sanitize_html(frappe.form_dict.search) or '' }}"
-			>
-		</div>
-	</div>
-
-	<div class="col-4 pl-0">
-		<button class="btn btn-light btn-sm btn-block d-md-none"
-			type="button"
-			data-toggle="collapse"
-			data-target="#product-filters"
-			aria-expanded="false"
-			aria-controls="product-filters"
-			style="white-space: nowrap;"
-		>
-			{{ _('Toggle Filters') }}
-		</button>
-	</div>
-</div> -->
-
 <div class="row">
 	<!-- Items section -->
 	<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
@@ -40,11 +24,6 @@
 
 	<!-- Filters Section -->
 	<div class="col-12 order-1 col-md-3 order-md-1">
-		{% if frappe.form_dict.start or frappe.form_dict.field_filters or frappe.form_dict.attribute_filters or frappe.form_dict.search %}
-
-
-		{% endif  %}
-
 		<div class="collapse d-md-block mr-4 filters-section" id="product-filters">
 			<div class="d-flex justify-content-between align-items-center mb-5 title-section">
 				<div class="mb-4 filters-title" > {{ _('Filters') }} </div>

@@ -153,6 +153,8 @@ erpnext.ProductList = class {
 					${ __('Add to Cart') }
 				</div>
 			`;
+		} else {
+			return ``;
 		}
 	}
 

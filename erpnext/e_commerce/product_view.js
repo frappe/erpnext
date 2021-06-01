@@ -402,4 +402,4 @@ erpnext.ProductView =  class {
 		}
 		return exists ? obj : undefined;
 	}
-}
+};

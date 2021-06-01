@@ -423,7 +423,7 @@ body.product-page {
 
 .total-discount {
 	font-size: var(--text-base);
-	color: var(--primary-color);
+	color: var(--primary-color) !important;
 }
 
 #page-cart {
@@ -531,6 +531,7 @@ body.product-page {
 				height: 22px;
 				background-color: var(--gray-200);
 				float: right;
+				cursor: pointer;
 			}
 
 			.remove-cart-item-logo {
@@ -862,4 +863,15 @@ body.product-page {
 	left: 0;
 	background-color: var(--gray-100);
 	height: 100%;
+}
+
+.item-thumb {
+	height: 50px;
+	max-width: 80px;
+	min-width: 80px;
+	object-fit: cover;
+}
+
+.brand-line {
+	color: gray;
 }
