@@ -933,12 +933,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"), si.name)
-		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"),
-			si.name)
-
-		# check if the serial number is already linked with any other Sales Invoice
-		_si = frappe.copy_doc(si.as_dict())
-		self.assertRaises(frappe.ValidationError, _si.insert)
 
 		return si
 

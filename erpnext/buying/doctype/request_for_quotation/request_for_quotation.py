@@ -62,6 +62,7 @@ class RequestforQuotation(BuyingController):
 		for supplier in self.suppliers:
 			supplier.email_sent = 0
 			supplier.quote_status = 'Pending'
+		self.send_to_supplier()
 
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
@@ -81,7 +82,7 @@ class RequestforQuotation(BuyingController):
 	def send_to_supplier(self):
 		"""Sends RFQ mail to involved suppliers."""
 		for rfq_supplier in self.suppliers:
-			if rfq_supplier.send_email:
+			if rfq_supplier.email_id is not None and rfq_supplier.send_email:
 				self.validate_email_id(rfq_supplier)
 
 				# make new user if required
