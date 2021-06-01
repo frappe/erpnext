@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 2,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:29.792928",
+ "modified": "2021-06-01 12:33:58.982337",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cash Flow",
@@ -17,9 +17,6 @@
  "report_name": "Cash Flow",
  "report_type": "Script Report",
  "roles": [
-  {
-   "role": "Accounts User"
-  },
   {
    "role": "Accounts Manager"
   },

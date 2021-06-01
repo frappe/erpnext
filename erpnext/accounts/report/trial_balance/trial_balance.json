@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 39,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:31.813713",
+ "modified": "2021-06-01 12:34:07.042924",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Trial Balance",
@@ -17,9 +17,6 @@
  "report_name": "Trial Balance",
  "report_type": "Script Report",
  "roles": [
-  {
-   "role": "Accounts User"
-  },
   {
    "role": "Accounts Manager"
   },

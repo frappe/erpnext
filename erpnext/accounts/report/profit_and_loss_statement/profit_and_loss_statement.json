@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 16,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:30.825721",
+ "modified": "2021-06-01 12:33:36.582643",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Profit and Loss Statement",
@@ -17,9 +17,6 @@
  "report_name": "Profit and Loss Statement",
  "report_type": "Script Report",
  "roles": [
-  {
-   "role": "Accounts User"
-  },
   {
    "role": "Accounts Manager"
   },
