@@ -104,26 +104,26 @@ def get_columns():
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 140
+			"width": 160
 		},
 		{
-			"label": _("Qty"),
+			"label": _("Order Qty"),
 			"fieldname": "qty",
 			"fieldtype": "Float",
-			"width": 70
+			"width": 90
 		},
 		{
-			"label": _("Received"),
+			"label": _("Received Qty"),
 			"fieldname": "received_qty",
 			"fieldtype": "Float",
-			"width": 80
+			"width": 110
 		},
 		{
 			"label": _("Supplied Item"),
 			"fieldname": "rm_item_code",
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 140
+			"width": 160
 		},
 		{
 			"label": _("Required Qty"),
@@ -138,21 +138,15 @@ def get_columns():
 			"width": 110
 		},
 		{
-			"label": _("Returned Qty"),
-			"fieldname": "returned_qty",
-			"fieldtype": "Float",
-			"width": 110
-		},
-		{
-			"label": _("Total Supplied"),
-			"fieldname": "total_supplied_qty",
+			"label": _("Consumed Qty"),
+			"fieldname": "consumed_qty",
 			"fieldtype": "Float",
 			"width": 120
 		},
 		{
-			"label": _("Consumed Qty"),
-			"fieldname": "consumed_qty",
+			"label": _("Returned Qty"),
+			"fieldname": "returned_qty",
 			"fieldtype": "Float",
 			"width": 110
-		},
+		}
 	]
