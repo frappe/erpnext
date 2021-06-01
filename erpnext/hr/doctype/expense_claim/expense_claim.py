@@ -36,7 +36,7 @@ class ExpenseClaim(AccountsController):
 			self.project = frappe.db.get_value("Task", self.task, "project")
 
 	def set_status(self):
-		self.status = {
+		status = {
 			"0": "Draft",
 			"1": "Submitted",
 			"2": "Cancelled"
@@ -47,11 +47,12 @@ class ExpenseClaim(AccountsController):
 		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
 			and flt(self.grand_total, precision) ==  flt(paid_amount, precision))) \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
-				self.status = "Paid"
+				status = "Paid"
 		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
-			self.status = "Unpaid"
+			status = "Unpaid"
 		elif self.docstatus == 1 and self.approval_status == 'Rejected':
-			self.status = 'Rejected'
+			status = 'Rejected'
+		self.db_set("status", status)
 
 	def on_update(self):
 		share_doc_with_approver(self, self.expense_approver)
