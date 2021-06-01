@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from past.builtins import cmp
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -167,6 +166,10 @@ def get_tax_template(posting_date, args):
 		rule.no_of_keys_matched = 0
 		for key in args:
 			if rule.get(key): rule.no_of_keys_matched += 1
+
+	def cmp(a, b):
+		# refernce: https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons
+		return int(a > b) - int(a < b)
 
 	rule = sorted(tax_rule,
 		key = functools.cmp_to_key(lambda b, a:

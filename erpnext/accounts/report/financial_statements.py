@@ -4,7 +4,6 @@
 
 
 import re
-from past.builtins import cmp
 import functools
 import math
 
@@ -339,7 +338,7 @@ def sort_accounts(accounts, is_root=False, key="name"):
 	def compare_accounts(a, b):
 		if re.split('\W+', a[key])[0].isdigit():
 			# if chart of accounts is numbered, then sort by number
-			return cmp(a[key], b[key])
+			return int(a[key] > b[key]) - int(a[key] < b[key])
 		elif is_root:
 			if a.report_type != b.report_type and a.report_type == "Balance Sheet":
 				return -1
@@ -351,7 +350,7 @@ def sort_accounts(accounts, is_root=False, key="name"):
 				return -1
 		else:
 			# sort by key (number) or name
-			return cmp(a[key], b[key])
+			return int(a[key] > b[key]) - int(a[key] < b[key])
 		return 1
 
 	accounts.sort(key = functools.cmp_to_key(compare_accounts))
