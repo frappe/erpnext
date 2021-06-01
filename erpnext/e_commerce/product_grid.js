@@ -144,6 +144,8 @@ erpnext.ProductGrid = class {
 					${ __('Add to Cart') }
 				</div>
 			`;
+		} else {
+			return ``;
 		}
 	}
 };
