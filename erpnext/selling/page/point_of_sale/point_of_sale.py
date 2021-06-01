@@ -15,7 +15,6 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 	data = dict()
 	result = []
 
-	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 	warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
 
 	if not frappe.db.exists('Item Group', item_group):
@@ -62,7 +61,6 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 			`tabItem` item {bin_join_selection}
 		WHERE
 			item.disabled = 0
-			AND item.is_stock_item = 1
 			AND item.has_variants = 0
 			AND item.is_sales_item = 1
 			AND item.is_fixed_asset = 0
@@ -84,6 +82,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 		), {'warehouse': warehouse}, as_dict=1)
 
 	if items_data:
+		items_data = filter_service_items(items_data)
 		items = [d.item_code for d in items_data]
 		item_prices_data = frappe.get_all("Item Price",
 			fields = ["item_code", "price_list_rate", "currency"],
@@ -96,10 +95,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			if allow_negative_stock:
-				item_stock_qty = frappe.db.sql("""select ifnull(sum(actual_qty), 0) from `tabBin` where item_code = %s""", item_code)[0][0]
-			else:
-				item_stock_qty = get_stock_availability(item_code, warehouse)
+			item_stock_qty = get_stock_availability(item_code, warehouse)
 
 			row = {}
 			row.update(item)
@@ -134,6 +130,14 @@ def search_serial_or_batch_or_barcode_number(search_value):
 		return batch_no_data
 
 	return {}
+
+def filter_service_items(items):
+	for item in items:
+		if not item['is_stock_item']:
+			if not frappe.db.exists('Product Bundle', item['item_code']):
+				items.remove(item)
+	
+	return items
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:

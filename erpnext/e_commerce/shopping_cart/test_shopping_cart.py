@@ -8,8 +8,7 @@ from frappe.utils import nowdate, add_months
 from erpnext.tests.utils import create_test_contact_and_address
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
-
-
+from erpnext.accounts.doctype.tax_rule.tax_rule import  ConflictingTaxRule
 # test_dependencies = ['Payment Terms Template']
 
 class TestShoppingCart(unittest.TestCase):
@@ -131,7 +130,7 @@ class TestShoppingCart(unittest.TestCase):
 		tax_rule = frappe.get_test_records("Tax Rule")[0]
 		try:
 			frappe.get_doc(tax_rule).insert()
-		except frappe.DuplicateEntryError:
+		except (frappe.DuplicateEntryError, ConflictingTaxRule):
 			pass
 
 	def create_quotation(self):
