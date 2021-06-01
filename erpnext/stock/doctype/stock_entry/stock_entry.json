@@ -14,6 +14,9 @@
   "outgoing_stock_entry",
   "purpose",
   "material_consumption",
+  "reference_challan",
+  "get_intercompany_item",
+  "transfer",
   "add_to_transit",
   "work_order",
   "material_produce",
@@ -669,11 +672,32 @@
    "options": "Material Consumption"
   },
   {
+   "depends_on": "eval:doc.stock_entry_type==\"Material Receipt\"",
+   "fieldname": "reference_challan",
+   "fieldtype": "Link",
+   "label": "Reference Challan",
+   "options": "Stock Entry"
+  },
+  {
    "fieldname": "material_produce",
    "fieldtype": "Link",
    "label": "Material Produce",
    "options": "Material Produce",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "transfer",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Transfer"
+  },
+  {
+   "depends_on": "eval:doc.reference_challan",
+   "fieldname": "get_intercompany_item",
+   "fieldtype": "Button",
+   "label": "Get Intercompany Item"
   }
  ],
  "icon": "fa fa-file-text",
@@ -681,7 +705,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-04 18:31:50.102160",
+ "modified": "2021-05-29 15:35:52.493687",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
