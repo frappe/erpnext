@@ -9,5 +9,6 @@ frappe.ui.form.on('Payment Terms Template', {
 		frm.add_fetch("payment_term", "credit_days", "credit_days");
 		frm.add_fetch("payment_term", "credit_months", "credit_months");
 		frm.add_fetch("payment_term", "mode_of_payment", "mode_of_payment");
+		frm.add_fetch("payment_term", "payment_amount_type", "payment_amount_type");
 	}
 });

@@ -1793,7 +1793,7 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, bill_dat
 		term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
 
 	if term_details.payment_amount_type in ("Amount", "Remaining Amount"):
-		term_details.invoice_portion = flt(term_details.payment_amount / flt(grand_total) * 100) if grand_total else 0
+		term_details.invoice_portion = flt(term_details.payment_amount / flt(grand_total) * 100) if flt(grand_total) else 0
 
 	if bill_date:
 		term_details.due_date = get_due_date(term, bill_date, delivery_date=delivery_date)
