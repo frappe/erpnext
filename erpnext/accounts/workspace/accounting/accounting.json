@@ -438,22 +438,34 @@
    "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "DATEV Export",
-   "link_to": "DATEV",
+   "label": "Tax Detail",
+   "link_to": "Tax Detail",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
-    "dependencies": "GL Entry",
-    "hidden": 0,
-    "is_query_report": 1,
-    "label": "UAE VAT 201",
-    "link_to": "UAE VAT 201",
-    "link_type": "Report",
-    "onboard": 0,
-    "type": "Link"
-   },
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "DATEV Export",
+   "link_to": "DATEV",
+   "link_type": "Report",
+   "onboard": 0,
+   "only_for": "Germany",
+   "type": "Link"
+  },
+  {
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "UAE VAT 201",
+   "link_to": "UAE VAT 201",
+   "link_type": "Report",
+   "onboard": 0,
+   "only_for": "United Arab Emirates",
+   "type": "Link"
+  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -684,6 +696,7 @@
    "is_query_report": 0,
    "label": "Goods and Services Tax (GST India)",
    "onboard": 0,
+   "only_for": "India",
    "type": "Card Break"
   },
   {
@@ -1052,7 +1065,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-05-12 11:48:01.905144",
+ "modified": "2021-05-13 13:44:56.249888",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
