@@ -34,7 +34,7 @@ force_fields = [
 ]
 force_fields += address_fields
 
-dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name']
+dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image']
 
 
 class VehicleBookingController(AccountsController):
@@ -146,6 +146,9 @@ class VehicleBookingController(AccountsController):
 		self.calculate_contribution()
 		self.set_total_in_words()
 
+	def get_withholding_tax_amount(self, tax_status):
+		return get_withholding_tax_amount(self.transaction_date, self.item_code, tax_status, self.company)
+
 	def calculate_contribution(self):
 		total = 0.0
 		sales_team = self.get("sales_team", [])
@@ -180,7 +183,9 @@ class VehicleBookingController(AccountsController):
 
 	def get_terms_and_conditions(self):
 		if self.get('tc_name'):
-			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+			context = self.as_dict()
+			context['doc'] = self
+			self.terms = get_terms_and_conditions(self.tc_name, context)
 
 @frappe.whitelist()
 def get_customer_details(args, get_withholding_tax=True):
@@ -386,6 +391,7 @@ def get_item_details(args):
 	out.description = item.description
 	out.item_group = item.item_group
 	out.brand = item.brand
+	out.image = item.image
 
 	out.variant_of = item.variant_of
 	out.variant_of_name = frappe.get_cached_value("Item", item.variant_of, "item_name") if item.variant_of else None

@@ -279,8 +279,12 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 				},
 				callback: function (r) {
 					if (!r.exc) {
-						me.frm.trigger('vehicle_amount');
-						callback && callback(r);
+						frappe.run_serially([
+							() => me.frm.trigger('vehicle_amount'),
+							() => me.frm.trigger('payment_terms_template'),
+							() => me.frm.trigger('image'),
+							() => callback && callback(r)
+						]);
 					}
 				}
 			});

@@ -27,6 +27,17 @@
   "transaction_date",
   "quotation_validity_days",
   "valid_till",
+  "contact_details_section",
+  "contact_person",
+  "contact_display",
+  "column_break_24",
+  "on_account_of",
+  "financer_contact_person",
+  "financer_contact_display",
+  "col_break_33",
+  "contact_email",
+  "contact_mobile",
+  "contact_phone",
   "customer_details_section",
   "customer_category",
   "tax_status",
@@ -38,20 +49,12 @@
   "address_and_contact_section",
   "customer_address",
   "address_display",
-  "col_break_33",
+  "column_break_15",
   "address_line1",
   "address_line2",
+  "column_break_27",
   "city",
   "state",
-  "column_break_15",
-  "contact_person",
-  "contact_display",
-  "financer_contact_person",
-  "financer_contact_display",
-  "column_break_27",
-  "contact_email",
-  "contact_mobile",
-  "contact_phone",
   "vehicle_details_section",
   "variant_of",
   "variant_of_name",
@@ -102,8 +105,6 @@
  ],
  "fields": [
   {
-   "fetch_from": "item_code.image",
-   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -250,7 +251,7 @@
    "collapsible": 1,
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break",
-   "label": "Address and Contact"
+   "label": "Address"
   },
   {
    "fieldname": "customer_address",
@@ -709,12 +710,27 @@
    "fieldname": "quotation_validity_days",
    "fieldtype": "Int",
    "label": "Validity Days"
+  },
+  {
+   "fieldname": "contact_details_section",
+   "fieldtype": "Section Break",
+   "label": "Contact Details"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "on_account_of",
+   "fieldtype": "Data",
+   "label": "On Account Of",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-01 14:05:45.158964",
+ "modified": "2021-06-02 00:42:14.285349",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",
