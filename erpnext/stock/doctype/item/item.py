@@ -49,7 +49,7 @@ class Item(WebsiteGenerator):
 	)
 
 	_cant_change_fields_bin = ["is_stock_item"]
-	_cant_change_fields_sle = ["has_serial_no", "has_batch_no", "valuation_method"]
+	_cant_change_fields_sle = ["has_serial_no", "has_batch_no", "valuation_method", "is_vehicle"]
 	_cant_change_fields_trn = ["stock_uom", "alt_uom", "alt_uom_size", "is_vehicle"]
 	_cant_change_fields = _cant_change_fields_bin + _cant_change_fields_sle + _cant_change_fields_trn
 
@@ -1056,6 +1056,7 @@ class Item(WebsiteGenerator):
 		link_doctypes_bin = ["Sales Order Item", "Purchase Order Item", "Material Request Item", "Work Order"]
 		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
 			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"] + link_doctypes_bin
+		linked_doctypes_vehicle = ["Vehicle Allocation", "Vehicle Booking Order"]
 
 		if field in self._cant_change_fields_sle or field in self._cant_change_fields_bin:
 			if self.stock_ledger_created():
@@ -1068,6 +1069,11 @@ class Item(WebsiteGenerator):
 
 		if field in self._cant_change_fields_trn:
 			for doctype in linked_doctypes:
+				if self.check_if_linked_doctype_exists(doctype):
+					return True
+
+		if field == 'is_vehicle':
+			for doctype in linked_doctypes_vehicle:
 				if self.check_if_linked_doctype_exists(doctype):
 					return True
 
