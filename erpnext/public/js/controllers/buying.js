@@ -106,7 +106,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				return{	query: "erpnext.controllers.queries.supplier_query" }});
 		}
 
-		this.frm.set_query("item_code", "items", function() {
+		this.frm.set_query("item_code", "items", function(doc) {
 			var filters = {};
 
 			if (me.frm.doc.is_subcontracted == "Yes") {
