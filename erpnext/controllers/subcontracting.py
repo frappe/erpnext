@@ -101,9 +101,9 @@ class Subcontracting(object):
 			self.set_alternative_item_details(row)
 
 		for doctype in ['Purchase Receipt', 'Purchase Invoice']:
-			self.remove_consumed_materials(doctype)
+			self.update_consumed_materials(doctype)
 
-	def remove_consumed_materials(self, doctype, return_consumed_items=False):
+	def update_consumed_materials(self, doctype, return_consumed_items=False):
 		'''Deduct the consumed materials from the available materials.'''
 
 		pr_items = self.get_received_items(doctype)
@@ -311,7 +311,7 @@ class Subcontracting(object):
 			return
 
 		self.get_purchase_orders()
-		consumed_items, pr_items = self.remove_consumed_materials(self.doctype, return_consumed_items=True)
+		consumed_items, pr_items = self.update_consumed_materials(self.doctype, return_consumed_items=True)
 
 		itemwise_consumed_qty = defaultdict(float)
 		for row in consumed_items:
