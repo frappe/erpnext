@@ -497,7 +497,7 @@ class PurchaseReceipt(BuyingController):
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
 		for d in self.get("items"):
-			if d.purchase_invoice and d.purchase_invoice_item:
+			if getattr(d, 'purchase_invoice', None) and getattr(d, 'purchase_invoice_item', None):
 				d.db_set('billed_amt', d.amount, update_modified=update_modified)
 			elif d.purchase_order_item:
 				updated_pr += update_billed_amount_based_on_po(d.purchase_order_item, update_modified)
