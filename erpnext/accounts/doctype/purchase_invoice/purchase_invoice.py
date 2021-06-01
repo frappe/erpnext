@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-# -*- coding: utf-8 -*-
 
 import frappe, erpnext
 from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form

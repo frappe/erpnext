@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import inspect
 import frappe
 from erpnext.hooks import regional_overrides

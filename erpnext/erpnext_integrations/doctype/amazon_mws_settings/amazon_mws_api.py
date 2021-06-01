@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Basic interface to Amazon MWS
 # Based on http://code.google.com/p/amazon-mws-python
