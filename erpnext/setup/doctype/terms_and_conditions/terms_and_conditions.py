@@ -24,6 +24,10 @@ def get_terms_and_conditions(template_name, doc):
 		doc = json.loads(doc)
 
 	terms_and_conditions = frappe.get_doc("Terms and Conditions", template_name)
-	
+
+	controller = frappe.get_doc(doc)
+	context = doc
+	context['doc'] = controller
+
 	if terms_and_conditions.terms:
-		return frappe.render_template(terms_and_conditions.terms, doc)
+		return frappe.render_template(terms_and_conditions.terms, context)

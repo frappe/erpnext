@@ -183,9 +183,8 @@ class VehicleBookingController(AccountsController):
 
 	def get_terms_and_conditions(self):
 		if self.get('tc_name'):
-			context = self.as_dict()
-			context['doc'] = self
-			self.terms = get_terms_and_conditions(self.tc_name, context)
+			doc = self.as_dict()
+			self.terms = get_terms_and_conditions(self.tc_name, doc)
 
 @frappe.whitelist()
 def get_customer_details(args, get_withholding_tax=True):
