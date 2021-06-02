@@ -120,7 +120,7 @@ def delete_item_from_index(website_item_doc):
 
 	try:
 		cache.delete(key)
-	except:
+	except Exception:
 		return False
 
 	delete_from_ac_dict(website_item_doc)
@@ -152,7 +152,7 @@ def define_autocomplete_dictionary():
 	try:
 		cache.delete(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE))
 		cache.delete(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE))
-	except:
+	except Exception:
 		return False
 
 	items = frappe.get_all(

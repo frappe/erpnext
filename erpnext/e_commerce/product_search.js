@@ -18,11 +18,11 @@ erpnext.ProductSearch = class {
 	bindSearchAction() {
 		let me = this;
 
-		this.searchBox.on("focus", (e) => {
+		this.searchBox.on("focus", () => {
 			this.search_dropdown.removeClass("hidden");
 		});
 
-		this.searchBox.on("focusout", (e) => {
+		this.searchBox.on("focusout", () => {
 			this.search_dropdown.addClass("hidden");
 		});
 
@@ -53,7 +53,7 @@ erpnext.ProductSearch = class {
 						query: query
 					},
 					callback: (data) => {
-						me.populateCategoriesList(data)
+						me.populateCategoriesList(data);
 					}
 				});
 			}
@@ -211,16 +211,16 @@ erpnext.ProductSearch = class {
 			return;
 		}
 
-		let html = ""
-		let search_results = data.message.results
+		let html = "";
+		let search_results = data.message.results;
 		search_results.forEach((category) => {
 			html += `
 				<div class="mb-2" style="font-weight: 400;">
 					<a href="/${category.route}">${category.name}</a>
 				</div>
 			`;
-		})
+		});
 
 		this.category_container.html(html);
 	}
-}
+};

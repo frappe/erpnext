@@ -70,13 +70,14 @@ def get_category_records(categories):
 			if frappe.get_meta(doctype, cached=True).get_field("image"):
 				fields += ["image"]
 
-			categorical_data[category] = frappe.db.sql(f"""
-				Select
-					{",".join(fields)}
-				from
-					`tab{doctype}`""",
-				as_dict=1
-			)
+			categorical_data[category] = frappe.db.sql(
+				f"""
+					Select
+						{",".join(fields)}
+					from
+						`tab{doctype}`
+				""",
+				as_dict=1)
 
 	return categorical_data
 
