@@ -12,7 +12,7 @@ $.extend(erpnext.bundling, {
 				erpnext.bundling.render_bundle_icons(frm);
 			},
 
-			onload: function (frm) {
+			onload_post_render: function (frm) {
 				frm.fields_dict.items.grid.wrapper.on('click', '.grid-row-check', () => erpnext.bundling.toggle_bundle_buttons(frm));
 			}
 		});
