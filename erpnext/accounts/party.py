@@ -53,7 +53,9 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 			billing_party_type = "Letter of Credit"
 			billing_party = letter_of_credit
 
-		account = get_party_account(billing_party_type, billing_party, company, transaction_type=transaction_type)
+		if not account:
+			account = get_party_account(billing_party_type, billing_party, company, transaction_type=transaction_type)
+
 		account_fieldname = "debit_to" if party_type == "Customer" else "credit_to"
 		party_details[account_fieldname] = account
 
@@ -97,7 +99,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 			"allocated_percentage": d.allocated_percentage or None
 		} for d in party.get("sales_team")]
 
-	if doctype in ("Sales Order", "Sales Invoice"):
+	if doctype == "Sales Order":
 		from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
 		meta = frappe.get_meta(doctype)
@@ -106,11 +108,18 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 		show_credit_balance = meta.has_field('customer_credit_balance')
 
 		if show_credit_balance or show_credit_limit:
-			party_details["customer_credit_limit"] = get_credit_limit(party.name, company)
+			party_details["customer_credit_limit"] = get_credit_limit(billing_party_doc.name, company)
 		if show_credit_balance or show_outstanding_amount:
-			party_details["customer_outstanding_amount"] = get_customer_outstanding(party.name, company)
+			party_details["customer_outstanding_amount"] = get_customer_outstanding(billing_party_doc.name, company)
 		if show_credit_balance:
 			party_details["customer_credit_balance"] = party_details["customer_credit_limit"] - party_details["customer_outstanding_amount"]
+
+	elif doctype == "Sales Invoice":
+		meta = frappe.get_meta(doctype)
+		if meta.has_field('previous_outstanding_amount') and account and billing_party_doc:
+			from erpnext.accounts.utils import get_balance_on
+			party_details["previous_outstanding_amount"] = get_balance_on(account, posting_date,
+				party_type=billing_party_doc.doctype, party=billing_party_doc.name, company=company, ignore_account_permission=1)
 
 	# supplier tax withholding category
 	if party_type == "Supplier" and party:

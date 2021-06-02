@@ -933,6 +933,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));
 
 		this.calculate_outstanding_amount(update_paid_amount);
+		this.calculate_customer_outstanding_amount();
 	},
 
 	calculate_outstanding_amount: function(update_paid_amount) {
@@ -984,6 +985,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
+		}
+	},
+
+	calculate_customer_outstanding_amount: function() {
+		if (this.frm.doc.doctype == "Sales Invoice" && frappe.meta.get_docfield(this.frm.doc.doctype, "customer_outstanding_amount")) {
+			this.frm.doc.customer_outstanding_amount = flt(flt(this.frm.doc.outstanding_amount) + flt(this.frm.doc.previous_outstanding_amount),
+				precision('customer_outstanding_amount'));
 		}
 	},
 

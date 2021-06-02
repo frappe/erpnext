@@ -91,7 +91,9 @@ class BuyingController(StockController):
 				company=self.company,
 				party_address=self.supplier_address,
 				shipping_address=self.get('shipping_address'),
-				contact_person=self.get('contact_person')
+				contact_person=self.get('contact_person'),
+				account=self.get('credit_to'),
+				posting_date=self.get('posting_date') or self.get('transaction_date')
 			), force_fields=force_party_fields)
 
 		self.set_missing_item_details(for_validate)

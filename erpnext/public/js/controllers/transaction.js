@@ -1310,8 +1310,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_total_before_discount", "base_tax_exclusive_total_before_discount",
 			"base_total_discount", "base_tax_exclusive_total_discount",
 			"base_total_depreciation", "base_tax_exclusive_total_depreciation",
-			"base_total_before_depreciation", "base_tax_exclusive_total_before_depreciation",
-			"customer_outstanding_amount", "customer_credit_limit", "customer_credit_balance"], company_currency);
+			"base_total_before_depreciation", "base_tax_exclusive_total_before_depreciation"], company_currency);
 
 		this.frm.set_currency_labels(["total", "net_total", "taxable_total", "total_taxes_and_charges",
 			"discount_amount", "grand_total", "total_discount_after_taxes", "total_after_taxes",
@@ -1324,6 +1323,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"total_discount", "tax_exclusive_total_discount",
 			"total_depreciation", "tax_exclusive_total_depreciation",
 			"total_before_depreciation", "tax_exclusive_total_before_depreciation"], this.frm.doc.currency);
+
+		if (this.frm.doc.doctype === "Sales Invoice") {
+			this.frm.set_currency_labels(["customer_outstanding_amount", "previous_outstanding_amount"],
+				this.frm.doc.party_account_currency);
+		} else {
+			this.frm.set_currency_labels(["customer_outstanding_amount", "customer_credit_limit",
+				"customer_credit_balance"], company_currency);
+		}
 
 		this.frm.set_currency_labels(["outstanding_amount", "total_advance"],
 			this.frm.doc.party_account_currency);

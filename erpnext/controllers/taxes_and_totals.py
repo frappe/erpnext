@@ -777,6 +777,7 @@ class calculate_taxes_and_totals(object):
 						.format(self.doc.party_account_currency, invoice_total))
 
 				self.calculate_outstanding_amount()
+				self.calculate_customer_outstanding_amount()
 
 	def calculate_outstanding_amount(self):
 		# NOTE:
@@ -818,6 +819,11 @@ class calculate_taxes_and_totals(object):
 
 			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
 			 	self.update_paid_amount_for_return(total_amount_to_pay)
+
+	def calculate_customer_outstanding_amount(self):
+		if self.doc.doctype == "Sales Invoice" and self.doc.meta.has_field('customer_outstanding_amount'):
+			self.doc.customer_outstanding_amount = flt(flt(self.doc.outstanding_amount) + flt(self.doc.get('previous_outstanding_amount')),
+				self.doc.precision('customer_outstanding_amount'))
 
 	def calculate_paid_amount(self):
 

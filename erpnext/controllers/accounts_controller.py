@@ -29,7 +29,8 @@ force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "alt_uom_siz
 	"allow_zero_valuation_rate", "has_batch_no", "has_serial_no", "is_vehicle")
 
 force_party_fields = ("customer_name", "bill_to_name", "customer_group", "supplier", "supplier_group",
-	"contact_display", "contact_mobile", "contact_phone", "contact_email")
+	"contact_display", "contact_mobile", "contact_phone", "contact_email",
+	"customer_outstanding_amount", "customer_credit_limit", "customer_credit_balance")
 
 merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
 	'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',

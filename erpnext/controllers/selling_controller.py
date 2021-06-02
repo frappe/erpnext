@@ -99,6 +99,8 @@ class SellingController(StockController):
 				party_address=self.customer_address,
 				shipping_address=self.shipping_address_name,
 				contact_person=self.get('contact_person'),
+				account=self.get('debit_to'),
+				posting_date=self.get('posting_date') or self.get('transaction_date')
 			)
 			if not self.meta.get_field("sales_team") and "sales_team" in party_details:
 				party_details.pop("sales_team")
