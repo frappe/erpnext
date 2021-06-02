@@ -132,12 +132,14 @@ class ECommerceSettings(Document):
 
 	def on_change(self):
 		old_doc = self.get_doc_before_save()
-		old_fields = old_doc.search_index_fields
-		new_fields = self.search_index_fields
 
-		# if search index fields get changed
-		if not (new_fields == old_fields):
-			create_website_items_index()
+		if old_doc:
+			old_fields = old_doc.search_index_fields
+			new_fields = self.search_index_fields
+
+			# if search index fields get changed
+			if not (new_fields == old_fields):
+				create_website_items_index()
 
 def validate_cart_settings(doc, method):
 	frappe.get_doc("E Commerce Settings", "E Commerce Settings").run_method("validate")
