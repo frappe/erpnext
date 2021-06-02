@@ -47,7 +47,8 @@ class AssetRepair(Document):
 		if self.capitalize_repair_cost:
 			self.check_for_purchase_invoice()
 			self.make_gl_entries()
-			self.modify_depreciation_schedule()
+			if frappe.db.get_value('Asset', self.asset, 'calculate_depreciation'):
+				self.modify_depreciation_schedule()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
