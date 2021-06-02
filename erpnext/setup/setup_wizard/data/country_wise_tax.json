@@ -481,6 +481,10 @@
 	},
 
 	"Germany": {
+		"tax_categories": [
+			"Umsatzsteuer",
+			"Vorsteuer"
+		],
 		"chart_of_accounts": {
 			"SKR04 mit Kontonummern": {
 				"sales_tax_templates": [
