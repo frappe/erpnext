@@ -18,7 +18,7 @@ class VehicleQuotation(VehicleBookingController):
 		super(VehicleQuotation, self).validate()
 
 		self.update_opportunity()
-		self.validate_valid_till()
+		self.validate_quotation_valid_till()
 		self.get_terms_and_conditions()
 
 		self.set_title()
@@ -35,18 +35,6 @@ class VehicleQuotation(VehicleBookingController):
 
 	def set_title(self):
 		self.title = self.customer_name
-
-	def validate_valid_till(self):
-		if cint(self.quotation_validity_days) < 0:
-			frappe.throw(_("Quotation Validity Days cannot be negative"))
-
-		if cint(self.quotation_validity_days):
-			self.valid_till = add_days(getdate(self.transaction_date), cint(self.quotation_validity_days) - 1)
-		if not cint(self.quotation_validity_days) and self.valid_till:
-			self.quotation_validity_days = date_diff(self.valid_till, self.transaction_date) + 1
-
-		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
-			frappe.throw(_("Valid till date cannot be before transaction date"))
 
 	def has_vehicle_booking_order(self):
 		return frappe.db.get_value("Vehicle Booking Order", {"vehicle_quotation": self.name, "docstatus": 1})

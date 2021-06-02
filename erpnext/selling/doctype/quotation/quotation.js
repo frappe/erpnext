@@ -62,9 +62,9 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		var me = this;
 
-		if (doc.__islocal && !doc.valid_till) {
-			if(frappe.boot.sysdefaults.quotation_valid_till){
-				this.frm.set_value('valid_till', frappe.datetime.add_days(doc.transaction_date, frappe.boot.sysdefaults.quotation_valid_till));
+		if (doc.__islocal && !doc.valid_till && !cint(doc.quotation_validity_days)) {
+			if(frappe.boot.sysdefaults.quotation_valid_till) {
+				this.frm.set_value('quotation_validity_days', cint(frappe.boot.sysdefaults.quotation_valid_till));
 			} else {
 				this.frm.set_value('valid_till', frappe.datetime.add_months(doc.transaction_date, 1));
 			}

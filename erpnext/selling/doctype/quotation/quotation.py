@@ -27,14 +27,10 @@ class Quotation(SellingController):
 		self.set_status()
 		self.update_opportunity()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.validate_valid_till()
+		self.validate_quotation_valid_till()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
-
-	def validate_valid_till(self):
-		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
-			frappe.throw(_("Valid till date cannot be before transaction date"))
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})

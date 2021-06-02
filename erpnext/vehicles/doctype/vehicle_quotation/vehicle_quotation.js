@@ -65,40 +65,6 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 		this.get_customer_details();
 	},
 
-	transaction_date: function () {
-		this._super();
-		this.set_valid_till();
-	},
-
-	quotation_validity_days: function () {
-		this.set_valid_till();
-	},
-
-	valid_till: function () {
-		this.set_quotation_validity_days();
-	},
-
-	set_valid_till: function() {
-		if (this.frm.doc.transaction_date) {
-			if (cint(this.frm.doc.quotation_validity_days) > 0) {
-				this.frm.doc.valid_till = frappe.datetime.add_days(this.frm.doc.transaction_date, cint(this.frm.doc.quotation_validity_days)-1);
-				this.frm.refresh_field('valid_till');
-			} else if (this.frm.doc.valid_till && cint(this.frm.doc.quotation_validity_days) == 0) {
-				this.set_quotation_validity_days();
-			}
-		}
-	},
-
-	set_quotation_validity_days: function () {
-		if (this.frm.doc.transaction_date && this.frm.doc.valid_till) {
-			var days = frappe.datetime.get_diff(this.frm.doc.valid_till, this.frm.doc.transaction_date) + 1;
-			if (days > 0) {
-				this.frm.doc.quotation_validity_days = days;
-				this.frm.refresh_field('quotation_validity_days');
-			}
-		}
-	},
-
 	set_dynamic_field_label: function() {
 		if (this.frm.doc.quotation_to) {
 			this.frm.set_df_property("party_name", "label", __(this.frm.doc.quotation_to));

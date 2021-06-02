@@ -19,6 +19,7 @@
   "amended_from",
   "naming_series",
   "transaction_date",
+  "quotation_validity_days",
   "valid_till",
   "more_info",
   "transaction_type",
@@ -1377,13 +1378,19 @@
   {
    "fieldname": "more_info_cb_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "quotation_validity_days",
+   "fieldtype": "Int",
+   "label": "Validity Days"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-05-29 23:13:13.952273",
+ "modified": "2021-06-02 22:15:27.402344",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

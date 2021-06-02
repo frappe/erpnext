@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _, throw, scrub
-from frappe.utils import (today, flt, cint, fmt_money, formatdate, cstr,
+from frappe.utils import (today, flt, cint, fmt_money, formatdate, cstr, date_diff,
 	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form, clean_whitespace)
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
@@ -336,6 +336,18 @@ class AccountsController(TransactionBase):
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(self.bill_date or self.posting_date, self.due_date,
 				"Supplier", self.supplier, self.company, self.bill_date, self.payment_terms_template)
+
+	def validate_quotation_valid_till(self):
+		if cint(self.quotation_validity_days) < 0:
+			frappe.throw(_("Quotation Validity Days cannot be negative"))
+
+		if cint(self.quotation_validity_days):
+			self.valid_till = add_days(getdate(self.transaction_date), cint(self.quotation_validity_days) - 1)
+		if not cint(self.quotation_validity_days) and self.valid_till:
+			self.quotation_validity_days = date_diff(self.valid_till, self.transaction_date) + 1
+
+		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
+			frappe.throw(_("Valid till date cannot be before transaction date"))
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("posting_date"):
