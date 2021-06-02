@@ -91,13 +91,23 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			fieldname: "customer",
 			label: __("Customer (User)"),
 			fieldtype: "Link",
-			options: "Customer"
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
 		},
 		{
 			fieldname: "financer",
 			label: __("Financer"),
 			fieldtype: "Link",
-			options: "Customer"
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
 		},
 		{
 			fieldname: "supplier",

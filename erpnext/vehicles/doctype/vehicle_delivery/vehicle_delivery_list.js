@@ -1,5 +1,9 @@
 frappe.listview_settings['Vehicle Delivery'] = {
 	onload: function(listview) {
+		listview.page.fields_dict.customer.get_query = () => {
+			return erpnext.queries.customer();
+		}
+
 		listview.page.fields_dict.variant_of.get_query = () => {
 			return erpnext.queries.item({"is_vehicle": 1, "has_variants": 1, "include_disabled": 1});
 		}

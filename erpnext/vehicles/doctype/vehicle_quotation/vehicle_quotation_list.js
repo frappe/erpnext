@@ -22,6 +22,15 @@ frappe.listview_settings['Vehicle Quotation'] = {
 			};
 		}
 
+		listview.page.fields_dict.party_name.get_query = () => {
+			var quotation_to = listview.page.fields_dict.quotation_to.get_value('quotation_to');
+			if (quotation_to == "Customer") {
+				return erpnext.queries.customer();
+			} else if (quotation_to == "Lead") {
+				return erpnext.queries.lead();
+			}
+		}
+
 		listview.page.fields_dict.variant_of.get_query = () => {
 			return erpnext.queries.item({"is_vehicle": 1, "has_variants": 1, "include_disabled": 1, "include_in_vehicle_booking": 1});
 		}
