@@ -661,6 +661,10 @@ erpnext.work_order = {
 							}
 						});
 					}, __('Finish'))
+					if(doc.material_transferred_for_manufacturing>=doc.qty) {
+						// all materials transferred for manufacturing, make this primary
+						finish_btn.addClass('btn-primary');
+					}
 					frm.add_custom_button(__('Complete'),function() {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
@@ -676,11 +680,6 @@ erpnext.work_order = {
 							}
 						});
 					}, __('Finish'))
-
-					if(doc.material_transferred_for_manufacturing>=doc.qty) {
-						// all materials transferred for manufacturing, make this primary
-						finish_btn.addClass('btn-primary');
-					}
 				}
 			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
