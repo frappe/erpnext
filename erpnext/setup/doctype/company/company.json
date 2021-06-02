@@ -653,16 +653,14 @@
    "fieldtype": "Data",
    "label": "Phone No",
    "oldfieldname": "phone_no",
-   "oldfieldtype": "Data",
-   "options": "Phone"
+   "oldfieldtype": "Data"
   },
   {
    "fieldname": "fax",
    "fieldtype": "Data",
    "label": "Fax",
    "oldfieldname": "fax",
-   "oldfieldtype": "Data",
-   "options": "Phone"
+   "oldfieldtype": "Data"
   },
   {
    "fieldname": "email",
@@ -890,7 +888,7 @@
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2021-03-12 15:01:33.523214",
+ "modified": "2021-06-02 15:28:27.342606",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
