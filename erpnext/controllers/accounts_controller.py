@@ -30,7 +30,7 @@ force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "alt_uom_siz
 
 force_party_fields = ("customer_name", "bill_to_name", "customer_group", "supplier", "supplier_group",
 	"contact_display", "contact_mobile", "contact_phone", "contact_email",
-	"customer_outstanding_amount", "customer_credit_limit", "customer_credit_balance")
+	"customer_credit_limit", "customer_credit_balance", "customer_outstanding_amount", "previous_outstanding_amount")
 
 merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
 	'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
