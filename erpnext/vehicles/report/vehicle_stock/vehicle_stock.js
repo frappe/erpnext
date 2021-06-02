@@ -138,9 +138,17 @@ frappe.query_reports["Vehicle Stock"] = {
 			style['color'] = data.status_color;
 		}
 
-		if (column.fieldname === "delivery_period" && data.delivery_date) {
-			if (frappe.datetime.get_today() > data.delivery_date) {
-				style['color'] = 'red';
+		if (column.fieldname === "delivery_period" && data.delivery_due_date) {
+			if (data.delivery_date) {
+				if (data.delivery_date > data.delivery_due_date) {
+					style['color'] = 'purple';
+				} else {
+					style['color'] = 'green';
+				}
+			} else {
+				if (frappe.datetime.get_today() > data.delivery_due_date) {
+					style['color'] = 'red';
+				}
 			}
 		}
 

@@ -197,7 +197,7 @@ class VehicleStockReport(object):
 				d.is_leased = booking_data.get('financer') and booking_data.get('finance_type') == "Leased"
 
 				d.delivery_period = booking_data.get('delivery_period')
-				d.delivery_date = booking_data.get('delivery_date')
+				d.delivery_due_date = booking_data.get('delivery_date')
 
 				d.bill_no = booking_data.get('bill_no')
 				d.invoice_status = booking_data.get('invoice_status')
