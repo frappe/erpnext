@@ -31,18 +31,19 @@ class EmployeeCheckin(Document):
 
 	def fetch_shift(self):
 		shift_actual_timings = get_actual_start_end_datetime_of_shift(self.employee, get_datetime(self.time), True)
-		if shift_actual_timings[0] and shift_actual_timings[1]:
-			if shift_actual_timings[2].shift_type.determine_check_in_and_check_out == 'Strictly based on Log Type in Employee Checkin' and not self.log_type and not self.skip_auto_attendance:
-				frappe.throw(_('Log Type is required for check-ins falling in the shift: {0}.').format(shift_actual_timings[2].shift_type.name))
-			if not self.attendance:
-				self.shift = shift_actual_timings[2].shift_type.name
-				self.shift_actual_start = shift_actual_timings[0]
-				self.shift_actual_end = shift_actual_timings[1]
-				self.shift_start = shift_actual_timings[2].start_datetime
-				self.shift_end = shift_actual_timings[2].end_datetime
+		if not frappe.db.get_value("Shift Type", shift_actual_timings[2].shift_type.name, "allow_overtime"):
+			if shift_actual_timings[0] and shift_actual_timings[1]:
+				if shift_actual_timings[2].shift_type.determine_check_in_and_check_out == 'Strictly based on Log Type in Employee Checkin' and not self.log_type and not self.skip_auto_attendance:
+					frappe.throw(_('Log Type is required for check-ins falling in the shift: {0}.').format(shift_actual_timings[2].shift_type.name))
+				if not self.attendance:
+					self.shift = shift_actual_timings[2].shift_type.name
+					self.shift_actual_start = shift_actual_timings[0]
+					self.shift_actual_end = shift_actual_timings[1]
+					self.shift_start = shift_actual_timings[2].start_datetime
+					self.shift_end = shift_actual_timings[2].end_datetime
 		elif frappe.db.get_value("Shift Type", shift_actual_timings[2].shift_type.name, "allow_overtime"):
-				#because after Actual time it takes check-in/out invalid
-				#if employee checkout late or check-in before before shift timing adding time buffer.
+		# 		#because after Actual time it takes check-in/out invalid
+		# 		#if employee checkout late or check-in before before shift timing adding time buffer.
 				self.shift = shift_actual_timings[2].shift_type.name
 				self.shift_start = shift_actual_timings[2].start_datetime
 				self.shift_end = shift_actual_timings[2].end_datetime
@@ -101,12 +102,18 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 		employee_doc = frappe.get_doc('Employee', employee)
 		if not frappe.db.exists('Attendance', {'employee':employee, 'attendance_date':attendance_date, 'docstatus':('!=', '2')}):
 
+			print(working_hours)
 			working_timedelta = '00:00:00'
 			working_time = None
 			working_time = modf(working_hours)
 			if working_time[1] or working_time[0]:
 				working_timedelta = timedelta(hours =int(working_time[1]), minutes = int(working_time[0] * 60))
-				working_time = str(int(working_time[1])) + ' Hours ' + str(int(working_time[0] * 60)) + ' Minutes'
+				from erpnext.hr.doctype.shift_type.shift_type import convert_time_into_duration
+				working_time = convert_time_into_duration(working_timedelta)
+
+			print("working")
+			print(working_timedelta)
+			print(working_time)
 
 			doc_dict = {
 				'doctype': 'Attendance',
@@ -114,7 +121,6 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				'attendance_date': attendance_date,
 				'status': attendance_status,
 				'working_time': working_time,
-				'working_timedelta': working_timedelta,
 				'company': employee_doc.company,
 				'shift': shift,
 				'late_entry': late_entry,
@@ -151,6 +157,8 @@ def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 	"""
 	total_hours = 0
 	in_time = out_time = None
+	print("Madar Chod")
+	print(logs)
 	if check_in_out_type == 'Alternating entries as IN and OUT during the same shift':
 		in_time = logs[0].time
 		if len(logs) >= 2:

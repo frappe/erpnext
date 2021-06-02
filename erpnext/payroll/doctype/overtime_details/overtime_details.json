@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "creation": "2021-05-27 13:39:56.788736",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_document_type",
+  "reference_document",
+  "date",
+  "start_time",
+  "end_time",
+  "overtime_type",
+  "total_working_time",
+  "working_timedelta",
+  "overtime_duration",
+  "overtime_durationtime",
+  "overtime_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "reference_document_type",
+   "fieldtype": "Link",
+   "label": "Reference Document Type ",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Datetime",
+   "label": "Start Time "
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Datetime",
+   "label": "End Time"
+  },
+  {
+   "fieldname": "overtime_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Overtime Type ",
+   "options": "Overtime Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_working_time",
+   "fieldtype": "Data",
+   "label": "Total Working Time"
+  },
+  {
+   "default": "00:00:00",
+   "fieldname": "working_timedelta",
+   "fieldtype": "Time",
+   "label": "Working Time(Delta)"
+  },
+  {
+   "fieldname": "overtime_duration",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Overtime Duration",
+   "reqd": 1
+  },
+  {
+   "default": "00:00:00",
+   "fieldname": "overtime_durationtime",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Overtime Duration(Time)"
+  },
+  {
+   "fieldname": "overtime_amount",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Overtime Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Document",
+   "options": "reference_document_type"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-05-27 13:43:11.578682",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Overtime Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

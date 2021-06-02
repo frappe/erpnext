@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2021-05-25 12:49:09.178306",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "party_type",
+  "party",
+  "column_break_3",
+  "applicable_salary_component",
+  "pay_rate_multipliers_section",
+  "standard_multiplier",
+  "applicable_for_weekend",
+  "weekend_multiplier",
+  "column_break_9",
+  "applicable_for_public_holiday",
+  "public_holiday_multipliers"
+ ],
+ "fields": [
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Party Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applicable_salary_component",
+   "fieldtype": "Table MultiSelect",
+   "label": "Applicable Salary Component",
+   "options": "Overtime Salary Component"
+  },
+  {
+   "description": "Pay Rate Multipliers apply to the hourly wage for the position you\u2019re working during the overtime hours.",
+   "fieldname": "pay_rate_multipliers_section",
+   "fieldtype": "Section Break",
+   "label": "Pay Rate Multipliers"
+  },
+  {
+   "fieldname": "standard_multiplier",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Standard Multiplier",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "If unchecked, the standard multiplier will be taken as default for the weekend.\n",
+   "fieldname": "applicable_for_weekend",
+   "fieldtype": "Check",
+   "label": "Applicable for Weekend"
+  },
+  {
+   "depends_on": "eval: doc.applicable_for_weekend == 1",
+   "fieldname": "weekend_multiplier",
+   "fieldtype": "Float",
+   "label": "Weekend Multiplier",
+   "mandatory_depends_on": "eval: doc.applicable_for_weekend == 1"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If unchecked, the standard multiplier will be taken as default for Public Holiday.",
+   "fieldname": "applicable_for_public_holiday",
+   "fieldtype": "Check",
+   "label": "Applicable for Public Holiday"
+  },
+  {
+   "depends_on": "eval: doc.applicable_for_public_holiday == 1",
+   "fieldname": "public_holiday_multipliers",
+   "fieldtype": "Float",
+   "label": "Public Holiday Multipliers",
+   "mandatory_depends_on": "eval: doc.applicable_for_public_holiday == 1"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-05-25 13:21:11.318945",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Overtime Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
