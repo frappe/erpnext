@@ -179,7 +179,7 @@ def make_item_tax_template(company_name, template):
 def make_tax_category(tax_category):
 	""" Make tax category based on title if not already created """
 	doctype = 'Tax Category'
-	if not frappe.db.exists(doctype, tax_category):
+	if not frappe.db.exists(doctype, tax_category['title']):
 		tax_category['doctype'] = doctype
 		doc = frappe.get_doc(tax_category)
 		doc.flags.ignore_links = True
