@@ -191,6 +191,8 @@ class VehicleStockReport(object):
 			# Booking Data
 			if d.vehicle_booking_order and d.vehicle_booking_order in self.booking_by_booking_data:
 				booking_data = self.booking_by_booking_data[d.vehicle_booking_order]
+				d.customer = d.customer or booking_data.get('customer')
+				d.financer = booking_data.get('financer')
 				d.customer_name = booking_data.get('customer_name')
 				d.lessee_name = booking_data.get('lessee_name')
 				d.contact_number = booking_data.get('contact_mobile') or booking_data.get('contact_phone')
@@ -235,7 +237,18 @@ class VehicleStockReport(object):
 			# Mark Unregistered
 			d.license_plate = 'Unregistered' if d.unregistered else d.license_plate
 
+		self.data = self.filter_rows(self.data)
 		self.data = sorted(self.data, key=lambda d: (not bool(d.received_date), cstr(d.received_date), cstr(d.dispatch_date)))
+
+	def filter_rows(self, data):
+		if self.filters.customer:
+			data = [d for d in self.data if d.customer == self.filters.customer]
+		if self.filters.financer:
+			data = [d for d in self.data if d.financer == self.filters.financer]
+		if self.filters.vehicle_owner:
+			data = [d for d in self.data if (d.financer == self.filters.vehicle_owner if d.is_leased else d.customer == self.filters.vehicle_owner)]
+
+		return data
 
 	def get_grouped_data(self):
 		data = self.data

@@ -117,6 +117,39 @@ frappe.query_reports["Vehicle Stock"] = {
 			options: "Vehicle"
 		},
 		{
+			fieldname: "customer",
+			label: __("Customer (User)"),
+			fieldtype: "Link",
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
+		},
+		{
+			fieldname: "financer",
+			label: __("Financer"),
+			fieldtype: "Link",
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
+		},
+		{
+			fieldname: "vehicle_owner",
+			label: __("Vehicle Owner"),
+			fieldtype: "Link",
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
+		},
+		{
 			fieldname: "group_by_1",
 			label: __("Group By Level 1"),
 			fieldtype: "Select",
