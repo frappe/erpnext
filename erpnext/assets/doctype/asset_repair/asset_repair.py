@@ -5,18 +5,19 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
+from frappe.utils import time_diff_in_hours, getdate, nowdate, add_months, flt, cint
 from frappe.model.document import Document
 from erpnext.accounts.general_ledger import make_gl_entries
 
 class AssetRepair(Document):
 	def validate(self):
 		if self.repair_status == "Completed" and not self.completion_date:
-			frappe.throw(_("Please select Completion Date for Completed Repair"))
+			self.completion_date = nowdate()
 
 		self.update_status()
-		self.set_total_value()		# change later
-		self.calculate_total_repair_cost()
+		if self.stock_consumption:
+			self.set_total_value()		# change later
+			self.calculate_total_repair_cost()
 		
 	def update_status(self):
 		if self.repair_status == 'Pending':
@@ -31,9 +32,8 @@ class AssetRepair(Document):
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = self.repair_cost
-		if self.stock_consumption:
-			for item in self.stock_items:
-				self.total_repair_cost += item.total_value
+		for item in self.stock_items:
+			self.total_repair_cost += item.total_value
 
 	def on_submit(self):
 		self.check_repair_status()
