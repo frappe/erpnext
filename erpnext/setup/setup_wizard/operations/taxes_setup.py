@@ -24,6 +24,7 @@ def setup_taxes_and_charges(company_name: str, country: str):
 		country_wise_tax = simple_to_detailed(country_wise_tax)
 
 	from_detailed_data(company_name, country_wise_tax.get('chart_of_accounts'))
+	update_regional_tax_settings(country, company_name)
 
 
 def simple_to_detailed(templates):
@@ -96,6 +97,17 @@ def from_detailed_data(company_name, data):
 		for template in item_tax_templates:
 			make_item_tax_template(company_name, template)
 
+
+def update_regional_tax_settings(country, company):
+	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
+	if os.path.exists(path.encode("utf-8")):
+		try:
+			module_name = "erpnext.regional.{0}.setup.update_regional_tax_settings".format(frappe.scrub(country))
+			frappe.get_attr(module_name)(country, company)
+		except Exception as e:
+			# Log error and ignore if failed to setup regional tax settings
+			frappe.log_error()
+			pass
 
 def make_taxes_and_charges_template(company_name, doctype, template):
 	template['company'] = company_name
