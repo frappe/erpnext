@@ -621,15 +621,12 @@ class SalarySlip(TransactionBase):
 
 			component_row = self.append(component_type)
 			for attr in (
-				'depends_on_payment_days', 'salary_component',
+				'depends_on_payment_days', 'salary_component', 'abbr',
 				'do_not_include_in_total', 'is_tax_applicable',
 				'is_flexible_benefit', 'variable_based_on_taxable_salary',
 				'exempted_from_income_tax'
 			):
 				component_row.set(attr, component_data.get(attr))
-
-			abbr = component_data.get('abbr') or component_data.get('salary_component_abbr')
-			component_row.set('abbr', abbr)
 
 		if additional_salary:
 			component_row.default_amount = 0
