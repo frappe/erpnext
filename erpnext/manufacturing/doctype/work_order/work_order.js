@@ -643,15 +643,15 @@ erpnext.work_order = {
 						}
 					}
 
-					var finish_btn = frm.add_custom_button(__('Partial'), function() {
-						erpnext.work_order.make_se(frm, 'Manufacture');
-					},("Finish"));
-					frm.add_custom_button(__('Partial'),function() {
+					// var finish_btn = frm.add_custom_button(__('Partial'), function() {
+					// 	erpnext.work_order.make_se(frm, 'Manufacture');
+					// },('Finish'));
+					frm.add_custom_button(__('Complete'),function() {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
 							args: {
 							  doc_name: frm.doc.name,
-							  partial: 1
+							  partial: 0
 							},
 							callback: function(r){
 								if (r.message) {
@@ -661,13 +661,12 @@ erpnext.work_order = {
 							}
 						});
 					}, __('Finish'))
-
-					frm.add_custom_button(__('Complete'),function() {
+					frm.add_custom_button(__('Partial'),function() {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
 							args: {
 							  doc_name: frm.doc.name,
-							  partial: 0
+							  partial: 1
 							},
 							callback: function(r){
 								if (r.message) {
