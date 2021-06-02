@@ -504,9 +504,10 @@ class StockController(AccountsController):
 
 @frappe.whitelist()
 def make_quality_inspections(doctype, docname, items):
-	items = json.loads(items).get('items')
-	inspections = []
+	if isinstance(items, str):
+		items = json.loads(items)
 
+	inspections = []
 	for item in items:
 		if flt(item.get("sample_size")) > flt(item.get("qty")):
 			frappe.throw(_("{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})").format(

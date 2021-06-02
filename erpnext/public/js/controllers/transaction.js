@@ -2035,7 +2035,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					args: {
 						doctype: me.frm.doc.doctype,
 						docname: me.frm.doc.name,
-						items: data
+						items: data.items
 					},
 					freeze: true,
 					callback: function (r) {
