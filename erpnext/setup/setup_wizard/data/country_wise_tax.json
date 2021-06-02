@@ -491,6 +491,7 @@
 					{
 						"title": "Umsatzsteuer",
 						"tax_category": "Umsatzsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -515,6 +516,7 @@
 					{
 						"title": "Vorsteuer",
 						"tax_category": "Vorsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -567,6 +569,7 @@
 					{
 						"title": "Umsatzsteuer",
 						"tax_category": "Umsatzsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -591,6 +594,7 @@
 					{
 						"title": "Vorsteuer",
 						"tax_category": "Vorsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -619,6 +623,7 @@
 					{
 						"title": "Umsatzsteuer",
 						"tax_category": "Umsatzsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -643,6 +648,7 @@
 					{
 						"title": "Vorsteuer",
 						"tax_category": "Vorsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -761,6 +767,7 @@
 					{
 						"title": "Umsatzsteuer",
 						"tax_category": "Umsatzsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -783,6 +790,7 @@
 					{
 						"title": "Vorsteuer 19%",
 						"tax_category": "Vorsteuer",
+						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
