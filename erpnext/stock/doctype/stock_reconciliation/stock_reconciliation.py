@@ -80,6 +80,9 @@ class StockReconciliation(StockController):
 
 	def update_current_qty_valuation_rate(self):
 		for item in self.items:
+			if not item.item_code:
+				continue
+
 			qty, rate, amount, serial_nos = get_stock_balance_for(item.item_code, item.warehouse,
 				self.posting_date, self.posting_time, item.batch_no)
 
