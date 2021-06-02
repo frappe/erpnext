@@ -540,7 +540,6 @@
 					},
 					{
 						"title": "Innergemeinschaftlicher Erwerb 19% Umsatzsteuer und 19% Vorsteuer",
-						"tax_category": "Innergemeinschaftlicher Erwerb 19%",
 						"taxes": [
 							{
 								"account_head": {
