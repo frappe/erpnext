@@ -1761,21 +1761,21 @@ def get_items_from_warehouse(warehouse, posting_date, posting_time, company):
 		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
 		and i.has_variants = 0 and i.has_serial_no = 0 and i.has_batch_no = 0
 		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
-	""", (lft, rgt))
+	""", (lft, rgt), as_dict=True)
 
 	res = []
-	for d in set(items):
-		stock_bal = get_stock_balance(d[0], d[2], posting_date, posting_time, with_valuation_rate=True)
+	for d in items:
+		stock_bal = get_stock_balance(d.get("name"), d.get("warehouse"), posting_date, posting_time, with_valuation_rate=True)
 
 		res.append({
-			"item_code": d[0],
-			"s_warehouse": d[2],
-			"item_group": d[3],
-			"description": d[4],
+			"item_code": d.get("name"),
+			"s_warehouse": d.get("warehouse"),
+			"item_group": d.get("item_group"),
+			"description": d.get("description"),
 			"qty": stock_bal[0],
 			"basic_rate": stock_bal[1],
-			"uom": d[5],
-			"stock_uom": d[5],
+			"uom": d.get("stock_uom"),
+			"stock_uom": d.get("stock_uom"),
 			"transfer_qty": stock_bal[0],
 			"conversion_factor": 1,
 		})
