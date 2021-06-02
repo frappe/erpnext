@@ -76,7 +76,8 @@ class AssetRepair(Document):
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc({
 			"doctype": "Stock Entry",
-			"stock_entry_type": "Material Issue"
+			"stock_entry_type": "Material Issue",
+			"company": frappe.get_value('Asset', self.asset, "company")
 		})
 
 		for stock_item in self.stock_items:
