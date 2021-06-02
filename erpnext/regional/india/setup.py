@@ -15,7 +15,6 @@ def setup(company=None, patch=True):
 	setup_company_independent_fixtures(patch=patch)
 	if not patch:
 		make_fixtures(company)
-		setup_gst_settings(company)
 
 # TODO: for all countries
 def setup_company_independent_fixtures(patch=False):
@@ -694,7 +693,7 @@ def make_fixtures(company=None):
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
 
-def setup_gst_settings(company):
+def update_regional_tax_settings(country, company):
 	# Will only add default GST accounts if present
 	input_account_names = ['Input Tax CGST', 'Input Tax SGST', 'Input Tax IGST']
 	output_account_names = ['Output Tax CGST', 'Output Tax SGST', 'Output Tax IGST']
