@@ -18,14 +18,24 @@ erpnext.ProductSearch = class {
 	bindSearchAction() {
 		let me = this;
 
+		// Show Search dropdown
 		this.searchBox.on("focus", () => {
 			this.search_dropdown.removeClass("hidden");
 		});
 
-		this.searchBox.on("focusout", () => {
-			this.search_dropdown.addClass("hidden");
+		// If click occurs outside search input/results, hide results.
+		// Click can happen anywhere on the page
+		$("body").on("click", (e) => {
+			let searchEvent = $(e.target).closest('#search-box').length;
+			let resultsEvent = $(e.target).closest('#search-results-container').length;
+			let isResultHidden = this.search_dropdown.hasClass("hidden");
+
+			if (!searchEvent && !resultsEvent && !isResultHidden) {
+				this.search_dropdown.addClass("hidden");
+			}
 		});
 
+		// Process search input
 		this.searchBox.on("input", (e) => {
 			let query = e.target.value;
 
@@ -178,7 +188,12 @@ erpnext.ProductSearch = class {
 
 	populateResults(data) {
 		if (data.message.results.length === 0) {
-			this.products_container.html('No results');
+			let empty_html = `
+				<div class="mt-6 w-100 text-muted" style="font-weight: 400; text-align: center;">
+					${ __('No results') }
+				</div>
+			`;
+			this.products_container.html(empty_html);
 			return;
 		}
 
