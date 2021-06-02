@@ -1523,7 +1523,7 @@ class StockEntry(StockController):
 			}
 
 			self._update_percent_field_in_targets(args, update_modified=True)
-
+	
 	def update_quality_inspection(self):
 		if self.inspection_required:
 			reference_type = reference_name = ''
@@ -1630,6 +1630,30 @@ def make_stock_in_entry(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def referance_challan(reference_challan,name):
+	doc=frappe.db.get_all("Stock Entry Detail",{"parent":reference_challan,"docstatus":1},
+							['item_code','qty','subcontracted_item','uom','conversion_factor','stock_uom','transfer_qty','t_warehouse'])
+
+	return doc
+	
+
+@frappe.whitelist()
+def get_list(company):
+	list=[]
+	lst=[]
+	doc=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Send to Subcontractor","docstatus":1,"company":["!=", company]},['name'])
+	db=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Material Receipt","docstatus":1},['reference_challan'])
+	for i in db:
+		if i.reference_challan:
+			lst.append(i.reference_challan)
+	for i in doc:
+		if i.name not in lst:
+			list.append(i.name)
+	return list
+
+
 
 @frappe.whitelist()
 def get_work_order_details(work_order, company):
