@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -35,6 +34,12 @@
   "prevent_pos",
   "allowed_to_transact_section",
   "companies",
+  "status_section",
+  "advances",
+  "pending_returns",
+  "debit",
+  "credit",
+  "remaining_balance",
   "section_break_7",
   "default_currency",
   "column_break_10",
@@ -372,13 +377,52 @@
    "fieldtype": "Data",
    "label": "RTN",
    "reqd": 1
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Account Status"
+  },
+  {
+   "fieldname": "advances",
+   "fieldtype": "Currency",
+   "label": "Advances",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_returns",
+   "fieldtype": "Currency",
+   "label": "Pending Returns",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "label": "Debit",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "label": "Credit",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remaining_balance",
+   "fieldtype": "Currency",
+   "label": "Remaining Balance",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "links": [],
- "modified": "2020-04-14 23:00:29.144151",
+ "modified": "2021-05-18 16:41:59.583491",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

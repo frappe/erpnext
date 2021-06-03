@@ -1,0 +1,40 @@
+{
+ "creation": "2021-05-25 15:37:13.187608",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reason",
+  "percentage"
+ ],
+ "fields": [
+  {
+   "fieldname": "reason",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reason For Retention",
+   "options": "Reason For Retention",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "reason.percentage",
+   "fetch_if_empty": 1,
+   "fieldname": "percentage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Percentage",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-05-25 15:51:44.162809",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Reason And Percentage",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

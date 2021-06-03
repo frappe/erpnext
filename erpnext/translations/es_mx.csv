@@ -23,6 +23,7 @@ DocType: Loyalty Point Entry,Loyalty Point Entry,Entrada de Punto de Lealtad
 DocType: Leave Policy Detail,Leave Policy Detail,Detalles de política de Licencia
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+DocType: Sales Invoice,Client Name,Nombre del cliente
 
 #### Note
 

@@ -8084,3 +8084,4 @@ DocType: Training Event,Training Program,Programa de Entrenamiento
 DocType: Account,Cash,Efectivo
 DocType: Sales Invoice,Unpaid and Discounted,Sin pagar y con descuento
 DocType: Employee,Short biography for website and other publications.,Breve biografía para la página web y otras publicaciones.
+DocType: Sales Invoice,Client Name,Nombre del cliente

@@ -30,6 +30,7 @@ from erpnext.healthcare.utils import manage_invoice_submit_cancel
 from six import iteritems
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
+from frappe.utils.data import money_in_words
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -79,6 +80,9 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
+		
+		if not self.creation_date:
+			self.creation_date = datetime.now()
 
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -140,6 +144,8 @@ class SalesInvoice(SellingController):
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.exonerated_value()
+		if self.docstatus == 1:
+			self.update_accounts_status()
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
@@ -152,6 +158,8 @@ class SalesInvoice(SellingController):
 		taxed18 = 0
 		exempt = 0
 		exonerated = 0
+		taxed_sales15 = 0
+		taxed_sales18 = 0
 
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
@@ -183,16 +191,20 @@ class SalesInvoice(SellingController):
 
 								if tax_detail.tax_rate == 15:
 									if self.exonerated == 1:
+										taxed_sales15 += item.amount/1.15
 										taxed15 += item.amount - (item.amount/1.15)
 										exonerated += item.amount
 									else:
+										taxed_sales15 += item.amount/1.15
 										taxed15 += item.amount - (item.amount/1.15)
 								
 								if tax_detail.tax_rate == 18:
 									if self.exonerated == 1:
+										taxed_sales18 += item.amount/1.18
 										taxed18 += item.amount - (item.amount/1.18)
 										exonerated += item.amount
 									else:
+										taxed_sales18 += item.amount/1.18
 										taxed18 += item.amount - (item.amount/1.18)
 				else:
 					exempt += item.amount
@@ -202,15 +214,31 @@ class SalesInvoice(SellingController):
 		self.total_exonerated = exonerated
 		self.total_exempt = exempt
 		self.total_taxes_and_charges = taxed15 + taxed18
+		self.taxed_sales15 = taxed_sales15
+		self.taxed_sales18 = taxed_sales18
 
 		if self.exonerated == 1:
-			self.grand_total -= self.total_taxes_and_charges
-			self.rounded_total -= self.total_taxes_and_charges
-			self.outstanding_amount -= self.total_taxes_and_charges
+			if self.discount_amount:
+				self.grand_total = self.grand_total = self.total - self.total_taxes_and_charges - self.discount_amount
+			else:
+				self.grand_total = self.grand_total = self.total - self.total_taxes_and_charges			
 		else:
-			self.grand_total = self.total
-			self.rounded_total = self.grand_total
-			self.outstanding_amount = self.grand_total
+			if self.discount_amount:
+				self.grand_total = self.total - self.discount_amount
+			else:
+				self.grand_total = self.total
+		
+		self.outstanding_amount = self.grand_total - self.total_advance
+		self.in_words = money_in_words(self.grand_total)
+
+		# if self.status == 'Draft' or self.docstatus == 1:
+		self.db_set('isv15', taxed15, update_modified=False)
+		self.db_set('isv18', taxed18, update_modified=False)
+		self.db_set('total_exonerated', exonerated, update_modified=False)
+		self.db_set('taxed_sales15', taxed_sales15, update_modified=False)
+		self.db_set('total_exempt', exempt, update_modified=False)
+		self.db_set('taxed_sales18', taxed_sales18, update_modified=False)
+		self.db_set('total_taxes_and_charges', taxed15 + taxed18, update_modified=False)
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
@@ -218,7 +246,7 @@ class SalesInvoice(SellingController):
 	
 	def exonerated_value(self):
 		if self.exonerated == 1:
-			if self.grand_total > self.total:
+			if self.grand_total < self.total:
 				self.grand_total -= self.total_taxes_and_charges
 				self.outstanding_amount -= self.total_taxes_and_charges
 
@@ -240,6 +268,13 @@ class SalesInvoice(SellingController):
 					doc.payment_amount += self.total_taxes_and_charges
 					doc.save()
 
+	def update_accounts_status(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		if customer:
+			customer.debit += self.grand_total
+			customer.remaining_balance += self.grand_total
+			customer.save()
+			
 	def discount_product(self):
 		total_discount = 0
 		for d in self.get('items'):
@@ -250,6 +285,9 @@ class SalesInvoice(SellingController):
 		user = frappe.session.user
 
 		cai = frappe.get_all("CAI", ["initial_number", "final_number", "name_cai", "cai", "issue_deadline", "prefix"], filters = { "status": "Active", "prefix": self.naming_series})
+
+		if len(cai) == 0:
+			frappe.throw(_("This secuence no assign cai"))
 
 		current_value = self.get_current(cai[0].prefix)
 
@@ -384,6 +422,31 @@ class SalesInvoice(SellingController):
 	def before_naming(self):
 		if self.docstatus == 0:
 			self.assign_cai()
+			self.create_prefix_for_days()
+			self.create_daily_summary_series()
+
+		if self.status == 'Draft' and self.cai == None:
+			self.assign_cai()
+			self.create_prefix_for_days()
+			self.create_daily_summary_series()
+
+	def create_prefix_for_days(self):
+		prefix = cai = frappe.get_all("Prefix sales for days", ["name_prefix"], filters = {"name_prefix": self.naming_series})
+
+		if len(prefix) == 0:
+			doc = frappe.new_doc('Prefix sales for days')
+			doc.name_prefix = self.naming_series
+			doc.insert()
+	
+	def create_daily_summary_series(self):
+		split_serie = self.naming_series.split('-')
+		serie =  "{}-{}".format(split_serie[0], split_serie[1])
+		prefix = cai = frappe.get_all("Daily summary series", ["name_serie"], filters = {"name_serie": serie})
+
+		if len(prefix) == 0:
+			doc = frappe.new_doc('Daily summary series')
+			doc.name_serie = serie
+			doc.insert()
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
@@ -933,6 +996,7 @@ class SalesInvoice(SellingController):
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
+		
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -943,8 +1007,8 @@ class SalesInvoice(SellingController):
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
-			if self.exonerated == 1:
-				gl_entries.pop(1)
+			# if self.exonerated == 1:
+			# 	gl_entries.pop(1)
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)

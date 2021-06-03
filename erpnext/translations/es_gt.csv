@@ -7,3 +7,4 @@ apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_bala
 DocType: Bank Statement Transaction Invoice Item,Outstanding Amount,Saldo Pendiente
 DocType: Payment Entry Reference,Outstanding,Pendiente
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,{0} on Leave on {1},{0} De permiso De permiso {1}
+DocType: Sales Invoice,Client Name,Nombre del cliente
