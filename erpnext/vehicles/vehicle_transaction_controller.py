@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, getdate
+from frappe.utils import cstr, getdate, cint
 from erpnext.controllers.stock_controller import StockController
 from erpnext.vehicles.vehicle_booking_controller import validate_vehicle_item
 from erpnext.accounts.party import validate_party_frozen_disabled
@@ -309,13 +309,15 @@ def get_vehicle_booking_order_details(args):
 
 
 @frappe.whitelist()
-def get_vehicle_details(vehicle=None, get_vehicle_booking_order=True, vehicle_booking_order=None):
+def get_vehicle_details(vehicle=None, get_vehicle_booking_order=True, vehicle_booking_order=None,
+		get_vehicle_invoice_receipt=False):
 	out = frappe._dict()
 
 	vehicle_details = frappe._dict()
 	if vehicle:
 		vehicle_details = frappe.db.get_value("Vehicle", vehicle,
-			['item_code', 'warehouse', 'chassis_no', 'engine_no', 'license_plate', 'unregistered', 'color'], as_dict=1)
+			['item_code', 'warehouse', 'chassis_no', 'engine_no', 'license_plate', 'unregistered', 'color', 'image'],
+			as_dict=1)
 		if not vehicle_details:
 			frappe.throw(_("Vehicle {0} does not exist").format(vehicle))
 
@@ -327,14 +329,20 @@ def get_vehicle_details(vehicle=None, get_vehicle_booking_order=True, vehicle_bo
 	out.vehicle_license_plate = vehicle_details.license_plate
 	out.vehicle_unregistered = vehicle_details.unregistered
 	out.vehicle_color = vehicle_details.color
+	out.image = vehicle_details.image
 
 	if vehicle_details.warehouse:
 		out.warehouse = vehicle_details.warehouse
 
 	if vehicle and get_vehicle_booking_order and not vehicle_booking_order:
 		vehicle_booking_order = get_vehicle_booking_order_from_vehicle(vehicle)
-		if vehicle_booking_order:
-			out.vehicle_booking_order = vehicle_booking_order
+		out.vehicle_booking_order = vehicle_booking_order
+
+	if cint(get_vehicle_invoice_receipt):
+		from erpnext.vehicles.doctype.vehicle_invoice_delivery.vehicle_invoice_delivery import get_vehicle_invoice_receipt,\
+			get_vehicle_invoice_details
+		out.vehicle_invoice_receipt = get_vehicle_invoice_receipt(vehicle)
+		out.update(get_vehicle_invoice_details(out.vehicle_invoice_receipt))
 
 	return out
 

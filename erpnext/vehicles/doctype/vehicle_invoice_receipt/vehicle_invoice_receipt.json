@@ -130,8 +130,7 @@
    "in_standard_filter": 1,
    "label": "Vehicle Booking Order",
    "no_copy": 1,
-   "options": "Vehicle Booking Order",
-   "reqd": 1
+   "options": "Vehicle Booking Order"
   },
   {
    "fieldname": "vehicle_details_section",
@@ -253,8 +252,7 @@
    "fieldname": "booking_customer_name",
    "fieldtype": "Data",
    "label": "Booking Customer Name",
-   "no_copy": 1,
-   "read_only": 1
+   "no_copy": 1
   },
   {
    "fetch_from": "vehicle_booking_order.finance_type",
@@ -358,7 +356,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 22:36:31.466681",
+ "modified": "2021-06-03 20:03:10.039861",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Receipt",

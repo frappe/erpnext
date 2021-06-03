@@ -708,3 +708,4 @@ erpnext.patches.v12_0.set_variant_of_in_vehicle_transaction
 erpnext.patches.v12_0.update_stock_reconciliation_and_sle
 erpnext.patches.v12_0.rename_vehicle_bilty_field
 erpnext.patches.v12_0.set_service_person_name
+erpnext.patches.v12_0.set_vehicle_invoice_receipt_in_delivery

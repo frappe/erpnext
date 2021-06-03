@@ -9,8 +9,7 @@ erpnext.vehicles.VehicleInvoiceDeliveryController = erpnext.vehicles.VehicleTran
 		var me = this;
 		this.frm.set_query("vehicle", function () {
 			var filters = {
-				item_code: me.frm.doc.item_code,
-				is_booked: 1
+				item_code: me.frm.doc.item_code
 			};
 
 			if (me.frm.doc.supplier) {

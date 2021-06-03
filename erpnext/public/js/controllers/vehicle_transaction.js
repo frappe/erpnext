@@ -182,7 +182,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 			args: {
 				doctype: me.frm.doc.doctype,
 				vehicle: me.frm.doc.vehicle,
-				vehicle_booking_order: me.frm.doc.vehicle_booking_order
+				get_vehicle_invoice_receipt: cint(me.frm.doc.doctype == "Vehicle Invoice Delivery")
 			},
 			callback: function (r) {
 				if (r.message && !r.exc) {

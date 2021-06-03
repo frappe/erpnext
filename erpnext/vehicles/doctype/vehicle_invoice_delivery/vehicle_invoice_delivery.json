@@ -16,6 +16,7 @@
   "vehicle_booking_order",
   "column_break_8",
   "remarks",
+  "vehicle_invoice_receipt",
   "column_break_11",
   "amended_from",
   "posting_date",
@@ -91,8 +92,7 @@
    "in_standard_filter": 1,
    "label": "Vehicle Booking Order",
    "no_copy": 1,
-   "options": "Vehicle Booking Order",
-   "reqd": 1
+   "options": "Vehicle Booking Order"
   },
   {
    "fieldname": "column_break_8",
@@ -122,7 +122,7 @@
    "search_index": 1
   },
   {
-   "fetch_from": "vehicle_booking_order.bill_no",
+   "fetch_from": "vehicle_invoice_receipt.bill_no",
    "fieldname": "bill_no",
    "fieldtype": "Data",
    "in_standard_filter": 1,
@@ -131,7 +131,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "vehicle_booking_order.bill_date",
+   "fetch_from": "vehicle_invoice_receipt.bill_date",
    "fieldname": "bill_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,
@@ -255,12 +255,20 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_invoice_receipt",
+   "fieldtype": "Link",
+   "label": "Vehicle Invoice Receipt",
+   "no_copy": 1,
+   "options": "Vehicle Invoice Receipt",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 22:36:43.412022",
+ "modified": "2021-06-03 20:31:19.392901",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",

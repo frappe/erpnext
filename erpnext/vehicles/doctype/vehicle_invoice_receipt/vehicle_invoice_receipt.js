@@ -9,8 +9,7 @@ erpnext.vehicles.VehicleInvoiceReceiptController = erpnext.vehicles.VehicleTrans
 		var me = this;
 		this.frm.set_query("vehicle", function () {
 			var filters = {
-				item_code: me.frm.doc.item_code,
-				is_booked: 1
+				item_code: me.frm.doc.item_code
 			};
 
 			if (me.frm.doc.supplier) {
@@ -26,7 +25,8 @@ erpnext.vehicles.VehicleInvoiceReceiptController = erpnext.vehicles.VehicleTrans
 			return {
 				filters: {
 					docstatus: 1,
-					invoice_status: 'To Receive'
+					invoice_status: 'To Receive',
+					vehicle: ['is', 'set']
 				}
 			};
 		});
