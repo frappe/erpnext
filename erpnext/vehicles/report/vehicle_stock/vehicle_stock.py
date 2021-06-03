@@ -40,6 +40,7 @@ class VehicleStockReport(object):
 		self.get_dispatched_vehicles()
 		self.get_vehicle_data()
 		self.get_vehicle_receipt_delivery_data()
+		self.get_vehicle_invoice_data()
 		self.get_booking_data()
 		self.prepare_data()
 
@@ -205,10 +206,19 @@ class VehicleStockReport(object):
 				d.delivery_period = booking_data.get('delivery_period')
 				d.delivery_due_date = booking_data.get('delivery_date')
 
-				d.bill_no = booking_data.get('bill_no')
-				d.invoice_status = booking_data.get('invoice_status')
+			# Invoice Receipt Data
+			if d.vehicle in self.vehicle_invoice_receipt_data:
+				invoice_data = self.vehicle_invoice_receipt_data[d.vehicle]
+				d.bill_no = invoice_data.get('bill_no')
+				d.bill_date = invoice_data.get('bill_date')
+				d.invoice_received_date = invoice_data.get('posting_date')
 
-			# Status
+			# Invoice Delivery Data
+			if d.vehicle in self.vehicle_invoice_delivery_data:
+				invoice_data = self.vehicle_invoice_delivery_data[d.vehicle]
+				d.invoice_delivery_date = invoice_data.get('posting_date')
+
+			# Stock Status
 			if d.qty > 0:
 				if d.vehicle_booking_order and d.open_stock:
 					d.status = "Open Stock (Booked)"
@@ -233,10 +243,13 @@ class VehicleStockReport(object):
 						d.status = "Dispatched"
 						d.status_color = "orange"
 
-			if d.invoice_status == "To Deliver":
-				d.invoice_status_color = "orange"
-			elif d.invoice_status == "Delivered":
+			# Invoice Status
+			if d.invoice_delivery_date:
+				d.invoice_status = "Delivered"
 				d.invoice_status_color = "green"
+			elif d.invoice_received_date:
+				d.invoice_status = "In Hand"
+				d.invoice_status_color = "orange"
 
 			# Mark Unregistered
 			d.license_plate = 'Unregistered' if d.unregistered else d.license_plate
@@ -433,6 +446,38 @@ class VehicleStockReport(object):
 			for d in data:
 				self.vehicle_delivery_data[d.name] = d
 
+	def get_vehicle_invoice_data(self):
+		vehicle_names = list(set([d.vehicle for d in self.data]))
+		if not vehicle_names:
+			return {}
+
+		args = self.filters.copy()
+		args['vehicle_names'] = vehicle_names
+
+		date_condition = ""
+		if self.filters.to_date:
+			date_condition += " and posting_date <= %(to_date)s"
+
+		receipt_data = frappe.db.sql("""
+			select name, vehicle, posting_date, bill_no, bill_date
+			from `tabVehicle Invoice Receipt`
+			where docstatus = 1 and vehicle in %(vehicle_names)s {0}
+		""".format(date_condition), args, as_dict=1)
+
+		self.vehicle_invoice_receipt_data = {}
+		for d in receipt_data:
+			self.vehicle_invoice_receipt_data[d.vehicle] = d
+
+		delivery_data = frappe.db.sql("""
+			select name, vehicle, posting_date
+			from `tabVehicle Invoice Delivery`
+			where docstatus = 1 and vehicle in %(vehicle_names)s {0}
+		""".format(date_condition), args, as_dict=1)
+
+		self.vehicle_invoice_delivery_data = {}
+		for d in delivery_data:
+			self.vehicle_invoice_delivery_data[d.vehicle] = d
+
 	def get_booking_data(self):
 		self.booking_by_vehicle_data = {}
 		self.booking_by_booking_data = {}
@@ -447,7 +492,6 @@ class VehicleStockReport(object):
 				customer_name, lessee_name,
 				supplier, supplier_name,
 				contact_mobile, contact_phone,
-				bill_no, invoice_status,
 				delivery_period, delivery_date
 			from `tabVehicle Booking Order`
 			where docstatus = 1 and vehicle in %s

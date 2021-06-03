@@ -177,6 +177,10 @@ frappe.query_reports["Vehicle Stock"] = {
 			style['color'] = data.status_color;
 		}
 
+		if (column.fieldname === "invoice_status" && data.invoice_status_color) {
+			style['color'] = data.invoice_status_color;
+		}
+
 		if (column.fieldname === "delivery_period" && data.delivery_due_date) {
 			if (data.delivery_date) {
 				if (data.delivery_date > data.delivery_due_date) {
