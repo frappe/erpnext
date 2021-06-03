@@ -51,7 +51,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 	}
 
-	get_items({start = 0, page_length = 40, search_value=''}) {
+	get_items({start = 0, page_length = 40, search_term=''}) {
 		const doc = this.events.get_frm().doc;
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
@@ -61,7 +61,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
-			args: { start, page_length, price_list, item_group, search_value, pos_profile },
+			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
 	}
 
@@ -302,7 +302,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
-		this.get_items({ search_value: search_term })
+		this.get_items({ search_term })
 			.then(({ message }) => {
 				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;
