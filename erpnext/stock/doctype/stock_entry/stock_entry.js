@@ -280,7 +280,7 @@ frappe.ui.form.on('Stock Entry', {
 				frappe.call({
 					method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_warehouse",
 					freeze: true,
-					freeze_message: __("Loading items from warehosue..."),
+					freeze_message: __("Loading items from warehouse..."),
 					args: {
 						warehouse: frm.doc.from_warehouse,
 						posting_date: frm.doc.posting_date,
