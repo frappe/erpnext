@@ -72,7 +72,7 @@ class AssetRepair(Document):
 		if self.capitalize_repair_cost:
 			asset_value += self.repair_cost
 		frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
-		
+
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc({
 			"doctype": "Stock Entry",
