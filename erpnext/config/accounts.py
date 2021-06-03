@@ -45,6 +45,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Customer Retention",
+					"description": _("Customer Retention Database."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Payment Entry",
 					"description": _("Bank/Cash transactions against party or for internal transfer")
 				},
@@ -116,6 +122,12 @@ def get_data():
 					"type": "doctype",
 					"name": "Credit Note CXP",
 					"description": _("Credit Note Database."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Retention",
+					"description": _("Supplier Retention Database."),
 					"onboard": 1,
 				},
 				{

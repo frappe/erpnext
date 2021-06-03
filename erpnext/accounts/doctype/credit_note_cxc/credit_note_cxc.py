@@ -100,7 +100,7 @@ class CreditNoteCXC(Document):
 		customer = frappe.get_doc("Customer", self.customer)
 		if customer:
 			customer.credit += self.amount_total
-			customer.remaining_balance += self.amount_total
+			customer.remaining_balance -= self.amount_total
 			customer.save()
 	
 	def assign_cai(self):

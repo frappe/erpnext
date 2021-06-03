@@ -31,6 +31,10 @@ def get_data():
 			{
 				'label': _('Credit And Debit Notes'),
 				'items': ['Debit Note CXP', 'Credit Note CXP']
-			}
+			},
+			{
+				'label': _('Retention'),
+				'items': ['Supplier Retention']
+			},
 		]
 	}
