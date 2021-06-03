@@ -160,6 +160,8 @@ class VehicleStockReport(object):
 						d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
 						d.customer = vehicle_receipt_data.customer
 						d.customer_name = vehicle_receipt_data.customer_name
+						d.supplier = vehicle_receipt_data.supplier
+						d.supplier_name = vehicle_receipt_data.supplier_name
 						d.transporter = vehicle_receipt_data.transporter
 						d.transporter_name = vehicle_receipt_data.transporter_name or vehicle_receipt_data.transporter
 						d.lr_no = vehicle_receipt_data.lr_no
@@ -195,6 +197,8 @@ class VehicleStockReport(object):
 				d.financer = booking_data.get('financer')
 				d.customer_name = booking_data.get('customer_name')
 				d.lessee_name = booking_data.get('lessee_name')
+				d.supplier = d.supplier or booking_data.get('supplier')
+				d.supplier_name = d.supplier_name or booking_data.get('supplier_name')
 				d.contact_number = booking_data.get('contact_mobile') or booking_data.get('contact_phone')
 				d.is_leased = booking_data.get('financer') and booking_data.get('finance_type') == "Leased"
 
@@ -247,6 +251,9 @@ class VehicleStockReport(object):
 			data = [d for d in self.data if d.financer == self.filters.financer]
 		if self.filters.vehicle_owner:
 			data = [d for d in self.data if (d.financer == self.filters.vehicle_owner if d.is_leased else d.customer == self.filters.vehicle_owner)]
+
+		if self.filters.supplier:
+			data = [d for d in self.data if d.supplier == self.filters.supplier]
 
 		return data
 
@@ -403,7 +410,7 @@ class VehicleStockReport(object):
 		receipt_names = list(set([d.received_dn for d in self.data if d.received_dn and d.received_dt == "Vehicle Receipt"]))
 		if receipt_names:
 			data = frappe.db.sql("""
-				select name, vehicle_booking_order, supplier, customer, customer_name,
+				select name, vehicle_booking_order, supplier, supplier_name, customer, customer_name,
 					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered,
 					transporter, transporter_name, lr_no
 				from `tabVehicle Receipt`
@@ -438,6 +445,7 @@ class VehicleStockReport(object):
 			select name, vehicle, vehicle_receipt,
 				customer, financer, finance_type,
 				customer_name, lessee_name,
+				supplier, supplier_name,
 				contact_mobile, contact_phone,
 				bill_no, invoice_status,
 				delivery_period, delivery_date
@@ -500,6 +508,7 @@ class VehicleStockReport(object):
 			{"label": _("Lessee/User Name"), "fieldname": "lessee_name", "fieldtype": "Data", "width": 130},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Delivered To"), "fieldname": "delivered_to", "fieldtype": "Data", "width": 110},
+			{"label": _("Supplier"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Transporter"), "fieldname": "transporter_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Bilty"), "fieldname": "lr_no", "fieldtype": "Data", "width": 70},
 			{"label": _("Invoice"), "fieldname": "bill_no", "fieldtype": "Data", "width": 80},

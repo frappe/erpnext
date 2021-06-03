@@ -150,6 +150,12 @@ frappe.query_reports["Vehicle Stock"] = {
 			}
 		},
 		{
+			fieldname: "supplier",
+			label: __("Supplier"),
+			fieldtype: "Link",
+			options: "Supplier",
+		},
+		{
 			fieldname: "group_by_1",
 			label: __("Group By Level 1"),
 			fieldtype: "Select",
