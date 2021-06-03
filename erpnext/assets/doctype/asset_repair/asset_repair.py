@@ -172,7 +172,6 @@ class AssetRepair(Document):
 		if asset.to_date > schedule_date:
 			row.total_number_of_depreciations += 1
 
-			
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
 	downtime = time_diff_in_hours(completion_date, failure_date)
