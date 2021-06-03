@@ -1757,8 +1757,10 @@ def get_items_from_warehouse(warehouse, posting_date, posting_time, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 	items = frappe.db.sql("""
 		select i.name, i.item_name, bin.warehouse, i.item_group, i.description, i.stock_uom
-		from tabBin bin, tabItem i
-		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
+		from tabBin bin
+		inner join tabItem i
+		on i.name=bin.item_code
+		where i.disabled=0 and i.is_stock_item = 1
 		and i.has_variants = 0 and i.has_serial_no = 0 and i.has_batch_no = 0
 		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
 	""", (lft, rgt), as_dict=True)
