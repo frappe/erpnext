@@ -109,6 +109,9 @@ frappe.ui.form.on('Payment Entry', {
 			var filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
 				'Purchase Order', 'Expense Claim', 'Fees', 'Debit Note CXC', 'Credit Note CXP'];
+			if(child.reference_doctype == "Sales Invoice" || child.reference_doctype == "Purchase Invoice"){
+				filters = {"docstatus": 1, "company": doc.company, "status": "Unpaid"};
+			}
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				filters[doc.party_type.toLowerCase()] = doc.party;
 			}

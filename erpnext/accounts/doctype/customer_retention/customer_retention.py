@@ -12,6 +12,7 @@ class CustomerRetention(Document):
 		self.calculate_percentage_and_references()
 		if self.docstatus == 1:
 			self.calculate_retention()
+			self.update_accounts_status()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
@@ -34,4 +35,11 @@ class CustomerRetention(Document):
 			sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
 			sales_invoice.outstanding_amount -= total
 			sales_invoice.save()
+	
+	def update_accounts_status(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		if customer:
+			customer.credit += self.total_withheld
+			customer.remaining_balance -= self.total_withheld
+			customer.save()
 

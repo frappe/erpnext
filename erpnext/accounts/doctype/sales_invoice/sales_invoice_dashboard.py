@@ -9,6 +9,7 @@ def get_data():
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Credit Note CXC': 'reference_name',
+			'Customer Retention': 'reference_name',
 			'Payment Request': 'reference_name',
 			'Sales Invoice': 'return_against',
 			'Auto Repeat': 'reference_document',
@@ -32,6 +33,10 @@ def get_data():
 			{
 				'label': _('Subscription'),
 				'items': ['Auto Repeat']
+			},
+			{
+				'label': _('Retention'),
+				'items': ['Customer Retention']
 			},
 		]
 	}
