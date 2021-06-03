@@ -114,16 +114,23 @@ def get_onboarding_details(parent, parenttype):
 		filters={"parent": parent, "parenttype": parenttype},
 		order_by= "idx")
 
-@frappe.whitelist()
-def get_boarding_status(project):
+def update_employee_boarding_status(project):
+	employee_onboarding = frappe.db.exists('Employee Onboarding', {'project': project.name})
+	employee_separation = frappe.db.exists('Employee Separation', {'project': project.name})
+
+	if not (employee_onboarding or employee_separation):
+		return
+
 	status = 'Pending'
-	if project:
-		doc = frappe.get_doc('Project', project)
-		if flt(doc.percent_complete) > 0.0 and flt(doc.percent_complete) < 100.0:
-			status = 'In Process'
-		elif flt(doc.percent_complete) == 100.0:
-			status = 'Completed'
-		return status
+	if flt(project.percent_complete) > 0.0 and flt(project.percent_complete) < 100.0:
+		status = 'In Process'
+	elif flt(project.percent_complete) == 100.0:
+		status = 'Completed'
+
+	if employee_onboarding:
+		frappe.db.set_value('Employee Onboarding', employee_onboarding, 'boarding_status', status)
+	elif employee_separation:
+		frappe.db.set_value('Employee Separation', employee_separation, 'boarding_status', status)
 
 def set_employee_name(doc):
 	if doc.employee and not doc.employee_name:

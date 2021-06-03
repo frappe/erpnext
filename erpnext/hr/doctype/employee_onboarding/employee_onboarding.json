@@ -30,18 +30,14 @@
    "fieldtype": "Link",
    "label": "Job Applicant",
    "options": "Job Applicant",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "job_offer",
    "fieldtype": "Link",
    "label": "Job Offer",
    "options": "Job Offer",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fetch_from": "job_applicant.applicant_name",
@@ -49,116 +45,90 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Employee Name",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "employee",
    "fieldtype": "Link",
    "label": "Employee",
    "options": "Employee",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "date_of_joining",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date of Joining",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Date of Joining"
   },
   {
    "allow_on_submit": 1,
+   "default": "Pending",
    "fieldname": "boarding_status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nPending\nIn Process\nCompleted",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Pending\nIn Process\nCompleted",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "notify_users_by_email",
    "fieldtype": "Check",
-   "label": "Notify users by email",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Notify users by email"
   },
   {
    "fieldname": "column_break_7",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "employee_onboarding_template",
    "fieldtype": "Link",
    "label": "Employee Onboarding Template",
-   "options": "Employee Onboarding Template",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Employee Onboarding Template"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Company"
   },
   {
    "fieldname": "department",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Department",
-   "options": "Department",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Department"
   },
   {
    "fieldname": "designation",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Designation",
-   "options": "Designation",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Designation"
   },
   {
    "fieldname": "employee_grade",
    "fieldtype": "Link",
    "label": "Employee Grade",
-   "options": "Employee Grade",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Employee Grade"
   },
   {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "table_for_activity",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "activities",
    "fieldtype": "Table",
    "label": "Activities",
-   "options": "Employee Boarding Activity",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Employee Boarding Activity"
   },
   {
    "fieldname": "amended_from",
@@ -167,14 +137,12 @@
    "no_copy": 1,
    "options": "Employee Onboarding",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 15:22:24.923835",
+ "modified": "2021-06-03 18:01:51.097927",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Onboarding",
