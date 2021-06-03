@@ -120,7 +120,7 @@ class PeriodClosingVoucher(AccountsController):
 		if not self.accounting_dimensions:
 			self.accounting_dimensions = get_accounting_dimensions()
 
-		_, default_dimensions = get_dimensions()
+		_, default_dimensions = get_dimension_filters()
 		for dimension in self.accounting_dimensions:
 			gl_entry.update({
 				dimension: default_dimensions.get(self.company, {}).get(dimension)
