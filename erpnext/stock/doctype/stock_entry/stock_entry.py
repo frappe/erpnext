@@ -1766,17 +1766,20 @@ def get_items_from_warehouse(warehouse, posting_date, posting_time, company):
 	res = []
 	for d in items:
 		stock_bal = get_stock_balance(d.get("name"), d.get("warehouse"), posting_date, posting_time, with_valuation_rate=True)
+		qty = stock_bal[0]
+		rate = stock_bal[1]
 
-		res.append({
-			"item_code": d.get("name"),
-			"s_warehouse": d.get("warehouse"),
-			"item_group": d.get("item_group"),
-			"description": d.get("description"),
-			"qty": stock_bal[0],
-			"basic_rate": stock_bal[1],
-			"uom": d.get("stock_uom"),
-			"stock_uom": d.get("stock_uom"),
-			"transfer_qty": stock_bal[0],
-			"conversion_factor": 1,
-		})
+		if qty > 0:
+			res.append({
+				"item_code": d.get("name"),
+				"s_warehouse": d.get("warehouse"),
+				"item_group": d.get("item_group"),
+				"description": d.get("description"),
+				"qty": qty,
+				"basic_rate": rate,
+				"uom": d.get("stock_uom"),
+				"stock_uom": d.get("stock_uom"),
+				"transfer_qty": qty,
+				"conversion_factor": 1,
+			})
 	return res
