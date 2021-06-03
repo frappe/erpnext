@@ -276,27 +276,48 @@ frappe.ui.form.on('Stock Entry', {
 			}, __("Get Items From"));
 
 			frm.add_custom_button(__("Source Warehouse"), function() {
-				if(!frm.doc.from_warehouse) frappe.throw(__("Please select source warehouse!"));
-				frappe.call({
-					method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_warehouse",
-					freeze: true,
-					freeze_message: __("Loading items from warehouse..."),
-					args: {
-						warehouse: frm.doc.from_warehouse,
-						posting_date: frm.doc.posting_date,
-						posting_time: frm.doc.posting_time,
-						company: frm.doc.company
-					},
-					callback(r) {
-						frm.clear_table("items");
-						r.message.forEach(item => {
-							var d = frm.add_child("items");
-							d.t_warehouse = frm.doc.to_warehouse;
-							$.extend(d, item);
-						});
-						frm.refresh_field("items");
-					}
-				});
+				let from_warehouse = frm.doc.from_warehouse;
+				const get_items_from_warehouse = function(from_warehouse) {
+					frappe.call({
+						method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_warehouse",
+						freeze: true,
+						freeze_message: __("Loading items from warehouse..."),
+						args: {
+							warehouse: from_warehouse,
+							posting_date: frm.doc.posting_date,
+							posting_time: frm.doc.posting_time,
+							company: frm.doc.company
+						},
+						callback(r) {
+							frm.clear_table("items");
+							r.message.forEach(item => {
+								var d = frm.add_child("items");
+								d.t_warehouse = frm.doc.to_warehouse;
+								$.extend(d, item);
+							});
+							frm.refresh_field("items");
+						}
+					});
+				}
+
+				if(from_warehouse) {
+					get_items_from_warehouse(from_warehouse);
+				} else {
+					frappe.prompt({
+						label: "Warehouse",
+						fieldname: "from_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						reqd: 1,
+						get_query: function () {
+							return {
+								filters: {
+									company: frm.doc.company
+								}
+							}
+						}
+					}, (data) => get_items_from_warehouse(data.from_warehouse));
+				}
 			}, __("Get Items From"));
 
 		}
