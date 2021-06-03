@@ -117,7 +117,8 @@ class AssetRepair(Document):
 			"voucher_type": self.doctype,		
 			"voucher_no": self.name,
 			"cost_center": self.cost_center,
-			"posting_date": getdate()
+			"posting_date": getdate(),
+			"company": company
 		})
 		gl_entry.insert()
 		gl_entry = frappe.get_doc({
@@ -131,7 +132,8 @@ class AssetRepair(Document):
 			"cost_center": self.cost_center,
 			"posting_date": getdate(),
 			"against_voucher_type": "Purchase Invoice",
-			"against_voucher": self.purchase_invoice
+			"against_voucher": self.purchase_invoice,
+			"company": company
 		})
 		gl_entry.insert()
 
