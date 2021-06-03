@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
-from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
+from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax, validate_cost_center, validate_account_head
 
 class SalesTaxesandChargesTemplate(Document):
 	def validate(self):
@@ -39,6 +39,8 @@ def valdiate_taxes_and_charges_template(doc):
 
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)
+		validate_account_head(tax, doc)
+		validate_cost_center(tax, doc)
 		validate_inclusive_tax(tax, doc)
 
 def validate_disabled(doc):
