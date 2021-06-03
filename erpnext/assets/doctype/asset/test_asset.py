@@ -699,7 +699,7 @@ def create_asset(**args):
 		"item_code": args.item_code or "Macbook Pro",
 		"company": args.company or"_Test Company",
 		"purchase_date": "2015-01-01",
-		"calculate_depreciation": 0,
+		"calculate_depreciation": args.calculate_depreciation or 0,
 		"gross_purchase_amount": 100000,
 		"purchase_receipt_amount": 100000,
 		"expected_value_after_useful_life": 10000,
@@ -709,6 +709,13 @@ def create_asset(**args):
 		"asset_owner": "Company",
 		"is_existing_asset": args.is_existing_asset or 0
 	})
+
+	if asset.calculate_depreciation:
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 5
+		})
 
 	try:
 		asset.save()
