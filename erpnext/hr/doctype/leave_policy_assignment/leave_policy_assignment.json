@@ -106,12 +106,14 @@
    "fieldname": "leaves_allocated",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Leaves Allocated"
+   "label": "Leaves Allocated",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-31 16:43:30.695206",
+ "modified": "2021-03-01 17:54:01.014509",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Policy Assignment",

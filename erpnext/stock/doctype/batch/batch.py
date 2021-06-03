@@ -93,7 +93,7 @@ class Batch(Document):
 
 			if create_new_batch:
 				if batch_number_series:
-					self.batch_id = make_autoname(batch_number_series)
+					self.batch_id = make_autoname(batch_number_series, doc=self)
 				elif batch_uses_naming_series():
 					self.batch_id = self.get_name_from_naming_series()
 				else:

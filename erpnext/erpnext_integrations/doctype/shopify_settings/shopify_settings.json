@@ -330,7 +330,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-11-05 20:44:03.664891",
+ "modified": "2021-03-02 17:35:41.953317",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Shopify Settings",
@@ -348,5 +348,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

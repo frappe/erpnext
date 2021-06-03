@@ -129,6 +129,9 @@ def get_gl_entries(filters, accounting_dimensions):
 
 	order_by_statement = "order by posting_date, account, creation"
 
+	if filters.get("include_dimensions"):
+		order_by_statement = "order by posting_date, creation"
+
 	if filters.get("group_by") == _("Group by Voucher"):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
@@ -142,7 +145,9 @@ def get_gl_entries(filters, accounting_dimensions):
 
 	distributed_cost_center_query = ""
 	if filters and filters.get('cost_center'):
-		select_fields_with_percentage = """, debit*(DCC_allocation.percentage_allocation/100) as debit, credit*(DCC_allocation.percentage_allocation/100) as credit, debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
+		select_fields_with_percentage = """, debit*(DCC_allocation.percentage_allocation/100) as debit,
+		credit*(DCC_allocation.percentage_allocation/100) as credit,
+		debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
 		credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency """
 
 		distributed_cost_center_query = """
@@ -200,7 +205,7 @@ def get_gl_entries(filters, accounting_dimensions):
 
 def get_conditions(filters):
 	conditions = []
-	if filters.get("account"):
+	if filters.get("account") and not filters.get("include_dimensions"):
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
@@ -245,17 +250,19 @@ def get_conditions(filters):
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	if filters.get("include_dimensions"):
+		accounting_dimensions = get_accounting_dimensions(as_list=False)
 
-	if accounting_dimensions:
-		for dimension in accounting_dimensions:
-			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
-					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
-						filters.get(dimension.fieldname))
-					conditions.append("{0} in %({0})s".format(dimension.fieldname))
-				else:
-					conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
+		if accounting_dimensions:
+			for dimension in accounting_dimensions:
+				if not dimension.disabled:
+					if filters.get(dimension.fieldname):
+						if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+							filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+								filters.get(dimension.fieldname))
+							conditions.append("{0} in %({0})s".format(dimension.fieldname))
+						else:
+							conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -337,12 +344,33 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	consolidated_gle = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
 
+	if filters.get('show_net_values_in_party_account'):
+		account_type_map = get_account_type_map(filters.get('company'))
+
 	def update_value_in_dict(data, key, gle):
 		data[key].debit += flt(gle.debit)
 		data[key].credit += flt(gle.credit)
 
 		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
 		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
+
+		if filters.get('show_net_values_in_party_account') and \
+			account_type_map.get(data[key].account) in ('Receivable', 'Payable'):
+			net_value = flt(data[key].debit) - flt(data[key].credit)
+			net_value_in_account_currency = flt(data[key].debit_in_account_currency) \
+				- flt(data[key].credit_in_account_currency)
+
+			if net_value < 0:
+				dr_or_cr = 'credit'
+				rev_dr_or_cr = 'debit'
+			else:
+				dr_or_cr = 'debit'
+				rev_dr_or_cr = 'credit'
+
+			data[key][dr_or_cr] = abs(net_value)
+			data[key][dr_or_cr+'_in_account_currency'] = abs(net_value_in_account_currency)
+			data[key][rev_dr_or_cr] = 0
+			data[key][rev_dr_or_cr+'_in_account_currency'] = 0
 
 		if data[key].against_voucher and gle.against_voucher:
 			data[key].against_voucher += ', ' + gle.against_voucher
@@ -380,6 +408,12 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 		entries.append(value)
 
 	return totals, entries
+
+def get_account_type_map(company):
+	account_type_map = frappe._dict(frappe.get_all('Account', fields=['name', 'account_type'],
+		filters={'company': company}, as_list=1))
+
+	return account_type_map
 
 def get_result_as_list(data, filters):
 	balance, balance_in_account_currency = 0, 0

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime, flt
+from frappe.utils import get_datetime, flt, getdate
 import json
 from six import iteritems
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
@@ -113,7 +113,11 @@ class LoanSecurityUnpledge(Document):
 				pledged_qty += qty
 
 			if not pledged_qty:
-				frappe.db.set_value('Loan', self.loan, 'status', 'Closed')
+				frappe.db.set_value('Loan', self.loan,
+					{
+						'status': 'Closed',
+						'closure_date': getdate()
+					})
 
 @frappe.whitelist()
 def get_pledged_security_qty(loan):

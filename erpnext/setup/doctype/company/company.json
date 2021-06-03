@@ -59,6 +59,7 @@
   "default_deferred_expense_account",
   "default_payroll_payable_account",
   "default_expense_claim_payable_account",
+  "default_discount_account",
   "section_break_22",
   "cost_center",
   "column_break_26",
@@ -98,7 +99,6 @@
   "company_description",
   "registration_info",
   "registration_details",
-  "delete_company_transactions",
   "lft",
   "rgt",
   "old_parent"
@@ -666,11 +666,6 @@
    "oldfieldtype": "Code"
   },
   {
-   "fieldname": "delete_company_transactions",
-   "fieldtype": "Button",
-   "label": "Delete Company Transactions"
-  },
-  {
    "fieldname": "lft",
    "fieldtype": "Int",
    "hidden": 1,
@@ -725,13 +720,19 @@
   {
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
-   "label": "Default In Transit Warehouse",
+   "label": "Default In-Transit Warehouse",
    "options": "Warehouse"
   },
   {
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Profit / Loss Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_discount_account",
+   "fieldtype": "Link",
+   "label": "Default Payment Discount Account",
    "options": "Account"
   }
  ],
@@ -740,7 +741,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-12-03 12:27:27.085094",
+ "modified": "2021-05-07 03:11:28.189740",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

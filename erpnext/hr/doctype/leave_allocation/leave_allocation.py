@@ -18,7 +18,6 @@ class ValueMultiplierError(frappe.ValidationError): pass
 class LeaveAllocation(Document):
 	def validate(self):
 		self.validate_period()
-		self.validate_new_leaves_allocated_value()
 		self.validate_allocation_overlap()
 		self.validate_back_dated_allocation()
 		self.set_total_leaves_allocated()
@@ -72,11 +71,6 @@ class LeaveAllocation(Document):
 		if frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
 			frappe.throw(_("Leave Type {0} cannot be allocated since it is leave without pay").format(self.leave_type))
 
-	def validate_new_leaves_allocated_value(self):
-		"""validate that leave allocation is in multiples of 0.5"""
-		if flt(self.new_leaves_allocated) % 0.5:
-			frappe.throw(_("Leaves must be allocated in multiples of 0.5"), ValueMultiplierError)
-
 	def validate_allocation_overlap(self):
 		leave_allocation = frappe.db.sql("""
 			SELECT
@@ -105,6 +99,7 @@ class LeaveAllocation(Document):
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name),
 					BackDatedAllocationError)
 
+	@frappe.whitelist()
 	def set_total_leaves_allocated(self):
 		self.unused_leaves = get_carry_forwarded_leaves(self.employee,
 			self.leave_type, self.from_date, self.carry_forward)

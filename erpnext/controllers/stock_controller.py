@@ -1,17 +1,21 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, flt, cstr, get_link_to_form, today, getdate
-from frappe import _
-import frappe.defaults
+import json
 from collections import defaultdict
-from erpnext.accounts.utils import get_fiscal_year, check_if_stock_and_account_balance_synced
+
+import frappe
+import frappe.defaults
+from frappe import _
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
+from erpnext.accounts.utils import check_if_stock_and_account_balance_synced, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.stock_ledger import get_valuation_rate
+
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
 class QualityInspectionRejectedError(frappe.ValidationError): pass
@@ -117,7 +121,6 @@ class StockController(AccountsController):
 							"account": expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
-							"project": item_row.project or self.get('project'),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
@@ -190,7 +193,6 @@ class StockController(AccountsController):
 		if hasattr(self, "items"):
 			item_doclist = self.get("items")
 		elif self.doctype == "Stock Reconciliation":
-			import json
 			item_doclist = []
 			data = json.loads(self.reconciliation_json)
 			for row in data[data.index(self.head_row)+1:]:
@@ -320,7 +322,7 @@ class StockController(AccountsController):
 		return serialized_items
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company, validate_disabled_warehouse
+		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
 		warehouses = list(set([d.warehouse for d in
 			self.get("items") if getattr(d, "warehouse", None)]))
@@ -380,8 +382,7 @@ class StockController(AccountsController):
 					link = frappe.utils.get_link_to_form('Quality Inspection', d.quality_inspection)
 					frappe.throw(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx), QualityInspectionNotSubmittedError)
 
-				qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
-				if qa_failed:
+				if qa_doc.status != 'Accepted':
 					frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
 						.format(d.idx, d.item_code), QualityInspectionRejectedError)
 			elif qa_required :
@@ -406,7 +407,7 @@ class StockController(AccountsController):
 	def set_rate_of_stock_uom(self):
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice", "Purchase Order", "Sales Invoice", "Sales Order", "Delivery Note", "Quotation"]:
 			for d in self.get("items"):
-				d.stock_uom_rate = d.rate / d.conversion_factor
+				d.stock_uom_rate = d.rate / (d.conversion_factor or 1)
 
 	def validate_internal_transfer(self):
 		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Purchase Invoice', 'Purchase Receipt') \
@@ -483,7 +484,7 @@ class StockController(AccountsController):
 			)
 		message += "<br><br>"
 		rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
-		message += _(" Please adjust the qty or edit {0} to proceed.").format(rule_link)
+		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
 	def repost_future_sle_and_gle(self):
@@ -494,48 +495,86 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-		if check_if_future_sle_exists(args):
+		if future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
 		elif not is_reposting_pending():
 			check_if_stock_and_account_balance_synced(self.posting_date,
 				self.company, self.doctype, self.name)
+
+
+@frappe.whitelist()
+def make_quality_inspections(doctype, docname, items):
+	if isinstance(items, str):
+		items = json.loads(items)
+
+	inspections = []
+	for item in items:
+		if flt(item.get("sample_size")) > flt(item.get("qty")):
+			frappe.throw(_("{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})").format(
+				item_name=item.get("item_name"),
+				sample_size=item.get("sample_size"),
+				accepted_quantity=item.get("qty")
+			))
+
+		quality_inspection = frappe.get_doc({
+			"doctype": "Quality Inspection",
+			"inspection_type": "Incoming",
+			"inspected_by": frappe.session.user,
+			"reference_type": doctype,
+			"reference_name": docname,
+			"item_code": item.get("item_code"),
+			"description": item.get("description"),
+			"sample_size": flt(item.get("sample_size")),
+			"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
+			"batch_no": item.get("batch_no")
+		}).insert()
+		quality_inspection.save()
+		inspections.append(quality_inspection.name)
+
+	return inspections
+
 
 def is_reposting_pending():
 	return frappe.db.exists("Repost Item Valuation",
 		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
 
 
-def check_if_future_sle_exists(args):
-	sl_entries = frappe.db.get_all("Stock Ledger Entry",
+def future_sle_exists(args):
+	sl_entries = frappe.get_all("Stock Ledger Entry",
 		filters={"voucher_type": args.voucher_type, "voucher_no": args.voucher_no},
 		fields=["item_code", "warehouse"],
 		order_by="creation asc")
 
-	distinct_item_warehouses = list(set([(d.item_code, d.warehouse) for d in sl_entries]))
+	if not sl_entries:
+		return
 
-	sle_exists = False
-	for item_code, warehouse in distinct_item_warehouses:
-		args.update({
-			"item_code": item_code,
-			"warehouse": warehouse
-		})
-		if get_sle(args):
-			sle_exists = True
-			break
-	return sle_exists
+	warehouse_items_map = {}
+	for entry in sl_entries:
+		if entry.warehouse not in warehouse_items_map:
+			warehouse_items_map[entry.warehouse] = set()
 
-def get_sle(args):
+		warehouse_items_map[entry.warehouse].add(entry.item_code)
+
+	or_conditions = []
+	for warehouse, items in warehouse_items_map.items():
+		or_conditions.append(
+			"warehouse = '{}' and item_code in ({})".format(
+				warehouse,
+				", ".join(frappe.db.escape(item) for item in items)
+			)
+		)
+
 	return frappe.db.sql("""
 		select name
 		from `tabStock Ledger Entry`
 		where
-			item_code=%(item_code)s
-			and warehouse=%(warehouse)s
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+			({})
+			and timestamp(posting_date, posting_time)
+				>= timestamp(%(posting_date)s, %(posting_time)s)
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		limit 1
-	""", args)
+		""".format(" or ".join(or_conditions)), args)
 
 def create_repost_item_valuation_entry(args):
 	args = frappe._dict(args)

@@ -78,16 +78,33 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
+
+		let qty_to_display = actual_qty;
+
+		if (Math.round(qty_to_display) > 999) {
+			qty_to_display = Math.round(qty_to_display)/1000;
+			qty_to_display = qty_to_display.toFixed(1) + 'K';
+		}
 
 		function get_item_image_html() {
 			if (!me.hide_images && item_image) {
-				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
+						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+							<img 
+								onerror="cur_pos.item_selector.handle_broken_image(this)"
+								class="h-full" src="${item_image}"
+								alt="${frappe.get_abbr(item.item_name)}"
+								style="object-fit: cover;">
 						</div>`;
 			} else {
-				return `<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
+						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
 			}
 		}
 
@@ -95,19 +112,24 @@ erpnext.PointOfSale.ItemSelector = class {
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
-				title="Avaiable Qty: ${actual_qty}">
+				data-rate="${escape(price_list_rate)}"
+				title="${item.item_name}">
 
 				${get_item_image_html()}
 
 				<div class="item-detail">
 					<div class="item-name">
-						<span class="indicator ${indicator_color}"></span>
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
-					<div class="item-rate">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
+					<div class="item-rate">${format_currency(price_list_rate, item.currency, 0) || 0}</div>
 				</div>
 			</div>`
 		);
+	}
+
+	handle_broken_image($img) {
+		const item_abbr = $($img).attr('alt');
+		$($img).parent().replaceWith(`<div class="item-display abbr">${item_abbr}</div>`);
 	}
 
 	make_search_bar() {
@@ -152,14 +174,44 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.item_group_field.toggle_label(false);
 	}
 
+	set_search_value(value) {
+		$(this.search_field.$input[0]).val(value).trigger("input");
+	}
+
 	bind_events() {
 		const me = this;
 		window.onScan = onScan;
+
+		onScan.decodeKeyEvent = function (oEvent) {
+			var iCode = this._getNormalizedKeyNum(oEvent);
+			switch (true) {
+				case iCode >= 48 && iCode <= 90: // numbers and letters
+				case iCode >= 106 && iCode <= 111: // operations on numeric keypad (+, -, etc.)
+				case (iCode >= 160 && iCode <= 164) || iCode == 170: // ^ ! # $ *
+				case iCode >= 186 && iCode <= 194: // (; = , - . / `)
+				case iCode >= 219 && iCode <= 222: // ([ \ ] ')
+				case iCode == 32: // spacebar
+					if (oEvent.key !== undefined && oEvent.key !== '') {
+						return oEvent.key;
+					}
+
+					var sDecoded = String.fromCharCode(iCode);
+					switch (oEvent.shiftKey) {
+						case false: sDecoded = sDecoded.toLowerCase(); break;
+						case true: sDecoded = sDecoded.toUpperCase(); break;
+					}
+					return sDecoded;
+				case iCode >= 96 && iCode <= 105: // numbers on numeric keypad
+					return 0 + (iCode - 96);
+			}
+			return '';
+		};
+
 		onScan.attachTo(document, {
 			onScan: (sScancode) => {
 				if (this.search_field && this.$component.is(':visible')) {
 					this.search_field.set_focus();
-					$(this.search_field.$input[0]).val(sScancode).trigger("input");
+					this.set_search_value(sScancode);
 					this.barcode_scanned = true;
 				}
 			}
@@ -171,13 +223,16 @@ erpnext.PointOfSale.ItemSelector = class {
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
+			let rate = unescape($item.attr('data-rate'));
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
+			rate = rate === "undefined" ? undefined : rate;
 
-			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
+			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom, rate }});
+			me.set_search_value('');
 		});
 
 		this.search_field.$input.on('input', (e) => {

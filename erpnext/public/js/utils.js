@@ -48,31 +48,24 @@ $.extend(erpnext, {
 		return cint(frappe.boot.sysdefaults.allow_stale);
 	},
 
-	setup_serial_no: function() {
-		var grid_row = cur_frm.open_grid_row();
-		if(!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
-			grid_row.grid_form.fields_dict.serial_no.get_status()!=="Write") return;
+	setup_serial_or_batch_no: function() {
+		let grid_row = cur_frm.open_grid_row();
+		if (!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
+			grid_row.grid_form.fields_dict.serial_no.get_status() !== "Write") return;
 
-		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')
-			.appendTo($("<div>")
-				.css({"margin-bottom": "10px", "margin-top": "10px"})
-				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
+		frappe.model.get_value('Item', {'name': grid_row.doc.item_code},
+			['has_serial_no', 'has_batch_no'], ({has_serial_no, has_batch_no}) => {
+				Object.assign(grid_row.doc, {has_serial_no, has_batch_no});
 
-		var me = this;
-		$btn.on("click", function() {
-			let callback = '';
-			let on_close = '';
-
-			frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 'has_serial_no',
-				(data) => {
-					if(data) {
-						grid_row.doc.has_serial_no = data.has_serial_no;
-						me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-							callback, on_close, true);
-					}
+				if (has_serial_no) {
+					attach_selector_button(__("Add Serial No"),
+						grid_row.grid_form.fields_dict.serial_no.$wrapper, this, grid_row);
+				} else if (has_batch_no) {
+					attach_selector_button(__("Pick Batch No"),
+						grid_row.grid_form.fields_dict.batch_no.$wrapper, this, grid_row);
 				}
-			);
-		});
+			}
+		);
 	},
 
 	route_to_adjustment_jv: (args) => {
@@ -291,17 +284,15 @@ $.extend(erpnext.utils, {
 			return options[0];
 		}
 	},
-	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
-		var d = locals[dt][dn];
-		if(d[fieldname]){
-			var cl = doc[table_fieldname] || [];
-			for(var i = 0; i < cl.length; i++) {
+	overrides_parent_value_in_all_rows: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
+		if (doc[parent_fieldname]) {
+			let cl = doc[table_fieldname] || [];
+			for (let i = 0; i < cl.length; i++) {
 				cl[i][fieldname] = doc[parent_fieldname];
 			}
+			frappe.refresh_field(table_fieldname);
 		}
-		refresh_field(table_fieldname);
 	},
-
 	create_new_doc: function (doctype, update_fields) {
 		frappe.model.with_doctype(doctype, function() {
 			var new_doc = frappe.model.get_new_doc(doctype);
@@ -513,6 +504,7 @@ erpnext.utils.update_child_items = function(opts) {
 	}, {
 		fieldtype:'Currency',
 		fieldname:"rate",
+		options: "currency",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
@@ -594,21 +586,7 @@ erpnext.utils.update_child_items = function(opts) {
 }
 
 erpnext.utils.map_current_doc = function(opts) {
-	let query_args = {};
-	if (opts.get_query_filters) {
-		query_args.filters = opts.get_query_filters;
-	}
-
-	if (opts.get_query_method) {
-		query_args.query = opts.get_query_method;
-	}
-
-	if (query_args.filters || query_args.query) {
-		opts.get_query = () => {
-			return query_args;
-		}
-	}
-	var _map = function() {
+	function _map() {
 		if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
 			// remove first item row if empty
 			if(!cur_frm.doc.items[0].item_code) {
@@ -682,8 +660,22 @@ erpnext.utils.map_current_doc = function(opts) {
 			}
 		});
 	}
-	if(opts.source_doctype) {
-		var d = new frappe.ui.form.MultiSelectDialog({
+
+	let query_args = {};
+	if (opts.get_query_filters) {
+		query_args.filters = opts.get_query_filters;
+	}
+
+	if (opts.get_query_method) {
+		query_args.query = opts.get_query_method;
+	}
+
+	if (query_args.filters || query_args.query) {
+		opts.get_query = () => query_args;
+	}
+
+	if (opts.source_doctype) {
+		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			date_field: opts.date_field || undefined,
@@ -705,14 +697,18 @@ erpnext.utils.map_current_doc = function(opts) {
 				_map();
 			},
 		});
-	} else if(opts.source_name) {
+
+		return d;
+	}
+
+	if (opts.source_name) {
 		opts.source_name = [opts.source_name];
 		_map();
 	}
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
-	if (doc && value && doc.item_name && doc.item_name !== value) {
+	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
 		return value + ': ' + doc.item_name;
 	} else if (!value && doc.doctype && doc.item_name) {
 		// format blank value in child table
@@ -731,6 +727,18 @@ frappe.form.link_formatters['Employee'] = function(value, doc) {
 	}
 }
 
+frappe.form.link_formatters['Project'] = function(value, doc) {
+	if (doc && value && doc.project_name && doc.project_name !== value && doc.project === value) {
+		return value + ': ' + doc.project_name;
+	} else if (!value && doc.doctype && doc.project_name) {
+		// format blank value in child table
+		return doc.project;
+	} else {
+		// if value is blank in report view or project name and name are the same, return as is
+		return value;
+	}
+};
+
 // add description on posting time
 $(document).on('app_ready', function() {
 	if(!frappe.datetime.is_timezone_same()) {
@@ -743,3 +751,14 @@ $(document).on('app_ready', function() {
 		});
 	}
 });
+
+function attach_selector_button(inner_text, append_loction, context, grid_row) {
+	let $btn_div = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
+		.appendTo(append_loction);
+	let $btn = $(`<button class="btn btn-sm btn-default">${inner_text}</button>`)
+		.appendTo($btn_div);
+
+	$btn.on("click", function() {
+		context.show_serial_batch_selector(grid_row.frm, grid_row.doc, "", "", true);
+	});
+}

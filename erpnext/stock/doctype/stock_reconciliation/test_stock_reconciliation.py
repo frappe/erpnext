@@ -32,7 +32,7 @@ class TestStockReconciliation(unittest.TestCase):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 		# [[qty, valuation_rate, posting_date,
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
-		
+
 		input_data = [
 			[50, 1000, "2012-12-26", "12:00"],
 			[25, 900, "2012-12-26", "12:00"],
@@ -86,7 +86,7 @@ class TestStockReconciliation(unittest.TestCase):
 		se1.cancel()
 
 	def test_get_items(self):
-		create_warehouse("_Test Warehouse Group 1", 
+		create_warehouse("_Test Warehouse Group 1",
 			{"is_group": 1, "company": "_Test Company", "parent_warehouse": "All Warehouses - _TC"})
 		create_warehouse("_Test Warehouse Ledger 1",
 			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC", "company": "_Test Company"})
@@ -193,6 +193,16 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
+	def test_customer_provided_items(self):
+		item_code = 'Stock-Reco-customer-Item-100'
+		create_item(item_code, is_customer_provided_item = 1,
+			  customer = '_Test Customer', is_purchase_item = 0)
+
+		sr = create_stock_reconciliation(item_code = item_code, qty = 10, rate = 420)
+
+		self.assertEqual(sr.get("items")[0].allow_zero_valuation_rate, 1)
+		self.assertEqual(sr.get("items")[0].valuation_rate, 0)
+		self.assertEqual(sr.get("items")[0].amount, 0)
 
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

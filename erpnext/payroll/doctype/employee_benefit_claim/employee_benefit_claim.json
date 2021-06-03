@@ -125,10 +125,9 @@
    "label": "Attachments"
   },
   {
-   "default": "Company:company:default_currency",
+   "depends_on": "eval: doc.employee",
    "fieldname": "currency",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Currency",
    "options": "Currency",
    "read_only": 1,
@@ -145,7 +144,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-25 11:49:56.097352",
+ "modified": "2021-03-31 22:37:21.024625",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Claim",

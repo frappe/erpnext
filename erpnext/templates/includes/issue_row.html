@@ -1,6 +1,6 @@
 <div class="web-list-item transaction-list-item">
 	<a href="/issues?name={{ doc.name }}" class="no-underline">
-		<div class="row py-4 border-bottom">
+		<div class="row py-4">
 			<div class="col-3 d-flex align-items-center">
 				{% set indicator = 'red' if doc.status == 'Open' else 'gray' %}
 				{% set indicator = 'green' if doc.status == 'Closed' else indicator %}

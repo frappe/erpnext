@@ -5,12 +5,21 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import nowdate
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import make_closing_entry_from_opening
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 class TestPOSClosingEntry(unittest.TestCase):
+	def setUp(self):
+		# Make stock available for POS Sales
+		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.sql("delete from `tabPOS Profile`")
+
 	def test_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
@@ -40,9 +49,6 @@ class TestPOSClosingEntry(unittest.TestCase):
 
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
-
-		frappe.set_user("Administrator")
-		frappe.db.sql("delete from `tabPOS Profile`")
 
 	def test_cancelling_of_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
@@ -84,8 +90,6 @@ class TestPOSClosingEntry(unittest.TestCase):
 		self.assertEqual(si_doc.docstatus, 2)
 		self.assertEqual(pos_inv1.status, 'Paid')
 
-		frappe.set_user("Administrator")
-		frappe.db.sql("delete from `tabPOS Profile`")
 
 def init_user_and_profile(**args):
 	user = 'test@example.com'

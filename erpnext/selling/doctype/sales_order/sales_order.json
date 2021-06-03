@@ -98,6 +98,7 @@
   "rounded_total",
   "in_words",
   "advance_paid",
+  "disable_rounded_total",
   "packing_list",
   "packed_items",
   "payment_schedule_section",
@@ -901,6 +902,7 @@
    "width": "150px"
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -912,6 +914,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -961,6 +964,7 @@
    "width": "150px"
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -973,6 +977,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1474,13 +1479,20 @@
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "grand_total",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-20 23:40:39.929296",
+ "modified": "2021-04-15 23:55:13.439068",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

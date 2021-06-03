@@ -1,12 +1,13 @@
 erpnext.setup_einvoice_actions = (doctype) => {
 	frappe.ui.form.on(doctype, {
-		refresh(frm) {
-			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
-			const supply_type = frm.doc.gst_category;
-			const valid_supply_type = ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type);
-			const company_transaction = frm.doc.billing_address_gstin == frm.doc.company_gstin;
+		async refresh(frm) {
+			const res = await frappe.call({
+				method: 'erpnext.regional.india.e_invoice.utils.validate_eligibility',
+				args: { doc: frm.doc }
+			});
+			const invoice_eligible = res.message;
 
-			if (!einvoicing_enabled || !valid_supply_type || company_transaction) return;
+			if (!invoice_eligible) return;
 
 			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
 
@@ -45,7 +46,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						"default": "1-Duplicate",
 						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
 					},
-					{ 
+					{
 						"label": "Remark",
 						"fieldname": "remark",
 						"fieldtype": "Data",
@@ -60,7 +61,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							const data = d.get_values();
 							frappe.call({
 								method: 'erpnext.regional.india.e_invoice.utils.cancel_irn',
-								args: { 
+								args: {
 									doctype,
 									docname: name,
 									irn: irn,
@@ -83,7 +84,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				const action = () => {
 					const d = new frappe.ui.Dialog({
 						title: __('Generate E-Way Bill'),
-						wide: 1,
+						size: "large",
 						fields: get_ewaybill_fields(frm),
 						primary_action: function() {
 							const data = d.get_values();
@@ -109,45 +110,27 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			}
 
 			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
-				const fields = [
-					{
-						"label": "Reason",
-						"fieldname": "reason",
-						"fieldtype": "Select",
-						"reqd": 1,
-						"default": "1-Duplicate",
-						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
-					},
-					{
-						"label": "Remark",
-						"fieldname": "remark",
-						"fieldtype": "Data",
-						"reqd": 1
-					}
-				];
 				const action = () => {
-					const d = new frappe.ui.Dialog({
-						title: __('Cancel E-Way Bill'),
-						fields: fields,
-						primary_action: function() {
-							const data = d.get_values();
-							frappe.call({
-								method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
-								args: {
-									doctype,
-									docname: name,
-									eway_bill: ewaybill,
-									reason: data.reason.split('-')[0],
-									remark: data.remark
-								},
-								freeze: true,
-								callback: () => frm.reload_doc() || d.hide(),
-								error: () => d.hide()
-							});
+					let message = __('Cancellation of e-way bill is currently not supported. ');
+					message += '<br><br>';
+					message += __('You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system.');
+
+					const dialog = frappe.msgprint({
+						title: __('Update E-Way Bill Cancelled Status?'),
+						message: message,
+						indicator: 'orange',
+						primary_action: {
+							action: function() {
+								frappe.call({
+									method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
+									args: { doctype, docname: name },
+									freeze: true,
+									callback: () => frm.reload_doc() || dialog.hide()
+								});
+							}
 						},
-						primary_action_label: __('Submit')
+						primary_action_label: __('Yes')
 					});
-					d.show();
 				};
 				add_custom_button(__("Cancel E-Way Bill"), action);
 			}
@@ -252,9 +235,9 @@ const request_irn_generation = (frm) => {
 const get_preview_dialog = (frm, action) => {
 	const dialog = new frappe.ui.Dialog({
 		title: __("Preview"),
-		wide: 1,
+		size: "large",
 		fields: [
-			{ 
+			{
 				"label": "Preview",
 				"fieldname": "preview_html",
 				"fieldtype": "HTML"

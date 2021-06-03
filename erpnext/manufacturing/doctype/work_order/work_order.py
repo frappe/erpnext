@@ -240,8 +240,12 @@ class WorkOrder(Document):
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
+		
+		if self.production_plan and frappe.db.exists('Production Plan Item Reference',{'parent':self.production_plan}):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
 
-		self.update_work_order_qty_in_so()
 		self.update_reserved_qty_for_production()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -250,9 +254,13 @@ class WorkOrder(Document):
 
 	def on_cancel(self):
 		self.validate_cancel()
-
 		frappe.db.set(self,'status', 'Cancelled')
-		self.update_work_order_qty_in_so()
+
+		if self.production_plan and frappe.db.exists('Production Plan Item Reference',{'parent':self.production_plan}):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
+			
 		self.delete_job_card()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -357,7 +365,28 @@ class WorkOrder(Document):
 		work_order_qty = qty[0][0] if qty and qty[0][0] else 0
 		frappe.db.set_value('Sales Order Item',
 			self.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
+		
+	def update_work_order_qty_in_combined_so(self):
+		total_bundle_qty = 1
+		if self.product_bundle_item:
+			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
+				`tabProduct Bundle Item` where parent = %s""", (frappe.db.escape(self.product_bundle_item)))[0][0]
 
+			if not total_bundle_qty:
+				# product bundle is 0 (product bundle allows 0 qty for items)
+				total_bundle_qty = 1
+
+		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
+		item_reference = frappe.get_value('Production Plan Item', self.production_plan_item, 'sales_order_item')
+		
+		for plan_reference in prod_plan.prod_plan_references:
+			work_order_qty = 0.0
+			if plan_reference.item_reference == item_reference:
+				if self.docstatus == 1:
+					work_order_qty = flt(plan_reference.qty) / total_bundle_qty
+				frappe.db.set_value('Sales Order Item',
+					plan_reference.sales_order_item, 'work_order_qty', work_order_qty)
+	
 	def update_completed_qty_in_material_request(self):
 		if self.material_request:
 			frappe.get_doc("Material Request", self.material_request).update_completed_qty([self.material_request_item])
@@ -509,6 +538,7 @@ class WorkOrder(Document):
 				stock_bin = get_bin(d.item_code, d.source_warehouse)
 				stock_bin.update_reserved_qty_for_production()
 
+	@frappe.whitelist()
 	def get_items_and_operations_from_bom(self):
 		self.set_required_items()
 		self.set_work_order_operations()
@@ -528,6 +558,10 @@ class WorkOrder(Document):
 		if not reset_only_qty:
 			self.required_items = []
 
+		operation = None
+		if self.get('operations') and len(self.operations) == 1:
+			operation = self.operations[0].operation
+
 		if self.bom_no and self.qty:
 			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
 				fetch_exploded = self.use_multi_level_bom)
@@ -536,6 +570,9 @@ class WorkOrder(Document):
 				for d in self.get("required_items"):
 					if item_dict.get(d.item_code):
 						d.required_qty = item_dict.get(d.item_code).get("qty")
+
+					if not d.operation:
+						d.operation = operation
 			else:
 				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
 				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
@@ -543,7 +580,7 @@ class WorkOrder(Document):
 					self.append('required_items', {
 						'rate': item.rate,
 						'amount': item.amount,
-						'operation': item.operation,
+						'operation': item.operation or operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
 						'description': item.description,
@@ -606,6 +643,7 @@ class WorkOrder(Document):
 
 			item.db_set('consumed_qty', flt(consumed_qty), update_modified=False)
 
+	@frappe.whitelist()
 	def make_bom(self):
 		data = frappe.db.sql(""" select sed.item_code, sed.qty, sed.s_warehouse
 			from `tabStock Entry Detail` sed, `tabStock Entry` se
@@ -879,7 +917,7 @@ def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto
 			doc.schedule_time_logs(row)
 
 		doc.insert()
-		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)))
+		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
 
 	return doc
 

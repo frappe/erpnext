@@ -158,16 +158,18 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		let me = this;
 		frappe.flags.round_off_applicable_accounts = [];
 
-		return frappe.call({
-			"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
-			"args": {
-				"company": me.frm.doc.company,
-				"account_list": frappe.flags.round_off_applicable_accounts
-			},
-			callback: function(r) {
-				frappe.flags.round_off_applicable_accounts.push(...r.message);
-			}
-		});
+		if (me.frm.doc.company) {
+			return frappe.call({
+				"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
+				"args": {
+					"company": me.frm.doc.company,
+					"account_list": frappe.flags.round_off_applicable_accounts
+				},
+				callback: function(r) {
+					frappe.flags.round_off_applicable_accounts.push(...r.message);
+				}
+			});
+		}
 	},
 
 	determine_exclusive_rate: function() {
@@ -321,12 +323,15 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				// set precision in the last item iteration
 				if (n == me.frm.doc["items"].length - 1) {
 					me.round_off_totals(tax);
+					me.set_in_company_currency(tax,
+						["tax_amount", "tax_amount_after_discount_amount"]);
+
+					me.round_off_base_values(tax);
 
 					// in tax.total, accumulate grand total for each item
 					me.set_cumulative_total(i, tax);
 
-					me.set_in_company_currency(tax,
-						["total", "tax_amount", "tax_amount_after_discount_amount"]);
+					me.set_in_company_currency(tax, ["total"]);
 
 					// adjust Discount Amount loss in last tax iteration
 					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied
@@ -391,16 +396,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			current_tax_amount = tax_rate * item.qty;
 		}
 
-		current_tax_amount = this.get_final_tax_amount(tax, current_tax_amount);
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
-
-		return current_tax_amount;
-	},
-
-	get_final_tax_amount: function(tax, current_tax_amount) {
-		if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
-			current_tax_amount = Math.round(current_tax_amount);
-		}
 
 		return current_tax_amount;
 	},
@@ -418,8 +414,20 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	round_off_totals: function(tax) {
+		if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
+			tax.tax_amount= Math.round(tax.tax_amount);
+			tax.tax_amount_after_discount_amount = Math.round(tax.tax_amount_after_discount_amount);
+		}
+
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, precision("tax_amount", tax));
+	},
+
+	round_off_base_values: function(tax) {
+		if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
+			tax.base_tax_amount= Math.round(tax.base_tax_amount);
+			tax.base_tax_amount_after_discount_amount = Math.round(tax.base_tax_amount_after_discount_amount);
+		}
 	},
 
 	manipulate_grand_total_for_inclusive_tax: function() {

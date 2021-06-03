@@ -968,7 +968,7 @@ class PurchaseInvoice(BuyingController):
 		# base_rounding_adjustment may become zero due to small precision
 		# eg: rounding_adjustment = 0.01 and exchange rate = 0.05 and precision of base_rounding_adjustment is 2
 		#	then base_rounding_adjustment becomes zero and error is thrown in GL Entry
-		if self.rounding_adjustment and self.base_rounding_adjustment:
+		if not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 
@@ -1207,3 +1207,41 @@ def make_inter_company_sales_invoice(source_name, target_doc=None):
 
 def on_doctype_update():
 	frappe.db.add_index("Purchase Invoice", ["supplier", "is_return", "return_against"])
+
+@frappe.whitelist()
+def make_purchase_receipt(source_name, target_doc=None):
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty) - flt(obj.received_qty)
+		target.received_qty = flt(obj.qty) - flt(obj.received_qty)
+		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * \
+			flt(obj.rate) * flt(source_parent.conversion_rate)
+
+	doc = get_mapped_doc("Purchase Invoice", source_name, {
+		"Purchase Invoice": {
+			"doctype": "Purchase Receipt",
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		"Purchase Invoice Item": {
+			"doctype": "Purchase Receipt Item",
+			"field_map": {
+				"name": "purchase_invoice_item",
+				"parent": "purchase_invoice",
+				"bom": "bom",
+				"purchase_order": "purchase_order",
+				"po_detail": "purchase_order_item",
+				"material_request": "material_request",
+				"material_request_item": "material_request_item"
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
+		},
+		"Purchase Taxes and Charges": {
+			"doctype": "Purchase Taxes and Charges"
+		}
+	}, target_doc)
+
+	return doc

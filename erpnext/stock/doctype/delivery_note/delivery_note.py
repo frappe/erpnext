@@ -101,7 +101,7 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-		super(DeliveryNote, self).before_print()
+		super(DeliveryNote, self).before_print(settings)
 
 	def set_actual_qty(self):
 		for d in self.get('items'):
@@ -732,7 +732,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"doctype": target_doctype,
 			"postprocess": update_details,
 			"field_no_map": [
-				"taxes_and_charges"
+				"taxes_and_charges",
+				"set_warehouse"
 			]
 		},
 		doctype +" Item": {

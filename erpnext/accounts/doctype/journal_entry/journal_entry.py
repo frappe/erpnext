@@ -39,7 +39,11 @@ class JournalEntry(AccountsController):
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
 		self.validate_debit_credit_amount()
-		self.validate_total_debit_and_credit()
+
+		# Do not validate while importing via data import
+		if not frappe.flags.in_import:
+			self.validate_total_debit_and_credit()
+
 		self.validate_against_jv()
 		self.validate_reference_doc()
 		self.set_against_account()
@@ -564,6 +568,7 @@ class JournalEntry(AccountsController):
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
 
+	@frappe.whitelist()
 	def get_balance(self):
 		if not self.get('accounts'):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
@@ -591,6 +596,7 @@ class JournalEntry(AccountsController):
 
 			self.validate_total_debit_and_credit()
 
+	@frappe.whitelist()
 	def get_outstanding_invoices(self):
 		self.set('accounts', [])
 		total = 0

@@ -15,7 +15,6 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 	data = dict()
 	result = []
 
-	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 	warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
 
 	if not frappe.db.exists('Item Group', item_group):
@@ -23,7 +22,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 
 	if search_value:
 		data = search_serial_or_batch_or_barcode_number(search_value)
-	
+
 	item_code = data.get("item_code") if data.get("item_code") else search_value
 	serial_no = data.get("serial_no") if data.get("serial_no") else ""
 	batch_no = data.get("batch_no") if data.get("batch_no") else ""
@@ -31,7 +30,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 
 	if data:
 		item_info = frappe.db.get_value(
-			"Item", data.get("item_code"), 
+			"Item", data.get("item_code"),
 			["name as item_code", "item_name", "description", "stock_uom", "image as item_image", "is_stock_item"]
 		, as_dict=1)
 		item_info.setdefault('serial_no', serial_no)
@@ -62,7 +61,6 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 			`tabItem` item {bin_join_selection}
 		WHERE
 			item.disabled = 0
-			AND item.is_stock_item = 1
 			AND item.has_variants = 0
 			AND item.is_sales_item = 1
 			AND item.is_fixed_asset = 0
@@ -84,6 +82,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 		), {'warehouse': warehouse}, as_dict=1)
 
 	if items_data:
+		items_data = filter_service_items(items_data)
 		items = [d.item_code for d in items_data]
 		item_prices_data = frappe.get_all("Item Price",
 			fields = ["item_code", "price_list_rate", "currency"],
@@ -96,10 +95,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			if allow_negative_stock:
-				item_stock_qty = frappe.db.sql("""select ifnull(sum(actual_qty), 0) from `tabBin` where item_code = %s""", item_code)[0][0]
-			else:
-				item_stock_qty = get_stock_availability(item_code, warehouse)
+			item_stock_qty = get_stock_availability(item_code, warehouse)
 
 			row = {}
 			row.update(item)
@@ -135,12 +131,36 @@ def search_serial_or_batch_or_barcode_number(search_value):
 
 	return {}
 
+def filter_service_items(items):
+	for item in items:
+		if not item['is_stock_item']:
+			if not frappe.db.exists('Product Bundle', item['item_code']):
+				items.remove(item)
+	
+	return items
+
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
 		return "item.name = {0}".format(frappe.db.escape(item_code))
 
-	return """(item.name like {item_code}
-		or item.item_name like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
+	return make_condition(item_code)
+
+def make_condition(item_code):
+	condition = "("
+	condition += """item.name like {item_code}
+		or item.item_name like {item_code}""".format(item_code = frappe.db.escape('%' + item_code + '%'))
+	condition += add_search_fields_condition(item_code)
+	condition += ")"
+
+	return condition
+
+def add_search_fields_condition(item_code):
+	condition = ''
+	search_fields = frappe.get_all('POS Search Fields', fields = ['fieldname'])
+	if search_fields:
+		for field in search_fields:
+			condition += " or item.{0} like {1}".format(field['fieldname'], frappe.db.escape('%' + item_code + '%'))
+	return condition
 
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"

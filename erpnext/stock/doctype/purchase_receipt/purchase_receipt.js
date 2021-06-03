@@ -73,6 +73,34 @@ frappe.ui.form.on("Purchase Receipt", {
 				})
 			}, __('Create'));
 		}
+
+		frm.events.add_custom_buttons(frm);
+	},
+
+	add_custom_buttons: function(frm) {
+		if (frm.doc.docstatus == 0) {
+			frm.add_custom_button(__('Purchase Invoice'), function () {
+				if (!frm.doc.supplier) {
+					frappe.throw({
+						title: __("Mandatory"),
+						message: __("Please Select a Supplier")
+					});
+				}
+				erpnext.utils.map_current_doc({
+					method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_receipt",
+					source_doctype: "Purchase Invoice",
+					target: frm,
+					setters: {
+						supplier: frm.doc.supplier,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						per_received: ["<", 100],
+						company: frm.doc.company
+					}
+				})
+			}, __("Get Items From"));
+		}
 	},
 
 	company: function(frm) {
@@ -246,13 +274,6 @@ cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc,
 			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
 	}
-}
-
-cur_frm.cscript.select_print_heading = function(doc, cdt, cdn) {
-	if(doc.select_print_heading)
-		cur_frm.pformat.print_heading = doc.select_print_heading;
-	else
-		cur_frm.pformat.print_heading = "Purchase Receipt";
 }
 
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {

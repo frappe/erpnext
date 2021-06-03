@@ -659,6 +659,7 @@
                         },
                         "Abziehbare Vorsteuer (Gruppe)": {
                             "is_group": 1,
+                            "account_type": "Tax",
                             "Abziehbare Vorsteuer": {
                                 "account_number": "1400"
                             },

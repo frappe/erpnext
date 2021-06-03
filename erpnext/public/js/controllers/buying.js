@@ -84,13 +84,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			if (me.frm.doc.is_subcontracted == "Yes") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'is_sub_contracted_item': 1 }
+					filters:{ 'supplier': me.frm.doc.supplier, 'is_sub_contracted_item': 1 }
 				}
 			}
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_purchase_item': 1}
+					filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1 }
 				}
 			}
 		});
@@ -139,29 +139,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	buying_price_list: function() {
 		this.apply_price_list();
-	},
-
-	price_list_rate: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-
-		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
-
-		let item_rate = item.price_list_rate;
-		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
-			item_rate = item.blanket_order_rate;
-		}
-
-		if (item.discount_percentage) {
-			item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
-		}
-
-		if (item.discount_amount) {
-			item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
-		} else {
-			item.rate = item_rate;
-		}
-
-		this.calculate_taxes_and_totals();
 	},
 
 	discount_percentage: function(doc, cdt, cdn) {
@@ -239,7 +216,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				child: item,
 				args: {
 					item_code: item.item_code,
-					warehouse: item.warehouse
+					warehouse: item.warehouse,
+					company: doc.company
 				}
 			});
 		}
