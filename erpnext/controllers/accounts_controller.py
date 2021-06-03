@@ -1133,7 +1133,8 @@ def validate_account_head(tax, doc):
 
 
 def validate_cost_center(tax, doc):
-	if not tax.cost_center: return
+	if not tax.cost_center:
+		return
 
 	company = frappe.get_cached_value('Cost Center',
 		tax.cost_center, 'company')

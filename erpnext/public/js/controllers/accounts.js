@@ -37,7 +37,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 						"company": doc.company,
 						"is_group": 0
 					}
-				}
+				};
 			});
 		}
 	},
