@@ -15,9 +15,8 @@ class AssetRepair(Document):
 			self.completion_date = nowdate()
 
 		self.update_status()
-		if self.stock_consumption:
-			self.set_total_value()		# change later
-			self.calculate_total_repair_cost()
+		self.set_total_value()		# change later
+		self.calculate_total_repair_cost()
 		
 	def update_status(self):
 		if self.repair_status == 'Pending':
@@ -72,7 +71,7 @@ class AssetRepair(Document):
 		if self.capitalize_repair_cost:
 			asset_value += self.repair_cost
 		frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
-		
+
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc({
 			"doctype": "Stock Entry",
