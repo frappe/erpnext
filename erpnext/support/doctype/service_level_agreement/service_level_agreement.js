@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Service Level Agreement', {
 	setup: function(frm) {
-		if (frm.doc.apply_sla_for_resolution) {
+		if (cint(frm.doc.apply_sla_for_resolution) === 1) {
 			frm.get_field('priorities').grid.editable_fields = [
 				{fieldname: 'priority', columns: 1},
 				{fieldname: 'default_priority', columns: 1},
@@ -60,9 +60,15 @@ frappe.ui.form.on('Service Level Agreement', {
 	},
 
 	toggle_resolution_fields: function(frm) {
-		frm.fields_dict.priorities.grid.set_column_disp('resolution_time', frm.doc.apply_sla_for_resolution);
-		frm.fields_dict.priorities.grid.toggle_reqd('resolution_time', frm.doc.apply_sla_for_resolution);
-		frm.fields_dict.priorities.grid.refresh();
+		if (cint(frm.doc.apply_sla_for_resolution) === 1) {
+			frm.fields_dict.priorities.grid.update_docfield_property('resolution_time', 'hidden', 0);
+			frm.fields_dict.priorities.grid.update_docfield_property('resolution_time', 'reqd', 1);
+		} else {
+			frm.fields_dict.priorities.grid.update_docfield_property('resolution_time', 'hidden', 1);
+			frm.fields_dict.priorities.grid.update_docfield_property('resolution_time', 'reqd', 0);
+		}
+
+		frm.refresh_field('priorities');
 	},
 
 	onload: function(frm) {
