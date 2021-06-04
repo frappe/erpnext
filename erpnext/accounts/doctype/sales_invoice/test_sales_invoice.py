@@ -749,7 +749,7 @@ class TestSalesInvoice(unittest.TestCase):
 		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+		make_purchase_receipt(company= "_Test Company with perpetual inventory",
 			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
 
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
@@ -774,7 +774,7 @@ class TestSalesInvoice(unittest.TestCase):
 		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+		make_purchase_receipt(company= "_Test Company with perpetual inventory",
 			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
 
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
