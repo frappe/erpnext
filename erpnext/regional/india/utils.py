@@ -204,8 +204,6 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
-
-		get_tax_template_for_sez(party_details, master_doctype, company, 'Customer')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
 		if party_details.get('taxes_and_charges'):
@@ -216,7 +214,6 @@ def get_regional_address_details(party_details, doctype, company):
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
-		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
 		if party_details.get('taxes_and_charges'):
@@ -282,20 +279,6 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 			default_tax = frappe.db.get_value(master_doctype,
 				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
-
-def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
-
-	gst_details = frappe.db.get_value(party_type, {'name': party_details.get(frappe.scrub(party_type))},
-			['gst_category', 'export_type'], as_dict=1)
-
-	if gst_details:
-		if gst_details.gst_category == 'SEZ' and gst_details.export_type == 'With Payment of Tax':
-			default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0,
-				"gst_state": number_state_mapping[party_details.company_gstin[:2]]})
-
-			party_details["taxes_and_charges"] = default_tax
-			party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
-
 
 def calculate_annual_eligible_hra_exemption(doc):
 	basic_component, hra_component = frappe.db.get_value('Company',  doc.company,  ["basic_component", "hra_component"])
@@ -697,13 +680,22 @@ def validate_state_code(state_code, address):
 		return int(state_code)
 
 @frappe.whitelist()
-def get_gst_accounts(company, account_wise=False):
+def get_gst_accounts(company=None, account_wise=False, only_reverse_charge=0, only_non_reverse_charge=0):
+	filters={"parent": "GST Settings"}
+
+	if company:
+		filters.update({'company': company})
+	if only_reverse_charge:
+		filters.update({'is_reverse_charge_account': 1})
+	elif only_non_reverse_charge:
+		filters.update({'is_reverse_charge_account': 0})
+
 	gst_accounts = frappe._dict()
 	gst_settings_accounts = frappe.get_all("GST Account",
-		filters={"parent": "GST Settings", "company": company},
+		filters=filters,
 		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
-	if not gst_settings_accounts and not frappe.flags.in_test:
+	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 		frappe.throw(_("Please set GST Accounts in GST Settings"))
 
 	for d in gst_settings_accounts:
@@ -715,101 +707,63 @@ def get_gst_accounts(company, account_wise=False):
 
 	return gst_accounts
 
-def update_grand_total_for_rcm(doc, method):
+def validate_reverse_charge_transaction(doc, method):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'India':
 		return
 
-	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
-
-	if not base_gst_tax:
-		return
+	base_gst_tax = 0
+	base_reverse_charge_booked = 0
 
 	if doc.reverse_charge == 'Y':
-		doc.taxes_and_charges_added -= gst_tax
-		doc.total_taxes_and_charges -= gst_tax
-		doc.base_taxes_and_charges_added -= base_gst_tax
-		doc.base_total_taxes_and_charges -= base_gst_tax
+		gst_accounts = get_gst_accounts(doc.company, only_reverse_charge=1)
+		reverse_charge_accounts = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+			+ gst_accounts.get('igst_account')
 
-		update_totals(gst_tax, base_gst_tax, doc)
-
-def update_totals(gst_tax, base_gst_tax, doc):
-	doc.base_grand_total -= base_gst_tax
-	doc.grand_total -= gst_tax
-
-	if doc.meta.get_field("rounded_total"):
-		if doc.is_rounded_total_disabled():
-			doc.outstanding_amount = doc.grand_total
-		else:
-			doc.rounded_total = round_based_on_smallest_currency_fraction(doc.grand_total,
-				doc.currency, doc.precision("rounded_total"))
-
-			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
-				doc.precision("rounding_adjustment"))
-
-			doc.outstanding_amount = doc.rounded_total or doc.grand_total
-
-	doc.in_words = money_in_words(doc.grand_total, doc.currency)
-	doc.base_in_words = money_in_words(doc.base_grand_total, erpnext.get_company_currency(doc.company))
-	doc.set_payment_schedule()
-
-def make_regional_gl_entries(gl_entries, doc):
-	country = frappe.get_cached_value('Company', doc.company, 'country')
-
-	if country != 'India':
-		return gl_entries
-
-	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
-
-	if not base_gst_tax:
-		return gl_entries
-
-	if doc.reverse_charge == 'Y':
-		gst_accounts = get_gst_accounts(doc.company)
-		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+		gst_accounts = get_gst_accounts(doc.company, only_non_reverse_charge=1)
+		non_reverse_charge_accounts = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
 			+ gst_accounts.get('igst_account')
 
 		for tax in doc.get('taxes'):
-			if tax.category not in ("Total", "Valuation and Total"):
-				continue
+			if tax.account_head in non_reverse_charge_accounts:
+				if tax.add_deduct_tax == 'Add':
+					base_gst_tax += tax.base_tax_amount_after_discount_amount
+				else:
+					base_gst_tax += tax.base_tax_amount_after_discount_amount
+			elif tax.account_head in reverse_charge_accounts:
+				if tax.add_deduct_tax == 'Add':
+					base_reverse_charge_booked += tax.base_tax_amount_after_discount_amount
+				else:
+					base_reverse_charge_booked += tax.base_tax_amount_after_discount_amount
 
-			dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-				account_currency = get_account_currency(tax.account_head)
+		if base_gst_tax != base_reverse_charge_booked:
+			msg = _("Booked reverse charge is not equal to applied tax amount")
+			msg += "<br>"
+			msg += _("Please refer {gst_document_link} to learn more about how to setup and create reverse charge invoice").format(
+				gst_document_link='<a href="https://docs.erpnext.com/docs/user/manual/en/regional/india/gst-setup">GST Documentation</a>')
 
-				gl_entries.append(doc.get_gl_dict(
-					{
-						"account": tax.account_head,
-						"cost_center": tax.cost_center,
-						"posting_date": doc.posting_date,
-						"against": doc.supplier,
-						dr_or_cr: tax.base_tax_amount_after_discount_amount,
-						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==doc.company_currency \
-							else tax.tax_amount_after_discount_amount
-					}, account_currency, item=tax)
-				)
+			frappe.throw(msg)
 
-	return gl_entries
+def update_itc_availed_fields(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
 
-def get_gst_tax_amount(doc):
-	gst_accounts = get_gst_accounts(doc.company)
-	gst_account_list = gst_accounts.get('cgst_account', []) + gst_accounts.get('sgst_account', []) \
-		+ gst_accounts.get('igst_account', [])
+	if country != 'India':
+		return
 
-	base_gst_tax = 0
-	gst_tax = 0
+	# Initialize values
+	doc.itc_integrated_tax = doc.itc_state_tax = doc.itc_central_tax = doc.itc_cess_amount = 0
+	gst_accounts = get_gst_accounts(doc.company, only_non_reverse_charge=1)
 
 	for tax in doc.get('taxes'):
-		if tax.category not in ("Total", "Valuation and Total"):
-			continue
-
-		if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-			base_gst_tax += tax.base_tax_amount_after_discount_amount
-			gst_tax += tax.tax_amount_after_discount_amount
-
-	return gst_tax, base_gst_tax
+		if tax.account_head in gst_accounts.get('igst_account', []):
+			doc.itc_integrated_tax += flt(tax.base_tax_amount_after_discount_amount)
+		if tax.account_head in gst_accounts.get('sgst_account', []):
+			doc.itc_state_tax += flt(tax.base_tax_amount_after_discount_amount)
+		if tax.account_head in gst_accounts.get('cgst_account', []):
+			doc.itc_central_tax += flt(tax.base_tax_amount_after_discount_amount)
+		if tax.account_head in gst_accounts.get('cess_account', []):
+			doc.itc_cess_amount += flt(tax.base_tax_amount_after_discount_amount)
 
 @frappe.whitelist()
 def get_regional_round_off_accounts(company, account_list):
