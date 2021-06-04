@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.utils.rename_field import rename_field
+from frappe.model.rename_doc import get_link_fields
 
 def execute():
 	if frappe.db.exists('DocType', 'Lab Test') and frappe.db.exists('DocType', 'Lab Test Template'):
@@ -17,9 +18,18 @@ def execute():
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test_template')
 
 		for old_dt, new_dt in doctypes.items():
-			if not frappe.db.table_exists(new_dt) and frappe.db.table_exists(old_dt):
+			should_rename = (
+				frappe.db.table_exists(old_dt)
+				and not frappe.db.table_exists(new_dt)
+			)
+			if should_rename:
 				frappe.reload_doc('healthcare', 'doctype', frappe.scrub(old_dt))
+
+				linked_doctypes = {x.parent for x in get_link_fields(old_dt)}
+				for linked_doctype in linked_doctypes:
+					frappe.reload_doctype(linked_doctype, force=True)
 				frappe.rename_doc('DocType', old_dt, new_dt, force=True)
+
 				frappe.reload_doc('healthcare', 'doctype', frappe.scrub(new_dt))
 				frappe.delete_doc_if_exists('DocType', old_dt)
 
