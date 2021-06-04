@@ -14,7 +14,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	refresh: function () {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
-		this.set_dynamic_link();
+		this.set_customer_dynamic_link();
 		this.setup_route_options();
 	},
 
@@ -32,13 +32,22 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 
 		if (this.frm.fields_dict.contact_person) {
 			this.frm.set_query('contact_person', () => {
+				me.set_customer_dynamic_link();
 				return erpnext.queries.contact_query(me.frm.doc);
 			});
 		}
 
 		if (this.frm.fields_dict.customer_address) {
 			this.frm.set_query('customer_address', () => {
+				me.set_customer_dynamic_link();
 				return erpnext.queries.address_query(me.frm.doc);
+			});
+		}
+
+		if (this.frm.fields_dict.receiver_contact) {
+			this.frm.set_query('receiver_contact', () => {
+				me.set_receiver_dynamic_link();
+				return erpnext.queries.contact_query(me.frm.doc);
 			});
 		}
 
@@ -105,10 +114,23 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		}
 	},
 
-	set_dynamic_link: function () {
+	set_customer_dynamic_link: function () {
 		frappe.dynamic_link = {
 			doc: this.frm.doc,
 			fieldname: 'customer',
+			doctype: 'Customer'
+		};
+	},
+
+	set_receiver_dynamic_link: function () {
+		var fieldname = 'customer';
+		if (this.frm.doc.broker) {
+			fieldname = 'broker';
+		}
+
+		frappe.dynamic_link = {
+			doc: this.frm.doc,
+			fieldname: fieldname,
 			doctype: 'Customer'
 		};
 	},
@@ -140,6 +162,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					company: me.frm.doc.company,
 					customer: me.frm.doc.customer,
 					vehicle_owner: me.frm.doc.vehicle_owner,
+					broker: me.frm.doc.broker,
 					supplier: me.frm.doc.supplier,
 					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
 					posting_date: me.frm.doc.posting_date

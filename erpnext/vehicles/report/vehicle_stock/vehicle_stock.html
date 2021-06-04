@@ -58,7 +58,7 @@
 	</div>
 </div>
 
-{% var show_delivered_to = data.filter(d => d.delivered_to).length %}
+{% var show_delivered_to = data.filter(d => d.delivered_to || d.broker).length %}
 {% var total_colspan = show_delivered_to ? "8" : "7" %}
 
 <table class="table table-bordered">
@@ -138,6 +138,9 @@
 						{% } %}
 						{% if(data[i].delivered_to_contact) { %}
 							<div>Contact #: {%= data[i].delivered_to_contact %}</div>
+						{% } %}
+						{% if(data[i].broker_name) { %}
+							<div>Broker: {%= data[i].broker_name %}</div>
 						{% } %}
 					</td>
 				{% endif %}

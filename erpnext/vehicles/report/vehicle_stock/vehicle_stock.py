@@ -179,6 +179,8 @@ class VehicleStockReport(object):
 						d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
 						d.customer = vehicle_delivery_data.customer
 						d.customer_name = vehicle_delivery_data.booking_customer_name or vehicle_delivery_data.customer_name
+						d.broker = vehicle_delivery_data.broker
+						d.broker_name = vehicle_delivery_data.broker_name
 						d.delivered_to = vehicle_delivery_data.receiver_contact_display or vehicle_delivery_data.customer_name
 						d.delivered_to_contact = vehicle_delivery_data.receiver_contact_mobile or vehicle_delivery_data.receiver_contact_phone
 
@@ -264,6 +266,8 @@ class VehicleStockReport(object):
 			data = [d for d in self.data if d.financer == self.filters.financer]
 		if self.filters.vehicle_owner:
 			data = [d for d in self.data if (d.financer == self.filters.vehicle_owner if d.is_leased else d.customer == self.filters.vehicle_owner)]
+		if self.filters.broker:
+			data = [d for d in self.data if d.broker == self.filters.broker]
 
 		if self.filters.supplier:
 			data = [d for d in self.data if d.supplier == self.filters.supplier]
@@ -436,7 +440,7 @@ class VehicleStockReport(object):
 		delivery_names = list(set([d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Delivery"]))
 		if delivery_names:
 			data = frappe.db.sql("""
-				select name, vehicle_booking_order, customer, customer_name, booking_customer_name,
+				select name, vehicle_booking_order, customer, customer_name, booking_customer_name, broker, broker_name,
 					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered,
 					receiver_contact_display, receiver_contact_mobile, receiver_contact_phone
 				from `tabVehicle Delivery`
@@ -552,6 +556,7 @@ class VehicleStockReport(object):
 			{"label": _("Lessee/User Name"), "fieldname": "lessee_name", "fieldtype": "Data", "width": 130},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Delivered To"), "fieldname": "delivered_to", "fieldtype": "Data", "width": 110},
+			{"label": _("Broker Name"), "fieldname": "broker_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Supplier"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Transporter"), "fieldname": "transporter_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Bilty"), "fieldname": "lr_no", "fieldtype": "Data", "width": 70},

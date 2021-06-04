@@ -150,6 +150,17 @@ frappe.query_reports["Vehicle Stock"] = {
 			}
 		},
 		{
+			fieldname: "broker",
+			label: __("Broker"),
+			fieldtype: "Link",
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
+		},
+		{
 			fieldname: "supplier",
 			label: __("Supplier"),
 			fieldtype: "Link",

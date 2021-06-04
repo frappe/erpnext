@@ -14,6 +14,8 @@
   "customer_name",
   "booking_customer_name",
   "column_break_8",
+  "broker",
+  "broker_name",
   "vehicle_owner",
   "vehicle_owner_name",
   "column_break_11",
@@ -295,7 +297,6 @@
    "options": "Project"
   },
   {
-   "collapsible": 1,
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
@@ -576,12 +577,28 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "broker",
+   "fieldtype": "Link",
+   "label": "Broker",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.broker && doc.broker_name != doc.broker",
+   "fetch_from": "broker.customer_name",
+   "fieldname": "broker_name",
+   "fieldtype": "Data",
+   "label": "Broker Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 22:36:05.320966",
+ "modified": "2021-06-04 12:04:25.728306",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",
