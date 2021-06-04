@@ -128,6 +128,7 @@ class Item(WebsiteGenerator):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.update_show_in_website()
+		self.validate_item_tax_net_rate_range()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -489,6 +490,11 @@ class Item(WebsiteGenerator):
 	def update_show_in_website(self):
 		if self.disabled:
 			self.show_in_website = False
+
+	def validate_item_tax_net_rate_range(self):
+		for tax in self.get('taxes'):
+			if tax.maximum_net_rate < tax.minimum_net_rate:
+				frappe.throw(_("Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"))
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
