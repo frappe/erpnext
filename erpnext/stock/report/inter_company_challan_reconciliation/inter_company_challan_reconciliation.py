@@ -14,14 +14,8 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns=[
-			# {
-			# 	"label": _("Posting Date "),
-			# 	"fieldname": 'posting_date',
-			# 	"fieldtype": "Date",
-			# 	"width": 100
-			# },
 			{
-				"label": _("Receipt Document"),
+				"label": _("Inward Document"),
 				"fieldname": "name",
 				"fieldtype": "Link",
 				"options": "Stock Entry",
@@ -35,35 +29,54 @@ def get_columns(filters):
 				"width": 100
 			},
 			{
-				"label": _("Item code "),
+				"label": _("Outward Item code "),
 				"fieldname": 'item_code',
 				"fieldtype": "Link",
 				"options": "Item",
 				"width": 100
 			},
 			{
-				"label": _("InterCompany Item"),
-				"fieldname": 'intercompany_item',
+				"label": _("Inward Item Code"),
+				"fieldname": 'item_code1',
 				"fieldtype": "Link",
 				"options": "Item",
 				"width": 100
 			},
 
 			{
-				"label": _("Item Name "),
+				"label": _("Outward Item Name "),
 				"fieldname": 'item_name',
 				"fieldtype": "Read Only",
 				"width": 100
 			},
 			{
-				"label": _("Item Description"),
+				"label": _("Inward Item Name "),
+				"fieldname": 'item_name1',
+				"fieldtype": "Read Only",
+				"width": 100
+			},
+			{
+				"label": _("Outward Item Description"),
 				"fieldname": 'description',
 				"fieldtype": "Read Only",
 				"width": 100
 			},
 			{
-				"label": _("Batch number "),
+				"label": _("Inward Item Description"),
+				"fieldname": 'description1',
+				"fieldtype": "Read Only",
+				"width": 100
+			},
+			{
+				"label": _("Outward Batch number "),
 				"fieldname": 'batch_no',
+				"fieldtype": "Link",
+				"options":"Batch",
+				"width": 100
+			},
+			{
+				"label": _("Inward Batch number "),
+				"fieldname": 'batch_no1',
 				"fieldtype": "Link",
 				"options":"Batch",
 				"width": 100
@@ -93,13 +106,13 @@ def get_columns(filters):
 				"width": 100
 			},
 			{
-				"label": _("qty from outward_warehouse"),
+				"label": _("Outward Warehouse Qty"),
 				"fieldname": 'actual_qty',
 				"fieldtype": "Data",
 				"width": 100
 			},
 			{
-				"label": _("qty from inward_warehouse"),
+				"label": _("Inward Warehouse Qty"),
 				"fieldname": 'actual_qty1',
 				"fieldtype": "Data",
 				"width": 100
@@ -125,15 +138,12 @@ def get_data(filters):
 	# 	stock_filter['posting_date']=filters.get('to_date')
 	if(filters.get('company')):
 		stock_filter['company']=filters.get('company')
-	
-
 	doc=frappe.db.get_all("Stock Entry",stock_filter,['name','reference_challan','posting_date'])
 	for i in doc:
-		lst={}
-		lst['name']=i.get('name')
-		lst['reference_challan']=i.get('reference_challan')
-		# lst['posting_date']=i.get('posting_date')
-		data_list.append(lst)
+		# lst={}
+		# lst['name']=i.get('name')
+		# lst['reference_challan']=i.get('reference_challan')
+		# data_list.append(lst)
 		stock_entry_filter={
 		"parent":i.reference_challan,"docstatus":1
 			}
@@ -141,62 +151,39 @@ def get_data(filters):
 			stock_entry_filter['item_code'] = filters.get('item_code')
 		if(filters.get('batch_no')):
 			stock_entry_filter['batch_no'] = filters.get('batch_no')
-
-		lst=frappe.db.get_all("Stock Entry Detail",stock_entry_filter,["item_code","batch_no","item_name","description","qty","s_warehouse","actual_qty"])
-
-
-		doclst=frappe.db.get_all("Stock Entry Detail",{"parent":i.name,"docstatus":1},["item_code","batch_no","qty","t_warehouse","actual_qty"])
-		for k in lst:
-			stock_details_filter={
-				"name":k.get('item_code')
-			}
-			# if(filters.get('intercompany_item')):
-			# 	stock_details_filter['intercompany_item'] = filters.get('intercompany_item')
-
-			item=frappe.db.get_all("Item",stock_details_filter,["intercompany_item"])
-			for j in doclst:
-				for itm in item:
-					data = {}
-					data['item_code']=k.get('item_code')
-					data['item_name']=k.get('item_name')
-					data['description']=k.get('description')
-					data['batch_no']=k.get('batch_no')
-					data['qty']=k.get('qty')
-					data['s_warehouse']=k.get('s_warehouse')
-					data['actual_qty']=k.get('actual_qty')
-					data['intercompany_item']=itm.get('intercompany_item')
-					data['qty1']=j.get('qty')
-					data['t_warehouse']=j.get('t_warehouse')
-					data['actual_qty1']=j.get('actual_qty')
-			data_list.append(data)
-	return data_list
 	
-
-# def get_data(filters):
-# 	data_list = []
-# 	doc=frappe.db.sql("""Select se.name ,se.reference_challan from `tabStock Entry` se where se.stock_entry_type="Material Receipt" and se.docstatus=1 and se.reference_challan !=" " """,as_dict=1)
-# 	for i in doc:
-# 		data = {}
-# 		lst=frappe.db.get_all("Stock Entry Detail",{"parent":i.get('reference_challan'),"docstatus":1},["item_code","item_name","description","qty","s_warehouse","actual_qty"])
-# 		doclst=frappe.db.get_all("Stock Entry Detail",{"parent":i.get('name'),"docstatus":1},["item_code","batch_no","qty","t_warehouse","actual_qty"])
-# 		data['name']=i.get('name')
-# 		data['reference_challan']=i.get('reference_challan')
-# 		data_list.append(data)
-# 		for k in lst:
-# 			value={}
-# 			value['item_code']=k.get('item_code')
-# 			value['item_name']=k.get('item_name')
-# 			value['description']=k.get('description')
-# 			value['qty']=k.get('qty')
-# 			value['s_warehouse']=k.get('s_warehouse')
-# 			value['actual_qty']=k.get('actual_qty')
-# 			data_list.append(value)
-# 		for j in doclst:
-# 			doc_lst={}
-# 			doc_lst['intercompany_item']=j.get('item_code')
-# 			doc_lst['batch_no']=j.get('batch_no')
-# 			doc_lst['qty1']=j.get('qty')
-# 			doc_lst['t_warehouse']=j.get('t_warehouse')
-# 			doc_lst['actual_qty1']=j.get('actual_qty')
-# 			data_list.append(doc_lst)
-# 	return data_list
+		lst=frappe.db.get_all("Stock Entry Detail",stock_entry_filter,["item_code","batch_no","subcontracted_item","item_name","description","qty","s_warehouse","actual_qty"])
+		stock_entry={
+		"parent":i.name,"docstatus":1
+			}
+		if(filters.get('item_code1')):
+			stock_entry_filter['item_code'] = filters.get('item_code1')
+		if(filters.get('batch_no1')):
+			stock_entry_filter['batch_no'] = filters.get('batch_no1')
+		doclst=frappe.db.get_all("Stock Entry Detail",stock_entry,["item_code","batch_no","subcontracted_item","item_name","description","qty","t_warehouse","actual_qty"])
+		for k in lst:
+			for j in doclst:
+				itm=frappe.db.get_all("Item",{"item_code":k.item_code},["intercompany_item"])
+				it=frappe.db.get_all("Item",{"intercompany_item":j.item_code},["intercompany_item"])
+				for m in itm:
+					for u in it:
+						if u.intercompany_item==j.item_code and m.intercompany_item==j.item_code:
+							data={}
+							data['name']=i.get('name')
+							data['reference_challan']=i.get('reference_challan')
+							data['item_code']=k.get('item_code')
+							data['item_name']=k.get('item_name')
+							data['description']=k.get('description')
+							data['batch_no']=k.get('batch_no')
+							data['qty']=k.get('qty')
+							data['s_warehouse']=k.get('s_warehouse')
+							data['actual_qty']=k.get('actual_qty')
+							data['item_code1']=j.get('item_code')
+							data['item_name1']=j.get('item_name')
+							data['description1']=j.get('description')
+							data['batch_no1']=j.get('batch_no')
+							data['qty1']=j.get('qty')
+							data['t_warehouse']=j.get('t_warehouse')
+							data['actual_qty1']=j.get('actual_qty')
+							data_list.append(data)
+	return data_list

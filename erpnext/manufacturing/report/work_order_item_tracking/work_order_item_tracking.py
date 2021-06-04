@@ -136,7 +136,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.project,
 			stock_value_difference
 		FROM
-			`tabStock Ledger Entry` sle join `tabStock Entry` se 
+			`tabStock Ledger Entry` sle join `tabStock Entry` se
 		WHERE
 			sle.company = %(company)s
 				AND is_cancelled = 0 AND sle.posting_date BETWEEN %(from_date)s AND %(to_date)s
@@ -228,6 +228,18 @@ def get_se_conditions(filters):
 		d=tuple(d)
 		conditions.append("sle.item_code IN {c}".format(c=c))
 		conditions.append("sle.batch_no IN {d}".format(d=d))
+		e=[]
+		f=frappe.db.get_all("Stock Entry",{"work_order":filters.get("work_order")},["name"])
+		lst=frappe.db.sql("""select sle.voucher_type , sle.voucher_no From `tabStock Ledger Entry` sle""",as_dict=1)
+		print(lst)
+		for l in lst:
+			if l.voucher_type=="Stock Entry":
+				for k in f:
+					e.append(k.get("name"))
+			else:
+				e.append(l.voucher_no)
+		e=tuple(e)
+		conditions.append("sle.voucher_no In {e}".format(e=e))
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 def get_opening_balance(filters, columns):
