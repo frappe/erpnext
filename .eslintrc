@@ -154,7 +154,7 @@
 		"before": true,
 		"beforeEach": true,
 		"onScan": true,
-		"extend_cscript": true
+		"extend_cscript": true,
 		"localforage": true,
 	}
 }
