@@ -1129,7 +1129,7 @@ def validate_account_head(tax, doc):
 
 	if company != doc.company:
 		frappe.throw(_('Row {0}: Account {1} does not belong to Company {2}')
-			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)))
+			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)), title=_('Invalid Account'))
 
 
 def validate_cost_center(tax, doc):
@@ -1141,7 +1141,7 @@ def validate_cost_center(tax, doc):
 
 	if company != doc.company:
 		frappe.throw(_('Row {0}: Cost Center {1} does not belong to Company {2}')
-			.format(tax.idx, frappe.bold(tax.cost_center), frappe.bold(doc.company)))
+			.format(tax.idx, frappe.bold(tax.cost_center), frappe.bold(doc.company)), title=_('Invalid Cost Center'))
 
 
 def validate_inclusive_tax(tax, doc):
