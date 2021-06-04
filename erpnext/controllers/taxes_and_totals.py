@@ -54,6 +54,7 @@ class calculate_taxes_and_totals(object):
 			if item.item_code and item.get('item_tax_template'):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
 				args = {
+					'net_rate': item.net_rate or item.rate,
 					'tax_category': self.doc.get('tax_category'),
 					'posting_date': self.doc.get('posting_date'),
 					'bill_date': self.doc.get('bill_date'),
@@ -78,7 +79,8 @@ class calculate_taxes_and_totals(object):
 				taxes = _get_item_tax_template(args, item_taxes + item_group_taxes, for_validate=True)
 
 				if item.item_tax_template not in taxes:
-					frappe.throw(_("Row {0}: Invalid Item Tax Template for item {1}").format(
+					item.item_tax_template = taxes[0]
+					frappe.msgprint(_("Row {0}: Item Tax template updated as per validity and rate applied").format(
 						item.idx, frappe.bold(item.item_code)
 					))
 
