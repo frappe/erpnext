@@ -609,10 +609,10 @@ def validate_mobile_pakistan(mobile_no):
 		return
 
 	import re
-	mobile_regex = re.compile(r'^0\d\d\d-\d\d\d\d\d\d\d$')
+	mobile_regex = re.compile(r'^03\d\d-\d\d\d\d\d\d\d$')
 
 	if not mobile_regex.match(mobile_no):
-		frappe.throw(_("Invalid Mobile No. Pakistani Mobile Nos must be in the format 0###-#######"))
+		frappe.throw(_("Invalid Mobile No. Pakistani Mobile Nos must be in the format 03##-#######"))
 
 @frappe.whitelist()
 def validate_duplicate_tax_id(doctype, fieldname, value, exclude=None, throw=False):
