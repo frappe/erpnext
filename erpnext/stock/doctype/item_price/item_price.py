@@ -83,3 +83,21 @@ class ItemPrice(Document):
 		if self.buying and not self.selling:
 			# if only buying then remove customer
 			self.customer = None
+		
+	@frappe.whitelist()
+	def update_customer_pricing_rule_item(self):
+		old_rate = frappe.get_value('Item Price',{'name':self.name},'price_list_rate')
+		if(self.price_list_rate != old_rate):
+			all_items = frappe.db.get_all("Customer Pricing Rule Item",{'Item':self.item_code},['name','additional_price','parent'])
+
+			for item in all_items:
+				doc = frappe.get_doc('Customer Pricing Rule', item.get('parent'))
+				if doc.get('for_price_list' == self.price_list):
+					list_price = self.price_list_rate + item.get('additional_price') 
+					q = """
+						UPDATE `tabCustomer Pricing Rule Item`
+						SET base_price = '{0}', list_price = '{1}'
+						WHERE name = '{2}';
+						""".format(self.price_list_rate,list_price,item.get('name'))
+					frappe.db.sql(q)
+					frappe.db.commit()
