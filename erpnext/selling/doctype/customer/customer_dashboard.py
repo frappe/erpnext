@@ -6,12 +6,12 @@ from frappe import _
 
 def get_data():
 	vehicle_domain_links = []
-	vbo_link = []
+	vehicle_quotation = []
 	if 'Vehicles' in frappe.get_active_domains():
-		vbo_link.append("Vehicle Booking Order")
+		vehicle_quotation.append("Vehicle Quotation")
 		vehicle_domain_links.append({
 			'label': _('Vehicles'),
-			'items': ['Vehicle']
+			'items': ['Vehicle Booking Order', 'Vehicle Delivery', 'Vehicle']
 		})
 
 	return {
@@ -23,15 +23,16 @@ def get_data():
 			'Journal Entry': 'party',
 			'Sales Invoice': 'bill_to',
 			'Quotation': 'party_name',
-			'Opportunity': 'party_name'
+			'Opportunity': 'party_name',
+			'Vehicle Quotation': 'party_name',
 		},
 		'dynamic_links': {
 			'party_name': ['Customer', 'quotation_to']
 		},
-		'transactions': [
+		'transactions': vehicle_domain_links + [
 			{
 				'label': _('Pre Sales'),
-				'items': vbo_link + ['Opportunity', 'Quotation']
+				'items': vehicle_quotation + ['Quotation', 'Opportunity']
 			},
 			{
 				'label': _('Orders'),
@@ -42,20 +43,16 @@ def get_data():
 				'items': ['Payment Entry', 'Journal Entry']
 			},
 			{
-				'label': _('Support'),
-				'items': ['Issue']
-			},
-			{
-				'label': _('Projects'),
-				'items': ['Project']
+				'label': _('Support & Projects'),
+				'items': ['Project', 'Issue']
 			},
 			{
 				'label': _('Pricing'),
-				'items': ['Pricing Rule']
+				'items': ['Pricing Rule', 'Item Price']
 			},
 			{
 				'label': _('Subscriptions'),
 				'items': ['Subscription']
 			}
-		] + vehicle_domain_links
+		]
 	}
