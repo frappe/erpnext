@@ -89,7 +89,7 @@
    "default": "0",
    "fieldname": "cost_center_wise_pnl",
    "fieldtype": "Check",
-   "label": "Book Cost Center-Wise Profit/Loss"
+   "label": "Book Cost Center Wise Profit/Loss"
   }
  ],
  "icon": "fa fa-file-text",
