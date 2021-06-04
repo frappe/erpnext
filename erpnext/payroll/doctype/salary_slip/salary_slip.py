@@ -527,7 +527,9 @@ class SalarySlip(TransactionBase):
 				"from_date": ("<=", date_to_validate),
 				"docstatus": 1,
 			},
+			"*",
 			order_by="from_date desc",
+			as_dict=True,
 		)
 
 		if not salary_structure_assignment:
@@ -539,9 +541,7 @@ class SalarySlip(TransactionBase):
 				)
 			)
 
-		data.update(frappe.get_doc("Salary Structure Assignment",
-			salary_structure_assignment).as_dict())
-
+		data.update(salary_structure_assignment)
 		data.update(employee)
 		data.update(self.as_dict())
 
