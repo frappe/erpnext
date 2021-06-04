@@ -583,59 +583,67 @@ def handle_hold_time(doc, meta, status):
 				"parent": doc.service_level_agreement
 			}, fields=["status"])]
 
-		update_values = {}
-
 		if not hold_statuses:
 			return
 
 		if meta.has_field("status") and doc.status in hold_statuses and status not in hold_statuses:
-			update_values['on_hold_since'] = frappe.flags.current_time or now_datetime(doc.get("owner"))
-
-			if meta.has_field("first_responded_on") and not doc.first_responded_on:
-				update_values['response_by'] = None
-				update_values['response_by_variance'] = 0
-
-			update_values['resolution_by'] = None
-			update_values['resolution_by_variance'] = 0
+			apply_hold_status(doc, meta)
 
 		# calculate hold time when status is changed from any hold status to any non-hold status
 		if meta.has_field("status") and doc.status not in hold_statuses and status in hold_statuses:
-			hold_time = doc.total_hold_time if meta.has_field("total_hold_time") and doc.total_hold_time else 0
-			now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
-			last_hold_time = 0
+			reset_hold_status_and_update_hold_time(doc, meta)
 
-			if meta.has_field("on_hold_since") and doc.on_hold_since:
-				# last_hold_time will be added to the sla variables
-				last_hold_time = time_diff_in_seconds(now_time, doc.on_hold_since)
-				update_values['total_hold_time'] = hold_time + last_hold_time
 
-			# re-calculate SLA variables after issue changes from any hold status to any non-hold status
-			# add hold time to SLA variables
-			start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
-			priority = get_priority(doc)
-			now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+def apply_hold_status(doc, meta):
+	update_values = {'on_hold_since': frappe.flags.current_time or now_datetime(doc.get("owner"))}
 
-			# add hold time to response by variance
-			if meta.has_field("first_responded_on") and not doc.first_responded_on:
-				response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
-				response_by = add_to_date(response_by, seconds=round(last_hold_time))
-				response_by_variance = round(time_diff_in_seconds(response_by, now_time))
+	if meta.has_field("first_responded_on") and not doc.first_responded_on:
+		update_values['response_by'] = None
+		update_values['response_by_variance'] = 0
 
-				update_values['response_by'] = response_by
-				update_values['response_by_variance'] = response_by_variance + last_hold_time
+	update_values['resolution_by'] = None
+	update_values['resolution_by_variance'] = 0
 
-			# add hold time to resolution by variance
-			if frappe.db.get_value("Service Level Agreement", doc.service_level_agreement, "apply_sla_for_resolution"):
-				resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
-				resolution_by = add_to_date(resolution_by, seconds=round(last_hold_time))
-				resolution_by_variance = round(time_diff_in_seconds(resolution_by, now_time))
+	doc.db_set(update_values)
 
-				update_values['resolution_by'] = resolution_by
-				update_values['resolution_by_variance'] = resolution_by_variance + last_hold_time
 
-			update_values['on_hold_since'] = None
+def reset_hold_status_and_update_hold_time(doc, meta):
+	hold_time = doc.total_hold_time if meta.has_field("total_hold_time") and doc.total_hold_time else 0
+	now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+	last_hold_time = 0
+	update_values = {}
 
-		doc.db_set(update_values)
+	if meta.has_field("on_hold_since") and doc.on_hold_since:
+		# last_hold_time will be added to the sla variables
+		last_hold_time = time_diff_in_seconds(now_time, doc.on_hold_since)
+		update_values['total_hold_time'] = hold_time + last_hold_time
+
+	# re-calculate SLA variables after issue changes from any hold status to any non-hold status
+	start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
+	priority = get_priority(doc)
+	now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+
+	# add hold time to response by variance
+	if meta.has_field("first_responded_on") and not doc.first_responded_on:
+		response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
+		response_by = add_to_date(response_by, seconds=round(last_hold_time))
+		response_by_variance = round(time_diff_in_seconds(response_by, now_time))
+
+		update_values['response_by'] = response_by
+		update_values['response_by_variance'] = response_by_variance + last_hold_time
+
+	# add hold time to resolution by variance
+	if frappe.db.get_value("Service Level Agreement", doc.service_level_agreement, "apply_sla_for_resolution"):
+		resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
+		resolution_by = add_to_date(resolution_by, seconds=round(last_hold_time))
+		resolution_by_variance = round(time_diff_in_seconds(resolution_by, now_time))
+
+		update_values['resolution_by'] = resolution_by
+		update_values['resolution_by_variance'] = resolution_by_variance + last_hold_time
+
+	update_values['on_hold_since'] = None
+
+	doc.db_set(update_values)
 
 
 def get_service_level_agreement_fields():
