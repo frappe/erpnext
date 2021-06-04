@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://test-develop:8001/",
+  "baseUrl": "http://test_site:8000/",
   "projectId": "92odwv",
   "adminPassword": "admin",
   "defaultCommandTimeout": 20000,
