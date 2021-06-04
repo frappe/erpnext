@@ -1421,12 +1421,13 @@ class AccountsController(TransactionBase):
 			if self.doctype in ("Sales Order", "Vehicle Booking Order") and getdate(d.due_date) < getdate(self.transaction_date):
 				frappe.throw(_("Row {0}: Due Date in the Payment Terms table cannot be before Transaction Date").format(d.idx))
 			if d.due_date in dates:
-				li.append(_("{0} in row {1}").format(d.due_date, d.idx))
+				li.append(_("{0} in row {1}").format(frappe.format(getdate(d.due_date)), d.idx))
 			dates.append(d.due_date)
 
 		if li:
 			duplicates = '<br>' + '<br>'.join(li)
-			frappe.throw(_("Rows with duplicate due dates in other rows were found: {0}").format(duplicates))
+			frappe.msgprint(_("Payment Schedule rows with duplicate Due Dates found: {0}").format(duplicates),
+				alert=1, indicator='orange')
 
 	def validate_payment_schedule_amount(self):
 		if self.doctype == 'Sales Invoice' and self.is_pos: return
