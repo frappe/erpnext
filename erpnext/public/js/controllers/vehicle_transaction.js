@@ -47,7 +47,6 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		if (this.frm.fields_dict.receiver_contact) {
 			this.frm.set_query('receiver_contact', () => {
 				me.set_receiver_dynamic_link();
-				return erpnext.queries.contact_query(me.frm.doc);
 			});
 		}
 
@@ -123,15 +122,21 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	},
 
 	set_receiver_dynamic_link: function () {
+		var doctype = 'Customer';
 		var fieldname = 'customer';
-		if (this.frm.doc.broker) {
+
+		if (this.frm.doc.transporter) {
+			doctype = 'Supplier';
+			fieldname = 'transporter';
+		} else if (this.frm.doc.broker) {
+			doctype = 'Customer';
 			fieldname = 'broker';
 		}
 
 		frappe.dynamic_link = {
 			doc: this.frm.doc,
 			fieldname: fieldname,
-			doctype: 'Customer'
+			doctype: doctype
 		};
 	},
 
@@ -163,6 +168,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					customer: me.frm.doc.customer,
 					vehicle_owner: me.frm.doc.vehicle_owner,
 					broker: me.frm.doc.broker,
+					transporter: me.frm.doc.transporter,
 					supplier: me.frm.doc.supplier,
 					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
 					posting_date: me.frm.doc.posting_date

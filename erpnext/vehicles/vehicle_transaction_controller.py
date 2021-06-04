@@ -15,7 +15,7 @@ from six import string_types
 
 
 force_fields = [
-	'customer_name', 'vehicle_owner_name', 'broker_name',
+	'customer_name', 'vehicle_owner_name', 'broker_name', 'transporter_name',
 	'variant_of', 'variant_of_name',
 	'tax_id', 'tax_cnic', 'tax_strn',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
@@ -234,10 +234,16 @@ def get_customer_details(args):
 		broker_details = frappe.get_cached_value("Customer", args.broker,
 			['customer_name'], as_dict=1)
 
+	transporter_details = frappe._dict()
+	if args.transporter:
+		transporter_details = frappe.get_cached_value("Supplier", args.transporter,
+			['supplier_name'], as_dict=1)
+
 	# Customer Name
 	out.customer_name = customer_details.customer_name
 	out.vehicle_owner_name = owner_details.customer_name
 	out.broker_name = broker_details.customer_name
+	out.transporter_name = transporter_details.supplier_name
 
 	# Tax IDs
 	out.tax_id = customer_details.tax_id
