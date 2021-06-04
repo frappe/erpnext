@@ -771,6 +771,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(pos.write_off_amount, -5)
 
 	def test_pos_with_no_gl_entry_for_change_amount(self):
+		frappe.db.set_value('Accounts Settings', None, 'post_change_gl_entries', 0)
+
 		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
@@ -793,8 +795,6 @@ class TestSalesInvoice(unittest.TestCase):
 		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 50})
 		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 60})
 
-		frappe.db.set_value('Accounts Settings', 'Accounts Settings', 'post_change_gl_entry', 0)
-
 		pos.insert()
 		pos.submit()
 
@@ -803,7 +803,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
 
-		frappe.db.set_value('Accounts Settings', 'Accounts Settings', 'post_change_gl_entry', 1)
+		frappe.db.set_value('Accounts Settings', None, 'post_change_gl_entries', 1)
 
 	def validate_pos_gl_entry(self, si, pos, cash_amount, validate_without_change_gle=False):
 		if validate_without_change_gle:
