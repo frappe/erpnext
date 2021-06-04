@@ -115,6 +115,14 @@ frappe.ui.form.on('Stock Entry', {
 			return;
 		}
 
+		if (!frm.is_new() && frm.doc.docstatus === 0) {
+			frm.add_custom_button(__("Quality Inspection(s)"), () => {
+				let transaction_controller = new erpnext.TransactionController({ frm: frm });
+				transaction_controller.make_quality_inspection();
+			}, __("Create"));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+
 		let quality_inspection_field = frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function(row) {
 			if (frm.is_new()) return;
@@ -155,7 +163,7 @@ frappe.ui.form.on('Stock Entry', {
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
-			frm.add_custom_button(__('Create Material Request'), function() {
+			frm.add_custom_button(__('Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
 					var mr = frappe.model.get_new_doc('Material Request');
 					var items = frm.get_field('items').grid.get_selected_children();
@@ -178,7 +186,7 @@ frappe.ui.form.on('Stock Entry', {
 					});
 					frappe.set_route('Form', 'Material Request', mr.name);
 				});
-			});
+			}, __("Create"));
 		}
 
 		if(frm.doc.items) {
@@ -600,7 +608,6 @@ frappe.ui.form.on('Stock Entry', {
 	add_to_transit: function(frm) {
 		if(frm.doc.add_to_transit && frm.doc.purpose=='Material Transfer') {
 			frm.set_value('to_warehouse', '');
-			frm.set_value('stock_entry_type', 'Material Transfer');
 			frm.fields_dict.to_warehouse.get_query = function() {
 				return {
 					filters:{
@@ -610,12 +617,13 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				};
 			};
-			frm.trigger('set_tansit_warehouse');
+			frm.trigger('set_transit_warehouse');
 		}
 	},
 
-	set_tansit_warehouse: function(frm) {
-		if(frm.doc.add_to_transit && frm.doc.purpose == 'Material Transfer' && !frm.doc.to_warehouse) {
+	set_transit_warehouse: function(frm) {
+		if(frm.doc.add_to_transit && frm.doc.purpose == 'Material Transfer' && !frm.doc.to_warehouse
+			&& frm.doc.from_warehouse) {
 			let dt = frm.doc.from_warehouse ? 'Warehouse' : 'Company';
 			let dn = frm.doc.from_warehouse ? frm.doc.from_warehouse : frm.doc.company;
 			frappe.db.get_value(dt, dn, 'default_in_transit_warehouse', (r) => {
@@ -985,7 +993,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	from_warehouse: function(doc) {
-		this.frm.trigger('set_tansit_warehouse');
+		this.frm.trigger('set_transit_warehouse');
 		this.set_warehouse_in_children(doc.items, "s_warehouse", doc.from_warehouse);
 	},
 
