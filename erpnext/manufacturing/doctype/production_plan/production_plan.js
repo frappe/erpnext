@@ -211,14 +211,25 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	get_items: function(frm) {
+	get_items: function (frm) {
+		frm.clear_table('prod_plan_references');
+
 		frappe.call({
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
-			callback: function() {
+			callback: function () {
 				refresh_field('po_items');
 			}
+		});
+	},
+	combine_items: function (frm) {
+		frm.clear_table('prod_plan_references');
+
+		frappe.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
 		});
 	},
 

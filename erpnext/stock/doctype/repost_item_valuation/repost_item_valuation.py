@@ -37,6 +37,9 @@ class RepostItemValuation(Document):
 		self.db_set('status', status)
 
 	def on_submit(self):
+		if not frappe.flags.in_test:
+			return
+
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=frappe.flags.in_test, doc=self)
 
@@ -115,12 +118,6 @@ def notify_error_to_stock_managers(doc, traceback):
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
 def repost_entries():
-	job_log = frappe.get_all('Scheduled Job Log', fields = ['status', 'creation'],
-		filters = {'scheduled_job_type': 'repost_item_valuation.repost_entries'}, order_by='creation desc', limit=1)
-
-	if job_log and job_log[0]['status'] == 'Start' and time_diff_in_hours(now(), job_log[0]['creation']) < 2:
-		return
-
 	riv_entries = get_repost_item_valuation_entries()
 
 	for row in riv_entries:
@@ -135,9 +132,7 @@ def repost_entries():
 		check_if_stock_and_account_balance_synced(today(), d.name)
 
 def get_repost_item_valuation_entries():
-	date = add_to_date(now(), hours=-3)
-
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
 		WHERE status != 'Completed' and creation <= %s and docstatus = 1
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
-	""", date, as_dict=1)
+	""", now(), as_dict=1)
