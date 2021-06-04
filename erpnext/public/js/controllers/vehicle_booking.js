@@ -399,7 +399,9 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 				args: {
 					customer: me.frm.doc.customer,
 					financer: me.frm.doc.financer,
-					finance_type: me.frm.doc.finance_type
+					finance_type: me.frm.doc.finance_type,
+					quotation_to: me.frm.doc.quotation_to,
+					party_name: me.frm.doc.party_name
 				},
 				customer_contact: me.frm.doc.contact_person,
 				financer_contact: me.frm.doc.financer_contact_person

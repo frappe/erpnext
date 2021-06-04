@@ -37,7 +37,9 @@ class Quotation(SellingController):
 
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
-			frappe.get_doc("Lead", self.party_name).set_status(update=True)
+			doc = frappe.get_doc("Lead", self.party_name)
+			doc.set_status(update=True)
+			doc.notify_update()
 
 	def set_customer_name(self):
 		if self.party_name and self.quotation_to == 'Customer':
@@ -60,6 +62,7 @@ class Quotation(SellingController):
 
 		opp = frappe.get_doc("Opportunity", opportunity)
 		opp.set_status(update=True)
+		opp.notify_update()
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():

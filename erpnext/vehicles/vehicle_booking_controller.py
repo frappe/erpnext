@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, cstr, getdate, add_days
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from erpnext.crm.doctype.lead.lead import get_lead_contact_details
 from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier, get_default_terms
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -71,10 +72,11 @@ class VehicleBookingController(AccountsController):
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
 				self.set(k, v)
 
-		item_details = get_item_details(self.as_dict())
-		for k, v in item_details.items():
-			if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
-				self.set(k, v)
+		if self.get('item_code'):
+			item_details = get_item_details(self.as_dict())
+			for k, v in item_details.items():
+				if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
+					self.set(k, v)
 
 		self.set_vehicle_details()
 
@@ -344,6 +346,11 @@ def get_customer_contact_details(args, customer_contact=None, financer_contact=N
 	customer_contact = get_contact_details(customer_contact) if customer_contact else frappe._dict()
 	financer_contact = get_contact_details(financer_contact) if financer_contact else frappe._dict()
 
+	lead_contact = frappe._dict()
+	if args.quotation_to == "Lead" and args.party_name and not customer_contact:
+		lead_contact = get_lead_contact_details(args.party_name)
+		customer_contact = lead_contact
+
 	is_leased = args.financer and args.finance_type == "Leased"
 
 	out.contact_display = customer_contact.get('contact_display')
@@ -354,7 +361,6 @@ def get_customer_contact_details(args, customer_contact=None, financer_contact=N
 	out.contact_phone = financer_contact.get('contact_phone') if is_leased else customer_contact.get('contact_phone')
 
 	return out
-
 
 @frappe.whitelist()
 def get_address_details(address):

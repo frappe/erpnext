@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import (cstr, validate_email_address, cint, comma_and, has_gravatar, now, getdate, nowdate)
 from frappe.model.mapper import get_mapped_doc
 
+from frappe.model.document import Document
 from erpnext.controllers.selling_controller import SellingController
 from frappe.contacts.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import set_taxes
@@ -33,6 +34,10 @@ class Lead(SellingController):
 			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if \
 				(not cint(self.get("__islocal"))) else None,
 		})
+
+		self.validate_organization_lead()
+		self.validate_tax_id()
+		self.validate_mobile_no()
 
 		self.set_status()
 		self.check_email_id_is_unique()
@@ -85,6 +90,26 @@ class Lead(SellingController):
 			self.name)
 
 		self.delete_events()
+
+	def validate_tax_id(self):
+		from erpnext.accounts.party import validate_ntn_cnic_strn
+		validate_ntn_cnic_strn(self.get('tax_id'), self.get('tax_cnic'), self.get('tax_strn'))
+
+	def validate_mobile_no(self):
+		from erpnext.accounts.party import validate_mobile_pakistan
+
+		if self.get('mobile_no_2') and not self.get('mobile_no'):
+			self.mobile_no = self.mobile_no_2
+			self.mobile_no_2 = ""
+
+		validate_mobile_pakistan(self.get('mobile_no'))
+		validate_mobile_pakistan(self.get('mobile_no_2'))
+
+	def validate_organization_lead(self):
+		if cint(self.organization_lead):
+			self.lead_name = None
+			self.gender = None
+			self.salutation = None
 
 	def has_customer(self):
 		return frappe.db.get_value("Customer", {"lead_name": self.name})
@@ -155,8 +180,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			"field_map": {
 				"name": "lead_name",
 				"company_name": "customer_name",
-				"contact_no": "phone_1",
-				"fax": "fax_1"
+				"lead_name": "contact_first_name",
 			}
 		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
@@ -201,6 +225,23 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
+@frappe.whitelist()
+def make_vehicle_quotation(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
+	target_doc = get_mapped_doc("Lead", source_name,
+		{"Lead": {
+			"doctype": "Vehicle Quotation",
+			"field_map": {
+				"name": "party_name"
+			}
+		}}, target_doc, set_missing_values)
+
+	target_doc.quotation_to = "Lead"
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("calculate_taxes_and_totals")
+
 	return target_doc
 
 def _set_missing_values(source, target):
@@ -224,7 +265,7 @@ def _set_missing_values(source, target):
 
 @frappe.whitelist()
 def get_lead_details(lead, posting_date=None, company=None):
-	if not lead: return {}
+	if not lead: return frappe._dict()
 
 	from erpnext.accounts.party import set_address_details
 	out = frappe._dict()
@@ -232,14 +273,10 @@ def get_lead_details(lead, posting_date=None, company=None):
 	lead_doc = frappe.get_doc("Lead", lead)
 	lead = lead_doc
 
-	out.update({
-		"territory": lead.territory,
-		"customer_name": lead.company_name or lead.lead_name,
-		"contact_display": " ".join(filter(None, [lead.salutation, lead.lead_name])),
-		"contact_email": lead.email_id,
-		"contact_mobile": lead.mobile_no,
-		"contact_phone": lead.phone,
-	})
+	out["customer_name"] = lead.company_name or lead.lead_name
+	out["territory"] = lead.territory
+
+	out.update(_get_lead_contact_details(lead))
 
 	set_address_details(out, lead, "Lead")
 
@@ -249,6 +286,24 @@ def get_lead_details(lead, posting_date=None, company=None):
 		out['taxes_and_charges'] = taxes_and_charges
 
 	return out
+
+
+@frappe.whitelist()
+def get_lead_contact_details(lead):
+	if not lead:
+		return frappe._dict()
+
+	lead_doc = frappe.get_doc("Lead", lead)
+	return _get_lead_contact_details(lead_doc)
+
+def _get_lead_contact_details(lead):
+	return frappe._dict({
+		"contact_display": " ".join(filter(None, [lead.salutation, lead.lead_name])),
+		"contact_email": lead.email_id,
+		"contact_mobile": lead.mobile_no,
+		"contact_phone": lead.phone,
+	})
+
 
 @frappe.whitelist()
 def make_lead_from_communication(communication, ignore_communication_links=False):

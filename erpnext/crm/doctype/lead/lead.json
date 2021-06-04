@@ -7,43 +7,57 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "image",
   "organization_lead",
   "lead_details",
   "naming_series",
   "lead_name",
   "company_name",
-  "email_id",
   "col_break123",
-  "lead_owner",
-  "status",
-  "gender",
   "source",
   "customer",
-  "campaign_name",
-  "image",
+  "column_break_9",
+  "status",
+  "lead_owner",
+  "contact_section",
+  "salutation",
+  "gender",
+  "column_break_25",
+  "mobile_no",
+  "mobile_no_2",
+  "column_break_26",
+  "email_id",
+  "phone",
+  "column_break_28",
+  "fax",
+  "website",
+  "identification_section",
+  "tax_cnic",
+  "column_break_27",
+  "tax_id",
+  "column_break_29",
+  "tax_strn",
   "section_break_12",
   "contact_by",
   "column_break_14",
   "contact_date",
+  "column_break_18",
   "ends_on",
   "notes_section",
   "notes",
   "contact_info",
+  "territory",
+  "column_break2",
   "address_desc",
   "address_html",
-  "column_break2",
   "contact_html",
-  "phone",
-  "salutation",
-  "mobile_no",
-  "fax",
-  "website",
-  "territory",
   "more_info",
   "type",
+  "request_type",
+  "column_break_43",
   "market_segment",
   "industry",
-  "request_type",
+  "campaign_name",
   "column_break3",
   "company",
   "unsubscribed",
@@ -54,8 +68,7 @@
    "default": "0",
    "fieldname": "organization_lead",
    "fieldtype": "Check",
-   "label": "Lead is an Organization",
-   "set_only_once": 1
+   "label": "Lead is an Organization"
   },
   {
    "fieldname": "lead_details",
@@ -70,7 +83,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "CRM-LEAD-",
+   "options": "LEAD-",
    "set_only_once": 1
   },
   {
@@ -221,7 +234,7 @@
    "collapsible": 1,
    "fieldname": "contact_info",
    "fieldtype": "Section Break",
-   "label": "Address & Contact",
+   "label": "Address",
    "oldfieldtype": "Column Break",
    "options": "fa fa-map-marker"
   },
@@ -250,7 +263,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
    "fieldname": "phone",
    "fieldtype": "Data",
    "label": "Phone",
@@ -265,15 +277,13 @@
    "options": "Salutation"
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
-   "label": "Mobile No.",
+   "label": "Mobile No (Primary)",
    "oldfieldname": "mobile_no",
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
    "fieldname": "fax",
    "fieldtype": "Data",
    "label": "Fax",
@@ -362,12 +372,75 @@
    "fieldname": "blog_subscriber",
    "fieldtype": "Check",
    "label": "Blog Subscriber"
+  },
+  {
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mobile_no_2",
+   "fieldtype": "Data",
+   "label": "Mobile No (Secondary)"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "identification_section",
+   "fieldtype": "Section Break",
+   "label": "Identification"
+  },
+  {
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "label": "CNIC"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax Id"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "label": "STRN"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2020-05-11 20:30:02.536647",
+ "modified": "2021-06-04 22:50:29.472386",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -430,5 +503,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "lead_name"
+ "title_field": "lead_name",
+ "track_changes": 1,
+ "track_seen": 1
 }

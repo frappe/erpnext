@@ -8,7 +8,8 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.frm.make_methods = {
 			'Quotation': this.make_quotation,
-			'Opportunity': this.create_opportunity
+			'Opportunity': this.create_opportunity,
+			'Vehicle Quotation': this.make_vehicle_quotation,
 		}
 
 		this.frm.fields_dict.customer.get_query = function (doc, cdt, cdn) {
@@ -35,12 +36,17 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	refresh: function () {
 		var doc = this.frm.doc;
 		erpnext.toggle_naming_series();
+		erpnext.hide_company();
 		frappe.dynamic_link = { doc: doc, fieldname: 'name', doctype: 'Lead' }
 
 		if(!doc.__islocal && doc.__onload && !doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.create_customer, __('Create'));
 			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __('Create'));
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __('Create'));
+
+			if (frappe.boot.active_domains.includes("Vehicles")) {
+				this.frm.add_custom_button(__("Vehicle Quotation"), this.make_vehicle_quotation, __('Create'));
+			}
 		}
 
 		if (!this.frm.doc.__islocal) {
@@ -71,6 +77,13 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		})
 	},
 
+	make_vehicle_quotation: function () {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.lead.lead.make_vehicle_quotation",
+			frm: cur_frm
+		})
+	},
+
 	organization_lead: function () {
 		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
 		this.frm.toggle_reqd("company_name", this.frm.doc.organization_lead);
@@ -88,6 +101,35 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			d.add(1, "hours");
 			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
 		}
+	},
+
+	validate: function() {
+		erpnext.utils.format_ntn(this.frm, "tax_id");
+		erpnext.utils.format_cnic(this.frm, "tax_cnic");
+		erpnext.utils.format_strn(this.frm, "tax_strn");
+
+		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no");
+		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no_2");
+	},
+
+	tax_id: function() {
+		erpnext.utils.format_ntn(this.frm, "tax_id");
+		erpnext.utils.validate_duplicate_tax_id(this.frm.doc, "tax_id");
+	},
+	tax_cnic: function() {
+		erpnext.utils.format_cnic(this.frm, "tax_cnic");
+		erpnext.utils.validate_duplicate_tax_id(this.frm.doc, "tax_cnic");
+	},
+	tax_strn: function() {
+		erpnext.utils.format_strn(this.frm, "tax_strn");
+		erpnext.utils.validate_duplicate_tax_id(this.frm.doc, "tax_strn");
+	},
+
+	mobile_no: function () {
+		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no");
+	},
+	mobile_no_2: function () {
+		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no_2");
 	}
 });
 
