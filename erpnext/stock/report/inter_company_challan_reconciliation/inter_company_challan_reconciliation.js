@@ -12,39 +12,23 @@ frappe.query_reports["Inter Company Challan Reconciliation"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "item_code",
-			label: __("Item Code"),
-			fieldtype: "Link",
-			options:"Item",
-			reqd: 0
-		},
-		// {
-		// 	fieldname: "intercompany_item",
-		// 	label: __("Intercompany Item"),
-		// 	fieldtype: "Link",
-		// 	options:"Item",
-		// 	default: "",
-		// 	reqd: 0
-		// },
-		{
-			fieldname: "batch_no",
-			label: __("Batch Number"),
-			fieldtype: "Link",
-			options:"Batch",
-			default: "",
-			reqd: 0
-		},
-		{
 			fieldname: "stock_entry",
-			label: __("Stock Entry"),
+			label: __("Inward Challan"),
 			fieldtype: "Link",
 			options:"Stock Entry",
 			default: "",
-			reqd: 0
+			reqd: 0,
+			get_query: () => {
+				return {
+					filters: {
+						'stock_entry_type':"Material Receipt"
+					}
+				};
+			}
 		},
 		{
 			fieldname: "reference_challan",
-			label: __("Reference Challan"),
+			label: __("Outward Challan"),
 			fieldtype: "Link",
 			options:"Stock Entry",
 			default: "",
@@ -56,6 +40,37 @@ frappe.query_reports["Inter Company Challan Reconciliation"] = {
 					}
 				};
 			}
+		},
+		{
+			fieldname: "item_code",
+			label: __("Inward Item Code"),
+			fieldtype: "Link",
+			options:"Item",
+			reqd: 0
+		},
+		{
+			fieldname: "item_code",
+			label: __("Outward Item Code"),
+			fieldtype: "Link",
+			options:"Item",
+			default: "",
+			reqd: 0
+		},
+		{
+			fieldname: "batch_no",
+			label: __("Inward Batch Number"),
+			fieldtype: "Link",
+			options:"Batch",
+			default: "",
+			reqd: 0
+		},
+		{
+			fieldname: "batch_no",
+			label: __("Outward Batch Number"),
+			fieldtype: "Link",
+			options:"Batch",
+			default: "",
+			reqd: 0
 		},
 		{
 			fieldname: "from_date",
