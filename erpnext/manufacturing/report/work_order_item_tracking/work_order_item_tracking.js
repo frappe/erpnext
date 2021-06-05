@@ -77,19 +77,11 @@ frappe.query_reports["Work Order Item Tracking"] = {
 			"label": __("Work Order"),
 			"fieldtype": "Link",
 			"options": "Work Order",
-			// on_change: () => {
-			// 	var work_order = frappe.query_report.get_filter_value('work_order');
-			// 	if (work_order) {
-			// 		frappe.db.get_value('Stock Entry', {"work_order":work_order}, ['name'], function(a) {
-			// 		console.log(a.name)
-			// 		frappe.db.get_value('Stock Ledger Entry',{"voucher_no":a.name}, ["item_code", "batch_no"], function(value) {
-			// 			console.log(value.item_code)
-			// 			frappe.query_report.set_filter_value('item_code', value["item_code"]);
-			// 			frappe.query_report.set_filter_value('batch_no', value["batch_no"]);
-			// 		});
-			// 	});
-			// 	} 
-			// }
+			"get_query": function() {
+				return {
+					filters:{ 'docstatus': 1 }
+				}
+			}
 		},
 		{
 			"fieldname":"project",

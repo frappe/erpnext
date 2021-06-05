@@ -91,8 +91,7 @@
    "fieldtype": "Float",
    "label": "Consumed Qty",
    "oldfieldname": "consumed_qty",
-   "oldfieldtype": "Currency",
-   "reqd": 1
+   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "stock_uom",
@@ -187,7 +186,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-31 08:51:56.882244",
+ "modified": "2021-06-03 18:09:12.125889",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",
