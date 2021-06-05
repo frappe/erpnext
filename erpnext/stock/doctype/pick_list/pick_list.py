@@ -316,13 +316,13 @@ def get_available_item_locations_for_serialized_item(item_code, from_warehouses,
 
 def get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company, self=None):
 	if from_warehouses and self.is_material_consumption == 0:
-		warehouse_condition = 'and warehouse = %(warehouses)s'
+		warehouse_condition = 'and warehouse in %(warehouses)s'
 	if from_warehouses and self.is_material_consumption == 1:
-		warehouse_condition = "and warehouse in '{0}'".format(from_warehouses)
+		warehouse_condition = "and warehouse = '{0}'".format(from_warehouses)
 	if isinstance(from_warehouses,list) and self.is_material_consumption == 0:
-		warehouse_condition = 'and warehouse = %(warehouses)s'
+		warehouse_condition = 'and warehouse in %(warehouses)s'
 	else:
-		warehouse_condition = "and warehouse in '{0}'".format(from_warehouses) if from_warehouses else ''
+		warehouse_condition = "and warehouse = '{0}'".format(from_warehouses) if from_warehouses else ''
 	print("## "*300)
 	print(from_warehouses)
 	print(warehouse_condition)
