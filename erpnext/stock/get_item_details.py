@@ -509,7 +509,7 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 
 	# do not change if already a valid template
 	if args.get('item_tax_template') in taxes:
-		return arg.get('item_tax_template')
+		return args.get('item_tax_template')
 
 	for tax in taxes:
 		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
