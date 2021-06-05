@@ -49,18 +49,21 @@ class BuyingController(StockController):
 			self.validate_accepted_rejected_qty()
 			validate_for_items(self)
 
-			# #sub-contracting
-			# self.validate_for_subcontracting()
-			# self.create_raw_materials_supplied("supplied_items")
-			# self.set_landed_cost_voucher_amount()
+			#sub-contracting
+			self.validate_for_subcontracting()
+			self.create_raw_materials_supplied("supplied_items")
+			self.set_landed_cost_voucher_amount()
 
-	def before_insert(self):
-		self.validate_for_subcontracting()
-		self.create_raw_materials_supplied("supplied_items")
-		self.set_landed_cost_voucher_amount()
+			if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
+				self.update_valuation_rate()
+
+	# def before_insert(self):
+	# 	# self.validate_for_subcontracting()
+	# 	self.create_raw_materials_supplied("supplied_items")
+	# 	self.set_landed_cost_voucher_amount()
 		
-		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
-			self.update_valuation_rate()
+	# 	if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
+	# 		self.update_valuation_rate()
 
 
 	def set_missing_values(self, for_validate=False):
