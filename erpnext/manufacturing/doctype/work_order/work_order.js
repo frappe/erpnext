@@ -114,6 +114,9 @@ frappe.ui.form.on("Work Order", {
 				if(resp.message && resp.message ===1){
 					frm.set_df_property("source_warehouse", "read_only",1)
 					frm.refresh_field('source_warehouse')
+				} else {
+					frm.set_df_property("source_warehouse", "read_only",0)
+					frm.refresh_field('source_warehouse')
 				}
 			}
 		})
@@ -130,7 +133,22 @@ frappe.ui.form.on("Work Order", {
 			erpnext.work_order.set_default_warehouse(frm);
 		}
 	},
-
+	company: function(frm){
+		frappe.call({
+			method:'make_read_only',
+			doc: frm.doc,
+			callback: function(resp){
+				if(resp.message && resp.message ===1){
+					frm.set_df_property("source_warehouse", "read_only",1)
+					frm.refresh_field('source_warehouse')
+				}
+				else {
+					frm.set_df_property("source_warehouse", "read_only",0)
+					frm.refresh_field('source_warehouse')
+				}
+			}
+		})
+	},
 	source_warehouse: function(frm) {
 		let transaction_controller = new erpnext.TransactionController();
 		transaction_controller.autofill_warehouse(frm.doc.required_items, "source_warehouse", frm.doc.source_warehouse);

@@ -196,10 +196,9 @@ frappe.ui.form.on('Stock Entry', {
             });
 			frm.refresh_field('items');
 			frm.refresh();
-		
+			
         }
     });
-
     },
 	outgoing_stock_entry: function(frm) {
 		frappe.call({
@@ -334,6 +333,10 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			}, __("Get Items From"));
 		}
+		if (frm.doc.docstatus === 1) {
+			frm.set_df_property('get_intercompany_item', 'hidden', true)
+		}
+
 		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
 			frm.add_custom_button(__('Expired Batches'), function() {
 				frappe.call({
