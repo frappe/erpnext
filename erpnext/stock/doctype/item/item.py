@@ -493,7 +493,7 @@ class Item(WebsiteGenerator):
 
 	def validate_item_tax_net_rate_range(self):
 		for tax in self.get('taxes'):
-			if tax.maximum_net_rate < tax.minimum_net_rate:
+			if flt(tax.maximum_net_rate) < flt(tax.minimum_net_rate):
 				frappe.throw(_("Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"))
 
 	def update_template_tables(self):
