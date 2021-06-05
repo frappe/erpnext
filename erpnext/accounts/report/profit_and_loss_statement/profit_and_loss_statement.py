@@ -104,7 +104,7 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 		total_income = flt(income[-2][key], 3) if income else 0
 		total_expense = flt(expense[-2][key], 3) if expense else 0
 
-		net_profit_loss[key] = total_income - total_expense
+		net_profit_loss[key] = total_income + total_expense
 
 		if net_profit_loss[key]:
 			has_value=True
