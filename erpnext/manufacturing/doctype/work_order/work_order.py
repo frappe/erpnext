@@ -59,7 +59,13 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def make_read_only(self):
-		return frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+		table = frappe.db.get_all("Staging Details", ["company","staging_picklist_warehouse"])
+		print("****"*200)
+		print(table)
+		if(len(table) > 0):
+			for t in table:
+				if(self.company == t.get('company')):
+					return 1
 	
 	@frappe.whitelist()
 	def get_warehouse(self):
@@ -340,7 +346,8 @@ class WorkOrder(Document):
 		frappe.db.set_value("Work Order", self.name, "transferred_total_weight", self.transferred_total_weight)
 
 	def actual_yeild_on_wo(self):
-		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(self.weight_per_unit), self.precision('actual_fg_weight'))
+		item_to_manuf_weight = frappe.db.get_value("Item", {'name':self.production_item},'weight_per_unit')
+		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(item_to_manuf_weight), self.precision('actual_fg_weight'))
 		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
 			self.actual_yeild = 0
 		else:

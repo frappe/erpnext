@@ -507,6 +507,7 @@
    "read_only": 1
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "supplied_items",
    "fieldtype": "Table",
    "label": "Consumed Items",
@@ -1146,7 +1147,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-25 10:48:05.552684",
+ "modified": "2021-06-03 18:07:39.515286",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
