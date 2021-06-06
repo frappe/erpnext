@@ -133,11 +133,22 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
 		if (image) {
-			this.$item_image.html(`<img src="${image}" alt="${image}">`);
+			this.$item_image.html(
+				`<img 
+					onerror="cur_pos.item_details.handle_broken_image(this)"
+					class="h-full" src="${image}"
+					alt="${frappe.get_abbr(item_name)}"
+					style="object-fit: cover;">`
+			);
 		} else {
 			this.$item_image.html(`<div class="item-abbr">${frappe.get_abbr(item_name)}</div>`);
 		}
 
+	}
+
+	handle_broken_image($img) {
+		const item_abbr = $($img).attr('alt');
+		$($img).replaceWith(`<div class="item-abbr">${item_abbr}</div>`);
 	}
 
 	render_discount_dom(item) {
