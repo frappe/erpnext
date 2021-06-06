@@ -10,14 +10,15 @@ from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
 from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
-from erpnext.stock.doctype.item.item import get_uom_conv_factor
+from erpnext.stock.doctype.item.item import (get_uom_conv_factor, get_item_attribute,
+	validate_is_stock_item, get_timeline_data)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
+from erpnext.tests.utils import change_settings
 
-from six import iteritems
 
 test_ignore = ["BOM"]
-test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand"]
+test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
 def make_item(item_code, properties=None):
 	if frappe.db.exists("Item", item_code):
@@ -98,7 +99,7 @@ class TestItem(unittest.TestCase):
 			"ignore_pricing_rule": 1
 		})
 
-		for key, value in iteritems(to_check):
+		for key, value in to_check.items():
 			self.assertEqual(value, details.get(key))
 
 	def test_item_tax_template(self):
@@ -194,7 +195,7 @@ class TestItem(unittest.TestCase):
 			"plc_conversion_rate": 1,
 			"customer": "_Test Customer",
 		})
-		for key, value in iteritems(sales_item_check):
+		for key, value in sales_item_check.items():
 			self.assertEqual(value, sales_item_details.get(key))
 
 		purchase_item_check = {
@@ -215,7 +216,7 @@ class TestItem(unittest.TestCase):
 			"plc_conversion_rate": 1,
 			"supplier": "_Test Supplier",
 		})
-		for key, value in iteritems(purchase_item_check):
+		for key, value in purchase_item_check.items():
 			self.assertEqual(value, purchase_item_details.get(key))
 
 	def test_item_attribute_change_after_variant(self):
@@ -375,6 +376,14 @@ class TestItem(unittest.TestCase):
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
+	def test_uom_conv_intermediate(self):
+		factor = get_uom_conv_factor("Pound", "Gram")
+		self.assertAlmostEqual(factor, 453.592, 3)
+
+	def test_uom_conv_base_case(self):
+		factor = get_uom_conv_factor("m", "m")
+		self.assertEqual(factor, 1.0)
+
 	def test_item_variant_by_manufacturer(self):
 		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]
 		set_item_variant_settings(fields)
@@ -464,7 +473,7 @@ class TestItem(unittest.TestCase):
 		self.assertEqual(len(matching_barcodes), 1)
 		details = matching_barcodes[0]
 
-		for key, value in iteritems(barcode_properties):
+		for key, value in barcode_properties.items():
 			self.assertEqual(value, details.get(key))
 
 		# Add barcode again - should cause DuplicateEntryError
@@ -480,6 +489,89 @@ class TestItem(unittest.TestCase):
 		new_barcode.barcode_type = 'EAN'
 		self.assertRaises(InvalidBarcode, item_doc.save)
 
+	def test_heatmap_data(self):
+		import time
+		data = get_timeline_data("Item", "_Test Item")
+		self.assertTrue(isinstance(data, dict))
+
+		now = time.time()
+		one_year_ago = now - 366 * 24 * 60 * 60
+
+		for timestamp, count in data.items():
+			self.assertIsInstance(timestamp, int)
+			self.assertTrue(one_year_ago <= timestamp <= now)
+			self.assertIsInstance(count, int)
+			self.assertTrue(count >= 0)
+
+	def test_index_creation(self):
+		"check if index is getting created in db"
+		from erpnext.stock.doctype.item.item import on_doctype_update
+		on_doctype_update()
+
+		indices = frappe.db.sql("show index from tabItem", as_dict=1)
+		expected_columns = {"item_code", "item_name", "item_group", "route"}
+		for index in indices:
+			expected_columns.discard(index.get("Column_name"))
+
+		if expected_columns:
+			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")
+
+	def test_attribute_completions(self):
+		expected_attrs = {"Small", "Extra Small", "Extra Large", "Large", "2XL", "Medium"}
+
+		attrs = get_item_attribute("Test Size")
+		received_attrs = {attr.attribute_value for attr in attrs}
+		self.assertEqual(received_attrs, expected_attrs)
+
+		attrs = get_item_attribute("Test Size", attribute_value="extra")
+		received_attrs = {attr.attribute_value for attr in attrs}
+		self.assertEqual(received_attrs, {"Extra Small", "Extra Large"})
+
+	def test_check_stock_uom_with_bin(self):
+		# this item has opening stock and stock_uom set in test_records.
+		item = frappe.get_doc("Item", "_Test Item")
+		item.stock_uom = "Gram"
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_check_stock_uom_with_bin_no_sle(self):
+		from erpnext.stock.stock_balance import update_bin_qty
+		item = create_item("_Item with bin qty")
+		item.stock_uom = "Gram"
+		item.save()
+
+		update_bin_qty(item.item_code, "_Test Warehouse - _TC", {
+			"reserved_qty": 10
+		})
+
+		item.stock_uom = "Kilometer"
+		self.assertRaises(frappe.ValidationError, item.save)
+
+		update_bin_qty(item.item_code, "_Test Warehouse - _TC", {
+			"reserved_qty": 0
+		})
+
+		item.load_from_db()
+		item.stock_uom = "Kilometer"
+		try:
+			item.save()
+		except frappe.ValidationError as e:
+			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
+
+	def test_validate_stock_item(self):
+		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")
+
+		try:
+			validate_is_stock_item("_Test Item")
+		except frappe.ValidationError as e:
+			self.fail(f"stock item considered non-stock item: {e}")
+
+	@change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
+	def test_autoname_series(self):
+		item = frappe.new_doc("Item")
+		item.item_group = "All Item Groups"
+		item.save()  # if item code saved without item_code then series worked
+
+
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')
 	doc.set('fields', fields)
@@ -494,23 +586,24 @@ def make_item_variant():
 
 test_records = frappe.get_test_records('Item')
 
-def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None, is_customer_provided_item=None,
-	customer=None, is_purchase_item=None, opening_stock=None, company=None):
+def create_item(item_code, is_stock_item=1, valuation_rate=0, warehouse="_Test Warehouse - _TC",
+		is_customer_provided_item=None, customer=None, is_purchase_item=None, opening_stock=0,
+		company="_Test Company"):
 	if not frappe.db.exists("Item", item_code):
 		item = frappe.new_doc("Item")
 		item.item_code = item_code
 		item.item_name = item_code
 		item.description = item_code
 		item.item_group = "All Item Groups"
-		item.is_stock_item = is_stock_item or 1
-		item.opening_stock = opening_stock or 0
-		item.valuation_rate = valuation_rate or 0.0
+		item.is_stock_item = is_stock_item
+		item.opening_stock = opening_stock
+		item.valuation_rate = valuation_rate
 		item.is_purchase_item = is_purchase_item
 		item.is_customer_provided_item = is_customer_provided_item
 		item.customer = customer or ''
 		item.append("item_defaults", {
-			"default_warehouse": warehouse or '_Test Warehouse - _TC',
-			"company": company or "_Test Company"
+			"default_warehouse": warehouse,
+			"company": company
 		})
 		item.save()
 	else:

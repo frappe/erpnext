@@ -106,6 +106,9 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 			'charge_type': 'On Net Total'
 		}
 
+		if doctype == 'Purchase Taxes and Charges Template':
+			tax_row_defaults['add_deduct_tax'] = 'Add'
+
 		# if account_head is a dict, search or create the account and get it's name
 		if isinstance(account_data, dict):
 			tax_row_defaults['description'] = '{0} @ {1}'.format(account_data.get('account_name'), account_data.get('tax_rate'))
