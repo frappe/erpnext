@@ -78,11 +78,12 @@ class calculate_taxes_and_totals(object):
 
 				taxes = _get_item_tax_template(args, item_taxes + item_group_taxes, for_validate=True)
 
-				if item.item_tax_template not in taxes:
-					item.item_tax_template = taxes[0]
-					frappe.msgprint(_("Row {0}: Item Tax template updated as per validity and rate applied").format(
-						item.idx, frappe.bold(item.item_code)
-					))
+				if taxes:
+					if item.item_tax_template not in taxes:
+						item.item_tax_template = taxes[0]
+						frappe.msgprint(_("Row {0}: Item Tax template updated as per validity and rate applied").format(
+							item.idx, frappe.bold(item.item_code)
+						))
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
