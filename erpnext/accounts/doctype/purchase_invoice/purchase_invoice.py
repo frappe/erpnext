@@ -634,6 +634,29 @@ class PurchaseInvoice(BuyingController):
 								"project": item.project or self.project
 							}, account_currency, item=item))
 
+						# check if the exchange rate has changed
+						purchase_receipt_conversion_rate = frappe.db.get_value('Purchase Receipt', {'name': item.purchase_receipt}, ['conversion_rate'])
+						if self.conversion_rate != purchase_receipt_conversion_rate:
+							discrepancy_caused_by_exchange_rate_difference = (item.qty * item.rate) * (purchase_receipt_conversion_rate - self.conversion_rate)
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": expense_account,
+									"against": self.supplier,
+									"debit": discrepancy_caused_by_exchange_rate_difference,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": self.get_company_default("exchange_gain_loss_account"),		
+									"against": self.supplier,
+									"credit": discrepancy_caused_by_exchange_rate_difference,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+
 					# If asset is bought through this document and not linked to PR
 					if self.update_stock and item.landed_cost_voucher_amount:
 						expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
