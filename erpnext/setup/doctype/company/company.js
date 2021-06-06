@@ -90,12 +90,6 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
-			if (frm.has_perm('write')) {
-				frm.add_custom_button(__('Create Tax Template'), function() {
-					frm.trigger("make_default_tax_template");
-				});
-			}
-
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
 					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
@@ -121,17 +115,21 @@ frappe.ui.form.on("Company", {
 			}
 
 			if (frm.has_perm('write')) {
-				frm.add_custom_button(__('Default Tax Template'), function() {
+				frm.add_custom_button(__('Create Tax Template'), function() {
 					frm.trigger("make_default_tax_template");
-				}, __('Create'));
+				}, __('Manage'));
+			}
+
+			if (frappe.user.has_role('System Manager')) {
+				if (frm.has_perm('write')) {
+					frm.add_custom_button(__('Delete Transactions'), function() {
+						frm.trigger("delete_company_transactions");
+					}, __('Manage'));
+				}
 			}
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
-
-		if (!frappe.user.has_role('System Manager')) {
-			frm.get_field("delete_company_transactions").hide();
-		}
 	},
 
 	make_default_tax_template: function(frm) {
@@ -143,11 +141,6 @@ frappe.ui.form.on("Company", {
 				frappe.msgprint(__("Default tax templates for sales, purchase and items are created."));
 			}
 		})
-	},
-
-	onload_post_render: function(frm) {
-		if(frm.get_field("delete_company_transactions").$input)
-			frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
 	},
 
 	country: function(frm) {

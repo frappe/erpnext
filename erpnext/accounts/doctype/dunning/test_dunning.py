@@ -29,7 +29,7 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(amounts.get('interest_amount'), 2), 0.44)
 		self.assertEqual(round(amounts.get('dunning_amount'), 2), 20.44)
 		self.assertEqual(round(amounts.get('grand_total'), 2), 120.44)
-	
+
 	def test_gl_entries(self):
 		dunning = create_dunning()
 		dunning.submit()
