@@ -636,7 +636,7 @@ class PurchaseInvoice(BuyingController):
 
 						# check if the exchange rate has changed
 						purchase_receipt_conversion_rate = frappe.db.get_value('Purchase Receipt', {'name': item.purchase_receipt}, ['conversion_rate'])
-						if self.conversion_rate != purchase_receipt_conversion_rate:
+						if purchase_receipt_conversion_rate and self.conversion_rate != purchase_receipt_conversion_rate:
 							discrepancy_caused_by_exchange_rate_difference = (item.qty * item.rate) * (purchase_receipt_conversion_rate - self.conversion_rate)
 							gl_entries.append(
 								self.get_gl_dict({
