@@ -673,7 +673,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	include_employees = []
 	emp_cond = ''
 	if filters.start_date and filters.end_date:
-		employee_list = get_employee_list(filters)
+		employee_list = get_employee_list(filters) or []
 		emp = filters.get('employees')
 		include_employees = [employee.employee for employee in employee_list if employee.employee not in emp]
 		filters.pop('start_date')
