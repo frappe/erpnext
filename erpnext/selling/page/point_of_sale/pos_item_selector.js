@@ -80,6 +80,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		// eslint-disable-next-line no-unused-vars
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
+		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 
 		let qty_to_display = actual_qty;
 
@@ -121,7 +122,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-name">
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
-					<div class="item-rate">${format_currency(price_list_rate, item.currency, 0) || 0}</div>
+					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
 				</div>
 			</div>`
 		);
