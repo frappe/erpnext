@@ -1963,27 +1963,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(value_details['TotInvVal'], si.base_grand_total)
 		self.assertTrue(einvoice['EwbDtls'])
 
-	def test_item_tax_validity(self):
-		item = frappe.get_doc("Item", "_Test Item 2")
-
-		if item.taxes:
-			item.taxes = []
-			item.save()
-
-		item.append("taxes", {
-			"item_tax_template": "_Test Item Tax Template 1 - _TC",
-			"valid_from": add_days(nowdate(), 1)
-		})
-
-		item.save()
-
-		sales_invoice = create_sales_invoice(item = "_Test Item 2", do_not_save=1)
-		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1 - _TC"
-		self.assertRaises(frappe.ValidationError, sales_invoice.save)
-
-		item.taxes = []
-		item.save()
-
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
 
