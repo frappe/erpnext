@@ -131,15 +131,22 @@ class ProductionPlan(Document):
 			bom_item = self.get_bom_item() or bom_item
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
-		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-				(qty - work_order_qty) * conversion_factor as pending_qty, description, name
-				from `tabSales Order Item` so_item
-			where 
+		items = frappe.db.sql("""
+			select
+				distinct parent, item_code, warehouse,
+				(qty - work_order_qty) * conversion_factor as pending_qty,
+				description, name
+			from
+				`tabSales Order Item` so_item
+			where
 				parent in (%s) and docstatus = 1 and qty > work_order_qty
 				and exists (select name from `tabBOM` bom where %s
-						and bom.is_active = 1) %s""" % \
-			(", ".join(["%s"] * len(so_list)), bom_item, item_condition), tuple(so_list), as_dict=1)
-			
+				and bom.is_active = 1) %s""" %
+			(", ".join(["%s"] * len(so_list)),
+			bom_item,
+			item_condition),
+			tuple(so_list), as_dict=1)
+
 		if self.item_code:
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
