@@ -288,6 +288,10 @@ class PurchaseReceipt(BuyingController):
 
 					self.add_gl_entry(gl_entries, warehouse_account_name, d.cost_center, stock_value_diff, 0.0, remarks,
 						stock_rbnb, account_currency=warehouse_account_currency, item=d)
+					print("*"* 30)
+					print(1)
+					print("warehouse_account_name: ", warehouse_account_name)
+					print("")					
 
 					# GL Entry for from warehouse or Stock Received but not billed
 					# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
@@ -303,6 +307,19 @@ class PurchaseReceipt(BuyingController):
 						self.add_gl_entry(gl_entries, account, d.cost_center,
 							-1 * flt(d.base_net_amount, d.precision("base_net_amount")), 0.0, remarks, warehouse_account_name,
 							debit_in_account_currency=-1 * credit_amount, account_currency=credit_currency, item=d)
+						
+						# check if the exchange rate has changed
+						purchase_invoice_conversion_rate = frappe.db.get_value('Purchase Invoice', {'name': d.purchase_invoice}, ['conversion_rate'])
+						if purchase_invoice_conversion_rate and self.conversion_rate != purchase_invoice_conversion_rate:
+							discrepancy_caused_by_exchange_rate_difference = (d.qty * d.rate) * (purchase_invoice_conversion_rate - self.conversion_rate)
+
+							self.add_gl_entry(gl_entries, account, d.cost_center, 0.0, discrepancy_caused_by_exchange_rate_difference,
+								remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference, 
+								account_currency=credit_currency, item=d)
+
+							self.add_gl_entry(gl_entries, self.get_company_default("exchange_gain_loss_account"), d.cost_center, discrepancy_caused_by_exchange_rate_difference, 0.0, 
+								remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference, 
+								account_currency=credit_currency, item=d)
 
 					# Amount added through landed-cos-voucher
 					if d.landed_cost_voucher_amount and landed_cost_entries:
