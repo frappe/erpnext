@@ -41,8 +41,6 @@ frappe.ui.form.on("Purchase Receipt", {
 			}
 		});
 
-		frm.set_df_property('supplied_items', 'cannot_add_rows', 1);
-
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
@@ -77,6 +75,15 @@ frappe.ui.form.on("Purchase Receipt", {
 		}
 
 		frm.events.add_custom_buttons(frm);
+		frm.trigger('toggle_subcontracting_fields');
+	},
+
+	toggle_subcontracting_fields: function(frm) {
+		frm.fields_dict.supplied_items.grid.update_docfield_property('consumed_qty',
+			'read_only', frm.doc.__onload && frm.doc.__onload.backflush_based_on === 'BOM');
+
+		frm.set_df_property('supplied_items', 'cannot_add_rows', 1);
+		frm.set_df_property('supplied_items', 'cannot_delete_rows', 1);
 	},
 
 	add_custom_buttons: function(frm) {
