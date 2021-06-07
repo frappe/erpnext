@@ -1329,7 +1329,8 @@
    "fieldname": "base_returned_amount",
    "fieldtype": "Currency",
    "label": "Returned Amount (Company Currency)",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -1351,7 +1352,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-13 18:12:06.399479",
+ "modified": "2021-06-08 01:13:17.684995",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
