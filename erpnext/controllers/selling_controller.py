@@ -463,10 +463,20 @@ class SellingController(StockController):
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
+
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled
 		from erpnext.controllers.buying_controller import validate_item_type
 		validate_item_type(self, "is_sales_item", "sales")
+
+		from erpnext.stock.doctype.item.item import validate_end_of_life
+		for d in self.get('items'):
+			if d.item_code:
+				item = frappe.get_cached_value("Item", d.item_code, ['has_variants', 'end_of_life', 'disabled'], as_dict=1)
+				validate_end_of_life(d.item_code, end_of_life=item.end_of_life, disabled=item.disabled)
+
+				if cint(item.has_variants):
+					throw(_("Item {0} is a template, please select one of its variants").format(item.name))
 
 	def validate_target_warehouse(self):
 		if frappe.get_meta(self.doctype + " Item").has_field("target_warehouse"):

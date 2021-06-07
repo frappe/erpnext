@@ -188,16 +188,6 @@ def validate_item_details(args, item):
 	if not args.company:
 		throw(_("Please specify Company"))
 
-	from erpnext.stock.doctype.item.item import validate_end_of_life
-	validate_end_of_life(item.name, item.end_of_life, item.disabled)
-
-	if args.transaction_type == "selling" and cint(item.has_variants):
-		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
-
-	elif args.transaction_type == "buying" and args.doctype != "Material Request":
-		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != 1:
-			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
-
 
 def get_basic_details(args, item, overwrite_warehouse=True):
 	"""
