@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "autoname": "IWDP-.YYMM.-.#####.",
+ "creation": "2021-06-02 18:59:49.642910",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transporter",
+  "customer",
+  "item",
+  "item_name",
+  "o_qty",
+  "p_qty",
+  "qty_tbd",
+  "weight_od",
+  "cb1",
+  "sales_order",
+  "src_warehouse",
+  "pincode",
+  "d_date",
+  "c_stock",
+  "a_stock",
+  "d_type",
+  "weight_pu"
+ ],
+ "fields": [
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Data",
+   "label": "Transporter",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "o_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Ordered Qty",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "p_qty",
+   "fieldtype": "Float",
+   "label": "Pending Qty",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "qty_tbd",
+   "fieldtype": "Float",
+   "label": "Qty to be Delivered"
+  },
+  {
+   "fieldname": "weight_od",
+   "fieldtype": "Float",
+   "label": "Weight of Delivery",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "src_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse ",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "c_stock",
+   "fieldtype": "Float",
+   "label": "Current Stock ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "d_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "a_stock",
+   "fieldtype": "Float",
+   "label": "Available Stock",
+   "read_only": 1
+  },
+  {
+   "fieldname": "d_type",
+   "fieldtype": "Select",
+   "label": "Delivery Type",
+   "options": "\nWarehouse Delivery\nDrop Shipment"
+  },
+  {
+   "fieldname": "weight_pu",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Weight Per Unit"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-06-03 17:15:59.511970",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item wise Delivery Planning",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "creation": "2021-06-02 19:06:42.040127",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_order",
+  "item_code",
+  "item_name",
+  "column_break_4",
+  "qty_to",
+  "supplier"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "sales_order.item.item_code",
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "sales_order.total_qty",
+   "fieldname": "qty_to",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Qty to Order",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-06-04 17:58:45.536569",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Order wise Purchase Planning",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
