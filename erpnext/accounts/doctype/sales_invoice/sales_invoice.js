@@ -386,8 +386,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	set_dynamic_labels: function() {
-		this._super();
 		this.hide_fields(this.frm.doc);
+		this._super();
 	},
 
 	items_on_form_rendered: function() {
@@ -490,30 +490,29 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 
 // Hide Fields
 // ------------
-cur_frm.cscript.hide_fields = function(doc) {
+cur_frm.cscript.hide_fields = function(doc, refresh) {
 	var parent_fields = ['due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
 		'advances', 'from_date', 'to_date'];
 
-	if(cint(doc.is_pos) == 1) {
-		hide_field(parent_fields);
-	} else {
-		for (var i in parent_fields) {
-			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
-			if(!docfield.hidden) unhide_field(parent_fields[i]);
-		}
+	var hidden = cint(doc.is_pos);
+	for (var i in parent_fields) {
+		this.frm.set_df_property(parent_fields[i], "hidden", hidden);
 	}
 
 	// India related fields
-	if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
-	else hide_field(['c_form_applicable', 'c_form_no']);
+	hidden = cint(frappe.boot.sysdefaults.country != 'India');
+	this.frm.set_df_property("c_form_applicable", "hidden", hidden);
+	this.frm.set_df_property("c_form_no", "hidden", hidden);
 
 	this.frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
 
-	cur_frm.refresh_fields();
+	if (refresh) {
+		cur_frm.refresh_fields();
+	}
 }
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
-	cur_frm.cscript.hide_fields(doc, dt, dn);
+	cur_frm.cscript.hide_fields(doc, true);
 	this.frm.fields_dict.items.grid.toggle_reqd("item_code", doc.update_stock? true: false)
 	this.show_hide_select_batch_button();
 }
