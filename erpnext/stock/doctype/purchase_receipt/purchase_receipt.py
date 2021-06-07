@@ -102,6 +102,11 @@ class PurchaseReceipt(BuyingController):
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
 			apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
+	def onload(self):
+		super(PurchaseReceipt, self).onload()
+		self.set_onload("backflush_based_on", frappe.db.get_single_value('Buying Settings',
+			'backflush_raw_materials_of_subcontract_based_on'))
+
 	def validate(self):
 		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
