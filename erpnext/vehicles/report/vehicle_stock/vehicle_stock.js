@@ -117,6 +117,12 @@ frappe.query_reports["Vehicle Stock"] = {
 			options: "Vehicle"
 		},
 		{
+			fieldname: "vehicle_booking_order",
+			label: __("Vehicle Booking Order"),
+			fieldtype: "Link",
+			options: "Vehicle Booking Order"
+		},
+		{
 			fieldname: "customer",
 			label: __("Customer (User)"),
 			fieldtype: "Link",

@@ -272,6 +272,9 @@ class VehicleStockReport(object):
 		if self.filters.supplier:
 			data = [d for d in self.data if d.supplier == self.filters.supplier]
 
+		if self.filters.vehicle_booking_order:
+			data = [d for d in self.data if d.vehicle_booking_order == self.filters.vehicle_booking_order]
+
 		return data
 
 	def get_grouped_data(self):
