@@ -9,10 +9,16 @@ from erpnext.accounts.report.general_ledger.general_ledger import get_gl_entries
 
 
 def execute(filters=None):
+	update_filters_with_account(filters)
 	validate_filters(filters)
 	columns = get_columns()
 	data = get_data(filters)
 	return columns, data
+
+
+def update_filters_with_account(filters):
+	account = frappe.get_value("Company", filters.get("company"), "default_expense_account")
+	filters.update(dict(account=account))
 
 
 def validate_filters(filters):

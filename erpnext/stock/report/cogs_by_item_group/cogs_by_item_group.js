@@ -2,8 +2,9 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
+
 frappe.query_reports["COGS By Item Group"] = {
-	"filters": [
+	filters: [
     {
       label: __("Company"),
       fieldname: "company",
@@ -12,22 +13,22 @@ frappe.query_reports["COGS By Item Group"] = {
       mandatory: true,
 			default: frappe.defaults.get_user_default("Company"),
     },
-    {
-      label: __("Account"),
-      fieldname: "account",
-      fieldtype: "Link",
-      options: "Account",
-      mandatory: true,
-			get_query() {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					"doctype": "Account",
-					"filters": {
-						"company": company,
-					}
-				}
-			},
-    },
+    // {
+      // label: __("Account"),
+      // fieldname: "account",
+      // fieldtype: "Link",
+      // options: "Account",
+      // mandatory: true,
+			// get_query() {
+				// const company = frappe.query_report.get_filter_value('company');
+				// return {
+					// "doctype": "Account",
+					// "filters": {
+						// "company": company,
+					// }
+				// }
+			// },
+    // },
     {
       label: __("From Date"),
       fieldname: "from_date",
