@@ -36,19 +36,6 @@ frappe.ui.form.on('Delivery Planning', {
 
 	 refresh: function(frm) {
 
-//	 frm.cscript.pincode_from = function()
-//	 	{
-//	 		frm.call({
-//	 			doc:frm.doc,
-//	 			method:'get_options'
-//	 			callback:function(r){
-//	 				if(r.message){
-//	 					console.log(r);
-//	 				}
-//	 			}
-//	 		});
-//	 	}
-
 	frm.cscript.get_sales_orders = function()
 		{
 			frm.call({
