@@ -6,7 +6,7 @@ import frappe
 import unittest
 import erpnext
 from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_days, add_years, getdate, add_months, get_first_day, date_diff
+from frappe.utils import nowdate, add_years, get_first_day, date_diff
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
 	make_deduction_salary_component, make_employee_salary_slip, create_tax_slab
