@@ -90,6 +90,17 @@ body.product-page {
 		color: var(--gray-500);
 	}
 
+	.no-image-list {
+		@include flex(flex, center, center, null);
+		height: 150px;
+		background: var(--gray-100);
+		border-radius: var(--border-radius);
+		font-size: 2rem;
+		color: var(--gray-500);
+		margin-top: 15px;
+		margin-bottom: 15px;
+	}
+
 	.product-title {
 		font-size: 14px;
 		color: var(--gray-800);
@@ -188,7 +199,7 @@ body.product-page {
 		max-width: 50%;
 
 		.btn-add-to-cart {
-			font-size: var(--text-base);
+			font-size: 14px;
 		}
 	}
 
@@ -201,7 +212,7 @@ body.product-page {
 			max-width: 90% !important;
 
 			.btn-add-to-cart {
-				font-size: var(--text-base);
+				font-size: 14px;
 			}
 		}
 	}
@@ -284,7 +295,7 @@ body.product-page {
 
 			.formatted-price {
 				color: var(--text-muted);
-				font-size: var(--text-base);
+				font-size: 14px;
 			}
 		}
 
@@ -410,7 +421,7 @@ body.product-page {
 }
 
 .total-discount {
-	font-size: var(--text-base);
+	font-size: 14px;
 	color: var(--primary-color) !important;
 }
 
@@ -456,23 +467,23 @@ body.product-page {
 
 			.cart-items {
 				.item-title {
-					font-size: var(--text-base);
+					font-size: 14px;
 					font-weight: 500;
 					color: var(--text-color);
 				}
 
 				.item-subtitle {
 					color: var(--text-muted);
-					font-size: var(--text-md);
+					font-size: 13px;
 				}
 
 				.item-subtotal {
-					font-size: var(--text-base);
+					font-size: 14px;
 					font-weight: 500;
 				}
 
 				.sm-item-subtotal {
-					font-size: var(--text-base);
+					font-size: 14px;
 					font-weight: 500;
 					display: none;
 
@@ -482,7 +493,7 @@ body.product-page {
 				}
 
 				.item-rate {
-					font-size: var(--text-md);
+					font-size: 13px;
 					color: var(--text-muted);
 				}
 
@@ -558,7 +569,7 @@ body.product-page {
 
 			.cart-qty {
 				height: 28px;
-				font-size: var(--text-md);
+				font-size: 13px;
 			}
 		}
 
@@ -583,7 +594,7 @@ body.product-page {
 
 .address-card {
 	.card-title {
-		font-size: var(--text-base);
+		font-size: 14px;
 		font-weight: 500;
 	}
 
@@ -592,12 +603,12 @@ body.product-page {
 	}
 
 	.card-text {
-		font-size: var(--text-md);
+		font-size: 13px;
 		color: var(--gray-700);
 	}
 
 	.card-link {
-		font-size: var(--text-md);
+		font-size: 13px;
 
 		svg use {
 			stroke: var(--blue-500);
@@ -703,6 +714,7 @@ body.product-page {
 	color: var(--primary-color);
 	background-color: transparent;
 	border: 1px solid var(--blue-500);
+	font-size: 13px;
 
 	&:hover {
 		background-color: var(--primary-color);
@@ -714,6 +726,7 @@ body.product-page {
 	background-color: var(--dark-green-400);
 	color: white;
 	border: 2px solid var(--green-300);
+	font-size: 13px;
 
 	&:hover {
 		color: white;
@@ -725,6 +738,7 @@ body.product-page {
 	background-color: white;
 	border: 1px solid var(--blue-500);
 	--icon-stroke: var(--blue-500);
+	font-size: 14px;
 
 	&:hover {
 		background-color: var(--blue-500);
@@ -736,6 +750,7 @@ body.product-page {
 .remove-wish {
 	background-color: var(--gray-200);
 	position: absolute;
+	cursor: pointer;
 	top:10px;
 	right: 20px;
 	border-radius: 50%;
@@ -862,4 +877,12 @@ body.product-page {
 
 .brand-line {
 	color: gray;
+}
+
+.btn-next, .btn-prev {
+	font-size: 14px;
+}
+
+.font-md {
+	font-size: 14px !important;
 }
