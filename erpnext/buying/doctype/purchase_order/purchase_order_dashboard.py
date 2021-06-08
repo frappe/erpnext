@@ -26,11 +26,11 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Material Request', 'Supplier Quotation', 'Project', 'Auto Repeat']
+				'items': ['Material Request', 'Supplier Quotation', 'Project']
 			},
 			{
-				'label': _('Sub-contracting'),
-				'items': ['Stock Entry']
+				'label': _('Sub-contracting / Subscription'),
+				'items': ['Stock Entry', 'Auto Repeat']
 			},
 		]
 	}

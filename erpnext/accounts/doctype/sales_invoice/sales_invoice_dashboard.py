@@ -3,10 +3,6 @@ import frappe
 from frappe import _
 
 def get_data():
-	reference_list = ['Timesheet', 'Delivery Note', 'Sales Order']
-	if 'Vehicles' in frappe.get_active_domains():
-		reference_list.append('Vehicle')
-
 	return {
 		'fieldname': 'sales_invoice',
 		'non_standard_fieldnames': {
@@ -25,11 +21,11 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Payment'),
-				'items': ['Payment Entry', 'Payment Request', 'Journal Entry', 'Invoice Discounting']
+				'items': ['Payment Entry', 'Payment Request', 'Journal Entry']
 			},
 			{
 				'label': _('Reference'),
-				'items': reference_list
+				'items': ['Delivery Note', 'Sales Order', 'Timesheet']
 			},
 			{
 				'label': _('Returns'),
