@@ -636,8 +636,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_rejected_serial_no(self):
 		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,
-			rejected_qty=1, rate=500, update_stock=1,
-			rejected_warehouse = "_Test Rejected Warehouse - _TC")
+			rejected_qty=1, rate=500, update_stock=1, rejected_warehouse = "_Test Rejected Warehouse - _TC",
+			allow_zero_valuation_rate=1)
 
 		self.assertEqual(frappe.db.get_value("Serial No", pi.get("items")[0].serial_no, "warehouse"),
 			pi.get("items")[0].warehouse)
@@ -994,7 +994,8 @@ def make_purchase_invoice(**args):
 		"project": args.project,
 		"rejected_warehouse": args.rejected_warehouse or "",
 		"rejected_serial_no": args.rejected_serial_no or "",
-		"asset_location": args.location or ""
+		"asset_location": args.location or "",
+		"allow_zero_valuation_rate": args.get("allow_zero_valuation_rate") or 0
 	})
 
 	if args.get_taxes_and_charges:
