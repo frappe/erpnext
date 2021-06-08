@@ -20,10 +20,8 @@ class Quiz {
 	}
 
 	make(data) {
-		if (data.duration) {
-			const timer_display = document.createElement("div");
-			timer_display.classList.add("lms-timer", "float-right", "font-weight-bold");
-			document.getElementsByClassName("lms-title")[0].appendChild(timer_display);
+		if (data.is_time_bound) {
+			$(".lms-timer").removeClass("hide");
 			if (!data.activity || (data.activity && !data.activity.is_complete)) {
 				this.initialiseTimer(data.duration);
 				this.is_time_bound = true;
