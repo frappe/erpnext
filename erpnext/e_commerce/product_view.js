@@ -140,20 +140,24 @@ erpnext.ProductView =  class {
 			let query_params = frappe.utils.get_query_params();
 			let start = query_params.start ? cint(JSON.parse(query_params.start)) : 0;
 			let page_length = settings.products_per_page || 0;
+			let no_of_products = this.products.length;
 
-			if (start > 0) {
-				paging_html += `
-					<button class="btn btn-default btn-prev" data-start="${ start - page_length }" style="float: left">
-						${ __("Prev") }
-					</button>`;
-			}
-			if (this.products.length > page_length || this.products.length == page_length) {
-				paging_html += `
-					<button class="btn btn-default btn-next" data-start="${ start + page_length }">
-						${ __("Next") }
-					</button>
-				`;
-			}
+			let prev_disable = start > 0 ? "" : "disabled";
+			let next_disable = (no_of_products > page_length || no_of_products == page_length) ? "" : "disabled";
+
+			paging_html += `
+				<button class="btn btn-default btn-prev" data-start="${ start - page_length }"
+					style="float: left" ${prev_disable}>
+					${ __("Prev") }
+				</button>`;
+
+			paging_html += `
+				<button class="btn btn-default btn-next" data-start="${ start + page_length }"
+					${next_disable}>
+					${ __("Next") }
+				</button>
+			`;
+
 			paging_html += `</div></div>`;
 
 			$(".page_content").append(paging_html);
@@ -240,6 +244,7 @@ erpnext.ProductView =  class {
 								name="discount" id="${ filter[0] }"
 								data-filter-name="discount"
 								data-filter-value="${ filter[0] }"
+								style="width: 14px !important"
 							>
 								<span class="label-area" for="${ filter[0] }">
 									${ filter[1] }
