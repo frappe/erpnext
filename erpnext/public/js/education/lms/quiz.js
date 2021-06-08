@@ -21,7 +21,7 @@ class Quiz {
 
 	make(data) {
 		if (data.is_time_bound) {
-			$(".lms-timer").removeClass("hide")
+			$(".lms-timer").removeClass("hide");
 			if (!data.activity || (data.activity && !data.activity.is_complete)) {
 				this.initialiseTimer(data.duration);
 				this.is_time_bound = true;
