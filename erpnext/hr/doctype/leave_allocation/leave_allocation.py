@@ -58,7 +58,18 @@ class LeaveAllocation(Document):
 
 	def on_update_after_submit(self):
 		if self.has_value_changed("new_leaves_allocated"):
-			ledger_entries = frappe.get_all("Leave Ledger Entry",
+			self.validate_against_leave_applications()
+			leaves_to_be_added = self.new_leaves_allocated - self.get_existing_leave_count()
+			args = {
+				"leaves": leaves_to_be_added,
+				"from_date": self.from_date,
+				"to_date": self.to_date,
+				"is_carry_forward": 0
+			}
+			create_leave_ledger_entry(self, args, True)
+
+	def get_existing_leave_count(self):
+		ledger_entries = frappe.get_all("Leave Ledger Entry",
 								filters={
 									"transaction_type": "Leave Allocation",
 									"transaction_name": self.name,
@@ -66,20 +77,12 @@ class LeaveAllocation(Document):
 									"company": self.company,
 									"leave_type": self.leave_type
 								},
-								fields=["leaves"])
-			self.validate_against_leave_applications()
-			total_existing_leaves = 0
-			for entry in ledger_entries:
-				total_existing_leaves += entry.leaves
+								pluck="leaves")
+		total_existing_leaves = 0
+		for entry in ledger_entries:
+			total_existing_leaves += entry
 
-			leaves_to_be_added = self.new_leaves_allocated - total_existing_leaves
-			args = dict(
-				leaves=leaves_to_be_added,
-				from_date=self.from_date,
-				to_date= self.to_date,
-				is_carry_forward=0
-			)
-			create_leave_ledger_entry(self, args, True)
+		return total_existing_leaves
 
 	def validate_against_leave_applications(self):
 		leaves_taken = get_approved_leaves_for_period(self.employee, self.leave_type,
