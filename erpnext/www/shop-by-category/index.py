@@ -26,12 +26,12 @@ def get_slideshow(slideshow):
 	slideshow = frappe.get_cached_doc("Website Slideshow", slideshow)
 	slides = slideshow.get({"doctype": "Website Slideshow Item"})
 	for index, slide in enumerate(slides, start=1):
-		values[f"slide_{index + 1}_image"] = slide.image
-		values[f"slide_{index + 1}_title"] = slide.heading
-		values[f"slide_{index + 1}_subtitle"] = slide.description
-		values[f"slide_{index + 1}_theme"] = slide.get("theme") or "Light"
-		values[f"slide_{index + 1}_content_align"] = slide.get("content_align") or "Centre"
-		values[f"slide_{index + 1}_primary_action"] = slide.url
+		values[f"slide_{index}_image"] = slide.image
+		values[f"slide_{index}_title"] = slide.heading
+		values[f"slide_{index}_subtitle"] = slide.description
+		values[f"slide_{index}_theme"] = slide.get("theme") or "Light"
+		values[f"slide_{index}_content_align"] = slide.get("content_align") or "Centre"
+		values[f"slide_{index}_primary_action"] = slide.url
 
 	return values
 

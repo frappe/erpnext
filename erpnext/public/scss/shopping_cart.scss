@@ -476,7 +476,7 @@ body.product-page {
 					font-weight: 500;
 					display: none;
 
-					@include media-breakpoint-between(xs, md) {
+					@media (max-width: 992px) {
 						display: unset !important;
 					}
 				}
@@ -500,14 +500,14 @@ body.product-page {
 			}
 
 			.column-sm-view {
-				@include media-breakpoint-between(xs, md) {
+				@media (max-width: 992px) {
 					display: none !important;
 				}
 			}
 
 			.item-column {
 				width: 50%;
-				@include media-breakpoint-between(xs, md) {
+				@media (max-width: 992px) {
 					width: 70%;
 				}
 			}
@@ -529,7 +529,7 @@ body.product-page {
 
 			.totals {
 				padding-right: 4rem;
-				@include media-breakpoint-between(xs, md) {
+				@media (max-width: 992px) {
 					padding-right: 1rem;
 				}
 			}
