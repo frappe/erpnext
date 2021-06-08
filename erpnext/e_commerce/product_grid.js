@@ -47,11 +47,13 @@ erpnext.ProductGrid = class {
 			`;
 		} else {
 			return `
-				<a href="/${ item.route || '#' }" style="text-decoration: none;">
-					<div class="card-img-top no-image">
-						${ frappe.get_abbr(title) }
-					</div>
-				</a>
+				<div class="card-img-container">
+					<a href="/${ item.route || '#' }" style="text-decoration: none;">
+						<div class="card-img-top no-image">
+							${ frappe.get_abbr(title) }
+						</div>
+					</a>
+				</div>
 			`;
 		}
 	}

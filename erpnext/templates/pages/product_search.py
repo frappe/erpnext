@@ -86,9 +86,15 @@ def search(query, limit=10, fuzzy_search=True):
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
 	suggestions = ac.get_suggestions(
+<<<<<<< HEAD
 		query, 
 		num=limit, 
 		fuzzy= fuzzy_search and len(query) > 4 # Fuzzy on length < 3 can be real slow
+=======
+		query,
+		num=limit,
+		fuzzy= fuzzy_search and len(query) > 3 # Fuzzy on length < 3 can be real slow
+>>>>>>> aca3c8fce7 (fix: Font size, empty image styles, and minor cleanup)
 	)
 
 	# Build a query

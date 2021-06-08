@@ -138,33 +138,30 @@
 
 
 {%- macro wishlist_card(item, settings) %}
+{%- set title = item.item_name or item.item_code -%}
+{%- set title = title[:50] + "..." if title|len > 50 else title -%}
 <div class="col-sm-3 wishlist-card">
 	<div class="card text-center" style="max-height: 390px;">
-		{% if item.image %}
-			<div class="card-img-container">
-				<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
+		<div class="card-img-container">
+			<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
+				{% if item.image %}
 					<img class="card-img" src="{{ item.image }}" alt="{{ title }}">
-				</a>
-				<div class="remove-wish" data-item-code="{{ item.item_code }}">
-					<span style="padding-bottom: 2px;">
-						<svg class="icon sm remove-wish-icon" style="margin-bottom: 4px; margin-left: 0.5px;">
-							<use class="close" href="#icon-close"></use>
-						</svg>
-					</span>
-				</div>
-
+				{% else %}
+					<div class="card-img-top no-image">
+						{{ frappe.utils.get_abbr(title) }}
+					</div>
+				{% endif %}
+			</a>
+			<div class="remove-wish" data-item-code="{{ item.item_code }}">
+				<span style="padding-bottom: 2px;">
+					<svg class="icon sm remove-wish-icon" style="margin-bottom: 4px; margin-left: 0.5px;">
+						<use class="close" href="#icon-close"></use>
+					</svg>
+				</span>
 			</div>
-		{% else %}
-		<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
-			<div class="card-img-top no-image">
-				{{ frappe.utils.get_abbr(title) }}
-			</div>
-		</a>
-		{% endif %}
+		</div>
 
 		{{ wishlist_card_body(item, settings) }}
-
-
 	</div>
 </div>
 {%- endmacro -%}
