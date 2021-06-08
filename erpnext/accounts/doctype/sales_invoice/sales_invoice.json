@@ -181,25 +181,17 @@
   "grand_total",
   "base_grand_total",
   "column_break5",
-  "rounded_total",
-  "base_rounded_total",
-  "column_break_149",
-  "total_advance",
-  "outstanding_amount",
-  "section_break_152",
-  "in_words",
-  "base_in_words",
-  "column_break_155",
   "rounding_adjustment",
   "base_rounding_adjustment",
+  "column_break_149",
+  "rounded_total",
+  "base_rounded_total",
   "disable_rounded_total",
   "advances_section",
   "allocate_advances_automatically",
   "get_advances",
   "advances",
-  "payment_schedule_section",
-  "payment_terms_template",
-  "payment_schedule",
+  "total_advance",
   "payments_section",
   "cash_bank_account",
   "payments",
@@ -219,6 +211,14 @@
   "write_off_account",
   "column_break_184",
   "write_off_cost_center",
+  "section_break_211",
+  "in_words",
+  "base_in_words",
+  "column_break_155",
+  "outstanding_amount",
+  "payment_schedule_section",
+  "payment_terms_template",
+  "payment_schedule",
   "terms_section_break",
   "tc_name",
   "terms",
@@ -416,6 +416,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:!doc.is_pos",
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Payment Due Date",
@@ -1082,6 +1083,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_pos",
    "fieldname": "total_advance",
    "fieldtype": "Currency",
    "label": "Total Advance",
@@ -1114,18 +1116,20 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_pos",
    "fieldname": "allocate_advances_automatically",
    "fieldtype": "Check",
    "label": "Allocate Advances Automatically (FIFO)"
   },
   {
-   "depends_on": "eval:!doc.allocate_advances_automatically",
+   "depends_on": "eval:!doc.allocate_advances_automatically && !doc.is_pos && doc.docstatus == 0",
    "fieldname": "get_advances",
    "fieldtype": "Button",
    "label": "Get Advances Received",
    "options": "set_advances"
   },
   {
+   "depends_on": "eval:!doc.is_pos",
    "fieldname": "advances",
    "fieldtype": "Table",
    "label": "Advances",
@@ -1451,6 +1455,7 @@
   },
   {
    "default": "No",
+   "depends_on": "eval:!doc.is_pos",
    "fieldname": "is_opening",
    "fieldtype": "Select",
    "label": "Is Opening Entry",
@@ -1491,6 +1496,7 @@
    "collapsible_depends_on": "sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group",
@@ -1556,6 +1562,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:!doc.is_pos",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
@@ -1564,6 +1571,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:!doc.is_pos",
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
@@ -1912,16 +1920,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_152",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "column_break_155",
    "fieldtype": "Column Break"
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.is_opening == \"Yes\"",
+   "depends_on": "eval:doc.is_opening == \"Yes\" || doc.disable_rounded_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
@@ -2168,12 +2172,16 @@
   {
    "fieldname": "more_info_cb_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_211",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-05-29 23:32:45.091003",
+ "modified": "2021-06-08 10:49:22.656066",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

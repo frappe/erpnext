@@ -159,22 +159,22 @@
   "grand_total",
   "base_grand_total",
   "column_break_144",
-  "rounded_total",
-  "base_rounded_total",
-  "column_break8",
-  "total_advance",
-  "outstanding_amount",
-  "section_break_150",
-  "in_words",
-  "base_in_words",
-  "column_break_153",
   "rounding_adjustment",
   "base_rounding_adjustment",
+  "column_break8",
+  "rounded_total",
+  "base_rounded_total",
   "disable_rounded_total",
+  "advances_section",
+  "allocate_advances_automatically",
+  "get_advances",
+  "advances",
+  "total_advance",
   "payments_section",
   "mode_of_payment",
-  "cash_bank_account",
   "clearance_date",
+  "column_break_169",
+  "cash_bank_account",
   "col_br_payments",
   "paid_amount",
   "base_paid_amount",
@@ -185,10 +185,11 @@
   "write_off_account",
   "column_break_171",
   "write_off_cost_center",
-  "advances_section",
-  "allocate_advances_automatically",
-  "get_advances",
-  "advances",
+  "section_break_150",
+  "in_words",
+  "base_in_words",
+  "column_break_153",
+  "outstanding_amount",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -274,6 +275,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_paid",
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Due Date",
@@ -986,6 +988,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_paid",
    "fieldname": "total_advance",
    "fieldtype": "Currency",
    "label": "Total Advance",
@@ -1017,7 +1020,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "paid_amount",
-   "depends_on": "eval:doc.is_paid===1||(doc.advances && doc.advances.length>0)",
+   "depends_on": "eval:doc.is_paid===1",
    "fieldname": "payments_section",
    "fieldtype": "Section Break",
    "label": "Payments"
@@ -1126,12 +1129,13 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_paid",
    "fieldname": "allocate_advances_automatically",
    "fieldtype": "Check",
    "label": "Set Advances and Allocate (FIFO)"
   },
   {
-   "depends_on": "eval:!doc.allocate_advances_automatically",
+   "depends_on": "eval:!doc.allocate_advances_automatically && !doc.is_paid && doc.docstatus == 0",
    "fieldname": "get_advances",
    "fieldtype": "Button",
    "label": "Get Advances Paid",
@@ -1139,6 +1143,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:!doc.is_paid",
    "fieldname": "advances",
    "fieldtype": "Table",
    "label": "Advances",
@@ -1150,7 +1155,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:(!doc.is_return)",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Terms"
@@ -1266,6 +1270,7 @@
   },
   {
    "default": "No",
+   "depends_on": "eval:!doc.is_paid",
    "fieldname": "is_opening",
    "fieldtype": "Select",
    "label": "Is Opening",
@@ -1324,6 +1329,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:!doc.is_paid",
    "description": "Start date of current invoice's period",
    "fieldname": "from_date",
    "fieldtype": "Date",
@@ -1333,6 +1339,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:!doc.is_paid",
    "description": "End date of current invoice's period",
    "fieldname": "to_date",
    "fieldtype": "Date",
@@ -1789,12 +1796,16 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_169",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-04-19 01:29:42.095552",
+ "modified": "2021-06-08 11:18:53.953990",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -491,16 +491,8 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc, refresh) {
-	var parent_fields = ['due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
-		'advances', 'from_date', 'to_date'];
-
-	var hidden = cint(doc.is_pos);
-	for (var i in parent_fields) {
-		this.frm.set_df_property(parent_fields[i], "hidden", hidden);
-	}
-
 	// India related fields
-	hidden = cint(frappe.boot.sysdefaults.country != 'India');
+	var hidden = cint(frappe.boot.sysdefaults.country != 'India');
 	this.frm.set_df_property("c_form_applicable", "hidden", hidden);
 	this.frm.set_df_property("c_form_no", "hidden", hidden);
 

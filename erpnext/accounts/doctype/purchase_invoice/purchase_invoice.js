@@ -361,7 +361,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	is_paid: function() {
-		hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
 			this.frm.set_value("allocate_advances_automatically", 0);
 			if(!this.frm.doc.company) {
@@ -415,24 +414,10 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 // Hide Fields
 // ------------
 function hide_fields(doc) {
-	var parent_fields = ['due_date', 'is_opening', 'advances_section', 'from_date', 'to_date'];
-
-	if(cint(doc.is_paid) == 1) {
-		hide_field(parent_fields);
-	} else {
-		for (var i in parent_fields) {
-			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
-			if(!docfield.hidden) unhide_field(parent_fields[i]);
-		}
-
-	}
-
 	var item_fields_stock = ['warehouse_section', 'received_qty', 'rejected_qty'];
 
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
 		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
-
-	cur_frm.refresh_fields();
 }
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
