@@ -9,7 +9,13 @@
 
 {% macro product_image(website_image, css_class="product-image", alt="") %}
 	<div class="border text-center rounded {{ css_class }}" style="overflow: hidden;">
-		<img itemprop="image" class="website-image h-100 w-100" alt="{{ alt }}" src="{{ frappe.utils.quoted(website_image or 'no-image.jpg') | abs_url }}">
+		{% if website_image %}
+			<img itemprop="image" class="website-image h-100 w-100" alt="{{ alt }}" src="{{ frappe.utils.quoted(website_image) | abs_url }}">
+		{% else %}
+			<div class="card-img-top no-image-item">
+				{{ frappe.utils.get_abbr(alt) or "NA" }}
+			</div>
+		{% endif %}
 	</div>
 {% endmacro %}
 
