@@ -141,7 +141,7 @@
 {%- set title = item.item_name or item.item_code -%}
 {%- set title = title[:50] + "..." if title|len > 50 else title -%}
 <div class="col-sm-3 wishlist-card">
-	<div class="card text-center" style="max-height: 390px;">
+	<div class="card text-center" style="height: 100%">
 		<div class="card-img-container">
 			<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
 				{% if item.image %}
@@ -295,7 +295,8 @@
 						class="product-filter field-filter"
 						id="{{value}}"
 						data-filter-name="{{ item_field.fieldname }}"
-						data-filter-value="{{ value }}">
+						data-filter-value="{{ value }}"
+						style="width: 14px !important">
 					<span class="label-area">{{ value }}</span>
 				</label>
 			</div>
@@ -327,6 +328,7 @@
 						id="{{attr_value.name}}"
 						data-attribute-name="{{ attribute.name }}"
 						data-attribute-value="{{ attr_value.attribute_value }}"
+						style="width: 14px !important"
 						{% if attr_value.checked %} checked {% endif %}>
 						<span class="label-area">{{ attr_value.attribute_value }}</span>
 				</label>

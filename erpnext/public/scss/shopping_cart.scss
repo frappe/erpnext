@@ -185,6 +185,18 @@ body.product-page {
 	}
 }
 
+.product-filter {
+	width: 14px !important;
+	height: 14px !important;
+}
+
+.discount-filter {
+	&:before {
+		width: 14px !important;
+		height: 14px !important;
+	}
+}
+
 .list-image {
 	overflow: hidden;
 	max-height: 200px;
