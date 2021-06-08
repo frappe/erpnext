@@ -14,12 +14,11 @@ from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_on_hold_or_closed_status
 from erpnext.stock.utils import get_bin
 from erpnext.accounts.party import get_party_account_currency
-from six import string_types
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_party,
+	update_linked_doc, unlink_inter_company_doc)
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -504,7 +503,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 @frappe.whitelist()
 def make_rm_stock_entry(purchase_order, rm_items):
 	rm_items_list = rm_items
-	if isinstance(rm_items, string_types):
+
+	if isinstance(rm_items, str):
 		rm_items_list = json.loads(rm_items)
 	elif not rm_items:
 		frappe.throw(_("No Items available for transfer"))
@@ -588,7 +588,7 @@ def make_inter_company_sales_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def get_materials_from_supplier(purchase_order, po_details):
-	if isinstance(po_details, string_types):
+	if isinstance(po_details, str):
 		po_details = json.loads(po_details)
 
 	doc = frappe.get_cached_doc('Purchase Order', purchase_order)
@@ -615,7 +615,8 @@ def make_return_stock_entry_for_subcontract(available_materials, po_doc, po_deta
 
 		if value.batch_no:
 			for batch_no, qty in value.batch_no.items():
-				add_items_in_ste(ste_doc, value, value.qty, po_details, batch_no)
+				if qty > 0:
+					add_items_in_ste(ste_doc, value, value.qty, po_details, batch_no)
 		else:
 			add_items_in_ste(ste_doc, value, value.qty, po_details)
 

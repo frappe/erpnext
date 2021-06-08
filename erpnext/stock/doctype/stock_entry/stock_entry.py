@@ -1005,10 +1005,12 @@ class StockEntry(StockController):
 					if self.purchase_order and self.purpose == "Send to Subcontractor":
 						#Get PO Supplied Items Details
 						item_wh = frappe._dict(frappe.db.sql("""
-							select rm_item_code, reserve_warehouse
-							from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-							where po.name = poitemsup.parent
-								and po.name = %s""",self.purchase_order))
+							SELECT
+								rm_item_code, reserve_warehouse
+							FROM
+								`tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+							WHERE
+								po.name = poitemsup.parent and po.name = %s """,self.purchase_order))
 
 					for item in itervalues(item_dict):
 						if self.pro_doc and cint(self.pro_doc.from_wip_warehouse):

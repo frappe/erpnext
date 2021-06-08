@@ -22,9 +22,9 @@
   "required_qty",
   "supplied_qty",
   "col_break1",
+  "consumed_qty",
   "returned_qty",
-  "total_supplied_qty",
-  "consumed_qty"
+  "total_supplied_qty"
  ],
  "fields": [
   {
@@ -183,7 +183,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-01 00:41:54.123436",
+ "modified": "2021-06-09 15:17:58.128242",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item Supplied",
