@@ -54,7 +54,7 @@ class PaymentEntry(AccountsController):
 		self.validate_mandatory()
 		self.validate_reference_documents()
 		self.set_tax_withholding()
-		self.calculate_taxes()
+		self.apply_taxes()
 		self.set_amounts()
 		self.clear_unallocated_reference_document_rows()
 		self.validate_payment_against_negative_invoice()
@@ -65,7 +65,6 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
-		self.set_advance_tax_account()
 		self.set_status()
 
 	def on_submit(self):
@@ -311,14 +310,6 @@ class PaymentEntry(AccountsController):
 				+ "<br><br>" + _("If this is undesirable please cancel the corresponding Payment Entry."),
 				title=_("Warning"), indicator="orange")
 
-	def set_advance_tax_account(self):
-		if self.get('taxes') and not self.advance_tax_account:
-			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
-			if not unrealized_profit_loss_account:
-				frappe.throw(_("Please select advance tax account or add Unrealized Profit / Loss Account in company master"))
-
-			self.advance_tax_account = unrealized_profit_loss_account
-
 	def validate_journal_entry(self):
 		for d in self.get("references"):
 			if d.allocated_amount and d.reference_doctype == "Journal Entry":
@@ -460,6 +451,11 @@ class PaymentEntry(AccountsController):
 
 		for d in to_remove:
 			self.remove(d)
+
+	def apply_taxes(self):
+		self.initialize_taxes()
+		self.determine_exclusive_rate()
+		self.calculate_taxes()
 
 	def set_amounts(self):
 		self.set_received_amount()
@@ -715,12 +711,12 @@ class PaymentEntry(AccountsController):
 			if account_currency != self.company_currency:
 				frappe.throw(_("Currency for {0} must be {1}").format(d.account_head, self.company_currency))
 
-			if self.payment_type == 'Pay':
+			if (self.payment_type == 'Pay' and self.advance_tax_account) or self.payment_type == 'Receive':
 				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
-				rev_dr_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
-			elif self.payment_type == 'Receive':
+			elif (self.payment_type == 'Receive' and self.advance_tax_account) or self.payment_type == 'Pay':
 				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
-				rev_dr_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
+
+			payment_or_advance_account = self.get_party_account_for_taxes()
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -733,15 +729,16 @@ class PaymentEntry(AccountsController):
 					"cost_center": d.cost_center
 				}, account_currency, item=d))
 
+			#Intentionally use -1 to get net values in party account
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": self.advance_tax_account,
+					"account": payment_or_advance_account,
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
-					rev_dr_cr: d.base_tax_amount,
-					rev_dr_cr + "_in_account_currency": d.base_tax_amount
+					dr_or_cr: -1 * d.base_tax_amount,
+					dr_or_cr + "_in_account_currency": -1*d.base_tax_amount
 					if account_currency==self.company_currency
 					else d.tax_amount,
-					"cost_center": d.cost_center or self.cost_center
+					"cost_center": self.cost_center,
 				}, account_currency, item=d))
 
 	def add_deductions_gl_entries(self, gl_entries):
@@ -761,6 +758,14 @@ class PaymentEntry(AccountsController):
 						"cost_center": d.cost_center
 					}, item=d)
 				)
+
+	def get_party_account_for_taxes(self):
+		if self.advance_tax_account:
+			return self.advance_tax_account
+		elif self.payment_type == 'Pay':
+			return self.paid_from
+		elif self.payment_type == 'Receive':
+			return self.paid_to
 
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
@@ -808,32 +813,52 @@ class PaymentEntry(AccountsController):
 		self.append('deductions', row)
 		self.set_unallocated_amount()
 
+	def initialize_taxes(self):
+		for tax in self.get("taxes"):
+			tax_fields = ["total", "tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
+
+			if tax.charge_type != "Actual":
+				tax_fields.append("tax_amount")
+
+			for fieldname in tax_fields:
+				tax.set(fieldname, 0.0)
+
+		self.paid_amount_after_tax = self.paid_amount
+
+	def determine_exclusive_rate(self):
+		if not any((cint(tax.included_in_paid_amount) for tax in self.get("taxes"))):
+			return
+
+		cumulated_tax_fraction = 0
+		total_inclusive_tax_amount_per_qty = 0
+		for i, tax in enumerate(self.get("taxes")):
+
+			tax.tax_fraction_for_current_item = self.get_current_tax_fraction(tax)
+			if i==0:
+				tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item
+			else:
+				tax.grand_total_fraction_for_current_item = \
+					self.get("taxes")[i-1].grand_total_fraction_for_current_item \
+					+ tax.tax_fraction_for_current_item
+
+			cumulated_tax_fraction += tax.tax_fraction_for_current_item
+
+		self.paid_amount_after_tax = flt(self.paid_amount/(1+cumulated_tax_fraction))
+
 	def calculate_taxes(self):
 		self.total_taxes_and_charges = 0.0
 		self.base_total_taxes_and_charges = 0.0
 
+		actual_tax_dict = dict([[tax.idx, flt(tax.tax_amount, tax.precision("tax_amount"))]
+			for tax in self.get("taxes") if tax.charge_type == "Actual"])
+
 		for i, tax in enumerate(self.get('taxes')):
-			tax_rate = tax.rate
-
-			# To set row_id by default as previous row.
-			if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"]:
-				if tax.idx == 1:
-					frappe.throw(_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
-
-				if not tax.row_id:
-					tax.row_id = tax.idx - 1
+			current_tax_amount = self.get_current_tax_amount(tax)
 
 			if tax.charge_type == "Actual":
-				current_tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
-			elif tax.charge_type == "On Paid Amount":
-				current_tax_amount = (tax_rate / 100.0) * self.paid_amount
-			elif tax.charge_type == "On Previous Row Amount":
-				current_tax_amount = (tax_rate / 100.0) * \
-					self.get('taxes')[cint(tax.row_id) - 1].tax_amount
-
-			elif tax.charge_type == "On Previous Row Total":
-				current_tax_amount = (tax_rate / 100.0) * \
-					self.get('taxes')[cint(tax.row_id) - 1].total
+				actual_tax_dict[tax.idx] -= current_tax_amount
+				if i == len(self.get("taxes")) - 1:
+					current_tax_amount += actual_tax_dict[tax.idx]
 
 			tax.tax_amount = current_tax_amount
 			tax.base_tax_amount = tax.tax_amount * self.source_exchange_rate
@@ -843,20 +868,67 @@ class PaymentEntry(AccountsController):
 			else:
 				current_tax_amount *= 1.0
 
-			if not tax.included_in_paid_amount:
-				applicable_tax = current_tax_amount
-			else:
-				applicable_tax = 0
-
 			if i == 0:
-				tax.total = flt(self.paid_amount + applicable_tax, self.precision("total", tax))
+				tax.total = flt(self.paid_amount_after_tax + current_tax_amount, self.precision("total", tax))
 			else:
-				tax.total = flt(self.get('taxes')[i-1].total + applicable_tax, self.precision("total", tax))
+				tax.total = flt(self.get('taxes')[i-1].total + current_tax_amount, self.precision("total", tax))
 
 			tax.base_total = tax.total * self.source_exchange_rate
 
 			self.total_taxes_and_charges += current_tax_amount
 			self.base_total_taxes_and_charges += current_tax_amount * self.source_exchange_rate
+
+		if self.get('taxes'):
+			self.paid_amount_after_tax = self.get('taxes')[-1].base_total
+
+	def get_current_tax_amount(self, tax):
+		tax_rate = tax.rate
+
+		# To set row_id by default as previous row.
+		if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"]:
+			if tax.idx == 1:
+				frappe.throw(_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
+
+			if not tax.row_id:
+				tax.row_id = tax.idx - 1
+
+		if tax.charge_type == "Actual":
+			current_tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
+		elif tax.charge_type == "On Paid Amount":
+			current_tax_amount = (tax_rate / 100.0) * self.paid_amount_after_tax
+		elif tax.charge_type == "On Previous Row Amount":
+			current_tax_amount = (tax_rate / 100.0) * \
+				self.get('taxes')[cint(tax.row_id) - 1].tax_amount
+
+		elif tax.charge_type == "On Previous Row Total":
+			current_tax_amount = (tax_rate / 100.0) * \
+				self.get('taxes')[cint(tax.row_id) - 1].total
+
+		return current_tax_amount
+
+	def get_current_tax_fraction(self, tax):
+		current_tax_fraction = 0
+
+		if cint(tax.included_in_paid_amount):
+			tax_rate = tax.rate
+
+			if tax.charge_type == 'Actual':
+				current_tax_fraction = tax.tax_amount/self.paid_amount_after_tax
+			elif tax.charge_type == "On Paid Amount":
+				current_tax_fraction = tax_rate / 100.0
+
+			elif tax.charge_type == "On Previous Row Amount":
+				current_tax_fraction = (tax_rate / 100.0) * \
+					self.get("taxes")[cint(tax.row_id) - 1].tax_fraction_for_current_item
+
+			elif tax.charge_type == "On Previous Row Total":
+				current_tax_fraction = (tax_rate / 100.0) * \
+					self.get("taxes")[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
+
+		if getattr(tax, "add_deduct_tax", None) and tax.add_deduct_tax == "Deduct":
+			current_tax_fraction *= -1.0
+
+		return current_tax_fraction
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
@@ -1425,6 +1497,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if doc.doctype == 'Purchase Order' and doc.apply_tds:
 		pe.apply_tax_withholding_amount = 1
 		pe.tax_withholding_category = doc.tax_withholding_category
+
+		if not pe.advance_tax_account:
+			pe.advance_tax_account = frappe.db.get_value('Company', pe.company, 'unrealized_profit_loss_account')
 
 	return pe
 

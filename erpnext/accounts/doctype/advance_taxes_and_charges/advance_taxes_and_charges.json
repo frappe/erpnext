@@ -19,6 +19,7 @@
   "section_break_8",
   "rate",
   "section_break_9",
+  "currency",
   "tax_amount",
   "total",
   "allocated_amount",
@@ -172,12 +173,20 @@
    "fieldtype": "Currency",
    "label": "Allocated Amount (Company Currency)",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fetch_from": "account_head.account_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-31 02:03:57.444647",
+ "modified": "2021-06-08 07:04:44.287002",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Taxes and Charges",
