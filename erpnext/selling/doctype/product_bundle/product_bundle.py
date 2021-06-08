@@ -4,6 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 
+from frappe.utils import get_link_to_form
+
 from frappe import _
 
 from frappe.model.document import Document
@@ -17,6 +19,14 @@ class ProductBundle(Document):
 		self.validate_child_items()
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "uom", "qty")
+
+	def on_trash(self):
+		invoices = frappe.db.get_all("Sales Invoice Item", {"item_code": self.new_item_code, "docstatus": ["!=", 2]}, ["parent"])
+		invoice_links = []
+		for invoice in invoices:
+			invoice_links.append(get_link_to_form('Sales Invoice', invoice['parent']))
+		if len(invoice_links):
+			frappe.throw("This Product Bundle is linked with Sales Invoice: {0}. You will have to cancel these invoices in order to cancel this Product Bundle".format(", ".join(invoice_links)))
 
 	def validate_main_item(self):
 		"""Validates, main Item is not a stock item"""
