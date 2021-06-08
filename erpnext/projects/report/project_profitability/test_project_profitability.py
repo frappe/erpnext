@@ -8,20 +8,20 @@ from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_
 from erpnext.projects.report.project_profitability.project_profitability import execute
 
 class TestProjectProfitability(unittest.TestCase):
-	@classmethod
+
 	def setUp(self):
 		emp = make_employee('test_employee_9@salary.com', company='_Test Company')
 		if not frappe.db.exists('Salary Component', 'Timesheet Component'):
 			frappe.get_doc({'doctype': 'Salary Component', 'salary_component': 'Timesheet Component'}).insert()
 		make_salary_structure_for_timesheet(emp, company='_Test Company')
-		self.timesheet = make_timesheet(emp, simulate = True, billable=1)
+		self.timesheet = make_timesheet(emp, simulate = True, is_billable=1)
 		self.salary_slip = make_salary_slip(self.timesheet.name)
 		self.salary_slip.submit()
 		self.sales_invoice = make_sales_invoice(self.timesheet.name, '_Test Item', '_Test Customer')
 		self.sales_invoice.due_date = nowdate()
 		self.sales_invoice.submit()
 
-		frappe.db.set_value("HR Settings", "HR Settings", "standard_working_hours", 8)
+		frappe.db.set_value('HR Settings', None, 'standard_working_hours', 8)
 
 	def test_project_profitability(self):
 		filters = {

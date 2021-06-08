@@ -574,7 +574,7 @@ class Gstr1Report(object):
 def get_json(filters, report_name, data):
 	filters = json.loads(filters)
 	report_data = json.loads(data)
-	gstin = get_company_gstin_number(filters["company"])
+	gstin = get_company_gstin_number(filters["company"], filters["company_address"])
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
@@ -810,22 +810,28 @@ def get_rate_and_tax_details(row, gstin):
 
 	return {"num": int(num), "itm_det": itm_det}
 
-def get_company_gstin_number(company):
-	filters = [
-		["is_your_company_address", "=", 1],
-		["Dynamic Link", "link_doctype", "=", "Company"],
-		["Dynamic Link", "link_name", "=", company],
-		["Dynamic Link", "parenttype", "=", "Address"],
-	]
+def get_company_gstin_number(company, address=None):
+	if address:
+		gstin = frappe.db.get_value("Address", address, "gstin")
 
-	gstin = frappe.get_all("Address", filters=filters, fields=["gstin"])
-
-	if gstin:
-		return gstin[0]["gstin"]
-	else:
-		frappe.throw(_("Please set valid GSTIN No. in Company Address for company {0}").format(
-			frappe.bold(company)
+	if not gstin:
+		filters = [
+			["is_your_company_address", "=", 1],
+			["Dynamic Link", "link_doctype", "=", "Company"],
+			["Dynamic Link", "link_name", "=", company],
+			["Dynamic Link", "parenttype", "=", "Address"],
+		]
+		gstin = frappe.get_all("Address", filters=filters, pluck="gstin")
+		if gstin:
+			gstin[0]
+	
+	if not gstin:
+		address = frappe.bold(address) if address else ""
+		frappe.throw(_("Please set valid GSTIN No. in Company Address {} for company {}").format(
+			address, frappe.bold(company)
 		))
+
+	return gstin
 
 @frappe.whitelist()
 def download_json_file():

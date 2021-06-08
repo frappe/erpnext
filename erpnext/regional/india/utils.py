@@ -500,7 +500,7 @@ def download_ewb_json():
 
 		if not isinstance(docname, list):
 			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
-			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
+			filename_prefix = re.sub(r'[^\w_.)( -]', '', docname)
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
@@ -695,7 +695,7 @@ def get_gst_accounts(company=None, account_wise=False, only_reverse_charge=0, on
 		filters=filters,
 		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
-	if not gst_settings_accounts and not frappe.flags.in_test:
+	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 		frappe.throw(_("Please set GST Accounts in GST Settings"))
 
 	for d in gst_settings_accounts:

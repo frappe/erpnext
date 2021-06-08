@@ -264,7 +264,7 @@ def make_loan_write_off(loan, company=None, posting_date=None, amount=0, as_dict
 	pending_amount = amounts['pending_principal_amount']
 
 	if amount and (amount > pending_amount):
-		frappe.throw('Write Off amount cannot be greater than pending loan amount')
+		frappe.throw(_('Write Off amount cannot be greater than pending loan amount'))
 
 	if not amount:
 		amount = pending_amount
