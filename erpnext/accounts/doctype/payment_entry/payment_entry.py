@@ -176,7 +176,7 @@ class PaymentEntry(AccountsController):
 					d.reference_name, self.party_account_currency)
 
 				for field, value in iteritems(ref_details):
-					if field == 'exchange_rate' or not d.get(field) or force:
+					if (field == 'exchange_rate' or not d.get(field) or force) and not d.exchange_gain_loss:
 						d.set(field, value)
 
 	def validate_payment_type(self):
@@ -553,7 +553,6 @@ class PaymentEntry(AccountsController):
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
-			total_exchange_gain_loss = 0
 			for d in self.get("references"):
 				gle = party_gl_dict.copy()
 				gle.update({
@@ -562,9 +561,7 @@ class PaymentEntry(AccountsController):
 				})
 
 				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
-					self.precision("paid_amount")) + flt(d.exchange_gain_loss)
-				
-				total_exchange_gain_loss += flt(d.exchange_gain_loss)
+					self.precision("paid_amount"))
 
 				gle.update({
 					dr_or_cr + "_in_account_currency": d.allocated_amount,
@@ -574,8 +571,8 @@ class PaymentEntry(AccountsController):
 				gl_entries.append(gle)
 
 			if self.unallocated_amount:
-				exchange_rate = self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate
-				base_unallocated_amount = (self.unallocated_amount * exchange_rate) - total_exchange_gain_loss
+				exchange_rate = self.get_exchange_rate()
+				base_unallocated_amount = (self.unallocated_amount * exchange_rate)
 
 				gle = party_gl_dict.copy()
 
@@ -676,6 +673,9 @@ class PaymentEntry(AccountsController):
 
 		self.append('deductions', row)
 		self.set_unallocated_amount()
+
+	def get_exchange_rate(self):
+		return self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):

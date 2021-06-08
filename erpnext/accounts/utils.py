@@ -472,7 +472,7 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate,
+		"exchange_rate": d.exchange_rate if not d.exchange_gain_loss else payment_entry.get_exchange_rate(),
 		"exchange_gain_loss": d.exchange_gain_loss #only populated from invoice in case of advance allocation
 	}
 
@@ -497,9 +497,6 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
-
-	if d.exchange_gain_loss:
-		payment_entry.base_total_allocated_amount += d.exchange_gain_loss
 
 	if d.difference_amount and d.difference_account:
 		account_details = {
