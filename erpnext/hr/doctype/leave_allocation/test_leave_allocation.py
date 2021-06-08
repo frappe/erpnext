@@ -173,7 +173,7 @@ class TestLeaveAllocation(unittest.TestCase):
 		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 15)
 		leave_allocation.new_leaves_allocated = 40
-		leave_allocation.update()
+		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 40)
 
 	def test_leave_subtraction_after_submit(self):
@@ -184,7 +184,7 @@ class TestLeaveAllocation(unittest.TestCase):
 		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 15)
 		leave_allocation.new_leaves_allocated = 10
-		leave_allocation.update()
+		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 10)
 
 	def test_against_leave_application_validation_after_submit(self):
