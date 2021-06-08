@@ -217,7 +217,7 @@ class Asset(AccountsController):
 
 				# For first row
 				if has_pro_rata and n==0:
-					depreciation_amount, days, months = get_pro_rata_amt(d, depreciation_amount,
+					depreciation_amount, days, months = self.get_pro_rata_amt(d, depreciation_amount,
 						self.available_for_use_date, d.depreciation_start_date)
 
 					# For first depr schedule date will be the start date
@@ -230,7 +230,7 @@ class Asset(AccountsController):
 						self.to_date = add_months(self.available_for_use_date,
 							n * cint(d.frequency_of_depreciation))
 
-					depreciation_amount, days, months = get_pro_rata_amt(d,
+					depreciation_amount, days, months = self.get_pro_rata_amt(d,
 						depreciation_amount, schedule_date, self.to_date)
 
 					monthly_schedule_date = add_months(schedule_date, 1)
@@ -568,6 +568,13 @@ class Asset(AccountsController):
 
 			return 100 * (1 - flt(depreciation_rate, float_precision))
 
+	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):
+		days = date_diff(to_date, from_date)
+		months = month_diff(to_date, from_date)
+		total_days = get_total_days(to_date, row.frequency_of_depreciation)
+
+		return (depreciation_amount * flt(days)) / flt(total_days), days, months
+
 def update_maintenance_status():
 	assets = frappe.get_all(
 		"Asset", filters={"docstatus": 1, "maintenance_required": 1}
@@ -759,13 +766,6 @@ def make_asset_movement(assets, purpose=None):
 
 def is_cwip_accounting_enabled(asset_category):
 	return cint(frappe.db.get_value("Asset Category", asset_category, "enable_cwip_accounting"))
-
-def get_pro_rata_amt(row, depreciation_amount, from_date, to_date):
-	days = date_diff(to_date, from_date)
-	months = month_diff(to_date, from_date)
-	total_days = get_total_days(to_date, row.frequency_of_depreciation)
-
-	return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
 def get_total_days(date, frequency):
 	period_start_date = add_months(date,

@@ -22,50 +22,50 @@ class TestIssue(unittest.TestCase):
 		customer = create_customer("_Test Customer", "__Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "_Test Customer", 1)
 
-		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
-		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 4, 15, 0))
+		self.assertEqual(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
+		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 4, 15, 0))
 
 		# make issue with customer_group specific SLA
 		customer = create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "__Test Customer", 2)
 
-		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
-		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 4, 15, 0))
+		self.assertEqual(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
+		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 4, 15, 0))
 
 
 		# make issue with territory specific SLA
 		customer = create_customer("___Test Customer", "__Test SLA Customer Group", "_Test SLA Territory")
 		issue = make_issue(creation, "___Test Customer", 3)
 
-		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
-		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 4, 15, 0))
+		self.assertEqual(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
+		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 4, 15, 0))
 
 		# make issue with default SLA
 		issue = make_issue(creation=creation, index=4)
 
-		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 16, 0))
-		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
+		self.assertEqual(issue.response_by, datetime.datetime(2019, 3, 4, 16, 0))
+		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
 
 		# make issue with default SLA before working hours
 		creation = datetime.datetime(2019, 3, 4, 7, 0)
 		issue = make_issue(creation=creation, index=5)
 
-		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
-		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 4, 16, 0))
+		self.assertEqual(issue.response_by, datetime.datetime(2019, 3, 4, 14, 0))
+		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 4, 16, 0))
 
 		# make issue with default SLA after working hours
 		creation = datetime.datetime(2019, 3, 4, 20, 0)
 		issue = make_issue(creation, index=6)
 
-		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 6, 14, 0))
-		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 6, 16, 0))
+		self.assertEqual(issue.response_by, datetime.datetime(2019, 3, 6, 14, 0))
+		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 6, 16, 0))
 
 		# make issue with default SLA next day
 		creation = datetime.datetime(2019, 3, 4, 14, 0)
 		issue = make_issue(creation=creation, index=7)
 
-		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 18, 0))
-		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 6, 12, 0))
+		self.assertEqual(issue.response_by, datetime.datetime(2019, 3, 4, 18, 0))
+		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 6, 12, 0))
 
 		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 15, 0)
 

@@ -13,7 +13,7 @@ class BalanceMismatchError(frappe.ValidationError): pass
 class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
 	def on_update(self):
-		if frappe.local.flags.ignore_on_update:
+		if frappe.local.flags.ignore_update_nsm:
 			return
 		else:
 			super(Account, self).on_update()

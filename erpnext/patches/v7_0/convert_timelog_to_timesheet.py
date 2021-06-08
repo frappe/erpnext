@@ -51,7 +51,7 @@ def execute():
 
 def get_timelog_data(data):
 	return {
-		'billable': data.billable,
+		'is_billable': data.billable,
 		'from_time': data.from_time,
 		'hours': data.hours,
 		'to_time': data.to_time,

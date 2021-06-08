@@ -94,7 +94,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 
 	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, company_currency, True)
+	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, company_currency, filters, True)
 
 	return data, None, chart, report_summary
 
@@ -149,9 +149,9 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			section_data.append(account_data)
 
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'],
-			companies, company_currency, summary_data, True)
+			companies, company_currency, summary_data, filters, True)
 
-	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, summary_data, True)
+	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, summary_data, filters, True)
 
 	report_summary = get_cash_flow_summary(summary_data, company_currency)
 

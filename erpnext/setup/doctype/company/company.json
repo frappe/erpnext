@@ -100,7 +100,6 @@
   "company_description",
   "registration_info",
   "registration_details",
-  "delete_company_transactions",
   "lft",
   "rgt",
   "old_parent"
@@ -660,11 +659,6 @@
    "label": "Registration Details",
    "oldfieldname": "registration_details",
    "oldfieldtype": "Code"
-  },
-  {
-   "fieldname": "delete_company_transactions",
-   "fieldtype": "Button",
-   "label": "Delete Company Transactions"
   },
   {
    "fieldname": "lft",
