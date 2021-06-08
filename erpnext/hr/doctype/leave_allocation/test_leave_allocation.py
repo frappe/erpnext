@@ -208,7 +208,7 @@ class TestLeaveAllocation(unittest.TestCase):
 		})
 		leave_application.submit()
 		leave_allocation.new_leaves_allocated = 10
-		self.assertRaises(frappe.ValidationError, leave_allocation.update)
+		self.assertRaises(frappe.ValidationError, leave_allocation.submit)
 
 def create_leave_allocation(**args):
 	args = frappe._dict(args)
