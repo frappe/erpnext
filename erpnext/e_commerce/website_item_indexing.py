@@ -60,7 +60,8 @@ def create_website_items_index():
 	idx_fields = frappe.db.get_single_value(
 		'E Commerce Settings',
 		'search_index_fields'
-	).split(',')
+	)
+	idx_fields = idx_fields.split(',') if idx_fields else []
 
 	if 'web_item_name' in idx_fields:
 		idx_fields.remove('web_item_name')
@@ -192,7 +193,8 @@ def get_fields_indexed():
 	fields_to_index = frappe.db.get_single_value(
 		'E Commerce Settings',
 		'search_index_fields'
-	).split(',')
+	)
+	fields_to_index = fields_to_index.split(',') if fields_to_index else []
 
 	mandatory_fields = ['name', 'web_item_name', 'route', 'thumbnail']
 	fields_to_index = fields_to_index + mandatory_fields
