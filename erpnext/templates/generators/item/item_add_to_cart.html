@@ -100,7 +100,7 @@
 				<!-- Add to Wishlist -->
 				{% if cart_settings.enable_wishlist %}
 					<a href="/wishlist"
-						class="btn btn-view-in-wishlist hidden"
+						class="btn btn-view-in-wishlist font-md hidden"
 						role="button"
 					>
 						<span class="mr-2">
@@ -116,7 +116,7 @@
 						data-item-code="{{item_code}}"
 						data-price="{{ price.get('price_list_rate') or 0}}"
 						data-formatted-price="{{ price.get('formatted_price') or 0 }}"
-						class="btn btn-add-to-wishlist"
+						class="btn btn-add-to-wishlist font-md"
 					>
 						<span class="mr-2">
 							<svg class="icon icon-md">
