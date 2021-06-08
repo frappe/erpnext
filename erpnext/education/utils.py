@@ -245,7 +245,7 @@ def get_quiz(quiz_name, course):
 	return {
 		'questions': questions,
 		'activity': {'is_complete': status, 'score': score, 'result': result, 'time_taken': time_taken},
-			'is_time_bound': quiz.is_time_bound,
+		'is_time_bound': quiz.is_time_bound,
 		'duration': quiz.duration
 	}
 
