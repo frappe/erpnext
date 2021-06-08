@@ -56,6 +56,19 @@ body.product-page {
 	}
 }
 
+.no-image-item {
+	height: 340px;
+	width: 340px;
+	background: var(--gray-100);
+	border-radius: var(--border-radius);
+	font-size: 2rem;
+	color: var(--gray-500);
+	font-size: 52px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .item-card-group-section {
 	.card {
 		align-items: center;
@@ -701,12 +714,14 @@ body.product-page {
 .btn-explore-variants {
 	box-shadow: none;
 	margin: var(--margin-sm) 0;
+	width: 90px;
 	max-height: 50px; // to avoid resizing on window resize
 	flex: none;
 	transition: 0.3s ease;
 	color: var(--orange-500);
 	background-color: white;
 	border: 1px solid var(--orange-500);
+	font-size: 13px;
 
 	&:hover {
 		color: white;
