@@ -122,6 +122,8 @@ class AccountsController(TransactionBase):
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
 
+			self.set_advance_gain_or_loss()
+
 			if self.is_return:
 				self.validate_qty()
 			else:
@@ -664,6 +666,51 @@ class AccountsController(TransactionBase):
 				difference = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
 
 				d.exchange_gain_loss = difference
+
+	def make_exchange_gain_loss_gl_entries(self, gl_entries):
+		if self.get('doctype') in ['Purchase Invoice', 'Sales Invoice']:
+			for d in self.get("advances"):
+				if d.exchange_gain_loss:
+					party = self.supplier if self.get('doctype') == 'Purchase Invoice' else self.customer
+					party_account = self.credit_to if self.get('doctype') == 'Purchase Invoice' else self.debit_to
+					party_type = "Supplier" if self.get('doctype') == 'Purchase Invoice' else "Customer"
+
+					gain_loss_account = frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
+					account_currency = get_account_currency(gain_loss_account)
+					if account_currency != self.company_currency:
+						frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
+
+					# for purchase
+					dr_or_cr = 'debit' if d.exchange_gain_loss > 0 else 'credit'
+					# just reverse for sales?
+					dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": gain_loss_account,
+							"account_currency": account_currency,
+							"against": party,
+							dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
+							dr_or_cr: abs(d.exchange_gain_loss),
+							"cost_center": self.cost_center,
+							"project": self.project
+						}, item=d)
+					)
+
+					dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": party_account,
+							"party_type": party_type,
+							"party": party,
+							"against": gain_loss_account,
+							dr_or_cr + "_in_account_currency": flt(abs(d.exchange_gain_loss) / self.conversion_rate),
+							dr_or_cr: abs(d.exchange_gain_loss),
+							"cost_center": self.cost_center,
+							"project": self.project
+						}, self.party_account_currency, item=self)
+					)
 
 	def update_against_document_in_jv(self):
 		"""
