@@ -9,12 +9,12 @@ class DeliveryPlanning(Document):
 	def on_submit(self):
 		self.on_delivery_planning_submit()
 
-	@frappe.whitelist()
-	def get_pin(self):
-		if self.pincode_from:
-			pin = frappe.get_list('Address', fields = ['pincode'])
-			print("111111111110000000555550000000011111111111",pin)
-			return pin
+	# @frappe.whitelist()
+	# def get_pin(self):
+	# 	if self.pincode_from:
+	# 		pin = frappe.get_list('Address', fields = ['pincode'])
+	# 		print("111111111110000000555550000000011111111111",pin)
+	# 		return pin
 
 	@frappe.whitelist()
 	def get_sales_order(self):
@@ -66,6 +66,7 @@ class DeliveryPlanning(Document):
 
 						from `tabSales Order Item` soi
 						join `tabSales Order` so ON soi.parent = so.name
+						left outer join `tabAddress` as add on add.name = so.shipping_address_name
 
 						where so.docstatus = 1
 						{conditions} """.format(conditions=conditions), as_dict=1)
@@ -189,10 +190,16 @@ class DeliveryPlanning(Document):
 				conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
 
 			if self.delivery_date_from:
-				conditions += "AND so.delivery_date >= '%s'" % self.delivery_date_from
+				conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
 
 			if self.delivery_date_to:
-				conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
+				conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
+
+			if self.pincode_from:
+				conditions += "And add.pincode >= '%s" % self.pincode_from
+
+			if self.pincode_to:
+				conditions += "And add.pincode <= '%s" % self.pincode_to
 
 			query = frappe.db.sql(""" select
 									so.customer,
@@ -210,6 +217,7 @@ class DeliveryPlanning(Document):
 
 									from `tabSales Order Item` soi
 									join `tabSales Order` so ON soi.parent = so.name
+									left outer join `tabAddress` as add on add.name = so.shipping_address_name
 
 									where so.docstatus = 1
 									{conditions} """.format(conditions=conditions), as_dict=1)
@@ -231,7 +239,7 @@ class DeliveryPlanning(Document):
 				dp_item.source_warehouse = i.warehouse
 				dp_item.postal_code = 0
 				dp_item.delivery_date = i.delivery_date
-				dp_item.current_stock = i.stock_qty - i.projected_qty
+				dp_item.current_stock = i.projected_qty - i.stock_qty
 				dp_item.available_stock = i.projected_qty
 				dp_item.related_delivey_planning = self.name
 				dp_item.weight_per_unit = i.weight_per_unit

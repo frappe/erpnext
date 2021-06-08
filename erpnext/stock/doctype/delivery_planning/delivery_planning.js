@@ -145,7 +145,7 @@ frappe.ui.form.on('Delivery Planning', {
 
 			frappe.route_options = {"related_delivery_planning": frm.doc.docname };
 			frappe.set_route("Form", "Delivery Planning Item", {
-   				"related_delivery_planning": frm.doc.docname
+   				"related_delivey_planning": frm.doc.name
 			});
 		},
 
