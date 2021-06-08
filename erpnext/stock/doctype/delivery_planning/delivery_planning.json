@@ -69,6 +69,7 @@
   {
    "fieldname": "get_daily_dp",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Get Daily Delivery  Plan"
   },
   {
@@ -78,6 +79,7 @@
   {
    "fieldname": "po_to_create",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Get Purchase Order to be Created"
   },
   {
@@ -123,6 +125,7 @@
   {
    "fieldname": "get_sales_orders",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Get Sales Order"
   },
   {
@@ -167,7 +170,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-08 13:08:41.078429",
+ "modified": "2021-06-08 16:33:51.579863",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning",
