@@ -231,7 +231,7 @@ class DeliveryPlanning(Document):
 				dp_item.source_warehouse = i.warehouse
 				dp_item.postal_code = 0
 				dp_item.delivery_date = i.delivery_date
-				dp_item.current_stock = i.stock_qty
+				dp_item.current_stock = i.stock_qty - i.projected_qty
 				dp_item.available_stock = i.projected_qty
 				dp_item.related_delivey_planning = self.name
 				dp_item.weight_per_unit = i.weight_per_unit
