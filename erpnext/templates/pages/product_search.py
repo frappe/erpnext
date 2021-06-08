@@ -79,7 +79,7 @@ def search(query, limit=10, fuzzy_search=True):
 	suggestions = ac.get_suggestions(
 		query,
 		num=limit,
-		fuzzy= fuzzy_search and len(query) > 4 # Fuzzy on length < 3 can be real slow
+		fuzzy= fuzzy_search and len(query) > 3 # Fuzzy on length < 3 can be real slow
 	)
 
 	# Build a query

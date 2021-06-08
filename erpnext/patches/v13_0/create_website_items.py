@@ -1,6 +1,4 @@
-from __future__ import unicode_literals
 import frappe
-
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 
 def execute():
@@ -48,7 +46,7 @@ def execute():
 		website_item.ranking = item.get("weightage")
 		for field in web_fields_to_map:
 			website_item.update({field: item.get(field)})
-			website_item.save()
+		website_item.save()
 
 		# move Website Item Group & Website Specification table to Website Item
 		for doctype in ("Website Item Group", "Item Website Specification"):
