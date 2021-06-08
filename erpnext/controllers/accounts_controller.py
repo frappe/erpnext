@@ -623,18 +623,17 @@ class AccountsController(TransactionBase):
 		company_currency = erpnext.get_company_currency(self.company)
 
 		self.set("advances", [])
-		advance_allocated = 0
-		for d in res:
-			if d.against_order:
-				allocated_amount = flt(d.amount)
-			else:
-				if self.get("party_account_currency")\
-					and self.get("party_account_currency") == company_currency:
-					amount = self.get("base_rounded_total") or self.get("base_grand_total")
-				else:
-					amount = self.get("rounded_total") or self.get("grand_total")
 
-				allocated_amount = min(flt(amount) - advance_allocated, d.amount)
+		advance_allocated = 0
+		if self.get("party_account_currency") and self.get("party_account_currency") == company_currency:
+			grand_total = self.get("base_rounded_total") or self.get("base_grand_total")
+		else:
+			grand_total = self.get("rounded_total") or self.get("grand_total")
+
+		for d in res:
+			remaining_amount = flt(grand_total) - advance_allocated
+			allocated_amount = flt(min(remaining_amount, flt(d.amount)), self.precision('total_advance'))
+
 			advance_allocated += flt(allocated_amount)
 
 			self.append("advances", {
