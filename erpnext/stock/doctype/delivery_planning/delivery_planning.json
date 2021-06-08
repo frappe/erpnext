@@ -44,8 +44,7 @@
    "fieldname": "transporter",
    "fieldtype": "Link",
    "label": "Transporter",
-   "options": "Supplier",
-   "reqd": 1
+   "options": "Supplier"
   },
   {
    "fieldname": "cb1",
@@ -101,13 +100,13 @@
   {
    "fetch_from": "address.pincode",
    "fieldname": "pincode_from",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "label": "Shipping Postal From"
   },
   {
    "fetch_from": "address.pincode",
    "fieldname": "pincode_to",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "label": "Shipping Postal To "
   },
   {
@@ -170,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-08 16:33:51.579863",
+ "modified": "2021-06-08 18:04:40.373990",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning",

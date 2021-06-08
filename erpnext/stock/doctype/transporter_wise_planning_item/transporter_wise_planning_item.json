@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "autoname": "TPI-.YY.-.MM.-.#####.",
+ "creation": "2021-06-08 18:37:59.552827",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transporter",
+  "delivery_date",
+  "weight_to_deliver",
+  "quantity_to_deliver",
+  "source_warehouse",
+  "related_delivery_planning"
+ ],
+ "fields": [
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date"
+  },
+  {
+   "fieldname": "weight_to_deliver",
+   "fieldtype": "Float",
+   "label": "Weight To Deliver"
+  },
+  {
+   "fieldname": "quantity_to_deliver",
+   "fieldtype": "Data",
+   "label": "Quantity To Deliver"
+  },
+  {
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "related_delivery_planning",
+   "fieldtype": "Link",
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-06-08 18:56:47.844467",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Transporter Wise Planning Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
