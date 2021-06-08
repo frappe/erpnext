@@ -52,11 +52,11 @@
 			<div class="row mt-2">
 				<div class="col-3">
 					{% if cart_settings.enable_checkout %}
-						<a class="btn btn-outline-primary" href="/orders">
+						<a class="btn btn-outline-primary font-md" href="/orders">
 							{{ _('Past Orders') }}
 						</a>
 					{% else %}
-						<a class="btn btn-outline-primary" href="/quotations">
+						<a class="btn btn-outline-primary font-md" href="/quotations">
 							{{ _('See past quotations') }}
 						</a>
 					{% endif %}
@@ -64,15 +64,15 @@
 				<div class="col-9">
 					{% if doc.items %}
 					<div class="place-order-container">
-						<a class="btn btn-primary-light mr-2" href="/all-products">
+						<a class="btn btn-primary-light mr-2 font-md" href="/all-products">
 							{{ _('Back to Shop') }}
 						</a>
 						{% if cart_settings.enable_checkout %}
-							<button class="btn btn-primary btn-place-order" type="button">
+							<button class="btn btn-primary btn-place-order font-md" type="button">
 								{{ _('Place Order') }}
 							</button>
 						{% else %}
-							<button class="btn btn-primary btn-request-for-quotation" type="button">
+							<button class="btn btn-primary btn-request-for-quotation font-md" type="button">
 								{{ _('Request for Quotation') }}
 							</button>
 						{% endif %}

@@ -179,7 +179,11 @@ erpnext.ProductSearch = class {
 
 		let html = "";
 		recents.forEach((key) => {
-			html += `<button class="btn btn-sm recent-chip mr-1 mb-2">${ key }</button>`;
+			html += `
+				<button class="btn btn-sm recent-chip mr-1 mb-2" style="font-size: 13px">
+					${ key }
+				</button>
+			`;
 		});
 
 		this.recents_container.html(html);

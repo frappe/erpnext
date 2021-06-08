@@ -48,11 +48,14 @@ erpnext.ProductList = class {
 			`;
 		} else {
 			return `
-				<a href="/${ item.route || '#' }" style="text-decoration: none;">
-					<div class="card-img-top no-image">
-						${ frappe.get_abbr(title) }
-					</div>
-				</a>
+				<div class="col-2 border text-center rounded list-image">
+					<a class="product-link product-list-link" href="/${ item.route || '#' }"
+						style="text-decoration: none">
+						<div class="card-img-top no-image-list">
+							${ frappe.get_abbr(title) }
+						</div>
+					</a>
+				</div>
 			`;
 		}
 	}

@@ -8,9 +8,9 @@
 {% if show_coupon_code == 1%}
 <div class="mb-3">
 	<div class="row no-gutters">
-		<input type="text" class="txtcoupon form-control mr-3 w-25" placeholder="Enter Coupon Code" name="txtcouponcode"  ></input>
-		<button class="btn btn-primary btn-sm  bt-coupon">{{ _("Apply Coupon Code") }}</button>
-		<input type="hidden" class="txtreferral_sales_partner" placeholder="Enter Sales Partner" name="txtreferral_sales_partner" type="text"></input>
+		<input type="text" class="txtcoupon form-control mr-3 w-50 font-md" placeholder="Enter Coupon Code" name="txtcouponcode"  ></input>
+		<button class="btn btn-primary btn-sm bt-coupon font-md">{{ _("Apply Coupon Code") }}</button>
+		<input type="hidden" class="txtreferral_sales_partner font-md" placeholder="Enter Sales Partner" name="txtreferral_sales_partner" type="text"></input>
 		</div>
 </div>
 {% endif %}
@@ -30,7 +30,7 @@
 <div class="checkbox ml-1 mb-2">
 	<label for="input_same_billing">
 		<input type="checkbox" id="input_same_billing" checked>
-		<span class="label-area">{{ _('Billing Address is same as Shipping Address') }}</span>
+		<span class="label-area font-md">{{ _('Billing Address is same as Shipping Address') }}</span>
 	</label>
 </div>
 <div class="mb-3 frappe-card p-5" data-section="billing-address">
@@ -46,7 +46,9 @@
 		{% endif %}
 	{% endfor %}
 </div>
-<button class="btn btn-outline-primary btn-sm mt-1 btn-new-address bg-white">{{ _("Add a new address") }}</button>
+<button class="btn btn-outline-primary btn-sm mt-1 btn-new-address bg-white font-md">
+	{{ _("Add a new address") }}
+</button>
 
 <script>
 frappe.ready(() => {
@@ -125,7 +127,8 @@ frappe.ready(() => {
 				{
 					fieldname: "phone",
 					fieldtype: "Data",
-					label: "Phone"
+					label: "Phone",
+					reqd: 1
 				},
 			],
 			primary_action_label: __('Save'),
