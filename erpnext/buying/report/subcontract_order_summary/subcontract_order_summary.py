@@ -87,7 +87,7 @@ def get_subcontracted_data(po_details, data):
 def get_columns():
 	return [
 		{
-			"label": _("Id"),
+			"label": _("Purchase Order"),
 			"fieldname": "po_id",
 			"fieldtype": "Link",
 			"options": "Purchase Order",

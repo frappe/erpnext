@@ -74,6 +74,7 @@ frappe.ui.form.on("Purchase Order", {
 			frm.add_custom_button(__('Return of Components'), () => {
 				frm.call({
 					method: 'erpnext.buying.doctype.purchase_order.purchase_order.get_materials_from_supplier',
+					freeze: true,
 					freeze_message: __('Creating Stock Entry'),
 					args: { purchase_order: frm.doc.name, po_details: po_details },
 					callback: function(r) {
@@ -545,14 +546,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			],
 			primary_action: function() {
 				var data = d.get_values();
-				var content_msg = 'Reason for hold: ' + data.reason_for_hold;
+				let reason_for_hold = 'Reason for hold: ' + data.reason_for_hold;
 
 				frappe.call({
 					method: "frappe.desk.form.utils.add_comment",
 					args: {
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
-						content: __(content_msg),
+						content: __(reason_for_hold),
 						comment_email: frappe.session.user,
 						comment_by: frappe.session.user_fullname
 					},
