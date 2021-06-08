@@ -26,7 +26,7 @@ class ProductBundle(Document):
 		for invoice in invoices:
 			invoice_links.append(get_link_to_form('Sales Invoice', invoice['parent']))
 		if len(invoice_links):
-			frappe.throw("This Product Bundle linked with Sales Invoice: {0}. You will have to cancel these invoices in order to cancel this Product Bundle".format(", ".join(invoice_links)))
+			frappe.throw("This Product Bundle is linked with Sales Invoice: {0}. You will have to cancel these invoices in order to cancel this Product Bundle".format(", ".join(invoice_links)))
 
 	def validate_main_item(self):
 		"""Validates, main Item is not a stock item"""
