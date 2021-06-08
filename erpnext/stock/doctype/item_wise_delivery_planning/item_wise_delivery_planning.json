@@ -22,7 +22,8 @@
   "c_stock",
   "a_stock",
   "d_type",
-  "weight_pu"
+  "weight_pu",
+  "delivery_planning"
  ],
  "fields": [
   {
@@ -137,12 +138,18 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Weight Per Unit"
+  },
+  {
+   "fieldname": "delivery_planning",
+   "fieldtype": "Link",
+   "label": "Delivery Planning",
+   "options": "Delivery Planning"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-03 17:15:59.511970",
+ "modified": "2021-06-08 12:49:02.914272",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item wise Delivery Planning",
