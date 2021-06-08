@@ -79,6 +79,7 @@
   "default_receivable_accounts",
   "default_bank_account",
   "tax_category",
+  "linked_supplier",
   "is_frozen",
   "column_break_41",
   "accounts",
@@ -650,12 +651,19 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Mobile No (Secondary)"
+  },
+  {
+   "fieldname": "linked_supplier",
+   "fieldtype": "Link",
+   "label": "Linked Supplier",
+   "no_copy": 1,
+   "options": "Supplier"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-06-04 22:16:40.063012",
+ "modified": "2021-06-08 22:22:57.659475",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

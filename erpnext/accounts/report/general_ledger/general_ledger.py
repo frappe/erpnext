@@ -30,6 +30,7 @@ def execute(filters=None):
 	validate_filters(filters, account_details)
 
 	validate_party(filters)
+	get_customer_linked_suppliers(filters)
 
 	filters = set_account_currency(filters)
 
@@ -72,18 +73,44 @@ def validate_filters(filters, account_details):
 
 def validate_party(filters):
 	party_type, party = filters.get("party_type"), filters.get("party")
+	filters['party_list'] = []
 
 	if party:
 		if not party_type:
 			frappe.throw(_("To filter based on Party, select Party Type first"))
 		else:
 			for d in party:
+				filters['party_list'].append((party_type, d))
 				if not frappe.db.exists(party_type, d):
 					frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
 
+
+def get_customer_linked_suppliers(filters):
+	if not filters.party_list or not filters.merge_linked_parties:
+		return
+
+	if filters.get("party_type") == "Customer":
+		linked_suppliers = frappe.db.sql("""
+			select 'Supplier', linked_supplier
+			from `tabCustomer`
+			where name in %s and ifnull(linked_supplier, '') != ''
+		""", [filters.party])
+
+		filters.party_list += linked_suppliers
+
+	if filters.get("party_type") == "Supplier":
+		linked_customers = frappe.db.sql("""
+			select 'Customer', name
+			from `tabCustomer`
+			where linked_supplier in %s
+		""", [filters.party])
+
+		filters.party_list += linked_customers
+
+
 def set_account_currency(filters):
 	filters["company_currency"] = frappe.get_cached_value('Company',  filters.company,  "default_currency")
-	if filters.get("account") or filters.get('party') and len(filters.party) == 1:
+	if filters.get("account") or (filters.get('party_list') and len(filters.party_list) == 1):
 		account_currency = None
 
 		if filters.get("account"):
@@ -107,6 +134,7 @@ def set_account_currency(filters):
 			filters.presentation_currency = filters.account_currency
 
 	return filters
+
 
 def get_result(filters, account_details, accounting_dimensions):
 	gl_entries = get_gl_entries(filters, accounting_dimensions)
@@ -233,11 +261,11 @@ def get_conditions(filters, accounting_dimensions):
 	if filters.get("group_by") == _("Group by Party") and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
-	if filters.get("party_type"):
+	if filters.get("party_type") and not filters.get("party_list"):
 		conditions.append("party_type=%(party_type)s")
 
-	if filters.get("party"):
-		conditions.append("party in %(party)s")
+	if filters.get("party_list"):
+		conditions.append("(party_type, party) in %(party_list)s")
 
 	if filters.get("account") or filters.get("party") \
 			or filters.get("group_by") in [_("Group by Account"), _("Group by Party")]:

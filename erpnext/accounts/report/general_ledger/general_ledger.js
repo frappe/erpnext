@@ -165,21 +165,26 @@ frappe.query_reports["General Ledger"] = {
 			"hidden": 1
 		},
 		{
-			"fieldname":"against_in_print",
-			"label": __("Against Column In Print"),
-			"fieldtype": "Check",
-			on_change: function() { }
-		},
-		{
 			"fieldname": "merge_similar_entries",
 			"label": __("Merge Similar Entries"),
 			"fieldtype": "Check",
 			"default": 1
 		},
 		{
+			"fieldname": "merge_linked_parties",
+			"label": __("Merge Linked Parties"),
+			"fieldtype": "Check"
+		},
+		{
 			"fieldname": "show_opening_entries",
 			"label": __("Show Opening Entries"),
 			"fieldtype": "Check"
+		},
+		{
+			"fieldname":"against_in_print",
+			"label": __("Against Column In Print"),
+			"fieldtype": "Check",
+			on_change: function() { }
 		},
 		{
 			"fieldname":"tax_id",
