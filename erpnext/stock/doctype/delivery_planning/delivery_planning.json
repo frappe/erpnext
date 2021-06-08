@@ -14,6 +14,12 @@
   "cb2",
   "pincode_from",
   "pincode_to",
+  "section_break_9",
+  "show_delivery_planning_item",
+  "column_break_11",
+  "show_transporter_planning_item",
+  "column_break_13",
+  "show_purchase_order_planning_item",
   "section_break_10",
   "get_sales_orders",
   "item_wise_dp",
@@ -38,7 +44,8 @@
    "fieldname": "transporter",
    "fieldtype": "Link",
    "label": "Transporter",
-   "options": "Supplier"
+   "options": "Supplier",
+   "reqd": 1
   },
   {
    "fieldname": "cb1",
@@ -104,12 +111,14 @@
   {
    "fieldname": "delivery_date_from",
    "fieldtype": "Date",
-   "label": "Delivery Date From"
+   "label": "Delivery Date From",
+   "reqd": 1
   },
   {
    "fieldname": "delivery_date_to",
    "fieldtype": "Date",
-   "label": "Deliver Date To"
+   "label": "Deliver Date To",
+   "reqd": 1
   },
   {
    "fieldname": "get_sales_orders",
@@ -126,12 +135,39 @@
   {
    "fieldname": "section_break_13",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_transporter_planning_item",
+   "fieldtype": "Button",
+   "label": "Show Transporter Planning Item"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_delivery_planning_item",
+   "fieldtype": "Button",
+   "label": "Show Delivery Planning Item"
+  },
+  {
+   "fieldname": "show_purchase_order_planning_item",
+   "fieldtype": "Button",
+   "label": "Show Purchase Order Planning Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-05 13:03:59.551315",
+ "modified": "2021-06-08 13:08:41.078429",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning",

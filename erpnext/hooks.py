@@ -298,7 +298,7 @@ doc_events = {
 	},
 	('Quotation', 'Sales Order', 'Sales Invoice'): {
 		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
-	}
+	},
 }
 
 # On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
