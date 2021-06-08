@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "autoname": "DPI-.YY.-.MM.-.#####.",
+ "creation": "2021-06-08 12:26:48.361381",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transporter",
+  "customer",
+  "item_code",
+  "item_name",
+  "ordered_qty",
+  "pending_qty",
+  "qty_to_deliver",
+  "weight_to_deliver",
+  "column_break_9",
+  "sales_order",
+  "sorce_warehouse",
+  "postal_code",
+  "delivery_date",
+  "current_stock",
+  "available_stock",
+  "related_delivey_planning",
+  "approved",
+  "weight_per_unit"
+ ],
+ "fields": [
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "label": "Item Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ordered_qty",
+   "fieldtype": "Data",
+   "label": "Ordered Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_qty",
+   "fieldtype": "Data",
+   "label": "Pending Qty"
+  },
+  {
+   "fieldname": "qty_to_deliver",
+   "fieldtype": "Data",
+   "label": "Qty to Deliver"
+  },
+  {
+   "fieldname": "weight_to_deliver",
+   "fieldtype": "Data",
+   "label": "Weight to Deliver"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date"
+  },
+  {
+   "fieldname": "current_stock",
+   "fieldtype": "Data",
+   "label": "Current Stock "
+  },
+  {
+   "fieldname": "available_stock",
+   "fieldtype": "Data",
+   "label": "Available Stock"
+  },
+  {
+   "fieldname": "related_delivey_planning",
+   "fieldtype": "Link",
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "No",
+   "fieldname": "approved",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Approved",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "weight_per_unit",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Weight per unit"
+  },
+  {
+   "fieldname": "sorce_warehouse",
+   "fieldtype": "Link",
+   "label": "Sorce Warehouse",
+   "options": "Warehouse"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-06-08 16:17:05.159219",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Planning Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

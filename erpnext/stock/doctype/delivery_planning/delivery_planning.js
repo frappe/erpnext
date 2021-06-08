@@ -3,23 +3,8 @@
 
 frappe.ui.form.on('Delivery Planning', {
 
-//	 setup(frm){
-//         frm.call({
-//			method: "get_options",
-//			doc: frm.doc,
-//			callback: function(r) {
-//			console.log("This is",r)
-//				if(r.message){
-//				console.log(r)
-////				frm.set_df_property("pincode_from", "options", r.message);
-////				frm.refresh_field("pincode_from")
-//				}
-//
-//			}
-//		});
-////		frm.set_value("company",frappe.defaults.get_user_default("Company"));
-//    };
 	 onload: function(frm){
+//	 To fetch pin code from Address and set in Postal code from and to
 	 	console.log("--------------000000000---------------")
          frappe.call({
 			method: "get_options",
@@ -34,7 +19,34 @@ frappe.ui.form.on('Delivery Planning', {
 		});
     },
 
+//    on_submit: funtion(frm){
+//
+//    },
+
 	 refresh: function(frm) {
+
+//	 if (frm.docstatus === 1)
+//	 	{
+//	 	frm.add_custom_button(__("Create Pick List"), function()  {
+////	 		return frm.call({
+////				doc: frm.doc,
+////				freeze: true,
+////				btn: $(btn_primary),
+////				method: "make_pick_list",
+////				freeze_message: __("Creating Pick Lists"),
+////				callback: (r) => {
+////					if(!r.exc){
+////						frappe.msgprint(__("Pick List Created"));
+////						frm.clear_table("items");
+////						frm.clear_table("item");
+////						frm.refresh_fields();
+////						frm.reload_doc();
+////					}
+////				}
+////			});
+//
+//   		 });
+//	 	}
 
 	frm.cscript.get_sales_orders = function()
 		{
@@ -129,24 +141,14 @@ frappe.ui.form.on('Delivery Planning', {
 
 	},
 
-//	pincode_from:function(frm)
-//    {
-//      frappe.call(
-//      {
-//        doc: frm.doc,
-//        method:"get_pin",
-//        callback: function(r)
-//        {
-//          if(r.message)
-//          {
-//          console.log(r)
-////            $(frm.fields_dict["pincode_from"]).( r.message)
-////            refresh_field("primary_address")
-//          }
-//        }
-//      })
-//    }
-//
+		show_delivery_planning_item: function(frm) {
+
+			frappe.route_options = {"related_delivery_planning": frm.doc.docname };
+			frappe.set_route("Form", "Delivery Planning Item", {
+   				"related_delivery_planning": frm.doc.docname
+			});
+		}, 
+
 
 });
 
@@ -161,3 +163,13 @@ frappe.ui.form.on("Item wise Delivery Planning", {
 
 	},
 });
+
+//frappe.ui.form.on("Show Delivery Planning Item", {
+//	show_delivery_planning_item: function(frm) {
+//		frappe.set_route("Form", "Delivery Planning Item", {
+//   		"related_delivey_planning": frm.doc.docname
+//	});
+//	},
+//});
+
+

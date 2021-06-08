@@ -5,6 +5,10 @@ import frappe
 from frappe.model.document import Document
 
 class DeliveryPlanning(Document):
+
+	def on_submit(self):
+		self.on_delivery_planning_submit()
+
 	@frappe.whitelist()
 	def get_pin(self):
 		if self.pincode_from:
@@ -145,3 +149,92 @@ class DeliveryPlanning(Document):
 		for r in query:
 			option_str += r.get('pincode')+"\n"
 		return option_str
+	# Custom button for pick list creation
+	# @frappe.whitelist()
+	# def make_pick_list(self):
+	# 	lst = []
+	# 	for itm in self.item_wise_dp:
+	# 		lst.append(itm.customer)
+	# 	for customer in set(lst):
+	# 		doc = frappe.new_doc("Pick List")
+	#
+	# 		doc.customer = customer
+	# 		doc.company = self.company
+	# 		doc.purpose = "Delivery"
+	# 		doc.parent_warehouse = self.src_warehouse
+	# 		for itm in self.item_wise_dp:
+	# 			if customer == itm.customer:
+	# 				doc.append("locations", {
+	# 					"item_name": itm.item_name,
+	# 					"item_code": itm.item,
+	# 					# "description": itm.description,
+	# 					"warehouse": itm.src_warehouse,
+	# 					"qty": itm.qty,
+	# 					# "uom": itm.uom,
+	# 					"stock_qty": itm.c_stock,
+	# 					# "stock_uom": itm.stock_uom,
+	# 					# "conversion_factor": itm.conversion_factor,
+	# 					"sales_order": itm.sales_order,
+	# 					# "sales_order_item": itm.sales_order_item,
+	# 				})
+	# 		doc.set_item_locations()
+	# 		doc.insert()
+	# 		doc.save()
+	def on_delivery_planning_submit(self):
+			conditions = ""
+			if self.company:
+				conditions += "AND so.company = %s" % frappe.db.escape(self.company)
+
+			if self.transporter:
+				conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
+
+			if self.delivery_date_from:
+				conditions += "AND so.delivery_date >= '%s'" % self.delivery_date_from
+
+			if self.delivery_date_to:
+				conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
+
+			query = frappe.db.sql(""" select
+									so.customer,
+									soi.item_code,
+									soi.item_name,
+									soi.warehouse,
+									soi.qty,
+									soi.stock_qty,
+									so.name,
+									soi.name as soi_item,
+									soi.weight_per_unit,
+									soi.delivery_date,
+									soi.projected_qty,
+									so.transporter
+
+									from `tabSales Order Item` soi
+									join `tabSales Order` so ON soi.parent = so.name
+
+									where so.docstatus = 1
+									{conditions} """.format(conditions=conditions), as_dict=1)
+
+			print("0000000000...........0000000000",query)
+			for i in query:
+				dp_item = frappe.new_doc("Delivery Planning Item")
+
+				dp_item.transporter = i.transporter
+				dp_item.customer = i.customer
+				dp_item.item_code = i.item_code
+				dp_item.item_name = i.item_name
+
+				dp_item.ordered_qty = i.qty
+				dp_item.pending_qty = i.qty
+				dp_item.qty_to_deliver = i.qty
+				dp_item.weight_to_deliver = i.weight_per_unit * i.qty
+				dp_item.sales_order = i.name
+				dp_item.source_warehouse = i.warehouse
+				dp_item.postal_code = 0
+				dp_item.delivery_date = i.delivery_date
+				dp_item.current_stock = i.stock_qty
+				dp_item.available_stock = i.projected_qty
+				dp_item.related_delivey_planning = self.name
+				dp_item.weight_per_unit = i.weight_per_unit
+				dp_item.save(ignore_permissions = True)
+
+
