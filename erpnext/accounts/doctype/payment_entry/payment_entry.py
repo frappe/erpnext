@@ -176,7 +176,14 @@ class PaymentEntry(AccountsController):
 					d.reference_name, self.party_account_currency)
 
 				for field, value in iteritems(ref_details):
-					if (field == 'exchange_rate' or not d.get(field) or force) and not d.exchange_gain_loss:
+					if d.exchange_gain_loss:
+						# for cases where gain/loss is booked into invoice
+						# exchange_gain_loss is calculated from invoice & populated 
+						# and row.exchange_rate is already set to payment entry's exchange rate
+						# refer -> `update_reference_in_payment_entry()` in utils.py
+						continue
+
+					if field == 'exchange_rate' or not d.get(field) or force:
 						d.set(field, value)
 
 	def validate_payment_type(self):
@@ -669,6 +676,7 @@ class PaymentEntry(AccountsController):
 			row.update(account_details)
 		
 		if not row.get('amount'):
+			# if no difference amount
 			return
 
 		self.append('deductions', row)

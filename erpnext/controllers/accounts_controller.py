@@ -592,7 +592,7 @@ class AccountsController(TransactionBase):
 				"remarks": d.remarks,
 				"advance_amount": flt(d.amount),
 				"allocated_amount": allocated_amount,
-				"ref_exchange_rate": flt(d.exchange_rate)
+				"ref_exchange_rate": flt(d.exchange_rate) # exchange_rate of advance entry
 			}
 
 			self.append("advances", advance_row)
@@ -658,12 +658,13 @@ class AccountsController(TransactionBase):
 			return
 
 		for d in self.get("advances"):
+			advance_exchange_rate = d.ref_exchange_rate
 			if (d.allocated_amount and self.conversion_rate != 1
-				and self.conversion_rate != d.ref_exchange_rate):
+				and self.conversion_rate != advance_exchange_rate):
 
-				allocated_amount_in_ref_rate = d.ref_exchange_rate * d.allocated_amount
-				allocated_amount_in_inv_rate = self.conversion_rate * d.allocated_amount
-				difference = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
+				base_allocated_amount_in_ref_rate = advance_exchange_rate * d.allocated_amount
+				base_allocated_amount_in_inv_rate = self.conversion_rate * d.allocated_amount
+				difference = base_allocated_amount_in_ref_rate - base_allocated_amount_in_inv_rate
 
 				d.exchange_gain_loss = difference
 
