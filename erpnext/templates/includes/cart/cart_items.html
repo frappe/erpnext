@@ -31,7 +31,10 @@
 			{%- set variant_of = frappe.db.get_value('Item', d.item_code, 'variant_of') %}
 			{% if variant_of %}
 			<span class="item-subtitle mr-2">
-				{{ _('Variant of') }} <a href="{{frappe.db.get_value('Item', variant_of, 'route')}}">{{ variant_of }}</a>
+				{{ _('Variant of') }}
+				<a href="{{frappe.db.get_value('Website Item', {'item_code': variant_of}, 'route') or '#'}}">
+					{{ variant_of }}
+				</a>
 			</span>
 			{% endif %}
 			<div class="mt-2 notes">
