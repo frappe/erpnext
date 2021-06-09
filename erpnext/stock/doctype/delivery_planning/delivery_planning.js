@@ -170,7 +170,7 @@ frappe.ui.form.on('Delivery Planning', {
 
 		show_delivery_planning_item: function(frm) {
 
-			frappe.route_options = {"related_delivery_planning": frm.doc.docname };
+			frappe.route_options = {"related_delivey_planning": frm.doc.docname };
 			frappe.set_route("Report", "Delivery Planning Item", {
    				"related_delivey_planning": frm.doc.name
 			});
@@ -179,16 +179,16 @@ frappe.ui.form.on('Delivery Planning', {
 		show_transporter_planning_item: function(frm) {
 
 			frappe.route_options = {"related_delivery_planning": frm.doc.docname };
-			frappe.set_route("Form", "Transporter Wise Planning Item", {
-   				"related_delivey_planning": frm.doc.name
+			frappe.set_route("Report", "Transporter Wise Planning Item", {
+   				"related_delivery_planning": frm.doc.name
 			});
 		},
 
 		show_purchase_order_planning_item: function(frm) {
 
 			frappe.route_options = {"related_delivery_planning": frm.doc.docname };
-			frappe.set_route("Form", "Purchase Orders Planning Item", {
-   				"related_delivey_planning": frm.doc.name
+			frappe.set_route("Report", "Purchase Orders Planning Item", {
+   				"related_delivery_planning": frm.doc.name
 			});
 		},
 
