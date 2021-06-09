@@ -992,6 +992,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			order by account asc""", (payment_entry.name), as_dict=1)
 
 		for i, gle in enumerate(gl_entries):
+			print(gle.account, gle.debit, gle.credit)
+
+		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.debit)
 			self.assertEqual(expected_gle[i][2], gle.credit)
