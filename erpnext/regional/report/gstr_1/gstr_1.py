@@ -147,6 +147,13 @@ class Gstr1Report(object):
 	def get_invoice_data(self):
 		self.invoices = frappe._dict()
 		conditions = self.get_conditions()
+
+		company_gstins = get_company_gstin_number(self.filters.get('company'), all_gstins=True)
+
+		self.filters.update({
+			'company_gstins': company_gstins
+		})
+
 		invoice_data = frappe.db.sql("""
 			select
 				{select_columns}
@@ -193,6 +200,9 @@ class Gstr1Report(object):
 
 		elif self.filters.get("type_of_business") ==  "EXPORT":
 			conditions += """ AND is_return !=1 and gst_category = 'Overseas' """
+
+		conditions += " AND billing_address_gstin NOT IN %(company_gstins)s"
+
 		return conditions
 
 	def get_invoice_items(self):
@@ -810,7 +820,8 @@ def get_rate_and_tax_details(row, gstin):
 
 	return {"num": int(num), "itm_det": itm_det}
 
-def get_company_gstin_number(company, address=None):
+def get_company_gstin_number(company, address=None, all_gstins=False):
+	gstin = ''
 	if address:
 		gstin = frappe.db.get_value("Address", address, "gstin")
 
@@ -822,9 +833,9 @@ def get_company_gstin_number(company, address=None):
 			["Dynamic Link", "parenttype", "=", "Address"],
 		]
 		gstin = frappe.get_all("Address", filters=filters, pluck="gstin")
-		if gstin:
-			gstin[0]
-	
+		if gstin and not all_gstins:
+			gstin = gstin[0]
+
 	if not gstin:
 		address = frappe.bold(address) if address else ""
 		frappe.throw(_("Please set valid GSTIN No. in Company Address {} for company {}").format(
