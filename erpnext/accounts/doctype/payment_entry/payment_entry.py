@@ -68,7 +68,6 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 
 	def on_submit(self):
-		self.setup_party_account_field()
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
@@ -81,7 +80,6 @@ class PaymentEntry(AccountsController):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
-		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
@@ -123,6 +121,11 @@ class PaymentEntry(AccountsController):
 		for d in self.get("references"):
 			if (flt(d.allocated_amount))> 0:
 				if flt(d.allocated_amount) > flt(d.outstanding_amount):
+					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
+
+			# Check for negative outstanding invoices as well
+			if flt(d.allocated_amount) < 0:
+				if flt(d.allocated_amount) < flt(d.outstanding_amount):
 					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
 
 	def delink_advance_entry_references(self):
@@ -180,7 +183,7 @@ class PaymentEntry(AccountsController):
 
 				for field, value in iteritems(ref_details):
 					if field == 'exchange_rate' or not d.get(field) or force:
-						d.set(field, value)
+						d.db_set(field, value)
 
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
@@ -387,6 +390,8 @@ class PaymentEntry(AccountsController):
 			self.status = 'Submitted'
 		else:
 			self.status = 'Draft'
+
+		self.db_set('status', self.status, update_modified = True)
 
 	def set_tax_withholding(self):
 		if not self.party_type == 'Supplier':
@@ -1248,6 +1253,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		outstanding_amount = ref_doc.get("outstanding_amount")
 	elif reference_doctype == "Donation":
 		total_amount = ref_doc.get("amount")
+		outstanding_amount = total_amount
 		exchange_rate = 1
 	elif reference_doctype == "Dunning":
 		total_amount = ref_doc.get("dunning_amount")
