@@ -175,9 +175,9 @@ def install(country=None):
 		]},
 
 		# Issue Priority
-		{'doctype': 'Issue Priority', 'name': _('Low')},
-		{'doctype': 'Issue Priority', 'name': _('Medium')},
-		{'doctype': 'Issue Priority', 'name': _('High')},
+		{'doctype': 'Issue Priority', 'name': 'Low'},
+		{'doctype': 'Issue Priority', 'name': 'Medium'},
+		{'doctype': 'Issue Priority', 'name': 'High'},
 
 		#Job Applicant Source
 		{'doctype': 'Job Applicant Source', 'source_name': _('Website Listing')},
