@@ -992,9 +992,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			order by account asc""", (payment_entry.name), as_dict=1)
 
 		for i, gle in enumerate(gl_entries):
-			print(gle.account, gle.debit, gle.credit)
-
-		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.debit)
 			self.assertEqual(expected_gle[i][2], gle.credit)
@@ -1011,17 +1008,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
 			['_Test Account Excise Duty - _TC', 0, 3000],
 			['Creditors - _TC', 0, 27000],
-			['TDS Payable - _TC', 0, 3000],
 			['TDS Payable - _TC', 3000, 0]
+			['TDS Payable - _TC', 0, 3000],
 		]
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no=%s
 			order by account asc""", (purchase_invoice.name), as_dict=1)
-
-		for i, gle in enumerate(gl_entries):
-			print(gle.account, gle.debit, gle.credit)
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
