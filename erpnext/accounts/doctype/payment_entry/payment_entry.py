@@ -835,9 +835,7 @@ class PaymentEntry(AccountsController):
 			return
 
 		cumulated_tax_fraction = 0
-		total_inclusive_tax_amount_per_qty = 0
 		for i, tax in enumerate(self.get("taxes")):
-
 			tax.tax_fraction_for_current_item = self.get_current_tax_fraction(tax)
 			if i==0:
 				tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item
