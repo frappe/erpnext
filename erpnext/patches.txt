@@ -769,6 +769,7 @@ erpnext.patches.v13_0.rename_discharge_date_in_ip_record
 erpnext.patches.v12_0.create_taxable_value_field
 erpnext.patches.v12_0.add_gst_category_in_delivery_note
 erpnext.patches.v12_0.purchase_receipt_status
+erpnext.patches.v12_0.create_itc_reversal_custom_fields
 erpnext.patches.v13_0.fix_non_unique_represents_company
 erpnext.patches.v12_0.add_document_type_field_for_italy_einvoicing
 erpnext.patches.v13_0.make_non_standard_user_type #13-04-2021
@@ -779,3 +780,4 @@ erpnext.patches.v13_0.germany_make_custom_fields
 erpnext.patches.v13_0.germany_fill_debtor_creditor_number
 erpnext.patches.v13_0.set_pos_closing_as_failed
 erpnext.patches.v13_0.update_timesheet_changes
+erpnext.patches.v13_0.set_training_event_attendance

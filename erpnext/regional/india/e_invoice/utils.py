@@ -43,8 +43,9 @@ def validate_eligibility(doc):
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
+	has_non_gst_item = any(d for d in doc.get('items', []) if d.get('is_non_gst'))
 
-	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied or has_non_gst_item:
 		return False
 
 	return True
@@ -533,11 +534,9 @@ def santize_einvoice_fields(einvoice):
 	return einvoice
 
 def safe_json_load(json_string):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
-
 	try:
 		return json.loads(json_string)
-	except JSONDecodeError as e:
+	except json.JSONDecodeError as e:
 		# print a snippet of 40 characters around the location where error occured
 		pos = e.pos
 		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
