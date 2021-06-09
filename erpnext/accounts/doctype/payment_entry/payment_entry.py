@@ -179,7 +179,7 @@ class PaymentEntry(AccountsController):
 					d.reference_name, self.party_account_currency)
 
 				for field, value in iteritems(ref_details):
-					if (field == 'exchange_rate' or not d.get(field)) or force) and hasattr(d, field):
+					if (field == 'exchange_rate' or not d.get(field) or force) and hasattr(d, field):
 						d.db_set(field, value)
 
 	def validate_payment_type(self):
