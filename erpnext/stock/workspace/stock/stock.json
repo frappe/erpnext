@@ -15,6 +15,7 @@
  "hide_custom": 0,
  "icon": "stock",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Stock",
  "links": [
@@ -262,7 +263,51 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Plannings",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Planning",
+   "link_to": "Delivery Planning",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Planning Item",
+   "link_to": "Delivery Planning Item",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transporter Wise Planning Item",
+   "link_to": "Transporter Wise Planning Item",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Orders Planning Item",
+   "link_to": "Purchase Orders Planning Item",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Settings",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -655,7 +700,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:36.282890",
+ "modified": "2021-06-09 11:48:54.462146",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -694,6 +739,15 @@
    "type": "DocType"
   },
   {
+   "color": "#CB2929",
+   "doc_view": "",
+   "format": "{} Draft",
+   "label": "Delivery Planning",
+   "link_to": "Delivery Planning",
+   "stats_filter": "{ \"status\" : \"Draft\"}",
+   "type": "DocType"
+  },
+  {
    "color": "Yellow",
    "format": "{} To Bill",
    "label": "Delivery Note",
@@ -714,6 +768,7 @@
   {
    "label": "Dashboard",
    "link_to": "Stock",
+   "stats_filter": "",
    "type": "Dashboard"
   }
  ],
