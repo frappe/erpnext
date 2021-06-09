@@ -68,9 +68,6 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).validate()
 
-		# apply tax withholding only if checked and applicable
-		self.set_tax_withholding()
-
 		if not self.is_return:
 			self.po_required()
 			self.pr_required()

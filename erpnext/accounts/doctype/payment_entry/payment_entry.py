@@ -400,6 +400,9 @@ class PaymentEntry(AccountsController):
 		if not self.apply_tax_withholding_amount:
 			return
 
+		if not self.advance_tax_account:
+			frappe.throw(_("Advance TDS account is mandatory for advance TDS deduction"))
+
 		reference_doclist = []
 		net_total = self.paid_amount
 		included_in_paid_amount = 0
@@ -916,7 +919,7 @@ class PaymentEntry(AccountsController):
 			tax_rate = tax.rate
 
 			if tax.charge_type == 'Actual':
-				current_tax_fraction = tax.tax_amount/self.paid_amount_after_tax
+				current_tax_fraction = tax.tax_amount/ (self.paid_amount_after_tax + tax.tax_amount)
 			elif tax.charge_type == "On Paid Amount":
 				current_tax_fraction = tax_rate / 100.0
 

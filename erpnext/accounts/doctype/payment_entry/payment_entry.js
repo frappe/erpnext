@@ -1133,7 +1133,7 @@ frappe.ui.form.on('Payment Entry', {
 			let tax_rate = tax.rate;
 
 			if (tax.charge_type == "Actual") {
-				current_tax_fraction = tax.tax_amount/frm.doc.paid_amount_after_tax;
+				current_tax_fraction = tax.tax_amount/(frm.doc.paid_amount_after_tax + frm.doc.tax_amount);
 			} else if(tax.charge_type == "On Paid Amount") {
 				current_tax_fraction = (tax_rate / 100.0);
 			} else if(tax.charge_type == "On Previous Row Amount") {
