@@ -29,7 +29,10 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item", function() {
 			return {
-				query: "erpnext.manufacturing.doctype.bom.bom.item_query"
+				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
+				filters: {
+					"is_stock_item": 1
+				}
 			};
 		});
 

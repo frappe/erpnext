@@ -41,7 +41,7 @@ def build_conditions(process_type, account, company):
 	if account:
 		conditions += "AND %s='%s'"%(deferred_account, account)
 	elif company:
-		conditions += "AND p.company='%s'"%(company)
+		conditions += f"AND p.company = {frappe.db.escape(company)}"
 
 	return conditions
 
@@ -360,12 +360,10 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			frappe.flags.deferred_accounting_error = True
 
 def send_mail(deferred_process):
-	title = _("Error while processing deferred accounting for {0}".format(deferred_process))
-	content = _("""
-		Deferred accounting failed for some invoices:
-		Please check Process Deferred Accounting {0}
-		and submit manually after resolving errors
-	""").format(get_link_to_form('Process Deferred Accounting', deferred_process))
+	title = _("Error while processing deferred accounting for {0}").format(deferred_process)
+	link = get_link_to_form('Process Deferred Accounting', deferred_process)
+	content = _("Deferred accounting failed for some invoices:") + "\n"
+	content += _("Please check Process Deferred Accounting {0} and submit manually after resolving errors.").format(link)
 	sendmail_to_system_managers(title, content)
 
 def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,

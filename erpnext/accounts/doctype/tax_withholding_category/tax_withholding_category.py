@@ -21,7 +21,10 @@ def get_party_details(inv):
 	else:
 		party_type = 'Supplier'
 		party = inv.supplier
-	
+
+	if not party:
+		frappe.throw(_("Please select {0} first").format(party_type))
+
 	return party_type, party
 
 def get_party_tax_withholding_details(inv, tax_withholding_category=None):
@@ -251,7 +254,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 	threshold = tax_details.get('threshold', 0)
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
 
-	if ((threshold and supp_credit_amt >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
+	if ((threshold and inv.net_total >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
 			inv.posting_date, tax_deducted,
@@ -324,7 +327,7 @@ def get_tds_amount_from_ldc(ldc, parties, fiscal_year, pan_no, tax_details, post
 		net_total, ldc.certificate_limit
 	):
 		tds_amount = get_ltds_amount(net_total, limit_consumed, ldc.certificate_limit, ldc.rate, tax_details)
-	
+
 	return tds_amount
 
 def get_debit_note_amount(suppliers, fiscal_year_details, company=None):

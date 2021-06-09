@@ -171,7 +171,7 @@ erpnext.PointOfSale.Payment = class {
 
 		this.setup_listener_for_payments();
 
-		this.$payment_modes.on('click', '.shortcut', () => {
+		this.$payment_modes.on('click', '.shortcut', function() {
 			const value = $(this).attr('data-value');
 			me.selected_mode.set_value(value);
 		});

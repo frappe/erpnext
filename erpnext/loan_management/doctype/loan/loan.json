@@ -360,13 +360,14 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-10 09:28:21.946972",
+ "modified": "2021-04-19 18:10:32.360818",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
