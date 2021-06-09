@@ -17,6 +17,7 @@
   {
    "fieldname": "sales_order",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Sales Order",
    "options": "Sales Order",
    "read_only": 1
@@ -24,12 +25,14 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Item Code",
    "read_only": 1
   },
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Item Name",
    "read_only": 1
   },
@@ -42,19 +45,21 @@
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Supplier",
    "options": "Supplier"
   },
   {
    "fieldname": "related_delivery_planning",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Related Delivery Planning",
    "options": "Delivery Planning"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-08 19:11:56.863457",
+ "modified": "2021-06-09 15:02:23.243454",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Orders Planning Item",
