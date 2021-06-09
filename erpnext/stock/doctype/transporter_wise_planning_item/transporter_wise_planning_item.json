@@ -12,7 +12,6 @@
   "quantity_to_deliver",
   "source_warehouse",
   "related_delivery_planning",
-  "split",
   "section_break_8",
   "items"
  ],
@@ -61,18 +60,13 @@
    "options": "Transporter Planning Items"
   },
   {
-   "fieldname": "split",
-   "fieldtype": "Button",
-   "label": "Split"
-  },
-  {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 15:01:47.159765",
+ "modified": "2021-06-09 15:11:05.395131",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Transporter Wise Planning Item",

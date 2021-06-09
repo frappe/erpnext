@@ -25,7 +25,8 @@
   "approved",
   "weight_per_unit",
   "supplier_dc",
-  "supplier"
+  "supplier",
+  "split"
  ],
  "fields": [
   {
@@ -149,11 +150,16 @@
    "fieldtype": "Link",
    "label": "Supplier",
    "options": "Supplier"
+  },
+  {
+   "fieldname": "split",
+   "fieldtype": "Button",
+   "label": "Split"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 12:49:48.927513",
+ "modified": "2021-06-09 15:11:33.115242",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
