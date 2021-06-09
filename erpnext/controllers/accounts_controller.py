@@ -116,6 +116,8 @@ class AccountsController(TransactionBase):
 
 		if self.doctype == 'Purchase Invoice':
 			self.calculate_paid_amount()
+			# apply tax withholding only if checked and applicable
+			self.set_tax_withholding()
 
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
 			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
@@ -742,7 +744,8 @@ class AccountsController(TransactionBase):
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
 		for pe in self.get("advances"):
-			if pe.reference_type == "Payment Entry":
+			if pe.reference_type == "Payment Entry" and \
+				frappe.db.get_value('Payment Entry', pe.reference_name, 'advance_tax_account'):
 				pe = frappe.get_doc("Payment Entry", pe.reference_name)
 				for tax in pe.get("taxes"):
 					account_currency = get_account_currency(tax.account_head)

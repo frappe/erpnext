@@ -975,6 +975,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		# Create Payment Entry Against the order
 		payment_entry = get_payment_entry(dt='Purchase Order', dn=po.name)
+		payment_entry.paid_from = 'Cash - _TC'
 		payment_entry.save()
 		payment_entry.submit()
 
