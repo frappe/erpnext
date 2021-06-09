@@ -223,15 +223,17 @@ class DeliveryPlanning(Document):
 									soi.weight_per_unit,
 									soi.delivery_date,
 									soi.projected_qty,
-									so.transporter
+									so.transporter,
+									soi.delivered_by_supplier,
+									soi.supplier
+
 
 									from `tabSales Order Item` soi
 									join `tabSales Order` so ON soi.parent = so.name
 
 									where so.docstatus = 1
 									{conditions} """.format(conditions=conditions), as_dict=1)
-
-			print("0000000000...........0000000000",query)
+			print("00000000000.0000000000.000000",query)
 			for i in query:
 				dp_item = frappe.new_doc("Delivery Planning Item")
 
@@ -252,6 +254,9 @@ class DeliveryPlanning(Document):
 				dp_item.available_stock = i.projected_qty
 				dp_item.related_delivey_planning = self.name
 				dp_item.weight_per_unit = i.weight_per_unit
+				dp_item.supplier_dc = i.delivered_by_supplier
+				dp_item.supplier = i.supplier
+
 				dp_item.save(ignore_permissions = True)
 
 	def on_transporter_planning(self):
@@ -268,34 +273,34 @@ class DeliveryPlanning(Document):
 		if self.delivery_date_to:
 			conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
 
-			query = frappe.db.sql(""" select
-								so.transporter,
-								so.delivery_date,
-								SUM(so.total_net_weight) AS total_net_weight ,
-								SUM(so.total_qty) AS total_qty
+		query = frappe.db.sql(""" select
+							so.transporter,
+							so.delivery_date,
+							SUM(so.total_net_weight) AS total_net_weight ,
+							SUM(so.total_qty) AS total_qty
 
-								from `tabSales Order` so
-								# from `tabSales Order Item` soi
-								# join `tabSales Order` so ON soi.parent = so.name
+							from `tabSales Order` so
+							# from `tabSales Order Item` soi
+							# join `tabSales Order` so ON soi.parent = so.name
 
-								where so.docstatus = 1
-								{conditions}
-								group by so.transporter, so.delivery_date
+							where so.docstatus = 1
+							{conditions}
+							group by so.transporter, so.delivery_date
 
-								""".format(conditions=conditions), as_dict=1)
+							""".format(conditions=conditions), as_dict=1)
 
 							# from `tabSupplier` s
 							# join `tabSales Order` so ON s.name = so.transporter
 
-			for i in query:
-				dp_item = frappe.new_doc("Transporter Wise Planning Item")
-				dp_item.transporter = i.transporter
-				dp_item.delivery_date = i.delivery_date
-				dp_item.weight_to_deliver = i.total_net_weight
-				dp_item.quantity_to_deliver = i.total_qty
-				dp_item.source_warehouse = ""
-				dp_item.related_delivery_planning = self.name
-				dp_item.save(ignore_permissions=True)
+		for i in query:
+			dp_item = frappe.new_doc("Transporter Wise Planning Item")
+			dp_item.transporter = i.transporter
+			dp_item.delivery_date = i.delivery_date
+			dp_item.weight_to_deliver = i.total_net_weight
+			dp_item.quantity_to_deliver = i.total_qty
+			dp_item.source_warehouse = ""
+			dp_item.related_delivery_planning = self.name
+			dp_item.save(ignore_permissions=True)
 
 
 	def on_purchase_planning(self):
@@ -335,4 +340,4 @@ class DeliveryPlanning(Document):
 			dp_item.related_delivery_planning = self.name
 			dp_item.save(ignore_permissions=True)
 
-# left outer join `tabAddress` as add on add.name = so.shipping_address_name
+# left outer join `tabAddress` as add on add.address_title = so.customer
