@@ -12,10 +12,6 @@ from frappe.desk.notifications import clear_notifications
 class TransactionDeletionRecord(Document):
 	def validate(self):
 		frappe.only_for('System Manager')
-		company_obj = frappe.get_doc('Company', self.company)
-		if frappe.session.user != company_obj.owner and frappe.session.user != 'Administrator':
-			frappe.throw(_('Transactions can only be deleted by the creator of the Company or the Administrator.'), 
-				frappe.PermissionError)
 		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
 		for doctype in self.doctypes_to_be_ignored:
 			if doctype.doctype_name not in doctypes_to_be_ignored_list:

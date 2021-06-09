@@ -1019,6 +1019,7 @@
    "show_seconds": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -1075,6 +1076,7 @@
    "show_seconds": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -1690,7 +1692,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-02-28 22:33:15.728392",
+ "modified": "2021-06-09 12:30:25.632109",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
