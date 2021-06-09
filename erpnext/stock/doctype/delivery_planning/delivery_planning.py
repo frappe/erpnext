@@ -8,6 +8,7 @@ class DeliveryPlanning(Document):
 
 	def on_submit(self):
 		self.on_delivery_planning_submit()
+		print("Calling DPI")
 		self.on_transporter_planning()
 		self.on_purchase_planning()
 
@@ -291,6 +292,21 @@ class DeliveryPlanning(Document):
 
 							# from `tabSupplier` s
 							# join `tabSales Order` so ON s.name = so.transporter
+		# query2 = frappe.db.sql(""" select
+		# 					so.transporter,
+		# 					so.delivery_date,
+		# 					SUM(so.total_net_weight) AS total_net_weight ,
+		# 					SUM(so.total_qty) AS total_qty
+		#
+		# 					from `tabSales Order` so
+		# 					# from `tabSales Order Item` soi
+		# 					# join `tabSales Order` so ON soi.parent = so.name
+		#
+		# 					where so.docstatus = 1
+		# 					{conditions}
+		# 					group by so.transporter, so.delivery_date
+		#
+		# 					""".format(conditions=conditions), as_dict=1)
 
 		for i in query:
 			dp_item = frappe.new_doc("Transporter Wise Planning Item")
