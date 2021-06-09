@@ -11,23 +11,29 @@
   "weight_to_deliver",
   "quantity_to_deliver",
   "source_warehouse",
-  "related_delivery_planning"
+  "related_delivery_planning",
+  "split",
+  "section_break_8",
+  "items"
  ],
  "fields": [
   {
    "fieldname": "transporter",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Transporter",
    "options": "Supplier"
   },
   {
    "fieldname": "delivery_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Delivery Date"
   },
   {
    "fieldname": "weight_to_deliver",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Weight To Deliver"
   },
   {
@@ -38,6 +44,7 @@
   {
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Source Warehouse",
    "options": "Warehouse"
   },
@@ -46,11 +53,26 @@
    "fieldtype": "Link",
    "label": "Related Delivery Planning",
    "options": "Delivery Planning"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Transporter Planning Items"
+  },
+  {
+   "fieldname": "split",
+   "fieldtype": "Button",
+   "label": "Split"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-08 18:56:47.844467",
+ "modified": "2021-06-09 15:01:47.159765",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Transporter Wise Planning Item",
