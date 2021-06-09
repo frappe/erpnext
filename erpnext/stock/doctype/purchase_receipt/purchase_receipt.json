@@ -473,6 +473,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Accepted Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -481,6 +482,7 @@
    "description": "Warehouse where you are maintaining stock of rejected items",
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "oldfieldname": "rejected_warehouse",
@@ -1538,7 +1540,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2021-04-19 01:29:42.095552",
+ "modified": "2021-06-09 23:48:18.448613",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

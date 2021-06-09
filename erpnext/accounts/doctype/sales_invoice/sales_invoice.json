@@ -643,6 +643,7 @@
    "depends_on": "update_stock",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set Source Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -2181,7 +2182,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-06-08 10:49:22.656066",
+ "modified": "2021-06-10 00:36:22.172310",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
