@@ -224,7 +224,8 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 	return frappe.db.sql("""SELECT tsd.name as name,
 				tsd.parent as parent, tsd.billing_hours as billing_hours,
 				tsd.billing_amount as billing_amount, tsd.activity_type as activity_type,
-				tsd.description as description, ts.currency as currency
+				tsd.description as description, ts.currency as currency,
+				tsd.project_name as project_name
 			FROM `tabTimesheet Detail` tsd
 			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent
 			WHERE tsd.parenttype = 'Timesheet'
