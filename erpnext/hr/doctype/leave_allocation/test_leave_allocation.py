@@ -207,7 +207,8 @@ class TestLeaveAllocation(unittest.TestCase):
 			"leave_approver": 'test@example.com'
 		})
 		leave_application.submit()
-		leave_allocation.new_leaves_allocated = 10
+		leave_allocation.new_leaves_allocated = 8
+		leave_allocation.total_leaves_allocated = 8
 		self.assertRaises(frappe.ValidationError, leave_allocation.submit)
 
 def create_leave_allocation(**args):
