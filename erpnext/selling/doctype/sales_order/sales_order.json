@@ -36,6 +36,8 @@
   "company_address",
   "company_address_display",
   "col_break46",
+  "transporter",
+  "transporter_name",
   "shipping_address_name",
   "shipping_address",
   "customer_group",
@@ -1486,13 +1488,25 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "default": "transporter.supplier_name",
+   "fieldname": "transporter_name",
+   "fieldtype": "Data",
+   "label": "Transporter Name"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 23:55:13.439068",
+ "modified": "2021-06-09 13:18:01.282463",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

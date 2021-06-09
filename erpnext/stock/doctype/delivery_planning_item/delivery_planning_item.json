@@ -23,18 +23,22 @@
   "available_stock",
   "related_delivey_planning",
   "approved",
-  "weight_per_unit"
+  "weight_per_unit",
+  "supplier_dc",
+  "supplier"
  ],
  "fields": [
   {
    "fieldname": "transporter",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Transporter",
    "options": "Supplier"
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Customer",
    "options": "Customer",
    "read_only": 1
@@ -48,12 +52,14 @@
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Item Name",
    "read_only": 1
   },
   {
    "fieldname": "ordered_qty",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Ordered Qty",
    "read_only": 1
   },
@@ -70,6 +76,7 @@
   {
    "fieldname": "weight_to_deliver",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Weight to Deliver"
   },
   {
@@ -81,11 +88,13 @@
   {
    "fieldname": "postal_code",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Postal Code"
   },
   {
    "fieldname": "delivery_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Delivery Date"
   },
   {
@@ -128,11 +137,23 @@
    "fieldtype": "Link",
    "label": "Sorce Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "supplier_dc",
+   "fieldtype": "Check",
+   "label": " Supplier delivers to Customer "
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-08 16:17:05.159219",
+ "modified": "2021-06-09 12:49:48.927513",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
