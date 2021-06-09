@@ -179,7 +179,7 @@ class PaymentEntry(AccountsController):
 					d.reference_name, self.party_account_currency)
 
 				for field, value in iteritems(ref_details):
-					if (field == 'exchange_rate' or not d.get(field) or force) and hasattr(d, field):
+					if field == 'exchange_rate' or not d.get(field) or force:
 						d.db_set(field, value)
 
 	def validate_payment_type(self):
@@ -994,6 +994,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		outstanding_amount = ref_doc.get("outstanding_amount")
 	elif reference_doctype == "Donation":
 		total_amount = ref_doc.get("amount")
+		outstanding_amount = total_amount
 		exchange_rate = 1
 	elif reference_doctype == "Dunning":
 		total_amount = ref_doc.get("dunning_amount")
