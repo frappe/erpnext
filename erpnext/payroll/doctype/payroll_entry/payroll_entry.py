@@ -665,6 +665,8 @@ def get_employee_list(filters):
 		emp_list = remove_payrolled_employees(emp_list, filters.start_date, filters.end_date)
 		return emp_list
 
+	return []
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
@@ -673,7 +675,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	include_employees = []
 	emp_cond = ''
 	if filters.start_date and filters.end_date:
-		employee_list = get_employee_list(filters) or []
+		employee_list = get_employee_list(filters)
 		emp = filters.get('employees')
 		include_employees = [employee.employee for employee in employee_list if employee.employee not in emp]
 		filters.pop('start_date')
