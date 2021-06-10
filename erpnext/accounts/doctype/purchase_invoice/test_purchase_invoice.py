@@ -951,7 +951,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.save()
 
 	def test_gain_loss_with_advance_entry(self):
-		unlink_payment_on_cancel_of_invoice(0)
+		unlink_enabled = frappe.db.get_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice")
+		frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", 1)
 		pay = frappe.get_doc({
 			'doctype': 'Payment Entry',
 			'company': '_Test Company',
@@ -1051,7 +1052,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.delete()
 		pi_2.delete()
 		pay.delete()
-		unlink_payment_on_cancel_of_invoice(1)
+		frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled)
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
