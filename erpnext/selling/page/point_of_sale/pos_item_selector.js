@@ -51,7 +51,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 	}
 
-	get_items({start = 0, page_length = 40, search_value=''}) {
+	get_items({start = 0, page_length = 40, search_term=''}) {
 		const doc = this.events.get_frm().doc;
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
@@ -61,7 +61,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
-			args: { start, page_length, price_list, item_group, search_value, pos_profile },
+			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
 	}
 
@@ -78,8 +78,9 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
+		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 
 		let qty_to_display = actual_qty;
 
@@ -94,7 +95,11 @@ erpnext.PointOfSale.ItemSelector = class {
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
 						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
+							<img 
+								onerror="cur_pos.item_selector.handle_broken_image(this)"
+								class="h-full" src="${item_image}"
+								alt="${frappe.get_abbr(item.item_name)}"
+								style="object-fit: cover;">
 						</div>`;
 			} else {
 				return `<div class="item-qty-pill">
@@ -108,6 +113,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+				data-rate="${escape(price_list_rate)}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -116,10 +122,15 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-name">
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
-					<div class="item-rate">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
+					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
 				</div>
 			</div>`
 		);
+	}
+
+	handle_broken_image($img) {
+		const item_abbr = $($img).attr('alt');
+		$($img).parent().replaceWith(`<div class="item-display abbr">${item_abbr}</div>`);
 	}
 
 	make_search_bar() {
@@ -213,13 +224,15 @@ erpnext.PointOfSale.ItemSelector = class {
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
+			let rate = unescape($item.attr('data-rate'));
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
+			rate = rate === "undefined" ? undefined : rate;
 
-			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
+			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom, rate }});
 			me.set_search_value('');
 		});
 
@@ -290,7 +303,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
-		this.get_items({ search_value: search_term })
+		this.get_items({ search_term })
 			.then(({ message }) => {
 				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;

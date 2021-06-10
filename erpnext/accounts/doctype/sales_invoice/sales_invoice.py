@@ -531,7 +531,7 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
+					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos, update_data=True)
 					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -849,7 +849,6 @@ class SalesInvoice(SellingController):
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
@@ -983,7 +982,13 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
+
+			skip_change_gl_entries = not cint(frappe.db.get_single_value('Accounts Settings', 'post_change_gl_entries'))
+
 			for payment_mode in self.payments:
+				if skip_change_gl_entries and payment_mode.account == self.account_for_change_amount:
+					payment_mode.base_amount -= self.change_amount
+
 				if payment_mode.amount:
 					# POS, make payment entries
 					gl_entries.append(
@@ -1015,8 +1020,11 @@ class SalesInvoice(SellingController):
 						}, payment_mode_account_currency, item=self)
 					)
 
+			if not skip_change_gl_entries:
+				self.make_gle_for_change_amount(gl_entries)
+
 	def make_gle_for_change_amount(self, gl_entries):
-		if cint(self.is_pos) and self.change_amount:
+		if self.change_amount:
 			if self.account_for_change_amount:
 				gl_entries.append(
 					self.get_gl_dict({

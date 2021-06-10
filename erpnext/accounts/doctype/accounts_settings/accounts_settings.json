@@ -18,6 +18,7 @@
   "delete_linked_ledger_entries",
   "book_asset_depreciation_entry_automatically",
   "unlink_advance_payment_on_cancelation_of_order",
+  "post_change_gl_entries",
   "tax_settings_section",
   "determine_address_tax_category_from",
   "column_break_19",
@@ -253,6 +254,12 @@
   {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "post_change_gl_entries",
+   "fieldtype": "Check",
+   "label": "Post Ledger Entries for Given Change"
   }
  ],
  "icon": "icon-cog",
@@ -260,7 +267,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-30 15:25:10.381008",
+ "modified": "2021-05-25 12:34:05.858669",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
