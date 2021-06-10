@@ -1000,6 +1000,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Create Purchase Invoice against Purchase Order
 		purchase_invoice = get_mapped_purchase_invoice(po.name)
 		purchase_invoice.allocate_advances_automatically = 1
+		purchase_invoice.items[0].expense_account = '_Test Account Cost for Goods Sold - _TC'
 		purchase_invoice.save()
 		purchase_invoice.submit()
 
@@ -1009,8 +1010,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
 			['_Test Account Excise Duty - _TC', 0, 3000],
 			['Creditors - _TC', 0, 27000],
-			['TDS Payable - _TC', 3000, 0],
-			['TDS Payable - _TC', 0, 3000]
+			['TDS Payable - _TC', 3000, 3000]
 		]
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
