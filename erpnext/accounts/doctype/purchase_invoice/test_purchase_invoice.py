@@ -950,6 +950,108 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
+	def test_gain_loss_with_advance_entry(self):
+		unlink_payment_on_cancel_of_invoice(0)
+		pay = frappe.get_doc({
+			'doctype': 'Payment Entry',
+			'company': '_Test Company',
+			'payment_type': 'Pay',
+			'party_type': 'Supplier',
+			'party': '_Test Supplier USD',
+			'paid_to': '_Test Payable USD - _TC',
+			'paid_from': 'Cash - _TC',
+			'paid_amount': 70000,
+			'target_exchange_rate': 70,
+			'received_amount': 1000,
+		})
+		pay.insert()
+		pay.submit()
+
+		pi =  make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
+			conversion_rate=75, rate=500, do_not_save=1, qty=1)
+		pi.cost_center = "_Test Cost Center - _TC"
+		pi.advances = []
+		pi.append("advances", {
+			"reference_type": "Payment Entry",
+			"reference_name": pay.name,
+			"advance_amount": 1000,
+			"remarks": pay.remarks,
+			"allocated_amount": 500,
+			"ref_exchange_rate": 70
+		})
+		pi.save()
+		pi.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 37500.0, 0.0],
+			["_Test Payable USD - _TC", 0.0, 37500.0],
+			["_Test Payable USD - _TC", 0.0, 2500.0],
+			["Exchange Gain/Loss - _TC", 2500.0, 0.0]
+		]
+
+		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_no=%s order by account asc, credit desc""", (pi.name), as_dict=1)
+		
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+
+		pi_2 =  make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
+			conversion_rate=73, rate=500, do_not_save=1, qty=1)
+		pi_2.cost_center = "_Test Cost Center - _TC"
+		pi_2.advances = []
+		pi_2.append("advances", {
+			"reference_type": "Payment Entry",
+			"reference_name": pay.name,
+			"advance_amount": 500,
+			"remarks": pay.remarks,
+			"allocated_amount": 500,
+			"ref_exchange_rate": 70
+		})
+		pi_2.save()
+		pi_2.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 36500.0, 0.0],
+			["_Test Payable USD - _TC", 0.0, 36500.0],
+			["_Test Payable USD - _TC", 0.0, 1500.0],
+			["Exchange Gain/Loss - _TC", 1500.0, 0.0]
+		]
+
+		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_no=%s order by account asc, credit desc""", (pi_2.name), as_dict=1)
+		
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+
+		expected_gle = [["_Test Payable USD - _TC", 35000.0, 0.0],
+			["_Test Payable USD - _TC", 35000.0, 0.0],
+			["Cash - _TC", 0.0, 70000.0]]
+
+		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_no=%s and is_cancelled=0 order by account asc""", (pay.name), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+
+		pi.reload()
+		pi.cancel()
+
+		pi_2.reload()
+		pi_2.cancel()
+
+		pay.reload()
+		pay.cancel()
+
+		pi.delete()
+		pi_2.delete()
+		pay.delete()
+		unlink_payment_on_cancel_of_invoice(1)
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
