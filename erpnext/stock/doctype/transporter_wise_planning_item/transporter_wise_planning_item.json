@@ -12,6 +12,7 @@
   "quantity_to_deliver",
   "source_warehouse",
   "related_delivery_planning",
+  "related_dpi",
   "section_break_8",
   "items"
  ],
@@ -33,12 +34,15 @@
    "fieldname": "weight_to_deliver",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Weight To Deliver"
+   "label": "Weight To Deliver",
+   "read_only": 1
   },
   {
    "fieldname": "quantity_to_deliver",
    "fieldtype": "Data",
-   "label": "Quantity To Deliver"
+   "in_list_view": 1,
+   "label": "Quantity To Deliver",
+   "read_only": 1
   },
   {
    "fieldname": "source_warehouse",
@@ -50,8 +54,10 @@
   {
    "fieldname": "related_delivery_planning",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Related Delivery Planning",
-   "options": "Delivery Planning"
+   "options": "Delivery Planning",
+   "read_only": 1
   },
   {
    "fieldname": "items",
@@ -62,11 +68,18 @@
   {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "related_dpi",
+   "fieldtype": "Link",
+   "label": "Related Delivery Planning Item",
+   "options": "Delivery Planning Item",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 15:11:05.395131",
+ "modified": "2021-06-10 18:58:53.697935",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Transporter Wise Planning Item",

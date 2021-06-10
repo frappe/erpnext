@@ -72,6 +72,7 @@
   {
    "fieldname": "qty_to_deliver",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Qty to Deliver"
   },
   {
@@ -83,6 +84,7 @@
   {
    "fieldname": "sales_order",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Sales Order",
    "options": "Sales Order"
   },
@@ -159,7 +161,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 15:11:33.115242",
+ "modified": "2021-06-09 15:13:10.871780",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",

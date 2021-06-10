@@ -9,8 +9,8 @@ class DeliveryPlanning(Document):
 	def on_submit(self):
 		self.on_delivery_planning_submit()
 		print("Calling DPI")
-		self.on_transporter_planning()
-		self.on_purchase_planning()
+		# self.on_transporter_planning()
+		# self.on_purchase_planning()
 
 
 	# @frappe.whitelist()
@@ -357,3 +357,165 @@ class DeliveryPlanning(Document):
 			dp_item.save(ignore_permissions=True)
 
 # left outer join `tabAddress` as add on add.address_title = so.customer
+
+	# on click of custom button Calculate Purchase Order Plan Summary create new PODPI
+	@frappe.whitelist()
+	def purchase_order_call(self):
+		conditions = ""
+		print("----------0000000000 this is call purchase order------------")
+		item = frappe.db.get_list(doctype='Delivery Planning Item',
+							  	  filters={"approved": "Yes",
+								  "related_delivey_planning" : self.name})
+		print("<<<<<<<<<<>>>>>>>>>>>>>>>>>",item)
+
+		if(item):
+
+			for i in item:
+
+				popi = frappe.db.get_list(doctype= 'Purchase Orders Planning Item',
+								filters={"related_delivery_planning" : self.name})
+
+
+				if popi:
+					for p in popi:
+						frappe.db.delete('Purchase Orders Planning Item', {
+										'name': p.name
+						})
+						print("-----------Deleted TDPi Id--------------",p.name)
+
+					conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
+					query = frappe.db.sql(""" select
+									sales_order,
+									item_code,
+									item_name,
+									ordered_qty,
+									supplier,
+									name
+
+									from `tabDelivery Planning Item`
+
+									where supplier_dc = 1
+									{conditions} """.format(conditions=conditions), as_dict=1)
+
+					for q in query:
+						dp_item = frappe.new_doc("Purchase Orders Planning Item")
+						dp_item.sales_order = q.sales_order
+						dp_item.item_code = q.item_code
+						dp_item.item_name = q.item_name
+						dp_item.supplier = q.supplier
+						do_item.qty_to_order = q.ordered_qty
+						dp_item.related_delivery_planning = self.name
+						dp_item.rdp_item = q.name
+						dp_item.save(ignore_permissions=True)
+
+				else:
+						conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
+						query = frappe.db.sql(""" select
+											sales_order,
+											item_code,
+											item_name,
+											ordered_qty,
+											supplier,
+											name
+
+											from `tabDelivery Planning Item`
+
+											where supplier_dc = 1
+											{conditions} """.format(conditions=conditions), as_dict=1)
+
+						for q in query:
+							p_item = frappe.new_doc("Purchase Orders Planning Item")
+							p_item.sales_order = q.sales_order
+							p_item.item_code = q.item_code
+							p_item.item_name = q.item_name
+							p_item.supplier = q.supplier
+							p_item.qty_to_order = q.ordered_qty
+							p_item.related_delivery_planning = self.name
+							p_item.rdp_item = q.name
+							p_item.save(ignore_permissions=True)
+
+				return 1
+
+# Creating Transporter wise delivery planning item
+	@frappe.whitelist()
+	def summary_call(self):
+		conditions = ""
+		print("----------0000000000 this is call purchase order------------")
+		item = frappe.db.get_list(doctype='Delivery Planning Item',
+								  filters={"approved": "Yes",
+										   "related_delivey_planning": self.name})
+		print("<<<<<<<<<<>>>>>>>>>>>>>>>>>", item)
+
+		if (item):
+			print("-----------D gfhgfhfg --------------",item)
+			for i in item:
+				popi = frappe.db.get_list(doctype='Transporter Wise Planning Item',
+										  filters={"related_delivery_planning": self.name})
+
+				if popi:
+					for p in popi:
+						frappe.db.delete('Transporter Wise Planning Item', {
+							'name': p.name
+						})
+						print("-----------Deleted TDPi Id--------------", p.name)
+
+					conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
+					query = frappe.db.sql(""" select
+											transporter,
+											delivery_date,
+											sum(weight_to_deliver) as total_weight,
+											sorce_warehouse,
+											sum(ordered_qty) as total_qty,
+											name
+
+											from `tabDelivery Planning Item`
+
+											where approved = "Yes"
+											{conditions}
+											group by transporter, delivery_date
+											""".format(conditions=conditions), as_dict=1)
+
+					for q in query:
+						dp_item = frappe.new_doc("Transporter Wise Planning Item")
+						dp_item.transporter = q.transporter
+						dp_item.delivery_date = q.delivery_date
+						dp_item.weight_to_deliver = q.total_weight
+						dp_item.quantity_to_deliver = q.total_qty
+						dp_item.source_warehouse = q.sorce_warehouse
+						dp_item.related_delivery_planning = self.name
+						dp_item.related_dpi= q.name
+						dp_item.save(ignore_permissions=True)
+
+						print("aaaaaaa0000000 ..........",q.total_weight)
+
+				else:
+					conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
+					query = frappe.db.sql(""" select
+										transporter,
+										delivery_date,
+										sum(weight_to_deliver) as total_weight,
+										sorce_warehouse,
+										sum(ordered_qty) as total_qty,
+										name
+
+										from `tabDelivery Planning Item`
+
+										where approved = "Yes"
+										{conditions}
+										group by transporter, delivery_date
+										""".format(conditions=conditions), as_dict=1)
+
+					for q in query:
+						dp_item = frappe.new_doc("Transporter Wise Planning Item")
+						dp_item.transporter = q.transporter
+						dp_item.delivery_date = q.delivery_date
+						dp_item.weight_to_deliver = q.total_weight
+						dp_item.quantity_to_deliver = q.total_qty
+						dp_item.source_warehouse = q.sorce_warehouse
+						dp_item.related_delivery_planning = self.name
+						dp_item.related_dpi = q.name
+						dp_item.save(ignore_permissions=True)
+						print("-----------Date 0000000 TDPi Id--------------",q.delivery_date)
+		return 1
+
+
