@@ -2,7 +2,17 @@
 # For license information, please see license.txt
 
 # import frappe
+import frappe
 from frappe.model.document import Document
 
 class TreatmentPlanTemplate(Document):
-	pass
+	def validate(self):
+		self.validate_age()
+
+	def validate_age(self):
+		if self.patient_age_from and self.patient_age_from < 0:
+			frappe.throw('Patient Age From cannot be less than 0')
+		if self.patient_age_to and self.patient_age_to < 0:
+			frappe.throw('Patient Age To cannot be less than 0')
+		if self.patient_age_to < self.patient_age_from:
+			frappe.throw('Patient Age To cannot be less than Patient Age From')
