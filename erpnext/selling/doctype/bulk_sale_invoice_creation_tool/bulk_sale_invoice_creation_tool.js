@@ -39,7 +39,7 @@ frappe.ui.form.on('Bulk Sale Invoice Creation Tool', {
     
 	    frm.add_custom_button(__('Sales Order'),function() {
             erpnext.utils.map_current_doc({
-                method: "nextsales.next_sales.doctype.bulk_sale_invoice_creation_tool.bulk_sale_invoice_creation_tool.make_sales_invoice",
+                method: "erpnext.selling.doctype.bulk_sale_invoice_creation_tool.bulk_sale_invoice_creation_tool.make_sales_invoice",
                 source_doctype: "Sales Order",
                 date_field: "transaction_date",
                 target: frm,
@@ -61,7 +61,7 @@ frappe.ui.form.on('Bulk Sale Invoice Creation Tool', {
 
         frm.add_custom_button(__('Quotation'), function() {
             erpnext.utils.map_current_doc({
-                method: "nextsales.next_sales.doctype.bulk_sale_invoice_creation_tool.bulk_sale_invoice_creation_tool.make_sales_invoice_quotation",
+                method: "erpnext.selling.doctype.bulk_sale_invoice_creation_tool.bulk_sale_invoice_creation_tool.make_sales_invoice_quotation",
                 source_doctype: "Quotation",
                 date_field: "transaction_date",
                 target: frm,
@@ -95,7 +95,7 @@ frappe.ui.form.on('Bulk Sale Invoice Creation Tool', {
 
         frm.add_custom_button(__('Delivery Note'), function() {
             erpnext.utils.map_current_doc({
-                method: "nextsales.next_sales.doctype.bulk_sale_invoice_creation_tool.bulk_sale_invoice_creation_tool.make_sales_invoice_delivery",
+                method: "erpnext.selling.doctype.bulk_sale_invoice_creation_tool.bulk_sale_invoice_creation_tool.make_sales_invoice_delivery",
                 source_doctype: "Delivery Note",
                 target: frm,
                 date_field: "posting_date",
