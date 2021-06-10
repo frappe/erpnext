@@ -118,14 +118,12 @@
    "options": "Gender"
   },
   {
-   "default": "Company",
    "fieldname": "customer_type",
    "fieldtype": "Select",
    "label": "Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual",
-   "reqd": 1
+   "options": "\nCompany\nIndividual"
   },
   {
    "fieldname": "default_bank_account",
@@ -175,7 +173,6 @@
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
    "options": "Customer Group",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -321,7 +318,9 @@
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
-   "label": "Mobile No"
+   "label": "Mobile No",
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fetch_from": "customer_primary_contact.email_id",
@@ -525,7 +524,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-02 19:45:01.211786",
+ "modified": "2021-06-09 10:31:32.492985",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
