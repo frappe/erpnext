@@ -984,7 +984,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	}
 
-	from_warehouse: function(doc) {
+	from_warehouse(doc) {
 		this.frm.trigger('set_transit_warehouse');
 		this.set_warehouse_in_children(doc.items, "s_warehouse", doc.from_warehouse);
 	}
