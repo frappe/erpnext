@@ -441,7 +441,7 @@ class SalesInvoice(SellingController):
 	def create_daily_summary_series(self):
 		split_serie = self.naming_series.split('-')
 		serie =  "{}-{}".format(split_serie[0], split_serie[1])
-		prefix = cai = frappe.get_all("Daily summary series", ["name_serie"], filters = {"name_serie": serie})
+		prefix = frappe.get_all("Daily summary series", ["name_serie"], filters = {"name_serie": serie})
 
 		if len(prefix) == 0:
 			doc = frappe.new_doc('Daily summary series')
