@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "POPI-.YY.-.MM.-#####.",
+ "autoname": "POPI-.YY.-.MM.-.#####.",
  "creation": "2021-06-08 18:41:31.944126",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -11,7 +11,8 @@
   "item_name",
   "qty_to_order",
   "supplier",
-  "related_delivery_planning"
+  "related_delivery_planning",
+  "rdp_item"
  ],
  "fields": [
   {
@@ -55,11 +56,17 @@
    "in_list_view": 1,
    "label": "Related Delivery Planning",
    "options": "Delivery Planning"
+  },
+  {
+   "fieldname": "rdp_item",
+   "fieldtype": "Link",
+   "label": "Related Delivery Planning Item",
+   "options": "Delivery Planning Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 15:02:23.243454",
+ "modified": "2021-06-10 18:08:28.321519",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Orders Planning Item",

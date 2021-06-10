@@ -4,20 +4,6 @@
 frappe.ui.form.on('Delivery Planning', {
 
 	 onload: function(frm){
-
-
-//		frappe.ui.form.on("Transporter", {
-//			setup: function(frm) {
-//				frm.set_query("transporter", function() {
-//					return {
-//						filters: [
-//							["is_transporter" = 1]
-//						]
-//					}
-//				});
-//			}
-//		});
-
 ////	 To fetch pin code from Address and set in Postal code from and to
 //	 	console.log("--------------000000000---------------")
 //         frappe.call({
@@ -31,24 +17,48 @@ frappe.ui.form.on('Delivery Planning', {
 //				frm.refresh_field('pincode_to');
 //			}
 //		});
-//   		frappe.call({
-//   			method: "get_transport",
-//   			doc: frm.doc,
-//   			callback: function(r){
-//   			if(r.message)
-//   			console.log("000000000011111111111",r)
-//   				frm.set_df_property("transporter","link",r.message);
-//   			}
-//
-//   		});
+
 
     },
 
-//    on_submit: funtion(frm){
-//
-//    },
 
 	 refresh: function(frm) {
+
+
+	if(frm.doc.docstatus === 1)
+	{
+		console.log("Inside custom if purchase order")
+		frm.add_custom_button(__("Calculate Purchase Order Summary"), function() {
+		frm.call({
+    		method : 'purchase_order_call',
+    		doc: frm.doc,
+
+			callback : function(r){
+               	if(r.message){
+               		console.log("-----  --- --item--  ---  ---  ",r);
+               		frappe.msgprint("  Purchase Plan Summary created  ");
+               	}
+           }
+        });
+
+
+    	})
+    	//  custom button to populate Transporter wise Delivery Planning
+    	frm.add_custom_button(__("Calculate Transporter Summary"), function() {
+
+			frm.call({
+				method : 'summary_call',
+				doc: frm.doc,
+				callback : function(r){
+					if(r.message){
+						console.log("-----  --- --item--  ---  ---  ",r);
+						frappe.msgprint("  Transporter wise Delivery Plan created  ");
+					}
+			   }
+			});
+    	});
+	}
+
 
 //	 if (frm.docstatus === 1)
 //	 	{
@@ -209,13 +219,6 @@ frappe.ui.form.on('Delivery Planning', {
 //	},
 //});
 
-frappe.ui.form.on("Show Delivery Planning Item", {
-	show_delivery_planning_item: function(frm) {
-		frappe.set_route("Form", "Delivery Planning Item", {
-   		"related_delivey_planning": frm.doc.docname
-	});
-	},
-});
 
 frappe.ui.form.on("Delivery Planning", "onload", function(frm) {
     cur_frm.set_query("transporter", function() {
@@ -226,6 +229,7 @@ frappe.ui.form.on("Delivery Planning", "onload", function(frm) {
         }
     });
 });
+
 
 
 
