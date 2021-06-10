@@ -15,6 +15,7 @@
  "hide_custom": 0,
  "icon": "stock",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Stock",
  "links": [
@@ -498,6 +499,15 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Inter Company  Challan Reconciliation ",
+   "link_to": "Inter Company Challan Reconciliation",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
@@ -655,7 +665,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:36.282890",
+ "modified": "2021-06-08 19:58:55.090977",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -715,6 +725,12 @@
    "label": "Dashboard",
    "link_to": "Stock",
    "type": "Dashboard"
+  },
+  {
+   "doc_view": "",
+   "label": "Inter Company Challan Reconciliation",
+   "link_to": "Inter Company Challan Reconciliation",
+   "type": "Report"
   }
  ],
  "shortcuts_label": "Quick Access"

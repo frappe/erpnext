@@ -27,7 +27,9 @@
   "total_stock_weight",
   "column_break_20",
   "total_picked_weight",
-  "amended_from"
+  "amended_from",
+  "transaction_date",
+  "delivery_note_done"
  ],
  "fields": [
   {
@@ -173,11 +175,24 @@
    "fieldname": "planned_rm_weight",
    "fieldtype": "Read Only",
    "label": "Planned RM Weight"
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Transaction Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "delivery_note_done",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": " Delivery Note done"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-18 12:05:18.556092",
+ "modified": "2021-06-08 11:12:40.969719",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
