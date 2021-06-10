@@ -1,0 +1,158 @@
+{
+ "actions": [],
+ "creation": "2021-06-10 10:14:17.901273",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1",
+  "template_name",
+  "description",
+  "practitioners",
+  "disable",
+  "data_9",
+  "medical_department",
+  "goal",
+  "order_group",
+  "section_break_8",
+  "patient_age_from",
+  "complaints",
+  "gender",
+  "column_break_12",
+  "patient_age_to",
+  "diagnosis",
+  "plan_items_section",
+  "items",
+  "drugs"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Plan Details"
+  },
+  {
+   "fieldname": "medical_department",
+   "fieldtype": "Link",
+   "label": "Medical Department",
+   "options": "Medical Department"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "goal",
+   "fieldtype": "Small Text",
+   "label": "Goal"
+  },
+  {
+   "fieldname": "practitioners",
+   "fieldtype": "Table MultiSelect",
+   "label": "Practitioners",
+   "options": "Treatment Plan Template Practitioner"
+  },
+  {
+   "fieldname": "order_group",
+   "fieldtype": "Link",
+   "label": "Order Group",
+   "options": "Patient Encounter",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "Plan Conditions"
+  },
+  {
+   "fieldname": "data_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable",
+   "fieldtype": "Check",
+   "label": "Disable"
+  },
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "patient_age_from",
+   "fieldtype": "Int",
+   "label": "Patient Age From"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "patient_age_to",
+   "fieldtype": "Int",
+   "label": "Patient Age To"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fieldname": "complaints",
+   "fieldtype": "Table MultiSelect",
+   "label": "Complaints",
+   "options": "Patient Encounter Symptom"
+  },
+  {
+   "fieldname": "diagnosis",
+   "fieldtype": "Table MultiSelect",
+   "label": "Diagnosis",
+   "options": "Patient Encounter Diagnosis"
+  },
+  {
+   "fieldname": "plan_items_section",
+   "fieldtype": "Section Break",
+   "label": "Plan Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Treatment Plan Item"
+  },
+  {
+   "fieldname": "drugs",
+   "fieldtype": "Table",
+   "label": "Drugs",
+   "options": "Drug Prescription"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-06-10 17:07:25.800673",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Treatment Plan Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "template_name",
+ "track_changes": 1
+}
