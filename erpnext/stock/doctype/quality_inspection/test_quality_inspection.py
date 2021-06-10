@@ -1,29 +1,45 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
-from __future__ import unicode_literals
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import nowdate
-from erpnext.stock.doctype.item.test_item import create_item
+
+from erpnext.controllers.stock_controller import (
+	QualityInspectionNotSubmittedError,
+	QualityInspectionRejectedError,
+	QualityInspectionRequiredError,
+	make_quality_inspections,
+)
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.controllers.stock_controller import QualityInspectionRejectedError, QualityInspectionRequiredError, QualityInspectionNotSubmittedError
 
 # test_records = frappe.get_test_records('Quality Inspection')
+
 
 class TestQualityInspection(unittest.TestCase):
 	def setUp(self):
 		create_item("_Test Item with QA")
-		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_delivery", 1)
+		frappe.db.set_value(
+			"Item", "_Test Item with QA", "inspection_required_before_delivery", 1
+		)
 
 	def test_qa_for_delivery(self):
-		make_stock_entry(item_code="_Test Item with QA", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item with QA",
+			target="_Test Warehouse - _TC",
+			qty=1,
+			basic_rate=100
+		)
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 
 		self.assertRaises(QualityInspectionRequiredError, dn.submit)
 
-		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name, status="Rejected")
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, status="Rejected"
+		)
 		dn.reload()
 		self.assertRaises(QualityInspectionRejectedError, dn.submit)
 
@@ -38,7 +54,9 @@ class TestQualityInspection(unittest.TestCase):
 
 	def test_qa_not_submit(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name, do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, do_not_submit=True
+		)
 		dn.items[0].quality_inspection = qa.name
 		self.assertRaises(QualityInspectionNotSubmittedError, dn.submit)
 
@@ -48,21 +66,28 @@ class TestQualityInspection(unittest.TestCase):
 	def test_value_based_qi_readings(self):
 		# Test QI based on acceptance values (Non formula)
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		readings = [{
-			"specification": "Iron Content", # numeric reading
-			"min_value": 0.1,
-			"max_value": 0.9,
-			"reading_1": "0.4"
-		},
-		{
-			"specification": "Particle Inspection Needed", # non-numeric reading
-			"numeric": 0,
-			"value": "Yes",
-			"reading_value": "Yes"
-		}]
+		readings = [
+			{
+				"specification": "Iron Content",  # numeric reading
+				"min_value": 0.1,
+				"max_value": 0.9,
+				"reading_1": "0.4"
+			},
+			{
+				"specification": "Particle Inspection Needed",  # non-numeric reading
+				"numeric": 0,
+				"value": "Yes",
+				"reading_value": "Yes"
+			}
+		]
 
-		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name,
-			readings=readings, do_not_save=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note",
+			reference_name=dn.name,
+			readings=readings,
+			do_not_save=True
+		)
+
 		qa.save()
 
 		# status must be auto set as per formula
@@ -74,36 +99,43 @@ class TestQualityInspection(unittest.TestCase):
 
 	def test_formula_based_qi_readings(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		readings = [{
-			"specification": "Iron Content", # numeric reading
-			"formula_based_criteria": 1,
-			"acceptance_formula": "reading_1 > 0.35 and reading_1 < 0.50",
-			"reading_1": "0.4"
-		},
-		{
-			"specification": "Calcium Content", # numeric reading
-			"formula_based_criteria": 1,
-			"acceptance_formula": "reading_1 > 0.20 and reading_1 < 0.50",
-			"reading_1": "0.7"
-		},
-		{
-			"specification": "Mg Content", # numeric reading
-			"formula_based_criteria": 1,
-			"acceptance_formula": "mean < 0.9",
-			"reading_1": "0.5",
-			"reading_2": "0.7",
-			"reading_3": "random text" # check if random string input causes issues
-		},
-		{
-			"specification": "Calcium Content", # non-numeric reading
-			"formula_based_criteria": 1,
-			"numeric": 0,
-			"acceptance_formula": "reading_value in ('Grade A', 'Grade B', 'Grade C')",
-			"reading_value": "Grade B"
-		}]
+		readings = [
+			{
+				"specification": "Iron Content",  # numeric reading
+				"formula_based_criteria": 1,
+				"acceptance_formula": "reading_1 > 0.35 and reading_1 < 0.50",
+				"reading_1": "0.4"
+			},
+			{
+				"specification": "Calcium Content",  # numeric reading
+				"formula_based_criteria": 1,
+				"acceptance_formula": "reading_1 > 0.20 and reading_1 < 0.50",
+				"reading_1": "0.7"
+			},
+			{
+				"specification": "Mg Content",  # numeric reading
+				"formula_based_criteria": 1,
+				"acceptance_formula": "mean < 0.9",
+				"reading_1": "0.5",
+				"reading_2": "0.7",
+				"reading_3": "random text"  # check if random string input causes issues
+			},
+			{
+				"specification": "Calcium Content",  # non-numeric reading
+				"formula_based_criteria": 1,
+				"numeric": 0,
+				"acceptance_formula": "reading_value in ('Grade A', 'Grade B', 'Grade C')",
+				"reading_value": "Grade B"
+			}
+		]
 
-		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name,
-			readings=readings, do_not_save=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note",
+			reference_name=dn.name,
+			readings=readings,
+			do_not_save=True
+		)
+
 		qa.save()
 
 		# status must be auto set as per formula
@@ -114,6 +146,19 @@ class TestQualityInspection(unittest.TestCase):
 
 		qa.delete()
 		dn.delete()
+
+	def test_make_quality_inspections_from_linked_document(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		for item in dn.items:
+			item.sample_size = item.qty
+		quality_inspections = make_quality_inspections(dn.doctype, dn.name, dn.items)
+		self.assertEqual(len(dn.items), len(quality_inspections))
+
+		# cleanup
+		for qi in quality_inspections:
+			frappe.delete_doc("Quality Inspection", qi)
+		dn.delete()
+
 
 def create_quality_inspection(**args):
 	args = frappe._dict(args)
@@ -134,7 +179,7 @@ def create_quality_inspection(**args):
 		readings = args.readings
 
 	if args.status == "Rejected":
-		readings["reading_1"] = "12" # status is auto set in child on save
+		readings["reading_1"] = "12"  # status is auto set in child on save
 
 	if isinstance(readings, list):
 		for entry in readings:
@@ -149,6 +194,7 @@ def create_quality_inspection(**args):
 			qa.submit()
 
 	return qa
+
 
 def create_quality_inspection_parameter(parameter):
 	if not frappe.db.exists("Quality Inspection Parameter", parameter):
