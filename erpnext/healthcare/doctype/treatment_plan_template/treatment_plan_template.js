@@ -2,7 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Treatment Plan Template', {
-	// refresh: function(frm) {
-
-	// }
+	refresh: function(frm) {
+		frm.set_query('type', 'items', function (){
+			return {
+				filters: {
+					'module': 'Healthcare',
+					'name': ['in', 'Lab Test Template', 'Clinical Procedure Template', 'Therapy Type'],
+				}
+			}
+		});
+	}
 });

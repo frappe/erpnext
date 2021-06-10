@@ -121,7 +121,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Treatment Plan Item"
+   "options": "Treatment Plan Template Item"
   },
   {
    "fieldname": "drugs",
@@ -132,7 +132,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-10 17:07:25.800673",
+ "modified": "2021-06-10 17:43:38.153602",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Treatment Plan Template",
