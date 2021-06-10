@@ -103,6 +103,9 @@ class PurchaseInvoice(BuyingController):
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
+	def after_insert(self):
+		self.set_last_purchase_invoice()
+		
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
 			frappe.throw(_('Release date must be in the future'))
@@ -168,6 +171,14 @@ class PurchaseInvoice(BuyingController):
 			)
 
 		self.party_account_currency = account.account_currency
+
+	def set_last_purchase_invoice(self):
+		if self.name:
+			s = str(self.name[:3]) + '%'
+			query = frappe.db.sql("""select name from `tabPurchase Invoice` where name != %s and name like %s order by creation desc limit 1""",(self.name,s),as_list=1)
+			if query:
+				self.previous_purchase_invoice_ = query[0][0]
+				self.db_update()
 
 	def check_on_hold_or_closed_status(self):
 		check_list = []
