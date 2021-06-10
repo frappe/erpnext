@@ -19,6 +19,7 @@
   "section_break_8",
   "rate",
   "section_break_9",
+  "currency",
   "tax_amount",
   "total",
   "allocated_amount",
@@ -36,10 +37,8 @@
    "label": "Type",
    "oldfieldname": "charge_type",
    "oldfieldtype": "Select",
-   "options": "\nActual\nOn Paid Amount\nIncluded In Paid Amount\nOn Previous Row Amount\nOn Previous Row Total",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "\nActual\nOn Paid Amount\nOn Previous Row Amount\nOn Previous Row Total",
+   "reqd": 1
   },
   {
    "depends_on": "eval:[\"On Previous Row Amount\", \"On Previous Row Total\"].indexOf(doc.charge_type)!==-1",
@@ -47,9 +46,7 @@
    "fieldtype": "Data",
    "label": "Reference Row #",
    "oldfieldname": "row_id",
-   "oldfieldtype": "Data",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Data"
   },
   {
    "columns": 2,
@@ -61,15 +58,11 @@
    "oldfieldtype": "Link",
    "options": "Account",
    "reqd": 1,
-   "search_index": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "search_index": 1
   },
   {
    "fieldname": "col_break_1",
    "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -80,16 +73,12 @@
    "oldfieldtype": "Small Text",
    "print_width": "300px",
    "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "300px"
   },
   {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Accounting Dimensions"
   },
   {
    "default": ":Company",
@@ -98,21 +87,15 @@
    "label": "Cost Center",
    "oldfieldname": "cost_center_other_charges",
    "oldfieldtype": "Link",
-   "options": "Cost Center",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_8",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "columns": 2,
@@ -121,15 +104,11 @@
    "in_list_view": 1,
    "label": "Rate",
    "oldfieldname": "rate",
-   "oldfieldtype": "Currency",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "section_break_9",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "columns": 2,
@@ -137,9 +116,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
-   "options": "currency",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "currency"
   },
   {
    "columns": 2,
@@ -148,15 +125,11 @@
    "in_list_view": 1,
    "label": "Total",
    "options": "currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_13",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "base_tax_amount",
@@ -165,9 +138,7 @@
    "oldfieldname": "tax_amount",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "base_total",
@@ -176,48 +147,46 @@
    "oldfieldname": "total",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "add_deduct_tax",
    "fieldtype": "Select",
    "label": "Add Or Deduct",
    "options": "Add\nDeduct",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "default": "0",
    "fieldname": "included_in_paid_amount",
    "fieldtype": "Check",
-   "label": "Included In Paid Amount",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Considered In Paid Amount"
   },
   {
    "fieldname": "allocated_amount",
    "fieldtype": "Currency",
    "label": "Allocated Amount",
-   "options": "currency",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "currency"
   },
   {
    "fieldname": "base_allocated_amount",
    "fieldtype": "Currency",
    "label": "Allocated Amount (Company Currency)",
-   "options": "Company:company:default_currency",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fetch_from": "account_head.account_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-29 19:06:14.666460",
+ "modified": "2021-06-09 11:46:58.373170",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Taxes and Charges",
