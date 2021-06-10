@@ -531,7 +531,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_totals: function() {
-		// Changing sequence can cause rounding_adjustmentng issue and on-screen discrepency
+		// Changing sequence can because of rounding adjustment issue and on-screen discrepancy
 		var me = this;
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
 		this.frm.doc.grand_total = flt(tax_count
