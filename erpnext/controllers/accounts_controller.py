@@ -225,7 +225,7 @@ class AccountsController(TransactionBase):
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year"):
-			date_field = ""
+			date_field = None
 			if self.meta.get_field("posting_date"):
 				date_field = "posting_date"
 			elif self.meta.get_field("transaction_date"):
@@ -1448,6 +1448,7 @@ def validate_and_delete_children(parent, data):
 
 	for d in deleted_children:
 		update_bin_on_delete(d, parent.doctype)
+
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
