@@ -44,7 +44,7 @@
  "modified": "2021-06-10 11:53:40.365294",
  "modified_by": "Administrator",
  "module": "Healthcare",
- "name": "Treatment Plan Item",
+ "name": "Treatment Plan Template Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
