@@ -94,7 +94,7 @@ def return_data(filters):
 
 	conditions = return_filters_debit_note(filters, from_date, to_date)
 
-	debit_notes = frappe.get_all("Debit Note CXC", ["name", "customer", "cai", "naming_series", "posting_date", "isv_18", "isv_15", "outstanding_amount", "amount"], filters = conditions, order_by = "name asc")
+	debit_notes = frappe.get_all("Debit Note CXC", ["name", "customer", "cai", "naming_series", "posting_date", "isv_18", "isv_15", "outstanding_amount"], filters = conditions, order_by = "name asc")
 
 	for debit_note in debit_notes:
 		split_date = str(debit_note.posting_date).split("T")[0].split("-")
@@ -199,6 +199,40 @@ def return_data(filters):
 
 			row = [posting_date,rtn,credit_note.customer, type_transaction, serie_number, credit_note.name, credit_note.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
 			data.append(row)
+	
+	conditions = return_filters_customer_retention(filters, from_date, to_date)
+
+	customer_retentions = frappe.get_all("Customer Retention", ["name", "rtn", "posting_date", "customer", "cai", "naming_series"], filters = conditions, order_by = "name asc")
+
+	for customer_retetention in customer_retentions:
+		total_exempt = 0
+		total_exonerated = 0
+		taxed_sales15 = 0
+		isv15 = 0
+		taxed_sales18 = 0
+		isv18 = 0
+		grand_total = 0
+		type_transaction = "CR"
+		split_serie = customer_retetention.naming_series.split('-')
+		serie =  "{}-{}".format(split_serie[0], split_serie[1])
+
+		if serie_number == serie:
+			withholding_references = frappe.get_all("Withholding Reference", ["reference_name"], filters = {"parent": customer_retetention.name})
+
+			for withholding_reference in withholding_references:
+				sales_invoices_customer_retention = frappe.get_all("Sales Invoice", ["total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = {"name" : withholding_reference.reference_name})
+
+				for sales_invoice_customer_retention in sales_invoices_customer_retention:
+					total_exempt += sales_invoice_customer_retention.total_exempt
+					total_exonerated += sales_invoice_customer_retention.total_exonerated
+					taxed_sales15 += sales_invoice_customer_retention.taxed_sales15
+					isv15 += sales_invoice_customer_retention.isv15
+					taxed_sales18 += sales_invoice_customer_retention.taxed_sales18
+					isv18 += sales_invoice_customer_retention.isv18
+					grand_total += sales_invoice_customer_retention.grand_total
+		
+			row = [customer_retetention.posting_date, customer_retetention.rtn,customer_retetention.customer, type_transaction, serie_number, customer_retetention.name, customer_retetention.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+			data.append(row)
 
 	return data
 
@@ -222,6 +256,15 @@ def return_filters_debit_note(filters, from_date, to_date):
 	return conditions
 
 def return_filters_credit_note(filters, from_date, to_date):
+	conditions = ''	
+
+	conditions += "{"
+	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += '}'
+
+	return conditions
+
+def return_filters_customer_retention(filters, from_date, to_date):
 	conditions = ''	
 
 	conditions += "{"
