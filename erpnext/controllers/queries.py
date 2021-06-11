@@ -88,7 +88,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Customer", fields)
 
 	searchfields = frappe.get_meta("Customer").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2

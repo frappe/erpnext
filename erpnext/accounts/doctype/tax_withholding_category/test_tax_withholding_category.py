@@ -112,7 +112,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		si = create_sales_invoice(customer = "Test TCS Customer", rate=5000)
 		si.submit()
 
-		tcs_charged = sum([d.base_tax_amount for d in si.taxes if d.account_head == 'TCS - _TC'])
+		tcs_charged = sum(d.base_tax_amount for d in si.taxes if d.account_head == 'TCS - _TC')
 		self.assertEqual(tcs_charged, 500)
 		invoices.append(si)
 
