@@ -6,7 +6,9 @@ frappe.ui.form.on('Delivery Planning Item', {
 //
 //
 //
-//	}
+//
+//	},
+
 
 	split: function(frm) {
 			let d = new frappe.ui.Dialog({
@@ -28,6 +30,11 @@ frappe.ui.form.on('Delivery Planning Item', {
 					fieldname: 'src_warehouse',
 					fieldtype: 'Link',
 					options: "Warehouse"
+				},
+				{
+					label: 'Supplier delivers to Customer ',
+					fieldname: 'supplier_dc',
+					fieldtype: 'Check'
 				},
 				{
 					label: 'Supplier',
@@ -70,4 +77,14 @@ frappe.ui.form.on('Delivery Planning Item', {
 			d.show();
 
 		}
+});
+
+frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
+	console.log(" in side split button",frm.doc.ordered_qty)
+		if(frm.doc.ordered_qty > 1)
+			{
+				frm.set_df_property('split','hidden',0)
+	            frm.refresh_field("split")
+			}
+
 });
