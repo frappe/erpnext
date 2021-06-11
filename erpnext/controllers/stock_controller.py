@@ -313,7 +313,7 @@ class StockController(AccountsController):
 
 	def get_serialized_items(self):
 		serialized_items = []
-		item_codes = list(set([d.item_code for d in self.get("items")]))
+		item_codes = list(set(d.item_code for d in self.get("items")))
 		if item_codes:
 			serialized_items = frappe.db.sql_list("""select name from `tabItem`
 				where has_serial_no=1 and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
@@ -324,8 +324,8 @@ class StockController(AccountsController):
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
-		warehouses = list(set([d.warehouse for d in
-			self.get("items") if getattr(d, "warehouse", None)]))
+		warehouses = list(set(d.warehouse for d in
+			self.get("items") if getattr(d, "warehouse", None)))
 
 		target_warehouses = list(set([d.target_warehouse for d in
 			self.get("items") if getattr(d, "target_warehouse", None)]))
