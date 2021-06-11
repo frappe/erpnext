@@ -141,7 +141,7 @@ def get_stock_ledger_entries(filters, items):
 		return []
 
 	item_conditions_sql = ' and sle.item_code in ({})' \
-		.format(', '.join([frappe.db.escape(i) for i in items]))
+		.format(', '.join(frappe.db.escape(i) for i in items))
 
 	conditions = get_sle_conditions(filters)
 
