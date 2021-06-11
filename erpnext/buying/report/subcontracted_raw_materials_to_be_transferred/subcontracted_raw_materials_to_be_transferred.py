@@ -70,7 +70,7 @@ def get_data(filters):
 		transferred_qty = row.get("transferred_qty") or 0
 		if transferred_qty < row.get("reqd_qty", 0):
 			pending_qty = frappe.utils.flt(row.get("reqd_qty", 0) - transferred_qty)
-			row.p_qty =  pending_qty if pending_qty > 0 else 0
+			row.p_qty = pending_qty if pending_qty > 0 else 0
 			data.append(row)
 
 	return data
