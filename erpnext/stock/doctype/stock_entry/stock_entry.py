@@ -465,7 +465,7 @@ class StockEntry(StockController):
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
-		finished_item_qty = sum([d.transfer_qty for d in self.items if d.is_finished_item])
+		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item)
 
 		# Set basic rate for incoming items
 		for d in self.get('items'):

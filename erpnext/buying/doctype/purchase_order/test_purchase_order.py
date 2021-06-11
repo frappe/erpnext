@@ -359,7 +359,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		update_child_qty_rate('Purchase Order', trans_item, po.name)
 		po.reload()
 
-		total_reqd_qty_after_change = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+		total_reqd_qty_after_change = sum(d.get("required_qty") for d in po.as_dict().get("supplied_items"))
 
 		self.assertEqual(total_reqd_qty_after_change, 2 * total_reqd_qty)
 

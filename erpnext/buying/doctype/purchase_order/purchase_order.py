@@ -139,7 +139,7 @@ class PurchaseOrder(BuyingController):
 
 	def validate_minimum_order_qty(self):
 		if not self.get("items"): return
-		items = list(set([d.item_code for d in self.get("items")]))
+		items = list(set(d.item_code for d in self.get("items")))
 
 		itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
 			from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
@@ -326,10 +326,10 @@ class PurchaseOrder(BuyingController):
 			so.notify_update()
 
 	def has_drop_ship_item(self):
-		return any([d.delivered_by_supplier for d in self.items])
+		return any(d.delivered_by_supplier for d in self.items)
 
 	def is_against_so(self):
-		return any([d.sales_order for d in self.items if d.sales_order])
+		return any(d.sales_order for d in self.items if d.sales_order)
 
 	def set_received_qty_for_drop_ship_items(self):
 		for item in self.items:
