@@ -151,7 +151,7 @@ class SalesOrder(SellingController):
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	def update_prevdoc_status(self, flag=None):
-		for quotation in list(set([d.prevdoc_docname for d in self.get("items")])):
+		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
 				if doc.docstatus==2:
