@@ -27,6 +27,9 @@ def setup_company_independent_fixtures(patch=False):
 	add_print_formats()
 
 def add_hsn_sac_codes():
+	if frappe.flags.in_test and frappe.flags.created_hsn_codes:
+		return
+
 	# HSN codes
 	with open(os.path.join(os.path.dirname(__file__), 'hsn_code_data.json'), 'r') as f:
 		hsn_codes = json.loads(f.read())
@@ -37,6 +40,9 @@ def add_hsn_sac_codes():
 	with open(os.path.join(os.path.dirname(__file__), 'sac_code_data.json'), 'r') as f:
 		sac_codes = json.loads(f.read())
 	create_hsn_codes(sac_codes, code_field="sac_code")
+
+	if frappe.flags.in_test:
+		frappe.flags.created_hsn_codes = True
 
 def create_hsn_codes(data, code_field):
 	for d in data:
