@@ -59,7 +59,7 @@ def can_change_vehicle(vbo_doc, throw=False):
 	if not can_assign_vehicle(throw=throw):
 		return False
 
-	if check_vehicle_received(vbo_doc, throw=throw):
+	if check_vehicle_received(vbo_doc, throw=throw) and not vbo_doc.vehicle_receipt:
 		return False
 
 	return True
