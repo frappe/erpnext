@@ -88,7 +88,7 @@ class StockEntry(StockController):
 
 		self.validate_serialized_batch()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(update_basic_rate=False)
 		self.validate_putaway_capacity()
 
 	def on_submit(self):
@@ -451,15 +451,15 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 
-	def calculate_rate_and_amount(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
-		self.set_basic_rate(reset_outgoing_rate, raise_error_if_no_rate)
+	def calculate_rate_and_amount(self, reset_outgoing_rate=True, raise_error_if_no_rate=True, update_basic_rate=True):
+		self.set_basic_rate(reset_outgoing_rate, raise_error_if_no_rate, update_basic_rate)
 		init_landed_taxes_and_totals(self)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
 
-	def set_basic_rate(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
+	def set_basic_rate(self, reset_outgoing_rate=True, raise_error_if_no_rate=True, update_basic_rate=True):
 		"""
 			Set rate for outgoing, scrapped and finished items
 		"""
@@ -480,6 +480,8 @@ class StockEntry(StockController):
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 
 			if not d.basic_rate and not d.allow_zero_valuation_rate:
+				self.validate_basic_rate(d, update_basic_rate)
+
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company,
@@ -487,6 +489,12 @@ class StockEntry(StockController):
 
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+
+	def validate_basic_rate(self, row, update_basic_rate=True):
+		if self.purpose == 'Material Receipt' and not update_basic_rate:
+			btn = frappe.bold(_('Update Rate and Availability'))
+			frappe.throw(_(f'''Row {row.idx}: Either set the basic rate for the item
+				{frappe.bold(row.item_code)} or click on {btn} button.'''))
 
 	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		outgoing_items_cost = 0.0
@@ -916,8 +924,8 @@ class StockEntry(StockController):
 			if not ret.get(field):
 				ret[field] = frappe.get_cached_value('Company',  self.company,  company_field)
 
-		args['posting_date'] = self.posting_date
-		args['posting_time'] = self.posting_time
+		for dt_field in ['posting_date', 'posting_time', 'purpose']:
+			args[dt_field] = self.get(dt_field)
 
 		stock_and_rate = get_warehouse_details(args) if args.get('warehouse') else {}
 		ret.update(stock_and_rate)
@@ -1722,14 +1730,11 @@ def get_warehouse_details(args):
 
 	ret = {}
 	if args.warehouse and args.item_code:
-		args.update({
-			"posting_date": args.posting_date,
-			"posting_time": args.posting_time,
-		})
 		ret = {
 			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
-			"basic_rate" : get_incoming_rate(args)
+			"basic_rate" : get_incoming_rate(args) if args.get('purpose') != 'Material Receipt' else 0
 		}
+
 	return ret
 
 @frappe.whitelist()

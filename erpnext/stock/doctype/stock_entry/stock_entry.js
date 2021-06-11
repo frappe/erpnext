@@ -422,7 +422,7 @@ frappe.ui.form.on('Stock Entry', {
 			'allow_zero_valuation': 1,
 		};
 
-		if (item.item_code || item.serial_no) {
+		if ((item.item_code || item.serial_no) && frm.doc.purpose !== 'Material Receipt') {
 			frappe.call({
 				method: "erpnext.stock.utils.get_incoming_rate",
 				args: {
@@ -453,6 +453,7 @@ frappe.ui.form.on('Stock Entry', {
 						'company': frm.doc.company,
 						'voucher_type': frm.doc.doctype,
 						'voucher_no': child.name,
+						'purpose': frm.doc.purpose,
 						'allow_zero_valuation': 1
 					}
 				},
@@ -821,10 +822,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 			};
 		});
-
-		if(me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
-			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-		}
 
 		this.frm.fields_dict.items.grid.get_field('expense_account').get_query = function() {
 			if (erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {

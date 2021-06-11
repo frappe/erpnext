@@ -754,6 +754,20 @@ class TestStockEntry(unittest.TestCase):
 			filters={"voucher_type": "Stock Entry", "voucher_no": mr.name}, fieldname="is_opening")
 		self.assertEqual(is_opening, "Yes")
 
+	def test_material_receipt_entry_basic_rate_validate(self):
+		se_doc = make_stock_entry(item_code="_Test Item", target="Stores - TCP1",
+			company="_Test Company with perpetual inventory", qty=1, basic_rate=0,
+			expense_account="Stock Adjustment - TCP1", purpose="Material Receipt", do_not_save=True)
+
+		self.assertRaises(frappe.ValidationError, se_doc.save)
+
+		se_doc.items[0].basic_rate = 10
+		se_doc.save()
+
+		self.assertEqual(se_doc.items[0].amount, 10)
+		self.assertEqual(se_doc.items[0].basic_amount, 10)
+		self.assertEqual(se_doc.items[0].basic_rate, 10)
+
 	def test_total_basic_amount_zero(self):
 		se = frappe.get_doc({"doctype":"Stock Entry",
 			"purpose":"Material Receipt",
