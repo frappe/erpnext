@@ -290,24 +290,6 @@ class DeliveryPlanning(Document):
 
 							""".format(conditions=conditions), as_dict=1)
 
-							# from `tabSupplier` s
-							# join `tabSales Order` so ON s.name = so.transporter
-		# query2 = frappe.db.sql(""" select
-		# 					so.transporter,
-		# 					so.delivery_date,
-		# 					SUM(so.total_net_weight) AS total_net_weight ,
-		# 					SUM(so.total_qty) AS total_qty
-		#
-		# 					from `tabSales Order` so
-		# 					# from `tabSales Order Item` soi
-		# 					# join `tabSales Order` so ON soi.parent = so.name
-		#
-		# 					where so.docstatus = 1
-		# 					{conditions}
-		# 					group by so.transporter, so.delivery_date
-		#
-		# 					""".format(conditions=conditions), as_dict=1)
-
 		for i in query:
 			dp_item = frappe.new_doc("Transporter Wise Planning Item")
 			dp_item.transporter = i.transporter
@@ -362,17 +344,16 @@ class DeliveryPlanning(Document):
 	@frappe.whitelist()
 	def purchase_order_call(self):
 		conditions = ""
-		print("----------0000000000 this is call purchase order------------")
-		item = frappe.db.get_list(doctype='Delivery Planning Item',
+		item = frappe.get_all(doctype='Delivery Planning Item',
 							  	  filters={"approved": "Yes",
 								  "related_delivey_planning" : self.name})
-		print("<<<<<<<<<<>>>>>>>>>>>>>>>>>",item)
+		print("<<<<<<<<<< Po plan >>>>>>>>>>>>>>>>>",item)
 
 		if(item):
 
 			for i in item:
 
-				popi = frappe.db.get_list(doctype= 'Purchase Orders Planning Item',
+				popi = frappe.db.get_all(doctype= 'Purchase Orders Planning Item',
 								filters={"related_delivery_planning" : self.name})
 
 
@@ -403,7 +384,7 @@ class DeliveryPlanning(Document):
 						dp_item.item_code = q.item_code
 						dp_item.item_name = q.item_name
 						dp_item.supplier = q.supplier
-						do_item.qty_to_order = q.ordered_qty
+						dp_item.qty_to_order = q.ordered_qty
 						dp_item.related_delivery_planning = self.name
 						dp_item.rdp_item = q.name
 						dp_item.save(ignore_permissions=True)
@@ -434,22 +415,23 @@ class DeliveryPlanning(Document):
 							p_item.rdp_item = q.name
 							p_item.save(ignore_permissions=True)
 
-				return 1
+			return 1
+		return 0
 
 # Creating Transporter wise delivery planning item
 	@frappe.whitelist()
 	def summary_call(self):
 		conditions = ""
-		print("----------0000000000 this is call purchase order------------")
-		item = frappe.db.get_list(doctype='Delivery Planning Item',
+		print("----------0000000000 this is  Transporter wise delivery call ------------")
+		item = frappe.db.get_all(doctype='Delivery Planning Item',
 								  filters={"approved": "Yes",
 										   "related_delivey_planning": self.name})
-		print("<<<<<<<<<<>>>>>>>>>>>>>>>>>", item)
+		print("<<<<<<<<<<>>  Transporter wise delivery >>>>>>>>>>>>>>>", item)
 
 		if (item):
 			print("-----------D gfhgfhfg --------------",item)
 			for i in item:
-				popi = frappe.db.get_list(doctype='Transporter Wise Planning Item',
+				popi = frappe.db.get_all(doctype='Transporter Wise Planning Item',
 										  filters={"related_delivery_planning": self.name})
 
 				if popi:
@@ -483,7 +465,23 @@ class DeliveryPlanning(Document):
 						dp_item.quantity_to_deliver = q.total_qty
 						dp_item.source_warehouse = q.sorce_warehouse
 						dp_item.related_delivery_planning = self.name
-						dp_item.related_dpi= q.name
+
+						# code for test
+						so_wise_data = frappe.db.get_all("Delivery Planning Item",
+								{"related_delivey_planning" :self.name, "transporter" : q.transporter },
+								["sales_order","item_name","ordered_qty","weight_to_deliver"]
+						)
+						print("0000000000000000000000000000",so_wise_data)
+						if(so_wise_data):
+							for s in so_wise_data:
+								# dp_item.doc_childs = frappe.get_all("Transporter Planning Items",
+								# 								filters={'parent': doc.name},
+								# 								fields=["*"])
+								dp_item.append("items",{"sales_order": s.sales_order,
+														 "item_name": s.item_name,
+														 "qty": s.ordered_qty,
+										   				 "weight": s.weight_to_deliver
+														 })
 						dp_item.save(ignore_permissions=True)
 
 						print("aaaaaaa0000000 ..........",q.total_weight)
@@ -512,10 +510,32 @@ class DeliveryPlanning(Document):
 						dp_item.weight_to_deliver = q.total_weight
 						dp_item.quantity_to_deliver = q.total_qty
 						dp_item.source_warehouse = q.sorce_warehouse
+
+						so_wise_data = frappe.db.get_all("Delivery Planning Item",
+														 {"related_delivey_planning": self.name,
+														  "transporter": q.transporter},
+														 ["sales_order", "item_name", "ordered_qty",
+														  "weight_to_deliver"]
+														 )
+						print("0000000000000000000000000000", so_wise_data)
+						if (so_wise_data):
+							for s in so_wise_data:
+								# dp_item.doc_childs = frappe.get_all("Transporter Planning Items",
+								# 								filters={'parent': doc.name},
+								# 								fields=["*"])
+								dp_item.append("items", {"sales_order": s.sales_order,
+														 "item_name": s.item_name,
+														 "qty": s.ordered_qty,
+														 "weight": s.weight_to_deliver
+														 })
+
 						dp_item.related_delivery_planning = self.name
-						dp_item.related_dpi = q.name
+
+
 						dp_item.save(ignore_permissions=True)
 						print("-----------Date 0000000 TDPi Id--------------",q.delivery_date)
-		return 1
+			return 1
+		else:
+			return 0
 
 

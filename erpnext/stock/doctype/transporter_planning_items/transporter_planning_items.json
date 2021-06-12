@@ -5,8 +5,9 @@
  "engine": "InnoDB",
  "field_order": [
   "sales_order",
-  "total_qty",
-  "total_weight"
+  "item_name",
+  "qty",
+  "weight"
  ],
  "fields": [
   {
@@ -14,25 +15,35 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sales Order",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1
   },
   {
-   "fieldname": "total_qty",
-   "fieldtype": "Float",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Total Qty"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
-   "fieldname": "total_weight",
+   "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Total Weight"
+   "label": "Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weight",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-09 14:52:34.356597",
+ "modified": "2021-06-11 16:20:45.779140",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Transporter Planning Items",
