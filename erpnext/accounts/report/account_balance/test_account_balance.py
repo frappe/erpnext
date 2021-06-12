@@ -23,7 +23,7 @@ class TestAccountBalance(unittest.TestCase):
 
 		expected_data = [
 			{
-				"account": 'Sales - _TC2',
+				"account": 'Direct Income - _TC2',
 				"currency": 'EUR',
 				"balance": -100.0,
 			},
@@ -33,20 +33,20 @@ class TestAccountBalance(unittest.TestCase):
 				"balance": -100.0,
 			},
 			{
-				"account": 'Service - _TC2',
-				"currency": 'EUR',
-				"balance": 0.0,
-			},
-			{
-				"account": 'Direct Income - _TC2',
-				"currency": 'EUR',
-				"balance": -100.0,
-			},
-			{
 				"account": 'Indirect Income - _TC2',
 				"currency": 'EUR',
 				"balance": 0.0,
 			},
+			{
+				"account": 'Sales - _TC2',
+				"currency": 'EUR',
+				"balance": -100.0,
+			},
+			{
+				"account": 'Service - _TC2',
+				"currency": 'EUR',
+				"balance": 0.0,
+			}
 		]
 
 		self.assertEqual(expected_data, report[1])
