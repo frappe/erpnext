@@ -12,7 +12,6 @@
   "quantity_to_deliver",
   "source_warehouse",
   "related_delivery_planning",
-  "related_dpi",
   "section_break_8",
   "items"
  ],
@@ -68,18 +67,11 @@
   {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "related_dpi",
-   "fieldtype": "Link",
-   "label": "Related Delivery Planning Item",
-   "options": "Delivery Planning Item",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-10 18:58:53.697935",
+ "modified": "2021-06-11 12:07:39.671581",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Transporter Wise Planning Item",

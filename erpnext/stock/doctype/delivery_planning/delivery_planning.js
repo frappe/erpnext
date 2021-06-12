@@ -27,22 +27,7 @@ frappe.ui.form.on('Delivery Planning', {
 
 	if(frm.doc.docstatus === 1)
 	{
-		console.log("Inside custom if purchase order")
-		frm.add_custom_button(__("Calculate Purchase Order Summary"), function() {
-		frm.call({
-    		method : 'purchase_order_call',
-    		doc: frm.doc,
 
-			callback : function(r){
-               	if(r.message){
-               		console.log("-----  --- --item--  ---  ---  ",r);
-               		frappe.msgprint("  Purchase Plan Summary created  ");
-               	}
-           }
-        });
-
-
-    	})
     	//  custom button to populate Transporter wise Delivery Planning
     	frm.add_custom_button(__("Calculate Transporter Summary"), function() {
 
@@ -50,13 +35,34 @@ frappe.ui.form.on('Delivery Planning', {
 				method : 'summary_call',
 				doc: frm.doc,
 				callback : function(r){
-					if(r.message){
+					if(r.message == 1){
 						console.log("-----  --- --item--  ---  ---  ",r);
 						frappe.msgprint("  Transporter wise Delivery Plan created  ");
+					}
+					else{
+					frappe.msgprint(" Unable to create Transporter wise Delivery Plan   ");
 					}
 			   }
 			});
     	});
+
+    	console.log("Inside custom if purchase order")
+		frm.add_custom_button(__("Calculate Purchase Order Summary"), function() {
+		frm.call({
+    		method : 'purchase_order_call',
+    		doc: frm.doc,
+
+			callback : function(r){
+               	if(r.message == 1){
+						console.log("-----  --- --item--  ---  ---  ",r);
+						frappe.msgprint(" Purchase Order Plan Items created  ");
+					}
+				else{
+					frappe.msgprint(" Unable to create Purchase Delivery Plan Item   ");
+					}
+           }
+        });
+    	})
 	}
 
 

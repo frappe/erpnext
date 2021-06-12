@@ -27,6 +27,7 @@
    "fieldname": "item_code",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "read_only": 1
   },
@@ -40,6 +41,7 @@
   {
    "fieldname": "qty_to_order",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Qty to Order",
    "read_only": 1
   },
@@ -55,18 +57,20 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Related Delivery Planning",
-   "options": "Delivery Planning"
+   "options": "Delivery Planning",
+   "read_only": 1
   },
   {
    "fieldname": "rdp_item",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Related Delivery Planning Item",
    "options": "Delivery Planning Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-10 18:08:28.321519",
+ "modified": "2021-06-11 17:06:16.316120",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Orders Planning Item",
