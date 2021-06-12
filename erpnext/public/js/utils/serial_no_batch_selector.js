@@ -324,7 +324,7 @@ erpnext.SerialNoBatchSelector = class SerialNoBatchSelector {
 		qty_field.set_input(total_qty);
 	}
 
-	update_pending_qtys: function() {
+	update_pending_qtys() {
 		const pending_qty_field = this.dialog.fields_dict.pending_qty;
 		const total_selected_qty_field = this.dialog.fields_dict.total_selected_qty;
 
@@ -340,7 +340,7 @@ erpnext.SerialNoBatchSelector = class SerialNoBatchSelector {
 		total_selected_qty_field.set_input(total_selected_qty);
 	}
 
-	get_batch_fields: function() {
+	get_batch_fields() {
 		var me = this;
 
 		return [
@@ -537,7 +537,7 @@ erpnext.SerialNoBatchSelector = class SerialNoBatchSelector {
 			}
 		];
 	}
-});
+};
 
 function get_pending_qty_fields(me) {
 	if (!check_can_calculate_pending_qty(me)) return [];

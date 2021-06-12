@@ -374,10 +374,10 @@ class calculate_taxes_and_totals(object):
 
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# if fully inclusive taxes and diff
-		if self.doc.get("taxes") and any([cint(t.included_in_print_rate) for t in self.doc.get("taxes")]):
+		if self.doc.get("taxes") and any(cint(t.included_in_print_rate) for t in self.doc.get("taxes")):
 			last_tax = self.doc.get("taxes")[-1]
-			non_inclusive_tax_amount = sum([flt(d.tax_amount_after_discount_amount)
-				for d in self.doc.get("taxes") if not d.included_in_print_rate])
+			non_inclusive_tax_amount = sum(flt(d.tax_amount_after_discount_amount)
+				for d in self.doc.get("taxes") if not d.included_in_print_rate)
 
 			diff = self.doc.total + non_inclusive_tax_amount \
 				- flt(last_tax.total, last_tax.precision("total"))
@@ -517,8 +517,8 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_total_advance(self):
 		if self.doc.docstatus < 2:
-			total_allocated_amount = sum([flt(adv.allocated_amount, adv.precision("allocated_amount"))
-				for adv in self.doc.get("advances")])
+			total_allocated_amount = sum(flt(adv.allocated_amount, adv.precision("allocated_amount"))
+				for adv in self.doc.get("advances"))
 
 			self.doc.total_advance = flt(total_allocated_amount, self.doc.precision("total_advance"))
 
@@ -618,7 +618,7 @@ class calculate_taxes_and_totals(object):
 
 		if self.doc.doctype == "Sales Invoice" \
 			and self.doc.paid_amount > self.doc.grand_total and not self.doc.is_return \
-			and any([d.type == "Cash" for d in self.doc.payments]):
+			and any(d.type == "Cash" for d in self.doc.payments):
 			grand_total = self.doc.rounded_total or self.doc.grand_total
 			base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
 

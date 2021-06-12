@@ -520,7 +520,7 @@ class update_entries_after(object):
 			fields=["purchase_rate", "name", "company"],
 			filters = {'name': ('in', serial_nos)})
 
-		incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
+		incoming_values = sum(flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company)
 
 		# Get rate for serial nos which has been transferred to other company
 		invalid_serial_nos = [d.name for d in all_serial_nos if d.company!=sle.company]
