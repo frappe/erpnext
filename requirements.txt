@@ -1,6 +1,6 @@
 braintree==3.57.1
 frappe
-git+git://raw.githubusercontent.com/frappe/bench/develop/
+git+git://raw.githubusercontent.com/frappe/bench.git@develop
 gocardless-pro==1.11.0
 googlemaps==3.1.1
 pandas>=1.0.5
