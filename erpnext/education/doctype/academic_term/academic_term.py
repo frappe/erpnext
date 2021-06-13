@@ -9,13 +9,12 @@ from frappe.utils import getdate
 from frappe.model.document import Document
 
 class AcademicTerm(Document):
-    def autoname(self):
-        self.name = self.academic_year + " ({})".format(self.term_name) if self.term_name else ""
-
+    def before_naming(self):
+        self.title =  f"{self.academic_year} {self.term_name}"
     def validate(self):
         #Check if entry with same academic_year and the term_name already exists
-        validate_duplication(self)
-        self.title = self.academic_year + " ({})".format(self.term_name) if self.term_name else ""
+        # validate_duplication(self)
+        # self.title = self.academic_year + " ({})".format(self.term_name) if self.term_name else ""
 
         #Check that start of academic year is earlier than end of academic year
         if self.term_start_date and self.term_end_date \

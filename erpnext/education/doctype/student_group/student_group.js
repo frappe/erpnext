@@ -83,27 +83,22 @@ frappe.ui.form.on('Student Group', {
 	},
 
 	get_students: function(frm) {
-		if (frm.doc.group_based_on == 'Batch' || frm.doc.group_based_on == 'Course') {
-			var student_list = [];
+		var student_list = [];
 			var max_roll_no = 0;
 			$.each(frm.doc.students, function(_i,d) {
 				student_list.push(d.student);
-				if (d.group_roll_number>max_roll_no) {
-					max_roll_no = d.group_roll_number;
-				}
+				// if (d.group_roll_number>max_roll_no) {
+				// 	max_roll_no = d.group_roll_number;
+				// }
 			});
-
-			if (frm.doc.academic_year) {
 				frappe.call({
 					method: 'erpnext.education.doctype.student_group.student_group.get_students',
 					args: {
-						'academic_year': frm.doc.academic_year,
 						'academic_term': frm.doc.academic_term,
 						'group_based_on': frm.doc.group_based_on,
-						'program': frm.doc.program,
-						'batch' : frm.doc.batch,
-						'student_category' : frm.doc.student_category,
-						'course': frm.doc.course
+						'program': frm.doc.programs,
+						'stream' : frm.doc.stream,
+						'program_and_stream':frm.doc.program_and_stream
 					},
 					callback: function(r) {
 						if (r.message) {
@@ -111,11 +106,12 @@ frappe.ui.form.on('Student Group', {
 								if(!in_list(student_list, d.student)) {
 									var s = frm.add_child('students');
 									s.student = d.student;
-									s.student_name = d.student_name;
-									if (d.active === 0) {
-										s.active = 0;
-									}
-									s.group_roll_number = ++max_roll_no;
+									s.student_email_id = d.student_email_id;
+									s.student_phone_number = d.student_phone_number;
+									// if (d.active === 0) {
+									// 	s.active = 0;
+									// }
+									// s.group_roll_number = ++max_roll_no;
 								}
 							});
 							refresh_field('students');
@@ -125,10 +121,7 @@ frappe.ui.form.on('Student Group', {
 						}
 					}
 				})
-			}
-		} else {
-			frappe.msgprint(__('Select students manually for the Activity based Group'));
-		}
+		
 	}
 });
 

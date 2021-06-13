@@ -22,7 +22,7 @@
    "fieldname": "based_on",
    "fieldtype": "Select",
    "label": "Based On",
-   "options": "Student Group\nCourse Schedule"
+   "options": "Student Group\nSchedule Subject Lecture"
   },
   {
    "default": "Batch",
@@ -51,7 +51,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Course Schedule",
-   "options": "Course Schedule",
+   "options": "Schedule Subject Lecture",
    "reqd": 1
   },
   {
@@ -93,7 +93,7 @@
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-23 17:52:28.078971",
+ "modified": "2021-06-12 23:03:09.482928",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Attendance Tool",

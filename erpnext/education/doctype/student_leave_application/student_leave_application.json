@@ -85,10 +85,10 @@
   {
    "allow_in_quick_entry": 1,
    "default": "Student Group",
-   "fieldname": "attendance_based_on",
+   "fieldname": "attendance_based_on",  
    "fieldtype": "Select",
    "label": "Attendance Based On",
-   "options": "Student Group\nCourse Schedule"
+   "options": "Student Group\nSchedule Subject Lecture"
   },
   {
    "allow_in_quick_entry": 1,
@@ -106,7 +106,7 @@
    "fieldtype": "Link",
    "label": "Course Schedule",
    "mandatory_depends_on": "eval:doc.attendance_based_on === \"Course Schedule\";",
-   "options": "Course Schedule"
+   "options": "Schedule Subject Lecture"
   },
   {
    "fieldname": "column_break_11",
@@ -121,7 +121,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-21 18:10:24.440669",
+ "modified": "2021-06-12 23:03:09.137163",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Leave Application",

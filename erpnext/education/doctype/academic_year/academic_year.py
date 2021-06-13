@@ -8,6 +8,8 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 
 class AcademicYear(Document):
+    def before_naming(self):
+        self.title = f"{self.academic_year_name}-{self.academic_year_intake}"
     def validate(self):
         #Check that start of academic year is earlier than end of academic year
         if self.year_start_date and self.year_end_date and self.year_start_date > self.year_end_date:

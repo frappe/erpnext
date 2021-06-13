@@ -1,4 +1,4 @@
-frappe.views.calendar["Course Schedule"] = {
+frappe.views.calendar["Schedule Subject Lecture"] = {
 	field_map: {
 		// from_datetime and to_datetime don't exist as docfields but are used in onload
 		"start": "from_datetime",
