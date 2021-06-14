@@ -175,15 +175,9 @@ class SerialNo(StockController):
 			self.vehicle_owner_name = None
 
 		if self.vehicle:
-			last_date = None
-			dates = [self.purchase_date, self.delivery_date]
-			dates = [getdate(d) for d in dates if d]
-			if dates:
-				last_date = max(dates)
-
 			filters = {"vehicle": self.vehicle, "docstatus": 1}
-			if last_date:
-				filters['posting_date'] = ['>=', last_date]
+			if self.purchase_date:
+				filters['posting_date'] = ['>=', self.purchase_date]
 
 			transfer_letter_details = frappe.get_all("Vehicle Transfer Letter", fields=['customer', 'customer_name'],
 				filters=filters, order_by="posting_date desc, creation desc", limit=1)
