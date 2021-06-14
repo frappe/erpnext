@@ -1087,6 +1087,8 @@ frappe.ui.form.on('Payment Entry', {
 
 	initialize_taxes: function(frm) {
 		$.each(frm.doc["taxes"] || [], function(i, tax) {
+			frm.events.validate_taxes_and_charges(tax);
+			frm.events.validate_inclusive_tax(tax);
 			tax.item_wise_tax_detail = {};
 			let tax_fields = ["total",  "tax_fraction_for_current_item",
 				"grand_total_fraction_for_current_item"];
@@ -1101,6 +1103,73 @@ frappe.ui.form.on('Payment Entry', {
 		});
 	},
 
+	validate_taxes_and_charges: function(d) {
+		let msg = "";
+
+		if (d.account_head && !d.description) {
+			// set description from account head
+			d.description = d.account_head.split(' - ').slice(0, -1).join(' - ');
+		}
+
+		if (!d.charge_type && (d.row_id || d.rate || d.tax_amount)) {
+			msg = __("Please select Charge Type first");
+			d.row_id = "";
+			d.rate = d.tax_amount = 0.0;
+		} else if ((d.charge_type == 'Actual' || d.charge_type == 'On Net Total' || d.charge_type == 'On Paid Amount') && d.row_id) {
+			msg = __("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'");
+			d.row_id = "";
+		} else if ((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
+			if (d.idx == 1) {
+				msg = __("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row");
+				d.charge_type = '';
+			} else if (!d.row_id) {
+				msg = __("Please specify a valid Row ID for row {0} in table {1}", [d.idx, __(d.doctype)]);
+				d.row_id = "";
+			} else if (d.row_id && d.row_id >= d.idx) {
+				msg = __("Cannot refer row number greater than or equal to current row number for this Charge type");
+				d.row_id = "";
+			}
+		}
+		if (msg) {
+			frappe.validated = false;
+			refresh_field("taxes");
+			frappe.throw(msg);
+		}
+
+	},
+
+	validate_inclusive_tax: function(tax) {
+		let actual_type_error = function() {
+			let msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
+			frappe.throw(msg);
+		};
+
+		let on_previous_row_error = function(row_range) {
+			let msg = __("For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included",
+				[tax.idx, __(tax.doctype), tax.charge_type, row_range])
+			frappe.throw(msg);
+		};
+
+		if(cint(tax.included_in_paid_amount)) {
+			if(tax.charge_type == "Actual") {
+				// inclusive tax cannot be of type Actual
+				actual_type_error();
+			} else if(tax.charge_type == "On Previous Row Amount" &&
+				!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_paid_amount)
+			) {
+				// referred row should also be an inclusive tax
+				on_previous_row_error(tax.row_id);
+			} else if(tax.charge_type == "On Previous Row Total") {
+				let taxes_not_included = $.map(this.frm.doc["taxes"].slice(0, tax.row_id),
+					function(t) { return cint(t.included_in_paid_amount) ? null : t; });
+				if(taxes_not_included.length > 0) {
+					// all rows above this tax should be inclusive
+					on_previous_row_error(tax.row_id == 1 ? "1" : "1 - " + tax.row_id);
+				}
+			}
+		}
+	},
+
 	determine_exclusive_rate: function(frm) {
 		let has_inclusive_tax = false;
 		$.each(frm.doc["taxes"] || [], function(i, row) {
@@ -1110,8 +1179,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		let cumulated_tax_fraction = 0.0;
 		$.each(frm.doc["taxes"] || [], function(i, tax) {
-			let current_tax_fraction = frm.events.get_current_tax_fraction(frm, tax);
-			tax.tax_fraction_for_current_item = current_tax_fraction[0];
+			tax.tax_fraction_for_current_item = frm.events.get_current_tax_fraction(frm, tax);
 
 			if(i==0) {
 				tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item;
@@ -1132,9 +1200,7 @@ frappe.ui.form.on('Payment Entry', {
 		if(cint(tax.included_in_paid_amount)) {
 			let tax_rate = tax.rate;
 
-			if (tax.charge_type == "Actual") {
-				current_tax_fraction = tax.tax_amount/(frm.doc.paid_amount_after_tax + frm.doc.tax_amount);
-			} else if(tax.charge_type == "On Paid Amount") {
+			if(tax.charge_type == "On Paid Amount") {
 				current_tax_fraction = (tax_rate / 100.0);
 			} else if(tax.charge_type == "On Previous Row Amount") {
 				current_tax_fraction = (tax_rate / 100.0) *
@@ -1147,7 +1213,6 @@ frappe.ui.form.on('Payment Entry', {
 
 		if(tax.add_deduct_tax && tax.add_deduct_tax == "Deduct") {
 			current_tax_fraction *= -1;
-			inclusive_tax_amount_per_qty *= -1;
 		}
 		return current_tax_fraction;
 	},
@@ -1207,10 +1272,8 @@ frappe.ui.form.on('Payment Entry', {
 				frappe.throw(
 					__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
 			}
-			if (!tax.row_id) {
-				tax.row_id = tax.idx - 1;
-			}
 		}
+
 		if(tax.charge_type == "Actual") {
 			current_tax_amount = flt(tax.tax_amount, precision("tax_amount", tax))
 		} else if(tax.charge_type == "On Paid Amount") {
@@ -1294,6 +1357,11 @@ frappe.ui.form.on('Advance Taxes and Charges', {
 	},
 
 	included_in_paid_amount: function(frm) {
+		frm.events.apply_taxes(frm);
+		frm.events.set_unallocated_amount(frm);
+	},
+
+	charge_type: function(frm) {
 		frm.events.apply_taxes(frm);
 		frm.events.set_unallocated_amount(frm);
 	}
