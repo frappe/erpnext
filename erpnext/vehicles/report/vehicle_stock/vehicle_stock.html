@@ -148,6 +148,9 @@
 						{% if(data[i].broker_name) { %}
 							<div>Broker: {%= data[i].broker_name %}</div>
 						{% } %}
+						{% if(data[i].delivery_customer_name && data[i].receiver_contact && data[i].finance_type != 'Leased') { %}
+							<div>User: {%= data[i].delivery_customer_name %}</div>
+						{% } %}
 					</td>
 				{% endif %}
 

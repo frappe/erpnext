@@ -181,8 +181,13 @@ class VehicleStockReport(object):
 						d.customer_name = vehicle_delivery_data.booking_customer_name or vehicle_delivery_data.customer_name
 						d.broker = vehicle_delivery_data.broker
 						d.broker_name = vehicle_delivery_data.broker_name
+						d.receiver_contact = vehicle_delivery_data.receiver_contact
 						d.delivered_to = vehicle_delivery_data.receiver_contact_display or vehicle_delivery_data.customer_name
 						d.delivered_to_contact = vehicle_delivery_data.receiver_contact_mobile or vehicle_delivery_data.receiver_contact_phone
+
+						if vehicle_delivery_data.vehicle_owner and vehicle_delivery_data.vehicle_owner != vehicle_delivery_data.customer:
+							d.delivery_customer = vehicle_delivery_data.customer
+							d.delivery_customer_name = vehicle_delivery_data.customer_name
 
 			# Booked Open Stock
 			if not d.vehicle_booking_order and d.vehicle in self.booking_by_vehicle_data:
@@ -204,6 +209,7 @@ class VehicleStockReport(object):
 				d.supplier_name = d.supplier_name or booking_data.get('supplier_name')
 				d.contact_number = booking_data.get('contact_mobile') or booking_data.get('contact_phone')
 				d.is_leased = booking_data.get('financer') and booking_data.get('finance_type') == "Leased"
+				d.finance_type = booking_data.get('finance_type') if booking_data.get('financer') else None
 
 				d.delivery_period = booking_data.get('delivery_period')
 				d.delivery_due_date = booking_data.get('delivery_date')
@@ -219,6 +225,9 @@ class VehicleStockReport(object):
 			if d.vehicle in self.vehicle_invoice_delivery_data:
 				invoice_data = self.vehicle_invoice_delivery_data[d.vehicle]
 				d.invoice_delivery_date = invoice_data.get('posting_date')
+
+			# User Name
+			d.user_name = d.lessee_name or d.delivery_customer_name
 
 			# Stock Status
 			if d.qty > 0:
@@ -452,9 +461,10 @@ class VehicleStockReport(object):
 		delivery_names = list(set([d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Delivery"]))
 		if delivery_names:
 			data = frappe.db.sql("""
-				select name, vehicle_booking_order, customer, customer_name, booking_customer_name, broker, broker_name,
+				select name, vehicle_booking_order,
+					customer, customer_name, booking_customer_name, broker, broker_name, vehicle_owner, vehicle_owner_name,
 					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered,
-					receiver_contact_display, receiver_contact_mobile, receiver_contact_phone
+					receiver_contact, receiver_contact_display, receiver_contact_mobile, receiver_contact_phone
 				from `tabVehicle Delivery`
 				where docstatus = 1 and name in %s
 			""", [delivery_names], as_dict=1)
@@ -565,7 +575,7 @@ class VehicleStockReport(object):
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
-			{"label": _("Lessee/User Name"), "fieldname": "lessee_name", "fieldtype": "Data", "width": 130},
+			{"label": _("User/Lessee Name"), "fieldname": "user_name", "fieldtype": "Data", "width": 130},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Delivered To"), "fieldname": "delivered_to", "fieldtype": "Data", "width": 110},
 			{"label": _("Broker Name"), "fieldname": "broker_name", "fieldtype": "Data", "width": 110},
