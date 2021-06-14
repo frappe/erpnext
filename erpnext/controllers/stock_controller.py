@@ -558,11 +558,8 @@ def future_sle_exists(args):
 	or_conditions = []
 	for warehouse, items in warehouse_items_map.items():
 		or_conditions.append(
-			"warehouse = '{}' and item_code in ({})".format(
-				warehouse,
-				", ".join(frappe.db.escape(item) for item in items)
-			)
-		)
+			f"""warehouse = {frappe.db.escape(warehouse)}
+				and item_code in ({', '.join(frappe.db.escape(item) for item in items)})""")
 
 	return frappe.db.sql("""
 		select name
