@@ -36,8 +36,6 @@ class ShiftType(Document):
 			time_difference = shift_start - shift_end
 		self.standard_working_time = convert_time_into_duration(time_difference)
 
-
-
 	def validate_overtime(self):
 		if not frappe.db.get_single_value("Payroll Settings", "fetch_standard_working_hours_from_shift_type") and self.allow_overtime:
 			frappe.throw(_('Please enable "Fetch Standard Working Hours from Shift Type" in payroll Settings for Overtime.'))
@@ -47,6 +45,7 @@ class ShiftType(Document):
 
 	@frappe.whitelist()
 	def process_auto_attendance(self):
+		self.validate_overtime()
 		if not cint(self.enable_auto_attendance) or not self.process_attendance_after or not self.last_sync_of_checkin:
 			return
 		filters = {
@@ -57,11 +56,8 @@ class ShiftType(Document):
 			'shift': self.name
 		}
 		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
-		from pprint import pprint
-		pprint(logs)
 
 		if self.allow_overtime == 1:
-			print("chumma")
 			checkins_log = itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_start']))
 		else:
 			checkins_log = itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start']))
@@ -69,7 +65,6 @@ class ShiftType(Document):
 		for key, group in checkins_log:
 			single_shift_logs = list(group)
 			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
-			print(attendance_status, working_hours, late_entry, early_exit, in_time, out_time)
 
 			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, in_time, out_time, self.name)
 
@@ -86,7 +81,6 @@ class ShiftType(Document):
 
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
-		print(total_working_hours)
 
 		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
@@ -95,7 +89,6 @@ class ShiftType(Document):
 			early_exit = True
 
 		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
-			print("------->>", 'Here', print(self.working_hours_threshold_for_absent))
 			return 'Absent', total_working_hours, late_entry, early_exit, in_time, out_time
 
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:

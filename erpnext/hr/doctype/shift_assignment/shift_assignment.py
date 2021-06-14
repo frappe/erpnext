@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, now_datetime, nowdate
+from frappe.utils import cint, cstr, getdate, now_datetime, nowdate
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.hr.utils import validate_active_employee
@@ -236,13 +236,15 @@ def get_shift_details(shift_type_name, for_date=nowdate()):
 	end_datetime = datetime.combine(for_date, datetime.min.time()) + shift_type.end_time
 	actual_start = start_datetime - timedelta(minutes=shift_type.begin_check_in_before_shift_start_time)
 	actual_end = end_datetime + timedelta(minutes=shift_type.allow_check_out_after_shift_end_time)
+	allow_overtime = shift_type.allow_overtime
 
 	return frappe._dict({
 		'shift_type': shift_type,
 		'start_datetime': start_datetime,
 		'end_datetime': end_datetime,
 		'actual_start': actual_start,
-		'actual_end': actual_end
+		'actual_end': actual_end,
+		'allow_overtime': allow_overtime
 	})
 
 
@@ -254,22 +256,32 @@ def get_actual_start_end_datetime_of_shift(employee, for_datetime, consider_defa
 	"""
 	actual_shift_start = actual_shift_end = shift_details = None
 	shift_timings_as_per_timestamp = get_employee_shift_timings(employee, for_datetime, consider_default_shift)
-	timestamp_list = []
-	for shift in shift_timings_as_per_timestamp:
-		if shift:
-			timestamp_list.extend([shift.actual_start, shift.actual_end])
-		else:
-			timestamp_list.extend([None, None])
-	timestamp_index = None
-	for index, timestamp in enumerate(timestamp_list):
-		if timestamp and for_datetime <= timestamp:
-			timestamp_index = index
-			break
-	if timestamp_index and timestamp_index%2 == 1:
-		shift_details = shift_timings_as_per_timestamp[int((timestamp_index-1)/2)]
-		actual_shift_start = shift_details.actual_start
-		actual_shift_end = shift_details.actual_end
-	elif timestamp_index:
-		shift_details = shift_timings_as_per_timestamp[int(timestamp_index/2)]
+
+	if not shift_timings_as_per_timestamp[0].allow_overtime:
+		# If Shift is not allowed for automatic calculation of overtime, then previous, current and next
+		# shift will also should be considered for valid and invalid checkins.
+		# if checkin time is not in current shift thenit will check prev and next shift for checkin validation.
+		timestamp_list = []
+		for shift in shift_timings_as_per_timestamp:
+			if shift:
+				timestamp_list.extend([shift.actual_start, shift.actual_end])
+			else:
+				timestamp_list.extend([None, None])
+
+		timestamp_index = None
+		for index, timestamp in enumerate(timestamp_list):
+			if timestamp and for_datetime <= timestamp:
+				timestamp_index = index
+				break
+		if timestamp_index and timestamp_index%2 == 1:
+			shift_details = shift_timings_as_per_timestamp[int((timestamp_index-1)/2)]
+			actual_shift_start = shift_details.actual_start
+			actual_shift_end = shift_details.actual_end
+		elif timestamp_index:
+			shift_details = shift_timings_as_per_timestamp[int(timestamp_index/2)]
+	else:
+		# for overtime calculation there is no valid and invalid checkins it should return the current shift and after that total working
+		# hours will be taken in consideration for overtime calculation. there will be no actual_shift_start/end.
+		shift_details = shift_timings_as_per_timestamp[1]
 
 	return actual_shift_start, actual_shift_end, shift_details

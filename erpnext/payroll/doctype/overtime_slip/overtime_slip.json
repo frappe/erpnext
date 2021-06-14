@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "autoname": "HR-OVR-SLIP-.#####",
  "creation": "2021-05-27 12:47:32.372698",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -21,10 +22,7 @@
   "overtime_details",
   "section_break_13",
   "total_overtime_duration",
-  "total_overtime_durationtime",
   "column_break_17",
-  "amount",
-  "name1",
   "amended_from"
  ],
  "fields": [
@@ -119,18 +117,8 @@
   },
   {
    "fieldname": "total_overtime_duration",
-   "fieldtype": "Data",
+   "fieldtype": "Duration",
    "label": "Total Overtime Duration"
-  },
-  {
-   "fieldname": "total_overtime_durationtime",
-   "fieldtype": "Time",
-   "label": "Total Overtime Duration(Time)"
-  },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "label": "Amount"
   },
   {
    "fieldname": "section_break_12",
@@ -139,11 +127,6 @@
   {
    "fieldname": "column_break_17",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "name1",
-   "fieldtype": "Duration",
-   "label": "name"
   },
   {
    "default": "Today",
@@ -156,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-31 15:07:39.485473",
+ "modified": "2021-06-10 13:35:57.511257",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Overtime Slip",

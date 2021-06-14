@@ -4,16 +4,12 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
-
 import json
+from frappe import _
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, date_diff, add_to_date
+from frappe.utils import flt, time_diff_in_hours, getdate
 from frappe.model.document import Document
-from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
-	WorkstationHolidayError)
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.hr.utils import validate_active_employee
 
@@ -31,6 +27,7 @@ class Timesheet(Document):
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
+		self.validate_overtime()
 		self.set_dates()
 
 	def set_employee_name(self):
@@ -64,6 +61,45 @@ class Timesheet(Document):
 		self.per_billed = 0
 		if self.total_billed_amount > 0 and self.total_billable_amount > 0:
 			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
+
+	def validate_overtime(self):
+		total_overtime_hours= 0
+		overtime_type = None
+		for data in self.time_logs:
+			overtime_type = data.overtime_type
+			if data.is_overtime:
+				if frappe.db.get_single_value("Payroll Settings", "overtime_based_on") == "Timesheet":
+					if not self.employee:
+						frappe.throw("Select Employee, if applicable for overtime")
+
+					if not data.overtime_type:
+						frappe.throw(_("Define Overtime Type for Employee {0}").format(self.employee))
+
+					if data.overtime_on:
+						if data.overtime_on <= data.from_time or data.overtime_on >= data.to_time:
+							frappe.throw(_("Row {0}: {3} should be within {1} and {2}").format(
+								str(data.idx),
+								data.from_time,
+								data.to_time,
+								frappe.bold("Overtime On"))
+							)
+					maximum_overtime_hours_allowed = frappe.db.get_single_value("Payroll Settings", "maximum_overtime_hours_allowed")
+
+					if data.overtime_hours <= maximum_overtime_hours_allowed:
+						total_overtime_hours += data.overtime_hours
+					else:
+						frappe.throw(_("Row {0}: Overtime Hours can not be greater than {1} for a day. You can change this in Payroll Settings").
+						format(
+							str(data.idx),
+							frappe.bold(str(maximum_overtime_hours_allowed))
+						))
+				else:
+					frappe.throw(_('Please Set "Calculate Overtime Based On" to TimeSheet In Payroll Settings'))
+
+
+		if total_overtime_hours:
+			self.total_overtime_hours = total_overtime_hours
+			self.overtime_type =overtime_type
 
 	def update_billing_hours(self, args):
 		if args.is_billable:

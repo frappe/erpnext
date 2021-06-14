@@ -9,7 +9,6 @@
   "start_time",
   "end_time",
   "standard_working_time",
-  "working_time_delta",
   "column_break_3",
   "holiday_list",
   "enable_auto_attendance",
@@ -169,15 +168,9 @@
   },
   {
    "fieldname": "standard_working_time",
-   "fieldtype": "Data",
+   "fieldtype": "Duration",
    "label": "Standard Working Time",
    "read_only": 1
-  },
-  {
-   "fieldname": "working_time_delta",
-   "fieldtype": "Time",
-   "hidden": 1,
-   "label": "Working time(delta)"
   },
   {
    "default": "0",
@@ -198,7 +191,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-26 14:10:09.574202",
+ "modified": "2021-06-09 13:38:25.697100",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

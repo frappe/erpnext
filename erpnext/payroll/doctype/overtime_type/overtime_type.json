@@ -16,7 +16,7 @@
   "weekend_multiplier",
   "column_break_9",
   "applicable_for_public_holiday",
-  "public_holiday_multipliers"
+  "public_holiday_multiplier"
  ],
  "fields": [
   {
@@ -83,15 +83,15 @@
   },
   {
    "depends_on": "eval: doc.applicable_for_public_holiday == 1",
-   "fieldname": "public_holiday_multipliers",
+   "fieldname": "public_holiday_multiplier",
    "fieldtype": "Float",
-   "label": "Public Holiday Multipliers",
+   "label": "Public Holiday Multiplier",
    "mandatory_depends_on": "eval: doc.applicable_for_public_holiday == 1"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-25 13:21:11.318945",
+ "modified": "2021-06-09 15:43:43.891270",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Overtime Type",

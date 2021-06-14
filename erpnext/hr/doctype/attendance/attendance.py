@@ -22,6 +22,9 @@ class Attendance(Document):
 		self.set_overtime_type()
 		self.set_default_shift()
 
+		if not frappe.db.get_single_value('Payroll Settings', 'fetch_standard_working_hours_from_shift_type'):
+			self.standard_working_time = None
+
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
@@ -53,6 +56,18 @@ class Attendance(Document):
 
 	def set_overtime_type(self):
 		self.overtime_type = get_overtime_type(self.employee)
+
+		if self.overtime_type:
+			if  frappe.db.get_single_value("Payroll Settings", "overtime_based_on") != "Attendance":
+				frappe.msgprint(_('Set "Calculate Overtime Based On Attendance" to Attendance for Overtime Slip Creation'))
+
+			maximum_overtime_hours_allowed = frappe.db.get_single_value("Payroll Settings", "maximum_overtime_hours_allowed")
+
+			if maximum_overtime_hours_allowed and maximum_overtime_hours_allowed * 3600 < self.overtime_duration:
+				self.overtime_duration = maximum_overtime_hours_allowed * 3600
+				frappe.msgprint(_("Overtime Duration can not be greater than {0} Hours. You can change this in Payroll settings").format(
+					str(maximum_overtime_hours_allowed)
+				))
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""
@@ -91,11 +106,9 @@ class Attendance(Document):
 
 	def calculate_overtime_duration(self):
 		#this method is only for Calculation of overtime based on Attendance through Employee Checkins
-		overtime_duration = self.working_timedelta - self.standard_working_time_delta
-		self.overtime_duration = overtime_duration
-		overtime_duration = str(overtime_duration).split(':')
-		if int(overtime_duration[0]) or int(overtime_duration[1]):
-			self.overtime_duration_words = overtime_duration[0] + " Hours " + overtime_duration[1] + " Minutes"
+		self.overtime_duration = None
+		if int(self.working_time) > int(self.standard_working_time):
+			self.overtime_duration = int(self.working_time) - int(self.standard_working_time)
 
 @frappe.whitelist()
 def get_shift_type(employee, attendance_date):
@@ -123,9 +136,6 @@ def get_shift_type(employee, attendance_date):
 
 @frappe.whitelist()
 def get_overtime_type(employee):
-	overtime_based_on = frappe.db.get_single_value("Payroll Settings", "overtime_based_on")
-	if overtime_based_on == "Attendance":
-
 		emp_department = frappe.db.get_value("Employee", employee, "department")
 		if emp_department:
 			overtime_type = frappe.get_list("Overtime Type", filters={"party_type": "Department", "party": emp_department}, fields=['name'])

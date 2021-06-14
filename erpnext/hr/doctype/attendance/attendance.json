@@ -25,16 +25,13 @@
   "out_time",
   "column_break_18",
   "standard_working_time",
-  "standard_working_time_delta",
   "working_time",
-  "working_timedelta",
   "late_entry",
   "early_exit",
   "overtime_details_section",
   "overtime_type",
-  "overtime_duration",
   "column_break_27",
-  "overtime_duration_words",
+  "overtime_duration",
   "amended_from"
  ],
  "fields": [
@@ -215,41 +212,23 @@
    "description": "Shift duration for a day",
    "fetch_from": "shift.standard_working_time",
    "fieldname": "standard_working_time",
-   "fieldtype": "Data",
+   "fieldtype": "Duration",
    "label": " Standard Working Time",
    "read_only": 1
   },
   {
-   "fetch_from": "shift.working_time_delta",
-   "fieldname": "standard_working_time_delta",
-   "fieldtype": "Time",
-   "hidden": 1,
-   "label": "Standard Working Time(Delta)"
-  },
-  {
    "depends_on": "working_time",
    "fieldname": "working_time",
-   "fieldtype": "Data",
+   "fieldtype": "Duration",
    "label": "Total Working Time",
    "precision": "1",
    "read_only": 1
   },
   {
-   "fieldname": "working_timedelta",
-   "fieldtype": "Time",
-   "hidden": 1,
-   "label": "Working Time(Delta)"
-  },
-  {
-   "fieldname": "overtime_duration_words",
-   "fieldtype": "Data",
-   "label": "Overtime Duration(Words)",
-   "read_only": 1
-  },
-  {
-   "default": "00:00:00",
+   "default": "0000",
    "fieldname": "overtime_duration",
-   "fieldtype": "Time",
+   "fieldtype": "Duration",
+   "hide_days": 1,
    "label": "Overtime Duration"
   },
   {
@@ -267,7 +246,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-26 16:44:33.219313",
+ "modified": "2021-06-09 13:42:36.176547",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

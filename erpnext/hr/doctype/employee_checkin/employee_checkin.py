@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import now, cint, get_datetime
+from frappe.utils import cint, get_datetime
 from frappe.model.document import Document
 from datetime import timedelta
 from math import modf
@@ -42,8 +42,8 @@ class EmployeeCheckin(Document):
 					self.shift_start = shift_actual_timings[2].start_datetime
 					self.shift_end = shift_actual_timings[2].end_datetime
 		elif frappe.db.get_value("Shift Type", shift_actual_timings[2].shift_type.name, "allow_overtime"):
-		# 		#because after Actual time it takes check-in/out invalid
-		# 		#if employee checkout late or check-in before before shift timing adding time buffer.
+				#because after Actual time it takes check-in/out invalid
+				#if employee checkout late or check-in before before shift timing adding time buffer.
 				self.shift = shift_actual_timings[2].shift_type.name
 				self.shift_start = shift_actual_timings[2].start_datetime
 				self.shift_end = shift_actual_timings[2].end_datetime
@@ -110,10 +110,6 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				working_timedelta = timedelta(hours =int(working_time[1]), minutes = int(working_time[0] * 60))
 				from erpnext.hr.doctype.shift_type.shift_type import convert_time_into_duration
 				working_time = convert_time_into_duration(working_timedelta)
-
-			print("working")
-			print(working_timedelta)
-			print(working_time)
 
 			doc_dict = {
 				'doctype': 'Attendance',

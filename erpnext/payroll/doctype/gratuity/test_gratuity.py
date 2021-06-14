@@ -166,15 +166,15 @@ def set_mode_of_payment_account():
 
 def create_account():
 	return frappe.get_doc({
-			"doctype": "Account",
-			"company": "_Test Company",
-			"account_name": "Payment Account",
-			"root_type": "Asset",
-			"report_type": "Balance Sheet",
-			"currency": "INR",
-			"parent_account": "Bank Accounts - _TC",
-			"account_type": "Bank",
-		}).insert(ignore_permissions=True)
+		"doctype": "Account",
+		"company": "_Test Company",
+		"account_name": "Payment Account",
+		"root_type": "Asset",
+		"report_type": "Balance Sheet",
+		"currency": "INR",
+		"parent_account": "Bank Accounts - _TC",
+		"account_type": "Bank",
+	}).insert(ignore_permissions=True)
 
 def create_employee_and_get_last_salary_slip():
 	employee = make_employee("test_employee@salary.com", company='_Test Company')

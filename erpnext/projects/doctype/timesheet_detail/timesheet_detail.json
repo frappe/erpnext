@@ -14,10 +14,16 @@
   "to_time",
   "hours",
   "completed",
+  "section_break_9",
+  "is_overtime",
+  "overtime_type",
+  "column_break_12",
+  "overtime_on",
+  "overtime_hours",
   "section_break_7",
   "completed_qty",
   "workstation",
-  "column_break_12",
+  "column_break_18",
   "operation",
   "operation_id",
   "project_details",
@@ -70,7 +76,7 @@
    "fieldname": "hours",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hrs"
+   "label": "Working Hours"
   },
   {
    "fieldname": "to_time",
@@ -262,12 +268,47 @@
    "label": "Costing Amount",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_overtime",
+   "fieldtype": "Check",
+   "label": "Is Applicable For Overtime"
+  },
+  {
+   "depends_on": "eval: doc.is_overtime",
+   "fieldname": "overtime_on",
+   "fieldtype": "Date",
+   "label": "Overtime On",
+   "mandatory_depends_on": "eval: doc.is_overtime"
+  },
+  {
+   "depends_on": "eval: doc.is_overtime",
+   "fieldname": "overtime_hours",
+   "fieldtype": "Float",
+   "label": "Overtime Hours",
+   "mandatory_depends_on": "eval: doc.is_overtime"
+  },
+  {
+   "depends_on": "eval: doc.is_overtime",
+   "fieldname": "overtime_type",
+   "fieldtype": "Link",
+   "label": "Overtime Type",
+   "options": "Overtime Type"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-18 12:19:33.205940",
+ "modified": "2021-06-10 15:17:20.846091",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet Detail",

@@ -14,11 +14,11 @@
   "customer",
   "currency",
   "exchange_rate",
-  "sales_invoice",
   "column_break_3",
-  "salary_slip",
   "status",
   "parent_project",
+  "salary_slip",
+  "sales_invoice",
   "employee_detail",
   "employee",
   "employee_name",
@@ -29,7 +29,10 @@
   "end_date",
   "section_break_5",
   "time_logs",
-  "working_hours",
+  "overtime_details_section",
+  "overtime_type",
+  "total_overtime_hours",
+  "column_break_26",
   "total_hours",
   "billing_details",
   "total_billable_hours",
@@ -174,10 +177,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "working_hours",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "total_hours",
@@ -313,13 +312,36 @@
    "fieldname": "exchange_rate",
    "fieldtype": "Float",
    "label": "Exchange Rate"
+  },
+  {
+   "depends_on": "eval: doc.total_overtime_hours",
+   "fieldname": "overtime_details_section",
+   "fieldtype": "Section Break",
+   "label": "Overtime Details"
+  },
+  {
+   "fieldname": "overtime_type",
+   "fieldtype": "Link",
+   "label": "Overtime Type",
+   "options": "Overtime Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_overtime_hours",
+   "fieldtype": "Float",
+   "label": "Total Overtime Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-clock-o",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-18 16:10:08.249619",
+ "modified": "2021-06-14 17:10:31.434084",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
