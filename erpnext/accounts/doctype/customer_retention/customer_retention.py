@@ -43,3 +43,16 @@ class CustomerRetention(Document):
 			customer.remaining_balance -= self.total_withheld
 			customer.save()
 
+	def create_daily_summary_series(self):
+		split_serie = self.naming_series.split('-')
+		serie =  "{}-{}".format(split_serie[0], split_serie[1])
+		prefix = frappe.get_all("Daily summary series", ["name_serie"], filters = {"name_serie": serie})
+
+		if len(prefix) == 0:
+			doc = frappe.new_doc('Daily summary series')
+			doc.name_serie = serie
+			doc.insert()
+	
+	def before_naming(self):
+		if self.docstatus == 0:
+			self.create_daily_summary_series()
