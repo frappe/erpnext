@@ -49,8 +49,12 @@ def validate_filters(filters, account_details):
 	if not filters.get("from_date") and not filters.get("to_date"):
 		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date"))))
 
-	if filters.get("account") and not account_details.get(filters.account):
-		frappe.throw(_("Account {0} does not exists").format(filters.account))
+	for account in filters.account:
+		if not account_details.get(account):
+			frappe.throw(_("Account {0} does not exists").format(account))
+			
+	if filters.get('account'):
+		filters.account = frappe.parse_json(filters.get('account'))
 
 	if (filters.get("account") and filters.get("group_by") == _('Group by Account')
 		and account_details[filters.account].is_group == 0):
@@ -87,7 +91,7 @@ def set_account_currency(filters):
 		account_currency = None
 
 		if filters.get("account"):
-			account_currency = get_account_currency(filters.account)
+			account_currency = get_account_currency(filters.account[0])
 		elif filters.get("party"):
 			gle_currency = frappe.db.get_value(
 				"GL Entry", {
@@ -205,10 +209,18 @@ def get_gl_entries(filters, accounting_dimensions):
 
 def get_conditions(filters):
 	conditions = []
+
 	if filters.get("account") and not filters.get("include_dimensions"):
-		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
-		conditions.append("""account in (select name from tabAccount
-			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+		account_conditions = ""
+		for account in filters["account"]:
+			lft, rgt = frappe.db.get_value("Account", account, ["lft", "rgt"])
+			account_conditions += """account in (select name from tabAccount
+				where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt)
+
+			# so that the OR doesn't get added to the last account condition
+			if account != filters["account"][-1]:
+				account_conditions += " OR "
+		conditions.append(account_conditions)
 
 	if filters.get("cost_center"):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
