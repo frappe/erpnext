@@ -595,13 +595,14 @@
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-28 00:34:12.938280",
+ "modified": "2021-06-14 11:09:25.593175",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -615,6 +616,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
