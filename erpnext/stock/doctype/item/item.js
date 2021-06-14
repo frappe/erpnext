@@ -93,12 +93,12 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
-		
+
 		if (!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
 		}
 
-		frm.add_custom_button(__('Duplicate'), function() {
+		frm.add_custom_button(__('Duplicate Item'), function() {
 			var new_item = frappe.model.copy_doc(frm.doc);
 			if(new_item.item_name===new_item.item_code) {
 				new_item.item_name = null;
