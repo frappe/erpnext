@@ -92,7 +92,8 @@ class MaterialProduce(Document):
                         frappe.db.set_value("Work Order", self.work_order, "actual_yeild", wo.actual_yeild)
                         self.make_se()
                     else:
-                        frappe.throw(_('Actual yeild is not within deviation limits'))
+                        frappe.throw(previous_complete_mp)
+                        #frappe.throw(_('Actual yeild is not within deviation limits'))
                 else:
                     frappe.throw(_('Another complete Material Produce for {0} is already present'.format(self.work_order)))
             else:
