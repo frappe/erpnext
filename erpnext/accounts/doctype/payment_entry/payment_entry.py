@@ -18,8 +18,7 @@ from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from six import string_types, iteritems
 
-from erpnext.controllers.accounts_controller import validate_conversion_rate, \
-	validate_taxes_and_charges, validate_inclusive_tax
+from erpnext.controllers.accounts_controller import validate_taxes_and_charges
 
 class InvalidPaymentEntry(ValidationError):
 	pass
@@ -924,6 +923,25 @@ class PaymentEntry(AccountsController):
 			current_tax_fraction *= -1.0
 
 		return current_tax_fraction
+
+def validate_inclusive_tax(tax, doc):
+	def _on_previous_row_error(row_range):
+		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx, row_range))
+
+	if cint(getattr(tax, "included_in_paid_amount", None)):
+		if tax.charge_type == "Actual":
+			# inclusive tax cannot be of type Actual
+			throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount").format(tax.idx))
+		elif tax.charge_type == "On Previous Row Amount" and \
+				not cint(doc.get("taxes")[cint(tax.row_id) - 1].included_in_paid_amount):
+			# referred row should also be inclusive
+			_on_previous_row_error(tax.row_id)
+		elif tax.charge_type == "On Previous Row Total" and \
+				not all([cint(t.included_in_paid_amount for t in doc.get("taxes")[:cint(tax.row_id) - 1])]):
+			# all rows about the referred tax should be inclusive
+			_on_previous_row_error("1 - %d" % (cint(tax.row_id),))
+		elif tax.get("category") == "Valuation":
+			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
