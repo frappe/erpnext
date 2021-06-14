@@ -16,8 +16,10 @@ from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_ac
 from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-
 from six import string_types, iteritems
+
+from erpnext.controllers.accounts_controller import validate_conversion_rate, \
+	validate_taxes_and_charges, validate_inclusive_tax
 
 class InvalidPaymentEntry(ValidationError):
 	pass
@@ -407,20 +409,6 @@ class PaymentEntry(AccountsController):
 		net_total = self.paid_amount
 		included_in_paid_amount = 0
 
-		if self.get('references'):
-			for doc in self.get('references'):
-				if doc.reference_doctype == 'Purchase Order':
-					reference_doclist.append(doc.reference_name)
-
-			if reference_doclist:
-				order_amount = frappe.db.get_all('Purchase Order', fields=['sum(net_total)'],
-					filters = {'name': ('in', reference_doclist), 'docstatus': 1,
-						'apply_tds': 1}, as_list=1)
-
-				if order_amount:
-					net_total = order_amount[0][0]
-					included_in_paid_amount = 1
-
 		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict({
 			'company': self.company,
@@ -719,9 +707,9 @@ class PaymentEntry(AccountsController):
 			if account_currency != self.company_currency:
 				frappe.throw(_("Currency for {0} must be {1}").format(d.account_head, self.company_currency))
 
-			if (self.payment_type == 'Pay' and self.advance_tax_account) or self.payment_type == 'Receive':
+			if self.payment_type == 'Pay':
 				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
-			elif (self.payment_type == 'Receive' and self.advance_tax_account) or self.payment_type == 'Pay':
+			elif self.payment_type == 'Receive':
 				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
 
 			payment_or_advance_account = self.get_party_account_for_taxes()
@@ -747,6 +735,8 @@ class PaymentEntry(AccountsController):
 					if account_currency==self.company_currency
 					else d.tax_amount,
 					"cost_center": self.cost_center,
+					"party_type": self.party_type,
+					"party": self.party
 				}, account_currency, item=d))
 
 	def add_deductions_gl_entries(self, gl_entries):
@@ -770,9 +760,9 @@ class PaymentEntry(AccountsController):
 	def get_party_account_for_taxes(self):
 		if self.advance_tax_account:
 			return self.advance_tax_account
-		elif self.payment_type == 'Pay':
-			return self.paid_from
 		elif self.payment_type == 'Receive':
+			return self.paid_from
+		elif self.payment_type == 'Pay':
 			return self.paid_to
 
 	def update_advance_paid(self):
@@ -823,6 +813,9 @@ class PaymentEntry(AccountsController):
 
 	def initialize_taxes(self):
 		for tax in self.get("taxes"):
+			validate_taxes_and_charges(tax)
+			validate_inclusive_tax(tax, self)
+
 			tax_fields = ["total", "tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
 			if tax.charge_type != "Actual":
@@ -918,15 +911,11 @@ class PaymentEntry(AccountsController):
 		if cint(tax.included_in_paid_amount):
 			tax_rate = tax.rate
 
-			if tax.charge_type == 'Actual':
-				current_tax_fraction = tax.tax_amount/ (self.paid_amount_after_tax + tax.tax_amount)
-			elif tax.charge_type == "On Paid Amount":
+			if tax.charge_type == "On Paid Amount":
 				current_tax_fraction = tax_rate / 100.0
-
 			elif tax.charge_type == "On Previous Row Amount":
 				current_tax_fraction = (tax_rate / 100.0) * \
 					self.get("taxes")[cint(tax.row_id) - 1].tax_fraction_for_current_item
-
 			elif tax.charge_type == "On Previous Row Total":
 				current_tax_fraction = (tax_rate / 100.0) * \
 					self.get("taxes")[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
@@ -1626,6 +1615,13 @@ def set_paid_amount_and_received_amount(dt, party_account_currency, bank, outsta
 			paid_amount = received_amount * doc.get('conversion_rate', 1)
 			if dt == "Employee Advance":
 				paid_amount = received_amount * doc.get('exchange_rate', 1)
+
+	if dt == "Purchase Order" and doc.apply_tds:
+		if party_account_currency == bank.account_currency:
+			paid_amount = received_amount = doc.base_net_total
+		else:
+			paid_amount = received_amount = doc.base_net_total * doc.get('exchange_rate', 1)
+
 	return paid_amount, received_amount
 
 def apply_early_payment_discount(paid_amount, received_amount, doc):
