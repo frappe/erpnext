@@ -155,6 +155,13 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
+		frm.set_query("bom_no", function() {
+			return {
+				filters: {
+					'company': frm.doc.company,
+				}
+			};
+		});
 		if(frm.doc.transfer_material_against === "Work Order"){
 			frm.add_custom_button(__('Add Additional Items'),function() {
 				var usr = frappe.session.user
