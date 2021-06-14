@@ -82,8 +82,8 @@ class MaterialProduce(Document):
             atleast_one_mc = frappe.db.sql("""select * from `tabMaterial Consumption` where work_order = %s and docstatus = 1""", (self.work_order))
             if atleast_one_mc:
                 # no_previous_complete_mc = frappe.db.count('Material Produce', {'work_order': self.work_order, 'docstatus': 1, 'partial_produce': 0})
-                previous_complete_mp = frappe.db.sql("""select * from `tabMaterial Produce` where work_order = %s and docstatus = 1 and partial_produce = 0""", (self.work_order))
-                if not previous_complete_mp:
+                previous_complete_mp = frappe.db.sql("""select * from `tabMaterial Produce` where work_order = %s and docstatus = 1 and partial_produce = 0""", (self.work_order),as_dict = 1)
+                if len(previous_complete_mp) == 0:
                     mfg = frappe.get_doc("Manufacturing Settings")
                     wo = frappe.get_doc("Work Order", self.work_order)
                     if self.actual_yeild_on_wo() >= (wo.bom_yeild-mfg.allowed_production_deviation_percentage) and self.actual_yeild_on_wo() <= (wo.bom_yeild+mfg.allowed_production_deviation_percentage):
