@@ -346,6 +346,7 @@ class DeliveryPlanning(Document):
 		conditions = ""
 		item = frappe.get_all(doctype='Delivery Planning Item',
 							  	  filters={"approved": "Yes",
+										   "supplier_dc": 1,
 								  "related_delivey_planning" : self.name})
 		print("<<<<<<<<<< Po plan >>>>>>>>>>>>>>>>>",item)
 
@@ -474,9 +475,6 @@ class DeliveryPlanning(Document):
 						print("0000000000000000000000000000",so_wise_data)
 						if(so_wise_data):
 							for s in so_wise_data:
-								# dp_item.doc_childs = frappe.get_all("Transporter Planning Items",
-								# 								filters={'parent': doc.name},
-								# 								fields=["*"])
 								dp_item.append("items",{"sales_order": s.sales_order,
 														 "item_name": s.item_name,
 														 "qty": s.ordered_qty,
@@ -520,9 +518,6 @@ class DeliveryPlanning(Document):
 						print("0000000000000000000000000000", so_wise_data)
 						if (so_wise_data):
 							for s in so_wise_data:
-								# dp_item.doc_childs = frappe.get_all("Transporter Planning Items",
-								# 								filters={'parent': doc.name},
-								# 								fields=["*"])
 								dp_item.append("items", {"sales_order": s.sales_order,
 														 "item_name": s.item_name,
 														 "qty": s.ordered_qty,
