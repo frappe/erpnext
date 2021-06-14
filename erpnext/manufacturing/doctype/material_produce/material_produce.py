@@ -94,7 +94,8 @@ class MaterialProduce(Document):
                     else:
                         frappe.throw(_('Actual yeild is not within deviation limits'))
                 else:
-                    frappe.throw(previous_complete_mp)
+                    print("***"*200)
+                    print(previous_complete_mp)
                     #frappe.throw(_('Another complete Material Produce for {0} is already present'.format(self.work_order)))
             else:
                 frappe.throw(_('Atleast one submitted Material Consumption required'))
