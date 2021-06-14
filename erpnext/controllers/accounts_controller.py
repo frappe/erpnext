@@ -368,6 +368,11 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
+					# Double check for cost center
+					# Items add via promotional scheme may not have cost center set
+					if hasattr(item, 'cost_center') and not item.get('cost_center'):
+						item.set('cost_center', self.get('cost_center') or erpnext.get_default_cost_center(self.company))
+
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
 						self.set_pricing_rule_details(item, ret)
@@ -603,8 +608,8 @@ class AccountsController(TransactionBase):
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
 
-		order_list = list(set([d.get(order_field)
-			for d in self.get("items") if d.get(order_field)]))
+		order_list = list(set(d.get(order_field)
+			for d in self.get("items") if d.get(order_field)))
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
 			amount_field, order_doctype, order_list, include_unallocated)
@@ -628,8 +633,8 @@ class AccountsController(TransactionBase):
 
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
-		order_list = list(set([d.get(order_field)
-			for d in self.get("items") if d.get(order_field)]))
+		order_list = list(set(d.get(order_field)
+			for d in self.get("items") if d.get(order_field)))
 
 		if not order_list: return
 

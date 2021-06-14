@@ -311,7 +311,7 @@ def create_landed_cost_voucher(receipt_document_type, receipt_document, company,
 
 def distribute_landed_cost_on_items(lcv):
 	based_on = lcv.distribute_charges_based_on.lower()
-	total = sum([flt(d.get(based_on)) for d in lcv.get("items")])
+	total = sum(flt(d.get(based_on)) for d in lcv.get("items"))
 
 	for item in lcv.get("items"):
 		item.applicable_charges = flt(item.get(based_on)) * flt(lcv.total_taxes_and_charges) / flt(total)

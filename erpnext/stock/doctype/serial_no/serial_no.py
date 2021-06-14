@@ -613,7 +613,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 	batch_nos = filters.get("batch_no")
 	expiry_date = filters.get("expiry_date")
 	if batch_nos:
-		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join(["'%s'" % d for d in batch_nos]))
+		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join("'%s'" % d for d in batch_nos))
 
 	if expiry_date:
 		batch_join_selection = "LEFT JOIN `tabBatch` batch on sr.batch_no = batch.name "
