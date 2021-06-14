@@ -1985,6 +1985,33 @@ def get_sales_invoice_for_e_invoice():
 
 	return si
 
+	def test_item_tax_net_range(self):
+		item = create_item("T Shirt")
+
+		item.set('taxes', [])
+		item.append("taxes", {
+			"item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
+			"minimum_net_rate": 0,
+			"maximum_net_rate": 500
+		})
+
+		item.append("taxes", {
+			"item_tax_template": "_Test Account Excise Duty @ 12 - _TC",
+			"minimum_net_rate": 501,
+			"maximum_net_rate": 1000
+		})
+
+		item.save()
+
+		sales_invoice = create_sales_invoice(item = "T Shirt", rate=700, do_not_submit=True)
+		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 12 - _TC")
+
+		# Apply discount
+		sales_invoice.apply_discount_on = 'Net Total'
+		sales_invoice.discount_amount = 300
+		sales_invoice.save()
+		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+
 def make_test_address_for_ewaybill():
 	if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
 		address = frappe.get_doc({
@@ -2106,27 +2133,6 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
-
-	def test_item_tax_validity(self):
-		item = frappe.get_doc("Item", "_Test Item 2")
-
-		if item.taxes:
-			item.taxes = []
-			item.save()
-
-		item.append("taxes", {
-			"item_tax_template": "_Test Item Tax Template 1 - _TC",
-			"valid_from": add_days(nowdate(), 1)
-		})
-
-		item.save()
-
-		sales_invoice = create_sales_invoice(item = "_Test Item 2", do_not_save=1)
-		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1 - _TC"
-		self.assertRaises(frappe.ValidationError, sales_invoice.save)
-
-		item.taxes = []
-		item.save()
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
