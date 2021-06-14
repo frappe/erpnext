@@ -75,6 +75,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	party_details["tax_category"] = get_address_tax_category(billing_party_doc.get("tax_category"),
 		party_address, shipping_address if party_type != "Supplier" else party_address)
 
+	party_details.bill_to_name = billing_party_doc.get('customer_name')
 	party_details.tax_id = billing_party_doc.get('tax_id')
 	party_details.tax_cnic = billing_party_doc.get('tax_cnic')
 	party_details.tax_strn = billing_party_doc.get('tax_strn')
