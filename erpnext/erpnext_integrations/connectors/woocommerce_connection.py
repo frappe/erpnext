@@ -174,6 +174,9 @@ def _order(woocommerce_settings, *args, **kwargs):
 			frappe.log_error(title="Error in guest order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 	else: # this is a user login, a practitioner
 		if woocommerce_settings.company == "RN Labs":
+			if pos_order_type not in order_type_mapping:
+				log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=None, status="Cancelled", data=json.dumps(order, indent=4), error="Order Type is not found on WooCommcerce Payload!", woocommerce_settings=woocommerce_settings)
+				frappe.throw('Order Type is not found on WooCommcerce Payload!')
 			order_type = order_type_mapping[pos_order_type]
 			edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 
