@@ -33,12 +33,11 @@ for(var i=0, l=data.length; i<l; i++) {
 </h4>
 
 <h4 class="text-center">
-	{% var parties = filters.party ? [filters.party] : [] %}
-	{% if (parties && parties.length) { %}
-		{% if (parties.length == 1) { %}
-			{%= parties[0] %} -
+	{% if (filters.party) { %}
+		{%= filters.party %}
+		{% if filters.party_name && filters.party_name != filters.party %}
+			- {%= filters.party_name %}
 		{% } %}
-		{%= filters.party_name || parties.join(", ") %}
 	{% } else if (group.party) { %}
 		{%= group.party %}
 		{% if (group.party_name && group.party_name != group.party) { %}
