@@ -17,7 +17,7 @@ class VehicleStockReport(object):
 		if getdate(self.filters.from_date) > self.filters.to_date:
 			frappe.throw(_("From Date cannot be after To Date"))
 
-		# Status filter
+		# Vehicle Status filter
 		self.filters.exclude_in_stock = 0
 		self.filters.exclude_delivered = 0
 		self.filters.exclude_dispatched = 0
@@ -274,6 +274,15 @@ class VehicleStockReport(object):
 
 		if self.filters.vehicle_booking_order:
 			data = [d for d in self.data if d.vehicle_booking_order == self.filters.vehicle_booking_order]
+
+		if self.filters.invoice_status == "Invoice In Hand and Delivered":
+			data = [d for d in self.data if d.invoice_received_date or d.invoice_delivery_date]
+		elif self.filters.invoice_status == "Invoice In Hand":
+			data = [d for d in self.data if d.invoice_received_date and not d.invoice_delivery_date]
+		elif self.filters.invoice_status == "Invoice Delivered":
+			data = [d for d in self.data if d.invoice_delivery_date]
+		elif self.filters.invoice_status == "Invoice Not Received":
+			data = [d for d in self.data if not d.invoice_received_date and not d.invoice_delivery_date]
 
 		return data
 

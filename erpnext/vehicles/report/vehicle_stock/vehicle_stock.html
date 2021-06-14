@@ -22,6 +22,12 @@
 	{% } %}
 </h4>
 
+<h4 class="text-center">
+	{% if (filters.invoice_status) %}
+		{%= filters.invoice_status %}
+	{% } %}
+</h4>
+
 <h5 class="text-center">
 	{% if (filters.from_date == filters.to_date) { %}
 		{%= frappe.datetime.str_to_user(filters.from_date) %}

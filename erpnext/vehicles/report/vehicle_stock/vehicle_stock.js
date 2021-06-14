@@ -6,7 +6,7 @@ frappe.query_reports["Vehicle Stock"] = {
 	filters: [
 		{
 			fieldname: "status",
-			label: __("Status"),
+			label: __("Vehicle Status"),
 			fieldtype: "Select",
 			options: [
 				'All Vehicles',
@@ -16,6 +16,18 @@ frappe.query_reports["Vehicle Stock"] = {
 				'Delivered Vehicles',
 			],
 			default: 'All Vehicles'
+		},
+		{
+			fieldname: "invoice_status",
+			label: __("Invoice Status"),
+			fieldtype: "Select",
+			options: [
+				'',
+				'Invoice In Hand and Delivered',
+				'Invoice In Hand',
+				'Invoice Delivered',
+				'Invoice Not Received'
+			]
 		},
 		{
 			fieldname: "from_date",
