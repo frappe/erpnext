@@ -793,14 +793,7 @@ class calculate_taxes_and_totals(object):
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			grand_total = self.doc.rounded_total or self.doc.grand_total
-			if self.doc.party_account_currency == self.doc.currency:
-				total_amount_to_pay = flt(grand_total - self.doc.total_advance
-					- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
-			else:
-				total_amount_to_pay = flt(flt(grand_total *
-					self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
-						- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
+			total_amount_to_pay = self.get_total_amount_to_pay()
 
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
 			change_amount = 0
@@ -818,12 +811,29 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("outstanding_amount"))
 
 			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
-			 	self.update_paid_amount_for_return(total_amount_to_pay)
+				self.update_paid_amount_for_return(total_amount_to_pay)
 
 	def calculate_customer_outstanding_amount(self):
 		if self.doc.doctype == "Sales Invoice" and self.doc.meta.has_field('customer_outstanding_amount'):
-			self.doc.customer_outstanding_amount = flt(flt(self.doc.outstanding_amount) + flt(self.doc.get('previous_outstanding_amount')),
+			if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos'):
+				party_amount = self.get_total_amount_to_pay()
+			else:
+				party_amount = self.doc.outstanding_amount
+
+			self.doc.customer_outstanding_amount = flt(flt(party_amount) + flt(self.doc.get('previous_outstanding_amount')),
 				self.doc.precision('customer_outstanding_amount'))
+
+	def get_total_amount_to_pay(self):
+		grand_total = self.doc.rounded_total or self.doc.grand_total
+		if self.doc.party_account_currency == self.doc.currency:
+			total_amount_to_pay = flt(grand_total - self.doc.total_advance
+				- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
+		else:
+			total_amount_to_pay = flt(flt(grand_total *
+				self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
+					- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
+
+		return total_amount_to_pay
 
 	def calculate_paid_amount(self):
 
