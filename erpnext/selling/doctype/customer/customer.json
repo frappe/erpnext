@@ -524,11 +524,10 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 10:31:32.492985",
+ "modified": "2021-06-14 11:22:08.886766",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
- "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
@@ -607,6 +606,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
- "title_field": "customer_name",
  "track_changes": 1
 }
