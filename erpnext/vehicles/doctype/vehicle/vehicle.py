@@ -136,7 +136,7 @@ class Vehicle(Document):
 				serial_no_doc.set(key, self.get(key))
 
 			serial_no_doc.flags.from_vehicle = self.name
-			serial_no_doc.save()
+			serial_no_doc.save(ignore_permissions=1)
 
 		for f in self._copy_fields:
 			self.set(f, serial_no_doc.get(f))
