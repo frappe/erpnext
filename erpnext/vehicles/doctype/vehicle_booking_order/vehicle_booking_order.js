@@ -478,6 +478,10 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		}
 	},
 
+	vehicle: function () {
+		this.warn_vehicle_reserved();
+	},
+
 	make_payment_entry: function(party_type) {
 		if (['Customer', 'Supplier', 'Company'].includes(party_type)) {
 			return frappe.call({
@@ -528,6 +532,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 									dialog.set_values(r);
 								}
 							});
+
+							me.warn_vehicle_reserved(vehicle);
 						}
 					}, get_query: () => me.vehicle_query(), get_route_options_for_new_doc: () => me.vehicle_route_options()
 				},

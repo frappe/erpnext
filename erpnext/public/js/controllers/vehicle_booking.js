@@ -506,4 +506,23 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 			});
 		}
 	},
+
+	warn_vehicle_reserved: function (vehicle, customer) {
+		if (!vehicle) {
+			vehicle = this.frm.doc.vehicle;
+		}
+		if (!customer) {
+			customer = this.frm.doc.customer;
+		}
+
+		if (vehicle) {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle.vehicle.warn_vehicle_reserved",
+				args: {
+					vehicle: vehicle,
+					customer: customer
+				}
+			})
+		}
+	}
 });
