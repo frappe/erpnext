@@ -83,7 +83,7 @@ class MaterialProduce(Document):
             if atleast_one_mc:
                 # no_previous_complete_mc = frappe.db.count('Material Produce', {'work_order': self.work_order, 'docstatus': 1, 'partial_produce': 0})
                 previous_complete_mp = frappe.db.sql("""select * from `tabMaterial Produce` where work_order = %s and docstatus = 1 and partial_produce = 0""", (self.work_order),as_dict = 1)
-                if len(previous_complete_mp) == 0:
+                if len(previous_complete_mp) == 0 or previous_complete_mp[0].get('name') != self.name:
                     mfg = frappe.get_doc("Manufacturing Settings")
                     wo = frappe.get_doc("Work Order", self.work_order)
                     if self.actual_yeild_on_wo() >= (wo.bom_yeild-mfg.allowed_production_deviation_percentage) and self.actual_yeild_on_wo() <= (wo.bom_yeild+mfg.allowed_production_deviation_percentage):
@@ -94,8 +94,8 @@ class MaterialProduce(Document):
                     else:
                         frappe.throw(_('Actual yeild is not within deviation limits'))
                 else:
-                    # frappe.throw(_('Another complete Material Produce for {0} is already present'.format(self.work_order)))
-                    frappe.throw(_('Another complete Material Produce for {0} is already present'.format(len(previous_complete_mp))))
+                    frappe.throw(_('Another complete Material Produce for {0} is already present'.format(self.work_order)))
+                    #frappe.throw(_('Another complete Material Produce for {0} is already present'.format(len(previous_complete_mp))))
             else:
                 frappe.throw(_('Atleast one submitted Material Consumption required'))
 
