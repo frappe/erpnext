@@ -41,6 +41,54 @@ frappe.ui.form.on("Issue", {
 		}
 	},
 
+	refresh: function(frm) {
+		// alert messages
+		if (frm.doc.status !== "Closed" && frm.doc.service_level_agreement
+			&& frm.doc.agreement_status === "Ongoing") {
+			frappe.call({
+				"method": "frappe.client.get",
+				args: {
+					doctype: "Service Level Agreement",
+					name: frm.doc.service_level_agreement
+				},
+				callback: function(data) {
+					let statuses = data.message.pause_sla_on;
+					const hold_statuses = [];
+					$.each(statuses, (_i, entry) => {
+						hold_statuses.push(entry.status);
+					});
+					if (hold_statuses.includes(frm.doc.status)) {
+						frm.dashboard.clear_headline();
+						let message = { "indicator": "orange", "msg": __("SLA is on hold since {0}", [moment(frm.doc.on_hold_since).fromNow(true)]) };
+						frm.dashboard.set_headline_alert(
+							'<div class="row">' +
+							'<div class="col-xs-12">' +
+							'<span class="indicator whitespace-nowrap ' + message.indicator + '"><span>' + message.msg + '</span></span> ' +
+							'</div>' +
+							'</div>'
+						);
+					} else {
+						set_time_to_resolve_and_response(frm);
+					}
+				}
+			});
+		} else if (frm.doc.service_level_agreement) {
+			frm.dashboard.clear_headline();
+
+			let agreement_status = (frm.doc.agreement_status == "Fulfilled") ?
+				{ "indicator": "green", "msg": "Service Level Agreement has been fulfilled" } :
+				{ "indicator": "red", "msg": "Service Level Agreement Failed" };
+
+			frm.dashboard.set_headline_alert(
+				'<div class="row">' +
+				'<div class="col-xs-12">' +
+				'<span class="indicator whitespace-nowrap ' + agreement_status.indicator + '"><span class="hidden-xs">' + agreement_status.msg + '</span></span> ' +
+				'</div>' +
+				'</div>'
+			);
+		}
+	},
+
 	reset_service_level_agreement: function(frm) {
 		let reset_sla = new frappe.ui.Dialog({
 			title: __("Reset Service Level Agreement"),
