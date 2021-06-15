@@ -1,4 +1,3 @@
-@import "frappe/public/scss/website/variables";
 
 .filter-options {
 	max-height: 300px;
@@ -14,7 +13,7 @@
 	}
 
 	&.active {
-		border-color: $primary;
+		border-color: var(--primary);
 
 		.check {
 			display: inline-flex;
@@ -25,7 +24,7 @@
 .check {
 	display: inline-flex;
 	padding: 0.25rem;
-	background: $primary;
+	background: var(--primary);
 	color: white;
 	border-radius: 50%;
 	font-size: 12px;
@@ -38,12 +37,12 @@
 }
 
 .result {
-	border-bottom: 1px solid $border-color;
+	border-bottom: 1px solid var(--border-color);
 }
 
 .transaction-list-item {
 	padding: 1rem 0;
-	border-top: 1px solid $border-color;
+	border-top: 1px solid var(--border-color);
 	position: relative;
 
 	a.transaction-item-link {
