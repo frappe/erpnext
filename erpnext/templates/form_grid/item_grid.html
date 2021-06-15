@@ -17,18 +17,18 @@
 					title = "Warehouse",
 					actual_qty = (frm.doc.doctype==="Sales Order"
 						? doc.projected_qty : doc.actual_qty);
-                if(flt(frm.doc.per_delivered) < 100
-                    && in_list(["Sales Order Item", "Delivery Note Item"], doc.doctype)) {
-    				if(actual_qty != undefined) {
-    					if(actual_qty >= doc.qty) {
-    						var color = "green";
-    						var title = "In Stock"
-    					} else {
-    						var color = "red";
-    						var title = "Not In Stock"
-    					}
-    				}
-                } %}
+				if(flt(frm.doc.per_delivered) < 100
+					&& in_list(["Sales Order Item", "Delivery Note Item"], doc.doctype)) {
+					if(actual_qty != undefined) {
+						if(actual_qty >= doc.qty) {
+							var color = "green";
+							var title = "In Stock"
+						} else {
+							var color = "red";
+							var title = "Not In Stock"
+						}
+					}
+				} %}
 				<span class="pull-right indicator {{ color }}" title="{%= title %}" style="margin-left: 10px;">
 					{%= doc.warehouse %}
 				</span>
@@ -37,17 +37,17 @@
 			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
 				doc.doctype) && frm.doc.docstatus===1) {
 				var delivered = doc.doctype==="Sales Order Item" ?
-                                                doc.delivered_qty : doc.received_qty;
-                                var pending = flt(doc.qty) - flt(delivered);
-                                %}
-                <span class="indicator {%= pending>0 ? "orange" : "green" %}">{%= doc.item_code %}</span>
+												doc.delivered_qty : doc.received_qty;
+								var pending = flt(doc.qty) - flt(delivered);
+								%}
+				<span class="indicator {%= pending>0 ? "orange" : "green" %}">{%= doc.item_code %}</span>
 			{% } else { %}
-                <strong>{%= doc.item_code %}</strong>
-            {% } %}
+				<strong>{%= doc.item_code %}</strong>
+			{% } %}
 
 			{% if(doc.item_name != doc.item_code && in_list(visible_column_fieldnames, "item_name")) { %}
 				{% if (doc.item_code) { %}<br>{% } %}
-                {%= doc.item_name %}{% } %}
+				{%= doc.item_name %}{% } %}
 
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 		</div>
@@ -55,7 +55,7 @@
 		<!-- qty -->
 		<div class="col-sm-2 hidden-xs text-right">
 			{%= doc.get_formatted("qty") %}
-            <span class="small">{%= doc.uom || doc.stock_uom %}</span>
+			<span class="small">{%= doc.uom || doc.stock_uom %}</span>
 		</div>
 
 		<!-- rate -->
