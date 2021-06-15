@@ -9,7 +9,7 @@ from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 
 def search_by_term(search_term, warehouse, price_list):
-	result = search_for_serial_or_batch_or_barcode_number(search_term)
+	result = search_for_serial_or_batch_or_barcode_number(search_term) or {}
 
 	item_code = result.get("item_code") or search_term
 	serial_no = result.get("serial_no") or ""
@@ -25,7 +25,7 @@ def search_by_term(search_term, warehouse, price_list):
 		price_list_rate, currency = frappe.db.get_value('Item Price', {
 			'price_list': price_list,
 			'item_code': item_code
-		}, ["price_list_rate", "currency"])
+		}, ["price_list_rate", "currency"]) or [None, None]
 
 		item_info.update({
 			'serial_no': serial_no,
@@ -46,7 +46,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	result = []
 
 	if search_term:
-		result = search_by_term(search_term, warehouse, price_list)
+		result = search_by_term(search_term, warehouse, price_list) or []
 		if result:
 			return result
 
