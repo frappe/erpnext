@@ -10,7 +10,10 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'items': ['Attendance', 'Employee Checkin', 'Shift Request', 'Shift Assignment']
+				'items': ['Attendance', 'Employee Checkin']
+			},
+			{
+				'items': ['Shift Request', 'Shift Assignment']
 			}
 		]
 	}

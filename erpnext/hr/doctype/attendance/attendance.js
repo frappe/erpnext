@@ -45,15 +45,21 @@ frappe.ui.form.on('Attendance', {
 	},
 
 	set_overtime_type: function(frm) {
-		frappe.call({
-			method: "erpnext.hr.doctype.attendance.attendance.get_overtime_type",
-			args: {
-				employee: frm.doc.employee,
-			},
-			callback: function(r) {
-				if (r.message) {
-					frm.set_value("overtime_type", r.message);
-				}
+		frappe.db.get_single_value("Payroll Settings", "overtime_based_on").then((r)=>{
+			if (r == "Attendance") {
+				frappe.call({
+					method: "erpnext.hr.doctype.attendance.attendance.get_overtime_type",
+					args: {
+						employee: frm.doc.employee,
+					},
+					callback: function(r) {
+						if (r.message) {
+							frm.set_value("overtime_type", r.message);
+						}
+					}
+				});
+			} else {
+				frm.set_value("overtime_type", '');
 			}
 		});
 	},

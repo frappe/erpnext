@@ -4,11 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_active_employee
-from frappe.utils import cstr, get_datetime, formatdate, getdate
+from frappe.utils import cstr, get_datetime, formatdate, getdate, nowdate
 
 class Attendance(Document):
 	def validate(self):
@@ -58,7 +57,7 @@ class Attendance(Document):
 		self.overtime_type = get_overtime_type(self.employee)
 
 		if self.overtime_type:
-			if  frappe.db.get_single_value("Payroll Settings", "overtime_based_on") != "Attendance":
+			if frappe.db.get_single_value("Payroll Settings", "overtime_based_on") != "Attendance":
 				frappe.msgprint(_('Set "Calculate Overtime Based On Attendance" to Attendance for Overtime Slip Creation'))
 
 			maximum_overtime_hours_allowed = frappe.db.get_single_value("Payroll Settings", "maximum_overtime_hours_allowed")
@@ -136,25 +135,28 @@ def get_shift_type(employee, attendance_date):
 
 @frappe.whitelist()
 def get_overtime_type(employee):
-		emp_department = frappe.db.get_value("Employee", employee, "department")
-		if emp_department:
-			overtime_type = frappe.get_list("Overtime Type", filters={"party_type": "Department", "party": emp_department}, fields=['name'])
-			if len(overtime_type):
-				overtime_type = overtime_type[0].name
-
-		emp_grade = frappe.db.get_value("Employee", employee, "grade")
-		if emp_grade:
-			overtime_type = frappe.get_list("Overtime Type", filters={"party_type": "Employee Grade", "party": emp_grade},
-				fields=['name'])
-			if len(overtime_type):
-
-				overtime_type = overtime_type[0].name
-
-		overtime_type = frappe.get_list("Overtime Type", filters={"party_type": "Employee", "party": employee}, fields=['name'])
+	emp_department = frappe.db.get_value("Employee", employee, "department")
+	if emp_department:
+		overtime_type = frappe.get_list("Overtime Type", filters={
+			"applicable_for": "Department", "department": emp_department}, fields=['name'])
 		if len(overtime_type):
 			overtime_type = overtime_type[0].name
 
-		return overtime_type
+	emp_grade = frappe.db.get_value("Employee", employee, "grade")
+	if emp_grade:
+		overtime_type = frappe.get_list("Overtime Type", filters={
+			"applicable_for": "Employee Grade", "employee_grade": emp_grade},
+			fields=['name'])
+		if len(overtime_type):
+
+			overtime_type = overtime_type[0].name
+
+	overtime_type = frappe.get_list("Overtime Type", filters={
+		"applicable_for": "Employee", "employee": employee}, fields=['name'])
+	if len(overtime_type):
+		overtime_type = overtime_type[0].name
+
+	return overtime_type
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

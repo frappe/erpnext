@@ -25,7 +25,7 @@
   "column_break_19",
   "process_attendance_after",
   "last_sync_of_checkin",
-  "grace_period_settings_auto_attendance_section",
+  "grace_period_settings_section",
   "enable_entry_grace_period",
   "late_entry_grace_period",
   "column_break_18",
@@ -142,12 +142,6 @@
    "label": "Auto Attendance Settings"
   },
   {
-   "depends_on": "enable_auto_attendance",
-   "fieldname": "grace_period_settings_auto_attendance_section",
-   "fieldtype": "Section Break",
-   "label": "Grace Period Settings For Auto Attendance"
-  },
-  {
    "default": "0",
    "description": "Mark attendance based on 'Employee Checkin' for Employees assigned to this shift.",
    "fieldname": "enable_auto_attendance",
@@ -188,10 +182,16 @@
   {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enable_auto_attendance",
+   "fieldname": "grace_period_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Grace Period Settings"
   }
  ],
  "links": [],
- "modified": "2021-06-09 13:38:25.697100",
+ "modified": "2021-06-15 15:22:55.756078",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

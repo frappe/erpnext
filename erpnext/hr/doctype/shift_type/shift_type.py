@@ -4,11 +4,8 @@
 
 from __future__ import unicode_literals
 import itertools
-from datetime import timedelta
-
 import frappe
 from frappe import _
-from math import modf
 from frappe.model.document import Document
 from frappe.utils import cint, getdate, get_datetime
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
@@ -26,7 +23,7 @@ class ShiftType(Document):
 		end_time = self.end_time.split(":")
 		start_time = self.start_time.split(":")
 
-		shift_end = timedelta(hours = int(end_time[0]), minutes =  int(end_time[1]), seconds =  int(end_time[2]))
+		shift_end = timedelta(hours = int(end_time[0]), minutes = int(end_time[1]), seconds = int(end_time[2]))
 		shift_start = timedelta(hours =int(start_time[0]), minutes = int(start_time[1]), seconds = int(start_time[2]))
 
 		if shift_end > shift_start:

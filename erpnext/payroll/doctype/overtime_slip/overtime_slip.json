@@ -18,6 +18,7 @@
   "to_date",
   "column_break_10",
   "payroll_frequency",
+  "salary_slip",
   "section_break_12",
   "overtime_details",
   "section_break_13",
@@ -134,12 +135,20 @@
    "fieldtype": "Date",
    "label": "Posting Date",
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "salary_slip",
+   "fieldtype": "Link",
+   "label": "Salary Slip",
+   "options": "Salary Slip",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-10 13:35:57.511257",
+ "modified": "2021-06-15 12:53:17.355755",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Overtime Slip",

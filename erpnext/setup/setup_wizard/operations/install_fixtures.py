@@ -320,7 +320,7 @@ def update_hr_defaults():
 def update_payroll_defaults():
 	payroll_settings = frappe.get_doc("Payroll Settings")
 	payroll_settings.overtime_based_on = "Attendance"
-	Payroll_settings.overtime_salary_component = _("Overtime Allowance")
+	payroll_settings.overtime_salary_component = _("Overtime Allowance")
 	payroll_settings.save()
 
 

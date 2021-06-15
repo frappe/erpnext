@@ -3,11 +3,11 @@
 
 frappe.ui.form.on('Overtime Type', {
 	setup: function(frm) {
-		frm.set_query("party_type", () => {
-			let party_type = ["Employee", "Department", "Employee Grade"];
+		frm.set_query("applicable_for", () => {
+			let doctype_list = ["Employee", "Department", "Employee Grade"];
 			return {
 				filters: {
-					name: ["in", party_type]
+					name: ["in", doctype_list]
 				}
 			};
 		});

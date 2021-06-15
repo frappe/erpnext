@@ -235,7 +235,7 @@ def get_gratuity_rule_slabs(gratuity_rule):
 	return frappe.get_all("Gratuity Rule Slab", filters= {'parent': gratuity_rule}, fields = ["*"], order_by="idx")
 
 def get_salary_structure(employee):
-	salary_structure_assignment =  frappe.get_list("Salary Structure Assignment", filters = {
+	salary_structure_assignment = frappe.get_list("Salary Structure Assignment", filters = {
 			"employee": employee, 'docstatus': 1
 		},
 		fields=["from_date", "salary_structure"],

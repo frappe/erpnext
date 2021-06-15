@@ -42,11 +42,11 @@ class EmployeeCheckin(Document):
 					self.shift_start = shift_actual_timings[2].start_datetime
 					self.shift_end = shift_actual_timings[2].end_datetime
 		elif frappe.db.get_value("Shift Type", shift_actual_timings[2].shift_type.name, "allow_overtime"):
-				#because after Actual time it takes check-in/out invalid
-				#if employee checkout late or check-in before before shift timing adding time buffer.
-				self.shift = shift_actual_timings[2].shift_type.name
-				self.shift_start = shift_actual_timings[2].start_datetime
-				self.shift_end = shift_actual_timings[2].end_datetime
+			#because after Actual time it takes check-in/out invalid
+			#if employee checkout late or check-in before before shift timing adding time buffer.
+			self.shift = shift_actual_timings[2].shift_type.name
+			self.shift_start = shift_actual_timings[2].start_datetime
+			self.shift_end = shift_actual_timings[2].end_datetime
 
 @frappe.whitelist()
 def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=None, log_type=None, skip_auto_attendance=0, employee_fieldname='attendance_device_id'):

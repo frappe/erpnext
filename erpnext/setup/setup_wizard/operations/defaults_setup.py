@@ -67,7 +67,7 @@ def set_default_settings(args):
 
 	payroll_settings = frappe.get_doc("Payroll Settings")
 	payroll_settings.overtime_based_on = "Attendance"
-	Payroll_settings.overtime_salary_component = _("Overtime Allowance")
+	payroll_settings.overtime_salary_component = _("Overtime Allowance")
 	payroll_settings.save()
 
 def set_no_copy_fields_in_variant_settings():

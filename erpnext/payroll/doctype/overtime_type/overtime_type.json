@@ -6,8 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "party_type",
-  "party",
+  "applicable_for",
+  "employee",
+  "department",
+  "employee_grade",
   "column_break_3",
   "applicable_salary_component",
   "pay_rate_multipliers_section",
@@ -20,20 +22,6 @@
  ],
  "fields": [
   {
-   "fieldname": "party_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Party Type",
-   "options": "DocType",
-   "reqd": 1
-  },
-  {
-   "fieldname": "party",
-   "fieldtype": "Dynamic Link",
-   "label": "Party",
-   "options": "party_type"
-  },
-  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
@@ -41,7 +29,8 @@
    "fieldname": "applicable_salary_component",
    "fieldtype": "Table MultiSelect",
    "label": "Applicable Salary Component",
-   "options": "Overtime Salary Component"
+   "options": "Overtime Salary Component",
+   "reqd": 1
   },
   {
    "description": "Pay Rate Multipliers apply to the hourly wage for the position you\u2019re working during the overtime hours.",
@@ -87,11 +76,43 @@
    "fieldtype": "Float",
    "label": "Public Holiday Multiplier",
    "mandatory_depends_on": "eval: doc.applicable_for_public_holiday == 1"
+  },
+  {
+   "fieldname": "applicable_for",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applicable For",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval: doc.applicable_for == \"Employee\"",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "mandatory_depends_on": "eval: doc.applicable_for == \"Employee\"",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval: doc.applicable_for == \"Department\"",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "mandatory_depends_on": "eval: doc.applicable_for == \"Department\"",
+   "options": "Department"
+  },
+  {
+   "depends_on": "eval: doc.applicable_for == \"Employee Grade\"",
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "mandatory_depends_on": "eval: doc.applicable_for == \"Employee Grade\"",
+   "options": "Employee Grade"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 15:43:43.891270",
+ "modified": "2021-06-15 13:49:20.612464",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Overtime Type",

@@ -1,14 +1,43 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from erpnext.hr.doctype.attendance.attendance import get_overtime_type
 import frappe
-from frappe import _
-from frappe.utils import get_datetime, getdate
+from frappe import _, bold
+from frappe.utils import get_datetime, getdate, get_link_to_form, formatdate
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.payroll.doctype.gratuity.gratuity import get_salary_structure
 from frappe.model.document import Document
 class OvertimeSlip(Document):
+	def validate(self):
+		self.validate_overlap()
+		if self.from_date >= self.to_date:
+			frappe.throw(_("From date can not be greater than To date"))
+
+		if not (self.from_date or self.to_date or self.payroll_frequency):
+			date = self.from_date or self.posting_date
+			get_frequency_and_dates(self.employee, date)
+
+		if not len(self.overtime_details):
+			self.get_emp_and_overtime_details()
+
+	def validate_overlap(self):
+		if not self.name:
+			# hack! if name is null, it could cause problems with !=
+			self.name = "new-overtime-slip-1"
+
+		overtime_slips = frappe.db.get_all("Overtime Slip", filters = {
+			"docstatus": ("<", 2),
+			"employee":  self.employee,
+			"to_date": (">=", self.from_date),
+			"from_date": ("<=", self.to_date)
+		})
+		if len(overtime_slips):
+			form_link = get_link_to_form("Overtime Slip", overtime_slips[0].name)
+			msg = _("Overtime Slip:{0} has been created between {1} and {1}").format(
+				bold(form_link),
+				bold(formatdate(self.from_date)), bold(formatdate(self.to_date)))
+			frappe.throw(msg)
+
 	def on_submit(self):
 		if self.status == "Pending":
 			frappe.throw(_("Overtime Slip with Status 'Approved' or 'Rejected' are allowed for Submission"))

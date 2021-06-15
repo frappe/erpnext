@@ -20,10 +20,9 @@
   "section_break_12",
   "overtime_based_on",
   "maximum_overtime_hours_allowed",
-  "overtime_salary_component",
   "column_break_14",
-  "fetch_standard_working_hours_from_shift_type",
-  "is_overtime_approval_required"
+  "overtime_salary_component",
+  "fetch_standard_working_hours_from_shift_type"
  ],
  "fields": [
   {
@@ -112,6 +111,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.overtime_based_on == \"Attendance\"",
    "description": "If unchecked, Standard Working Hours as defined in HR Settings will be taken into consideration.",
    "fieldname": "fetch_standard_working_hours_from_shift_type",
    "fieldtype": "Check",
@@ -129,12 +129,6 @@
    "options": "Attendance\nTimesheet"
   },
   {
-   "default": "0",
-   "fieldname": "is_overtime_approval_required",
-   "fieldtype": "Check",
-   "label": "Is Overtime Approval Required"
-  },
-  {
    "description": "Overtime payment will not be given for more than the defined hours limit.",
    "fieldname": "maximum_overtime_hours_allowed",
    "fieldtype": "Int",
@@ -145,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-26 15:56:25.313007",
+ "modified": "2021-06-15 13:55:44.563796",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",
