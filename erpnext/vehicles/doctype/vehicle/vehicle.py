@@ -435,3 +435,22 @@ def get_project_odometer(project, vehicle):
 	first_odometer = get_vehicle_odometer(vehicle, project=project, ascending=True)
 	last_odometer = get_vehicle_odometer(vehicle, project=project, ascending=False)
 	return first_odometer, last_odometer
+
+
+@frappe.whitelist()
+def warn_vehicle_reserved(vehicle, customer=None):
+	vehicle_details = frappe.db.get_value("Vehicle", vehicle,
+		['is_reserved', 'reserved_customer', 'reserved_customer_name'], as_dict=1)
+
+	if not vehicle_details:
+		return
+
+	if vehicle_details.reserved_customer:
+		if vehicle_details.reserved_customer != customer:
+			frappe.msgprint(_("{0} is reserved for Customer {1}").format(
+				frappe.get_desk_link("Vehicle", vehicle),
+				frappe.bold(vehicle_details.reserved_customer_name or vehicle_details.reserved_customer)),
+			title="Reserved", indicator="orange")
+	else:
+		frappe.msgprint(_("{0} is reserved without a Customer").format(frappe.get_desk_link("Vehicle", vehicle)),
+			title="Reserved", indicator="orange")

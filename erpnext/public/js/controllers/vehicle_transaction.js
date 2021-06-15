@@ -209,8 +209,11 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_vehicle_details",
 			args: {
-				doctype: me.frm.doc.doctype,
-				vehicle: me.frm.doc.vehicle,
+				args: {
+					doctype: me.frm.doc.doctype,
+					vehicle: me.frm.doc.vehicle,
+					customer: me.frm.doc.customer
+				},
 				get_vehicle_invoice_receipt: cint(me.frm.doc.doctype == "Vehicle Invoice Delivery")
 			},
 			callback: function (r) {

@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import cstr, getdate, cint
 from erpnext.controllers.stock_controller import StockController
 from erpnext.vehicles.vehicle_booking_controller import validate_vehicle_item
+from erpnext.vehicles.doctype.vehicle.vehicle import warn_vehicle_reserved
 from erpnext.accounts.party import validate_party_frozen_disabled
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
@@ -53,13 +54,7 @@ class VehicleTransactionController(StockController):
 
 	def onload(self):
 		if self.docstatus == 0:
-			self.set_missing_values(for_validate=True)
-
-	def before_print(self):
-		super(VehicleTransactionController, self).before_print()
-
-		if self.docstatus == 0:
-			self.set_missing_values(for_validate=True)
+			self.set_missing_values()
 
 	def set_missing_values(self, for_validate=False):
 		vehicle_booking_order_details = get_vehicle_booking_order_details(self.as_dict())
@@ -67,7 +62,7 @@ class VehicleTransactionController(StockController):
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
 
-		vehicle_details = get_vehicle_details(self.get('vehicle'), get_vehicle_booking_order=False)
+		vehicle_details = get_vehicle_details(self.as_dict(), get_vehicle_booking_order=False, warn_reserved=for_validate)
 		for k, v in vehicle_details.items():
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
@@ -330,17 +325,20 @@ def get_vehicle_booking_order_details(args):
 
 
 @frappe.whitelist()
-def get_vehicle_details(vehicle=None, get_vehicle_booking_order=True, vehicle_booking_order=None,
-		get_vehicle_invoice_receipt=False):
+def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoice_receipt=False, warn_reserved=True):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
 	out = frappe._dict()
 
 	vehicle_details = frappe._dict()
-	if vehicle:
-		vehicle_details = frappe.db.get_value("Vehicle", vehicle,
-			['item_code', 'warehouse', 'chassis_no', 'engine_no', 'license_plate', 'unregistered', 'color', 'image'],
-			as_dict=1)
+	if args.vehicle:
+		vehicle_details = frappe.db.get_value("Vehicle", args.vehicle, ['item_code', 'warehouse',
+			'chassis_no', 'engine_no', 'license_plate', 'unregistered',
+			'color', 'image'], as_dict=1)
 		if not vehicle_details:
-			frappe.throw(_("Vehicle {0} does not exist").format(vehicle))
+			frappe.throw(_("Vehicle {0} does not exist").format(args.vehicle))
 
 	if vehicle_details:
 		out.item_code = vehicle_details.item_code
@@ -355,15 +353,18 @@ def get_vehicle_details(vehicle=None, get_vehicle_booking_order=True, vehicle_bo
 	if vehicle_details.warehouse:
 		out.warehouse = vehicle_details.warehouse
 
-	if vehicle and get_vehicle_booking_order and not vehicle_booking_order:
-		vehicle_booking_order = get_vehicle_booking_order_from_vehicle(vehicle)
+	if args.vehicle and get_vehicle_booking_order and not args.vehicle_booking_order:
+		vehicle_booking_order = get_vehicle_booking_order_from_vehicle(args.vehicle)
 		out.vehicle_booking_order = vehicle_booking_order
 
 	if cint(get_vehicle_invoice_receipt):
 		from erpnext.vehicles.doctype.vehicle_invoice_delivery.vehicle_invoice_delivery import get_vehicle_invoice_receipt,\
 			get_vehicle_invoice_details
-		out.vehicle_invoice_receipt = get_vehicle_invoice_receipt(vehicle)
+		out.vehicle_invoice_receipt = get_vehicle_invoice_receipt(args.vehicle)
 		out.update(get_vehicle_invoice_details(out.vehicle_invoice_receipt))
+
+	if warn_reserved and args.doctype == "Vehicle Delivery":
+		warn_vehicle_reserved(args.vehicle, args.customer)
 
 	return out
 
