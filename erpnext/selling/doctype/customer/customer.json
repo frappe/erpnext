@@ -319,7 +319,6 @@
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
    "label": "Mobile No",
-   "reqd": 1,
    "unique": 1
   },
   {
@@ -523,15 +522,8 @@
  "idx": 363,
  "image_field": "image",
  "index_web_pages_for_search": 1,
- "links": [
-  {
-   "custom": 1,
-   "group": "Requests",
-   "link_doctype": "FseRequest",
-   "link_fieldname": "customer"
-  }
- ],
- "modified": "2021-06-14 13:14:39.728218",
+ "links": [],
+ "modified": "2021-06-15 17:23:01.066052",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
