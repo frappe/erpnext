@@ -334,9 +334,14 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 
 	vehicle_details = frappe._dict()
 	if args.vehicle:
-		vehicle_details = frappe.db.get_value("Vehicle", args.vehicle, ['item_code', 'warehouse',
-			'chassis_no', 'engine_no', 'license_plate', 'unregistered',
-			'color', 'image'], as_dict=1)
+		vehicle_details = frappe.db.get_value("Vehicle", args.vehicle, [
+			'item_code', 'warehouse',
+			'chassis_no', 'engine_no',
+			'license_plate', 'unregistered',
+			'warranty_no',
+			'color', 'image'
+		], as_dict=1)
+
 		if not vehicle_details:
 			frappe.throw(_("Vehicle {0} does not exist").format(args.vehicle))
 
@@ -348,6 +353,7 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	out.vehicle_license_plate = vehicle_details.license_plate
 	out.vehicle_unregistered = vehicle_details.unregistered
 	out.vehicle_color = vehicle_details.color
+	out.vehicle_warranty_no = vehicle_details.warranty_no
 	out.image = vehicle_details.image
 
 	if vehicle_details.warehouse:

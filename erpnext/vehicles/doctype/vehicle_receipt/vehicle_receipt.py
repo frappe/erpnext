@@ -21,6 +21,7 @@ class VehicleReceipt(VehicleTransactionController):
 		self.validate_transporter()
 
 	def on_submit(self):
+		self.update_vehicle_details()
 		self.update_stock_ledger()
 		self.update_vehicle_booking_order()
 
@@ -35,3 +36,7 @@ class VehicleReceipt(VehicleTransactionController):
 	def validate_transporter(self):
 		if self.get('transporter') and not self.get('lr_no'):
 			frappe.throw(_("Transport Receipt No (Bilty) is mandatory when receiving from Transporter"))
+
+	def update_vehicle_details(self):
+		if self.vehicle_warranty_no:
+			frappe.db.set_value("Vehicle", self.vehicle, "warranty_no", self.vehicle_warranty_no)

@@ -49,6 +49,7 @@
   "vehicle_engine_no",
   "column_break_25",
   "vehicle_color",
+  "vehicle_warranty_no",
   "vehicle_license_plate",
   "vehicle_unregistered"
  ],
@@ -370,12 +371,18 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Transport Receipt No (Bilty)"
+  },
+  {
+   "fieldname": "vehicle_warranty_no",
+   "fieldtype": "Data",
+   "label": "Warranty Number",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 22:36:14.987464",
+ "modified": "2021-06-15 15:48:16.111918",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",
