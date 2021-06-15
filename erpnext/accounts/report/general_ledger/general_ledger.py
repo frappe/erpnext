@@ -211,15 +211,16 @@ def get_conditions(filters):
 	conditions = []
 
 	if filters.get("account") and not filters.get("include_dimensions"):
-		account_conditions = ""
+		account_conditions = "account in (select name from tabAccount where"
 		for account in filters["account"]:
 			lft, rgt = frappe.db.get_value("Account", account, ["lft", "rgt"])
-			account_conditions += """account in (select name from tabAccount
-				where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt)
+			account_conditions += """ (lft>=%s and rgt<=%s) """ % (lft, rgt)
 
 			# so that the OR doesn't get added to the last account condition
 			if account != filters["account"][-1]:
-				account_conditions += " OR "
+				account_conditions += "OR"
+		
+		account_conditions += "and docstatus<2)"
 		conditions.append(account_conditions)
 
 	if filters.get("cost_center"):
