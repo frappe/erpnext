@@ -45,6 +45,14 @@ frappe.ui.form.on("Purchase Order", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	apply_tds: function(frm) {
+		if (!frm.doc.apply_tds) {
+			frm.set_value("tax_withholding_category", '');
+		} else {
+			frm.set_value("tax_withholding_category", frm.supplier_tds);
+		}
 	}
 });
 
@@ -313,7 +321,8 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			if(me.values) {
 				me.values.sub_con_rm_items.map((row,i) => {
 					if (!row.item_code || !row.rm_item_code || !row.warehouse || !row.qty || row.qty === 0) {
-						frappe.throw(__("Item Code, warehouse, quantity are required on row {0}", [i+1]));
+						let row_id = i+1;
+						frappe.throw(__("Item Code, warehouse and quantity are required on row {0}", [row_id]));
 					}
 				})
 				me._make_rm_stock_entry(me.dialog.fields_dict.sub_con_rm_items.grid.get_selected_children())
@@ -509,7 +518,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 					args: {
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
-						content: __('Reason for hold: ')+data.reason_for_hold,
+						content: __('Reason for hold:') + " " +data.reason_for_hold,
 						comment_email: frappe.session.user,
 						comment_by: frappe.session.user_fullname
 					},
