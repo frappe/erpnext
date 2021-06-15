@@ -10,7 +10,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.purchase_order.purchase_order import (make_rm_stock_entry,
-	make_purchase_receipt, get_materials_from_supplier)
+	make_purchase_receipt, make_purchase_invoice, get_materials_from_supplier)
 
 class TestSubcontracting(unittest.TestCase):
 	def setUp(self):
@@ -458,10 +458,273 @@ class TestSubcontracting(unittest.TestCase):
 			self.assertEqual(value.qty, details.qty)
 			self.assertEqual(value.batch_no, details.batch_no)
 
+
+	def test_item_with_batch_based_on_material_transfer_for_purchase_invoice(self):
+		'''
+			- Set backflush based on Material Transferred for Subcontract
+			- Create subcontracted PO for the item Subcontracted Item SA4 (has batch no).
+			- Transfer the components from Stores to Supplier warehouse with batch no and serial nos.
+			- Transfer the components in multiple batches with extra 2 qty for the batched item.
+			- Create the 3 purchase receipt against the PO and split Subcontracted Items into two batches.
+			- Keep the qty as 2 for Subcontracted Item in the purchase receipt.
+			- In the first purchase receipt the batched raw materials will be consumed 2 extra qty.
+		'''
+
+		set_backflush_based_on('Material Transferred for Subcontract')
+		item_code = 'Subcontracted Item SA4'
+		items = [{'warehouse': '_Test Warehouse - _TC', 'item_code': item_code, 'qty': 10, 'rate': 100}]
+
+		rm_items = [{'item_code': 'Subcontracted SRM Item 1', 'qty': 10},
+			{'item_code': 'Subcontracted SRM Item 2', 'qty': 10},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 3},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 3},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 3},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 3}
+		]
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+			supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		for d in rm_items:
+			d['po_detail'] = po.items[0].name
+
+		make_stock_transfer_entry(po_no = po.name, main_item_code=item_code,
+			rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details))
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].qty = 2
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		add_second_row_in_pr(pr1)
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			qty = 4 if key != 'Subcontracted SRM Item 3' else 6
+			self.assertEqual(value.qty, qty)
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		pr1.items[0].qty = 2
+		add_second_row_in_pr(pr1)
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			self.assertEqual(value.qty, 4)
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].qty = 2
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			self.assertEqual(value.qty, 2)
+
+	def test_partial_transfer_serial_no_components_based_on_material_transfer_for_purchase_invoice(self):
+		'''
+			- Set backflush based on Material Transferred for Subcontract
+			- Create subcontracted PO for the item Subcontracted Item SA2.
+			- Transfer the partial components from Stores to Supplier warehouse with serial nos.
+			- Create partial purchase receipt against the PO and change the qty manually.
+			- Transfer the remaining components from Stores to Supplier warehouse with serial nos.
+			- Create purchase receipt for remaining qty against the PO and change the qty manually.
+		'''
+
+		set_backflush_based_on('Material Transferred for Subcontract')
+		item_code = 'Subcontracted Item SA2'
+		items = [{'warehouse': '_Test Warehouse - _TC', 'item_code': item_code, 'qty': 10, 'rate': 100}]
+
+		rm_items = [{'item_code': 'Subcontracted SRM Item 2', 'qty': 5}]
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+			supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		for d in rm_items:
+			d['po_detail'] = po.items[0].name
+
+		make_stock_transfer_entry(po_no = po.name, main_item_code=item_code,
+			rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details))
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].qty = 5
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		pr1.save()
+
+		for key, value in get_supplied_items(pr1).items():
+			details = itemwise_details.get(key)
+			self.assertEqual(value.qty, 3)
+			self.assertEqual(sorted(value.serial_no), sorted(details.serial_no[0:3]))
+
+		pr1.load_from_db()
+		pr1.supplied_items[0].consumed_qty = 5
+		pr1.supplied_items[0].serial_no = '\n'.join(itemwise_details[pr1.supplied_items[0].rm_item_code]['serial_no'])
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			details = itemwise_details.get(key)
+			self.assertEqual(value.qty, details.qty)
+			self.assertEqual(sorted(value.serial_no), sorted(details.serial_no))
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		for d in rm_items:
+			d['po_detail'] = po.items[0].name
+
+		make_stock_transfer_entry(po_no = po.name, main_item_code=item_code,
+			rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details))
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			details = itemwise_details.get(key)
+			self.assertEqual(value.qty, details.qty)
+			self.assertEqual(sorted(value.serial_no), sorted(details.serial_no))
+
+	def test_partial_transfer_batch_based_on_material_transfer_for_purchase_invoice(self):
+		'''
+			- Set backflush based on Material Transferred for Subcontract
+			- Create subcontracted PO for the item Subcontracted Item SA6.
+			- Transfer the partial components from Stores to Supplier warehouse with batch.
+			- Create partial purchase receipt against the PO and change the qty manually.
+			- Transfer the remaining components from Stores to Supplier warehouse with batch.
+			- Create purchase receipt for remaining qty against the PO and change the qty manually.
+		'''
+
+		set_backflush_based_on('Material Transferred for Subcontract')
+		item_code = 'Subcontracted Item SA6'
+		items = [{'warehouse': '_Test Warehouse - _TC', 'item_code': item_code, 'qty': 10, 'rate': 100}]
+
+		rm_items = [{'item_code': 'Subcontracted SRM Item 3', 'qty': 5}]
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+			supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		for d in rm_items:
+			d['po_detail'] = po.items[0].name
+
+		make_stock_transfer_entry(po_no = po.name, main_item_code=item_code,
+			rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details))
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].qty = 5
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		pr1.save()
+
+		transferred_batch_no = ''
+		for key, value in get_supplied_items(pr1).items():
+			details = itemwise_details.get(key)
+			self.assertEqual(value.qty, 3)
+			transferred_batch_no = details.batch_no
+			self.assertEqual(value.batch_no, details.batch_no)
+
+		pr1.load_from_db()
+		pr1.supplied_items[0].consumed_qty = 5
+		pr1.supplied_items[0].batch_no = list(transferred_batch_no.keys())[0]
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			details = itemwise_details.get(key)
+			self.assertEqual(value.qty, details.qty)
+			self.assertEqual(value.batch_no, details.batch_no)
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		for d in rm_items:
+			d['po_detail'] = po.items[0].name
+
+		make_stock_transfer_entry(po_no = po.name, main_item_code=item_code,
+			rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details))
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			details = itemwise_details.get(key)
+			self.assertEqual(value.qty, details.qty)
+			self.assertEqual(value.batch_no, details.batch_no)
+
+	def test_item_with_batch_based_on_bom_for_purchase_invoice(self):
+		'''
+			- Set backflush based on BOM
+			- Create subcontracted PO for the item Subcontracted Item SA4 (has batch no).
+			- Transfer the components from Stores to Supplier warehouse with batch no and serial nos.
+			- Transfer the components in multiple batches.
+			- Create the 3 purchase receipt against the PO and split Subcontracted Items into two batches.
+			- Keep the qty as 2 for Subcontracted Item in the purchase receipt.
+		'''
+
+		set_backflush_based_on('BOM')
+		item_code = 'Subcontracted Item SA4'
+		items = [{'warehouse': '_Test Warehouse - _TC', 'item_code': item_code, 'qty': 10, 'rate': 100}]
+
+		rm_items = [{'item_code': 'Subcontracted SRM Item 1', 'qty': 10},
+			{'item_code': 'Subcontracted SRM Item 2', 'qty': 10},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 3},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 3},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 3},
+			{'item_code': 'Subcontracted SRM Item 3', 'qty': 1}
+		]
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+			supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		for d in rm_items:
+			d['po_detail'] = po.items[0].name
+
+		make_stock_transfer_entry(po_no = po.name, main_item_code=item_code,
+			rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details))
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].qty = 2
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		add_second_row_in_pr(pr1)
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			self.assertEqual(value.qty, 4)
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].qty = 2
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		add_second_row_in_pr(pr1)
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			self.assertEqual(value.qty, 4)
+
+		pr1 = make_purchase_invoice(po.name)
+		pr1.update_stock = 1
+		pr1.items[0].qty = 2
+		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
+		pr1.save()
+		pr1.submit()
+
+		for key, value in get_supplied_items(pr1).items():
+			self.assertEqual(value.qty, 2)
+
 def add_second_row_in_pr(pr):
 	item_dict = {}
 	for column in ['item_code', 'item_name', 'qty', 'uom', 'warehouse', 'stock_uom',
-		'purchase_order', 'purchase_order_item', 'conversion_factor', 'rate']:
+		'purchase_order', 'purchase_order_item', 'conversion_factor', 'rate', 'expense_account', 'po_detail']:
 		item_dict[column] = pr.items[0].get(column)
 
 	pr.append('items', item_dict)

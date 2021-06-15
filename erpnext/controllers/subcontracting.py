@@ -40,9 +40,10 @@ class Subcontracting():
 		self.purchase_orders = [d.purchase_order for d in self.items if d.purchase_order]
 
 	def __identify_change_in_item_table(self):
-		self.changed_name = []
+		self.__changed_name = []
+		self.__reference_name = []
 
-		if self.doctype == 'Purchase Order' or not self.get(self.raw_material_table):
+		if self.doctype == 'Purchase Order' or self.is_new():
 			self.set(self.raw_material_table, [])
 			return
 
@@ -51,17 +52,18 @@ class Subcontracting():
 			return True
 
 		for n_row in self.items:
+			self.__reference_name.append(n_row.name)
 			if (n_row.name not in item_dict) or (n_row.item_code, n_row.qty) != item_dict[n_row.name]:
-				self.changed_name.append(n_row.name)
+				self.__changed_name.append(n_row.name)
 
 			if item_dict.get(n_row.name):
 				del item_dict[n_row.name]
 
-		self.changed_name.extend(item_dict.keys())
+		self.__changed_name.extend(item_dict.keys())
 
 	def __get_data_before_save(self):
 		item_dict = {}
-		if self.doctype == 'Purchase Receipt' and self._doc_before_save:
+		if self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self._doc_before_save:
 			for row in self._doc_before_save.get('items'):
 				item_dict[row.name] = (row.item_code, row.qty)
 
@@ -149,7 +151,7 @@ class Subcontracting():
 
 	def __get_received_items(self, doctype):
 		fields = []
-		self.po_field = 'purchase_order' if doctype == 'Purchase Receipt' else 'po_detail'
+		self.po_field = 'purchase_order'
 
 		for field in ['name', self.po_field, 'parent']:
 			fields.append(f'`tab{doctype} Item`.`{field}`')
@@ -161,9 +163,9 @@ class Subcontracting():
 		return frappe.get_all(f'{doctype}', fields = fields, filters = filters)
 
 	def __get_consumed_items(self, doctype, pr_items):
-		return frappe.get_all(f'{doctype} Item Supplied',
+		return frappe.get_all('Purchase Receipt Item Supplied',
 			fields = ['serial_no', 'rm_item_code', 'reference_name', 'batch_no', 'consumed_qty', 'main_item_code'],
-			filters = {'docstatus': 1, 'reference_name': ('in', list(pr_items))})
+			filters = {'docstatus': 1, 'reference_name': ('in', list(pr_items)), 'parenttype': doctype})
 
 	def __set_alternative_item_details(self, row):
 		if row.get('original_item'):
@@ -196,13 +198,16 @@ class Subcontracting():
 		return frappe.get_all('BOM', fields = fields, filters=filters, order_by = f'`tab{doctype}`.`idx`') or []
 
 	def __remove_changed_rows(self):
-		if not self.changed_name:
+		if not self.__changed_name:
 			return
 
 		i=1
 		self.set(self.raw_material_table, [])
 		for d in self._doc_before_save.supplied_items:
-			if d.reference_name in self.changed_name:
+			if d.reference_name in self.__changed_name:
+				continue
+
+			if (d.reference_name not in self.__reference_name):
 				continue
 
 			d.idx = i
@@ -215,8 +220,8 @@ class Subcontracting():
 
 		has_supplied_items = True if self.get(self.raw_material_table) else False
 		for row in self.items:
-			if (self.doctype != 'Purchase Order' and ((self.changed_name and row.name not in self.changed_name)
-				or (has_supplied_items and not self.changed_name))):
+			if (self.doctype != 'Purchase Order' and ((self.__changed_name and row.name not in self.__changed_name)
+				or (has_supplied_items and not self.__changed_name))):
 				continue
 
 			if self.doctype == 'Purchase Order' or self.backflush_based_on == 'BOM':
@@ -305,16 +310,18 @@ class Subcontracting():
 				self.available_materials[key]['serial_no'].remove(sn)
 
 	def set_consumed_qty_in_po(self):
+		# Update consumed qty back in the purchase order
 		if self.is_subcontracted != 'Yes':
 			return
 
 		self.__get_purchase_orders()
-		consumed_items, pr_items = self.__update_consumed_materials(self.doctype, return_consumed_items=True)
-
 		itemwise_consumed_qty = defaultdict(float)
-		for row in consumed_items:
-			key = (row.rm_item_code, row.main_item_code, pr_items.get(row.reference_name))
-			itemwise_consumed_qty[key] += row.consumed_qty
+		for doctype in ['Purchase Receipt', 'Purchase Invoice']:
+			consumed_items, pr_items = self.__update_consumed_materials(doctype, return_consumed_items=True)
+
+			for row in consumed_items:
+				key = (row.rm_item_code, row.main_item_code, pr_items.get(row.reference_name))
+				itemwise_consumed_qty[key] += row.consumed_qty
 
 		self.__update_consumed_qty_in_po(itemwise_consumed_qty)
 

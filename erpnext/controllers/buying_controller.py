@@ -58,6 +58,11 @@ class BuyingController(StockController, Subcontracting):
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate()
 
+	def onload(self):
+		super(BuyingController, self).onload()
+		self.set_onload("backflush_based_on", frappe.db.get_single_value('Buying Settings',
+			'backflush_raw_materials_of_subcontract_based_on'))
+
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
 
