@@ -18,7 +18,6 @@
   "brand",
   "column_break_7",
   "warehouse",
-  "sales_order",
   "customer_details_section",
   "customer",
   "customer_name",
@@ -69,9 +68,16 @@
   "delivery_time",
   "column_break5",
   "sales_invoice",
+  "reservation_section",
+  "sales_order",
+  "is_reserved",
+  "is_booked",
+  "cb_64",
+  "reserved_customer",
+  "column_break_67",
+  "reserved_customer_name",
   "more_info",
   "status",
-  "is_booked",
   "column_break_60",
   "employee",
   "amc_expiry_date",
@@ -583,10 +589,49 @@
   {
    "fieldname": "column_break_40",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "is_reserved",
+   "fieldname": "reservation_section",
+   "fieldtype": "Section Break",
+   "label": "Reservation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_reserved",
+   "fieldtype": "Check",
+   "label": "Is Reserved",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "cb_64",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "is_reserved",
+   "fieldname": "reserved_customer",
+   "fieldtype": "Link",
+   "label": "Reserved For Customer",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.is_reserved && doc.reserved_customer && doc.reserved_customer_name != doc.reserved_customer",
+   "fetch_from": "reserved_customer.customer_name",
+   "fieldname": "reserved_customer_name",
+   "fieldtype": "Data",
+   "label": "Reserved For Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_67",
+   "fieldtype": "Column Break"
   }
  ],
  "image_field": "image",
- "modified": "2021-05-25 16:12:48.601157",
+ "modified": "2021-06-14 23:13:08.064804",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

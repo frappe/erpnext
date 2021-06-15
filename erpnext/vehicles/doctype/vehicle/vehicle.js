@@ -23,13 +23,21 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 			return {filters: {is_insurance_company: 1}};
 		});
 
+		this.frm.set_query("vehicle_owner", function(doc) {
+			return erpnext.queries.customer();
+		});
+
+		this.frm.set_query("reserved_customer", function(doc) {
+			return erpnext.queries.customer();
+		});
+
 		this.frm.set_query("color", function() {
 			return erpnext.queries.vehicle_color({item_code: me.frm.doc.item_code});
 		});
 	},
 
 	refresh: function () {
-
+		erpnext.hide_company();
 	},
 
 	unregistered: function () {

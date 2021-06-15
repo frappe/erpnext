@@ -15,10 +15,15 @@ class Vehicle(Document):
 		'company',
 		'warehouse', 'sales_order',
 		'customer', 'customer_name', 'vehicle_owner', 'vehicle_owner_name',
+		'is_reserved', 'reserved_customer', 'reserved_customer_name',
 		'supplier', 'supplier_name',
 		'purchase_document_type', 'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate',
 		'delivery_document_type', 'delivery_document_no', 'delivery_date', 'delivery_time', 'sales_invoice',
 		'warranty_expiry_date', 'amc_expiry_date', 'maintenance_status'
+	]
+
+	_sync_fields = [
+		'sales_order', 'is_reserved', 'reserved_customer', 'reserved_customer_name'
 	]
 
 	def __init__(self, *args, **kwargs):
@@ -123,8 +128,13 @@ class Vehicle(Document):
 		if not serial_no_doc:
 			return
 
-		if cstr(self.get('sales_order')) != cstr(self.db_get('sales_order')):
-			serial_no_doc.sales_order = self.sales_order
+		before_values_sync = frappe.db.get_value(self.doctype, self.name, self._sync_fields, as_dict=1)
+		to_sync = any([before_values_sync.get(key) != self.get(key) for key in before_values_sync])
+
+		if to_sync:
+			for key in self._sync_fields:
+				serial_no_doc.set(key, self.get(key))
+
 			serial_no_doc.flags.from_vehicle = self.name
 			serial_no_doc.save()
 
