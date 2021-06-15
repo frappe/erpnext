@@ -29,7 +29,7 @@ frappe.ui.form.on('Delivery Planning', {
 	{
 
     	//  custom button to populate Transporter wise Delivery Planning
-    	frm.add_custom_button(__("Calculate Transporter Summary"), function() {
+    	frm.add_custom_button(__("Transporter Summary"), function() {
 
 			frm.call({
 				method : 'summary_call',
@@ -44,10 +44,11 @@ frappe.ui.form.on('Delivery Planning', {
 					}
 			   }
 			});
-    	});
+    	},__("Calculate"));
 
+		//custom button to generate Purchase Order Planning Items
     	console.log("Inside custom if purchase order")
-		frm.add_custom_button(__("Calculate Purchase Order Summary"), function() {
+		frm.add_custom_button(__("Purchase Order Summary"), function() {
 		frm.call({
     		method : 'purchase_order_call',
     		doc: frm.doc,
@@ -62,32 +63,47 @@ frappe.ui.form.on('Delivery Planning', {
 					}
            }
         });
-    	})
+    	},__("Calculate"));
+
+
+    	//custom button 'Create' for PO and Pick List
+    	console.log("Creating CREATE button")
+    	frm.add_custom_button(__('Pick List'), function () {
+    		frm.call({
+				method : 'make_picklist',
+				doc: frm.doc,
+				callback : function(r){
+					if(r.message == 1){
+						console.log("-----  --- --PO Create-  ---  ---  ",r);
+						frappe.msgprint("  Purchase Pick List created ");
+					}
+					else{
+						frappe.msgprint(" Unable to create Pick List ");
+					}
+			   }
+			});
+    	}, __('Create'));
+
+		// custom button Create for Purchase Order Creation
+		frm.add_custom_button(__('Purchase Order'), function () {
+    		frm.call({
+				method : 'make_po',
+				doc: frm.doc,
+				callback : function(r){
+					if(r.message == 1){
+						console.log("-----  --- --PO Create-  ---  ---  ",r);
+						frappe.msgprint("  Purchase Order created ");
+					}
+					else{
+						frappe.msgprint(" Unable to create Purchase Order ");
+					}
+			   }
+			});
+    	}, __('Create'));
 	}
 
 
-//	 if (frm.docstatus === 1)
-//	 	{
-//	 	frm.add_custom_button(__("Create Pick List"), function()  {
-////	 		return frm.call({
-////				doc: frm.doc,
-////				freeze: true,
-////				btn: $(btn_primary),
-////				method: "make_pick_list",
-////				freeze_message: __("Creating Pick Lists"),
-////				callback: (r) => {
-////					if(!r.exc){
-////						frappe.msgprint(__("Pick List Created"));
-////						frm.clear_table("items");
-////						frm.clear_table("item");
-////						frm.refresh_fields();
-////						frm.reload_doc();
-////					}
-////				}
-////			});
-//
-//   		 });
-//	 	}
+
 
 //	frm.cscript.get_sales_orders = function()
 //		{
@@ -183,6 +199,13 @@ frappe.ui.form.on('Delivery Planning', {
 
 
 	},
+
+		create_pick_list() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+			frm: this.frm
+		})
+		},
 
 		show_delivery_planning_item: function(frm) {
 

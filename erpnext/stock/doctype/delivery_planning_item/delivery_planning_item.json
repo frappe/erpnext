@@ -26,7 +26,10 @@
   "weight_per_unit",
   "supplier_dc",
   "supplier",
-  "split"
+  "split",
+  "uom",
+  "conversion_factor",
+  "stock_uom"
  ],
  "fields": [
   {
@@ -158,6 +161,7 @@
    "label": " Supplier delivers to Customer "
   },
   {
+   "depends_on": "eval: doc.supplier_dc == 1",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -167,11 +171,30 @@
    "fieldname": "split",
    "fieldtype": "Button",
    "label": "Split"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "UOM Conversion Factor"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Stock UOM"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-14 16:05:54.273744",
+ "modified": "2021-06-15 16:56:24.518090",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
