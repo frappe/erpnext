@@ -1937,69 +1937,53 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):
-		from erpnext.regional.india.e_invoice.utils import make_einvoice
+		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
 
-		si = make_sales_invoice_for_ewaybill()
-		si.naming_series = 'INV-2020-.#####'
-		si.items = []
-		si.append("items", {
-			"item_code": "_Test Item",
-			"uom": "Nos",
-			"warehouse": "_Test Warehouse - _TC",
-			"qty": 2000,
-			"rate": 12,
-			"income_account": "Sales - _TC",
-			"expense_account": "Cost of Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-		})
-		si.append("items", {
-			"item_code": "_Test Item 2",
-			"uom": "Nos",
-			"warehouse": "_Test Warehouse - _TC",
-			"qty": 420,
-			"rate": 15,
-			"income_account": "Sales - _TC",
-			"expense_account": "Cost of Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-		})
+		si = get_sales_invoice_for_e_invoice()
 		si.discount_amount = 100
 		si.save()
 
 		einvoice = make_einvoice(si)
-
-		total_item_ass_value = 0
-		total_item_cgst_value = 0
-		total_item_sgst_value = 0
-		total_item_igst_value = 0
-		total_item_value = 0
-
-		for item in einvoice['ItemList']:
-			total_item_ass_value += item['AssAmt']
-			total_item_cgst_value += item['CgstAmt']
-			total_item_sgst_value += item['SgstAmt']
-			total_item_igst_value += item['IgstAmt']
-			total_item_value += item['TotItemVal']
-
-			self.assertTrue(item['AssAmt'], item['TotAmt'] - item['Discount'])
-			self.assertTrue(item['TotItemVal'], item['AssAmt'] + item['CgstAmt'] + item['SgstAmt'] + item['IgstAmt'])
-
-		value_details = einvoice['ValDtls']
-
-		self.assertEqual(einvoice['Version'], '1.1')
-		self.assertEqual(value_details['AssVal'], total_item_ass_value)
-		self.assertEqual(value_details['CgstVal'], total_item_cgst_value)
-		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
-		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
-
-		calculated_invoice_value = \
-			value_details['AssVal'] + value_details['CgstVal'] \
-			+ value_details['SgstVal'] + value_details['IgstVal'] \
-			+ value_details['OthChrg'] - value_details['Discount']
-
-		self.assertTrue(value_details['TotInvVal'] - calculated_invoice_value < 0.1)
-
-		self.assertEqual(value_details['TotInvVal'], si.base_grand_total)
 		self.assertTrue(einvoice['EwbDtls'])
+		validate_totals(einvoice)
+
+		si.apply_discount_on = 'Net Total'
+		si.save()
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		[d.set('included_in_print_rate', 1) for d in si.taxes]
+		si.save()
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+def get_sales_invoice_for_e_invoice():
+	si = make_sales_invoice_for_ewaybill()
+	si.naming_series = 'INV-2020-.#####'
+	si.items = []
+	si.append("items", {
+		"item_code": "_Test Item",
+		"uom": "Nos",
+		"warehouse": "_Test Warehouse - _TC",
+		"qty": 2000,
+		"rate": 12,
+		"income_account": "Sales - _TC",
+		"expense_account": "Cost of Goods Sold - _TC",
+		"cost_center": "_Test Cost Center - _TC",
+	})
+
+	si.append("items", {
+		"item_code": "_Test Item 2",
+		"uom": "Nos",
+		"warehouse": "_Test Warehouse - _TC",
+		"qty": 420,
+		"rate": 15,
+		"income_account": "Sales - _TC",
+		"expense_account": "Cost of Goods Sold - _TC",
+		"cost_center": "_Test Cost Center - _TC",
+	})
+
+	return si
 
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
