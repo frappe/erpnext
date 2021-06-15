@@ -63,14 +63,14 @@ class MaterialProduce(Document):
     def on_submit(self):
         self.our_validation()
 
-    def on_cancel(self):
-        pass
+    # def on_cancel(self):
+    #     pass
         # self.calc_actual_fg_wt_on_wo()
 
-    # def calc_actual_fg_wt_on_wo(self):
-    #     wo = frappe.get_doc("Work Order", self.work_order)
-    #     wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
-    #     # wo.db_update()
+    def calc_actual_fg_wt_on_wo(self):
+        wo = frappe.get_doc("Work Order", self.work_order)
+        wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
+        wo.db_update()
 
     def our_validation(self):
         if self.partial_produce:
@@ -87,7 +87,7 @@ class MaterialProduce(Document):
                     mfg = frappe.get_doc("Manufacturing Settings")
                     wo = frappe.get_doc("Work Order", self.work_order)
                     if self.actual_yeild_on_wo() >= (wo.bom_yeild-mfg.allowed_production_deviation_percentage) and self.actual_yeild_on_wo() <= (wo.bom_yeild+mfg.allowed_production_deviation_percentage):
-                    # self.calc_actual_fg_wt_on_wo() 
+                        self.calc_actual_fg_wt_on_wo() 
                         wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
                         frappe.db.set_value("Work Order", self.work_order, "actual_yeild", wo.actual_yeild)
                         self.make_se()
