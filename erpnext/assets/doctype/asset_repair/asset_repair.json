@@ -174,6 +174,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -239,7 +240,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-21 10:37:35.002238",
+ "modified": "2021-06-15 10:34:00.839353",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
