@@ -19,10 +19,6 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 				purchase_document_no: ['is', 'not set']
 			};
 
-			if (!me.frm.doc.vehicle_booking_order) {
-				filters['is_booked'] = 0;
-			}
-
 			if (me.frm.doc.supplier) {
 				filters['supplier'] = ['in', ['', me.frm.doc.supplier]];
 			}

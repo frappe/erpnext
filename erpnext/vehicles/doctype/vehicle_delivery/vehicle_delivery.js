@@ -20,10 +20,6 @@ erpnext.vehicles.VehicleDeliveryController = erpnext.vehicles.VehicleTransaction
 				filters['warehouse'] = ['is', 'set'];
 			}
 
-			if (me.frm.doc.vehicle_booking_order) {
-				filters['is_booked'] = 1;
-			}
-
 			return {
 				filters: filters
 			}
