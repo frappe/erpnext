@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
 from frappe.model.document import Document
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.assets.doctype.asset.asset import get_asset_account
 
 class AssetRepair(Document):
 	def validate(self):
@@ -100,7 +101,7 @@ class AssetRepair(Document):
 	def get_gl_entries(self):
 		gl_entry = []
 		repair_and_maintenance_account = frappe.db.get_value('Company', self.company, 'repair_and_maintenance_account')
-		fixed_asset_account = self.get_fixed_asset_account()
+		fixed_asset_account = get_asset_account("fixed_asset_account", asset=self.asset, company=self.company)
 		expense_account = frappe.get_doc('Purchase Invoice', self.purchase_invoice).items[0].expense_account	
 
 		gl_entry = frappe.get_doc({
@@ -131,12 +132,6 @@ class AssetRepair(Document):
 			"company": self.company
 		})
 		gl_entry.insert()
-
-	def get_fixed_asset_account(self):
-		asset_category = frappe.get_doc('Asset Category', frappe.db.get_value('Asset', self.asset, 'asset_category'))
-		for account in asset_category.accounts:
-			if account.company_name == self.company:
-				return account.fixed_asset_account
 
 	def modify_depreciation_schedule(self):
 		if self.increase_in_asset_life:
