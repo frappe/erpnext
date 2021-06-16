@@ -91,7 +91,19 @@ def set_account_currency(filters):
 		account_currency = None
 
 		if filters.get("account"):
-			account_currency = get_account_currency(filters.account[0])
+			if len(filters.get("account")) == 1:	
+				account_currency = get_account_currency(filters.account[0])
+			else:
+				currency = get_account_currency(filters.account[0])
+				is_same_account_currency = True
+				for account in filters.get("account"):
+					if get_account_currency(account) != currency:
+						is_same_account_currency = False
+						break
+
+				if is_same_account_currency:
+					account_currency = currency
+
 		elif filters.get("party"):
 			gle_currency = frappe.db.get_value(
 				"GL Entry", {
