@@ -31,7 +31,7 @@ class ProductBundle(Document):
 			if doctype == "Stock Entry":
 				item_doctype = doctype + " Detail"
 
-			invoices = frappe.db.get_all(item_doctype, {"item_code": self.new_item_code, "docstatus": ["!=", 2]}, ["parent"])
+			invoices = frappe.db.get_all(item_doctype, {"item_code": self.new_item_code, "docstatus": 1}, ["parent"])
 
 			for invoice in invoices:
 				invoice_links.append(get_link_to_form(doctype, invoice['parent']))
