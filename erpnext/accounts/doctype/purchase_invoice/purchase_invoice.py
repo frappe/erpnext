@@ -517,6 +517,8 @@ class PurchaseInvoice(BuyingController):
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
+		purchase_receipt_details = self.get_purchase_receipt_details()
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
@@ -634,10 +636,13 @@ class PurchaseInvoice(BuyingController):
 								"project": item.project or self.project
 							}, account_currency, item=item))
 
-						# check if the exchange rate has changed
-						purchase_receipt_conversion_rate = frappe.db.get_value('Purchase Receipt', {'name': item.purchase_receipt}, ['conversion_rate'])
-						if purchase_receipt_conversion_rate and self.conversion_rate != purchase_receipt_conversion_rate:
-							discrepancy_caused_by_exchange_rate_difference = (item.qty * item.rate) * (purchase_receipt_conversion_rate - self.conversion_rate)
+						if purchase_receipt_details[item.item_code]["conversion_rate"] and \
+							self.conversion_rate != purchase_receipt_details[item.item_code]["conversion_rate"] and \
+							item.net_rate == purchase_receipt_details[item.item_code]["net_rate"]:
+
+							discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * \
+								(purchase_receipt_details[item.item_code]["conversion_rate"] - self.conversion_rate)
+
 							gl_entries.append(
 								self.get_gl_dict({
 									"account": expense_account,
@@ -709,6 +714,23 @@ class PurchaseInvoice(BuyingController):
 
 							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
 								item.precision("item_tax_amount"))
+
+	def get_purchase_receipt_details(self):
+		purchase_receipt_details = {}
+		for item in self.items:
+			if item.purchase_receipt:
+				purchase_receipt = frappe.get_doc('Purchase Receipt', item.purchase_receipt)
+				pr_item_details = {
+					"conversion_rate" : purchase_receipt.conversion_rate
+				}
+				
+				for pr_item in purchase_receipt.items:
+					if pr_item.item_code == item.item_code:
+						pr_item_details["net_rate"] = pr_item.net_rate
+
+				purchase_receipt_details[item.item_code] = pr_item_details
+
+		return purchase_receipt_details
 
 	def get_asset_gl_entry(self, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
