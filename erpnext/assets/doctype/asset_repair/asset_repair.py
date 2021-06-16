@@ -56,9 +56,9 @@ class AssetRepair(Document):
 
 	def check_for_stock_items_and_warehouse(self):
 		if not self.stock_items:
-			frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
+			frappe.throw(_("Please enter Stock Items consumed during the Repair."), title=_("Missing Items"))
 		if not self.warehouse:
-			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Repair were taken."))
+			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."), title=_("Missing Warehouse"))
 
 	def check_for_cost_center(self):
 		if not self.cost_center:
