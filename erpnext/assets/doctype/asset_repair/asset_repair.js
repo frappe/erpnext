@@ -32,19 +32,19 @@ frappe.ui.form.on('Asset Repair', {
 });
 
 cur_frm.fields_dict.cost_center.get_query = function(doc) {
-	return{
-		filters:{
+	return {
+		filters: {
 			'is_group': 0,
 			'company': doc.company
 		}
-	}
-}
+	};
+};
 
 cur_frm.fields_dict.project.get_query = function(doc) {
-	return{
-		filters:{
+	return {
+		filters: {
 			'is_group': 0,
 			'company': doc.company
 		}
-	}
-}
+	};
+};
