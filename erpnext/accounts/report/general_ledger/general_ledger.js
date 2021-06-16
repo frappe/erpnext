@@ -36,16 +36,12 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"account",
 			"label": __("Account"),
-			"fieldtype": "Link",
+			"fieldtype": "MultiSelectList",
 			"options": "Account",
-			"get_query": function() {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					"doctype": "Account",
-					"filters": {
-						"company": company,
-					}
-				}
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Account', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
 			}
 		},
 		{
