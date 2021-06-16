@@ -241,6 +241,7 @@
    "fieldname": "purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
+   "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0",
    "options": "Purchase Invoice"
   },
   {
@@ -254,7 +255,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-16 08:02:34.782990",
+ "modified": "2021-06-16 08:16:07.581813",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

@@ -45,7 +45,6 @@ class AssetRepair(Document):
 			self.check_for_stock_items_and_warehouse()
 			self.decrease_stock_quantity()
 		if self.capitalize_repair_cost:
-			self.check_for_purchase_invoice()
 			self.make_gl_entries()
 			if frappe.db.get_value('Asset', self.asset, 'calculate_depreciation'):
 				self.modify_depreciation_schedule()
@@ -89,10 +88,6 @@ class AssetRepair(Document):
 
 		stock_entry.insert()
 		stock_entry.submit()
-
-	def check_for_purchase_invoice(self):
-		if not self.purchase_invoice:
-			frappe.throw(_("Please link Purchase Invoice."))
 
 	def on_cancel(self):
 		self.make_gl_entries(cancel=True)
