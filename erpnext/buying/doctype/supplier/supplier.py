@@ -51,6 +51,23 @@ class Supplier(TransactionBase):
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
 
+	@frappe.whitelist()
+	def get_supplier_group_details(self):
+		doc = frappe.get_doc('Supplier Group', self.supplier_group)
+		self.payment_terms = ""
+		self.accounts = []
+
+		if not self.accounts and doc.accounts:
+			for account in doc.accounts:
+				child = self.append('accounts')
+				child.company = account.company
+				child.account = account.account
+			self.save()
+
+		if not self.payment_terms and doc.payment_terms:
+			self.payment_terms = doc.payment_terms
+
+
 	def validate_internal_supplier(self):
 		internal_supplier = frappe.db.get_value("Supplier",
 			{"is_internal_supplier": 1, "represents_company": self.represents_company, "name": ("!=", self.name)}, "name")
