@@ -140,8 +140,11 @@ class Warehouse(NestedSet):
 			return 1
 
 	def unlink_from_items(self):
-		item_default_names = frappe.db.get_list('Item Default', pluck='name',
-										  filters={'default_warehouse':self.name})
+		item_default_names = frappe.db.get_list(
+			'Item Default',
+			pluck='name',
+			filters={'default_warehouse':self.name}
+		)
 		for name in item_default_names:
 			frappe.get_doc("Item Default", name).delete()
 
