@@ -22,7 +22,7 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 		});
 	}
 
-	set_payment_primary_action: function() {
+	set_payment_primary_action() {
 		var me = this;
 
 		this.dialog.set_primary_action(__("Submit"), function() {
@@ -107,7 +107,7 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 		this.bind_numeric_keys_event();
 	}
 
-	bind_form_control_event(){
+	bind_form_control_event() {
 		var me = this;
 		$(this.$body).find('.pos-payment-row').click(function() {
 			me.idx = $(this).attr("idx");
@@ -127,7 +127,7 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 		$(this.$body).find('.change_amount').change(function() {
 			me.change_amount(flt($(this).val()), precision("change_amount"));
 		});
-	},
+	}
 
 	highlight_selected_row() {
 		var selected_row = $(this.$body).find(repl(".pos-payment-row[idx='%(idx)s']", {'idx': this.idx}));
@@ -135,9 +135,9 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 		selected_row.addClass('selected-payment-mode');
 		$(this.$body).find('.amount').attr('disabled', true);
 		this.selected_mode.attr('disabled', false);
-	},
+	}
 
-	bind_numeric_keys_event: function() {
+	bind_numeric_keys_event() {
 		var me = this;
 		$(this.$body).find('.pos-keyboard-key').click(function(){
 			me.payment_val += $(this).text();
@@ -192,7 +192,7 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 		this.frm.doc.change_amount = flt(change_amount, precision("change_amount"));
 		this.calculate_write_off_amount();
 		this.show_amounts();
-	},
+	}
 
 	update_paid_amount(update_write_off) {
 		var me = this;

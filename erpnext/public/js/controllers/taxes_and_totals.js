@@ -268,7 +268,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 	}
 
-	update_item_tax_map: function() {
+	update_item_tax_map() {
 		let me = this;
 		let item_codes = [];
 		let item_rates = {};
@@ -305,9 +305,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 			});
 		}
-	},
+	}
 
-	add_taxes_from_item_tax_template: function(item_tax_map) {
+	add_taxes_from_item_tax_template(item_tax_map) {
 		let me = this;
 
 		if (item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
@@ -325,7 +325,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 			});
 		}
-	},
+	}
 
 	calculate_taxes() {
 		var me = this;
