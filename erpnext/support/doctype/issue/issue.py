@@ -30,7 +30,7 @@ class Issue(Document):
 		self.set_lead_contact(self.raised_by)
 
 		if not self.service_level_agreement:
-			self.reset_associated_fields()
+			self.reset_sla_fields()
 
 	def on_update(self):
 		# Add a communication in the issue timeline
@@ -57,7 +57,7 @@ class Issue(Document):
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
 					frappe.db.get_default("Company")
 
-	def reset_associated_fields(self):
+	def reset_sla_fields(self):
 		self.agreement_status = ""
 		self.response_by = ""
 		self.resolution_by = ""
