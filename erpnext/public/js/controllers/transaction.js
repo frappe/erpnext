@@ -1918,7 +1918,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 	}
 
-	make_quality_inspection: function () {
+	make_quality_inspection() {
 		let data = [];
 		const fields = [
 			{
@@ -2040,9 +2040,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		} else {
 			dialog.show();
 		}
-	},
+	}
 
-	get_method_for_payment: function(){
+	get_method_for_payment() {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(cur_frm.doc.__onload && cur_frm.doc.__onload.make_payment_via_journal_entry){
 			if(in_list(['Sales Invoice', 'Purchase Invoice'],  cur_frm.doc.doctype)){
