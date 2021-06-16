@@ -135,8 +135,6 @@ def check_payment_fields_reqd(patient):
 			fee_validity = frappe.db.exists('Fee Validity', {'patient': patient, 'status': 'Pending'})
 			if fee_validity:
 				return {'fee_validity': fee_validity}
-			if check_is_new_patient(patient):
-				return False
 		return True
 	return False
 
@@ -150,8 +148,6 @@ def invoice_appointment(appointment_doc):
 			fee_validity = None
 		elif not fee_validity:
 			if frappe.db.exists('Fee Validity Reference', {'appointment': appointment_doc.name}):
-				return
-			if check_is_new_patient(appointment_doc.patient, appointment_doc.name):
 				return
 	else:
 		fee_validity = None
