@@ -71,14 +71,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "completion_date",
    "fieldtype": "Datetime",
    "label": "Completion Date"
   },
   {
-   "allow_on_submit": 1,
    "default": "Pending",
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "repair_status",
@@ -104,13 +102,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "actions_performed",
    "fieldtype": "Long Text",
    "label": "Actions performed"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "downtime",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -122,7 +118,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "repair_cost",
    "fieldtype": "Currency",
    "label": "Repair Cost"
@@ -256,7 +251,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-16 08:16:07.581813",
+ "modified": "2021-06-16 08:32:06.160615",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
