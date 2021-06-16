@@ -5,4 +5,10 @@ frappe.listview_settings['Customer'] = {
                  $('.btn-primary').hide()
     },
 
+    formatters: {
+        customer_id(val) {
+        	return val.toString();
+        },
+    },
+
 };
