@@ -9,8 +9,8 @@ class DeliveryPlanning(Document):
 	def on_submit(self):
 		self.on_delivery_planning_submit()
 		print("Calling DPI")
-		# self.on_transporter_planning()
-		# self.on_purchase_planning()
+	# self.on_transporter_planning()
+	# self.on_purchase_planning()
 
 
 	# @frappe.whitelist()
@@ -39,117 +39,117 @@ class DeliveryPlanning(Document):
 	# def p_order_create(self):
 	# 	return self.p_order()
 
-# # Query for 1st child table Item wise Delivery Planning on button click Item wise Delivery Plan
-#
-# 	def get_so(self):
-# 		conditions = ""
-# 		if self.company:
-# 			conditions +="AND so.company = %s" % frappe.db.escape(self.company)
-#
-# 		if self.transporter:
-# 			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
-#
-# 		if self.delivery_date_from:
-# 			conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
-#
-# 		if self.delivery_date_to:
-# 			conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
-#
-# 		if self.pincode_from:
-# 			conditions += "AND so.address_display  LIKE '%s'" % self.pincode_from
-#
-# 		if self.pincode_to:
-# 			conditions += "AND so.address_display  LIKE '%s'" % self.pincode_to
-#
-# 		query = frappe.db.sql(""" select
-# 						so.customer,
-# 						soi.item_code,
-# 						soi.item_name,
-# 						soi.warehouse,
-# 						soi.qty,
-# 						soi.stock_qty,
-# 						so.name,
-# 						soi.name as soi_item,
-# 						soi.weight_per_unit,
-# 						soi.delivery_date,
-# 						soi.projected_qty,
-# 						so.transporter
-#
-# 						from `tabSales Order Item` soi
-# 						join `tabSales Order` so ON soi.parent = so.name
-# 						left outer join `tabAddress` as add on add.name = so.shipping_address_name
-#
-# 						where so.docstatus = 1
-# 						{conditions} """.format(conditions=conditions), as_dict=1)
-# 		print(conditions)
-# 		return query
-#
-# # Query for 3rd child table Transporter wise Delivery Planning on button click Get Daily Delivery Plan
-#
-# 	def get_dp(self):
-# 		conditions = ""
-# 		if self.company:
-# 			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
-#
-# 		if self.transporter:
-# 			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
-#
-# 		if self.delivery_date_from:
-# 			conditions += "AND so.delivery_date >= '%s'" % self.delivery_date_from
-#
-# 		if self.delivery_date_to:
-# 			conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
-#
-# 		query = frappe.db.sql(""" select
-# 					so.transporter,
-# 					so.delivery_date,
-# 					SUM(so.total_net_weight) AS total_net_weight ,
-# 					SUM(so.total_qty) AS total_qty
-#
-# 					# soi.warehouse,
-# 					# soi.weight_per_unit
-# 					from `tabSales Order` so
-# 					# from `tabSales Order Item` soi
-# 					# join `tabSales Order` so ON soi.parent = so.name
-#
-# 					where so.docstatus = 1
-# 					{conditions}
-# 					group by so.transporter, so.delivery_date
-# 					order by so.delivery_date
-# 					""".format(conditions=conditions), as_dict=1)
-#
-# 						# from `tabSupplier` s
-# 						# join `tabSales Order` so ON s.name = so.transporter
-# 		return query
-# # Query for 3rd child table Order wise Purchase Planning on button click Get Purchase Order To Be Created
-# 	def p_order(self):
-# 		conditions = ""
-# 		if self.company:
-# 			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
-#
-# 		if self.transporter:
-# 			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
-#
-# 		if self.delivery_date_from:
-# 			conditions += "AND so.delivery_date >= '%s'" % self.delivery_date_from
-#
-# 		if self.delivery_date_to:
-# 			conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
-#
-# 		query = frappe.db.sql(""" select
-# 					soi.item_code,
-# 					soi.item_name,
-# 					soi.warehouse,
-# 					soi.qty,
-# 					so.transporter,
-# 					so.name
-#
-# 					from `tabSales Order Item` soi
-# 					join `tabSales Order` so ON soi.parent = so.name
-#
-# 					where so.docstatus = 1
-# 					{conditions} """.format(conditions=conditions), as_dict=1)
-# 		return query
+	# # Query for 1st child table Item wise Delivery Planning on button click Item wise Delivery Plan
+	#
+	# 	def get_so(self):
+	# 		conditions = ""
+	# 		if self.company:
+	# 			conditions +="AND so.company = %s" % frappe.db.escape(self.company)
+	#
+	# 		if self.transporter:
+	# 			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
+	#
+	# 		if self.delivery_date_from:
+	# 			conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
+	#
+	# 		if self.delivery_date_to:
+	# 			conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
+	#
+	# 		if self.pincode_from:
+	# 			conditions += "AND so.address_display  LIKE '%s'" % self.pincode_from
+	#
+	# 		if self.pincode_to:
+	# 			conditions += "AND so.address_display  LIKE '%s'" % self.pincode_to
+	#
+	# 		query = frappe.db.sql(""" select
+	# 						so.customer,
+	# 						soi.item_code,
+	# 						soi.item_name,
+	# 						soi.warehouse,
+	# 						soi.qty,
+	# 						soi.stock_qty,
+	# 						so.name,
+	# 						soi.name as soi_item,
+	# 						soi.weight_per_unit,
+	# 						soi.delivery_date,
+	# 						soi.projected_qty,
+	# 						so.transporter
+	#
+	# 						from `tabSales Order Item` soi
+	# 						join `tabSales Order` so ON soi.parent = so.name
+	# 						left outer join `tabAddress` as add on add.name = so.shipping_address_name
+	#
+	# 						where so.docstatus = 1
+	# 						{conditions} """.format(conditions=conditions), as_dict=1)
+	# 		print(conditions)
+	# 		return query
+	#
+	# # Query for 3rd child table Transporter wise Delivery Planning on button click Get Daily Delivery Plan
+	#
+	# 	def get_dp(self):
+	# 		conditions = ""
+	# 		if self.company:
+	# 			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
+	#
+	# 		if self.transporter:
+	# 			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
+	#
+	# 		if self.delivery_date_from:
+	# 			conditions += "AND so.delivery_date >= '%s'" % self.delivery_date_from
+	#
+	# 		if self.delivery_date_to:
+	# 			conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
+	#
+	# 		query = frappe.db.sql(""" select
+	# 					so.transporter,
+	# 					so.delivery_date,
+	# 					SUM(so.total_net_weight) AS total_net_weight ,
+	# 					SUM(so.total_qty) AS total_qty
+	#
+	# 					# soi.warehouse,
+	# 					# soi.weight_per_unit
+	# 					from `tabSales Order` so
+	# 					# from `tabSales Order Item` soi
+	# 					# join `tabSales Order` so ON soi.parent = so.name
+	#
+	# 					where so.docstatus = 1
+	# 					{conditions}
+	# 					group by so.transporter, so.delivery_date
+	# 					order by so.delivery_date
+	# 					""".format(conditions=conditions), as_dict=1)
+	#
+	# 						# from `tabSupplier` s
+	# 						# join `tabSales Order` so ON s.name = so.transporter
+	# 		return query
+	# # Query for 3rd child table Order wise Purchase Planning on button click Get Purchase Order To Be Created
+	# 	def p_order(self):
+	# 		conditions = ""
+	# 		if self.company:
+	# 			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
+	#
+	# 		if self.transporter:
+	# 			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
+	#
+	# 		if self.delivery_date_from:
+	# 			conditions += "AND so.delivery_date >= '%s'" % self.delivery_date_from
+	#
+	# 		if self.delivery_date_to:
+	# 			conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
+	#
+	# 		query = frappe.db.sql(""" select
+	# 					soi.item_code,
+	# 					soi.item_name,
+	# 					soi.warehouse,
+	# 					soi.qty,
+	# 					so.transporter,
+	# 					so.name
+	#
+	# 					from `tabSales Order Item` soi
+	# 					join `tabSales Order` so ON soi.parent = so.name
+	#
+	# 					where so.docstatus = 1
+	# 					{conditions} """.format(conditions=conditions), as_dict=1)
+	# 		return query
 
 	# @frappe.whitelist()
 	# def get_options(self):
@@ -193,26 +193,26 @@ class DeliveryPlanning(Document):
 	# 		doc.insert()
 	# 		doc.save()
 	def on_delivery_planning_submit(self):
-			conditions = ""
-			if self.company:
-				conditions += "AND so.company = %s" % frappe.db.escape(self.company)
+		conditions = ""
+		if self.company:
+			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
 
-			if self.transporter:
-				conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
+		if self.transporter:
+			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
 
-			if self.delivery_date_from:
-				conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
+		if self.delivery_date_from:
+			conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
 
-			if self.delivery_date_to:
-				conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
+		if self.delivery_date_to:
+			conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
 
-			# if self.pincode_from:
-			# 	conditions += "And add.pincode >= '%s" % self.pincode_from
-			#
-			# if self.pincode_to:
-			# 	conditions += "And add.pincode <= '%s" % self.pincode_to
+		# if self.pincode_from:
+		# 	conditions += "And add.pincode >= '%s" % self.pincode_from
+		#
+		# if self.pincode_to:
+		# 	conditions += "And add.pincode <= '%s" % self.pincode_to
 
-			query = frappe.db.sql(""" select
+		query = frappe.db.sql(""" select
 									so.customer,
 									soi.item_code,
 									soi.item_name,
@@ -226,7 +226,10 @@ class DeliveryPlanning(Document):
 									soi.projected_qty,
 									so.transporter,
 									soi.delivered_by_supplier,
-									soi.supplier
+									soi.supplier,
+									soi.uom,
+									soi.conversion_factor,
+									soi.stock_uom
 
 
 									from `tabSales Order Item` soi
@@ -234,31 +237,33 @@ class DeliveryPlanning(Document):
 
 									where so.docstatus = 1
 									{conditions} """.format(conditions=conditions), as_dict=1)
-			print("00000000000.0000000000.000000",query)
-			for i in query:
-				dp_item = frappe.new_doc("Delivery Planning Item")
+		print("00000000000.0000000000.000000",query)
+		for i in query:
+			dp_item = frappe.new_doc("Delivery Planning Item")
 
-				dp_item.transporter = i.transporter
-				dp_item.customer = i.customer
-				dp_item.item_code = i.item_code
-				dp_item.item_name = i.item_name
+			dp_item.transporter = i.transporter
+			dp_item.customer = i.customer
+			dp_item.item_code = i.item_code
+			dp_item.item_name = i.item_name
 
-				dp_item.ordered_qty = i.qty
-				dp_item.pending_qty = i.qty
-				dp_item.qty_to_deliver = i.qty
-				dp_item.weight_to_deliver = i.weight_per_unit * i.qty
-				dp_item.sales_order = i.name
-				dp_item.source_warehouse = i.warehouse
-				dp_item.postal_code = 0
-				dp_item.delivery_date = i.delivery_date
-				dp_item.current_stock = i.projected_qty - i.stock_qty
-				dp_item.available_stock = i.projected_qty
-				dp_item.related_delivey_planning = self.name
-				dp_item.weight_per_unit = i.weight_per_unit
-				dp_item.supplier_dc = i.delivered_by_supplier
-				dp_item.supplier = i.supplier
-
-				dp_item.save(ignore_permissions = True)
+			dp_item.ordered_qty = i.qty
+			dp_item.pending_qty = i.qty
+			dp_item.qty_to_deliver = i.qty
+			dp_item.weight_to_deliver = i.weight_per_unit * i.qty
+			dp_item.sales_order = i.name
+			dp_item.source_warehouse = i.warehouse
+			dp_item.postal_code = 0
+			dp_item.delivery_date = i.delivery_date
+			dp_item.current_stock = i.projected_qty - i.stock_qty
+			dp_item.available_stock = i.projected_qty
+			dp_item.related_delivey_planning = self.name
+			dp_item.weight_per_unit = i.weight_per_unit
+			dp_item.supplier_dc = i.delivered_by_supplier
+			dp_item.supplier = i.supplier
+			dp_item.uom = i.uom
+			dp_item.conversion_factor = i.conversion_factor
+			dp_item.stock_uom = i.stock_uom
+			dp_item.save(ignore_permissions = True)
 
 	def on_transporter_planning(self):
 		conditions = ""
@@ -338,15 +343,16 @@ class DeliveryPlanning(Document):
 			dp_item.related_delivery_planning = self.name
 			dp_item.save(ignore_permissions=True)
 
-# left outer join `tabAddress` as add on add.address_title = so.customer
+	# left outer join `tabAddress` as add on add.address_title = so.customer
 
 	# on click of custom button Calculate Purchase Order Plan Summary create new PODPI
 	@frappe.whitelist()
 	def purchase_order_call(self):
 		conditions = ""
 		item = frappe.get_all(doctype='Delivery Planning Item',
-							  	  filters={"approved": "Yes",
-								  "related_delivey_planning" : self.name})
+							  filters={"approved": "Yes",
+									   "supplier_dc": 1,
+									   "related_delivey_planning" : self.name})
 		print("<<<<<<<<<< Po plan >>>>>>>>>>>>>>>>>",item)
 
 		if(item):
@@ -354,13 +360,13 @@ class DeliveryPlanning(Document):
 			for i in item:
 
 				popi = frappe.db.get_all(doctype= 'Purchase Orders Planning Item',
-								filters={"related_delivery_planning" : self.name})
+										 filters={"related_delivery_planning" : self.name})
 
 
 				if popi:
 					for p in popi:
 						frappe.db.delete('Purchase Orders Planning Item', {
-										'name': p.name
+							'name': p.name
 						})
 						print("-----------Deleted TDPi Id--------------",p.name)
 
@@ -390,8 +396,8 @@ class DeliveryPlanning(Document):
 						dp_item.save(ignore_permissions=True)
 
 				else:
-						conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
-						query = frappe.db.sql(""" select
+					conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
+					query = frappe.db.sql(""" select
 											sales_order,
 											item_code,
 											item_name,
@@ -404,35 +410,36 @@ class DeliveryPlanning(Document):
 											where supplier_dc = 1
 											{conditions} """.format(conditions=conditions), as_dict=1)
 
-						for q in query:
-							p_item = frappe.new_doc("Purchase Orders Planning Item")
-							p_item.sales_order = q.sales_order
-							p_item.item_code = q.item_code
-							p_item.item_name = q.item_name
-							p_item.supplier = q.supplier
-							p_item.qty_to_order = q.ordered_qty
-							p_item.related_delivery_planning = self.name
-							p_item.rdp_item = q.name
-							p_item.save(ignore_permissions=True)
+					for q in query:
+						p_item = frappe.new_doc("Purchase Orders Planning Item")
+						p_item.sales_order = q.sales_order
+						p_item.item_code = q.item_code
+						p_item.item_name = q.item_name
+						p_item.supplier = q.supplier
+						p_item.qty_to_order = q.ordered_qty
+						p_item.related_delivery_planning = self.name
+						p_item.rdp_item = q.name
+						p_item.save(ignore_permissions=True)
 
 			return 1
 		return 0
 
-# Creating Transporter wise delivery planning item
+	# Creating Transporter wise delivery planning item
 	@frappe.whitelist()
 	def summary_call(self):
 		conditions = ""
 		print("----------0000000000 this is  Transporter wise delivery call ------------")
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
-								  filters={"approved": "Yes",
-										   "related_delivey_planning": self.name})
+								 filters={"approved": "Yes",
+										  "supplier_dc": 0,
+										  "related_delivey_planning": self.name})
 		print("<<<<<<<<<<>>  Transporter wise delivery >>>>>>>>>>>>>>>", item)
 
 		if (item):
 			print("-----------D gfhgfhfg --------------",item)
 			for i in item:
 				popi = frappe.db.get_all(doctype='Transporter Wise Planning Item',
-										  filters={"related_delivery_planning": self.name})
+										 filters={"related_delivery_planning": self.name})
 
 				if popi:
 					for p in popi:
@@ -453,6 +460,7 @@ class DeliveryPlanning(Document):
 											from `tabDelivery Planning Item`
 
 											where approved = "Yes"
+											AND supplier_dc = 0
 											{conditions}
 											group by transporter, delivery_date
 											""".format(conditions=conditions), as_dict=1)
@@ -468,20 +476,21 @@ class DeliveryPlanning(Document):
 
 						# code for test
 						so_wise_data = frappe.db.get_all("Delivery Planning Item",
-								{"related_delivey_planning" :self.name, "transporter" : q.transporter },
-								["sales_order","item_name","ordered_qty","weight_to_deliver"]
-						)
-						print("0000000000000000000000000000",so_wise_data)
+														 {"related_delivey_planning" :self.name,
+														  "transporter" : q.transporter,
+														  "approved": "Yes",
+														  "supplier_dc" : 0},
+														 ["sales_order","item_name",
+														  "ordered_qty","weight_to_deliver"]
+														 )
+						print("000000000000000 1 if 0000000000000",so_wise_data)
 						if(so_wise_data):
 							for s in so_wise_data:
-								# dp_item.doc_childs = frappe.get_all("Transporter Planning Items",
-								# 								filters={'parent': doc.name},
-								# 								fields=["*"])
 								dp_item.append("items",{"sales_order": s.sales_order,
-														 "item_name": s.item_name,
-														 "qty": s.ordered_qty,
-										   				 "weight": s.weight_to_deliver
-														 })
+														"item_name": s.item_name,
+														"qty": s.ordered_qty,
+														"weight": s.weight_to_deliver
+														})
 						dp_item.save(ignore_permissions=True)
 
 						print("aaaaaaa0000000 ..........",q.total_weight)
@@ -517,12 +526,9 @@ class DeliveryPlanning(Document):
 														 ["sales_order", "item_name", "ordered_qty",
 														  "weight_to_deliver"]
 														 )
-						print("0000000000000000000000000000", so_wise_data)
+						print("000000000000 2 if 0000000000000000", so_wise_data)
 						if (so_wise_data):
 							for s in so_wise_data:
-								# dp_item.doc_childs = frappe.get_all("Transporter Planning Items",
-								# 								filters={'parent': doc.name},
-								# 								fields=["*"])
 								dp_item.append("items", {"sales_order": s.sales_order,
 														 "item_name": s.item_name,
 														 "qty": s.ordered_qty,
@@ -538,4 +544,77 @@ class DeliveryPlanning(Document):
 		else:
 			return 0
 
+	@frappe.whitelist()
+	def make_po(self):
+		conditions = ""
+		print("------------- inside PO make po ---------")
+		item = frappe.db.get_all(doctype='Delivery Planning Item',
+								 filters={"approved": "Yes",
+										  "supplier_dc": 1,
+										  "related_delivey_planning": self.name})
+		print("<<<<<<<<<<>>  Create PO after item >>>>>>>>>>>>>>>", item)
+		if (item):
+			print("-----------D gfhgfhfg --------------", item)
+			for i in item:
+				conditions += "AND dpi.related_delivey_planning = %s" % frappe.db.escape(self.name)
+				print("Condition000000000000000000 ",conditions)
+				query = frappe.db.sql(""" select
+										dpi.supplier,
+										sum(dpi.ordered_qty) t_qty,
+										sum(dpi.weight_to_deliver) t_weight
 
+										from `tabDelivery Planning Item`dpi
+
+										where dpi.supplier_dc = 1
+										AND dpi.approved = "Yes"
+
+										{conditions}
+										group by dpi.supplier
+										""".format(conditions=conditions), as_dict=1)
+
+			for q in query:
+				po = frappe.new_doc("Purchase Order")
+				po.supplier = q.supplier
+				po.total_qty = q.t_qty
+				po.total_net_weight = q.t_weight
+
+				so_wise_data = frappe.db.get_all("Delivery Planning Item",
+												 {"related_delivey_planning": self.name,
+												  "supplier": q.supplier},
+												 ["item_code",
+												  "item_name",
+												  "ordered_qty",
+												  "weight_to_deliver",
+												  "delivery_date",
+												  "uom",
+												  "stock_uom",
+												  "conversion_factor",
+												  "sorce_warehouse",
+												  "weight_per_unit"]
+												 )
+				print("0000000000000000000000000000", so_wise_data)
+				if (so_wise_data):
+					for s in so_wise_data:
+						po.append("items", {"item_code": s.item_code,
+											 "item_name": s.item_name,
+											 "schedule_date":s.delivery_date,
+											 "qty": s.ordered_qty,
+											 "total_weight": s.weight_to_deliver,
+											 "weight_per_unit":s.weight_per_unit,
+											 "uom": s.uom,
+											 "stock_uom" : s.stock_uom,
+											 "conversion_factor": s.conversion_factor,
+											 "warehouse": s.sorce_warehouse
+											 })
+				po.save(ignore_permissions=True)
+				# po.save()
+				# frappe.db.commit()
+				print("-----------Date 0purchase order create 111 -------------", q.delivery_date)
+
+
+			return 1
+
+	@frappe.whitelist()
+	def make_picklist(self):
+		print("------------- inside PL make picklist ---------")
+		return 1

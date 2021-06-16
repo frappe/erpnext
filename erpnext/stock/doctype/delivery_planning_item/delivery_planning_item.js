@@ -11,6 +11,8 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 
 	split: function(frm) {
+			var new_supplier;
+			var new_warehouse;
 			let d = new frappe.ui.Dialog({
 			title: 'Split Planning Item',
 			fields: [
@@ -18,18 +20,24 @@ frappe.ui.form.on('Delivery Planning Item', {
 					label: 'Transporter',
 					fieldname: 'transporter',
 					fieldtype: 'Link',
-				    options: "Supplier"
+				    options: "Supplier",
+				    default: frm.doc.transporter,
+
 				},
 				{
 					label: 'Qty To Deliver',
 					fieldname: 'qty_to_deliver',
-					fieldtype: 'Float'
+					fieldtype: 'Float',
+					default : 1,
+					reqd: 1
 				},
 				{
 					label: 'Source Warehouse',
 					fieldname: 'src_warehouse',
 					fieldtype: 'Link',
-					options: "Warehouse"
+					options: "Warehouse",
+					depends_on: "eval: doc.supplier_dc == 0",
+
 				},
 				{
 					label: 'Supplier delivers to Customer ',
@@ -40,34 +48,67 @@ frappe.ui.form.on('Delivery Planning Item', {
 					label: 'Supplier',
 					fieldname: 'supplier',
 					fieldtype: 'Link',
-					options: "Supplier"
+					options: "Supplier",
+					depends_on: "eval: doc.supplier_dc == 1 "
 				}
 			],
 
 			primary_action_label: 'Submit',
 			primary_action(values) {
 				console.log(values);
-				frm.call({
-				doc:frm.doc,
-				method: 'split_dp_item',
-				args: {
-						n_transporter : values.transporter,
-						n_qty : values.qty_to_deliver,
-						n_src_warehouse : values.src_warehouse,
-						n_supplier : values. supplier
-					  },
+				if(values.supplier)
+				{ new_supplier = values.supplier;
+					console.log("00000000000000",new_supplier);
+				}
+				else if(frm.doc.supplier){
+					new_supplier = frm.doc.supplier;
+					console.log("fr00000000",frm.doc.supplier);
+				}
+				else{ new_supplier = "";
+					console.log("00000000000000",new_supplier);
+				}
 
-                callback: function(r){
-                	if(r.message){
-                		console.log("item",r);
-                	}
-                }
-			});
-				frappe.msgprint({
-    			title: __('Notification'),
-   				indicator: 'green',
-    			message: __('Document updated successfully')
+				if(values.src_warehouse)
+				{ new_warehouse = values.src_warehouse;
+					console.log("0000000110000000",new_warehouse);
+				}
+				else if (frm.doc.source_warehouse)
+				{
+					new_warehouse = frm.doc.source_warehouse;
+				}
+				else{ new_warehouse = "";
+					console.log("0000000011000000",new_warehouse);
+				}
+
+					frm.call({
+					doc:frm.doc,
+					method: 'split_dp_item',
+					args: {
+							n_transporter : values.transporter,
+							n_qty : values.qty_to_deliver,
+							n_src_warehouse : new_warehouse,
+							n_supplier : new_supplier
+						  },
+
+					callback: function(r){
+						if(r.message){
+							console.log("item",r);
+							frappe.msgprint({
+								title: __('Notification'),
+								indicator: 'green',
+								message: __('Document updated successfully')
+								});
+						}
+						else{
+							frappe.msgprint({
+							title: __('Notification'),
+							indicator: 'red',
+							message: __('Document update failed')
+					});
+						}
+					}
 				});
+
 
 				d.hide();
 				frappe.set_route("Report", "Delivery Planning Item");
