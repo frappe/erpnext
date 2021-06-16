@@ -37,7 +37,6 @@ class AssetRepair(Document):
 
 	def on_submit(self):
 		self.check_repair_status()
-		self.check_for_cost_center()
 
 		if self.stock_consumption or self.capitalize_repair_cost:
 			self.increase_asset_value()
@@ -58,10 +57,6 @@ class AssetRepair(Document):
 			frappe.throw(_("Please enter Stock Items consumed during the Repair."), title=_("Missing Items"))
 		if not self.warehouse:
 			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."), title=_("Missing Warehouse"))
-
-	def check_for_cost_center(self):
-		if not self.cost_center:
-			frappe.throw(_("Please enter Cost Center."))
 
 	def increase_asset_value(self):
 		asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value')
