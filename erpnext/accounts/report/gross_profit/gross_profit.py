@@ -96,7 +96,6 @@ class GrossProfitGenerator(object):
 			item.cogs = item.cogs_per_unit * item.cogs_qty
 
 			self.postprocess_row(item)
-			item.gross_profit_per_unit = item.gross_profit / item.cogs_qty if item.cogs_qty else 0
 
 	def get_grouped_data(self):
 		data = self.data
@@ -132,7 +131,7 @@ class GrossProfitGenerator(object):
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
 		total_fields = [
-			'qty', 'stock_qty', 'cogs',
+			'qty', 'stock_qty', 'cogs_qty', 'cogs',
 			'base_net_amount', 'returned_qty', 'base_returned_amount'
 		]
 
@@ -183,11 +182,14 @@ class GrossProfitGenerator(object):
 			totals['voucher_no'] = "'Total'"
 
 		self.postprocess_row(totals)
+		totals.cogs_per_unit = totals.cogs / totals.cogs_qty if totals.cogs_qty else 0
 		return totals
 
 	def postprocess_row(self, item):
 		item.revenue = item.base_net_amount - flt(item.get('base_returned_amount'))
+		item.revenue_per_unit = item.revenue / item.cogs_qty if item.cogs_qty else 0
 		item.gross_profit = item.revenue - item.cogs
+		item.gross_profit_per_unit = item.gross_profit / item.cogs_qty if item.cogs_qty else 0
 		item.profit_margin = item.gross_profit / item.revenue * 100 if item.revenue else 0
 		item.profit_markup = item.gross_profit / item.cogs * 100 if item.cogs else 0
 
@@ -377,18 +379,18 @@ class GrossProfitGenerator(object):
 				"width": 60
 			},
 			{
-				"label": _("Valuation Rate"),
+				"label": _("Revenue/Unit"),
 				"fieldtype": "Currency",
-				"fieldname": "valuation_rate",
+				"fieldname": "revenue_per_unit",
 				"options": "Company:company:default_currency",
-				"width": 110
+				"width": 100
 			},
 			{
-				"label": _("Cost / Unit"),
+				"label": _("Cost/Unit"),
 				"fieldtype": "Currency",
 				"fieldname": "cogs_per_unit",
 				"options": "Company:company:default_currency",
-				"width": 110
+				"width": 100
 			},
 			{
 				"label": _("Revenue"),
@@ -412,11 +414,11 @@ class GrossProfitGenerator(object):
 				"width": 110
 			},
 			{
-				"label": _("Profit / Unit"),
+				"label": _("Profit/Unit"),
 				"fieldtype": "Currency",
 				"fieldname": "gross_profit_per_unit",
 				"options": "Company:company:default_currency",
-				"width": 110
+				"width": 100
 			},
 			{
 				"label": _("Margin %"),
@@ -429,6 +431,13 @@ class GrossProfitGenerator(object):
 				"fieldtype": "Percent",
 				"fieldname": "profit_markup",
 				"width": 80
+			},
+			{
+				"label": _("Valuation Rate"),
+				"fieldtype": "Currency",
+				"fieldname": "valuation_rate",
+				"options": "Company:company:default_currency",
+				"width": 110
 			},
 			{
 				"label": _("Invoice Qty"),
