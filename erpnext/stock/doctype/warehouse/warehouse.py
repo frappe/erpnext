@@ -146,7 +146,7 @@ class Warehouse(NestedSet):
 			filters={'default_warehouse':self.name}
 		)
 		for name in item_default_names:
-			frappe.get_doc("Item Default", name).delete()
+			frappe.delete_doc("Item Default", name)
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
