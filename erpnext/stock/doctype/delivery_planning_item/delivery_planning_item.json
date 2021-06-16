@@ -26,7 +26,10 @@
   "weight_per_unit",
   "supplier_dc",
   "supplier",
-  "split"
+  "split",
+  "uom",
+  "conversion_factor",
+  "stock_uom"
  ],
  "fields": [
   {
@@ -42,7 +45,8 @@
    "in_list_view": 1,
    "label": "Customer",
    "options": "Customer",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "item_code",
@@ -59,34 +63,38 @@
   },
   {
    "fieldname": "ordered_qty",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Ordered Qty",
    "read_only": 1
   },
   {
    "fieldname": "pending_qty",
-   "fieldtype": "Data",
-   "label": "Pending Qty"
+   "fieldtype": "Float",
+   "label": "Pending Qty",
+   "read_only": 1
   },
   {
    "fieldname": "qty_to_deliver",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty to Deliver"
   },
   {
    "fieldname": "weight_to_deliver",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Weight to Deliver"
+   "label": "Weight to Deliver",
+   "read_only": 1
   },
   {
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sales Order",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "postal_code",
@@ -98,23 +106,28 @@
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Delivery Date"
+   "label": "Delivery Date",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "current_stock",
-   "fieldtype": "Data",
-   "label": "Current Stock "
+   "fieldtype": "Float",
+   "label": "Current Stock ",
+   "read_only": 1
   },
   {
    "fieldname": "available_stock",
-   "fieldtype": "Data",
-   "label": "Available Stock"
+   "fieldtype": "Float",
+   "label": "Available Stock",
+   "read_only": 1
   },
   {
    "fieldname": "related_delivey_planning",
    "fieldtype": "Link",
    "label": "Related Delivery Planning",
-   "options": "Delivery Planning"
+   "options": "Delivery Planning",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_9",
@@ -138,7 +151,7 @@
   {
    "fieldname": "sorce_warehouse",
    "fieldtype": "Link",
-   "label": "Sorce Warehouse",
+   "label": "Source Warehouse",
    "options": "Warehouse"
   },
   {
@@ -148,6 +161,7 @@
    "label": " Supplier delivers to Customer "
   },
   {
+   "depends_on": "eval: doc.supplier_dc == 1",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -157,11 +171,30 @@
    "fieldname": "split",
    "fieldtype": "Button",
    "label": "Split"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "UOM Conversion Factor"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Stock UOM"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-09 15:13:10.871780",
+ "modified": "2021-06-15 16:56:24.518090",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",

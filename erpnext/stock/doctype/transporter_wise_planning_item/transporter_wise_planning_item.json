@@ -21,7 +21,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Transporter",
-   "options": "Supplier"
+   "options": "Supplier",
+   "read_only": 1
   },
   {
    "fieldname": "delivery_date",
@@ -62,7 +63,8 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Transporter Planning Items"
+   "options": "Transporter Planning Items",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_8",
@@ -71,7 +73,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-11 12:07:39.671581",
+ "modified": "2021-06-14 12:47:53.487699",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Transporter Wise Planning Item",
