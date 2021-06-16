@@ -492,6 +492,9 @@ def manage_fee_validity(appointment):
 		if appointment.status == 'Cancelled' and fee_validity.visited > 0:
 			fee_validity.visited -= 1
 			frappe.db.delete('Fee Validity Reference', {'appointment': appointment.name})
+			if fee_validity.visited == 0:
+				frappe.db.delete('Fee Validity', {'name': fee_validity.name})
+				return
 		elif fee_validity.status == 'Completed':
 			return
 		else:

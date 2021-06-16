@@ -219,9 +219,10 @@ def get_appointment_item(appointment_doc, item):
 def cancel_appointment(appointment_id):
 	appointment = frappe.get_doc('Patient Appointment', appointment_id)
 	if appointment.invoiced:
-		sales_invoice = check_sales_invoice_exists(appointment)
+		sales_invoice = frappe.get_doc('Sales Invoice', appointment.ref_sales_invoice)
 		if sales_invoice and cancel_sales_invoice(sales_invoice):
 			msg = _('Appointment {0} and Sales Invoice {1} cancelled').format(appointment.name, sales_invoice.name)
+			manage_fee_validity(appointment)
 		else:
 			msg = _('Appointment Cancelled. Please review and cancel the invoice {0}').format(sales_invoice.name)
 	else:
@@ -239,19 +240,6 @@ def cancel_sales_invoice(sales_invoice):
 			sales_invoice.cancel()
 			return True
 	return False
-
-
-def check_sales_invoice_exists(appointment):
-	sales_invoice = frappe.db.get_value('Sales Invoice Item', {
-		'reference_dt': 'Patient Appointment',
-		'reference_dn': appointment.name
-	}, 'parent')
-
-	if sales_invoice:
-		sales_invoice = frappe.get_doc('Sales Invoice', sales_invoice)
-		return sales_invoice
-	return False
-
 
 @frappe.whitelist()
 def get_availability_data(date, practitioner):
