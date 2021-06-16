@@ -317,7 +317,7 @@ class JobCard(Document):
 						'docstatus': ('!=', 2)}, fields = 'sum(transferred_qty) as qty', group_by='operation_id')
 
 					if job_cards:
-						qty = min([d.qty for d in job_cards])
+						qty = min(d.qty for d in job_cards)
 
 			doc.db_set('material_transferred_for_manufacturing', qty)
 
@@ -433,7 +433,8 @@ def make_material_request(source_name, target_doc=None):
 def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
-		target.conversion_factor = 1
+		if not target.conversion_factor:
+			target.conversion_factor = 1
 
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"

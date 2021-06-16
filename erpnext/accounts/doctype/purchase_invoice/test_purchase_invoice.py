@@ -16,6 +16,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_tra
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -631,7 +632,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(len(pi.get("supplied_items")), 2)
 
-		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
+		rm_supp_cost = sum(d.amount for d in pi.get("supplied_items"))
 		self.assertEqual(flt(pi.get("items")[0].rm_supp_cost, 2), flt(rm_supp_cost, 2))
 
 	def test_rejected_serial_no(self):
@@ -950,6 +951,102 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
+	def test_purchase_invoice_advance_taxes(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
+
+		# create a new supplier to test
+		supplier = create_supplier(supplier_name = '_Test TDS Advance Supplier',
+			tax_withholding_category = 'TDS - 194 - Dividends - Individual')
+
+		# Update tax withholding category with current fiscal year and rate details
+		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
+
+		# Create Purchase Order with TDS applied
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000)
+		po.apply_tds = 1
+		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
+		po.save()
+		po.submit()
+
+		# Update Unrealized Profit / Loss Account which is used as default advance tax account
+		frappe.db.set_value('Company', '_Test Company', 'unrealized_profit_loss_account', '_Test Account Excise Duty - _TC')
+
+		# Create Payment Entry Against the order
+		payment_entry = get_payment_entry(dt='Purchase Order', dn=po.name)
+		payment_entry.paid_from = 'Cash - _TC'
+		payment_entry.save()
+		payment_entry.submit()
+
+		# Check GLE for Payment Entry
+		expected_gle = [
+			['_Test Account Excise Duty - _TC', 3000, 0],
+			['Cash - _TC', 0, 27000],
+			['Creditors - _TC', 27000, 0],
+			['TDS Payable - _TC', 0, 3000],
+		]
+
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry`
+			where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""", (payment_entry.name), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+
+		# Create Purchase Invoice against Purchase Order
+		purchase_invoice = get_mapped_purchase_invoice(po.name)
+		purchase_invoice.allocate_advances_automatically = 1
+		purchase_invoice.items[0].expense_account = '_Test Account Cost for Goods Sold - _TC'
+		purchase_invoice.save()
+		purchase_invoice.submit()
+
+		# Check GLE for Purchase Invoice
+		# Zero net effect on final TDS Payable on invoice
+		expected_gle = [
+			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
+			['_Test Account Excise Duty - _TC', 0, 3000],
+			['Creditors - _TC', 0, 27000],
+			['TDS Payable - _TC', 3000, 3000]
+		]
+
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry`
+			where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", (purchase_invoice.name), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+
+def update_tax_witholding_category(company, account, date):
+	from erpnext.accounts.utils import get_fiscal_year
+
+	fiscal_year = get_fiscal_year(date=date, company=company)
+
+	if not frappe.db.get_value('Tax Withholding Rate',
+		{'parent': 'TDS - 194 - Dividends - Individual', 'fiscal_year': fiscal_year[0]}):
+		tds_category = frappe.get_doc('Tax Withholding Category', 'TDS - 194 - Dividends - Individual')
+		tds_category.append('rates', {
+			'fiscal_year': fiscal_year[0],
+			'tax_withholding_rate': 10,
+			'single_threshold': 2500,
+			'cumulative_threshold': 0
+		})
+		tds_category.save()
+
+	if not frappe.db.get_value('Tax Withholding Account',
+		{'parent': 'TDS - 194 - Dividends - Individual', 'account': account}):
+		tds_category = frappe.get_doc('Tax Withholding Category', 'TDS - 194 - Dividends - Individual')
+		tds_category.append('accounts', {
+			'company': company,
+			'account': account
+		})
+		tds_category.save()
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

@@ -236,7 +236,7 @@ def get_quiz(quiz_name, course):
 			'questions': questions,
 			'activity': None,
 			'is_time_bound': quiz.is_time_bound,
-			'duration':quiz.duration
+			'duration': quiz.duration
 		}
 
 	student = get_current_student()

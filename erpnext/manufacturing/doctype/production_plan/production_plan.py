@@ -96,8 +96,10 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def get_items(self):
+		self.set('po_items', [])
 		if self.get_items_from == "Sales Order":
-			self.get_so_items()
+			self.get_so_items()	
+
 		elif self.get_items_from == "Material Request":
 			self.get_mr_items()
 
@@ -165,9 +167,31 @@ class ProductionPlan(Document):
 		self.calculate_total_planned_qty()
 
 	def add_items(self, items):
-		self.set('po_items', [])
+		refs = {}
 		for data in items:
 			item_details = get_item_details(data.item_code)
+			if self.combine_items:	
+				if item_details.bom_no in refs:
+					refs[item_details.bom_no]['so_details'].append({
+						'sales_order': data.parent,
+						'sales_order_item': data.name, 
+						'qty': data.pending_qty
+					})
+					refs[item_details.bom_no]['qty'] += data.pending_qty
+					continue
+
+				else:
+					refs[item_details.bom_no] = {
+						'qty': data.pending_qty,
+						'po_item_ref': data.name,
+						'so_details': []
+					}
+					refs[item_details.bom_no]['so_details'].append({
+						'sales_order': data.parent,
+						'sales_order_item': data.name, 
+						'qty': data.pending_qty
+					})
+					
 			pi = self.append('po_items', {
 				'include_exploded_items': 1,
 				'warehouse': data.warehouse,
@@ -185,11 +209,28 @@ class ProductionPlan(Document):
 				pi.sales_order = data.parent
 				pi.sales_order_item = data.name
 				pi.description = data.description
-
+					
 			elif self.get_items_from == "Material Request":
 				pi.material_request = data.parent
 				pi.material_request_item = data.name
 				pi.description = data.description
+	
+		if refs:
+			for po_item in self.po_items:
+				po_item.planned_qty = refs[po_item.bom_no]['qty']
+				po_item.pending_qty = refs[po_item.bom_no]['qty']
+				po_item.sales_order = ''
+			self.add_pp_ref(refs)
+
+	def add_pp_ref(self, refs):
+		for bom_no in refs:
+			for so_detail in refs[bom_no]['so_details']:
+				self.append('prod_plan_references', {
+						'item_reference': refs[bom_no]['po_item_ref'],
+						'sales_order': so_detail['sales_order'],
+						'sales_order_item': so_detail['sales_order_item'],
+						'qty': so_detail['qty']
+				})
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
