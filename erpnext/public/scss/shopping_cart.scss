@@ -1,4 +1,3 @@
-@import "frappe/public/scss/desk/variables";
 @import "frappe/public/scss/common/mixins";
 
 body.product-page {
@@ -74,15 +73,6 @@ body.product-page {
 		}
 	}
 
-	// .card-body {
-	// 	text-align: center;
-	// }
-
-	// .featured-item {
-	// 	.card-body {
-	// 		text-align: left;
-	// 	}
-	// }
 	.card-img-container {
 		height: 210px;
 		width: 100%;
@@ -217,12 +207,12 @@ body.product-page {
 		border-color: var(--table-border-color) !important;
 		padding: 15px;
 
-		@include media-breakpoint-between(xs, md) {
+		@media (max-width: var(--md-width)) {
 			height: 300px;
 			width: 300px;
 		}
 
-		@include media-breakpoint-up(lg) {
+		@media (min-width: var(--lg-width)) {
 			height: 350px;
 			width: 350px;
 		}
@@ -233,11 +223,12 @@ body.product-page {
 	}
 
 	.item-slideshow {
-		@include media-breakpoint-between(xs, md) {
+
+		@media (max-width: var(--md-width)) {
 			max-height: 320px;
 		}
 
-		@include media-breakpoint-up(lg) {
+		@media (min-width: var(--lg-width)) {
 			max-height: 430px;
 		}
 
@@ -254,7 +245,7 @@ body.product-page {
 		cursor: pointer;
 
 		&:hover, &.active {
-			border-color: $primary;
+			border-color: var(--primary);
 		}
 	}
 
@@ -316,12 +307,9 @@ body.product-page {
 }
 
 .item-group-slideshow {
-	.item-group-description {
-		// max-width: 900px;
-	}
 
 	.carousel-inner.rounded-carousel {
-		border-radius: $card-border-radius;
+		border-radius: var(--card-border-radius);
 	}
 }
 

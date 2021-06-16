@@ -54,13 +54,24 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$dicount_section = this.$component.find('.discount-section');
 	}
 
-	toggle_item_details_section(item) {
-		const { item_code, batch_no, uom } = this.current_item;
+	has_item_has_changed(item) {
+		const { item_code, batch_no, uom, rate } = this.current_item;
 		const item_code_is_same = item && item_code === item.item_code;
 		const batch_is_same = item && batch_no == item.batch_no;
 		const uom_is_same = item && uom === item.uom;
+		const rate_is_same = item && rate === item.rate;
+		
+		if (!item)
+			return false;
 
-		this.item_has_changed = !item ? false : item_code_is_same && batch_is_same && uom_is_same ? false : true;
+		if (item_code_is_same && batch_is_same && uom_is_same && rate_is_same)
+			return false;
+
+		return true;
+	}
+
+	toggle_item_details_section(item) {
+		this.item_has_changed = this.has_item_has_changed(item);
 
 		this.events.toggle_item_selector(this.item_has_changed);
 		this.toggle_component(this.item_has_changed);
@@ -72,11 +83,12 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.item_row = item;
 			this.currency = this.events.get_frm().doc.currency;
 
-			this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom };
+			this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom, rate: item.rate };
 
 			this.render_dom(item);
 			this.render_discount_dom(item);
 			this.render_form(item);
+			this.events.highlight_cart_item(item);
 		} else {
 			this.validate_serial_batch_item();
 			this.current_item = {};
@@ -121,11 +133,22 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
 		if (image) {
-			this.$item_image.html(`<img src="${image}" alt="${image}">`);
+			this.$item_image.html(
+				`<img 
+					onerror="cur_pos.item_details.handle_broken_image(this)"
+					class="h-full" src="${image}"
+					alt="${frappe.get_abbr(item_name)}"
+					style="object-fit: cover;">`
+			);
 		} else {
 			this.$item_image.html(`<div class="item-abbr">${frappe.get_abbr(item_name)}</div>`);
 		}
 
+	}
+
+	handle_broken_image($img) {
+		const item_abbr = $($img).attr('alt');
+		$($img).replaceWith(`<div class="item-abbr">${item_abbr}</div>`);
 	}
 
 	render_discount_dom(item) {
@@ -198,12 +221,14 @@ erpnext.PointOfSale.ItemDetails = class {
 			if (this.allow_rate_change) {
 				this.rate_control.df.onchange = function() {
 					if (this.value || flt(this.value) === 0) {
+						me.events.set_value_in_current_cart_item('rate', this.value);
 						me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
 							const item_row = frappe.get_doc(me.doctype, me.name);
 							const doc = me.events.get_frm().doc;
 							me.$item_price.html(format_currency(item_row.rate, doc.currency));
 							me.render_discount_dom(item_row);
 						});
+						me.current_item.rate = this.value;
 					}
 				};
 			} else {
@@ -292,11 +317,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		frappe.model.on("POS Invoice Item", "*", (fieldname, value, item_row) => {
 			const field_control = this[`${fieldname}_control`];
-			const { item_code, batch_no, uom } = this.current_item;
-			const item_code_is_same = item_code === item_row.item_code;
-			const batch_is_same = batch_no == item_row.batch_no;
-			const uom_is_same = uom === item_row.uom;
-			const item_is_same = item_code_is_same && batch_is_same && uom_is_same ? true : false;
+			const item_is_same = !this.has_item_has_changed(item_row);
 
 			if (item_is_same && field_control && field_control.get_value() !== value) {
 				field_control.set_value(value);
