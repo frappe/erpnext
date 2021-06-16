@@ -170,6 +170,7 @@
    "fieldname": "stock_items",
    "fieldtype": "Table",
    "label": "Stock Items",
+   "mandatory_depends_on": "stock_consumption",
    "options": "Stock Item"
   },
   {
@@ -218,6 +219,7 @@
    "label": "Total Repair Cost"
   },
   {
+   "depends_on": "stock_consumption",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
@@ -245,7 +247,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-16 07:01:28.217619",
+ "modified": "2021-06-16 07:52:49.438800",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
