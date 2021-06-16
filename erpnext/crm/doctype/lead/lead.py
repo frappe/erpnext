@@ -21,14 +21,6 @@ class Lead(SellingController):
 		self.get("__onload").is_customer = customer
 		load_address_and_contact(self)
 
-	def before_insert(self):
-		if self.address_title and self.address_type:
-			self.address_doc = self.create_address()
-		self.contact_doc = self.create_contact()
-
-	def after_insert(self):
-		self.update_links()
-
 	def validate(self):
 		self.set_lead_name()
 		self.set_title()
@@ -120,84 +112,10 @@ class Lead(SellingController):
 				self.lead_name = self.email_id.split("@")[0]
 
 	def set_title(self):
-		if self.organization_lead:
+		if self.company_name:
 			self.title = self.company_name
 		else:
 			self.title = self.lead_name
-
-	def create_address(self):
-		address_fields = ["address_type", "address_title", "address_line1", "address_line2",
-			"city", "county", "state", "country", "pincode"]
-		info_fields = ["email_id", "phone", "fax"]
-
-		# do not create an address if no fields are available,
-		# skipping country since the system auto-sets it from system defaults
-		address = frappe.new_doc("Address")
-
-		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
-		address.update({info_field: self.get(info_field) for info_field in info_fields})
-		address.insert()
-
-		return address
-
-	def create_contact(self):
-		if not self.lead_name:
-			self.set_lead_name()
-
-		names = self.lead_name.strip().split(" ")
-		if len(names) > 1:
-			first_name, last_name = names[0], " ".join(names[1:])
-		else:
-			first_name, last_name = self.lead_name, None
-
-		contact = frappe.new_doc("Contact")
-		contact.update({
-			"first_name": first_name,
-			"last_name": last_name,
-			"salutation": self.salutation,
-			"gender": self.gender,
-			"designation": self.designation,
-		})
-
-		if self.email_id:
-			contact.append("email_ids", {
-				"email_id": self.email_id,
-				"is_primary": 1
-			})
-
-		if self.phone:
-			contact.append("phone_nos", {
-				"phone": self.phone,
-				"is_primary": 1
-			})
-
-		if self.mobile_no:
-			contact.append("phone_nos", {
-				"phone": self.mobile_no
-			})
-
-		contact.insert(ignore_permissions=True)
-
-		return contact
-
-	def update_links(self):
-		# update address links
-		if hasattr(self, 'address_doc'):
-			self.address_doc.append("links", {
-				"link_doctype": "Lead",
-				"link_name": self.name,
-				"link_title": self.lead_name
-			})
-			self.address_doc.save()
-
-		# update contact links
-		if self.contact_doc:
-			self.contact_doc.append("links", {
-				"link_doctype": "Lead",
-				"link_name": self.name,
-				"link_title": self.lead_name
-			})
-			self.contact_doc.save()
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):

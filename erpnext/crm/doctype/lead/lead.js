@@ -68,11 +68,6 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		})
 	}
 
-	organization_lead () {
-		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
-		this.frm.toggle_reqd("company_name", this.frm.doc.organization_lead);
-	}
-
 	company_name () {
 		if (this.frm.doc.organization_lead && !this.frm.doc.lead_name) {
 			this.frm.set_value("lead_name", this.frm.doc.company_name);

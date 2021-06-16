@@ -9,30 +9,32 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
-  "organization_lead",
   "lead_details",
   "naming_series",
-  "lead_name",
-  "company_name",
-  "email_id",
-  "col_break123",
-  "lead_owner",
-  "status",
   "salutation",
+  "first_name",
+  "middle_name",
+  "last_name",
+  "lead_name",
+  "email_id",
+  "mobile_no",
+  "phone",
+  "col_break123",
+  "status",
+  "company_name",
   "designation",
   "gender",
-  "source",
-  "customer",
-  "campaign_name",
-  "image",
-  "section_break_12",
-  "contact_by",
-  "column_break_14",
-  "contact_date",
-  "ends_on",
-  "notes_section",
-  "notes",
-  "address_info",
+  "additional_information_section",
+  "no_of_employees",
+  "industry",
+  "market_segment",
+  "type",
+  "request_type",
+  "column_break_22",
+  "whatsapp_no",
+  "fax",
+  "website",
+  "address_section",
   "address_html",
   "address_type",
   "address_title",
@@ -45,35 +47,33 @@
   "state",
   "country",
   "pincode",
-  "contact_section",
-  "phone",
-  "mobile_no",
-  "fax",
-  "website",
-  "more_info",
-  "type",
-  "market_segment",
-  "industry",
-  "request_type",
-  "column_break3",
+  "section_break_12",
+  "lead_owner",
+  "ends_on",
+  "column_break_14",
+  "contact_by",
+  "contact_date",
+  "lead_source_details_section",
   "company",
   "territory",
   "language",
+  "column_break_50",
+  "source",
+  "campaign_name",
   "unsubscribed",
   "blog_subscriber",
+  "notes_section",
+  "notes",
+  "other_information_section",
+  "customer",
+  "image",
   "title"
  ],
  "fields": [
   {
-   "default": "0",
-   "fieldname": "organization_lead",
-   "fieldtype": "Check",
-   "label": "Lead is an Organization",
-   "set_only_once": 1
-  },
-  {
    "fieldname": "lead_details",
    "fieldtype": "Section Break",
+   "label": "Lead Details",
    "options": "fa fa-user"
   },
   {
@@ -90,7 +90,8 @@
    "fieldname": "lead_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Person Name",
+   "label": "Full Name",
+   "mandatory_depends_on": "eval: !(doc.company_name)",
    "oldfieldname": "lead_name",
    "oldfieldtype": "Data",
    "search_index": 1
@@ -99,7 +100,9 @@
    "fieldname": "company_name",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Organization Name",
+   "mandatory_depends_on": "eval: !(doc.lead_name)",
    "oldfieldname": "company_name",
    "oldfieldtype": "Data"
   },
@@ -121,7 +124,6 @@
    "default": "__user",
    "fieldname": "lead_owner",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Lead Owner",
    "oldfieldname": "lead_owner",
    "oldfieldtype": "Link",
@@ -241,46 +243,39 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "description": "Home, Work, etc.",
    "fieldname": "address_title",
    "fieldtype": "Data",
    "label": "Address Title"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "address_line1",
    "fieldtype": "Data",
    "label": "Address Line 1",
    "mandatory_depends_on": "eval: doc.address_title && doc.address_type"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "address_line2",
    "fieldtype": "Data",
    "label": "Address Line 2"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "city",
    "fieldtype": "Data",
    "label": "City/Town",
    "mandatory_depends_on": "eval: doc.address_title && doc.address_type"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "county",
    "fieldtype": "Data",
    "label": "County"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "state",
    "fieldtype": "Data",
    "label": "State"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
@@ -288,7 +283,7 @@
    "options": "Country"
   },
   {
-   "depends_on": "eval: doc.__islocal",
+   "collapsible_depends_on": "eval: doc.__islocal",
    "fieldname": "pincode",
    "fieldtype": "Data",
    "label": "Postal Code"
@@ -330,14 +325,6 @@
    "oldfieldtype": "Data"
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text"
-  },
-  {
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Lead Type",
@@ -370,12 +357,6 @@
    "options": "\nProduct Enquiry\nRequest for Information\nSuggestions\nOther"
   },
   {
-   "fieldname": "column_break3",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -389,11 +370,14 @@
    "fieldtype": "Data",
    "label": "Website",
    "oldfieldname": "website",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "URL"
   },
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Territory",
    "oldfieldname": "territory",
    "oldfieldtype": "Link",
@@ -422,28 +406,13 @@
   {
    "fieldname": "designation",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Designation",
    "options": "Designation"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.__islocal",
-   "fieldname": "address_info",
-   "fieldtype": "Section Break",
-   "label": "Address & Contact",
-   "oldfieldtype": "Column Break",
-   "options": "fa fa-map-marker"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.__islocal",
-   "fieldname": "contact_section",
-   "fieldtype": "Section Break",
-   "label": "Contact"
-  },
-  {
    "default": "Billing",
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "address_type",
    "fieldtype": "Select",
    "label": "Address Type",
@@ -454,13 +423,70 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_information_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "no_of_employees",
+   "fieldtype": "Int",
+   "label": "No. of Employees"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "whatsapp_no",
+   "fieldtype": "Data",
+   "label": "WhatsApp No.",
+   "options": "Phone"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "address_section",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "lead_source_details_section",
+   "fieldtype": "Section Break",
+   "label": "Lead Source Details"
+  },
+  {
+   "fieldname": "column_break_50",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_information_section",
+   "fieldtype": "Section Break",
+   "label": "Other Information"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2021-01-06 19:39:58.748978",
+ "modified": "2021-06-17 00:20:37.768449",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
