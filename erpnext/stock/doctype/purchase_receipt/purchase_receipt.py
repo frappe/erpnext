@@ -287,11 +287,7 @@ class PurchaseReceipt(BuyingController):
 							continue
 
 					self.add_gl_entry(gl_entries, warehouse_account_name, d.cost_center, stock_value_diff, 0.0, remarks,
-						stock_rbnb, account_currency=warehouse_account_currency, item=d)
-					print("*"* 30)
-					print(1)
-					print("warehouse_account_name: ", warehouse_account_name)
-					print("")					
+						stock_rbnb, account_currency=warehouse_account_currency, item=d)					
 
 					# GL Entry for from warehouse or Stock Received but not billed
 					# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
