@@ -96,7 +96,7 @@ class StockReconciliation(StockController):
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
-			return _("Row # {0}: ").format(row_num+1) + msg
+			return _("Row # {0}:").format(row_num+1) + " " + msg
 
 		self.validation_messages = []
 		item_warehouse_combinations = []
@@ -167,8 +167,8 @@ class StockReconciliation(StockController):
 			item = frappe.get_doc("Item", item_code)
 
 			# end of life and stock item
-			validate_end_of_life(item_code, item.end_of_life, item.disabled, verbose=0)
-			validate_is_stock_item(item_code, item.is_stock_item, verbose=0)
+			validate_end_of_life(item_code, item.end_of_life, item.disabled)
+			validate_is_stock_item(item_code, item.is_stock_item)
 
 			# item should not be serialized
 			if item.has_serial_no and not row.serial_no and not item.serial_no_series:
@@ -179,10 +179,10 @@ class StockReconciliation(StockController):
 				raise frappe.ValidationError(_("Batch no is required for batched item {0}").format(item_code))
 
 			# docstatus should be < 2
-			validate_cancelled_item(item_code, item.docstatus, verbose=0)
+			validate_cancelled_item(item_code, item.docstatus)
 
 		except Exception as e:
-			self.validation_messages.append(_("Row # ") + ("%d: " % (row.idx)) + cstr(e))
+			self.validation_messages.append(_("Row #") + " " + ("%d: " % (row.idx)) + cstr(e))
 
 	def update_stock_ledger(self):
 		"""	find difference between current and expected entries
@@ -477,19 +477,19 @@ class StockReconciliation(StockController):
 def get_items(warehouse, posting_date, posting_time, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 	items = frappe.db.sql("""
-		select i.name, i.item_name, bin.warehouse
+		select i.name, i.item_name, bin.warehouse, i.has_serial_no
 		from tabBin bin, tabItem i
 		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
-		and i.has_variants = 0 and i.has_serial_no = 0 and i.has_batch_no = 0
+		and i.has_variants = 0 and i.has_batch_no = 0
 		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
 	""", (lft, rgt))
 
 	items += frappe.db.sql("""
-		select i.name, i.item_name, id.default_warehouse
+		select i.name, i.item_name, id.default_warehouse, i.has_serial_no
 		from tabItem i, `tabItem Default` id
 		where i.name = id.parent
 			and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse)
-			and i.is_stock_item = 1 and i.has_serial_no = 0 and i.has_batch_no = 0
+			and i.is_stock_item = 1 and i.has_batch_no = 0
 			and i.has_variants = 0 and i.disabled = 0 and id.company=%s
 		group by i.name
 	""", (lft, rgt, company))
@@ -497,7 +497,7 @@ def get_items(warehouse, posting_date, posting_time, company):
 	res = []
 	for d in set(items):
 		stock_bal = get_stock_balance(d[0], d[2], posting_date, posting_time,
-			with_valuation_rate=True)
+			with_valuation_rate=True , with_serial_no=cint(d[3]))
 
 		if frappe.db.get_value("Item", d[0], "disabled") == 0:
 			res.append({
@@ -507,7 +507,9 @@ def get_items(warehouse, posting_date, posting_time, company):
 				"item_name": d[1],
 				"valuation_rate": stock_bal[1],
 				"current_qty": stock_bal[0],
-				"current_valuation_rate": stock_bal[1]
+				"current_valuation_rate": stock_bal[1],
+				"current_serial_no": stock_bal[2] if cint(d[3]) else '',
+				"serial_no": stock_bal[2] if cint(d[3]) else ''
 			})
 
 	return res

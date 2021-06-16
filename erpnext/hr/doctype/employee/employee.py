@@ -37,7 +37,7 @@ class Employee(NestedSet):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
+		validate_status(self.status, ["Active", "Inactive", "Left"])
 
 		self.employee = self.name
 		self.set_employee_name()
@@ -478,7 +478,7 @@ def get_employee_emails(employee_list):
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
 
-	filters = [['status', '!=', 'Left']]
+	filters = [['status', '=', 'Active']]
 	if company and company != 'All Companies':
 		filters.append(['company', '=', company])
 
