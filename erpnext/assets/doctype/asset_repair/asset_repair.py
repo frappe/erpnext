@@ -76,7 +76,7 @@ class AssetRepair(Document):
 		stock_entry = frappe.get_doc({
 			"doctype": "Stock Entry",
 			"stock_entry_type": "Material Issue",
-			"company": frappe.get_value('Asset', self.asset, "company")
+			"company": self.company
 		})
 
 		for stock_item in self.stock_items:
@@ -103,8 +103,7 @@ class AssetRepair(Document):
 
 	def get_gl_entries(self):
 		gl_entry = []
-		company = frappe.db.get_value('Asset', self.asset, 'company')
-		repair_and_maintenance_account = frappe.db.get_value('Company', company, 'repair_and_maintenance_account')
+		repair_and_maintenance_account = frappe.db.get_value('Company', self.company, 'repair_and_maintenance_account')
 		fixed_asset_account = self.get_fixed_asset_account()
 		expense_account = frappe.get_doc('Purchase Invoice', self.purchase_invoice).items[0].expense_account	
 
@@ -118,7 +117,7 @@ class AssetRepair(Document):
 			"voucher_no": self.name,
 			"cost_center": self.cost_center,
 			"posting_date": getdate(),
-			"company": company
+			"company": self.company
 		})
 		gl_entry.insert()
 		gl_entry = frappe.get_doc({
@@ -133,15 +132,14 @@ class AssetRepair(Document):
 			"posting_date": getdate(),
 			"against_voucher_type": "Purchase Invoice",
 			"against_voucher": self.purchase_invoice,
-			"company": company
+			"company": self.company
 		})
 		gl_entry.insert()
 
 	def get_fixed_asset_account(self):
 		asset_category = frappe.get_doc('Asset Category', frappe.db.get_value('Asset', self.asset, 'asset_category'))
-		company = frappe.db.get_value('Asset', self.asset, 'company')
 		for account in asset_category.accounts:
-			if account.company_name == company:
+			if account.company_name == self.company:
 				return account.fixed_asset_account
 
 	def modify_depreciation_schedule(self):

@@ -11,6 +11,7 @@
   "naming_series",
   "column_break_2",
   "asset_name",
+  "company",
   "section_break_5",
   "failure_date",
   "repair_status",
@@ -242,12 +243,19 @@
    "fieldtype": "Link",
    "label": "Purchase Invoice",
    "options": "Purchase Invoice"
+  },
+  {
+   "fetch_from": "asset.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-16 07:52:49.438800",
+ "modified": "2021-06-16 08:02:34.782990",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
