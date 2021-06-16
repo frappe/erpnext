@@ -247,6 +247,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(pi.name, voucher_no)
 
+		exchange_gain_loss_amount = frappe.get_value('GL Entry', gl_entries[0]['name'], 'debit')
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+
+		self.assertEqual(exchange_gain_loss_amount, discrepancy_caused_by_exchange_rate_diff)
+
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
