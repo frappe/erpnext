@@ -71,6 +71,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "completion_date",
    "fieldtype": "Datetime",
    "label": "Completion Date"
@@ -78,6 +79,7 @@
   {
    "allow_on_submit": 1,
    "default": "Pending",
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "repair_status",
    "fieldtype": "Select",
    "label": "Repair Status",
@@ -154,6 +156,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "capitalize_repair_cost",
    "fieldtype": "Check",
    "label": "Capitalize Repair Cost"
@@ -196,6 +199,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "stock_consumption",
    "fieldtype": "Check",
    "label": "Stock Consumed During Repair"
@@ -230,6 +234,7 @@
    "label": "Increase In Asset Life(Months)"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
@@ -239,8 +244,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-15 10:34:00.839353",
- "title_field": "asset_name",
+ "modified": "2021-06-16 07:01:28.217619",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
@@ -279,6 +283,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "asset_name",
  "track_changes": 1,
  "track_seen": 1
 }
