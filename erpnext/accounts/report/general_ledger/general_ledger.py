@@ -223,17 +223,8 @@ def get_conditions(filters):
 	conditions = []
 
 	if filters.get("account") and not filters.get("include_dimensions"):
-		account_conditions = "account in (select name from tabAccount where"
-		for account in filters["account"]:
-			lft, rgt = frappe.db.get_value("Account", account, ["lft", "rgt"])
-			account_conditions += """ (lft>=%s and rgt<=%s) """ % (lft, rgt)
-
-			# so that the OR doesn't get added to the last account condition
-			if account != filters["account"][-1]:
-				account_conditions += "OR"
-		
-		account_conditions += "and docstatus<2)"
-		conditions.append(account_conditions)
+		filters.account = get_accounts_with_children(filters.account)
+		conditions.append("account in %(account)s")
 
 	if filters.get("cost_center"):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
@@ -291,6 +282,20 @@ def get_conditions(filters):
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
+def get_accounts_with_children(accounts):
+	if not isinstance(accounts, list):
+		accounts = [d.strip() for d in accounts.strip().split(',') if d]
+
+	all_accounts = []
+	for d in accounts:
+		if frappe.db.exists("Account", d):
+			lft, rgt = frappe.db.get_value("Account", d, ["lft", "rgt"])
+			children = frappe.get_all("Account", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+			all_accounts += [c.name for c in children]
+		else:
+			frappe.throw(_("Account: {0} does not exist").format(d))
+
+	return list(set(all_accounts))
 
 def get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries):
 	data = []
