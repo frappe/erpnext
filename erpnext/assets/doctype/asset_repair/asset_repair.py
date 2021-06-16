@@ -9,8 +9,9 @@ from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
 from frappe.model.document import Document
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.controllers.accounts_controller import AccountsController
 
-class AssetRepair(Document):
+class AssetRepair(AccountsController):
 	def validate(self):
 		if self.repair_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Repair"))
@@ -94,39 +95,56 @@ class AssetRepair(Document):
 			make_gl_entries(gl_entries, cancel)
 
 	def get_gl_entries(self):
-		gl_entry = []
+		gl_entries = []
 		repair_and_maintenance_account = frappe.db.get_value('Company', self.company, 'repair_and_maintenance_account')
 		fixed_asset_account = get_asset_account("fixed_asset_account", asset=self.asset, company=self.company)
 		expense_account = frappe.get_doc('Purchase Invoice', self.purchase_invoice).items[0].expense_account	
 
-		gl_entry = frappe.get_doc({
-			"doctype": "GL Entry",
-			"account": expense_account,
-			"credit": self.total_repair_cost,
-			"credit_in_account_currency": self.total_repair_cost,
-			"against": repair_and_maintenance_account,
-			"voucher_type": self.doctype,		
-			"voucher_no": self.name,
-			"cost_center": self.cost_center,
-			"posting_date": getdate(),
-			"company": self.company
-		})
-		gl_entry.insert()
-		gl_entry = frappe.get_doc({
-			"doctype": "GL Entry",
-			"account": fixed_asset_account,
-			"debit": self.total_repair_cost,
-			"debit_in_account_currency": self.total_repair_cost,
-			"against": expense_account,
-			"voucher_type": self.doctype,
-			"voucher_no": self.name,
-			"cost_center": self.cost_center,
-			"posting_date": getdate(),
-			"against_voucher_type": "Purchase Invoice",
-			"against_voucher": self.purchase_invoice,
-			"company": self.company
-		})
-		gl_entry.insert()
+		gl_entries.append(
+			self.get_gl_dict({
+				"account": expense_account,
+				"credit": self.repair_cost,
+				"credit_in_account_currency": self.repair_cost,
+				"against": repair_and_maintenance_account,
+				"voucher_type": self.doctype,		
+				"voucher_no": self.name,
+				"cost_center": self.cost_center,
+				"posting_date": getdate(),
+				"company": self.company
+			}, item=self)
+		)
+
+		gl_entries.append(
+			self.get_gl_dict({
+				"account": expense_account,
+				"credit": self.total_repair_cost - self.repair_cost,
+				"credit_in_account_currency": self.total_repair_cost - self.repair_cost,
+				"against": repair_and_maintenance_account,
+				"voucher_type": self.doctype,		
+				"voucher_no": self.name,
+				"cost_center": self.cost_center,
+				"posting_date": getdate(),
+				"company": self.company
+			}, item=self)
+		)
+
+		gl_entries.append(
+			self.get_gl_dict({
+				"account": fixed_asset_account,
+				"debit": self.total_repair_cost,
+				"debit_in_account_currency": self.total_repair_cost,
+				"against": expense_account,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"cost_center": self.cost_center,
+				"posting_date": getdate(),
+				"against_voucher_type": "Purchase Invoice",
+				"against_voucher": self.purchase_invoice,
+				"company": self.company
+			}, item=self)
+		)
+
+		return gl_entries
 
 	def modify_depreciation_schedule(self):
 		if self.increase_in_asset_life:
