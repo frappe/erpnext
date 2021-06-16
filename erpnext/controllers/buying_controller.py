@@ -181,8 +181,8 @@ class BuyingController(StockController):
 				stock_and_asset_items_amount += flt(d.base_net_amount)
 				last_item_idx = d.idx
 
-		total_valuation_amount = sum([flt(d.base_tax_amount_after_discount_amount) for d in self.get("taxes")
-			if d.category in ["Valuation", "Valuation and Total"]])
+		total_valuation_amount = sum(flt(d.base_tax_amount_after_discount_amount) for d in self.get("taxes")
+			if d.category in ["Valuation", "Valuation and Total"])
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get("items")):
@@ -325,7 +325,7 @@ class BuyingController(StockController):
 	def update_raw_materials_supplied_based_on_stock_entries(self):
 		self.set('supplied_items', [])
 
-		purchase_orders = set([d.purchase_order for d in self.items])
+		purchase_orders = set(d.purchase_order for d in self.items)
 
 		# qty of raw materials backflushed (for each item per purchase order)
 		backflushed_raw_materials_map = get_backflushed_subcontracted_raw_materials(purchase_orders)
@@ -838,9 +838,10 @@ class BuyingController(StockController):
 		if not self.get("items"):
 			return
 
-		earliest_schedule_date = min([d.schedule_date for d in self.get("items")])
-		if earliest_schedule_date:
-			self.schedule_date = earliest_schedule_date
+		if any(d.schedule_date for d in self.get("items")):
+			# Select earliest schedule_date.
+			self.schedule_date = min(d.schedule_date for d in self.get("items")
+							if d.schedule_date is not None)
 
 		if self.schedule_date:
 			for d in self.get('items'):

@@ -62,6 +62,7 @@ class RequestforQuotation(BuyingController):
 		for supplier in self.suppliers:
 			supplier.email_sent = 0
 			supplier.quote_status = 'Pending'
+		self.send_to_supplier()
 
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
@@ -81,7 +82,7 @@ class RequestforQuotation(BuyingController):
 	def send_to_supplier(self):
 		"""Sends RFQ mail to involved suppliers."""
 		for rfq_supplier in self.suppliers:
-			if rfq_supplier.send_email:
+			if rfq_supplier.email_id is not None and rfq_supplier.send_email:
 				self.validate_email_id(rfq_supplier)
 
 				# make new user if required
@@ -390,7 +391,7 @@ def get_item_from_material_requests_based_on_supplier(source_name, target_doc = 
 def get_supplier_tag():
 	if not frappe.cache().hget("Supplier", "Tags"):
 		filters = {"document_type": "Supplier"}
-		tags = list(set([tag.tag for tag in frappe.get_all("Tag Link", filters=filters, fields=["tag"]) if tag]))
+		tags = list(set(tag.tag for tag in frappe.get_all("Tag Link", filters=filters, fields=["tag"]) if tag))
 		frappe.cache().hset("Supplier", "Tags", tags)
 
 	return frappe.cache().hget("Supplier", "Tags")

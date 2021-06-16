@@ -28,7 +28,7 @@ class TestHomepageSection(unittest.TestCase):
 		set_request(method='GET', path='home')
 		response = render()
 
-		self.assertEquals(response.status_code, 200)
+		self.assertEqual(response.status_code, 200)
 
 		html = frappe.safe_decode(response.get_data())
 
@@ -61,7 +61,7 @@ class TestHomepageSection(unittest.TestCase):
 		set_request(method='GET', path='home')
 		response = render()
 
-		self.assertEquals(response.status_code, 200)
+		self.assertEqual(response.status_code, 200)
 
 		html = frappe.safe_decode(response.get_data())
 

@@ -35,3 +35,10 @@ __('You have' + 'subscribers in your mailing list.')
 // ruleid: frappe-translation-js-splitting
 __('You have {0} subscribers' +
     'in your mailing list', [subscribers.length])
+
+// ok: frappe-translation-js-splitting
+__("Ctrl+Enter to add comment")
+
+// ruleid: frappe-translation-js-splitting
+__('You have {0} subscribers \
+    in your mailing list', [subscribers.length])

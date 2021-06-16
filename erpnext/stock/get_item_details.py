@@ -79,7 +79,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
-		out.update(get_pos_profile_item_details(args.company, args))
+		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
 
 	if (args.get("doctype") == "Material Request" and
 		args.get("material_request_type") == "Material Transfer"):
@@ -436,18 +436,22 @@ def get_barcode_data(items_list):
 	return itemwise_barcode
 
 @frappe.whitelist()
-def get_item_tax_info(company, tax_category, item_codes):
+def get_item_tax_info(company, tax_category, item_codes, item_rates=None):
 	out = {}
 	if isinstance(item_codes, string_types):
 		item_codes = json.loads(item_codes)
 
+	if isinstance(item_rates, string_types):
+		item_rates = json.loads(item_rates)
+
 	for item_code in item_codes:
-		if not item_code or item_code in out:
+		if not item_code or item_code[1] in out:
 			continue
-		out[item_code] = {}
-		item = frappe.get_cached_doc("Item", item_code)
-		get_item_tax_template({"company": company, "tax_category": tax_category}, item, out[item_code])
-		out[item_code]["item_tax_rate"] = get_item_tax_map(company, out[item_code].get("item_tax_template"), as_json=True)
+		out[item_code[1]] = {}
+		item = frappe.get_cached_doc("Item", item_code[0])
+		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates[item_code[1]]}
+		get_item_tax_template(args, item, out[item_code[1]])
+		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(company, out[item_code[1]].get("item_tax_template"), as_json=True)
 
 	return out
 
@@ -470,18 +474,21 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-def _get_item_tax_template(args, taxes, out={}, for_validate=False):
+def _get_item_tax_template(args, taxes, out=None, for_validate=False):
+	if out is None:
+		out = {}
 	taxes_with_validity = []
 	taxes_with_no_validity = []
 
 	for tax in taxes:
 		tax_company = frappe.get_value("Item Tax Template", tax.item_tax_template, 'company')
-		if tax.valid_from and tax_company == args['company']:
+		if (tax.valid_from or tax.maximum_net_rate) and tax_company == args['company']:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
 			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
 
-			if getdate(tax.valid_from) <= getdate(validation_date):
+			if getdate(tax.valid_from) <= getdate(validation_date) \
+				and is_within_valid_range(args, tax):
 				taxes_with_validity.append(tax)
 		else:
 			if tax_company == args['company']:
@@ -500,11 +507,24 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	if not taxes_with_validity and (not taxes_with_no_validity):
 		return None
 
+	# do not change if already a valid template
+	if args.get('item_tax_template') in taxes:
+		return args.get('item_tax_template')
+
 	for tax in taxes:
 		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
 			out["item_tax_template"] = tax.item_tax_template
 			return tax.item_tax_template
 	return None
+
+def is_within_valid_range(args, tax):
+	if not flt(tax.maximum_net_rate):
+		# No range specified, just ignore
+		return True
+	elif flt(tax.minimum_net_rate) <= flt(args.get('net_rate')) <= flt(tax.maximum_net_rate):
+		return True
+
+	return False
 
 @frappe.whitelist()
 def get_item_tax_map(company, item_tax_template, as_json=True):
@@ -933,10 +953,10 @@ def get_bin_details(item_code, warehouse, company=None):
 	return bin_details
 
 def get_company_total_stock(item_code, company):
-	return frappe.db.sql("""SELECT sum(actual_qty) from 
-		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name) 
-		WHERE `tabWarehouse`.company = '{0}' and `tabBin`.item_code = '{1}'"""
-		.format(company, item_code))[0][0]
+	return frappe.db.sql("""SELECT sum(actual_qty) from
+		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name)
+		WHERE `tabWarehouse`.company = %s and `tabBin`.item_code = %s""",
+		(company, item_code))[0][0]
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
