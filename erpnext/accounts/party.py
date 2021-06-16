@@ -457,7 +457,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":
-			if frappe.db.get_value("Employee", party_name, "status") == "Left":
+			if frappe.db.get_value("Employee", party_name, "status") != "Active":
 				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
 
 def get_timeline_data(doctype, name):

@@ -20,9 +20,9 @@ from frappe.utils import cint, flt, get_link_to_form, getdate, today, fmt_money
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
 apply_on_table = {
-    'Item Code': 'items',
-    'Item Group': 'item_groups',
-    'Brand': 'brands'
+	'Item Code': 'items',
+	'Item Group': 'item_groups',
+	'Brand': 'brands'
 }
 
 def get_pricing_rules(args, doc=None):
@@ -183,7 +183,7 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 			condition = "ifnull({table}.{field}, '') in ({parent_groups})".format(
 				table=table,
 				field=field,
-				parent_groups=", ".join([frappe.db.escape(d) for d in parent_groups])
+				parent_groups=", ".join(frappe.db.escape(d) for d in parent_groups)
 			)
 
 			frappe.flags.tree_conditions[key] = condition
@@ -264,7 +264,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 
 	# find pricing rule with highest priority
 	if pricing_rules:
-		max_priority = max([cint(p.priority) for p in pricing_rules])
+		max_priority = max(cint(p.priority) for p in pricing_rules)
 		if max_priority:
 			pricing_rules = list(filter(lambda x: cint(x.priority)==max_priority, pricing_rules))
 
@@ -272,14 +272,14 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 		pricing_rules = list(pricing_rules)
 
 	if len(pricing_rules) > 1:
-		rate_or_discount = list(set([d.rate_or_discount for d in pricing_rules]))
+		rate_or_discount = list(set(d.rate_or_discount for d in pricing_rules))
 		if len(rate_or_discount) == 1 and rate_or_discount[0] == "Discount Percentage":
 			pricing_rules = list(filter(lambda x: x.for_price_list==args.price_list, pricing_rules)) \
 				or pricing_rules
 
 	if len(pricing_rules) > 1 and not args.for_shopping_cart:
 		frappe.throw(_("Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}")
-			.format("\n".join([d.name for d in pricing_rules])), MultiplePricingRuleConflict)
+			.format("\n".join(d.name for d in pricing_rules)), MultiplePricingRuleConflict)
 	elif pricing_rules:
 		return pricing_rules[0]
 
@@ -541,7 +541,7 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
 	if pricing_rule_args:
-		items = tuple([(d.item_code, d.pricing_rules) for d in doc.items if d.is_free_item])
+		items = tuple((d.item_code, d.pricing_rules) for d in doc.items if d.is_free_item)
 
 		for args in pricing_rule_args:
 			if not items or (args.get('item_code'), args.get('pricing_rules')) not in items:

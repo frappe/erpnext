@@ -184,7 +184,8 @@ erpnext.PointOfSale.ItemCart = class {
 			const item_code = unescape($cart_item.attr('data-item-code'));
 			const batch_no = unescape($cart_item.attr('data-batch-no'));
 			const uom = unescape($cart_item.attr('data-uom'));
-			me.events.cart_item_clicked(item_code, batch_no, uom);
+			const rate = unescape($cart_item.attr('data-rate'));
+			me.events.cart_item_clicked(item_code, batch_no, uom, rate);
 			this.numpad_value = '';
 		});
 
@@ -520,15 +521,25 @@ erpnext.PointOfSale.ItemCart = class {
 		}
 	}
 
-	get_cart_item({ item_code, batch_no, uom }) {
+	get_cart_item({ item_code, batch_no, uom, rate }) {
 		const batch_attr = `[data-batch-no="${escape(batch_no)}"]`;
 		const item_code_attr = `[data-item-code="${escape(item_code)}"]`;
 		const uom_attr = `[data-uom="${escape(uom)}"]`;
+		const rate_attr = `[data-rate="${escape(rate)}"]`;
 
 		const item_selector = batch_no ?
-			`.cart-item-wrapper${batch_attr}${uom_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}`;
+			`.cart-item-wrapper${batch_attr}${uom_attr}${rate_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}${rate_attr}`;
 
 		return this.$cart_items_wrapper.find(item_selector);
+	}
+
+	get_item_from_frm(item) {
+		const doc = this.events.get_frm().doc;
+		const { item_code, batch_no, uom, rate } = item;
+		const search_field = batch_no ? 'batch_no' : 'item_code';
+		const search_value = batch_no || item_code;
+
+		return doc.items.find(i => i[search_field] === search_value && i.uom === uom && i.rate === rate);
 	}
 
 	update_item_html(item, remove_item) {
@@ -537,11 +548,7 @@ erpnext.PointOfSale.ItemCart = class {
 		if (remove_item) {
 			$item && $item.next().remove() && $item.remove();
 		} else {
-			const { item_code, batch_no, uom } = item;
-			const search_field = batch_no ? 'batch_no' : 'item_code';
-			const search_value = batch_no || item_code;
-			const item_row = this.events.get_frm().doc.items.find(i => i[search_field] === search_value && i.uom === uom);
-
+			const item_row = this.get_item_from_frm(item);
 			this.render_cart_item(item_row, $item);
 		}
 
@@ -559,7 +566,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.$cart_items_wrapper.append(
 				`<div class="cart-item-wrapper"
 						data-item-code="${escape(item_data.item_code)}" data-uom="${escape(item_data.uom)}"
-						data-batch-no="${escape(item_data.batch_no || '')}">
+						data-batch-no="${escape(item_data.batch_no || '')}" data-rate="${escape(item_data.rate)}">
 				</div>
 				<div class="seperator"></div>`
 			)
@@ -636,11 +643,21 @@ erpnext.PointOfSale.ItemCart = class {
 		function get_item_image_html() {
 			const { image, item_name } = item_data;
 			if (image) {
-				return `<div class="item-image"><img src="${image}" alt="${image}""></div>`;
+				return `
+					<div class="item-image">
+						<img
+							onerror="cur_pos.cart.handle_broken_image(this)"
+							src="${image}" alt="${frappe.get_abbr(item_name)}"">
+					</div>`;
 			} else {
 				return `<div class="item-image item-abbr">${frappe.get_abbr(item_name)}</div>`;
 			}
 		}
+	}
+
+	handle_broken_image($img) {
+		const item_abbr = $($img).attr('alt');
+		$($img).parent().replaceWith(`<div class="item-image item-abbr">${item_abbr}</div>`);
 	}
 
 	scroll_to_item($item) {
