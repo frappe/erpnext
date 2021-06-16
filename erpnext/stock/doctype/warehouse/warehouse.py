@@ -145,6 +145,10 @@ class Warehouse(NestedSet):
 			pluck='name',
 			filters={'default_warehouse':self.name}
 		)
+
+		if len(item_default_names) > 0:
+			frappe.msgprint(_('Unlinking Items from') + ' ' + self.name)
+
 		for name in item_default_names:
 			frappe.delete_doc("Item Default", name)
 
