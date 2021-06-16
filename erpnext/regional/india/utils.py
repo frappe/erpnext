@@ -500,7 +500,7 @@ def download_ewb_json():
 
 		if not isinstance(docname, list):
 			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
-			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
+			filename_prefix = re.sub(r'[^\w_.)( -]', '', docname)
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
@@ -817,12 +817,8 @@ def update_taxable_values(doc, method):
 				considered_rows.append(prev_row_id)
 
 	for item in doc.get('items'):
-		if doc.apply_discount_on == 'Grand Total' and doc.discount_amount:
-			proportionate_value = item.base_amount if doc.base_total else item.qty
-			total_value = doc.base_total if doc.base_total else doc.total_qty
-		else:
-			proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
-			total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
+		proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
+		total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
 
 		applicable_charges = flt(flt(proportionate_value * (flt(additional_taxes) / flt(total_value)),
 			item.precision('taxable_value')))
