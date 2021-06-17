@@ -140,17 +140,10 @@ class Warehouse(NestedSet):
 			return 1
 
 	def unlink_from_items(self):
-		item_default_names = frappe.db.get_list(
-			'Item Default',
-			pluck='name',
-			filters={'default_warehouse':self.name}
-		)
-
-		if len(item_default_names) > 0:
-			frappe.msgprint(_('Unlinking Items from') + ' ' + self.name)
-
-		for name in item_default_names:
-			frappe.delete_doc("Item Default", name)
+		frappe.db.sql("""
+				update `tabItem Default`
+				set default_warehouse=NULL
+				where default_warehouse=%s""", self.name)
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
