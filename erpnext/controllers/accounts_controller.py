@@ -744,7 +744,7 @@ class AccountsController(TransactionBase):
 					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
 
 					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
-						if not cint(frappe.db.get_single_value("Buying Settings", "consider_rejected_quantity_for_purchase_invoice")):
+						if not cint(frappe.db.get_single_value("Buying Settings", "consider_rejected_quantity_in_purchase_invoice")):
 							frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 								.format(item.item_code, item.idx, max_allowed_amt))
 

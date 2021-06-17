@@ -598,7 +598,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		if frappe.db.get_single_value("Buying Settings", "consider_rejected_quantity_for_purchase_invoice"):
+		if frappe.db.get_single_value("Buying Settings", "consider_rejected_quantity_in_purchase_invoice"):
 			target_doc.qty = source_doc.received_qty - invoiced_qty_map.get(source_doc.name, 0)
 			target_doc.rejected_qty = 0
 		target_doc.stock_qty = flt(target_doc.qty) * flt(target_doc.conversion_factor, target_doc.precision("conversion_factor"))

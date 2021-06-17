@@ -16,7 +16,7 @@
   "pr_required",
   "maintain_same_rate",
   "allow_multiple_items",
-  "consider_rejected_quantity_for_purchase_invoice",
+  "consider_rejected_quantity_in_purchase_invoice",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -113,7 +113,7 @@
   {
    "default": "1",
    "description": "If checked, Rejected Quantity will be considered while making Purchase Invoice from Purchase Receipt.",
-   "fieldname": "consider_rejected_quantity_for_purchase_invoice",
+   "fieldname": "consider_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Consider Rejected Quantity in Purchase Invoice"
   }
@@ -123,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-06-17 16:39:55.707713",
+ "modified": "2021-06-17 17:17:40.024658",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
