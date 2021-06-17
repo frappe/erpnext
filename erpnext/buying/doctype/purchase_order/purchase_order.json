@@ -136,7 +136,8 @@
   "party_account_currency",
   "is_internal_supplier",
   "represents_company",
-  "inter_company_order_reference"
+  "inter_company_order_reference",
+  "related_delivery_planning"
  ],
  "fields": [
   {
@@ -1118,13 +1119,21 @@
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "related_delivery_planning",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-20 22:07:23.487138",
+ "modified": "2021-06-17 14:46:42.583108",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
