@@ -60,13 +60,19 @@ class AssetRepair(AccountsController):
 			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."), title=_("Missing Warehouse"))
 
 	def increase_asset_value(self):
-		asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value')
+		total_value_of_stock_consumed = 0
 		for item in self.stock_items:
-			asset_value += item.total_value
+			total_value_of_stock_consumed += item.total_value
 
-		if self.capitalize_repair_cost:
-			asset_value += self.repair_cost
-		frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
+		asset = frappe.get_doc('Asset', self.asset)
+		asset.flags.ignore_validate_update_after_submit = True
+		if asset.calculate_depreciation:
+			for row in asset.finance_books:
+				row.value_after_depreciation += total_value_of_stock_consumed
+
+				if self.capitalize_repair_cost:
+					row.value_after_depreciation += self.repair_cost
+		asset.save()
 
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc({

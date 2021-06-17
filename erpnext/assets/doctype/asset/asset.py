@@ -96,9 +96,6 @@ class Asset(AccountsController):
 			finance_books = get_item_details(self.item_code, self.asset_category)
 			self.set('finance_books', finance_books)
 
-		if not(self.asset_value):
-			self.asset_value = self.gross_purchase_amount
-
 	def validate_asset_values(self):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
@@ -187,8 +184,12 @@ class Asset(AccountsController):
 					start = n
 					break
 
-			value_after_depreciation = (flt(self.asset_value) -
-				flt(self.opening_accumulated_depreciation)) - flt(d.expected_value_after_useful_life)
+			if d.value_after_depreciation: 
+				value_after_depreciation = (flt(d.value_after_depreciation) -
+					flt(self.opening_accumulated_depreciation)) - flt(d.expected_value_after_useful_life)
+			else:
+				value_after_depreciation = (flt(self.gross_purchase_amount) -
+					flt(self.opening_accumulated_depreciation)) - flt(d.expected_value_after_useful_life)
 
 			d.value_after_depreciation = value_after_depreciation
 
