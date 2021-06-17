@@ -6,6 +6,7 @@ frappe.provide('erpnext.accounts.dimensions');
 erpnext.TransactionController = class TransactionController extends erpnext.taxes_and_totals {
 	setup() {
 		super.setup();
+		let me = this;
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
@@ -42,8 +43,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			cur_frm.cscript.calculate_taxes_and_totals();
 			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
 		});
-
-
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
@@ -121,7 +120,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		});
 
-		var me = this;
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
 				return me.set_query_for_batch(doc, cdt, cdn);
@@ -261,11 +259,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if(!in_list(["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)) {
 			return;
 		}
-		var me = this;
-		var inspection_type = in_list(["Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)
+
+		const me = this;
+		if (!this.frm.is_new() && this.frm.doc.docstatus === 0) {
+			this.frm.add_custom_button(__("Quality Inspection(s)"), () => {
+				me.make_quality_inspection();
+			}, __("Create"));
+			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+
+		const inspection_type = in_list(["Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)
 			? "Incoming" : "Outgoing";
 
-		var quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
+		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function(row) {
 			if(me.frm.is_new()) return;
 			return {
@@ -280,7 +286,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		this.frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
+			let d = locals[cdt][cdn];
 			return {
 				filters: {
 					docstatus: 1,
@@ -556,6 +562,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
 							qty: item.qty || 1,
+							net_rate: item.rate,
 							stock_qty: item.stock_qty,
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
@@ -835,9 +842,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 				frappe.run_serially([
 					() => me.frm.script_manager.trigger("currency"),
-					() => me.update_item_tax_map(),
 					() => me.apply_default_taxes(),
-					() => me.apply_pricing_rule()
+					() => me.apply_pricing_rule(),
+					() => me.calculate_taxes_and_totals()
 				]);
 			}
 		}
@@ -953,15 +960,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
 				var message1 = "";
 				var message2 = "";
-				var final_message = "Please clear the ";
+				var final_message = __("Please clear the") + " ";
 
 				if (this.frm.doc.payment_terms_template) {
-					message1 = "selected Payment Terms Template";
+					message1 = __("selected Payment Terms Template");
 					final_message = final_message + message1;
 				}
 
 				if ((this.frm.doc.payment_schedule || []).length) {
-					message2 = "Payment Schedule Table";
+					message2 = __("Payment Schedule Table");
 					if (message1.length !== 0) message2 = " and " + message2;
 					final_message = final_message + message2;
 				}
@@ -1816,7 +1823,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				callback: function(r) {
 					if(!r.exc) {
 						item.item_tax_rate = r.message;
-						me.add_taxes_from_item_tax_template(item.item_tax_rate);
 						me.calculate_taxes_and_totals();
 					}
 				}
@@ -1827,43 +1833,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	update_item_tax_map() {
-		var me = this;
-		var item_codes = [];
-		$.each(this.frm.doc.items || [], function(i, item) {
-			if(item.item_code) {
-				item_codes.push(item.item_code);
-			}
-		});
-
-		if(item_codes.length) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_item_tax_info",
-				args: {
-					company: me.frm.doc.company,
-					tax_category: cstr(me.frm.doc.tax_category),
-					item_codes: item_codes
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
-								if (!item.item_tax_template) {
-									item.item_tax_template = r.message[item.item_code].item_tax_template;
-									item.item_tax_rate = r.message[item.item_code].item_tax_rate;
-								}
-								me.add_taxes_from_item_tax_template(item.item_tax_rate);
-							} else {
-								item.item_tax_template = "";
-								item.item_tax_rate = "{}";
-							}
-						});
-						me.calculate_taxes_and_totals();
-					}
-				}
-			});
-		}
-	}
 
 	is_recurring() {
 		// set default values for recurring documents
@@ -1949,7 +1918,131 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 	}
 
-	get_method_for_payment(){
+	make_quality_inspection() {
+		let data = [];
+		const fields = [
+			{
+				label: "Items",
+				fieldtype: "Table",
+				fieldname: "items",
+				cannot_add_rows: true,
+				in_place_edit: true,
+				data: data,
+				get_data: () => {
+					return data;
+				},
+				fields: [
+					{
+						fieldtype: "Data",
+						fieldname: "docname",
+						hidden: true
+					},
+					{
+						fieldtype: "Read Only",
+						fieldname: "item_code",
+						label: __("Item Code"),
+						in_list_view: true
+					},
+					{
+						fieldtype: "Read Only",
+						fieldname: "item_name",
+						label: __("Item Name"),
+						in_list_view: true
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "qty",
+						label: __("Accepted Quantity"),
+						in_list_view: true,
+						read_only: true
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "sample_size",
+						label: __("Sample Size"),
+						reqd: true,
+						in_list_view: true
+					},
+					{
+						fieldtype: "Data",
+						fieldname: "description",
+						label: __("Description"),
+						hidden: true
+					},
+					{
+						fieldtype: "Data",
+						fieldname: "serial_no",
+						label: __("Serial No"),
+						hidden: true
+					},
+					{
+						fieldtype: "Data",
+						fieldname: "batch_no",
+						label: __("Batch No"),
+						hidden: true
+					}
+				]
+			}
+		];
+
+		const me = this;
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Items for Quality Inspection"),
+			fields: fields,
+			primary_action: function () {
+				const data = dialog.get_values();
+				frappe.call({
+					method: "erpnext.controllers.stock_controller.make_quality_inspections",
+					args: {
+						doctype: me.frm.doc.doctype,
+						docname: me.frm.doc.name,
+						items: data.items
+					},
+					freeze: true,
+					callback: function (r) {
+						if (r.message.length > 0) {
+							if (r.message.length === 1) {
+								frappe.set_route("Form", "Quality Inspection", r.message[0]);
+							} else {
+								frappe.route_options = {
+									"reference_type": me.frm.doc.doctype,
+									"reference_name": me.frm.doc.name
+								};
+								frappe.set_route("List", "Quality Inspection");
+							}
+						}
+						dialog.hide();
+					}
+				});
+			},
+			primary_action_label: __("Create")
+		});
+
+		this.frm.doc.items.forEach(item => {
+			if (!item.quality_inspection) {
+				let dialog_items = dialog.fields_dict.items;
+				dialog_items.df.data.push({
+					"docname": item.name,
+					"item_code": item.item_code,
+					"item_name": item.item_name,
+					"qty": item.qty,
+					"description": item.description,
+					"serial_no": item.serial_no,
+					"batch_no": item.batch_no
+				});
+				dialog_items.grid.refresh();
+			}
+		});
+
+		data = dialog.fields_dict.items.df.data;
+		if (!data.length) {
+			frappe.msgprint(__("All items in this document already have a linked Quality Inspection."));
+		} else {
+			dialog.show();
+		}
+	}
+
+	get_method_for_payment() {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(cur_frm.doc.__onload && cur_frm.doc.__onload.make_payment_via_journal_entry){
 			if(in_list(['Sales Invoice', 'Purchase Invoice'],  cur_frm.doc.doctype)){
