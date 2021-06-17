@@ -82,10 +82,10 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 	quotation = frappe.db.get_value("Vehicle Quotation", source_name, ["transaction_date", "valid_till"], as_dict=1)
 	if quotation.valid_till and (quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate())):
 		frappe.throw(_("Validity period of this quotation has ended."))
-	return _make_sales_order(source_name, target_doc)
+	return _make_vehicle_booking_order(source_name, target_doc)
 
 
-def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
+def _make_vehicle_booking_order(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
 		customer = _make_customer(source, ignore_permissions)
 		if customer:
