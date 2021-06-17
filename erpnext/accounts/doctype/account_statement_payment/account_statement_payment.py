@@ -9,12 +9,12 @@ from frappe.model.document import Document
 from datetime import datetime, timedelta, date
 
 class AccountStatementPayment(Document):
-	def validate(self):
-		if self.docstatus == 1:
-			self.create_new_sales_invoice()
+	# def validate(self):
+	# 	if self.docstatus == 1:
+	# 		self.create_new_sales_invoice()
 	
-	def on_cancel(self):
-		self.delete_new_sales_invoice()
+	# def on_cancel(self):
+	# 	self.delete_new_sales_invoice()
 	
 	def delete_new_sales_invoice(self):
 		sale_invoice = frappe.get_all("Sales Invoice", ["name"], filters = {"patient_statement": self.patient_statement})
