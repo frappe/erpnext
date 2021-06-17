@@ -32,7 +32,7 @@
 	<div class="result">
 		<div class="web-list-item transaction-list-item">
 			<div class="row">
-				<h3 class="col-xs-2">Tasks</h3>
+				<h3 class="col-xs-4">Tasks</h3>
 				<h3 class="col-xs-2">Status</h3>
 				<h3 class="col-xs-2">End Date</h3>
 				<h3 class="col-xs-2">Assigned To</h3>
@@ -42,57 +42,31 @@
 				</div>
 			</div>
 		</div>
-		{% for task in doc.tasks %}
-		{% set assigned_users = json.loads(task["_assign"])%}
-
-		<div class="web-list-item transaction-list-item">
-			<div class="row">
-				<div class="col-xs-2">{{ task.name }}</div>
-				<a class="transaction-item-link" href="/tasks?name={{ task.name | urlencode }}">Link</a>
-				<div class="col-xs-2">{{ task.status }}</div>
-				<div class="col-xs-2">{{ task.exp_end_date }}</div>
-				<div class="col-xs-2">
-					{% for user in assigned_users %}
-					{% set user_details = frappe.db.get_value("User", user, ["full_name", "user_image"], as_dict=True)
-					%}
-					{% if user_details.user_image %}
-					<span class="avatar avatar-small" style="width:32px; height:32px;"
-						title="{{ user_details.full_name }}">
-						<img src="{{ user_details.user_image }}">
-					</span>
-					{% else %}
-					<span class="avatar avatar-small" style="width:32px; height:32px;"
-						title="{{ user_details.full_name }}">
-						<div class='standard-image' style='background-color: #F5F4F4; color: #000;'>
-							{{ frappe.utils.get_abbr(user_details.full_name) }}</div>
-					</span>
-					{% endif %}
-					{% endfor %}
-				</div>
-				<div class="col-xs-2 text-right">
-					{{ frappe.utils.pretty_date(task.modified) }}
-				</div>
-			</div>
-		</div>
-		{% endfor %}
+		{% include "erpnext/templates/includes/projects/project_tasks.html" %}
 	</div>
 </div>
 {% else %}
-<p class="text-muted">{{ _("No tasks") }}</p>
+<p class="font-weight-bold">{{ _("No Tasks") }}</p>
 {% endif %}
 
-<h4 class="mt-5">{{ _("Timesheets") }}</h4>
-
 {% if doc.timesheets %}
-<div class='project-timelogs'>
-	{% include "erpnext/templates/includes/projects/project_timesheets.html" %}
+<div class="website-list">
+	<div class="result">
+		<div class="web-list-item transaction-list-item">
+			<div class="row">
+				<h3 class="col-xs-2">Timesheets</h3>
+				<h3 class="col-xs-2">Status</h3>
+				<h3 class="col-xs-2">From</h3>
+				<h3 class="col-xs-2">To</h3>
+				<h3 class="col-xs-2">Modified By</h3>
+				<h3 class="col-xs-2 text-right">Modified On</h3>
+			</div>
+		</div>
+		{% include "erpnext/templates/includes/projects/project_timesheets.html" %}
+	</div>
 </div>
-{% if doc.timesheets|length > 9 %}
-<p><a class='more-timelogs small underline'>{{ _("More") }}</a>
-<p>
-	{% endif %}
-	{% else %}
-<p class="text-muted">{{ _("No time sheets") }}</p>
+{% else %}
+<p class="font-weight-bold mt-5">{{ _("No Timesheets") }}</p>
 {% endif %}
 
 {% if doc.attachments %}
@@ -137,4 +111,36 @@
 {% else %}
 <hr>
 {% endif %}
+{% endmacro %}
+
+{% macro task_row(task) %}
+<div class="row {% if task.children %} font-weight-bold {% else %} mt-5 {% endif %}">
+	<div class="col-xs-4 {% if task.parent_task %} text-center {% endif %}">{{ task.name }}</div>
+	<a class="transaction-item-link" href="/tasks?name={{ task.name | urlencode }}">Link</a>
+	<div class="col-xs-2">{{ task.status }}</div>
+	<div class="col-xs-2">{{ task.exp_end_date }}</div>
+	<div class="col-xs-2">
+		{% if task["_assign"] %}
+		{% set assigned_users = json.loads(task["_assign"])%}
+		{% for user in assigned_users %}
+		{% set user_details = frappe.db.get_value("User", user, ["full_name", "user_image"], as_dict=True)
+		%}
+		{% if user_details.user_image %}
+		<span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+			<img src="{{ user_details.user_image }}">
+		</span>
+		{% else %}
+		<span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+			<div class='standard-image' style='background-color: #F5F4F4; color: #000;'>
+				{{ frappe.utils.get_abbr(user_details.full_name) }}
+			</div>
+		</span>
+		{% endif %}
+		{% endfor %}
+		{% endif %}
+	</div>
+	<div class="col-xs-2 text-right">
+		{{ frappe.utils.pretty_date(task.modified) }}
+	</div>
+</div>
 {% endmacro %}
