@@ -89,7 +89,7 @@ def resolve_dunning(doc, state):
 				'sales_invoice': reference.reference_name, 'status': ('!=', 'Resolved')}, ignore_permissions=True)
 
 			for dunning in dunnings:
-				frappe.db.set_value("Dunning", dunning.name, "status", 'Resolved', ignore_permissions=True)
+				frappe.db.set_value("Dunning", dunning.name, "status", 'Resolved')
 
 def calculate_interest_and_amount(posting_date, outstanding_amount, rate_of_interest, dunning_fee, overdue_days):
 	interest_amount = 0
