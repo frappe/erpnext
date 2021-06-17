@@ -35,7 +35,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	# if item_status:
 # 		filters["status"] = item_status
 	tasks = frappe.get_all("Task", filters=filters,
-		fields=["name", "subject", "status", "_seen", "_comments", "modified", "description"],
+		fields=["name", "subject", "status", "_seen", "_comments", "modified", "description", "_assign", "exp_end_date"],
 		limit_start=start, limit_page_length=10)
 
 	for task in tasks:
