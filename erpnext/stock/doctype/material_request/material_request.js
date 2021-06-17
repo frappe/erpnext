@@ -287,7 +287,6 @@ frappe.ui.form.on('Material Request', {
 					doc:frm.doc,
 					args: values,
 					callback: function(r) {
-						
 						if (r.message === 'Item not found') {
 							erpnext.utils.remove_empty_first_row(frm, "items");
 							refresh_field("items");
@@ -295,7 +294,9 @@ frappe.ui.form.on('Material Request', {
 							frappe.throw(__(r.message));
 						}
 						d.hide();
+						frm.set_df_property("work_order_detail",'read_only',1)
 						refresh_field("items");
+						refresh_field("work_order_detail");
 					}
 				});
 			}

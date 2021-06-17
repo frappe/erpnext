@@ -96,6 +96,7 @@ class MaterialRequest(BuyingController):
 			self.validate_budget()
 
 	def before_save(self):
+		self.set_wo_details()
 		self.set_status(update=True)
 		if self.manufacturing_staging == 1:
 			q = "select staging_material_request_warehouse from `tabStaging Details` where company = '{0}'".format(self.company)
@@ -205,6 +206,9 @@ class MaterialRequest(BuyingController):
 			update_bin_qty(item_code, warehouse, {
 				"indented_qty": get_indented_qty(item_code, warehouse)
 			})
+
+	def set_wo_details(self):
+		print("*********"*200)
 
 	def update_requested_qty_in_production_plan(self):
 		production_plans = []
@@ -316,6 +320,15 @@ class MaterialRequest(BuyingController):
 								"rate" : item.get('valuation_rate'),
 								"min_order_qty" : item.get('min_order_qty'),
 								"amount" : item.get('valuation_rate') * item.get('qty'),
+				})
+			for i in all_wo:
+				wo = frappe.get_doc('Work Order', i.get('name'))
+				self.append('work_order_detail', {
+					'work_order': i.get('name'),
+					'company': wo.get('company'),
+					'item_to_manufacture': wo.get('production_item'),
+					'qty_to_manufacture': wo.get('qty'),
+					'bom': wo.get('bom_no'),
 				})
 			return len(data_set)
 		if(len(all_wo_item) == 0):
@@ -552,6 +565,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 	return doclist
 
+
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
@@ -682,70 +696,3 @@ def create_pick_list(source_name, target_doc=None):
 
 	return doc
 
-# @frappe.whitelist()
-# def get_wo_items(company=None,schedule_start_from=None,schedule_start_to=None,item_to_manufacture = None, work_order = None):
-# 	if not company:
-# 		company = frappe.get_value("Work Order", {"name": work_order},'company')
-# 	all_wo = []
-# 	wo_filter = {'company':company}
-# 	if schedule_start_from and schedule_start_to:
-# 		wo_filter['planned_start_date'] = ['between',[schedule_start_from,schedule_start_to]]
-# 	if work_order:
-# 		wo_filter['name'] = work_order
-# 	if item_to_manufacture:
-# 		wo_filter['production_item'] = item_to_manufacture
-# 	all_wo_item = frappe.db.get_all("Work Order",wo_filter, 'name')
-# 	for item in all_wo_item:
-# 		all_wo.append(item)
-	
-# 	all_data = []
-# 	if len(all_wo) > 0:
-# 		for wo in all_wo:
-# 			wo_wise_data = frappe.db.get_all("Work Order Item", {'parent':wo.get('name')},['item_code','transferred_qty','required_qty','description'])
-# 			for itm in wo_wise_data:
-# 				float_precision = (frappe.db.get_default("float_precision")) or 2
-# 				qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
-# 				if qty > 0:
-# 					itm['qty'] = qty
-# 					itm['description'] = itm.get('description')
-# 					all_data.append(itm)
-	
-# 	c = {}
-# 	if len(all_data) > 0:
-# 		for d in all_data:
-# 			c.setdefault(d['item_code'], []).append(d['qty'])
-# 			result = [{'item_code': k, 'qty': v} for k,v in c.items()]
-# 		data_set = []
-# 		if result:
-# 			for res in result:
-# 				d = {}
-# 				qty_sum = 0
-# 				item_detail = frappe.get_value("Item",{'item_code':res.get('item_code')},['description','stock_uom','item_name','production_item_name','item_name','allowed_in_wo_staging','multi_order_qty','min_order_qty','staging_multiple'],as_dict = True)
-# 				if item_detail.get('allowed_in_wo_staging') == 'Yes':
-# 					default_data = frappe.db.get_value('Item Default', {'parent': res.get('item_code')},['buying_cost_center','expense_account','default_warehouse'],as_dict = True)
-# 					bin_data = frappe.db.get_value('Bin', {'item_code': res.get('item_code')},['projected_qty','actual_qty','valuation_rate'],as_dict = True)
-# 					d['item_code'] = res.get('item_code')
-# 					d['desc'] = item_detail.get('description')
-# 					d['stock_uom'] = item_detail.get('stock_uom')
-# 					d['item_name'] = item_detail.get('item_name')
-# 					d['production_item_name'] = item_detail['production_item_name']
-# 					d['cost_center'] = default_data.get('buying_cost_center')
-# 					d['expense_account'] = default_data.get('expense_account')
-# 					d['min_order_qty'] = item_detail.get('min_order_qty')
-# 					#if bin_data:
-# 					d['projected_qty'] = bin_data.get('projected_qty')
-# 					d['actual_qty'] = bin_data.get('actual_qty')
-# 					d['valuation_rate'] = bin_data.get('valuation_rate')
-
-# 					for r in res.get('qty'):
-# 						qty_sum +=r
-# 					if(item_detail.get('staging_multiple') > 0):
-# 						#round_up_qty=(round(qty/self.staging_multiple),up)*self.staging_multiple
-# 						round_up_qty = (math.ceil(qty_sum/item_detail.get('staging_multiple'))) * item_detail.get('staging_multiple')
-# 						d['qty'] = round_up_qty
-# 					else:
-# 						d['qty'] = qty_sum
-# 					d['production_item_name'] = item_detail['production_item_name']
-# 					d['multi_order_qty'] = item_detail['multi_order_qty']
-# 					data_set.append(d)
-# 		return data_set
