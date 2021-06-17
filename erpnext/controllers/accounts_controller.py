@@ -116,6 +116,8 @@ class AccountsController(TransactionBase):
 
 		if self.doctype == 'Purchase Invoice':
 			self.calculate_paid_amount()
+			# apply tax withholding only if checked and applicable
+			self.set_tax_withholding()
 
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
 			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
@@ -225,7 +227,7 @@ class AccountsController(TransactionBase):
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year"):
-			date_field = ""
+			date_field = None
 			if self.meta.get_field("posting_date"):
 				date_field = "posting_date"
 			elif self.meta.get_field("transaction_date"):
@@ -608,8 +610,8 @@ class AccountsController(TransactionBase):
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
 
-		order_list = list(set([d.get(order_field)
-			for d in self.get("items") if d.get(order_field)]))
+		order_list = list(set(d.get(order_field)
+			for d in self.get("items") if d.get(order_field)))
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
 			amount_field, order_doctype, order_list, include_unallocated)
@@ -633,8 +635,8 @@ class AccountsController(TransactionBase):
 
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
-		order_list = list(set([d.get(order_field)
-			for d in self.get("items") if d.get(order_field)]))
+		order_list = list(set(d.get(order_field)
+			for d in self.get("items") if d.get(order_field)))
 
 		if not order_list: return
 
@@ -700,12 +702,94 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			self.update_allocated_advance_taxes_on_cancel()
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self)
 
 		elif self.doctype in ["Sales Order", "Purchase Order"]:
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self)
+
+	def get_tax_map(self):
+		tax_map = {}
+		for tax in self.get('taxes'):
+			tax_map.setdefault(tax.account_head, 0.0)
+			tax_map[tax.account_head] += tax.tax_amount
+
+		return tax_map
+
+	def update_allocated_advance_taxes_on_cancel(self):
+		if self.get('advances'):
+			tax_accounts = [d.account_head for d in self.get('taxes')]
+			allocated_tax_map = frappe._dict(frappe.get_all('GL Entry', fields=['account', 'sum(credit - debit)'],
+				filters={'voucher_no': self.name, 'account': ('in', tax_accounts)},
+				group_by='account', as_list=1))
+
+			tax_map = self.get_tax_map()
+
+			for pe in self.get('advances'):
+				if pe.reference_type == 'Payment Entry':
+					pe = frappe.get_doc('Payment Entry', pe.reference_name)
+					for tax in pe.get('taxes'):
+						allocated_amount = tax_map.get(tax.account_head) - allocated_tax_map.get(tax.account_head)
+						if allocated_amount > tax.tax_amount:
+							allocated_amount = tax.tax_amount
+
+						if allocated_amount:
+							frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount',
+								tax.allocated_amount - allocated_amount)
+							tax_map[tax.account_head] -= allocated_amount
+							allocated_tax_map[tax.account_head] -= allocated_amount
+
+	def allocate_advance_taxes(self, gl_entries):
+		tax_map = self.get_tax_map()
+		for pe in self.get("advances"):
+			if pe.reference_type == "Payment Entry" and \
+				frappe.db.get_value('Payment Entry', pe.reference_name, 'advance_tax_account'):
+				pe = frappe.get_doc("Payment Entry", pe.reference_name)
+				for tax in pe.get("taxes"):
+					account_currency = get_account_currency(tax.account_head)
+
+					if self.doctype == "Purchase Invoice":
+						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+					else:
+						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+
+					party = self.supplier if self.doctype == "Purchase Invoice" else self.customer
+					unallocated_amount = tax.tax_amount - tax.allocated_amount
+					if tax_map.get(tax.account_head):
+						amount = tax_map.get(tax.account_head)
+						if amount < unallocated_amount:
+							unallocated_amount = amount
+
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": tax.account_head,
+								"against": party,
+								dr_or_cr: unallocated_amount,
+								dr_or_cr + "_in_account_currency": unallocated_amount
+								if account_currency==self.company_currency
+								else unallocated_amount,
+								"cost_center": tax.cost_center
+							}, account_currency, item=tax))
+
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": pe.advance_tax_account,
+								"against": party,
+								rev_dr_cr: unallocated_amount,
+								rev_dr_cr + "_in_account_currency": unallocated_amount
+								if account_currency==self.company_currency
+								else unallocated_amount,
+								"cost_center": tax.cost_center
+							}, account_currency, item=tax))
+
+						frappe.db.set_value("Advance Taxes and Charges", tax.name, "allocated_amount",
+							tax.allocated_amount + unallocated_amount)
+
+						tax_map[tax.account_head] -= unallocated_amount
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_allowance_for
@@ -1108,7 +1192,7 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 
 
 def validate_taxes_and_charges(tax):
-	if tax.charge_type in ['Actual', 'On Net Total'] and tax.row_id:
+	if tax.charge_type in ['Actual', 'On Net Total', 'On Paid Amount'] and tax.row_id:
 		frappe.throw(_("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"))
 	elif tax.charge_type in ['On Previous Row Amount', 'On Previous Row Total']:
 		if cint(tax.idx) == 1:
@@ -1125,20 +1209,19 @@ def validate_taxes_and_charges(tax):
 
 def validate_inclusive_tax(tax, doc):
 	def _on_previous_row_error(row_range):
-		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx,
-																										  row_range))
+		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx, row_range))
 
 	if cint(getattr(tax, "included_in_print_rate", None)):
 		if tax.charge_type == "Actual":
 			# inclusive tax cannot be of type Actual
-			throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate").format(tax.idx))
+			throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount").format(tax.idx))
 		elif tax.charge_type == "On Previous Row Amount" and \
 				not cint(doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate):
 			# referred row should also be inclusive
 			_on_previous_row_error(tax.row_id)
 		elif tax.charge_type == "On Previous Row Total" and \
 				not all([cint(t.included_in_print_rate) for t in doc.get("taxes")[:cint(tax.row_id) - 1]]):
-			# all rows about the reffered tax should be inclusive
+			# all rows about the referred tax should be inclusive
 			_on_previous_row_error("1 - %d" % (tax.row_id,))
 		elif tax.get("category") == "Valuation":
 			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
@@ -1239,7 +1322,6 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 			""".format(party_account_field, limit_cond), (party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
-
 
 def update_invoice_status():
 	# Daily update the status of the invoices
@@ -1448,6 +1530,7 @@ def validate_and_delete_children(parent, data):
 
 	for d in deleted_children:
 		update_bin_on_delete(d, parent.doctype)
+
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):

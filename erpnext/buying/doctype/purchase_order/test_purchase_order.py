@@ -359,7 +359,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		update_child_qty_rate('Purchase Order', trans_item, po.name)
 		po.reload()
 
-		total_reqd_qty_after_change = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+		total_reqd_qty_after_change = sum(d.get("required_qty") for d in po.as_dict().get("supplied_items"))
 
 		self.assertEqual(total_reqd_qty_after_change, 2 * total_reqd_qty)
 
@@ -1111,7 +1111,7 @@ def create_purchase_order(**args):
 
 	po.schedule_date = add_days(nowdate(), 1)
 	po.company = args.company or "_Test Company"
-	po.supplier = args.customer or "_Test Supplier"
+	po.supplier = args.supplier or "_Test Supplier"
 	po.is_subcontracted = args.is_subcontracted or "No"
 	po.currency = args.currency or frappe.get_cached_value('Company',  po.company,  "default_currency")
 	po.conversion_factor = args.conversion_factor or 1

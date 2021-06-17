@@ -10,3 +10,6 @@
 
 # Replace use of Class.extend with native JS class
 1fe891b287a1b3f225d29ee3d07e7b1824aba9e7
+
+# This commit just changes spaces to tabs for indentation in some files
+5f473611bd6ed57703716244a054d3fb5ba9cd23
