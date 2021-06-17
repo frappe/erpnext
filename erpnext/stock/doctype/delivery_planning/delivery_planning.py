@@ -526,7 +526,9 @@ class DeliveryPlanning(Document):
 
 						so_wise_data = frappe.db.get_all("Delivery Planning Item",
 														 {"related_delivey_planning": self.name,
-														  "transporter": q.transporter},
+														  "transporter": q.transporter,
+														  "approved": "Yes",
+														  },
 														 ["sales_order", "item_name", "ordered_qty",
 														  "weight_to_deliver"]
 														 )
@@ -582,20 +584,18 @@ class DeliveryPlanning(Document):
 				po.supplier = q.supplier
 				po.total_qty = q.t_qty
 				po.total_net_weight = q.t_weight
+				po.related_delivery_planning = self.name
 
 				so_wise_data = frappe.db.get_all("Delivery Planning Item",
 												 {"related_delivey_planning": self.name,
-												  "supplier": q.supplier},
+												  "supplier": q.supplier,
+												  "approved": "Yes"},
 												 ["item_code",
 												  "item_name",
 												  "ordered_qty",
-												  "weight_to_deliver",
 												  "delivery_date",
-												  "uom",
-												  "stock_uom",
-												  "conversion_factor",
-												  "sorce_warehouse",
-												  "weight_per_unit"]
+												  "sorce_warehouse"
+												 ]
 												 )
 				print("0000000000000000000000000000", so_wise_data)
 				if (so_wise_data):
@@ -604,11 +604,6 @@ class DeliveryPlanning(Document):
 											 "item_name": s.item_name,
 											 "schedule_date":s.delivery_date,
 											 "qty": s.ordered_qty,
-											 "total_weight": s.weight_to_deliver,
-											 "weight_per_unit":s.weight_per_unit,
-											 "uom": s.uom,
-											 "stock_uom" : s.stock_uom,
-											 "conversion_factor": s.conversion_factor,
 											 "warehouse": s.sorce_warehouse
 											 })
 					po.save(ignore_permissions=True)
@@ -635,8 +630,8 @@ class DeliveryPlanning(Document):
 				conditions += "AND dpi.related_delivey_planning = %s" % frappe.db.escape(self.name)
 				print("Condition000000000000000000 ", conditions)
 				query = frappe.db.sql(""" select
-										customer,
 										transporter,
+										customer,
 										sum(dpi.weight_to_deliver) t_weight
 
 										from `tabDelivery Planning Item`dpi
@@ -645,39 +640,35 @@ class DeliveryPlanning(Document):
 										AND dpi.approved = "Yes"
 
 										{conditions}
-										group by dpi.transporter, customer
+										group by dpi.transporter, dpi.customer
 										""".format(conditions=conditions), as_dict=1)
 			for q in query:
 				print(" query -------", q)
 				pi = frappe.new_doc("Pick List")
 				pi.customer = q.customer
 				pi.purpose = "Delivery"
+				pi.related_delivery_planning = self.name
 
 				so_wise_data = frappe.db.get_all("Delivery Planning Item",
 												 {"related_delivey_planning": self.name,
 												  "transporter": q.transporter,
-												  "customer": q.customer},
+												  "customer": q.customer,
+												  "approved": "Yes"},
 												 ["item_code",
 												  "item_name",
 												  "ordered_qty",
 												  "weight_to_deliver",
 												  "uom",
-												  "stock_uom",
 												  "conversion_factor",
 												  "sorce_warehouse",
-												  "weight_per_unit",
 												  "sales_order"]
 												 )
 				print("0000000000000  000000000000000", so_wise_data)
 				if (so_wise_data):
 					for s in so_wise_data:
 						pi.append("locations", {"item_code": s.item_code,
-
 											"qty": s.ordered_qty,
-											"total_weight": s.weight_to_deliver,
-											"weight_per_unit": s.weight_per_unit,
 											"uom": s.uom,
-											"stock_uom": s.stock_uom,
 											"conversion_factor": s.conversion_factor,
 											"warehouse": s.sorce_warehouse,
 											"stock_qty": s.ordered_qty,
