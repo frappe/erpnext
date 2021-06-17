@@ -334,6 +334,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "sales_team",
    "fieldname": "section_break_30",
    "fieldtype": "Section Break",
    "label": "Sales Team"
@@ -1054,7 +1055,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-02 00:42:30.149348",
+ "modified": "2021-06-17 12:53:33.913095",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

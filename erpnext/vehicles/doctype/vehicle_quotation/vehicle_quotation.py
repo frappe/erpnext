@@ -33,6 +33,10 @@ class VehicleQuotation(VehicleBookingController):
 		self.update_opportunity()
 		self.update_lead()
 
+	def before_print(self):
+		super(VehicleQuotation, self).before_print()
+		self.total_discount = -self.total_discount
+
 	def set_title(self):
 		self.title = self.customer_name
 

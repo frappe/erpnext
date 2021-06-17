@@ -82,6 +82,19 @@
   "invoice_total",
   "column_break_56",
   "in_words",
+  "totals_section",
+  "qty",
+  "total_vehicle_amount",
+  "column_break_79",
+  "total_fni_amount",
+  "total_withholding_tax_amount",
+  "column_break_82",
+  "total_discount",
+  "total_before_discount",
+  "section_break_85",
+  "grand_total",
+  "column_break_87",
+  "total_in_words",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -438,20 +451,20 @@
   {
    "fieldname": "pricing_section",
    "fieldtype": "Section Break",
-   "label": "Vehicle Price"
+   "label": "Unit Vehicle Price"
   },
   {
    "default": "0",
    "fieldname": "vehicle_amount",
    "fieldtype": "Currency",
-   "label": "Vehicle Retail Price",
+   "label": "Unit Vehicle Retail Price",
    "options": "Company:company:default_currency"
   },
   {
    "default": "0",
    "fieldname": "fni_amount",
    "fieldtype": "Currency",
-   "label": "Freight and Insurance",
+   "label": "Unit Freight and Insurance",
    "options": "Company:company:default_currency"
   },
   {
@@ -462,7 +475,7 @@
    "default": "0",
    "fieldname": "withholding_tax_amount",
    "fieldtype": "Currency",
-   "label": "Withholding Tax Amount",
+   "label": "Unit Withholding Tax Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -470,7 +483,7 @@
    "default": "0",
    "fieldname": "invoice_total",
    "fieldtype": "Currency",
-   "label": "Invoice Total",
+   "label": "Unit Invoice Total",
    "read_only": 1
   },
   {
@@ -480,7 +493,7 @@
   {
    "fieldname": "in_words",
    "fieldtype": "Data",
-   "label": "In Words",
+   "label": "In Words (Unit Total)",
    "read_only": 1
   },
   {
@@ -503,6 +516,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "sales_team",
    "fieldname": "section_break_30",
    "fieldtype": "Section Break",
    "label": "Sales Team"
@@ -725,12 +739,88 @@
    "fieldtype": "Data",
    "label": "On Account Of",
    "no_copy": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "label": "Qty"
+  },
+  {
+   "fieldname": "total_vehicle_amount",
+   "fieldtype": "Currency",
+   "label": "Total Vehicle Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_79",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_fni_amount",
+   "fieldtype": "Currency",
+   "label": "Total Freight and Insurance",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_withholding_tax_amount",
+   "fieldtype": "Currency",
+   "label": "Total Withholding Tax",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_82",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Qty and Total"
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "total_before_discount",
+   "fieldtype": "Currency",
+   "label": "Total Before Discount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_85",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_87",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_in_words",
+   "fieldtype": "Data",
+   "label": "In Words (Grand Total)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_discount",
+   "fieldtype": "Currency",
+   "label": "Total Discount",
+   "options": "Company:company:default_currency"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-02 00:42:14.285349",
+ "modified": "2021-06-17 13:11:44.523758",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",

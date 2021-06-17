@@ -1373,7 +1373,7 @@ class AccountsController(TransactionBase):
 		posting_date = self.get("posting_date") or self.get("transaction_date")
 		bill_date = self.get("bill_date") if self.doctype != 'Vehicle Booking Order' else None
 		due_date = self.get("due_date") or posting_date
-		grand_total = flt(self.get("rounded_total") or self.get('grand_total') or self.get('invoice_total'))
+		grand_total = flt(self.get("rounded_total") or self.get('invoice_total') or self.get('grand_total'))
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			grand_total = grand_total - flt(self.write_off_amount)
 

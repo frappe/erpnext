@@ -145,20 +145,39 @@ class VehicleBookingController(AccountsController):
 		self.invoice_total = flt(self.vehicle_amount + self.fni_amount + self.withholding_tax_amount,
 			self.precision('invoice_total'))
 
-		self.calculate_contribution()
 		self.set_total_in_words()
 
-	def get_withholding_tax_amount(self, tax_status):
-		return get_withholding_tax_amount(self.transaction_date, self.item_code, tax_status, self.company)
+		if self.meta.has_field('qty'):
+			self.calculate_grand_total()
+
+		self.calculate_contribution()
+
+	def calculate_grand_total(self):
+		self.total_vehicle_amount = flt(flt(self.vehicle_amount) * cint(self.qty),
+			self.precision('total_vehicle_amount'))
+		self.total_fni_amount = flt(flt(self.fni_amount) * cint(self.qty),
+			self.precision('total_fni_amount'))
+		self.total_withholding_tax_amount = flt(flt(self.withholding_tax_amount) * cint(self.qty),
+			self.precision('total_withholding_tax_amount'))
+
+		self.total_before_discount = flt(self.total_vehicle_amount + self.total_fni_amount
+			+ self.total_withholding_tax_amount, self.precision('total_before_discount'))
+
+		self.total_discount = flt(self.total_discount, self.precision('total_discount'))
+		self.grand_total = flt(self.total_before_discount - self.total_discount,
+			self.precision('grand_total'))
+
+		self.set_grand_total_in_words()
 
 	def calculate_contribution(self):
+		grand_total = self.get('grand_total') or self.get('invoice_total')
 		total = 0.0
 		sales_team = self.get("sales_team", [])
 		for sales_person in sales_team:
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.invoice_total * sales_person.allocated_percentage / 100.0,
+				flt(grand_total) * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
 
 			total += sales_person.allocated_percentage
@@ -170,11 +189,23 @@ class VehicleBookingController(AccountsController):
 		from frappe.utils import money_in_words
 		self.in_words = money_in_words(self.invoice_total, self.company_currency)
 
+	def set_grand_total_in_words(self):
+		from frappe.utils import money_in_words
+		self.total_in_words = money_in_words(self.grand_total, self.company_currency)
+
+	def get_withholding_tax_amount(self, tax_status):
+		return get_withholding_tax_amount(self.transaction_date, self.item_code, tax_status, self.company)
+
 	def validate_amounts(self):
 		for field in ['vehicle_amount', 'invoice_total']:
 			self.validate_value(field, '>', 0)
 		for field in ['fni_amount', 'withholding_tax_amount']:
 			self.validate_value(field, '>=', 0)
+
+		if self.meta.has_field('qty'):
+			self.validate_value('qty', '>', 0)
+		if self.meta.has_field('total_discount'):
+			self.validate_value('total_discount', '>=', 0)
 
 	def validate_payment_schedule(self):
 		self.validate_payment_schedule_dates()

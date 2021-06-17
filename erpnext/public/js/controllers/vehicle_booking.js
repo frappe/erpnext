@@ -319,6 +319,14 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		this.calculate_taxes_and_totals();
 	},
 
+	qty: function () {
+		this.calculate_taxes_and_totals();
+	},
+
+	total_discount: function () {
+		this.calculate_taxes_and_totals();
+	},
+
 	allocated_percentage: function () {
 		this.calculate_taxes_and_totals();
 	},
@@ -329,27 +337,53 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		this.frm.doc.invoice_total = flt(this.frm.doc.vehicle_amount + this.frm.doc.fni_amount + this.frm.doc.withholding_tax_amount,
 			precision('invoice_total'));
 
-		if (this.frm.doc.docstatus === 0) {
+		this.frm.doc.in_words = "";
+
+		if (frappe.meta.has_field(this.frm.doc.doctype, "qty")) {
+			this.calculate_grand_total();
+		}
+
+		this.calculate_contribution();
+		this.reset_outstanding_amount();
+
+		this.frm.refresh_fields();
+	},
+
+	calculate_grand_total: function () {
+		this.frm.doc.total_vehicle_amount = flt(flt(this.frm.doc.vehicle_amount) * cint(this.frm.doc.qty),
+			precision('total_vehicle_amount'));
+		this.frm.doc.total_fni_amount = flt(flt(this.frm.doc.fni_amount) * cint(this.frm.doc.qty),
+			precision('total_fni_amount'));
+		this.frm.doc.total_withholding_tax_amount = flt(flt(this.frm.doc.withholding_tax_amount) * cint(this.frm.doc.qty),
+			precision('total_withholding_tax_amount'));
+
+		this.frm.doc.total_before_discount = flt(this.frm.doc.total_vehicle_amount + this.frm.doc.total_fni_amount
+			+ this.frm.doc.total_withholding_tax_amount, precision('total_before_discount'));
+
+		this.frm.doc.total_discount = flt(this.frm.doc.total_discount, precision('total_discount'));
+		this.frm.doc.grand_total = flt(this.frm.doc.total_before_discount - this.frm.doc.total_discount,
+			precision('grand_total'));
+
+		this.frm.doc.total_in_words = "";
+	},
+
+	reset_outstanding_amount: function () {
+		if (this.frm.doc.docstatus === 0 && this.frm.doc.doctype == "Vehicle Booking Order") {
 			this.frm.doc.customer_advance = 0;
 			this.frm.doc.supplier_advance = 0;
 			this.frm.doc.customer_outstanding = this.frm.doc.invoice_total;
 			this.frm.doc.supplier_outstanding = this.frm.doc.invoice_total;
 		}
-
-		this.calculate_contribution();
-
-		this.frm.doc.in_words = "";
-
-		this.frm.refresh_fields();
 	},
 
 	calculate_contribution: function() {
 		var me = this;
+		var grand_total = me.frm.doc.grand_total || me.frm.doc.invoice_total;
 		$.each(this.frm.doc.sales_team || [], function(i, sales_person) {
 			frappe.model.round_floats_in(sales_person);
 			if(sales_person.allocated_percentage) {
 				sales_person.allocated_amount = flt(
-					me.frm.doc.invoice_total * sales_person.allocated_percentage / 100.0,
+					flt(grand_total) * sales_person.allocated_percentage / 100.0,
 					precision("allocated_amount", sales_person));
 			}
 		});
