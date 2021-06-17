@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2020-02-28 14:05:33.593871",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -10,7 +9,8 @@
   "quantity",
   "price",
   "net_pay",
-  "reference"
+  "reference",
+  "sale_amount"
  ],
  "fields": [
   {
@@ -56,11 +56,16 @@
    "hidden": 1,
    "label": "Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "sale_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Sales Amount"
   }
  ],
  "istable": 1,
- "links": [],
- "modified": "2020-03-19 03:40:57.797563",
+ "modified": "2021-06-16 15:49:46.560621",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment Item",
