@@ -247,6 +247,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						in_list_view:1
 					},
 					{
+						fieldtype:'Data',
+						fieldname:'item_name',
+						label: __('Item Name'),
+						read_only:1,
+						in_list_view:1
+					},
+					{
 						fieldtype:'Float',
 						read_only:1,
 						fieldname:'qty',
