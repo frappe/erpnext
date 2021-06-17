@@ -42,7 +42,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 			if len(child_tasks):
 				task.children = child_tasks
 		task_nest.append(task)
-	return list(filter(lambda x: x.parent_task == None, tasks))
+	return list(filter(lambda x: not x.parent_task, tasks))
 
 @frappe.whitelist()
 def get_task_html(project, start=0, item_status=None):
