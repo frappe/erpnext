@@ -78,6 +78,32 @@ class Customer(TransactionBase):
 			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
+	@frappe.whitelist()
+	def get_customer_group_details(self):
+		doc = frappe.get_doc('Customer Group', self.customer_group)
+		self.accounts = self.credit_limits = []
+		self.payment_terms = self.default_price_list = ""
+
+		if not self.accounts and doc.accounts:
+			for account in doc.accounts:
+				child = self.append('accounts')
+				child.company = account.company
+				child.account = account.account
+			self.save()
+
+		if not self.credit_limits and doc.credit_limits:
+			for credit in doc.credit_limits:
+				child = self.append('credit_limits')
+				child.company = credit.company
+				child.credit_limit = credit.credit_limit
+			self.save()
+
+		if not self.payment_terms and doc.payment_terms:
+			self.payment_terms = doc.payment_terms
+
+		if not self.default_price_list and doc.default_price_list:
+			self.default_price_list = doc.default_price_list
+
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
 
