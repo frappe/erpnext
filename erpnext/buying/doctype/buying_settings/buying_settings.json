@@ -112,10 +112,10 @@
   },
   {
    "default": "1",
-   "description": "When Checked, Rejected Quantity Will Be Considered While Making Purchase Invoice From Purchase Receipt.",
+   "description": "If checked, Rejected Quantity will be considered while making Purchase Invoice from Purchase Receipt.",
    "fieldname": "consider_rejected_quantity_for_purchase_invoice",
    "fieldtype": "Check",
-   "label": "Consider Rejected Quantity For Purchase Invoice"
+   "label": "Consider Rejected Quantity in Purchase Invoice"
   }
  ],
  "icon": "fa fa-cog",
@@ -123,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-25 23:40:30.871116",
+ "modified": "2021-06-17 16:39:55.707713",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
