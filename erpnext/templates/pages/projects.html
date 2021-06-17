@@ -115,8 +115,9 @@
 
 {% macro task_row(task) %}
 <div class="row {% if task.children %} font-weight-bold {% else %} mt-5 {% endif %}">
-	<div class="col-xs-4 {% if task.parent_task %} text-center {% endif %}">{{ task.name }}</div>
-	<a class="transaction-item-link" href="/tasks?name={{ task.name | urlencode }}">Link</a>
+	<div class="col-xs-4 {% if task.parent_task %} text-center {% endif %}">
+		<a class="nav-link" style="color: inherit;" href="/tasks?name={{ task.name | urlencode }}">{{ task.name }}</a>
+	</div>
 	<div class="col-xs-2">{{ task.status }}</div>
 	<div class="col-xs-2">{{ task.exp_end_date }}</div>
 	<div class="col-xs-2">

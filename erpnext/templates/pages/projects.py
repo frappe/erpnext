@@ -38,18 +38,11 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	task_nest = []
 	for task in tasks:
 		if task.is_group:
-			task.children = []
 			child_tasks = list(filter(lambda x: x.parent_task == task.name, tasks))
 			if len(child_tasks):
-				for child_task in child_tasks:
-					present_in_nesting = next((index for (index, d) in enumerate(task_nest) if d.name == child_task.name), None)
-					if present_in_nesting:
-						task_nest.pop(present_in_nesting)
-					index = next((index for (index, d) in enumerate(tasks) if d.name == child_task.name), None)
-					tasks.pop(index)
-					task.children.append(child_task)
+				task.children = child_tasks
 		task_nest.append(task)
-	return task_nest
+	return list(filter(lambda x: x.parent_task == None, tasks))
 
 @frappe.whitelist()
 def get_task_html(project, start=0, item_status=None):
