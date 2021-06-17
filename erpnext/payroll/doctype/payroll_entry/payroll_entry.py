@@ -42,7 +42,7 @@ class PayrollEntry(Document):
 				emp_with_sal_slip.append(employee_details.employee)
 
 		if len(emp_with_sal_slip):
-			frappe.throw(_("Salary Slip already exists for {0} ").format(comma_and(emp_with_sal_slip)))
+			frappe.throw(_("Salary Slip already exists for {0}").format(comma_and(emp_with_sal_slip)))
 
 	def on_cancel(self):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
@@ -287,7 +287,7 @@ class PayrollEntry(Document):
 
 	def update_accounting_dimensions(self, row, accounting_dimensions):
 		for dimension in accounting_dimensions:
-			row.update({ dimension: self.get(dimension)})
+			row.update({dimension: self.get(dimension)})
 
 		return row
 
