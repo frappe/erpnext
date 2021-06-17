@@ -989,7 +989,7 @@ class SalesInvoice(SellingController):
 
 			for payment_mode in self.payments:
 				if skip_change_gl_entries and payment_mode.account == self.account_for_change_amount:
-					payment_mode.base_amount -= self.change_amount
+					payment_mode.base_amount -= flt(self.change_amount)
 
 				if payment_mode.amount:
 					# POS, make payment entries
