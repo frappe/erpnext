@@ -46,6 +46,11 @@ def get_data():
 			{
 				'label': _('Subscriptions'),
 				'items': ['Subscription']
-			}
+			},
+			 {
+                                'label': _('Requests'),
+                                'items': ['FseRequest']
+                        }
+
 		]
 	}
