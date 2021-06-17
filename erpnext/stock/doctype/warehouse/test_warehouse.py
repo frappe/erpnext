@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import random
 import unittest
 
 import frappe
@@ -12,6 +11,7 @@ from frappe.test_runner import make_test_records
 import erpnext
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+from erpnext.stock.doctype.item.test_item import create_item
 
 test_records = frappe.get_test_records('Warehouse')
 
@@ -103,9 +103,8 @@ class TestWarehouse(unittest.TestCase):
 			warehouse_ids.append(warehouse_id)
 
 		item_names = [f'_Test Item {i} for Unlinking' for i in range(2)]
-		for item in item_names:
-			create_item(item)
-			assign_default_warehouses_to_item(item, warehouse_ids, company)
+		for item, warehouse in zip(item_names, warehouse_ids):
+			create_item(item, warehouse=warehouse, company=company)
 
 		# Delete warehouses
 		for warehouse in warehouse_ids:
@@ -113,10 +112,10 @@ class TestWarehouse(unittest.TestCase):
 
 		# Check Item existance
 		for item in item_names:
-			item_exists = frappe.db.exists("Item", item)
-			self.assertTrue(item_exists, item)
-			if not item_exists:
-				continue
+			self.assertTrue(
+				bool(frappe.db.exists("Item", item)),
+				f"{item} doesn't exist"
+			)
 
 			item_doc = frappe.get_doc("Item", item)
 			for item_default in item_doc.item_defaults:
@@ -182,24 +181,3 @@ def get_group_stock_account(company, company_abbr=None):
 			company_abbr = frappe.get_cached_value("Company", company, 'abbr')
 		group_stock_account = "Current Assets - " + company_abbr
 	return group_stock_account
-
-def assign_default_warehouses_to_item(item_code, default_warehouses, company):
-	warehouse = random.choice(default_warehouses)
-	item_default = frappe.new_doc("Item Default")
-	item_default.default_warehouse = warehouse
-	item_default.parent = item_code
-	item_default.company = company
-
-	item_doc = frappe.get_doc('Item', item_code)
-	item_doc.item_defaults = [item_default]
-	item_doc.save()
-
-def create_item(item_code):
-	if frappe.db.exists("Item", item_code):
-		return item_code
-
-	item = frappe.new_doc("Item")
-	item.item_code = item_code
-	item.item_group = "All Item Groups"
-	item.save()
-	return item_code
