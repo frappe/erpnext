@@ -19,6 +19,8 @@
   "products_table",
   "totals_section",
   "total",
+  "total_advance",
+  "outstanding_balance",
   "contact_section",
   "customer_address",
   "phone_number"
@@ -127,10 +129,22 @@
   {
    "fieldname": "columna_general",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_advance",
+   "fieldtype": "Currency",
+   "label": "Total Advance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_balance",
+   "fieldtype": "Currency",
+   "label": "Outstanding Balance",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-20 15:47:46.589398",
+ "modified": "2021-06-15 10:48:28.075185",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
