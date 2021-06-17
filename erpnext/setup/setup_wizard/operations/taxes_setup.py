@@ -11,6 +11,9 @@ from frappe import _
 
 
 def setup_taxes_and_charges(company_name: str, country: str):
+	if not frappe.db.exists('Company', company_name):
+		frappe.throw(_('Company {} does not exist yet. Taxes setup aborted.').format(company_name))
+
 	file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'country_wise_tax.json')
 	with open(file_path, 'r') as json_file:
 		tax_data = json.load(json_file)
@@ -23,7 +26,7 @@ def setup_taxes_and_charges(company_name: str, country: str):
 	if 'chart_of_accounts' not in country_wise_tax:
 		country_wise_tax = simple_to_detailed(country_wise_tax)
 
-	from_detailed_data(company_name, country_wise_tax.get('chart_of_accounts'))
+	from_detailed_data(company_name, country_wise_tax)
 
 
 def simple_to_detailed(templates):
@@ -74,10 +77,16 @@ def simple_to_detailed(templates):
 def from_detailed_data(company_name, data):
 	"""Create Taxes and Charges Templates from detailed data."""
 	coa_name = frappe.db.get_value('Company', company_name, 'chart_of_accounts')
-	tax_templates = data.get(coa_name) or data.get('*')
-	sales_tax_templates = tax_templates.get('sales_tax_templates') or tax_templates.get('*')
-	purchase_tax_templates = tax_templates.get('purchase_tax_templates') or tax_templates.get('*')
-	item_tax_templates = tax_templates.get('item_tax_templates') or tax_templates.get('*')
+	coa_data = data.get('chart_of_accounts', {})
+	tax_templates = coa_data.get(coa_name) or coa_data.get('*', {})
+	tax_categories = data.get('tax_categories')
+	sales_tax_templates = tax_templates.get('sales_tax_templates') or tax_templates.get('*', {})
+	purchase_tax_templates = tax_templates.get('purchase_tax_templates') or tax_templates.get('*', {})
+	item_tax_templates = tax_templates.get('item_tax_templates') or tax_templates.get('*', {})
+
+	if tax_categories:
+		for tax_category in tax_categories:
+			make_tax_catgory(tax_category)
 
 	if sales_tax_templates:
 		for template in sales_tax_templates:
@@ -233,3 +242,14 @@ def get_or_create_tax_group(company_name, root_type):
 	tax_group_name = tax_group_account.name
 
 	return tax_group_name
+
+
+def make_tax_catgory(tax_category):
+	doctype = 'Tax Category'
+	if isinstance(tax_category, str):
+		tax_category = {'title': tax_category}
+
+	tax_category['doctype'] = doctype
+	if not frappe.db.exists(doctype, tax_category['title']):
+		doc = frappe.get_doc(tax_category)
+		doc.insert(ignore_permissions=True)
