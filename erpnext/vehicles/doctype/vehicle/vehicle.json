@@ -560,7 +560,8 @@
    "fieldname": "dispatch_date",
    "fieldtype": "Date",
    "label": "Dispatch Date",
-   "no_copy": 1
+   "no_copy": 1,
+   "permlevel": 1
   },
   {
    "fetch_from": "item_code.variant_of",
@@ -631,7 +632,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-06-14 23:13:08.064804",
+ "modified": "2021-06-16 22:25:27.987042",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -661,6 +662,12 @@
    "report": 1,
    "role": "Vehicle Stock User",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Vehicle Stock User",
    "write": 1
   },
   {
