@@ -176,13 +176,8 @@ class Asset(AccountsController):
 
 		for d in self.get('finance_books'):
 			self.validate_asset_finance_books(d)
-
-			start = 0
-			for n in range(len(self.schedules)):
-				if not self.schedules[n].journal_entry:
-					del self.schedules[n:]
-					start = n
-					break
+			
+			start = self.clear_depreciation_schedule()
 
 			if d.value_after_depreciation: 
 				value_after_depreciation = (flt(d.value_after_depreciation) -
@@ -295,6 +290,15 @@ class Asset(AccountsController):
 							"finance_book": d.finance_book,
 							"finance_book_id": d.idx
 						})
+
+	def clear_depreciation_schedule(self):
+		start = 0
+		for n in range(len(self.schedules)):
+			if not self.schedules[n].journal_entry:
+				del self.schedules[n:]
+				start = n
+				break
+		return start
 
 	def check_is_pro_rata(self, row):
 		has_pro_rata = False
