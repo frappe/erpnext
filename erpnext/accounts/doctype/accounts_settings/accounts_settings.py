@@ -5,6 +5,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import cint
 from frappe.model.document import Document
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
@@ -24,7 +25,7 @@ class AccountsSettings(Document):
 	def validate_stale_days(self):
 		if not self.allow_stale and cint(self.stale_days) <= 0:
 			frappe.msgprint(
-				"Stale Days should start from 1.", title='Error', indicator='red',
+				_("Stale Days should start from 1."), title='Error', indicator='red',
 				raise_exception=1)
 
 	def enable_payment_schedule_in_print(self):

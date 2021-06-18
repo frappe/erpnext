@@ -185,10 +185,10 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	for d in gl_map:
 		if d.account == round_off_account:
 			round_off_gle = d
-			if d.debit_in_account_currency:
-				debit_credit_diff -= flt(d.debit_in_account_currency)
+			if d.debit:
+				debit_credit_diff -= flt(d.debit)
 			else:
-				debit_credit_diff += flt(d.credit_in_account_currency)
+				debit_credit_diff += flt(d.credit)
 			round_off_account_exists = True
 
 	if round_off_account_exists and abs(debit_credit_diff) <= (1.0 / (10**precision)):

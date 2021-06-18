@@ -241,10 +241,8 @@ erpnext.PointOfSale.Controller = class {
 			events: {
 				get_frm: () => this.frm,
 
-				cart_item_clicked: (item_code, batch_no, uom) => {
-					const search_field = batch_no ? 'batch_no' : 'item_code';
-					const search_value = batch_no || item_code;
-					const item_row = this.frm.doc.items.find(i => i[search_field] === search_value && i.uom === uom);
+				cart_item_clicked: (item_code, batch_no, uom, rate) => {
+					const item_row = this.get_item_from_frm(item_code, batch_no, uom, rate);
 					this.item_details.toggle_item_details_section(item_row);
 				},
 
@@ -275,18 +273,25 @@ erpnext.PointOfSale.Controller = class {
 					this.cart.toggle_numpad(minimize);
 				},
 
-				form_updated: async (cdt, cdn, fieldname, value) => {
+				form_updated: (cdt, cdn, fieldname, value) => {
 					const item_row = frappe.model.get_doc(cdt, cdn);
 					if (item_row && item_row[fieldname] != value) {
 
-						const { item_code, batch_no, uom } = this.item_details.current_item;
+						const { item_code, batch_no, uom, rate } = this.item_details.current_item;
 						const event = {
 							field: fieldname,
 							value,
-							item: { item_code, batch_no, uom }
+							item: { item_code, batch_no, uom, rate }
 						}
 						return this.on_cart_update(event)
 					}
+
+					return Promise.resolve();
+				},
+
+				highlight_cart_item: (item) => {
+					const cart_item = this.cart.get_cart_item(item);
+					this.cart.toggle_item_highlight(cart_item);
 				},
 
 				item_field_focused: (fieldname) => {
@@ -501,8 +506,8 @@ erpnext.PointOfSale.Controller = class {
 		let item_row = undefined;
 		try {
 			let { field, value, item } = args;
-			const { item_code, batch_no, serial_no, uom } = item;
-			item_row = this.get_item_from_frm(item_code, batch_no, uom);
+			const { item_code, batch_no, serial_no, uom, rate } = item;
+			item_row = this.get_item_from_frm(item_code, batch_no, uom, rate);
 
 			const item_selected_from_selector = field === 'qty' && value === "+1"
 
@@ -535,7 +540,7 @@ erpnext.PointOfSale.Controller = class {
 
 				item_selected_from_selector && (value = flt(value))
 
-				const args = { item_code, batch_no, [field]: value };
+				const args = { item_code, batch_no, rate, [field]: value };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -550,9 +555,11 @@ erpnext.PointOfSale.Controller = class {
 					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
 
 				await this.trigger_new_item_events(item_row);
-
-				this.check_serial_batch_selection_needed(item_row) && this.edit_item_details_of(item_row);
+				
 				this.update_cart_html(item_row);
+
+				this.item_details.$component.is(':visible') && this.edit_item_details_of(item_row);
+				this.check_serial_batch_selection_needed(item_row) && this.edit_item_details_of(item_row);
 			}
 
 		} catch (error) {
@@ -563,12 +570,13 @@ erpnext.PointOfSale.Controller = class {
 		}
 	}
 
-	get_item_from_frm(item_code, batch_no, uom) {
+	get_item_from_frm(item_code, batch_no, uom, rate) {
 		const has_batch_no = batch_no;
 		return this.frm.doc.items.find(
 			i => i.item_code === item_code
 				&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 				&& (i.uom === uom)
+				&& (i.rate == rate)
 		);
 	}
 
