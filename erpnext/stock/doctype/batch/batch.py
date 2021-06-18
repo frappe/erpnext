@@ -262,7 +262,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	for batch in batches:
 		if cint(qty) <= cint(batch.qty):
 			batch_no = batch.batch_id
-			if (alert_date > getdate(batch.expiry_date)):
+			if batch.expiry_date and (alert_date > getdate(batch.expiry_date)):
 				frappe.msgprint("Warning: Batch {0} for Item {1} will expire in less than 6 months. Expiry date: <strong>{2}</strong>".format(batch.batch_id, item_code, batch.expiry_date))
 			break
 
