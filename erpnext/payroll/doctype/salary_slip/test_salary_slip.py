@@ -23,6 +23,8 @@ class TestSalarySlip(unittest.TestCase):
 
 	def tearDown(self):
 		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 0)
+		frappe.db.sql("DELETE FROM `tabOvertime Type`")
+		frappe.db.sql("DELETE FROM `tabOvertime Slip`")
 		frappe.set_user("Administrator")
 
 	def test_payment_days_based_on_attendance(self):
@@ -459,6 +461,63 @@ class TestSalarySlip(unittest.TestCase):
 
 		# undelete fixture data
 		frappe.db.rollback()
+
+
+	def test_overtime_calculation(self):
+		from erpnext.payroll.doctype.overtime_type.test_overtime_type import create_overtime_type
+		from erpnext.payroll.doctype.overtime_slip.test_overtime_slip import create_overtime_slip
+		from erpnext.payroll.doctype.overtime_slip.test_overtime_slip import create_attendance_records_for_overtime
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
+		employee = make_employee("overtime_calc@salary.slip")
+		salary_structure = make_salary_structure("structure for Overtime 2", "Monthly", employee=employee)
+
+		frappe.db.set_value("Payroll Settings", None, "overtime_based_on", "Attendance")
+		frappe.db.set_value("Payroll Settings", None, "fetch_standard_working_hours_from_shift_type", 0)
+		self.get_salary_component_for_overtime()
+		frappe.db.set_value("Payroll Settings", None, "overtime_salary_component", "Overtime Allowance")
+
+		overtime_type = create_overtime_type(employee = employee).name
+		create_attendance_records_for_overtime(employee, overtime_type=overtime_type)
+
+		slip = create_overtime_slip(employee)
+		slip.status = "Approved"
+		slip.submit()
+
+		salary_slip = make_salary_slip(salary_structure.name, employee = employee)
+		overtime_component_details = {}
+		applicable_amount = 0
+
+		for earning in salary_slip.earnings:
+			if earning.salary_component == "Overtime Allowance":
+				overtime_component_details = earning
+
+			if earning.salary_component == "Basic Salary":
+				applicable_amount = earning.default_amount
+
+		self.assertIn("Overtime Allowance", overtime_component_details.salary_component)
+		self.assertEqual(slip.name, overtime_component_details.overtime_slips)
+
+		daily_wages = applicable_amount/ salary_slip.total_working_days
+		hourly_wages = daily_wages/ frappe.db.get_single_value("Hr Settings", "standard_working_hours")
+		overtime_amount = hourly_wages * 4 * 1.25
+		#since multiplier is defined as 1.25 and
+
+		self.assertEquals(flt(overtime_amount, 2), flt(overtime_component_details.amount, 2) )
+
+
+		# formula = sum(applicable_component)/(working_days)/ daily_standard_working_time * overtime hours * multiplier
+
+	def get_salary_component_for_overtime(self):
+		component = [{
+			"salary_component": 'Overtime Allowance',
+			"abbr":'OA',
+			"type": "Earning",
+			"amount_based_on_formula": 0
+		}]
+
+		company = erpnext.get_default_company()
+		make_salary_component(component, test_tax = 0, company_list=[company])
 
 	def make_activity_for_employee(self):
 		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")

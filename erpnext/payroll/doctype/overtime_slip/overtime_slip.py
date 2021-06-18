@@ -9,13 +9,17 @@ from erpnext.payroll.doctype.gratuity.gratuity import get_salary_structure
 from frappe.model.document import Document
 class OvertimeSlip(Document):
 	def validate(self):
+		if not (self.from_date or self.to_date or self.payroll_frequency):
+			date = self.from_date or self.posting_date
+			data = get_frequency_and_dates(self.employee, date)
+
+			self.from_date = data[0].start_date
+			self.to_date = data[0].end_date
+			self.payroll_frequency = data[1]
+
 		self.validate_overlap()
 		if self.from_date >= self.to_date:
 			frappe.throw(_("From date can not be greater than To date"))
-
-		if not (self.from_date or self.to_date or self.payroll_frequency):
-			date = self.from_date or self.posting_date
-			get_frequency_and_dates(self.employee, date)
 
 		if not len(self.overtime_details):
 			self.get_emp_and_overtime_details()
@@ -29,7 +33,8 @@ class OvertimeSlip(Document):
 			"docstatus": ("<", 2),
 			"employee":  self.employee,
 			"to_date": (">=", self.from_date),
-			"from_date": ("<=", self.to_date)
+			"from_date": ("<=", self.to_date),
+			"name": ("!=", self.name)
 		})
 		if len(overtime_slips):
 			form_link = get_link_to_form("Overtime Slip", overtime_slips[0].name)
@@ -119,16 +124,12 @@ class OvertimeSlip(Document):
 					AND (
 						overtime_duration IS NOT NULL OR overtime_duration != '00:00:00.000000'
 					)
-			""", (getdate(self.from_date), getdate(self.to_date), self.employee), as_dict=1, debug = 1)
+			""", (getdate(self.from_date), getdate(self.to_date), self.employee), as_dict=1)
 			return records
 		return []
 
 	def get_timesheet_record(self):
 		if self.from_date and self.to_date:
-
-			"""SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate
-			FROM Orders
-			INNER JOIN Customers ON Orders.CustomerID=Customers.CustomerID;"""
 
 			records = frappe.db.sql("""SELECT ts.name, ts.start_date, ts.end_date, tsd.overtime_on, tsd.overtime_type, tsd.overtime_hours
 				FROM `TabTimesheet` AS ts
@@ -141,7 +142,7 @@ class OvertimeSlip(Document):
 					AND (
 						total_overtime_hours IS NOT NULL OR total_overtime_hours != 0
 					)
-			""", {"from_date": get_datetime(self.from_date), "to_date": get_datetime(self.to_date),"employee": self.employee}, as_dict=1, debug = 1)
+			""", {"from_date": get_datetime(self.from_date), "to_date": get_datetime(self.to_date),"employee": self.employee}, as_dict=1)
 			return records
 		return []
 
@@ -155,7 +156,6 @@ def get_standard_working_hours(employee, date):
 		, as_dict=1, debug=1)
 
 	standard_working_time = 0
-
 
 	fetch_from_shift = frappe.db.get_single_value("Payroll Settings", "fetch_standard_working_hours_from_shift_type")
 

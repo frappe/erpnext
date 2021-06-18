@@ -84,18 +84,16 @@ class Timesheet(Document):
 								frappe.bold("Overtime On"))
 							)
 					maximum_overtime_hours_allowed = frappe.db.get_single_value("Payroll Settings", "maximum_overtime_hours_allowed")
-
-					if data.overtime_hours <= maximum_overtime_hours_allowed:
-						total_overtime_hours += data.overtime_hours
-					else:
+					if int(maximum_overtime_hours_allowed) and data.overtime_hours > maximum_overtime_hours_allowed:
 						frappe.throw(_("Row {0}: Overtime Hours can not be greater than {1} for a day. You can change this in Payroll Settings").
 						format(
 							str(data.idx),
 							frappe.bold(str(maximum_overtime_hours_allowed))
 						))
+					else:
+						total_overtime_hours += data.overtime_hours
 				else:
 					frappe.throw(_('Please Set "Calculate Overtime Based On" to TimeSheet In Payroll Settings'))
-
 
 		if total_overtime_hours:
 			self.total_overtime_hours = total_overtime_hours
@@ -140,19 +138,7 @@ class Timesheet(Document):
 		self.update_task_and_project()
 
 	def on_submit(self):
-		self.validate_mandatory_fields()
 		self.update_task_and_project()
-
-	def validate_mandatory_fields(self):
-		for data in self.time_logs:
-			if not data.from_time and not data.to_time:
-				frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
-
-			if not data.activity_type and self.employee:
-				frappe.throw(_("Row {0}: Activity Type is mandatory.").format(data.idx))
-
-			if flt(data.hours) == 0.0:
-				frappe.throw(_("Row {0}: Hours value must be greater than zero.").format(data.idx))
 
 	def update_task_and_project(self):
 		tasks, projects = [], []

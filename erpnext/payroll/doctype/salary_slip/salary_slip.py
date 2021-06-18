@@ -572,7 +572,6 @@ class SalarySlip(TransactionBase):
 					if "applicable_amount" not in overtime_types_details[detail.overtime_type].keys():
 						component_amount = sum([data.default_amount for data in self.earnings if data.salary_component in \
 						overtime_types_details[detail.overtime_type]["components"] and not data.get('additional_salary', None)])
-
 						overtime_types_details[detail.overtime_type]["applicable_daily_amount"] = component_amount/self.total_working_days
 
 				standard_working_hours = detail.standard_working_time/3600

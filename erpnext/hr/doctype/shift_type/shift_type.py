@@ -24,7 +24,7 @@ class ShiftType(Document):
 		start_time = self.start_time.split(":")
 
 		shift_end = timedelta(hours = int(end_time[0]), minutes = int(end_time[1]), seconds = int(end_time[2]))
-		shift_start = timedelta(hours =int(start_time[0]), minutes = int(start_time[1]), seconds = int(start_time[2]))
+		shift_start = timedelta(hours = int(start_time[0]), minutes = int(start_time[1]), seconds = int(start_time[2]))
 
 		if shift_end > shift_start:
 			time_difference = shift_end - shift_start

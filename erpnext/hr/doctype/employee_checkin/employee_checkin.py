@@ -102,7 +102,6 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 		employee_doc = frappe.get_doc('Employee', employee)
 		if not frappe.db.exists('Attendance', {'employee':employee, 'attendance_date':attendance_date, 'docstatus':('!=', '2')}):
 
-			print(working_hours)
 			working_timedelta = '00:00:00'
 			working_time = None
 			working_time = modf(working_hours)
@@ -153,8 +152,6 @@ def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 	"""
 	total_hours = 0
 	in_time = out_time = None
-	print("Madar Chod")
-	print(logs)
 	if check_in_out_type == 'Alternating entries as IN and OUT during the same shift':
 		in_time = logs[0].time
 		if len(logs) >= 2:

@@ -59,7 +59,7 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 
-		if (frm.doc.docstatus < 1) {
+		if (frm.doc.docstatus < 1 && !cur_frm.doc.__islocal) {
 
 			let button = 'Start Timer';
 			$.each(frm.doc.time_logs || [], function (i, row) {

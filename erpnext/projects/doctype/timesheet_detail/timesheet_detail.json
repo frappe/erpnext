@@ -53,14 +53,16 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Activity Type",
-   "options": "Activity Type"
+   "options": "Activity Type",
+   "reqd": 1
   },
   {
    "columns": 2,
    "fieldname": "from_time",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "From Time"
+   "label": "From Time",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_3",
@@ -76,12 +78,14 @@
    "fieldname": "hours",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Working Hours"
+   "label": "Working Hours",
+   "reqd": 1
   },
   {
    "fieldname": "to_time",
    "fieldtype": "Datetime",
-   "label": "To Time"
+   "label": "To Time",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -308,7 +312,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-10 15:17:20.846091",
+ "modified": "2021-06-17 17:44:09.306304",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet Detail",
