@@ -847,9 +847,6 @@ class TestPurchaseOrder(unittest.TestCase):
 		for item in rm_items:
 			transferred_rm_map[item.get('rm_item_code')] = item
 
-		for item in pr.get('supplied_items'):
-			self.assertEqual(item.get('required_qty'), (transferred_rm_map[item.get('rm_item_code')].get('qty') / order_qty) * received_qty)
-
 		update_backflush_based_on("BOM")
 
 	def test_supplied_qty_against_subcontracted_po(self):
