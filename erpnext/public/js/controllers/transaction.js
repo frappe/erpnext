@@ -864,9 +864,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		}
 
-		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
-		else var date = this.frm.doc.transaction_date;
-
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
 			erpnext.utils.get_shipping_address(this.frm, function(){
