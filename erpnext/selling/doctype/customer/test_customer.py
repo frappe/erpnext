@@ -27,6 +27,38 @@ class TestCustomer(unittest.TestCase):
 	def tearDown(self):
 		set_credit_limit('_Test Customer', '_Test Company', 0)
 
+	def test_get_customer_group_details(self):
+		doc = frappe.get_doc("Customer Group", "Commercial")
+		doc.payment_terms = "_Test Payment Term Template 3"
+		doc.accounts = []
+		doc.default_price_list = "Standard Buying"
+		doc.credit_limits = []
+		test_account_details = {
+			"company": "_Test Company",
+			"account": "Creditors - _TC",
+		}
+		test_credit_limits = {
+			"company": "_Test Company",
+			"credit_limit": 350000
+		}
+		doc.append("accounts", test_account_details)
+		doc.append("credit_limits", test_credit_limits)
+		doc.save()
+
+		doc = frappe.get_doc("Customer", "_Test Customer")
+		doc.customer_group = "Commercial"
+		doc.payment_terms = doc.default_price_list = ""
+		doc.accounts = doc.credit_limits= []
+		doc.save()
+		doc.get_customer_group_details()
+		self.assertEqual(doc.payment_terms, "_Test Payment Term Template 3")
+
+		self.assertEqual(doc.accounts[0].company, "_Test Company")
+		self.assertEqual(doc.accounts[0].account, "Creditors - _TC")
+
+		self.assertEqual(doc.credit_limits[0].company, "_Test Company")
+		self.assertEqual(doc.credit_limits[0].credit_limit, 350000 )
+
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
 
