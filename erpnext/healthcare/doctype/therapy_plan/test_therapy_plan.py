@@ -29,7 +29,7 @@ class TestTherapyPlan(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'Completed')
 
 		patient, medical_department, practitioner = create_healthcare_docs()
-		appointment = create_appointment(patient, practitioner, nowdate())		
+		appointment = create_appointment(patient, practitioner, nowdate())
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company', appointment.name)
 		session = frappe.get_doc(session)
 		session.submit()

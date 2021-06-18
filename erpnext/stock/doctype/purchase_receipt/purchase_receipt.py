@@ -497,7 +497,7 @@ class PurchaseReceipt(BuyingController):
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
 		for d in self.get("items"):
-			if d.purchase_invoice and d.purchase_invoice_item:
+			if d.get("purchase_invoice") and d.get("purchase_invoice_item"):
 				d.db_set('billed_amt', d.amount, update_modified=update_modified)
 			elif d.purchase_order_item:
 				updated_pr += update_billed_amount_based_on_po(d.purchase_order_item, update_modified)
@@ -748,4 +748,3 @@ def get_item_account_wise_additional_cost(purchase_document):
 						account.base_amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
-
