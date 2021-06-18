@@ -84,13 +84,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			if (me.frm.doc.is_subcontracted == "Yes") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'is_sub_contracted_item': 1 }
+					filters:{ 'supplier': me.frm.doc.supplier, 'is_sub_contracted_item': 1 }
 				}
 			}
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_purchase_item': 1}
+					filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1 }
 				}
 			}
 		});
@@ -403,7 +403,8 @@ erpnext.buying.get_default_bom = function(frm) {
 				type: "GET",
 				method: "erpnext.stock.get_item_details.get_default_bom",
 				args: {
-					"item_code": d.item_code,
+					item_code: d.item_code,
+					company:frm.doc.company,
 				},
 				callback: function(r) {
 					if(r) {

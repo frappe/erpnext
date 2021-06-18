@@ -27,7 +27,7 @@ class AccountingDimension(Document):
 		exists = frappe.db.get_value("Accounting Dimension", {'document_type': self.document_type}, ['name'])
 
 		if exists and self.is_new():
-			frappe.throw("Document Type already used as a dimension")
+			frappe.throw(_("Document Type already used as a dimension"))
 
 		if not self.is_new():
 			self.validate_document_type_change()

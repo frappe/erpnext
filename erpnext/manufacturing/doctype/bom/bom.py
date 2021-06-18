@@ -120,7 +120,8 @@ class BOM(WebsiteGenerator):
 		value1 = value2 = value3 = 0
 		if self.items:
 			for row in self.items:
-				if row.type == "RM":
+				item_type = frappe.db.get_value('Item',{'name':row.get('item_code')},'bom_item_type')
+				if item_type == "RM":
 					value1 += flt(row.stock_qty) * flt(row.weight_per_unit)
 					value3 += flt(row.qty) * flt(row.weight_per_unit)
 
