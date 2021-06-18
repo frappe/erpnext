@@ -120,19 +120,23 @@ class AssetRepair(AccountsController):
 			}, item=self)
 		)
 
-		gl_entries.append(
-			self.get_gl_dict({
-				"account": expense_account,
-				"credit": self.total_repair_cost - self.repair_cost,
-				"credit_in_account_currency": self.total_repair_cost - self.repair_cost,
-				"against": repair_and_maintenance_account,
-				"voucher_type": self.doctype,		
-				"voucher_no": self.name,
-				"cost_center": self.cost_center,
-				"posting_date": getdate(),
-				"company": self.company
-			}, item=self)
-		)
+		if self.stock_consumption:
+			# creating GL Entries for each row in Stock Items based on the Stock Entry created for it
+			stock_entry = frappe.get_last_doc('Stock Entry')
+			for item in stock_entry.items:
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.expense_account,
+						"credit": item.amount,
+						"credit_in_account_currency": item.amount,
+						"against": repair_and_maintenance_account,
+						"voucher_type": self.doctype,		
+						"voucher_no": self.name,
+						"cost_center": self.cost_center,
+						"posting_date": getdate(),
+						"company": self.company
+					}, item=self)
+				)
 
 		gl_entries.append(
 			self.get_gl_dict({
