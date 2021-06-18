@@ -469,9 +469,16 @@ class StockReconciliation(StockController):
 	def submit(self):
 		if len(self.items) > 100:
 			msgprint(_("The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"))
-			self.queue_action('submit', timeout=2000)
+			self.queue_action('submit', timeout=4600)
 		else:
 			self._submit()
+
+	def cancel(self):
+		if len(self.items) > 100:
+			msgprint(_("The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"))
+			self.queue_action('cancel', timeout=2000)
+		else:
+			self._cancel()
 
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time, company):

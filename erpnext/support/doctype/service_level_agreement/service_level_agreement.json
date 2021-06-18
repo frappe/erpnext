@@ -1,18 +1,18 @@
 {
  "actions": [],
- "autoname": "format:SLA-{service_level}-{####}",
+ "autoname": "format:SLA-{document_type}-{service_level}-{####}",
  "creation": "2018-12-26 21:08:15.448812",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "enable",
+  "enabled",
   "section_break_2",
-  "service_level",
-  "default_priority",
+  "document_type",
   "default_service_level_agreement",
+  "default_priority",
   "column_break_2",
-  "employee_group",
+  "service_level",
   "holiday_list",
   "entity_section",
   "entity_type",
@@ -20,13 +20,14 @@
   "entity",
   "agreement_details_section",
   "start_date",
-  "active",
   "column_break_7",
   "end_date",
-  "section_break_18",
-  "pause_sla_on",
   "response_and_resolution_time_section",
+  "apply_sla_for_resolution",
   "priorities",
+  "status_details",
+  "sla_fulfilled_on",
+  "pause_sla_on",
   "support_and_resolution_section_break",
   "support_and_resolution"
  ],
@@ -36,7 +37,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Service Level",
+   "label": "Service Level Name",
    "reqd": 1
   },
   {
@@ -51,20 +52,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "employee_group",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Employee Group",
-   "options": "Employee Group"
-  },
-  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "agreement_details_section",
    "fieldtype": "Section Break",
    "label": "Agreement Details"
   },
   {
-   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "start_date",
    "fieldtype": "Date",
    "label": "Start Date"
@@ -81,21 +74,18 @@
    "label": "End Date"
   },
   {
-   "collapsible": 1,
    "fieldname": "response_and_resolution_time_section",
    "fieldtype": "Section Break",
    "label": "Response and Resolution Time"
   },
   {
-   "collapsible": 1,
    "fieldname": "support_and_resolution_section_break",
    "fieldtype": "Section Break",
-   "label": "Support Hours"
+   "label": "Working Hours"
   },
   {
    "fieldname": "support_and_resolution",
    "fieldtype": "Table",
-   "label": "Support and Resolution",
    "options": "Service Day",
    "reqd": 1
   },
@@ -105,13 +95,6 @@
    "label": "Priorities",
    "options": "Service Level Priority",
    "reqd": 1
-  },
-  {
-   "default": "1",
-   "fieldname": "active",
-   "fieldtype": "Check",
-   "label": "Active",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_10",
@@ -139,14 +122,9 @@
    "options": "\nCustomer\nCustomer Group\nTerritory"
   },
   {
-   "default": "1",
-   "fieldname": "enable",
-   "fieldtype": "Check",
-   "label": "Enable"
-  },
-  {
    "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "default": "0",
@@ -162,19 +140,45 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_18",
-   "fieldtype": "Section Break",
-   "hide_border": 1
-  },
-  {
    "fieldname": "pause_sla_on",
    "fieldtype": "Table",
-   "label": "Pause SLA On",
+   "label": "SLA Paused On",
    "options": "Pause SLA On Status"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Document Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "status_details",
+   "fieldtype": "Section Break",
+   "label": "Status Details"
+  },
+  {
+   "fieldname": "sla_fulfilled_on",
+   "fieldtype": "Table",
+   "label": "SLA Fulfilled On",
+   "options": "SLA Fulfilled On Status",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_sla_for_resolution",
+   "fieldtype": "Check",
+   "label": "Apply SLA for Resolution Time"
   }
  ],
  "links": [],
- "modified": "2020-06-10 12:30:15.050785",
+ "modified": "2021-05-29 13:35:41.956849",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
