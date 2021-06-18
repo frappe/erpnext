@@ -60,6 +60,9 @@
   "weight_details_section",
   "bom_yeild",
   "bom_weight",
+  "planned_total_weight",
+  "transferred_total_weight",
+  "consumed_total_weight",
   "column_break_53",
   "planned_rm_weight",
   "transfered_rm_weight",
@@ -611,6 +614,27 @@
    "label": "Transfered RM Weight",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "planned_total_weight",
+   "fieldtype": "Float",
+   "label": "Planned Total Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transferred_total_weight",
+   "fieldtype": "Float",
+   "label": "Transferred Total Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumed_total_weight",
+   "fieldtype": "Float",
+   "label": "Consumed Total Weight",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -618,7 +642,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-12 11:31:16.914657",
+ "modified": "2021-05-18 19:00:38.689677",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

@@ -18,7 +18,9 @@
  "name": "Training Scheduled",
  "owner": "Administrator",
  "recipients": [
-  {}
+  {
+   "receiver_by_document_field": "employee_emails"
+  }
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,

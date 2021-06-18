@@ -114,9 +114,12 @@ def add_print_formats():
 
 def make_property_setters(patch=False):
 	# GST rules do not allow for an invoice no. bigger than 16 characters
+	journal_entry_types = frappe.get_meta("Journal Entry").get_options("voucher_type").split("\n") + ['Reversal Of ITC']
+
 	if not patch:
 		make_property_setter('Sales Invoice', 'naming_series', 'options', 'SINV-.YY.-\nSRET-.YY.-', '')
 		make_property_setter('Purchase Invoice', 'naming_series', 'options', 'PINV-.YY.-\nPRET-.YY.-', '')
+		make_property_setter('Journal Entry', 'voucher_type', 'options', '\n'.join(journal_entry_types), '')
 
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
@@ -198,15 +201,20 @@ def make_custom_fields(update=True):
 	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
 				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
-				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nIneligible\nAll Other ITC', default="All Other ITC"),
+				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nITC on Reverse Charge\nIneligible As Per Section 17(5)\nIneligible Others\nAll Other ITC',
+				default="All Other ITC"),
 			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
-				fieldtype='Data', insert_after='eligibility_for_itc', print_hide=1),
+				fieldtype='Currency', insert_after='eligibility_for_itc',
+				options='Company:company:default_currency', print_hide=1),
 			dict(fieldname='itc_central_tax', label='Availed ITC Central Tax',
-				fieldtype='Data', insert_after='itc_integrated_tax', print_hide=1),
+				fieldtype='Currency', insert_after='itc_integrated_tax',
+				options='Company:company:default_currency', print_hide=1),
 			dict(fieldname='itc_state_tax', label='Availed ITC State/UT Tax',
-				fieldtype='Data', insert_after='itc_central_tax', print_hide=1),
+				fieldtype='Currency', insert_after='itc_central_tax',
+				options='Company:company:default_currency', print_hide=1),
 			dict(fieldname='itc_cess_amount', label='Availed ITC Cess',
-				fieldtype='Data', insert_after='itc_state_tax', print_hide=1),
+				fieldtype='Currency', insert_after='itc_state_tax',
+				options='Company:company:default_currency', print_hide=1),
 		]
 
 	sales_invoice_gst_fields = [
@@ -235,6 +243,23 @@ def make_custom_fields(update=True):
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
 				depends_on="eval:doc.gst_category=='Overseas' "),
 		]
+
+	journal_entry_fields = [
+		dict(fieldname='reversal_type', label='Reversal Type',
+			fieldtype='Select', insert_after='voucher_type', print_hide=1,
+			options="As per rules 42 & 43 of CGST Rules\nOthers",
+			depends_on="eval:doc.voucher_type=='Reversal Of ITC'",
+			mandatory_depends_on="eval:doc.voucher_type=='Reversal Of ITC'"),
+		dict(fieldname='company_address', label='Company Address',
+			fieldtype='Link', options='Address', insert_after='reversal_type',
+			print_hide=1, depends_on="eval:doc.voucher_type=='Reversal Of ITC'",
+			mandatory_depends_on="eval:doc.voucher_type=='Reversal Of ITC'"),
+		dict(fieldname='company_gstin', label='Company GSTIN',
+			fieldtype='Data', read_only=1, insert_after='company_address', print_hide=1,
+			fetch_from='company_address.gstin',
+			depends_on="eval:doc.voucher_type=='Reversal Of ITC'",
+			mandatory_depends_on="eval:doc.voucher_type=='Reversal Of ITC'")
+	]
 
 	inter_state_gst_field = [
 		dict(fieldname='is_inter_state', label='Is Inter State',
@@ -430,13 +455,13 @@ def make_custom_fields(update=True):
 
 		dict(fieldname='einvoice_section', label='E-Invoice Fields', fieldtype='Section Break', insert_after='gst_vehicle_type',
 			print_hide=1, hidden=1),
-		
+
 		dict(fieldname='ack_no', label='Ack. No.', fieldtype='Data', read_only=1, hidden=1, insert_after='einvoice_section',
 			no_copy=1, print_hide=1),
-		
+
 		dict(fieldname='ack_date', label='Ack. Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_no', no_copy=1, print_hide=1),
 
-		dict(fieldname='irn_cancel_date', label='Cancel Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_date', 
+		dict(fieldname='irn_cancel_date', label='Cancel Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_date',
 			no_copy=1, print_hide=1),
 
 		dict(fieldname='signed_einvoice', label='Signed E-Invoice', fieldtype='Code', options='JSON', hidden=1, insert_after='irn_cancel_date',
@@ -469,6 +494,7 @@ def make_custom_fields(update=True):
 		'Purchase Receipt': purchase_invoice_gst_fields,
 		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields + delivery_note_gst_category,
+		'Journal Entry': journal_entry_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
 		'Item': [
@@ -486,7 +512,7 @@ def make_custom_fields(update=True):
 		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
-		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Salary Component': [
 			dict(fieldname=  'component_type',

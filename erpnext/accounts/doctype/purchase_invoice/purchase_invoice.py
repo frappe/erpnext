@@ -68,9 +68,6 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).validate()
 
-		# apply tax withholding only if checked and applicable
-		self.set_tax_withholding()
-
 		if not self.is_return:
 			self.po_required()
 			self.pr_required()
@@ -251,11 +248,9 @@ class PurchaseInvoice(BuyingController):
 
 				if self.update_stock and (not item.from_warehouse):
 					if for_validate and item.expense_account and item.expense_account != warehouse_account[item.warehouse]["account"]:
-						msg = _("Row {}: Expense Head changed to {} ").format(item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]))
-						msg += _("because account {} is not linked to warehouse {} ").format(frappe.bold(item.expense_account), frappe.bold(item.warehouse))
-						msg += _("or it is not the default inventory account")
+						msg = _("Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account").format(
+							item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]), frappe.bold(item.expense_account), frappe.bold(item.warehouse))
 						frappe.msgprint(msg, title=_("Expense Head Changed"))
-
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
@@ -266,8 +261,8 @@ class PurchaseInvoice(BuyingController):
 
 						if negative_expense_booked_in_pr:
 							if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
-								msg = _("Row {}: Expense Head changed to {} ").format(item.idx, frappe.bold(stock_not_billed_account))
-								msg += _("because expense is booked against this account in Purchase Receipt {}").format(frappe.bold(item.purchase_receipt))
+								msg = _("Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}").format(
+									item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.purchase_receipt))
 								frappe.msgprint(msg, title=_("Expense Head Changed"))
 
 							item.expense_account = stock_not_billed_account
@@ -275,8 +270,9 @@ class PurchaseInvoice(BuyingController):
 						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
 						# This is done in cases when Purchase Invoice is created before Purchase Receipt
 						if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
-							msg = _("Row {}: Expense Head changed to {} ").format(item.idx, frappe.bold(stock_not_billed_account))
-							msg += _("as no Purchase Receipt is created against Item {}. ").format(frappe.bold(item.item_code))
+							msg = _("Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}.").format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.item_code))
+							msg += "<br>"
 							msg += _("This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice")
 							frappe.msgprint(msg, title=_("Expense Head Changed"))
 
@@ -308,8 +304,8 @@ class PurchaseInvoice(BuyingController):
 				if not d.purchase_order:
 					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
-					msg += _("To submit the invoice without purchase order please set {} ").format(frappe.bold(_('Purchase Order Required')))
-					msg += _("as {} in {}").format(frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
+					msg += _("To submit the invoice without purchase order please set {0} as {1} in {2}").format(
+						frappe.bold(_('Purchase Order Required')), frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
 					throw(msg, title=_("Mandatory Purchase Order"))
 
 	def pr_required(self):
@@ -323,8 +319,8 @@ class PurchaseInvoice(BuyingController):
 				if not d.purchase_receipt and d.item_code in stock_items:
 					msg = _("Purchase Receipt Required for item {}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
-					msg += _("To submit the invoice without purchase receipt please set {} ").format(frappe.bold(_('Purchase Receipt Required')))
-					msg += _("as {} in {}").format(frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
+					msg += _("To submit the invoice without purchase receipt please set {0} as {1} in {2}").format(
+						frappe.bold(_('Purchase Receipt Required')), frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
 					throw(msg, title=_("Mandatory Purchase Receipt"))
 
 	def validate_write_off_account(self):
@@ -455,6 +451,8 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
+
+		self.allocate_advance_taxes(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -1090,6 +1088,7 @@ class PurchaseInvoice(BuyingController):
 		for d in self.taxes:
 			if d.account_head == tax_withholding_details.get("account_head"):
 				d.update(tax_withholding_details)
+
 			accounts.append(d.account_head)
 
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:

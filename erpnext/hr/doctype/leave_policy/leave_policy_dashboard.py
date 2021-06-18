@@ -7,7 +7,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Leaves'),
-				'items': ['Leave Allocation']
+				'items': ['Leave Policy Assignment', 'Leave Allocation']
 			},
 		]
 	}
