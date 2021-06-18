@@ -302,3 +302,16 @@ erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.st
 };
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
+
+frappe.tour['Stock Reconciliation'] = [
+	{
+		fieldname: "purpose",
+		title: __("Purpose"),
+		description: __("Set Purpose to Opening Stock to set the stock opening balance.")
+	},
+	{
+		fieldname: "items",
+		title: __("Items"),
+		description: __("Select the items for which the opening stock has to be set.")
+	},
+];
