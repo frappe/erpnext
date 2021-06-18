@@ -1,6 +1,7 @@
 import frappe
+import copy
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, get_link_to_form
 from collections import defaultdict
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -12,7 +13,7 @@ class Subcontracting():
 		self.raw_material_table = raw_material_table
 		self.__identify_change_in_item_table()
 		self.__prepare_supplied_items()
-		self.__validate_consumed_qty()
+		self.__validate_supplied_items()
 
 	def __prepare_supplied_items(self):
 		self.initialized_fields()
@@ -24,6 +25,7 @@ class Subcontracting():
 
 	def initialized_fields(self):
 		self.available_materials = frappe._dict()
+		self.__transferred_items = frappe._dict()
 		self.alternative_item_details = frappe._dict()
 		self.__get_backflush_based_on()
 
@@ -100,6 +102,7 @@ class Subcontracting():
 
 			self.__set_alternative_item_details(row)
 
+		self.__transferred_items = copy.deepcopy(self.available_materials)
 		for doctype in ['Purchase Receipt', 'Purchase Invoice']:
 			self.__update_consumed_materials(doctype)
 
@@ -254,6 +257,8 @@ class Subcontracting():
 
 		if self.qty_to_be_received:
 			qty = (flt(item_row.qty) * flt(transfer_item.qty)) / flt(self.qty_to_be_received.get(key, 0))
+			transfer_item.item_details.required_qty = transfer_item.qty
+
 			if (transfer_item.serial_no or frappe.get_cached_value('UOM',
 				transfer_item.item_details.stock_uom, 'must_be_whole_number')):
 				return frappe.utils.ceil(qty)
@@ -272,12 +277,15 @@ class Subcontracting():
 		if self.doctype == 'Purchase Order':
 			rm_obj.required_qty = qty
 		else:
+			rm_obj.consumed_qty = 0
+			rm_obj.purchase_order = item_row.purchase_order
 			self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
 	def __set_batch_nos(self, bom_item, item_row, rm_obj, qty):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.purchase_order)
 
 		if (self.available_materials.get(key) and self.available_materials[key]['batch_no']):
+			new_rm_obj = None
 			for batch_no, batch_qty in self.available_materials[key]['batch_no'].items():
 				if batch_qty >= qty:
 					self.__set_batch_no_as_per_qty(item_row, rm_obj, batch_no, qty)
@@ -290,13 +298,21 @@ class Subcontracting():
 					new_rm_obj.reference_name = item_row.name
 					self.__set_batch_no_as_per_qty(item_row, new_rm_obj, batch_no, batch_qty)
 					self.available_materials[key]['batch_no'][batch_no] = 0
+
+			if abs(qty) > 0 and not new_rm_obj:
+				self.__set_consumed_qty(rm_obj, qty)
 		else:
-			rm_obj.required_qty = qty
-			rm_obj.consumed_qty = qty
+			self.__set_consumed_qty(rm_obj, qty, bom_item.required_qty or qty)
 			self.__set_serial_nos(item_row, rm_obj)
 
+	def __set_consumed_qty(self, rm_obj, consumed_qty, required_qty=0):
+		rm_obj.required_qty = required_qty
+		rm_obj.consumed_qty = consumed_qty
+
 	def __set_batch_no_as_per_qty(self, item_row, rm_obj, batch_no, qty):
-		rm_obj.update({'consumed_qty': qty, 'batch_no': batch_no, 'required_qty': qty})
+		rm_obj.update({'consumed_qty': qty, 'batch_no': batch_no,
+			'required_qty': qty, 'purchase_order': item_row.purchase_order})
+
 		self.__set_serial_nos(item_row, rm_obj)
 
 	def __set_serial_nos(self, item_row, rm_obj):
@@ -339,9 +355,39 @@ class Subcontracting():
 			itemwise_consumed_qty[key] -= consumed_qty
 			frappe.db.set_value('Purchase Order Item Supplied', row.name, 'consumed_qty', consumed_qty)
 
-	def __validate_consumed_qty(self):
-		for row in self.get(self.raw_material_table):
-			if flt(row.consumed_qty) == 0.0 and row.get('serial_no'):
-				msg = f'Row {row.idx}: the consumed qty cannot be zero for the item {frappe.bold(row.rm_item_code)}'
+	def __validate_supplied_items(self):
+		if self.doctype not in ['Purchase Invoice', 'Purchase Receipt']:
+			return
 
-				frappe.throw(_(msg),title=_('Consumed Items Qty Check'))
+		for row in self.get(self.raw_material_table):
+			self.__validate_consumed_qty(row)
+
+			key = (row.rm_item_code, row.main_item_code, row.purchase_order)
+			if not self.__transferred_items or not self.__transferred_items.get(key):
+				return
+
+			self.__validate_batch_no(row, key)
+			self.__validate_serial_no(row, key)
+
+	def __validate_consumed_qty(self, row):
+		if self.backflush_based_on != 'BOM' and flt(row.consumed_qty) == 0.0:
+			msg = f'Row {row.idx}: the consumed qty cannot be zero for the item {frappe.bold(row.rm_item_code)}'
+
+			frappe.throw(_(msg),title=_('Consumed Items Qty Check'))
+
+	def __validate_batch_no(self, row, key):
+		if row.get('batch_no') and row.get('batch_no') not in self.__transferred_items.get(key).get('batch_no'):
+			link = get_link_to_form('Purchase Order', row.purchase_order)
+			msg = f'The Batch No {frappe.bold(row.get("batch_no"))} has not supplied against the Purchase Order {link}'
+			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
+
+	def __validate_serial_no(self, row, key):
+		if row.get('serial_no'):
+			serial_nos = get_serial_nos(row.get('serial_no'))
+			incorrect_sn = set(serial_nos).difference(self.__transferred_items.get(key).get('serial_no'))
+
+			if incorrect_sn:
+				incorrect_sn = "\n".join(incorrect_sn)
+				link = get_link_to_form('Purchase Order', row.purchase_order)
+				msg = f'The Serial Nos {incorrect_sn} has not supplied against the Purchase Order {link}'
+				frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))

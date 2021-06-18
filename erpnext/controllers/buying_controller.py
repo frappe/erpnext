@@ -292,11 +292,13 @@ class BuyingController(StockController, Subcontracting):
 				if item in self.sub_contracted_items and not item.bom:
 					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
 
-			if self.doctype == "Purchase Order":
-				for supplied_item in self.get("supplied_items"):
-					if not supplied_item.reserve_warehouse:
-						frappe.throw(_("Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied").format(frappe.bold(supplied_item.rm_item_code)))
+			if self.doctype != "Purchase Order":
+				return
 
+			for row in self.get("supplied_items"):
+				if not row.reserve_warehouse:
+					msg = f"Reserved Warehouse is mandatory for the Item {frappe.bold(row.rm_item_code)} in Raw Materials supplied"
+					frappe.throw(_(msg))
 		else:
 			for item in self.get("items"):
 				if item.bom:
