@@ -395,6 +395,37 @@ class TestSubcontracting(unittest.TestCase):
 			self.assertEqual(value.qty, details.qty)
 			self.assertEqual(sorted(value.serial_no), sorted(details.serial_no))
 
+	def test_incorrect_serial_no_components_based_on_material_transfer(self):
+		'''
+			- Set backflush based on Material Transferred for Subcontract
+			- Create subcontracted PO for the item Subcontracted Item SA2.
+			- Transfer the serialized componenets to the supplier.
+			- Create purchase receipt and change the serial no which is not transferred.
+			- System should throw the error and not allowed to save the purchase receipt.
+		'''
+
+		set_backflush_based_on('Material Transferred for Subcontract')
+		item_code = 'Subcontracted Item SA2'
+		items = [{'warehouse': '_Test Warehouse - _TC', 'item_code': item_code, 'qty': 10, 'rate': 100}]
+
+		rm_items = [{'item_code': 'Subcontracted SRM Item 2', 'qty': 10}]
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+			supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		for d in rm_items:
+			d['po_detail'] = po.items[0].name
+
+		make_stock_transfer_entry(po_no = po.name, main_item_code=item_code,
+			rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details))
+
+		pr1 = make_purchase_receipt(po.name)
+		pr1.save()
+		pr1.supplied_items[0].serial_no = 'ABCD'
+		self.assertRaises(frappe.ValidationError, pr1.save)
+		pr1.delete()
+
 	def test_partial_transfer_batch_based_on_material_transfer(self):
 		'''
 			- Set backflush based on Material Transferred for Subcontract

@@ -26,7 +26,8 @@
   "secbreak_3",
   "batch_no",
   "col_break4",
-  "serial_no"
+  "serial_no",
+  "purchase_order"
  ],
  "fields": [
   {
@@ -81,9 +82,10 @@
    "fieldname": "required_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Required Qty",
+   "label": "Available Qty For Consumption",
    "oldfieldname": "required_qty",
    "oldfieldtype": "Currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -91,7 +93,7 @@
    "fieldname": "consumed_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Consumed Qty",
+   "label": "Qty to Be Consumed",
    "oldfieldname": "consumed_qty",
    "oldfieldtype": "Currency",
    "reqd": 1
@@ -190,12 +192,22 @@
    "fieldtype": "Data",
    "label": "Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Order",
+   "no_copy": 1,
+   "options": "Purchase Order",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-29 17:22:14.977117",
+ "modified": "2021-06-19 19:33:04.431213",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",
