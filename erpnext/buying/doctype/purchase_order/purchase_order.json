@@ -138,7 +138,8 @@
   "party_account_currency",
   "is_internal_supplier",
   "represents_company",
-  "inter_company_order_reference"
+  "inter_company_order_reference",
+  "related_delivery_planning"
  ],
  "fields": [
   {
@@ -1356,6 +1357,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "related_delivery_planning",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning",
+   "read_only": 1
+  },
+  {
    "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
@@ -1377,7 +1386,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 00:55:30.781375",
+ "modified": "2021-06-17 14:46:42.583108",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
