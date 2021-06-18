@@ -263,49 +263,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Plannings",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Delivery Planning",
-   "link_to": "Delivery Planning",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Delivery Planning Item",
-   "link_to": "Delivery Planning Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Transporter Wise Planning Item",
-   "link_to": "Transporter Wise Planning Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Purchase Orders Planning Item",
-   "link_to": "Purchase Orders Planning Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Settings",
    "link_type": "DocType",
    "onboard": 0,
@@ -700,7 +657,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-06-09 11:48:54.462146",
+ "modified": "2021-06-17 11:59:30.491901",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
