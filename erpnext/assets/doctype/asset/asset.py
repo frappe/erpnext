@@ -179,7 +179,8 @@ class Asset(AccountsController):
 			
 			start = self.clear_depreciation_schedule()
 
-			if d.value_after_depreciation: 
+			# value_after_depreciation - current Asset value
+			if d.value_after_depreciation:
 				value_after_depreciation = (flt(d.value_after_depreciation) -
 					flt(self.opening_accumulated_depreciation)) - flt(d.expected_value_after_useful_life)
 			else:
@@ -291,6 +292,7 @@ class Asset(AccountsController):
 							"finance_book_id": d.idx
 						})
 
+	# used when depreciation schedule needs to be modified due to increase in asset life
 	def clear_depreciation_schedule(self):
 		start = 0
 		for n in range(len(self.schedules)):
@@ -300,10 +302,13 @@ class Asset(AccountsController):
 				break
 		return start
 
+
+	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
 		has_pro_rata = False
-
 		days = date_diff(row.depreciation_start_date, self.available_for_use_date) + 1
+
+		# if frequency_of_depreciation is 12 months, total_days = 365
 		total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
 
 		if days < total_days:
@@ -783,9 +788,12 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
+		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.to_date:
 			depreciation_amount = (flt(row.value_after_depreciation) -
 				flt(row.expected_value_after_useful_life)) / depreciation_left
+
+		# if the Depreciation Schedule is being modified after Asset Repair
 		else:
 			depreciation_amount = (flt(row.value_after_depreciation) -
 				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
