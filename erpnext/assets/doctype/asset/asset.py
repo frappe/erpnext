@@ -789,7 +789,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
-		if not asset.to_date:
+		if not asset.edit_dates:
 			depreciation_amount = (flt(row.value_after_depreciation) -
 				flt(row.expected_value_after_useful_life)) / depreciation_left
 
