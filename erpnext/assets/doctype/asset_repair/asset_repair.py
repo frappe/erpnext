@@ -47,7 +47,7 @@ class AssetRepair(AccountsController):
 			self.decrease_stock_quantity()
 		if self.capitalize_repair_cost:
 			self.make_gl_entries()
-			if frappe.db.get_value('Asset', self.asset, 'calculate_depreciation'):
+			if frappe.db.get_value('Asset', self.asset, 'calculate_depreciation') and self.increase_in_asset_life:
 				self.modify_depreciation_schedule()
 
 	def check_repair_status(self):
@@ -157,27 +157,33 @@ class AssetRepair(AccountsController):
 		return gl_entries
 
 	def modify_depreciation_schedule(self):
-		if self.increase_in_asset_life:
-			asset = frappe.get_doc('Asset', self.asset)
-			asset.flags.ignore_validate_update_after_submit = True
-			for row in asset.finance_books:
-				row.total_number_of_depreciations += self.increase_in_asset_life/row.frequency_of_depreciation
+		asset = frappe.get_doc('Asset', self.asset)
+		asset.flags.ignore_validate_update_after_submit = True
+		for row in asset.finance_books:
+			row.total_number_of_depreciations += self.increase_in_asset_life/row.frequency_of_depreciation
 
-				asset.edit_dates = ""
-				extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
-				if extra_months != 0:
-					self.calculate_last_schedule_date(asset, row, extra_months)
+			asset.edit_dates = ""
+			extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
+			if extra_months != 0:
+				self.calculate_last_schedule_date(asset, row, extra_months)
 
-			asset.prepare_depreciation_data()
-			asset.save()
+		asset.prepare_depreciation_data()
+		asset.save()
 
 	# to help modify depreciation schedule when increase_in_asset_life is not a multiple of frequency_of_depreciation
 	def calculate_last_schedule_date(self, asset, row, extra_months):
 		asset.edit_dates = "Don't Edit"
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - \
 			cint(asset.number_of_depreciations_booked)
+
+		# the Schedule Date in the final row of the old Depreciation Schedule
 		last_schedule_date = asset.schedules[len(asset.schedules)-1].schedule_date
+
+		# the Schedule Date in the final row of the new Depreciation Schedule
 		asset.to_date = add_months(last_schedule_date, extra_months)
+
+		# the latest possible date at which the depreciation can occur, without increasing the Total Number of Depreciations
+		# if depreciations happen yearly and the Depreciation Posting Date is 01-01-2020, this could be 01-01-2021, 01-01-2022...
 		schedule_date = add_months(row.depreciation_start_date,
 			number_of_pending_depreciations * cint(row.frequency_of_depreciation))
 
