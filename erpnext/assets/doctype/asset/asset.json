@@ -54,7 +54,6 @@
   "section_break_14",
   "schedules",
   "to_date",
-  "edit_dates",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -488,12 +487,6 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "To Date"
-  },
-  {
-   "fieldname": "edit_dates",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Edit Dates"
   }
  ],
  "idx": 72,
@@ -516,7 +509,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-06-17 12:59:39.189106",
+ "modified": "2021-06-19 13:56:58.450182",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

@@ -161,7 +161,7 @@ class AssetRepair(AccountsController):
 		for row in asset.finance_books:
 			row.total_number_of_depreciations += self.increase_in_asset_life/row.frequency_of_depreciation
 
-			asset.edit_dates = ""
+			asset.flags.increase_in_asset_life = False
 			extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
 			if extra_months != 0:
 				self.calculate_last_schedule_date(asset, row, extra_months)
@@ -171,7 +171,7 @@ class AssetRepair(AccountsController):
 
 	# to help modify depreciation schedule when increase_in_asset_life is not a multiple of frequency_of_depreciation
 	def calculate_last_schedule_date(self, asset, row, extra_months):
-		asset.edit_dates = "Don't Edit"
+		asset.flags.increase_in_asset_life = True
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - \
 			cint(asset.number_of_depreciations_booked)
 
