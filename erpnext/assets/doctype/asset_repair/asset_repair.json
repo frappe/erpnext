@@ -95,8 +95,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Long Text",
-   "label": "Error Description",
-   "reqd": 1
+   "label": "Error Description"
   },
   {
    "fieldname": "column_break_9",
@@ -262,7 +261,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-19 14:47:25.875814",
+ "modified": "2021-06-19 15:18:10.625833",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
