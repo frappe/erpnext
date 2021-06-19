@@ -20,15 +20,6 @@
   "show_transporter_planning_item",
   "column_break_13",
   "show_purchase_order_planning_item",
-  "section_break_10",
-  "get_sales_orders",
-  "item_wise_dp",
-  "section_break_13",
-  "get_daily_dp",
-  "transporter_wise_dp",
-  "section_break_14",
-  "po_to_create",
-  "orderw_pplan",
   "amended_from"
  ],
  "fields": [
@@ -53,40 +44,6 @@
   {
    "fieldname": "cb2",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "item_wise_dp",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Item wise Delivery Planning",
-   "options": "Item wise Delivery Planning"
-  },
-  {
-   "fieldname": "get_daily_dp",
-   "fieldtype": "Button",
-   "hidden": 1,
-   "label": "Get Daily Delivery  Plan"
-  },
-  {
-   "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "po_to_create",
-   "fieldtype": "Button",
-   "hidden": 1,
-   "label": "Get Purchase Order to be Created"
-  },
-  {
-   "fieldname": "orderw_pplan",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Order wise Purchase Planning",
-   "options": "Order wise Purchase Planning"
   },
   {
    "fieldname": "amended_from",
@@ -122,23 +79,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "get_sales_orders",
-   "fieldtype": "Button",
-   "hidden": 1,
-   "label": "Get Sales Order"
-  },
-  {
-   "fieldname": "transporter_wise_dp",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Transporter wise Delivery Planning",
-   "options": "Transporter Wise Delivery Planning"
-  },
-  {
-   "fieldname": "section_break_13",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "section_break_9",
    "fieldtype": "Section Break"
   },
@@ -169,7 +109,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-08 18:04:40.373990",
+ "modified": "2021-06-17 16:18:15.636566",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning",

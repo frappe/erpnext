@@ -86,6 +86,11 @@ class PickList(Document):
 		total_stock_weight = total_picked_weight = 0
 		if self.locations:
 			for row in self.locations:
+				item_wt = frappe.get_doc("Item", row.item_code)
+				total_weight += flt(row.qty)+flt(item_wt.weight_per_unit)
+				total_stock_weight += flt(row.stock_qty)+flt(item_wt.weight_per_unit)
+				total_picked_weight += flt(row.picked_qty)+flt(item_wt.weight_per_unit)
+				self.total_weight = flt(total_weight, self.precision('total_weight'))
 				item_wt = frappe.get_doc("Item", row.item_code) 
 				total_stock_weight += flt(row.stock_qty)*flt(item_wt.weight_per_unit) 
 				total_picked_weight += flt(row.picked_qty)*flt(item_wt.weight_per_unit) 
@@ -261,7 +266,7 @@ def get_available_item_locations(self,item_code, from_warehouses, required_qty, 
 	locations = []
 	has_serial_no  = frappe.get_cached_value('Item', item_code, 'has_serial_no')
 	has_batch_no = frappe.get_cached_value('Item', item_code, 'has_batch_no')
-	
+
 	if has_batch_no and has_serial_no:
 		locations = get_available_item_locations_for_serial_and_batched_item(item_code, from_warehouses, required_qty, company)
 	elif has_serial_no:
