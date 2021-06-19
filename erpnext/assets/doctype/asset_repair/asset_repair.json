@@ -31,6 +31,7 @@
   "warehouse",
   "stock_items",
   "total_repair_cost",
+  "stock_entry",
   "asset_depreciation_details_section",
   "increase_in_asset_life",
   "section_break_9",
@@ -118,6 +119,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "repair_cost",
    "fieldtype": "Currency",
    "label": "Repair Cost"
@@ -209,11 +211,12 @@
    "label": "Stock Consumption Details"
   },
   {
-   "depends_on": "stock_consumption",
+   "depends_on": "eval: doc.stock_consumption && doc.total_repair_cost > 0",
    "description": "Sum of Repair Cost and the total value of all Stock Items consumed during the repair.",
    "fieldname": "total_repair_cost",
    "fieldtype": "Currency",
-   "label": "Total Repair Cost"
+   "label": "Total Repair Cost",
+   "read_only": 1
   },
   {
    "depends_on": "stock_consumption",
@@ -247,12 +250,19 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock Entry",
+   "options": "Stock Entry",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-19 14:04:35.423111",
+ "modified": "2021-06-19 14:47:25.875814",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

@@ -91,6 +91,8 @@ class AssetRepair(AccountsController):
 		stock_entry.insert()
 		stock_entry.submit()
 
+		self.stock_entry = stock_entry.name
+
 	def on_cancel(self):
 		self.make_gl_entries(cancel=True)
 
@@ -121,7 +123,7 @@ class AssetRepair(AccountsController):
 
 		if self.stock_consumption:
 			# creating GL Entries for each row in Stock Items based on the Stock Entry created for it
-			stock_entry = frappe.get_last_doc('Stock Entry')
+			stock_entry = frappe.get_doc('Stock Entry', self.stock_entry)
 			for item in stock_entry.items:
 				gl_entries.append(
 					self.get_gl_dict({
