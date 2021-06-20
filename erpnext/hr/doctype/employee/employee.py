@@ -476,13 +476,14 @@ def get_employee_emails(employee_list):
 	return employee_emails
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
+def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False, fields=None):
 
 	filters = [['status', '!=', 'Left']]
 	if company and company != 'All Companies':
 		filters.append(['company', '=', company])
 
-	fields = ['name as value', 'employee_name as title']
+	if not fields:
+		fields = ['name as value', 'employee_name as title']
 
 	if is_root:
 		parent = ''
