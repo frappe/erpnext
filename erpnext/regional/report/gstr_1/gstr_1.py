@@ -63,7 +63,7 @@ class Gstr1Report(object):
 				for rate, items in items_based_on_rate.items():
 					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
 
-					if self.filters.get("type_of_business") == "CDNR-REG":
+					if self.filters.get("type_of_business") in ("CDNR-REG", "CDNR-UNREG"):
 						row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
 						row.append("C" if invoice_details.is_return else "D")
 
@@ -106,7 +106,7 @@ class Gstr1Report(object):
 	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
 		row = []
 		for fieldname in self.invoice_fields:
-			if self.filters.get("type_of_business") == "CDNR-REG" and fieldname == "invoice_value":
+			if self.filters.get("type_of_business") in ("CDNR-REG", "CDNR-UNREG") and fieldname == "invoice_value":
 				row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
 			elif fieldname == "invoice_value":
 				row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
@@ -197,6 +197,12 @@ class Gstr1Report(object):
 
 		elif self.filters.get("type_of_business") == "CDNR-REG":
 			conditions += """ AND (is_return = 1 OR is_debit_note = 1) AND IFNULL(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ')"""
+
+		elif self.filters.get("type_of_business") == "CDNR-UNREG":
+			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
+			conditions += """ AND ifnull(SUBSTR(place_of_supply, 1, 2),'') != ifnull(SUBSTR(company_gstin, 1, 2),'')
+				AND ABS(grand_total) > {0} AND (is_return = 1 OR is_debit_note = 1)
+				AND IFNULL(gst_category, '') in ('Unregistered', 'Overseas')""".format(flt(b2c_limit))
 
 		elif self.filters.get("type_of_business") ==  "EXPORT":
 			conditions += """ AND is_return !=1 and gst_category = 'Overseas' """
@@ -503,6 +509,84 @@ class Gstr1Report(object):
 					"width": 80
 				}
 			]
+		elif self.filters.get("type_of_business") == "CDNR-UNREG":
+			self.invoice_columns = [
+				{
+					"fieldname": "customer_name",
+					"label": "Receiver Name",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "return_against",
+					"label": "Issued Against",
+					"fieldtype": "Link",
+					"options": "Sales Invoice",
+					"width": 120
+				},
+				{
+					"fieldname": "posting_date",
+					"label": "Note Date",
+					"fieldtype": "Date",
+					"width": 120
+				},
+				{
+					"fieldname": "invoice_number",
+					"label": "Note Number",
+					"fieldtype": "Link",
+					"options": "Sales Invoice",
+					"width":120
+				},
+				{
+					"fieldname": "export_type",
+					"label": "Export Type",
+					"fieldtype": "Data",
+					"hidden": 1
+				},
+				{
+					"fieldname": "reason_for_issuing_document",
+					"label": "Reason For Issuing document",
+					"fieldtype": "Data",
+					"width": 140
+				},
+				{
+					"fieldname": "place_of_supply",
+					"label": "Place Of Supply",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "gst_category",
+					"label": "GST Category",
+					"fieldtype": "Data"
+				},
+				{
+					"fieldname": "invoice_value",
+					"label": "Invoice Value",
+					"fieldtype": "Currency",
+					"width": 120
+				}
+			]
+			self.other_columns = [
+				{
+					"fieldname": "cess_amount",
+					"label": "Cess Amount",
+					"fieldtype": "Currency",
+					"width": 100
+				},
+				{
+					"fieldname": "pre_gst",
+					"label": "PRE GST",
+					"fieldtype": "Data",
+					"width": 80
+				},
+				{
+					"fieldname": "document_type",
+					"label": "Document Type",
+					"fieldtype": "Data",
+					"width": 80
+				}
+			]
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			self.invoice_columns = [
 				{
@@ -622,6 +706,13 @@ def get_json(filters, report_name, data):
 
 		out = get_cdnr_reg_json(res, gstin)
 		gst_json["cdnr"] = out
+	elif filters["type_of_business"] == 'CDNR-UNREG':
+		for item in report_data[:-1]:
+			res.setdefault(item["invoice_number"],[]).append(item)
+
+		out = get_cdnr_unreg_json(res, gstin)
+		gst_json["cdnur"] = out
+
 
 	return {
 		'report_name': report_name,
@@ -780,6 +871,27 @@ def get_cdnr_reg_json(res, gstin):
 
 	return out
 
+def get_cdnr_unreg_json(res, gstin):
+	out = []
+
+	for invoice, items in iteritems(res):
+		inv_item = {
+			"nt_num": items[0]["invoice_number"],
+			"nt_dt": getdate(items[0]["posting_date"]).strftime('%d-%m-%Y'),
+			"val": abs(flt(items[0]["invoice_value"])),
+			"ntty": items[0]["document_type"],
+			"pos": "%02d" % int(items[0]["place_of_supply"].split('-')[0]),
+			"typ": get_invoice_type_for_cdnrur(items[0])
+		}
+
+		inv_item["itms"] = []
+		for item in items:
+			inv_item["itms"].append(get_rate_and_tax_details(item, gstin))
+
+		out.append(inv_item)
+
+	return out
+
 def get_invoice_type_for_cdnr(row):
 	if row.get('gst_category') == 'SEZ':
 		if row.get('export_type') == 'WPAY':
@@ -787,9 +899,20 @@ def get_invoice_type_for_cdnr(row):
 		else:
 			invoice_type = 'SEWOP'
 	elif row.get('gst_category') == 'Deemed Export':
-		row.invoice_type = 'DE'
+		invoice_type = 'DE'
 	elif row.get('gst_category') == 'Registered Regular':
 		invoice_type = 'R'
+
+	return invoice_type
+
+def get_invoice_type_for_cdnrur(row):
+	if row.get('gst_category') == 'Overseas':
+		if row.get('export_type') == 'WPAY':
+			invoice_type = 'EXPWP'
+		else:
+			invoice_type = 'EXPWOP'
+	elif row.get('gst_category') == 'Unregistered':
+		invoice_type = 'B2CL'
 
 	return invoice_type
 
