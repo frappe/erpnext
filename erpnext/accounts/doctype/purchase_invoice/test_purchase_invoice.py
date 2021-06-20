@@ -621,8 +621,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(actual_qty_0, get_qty_after_transaction())
 
 	def test_subcontracting_via_purchase_invoice(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import update_backflush_based_on
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
+		update_backflush_based_on('BOM')
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC",
 			qty=100, basic_rate=100)
