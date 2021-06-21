@@ -5,74 +5,73 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, nowdate, add_months, flt, cint
-from frappe.model.document import Document
+from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.controllers.accounts_controller import AccountsController
 
 class AssetRepair(AccountsController):
 	def validate(self):
-		if self.repair_status == "Completed" and not self.completion_date:
-			self.completion_date = nowdate()
-
+		self.asset_doc = frappe.get_doc('Asset', self.asset)
 		self.update_status()
-		self.set_total_value()		# change later
+		if self.get('stock_items'):
+			self.set_total_value()		# change later
 		self.calculate_total_repair_cost()
 		
 	def update_status(self):
 		if self.repair_status == 'Pending':
 			frappe.db.set_value('Asset', self.asset, 'status', 'Out of Order')
 		else:
-			asset = frappe.get_doc('Asset', self.asset)
-			asset.set_status()
+			self.asset_doc.set_status()
 
 	def set_total_value(self):
-		for item in self.stock_items:
+		for item in self.get('stock_items'):
 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = self.repair_cost
-		for item in self.stock_items:
-			self.total_repair_cost += item.total_value
+		if self.get('stock_items'):
+			for item in self.get('stock_items'):
+				self.total_repair_cost += item.total_value
 
 	def on_submit(self):
 		self.check_repair_status()
 
-		if self.stock_consumption or self.capitalize_repair_cost:
+		if self.get('stock_consumption') or self.get('capitalize_repair_cost'):
 			self.increase_asset_value()
-		if self.stock_consumption:
+		if self.get('stock_consumption'):
 			self.check_for_stock_items_and_warehouse()
 			self.decrease_stock_quantity()
-		if self.capitalize_repair_cost:
+		if self.get('capitalize_repair_cost'):
 			self.make_gl_entries()
 			if frappe.db.get_value('Asset', self.asset, 'calculate_depreciation') and self.increase_in_asset_life:
 				self.modify_depreciation_schedule()
+
+		self.asset_doc.flags.ignore_validate_update_after_submit = True
+		self.asset_doc.save()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
 			frappe.throw(_("Please update Repair Status."))
 
 	def check_for_stock_items_and_warehouse(self):
-		if not self.stock_items:
+		if not self.get('stock_items'):
 			frappe.throw(_("Please enter Stock Items consumed during the Repair."), title=_("Missing Items"))
 		if not self.warehouse:
 			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."), title=_("Missing Warehouse"))
 
 	def increase_asset_value(self):
 		total_value_of_stock_consumed = 0
-		for item in self.stock_items:
-			total_value_of_stock_consumed += item.total_value
+		if self.get('stock_consumption'):
+			for item in self.get('stock_items'):
+				total_value_of_stock_consumed += item.total_value
 
-		asset = frappe.get_doc('Asset', self.asset)
-		asset.flags.ignore_validate_update_after_submit = True
-		if asset.calculate_depreciation:
-			for row in asset.finance_books:
+		if self.asset_doc.calculate_depreciation:
+			for row in self.asset_doc.finance_books:
 				row.value_after_depreciation += total_value_of_stock_consumed
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation += self.repair_cost
-		asset.save()
 
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc({
@@ -81,7 +80,7 @@ class AssetRepair(AccountsController):
 			"company": self.company
 		})
 
-		for stock_item in self.stock_items:
+		for stock_item in self.get('stock_items'):
 			stock_entry.append('items', {
 				"s_warehouse": self.warehouse,
 				"item_code": stock_item.item,
@@ -121,7 +120,7 @@ class AssetRepair(AccountsController):
 			}, item=self)
 		)
 
-		if self.stock_consumption:
+		if self.get('stock_consumption'):
 			# creating GL Entries for each row in Stock Items based on the Stock Entry created for it
 			stock_entry = frappe.get_doc('Stock Entry', self.stock_entry)
 			for item in stock_entry.items:
@@ -158,18 +157,13 @@ class AssetRepair(AccountsController):
 		return gl_entries
 
 	def modify_depreciation_schedule(self):
-		asset = frappe.get_doc('Asset', self.asset)
-		asset.flags.ignore_validate_update_after_submit = True
-		for row in asset.finance_books:
+		for row in self.asset_doc.finance_books:
 			row.total_number_of_depreciations += self.increase_in_asset_life/row.frequency_of_depreciation
 
-			asset.flags.increase_in_asset_life = False
+			self.asset_doc.flags.increase_in_asset_life = False
 			extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
 			if extra_months != 0:
-				self.calculate_last_schedule_date(asset, row, extra_months)
-
-		asset.prepare_depreciation_data()
-		asset.save()
+				self.calculate_last_schedule_date(self.asset_doc, row, extra_months)
 
 	# to help modify depreciation schedule when increase_in_asset_life is not a multiple of frequency_of_depreciation
 	def calculate_last_schedule_date(self, asset, row, extra_months):
