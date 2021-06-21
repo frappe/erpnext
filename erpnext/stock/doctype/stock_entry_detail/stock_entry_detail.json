@@ -556,7 +556,11 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-06-22 16:47:11.268975",
+=======
+ "modified": "2021-06-21 16:03:18.834880",
+>>>>>>> 9ac9a4ef21 (feat: Optionally allow rejected quality inspection on submission)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

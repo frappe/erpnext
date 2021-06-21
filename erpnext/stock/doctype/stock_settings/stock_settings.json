@@ -284,12 +284,15 @@
    "fieldtype": "Select",
    "label": "Action If Quality Inspection Is Rejected",
    "options": "Stop\nWarn"
+<<<<<<< HEAD
   },
   {
    "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
    "fieldname": "mr_qty_allowance",
    "fieldtype": "Float",
    "label": "Over Transfer Allowance"
+=======
+>>>>>>> 9ac9a4ef21 (feat: Optionally allow rejected quality inspection on submission)
   }
  ],
  "icon": "icon-cog",
@@ -297,7 +300,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-06-28 17:02:26.683002",
+=======
+ "modified": "2021-06-21 16:17:42.159829",
+>>>>>>> 9ac9a4ef21 (feat: Optionally allow rejected quality inspection on submission)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
