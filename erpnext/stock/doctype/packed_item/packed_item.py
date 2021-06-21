@@ -53,6 +53,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.parent_detail_docname = main_item_row.name
 	pi.uom = item.stock_uom
 	pi.qty = flt(qty)
+	pi.conversion_factor = main_item_row.conversion_factor
 	if description and not pi.description:
 		pi.description = description
 	if not pi.warehouse and not doc.amended_from:

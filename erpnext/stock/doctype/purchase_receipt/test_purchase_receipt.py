@@ -246,7 +246,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
 		self.assertEqual(len(pr.get("supplied_items")), 2)
 
-		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
+		rm_supp_cost = sum(d.amount for d in pr.get("supplied_items"))
 		self.assertEqual(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
 
 		pr.cancel()
@@ -335,6 +335,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		se2.cancel()
 		se3.cancel()
 		po.reload()
+		pr2.load_from_db()
+		pr2.cancel()
+
+		po.load_from_db()
 		po.cancel()
 
 	def test_serial_no_supplier(self):

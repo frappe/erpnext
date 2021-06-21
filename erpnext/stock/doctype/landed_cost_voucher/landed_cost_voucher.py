@@ -78,7 +78,7 @@ class LandedCostVoucher(Document):
 					.format(item.idx, item.item_code))
 
 	def set_total_taxes_and_charges(self):
-		self.total_taxes_and_charges = sum([flt(d.base_amount) for d in self.get("taxes")])
+		self.total_taxes_and_charges = sum(flt(d.base_amount) for d in self.get("taxes"))
 
 	def set_applicable_charges_on_item(self):
 		if self.get('taxes') and self.distribute_charges_based_on != 'Distribute Manually':
@@ -104,15 +104,15 @@ class LandedCostVoucher(Document):
 		based_on = self.distribute_charges_based_on.lower()
 
 		if based_on != 'distribute manually':
-			total = sum([flt(d.get(based_on)) for d in self.get("items")])
+			total = sum(flt(d.get(based_on)) for d in self.get("items"))
 		else:
 			# consider for proportion while distributing manually
-			total = sum([flt(d.get('applicable_charges')) for d in self.get("items")])
+			total = sum(flt(d.get('applicable_charges')) for d in self.get("items"))
 
 		if not total:
 			frappe.throw(_("Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'").format(based_on))
 
-		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
+		total_applicable_charges = sum(flt(d.applicable_charges) for d in self.get("items"))
 
 		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
 		currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
