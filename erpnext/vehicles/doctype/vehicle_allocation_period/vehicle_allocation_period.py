@@ -64,3 +64,16 @@ class VehicleAllocationPeriod(Document):
 			return True
 		else:
 			return False
+
+
+@frappe.whitelist()
+def get_delivery_period(date):
+	date = getdate(date)
+
+	period_list = frappe.db.sql_list("""
+		select name
+		from `tabVehicle Allocation Period`
+		where %s between ifnull(from_date, '2000-01-01') and ifnull(to_date, '3000-01-01')
+	""", [date])
+
+	return period_list[0] if period_list else None

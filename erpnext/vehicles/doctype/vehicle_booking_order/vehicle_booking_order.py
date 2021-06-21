@@ -25,6 +25,8 @@ class VehicleBookingOrder(VehicleBookingController):
 		super(VehicleBookingOrder, self).validate()
 
 		self.ensure_supplier_is_not_blocked()
+
+		self.validate_allocation()
 		self.validate_color()
 		self.validate_vehicle_quotation()
 
@@ -112,8 +114,6 @@ class VehicleBookingOrder(VehicleBookingController):
 					.format(self.vehicle, existing_booking))
 
 	def validate_allocation(self):
-		super(VehicleBookingOrder, self).validate_allocation()
-
 		if not self.vehicle_allocation_required:
 			self.allocation_period = None
 			self.vehicle_allocation = None

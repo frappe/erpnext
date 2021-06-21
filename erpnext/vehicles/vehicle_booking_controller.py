@@ -15,6 +15,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
+from erpnext.vehicles.doctype.vehicle_allocation_period.vehicle_allocation_period import get_delivery_period
 from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import get_terms_and_conditions
 from erpnext.controllers.accounts_controller import AccountsController
@@ -26,7 +27,7 @@ address_fields = ['address_line1', 'address_line2', 'city', 'state']
 
 force_fields = [
 	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
-	'item_name', 'item_group', 'brand', 'variant_of', 'variant_of_name',
+	'item_name', 'item_group', 'brand', 'variant_of', 'variant_of_name', 'vehicle_allocation_required',
 	'customer_address',
 	'address_display', 'contact_display', 'financer_contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'father_name', 'husband_name',
@@ -47,7 +48,8 @@ class VehicleBookingController(AccountsController):
 		self.validate_customer()
 		self.validate_vehicle_item()
 		self.validate_vehicle()
-		self.validate_allocation()
+
+		self.validate_lead_time()
 		self.validate_delivery_date()
 
 		self.calculate_taxes_and_totals()
@@ -61,7 +63,6 @@ class VehicleBookingController(AccountsController):
 		super(VehicleBookingController, self).onload()
 
 		if self.docstatus == 0:
-			self.set_missing_values(for_validate=True)
 			self.calculate_taxes_and_totals()
 		elif self.docstatus == 1:
 			self.set_vehicle_details()
@@ -77,6 +78,12 @@ class VehicleBookingController(AccountsController):
 			for k, v in item_details.items():
 				if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
 					self.set(k, v)
+
+			if cint(item_details.get('lead_time_days')) > 0:
+				if item_details.get('delivery_date'):
+					self.delivery_date = item_details.get('delivery_date')
+				if item_details.get('delivery_period'):
+					self.delivery_period = item_details.get('delivery_period')
 
 		self.set_vehicle_details()
 
@@ -117,9 +124,16 @@ class VehicleBookingController(AccountsController):
 			if vehicle_item_code != self.item_code:
 				frappe.throw(_("Vehicle {0} is not {1}").format(self.vehicle, frappe.bold(self.item_name or self.item_code)))
 
-	def validate_allocation(self):
-		if self.meta.has_field('vehicle_allocation_required'):
-			self.vehicle_allocation_required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
+	def validate_lead_time(self):
+		if self.vehicle_allocation_required:
+			self.lead_time_days = 0
+		else:
+			if self.lead_time_days < 0:
+				frappe.throw(_("Delivery Lead Time cannot be negative"))
+
+			min_lead_time_days = cint(frappe.get_cached_value("Vehicles Settings", None, "minimum_lead_time_days"))
+			if self.lead_time_days and min_lead_time_days and self.lead_time_days < min_lead_time_days:
+				frappe.throw(_("Delivery Lead Time cannot be less than {0} days").format(min_lead_time_days))
 
 	def validate_delivery_date(self):
 		delivery_date = getdate(self.delivery_date)
@@ -429,6 +443,8 @@ def get_item_details(args):
 	out.brand = item.brand
 	out.image = item.image
 
+	out.vehicle_allocation_required = cint(item.vehicle_allocation_required)
+
 	out.variant_of = item.variant_of
 	out.variant_of_name = frappe.get_cached_value("Item", item.variant_of, "item_name") if item.variant_of else None
 
@@ -484,6 +500,16 @@ def get_item_details(args):
 			out.quotation_validity_days = cint(item.quotation_validity_days)
 			if out.quotation_validity_days:
 				out.valid_till = add_days(getdate(args.transaction_date), out.quotation_validity_days - 1)
+
+	if args.doctype and frappe.get_meta(args.doctype).has_field('lead_time_days'):
+		if not out.vehicle_allocation_required:
+			out.lead_time_days = cint(args.lead_time_days) if 'lead_time_days' in args else cint(item.lead_time_days)
+		else:
+			out.lead_time_days = 0
+
+		if out.lead_time_days:
+			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))
+			out.delivery_period = get_delivery_period(out.delivery_date)
 
 	return out
 

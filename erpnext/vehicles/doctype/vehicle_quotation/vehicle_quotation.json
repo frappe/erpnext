@@ -70,6 +70,7 @@
   "description",
   "allocation_details_section",
   "delivery_period",
+  "lead_time_days",
   "column_break_53",
   "delivery_date",
   "column_break_55",
@@ -815,12 +816,18 @@
    "fieldtype": "Currency",
    "label": "Total Discount",
    "options": "Company:company:default_currency"
+  },
+  {
+   "depends_on": "eval:!doc.vehicle_allocation_required",
+   "fieldname": "lead_time_days",
+   "fieldtype": "Int",
+   "label": "Delivery Lead Time in Days"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-17 13:11:44.523758",
+ "modified": "2021-06-17 22:32:54.329471",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",

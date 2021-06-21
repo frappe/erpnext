@@ -78,6 +78,7 @@
   "vehicle_engine_no",
   "allocation_details_section",
   "delivery_period",
+  "lead_time_days",
   "vehicle_receipt",
   "column_break_53",
   "delivery_date",
@@ -1050,12 +1051,18 @@
   {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.vehicle_allocation_required",
+   "fieldname": "lead_time_days",
+   "fieldtype": "Int",
+   "label": "Delivery Lead Time in Days"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-17 12:53:33.913095",
+ "modified": "2021-06-21 14:39:48.683343",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

@@ -299,6 +299,11 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (me.frm.doc.delivery_period) {
+			if (cint(me.frm.doc.lead_time_days)) {
+				me.frm.doc.lead_time_days = 0;
+				me.frm.refresh_field('lead_time_days');
+			}
+
 			frappe.db.get_value("Vehicle Allocation Period", me.frm.doc.delivery_period, "to_date", function (r) {
 				if (r) {
 					me.frm.set_value("delivery_date", r.to_date);
@@ -390,13 +395,62 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 	},
 
 	transaction_date: function () {
-		this.get_vehicle_price();
-		this.frm.trigger('payment_terms_template');
+		if (this.frm.doc.transaction_date) {
+			frappe.run_serially([
+				() => this.get_vehicle_price(),
+				() => {
+					if (cint(this.frm.doc.lead_time_days) > 0) {
+						this.frm.trigger('lead_time_days')
+					} else {
+						this.frm.trigger('payment_terms_template')
+					}
+				}
+			]);
+		}
 	},
 
 	delivery_date: function () {
 		if (this.frm.doc.delivery_date) {
+			this.get_delivery_period();
+			this.set_lead_time_days();
 			this.frm.trigger('payment_terms_template');
+		}
+	},
+
+	lead_time_days: function () {
+		if (cint(this.frm.doc.lead_time_days) > 0) {
+			var delivery_date = frappe.datetime.add_days(this.frm.doc.transaction_date, cint(this.frm.doc.lead_time_days));
+			this.frm.set_value('delivery_date', delivery_date);
+		}
+	},
+
+	set_lead_time_days: function () {
+		if (cint(this.frm.doc.lead_time_days)) {
+			if (this.frm.doc.transaction_date && this.frm.doc.delivery_date) {
+				var days = frappe.datetime.get_diff(this.frm.doc.delivery_date, this.frm.doc.transaction_date);
+				if (days > 0) {
+					this.frm.doc.lead_time_days = days;
+					this.frm.refresh_field('lead_time_days');
+				}
+			}
+		}
+	},
+
+	get_delivery_period: function () {
+		var me = this;
+		if (me.frm.doc.delivery_date) {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_allocation_period.vehicle_allocation_period.get_delivery_period",
+				args: {
+					date: me.frm.doc.delivery_date
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.doc.delivery_period = r.message;
+						me.frm.refresh_field('delivery_period');
+					}
+				}
+			});
 		}
 	},
 
@@ -521,7 +575,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (me.frm.doc.company && me.frm.doc.item_code && me.frm.doc.vehicle_price_list) {
-			me.frm.call({
+			return me.frm.call({
 				method: "erpnext.vehicles.vehicle_booking_controller.get_vehicle_price",
 				child: me.frm.doc,
 				args: {

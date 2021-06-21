@@ -22,7 +22,8 @@
   "role_change_booking_after_vehicle_delivery",
   "column_break_14",
   "role_change_payment_adjustment",
-  "maximum_payment_adjustment"
+  "maximum_payment_adjustment",
+  "minimum_lead_time_days"
  ],
  "fields": [
   {
@@ -121,11 +122,16 @@
    "fieldtype": "Link",
    "label": "Default Quotation Terms and Condition",
    "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "minimum_lead_time_days",
+   "fieldtype": "Int",
+   "label": "Minimum Delivery Lead Time in Days"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-06-01 15:08:22.546268",
+ "modified": "2021-06-21 14:35:17.653026",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
@@ -139,8 +145,13 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales Admin"
   }
  ],
+ "restrict_to_domain": "Vehicles",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
