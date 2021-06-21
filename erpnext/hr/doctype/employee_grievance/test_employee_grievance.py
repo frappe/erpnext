@@ -3,7 +3,7 @@
 
 import frappe
 import unittest
-from frappe.utils import today, add_days, get_date_str
+from frappe.utils import today
 from erpnext.hr.doctype.employee.test_employee import make_employee
 class TestEmployeeGrievance(unittest.TestCase):
 	def test_create_employee_grievance(self):

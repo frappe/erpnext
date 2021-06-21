@@ -2,10 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-import json
-from six import string_types
 from frappe import _, bold
-from frappe.utils import add_days, today
 from frappe.model.document import Document
 
 class EmployeeGrievance(Document):
