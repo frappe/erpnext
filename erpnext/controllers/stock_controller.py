@@ -387,11 +387,11 @@ class StockController(AccountsController):
 	def validate_qi_presence(self, row):
 		"""Check if QI is present on row level. Warn on save and stop on submit if missing."""
 		if not row.quality_inspection:
-			msg = _(f"Row #{row.idx}: Quality Inspection is required for Item {frappe.bold(row.item_code)}")
+			msg = f"Row #{row.idx}: Quality Inspection is required for Item {frappe.bold(row.item_code)}"
 			if self.docstatus == 1:
-				frappe.throw(msg, title=_("Inspection Required"), exc=QualityInspectionRequiredError)
+				frappe.throw(_(msg), title=_("Inspection Required"), exc=QualityInspectionRequiredError)
 			else:
-				frappe.msgprint(msg, title=_("Inspection Required"), indicator="blue")
+				frappe.msgprint(_(msg), title=_("Inspection Required"), indicator="blue")
 
 	def validate_qi_submission(self, row):
 		"""Check if QI is submitted on row level, during submission"""
@@ -400,11 +400,11 @@ class StockController(AccountsController):
 
 		if not qa_docstatus == 1:
 			link = frappe.utils.get_link_to_form('Quality Inspection', row.quality_inspection)
-			msg = _(f"Row #{row.idx}: Quality Inspection {link} is not submitted for the item: {row.item_code}")
+			msg = f"Row #{row.idx}: Quality Inspection {link} is not submitted for the item: {row.item_code}"
 			if action == "Stop":
-				frappe.throw(msg, title=_("Inspection Submission"), exc=QualityInspectionNotSubmittedError)
+				frappe.throw(_(msg), title=_("Inspection Submission"), exc=QualityInspectionNotSubmittedError)
 			else:
-				frappe.msgprint(msg, alert=True)
+				frappe.msgprint(_(msg), alert=True)
 
 	def validate_qi_rejection(self, row):
 		"""Check if QI is rejected on row level, during submission"""
@@ -413,11 +413,11 @@ class StockController(AccountsController):
 
 		if qa_status == "Rejected":
 			link = frappe.utils.get_link_to_form('Quality Inspection', row.quality_inspection)
-			msg = _(f"Row #{row.idx}: Quality Inspection was rejected for item {row.item_code}")
+			msg = f"Row #{row.idx}: Quality Inspection {link} was rejected for item {row.item_code}"
 			if action == "Stop":
-				frappe.throw(msg, title=_("Inspection Rejected"), exc=QualityInspectionRejectedError)
+				frappe.throw(_(msg), title=_("Inspection Rejected"), exc=QualityInspectionRejectedError)
 			else:
-				frappe.msgprint(msg, alert=True, indicator="orange")
+				frappe.msgprint(_(msg), alert=True, indicator="orange")
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
