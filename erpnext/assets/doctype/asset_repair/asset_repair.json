@@ -169,7 +169,7 @@
    "fieldtype": "Table",
    "label": "Stock Items",
    "mandatory_depends_on": "stock_consumption",
-   "options": "Stock Item"
+   "options": "Asset Repair Consumed Item"
   },
   {
    "fieldname": "section_break_23",
@@ -263,7 +263,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-20 17:35:51.075537",
+ "modified": "2021-06-21 14:53:46.665576",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
