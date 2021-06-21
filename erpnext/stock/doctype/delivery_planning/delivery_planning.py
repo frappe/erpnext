@@ -621,7 +621,8 @@ class DeliveryPlanning(Document):
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={"approved": "Yes",
 										  "supplier_dc": 0,
-										  "related_delivey_planning": self.name})
+										  "related_delivey_planning": self.name,
+										  })
 		print("<<<<<<<<<<>>  Create pi after item >>>>>>>>>>>>>>>", item)
 		if (item):
 			print("-----------D gfhgfhfg --------------", item)
@@ -638,7 +639,7 @@ class DeliveryPlanning(Document):
 
 										where dpi.supplier_dc = 0
 										AND dpi.approved = "Yes"
-
+										AND dpi.transporter IS NOT NULL
 										{conditions}
 										group by dpi.transporter, dpi.customer
 										""".format(conditions=conditions), as_dict=1)
@@ -677,3 +678,120 @@ class DeliveryPlanning(Document):
 
 				pi.save(ignore_permissions=True)
 			return 1
+
+	@frappe.whitelist()
+	def make_dnote(self):
+		salesno = 0
+		discount = []
+		print("************* In side Delivery Note ************")
+		pl = frappe.db.get_all('Pick List',
+							   filters={
+       							 'docstatus': 1,
+								 'related_delivery_planning': self.name },
+							   fields= ['customer', 'name'])
+		print("-----********-------",pl)
+		if pl:
+			for p in pl:
+				dnote = frappe.new_doc('Delivery Note')
+				dnote.customer = p.customer
+				dnote.related_delivery_planning = self.name
+				dnote.transporter = p.transporter
+
+				pli = frappe.db.get_all('Pick List Item',
+										filters={ 'parent': p.name },
+										fields =[ "item_code",
+												  "qty",
+												  'stock_uom',
+												  "uom",
+												  "conversion_factor",
+												  "warehouse",
+												  "sales_order"]
+										)
+
+
+
+				for p in pli:
+					print("thisd is sales order --------", p.sales_order)
+					salesno = p.sales_order
+					dnote.append('items',{
+									'item_code': p.item_code,
+									'warehouse': p.warehouse,
+									'qty': p.qty,
+									'stock_qty': p.stock_qty,
+									'uom': p.uom,
+
+									'conversion_factor': p.conversion_factor,
+									'against_sales_order': p.sales_order
+
+								})
+				discount = frappe.get_doc('Sales Order', salesno)
+				print("p........p.........p", discount.additional_discount_percentage)
+
+				dnote.additional_discount_percentage = discount.additional_discount_percentage
+				dnote.apply_dicount_on = discount.apply_discount_on
+				dnote.taxes_and_charges = discount.taxes_and_charges
+				dnote.save(ignore_permissions=True)
+			return 1
+
+		elif pl == []:
+			dpi = frappe.db.get_all('Delivery Planning Item',
+									filters={ 'related_delivey_planning': self.name,
+											  'approved': "Yes"},
+									group_by= 'customer',
+									fields = 'customer')
+			print("**********", dpi)
+			if dpi:
+				for d in dpi:
+					dnote = frappe.new_doc('Delivery Note')
+					dnote.customer = d.customer
+					dnote.related_delivery_planning = self.name
+					dnote.transporter = d.transporter
+
+
+					item = frappe.db.get_all('Delivery Planning Item',
+											filters={'related_delivey_planning': self.name,
+													 'approved': "Yes",
+													 'supplier_dc': 0,
+													 'customer': d.customer},
+											fields= ["item_code",
+													  "ordered_qty",
+													  'stock_uom',
+													  "uom",
+													  "conversion_factor",
+													  "sorce_warehouse",
+													  "sales_order"]
+											 )
+					print(" */*/*/  */*/*/  /*/", item)
+
+					for i in item:
+						print("thisd is sales order --------", i.sales_order)
+						salesno = i.sales_order
+						dnote.append('items', {
+							'item_code': i.item_code,
+							'warehouse': i.sorce_warehouse,
+							'qty': i.ordered_qty,
+							'stock_qty': i.ordered_qty,
+							'uom': i.uom,
+							'stock_uom': i.stock_uom,
+							'conversion_factor': i.conversion_factor,
+							'against_sales_order': i.sales_order
+
+						})
+
+					discount = frappe.get_doc('Sales Order', salesno)
+					print("p........p.........p", discount.additional_discount_percentage)
+
+					dnote.additional_discount_percentage = discount.additional_discount_percentage
+					dnote.apply_dicount_on = discount.apply_discount_on
+					dnote.taxes_and_charges = discount.taxes_and_charges
+					dnote.save(ignore_permissions=True)
+				return 2
+
+		else : return 0
+
+
+
+
+
+
+
