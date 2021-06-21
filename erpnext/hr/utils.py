@@ -326,10 +326,10 @@ def allocate_earned_leaves():
 
 			from_date=allocation.from_date
 
-			if e_leave_type.based_on_date_of_joining_date:
+			if e_leave_type.based_on_date_of_joining:
 				from_date  = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
 
-			if check_effective_date(from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining_date):
+			if check_effective_date(from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining):
 				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
 
 def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
