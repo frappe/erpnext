@@ -213,12 +213,10 @@ def start_import(invoices):
 	if errors:
 		frappe.msgprint(_("You had {} errors while creating opening invoices. Check {} for more details")
 			.format(errors, "<a href='/app/List/Error Log' class='variant-click'>Error Log</a>"), indicator="red", title=_("Error Occured"))
-	if len(invoices) < 5:
-		frappe.msgprint('Invoices created successfully.')
 	return names
 
 def publish(index, total, doctype):
-	if total < 5: return
+	if total < 50: return
 	frappe.publish_realtime(
 		"opening_invoice_creation_progress",
 		dict(
