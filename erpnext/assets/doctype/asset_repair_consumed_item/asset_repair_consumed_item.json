@@ -46,7 +46,7 @@
  "modified": "2021-05-12 03:19:55.006300",
  "modified_by": "Administrator",
  "module": "Assets",
- "name": "Stock Item",
+ "name": "Asset Repair Consumed Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
