@@ -25,14 +25,6 @@
   "description",
   "investigation_details_section",
   "cause_of_grievance",
-  "section_break_15",
-  "is_applicable_for_pay_cut",
-  "is_applicable_for_suspension",
-  "suspension_period_in_days",
-  "column_break_20",
-  "suspended_from",
-  "suspended_to",
-  "unsuspended_on",
   "resolution_details_section",
   "resolved_by",
   "resolution_date",
@@ -117,22 +109,6 @@
    "mandatory_depends_on": "eval: doc.status == \"Resolved\""
   },
   {
-   "default": "0",
-   "fetch_from": "grievance_type.is_applicable_for_suspension",
-   "fieldname": "is_applicable_for_suspension",
-   "fieldtype": "Check",
-   "label": "Is Applicable for Suspension",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "grievance_type.is_applicable_for_pay_cut",
-   "fieldname": "is_applicable_for_pay_cut",
-   "fieldtype": "Check",
-   "label": "Is Applicable for Pay Cut ",
-   "read_only": 1
-  },
-  {
    "fieldname": "grievance_against",
    "fieldtype": "Dynamic Link",
    "label": "Grievance Against",
@@ -147,20 +123,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "suspended_from",
-   "fieldtype": "Date",
-   "label": "Suspended From ",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "suspended_to",
-   "fieldtype": "Date",
-   "label": "Suspended To",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -168,22 +130,6 @@
    "options": "Employee Grievance",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "unsuspended_on",
-   "fieldtype": "Date",
-   "label": "Unsuspended On",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_15",
-   "fieldtype": "Section Break",
-   "label": "Actions"
-  },
-  {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break"
   },
   {
    "fetch_from": "raised_by.designation",
@@ -235,12 +181,6 @@
    "options": "associated_document_type"
   },
   {
-   "fetch_from": "grievance_type.suspension_period_in_days",
-   "fieldname": "suspension_period_in_days",
-   "fieldtype": "Int",
-   "label": "Suspension Period in Days"
-  },
-  {
    "fieldname": "investigation_details_section",
    "fieldtype": "Section Break",
    "label": "Investigation Details"
@@ -262,7 +202,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-26 13:41:05.271685",
+ "modified": "2021-06-21 12:51:01.499486",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grievance",

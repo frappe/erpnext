@@ -6,32 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "is_applicable_for_suspension",
-  "suspension_period_in_days",
-  "column_break_3",
-  "is_applicable_for_pay_cut",
   "section_break_5",
   "description"
  ],
  "fields": [
-  {
-   "default": "0",
-   "fieldname": "is_applicable_for_suspension",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Is Applicable for Suspension"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_applicable_for_pay_cut",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Is Applicable for Pay Cut "
-  },
   {
    "fieldname": "section_break_5",
    "fieldtype": "Section Break"
@@ -40,18 +18,11 @@
    "fieldname": "description",
    "fieldtype": "Text",
    "label": "Description"
-  },
-  {
-   "depends_on": "eval: doc.is_applicable_for_suspension == 1",
-   "fieldname": "suspension_period_in_days",
-   "fieldtype": "Int",
-   "label": "Suspension Period in Days",
-   "mandatory_depends_on": "eval: doc.is_applicable_for_suspension == 1"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-24 13:14:47.928103",
+ "modified": "2021-06-21 12:54:37.764712",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Grievance Type",
