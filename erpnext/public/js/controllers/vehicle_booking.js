@@ -282,6 +282,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 						frappe.run_serially([
 							() => me.frm.trigger('vehicle_amount'),
 							() => me.frm.trigger('payment_terms_template'),
+							() => me.frm.trigger('tc_name'),
 							() => me.frm.trigger('image'),
 							() => callback && callback(r)
 						]);
