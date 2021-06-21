@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:SLA-{document_type}-{service_level}-{####}",
+ "autoname": "format:SLA-{document_type}-{service_level}",
  "creation": "2018-12-26 21:08:15.448812",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -178,7 +178,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-29 13:35:41.956849",
+ "modified": "2021-06-21 12:10:47.800161",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
