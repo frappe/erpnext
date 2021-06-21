@@ -42,15 +42,25 @@ class AssetRepair(AccountsController):
 				self.modify_depreciation_schedule()
 
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
+		self.asset_doc.prepare_depreciation_data()
 		self.asset_doc.save()
 
 	def on_cancel(self):
+		self.asset_doc = frappe.get_doc('Asset', self.asset)
+
 		if self.get('stock_consumption') or self.get('capitalize_repair_cost'):
 			self.decrease_asset_value()
 		if self.get('stock_consumption'):
 			self.increase_stock_quantity()
 		if self.get('capitalize_repair_cost'):
+			self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 			self.make_gl_entries(cancel=True)
+			if frappe.db.get_value('Asset', self.asset, 'calculate_depreciation') and self.increase_in_asset_life:
+				self.revert_depreciation_schedule_on_cancellation()
+
+		self.asset_doc.flags.ignore_validate_update_after_submit = True
+		self.asset_doc.prepare_depreciation_data()
+		self.asset_doc.save()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
@@ -101,7 +111,8 @@ class AssetRepair(AccountsController):
 			stock_entry.append('items', {
 				"s_warehouse": self.warehouse,
 				"item_code": stock_item.item,
-				"qty": stock_item.consumed_quantity
+				"qty": stock_item.consumed_quantity,
+				"basic_rate": stock_item.valuation_rate
 			})
 
 		stock_entry.insert()
@@ -118,13 +129,15 @@ class AssetRepair(AccountsController):
 
 		for stock_item in self.get('stock_items'):
 			stock_entry.append('items', {
-				"s_warehouse": self.warehouse,
+				"t_warehouse": self.warehouse,
 				"item_code": stock_item.item,
 				"qty": stock_item.consumed_quantity
 			})
 
 		stock_entry.insert()
 		stock_entry.submit()
+
+		self.stock_entry = stock_entry.name
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.repair_cost) > 0:
@@ -215,6 +228,34 @@ class AssetRepair(AccountsController):
 
 		if asset.to_date > schedule_date:
 			row.total_number_of_depreciations += 1
+
+	def revert_depreciation_schedule_on_cancellation(self):
+		for row in self.asset_doc.finance_books:
+			row.total_number_of_depreciations -= self.increase_in_asset_life/row.frequency_of_depreciation
+
+			self.asset_doc.flags.increase_in_asset_life = False
+			extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
+			if extra_months != 0:
+				self.calculate_last_schedule_date_before_modification(self.asset_doc, row, extra_months)
+
+	def calculate_last_schedule_date_before_modification(self, asset, row, extra_months):
+		asset.flags.increase_in_asset_life = True
+		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - \
+			cint(asset.number_of_depreciations_booked)
+
+		# the Schedule Date in the final row of the modified Depreciation Schedule
+		last_schedule_date = asset.schedules[len(asset.schedules)-1].schedule_date
+
+		# the Schedule Date in the final row of the original Depreciation Schedule
+		asset.to_date = add_months(last_schedule_date, -extra_months)
+
+		# the latest possible date at which the depreciation can occur, without decreasing the Total Number of Depreciations
+		# if depreciations happen yearly and the Depreciation Posting Date is 01-01-2020, this could be 01-01-2021, 01-01-2022...
+		schedule_date = add_months(row.depreciation_start_date,
+			(number_of_pending_depreciations - 1) * cint(row.frequency_of_depreciation))
+
+		if asset.to_date < schedule_date:
+			row.total_number_of_depreciations -= 1
 
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
