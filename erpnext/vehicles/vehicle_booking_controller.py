@@ -222,8 +222,8 @@ class VehicleBookingController(AccountsController):
 			self.validate_value('total_discount', '>=', 0)
 
 	def validate_payment_schedule(self):
-		self.validate_payment_schedule_dates()
 		self.set_payment_schedule()
+		self.validate_payment_schedule_dates()
 		self.set_due_date()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()

@@ -203,8 +203,8 @@ class AccountsController(TransactionBase):
 					frappe.throw(_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx))
 
 	def validate_invoice_documents_schedule(self):
-		self.validate_payment_schedule_dates()
 		self.set_payment_schedule()
+		self.validate_payment_schedule_dates()
 		self.set_due_date()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()
@@ -1392,6 +1392,13 @@ class AccountsController(TransactionBase):
 			else:
 				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, payment_amount_type="Percentage")
 				self.append("payment_schedule", data)
+		else:
+			for d in self.get("payment_schedule"):
+				if d.payment_term:
+					term = frappe.get_cached_doc("Payment Term", d.payment_term)
+					d.due_date = get_due_date(term, posting_date, bill_date, delivery_date=self.get('delivery_date'))
+				elif getdate(d.due_date) < getdate(posting_date):
+					d.due_date = posting_date
 
 		for d in self.get("payment_schedule"):
 			if d.payment_amount_type == "Remaining Amount":
