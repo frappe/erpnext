@@ -155,7 +155,8 @@ def get_mode_of_payment(doc):
 	return frappe.db.sql("""
 		select mpa.default_account, mpa.parent, mp.type as type 
 		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
-		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
+		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1
+		order by if(mp.name = 'Cash', 0, mp.creation)""",
 	{'company': doc.company}, as_dict=1)
 
 

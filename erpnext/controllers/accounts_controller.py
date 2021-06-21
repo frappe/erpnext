@@ -276,6 +276,9 @@ class AccountsController(TransactionBase):
 			self.t_warehouses = list(set([frappe.get_cached_value("Warehouse", item.t_warehouse, 'warehouse_name')
 				for item in self.items if item.get('t_warehouse')]))
 
+		if self.doctype == "Sales Invoice":
+			self.payments = self.get('payments', {'amount': ['!=', 0]})
+
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
 			is_paid = self.get("is_pos") or self.get("is_paid")
@@ -300,8 +303,6 @@ class AccountsController(TransactionBase):
 				if self.meta.get_field(fieldname) and not self.get(fieldname):
 					self.set(fieldname, today())
 					break
-
-		self.validate_transaction_type()
 
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
