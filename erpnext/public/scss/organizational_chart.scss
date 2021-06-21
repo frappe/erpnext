@@ -6,6 +6,7 @@
 	padding: 0.75rem;
 	margin-left: 3rem;
 	width: 18rem;
+	overflow: hidden;
 
 	.btn-edit-node {
 		display: none;
@@ -206,4 +207,73 @@
 
 .collapsed-connector {
 	stroke: var(--blue-300);
+}
+
+// mobile
+
+.hierarchy-mobile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 30px;
+	padding-left: 0px;
+}
+
+.hierarchy-mobile li {
+	list-style-type: none;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.mobile-node {
+	margin-left: 0;
+}
+
+.mobile-node.active-path {
+	width: 12.25rem;
+}
+
+.active-child {
+	width: 15.5rem;
+}
+
+.mobile-node .node-connections {
+	max-width: 80px;
+}
+
+.hierarchy-mobile .node-children {
+	margin-top: 16px;
+}
+
+// node group
+
+.collapsed-level {
+	margin-bottom: 16px;
+}
+
+.node-group {
+	background: white;
+	border: 1px solid var(--gray-300);
+	box-shadow: var(--shadow-sm);
+	border-radius: 0.5rem;
+	padding: 0.75rem;
+	margin-left: 12px;
+	width: 5rem;
+	height: 3rem;
+	overflow: hidden;
+}
+
+.node-group .avatar-group {
+	margin-left: 0px;
+}
+
+.node-group .avatar-extra-count {
+	background-color: var(--blue-100);
+	color: var(--blue-500);
+}
+
+.node-group .avatar-frame {
+	width: 1.5rem;
+	height: 1.5rem;
 }

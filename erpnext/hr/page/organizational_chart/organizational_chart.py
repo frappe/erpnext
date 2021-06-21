@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()
-def get_children(parent=None, company=None, is_root=False, is_tree=False, fields=None):
+def get_children(parent=None, company=None, exclude_node=None, is_root=False, is_tree=False, fields=None):
 
 	filters = [['status', '!=', 'Left']]
 	if company and company != 'All Companies':
@@ -13,6 +13,10 @@ def get_children(parent=None, company=None, is_root=False, is_tree=False, fields
 
 	if is_root:
 		parent = ''
+
+	if exclude_node:
+		filters.append(['name', '!=', exclude_node])
+
 	if parent and company and parent!=company:
 		filters.append(['reports_to', '=', parent])
 	else:
