@@ -1219,8 +1219,8 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_so_cancellation_when_si_drafted(self):
 		"""
-			Test to check if Sales Order gets submitted if Sales Invoice is in Draft state
-			Expected result: sales order should not get submitted 
+			Test to check if Sales Order gets cancelled if Sales Invoice is in Draft state
+			Expected result: sales order should not get cancelled 
 		"""
 		so = make_sales_order()
 		so.submit()
