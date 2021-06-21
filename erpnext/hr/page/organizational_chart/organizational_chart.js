@@ -5,13 +5,20 @@ frappe.pages['organizational-chart'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	let organizational_chart = new OrganizationalChart(wrapper);
+	// let organizational_chart = undefined;
+	// if (frappe.is_mobile()) {
+	// 	organizational_chart = new OrgChartMobile(wrapper);
+	// } else {
+	// 	organizational_chart = new OrgChart(wrapper);
+	// }
+
+	let organizational_chart = new OrgChartMobile(wrapper);
 	$(wrapper).bind('show', ()=> {
 		organizational_chart.show();
 	});
 };
 
-class OrganizationalChart {
+class OrgChart {
 
 	constructor(wrapper) {
 		this.wrapper = $(wrapper);
@@ -405,5 +412,323 @@ class OrganizationalChart {
 
 			$(path).remove();
 		})
+	}
+}
+
+
+class OrgChartMobile {
+
+	constructor(wrapper) {
+		this.wrapper = $(wrapper);
+		this.page = wrapper.page;
+
+		this.page.main.css({
+			'min-height': '300px',
+			'max-height': '600px',
+			'overflow': 'auto',
+			'position': 'relative'
+		});
+		this.page.main.addClass('frappe-card');
+
+		this.nodes = {};
+		this.setup_node_class();
+	}
+
+	setup_node_class() {
+		let me = this;
+		this.Node = class {
+			constructor({
+				id, parent, parent_id, image, name, title, expandable, connections, is_root // eslint-disable-line
+			}) {
+				// to setup values passed via constructor
+				$.extend(this, arguments[0]);
+
+				this.expanded = 0;
+
+				me.nodes[this.id] = this;
+				me.make_node_element(this);
+				me.setup_node_click_action(this);
+			}
+		}
+	}
+
+	make_node_element(node) {
+		let node_card = frappe.render_template('node_card', {
+			id: node.id,
+			name: node.name,
+			title: node.title,
+			image: node.image,
+			parent: node.parent_id,
+			connections: node.connections,
+			is_mobile: 1
+		});
+
+		node.parent.append(node_card);
+		node.$link = $(`#${node.id}`);
+		node.$link.addClass('mobile-node');
+	}
+
+	show() {
+		frappe.breadcrumbs.add('HR');
+
+		let me = this;
+		let company = this.page.add_field({
+			fieldtype: 'Link',
+			options: 'Company',
+			fieldname: 'company',
+			placeholder: __('Select Company'),
+			default: frappe.defaults.get_default('company'),
+			only_select: true,
+			reqd: 1,
+			change: () => {
+				me.company = undefined;
+
+				if (company.get_value() && me.company != company.get_value()) {
+					me.company = company.get_value();
+
+					if (me.$hierarchy)
+						me.$hierarchy.remove();
+
+					// setup hierarchy
+					me.$hierarchy = $(
+						`<ul class="hierarchy-mobile">
+							<li class="root-level level"></li>
+						</ul>`);
+
+					me.page.main.append(me.$hierarchy);
+					me.render_root_node();
+				}
+			}
+		});
+
+		company.refresh();
+		$(`[data-fieldname="company"]`).trigger('change');
+	}
+
+	render_root_node() {
+		this.method = 'erpnext.hr.page.organizational_chart.organizational_chart.get_children';
+
+		let me = this;
+
+		frappe.call({
+			method: me.method,
+			args: {
+				company: me.company
+			},
+			callback: function(r) {
+				if (r.message.length) {
+					let data = r.message[0];
+
+					let root_node = new me.Node({
+						id: data.name,
+						parent: me.$hierarchy.find('.root-level'),
+						parent_id: undefined,
+						image: data.image,
+						name: data.employee_name,
+						title: data.designation,
+						expandable: true,
+						connections: data.connections,
+						is_root: true,
+					});
+
+					me.expand_node(root_node);
+				}
+			}
+		})
+	}
+
+	expand_node(node) {
+		this.set_selected_node(node);
+		this.show_active_path(node);
+
+		if (node.expandable && !node.expanded) {
+			return this.load_children(node);
+		}
+	}
+
+	collapse_node() {
+		let node = this.selected_node;
+		if (node.expandable) {
+			node.$children.hide();
+			node.expanded = false;
+
+			// add a collapsed level to show the collapsed parent
+			// and a button beside it to move to that level
+			let node_parent = node.$link.parent();
+			node_parent.prepend(
+				`<div class="collapsed-level d-flex flex-row"></div>`
+			);
+
+			node_parent
+				.find('.collapsed-level')
+				.append(node.$link);
+
+			frappe.run_serially([
+				() => this.get_child_nodes(node.parent_id, node.id),
+				(child_nodes) => this.get_node_group(child_nodes, node.id),
+				(node_group) => {
+					node_parent.find('.collapsed-level')
+						.append(node_group);
+				}
+			]);
+		}
+	}
+
+	show_active_path(node) {
+		// mark node parent on active path
+		$(`#${node.parent_id}`).addClass('active-path');
+	}
+
+	load_children(node) {
+		frappe.run_serially([
+			() => this.get_child_nodes(node.id),
+			(child_nodes) => this.render_child_nodes(node, child_nodes)
+		]);
+	}
+
+	get_child_nodes(node_id, exclude_node=null) {
+		let me = this;
+		return new Promise(resolve => {
+			frappe.call({
+				method: this.method,
+				args: {
+					parent: node_id,
+					company: me.company,
+					exclude_node: exclude_node
+				},
+				callback: (r) => {
+					resolve(r.message);
+				}
+			});
+		});
+	}
+
+	render_child_nodes(node, child_nodes) {
+		if (!node.$children) {
+			node.$children = $('<ul class="node-children"></ul>')
+					.hide()
+					.appendTo(node.$link.parent());
+
+			node.$children.empty();
+
+			if (child_nodes) {
+				$.each(child_nodes, (_i, data) => {
+					this.add_node(node, data);
+					$(`#${data.name}`).addClass('active-child');
+				});
+			}
+		}
+
+		node.$children.show();
+		node.expanded = true;
+	}
+
+	add_node(node, data) {
+		var $li = $('<li class="child-node"></li>');
+
+		return new this.Node({
+			id: data.name,
+			parent: $li.appendTo(node.$children),
+			parent_id: node.id,
+			image: data.image,
+			name: data.employee_name,
+			title: data.designation,
+			expandable: data.expandable,
+			connections: data.connections,
+			children: undefined
+		});
+	}
+
+	set_selected_node(node) {
+		// remove .active class from the current node
+		$('.active').removeClass('active');
+
+		// add active class to the newly selected node
+		this.selected_node = node;
+		node.$link.addClass('active');
+	}
+
+	setup_node_click_action(node) {
+		let me = this;
+		let node_element = $(`#${node.id}`);
+		let node_object = null;
+
+		node_element.click(function() {
+			if (node_element.is(':visible') && node_element.hasClass('active-path')) {
+				me.remove_levels_after_node(node);
+			} else {
+				me.add_node_to_hierarchy(node, true);
+				me.collapse_node();
+			}
+
+			me.expand_node(node);
+		});
+	}
+
+	add_node_to_hierarchy(node) {
+		this.$hierarchy.append(`
+			<li class="level">
+				<div class="node-level d-flex flex-row">
+				</div>
+			</li>
+		`);
+
+		node.$link.appendTo(this.$hierarchy.find('.level:last'));
+	}
+
+	get_node_group(nodes, sibling) {
+		let limit = 2;
+		const display_nodes = nodes.slice(0, limit);
+		const extra_nodes = nodes.slice(limit);
+
+		let html = display_nodes.map(node =>
+			this.get_avatar(node)
+		).join('');
+
+		if (extra_nodes.length === 1) {
+			let node = extra_nodes[0];
+			html += this.get_avatar(node);
+		} else if (extra_nodes.length > 1) {
+			html = `
+				${html}
+				<span class="avatar avatar-small">
+					<div class="avatar-frame standard-image avatar-extra-count"
+						title="${extra_nodes.map(node => node.employee_name).join(', ')}">
+						+${extra_nodes.length}
+					</div>
+				</span>
+			`;
+		}
+
+		const $node_group =
+			$(`<div class="node-group card cursor-pointer" data-sibling=${sibling}>
+				<div class="avatar-group right overlap">
+					${html}
+				</div>
+			</div>`);
+
+		return $node_group;
+	}
+
+	get_avatar(node) {
+		return `<span class="avatar avatar-small" title="${node.employee_name}">
+			<span class="avatar-frame" src=${node.image} style="background-image: url(${node.image})"></span>
+		</span>`
+	}
+
+	remove_levels_after_node(node) {
+		let level = $(`#${node.id}`).parent().parent();
+
+		level = $('.hierarchy-mobile > li:eq('+ (level.index()) + ')');
+		level.nextAll('li').remove();
+
+		let current_node = level.find(`#${node.id}`);
+		let node_object = this.nodes[node.id];
+
+		current_node.removeClass('active-child active-path');
+		node_object.expanded = 0;
+		node_object.$children = undefined;
+
+		level.empty().append(current_node);
 	}
 }
