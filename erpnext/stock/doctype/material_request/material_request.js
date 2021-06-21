@@ -407,33 +407,33 @@ frappe.ui.form.on("Material Request Item", {
 	}
 });
 
-erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
-	tc_name: function() {
+erpnext.buying.MaterialRequestController = class MaterialRequestController extends erpnext.buying.BuyingController {
+	tc_name() {
 		this.get_terms();
-	},
+	}
 
-	item_code: function() {
+	item_code() {
 		// to override item code trigger from transaction.js
-	},
+	}
 
-	validate_company_and_party: function() {
+	validate_company_and_party() {
 		return true;
-	},
+	}
 
-	calculate_taxes_and_totals: function() {
+	calculate_taxes_and_totals() {
 		return;
-	},
+	}
 
-	validate: function() {
+	validate() {
 		set_schedule_date(this.frm);
-	},
+	}
 
-	onload: function(doc, cdt, cdn) {
+	onload(doc, cdt, cdn) {
 		this.frm.set_query("item_code", "items", function() {
 			if (doc.material_request_type == "Customer Provided") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 
+					filters:{
 						'customer': me.frm.doc.customer,
 						'is_stock_item':1
 					}
@@ -450,9 +450,9 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				}
 			}
 		});
-	},
+	}
 
-	items_add: function(doc, cdt, cdn) {
+	items_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		if(doc.schedule_date) {
 			row.schedule_date = doc.schedule_date;
@@ -460,19 +460,19 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		} else {
 			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
 		}
-	},
+	}
 
-	items_on_form_rendered: function() {
-		set_schedule_date(this.frm);
-	},
-
-	schedule_date: function() {
+	items_on_form_rendered() {
 		set_schedule_date(this.frm);
 	}
-});
+
+	schedule_date() {
+		set_schedule_date(this.frm);
+	}
+};
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 
 function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){

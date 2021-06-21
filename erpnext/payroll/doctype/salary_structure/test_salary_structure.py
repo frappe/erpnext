@@ -6,7 +6,7 @@ import frappe
 import unittest
 import erpnext
 from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_days, add_years, getdate, add_months
+from frappe.utils import nowdate, add_years, get_first_day, date_diff
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
 	make_deduction_salary_component, make_employee_salary_slip, create_tax_slab
@@ -113,8 +113,9 @@ class TestSalaryStructure(unittest.TestCase):
 		sal_struct = make_salary_structure("Salary Structure Multi Currency", "Monthly", currency='USD')
 		self.assertEqual(sal_struct.currency, 'USD')
 
-def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
-	test_tax=False, company=None, currency=erpnext.get_default_currency(), payroll_period=None):
+def make_salary_structure(salary_structure, payroll_frequency, employee=None,
+	from_date=None, dont_submit=False, other_details=None,test_tax=False,
+	company=None, currency=erpnext.get_default_currency(), payroll_period=None):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 
@@ -139,10 +140,23 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 	else:
 		salary_structure_doc = frappe.get_doc("Salary Structure", salary_structure)
 
+	filters = {'employee':employee, 'docstatus': 1}
+	if not from_date and payroll_period:
+		from_date = payroll_period.start_date
+
+	if from_date:
+		filters['from_date'] = from_date
+
 	if employee and not frappe.db.get_value("Salary Structure Assignment",
-		{'employee':employee, 'docstatus': 1}) and salary_structure_doc.docstatus==1:
-			create_salary_structure_assignment(employee, salary_structure, company=company, currency=currency,
-			payroll_period=payroll_period)
+		filters) and salary_structure_doc.docstatus==1:
+		create_salary_structure_assignment(
+			employee,
+			salary_structure,
+			from_date=from_date,
+			company=company,
+			currency=currency,
+			payroll_period=payroll_period
+		)
 
 	return salary_structure_doc
 
@@ -165,12 +179,13 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.base = 50000
 	salary_structure_assignment.variable = 5000
 
-	if getdate(nowdate()).day == 1:
-		date = from_date or nowdate()
-	else:
-		date = from_date or add_days(nowdate(), -1)
+	if not from_date:
+		from_date = get_first_day(nowdate())
+		joining_date = frappe.get_cached_value("Employee", employee, "date_of_joining")
+		if date_diff(joining_date, from_date) > 0:
+			from_date = joining_date
 
-	salary_structure_assignment.from_date = date
+	salary_structure_assignment.from_date = from_date
 	salary_structure_assignment.salary_structure = salary_structure
 	salary_structure_assignment.currency = currency
 	salary_structure_assignment.payroll_payable_account = get_payable_account(company)

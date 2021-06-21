@@ -51,7 +51,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 	}
 
-	get_items({start = 0, page_length = 40, search_value=''}) {
+	get_items({start = 0, page_length = 40, search_term=''}) {
 		const doc = this.events.get_frm().doc;
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
@@ -61,7 +61,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
-			args: { start, page_length, price_list, item_group, search_value, pos_profile },
+			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
 	}
 
@@ -80,6 +80,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		// eslint-disable-next-line no-unused-vars
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
+		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 
 		let qty_to_display = actual_qty;
 
@@ -121,7 +122,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-name">
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
-					<div class="item-rate">${format_currency(price_list_rate, item.currency, 0) || 0}</div>
+					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
 				</div>
 			</div>`
 		);
@@ -302,7 +303,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
-		this.get_items({ search_value: search_term })
+		this.get_items({ search_term })
 			.then(({ message }) => {
 				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;
