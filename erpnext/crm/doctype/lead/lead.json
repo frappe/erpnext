@@ -440,7 +440,7 @@
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2021-06-04 22:50:29.472386",
+ "modified": "2021-06-21 15:31:24.805889",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -499,7 +499,7 @@
    "role": "Sales User"
   }
  ],
- "search_fields": "lead_name,lead_owner,status",
+ "search_fields": "lead_name, company_name, email_id, mobile_no, mobile_no_2, tax_cnic, tax_id, tax_strn, status",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
