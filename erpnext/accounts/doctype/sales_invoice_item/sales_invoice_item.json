@@ -743,7 +743,6 @@
    "fieldname": "asset",
    "fieldtype": "Link",
    "label": "Asset",
-   "no_copy": 1,
    "options": "Asset"
   },
   {
@@ -826,7 +825,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-23 01:05:22.123527",
+ "modified": "2021-06-21 23:03:11.599901",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
