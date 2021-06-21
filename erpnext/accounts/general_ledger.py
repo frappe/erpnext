@@ -143,7 +143,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 		validate_expense_against_budget(args)
 
 def validate_cwip_accounts(gl_map):
-	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
+	cwip_enabled = any(cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting"))
 
 	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
@@ -185,10 +185,10 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	for d in gl_map:
 		if d.account == round_off_account:
 			round_off_gle = d
-			if d.debit_in_account_currency:
-				debit_credit_diff -= flt(d.debit_in_account_currency)
+			if d.debit:
+				debit_credit_diff -= flt(d.debit)
 			else:
-				debit_credit_diff += flt(d.credit_in_account_currency)
+				debit_credit_diff += flt(d.credit)
 			round_off_account_exists = True
 
 	if round_off_account_exists and abs(debit_credit_diff) <= (1.0 / (10**precision)):
