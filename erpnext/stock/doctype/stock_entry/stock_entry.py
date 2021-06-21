@@ -97,8 +97,7 @@ class StockEntry(StockController):
 		update_serial_nos_after_submit(self, "items")
 		self.update_work_order()
 		self.validate_purchase_order()
-		if self.purchase_order and self.purpose == "Send to Subcontractor":
-			self.update_purchase_order_supplied_items()
+		self.update_purchase_order_supplied_items()
 
 		self.make_gl_entries()
 
@@ -117,9 +116,7 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status('Completed')
 
 	def on_cancel(self):
-
-		if self.purchase_order and self.purpose == "Send to Subcontractor":
-			self.update_purchase_order_supplied_items()
+		self.update_purchase_order_supplied_items()
 
 		if self.work_order and self.purpose == "Material Consumption for Manufacture":
 			self.validate_work_order_status()
@@ -1008,10 +1005,12 @@ class StockEntry(StockController):
 					if self.purchase_order and self.purpose == "Send to Subcontractor":
 						#Get PO Supplied Items Details
 						item_wh = frappe._dict(frappe.db.sql("""
-							select rm_item_code, reserve_warehouse
-							from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-							where po.name = poitemsup.parent
-								and po.name = %s""",self.purchase_order))
+							SELECT
+								rm_item_code, reserve_warehouse
+							FROM
+								`tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+							WHERE
+								po.name = poitemsup.parent and po.name = %s """,self.purchase_order))
 
 					for item in itervalues(item_dict):
 						if self.pro_doc and cint(self.pro_doc.from_wip_warehouse):
@@ -1294,7 +1293,8 @@ class StockEntry(StockController):
 				item_dict[item]["qty"] = 0
 
 		# delete items with 0 qty
-		for item in item_dict.keys():
+		list_of_items = item_dict.keys()
+		for item in list_of_items:
 			if not item_dict[item]["qty"]:
 				del item_dict[item]
 
@@ -1347,7 +1347,7 @@ class StockEntry(StockController):
 			se_child.is_scrap_item = item_dict[d].get("is_scrap_item", 0)
 
 			for field in ["idx", "po_detail", "original_item",
-				"expense_account", "description", "item_name"]:
+				"expense_account", "description", "item_name", "serial_no", "batch_no"]:
 				if item_dict[d].get(field):
 					se_child.set(field, item_dict[d].get(field))
 
@@ -1400,33 +1400,26 @@ class StockEntry(StockController):
 							.format(item.batch_no, item.item_code))
 
 	def update_purchase_order_supplied_items(self):
-		#Get PO Supplied Items Details
-		item_wh = frappe._dict(frappe.db.sql("""
-			select rm_item_code, reserve_warehouse
-			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-			where po.name = poitemsup.parent
-			and po.name = %s""", self.purchase_order))
+		if (self.purchase_order and
+			(self.purpose in ['Send to Subcontractor', 'Material Transfer'] or self.is_return)):
 
-		#Update Supplied Qty in PO Supplied Items
+			#Get PO Supplied Items Details
+			item_wh = frappe._dict(frappe.db.sql("""
+				select rm_item_code, reserve_warehouse
+				from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+				where po.name = poitemsup.parent
+				and po.name = %s""", self.purchase_order))
 
-		frappe.db.sql("""UPDATE `tabPurchase Order Item Supplied` pos
-			SET
-				pos.supplied_qty = IFNULL((SELECT ifnull(sum(transfer_qty), 0)
-					FROM
-						`tabStock Entry Detail` sed, `tabStock Entry` se
-					WHERE
-						pos.name = sed.po_detail AND pos.rm_item_code = sed.item_code
-						AND pos.parent = se.purchase_order AND sed.docstatus = 1
-						AND se.name = sed.parent and se.purchase_order = %(po)s
-				), 0)
-			WHERE pos.docstatus = 1 and pos.parent = %(po)s""", {"po": self.purchase_order})
+			supplied_items = get_supplied_items(self.purchase_order)
+			for name, item in supplied_items.items():
+				frappe.db.set_value('Purchase Order Item Supplied', name, item)
 
-		#Update reserved sub contracted quantity in bin based on Supplied Item Details and
-		for d in self.get("items"):
-			item_code = d.get('original_item') or d.get('item_code')
-			reserve_warehouse = item_wh.get(item_code)
-			stock_bin = get_bin(item_code, reserve_warehouse)
-			stock_bin.update_reserved_qty_for_sub_contracting()
+			#Update reserved sub contracted quantity in bin based on Supplied Item Details and
+			for d in self.get("items"):
+				item_code = d.get('original_item') or d.get('item_code')
+				reserve_warehouse = item_wh.get(item_code)
+				stock_bin = get_bin(item_code, reserve_warehouse)
+				stock_bin.update_reserved_qty_for_sub_contracting()
 
 	def update_so_in_serial_number(self):
 		so_name, item_code = frappe.db.get_value("Work Order", self.work_order, ["sales_order", "production_item"])
@@ -1480,7 +1473,7 @@ class StockEntry(StockController):
 				cond += """ WHEN (parent = %s and name = %s) THEN %s
 					""" %(frappe.db.escape(data[0]), frappe.db.escape(data[1]), transferred_qty)
 
-			if cond and stock_entries_child_list:
+			if stock_entries_child_list:
 				frappe.db.sql(""" UPDATE `tabStock Entry Detail`
 					SET
 						transferred_qty = CASE {cond} END
@@ -1751,3 +1744,30 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 			format(max_retain_qty, batch_no, item_code), alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+def get_supplied_items(purchase_order):
+	fields = ['`tabStock Entry Detail`.`transfer_qty`', '`tabStock Entry`.`is_return`',
+			'`tabStock Entry Detail`.`po_detail`', '`tabStock Entry Detail`.`item_code`']
+
+	filters = [['Stock Entry', 'docstatus', '=', 1], ['Stock Entry', 'purchase_order', '=', purchase_order]]
+
+	supplied_item_details = {}
+	for row in frappe.get_all('Stock Entry', fields = fields, filters = filters):
+		if not row.po_detail:
+			continue
+
+		key = row.po_detail
+		if key not in supplied_item_details:
+			supplied_item_details.setdefault(key,
+				frappe._dict({'supplied_qty': 0, 'returned_qty':0, 'total_supplied_qty':0}))
+
+		supplied_item = supplied_item_details[key]
+
+		if row.is_return:
+			supplied_item.returned_qty += row.transfer_qty
+		else:
+			supplied_item.supplied_qty += row.transfer_qty
+
+		supplied_item.total_supplied_qty = flt(supplied_item.supplied_qty) - flt(supplied_item.returned_qty)
+
+	return supplied_item_details

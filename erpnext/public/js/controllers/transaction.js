@@ -743,6 +743,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
+		if (item && item.doctype === 'Purchase Receipt Item Supplied') {
+			return;
+		}
+
 		if (item && item.serial_no) {
 			if (!item.item_code) {
 				this.frm.trigger("item_code", cdt, cdn);

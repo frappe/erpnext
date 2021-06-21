@@ -335,6 +335,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		se2.cancel()
 		se3.cancel()
 		po.reload()
+		pr2.load_from_db()
+		pr2.cancel()
+
+		po.load_from_db()
 		po.cancel()
 
 	def test_serial_no_supplier(self):
