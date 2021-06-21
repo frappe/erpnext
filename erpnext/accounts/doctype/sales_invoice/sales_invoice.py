@@ -916,7 +916,11 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
-					asset = frappe.get_doc("Asset", item.asset)
+					if item.get('asset'):
+						asset = frappe.get_doc("Asset", item.asset)
+					else:
+						frappe.throw(_("Enter Asset linked with Item {0}: {1} in row {2}.")
+							.format(item.item_code, item.item_name, item.idx))
 
 					if (len(asset.finance_books) > 1 and not item.finance_book
 						and asset.finance_books[0].finance_book):
