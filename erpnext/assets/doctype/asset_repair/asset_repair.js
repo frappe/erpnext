@@ -35,6 +35,13 @@ frappe.ui.form.on('Asset Repair', {
 	}
 });
 
+frappe.ui.form.on('Asset Repair Consumed Item', {
+	consumed_quantity: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, 'total_value', row.consumed_quantity * row.valuation_rate);
+	},
+});
+
 cur_frm.fields_dict.cost_center.get_query = function(doc) {
 	return {
 		filters: {
