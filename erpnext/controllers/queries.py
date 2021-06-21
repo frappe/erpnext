@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
+import json
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate
 from collections import defaultdict
@@ -87,7 +88,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Customer", fields)
 
 	searchfields = frappe.get_meta("Customer").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2
@@ -198,6 +199,9 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
 	#Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
@@ -216,11 +220,23 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
+	if filters and isinstance(filters, dict) and filters.get('supplier'):
+		item_group_list = frappe.get_all('Supplier Item Group',
+			filters = {'supplier': filters.get('supplier')}, fields = ['item_group'])
+
+		item_groups = []
+		for i in item_group_list:
+			item_groups.append(i.item_group)
+
+		del filters['supplier']
+
+		if item_groups:
+			filters['item_group'] = ['in', item_groups]
+
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
-
 	return frappe.db.sql("""select tabItem.name,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,

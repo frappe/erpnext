@@ -6,8 +6,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "subject",
   "raised_by",
-  "full_name",
+  "employee_name",
   "designation",
   "column_break_3",
   "date",
@@ -24,14 +25,6 @@
   "description",
   "investigation_details_section",
   "cause_of_grievance",
-  "section_break_15",
-  "is_applicable_for_pay_cut",
-  "is_applicable_for_suspension",
-  "suspension_period_in_days",
-  "column_break_20",
-  "suspended_from",
-  "suspended_to",
-  "unsuspended_on",
   "resolution_details_section",
   "resolved_by",
   "resolution_date",
@@ -89,7 +82,7 @@
   {
    "fieldname": "resolved_by",
    "fieldtype": "Link",
-   "label": "Resolved by",
+   "label": "Resolved By",
    "mandatory_depends_on": "eval: doc.status == \"Resolved\"",
    "options": "User"
   },
@@ -97,13 +90,12 @@
    "fieldname": "employee_responsible",
    "fieldtype": "Link",
    "label": "Employee Responsible ",
-   "mandatory_depends_on": "eval: doc.status == \"Resolved\"",
    "options": "Employee"
   },
   {
    "fieldname": "resolution_detail",
    "fieldtype": "Small Text",
-   "label": "Resolution Detail",
+   "label": "Resolution Details",
    "mandatory_depends_on": "eval: doc.status == \"Resolved\""
   },
   {
@@ -115,22 +107,6 @@
    "fieldtype": "Date",
    "label": "Resolution Date",
    "mandatory_depends_on": "eval: doc.status == \"Resolved\""
-  },
-  {
-   "default": "0",
-   "fetch_from": "grievance_type.is_applicable_for_suspension",
-   "fieldname": "is_applicable_for_suspension",
-   "fieldtype": "Check",
-   "label": "Is Applicable for Suspension",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "grievance_type.is_applicable_for_pay_cut",
-   "fieldname": "is_applicable_for_pay_cut",
-   "fieldtype": "Check",
-   "label": "Is Applicable for Pay Cut ",
-   "read_only": 1
   },
   {
    "fieldname": "grievance_against",
@@ -147,20 +123,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "suspended_from",
-   "fieldtype": "Date",
-   "label": "Suspended From ",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "suspended_to",
-   "fieldtype": "Date",
-   "label": "Suspended To",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -168,22 +130,6 @@
    "options": "Employee Grievance",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "unsuspended_on",
-   "fieldtype": "Date",
-   "label": "Unsuspended On",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_15",
-   "fieldtype": "Section Break",
-   "label": "Actions"
-  },
-  {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break"
   },
   {
    "fetch_from": "raised_by.designation",
@@ -235,34 +181,36 @@
    "options": "associated_document_type"
   },
   {
-   "fetch_from": "grievance_type.suspension_period_in_days",
-   "fieldname": "suspension_period_in_days",
-   "fieldtype": "Int",
-   "label": "Suspension Period in Days"
-  },
-  {
    "fieldname": "investigation_details_section",
    "fieldtype": "Section Break",
-   "label": "Investigation details"
+   "label": "Investigation Details"
   },
   {
    "fetch_from": "raised_by.employee_name",
-   "fieldname": "full_name",
+   "fieldname": "employee_name",
    "fieldtype": "Data",
-   "label": "Full Name",
+   "label": "Employee Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-24 15:14:21.812126",
+ "modified": "2021-06-21 12:51:01.499486",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grievance",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -271,10 +219,14 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "select": 1,
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -283,7 +235,9 @@
    "read": 1,
    "report": 1,
    "role": "HR Manager",
+   "select": 1,
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -299,7 +253,9 @@
    "write": 1
   }
  ],
+ "search_fields": "subject,raised_by,grievance_against_party",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "subject",
  "track_changes": 1
 }

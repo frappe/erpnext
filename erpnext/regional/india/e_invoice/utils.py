@@ -38,13 +38,14 @@ def validate_eligibility(doc):
 	einvoicing_eligible_from = frappe.db.get_single_value('E Invoice Settings', 'applicable_from') or '2021-04-01'
 	if getdate(doc.get('posting_date')) < getdate(einvoicing_eligible_from):
 		return False
-	
+
 	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
+	has_non_gst_item = any(d for d in doc.get('items', []) if d.get('is_non_gst'))
 
-	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied or has_non_gst_item:
 		return False
 
 	return True
@@ -134,7 +135,7 @@ def validate_address_fields(address, is_shipping_address):
 
 def get_party_details(address_name, is_shipping_address=False):
 	addr = frappe.get_doc('Address', address_name)
-	
+
 	validate_address_fields(addr, is_shipping_address)
 
 	if addr.gst_state_number == 97:
@@ -187,18 +188,13 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 
-		if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
-			item.discount_amount = abs(item.base_amount - item.base_net_amount)
-		else:
-			item.discount_amount = 0
-
 		item.unit_rate = abs((abs(item.taxable_value) - item.discount_amount)/ item.qty)
 		item.gross_amount = abs(item.taxable_value) + item.discount_amount
 		item.taxable_value = abs(item.taxable_value)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
-		item.is_service_item = 'N' if frappe.db.get_value('Item', d.item_code, 'is_stock_item') else 'Y'
+		item.is_service_item = 'Y' if item.gst_hsn_code and item.gst_hsn_code[:2] == "99" else 'N'
 		item.serial_no = ""
 
 		item = update_item_taxes(invoice, item)
@@ -253,18 +249,8 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
-
-	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
-		# Discount already applied on net total which means on items
-		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
-		invoice_value_details.invoice_discount_amt = 0
-	elif invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount:
-		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
-		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
-	else:
-		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
-		# since tax already considers discount amount
-		invoice_value_details.invoice_discount_amt = 0
+	invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
+	invoice_value_details.invoice_discount_amt = 0
 
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
@@ -286,8 +272,7 @@ def update_invoice_taxes(invoice, invoice_value_details):
 	considered_rows = []
 
 	for t in invoice.taxes:
-		tax_amount = t.base_tax_amount if (invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount) \
-						else t.base_tax_amount_after_discount_amount
+		tax_amount = t.base_tax_amount_after_discount_amount
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
 				# using after discount amt since item also uses after discount amt for cess calc
@@ -533,11 +518,9 @@ def santize_einvoice_fields(einvoice):
 	return einvoice
 
 def safe_json_load(json_string):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
-
 	try:
 		return json.loads(json_string)
-	except JSONDecodeError as e:
+	except json.JSONDecodeError as e:
 		# print a snippet of 40 characters around the location where error occured
 		pos = e.pos
 		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
@@ -996,7 +979,7 @@ class GSPConnector():
 		self.invoice.failure_description = self.get_failure_message(errors) if errors else ""
 		self.update_invoice()
 		frappe.db.commit()
-	
+
 	def get_failure_message(self, errors):
 		if isinstance(errors, list):
 			errors = ', '.join(errors)
@@ -1053,7 +1036,7 @@ def generate_einvoices(docnames):
 			_('{} e-invoices generated successfully').format(success),
 			title=_('Bulk E-Invoice Generation Complete')
 		)
-			
+
 	else:
 		enqueue_bulk_action(schedule_bulk_generate_irn, docnames=docnames)
 

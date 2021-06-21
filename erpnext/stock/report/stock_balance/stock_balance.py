@@ -157,7 +157,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
+			.format(', '.join(frappe.db.escape(i, percent=False) for i in items))
 
 	conditions = get_conditions(filters)
 
@@ -253,7 +253,7 @@ def get_items(filters):
 def get_item_details(items, sle, filters):
 	item_details = {}
 	if not items:
-		items = list(set([d.item_code for d in sle]))
+		items = list(set(d.item_code for d in sle))
 
 	if not items:
 		return item_details
@@ -291,7 +291,7 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
+		""".format(', '.join(frappe.db.escape(i, percent=False) for i in items)), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 

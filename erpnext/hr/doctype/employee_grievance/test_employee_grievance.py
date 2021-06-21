@@ -3,35 +3,11 @@
 
 import frappe
 import unittest
-from frappe.utils import today, add_days, get_date_str
+from frappe.utils import today
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.employee_grievance.employee_grievance import create_additional_salary, suspend_employee, unsuspend_employee
-
 class TestEmployeeGrievance(unittest.TestCase):
-	def tearDown(self):
-		frappe.db.sql("DELETE FROM `tabEmployee Grievance`")
-		frappe.db.sql("DELETE FROM `tabGrievance Type`")
-
-	def test_creation_paycut_suspension_and_unsuspension(self):
-		grievance = create_employee_grievance()
-
-		# Pay cut Creation
-		pay_cut_doc = create_additional_salary(grievance)
-		self.assertEqual(grievance.employee_responsible, pay_cut_doc.employee)
-		self.assertEqual(pay_cut_doc.type, "Deduction")
-		self.assertEqual(pay_cut_doc.ref_docname, grievance.name)
-		self.assertEqual(pay_cut_doc.ref_doctype, "Employee Grievance")
-
-		# suspension
-		suspend_employee(grievance.name)
-		grievance.reload()
-		self.assertEqual(today(), get_date_str(grievance.suspended_from))
-		self.assertEqual(add_days(today(), 30), get_date_str(grievance.suspended_to))
-
-		# unsuspension
-		unsuspend_employee(grievance.name)
-		grievance.reload()
-		self.assertEqual(today(), get_date_str(grievance.unsuspended_on))
+	def test_create_employee_grievance(self):
+		create_employee_grievance()
 
 def create_employee_grievance():
 	grievance_type = create_grievance_type()
@@ -39,6 +15,7 @@ def create_employee_grievance():
 	emp_2 = make_employee("testculprit@example.com", company="_Test Company")
 
 	grievance = frappe.new_doc("Employee Grievance")
+	grievance.subject = "Test Employee Grievance"
 	grievance.raised_by = emp_1
 	grievance.date = today()
 	grievance.grievance_type = grievance_type
@@ -67,9 +44,12 @@ def create_grievance_type():
 		return frappe.get_doc("Grievance Type", "Employee Abuse")
 	grievance_type = frappe.new_doc("Grievance Type")
 	grievance_type.name="Employee Abuse"
+<<<<<<< HEAD
 	grievance_type.is_applicable_for_pay_cut = 1
 	grievance_type.is_applicable_for_suspension = 1
 	grievance_type.number_of_days_for_suspension = 30
+=======
+>>>>>>> e6633cdda78809a246a91ad44cf1abc9ed2a1bbb
 	grievance_type.description = "Test"
 
 	grievance_type.save()

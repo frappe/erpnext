@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_date, cstr, get_link_to_form
+from frappe.utils import getdate, validate_email_address, today, add_years, cstr
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub, bold
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -36,7 +36,7 @@ class Employee(NestedSet):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Suspended", "Left"])
+		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
 
 		self.employee = self.name
 		self.set_employee_name()
@@ -499,7 +499,7 @@ def get_employee_emails(employee_list):
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
 
-	filters = [['status', '!=', 'Left']]
+	filters = [['status', '=', 'Active']]
 	if company and company != 'All Companies':
 		filters.append(['company', '=', company])
 
