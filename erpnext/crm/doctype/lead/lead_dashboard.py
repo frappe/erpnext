@@ -16,6 +16,7 @@ def get_data():
 			'Quotation': 'party_name',
 			'Opportunity': 'party_name',
 			'Vehicle Quotation': 'party_name',
+			'Customer': 'lead_name',
 		},
 		'dynamic_links': {
 			'party_name': ['Lead', 'quotation_to']
@@ -25,5 +26,10 @@ def get_data():
 				'label': _('Pre Sales'),
 				'items': ['Opportunity', 'Quotation']
 			},
-		] + vehicle_domain_links
+		] + vehicle_domain_links + [
+			{
+				'label': _("Converted Customer"),
+				'items': ['Customer']
+			}
+		]
 	}

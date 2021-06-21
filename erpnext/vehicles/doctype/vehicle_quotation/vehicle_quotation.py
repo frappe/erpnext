@@ -33,6 +33,14 @@ class VehicleQuotation(VehicleBookingController):
 		self.update_opportunity()
 		self.update_lead()
 
+	def onload(self):
+		super(VehicleQuotation, self).onload()
+		if self.quotation_to == "Customer":
+			self.set_onload('customer', self.party_name)
+		elif self.quotation_to == "Lead":
+			customer = frappe.db.get_value("Customer", {"lead_name": self.party_name})
+			self.set_onload('customer', customer)
+
 	def before_print(self):
 		super(VehicleQuotation, self).before_print()
 		self.total_discount = -self.total_discount
@@ -130,10 +138,9 @@ def _make_customer(quotation, ignore_permissions=False):
 	if quotation and quotation.get('party_name'):
 		if quotation.get('quotation_to') == 'Lead':
 			lead_name = quotation.get("party_name")
-			customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
-				["name", "customer_name"], as_dict=True)
+			customer_id = frappe.db.get_value("Customer", {"lead_name": lead_name})
 
-			if not customer_name:
+			if not customer_id:
 				from erpnext.crm.doctype.lead.lead import _make_customer
 				customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 				customer = frappe.get_doc(customer_doclist)
@@ -154,7 +161,7 @@ def _make_customer(quotation, ignore_permissions=False):
 
 					frappe.throw(message, title=_("Mandatory Missing"))
 			else:
-				return customer_name
+				return frappe.get_cached_doc("Customer", customer_id)
 		else:
 			return frappe.get_cached_doc("Customer", quotation.get("party_name"))
 

@@ -71,7 +71,7 @@ class Customer(TransactionBase):
 	def validate(self):
 		self.customer_name = clean_whitespace(self.customer_name)
 		self.flags.is_new_doc = self.is_new()
-		self.flags.old_lead = self.lead_name
+		self.flags.old_lead = self.db_get('lead_name') if not self.is_new() else self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
@@ -138,9 +138,6 @@ class Customer(TransactionBase):
 				self.customer_group, ignore_doctypes)
 
 	def update_primary_contact(self):
-		if self.lead_name and self.flags.is_new_doc:
-			return
-
 		push_or_pull = None
 
 		if not self.customer_primary_contact:
@@ -292,7 +289,14 @@ class Customer(TransactionBase):
 		'''If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
-			frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
+			new_lead = frappe.get_doc("Lead", self.lead_name)
+			new_lead.set_status(update=True, status='Converted')
+			new_lead.notify_update()
+
+		if self.flags.old_lead and frappe.db.exists("Lead", self.flags.old_lead):
+			old_lead = frappe.get_doc("Lead", self.flags.old_lead)
+			old_lead.set_status(update=True)
+			old_lead.notify_update()
 
 	def create_lead_address_contact(self):
 		if self.lead_name:
@@ -309,7 +313,8 @@ class Customer(TransactionBase):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
 					address.save()
 
-			lead = frappe.db.get_value("Lead", self.lead_name, ["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
+			lead = frappe.db.get_value("Lead", self.lead_name,
+				["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "mobile_no_2", "gender", "salutation"], as_dict=True)
 
 			if not lead.lead_name:
 				frappe.throw(_("Please mention the Lead Name in Lead {0}").format(self.lead_name))
@@ -327,7 +332,7 @@ class Customer(TransactionBase):
 						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
 						contact.save()
 
-			else:
+			elif not self.customer_primary_contact:
 				lead.lead_name = lead.lead_name.lstrip().split(" ")
 				lead.first_name = lead.lead_name[0]
 				lead.last_name = " ".join(lead.lead_name[1:])
@@ -347,6 +352,8 @@ class Customer(TransactionBase):
 					contact.append('email_ids', dict(email_id=lead.email_id, is_primary=1))
 				if lead.mobile_no:
 					contact.append('phone_nos', dict(phone=lead.mobile_no, is_primary_mobile_no=1))
+				if lead.mobile_no_2:
+					contact.append('phone_nos', dict(phone=lead.mobile_no_2, is_primary_mobile_no=1))
 				contact.flags.ignore_permissions = self.flags.ignore_permissions
 				contact.autoname()
 				if not frappe.db.exists("Contact", contact.name):
@@ -387,7 +394,12 @@ class Customer(TransactionBase):
 
 		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
+			if frappe.db.exists("Lead", self.lead_name):
+				lead = frappe.get_doc("Lead", self.lead_name)
+				lead.db_set('status', 'Interested')
+				frappe.db.set_value("Customer", self.name, 'lead_name', None)
+				lead.set_status(update=True)
+				lead.notify_update()
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Customer Name':
@@ -612,17 +624,26 @@ def get_credit_limit(customer, company):
 def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
-		'first_name': args.get('customer_name') or args.get('name'),
 		'is_primary_contact': is_primary_contact,
 		'links': [{
 			'link_doctype': args.get('doctype'),
 			'link_name': args.get('name')
 		}]
 	})
+
+	if args.get('contact_first_name'):
+		contact.first_name = args.get('contact_first_name')
+		contact.middle_name = args.get('contact_middle_name')
+		contact.last_name = args.get('contact_last_name')
+	else:
+		contact.first_name = args.get('customer_name') or args.get('name')
+
 	if args.get('email_id'):
 		contact.add_email(args.get('email_id'), is_primary=True)
 	if args.get('mobile_no'):
 		contact.add_phone(args.get('mobile_no'), is_primary_mobile_no=True)
+	if args.get('mobile_no_2'):
+		contact.add_phone(args.get('mobile_no_2'), is_primary_mobile_no=True)
 	if args.get('phone_no'):
 		contact.add_phone(args.get('phone_no'), is_primary_phone=True)
 

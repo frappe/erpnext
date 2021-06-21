@@ -8,7 +8,8 @@ frappe.provide("erpnext.vehicles");
 erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.extend({
 	setup: function () {
 		this.frm.custom_make_buttons = {
-			'Vehicle Booking Order': 'Vehicle Booking Order'
+			'Vehicle Booking Order': 'Vehicle Booking Order',
+			'Customer': 'Customer'
 		}
 	},
 
@@ -41,15 +42,30 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 	},
 
 	add_create_buttons: function () {
-		if(this.frm.doc.docstatus == 1 && this.frm.doc.status !== 'Lost') {
-			if(!this.frm.doc.valid_till || frappe.datetime.get_diff(this.frm.doc.valid_till, frappe.datetime.get_today()) >= 0) {
-				this.frm.add_custom_button(__('Vehicle Booking Order'), () => this.make_vehicle_booking_order(), __('Create'));
-			}
+		var is_valid = !this.frm.doc.valid_till || frappe.datetime.get_diff(this.frm.doc.valid_till, frappe.datetime.get_today()) >= 0;
 
+		var customer;
+		if (this.frm.doc.quotation_to == "Customer") {
+			customer = this.frm.doc.party_name;
+		} else if (this.frm.doc.quotation_to == "Lead") {
+			customer = this.frm.doc.__onload && this.frm.doc.__onload.customer;
+		}
+
+		if(this.frm.doc.docstatus == 1 && this.frm.doc.status !== 'Lost') {
 			if(this.frm.doc.status !== "Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {
 					this.frm.trigger('set_as_lost_dialog');
 				});
+			}
+
+			if(!customer) {
+				this.frm.add_custom_button(__('Customer'), () => {
+					this.create_customer(this.frm.doc.party_name);
+				}, __('Create'));
+			}
+
+			if(is_valid) {
+				this.frm.add_custom_button(__('Vehicle Booking Order'), () => this.make_vehicle_booking_order(), __('Create'));
 			}
 
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
@@ -82,7 +98,17 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 			method: "erpnext.vehicles.doctype.vehicle_quotation.vehicle_quotation.make_vehicle_booking_order",
 			frm: this.frm
 		});
-	}
+	},
+
+	create_customer: function (lead) {
+		if (lead) {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.crm.doctype.lead.lead.make_customer",
+				frm: this.frm,
+				source_name: lead
+			});
+		}
+	},
 });
 
 $.extend(cur_frm.cscript, new erpnext.vehicles.VehicleQuotation({frm: cur_frm}));
