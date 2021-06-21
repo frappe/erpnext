@@ -98,6 +98,7 @@
   "total_in_words",
   "payment_schedule_section",
   "payment_terms_template",
+  "payment_to",
   "payment_schedule",
   "section_break_30",
   "sales_team",
@@ -822,12 +823,20 @@
    "fieldname": "lead_time_days",
    "fieldtype": "Int",
    "label": "Delivery Lead Time in Days"
+  },
+  {
+   "default": "Supplier",
+   "fieldname": "payment_to",
+   "fieldtype": "Select",
+   "label": "Payment To",
+   "no_copy": 1,
+   "options": "Supplier\nDealer"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-17 22:32:54.329471",
+ "modified": "2021-06-21 15:14:33.808393",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",
