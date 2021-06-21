@@ -24,9 +24,9 @@ class AssetRepair(AccountsController):
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = self.repair_cost
-		if self.get('stock_items'):
-			for item in self.get('stock_items'):
-				self.total_repair_cost += item.total_value
+
+		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
+		self.total_repair_cost += total_value_of_stock_consumed
 
 	def on_submit(self):
 		self.check_repair_status()
@@ -44,6 +44,14 @@ class AssetRepair(AccountsController):
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		self.asset_doc.save()
 
+	def on_cancel(self):
+		if self.get('stock_consumption') or self.get('capitalize_repair_cost'):
+			self.decrease_asset_value()
+		if self.get('stock_consumption'):
+			self.increase_stock_quantity()
+		if self.get('capitalize_repair_cost'):
+			self.make_gl_entries(cancel=True)
+
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
 			frappe.throw(_("Please update Repair Status."))
@@ -55,10 +63,7 @@ class AssetRepair(AccountsController):
 			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."), title=_("Missing Warehouse"))
 
 	def increase_asset_value(self):
-		total_value_of_stock_consumed = 0
-		if self.get('stock_consumption'):
-			for item in self.get('stock_items'):
-				total_value_of_stock_consumed += item.total_value
+		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
 
 		if self.asset_doc.calculate_depreciation:
 			for row in self.asset_doc.finance_books:
@@ -66,6 +71,24 @@ class AssetRepair(AccountsController):
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation += self.repair_cost
+
+	def decrease_asset_value(self):
+		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
+
+		if self.asset_doc.calculate_depreciation:
+			for row in self.asset_doc.finance_books:
+				row.value_after_depreciation -= total_value_of_stock_consumed
+
+				if self.capitalize_repair_cost:
+					row.value_after_depreciation -= self.repair_cost
+		
+	def get_total_value_of_stock_consumed(self):
+		total_value_of_stock_consumed = 0
+		if self.get('stock_consumption'):
+			for item in self.get('stock_items'):
+				total_value_of_stock_consumed += item.total_value
+
+		return total_value_of_stock_consumed
 
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc({
@@ -86,8 +109,22 @@ class AssetRepair(AccountsController):
 
 		self.stock_entry = stock_entry.name
 
-	def on_cancel(self):
-		self.make_gl_entries(cancel=True)
+	def increase_stock_quantity(self):
+		stock_entry = frappe.get_doc({
+			"doctype": "Stock Entry",
+			"stock_entry_type": "Material Receipt",
+			"company": self.company
+		})
+
+		for stock_item in self.get('stock_items'):
+			stock_entry.append('items', {
+				"s_warehouse": self.warehouse,
+				"item_code": stock_item.item,
+				"qty": stock_item.consumed_quantity
+			})
+
+		stock_entry.insert()
+		stock_entry.submit()
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.repair_cost) > 0:
