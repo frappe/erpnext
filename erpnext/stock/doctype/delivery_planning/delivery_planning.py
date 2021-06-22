@@ -727,6 +727,10 @@ class DeliveryPlanning(Document):
 				discount = frappe.get_doc('Sales Order', salesno)
 				print("p........p.........p", discount.additional_discount_percentage)
 
+				tax = frappe.get_last_doc('Sales Taxes and Charges', filters={'parent': salesno})
+				print("--------- this  is taxes--------", tax)
+
+
 				dnote.additional_discount_percentage = discount.additional_discount_percentage
 				dnote.apply_dicount_on = discount.apply_discount_on
 				dnote.taxes_and_charges = discount.taxes_and_charges
@@ -780,6 +784,9 @@ class DeliveryPlanning(Document):
 
 					discount = frappe.get_doc('Sales Order', salesno)
 					print("p........p.........p", discount.additional_discount_percentage)
+
+					tax = frappe.get_doc('Sales Taxes and Charges', filters= {'parent':salesno})
+					print("--------- this  is taxes--------",tax)
 
 					dnote.additional_discount_percentage = discount.additional_discount_percentage
 					dnote.apply_dicount_on = discount.apply_discount_on
