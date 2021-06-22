@@ -264,7 +264,7 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.get("items")]):
+		if not any(flt(d.get('packed_qty')) for d in self.get("items")):
 			return
 		has_error = False
 		for d in self.get("items"):

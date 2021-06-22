@@ -470,7 +470,7 @@ class TestAsset(unittest.TestCase):
 		})
 		asset.insert()
 		accumulated_depreciation_after_full_schedule = \
-			max([d.accumulated_depreciation_amount for d in asset.get("schedules")])
+			max(d.accumulated_depreciation_amount for d in asset.get("schedules"))
 
 		asset_value_after_full_schedule = (flt(asset.gross_purchase_amount) -
 			flt(accumulated_depreciation_after_full_schedule))

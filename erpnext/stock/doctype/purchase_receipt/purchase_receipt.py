@@ -202,6 +202,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+		self.set_consumed_qty_in_po()
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql("""select t1.name
@@ -233,6 +234,7 @@ class PurchaseReceipt(BuyingController):
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 		self.delete_auto_created_batches()
+		self.set_consumed_qty_in_po()
 
 	@frappe.whitelist()
 	def get_current_stock(self):
