@@ -51,6 +51,7 @@ class RepostItemValuation(Document):
 
 def repost(doc):
 	try:
+		frappe.db.auto_commit_on_many_writes = 1
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
 			return
 
@@ -77,6 +78,7 @@ def repost(doc):
 		raise
 	finally:
 		frappe.db.commit()
+		frappe.db.auto_commit_on_many_writes = 0
 
 def repost_sl_entries(doc):
 	if doc.based_on == 'Transaction':
