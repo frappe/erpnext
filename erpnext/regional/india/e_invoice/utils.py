@@ -385,13 +385,16 @@ def validate_totals(einvoice):
 	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
 
-	if abs(flt(value_details['TotInvVal']) + flt(value_details['Discount']) - flt(value_details['OthChrg']) - total_item_value) > 1:
+	if abs(
+		flt(value_details['TotInvVal']) + flt(value_details['Discount']) - 
+		flt(value_details['OthChrg']) - flt(value_details['RndOffAmt']) -
+		total_item_value) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
 
 	calculated_invoice_value = \
 			flt(value_details['AssVal']) + flt(value_details['CgstVal']) \
 			+ flt(value_details['SgstVal']) + flt(value_details['IgstVal']) \
-			+ flt(value_details['OthChrg']) - flt(value_details['Discount'])
+			+ flt(value_details['OthChrg']) + flt(value_details['RndOffAmt']) - flt(value_details['Discount'])
 
 	if abs(flt(value_details['TotInvVal']) - calculated_invoice_value) > 1:
 		frappe.throw(_('Total Item Value + Taxes - Discount is not equal to the Invoice Grand Total. Please check taxes / discounts for any correction.'))
