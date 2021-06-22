@@ -404,7 +404,7 @@ class StockController(AccountsController):
 			if action == "Stop":
 				frappe.throw(_(msg), title=_("Inspection Submission"), exc=QualityInspectionNotSubmittedError)
 			else:
-				frappe.msgprint(_(msg), alert=True)
+				frappe.msgprint(_(msg), alert=True, indicator="orange")
 
 	def validate_qi_rejection(self, row):
 		"""Check if QI is rejected on row level, during submission"""
