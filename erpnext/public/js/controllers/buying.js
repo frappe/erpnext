@@ -122,7 +122,18 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 			this.set_from_product_bundle();
 		}
 
+		this.toggle_subcontracting_fields();
 		super.refresh();
+	}
+
+	toggle_subcontracting_fields() {
+		if (in_list(['Purchase Receipt', 'Purchase Invoice'], this.frm.doc.doctype)) {
+			this.frm.fields_dict.supplied_items.grid.update_docfield_property('consumed_qty',
+				'read_only', this.frm.doc.__onload && this.frm.doc.__onload.backflush_based_on === 'BOM');
+
+			this.frm.set_df_property('supplied_items', 'cannot_add_rows', 1);
+			this.frm.set_df_property('supplied_items', 'cannot_delete_rows', 1);
+		}
 	}
 
 	supplier() {

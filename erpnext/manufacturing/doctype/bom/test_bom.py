@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update
 from six import string_types
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.tests.test_subcontracting import set_backflush_based_on
 
 test_records = frappe.get_test_records('BOM')
 
@@ -160,6 +161,7 @@ class TestBOM(unittest.TestCase):
 
 	def test_subcontractor_sourced_item(self):
 		item_code = "_Test Subcontracted FG Item 1"
+		set_backflush_based_on('Material Transferred for Subcontract')
 
 		if not frappe.db.exists('Item', item_code):
 			make_item(item_code, {
