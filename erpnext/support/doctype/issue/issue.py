@@ -7,7 +7,8 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now_datetime
+from frappe.utils import now_datetime, time_diff_in_seconds, get_datetime
+from frappe.core.utils import get_parent_doc
 from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
@@ -24,17 +25,7 @@ class Issue(Document):
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
 
-		self.set_lead_contact(self.raised_by)
-
-		if not self.get("first_response_time") and self.check_first_response():
-			first_response_time = calculate_first_response_time(self, get_datetime(self.first_responded_on))
-			self.db_set("first_response_time", first_response_time)
-
-	def check_first_response(self):
-		first_response = frappe.get_all('Communication', filters = {'reference_name': self.name})
-		if first_response: 
-			return True
-		return False	
+		self.set_lead_contact(self.raised_by)	
 
 	def on_update(self):
 		# Add a communication in the issue timeline
@@ -228,6 +219,18 @@ def get_time_in_timedelta(time):
 	"""
 	import datetime
 	return datetime.timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
+
+def set_first_response_time(communication, method):
+	issue = get_parent_doc(communication)
+	if not issue.get("first_response_time") and check_first_response(issue):
+		first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
+		issue.db_set("first_response_time", first_response_time)
+
+def check_first_response(issue):
+	first_response = frappe.get_all('Communication', filters = {'reference_name': issue.name})
+	if first_response: 
+		return True
+	return False
 
 def calculate_first_response_time(issue, first_responded_on):
 	issue_creation_date = issue.creation

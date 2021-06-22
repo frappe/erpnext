@@ -303,6 +303,9 @@ doc_events = {
 	},
 	('Quotation', 'Sales Order', 'Sales Invoice'): {
 		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
+	},
+	"Communication": {
+		"on_update": "erpnext.support.doctype.issue.issue.set_first_response_time"
 	}
 }
 
