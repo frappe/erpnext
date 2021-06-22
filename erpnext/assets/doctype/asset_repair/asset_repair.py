@@ -14,6 +14,9 @@ class AssetRepair(AccountsController):
 	def validate(self):
 		self.asset_doc = frappe.get_doc('Asset', self.asset)
 		self.update_status()
+
+		if self.get('stock_items'):
+ 			self.set_total_value()
 		self.calculate_total_repair_cost()
 		
 	def update_status(self):
@@ -21,6 +24,10 @@ class AssetRepair(AccountsController):
 			frappe.db.set_value('Asset', self.asset, 'status', 'Out of Order')
 		else:
 			self.asset_doc.set_status()
+
+	def set_total_value(self):
+ 		for item in self.get('stock_items'):
+ 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = self.repair_cost
