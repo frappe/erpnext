@@ -625,7 +625,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		function get_item_image_html() {
 			const { image, item_name } = item_data;
-			if (image) {
+			if (!me.hide_images && image) {
 				return `
 					<div class="item-image">
 						<img
