@@ -420,10 +420,12 @@ def replace_abbr(company, old, new):
 		for d in doc:
 			_rename_record(d)
 
+	frappe.db.auto_commit_on_many_writes = 1
 	for dt in ["Warehouse", "Account", "Cost Center", "Department",
 			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
 		frappe.db.commit()
+	frappe.db.auto_commit_on_many_writes = 0
 
 
 def get_name_with_abbr(name, company):
