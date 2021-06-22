@@ -51,3 +51,11 @@ _(f"what" + f"this is also not cool")
 _("")
 # ruleid: frappe-translation-empty-string
 _('')
+
+
+class Test:
+	# ok: frappe-translation-python-splitting
+	def __init__(
+			args
+			):
+		pass

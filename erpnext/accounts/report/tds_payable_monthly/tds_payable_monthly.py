@@ -11,11 +11,14 @@ def execute(filters=None):
 	validate_filters(filters)
 	set_filters(filters)
 
+	# TDS payment entries
+	payment_entries = get_payment_entires(filters)
+
 	columns = get_columns(filters)
-	if not filters["invoices"]:
+	if not filters.get("invoices"):
 		return columns, []
 
-	res = get_result(filters)
+	res = get_result(filters, payment_entries)
 
 	return columns, res
 
@@ -27,8 +30,9 @@ def validate_filters(filters):
 def set_filters(filters):
 	invoices = []
 
-	if not filters["invoices"]:
-		filters["invoices"] = get_tds_invoices()
+	if not filters.get("invoices"):
+		filters["invoices"] = get_tds_invoices_and_orders()
+
 	if filters.supplier and filters.purchase_invoice:
 		for d in filters["invoices"]:
 			if d.name == filters.purchase_invoice and d.supplier == filters.supplier:
@@ -41,13 +45,29 @@ def set_filters(filters):
 		for d in filters["invoices"]:
 			if d.name == filters.purchase_invoice:
 				invoices.append(d)
+	elif filters.supplier and filters.purchase_order:
+		for d in filters.get("invoices"):
+			if d.name == filters.purchase_order and d.supplier == filters.supplier:
+				invoices.append(d)
+	elif filters.supplier and not filters.purchase_order:
+		for d in filters.get("invoices"):
+			if d.supplier == filters.supplier:
+				invoices.append(d)
+	elif filters.purchase_order and not filters.supplier:
+		for d in filters.get("invoices"):
+			if d.name == filters.purchase_order:
+				invoices.append(d)
 
 	filters["invoices"] = invoices if invoices else filters["invoices"]
 	filters.naming_series = frappe.db.get_single_value('Buying Settings', 'supp_master_name')
 
-def get_result(filters):
-	supplier_map, tds_docs = get_supplier_map(filters)
-	gle_map = get_gle_map(filters)
+	#print(filters.get('invoices'))
+
+def get_result(filters, payment_entries):
+	supplier_map, tds_docs = get_supplier_map(filters, payment_entries)
+	documents = [d.get('name') for d in filters.get('invoices')] + [d.get('name') for d in payment_entries]
+
+	gle_map = get_gle_map(filters, documents)
 
 	out = []
 	for d in gle_map:
@@ -62,10 +82,11 @@ def get_result(filters):
 
 		for k in gle_map[d]:
 			if k.party == supplier_map[d] and k.credit > 0:
-				total_amount_credited += k.credit
-			elif account_list and k.account == account and k.credit > 0:
-				tds_deducted = k.credit
-				total_amount_credited += k.credit
+				total_amount_credited += (k.credit - k.debit)
+			elif account_list and k.account == account and (k.credit - k.debit) > 0:
+				tds_deducted = (k.credit - k.debit)
+				total_amount_credited += (k.credit - k.debit)
+			voucher_type = k.voucher_type
 
 		rate = [i.tax_withholding_rate for i in tds_doc.rates
 			if i.fiscal_year == gle_map[d][0].fiscal_year]
@@ -73,29 +94,33 @@ def get_result(filters):
 		if rate and len(rate) > 0 and tds_deducted:
 			rate = rate[0]
 
-			if getdate(filters.from_date) <= gle_map[d][0].posting_date \
-				and getdate(filters.to_date) >= gle_map[d][0].posting_date:
-				row = [supplier.pan, supplier.name]
+			row = [supplier.pan, supplier.name]
 
-				if filters.naming_series == 'Naming Series':
-					row.append(supplier.supplier_name)
+			if filters.naming_series == 'Naming Series':
+				row.append(supplier.supplier_name)
 
-				row.extend([tds_doc.name, supplier.supplier_type, rate, total_amount_credited,
-					tds_deducted, gle_map[d][0].posting_date, "Purchase Invoice", d])
-				out.append(row)
+			row.extend([tds_doc.name, supplier.supplier_type, rate, total_amount_credited,
+				tds_deducted, gle_map[d][0].posting_date, voucher_type, d])
+			out.append(row)
 
 	return out
 
-def get_supplier_map(filters):
+def get_supplier_map(filters, payment_entries):
 	# create a supplier_map of the form {"purchase_invoice": {supplier_name, pan, tds_name}}
 	# pre-fetch all distinct applicable tds docs
 	supplier_map, tds_docs = {}, {}
 	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
+	supplier_list = [d.supplier for d in filters["invoices"]]
+
 	supplier_detail = frappe.db.get_all('Supplier',
-		{"name": ["in", [d.supplier for d in filters["invoices"]]]},
+		{"name": ["in", supplier_list]},
 		["tax_withholding_category", "name", pan+" as pan", "supplier_type", "supplier_name"])
 
 	for d in filters["invoices"]:
+		supplier_map[d.get("name")] = [k for k in supplier_detail
+			if k.name == d.get("supplier")][0]
+
+	for d in payment_entries:
 		supplier_map[d.get("name")] = [k for k in supplier_detail
 			if k.name == d.get("supplier")][0]
 
@@ -106,13 +131,19 @@ def get_supplier_map(filters):
 
 	return supplier_map, tds_docs
 
-def get_gle_map(filters):
+def get_gle_map(filters, documents):
 	# create gle_map of the form
 	# {"purchase_invoice": list of dict of all gle created for this invoice}
 	gle_map = {}
-	gle = frappe.db.get_all('GL Entry',\
-		{"voucher_no": ["in", [d.get("name") for d in filters["invoices"]]], 'is_cancelled': 0},
-		["fiscal_year", "credit", "debit", "account", "voucher_no", "posting_date"])
+
+	gle = frappe.db.get_all('GL Entry',
+		{
+			"voucher_no": ["in", documents],
+			'is_cancelled': 0,
+			'posting_date': ("between", [filters.get('from_date'), filters.get('to_date')]),
+		},
+		["fiscal_year", "credit", "debit", "account", "voucher_no", "posting_date", "voucher_type"],
+	)
 
 	for d in gle:
 		if not d.voucher_no in gle_map:
@@ -201,8 +232,26 @@ def get_columns(filters):
 
 	return columns
 
+def get_payment_entires(filters):
+	filter_dict = {
+		'posting_date': ("between", [filters.get('from_date'), filters.get('to_date')]),
+		'party_type': 'Supplier',
+		'apply_tax_withholding_amount': 1
+	}
+
+	if filters.get('purchase_invoice') or filters.get('purchase_order'):
+		parent = frappe.db.get_all('Payment Entry Reference',
+			{'reference_name': ('in', [d.get('name') for d in filters.get('invoices')])}, ['parent'])
+
+		filter_dict.update({'name': ('in', [d.get('parent') for d in parent])})
+
+	payment_entries = frappe.get_all('Payment Entry', fields=['name', 'party_name as supplier'],
+		filters=filter_dict)
+
+	return payment_entries
+
 @frappe.whitelist()
-def get_tds_invoices():
+def get_tds_invoices_and_orders():
 	# fetch tds applicable supplier and fetch invoices for these suppliers
 	suppliers = [d.name for d in frappe.db.get_list("Supplier",
 		{"tax_withholding_category": ["!=", ""]}, ["name"])]
@@ -210,7 +259,12 @@ def get_tds_invoices():
 	invoices = frappe.db.get_list("Purchase Invoice",
 		{"supplier": ["in", suppliers]}, ["name", "supplier"])
 
+	orders = frappe.db.get_list("Purchase Order",
+		{"supplier": ["in", suppliers]}, ["name", "supplier"])
+
+	invoices = invoices + orders
 	invoices = [d for d in invoices if d.supplier]
+
 	frappe.cache().hset("invoices", frappe.session.user, invoices)
 
 	return invoices

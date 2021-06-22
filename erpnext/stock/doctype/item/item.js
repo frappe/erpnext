@@ -25,6 +25,10 @@ frappe.ui.form.on("Item", {
 	},
 
 	refresh: function(frm) {
+		if (frm.doc.include_item_in_manufacturing === 1) {
+			frm.set_df_property("bom_item_type", "reqd", 1)
+		}
+
 		if (frm.doc.is_stock_item) {
 			frm.add_custom_button(__("Stock Balance"), function() {
 				frappe.route_options = {
