@@ -707,7 +707,7 @@ def create_asset(**args):
 		"available_for_use_date": "2020-06-06",
 		"location": "Test Location",
 		"asset_owner": "Company",
-		"is_existing_asset": args.is_existing_asset or 0
+		"is_existing_asset": 1
 	})
 
 	if asset.calculate_depreciation:
