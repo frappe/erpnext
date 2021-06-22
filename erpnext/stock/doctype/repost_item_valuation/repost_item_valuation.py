@@ -4,8 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
+from rq.timeouts import JobTimeoutException
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, add_to_date, now, today
+from frappe.utils import cint, get_link_to_form, add_to_date, now, today, time_diff_in_hours
 from erpnext.stock.stock_ledger import repost_future_sle
 from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
 from frappe.utils.user import get_users_with_role
@@ -36,6 +37,9 @@ class RepostItemValuation(Document):
 		self.db_set('status', status)
 
 	def on_submit(self):
+		if not frappe.flags.in_test:
+			return
+
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=frappe.flags.in_test, doc=self)
 
@@ -57,7 +61,8 @@ def repost(doc):
 		repost_gl_entries(doc)
 
 		doc.set_status('Completed')
-	except Exception:
+
+	except (Exception, JobTimeoutException):
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		frappe.log_error(traceback)
@@ -127,9 +132,7 @@ def repost_entries():
 		check_if_stock_and_account_balance_synced(today(), d.name)
 
 def get_repost_item_valuation_entries():
-	date = add_to_date(now(), hours=-3)
-
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
 		WHERE status != 'Completed' and creation <= %s and docstatus = 1
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
-	""", date, as_dict=1)
+	""", now(), as_dict=1)

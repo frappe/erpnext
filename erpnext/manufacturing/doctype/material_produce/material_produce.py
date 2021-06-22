@@ -63,44 +63,48 @@ class MaterialProduce(Document):
     def on_submit(self):
         self.our_validation()
 
-    def on_cancel(self):
-        pass
+    # def on_cancel(self):
+    #     pass
         # self.calc_actual_fg_wt_on_wo()
 
-    # def calc_actual_fg_wt_on_wo(self):
-    #     wo = frappe.get_doc("Work Order", self.work_order)
-    #     wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
-    #     # wo.db_update()
+    def calc_actual_fg_wt_on_wo(self):
+        wo = frappe.get_doc("Work Order", self.work_order)
+        wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
+        wo.db_update()
 
     def our_validation(self):
         if self.partial_produce:
             wo = frappe.get_doc("Work Order", self.work_order)
             wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
+            frappe.db.set_value("Work Order", self.work_order, "actual_yeild", wo.actual_yeild)
             self.make_se()
         else:
             atleast_one_mc = frappe.db.sql("""select * from `tabMaterial Consumption` where work_order = %s and docstatus = 1""", (self.work_order))
             if atleast_one_mc:
                 # no_previous_complete_mc = frappe.db.count('Material Produce', {'work_order': self.work_order, 'docstatus': 1, 'partial_produce': 0})
-                previous_complete_mp = frappe.db.sql("""select * from `tabMaterial Produce` where work_order = %s and docstatus = 1 and partial_produce = 1""", (self.work_order))
-                if not previous_complete_mp:
+                previous_complete_mp = frappe.db.sql("""select * from `tabMaterial Produce` where work_order = %s and docstatus = 1 and partial_produce = 0""", (self.work_order),as_dict = 1)
+                if len(previous_complete_mp) == 0 or previous_complete_mp[0].get('name') == self.name:
                     mfg = frappe.get_doc("Manufacturing Settings")
                     wo = frappe.get_doc("Work Order", self.work_order)
                     if self.actual_yeild_on_wo() >= (wo.bom_yeild-mfg.allowed_production_deviation_percentage) and self.actual_yeild_on_wo() <= (wo.bom_yeild+mfg.allowed_production_deviation_percentage):
-                    # self.calc_actual_fg_wt_on_wo() 
+                        self.calc_actual_fg_wt_on_wo() 
                         wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
+                        frappe.db.set_value("Work Order", self.work_order, "actual_yeild", wo.actual_yeild)
                         self.make_se()
                     else:
                         frappe.throw(_('Actual yeild is not within deviation limits'))
                 else:
                     frappe.throw(_('Another complete Material Produce for {0} is already present'.format(self.work_order)))
+                    #frappe.throw(_('Another complete Material Produce for {0} is already present'.format(len(previous_complete_mp))))
             else:
                 frappe.throw(_('Atleast one submitted Material Consumption required'))
 
     def actual_yeild_on_wo(self):
         value = 0
         wo = frappe.get_doc("Work Order", self.work_order)
-        wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
-        # frappe.db.set_value("Work Order", self.work_order, "actual_fg_weight", wo.actual_fg_weight)
+        # wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
+        wo.actual_fg_weight = flt(flt(wo.consumed_total_weight) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
+        frappe.db.set_value("Work Order", self.work_order, "actual_fg_weight", wo.actual_fg_weight)
         if wo.actual_rm_weight == 0 or wo.actual_rm_weight == None:
             wo.actual_yeild = 0
         else:
@@ -268,8 +272,7 @@ class MaterialProduce(Document):
                         se_item.is_scrap_item = 1 if res.type == 'Scrap' else 0
                         # in stock uom
                         se_item.conversion_factor = 1.00
-            # if res.type == "FG":
-            #     total_transfer_qty += res.qty_produced
+            
         stock_entry.from_bom = 1
         stock_entry.fg_completed_qty = flt(total_transfer_qty, stock_entry.precision('fg_completed_qty'))
         add_additional_cost(stock_entry, wo)
@@ -277,9 +280,7 @@ class MaterialProduce(Document):
         stock_entry.set_missing_values()
         stock_entry.insert(ignore_permissions=True)
         stock_entry.validate()
-        # for res in self.material_produce_item:
-        #     if res.data:
-        #         for line in json.loads(res.data):
+        stock_entry.validate_work_order()
         stock_entry.flags.ignore_validate_update_after_submit = True
         stock_entry.submit()
         return stock_entry.as_dict()
