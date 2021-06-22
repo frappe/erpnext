@@ -228,6 +228,7 @@ standard_queries = {
 
 doc_events = {
 	"*": {
+		"validate": "erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 		"on_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.create_medical_record",
 		"on_update_after_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.update_medical_record",
 		"on_cancel": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.delete_medical_record"
@@ -241,6 +242,9 @@ doc_events = {
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": ["erpnext.hr.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role"]
+	},
+	"Communication": {
+		"on_update": "erpnext.support.doctype.service_level_agreement.service_level_agreement.update_hold_time"
 	},
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
@@ -269,10 +273,12 @@ doc_events = {
 	},
 	"Purchase Invoice": {
 		"validate": [
-			"erpnext.regional.india.utils.update_grand_total_for_rcm",
+			"erpnext.regional.india.utils.validate_reverse_charge_transaction",
+			"erpnext.regional.india.utils.update_itc_availed_fields",
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
-			"erpnext.regional.united_arab_emirates.utils.validate_returns"
-			]
+			"erpnext.regional.united_arab_emirates.utils.validate_returns",
+			"erpnext.regional.india.utils.update_taxable_values"
+		]
 	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
@@ -330,8 +336,10 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
-		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
 		"erpnext.erpnext_integrations.connectors.shopify_connection.sync_old_orders",
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.set_service_level_agreement_variance"
+	],
+	"hourly_long": [
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries"
 	],
 	"daily": [
@@ -366,10 +374,8 @@ scheduler_events = {
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
-		"erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment.automatically_allocate_leaves_based_on_leave_policy",
 		"erpnext.hr.utils.generate_leave_encashment",
 		"erpnext.hr.utils.allocate_earned_leaves",
-		"erpnext.hr.utils.grant_leaves_automatically",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead"
@@ -426,7 +432,6 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_regional_round_off_accounts': 'erpnext.regional.india.utils.get_regional_round_off_accounts',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
-		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries',
 		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields',
 		'erpnext.assets.doctype.asset.asset.get_depreciation_amount': 'erpnext.regional.india.utils.get_depreciation_amount'
 	},

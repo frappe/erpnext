@@ -17,7 +17,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		var me = this;
 		super.onload();
 
-		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet'];
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log', 'POS Closing Entry'];
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
 			this.frm.set_df_property("debit_to", "print_hide", 0);
@@ -582,6 +582,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("adjustment_against", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					customer: frm.doc.customer,
+					docstatus: 1
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Return / Credit Note',
@@ -895,6 +905,10 @@ frappe.ui.form.on('Sales Invoice', {
 				});
 				d.show();
 			})
+		}
+
+		if (frm.doc.is_debit_note) {
+			frm.set_df_property('return_against', 'label', 'Adjustment Against');
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {

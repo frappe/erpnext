@@ -49,7 +49,7 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	if not parties:
 		parties.append(party)
 
-	fiscal_year = get_fiscal_year(inv.posting_date, company=inv.company)
+	fiscal_year = get_fiscal_year(inv.get('posting_date') or inv.get('transaction_date'), company=inv.company)
 	tax_details = get_tax_withholding_details(tax_withholding_category, fiscal_year[0], inv.company)
 
 	if not tax_details:
@@ -154,7 +154,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, fiscal_year_details, p
 		tax_deducted = get_deducted_tax(taxable_vouchers, fiscal_year, tax_details)
 
 	tax_amount = 0
-	posting_date = inv.posting_date
+	posting_date = inv.get('posting_date') or inv.get('transaction_date')
 	if party_type == 'Supplier':
 		ldc = get_lower_deduction_certificate(fiscal_year, pan_no)
 		if tax_deducted:
@@ -257,7 +257,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 	if ((threshold and inv.net_total >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
-			inv.posting_date, tax_deducted,
+			inv.get('posting_date') or inv.get('transaction_date'), tax_deducted,
 			inv.net_total, ldc.certificate_limit
 		):
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)

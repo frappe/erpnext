@@ -22,6 +22,7 @@ _exceptions = frappe.local('stockledger_exceptions')
 # _exceptions = []
 
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
+	from erpnext.controllers.stock_controller import future_sle_exists
 	if sl_entries:
 		from erpnext.stock.utils import update_bin
 
@@ -29,6 +30,9 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		if cancel:
 			validate_cancellation(sl_entries)
 			set_as_cancel(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
+
+		args = get_args_for_future_sle(sl_entries[0])
+		future_sle_exists(args, sl_entries)
 
 		for sle in sl_entries:
 			if sle.serial_no:
@@ -52,6 +56,14 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 			args = sle_doc.as_dict()
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
+
+def get_args_for_future_sle(row):
+	return frappe._dict({
+		'voucher_type': row.get('voucher_type'),
+		'voucher_no': row.get('voucher_no'),
+		'posting_date': row.get('posting_date'),
+		'posting_time': row.get('posting_time')
+	})
 
 def validate_serial_no(sle):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -232,7 +244,8 @@ class update_entries_after(object):
 				and is_cancelled = 0
 				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
 			order by timestamp(posting_date, posting_time) desc, creation desc
-			limit 1""", args, as_dict=1)
+			limit 1
+			for update""", args, as_dict=1)
 
 		return sle[0] if sle else frappe._dict()
 
@@ -471,7 +484,7 @@ class update_entries_after(object):
 			frappe.db.set_value("Purchase Receipt Item Supplied", sle.voucher_detail_no, "rate", outgoing_rate)
 
 		# Recalculate subcontracted item's rate in case of subcontracted purchase receipt/invoice
-		if frappe.db.get_value(sle.voucher_type, sle.voucher_no, "is_subcontracted"):
+		if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_subcontracted") == 'Yes':
 			doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
 			doc.update_valuation_rate(reset_outgoing_rate=False)
 			for d in (doc.items + doc.supplied_items):
@@ -520,7 +533,7 @@ class update_entries_after(object):
 			fields=["purchase_rate", "name", "company"],
 			filters = {'name': ('in', serial_nos)})
 
-		incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
+		incoming_values = sum(flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company)
 
 		# Get rate for serial nos which has been transferred to other company
 		invalid_serial_nos = [d.name for d in all_serial_nos if d.company!=sle.company]
@@ -623,7 +636,7 @@ class update_entries_after(object):
 							break
 
 					# If no entry found with outgoing rate, collapse stack
-					if index == None:
+					if index is None:  # nosemgrep
 						new_stock_value = sum((d[0]*d[1] for d in self.wh_data.stock_queue)) - qty_to_pop*outgoing_rate
 						new_stock_qty = sum((d[0] for d in self.wh_data.stock_queue)) - qty_to_pop
 						self.wh_data.stock_queue = [[new_stock_qty, new_stock_value/new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
