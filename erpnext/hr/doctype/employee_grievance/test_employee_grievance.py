@@ -44,14 +44,7 @@ def create_grievance_type():
 		return frappe.get_doc("Grievance Type", "Employee Abuse")
 	grievance_type = frappe.new_doc("Grievance Type")
 	grievance_type.name="Employee Abuse"
-<<<<<<< HEAD
-	grievance_type.is_applicable_for_pay_cut = 1
-	grievance_type.is_applicable_for_suspension = 1
-	grievance_type.number_of_days_for_suspension = 30
-=======
->>>>>>> e6633cdda78809a246a91ad44cf1abc9ed2a1bbb
 	grievance_type.description = "Test"
-
 	grievance_type.save()
 
 	return grievance_type.name
