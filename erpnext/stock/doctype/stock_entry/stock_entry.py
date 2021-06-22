@@ -110,6 +110,9 @@ class StockEntry(StockController):
 
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
+		
+		if self.work_order and self.stock_entry_type == "Manufacture":
+			self.scrap_qty()
 
 		if self.purpose == 'Material Transfer' and self.add_to_transit:
 			self.set_material_request_transfer_status('In Transit')
@@ -182,6 +185,14 @@ class StockEntry(StockController):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
 				self.precision("transfer_qty", item))
+	def scrap_qty(self):
+		if self.stock_entry_type=="Manufacture" and self.work_order:
+			doc=frappe.get_doc("Work Order",{"name":self.work_order})
+			for i in doc.items:
+				if i.is_scrap_item==1:
+					b=sum(i.qty)
+					doc.total_manufacture_of_scrap=b
+			doc.save(ignore_permissions=True)
 
 	def update_cost_in_project(self):
 		if (self.work_order and not frappe.db.get_value("Work Order",

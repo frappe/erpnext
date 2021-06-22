@@ -19,6 +19,7 @@
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
+  "total_manufacture_of_scrap",
   "sales_order",
   "project",
   "settings_section",
@@ -635,6 +636,13 @@
    "label": "Consumed Total Weight",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_manufacture_of_scrap",
+   "fieldtype": "Float",
+   "label": "Total Manufacture Of Scrap",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -642,7 +650,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-18 19:00:38.689677",
+ "modified": "2021-06-22 12:36:15.177163",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
