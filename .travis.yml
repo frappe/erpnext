@@ -40,8 +40,7 @@ install:
   - cd ~
   - nvm install 10
 
-  - git clone https://github.com/frappe/bench --depth 1
-  - pip install -e ./bench
+  - pip install -U frappe-bench --only-binary='all'
 
   - git clone https://github.com/frappe/frappe --branch $TRAVIS_BRANCH --depth 1
   - bench init --skip-assets --frappe-path ~/frappe --python $(which python) frappe-bench
