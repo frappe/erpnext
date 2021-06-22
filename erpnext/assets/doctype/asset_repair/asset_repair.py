@@ -125,26 +125,11 @@ class AssetRepair(AccountsController):
 		stock_entry.insert()
 		stock_entry.submit()
 
-		self.stock_entry = stock_entry.name
+		self.db_set('stock_entry', stock_entry.name)
 
 	def increase_stock_quantity(self):
-		stock_entry = frappe.get_doc({
-			"doctype": "Stock Entry",
-			"stock_entry_type": "Material Receipt",
-			"company": self.company
-		})
-
-		for stock_item in self.get('stock_items'):
-			stock_entry.append('items', {
-				"t_warehouse": self.warehouse,
-				"item_code": stock_item.item,
-				"qty": stock_item.consumed_quantity
-			})
-
-		stock_entry.insert()
-		stock_entry.submit()
-
-		self.stock_entry = stock_entry.name
+		stock_entry = frappe.get_doc('Stock Entry', self.stock_entry)
+		stock_entry.cancel()
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.repair_cost) > 0:
