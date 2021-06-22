@@ -14,7 +14,7 @@ def setup(domain):
 	complete_setup(domain)
 	# setup_demo_page()
 	setup_fiscal_year()
-	setup_holiday_list() #change back asap
+	setup_holiday_list()
 	setup_user()
 	setup_employee()
 	setup_user_roles(domain)
