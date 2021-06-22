@@ -74,7 +74,6 @@
  ],
  "fields": [
   {
-   "collapsible": 1,
    "fieldname": "basic_info",
    "fieldtype": "Section Break",
    "label": "Name and Type",
@@ -181,7 +180,6 @@
    "fieldtype": "Link",
    "hidden": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Territory",
    "oldfieldname": "territory",
    "oldfieldtype": "Link",
@@ -530,7 +528,7 @@
    "link_fieldname": "customer"
   }
  ],
- "modified": "2021-06-17 12:16:32.886603",
+ "modified": "2021-06-18 11:02:36.102291",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
