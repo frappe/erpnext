@@ -43,7 +43,7 @@ def create_grievance_type():
 	if frappe.db.exists("Grievance Type", "Employee Abuse"):
 		return frappe.get_doc("Grievance Type", "Employee Abuse")
 	grievance_type = frappe.new_doc("Grievance Type")
-	grievance_type.name="Employee Abuse"
+	grievance_type.name = "Employee Abuse"
 	grievance_type.description = "Test"
 	grievance_type.save()
 
