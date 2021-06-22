@@ -2,6 +2,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
+		this.hide_images = settings.hide_images;
 		this.allow_rate_change = settings.allow_rate_change;
 		this.allow_discount_change = settings.allow_discount_change;
 		this.current_item = {};
@@ -124,7 +125,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_name.html(item_name);
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
-		if (image) {
+		if (!this.hide_images && image) {
 			this.$item_image.html(
 				`<img 
 					onerror="cur_pos.item_details.handle_broken_image(this)"
