@@ -936,7 +936,8 @@ class SalesInvoice(SellingController):
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					asset.db_set("disposal_date", self.posting_date)
-					asset.set_status("Sold" if self.docstatus==1 else None)
+					self.set_asset_status(asset)
+				
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
@@ -961,6 +962,12 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	def set_asset_status(self, asset):
+		if self.is_return:
+			asset.set_status()
+		else: 	
+			asset.set_status("Sold" if self.docstatus==1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		if cint(self.redeem_loyalty_points):
