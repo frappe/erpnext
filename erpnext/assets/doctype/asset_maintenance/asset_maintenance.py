@@ -19,45 +19,10 @@ class AssetMaintenance(Document):
 			if not task.assign_to and self.docstatus == 0:
 				throw(_("Row #{}: Please asign task to a member.").format(task.idx))
 
-		if self.stock_consumption:
-			self.check_for_stock_items_and_warehouse()
-			self.increase_asset_value()
-			self.decrease_stock_quantity()
-
 	def on_update(self):
 		for task in self.get('asset_maintenance_tasks'):
 			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
-		self.sync_maintenance_tasks()		
-
-	def check_for_stock_items_and_warehouse(self):
-		if self.stock_consumption:
-			if not self.stock_items:
-				frappe.throw(_("Please enter Stock Items consumed during Asset Maintenance."))
-			if not self.warehouse:
-				frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Maintenance were taken."))
-
-	def increase_asset_value(self):
-		asset_value = frappe.db.get_value('Asset', self.asset_name, 'asset_value')
-		for item in self.stock_items:
-			asset_value += item.total_value
-
-		frappe.db.set_value('Asset', self.asset_name, 'asset_value', asset_value)
-
-	def decrease_stock_quantity(self):
-		stock_entry = frappe.get_doc({
-			"doctype": "Stock Entry",
-			"stock_entry_type": "Material Issue"
-		})
-
-		for stock_item in self.stock_items:
-			stock_entry.append('items', {
-				"s_warehouse": self.warehouse,
-				"item_code": stock_item.item,
-				"qty": stock_item.consumed_quantity
-			})
-
-		stock_entry.insert()
-		stock_entry.submit()
+		self.sync_maintenance_tasks()
 
 	def sync_maintenance_tasks(self):
 		tasks_names = []
