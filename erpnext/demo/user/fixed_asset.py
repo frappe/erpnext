@@ -8,7 +8,7 @@ import frappe
 from frappe.utils.make_random import get_random
 from erpnext.assets.doctype.asset.asset import make_sales_invoice
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
-
+cmp="Wind Power LLC"
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_accounts_user'))
@@ -20,18 +20,18 @@ def work():
 	post_depreciation_entries()
 
 	# scrap a random asset
-	frappe.db.set_value("Company", "Wind Power LLC", "disposal_account", "Gain/Loss on Asset Disposal - WPL")
+	frappe.db.set_value("Company", cmp, "disposal_account", "Gain/Loss on Asset Disposal - WPL")
 
-	asset = get_random_asset()
-	scrap_asset(asset.name)
+	# asset = get_random_asset()
+	# scrap_asset(asset.name)
 
 	# Sell a random asset
-	sell_an_asset()
+	# sell_an_asset()
 
 
 def sell_an_asset():
 	asset = get_random_asset()
-	si = make_sales_invoice(asset.name, asset.item_code, "Wind Power LLC")
+	si = make_sales_invoice(asset.name, asset.item_code, cmp)
 	si.customer = get_random("Customer")
 	si.get("items")[0].rate = asset.value_after_depreciation * 0.8 \
 		if asset.value_after_depreciation else asset.gross_purchase_amount * 0.9

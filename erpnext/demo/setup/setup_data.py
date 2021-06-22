@@ -12,9 +12,9 @@ from frappe import _
 def setup(domain):
 	frappe.flags.in_demo = 1
 	complete_setup(domain)
-	setup_demo_page()
+	# setup_demo_page()
 	setup_fiscal_year()
-	setup_holiday_list()
+	setup_holiday_list() #change back asap
 	setup_user()
 	setup_employee()
 	setup_user_roles(domain)
@@ -35,7 +35,13 @@ def setup(domain):
 	setup_warehouse()
 	import_json('Address')
 	import_json('Contact')
+	# import_json('Item')
 	import_json('Lead')
+	# import_json('Asset')
+	# import_json('Asset Catagory')
+	# import_json('Lead')
+	# import_json('Lead')
+	# import_json('Lead')
 	setup_currency_exchange()
 	#setup_mode_of_payment()
 	setup_account_to_expense_type()
@@ -90,7 +96,7 @@ def setup_fiscal_year():
 				"year": cstr(year),
 				"year_start_date": "{0}-01-01".format(year),
 				"year_end_date": "{0}-12-31".format(year)
-			}).insert()
+			}).insert(ignore_if_duplicate=True)
 		except frappe.DuplicateEntryError:
 			pass
 
@@ -107,7 +113,7 @@ def setup_holiday_list():
 		"from_date": "{0}-01-01".format(year),
 		"to_date": "{0}-12-31".format(year),
 	})
-	holiday_list.insert()
+	holiday_list.insert(ignore_if_duplicate=True)
 	holiday_list.weekly_off = "Saturday"
 	holiday_list.get_weekly_off_dates()
 	holiday_list.weekly_off = "Sunday"
@@ -124,7 +130,7 @@ def setup_user():
 		user.update(u)
 		user.flags.no_welcome_mail = True
 		user.new_password = 'Demo1234567!!!'
-		user.insert()
+		user.insert(ignore_if_duplicate=True)
 
 def setup_employee():
 	frappe.db.set_value("HR Settings", None, "emp_created_by", "Naming Series")
@@ -170,7 +176,7 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 		'formula': 'base*.1',
 		"idx": 1
 	})
-	ss.insert()
+	ss.insert(ignore_if_duplicate=True)
 	ss.submit()
 
 	for e in employees:
@@ -179,7 +185,7 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 		sa.salary_structure = ss.name
 		sa.from_date = "2015-01-01"
 		sa.base = random.random() * 10000
-		sa.insert()
+		sa.insert(ignore_if_duplicate=True)
 		sa.submit()
 
 	return ss
@@ -275,7 +281,7 @@ def setup_leave_allocation():
 			"leave_type": leave_type.name,
 			"new_leaves_allocated": random.randint(1, int(leave_type.max_continuous_days_allowed))
 		})
-		leave_allocation.insert()
+		leave_allocation.insert(ignore_if_duplicate=True)
 		leave_allocation.submit()
 		frappe.db.commit()
 
@@ -288,7 +294,7 @@ def setup_customer():
 			"customer_group": "Commercial",
 			"customer_type": random.choice(["Company", "Individual"]),
 			"territory": "Rest Of The World"
-		}).insert()
+		}).insert(ignore_if_duplicate=True)
 
 def setup_supplier():
 	suppliers = [u'Helios Air', u'Ks Merchandise', u'HomeBase', u'Scott Ties', u'Reliable Investments', u'Nan Duskin', u'Rainbow Records', u'New World Realty', u'Asiatic Solutions', u'Eagle Hardware', u'Modern Electricals']
@@ -297,12 +303,14 @@ def setup_supplier():
 			"doctype": "Supplier",
 			"supplier_name": s,
 			"supplier_group": random.choice(["Services", "Raw Material"]),
-		}).insert()
+		}).insert(ignore_if_duplicate=True)
 
 def setup_warehouse():
-	w = frappe.new_doc('Warehouse')
-	w.warehouse_name = 'Supplier'
-	w.insert()
+	wh=('Supplier','Finished Goods','Stores')
+	for i in range(len(wh)):
+		w = frappe.new_doc('Warehouse')
+		w.warehouse_name = wh[i]
+		w.insert(ignore_if_duplicate=True)
 
 def setup_currency_exchange():
 	frappe.get_doc({
@@ -310,14 +318,14 @@ def setup_currency_exchange():
 		'from_currency': 'EUR',
 		'to_currency': 'USD',
 		'exchange_rate': 1.13
-	}).insert()
+	}).insert(ignore_if_duplicate=True)
 
 	frappe.get_doc({
 		'doctype': 'Currency Exchange',
 		'from_currency': 'CNY',
 		'to_currency': 'USD',
 		'exchange_rate': 0.16
-	}).insert()
+	}).insert(ignore_if_duplicate=True)
 
 def setup_mode_of_payment():
 	company_abbr = frappe.get_cached_value('Company',  erpnext.get_default_company(),  "abbr")
@@ -339,7 +347,7 @@ def setup_account():
 		doc = frappe.new_doc('Account')
 		doc.update(d)
 		doc.parent_account = frappe.db.get_value('Account', {'account_name': doc.parent_account})
-		doc.insert()
+		doc.insert(ignore_if_duplicate=True)
 
 	frappe.flags.in_import = False
 
@@ -391,6 +399,7 @@ def setup_pos_profile():
 	pos.write_off_cost_center = 'Main - '+ company_abbr
 	pos.customer_group = get_root_of('Customer Group')
 	pos.territory = get_root_of('Territory')
+	pos.warehouse= "Stores - WPL"
 
 	pos.append('payments', {
 		'mode_of_payment': frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
@@ -398,7 +407,7 @@ def setup_pos_profile():
 		'default': 1
 	})
 
-	pos.insert()
+	pos.insert(ignore_if_duplicate=True)
 
 def setup_role_permissions():
 	role_permissions = {'Batch': ['Accounts User', 'Item Manager']}
@@ -423,7 +432,7 @@ def import_json(doctype, submit=False, values=None):
 	for d in data:
 		doc = frappe.new_doc(doctype)
 		doc.update(d)
-		doc.insert()
+		doc.insert(ignore_if_duplicate=True)
 		if submit:
 			doc.submit()
 

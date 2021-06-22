@@ -20,21 +20,21 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 def work():
 	frappe.set_user(frappe.db.get_global('demo_accounts_user'))
 
-	if random.random() <= 0.6:
-		report = "Ordered Items to be Billed"
-		for so in list(set([r[0] for r in query_report.run(report)["result"]
-				if r[0]!="Total"]))[:random.randint(1, 5)]:
-			try:
-				si = frappe.get_doc(make_sales_invoice(so))
-				si.posting_date = frappe.flags.current_date
-				for d in si.get("items"):
-					if not d.income_account:
-						d.income_account = "Sales - {}".format(frappe.get_cached_value('Company',  si.company,  'abbr'))
-				si.insert()
-				si.submit()
-				frappe.db.commit()
-			except frappe.ValidationError:
-				pass
+	# if random.random() <= 0.6:
+	# 	report = "Received Items to be Billed"
+	# 	for so in list(set([r[0] for r in query_report.run(report)["result"]
+	# 			if r[0]!="Total"]))[:random.randint(1, 5)]:
+	# 		try:
+	# 			si = frappe.get_doc(make_sales_invoice(so))
+	# 			si.posting_date = frappe.flags.current_date
+	# 			for d in si.get("items"):
+	# 				if not d.income_account:
+	# 					d.income_account = "Sales - {}".format(frappe.get_cached_value('Company',  si.company,  'abbr'))
+	# 			si.insert()
+	# 			si.submit()
+	# 			frappe.db.commit()
+	# 		except frappe.ValidationError:
+	# 			pass
 
 	if random.random() <= 0.6:
 		report = "Received Items to be Billed"

@@ -15,7 +15,7 @@ def work():
 	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
 
 	make_purchase_receipt()
-	make_delivery_note()
+	# make_delivery_note()
 	make_stock_reconciliation()
 	submit_draft_stock_entries()
 	make_sales_return_records()
@@ -24,7 +24,8 @@ def work():
 def make_purchase_receipt():
 	if random.random() < 0.6:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-		report = "Purchase Order Items To Be Received"
+		# report = "Purchase Order Items To Be Received"
+		report="Billed Items To Be Received"
 		po_list =list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:random.randint(1, 10)]
 		for po in po_list:
 			pr = frappe.get_doc(make_purchase_receipt(po))
@@ -47,7 +48,7 @@ def make_delivery_note():
 	# make delivery notes (if possible)
 	if random.random() < 0.6:
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-		report = "Ordered Items To Be Delivered"
+		report = "Item-wise Purchase History"
 		for so in list(set([r[0] for r in query_report.run(report)["result"]
 			if r[0]!="Total"]))[:random.randint(1, 3)]:
 			dn = frappe.get_doc(make_delivery_note(so))

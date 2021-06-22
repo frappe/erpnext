@@ -10,13 +10,15 @@ from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_acco
 from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 from erpnext.hr.doctype.leave_application.leave_application import (get_leave_balance_on,
 	OverlapError, AttendanceAlreadyMarkedError)
-
+cmp="Wind Power LLC"
 def work():
 	frappe.set_user(frappe.db.get_global('demo_hr_user'))
 	year, month = frappe.flags.current_date.strftime("%Y-%m").split("-")
 	setup_department_approvers()
-	mark_attendance()
+	if str(frappe.flags.current_date)<str(frappe.utils.nowdate()):
+		mark_attendance()
 	make_leave_application()
+
 
 	# payroll entry
 	if not frappe.db.sql('select name from `tabSalary Slip` where month(adddate(start_date, interval 1 month))=month(curdate())'):
@@ -47,12 +49,15 @@ def work():
 
 		#expense claim
 		expense_claim = frappe.new_doc("Expense Claim")
-		expense_claim.extend('expenses', get_expenses())
+		ge=get_expenses()
+		expense_claim.extend('expenses', ge)
+		# expense_claim.expenses = get_expenses()
 		expense_claim.employee = get_random("Employee")
-		expense_claim.company = frappe.flags.company
+		expense_claim.company = cmp
 		expense_claim.payable_account = get_payable_account(expense_claim.company)
 		expense_claim.posting_date = frappe.flags.current_date
 		expense_claim.expense_approver = frappe.db.get_global('demo_hr_user')
+		expense_claim.cost_center= 'Main - WPL'
 		expense_claim.save()
 
 		rand = random.random()
@@ -60,6 +65,7 @@ def work():
 		if rand < 0.4:
 			update_sanctioned_amount(expense_claim)
 			expense_claim.approval_status = 'Approved'
+			# expense_claim.cost_center= 'Main - WPL'
 			expense_claim.submit()
 
 			if random.randint(0, 1):
@@ -74,23 +80,26 @@ def work():
 def get_payroll_entry():
 	# process payroll for previous month
 	payroll_entry = frappe.new_doc("Payroll Entry")
-	payroll_entry.company = frappe.flags.company
+	payroll_entry.company = cmp
 	payroll_entry.payroll_frequency = 'Monthly'
 
 	# select a posting date from the previous month
 	payroll_entry.posting_date = get_last_day(getdate(frappe.flags.current_date) - datetime.timedelta(days=10))
 	payroll_entry.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
-
+	payroll_entry.exchange_rate=1
+	payroll_entry.payroll_payable_account="Payroll Payable - WPL"
 	payroll_entry.set_start_end_dates()
 	return payroll_entry
 
 def get_expenses():
 	expenses = []
-	expese_types = frappe.db.sql("""select ect.name, eca.default_account from `tabExpense Claim Type` ect,
-		`tabExpense Claim Account` eca where eca.parent=ect.name
-		and eca.company=%s """, frappe.flags.company,as_dict=1)
+	# expese_types = frappe.db.sql("""select ect.name, eca.default_account from `tabExpense Claim Type` ect,
+	# 	`tabExpense Claim Account` eca where eca.parent=ect.name
+	# 	and eca.company=%s """, cmp,as_dict=1)
 
-	for expense_type in expese_types[:random.randint(1,4)]:
+	expese_types = frappe.db.sql("""select name from `tabExpense Claim Type` """, as_dict=1)
+
+	for expense_type in expese_types[:random.randint(1,5)]:
 		claim_amount = random.randint(1,20)*10
 
 		expenses.append({
@@ -98,7 +107,8 @@ def get_expenses():
 			"expense_type": expense_type.name,
 			"default_account": expense_type.default_account or "Miscellaneous Expenses - WPL",
 			"amount": claim_amount,
-			"sanctioned_amount": claim_amount
+			"sanctioned_amount": claim_amount,
+			"cost_center": "Main - WPL"
 		})
 
 	return expenses
@@ -126,7 +136,7 @@ def get_timesheet_based_salary_slip_employee():
 def make_timesheet_records():
 	employees = get_timesheet_based_salary_slip_employee()
 	for e in employees:
-		ts = make_timesheet(e.employee, simulate = True, billable = 1, activity_type=get_random("Activity Type"), company=frappe.flags.company)
+		ts = make_timesheet(e.employee, simulate = True, is_billable = 1, activity_type=get_random("Activity Type"), company="Wind Power LLC")
 		frappe.db.commit()
 
 		rand = random.random()
@@ -149,7 +159,12 @@ def make_sales_invoice_for_timesheet(name):
 	sales_invoice.append('items', {
 		'item_code': get_random("Item", {"has_variants": 0, "is_stock_item": 0,
 			"is_fixed_asset": 0}),
+		'item_name':'item_code',
 		'qty': 1,
+		'description':"randonm description",
+		'uom': "Nos",
+		'income_account': 'Sales - WPL',
+		'conversion_factor': 1,
 		'rate': 1000
 	})
 	sales_invoice.flags.ignore_permissions = 1
@@ -180,7 +195,7 @@ def make_leave_application():
 			})
 			try:
 				leave_application.insert()
-				leave_application.submit()
+				# leave_application.submit() # beasu you neet to approve or reject it first
 				frappe.db.commit()
 			except (OverlapError, AttendanceAlreadyMarkedError):
 				frappe.db.rollback()

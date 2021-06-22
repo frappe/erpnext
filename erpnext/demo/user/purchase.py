@@ -16,12 +16,14 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \
 def work():
 	frappe.set_user(frappe.db.get_global('demo_purchase_user'))
 
-	if random.random() < 0.6:
-		report = "Items To Be Requested"
-		for row in query_report.run(report)["result"][:random.randint(1, 5)]:
-			item_code, qty = row[0], abs(row[-1])
-
-			mr = make_material_request(item_code, qty)
+	# if random.random() < 0.6:
+	# 	report = "Items To Be Requested"
+	# 	# for row in query_report.run(report)["result"][:random.randint(1, 5)]:
+	# 	row = query_report.run(report)["result"][:random.randint(1, 5)]
+	# 		# item_code, qty = row[0], abs(row[-1])
+	# 	item_code=row[0]['item']
+	# 	qty=row[0]['requested']
+	# 	mr = make_material_request(item_code, qty)
 
 	if random.random() < 0.6:
 		for mr in frappe.get_all('Material Request',
@@ -77,7 +79,7 @@ def work():
 	# make purchase orders
 	if random.random() < 0.5:
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-		report = "Requested Items To Be Ordered"
+		report = "Requested Items to Order and Receive"
 		for row in query_report.run(report)["result"][:how_many("Purchase Order")]:
 			if row[0] != "Total":
 				try:

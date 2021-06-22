@@ -70,13 +70,15 @@ def make_opportunity(domain):
 		"opportunity_type": "Sales",
 		"with_items": 1,
 		"transaction_date": frappe.flags.current_date,
+		
 	})
 
 	add_random_children(b, "items", rows=4, randomize = {
 		"qty": (1, 5),
+		# "conversion_factor": (1,2),
 		"item_code": ("Item", {"has_variants": 0, "is_fixed_asset": 0, "domain": domain})
 	}, unique="item_code")
-
+	# b.conversion_factor= 1
 	b.insert()
 	frappe.db.commit()
 
@@ -87,6 +89,9 @@ def make_quotation(domain):
 	if opportunity:
 		from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 		qtn = frappe.get_doc(make_quotation(opportunity))
+		# qtn.items[0].conversion_factor=1
+		# qtn.items[0].item_name
+
 		qtn.insert()
 		frappe.db.commit()
 		qtn.submit()

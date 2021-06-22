@@ -27,6 +27,7 @@ def make(domain='Manufacturing', days=100):
 	frappe.flags.domain = domain
 	frappe.flags.mute_emails = True
 	setup_data.setup(domain)
+	# manufacture.setup_data()
 	if domain== 'Manufacturing':
 		manufacture.setup_data()
 	elif domain == "Retail":
