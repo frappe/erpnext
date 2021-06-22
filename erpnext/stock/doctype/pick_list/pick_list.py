@@ -90,11 +90,11 @@ class PickList(Document):
 				total_weight += flt(row.qty)+flt(item_wt.weight_per_unit)
 				total_stock_weight += flt(row.stock_qty)+flt(item_wt.weight_per_unit)
 				total_picked_weight += flt(row.picked_qty)+flt(item_wt.weight_per_unit)
-		    self.total_weight = flt(total_weight, self.precision('total_weight'))
-				item_wt = frappe.get_doc("Item", row.item_code) 
-				total_stock_weight += flt(row.stock_qty)*flt(item_wt.weight_per_unit) 
-				total_picked_weight += flt(row.picked_qty)*flt(item_wt.weight_per_unit) 
-		
+
+				item_wt = frappe.get_doc("Item", row.item_code)
+				total_stock_weight += flt(row.stock_qty)*flt(item_wt.weight_per_unit)
+				total_picked_weight += flt(row.picked_qty)*flt(item_wt.weight_per_unit)
+		self.total_weight = flt(total_weight, self.precision('total_weight'))
 		self.total_stock_weight = flt(total_stock_weight, self.precision('total_stock_weight'))
 		self.total_picked_weight = flt(total_picked_weight, self.precision('total_picked_weight'))
 		if self.work_order:

@@ -552,7 +552,8 @@ class DeliveryPlanning(Document):
 
 	@frappe.whitelist()
 	def make_po(self):
-
+		salesno = 0
+		discount = []
 		print("------------- inside PO make po ---------")
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={"approved": "Yes",
@@ -594,19 +595,45 @@ class DeliveryPlanning(Document):
 												  "item_name",
 												  "ordered_qty",
 												  "delivery_date",
-												  "sorce_warehouse"
+												  "sorce_warehouse",
+												  "sales_order"
 												 ]
 												 )
 				print("0000000000000000000000000000", so_wise_data)
 				if (so_wise_data):
 					for s in so_wise_data:
+						salesno = s.sales_order
 						po.append("items", {"item_code": s.item_code,
 											 "item_name": s.item_name,
 											 "schedule_date":s.delivery_date,
 											 "qty": s.ordered_qty,
 											 "warehouse": s.sorce_warehouse
 											 })
-					po.save(ignore_permissions=True)
+
+				discount = frappe.get_doc('Sales Order', salesno)
+				print("po........p.o........po", discount.additional_discount_percentage)
+
+				# tax = frappe.get_list('Sales Taxes and Charges',
+				# 					  filters={'parent': salesno},
+				# 					  fields=["charge_type",
+				# 							  "account_head",
+				# 							  "description",
+				# 							  "rate"]
+				# 					  )
+				# print("--------- this  is taxes--------", tax)
+				# for t in tax:
+				# 	dnote.append('taxes', {
+				# 		'charge_type': t.charge_type,
+				# 		'description': t.description,
+				# 		'account_head': t.account_head,
+				# 		'rate': t.rate
+				# 	})
+
+				# po.additional_discount_percentage = discount.additional_discount_percentage
+				# po.apply_dicount_on = discount.apply_discount_on
+				# po.taxes_and_charges = discount.taxes_and_charges
+
+				po.save(ignore_permissions=True)
 				# po.save()
 				# frappe.db.commit()
 				print("-----------Date 0purchase order create 111 -------------", q.delivery_date)
@@ -727,8 +754,22 @@ class DeliveryPlanning(Document):
 				discount = frappe.get_doc('Sales Order', salesno)
 				print("p........p.........p", discount.additional_discount_percentage)
 
-				tax = frappe.get_last_doc('Sales Taxes and Charges', filters={'parent': salesno})
+				tax = frappe.get_list('Sales Taxes and Charges',
+									  filters={'parent': salesno},
+									  fields=["charge_type",
+											  "account_head",
+											  "description",
+											  "rate"]
+									  )
 				print("--------- this  is taxes--------", tax)
+				for t in tax:
+					dnote.append('taxes',{
+						'charge_type': t.charge_type,
+						'description': t.description,
+						'account_head': t.account_head,
+						'rate': t.rate
+					})
+
 
 
 				dnote.additional_discount_percentage = discount.additional_discount_percentage
@@ -785,8 +826,21 @@ class DeliveryPlanning(Document):
 					discount = frappe.get_doc('Sales Order', salesno)
 					print("p........p.........p", discount.additional_discount_percentage)
 
-					tax = frappe.get_doc('Sales Taxes and Charges', filters= {'parent':salesno})
-					print("--------- this  is taxes--------",tax)
+					tax = frappe.get_list('Sales Taxes and Charges',
+										  filters={'parent': salesno},
+										  fields=["charge_type",
+												  "account_head",
+												  "description",
+												  "rate"]
+										  )
+					print("--------- this  is taxes--------", tax)
+					for t in tax:
+						dnote.append('taxes', {
+							'charge_type': t.charge_type,
+							'description': t.description,
+							'account_head': t.account_head,
+							'rate': t.rate
+						})
 
 					dnote.additional_discount_percentage = discount.additional_discount_percentage
 					dnote.apply_dicount_on = discount.apply_discount_on
