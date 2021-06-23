@@ -1036,7 +1036,7 @@ class StockEntry(StockController):
 
 		self.set_scrap_items()
 		self.set_actual_qty()
-		self.adjust_qty_for_process_loss()
+		self.update_items_for_process_loss()
 		self.validate_customer_provided_item()
 		self.calculate_rate_and_amount()
 
@@ -1528,11 +1528,17 @@ class StockEntry(StockController):
 				material_requests.append(material_request)
 				frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
 				
-	def adjust_qty_for_process_loss(self):
+	def update_items_for_process_loss(self):
 		process_loss_dict = {}
 		for d in self.get("items"):
 			if not d.is_process_loss:
 				continue
+
+			scrap_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_scrap_warehouse")
+			if scrap_warehouse is not None:
+				d.t_warehouse = scrap_warehouse
+			d.is_scrap_item = 0
+
 			if d.item_code not in process_loss_dict:
 				process_loss_dict[d.item_code] = [flt(0), flt(0)]
 			process_loss_dict[d.item_code][0] += flt(d.transfer_qty)
@@ -1541,9 +1547,10 @@ class StockEntry(StockController):
 		for d in self.get("items"):
 			if not d.is_finished_item or d.item_code not in process_loss_dict:
 				continue
-			# Assumption: 1 FG has 1 row.
+			# Assumption: 1 finished item has 1 row.
 			d.transfer_qty -= process_loss_dict[d.item_code][0]
 			d.qty -= process_loss_dict[d.item_code][1]
+
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
