@@ -436,7 +436,7 @@ def get_barcode_data(items_list):
 	return itemwise_barcode
 
 @frappe.whitelist()
-def get_item_tax_info(company, tax_category, item_codes, item_rates=None):
+def get_item_tax_info(company, tax_category, item_codes, item_tax_templates, item_rates=None):
 	out = {}
 	if isinstance(item_codes, string_types):
 		item_codes = json.loads(item_codes)
@@ -444,12 +444,18 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None):
 	if isinstance(item_rates, string_types):
 		item_rates = json.loads(item_rates)
 
+	if isinstance(item_tax_templates, string_types):
+		item_tax_templates = json.loads(item_tax_templates)
+
 	for item_code in item_codes:
-		if not item_code or item_code[1] in out:
+		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
 			continue
+
 		out[item_code[1]] = {}
 		item = frappe.get_cached_doc("Item", item_code[0])
-		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates[item_code[1]]}
+		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates[item_code[1]],
+			"item_tax_template": item_tax_templates.get(item_code[1])}
+
 		get_item_tax_template(args, item, out[item_code[1]])
 		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(company, out[item_code[1]].get("item_tax_template"), as_json=True)
 
@@ -463,9 +469,7 @@ def get_item_tax_template(args, item, out):
 		}
 	"""
 	item_tax_template = args.get("item_tax_template")
-
-	if not item_tax_template:
-		item_tax_template = _get_item_tax_template(args, item.taxes, out)
+	item_tax_template = _get_item_tax_template(args, item.taxes, out)
 
 	if not item_tax_template:
 		item_group = item.item_group
@@ -508,7 +512,8 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 		return None
 
 	# do not change if already a valid template
-	if args.get('item_tax_template') in taxes:
+	if args.get('item_tax_template') in [t.item_tax_template for t in taxes]:
+		out["item_tax_template"] = args.get('item_tax_template')
 		return args.get('item_tax_template')
 
 	for tax in taxes:
