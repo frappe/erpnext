@@ -26,7 +26,7 @@ class PaymentTermsTemplate(Document):
 	def check_duplicate_terms(self):
 		terms = []
 		for term in self.terms:
-			term_info = (term.credit_days, term.credit_months, term.due_date_based_on)
+			term_info = (term.payment_term, term.credit_days, term.credit_months, term.due_date_based_on)
 			if term_info in terms:
 				frappe.msgprint(
 					_('The Payment Term at row {0} is possibly a duplicate.').format(term.idx),

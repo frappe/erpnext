@@ -635,7 +635,7 @@ def get_held_invoices(party_type, party):
 			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
 			as_dict=1
 		)
-		held_invoices = set([d['name'] for d in held_invoices])
+		held_invoices = set(d['name'] for d in held_invoices)
 
 	return held_invoices
 

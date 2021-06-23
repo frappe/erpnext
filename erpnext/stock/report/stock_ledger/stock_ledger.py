@@ -115,7 +115,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = 'and sle.item_code in ({})'\
-			.format(', '.join([frappe.db.escape(i) for i in items]))
+			.format(', '.join(frappe.db.escape(i) for i in items))
 
 	sl_entries = frappe.db.sql("""
 		SELECT
@@ -169,7 +169,7 @@ def get_items(filters):
 def get_item_details(items, sl_entries, include_uom):
 	item_details = {}
 	if not items:
-		items = list(set([d.item_code for d in sl_entries]))
+		items = list(set(d.item_code for d in sl_entries))
 
 	if not items:
 		return item_details

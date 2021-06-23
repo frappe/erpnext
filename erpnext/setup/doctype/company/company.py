@@ -54,7 +54,7 @@ class Company(NestedSet):
 
 	def validate_abbr(self):
 		if not self.abbr:
-			self.abbr = ''.join([c[0] for c in self.company_name.split()]).upper()
+			self.abbr = ''.join(c[0] for c in self.company_name.split()).upper()
 
 		self.abbr = self.abbr.strip()
 
@@ -335,7 +335,7 @@ class Company(NestedSet):
 		clear_defaults_cache()
 
 	def abbreviate(self):
-		self.abbr = ''.join([c[0].upper() for c in self.company_name.split()])
+		self.abbr = ''.join(c[0].upper() for c in self.company_name.split())
 
 	def on_trash(self):
 		"""
