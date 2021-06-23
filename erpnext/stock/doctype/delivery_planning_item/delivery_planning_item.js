@@ -139,3 +139,13 @@ frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
         }
     });
 });
+
+frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
+    cur_frm.set_query("supplier", function() {
+        return {
+           "filters": {
+                "is_transporter": 1,
+            }
+        }
+    });
+});
