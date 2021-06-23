@@ -843,6 +843,8 @@ class SalesInvoice(SellingController):
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
+		self.allocate_advance_taxes(gl_entries)
+
 		self.make_item_gl_entries(gl_entries)
 
 		# merge gl entries before adding pos entries
@@ -850,7 +852,6 @@ class SalesInvoice(SellingController):
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
@@ -984,7 +985,13 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
+
+			skip_change_gl_entries = not cint(frappe.db.get_single_value('Accounts Settings', 'post_change_gl_entries'))
+
 			for payment_mode in self.payments:
+				if skip_change_gl_entries and payment_mode.account == self.account_for_change_amount:
+					payment_mode.base_amount -= flt(self.change_amount)
+
 				if payment_mode.amount:
 					# POS, make payment entries
 					gl_entries.append(
@@ -1016,8 +1023,11 @@ class SalesInvoice(SellingController):
 						}, payment_mode_account_currency, item=self)
 					)
 
+			if not skip_change_gl_entries:
+				self.make_gle_for_change_amount(gl_entries)
+
 	def make_gle_for_change_amount(self, gl_entries):
-		if cint(self.is_pos) and self.change_amount:
+		if self.change_amount:
 			if self.account_for_change_amount:
 				gl_entries.append(
 					self.get_gl_dict({
