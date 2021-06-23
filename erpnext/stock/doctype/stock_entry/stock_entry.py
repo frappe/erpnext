@@ -114,8 +114,12 @@ class StockEntry(StockController):
 		if self.work_order and self.stock_entry_type == "Manufacture":
 			self.scrap_qty()
 
+		if self.work_order and self.stock_entry_type == "Material Consumption for Manufacture":
+			self.set_work_order_total_cost()
+
 		if self.purpose == 'Material Transfer' and self.add_to_transit:
 			self.set_material_request_transfer_status('In Transit')
+			
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('Completed')
 
@@ -154,6 +158,17 @@ class StockEntry(StockController):
 			self.from_bom = 1
 			self.bom_no = data.bom_no
 
+	def set_work_order_total_cost(self):
+		if self.stock_entry_type=="Material Consumption for Manufacture" and self.work_order:
+			lst=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Material Consumption for Manufacture","work_order":self.work_order},['name'])
+			doc=frappe.get_doc("Work Order",{"name":self.work_order})
+			for i in lst:
+				ls=frappe.get_doc("stock_entry",self.work_order)
+				for i in ls.items:
+					b=sum(i.qty)
+					doc.work_order_total_cost=b
+			doc.save(ignore_permissions=True)
+
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
 		if pro_doc.status == 'Completed':
@@ -188,7 +203,7 @@ class StockEntry(StockController):
 	def scrap_qty(self):
 		if self.stock_entry_type=="Manufacture" and self.work_order:
 			doc=frappe.get_doc("Work Order",{"name":self.work_order})
-			for i in doc.items:
+			for i in self.items:
 				if i.is_scrap_item==1:
 					b=sum(i.qty)
 					doc.total_manufacture_of_scrap=b
