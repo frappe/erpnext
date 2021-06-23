@@ -920,9 +920,10 @@ class SalesInvoice(SellingController):
 					if item.get('asset'):
 						asset = frappe.get_doc("Asset", item.asset)
 					else:
-						frappe.throw(_("Enter Asset linked with Item {0}: {1} in row {2}.")
-							.format(item.item_code, item.item_name, item.idx))
-
+						frappe.throw(_(
+							"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
+							title=_("Missing Asset")
+						)
 					if (len(asset.finance_books) > 1 and not item.finance_book
 						and asset.finance_books[0].finance_book):
 						frappe.throw(_("Select finance book for the item {0} at row {1}")
