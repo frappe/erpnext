@@ -143,6 +143,9 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 				tax_row[fieldname] = default_value
 
 	doc = frappe.get_doc(template)
+
+	# Data in country wise json is already pre validated, hence validations can be ignored 
+	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
 	doc.insert(ignore_permissions=True)
@@ -172,6 +175,9 @@ def make_item_tax_template(company_name, template):
 				tax_row['tax_rate'] = account_data.get('tax_rate')
 
 	doc = frappe.get_doc(template)
+
+	# Data in country wise json is already pre validated, hence validations can be ignored 
+	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
 	doc.insert(ignore_permissions=True)
