@@ -30,7 +30,7 @@ class ProductFiltersBuilder:
 						["Website Item Group", "item_group", "=", self.item_group]
 					])
 
-				values = frappe.get_all("Item", fields=[df.fieldname], filters=filters, or_filters=or_filters, distinct="True", pluck=df.fieldname, debug=1)
+				values = frappe.get_all("Item", fields=[df.fieldname], filters=filters, or_filters=or_filters, distinct="True", pluck=df.fieldname)
 			else:
 				doctype = df.get_link_doctype()
 
