@@ -453,8 +453,10 @@ def get_item_tax_info(company, tax_category, item_codes, item_tax_templates=None
 
 		out[item_code[1]] = {}
 		item = frappe.get_cached_doc("Item", item_code[0])
-		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates[item_code[1]],
-			"item_tax_template": item_tax_templates.get(item_code[1])}
+		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates[item_code[1]]}
+
+		if item_tax_templates:
+			args.update({"item_tax_template": item_tax_templates.get(item_code[1])})
 
 		get_item_tax_template(args, item, out[item_code[1]])
 		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(company, out[item_code[1]].get("item_tax_template"), as_json=True)
