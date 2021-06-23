@@ -710,6 +710,7 @@ class DeliveryPlanning(Document):
 	def make_dnote(self):
 		salesno = 0
 		discount = []
+		transporter = ""
 		print("************* In side Delivery Note ************")
 		pl = frappe.db.get_all('Pick List',
 							   filters={
@@ -722,7 +723,6 @@ class DeliveryPlanning(Document):
 				dnote = frappe.new_doc('Delivery Note')
 				dnote.customer = p.customer
 				dnote.related_delivery_planning = self.name
-				dnote.transporter = p.transporter
 
 				pli = frappe.db.get_all('Pick List Item',
 										filters={ 'parent': p.name },
@@ -753,7 +753,7 @@ class DeliveryPlanning(Document):
 								})
 				discount = frappe.get_doc('Sales Order', salesno)
 				print("p........p.........p", discount.additional_discount_percentage)
-
+				print("---------- trans - -------------", discount.transporter)
 				tax = frappe.get_list('Sales Taxes and Charges',
 									  filters={'parent': salesno},
 									  fields=["charge_type",
@@ -771,10 +771,11 @@ class DeliveryPlanning(Document):
 					})
 
 
-
+				dnote.tc_name = discount.tc_name
 				dnote.additional_discount_percentage = discount.additional_discount_percentage
 				dnote.apply_dicount_on = discount.apply_discount_on
 				dnote.taxes_and_charges = discount.taxes_and_charges
+				dnote.transporter = discount.transporter
 				dnote.save(ignore_permissions=True)
 			return 1
 
@@ -790,7 +791,6 @@ class DeliveryPlanning(Document):
 					dnote = frappe.new_doc('Delivery Note')
 					dnote.customer = d.customer
 					dnote.related_delivery_planning = self.name
-					dnote.transporter = d.transporter
 
 
 					item = frappe.db.get_all('Delivery Planning Item',
@@ -845,6 +845,8 @@ class DeliveryPlanning(Document):
 					dnote.additional_discount_percentage = discount.additional_discount_percentage
 					dnote.apply_dicount_on = discount.apply_discount_on
 					dnote.taxes_and_charges = discount.taxes_and_charges
+					dnote.tc_name = discount.tc_name
+					dnote.transporter = discount.transporter
 					dnote.save(ignore_permissions=True)
 				return 2
 
