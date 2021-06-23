@@ -1164,35 +1164,35 @@
 	},
 
 	"India": {
+		"tax_categories": [
+			{
+				"title": "In-State",
+				"is_inter_state": 0,
+				"gst_state": ""
+			},
+			{
+				"title": "Out-State",
+				"is_inter_state": 1,
+				"gst_state": ""
+			},
+			{
+				"title": "Reverse Charge In-State",
+				"is_inter_state": 0,
+				"gst_state": ""
+			},
+			{
+				"title": "Reverse Charge Out-State",
+				"is_inter_state": 1,
+				"gst_state": ""
+			},
+			{
+				"title": "Registered Composition",
+				"is_inter_state": 0,
+				"gst_state": ""
+			}
+		],
 		"chart_of_accounts": {
 			"*": {
-				"tax_categories": [
-					{
-						"title": "In-State",
-						"is_inter_state": 0,
-						"gst_state": ""
-					},
-					{
-						"title": "Out-State",
-						"is_inter_state": 1,
-						"gst_state": ""
-					},
-					{
-						"title": "Reverse Charge In-State",
-						"is_inter_state": 0,
-						"gst_state": ""
-					},
-					{
-						"title": "Reverse Charge Out-State",
-						"is_inter_state": 0,
-						"gst_state": ""
-					},
-					{
-						"title": "Registered Composition",
-						"is_inter_state": 0,
-						"gst_state": ""
-					}
-				],
 				"item_tax_templates": [
 					{
 						"title": "GST 9%",
