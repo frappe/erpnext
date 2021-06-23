@@ -101,7 +101,7 @@ class ProductQuery:
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
 			if product_info:
-				item.formatted_price = product_info.get('price', {}).get('formatted_price')
+				item.formatted_price = (product_info.get('price') or {}).get('formatted_price')
 
 		return result
 
