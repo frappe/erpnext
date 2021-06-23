@@ -774,18 +774,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1.items[0].purchase_receipt_item = pr.items[0].name
 		pr1.submit()
 
-		buying_settings = frappe.get_single("Buying Settings")
-		buying_settings.consider_rejected_quantity_in_purchase_invoice = 0
-		buying_settings.save()
-
 		pi1 = make_purchase_invoice(pr.name)
 		self.assertEqual(pi1.items[0].qty, 3)
-
-		buying_settings.consider_rejected_quantity_in_purchase_invoice = 1
-		buying_settings.save()
-
-		pi2 = make_purchase_invoice(pr.name)
-		self.assertEqual(pi2.items[0].qty, 4)
 
 		pr1.cancel()
 		pr.reload()
@@ -815,20 +805,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr2.items[0].purchase_receipt_item = pr1.items[0].name
 		pr2.submit()
 
-		buying_settings = frappe.get_single("Buying Settings")
-		buying_settings.consider_rejected_quantity_in_purchase_invoice = 0
-		buying_settings.save()
-
 		pi2 = make_purchase_invoice(pr1.name)
 		self.assertEqual(pi2.items[0].qty, 2)
 		self.assertEqual(pi2.items[1].qty, 1)
-
-		buying_settings.consider_rejected_quantity_in_purchase_invoice = 1
-		buying_settings.save()
-
-		pi3 = make_purchase_invoice(pr1.name)
-		self.assertEqual(pi3.items[0].qty, 8)
-		self.assertEqual(pi3.items[1].qty, 1)
 
 		pr2.cancel()
 		pi1.cancel()
