@@ -160,13 +160,11 @@ class StockEntry(StockController):
 
 	def set_work_order_total_cost(self):
 		if self.stock_entry_type=="Material Consumption for Manufacture" and self.work_order:
-			lst=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Material Consumption for Manufacture","work_order":self.work_order},['name'])
+			# lst=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Material Consumption for Manufacture","work_order":self.work_order},['name'])
 			doc=frappe.get_doc("Work Order",{"name":self.work_order})
-			for i in lst:
-				ls=frappe.get_doc("stock_entry",{"name":lst.name})
-				for i in ls.items:
-					b=sum(i.qty)
-					doc.work_order_total_cost=b
+			for i in self.items:
+				b=sum(i.qty)
+				doc.work_order_total_cost=b
 			doc.save(ignore_permissions=True)
 
 	def validate_work_order_status(self):
