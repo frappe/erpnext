@@ -387,7 +387,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		if(this.frm.doc.scan_barcode) {
 			frappe.call({
-				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_serial_or_batch_or_barcode_number",
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number",
 				args: { search_value: this.frm.doc.scan_barcode }
 			}).then(r => {
 				const data = r && r.message;
@@ -742,6 +742,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	serial_no(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+
+		if (item && item.doctype === 'Purchase Receipt Item Supplied') {
+			return;
+		}
 
 		if (item && item.serial_no) {
 			if (!item.item_code) {

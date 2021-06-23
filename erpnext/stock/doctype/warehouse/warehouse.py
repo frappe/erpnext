@@ -54,6 +54,7 @@ class Warehouse(NestedSet):
 			throw(_("Child warehouse exists for this warehouse. You can not delete this warehouse."))
 
 		self.update_nsm_model()
+		self.unlink_from_items()
 
 	def check_if_sle_exists(self):
 		return frappe.db.sql("""select name from `tabStock Ledger Entry`
@@ -137,6 +138,12 @@ class Warehouse(NestedSet):
 			self.is_group = 1
 			self.save()
 			return 1
+
+	def unlink_from_items(self):
+		frappe.db.sql("""
+				update `tabItem Default`
+				set default_warehouse=NULL
+				where default_warehouse=%s""", self.name)
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
