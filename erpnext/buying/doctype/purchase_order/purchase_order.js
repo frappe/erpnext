@@ -248,8 +248,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					},
 					{
 						fieldtype:'Data',
-						fieldname:'item_name',
-						label: __('Item Name'),
+						fieldname:'rm_item_name',
+						label: __('Raw Material Name'),
 						read_only:1,
 						in_list_view:1
 					},
