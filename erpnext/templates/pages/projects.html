@@ -2,6 +2,10 @@
 
 {% block title %}{{ doc.project_name }}{% endblock %}
 
+{% block head_include %}
+<link rel="stylesheet" href="/assets/frappe/css/font-awesome.css">
+{% endblock %}
+
 {% block header %}
 <h1>{{ doc.project_name }}</h1>
 {% endblock %}
@@ -20,9 +24,9 @@
 {{ progress_bar(doc.percent_complete) }}
 
 <div class="d-flex mt-5 mb-5 justify-content-between">
-	<h3>Status:</h3>
-	<h3>Progress: <span>{{ doc.percent_complete }} %</span> </h3>
-	<h3>Hours Spent: <span>{{ doc.actual_time }}</span> </h3>
+	<h4>Status:</h4>
+	<h4>Progress: <span>{{ doc.percent_complete }} %</span> </h4>
+	<h4>Hours Spent: <span>{{ doc.actual_time }}</span> </h4>
 </div>
 
 {{ progress_bar(doc.percent_complete) }}
@@ -115,11 +119,15 @@
 
 {% macro task_row(task) %}
 <div class="row {% if task.children %} font-weight-bold {% else %} mt-5 {% endif %}">
-	<div class="col-xs-4 {% if task.parent_task %} text-center {% endif %}">
-		<a class="nav-link" style="color: inherit;" href="/tasks?name={{ task.name | urlencode }}">{{ task.name }}</a>
+	<div class="col-xs-4 {% if task.parent_task %}  {% endif %}">
+		<a class="nav-link" style="color: inherit;" href="/tasks?name={{ task.name | urlencode }}">
+			{% if task.parent_task %}
+			<span class="ml-3 mr-3"> <i class="fa fa-level-up fa-rotate-90"></i> </span>
+			{% endif %}
+			{{ task.name }}</a>
 	</div>
 	<div class="col-xs-2">{{ task.status }}</div>
-	<div class="col-xs-2">{{ task.exp_end_date }}</div>
+	<div class="col-xs-2">{% if task.exp_end_date %}{{ task.exp_end_date }} {% else %} -- {% endif %}</div>
 	<div class="col-xs-2">
 		{% if task["_assign"] %}
 		{% set assigned_users = json.loads(task["_assign"])%}
