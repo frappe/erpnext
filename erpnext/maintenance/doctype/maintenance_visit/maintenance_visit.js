@@ -64,9 +64,9 @@ frappe.ui.form.on('Maintenance Visit', {
 })
 
 // TODO commonify this code
-erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
-	refresh: function () {
-		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer' };
+erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.form.Controller {
+	refresh() {
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		var me = this;
 
@@ -119,7 +119,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 					})
 				}, __("Get Items From"));
 		}
-	},
-});
+	}
+};
 
-$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({frm: cur_frm}));
