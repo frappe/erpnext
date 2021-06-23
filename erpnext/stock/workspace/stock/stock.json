@@ -500,6 +500,15 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Inter Company Challan Reconciliation",
+   "link_to": "Inter Company Challan Reconciliation",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
@@ -657,7 +666,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-06-17 11:59:30.491901",
+ "modified": "2021-06-21 16:51:28.600670",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
