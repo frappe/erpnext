@@ -695,7 +695,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				target.append('taxes', tax)
 
 	def update_details(source_doc, target_doc, source_parent):
-		target_doc.inter_company_invoice_reference = source_doc.name
+		target_doc.inter_company_invoice_reference = source_doc.nametaxes
 		if target_doc.doctype == 'Purchase Receipt':
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
