@@ -155,6 +155,7 @@ class BOM(WebsiteGenerator):
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
 		self.set_bom_level()
+		self.validate_scrap_items()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -690,6 +691,15 @@ class BOM(WebsiteGenerator):
 
 		if update:
 			self.db_set("bom_level", self.bom_level)
+
+	def validate_scrap_items(self):
+		for item in self.scrap_items:
+			if item.item_code == self.item and not item.is_process_loss:
+				frappe.throw(_('Item:') + f' {item.item_code} ' +\
+					_('in Scrap/Loss Items table should have Is Process Loss checked.'))
+			elif item.item_code != self.item and item.is_process_loss:
+				frappe.throw(_('Item:') + f' {item.item_code} ' +\
+					_('in Scrap/Loss Items table should not have Is Process Loss checked.'))
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':

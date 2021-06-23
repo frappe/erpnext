@@ -379,6 +379,9 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			child.bom_no = '';
 		}
 
+		if (scrap_items) {
+			set_is_process_loss(doc, cdt, cdn)
+		}
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	}
 
@@ -446,6 +449,10 @@ var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
+				if (d.is_process_loss) {
+					r.message.rate = 0
+					r.message.base_rate = 0
+				}
 				$.extend(d, r.message);
 				refresh_field("items");
 				refresh_field("scrap_items");
@@ -655,3 +662,11 @@ frappe.ui.form.on("BOM", "with_operations", function(frm) {
 		frm.set_value("operations", []);
 	}
 });
+
+function set_is_process_loss(doc, cdt, cdn) {
+	const row = locals[cdt][cdn]
+	if (row.item_code === doc.item) {
+		row.is_process_loss = 1
+		frappe.msgprint(__("Item:") + ` ${row.item_code} ` + __("set as process loss."))
+	}
+}
