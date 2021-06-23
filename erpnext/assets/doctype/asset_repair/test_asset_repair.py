@@ -74,21 +74,21 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
 
 	def test_increase_in_asset_value_due_to_stock_consumption(self):
-		asset = create_asset()
-		initial_asset_value = asset.asset_value
+		asset = create_asset(calculate_depreciation = 1)
+		initial_asset_value = get_asset_value(asset)
 		asset_repair = create_asset_repair(asset= asset, stock_consumption = 1, submit = 1)
 		asset.reload()
 
-		increase_in_asset_value = asset.asset_value - initial_asset_value
+		increase_in_asset_value = get_asset_value(asset) - initial_asset_value
 		self.assertEqual(asset_repair.stock_items[0].total_value, increase_in_asset_value)
 
 	def test_increase_in_asset_value_due_to_repair_cost_capitalisation(self):
-		asset = create_asset()
-		initial_asset_value = asset.asset_value
+		asset = create_asset(calculate_depreciation = 1)
+		initial_asset_value = get_asset_value(asset)
 		asset_repair = create_asset_repair(asset= asset, capitalize_repair_cost = 1, submit = 1)
 		asset.reload()
 
-		increase_in_asset_value = asset.asset_value - initial_asset_value
+		increase_in_asset_value = get_asset_value(asset) - initial_asset_value
 		self.assertEqual(asset_repair.repair_cost, increase_in_asset_value)
 
 	def test_purchase_invoice(self):
@@ -108,6 +108,9 @@ class TestAssetRepair(unittest.TestCase):
 	
 		self.assertEqual((initial_num_of_depreciations + 1), num_of_depreciations(asset))
 		self.assertEqual(asset.schedules[-1].accumulated_depreciation_amount, asset.finance_books[0].value_after_depreciation)
+
+def get_asset_value(asset):
+	return asset.finance_books[0].value_after_depreciation
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations
