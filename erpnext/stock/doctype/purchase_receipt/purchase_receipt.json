@@ -514,8 +514,7 @@
    "oldfieldname": "pr_raw_material_details",
    "oldfieldtype": "Table",
    "options": "Purchase Receipt Item Supplied",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "section_break0",
@@ -1149,7 +1148,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 01:01:00.754119",
+ "modified": "2021-05-25 00:15:12.239017",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
