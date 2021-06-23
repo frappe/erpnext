@@ -83,7 +83,7 @@ class PickList(Document):
 	# return batch_locations
 
 	def weight_details(self):
-		total_stock_weight = total_picked_weight = 0
+		total_stock_weight = total_picked_weight = total_weight=0
 		if self.locations:
 			for row in self.locations:
 				item_wt = frappe.get_doc("Item", row.item_code)
