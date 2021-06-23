@@ -1098,6 +1098,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			where voucher_type='Payment Entry' and voucher_no=%s
 			order by account asc""", (payment_entry.name), as_dict=1)
 
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+
 		# Create Purchase Invoice against Purchase Order
 		purchase_invoice = get_mapped_purchase_invoice(po.name)
 		purchase_invoice.allocate_advances_automatically = 1
