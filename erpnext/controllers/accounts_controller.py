@@ -830,7 +830,7 @@ class AccountsController(TransactionBase):
 					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
 						if self.doctype != "Purchase Invoice":
 							self.throw_overbill_exception(item, max_allowed_amt)
-						elif not cint(frappe.db.get_single_value("Buying Settings", "consider_rejected_quantity_in_purchase_invoice")):
+						elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
 							self.throw_overbill_exception(item, max_allowed_amt)
 
 	def throw_overbill_exception(self, item, max_allowed_amt):

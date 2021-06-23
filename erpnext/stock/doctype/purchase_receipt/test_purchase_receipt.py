@@ -422,7 +422,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		# Make PI against unreturned amount
 		buying_settings = frappe.get_single("Buying Settings")
-		buying_settings.consider_rejected_quantity_in_purchase_invoice = 0
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 0
 		buying_settings.save()
 
 		pi = make_purchase_invoice(pr.name)
@@ -430,7 +430,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertEqual(pi.items[0].qty, 3)
 
-		buying_settings.consider_rejected_quantity_in_purchase_invoice = 1
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 1
 		buying_settings.save()
 
 		pr.load_from_db()
