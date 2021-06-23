@@ -125,6 +125,9 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 	if not args and voucher_type and voucher_no:
 		args = get_args_for_voucher(voucher_type, voucher_no)
 
+	if args:
+		get_voucher_detail_no_wise_sle_data(args)
+
 	distinct_item_warehouses = [(d.item_code, d.warehouse) for d in args]
 
 	i = 0
@@ -142,6 +145,19 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 				args.append(new_sle)
 
 		i += 1
+
+def get_voucher_detail_no_wise_sle_data(args):
+	# cached voucher_detail_no_wise sle data for future use
+
+	if not hasattr(frappe.local, 'voucher_detail_no_wise_sle'):
+		frappe.local.voucher_detail_no_wise_sle = frappe._dict({})
+
+	sle_data = frappe.local.voucher_detail_no_wise_sle
+	for row in frappe.get_all('Stock Ledger Entry',
+		fields = ['item_code', 'warehouse', 'posting_date', 'posting_time',
+			'timestamp(posting_date, posting_time) as timestamp', 'voucher_detail_no', 'name'],
+		filters = {'posting_date': ('>=', args[0].get('posting_date')), 'voucher_detail_no': ('is', 'set')}):
+		sle_data.setdefault(row.voucher_detail_no, []).append(row)
 
 def get_args_for_voucher(voucher_type, voucher_no):
 	return frappe.db.get_all("Stock Ledger Entry",
@@ -797,10 +813,25 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		}, previous_sle, as_dict=1, debug=debug)
 
 def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
+	sle = get_voucher_detail_no_wise_cached_sle(voucher_detail_no, excluded_sle)
+	if sle:
+		return sle
+
 	return frappe.db.get_value('Stock Ledger Entry',
 		{'voucher_detail_no': voucher_detail_no, 'name': ['!=', excluded_sle]},
 		['item_code', 'warehouse', 'posting_date', 'posting_time', 'timestamp(posting_date, posting_time) as timestamp'],
 		as_dict=1)
+
+def get_voucher_detail_no_wise_cached_sle(voucher_detail_no, excluded_sle=None):
+	if not frappe.local.voucher_detail_no_wise_sle:
+		return
+
+	voucher_detail_no_wise_sle = frappe.local.voucher_detail_no_wise_sle.get(voucher_detail_no) or []
+	for row in voucher_detail_no_wise_sle:
+		if excluded_sle and row.name == excluded_sle:
+			continue
+
+		return row
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
