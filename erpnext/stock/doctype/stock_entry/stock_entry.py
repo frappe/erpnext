@@ -163,7 +163,7 @@ class StockEntry(StockController):
 			lst=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Material Consumption for Manufacture","work_order":self.work_order},['name'])
 			doc=frappe.get_doc("Work Order",{"name":self.work_order})
 			for i in lst:
-				ls=frappe.get_doc("stock_entry",self.work_order)
+				ls=frappe.get_doc("stock_entry",{"name":lst.name})
 				for i in ls.items:
 					b=sum(i.qty)
 					doc.work_order_total_cost=b
