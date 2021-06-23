@@ -44,3 +44,4 @@ sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 bench get-app erpnext "${GITHUB_WORKSPACE}"
 bench start &
 bench --site test_site reinstall --yes
+bench build --app frappe
