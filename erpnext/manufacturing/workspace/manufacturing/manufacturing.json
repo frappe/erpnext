@@ -14,6 +14,7 @@
  "hide_custom": 0,
  "icon": "organization",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Manufacturing",
  "links": [
@@ -230,6 +231,24 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Work Order Item Tracking",
+   "link_to": "Work Order Item Tracking",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Alternate Work Order Item Stock",
+   "link_to": "Alternate Work Order Item Stock",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Tools",
    "onboard": 0,
@@ -273,7 +292,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:39.365928",
+ "modified": "2021-06-21 16:49:13.945228",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

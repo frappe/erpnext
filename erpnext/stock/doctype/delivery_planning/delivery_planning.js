@@ -44,7 +44,7 @@ frappe.ui.form.on('Delivery Planning', {
 					}
 			   }
 			});
-    	},__("Calculate"));
+    	},__("Calculate"),__("In side"));
 
 		//custom button to generate Purchase Order Planning Items
     	console.log("Inside custom if purchase order")
@@ -100,6 +100,40 @@ frappe.ui.form.on('Delivery Planning', {
 			   }
 			});
     	}, __('Create'));
+
+//    	PickList creation using custom button
+    	frm.add_custom_button(__('Delivery Note'), function () {
+    		frm.call({
+				method : 'make_dnote',
+				doc: frm.doc,
+				callback : function(r){
+					if(r.message == 1){
+						console.log("-----  --- --Dnote Create-  ---  ---  ",r);
+						frappe.msgprint({
+						title: __('Delivery Note created'),
+						message: __('Created Delivery note using Pick List'),
+						indicator: 'green'
+					});
+					}
+					else if(r.message == 2){
+						console.log("-----  --- -- 2  Dnote Create-  ---  ---  ",r);
+						frappe.msgprint({
+						title: __('Delivery Note created'),
+						message: __('Created Delivery Note using Sales Order'),
+						indicator: 'green'
+					});
+					}
+					else{
+						frappe.msgprint({
+						title: __('Delivery Note not created'),
+						message: __('No Items with of this Delivery Planning is Approved or Pick not created'),
+						indicator: 'orange'
+					});
+					}
+			   }
+			});
+    	}, __('Create'));
+
 	}
 
 
