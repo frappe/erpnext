@@ -115,6 +115,17 @@ class ProductQuery:
 			if not values:
 				continue
 
+			# handle multiselect fields in filter addition
+			meta = frappe.get_meta('Item', cached=True)
+			df = meta.get_field(field)
+			if df.fieldtype == 'Table MultiSelect':
+				child_doctype = df.options
+				child_meta = frappe.get_meta(child_doctype, cached=True)
+				fields = child_meta.get("fields", { "fieldtype": "Link", "in_list_view": 1 })
+				if fields:
+					self.filters.append([child_doctype, fields[0].fieldname, 'IN', values])
+				continue
+
 			if isinstance(values, list):
 				# If value is a list use `IN` query
 				self.filters.append([field, 'IN', values])
