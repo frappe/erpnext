@@ -478,14 +478,12 @@ class TestSalarySlip(unittest.TestCase):
 def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 	from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
-	print(user, payroll_frequency, salary_structure)
 	if not salary_structure:
 		salary_structure = payroll_frequency + " Salary Structure Test for Salary Slip"
 
 
 	employee = frappe.db.get_value("Employee", {"user_id": user})
 	salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee=employee)
-	print(salary_structure_doc)
 	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})
 
 	if not salary_slip_name:
