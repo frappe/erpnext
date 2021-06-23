@@ -13,12 +13,6 @@ class TestAssetRepair(unittest.TestCase):
 		create_asset_data()
 		frappe.db.sql("delete from `tabTax Rule`")
 
-	def test_completion_date(self):
-		asset_repair = create_asset_repair()
-		asset_repair.repair_status = "Completed"
-		asset_repair.save()
-		self.assertTrue(asset_repair.completion_date)
-
 	def test_update_status(self):
 		asset = create_asset()
 		initial_status = asset.status
