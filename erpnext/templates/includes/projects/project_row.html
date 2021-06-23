@@ -10,15 +10,14 @@
 		</div>
 		<div class="col-xs-3 text-center">
 			{% if doc.percent_complete %}
-			<div>{{ doc.percent_complete }} %</div>
-			<div class="progress" style="margin-bottom: 0!important; margin-top: 10px!important; height:5px;">
-				<div class="progress-bar progress-bar-{{ 'warning' if doc.percent_complete|round < 100
-						else 'success' }}" role="progressbar" aria-valuenow="{{ doc.percent_complete|round|int }}" aria-valuemin="0"
-					aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
-				</div>
+			{% set pill_class = "green" if doc.percent_complete|round == 100 else "orange" %}
+			<div class="ellipsis">
+				<span class="indicator-pill {{ pill_class }} filterable ellipsis">
+					<span>{{ frappe.utils.cint(doc.percent_complete) }} %</span>
+				</span>
 			</div>
 			{% else %}
-			<span class="indicator {{ " red" if doc.status=="Open" else "darkgrey" }}">
+			<span class="indicator-pill {{ " red" if doc.status=="Open" else "darkgrey" }}">
 				{{ doc.status }}</span>
 			{% endif %}
 		</div>
