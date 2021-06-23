@@ -199,9 +199,11 @@ class StockEntry(StockController):
 	def scrap_qty(self):
 		if self.stock_entry_type=="Manufacture" and self.work_order:
 			doc=frappe.get_doc("Work Order",{"name":self.work_order})
+			a=[]
 			for i in self.items:
 				if i.is_scrap_item==1:
-					b=sum(i.qty)
+					a.append(i.qty)
+					b=sum(a)
 					doc.total_manufacture_of_scrap=b
 			doc.save(ignore_permissions=True)
 
