@@ -436,7 +436,7 @@ def get_barcode_data(items_list):
 	return itemwise_barcode
 
 @frappe.whitelist()
-def get_item_tax_info(company, tax_category, item_codes, item_tax_templates, item_rates=None):
+def get_item_tax_info(company, tax_category, item_codes, item_tax_templates=None, item_rates=None):
 	out = {}
 	if isinstance(item_codes, string_types):
 		item_codes = json.loads(item_codes)
