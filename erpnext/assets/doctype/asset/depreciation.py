@@ -147,7 +147,7 @@ def scrap_asset(asset_name):
 	je.company = asset.company
 	je.remark = "Scrap Entry for asset {0}".format(asset_name)
 
-	for entry in get_gl_entries_on_asset_disposal(asset):
+	for entry in get_gl_entries_on_asset_movement(asset):
 		entry.update({
 			"reference_type": "Asset",
 			"reference_name": asset_name
@@ -177,7 +177,7 @@ def restore_asset(asset_name):
 	asset.set_status()
 
 @frappe.whitelist()
-def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None):
+def get_gl_entries_on_asset_movement(asset, selling_amount=0, finance_book=None, is_return = False):
 	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
@@ -193,6 +193,44 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None)
 		if asset.calculate_depreciation else asset.value_after_depreciation)
 	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(value_after_depreciation)
 
+	if is_return:
+		gl_entries = get_gl_entries_on_asset_regain(fixed_asset_account, asset, depreciation_cost_center, accumulated_depr_account, accumulated_depr_amount)
+		profit_amount = abs(flt(value_after_depreciation)) - abs(flt(selling_amount))
+		
+	else:
+		gl_entries = get_gl_entries_on_asset_disposal(fixed_asset_account, asset, depreciation_cost_center, accumulated_depr_account, accumulated_depr_amount)
+		profit_amount = flt(selling_amount) - flt(value_after_depreciation)
+
+	if profit_amount:
+		debit_or_credit = "debit" if profit_amount < 0 else "credit"
+		gl_entries.append({
+			"account": disposal_account,
+			"cost_center": depreciation_cost_center,
+			debit_or_credit: abs(profit_amount),
+			debit_or_credit + "_in_account_currency": abs(profit_amount)
+		})
+
+	return gl_entries
+
+def get_gl_entries_on_asset_regain(fixed_asset_account, asset, depreciation_cost_center, accumulated_depr_account, accumulated_depr_amount):
+	gl_entries = [
+		{
+			"account": fixed_asset_account,
+			"debit_in_account_currency": asset.gross_purchase_amount,
+			"debit": asset.gross_purchase_amount,
+			"cost_center": depreciation_cost_center
+		},
+		{
+			"account": accumulated_depr_account,
+			"credit_in_account_currency": accumulated_depr_amount,
+			"credit": accumulated_depr_amount,
+			"cost_center": depreciation_cost_center
+		}
+	]
+
+	return gl_entries
+
+def get_gl_entries_on_asset_disposal(fixed_asset_account, asset, depreciation_cost_center, accumulated_depr_account, accumulated_depr_amount):
 	gl_entries = [
 		{
 			"account": fixed_asset_account,
@@ -207,16 +245,6 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None)
 			"cost_center": depreciation_cost_center
 		}
 	]
-
-	profit_amount = flt(selling_amount) - flt(value_after_depreciation)
-	if profit_amount:
-		debit_or_credit = "debit" if profit_amount < 0 else "credit"
-		gl_entries.append({
-			"account": disposal_account,
-			"cost_center": depreciation_cost_center,
-			debit_or_credit: abs(profit_amount),
-			debit_or_credit + "_in_account_currency": abs(profit_amount)
-		})
 
 	return gl_entries
 
