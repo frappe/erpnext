@@ -13,7 +13,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.assets.doctype.asset.depreciation \
-	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
+	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_movement
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -928,8 +928,12 @@ class SalesInvoice(SellingController):
 						frappe.throw(_("Select finance book for the item {0} at row {1}")
 							.format(item.item_code, item.idx))
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
-						item.base_net_amount, item.finance_book)
+					if self.is_return:
+						fixed_asset_gl_entries = get_gl_entries_on_asset_movement(asset,
+							item.base_net_amount, item.finance_book, True)
+					else:
+						fixed_asset_gl_entries = get_gl_entries_on_asset_movement(asset,
+							item.base_net_amount, item.finance_book)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
