@@ -1038,6 +1038,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_no=%s and is_cancelled=0 order by account asc""", (pay.name), as_dict=1)
 
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+
 		pi.reload()
 		pi.cancel()
 
