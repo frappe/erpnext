@@ -211,7 +211,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			dimension_fields=dimension_fields, select_fields=select_fields, conditions=get_conditions(filters), distributed_cost_center_query=distributed_cost_center_query,
 			order_by_statement=order_by_statement
 		),
-		filters, as_dict=1, debug=1)
+		filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
 		return convert_to_presentation_currency(gl_entries, currency_map, filters.get('company'))
