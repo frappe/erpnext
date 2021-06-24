@@ -61,7 +61,8 @@ class ProductQuery:
 					],
 					or_filters=self.or_filters,
 					start=start,
-					limit=self.page_length
+					limit=self.page_length,
+					order_by="weightage desc"
 				)
 
 				items_dict = {item.name: item for item in items}
@@ -71,7 +72,15 @@ class ProductQuery:
 
 			result = [items_dict.get(item) for item in list(set.intersection(*all_items))]
 		else:
-			result = frappe.get_all("Item", fields=self.fields, filters=self.filters, or_filters=self.or_filters, start=start, limit=self.page_length)
+			result = frappe.get_all(
+				"Item",
+				fields=self.fields,
+				filters=self.filters,
+				or_filters=self.or_filters,
+				start=start,
+				limit=self.page_length,
+				order_by="weightage desc"
+			)
 
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
