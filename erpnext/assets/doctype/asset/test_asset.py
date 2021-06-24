@@ -153,9 +153,8 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 12,
 			"depreciation_start_date": '2030-12-31'
 		})
-		asset.insert()
-		self.assertEqual(asset.status, "Draft")
 		asset.save()
+		self.assertEqual(asset.status, "Draft")
 
 		expected_schedules = [
 			['2030-12-31', 66667.00, 66667.00],
@@ -184,7 +183,7 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 12,
 			"depreciation_start_date": "2030-12-31"
 		})
-		asset.insert()
+		asset.save()
 		self.assertEqual(asset.status, "Draft")
 
 		expected_schedules = [
@@ -215,7 +214,6 @@ class TestAsset(unittest.TestCase):
 			"depreciation_start_date": "2030-12-31"
 		})
 
-		asset.insert()
 		asset.save()
 
 		expected_schedules = [
@@ -246,7 +244,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 10,
 			"depreciation_start_date": "2020-12-31"
 		})
-		asset.insert()
 		asset.submit()
 		asset.load_from_db()
 		self.assertEqual(asset.status, "Submitted")
@@ -349,7 +346,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 10,
 			"depreciation_start_date": "2020-12-31"
 		})
-		asset.insert()
 		asset.submit()
 		post_depreciation_entries(date="2021-01-01")
 
@@ -379,7 +375,6 @@ class TestAsset(unittest.TestCase):
 			"total_number_of_depreciations": 10,
 			"frequency_of_depreciation": 1
 		})
-		asset.insert()
 		asset.submit()
 
 		post_depreciation_entries(date=add_months('2020-01-01', 4))
@@ -423,7 +418,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 10,
 			"depreciation_start_date": "2020-12-31"
 		})
-		asset.insert()
 		asset.submit()
 		post_depreciation_entries(date="2021-01-01")
 
@@ -467,7 +461,7 @@ class TestAsset(unittest.TestCase):
 			"total_number_of_depreciations": 3,
 			"frequency_of_depreciation": 10
 		})
-		asset.insert()
+		asset.save()
 		accumulated_depreciation_after_full_schedule = \
 			max(d.accumulated_depreciation_amount for d in asset.get("schedules"))
 
