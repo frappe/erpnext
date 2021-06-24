@@ -288,8 +288,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					company: me.frm.doc.company,
 					tax_category: cstr(me.frm.doc.tax_category),
 					item_codes: item_codes,
-					item_tax_templates: item_tax_templates,
-					item_rates: item_rates
+					item_rates: item_rates,
+					item_tax_templates: item_tax_templates
 				},
 				callback: function(r) {
 					if (!r.exc) {
