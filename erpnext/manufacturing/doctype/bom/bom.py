@@ -590,7 +590,7 @@ class BOM(WebsiteGenerator):
 			self.get_routing()
 
 	def validate_operations(self):
-		if self.with_operations and not self.get('operations'):
+		if self.with_operations and not self.get('operations') and self.docstatus == 1:
 			frappe.throw(_("Operations cannot be left blank"))
 
 		if self.with_operations:
