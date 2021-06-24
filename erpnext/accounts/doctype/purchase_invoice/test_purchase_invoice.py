@@ -1052,9 +1052,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pay.reload()
 		pay.cancel()
 
-		pi.delete()
-		pi_2.delete()
-		pay.delete()
 		frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled)
 
 	def test_purchase_invoice_advance_taxes(self):
