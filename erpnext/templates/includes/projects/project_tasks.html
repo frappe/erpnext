@@ -1,11 +1,6 @@
 {% for task in doc.tasks %}
 
 <div class="web-list-item transaction-list-item">
-	{{ task_row(task) }}
-	{% if task.children %}
-	{% for child in task.children %}
-	{{ task_row(child) }}
-	{% endfor %}
-	{% endif %}
+	{{ task_row(task, 0) }}
 </div>
 {% endfor %}

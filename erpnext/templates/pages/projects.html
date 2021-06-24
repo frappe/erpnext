@@ -117,12 +117,12 @@
 {% endif %}
 {% endmacro %}
 
-{% macro task_row(task) %}
-<div class="row {% if task.children %} font-weight-bold {% else %} mt-5 {% endif %}">
-	<div class="col-xs-4 {% if task.parent_task %}  {% endif %}">
-		<a class="nav-link" style="color: inherit;" href="/tasks?name={{ task.name | urlencode }}">
+{% macro task_row(task, indent) %}
+<div class="row mt-5 {% if task.children %} font-weight-bold {% endif %}">
+	<div class="col-xs-4">
+		<a class="nav-link " style="color: inherit; {% if task.parent_task %} margin-left: {{ indent }}px {% endif %}" href="/tasks?name={{ task.name | urlencode }}">
 			{% if task.parent_task %}
-			<span class="ml-3 mr-3"> <i class="fa fa-level-up fa-rotate-90"></i> </span>
+			<span class=""> <i class="fa fa-level-up fa-rotate-90"></i> </span>
 			{% endif %}
 			{{ task.name }}</a>
 	</div>
@@ -152,4 +152,9 @@
 		{{ frappe.utils.pretty_date(task.modified) }}
 	</div>
 </div>
+{% if task.children %}
+{% for child in task.children %}
+{{ task_row(child, indent + 30) }}
+{% endfor %}
+{% endif %}
 {% endmacro %}
