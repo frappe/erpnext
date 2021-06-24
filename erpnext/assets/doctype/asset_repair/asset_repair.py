@@ -35,7 +35,7 @@ class AssetRepair(AccountsController):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
 		self.total_repair_cost += total_value_of_stock_consumed
 
-	def on_submit(self):
+	def before_submit(self):
 		self.check_repair_status()
 
 		if self.get('stock_consumption') or self.get('capitalize_repair_cost'):
@@ -52,7 +52,7 @@ class AssetRepair(AccountsController):
 		self.asset_doc.prepare_depreciation_data()
 		self.asset_doc.save()
 
-	def on_cancel(self):
+	def before_cancel(self):
 		self.asset_doc = frappe.get_doc('Asset', self.asset)
 
 		if self.get('stock_consumption') or self.get('capitalize_repair_cost'):
