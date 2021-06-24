@@ -125,7 +125,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 12,
 			"depreciation_start_date": "2030-12-31"
 		})
-		asset.insert()
 		self.assertEqual(asset.status, "Draft")
 		asset.save()
 		expected_schedules = [
