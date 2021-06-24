@@ -212,7 +212,7 @@
   },
   {
    "depends_on": "eval: doc.stock_consumption && doc.total_repair_cost > 0",
-   "description": "Sum of Repair Cost and the total value of all Stock Items consumed during the repair.",
+   "description": "Sum of Repair Cost and Value of Consumed Stock Items.",
    "fieldname": "total_repair_cost",
    "fieldtype": "Currency",
    "label": "Total Repair Cost",
