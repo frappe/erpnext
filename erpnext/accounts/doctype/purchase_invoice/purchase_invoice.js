@@ -28,7 +28,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	}
 
 	onload() {
-		this._super();
+		super.onload();
 
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
