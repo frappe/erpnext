@@ -107,7 +107,7 @@ class Lead(SellingController):
 
 	def validate_organization_lead(self):
 		if cint(self.organization_lead):
-			self.lead_name = None
+			self.lead_name = self.company_name
 			self.gender = None
 			self.salutation = None
 
@@ -297,12 +297,18 @@ def get_lead_contact_details(lead):
 	return _get_lead_contact_details(lead_doc)
 
 def _get_lead_contact_details(lead):
-	return frappe._dict({
-		"contact_display": " ".join(filter(None, [lead.salutation, lead.lead_name])),
+	out = frappe._dict({
 		"contact_email": lead.email_id,
 		"contact_mobile": lead.mobile_no,
 		"contact_phone": lead.phone,
 	})
+
+	if cint(lead.organization_lead):
+		out["contact_display"] = ""
+	else:
+		out["contact_display"] = " ".join(filter(None, [lead.salutation, lead.lead_name]))
+
+	return out
 
 
 @frappe.whitelist()
