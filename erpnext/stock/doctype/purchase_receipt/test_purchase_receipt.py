@@ -421,10 +421,17 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(return_pr_2.items[0].qty, -3)
 
 		# Make PI against unreturned amount
+		buying_settings = frappe.get_single("Buying Settings")
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 0
+		buying_settings.save()
+
 		pi = make_purchase_invoice(pr.name)
 		pi.submit()
 
 		self.assertEqual(pi.items[0].qty, 3)
+
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 1
+		buying_settings.save()
 
 		pr.load_from_db()
 		# PR should be completed on billing all unreturned amount
