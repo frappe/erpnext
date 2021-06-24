@@ -211,7 +211,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			dimension_fields=dimension_fields, select_fields=select_fields, conditions=get_conditions(filters), distributed_cost_center_query=distributed_cost_center_query,
 			order_by_statement=order_by_statement
 		),
-		filters, as_dict=1)
+		filters, as_dict=1, debug=1)
 
 	if filters.get('presentation_currency'):
 		return convert_to_presentation_currency(gl_entries, currency_map, filters.get('company'))
@@ -222,7 +222,7 @@ def get_gl_entries(filters, accounting_dimensions):
 def get_conditions(filters):
 	conditions = []
 
-	if filters.get("account") and not filters.get("include_dimensions"):
+	if filters.get("account"):
 		filters.account = get_accounts_with_children(filters.account)
 		conditions.append("account in %(account)s")
 
