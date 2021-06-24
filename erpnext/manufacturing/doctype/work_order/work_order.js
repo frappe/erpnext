@@ -704,6 +704,7 @@ erpnext.work_order = {
 	stop_work_order: function(frm, status) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
+			freeze: true,
 			args: {
 				work_order: frm.doc.name,
 				status: status
