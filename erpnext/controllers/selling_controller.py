@@ -58,6 +58,9 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 
+	def before_update_after_submit(self):
+		self.calculate_contribution()
+
 	def set_missing_values(self, for_validate=False):
 
 		super(SellingController, self).set_missing_values(for_validate)

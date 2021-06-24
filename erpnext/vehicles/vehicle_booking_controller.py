@@ -59,6 +59,9 @@ class VehicleBookingController(AccountsController):
 
 		self.clean_remarks()
 
+	def before_update_after_submit(self):
+		self.calculate_contribution()
+
 	def onload(self):
 		super(VehicleBookingController, self).onload()
 
@@ -184,6 +187,9 @@ class VehicleBookingController(AccountsController):
 		self.set_grand_total_in_words()
 
 	def calculate_contribution(self):
+		if not self.meta.get_field("sales_team"):
+			return
+
 		grand_total = self.get('grand_total') or self.get('invoice_total')
 		total = 0.0
 		sales_team = self.get("sales_team", [])
