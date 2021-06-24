@@ -14,7 +14,7 @@ from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_e
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from frappe.model.document import Document
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
-from erpnext.hr.utils import update_employee_boarding_status
+from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 
 class Project(Document):
 	def get_feed(self):

@@ -56,7 +56,7 @@ frappe.ui.form.on('Employee Onboarding', {
 		frm.set_value("activities" ,"");
 		if (frm.doc.employee_onboarding_template) {
 			frappe.call({
-				method: "erpnext.hr.utils.get_onboarding_details",
+				method: "erpnext.controllers.employee_boarding_controller.get_onboarding_details",
 				args: {
 					"parent": frm.doc.employee_onboarding_template,
 					"parenttype": "Employee Onboarding Template"

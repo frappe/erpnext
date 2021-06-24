@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from erpnext.hr.utils import EmployeeBoardingController
+from erpnext.controllers.employee_boarding_controller import EmployeeBoardingController
 
 class EmployeeSeparation(EmployeeBoardingController):
 	def validate(self):

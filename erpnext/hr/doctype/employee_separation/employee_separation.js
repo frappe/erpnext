@@ -29,7 +29,7 @@ frappe.ui.form.on('Employee Separation', {
 		frm.set_value("activities" ,"");
 		if (frm.doc.employee_separation_template) {
 			frappe.call({
-				method: "erpnext.hr.utils.get_onboarding_details",
+				method: "erpnext.controllers.employee_boarding_controller.get_onboarding_details",
 				args: {
 					"parent": frm.doc.employee_separation_template,
 					"parenttype": "Employee Separation Template"
