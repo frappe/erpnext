@@ -53,7 +53,6 @@
   "next_depreciation_date",
   "section_break_14",
   "schedules",
-  "to_date",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -481,12 +480,6 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
-  },
-  {
-   "fieldname": "to_date",
-   "fieldtype": "Date",
-   "hidden": 1,
-   "label": "To Date"
   }
  ],
  "idx": 72,
@@ -509,7 +502,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-06-19 13:56:58.450182",
+ "modified": "2021-06-24 14:58:51.097908",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
