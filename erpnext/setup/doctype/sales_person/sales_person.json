@@ -16,6 +16,7 @@
   "enabled",
   "cb0",
   "employee",
+  "employee_name",
   "department",
   "lft",
   "rgt",
@@ -41,7 +42,6 @@
    "unique": 1
   },
   {
-   "description": "Select company name first.",
    "fieldname": "parent_sales_person",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -139,12 +139,20 @@
    "oldfieldname": "target_details",
    "oldfieldtype": "Table",
    "options": "Target Detail"
+  },
+  {
+   "depends_on": "eval:doc.employee && doc.employee_name != doc.employee",
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
   }
  ],
  "icon": "icon-user",
  "idx": 1,
  "is_tree": 1,
- "modified": "2021-01-07 18:18:05.325687",
+ "modified": "2021-06-23 14:54:34.506999",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
