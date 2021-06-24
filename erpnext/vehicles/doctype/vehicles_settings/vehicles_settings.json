@@ -131,7 +131,7 @@
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-06-21 14:35:17.653026",
+ "modified": "2021-06-23 14:16:39.903917",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
@@ -148,7 +148,7 @@
   },
   {
    "read": 1,
-   "role": "Sales Admin"
+   "role": "Sales Manager"
   }
  ],
  "restrict_to_domain": "Vehicles",
