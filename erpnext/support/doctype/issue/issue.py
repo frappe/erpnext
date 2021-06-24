@@ -24,7 +24,7 @@ class Issue(Document):
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
 
-		self.set_lead_contact(self.raised_by)	
+		self.set_lead_contact(self.raised_by)
 
 	def on_update(self):
 		# Add a communication in the issue timeline
@@ -219,10 +219,11 @@ def get_time_in_timedelta(time):
 	return timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
 
 def set_first_response_time(communication, method):
-	issue = get_parent_doc(communication)
-	if not issue.get("first_response_time") and check_first_response(issue):
-		first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
-		issue.db_set("first_response_time", first_response_time)
+	if communication.get('reference_doctype') == "Issue":
+		issue = get_parent_doc(communication)
+		if not issue.get("first_response_time") and check_first_response(issue):
+			first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
+			issue.db_set("first_response_time", first_response_time)
 
 def check_first_response(issue):
 	first_response = frappe.get_all('Communication', filters = {'reference_name': issue.name})
