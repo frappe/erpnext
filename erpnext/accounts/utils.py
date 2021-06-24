@@ -473,7 +473,7 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
 		"exchange_rate": d.exchange_rate if not d.exchange_gain_loss else payment_entry.get_exchange_rate(),
-		"exchange_gain_loss": d.exchange_gain_loss #only populated from invoice in case of advance allocation
+		"exchange_gain_loss": d.exchange_gain_loss # only populated from invoice in case of advance allocation
 	}
 
 	if d.voucher_detail_no:

@@ -971,7 +971,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pay.insert()
 		pay.submit()
 
-		pi =  make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
+		pi = make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
 			conversion_rate=75, rate=500, do_not_save=1, qty=1)
 		pi.cost_center = "_Test Cost Center - _TC"
 		pi.advances = []
@@ -1001,7 +1001,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][1], gle.debit)
 			self.assertEqual(expected_gle[i][2], gle.credit)
 
-		pi_2 =  make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
+		pi_2 = make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
 			conversion_rate=73, rate=500, do_not_save=1, qty=1)
 		pi_2.cost_center = "_Test Cost Center - _TC"
 		pi_2.advances = []
