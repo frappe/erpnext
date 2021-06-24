@@ -328,7 +328,8 @@ def validate_serial_no(sle, item_det):
 	elif serial_nos:
 		# SLE is being cancelled and has serial nos
 		for serial_no in serial_nos:
-			check_serial_no_validity_on_cancel(serial_no, sle)
+			if sle.actual_qty < 0:
+				check_serial_no_validity_on_cancel(serial_no, sle)
 
 def check_serial_no_validity_on_cancel(serial_no, sle):
 	sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse", "company", "status"], as_dict=1)
