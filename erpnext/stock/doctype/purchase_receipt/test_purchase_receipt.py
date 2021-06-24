@@ -1011,6 +1011,47 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(pr.status, "To Bill")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
+	def test_service_item_purchase_with_perpetual_inventory(self):
+		company = '_Test Company with perpetual inventory'
+		service_item = '_Test Non Stock Item'
+
+		before_test_value = frappe.db.get_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items')
+		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', 1)
+		srbnb_account = 'Stock Received But Not Billed - TCP1'
+		frappe.db.set_value('Company', company, 'service_received_but_not_billed', srbnb_account)
+
+		pr = make_purchase_receipt(
+			company=company, item=service_item,
+			warehouse='Finished Goods - TCP1', do_not_save=1
+		)
+		item_row_with_diff_rate = frappe.copy_doc(pr.items[0])
+		item_row_with_diff_rate.rate = 100
+		pr.append('items', item_row_with_diff_rate)
+
+		pr.save()
+		pr.submit()
+
+		item_one_gl_entry = frappe.db.get_all("GL Entry", {
+			'voucher_type': pr.doctype,
+			'voucher_no': pr.name,
+			'account': srbnb_account,
+			'voucher_detail_no': pr.items[0].name
+		}, pluck="name")
+
+		item_two_gl_entry = frappe.db.get_all("GL Entry", {
+			'voucher_type': pr.doctype,
+			'voucher_no': pr.name,
+			'account': srbnb_account,
+			'voucher_detail_no': pr.items[1].name
+		}, pluck="name")
+		
+		# check if the entries are not merged into one
+		# seperate entries should be made since voucher_detail_no is different
+		self.assertEqual(len(item_one_gl_entry), 1)
+		self.assertEqual(len(item_two_gl_entry), 1)
+
+		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', before_test_value)
+
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference
 		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
