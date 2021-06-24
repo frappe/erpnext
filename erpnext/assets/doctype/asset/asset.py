@@ -196,7 +196,7 @@ class Asset(AccountsController):
 
 			if has_pro_rata:
 				number_of_pending_depreciations += 1
-			
+
 			skip_row = False
 			for n in range(start, number_of_pending_depreciations):
 				# If depreciation is already completed (for double declining balance)
