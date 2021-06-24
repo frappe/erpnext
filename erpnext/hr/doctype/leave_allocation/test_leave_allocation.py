@@ -198,16 +198,16 @@ class TestLeaveAllocation(unittest.TestCase):
 			"doctype": 'Leave Application',
 			"employee": employee.name,
 			"leave_type": "_Test Leave Type",
-			"from_date": nowdate(),
-			"to_date": add_days(nowdate(), 2),
+			"from_date": add_months(nowdate(), 2),
+			"to_date": add_months(add_days(nowdate(), 10), 2),
 			"company": erpnext.get_default_company() or "_Test Company",
 			"docstatus": 1,
 			"status": "Approved",
 			"leave_approver": 'test@example.com'
 		})
 		leave_application.submit()
-		leave_allocation.new_leaves_allocated = 1
-		leave_allocation.total_leaves_allocated = 1
+		leave_allocation.new_leaves_allocated = 8
+		leave_allocation.total_leaves_allocated = 8
 		self.assertRaises(frappe.ValidationError, leave_allocation.submit)
 
 def create_leave_allocation(**args):
