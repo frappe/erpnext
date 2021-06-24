@@ -1397,6 +1397,8 @@ class AccountsController(TransactionBase):
 				if d.payment_term:
 					term = frappe.get_cached_doc("Payment Term", d.payment_term)
 					d.due_date = get_due_date(term, posting_date, bill_date, delivery_date=self.get('delivery_date'))
+					if getdate(d.due_date) < getdate(posting_date):
+						d.due_date = posting_date
 				elif getdate(d.due_date) < getdate(posting_date):
 					d.due_date = posting_date
 
