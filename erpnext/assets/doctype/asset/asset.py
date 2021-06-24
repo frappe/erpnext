@@ -224,6 +224,7 @@ class Asset(AccountsController):
 				# For last row
 				elif has_pro_rata and n == cint(number_of_pending_depreciations) - 1:
 					if not self.flags.increase_in_asset_life:
+						# In case of increase_in_asset_life, the self.to_date is already set on asset_repair submission
 						self.to_date = add_months(self.available_for_use_date,
 							n * cint(d.frequency_of_depreciation))
 
