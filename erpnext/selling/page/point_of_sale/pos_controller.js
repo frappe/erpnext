@@ -281,8 +281,8 @@ erpnext.PointOfSale.Controller = class {
 							value,
 							item: this.item_details.current_item
 						};
-						return this.on_cart_update(args)
-					};
+						return this.on_cart_update(args);
+					}
 
 					return Promise.resolve();
 				},
