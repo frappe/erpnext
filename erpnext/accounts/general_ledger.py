@@ -101,7 +101,7 @@ def merge_similar_entries(gl_map, precision=None):
 
 def check_if_in_list(gle, gl_map, dimensions=None):
 	account_head_fieldnames = ['party_type', 'party', 'against_voucher', 'against_voucher_type',
-		'cost_center', 'project']
+		'cost_center', 'project', 'voucher_detail_no']
 
 	if dimensions:
 		account_head_fieldnames = account_head_fieldnames + dimensions
