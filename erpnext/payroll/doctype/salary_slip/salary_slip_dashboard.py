@@ -6,7 +6,7 @@ def get_data():
 		'fieldname': 'salary_slip',
 		'transactions': [
 			{
-				'items': ['Overtime Slip']
+				'items': [_('Overtime Slip')]
 			}
 		]
 	}

@@ -106,7 +106,8 @@ def create_attendance_records_for_overtime(employee, overtime_type):
 		attendance.status = 'Present'
 		attendance.attendance_date = add_days(today(), -(x))
 		attendance.overtime_type = overtime_type
-		attendance.overtime_duration = 2 * 3600 #for convertion to duration
+		#for convertion to duration
+		attendance.overtime_duration = 2 * 3600
 
 		attendance.save()
 		attendance.submit()

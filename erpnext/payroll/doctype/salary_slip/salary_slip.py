@@ -535,8 +535,7 @@ class SalarySlip(TransactionBase):
 	def get_overtime_slips(self):
 		return frappe.get_all("Overtime Slip", filters = {
 			'employee': self.employee,
-			'posting_date': (">=", self.start_date),
-			'posting_date': ("<=", self.end_date),
+			'posting_date': ("between", [self.start_date, self.end_date]),
 			'salary_slip': '',
 			'docstatus': 1
 		}, fields = ["name", "from_date", 'to_date'])
@@ -572,6 +571,7 @@ class SalarySlip(TransactionBase):
 					if "applicable_amount" not in overtime_types_details[detail.overtime_type].keys():
 						component_amount = sum([data.default_amount for data in self.earnings if data.salary_component in \
 						overtime_types_details[detail.overtime_type]["components"] and not data.get('additional_salary', None)])
+
 						overtime_types_details[detail.overtime_type]["applicable_daily_amount"] = component_amount/self.total_working_days
 
 				standard_working_hours = detail.standard_working_time/3600

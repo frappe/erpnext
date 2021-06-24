@@ -6,10 +6,10 @@ def get_data():
 		'fieldname': 'overtime_type',
 		'transactions': [
 			{
-				'items': ['Attendance', 'Timesheet']
+				'items': [_('Attendance'), _('Timesheet')]
 			},
 			{
-				'items': ['Overtime Slip']
+				'items': [_('Overtime Slip')]
 			}
 		]
 	}

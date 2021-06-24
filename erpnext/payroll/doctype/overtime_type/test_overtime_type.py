@@ -21,8 +21,8 @@ def create_overtime_type(**args):
 		overtime_type.employee = args.employee
 
 	overtime_type.standard_multiplier = 1.25
-	overtime_type.applicable_for_weekend =  args.applicable_for_weekend or 0
-	overtime_type.applicable_for_public_holiday =  args.applicable_for_public_holiday or 0
+	overtime_type.applicable_for_weekend = args.applicable_for_weekend or 0
+	overtime_type.applicable_for_public_holiday = args.applicable_for_public_holiday or 0
 
 	if args.applicable_for_weekend:
 		overtime_type.weekend_multiplier = 1.5

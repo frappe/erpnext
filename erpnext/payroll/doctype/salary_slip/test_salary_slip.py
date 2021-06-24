@@ -501,12 +501,9 @@ class TestSalarySlip(unittest.TestCase):
 		daily_wages = applicable_amount/ salary_slip.total_working_days
 		hourly_wages = daily_wages/ frappe.db.get_single_value("Hr Settings", "standard_working_hours")
 		overtime_amount = hourly_wages * 4 * 1.25
-		#since multiplier is defined as 1.25 and
-
-		self.assertEquals(flt(overtime_amount, 2), flt(overtime_component_details.amount, 2) )
-
-
+		#since multiplier is defined as 1.25
 		# formula = sum(applicable_component)/(working_days)/ daily_standard_working_time * overtime hours * multiplier
+		self.assertEquals(flt(overtime_amount, 2), flt(overtime_component_details.amount, 2))
 
 	def get_salary_component_for_overtime(self):
 		component = [{
@@ -541,12 +538,8 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 		salary_structure = payroll_frequency + " Salary Structure Test for Salary Slip"
 
 
-	employee = frappe.db.get_value("Employee",
-					{
-						"user_id": user
-					},
-					["name", "company", "employee_name"],
-					as_dict=True)
+	employee = frappe.db.get_value("Employee", {"user_id": user},
+		["name", "company", "employee_name"], as_dict=True)
 
 	salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee=employee.name, company=employee.company)
 	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})

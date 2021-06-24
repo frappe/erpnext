@@ -70,7 +70,7 @@ class Timesheet(Document):
 			if data.is_overtime:
 				if frappe.db.get_single_value("Payroll Settings", "overtime_based_on") == "Timesheet":
 					if not self.employee:
-						frappe.throw("Select Employee, if applicable for overtime")
+						frappe.throw(_("Select Employee, if applicable for overtime"))
 
 					if not data.overtime_type:
 						frappe.throw(_("Define Overtime Type for Employee {0}").format(self.employee))
