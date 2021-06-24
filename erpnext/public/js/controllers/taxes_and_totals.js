@@ -277,7 +277,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				// Use combination of name and item code in case same item is added multiple times
 				item_codes.push([item.item_code, item.name]);
 				item_rates[item.name] = item.net_rate;
-				item_tax_templates[item.name] = item.item_tax_template
+				item_tax_templates[item.name] = item.item_tax_template;
 			}
 		});
 
