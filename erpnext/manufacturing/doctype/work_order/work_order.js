@@ -76,9 +76,9 @@ frappe.ui.form.on("Work Order", {
 		frm.set_query("production_item", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query",
-				filters:[
-					['is_stock_item', '=',1]
-				]
+				filters: {
+					"is_stock_item": 1,
+				}
 			};
 		});
 
@@ -704,6 +704,8 @@ erpnext.work_order = {
 	stop_work_order: function(frm, status) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
+			freeze: true,
+			freeze_message: __("Updating Work Order status"),
 			args: {
 				work_order: frm.doc.name,
 				status: status

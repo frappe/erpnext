@@ -157,7 +157,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
+			.format(', '.join(frappe.db.escape(i, percent=False) for i in items))
 
 	conditions = get_conditions(filters)
 
@@ -165,7 +165,7 @@ def get_stock_ledger_entries(filters, items):
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
-			sle.item_code as name, sle.voucher_no, sle.stock_value
+			sle.item_code as name, sle.voucher_no, sle.stock_value, sle.batch_no
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
@@ -193,7 +193,7 @@ def get_item_warehouse_map(filters, sle):
 
 		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
 
-		if d.voucher_type == "Stock Reconciliation":
+		if d.voucher_type == "Stock Reconciliation" and not d.batch_no:
 			qty_diff = flt(d.qty_after_transaction) - flt(qty_dict.bal_qty)
 		else:
 			qty_diff = flt(d.actual_qty)
@@ -253,7 +253,7 @@ def get_items(filters):
 def get_item_details(items, sle, filters):
 	item_details = {}
 	if not items:
-		items = list(set([d.item_code for d in sle]))
+		items = list(set(d.item_code for d in sle))
 
 	if not items:
 		return item_details
@@ -291,7 +291,7 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
+		""".format(', '.join(frappe.db.escape(i, percent=False) for i in items)), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 

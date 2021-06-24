@@ -40,7 +40,7 @@ class ProcessStatementOfAccounts(Document):
 
 def get_report_pdf(doc, consolidated=True):
 	statement_dict = {}
-	aging = ''
+	ageing = ''
 	base_template_path = "frappe/www/printview.html"
 	template_path = "erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html"
 
@@ -56,12 +56,17 @@ def get_report_pdf(doc, consolidated=True):
 				'range4': 120,
 				'customer': entry.customer
 			})
-			col1, aging = get_ageing(ageing_filters)
-			aging[0]['ageing_based_on'] = doc.ageing_based_on
+			col1, ageing = get_ageing(ageing_filters)
+
+			if ageing:
+				ageing[0]['ageing_based_on'] = doc.ageing_based_on
 
 		tax_id = frappe.get_doc('Customer', entry.customer).tax_id
-		presentation_currency =  get_party_account_currency('Customer', entry.customer, doc.company) \
+		presentation_currency = get_party_account_currency('Customer', entry.customer, doc.company) \
 				or doc.currency or get_company_currency(doc.company)
+		if doc.letter_head:
+			from frappe.www.printview import get_letter_head
+			letter_head = get_letter_head(doc, 0)
 
 		filters= frappe._dict({
 			'from_date': doc.from_date,
@@ -87,11 +92,17 @@ def get_report_pdf(doc, consolidated=True):
 
 		if len(res) == 3:
 			continue
+
 		html = frappe.render_template(template_path, \
-			{"filters": filters, "data": res, "aging": aging[0] if doc.include_ageing else None})
+			{"filters": filters, "data": res, "ageing": ageing[0] if (doc.include_ageing and ageing) else None,
+				"letter_head": letter_head if doc.letter_head else None,
+				"terms_and_conditions": frappe.db.get_value('Terms and Conditions', doc.terms_and_conditions, 'terms')
+					if doc.terms_and_conditions else None})
+
 		html = frappe.render_template(base_template_path, {"body": html, \
 			"css": get_print_style(), "title": "Statement For " + entry.customer})
 		statement_dict[entry.customer] = html
+
 	if not bool(statement_dict):
 		return False
 	elif consolidated:

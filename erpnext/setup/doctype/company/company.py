@@ -54,7 +54,7 @@ class Company(NestedSet):
 
 	def validate_abbr(self):
 		if not self.abbr:
-			self.abbr = ''.join([c[0] for c in self.company_name.split()]).upper()
+			self.abbr = ''.join(c[0] for c in self.company_name.split()).upper()
 
 		self.abbr = self.abbr.strip()
 
@@ -335,7 +335,7 @@ class Company(NestedSet):
 		clear_defaults_cache()
 
 	def abbreviate(self):
-		self.abbr = ''.join([c[0].upper() for c in self.company_name.split()])
+		self.abbr = ''.join(c[0].upper() for c in self.company_name.split())
 
 	def on_trash(self):
 		"""
@@ -614,3 +614,12 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
 	else:
 		return None
+
+@frappe.whitelist()
+def create_transaction_deletion_request(company):
+	tdr = frappe.get_doc({
+		'doctype': 'Transaction Deletion Record',
+		'company': company
+	})
+	tdr.insert()
+	tdr.submit()

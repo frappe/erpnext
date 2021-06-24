@@ -1,4 +1,4 @@
-frappe
+# frappe   # https://github.com/frappe/frappe is installed during bench-init
 gocardless-pro~=1.22.0
 googlemaps  # used in ERPNext, but dependency is defined in Frappe
 pandas~=1.1.5
@@ -10,4 +10,3 @@ python-youtube~=0.8.0
 taxjar~=1.9.2
 tweepy~=3.10.0
 Unidecode~=1.2.0
-WooCommerce~=3.0.0

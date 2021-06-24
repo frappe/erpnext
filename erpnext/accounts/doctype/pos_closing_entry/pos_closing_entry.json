@@ -30,6 +30,8 @@
   "total_quantity",
   "column_break_16",
   "taxes",
+  "failure_description_section",
+  "error_message",
   "section_break_14",
   "amended_from"
  ],
@@ -195,7 +197,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
-   "options": "Draft\nSubmitted\nQueued\nCancelled",
+   "options": "Draft\nSubmitted\nQueued\nFailed\nCancelled",
    "print_hide": 1,
    "read_only": 1
   },
@@ -203,6 +205,21 @@
    "fieldname": "period_details_section",
    "fieldtype": "Section Break",
    "label": "Period Details"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "error_message",
+   "depends_on": "error_message",
+   "fieldname": "failure_description_section",
+   "fieldtype": "Section Break",
+   "label": "Failure Description"
+  },
+  {
+   "depends_on": "error_message",
+   "fieldname": "error_message",
+   "fieldtype": "Small Text",
+   "label": "Error",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
@@ -212,7 +229,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2021-02-01 13:47:20.722104",
+ "modified": "2021-05-05 16:59:49.723261",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
