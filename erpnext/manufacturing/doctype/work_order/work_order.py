@@ -289,10 +289,11 @@ class WorkOrder(Document):
 		self.bom_details()
 		# self.scrap_cost_calc()
 		
-	def before_save(self):
+	def after_save(self):
 		for row1 in self.required_items:
 			bo = frappe.get_doc("Item", row1.item_code)
 			row1.type = bo.bom_item_type
+		self.reload()
 		# bo = frappe.get_doc("BOM", self.bom_no)
 		# for row1 in self.required_items:
 		# 	for row2 in bo.items:
