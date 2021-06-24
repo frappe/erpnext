@@ -68,7 +68,7 @@ class TestIssue(unittest.TestCase):
 		self.assertEqual(issue.resolution_by, datetime.datetime(2019, 3, 6, 12, 0))
 
 		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 15, 0)
-
+		issue.reload()
 		issue.status = 'Closed'
 		issue.save()
 

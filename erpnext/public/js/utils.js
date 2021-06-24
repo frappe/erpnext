@@ -749,6 +749,151 @@ $(document).on('app_ready', function() {
 	}
 });
 
+// Show SLA dashboard
+$(document).on('app_ready', function() {
+	frappe.call({
+		method: 'erpnext.support.doctype.service_level_agreement.service_level_agreement.get_sla_doctypes',
+		callback: function(r) {
+			if (!r.message)
+				return;
+
+			$.each(r.message, function(_i, d) {
+				frappe.ui.form.on(d, {
+					onload: function(frm) {
+						if (!frm.doc.service_level_agreement)
+							return;
+
+						frappe.call({
+							method: 'erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters',
+							args: {
+								doctype: frm.doc.doctype,
+								name: frm.doc.service_level_agreement,
+								customer: frm.doc.customer
+							},
+							callback: function (r) {
+								if (r && r.message) {
+									frm.set_query('priority', function() {
+										return {
+											filters: {
+												'name': ['in', r.message.priority],
+											}
+										};
+									});
+									frm.set_query('service_level_agreement', function() {
+										return {
+											filters: {
+												'name': ['in', r.message.service_level_agreements],
+											}
+										};
+									});
+								}
+							}
+						});
+					},
+
+					refresh: function(frm) {
+						if (frm.doc.status !== 'Closed' && frm.doc.service_level_agreement
+							&& frm.doc.agreement_status === 'Ongoing') {
+							frappe.call({
+								'method': 'frappe.client.get',
+								args: {
+									doctype: 'Service Level Agreement',
+									name: frm.doc.service_level_agreement
+								},
+								callback: function(data) {
+									let statuses = data.message.pause_sla_on;
+									const hold_statuses = [];
+									$.each(statuses, (_i, entry) => {
+										hold_statuses.push(entry.status);
+									});
+									if (hold_statuses.includes(frm.doc.status)) {
+										frm.dashboard.clear_headline();
+										let message = {'indicator': 'orange', 'msg': __('SLA is on hold since {0}', [moment(frm.doc.on_hold_since).fromNow(true)])};
+										frm.dashboard.set_headline_alert(
+											'<div class="row">' +
+												'<div class="col-xs-12">' +
+													'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
+												'</div>' +
+											'</div>'
+										);
+									} else {
+										set_time_to_resolve_and_response(frm, data.message.apply_sla_for_resolution);
+									}
+								}
+							});
+						} else if (frm.doc.service_level_agreement) {
+							frm.dashboard.clear_headline();
+
+							let agreement_status = (frm.doc.agreement_status == 'Fulfilled') ?
+								{'indicator': 'green', 'msg': 'Service Level Agreement has been fulfilled'} :
+								{'indicator': 'red', 'msg': 'Service Level Agreement Failed'};
+
+							frm.dashboard.set_headline_alert(
+								'<div class="row">' +
+									'<div class="col-xs-12">' +
+										'<span class="indicator whitespace-nowrap '+ agreement_status.indicator +'"><span class="hidden-xs">'+ agreement_status.msg +'</span></span> ' +
+									'</div>' +
+								'</div>'
+							);
+						}
+					},
+				});
+			});
+		}
+	});
+});
+
+function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
+	frm.dashboard.clear_headline();
+
+	let time_to_respond = get_status(frm.doc.response_by_variance);
+	if (!frm.doc.first_responded_on && frm.doc.agreement_status === 'Ongoing') {
+		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
+	}
+
+	let alert = `
+		<div class="row">
+			<div class="col-xs-12 col-sm-6">
+				<span class="indicator whitespace-nowrap ${time_to_respond.indicator}">
+					<span>Time to Respond: ${time_to_respond.diff_display}</span>
+				</span>
+			</div>`;
+
+
+	if (apply_sla_for_resolution) {
+		let time_to_resolve = get_status(frm.doc.resolution_by_variance);
+		if (!frm.doc.resolution_date && frm.doc.agreement_status === 'Ongoing') {
+			time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+		}
+
+		alert += `
+			<div class="col-xs-12 col-sm-6">
+				<span class="indicator whitespace-nowrap ${time_to_resolve.indicator}">
+					<span>Time to Resolve: ${time_to_resolve.diff_display}</span>
+				</span>
+			</div>`;
+	}
+
+	alert += '</div>';
+
+	frm.dashboard.set_headline_alert(alert);
+}
+
+function get_time_left(timestamp, agreement_status) {
+	const diff = moment(timestamp).diff(moment());
+	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : 'Failed';
+	let indicator = (diff_display == 'Failed' && agreement_status != 'Fulfilled') ? 'red' : 'green';
+	return {'diff_display': diff_display, 'indicator': indicator};
+}
+
+function get_status(variance) {
+	if (variance > 0) {
+		return {'diff_display': 'Fulfilled', 'indicator': 'green'};
+	} else {
+		return {'diff_display': 'Failed', 'indicator': 'red'};
+	}
+}
+
 function attach_selector_button(inner_text, append_loction, context, grid_row) {
 	let $btn_div = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
 		.appendTo(append_loction);

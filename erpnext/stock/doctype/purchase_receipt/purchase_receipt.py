@@ -202,6 +202,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+		self.set_consumed_qty_in_po()
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql("""select t1.name
@@ -233,6 +234,7 @@ class PurchaseReceipt(BuyingController):
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 		self.delete_auto_created_batches()
+		self.set_consumed_qty_in_po()
 
 	@frappe.whitelist()
 	def get_current_stock(self):
@@ -497,7 +499,7 @@ class PurchaseReceipt(BuyingController):
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
 		for d in self.get("items"):
-			if d.purchase_invoice and d.purchase_invoice_item:
+			if d.get("purchase_invoice") and d.get("purchase_invoice_item"):
 				d.db_set('billed_amt', d.amount, update_modified=update_modified)
 			elif d.purchase_order_item:
 				updated_pr += update_billed_amount_based_on_po(d.purchase_order_item, update_modified)
@@ -579,7 +581,6 @@ def update_billing_percentage(pr_doc, update_modified=True):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc('Purchase Receipt', source_name)
@@ -599,11 +600,16 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
+		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+			target_doc.rejected_qty = 0
 		target_doc.stock_qty = flt(target_doc.qty) * flt(target_doc.conversion_factor, target_doc.precision("conversion_factor"))
 		returned_qty_map[source_doc.name] = returned_qty
 
 	def get_pending_qty(item_row):
-		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
+		qty = item_row.qty
+		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+			qty = item_row.received_qty
+		pending_qty = qty - invoiced_qty_map.get(item_row.name, 0)
 		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
 		if returned_qty:
 			if returned_qty >= pending_qty:
@@ -748,4 +754,3 @@ def get_item_account_wise_additional_cost(purchase_document):
 						account.base_amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
-

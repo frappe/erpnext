@@ -246,7 +246,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
 		self.assertEqual(len(pr.get("supplied_items")), 2)
 
-		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
+		rm_supp_cost = sum(d.amount for d in pr.get("supplied_items"))
 		self.assertEqual(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
 
 		pr.cancel()
@@ -335,6 +335,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		se2.cancel()
 		se3.cancel()
 		po.reload()
+		pr2.load_from_db()
+		pr2.cancel()
+
+		po.load_from_db()
 		po.cancel()
 
 	def test_serial_no_supplier(self):
@@ -417,10 +421,17 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(return_pr_2.items[0].qty, -3)
 
 		# Make PI against unreturned amount
+		buying_settings = frappe.get_single("Buying Settings")
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 0
+		buying_settings.save()
+
 		pi = make_purchase_invoice(pr.name)
 		pi.submit()
 
 		self.assertEqual(pi.items[0].qty, 3)
+
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 1
+		buying_settings.save()
 
 		pr.load_from_db()
 		# PR should be completed on billing all unreturned amount
@@ -763,8 +774,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1.items[0].purchase_receipt_item = pr.items[0].name
 		pr1.submit()
 
-		pi = make_purchase_invoice(pr.name)
-		self.assertEqual(pi.items[0].qty, 3)
+		pi1 = make_purchase_invoice(pr.name)
+		self.assertEqual(pi1.items[0].qty, 3)
 
 		pr1.cancel()
 		pr.reload()
