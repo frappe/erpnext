@@ -138,10 +138,7 @@ def create_asset_repair(**args):
 			"consumed_quantity": args.qty or 1
 		})
 
-	try:
-		asset_repair.save()
-	except frappe.DuplicateEntryError:
-		pass
+	asset_repair.insert(ignore_if_duplicate=True)
 	
 	if args.submit:
 		asset_repair.repair_status = "Completed"
