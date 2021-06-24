@@ -1,7 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import erpnext
 import frappe
 from frappe import _
 from frappe.desk.form import assign_to
