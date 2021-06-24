@@ -304,8 +304,13 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 		frappe.throw(_("The serial no {0} does not belong to item {1}")
 			.format(get_link_to_form("Serial No", serial_nos[0]), get_link_to_form("Item", item_code)))
 
-	serial_no_link = ','.join([get_link_to_form("Serial No", sn) for sn in serial_nos])
+	serial_no_link = ','.join(get_link_to_form("Serial No", sn) for sn in serial_nos)
 
 	message = "Serial Nos" if len(serial_nos) > 1 else "Serial No"
 	frappe.throw(_("There is no batch found against the {0}: {1}")
 		.format(message, serial_no_link))
+
+def make_batch(args):
+	if frappe.db.get_value("Item", args.item, "has_batch_no"):
+		args.doctype = "Batch"
+		frappe.get_doc(args).insert().name

@@ -369,7 +369,7 @@ def set_gl_entries_by_account(
 
 	if accounts:
 		additional_conditions += " and account in ({})"\
-			.format(", ".join([frappe.db.escape(d) for d in accounts]))
+			.format(", ".join(frappe.db.escape(d) for d in accounts))
 
 		gl_filters = {
 			"company": company,

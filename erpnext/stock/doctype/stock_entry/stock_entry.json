@@ -74,7 +74,8 @@
   "total_amount",
   "job_card",
   "amended_from",
-  "credit_note"
+  "credit_note",
+  "is_return"
  ],
  "fields": [
   {
@@ -611,6 +612,16 @@
    "fieldname": "apply_putaway_rule",
    "fieldtype": "Check",
    "label": "Apply Putaway Rule"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_return",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Return",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -618,7 +629,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-24 11:32:23.904307",
+ "modified": "2021-05-26 17:07:58.015737",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
