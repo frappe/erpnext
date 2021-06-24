@@ -71,7 +71,8 @@
    "description": "Qty of raw materials will be decided based on the qty of the Finished Goods Item",
    "fieldname": "for_qty",
    "fieldtype": "Float",
-   "label": "Qty of Finished Goods Item"
+   "label": "Qty of Finished Goods Item",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
