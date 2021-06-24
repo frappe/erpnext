@@ -81,7 +81,7 @@ class BOM(WebsiteGenerator):
 		self.validate_operations()
 		self.calculate_cost()
 		self.update_stock_qty()
-		self.update_cost(update_parent=False, from_child_bom=True, save=False)
+		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -213,7 +213,7 @@ class BOM(WebsiteGenerator):
 		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
 
 	@frappe.whitelist()
-	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
+	def update_cost(self, update_parent=True, from_child_bom=False, update_hour_rate = True, save=True):
 		if self.docstatus == 2:
 			return
 
@@ -242,7 +242,7 @@ class BOM(WebsiteGenerator):
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
-			self.calculate_cost()
+			self.calculate_cost(update_hour_rate)
 		if save:
 			self.db_update()
 
@@ -403,31 +403,46 @@ class BOM(WebsiteGenerator):
 		bom_list.reverse()
 		return bom_list
 
-	def calculate_cost(self):
+	def calculate_cost(self, update_hour_rate = False):
 		"""Calculate bom totals"""
-		self.calculate_op_cost()
+		self.calculate_op_cost(update_hour_rate)
 		self.calculate_rm_cost()
 		self.calculate_sm_cost()
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
 		self.base_total_cost = self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
 
-	def calculate_op_cost(self):
+	def calculate_op_cost(self, update_hour_rate = False):
 		"""Update workstation rate and calculates totals"""
 		self.operating_cost = 0
 		self.base_operating_cost = 0
 		for d in self.get('operations'):
 			if d.workstation:
-				if not d.hour_rate:
-					hour_rate = flt(frappe.db.get_value("Workstation", d.workstation, "hour_rate"))
-					d.hour_rate = hour_rate / flt(self.conversion_rate) if self.conversion_rate else hour_rate
-
-			if d.hour_rate and d.time_in_mins:
-				d.base_hour_rate = flt(d.hour_rate) * flt(self.conversion_rate)
-				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
-				d.base_operating_cost = flt(d.operating_cost) * flt(self.conversion_rate)
+				self.update_rate_and_time(d, update_hour_rate)
 
 			self.operating_cost += flt(d.operating_cost)
 			self.base_operating_cost += flt(d.base_operating_cost)
+
+	def update_rate_and_time(self, row, update_hour_rate = False):
+		if not row.hour_rate or update_hour_rate:
+			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
+			row.hour_rate = (hour_rate / flt(self.conversion_rate)
+				if self.conversion_rate and hour_rate else hour_rate)
+
+			if self.routing:
+				row.time_in_mins = flt(frappe.db.get_value("BOM Operation", {
+						"workstation": row.workstation,
+						"operation": row.operation,
+						"sequence_id": row.sequence_id,
+						"parent": self.routing
+				}, ["time_in_mins"]))
+
+		if row.hour_rate and row.time_in_mins:
+			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
+			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
+			row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+
+		if update_hour_rate:
+			row.db_update()
 
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
@@ -975,7 +990,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	if filters and filters.get("is_stock_item"):
 		query_filters["is_stock_item"] = 1
-		
+
 	return frappe.get_all("Item",
 		fields = fields, filters=query_filters,
 		or_filters = or_cond_filters, order_by=order_by,
