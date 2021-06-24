@@ -276,14 +276,13 @@ erpnext.PointOfSale.Controller = class {
 				form_updated: (item, field, value) => {
 					const item_row = frappe.model.get_doc(item.doctype, item.name);
 					if (item_row && item_row[field] != value) {
-
 						const args = {
 							field,
 							value,
 							item: this.item_details.current_item
-						}
+						};
 						return this.on_cart_update(args)
-					}
+					};
 
 					return Promise.resolve();
 				},
