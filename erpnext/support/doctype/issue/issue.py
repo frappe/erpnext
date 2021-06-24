@@ -221,13 +221,13 @@ def get_time_in_timedelta(time):
 def set_first_response_time(communication, method):
 	if communication.get('reference_doctype') == "Issue":
 		issue = get_parent_doc(communication)
-		if not issue.get("first_response_time") and check_first_response(issue):
+		if is_first_response(issue):
 			first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
 			issue.db_set("first_response_time", first_response_time)
 
-def check_first_response(issue):
-	first_response = frappe.get_all('Communication', filters = {'reference_name': issue.name})
-	if first_response: 
+def is_first_response(issue):
+	responses = frappe.get_all('Communication', filters = {'reference_name': issue.name})
+	if len(responses) == 1: 
 		return True
 	return False
 
