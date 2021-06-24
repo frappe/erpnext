@@ -110,6 +110,7 @@
    "label": "Allocation"
   },
   {
+    "allow_on_submit": 1,
    "bold": 1,
    "fieldname": "new_leaves_allocated",
    "fieldtype": "Float",
@@ -235,7 +236,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-14 15:28:26.335104",
+ "modified": "2021-06-03 15:28:26.335104",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Allocation",
