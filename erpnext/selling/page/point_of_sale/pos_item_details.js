@@ -57,7 +57,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	compare_with_current_item(item) {
 		// returns true if `item` is currently being edited
-		return item && item.name == this.current_item.name
+		return item && item.name == this.current_item.name;
 	}
 
 	toggle_item_details_section(item) {
@@ -76,7 +76,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.item_row = item;
 			this.currency = this.events.get_frm().doc.currency;
 
-			this.current_item = item
+			this.current_item = item;
 
 			this.render_dom(item);
 			this.render_discount_dom(item);
