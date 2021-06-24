@@ -695,11 +695,25 @@ class BOM(WebsiteGenerator):
 	def validate_scrap_items(self):
 		for item in self.scrap_items:
 			if item.item_code == self.item and not item.is_process_loss:
-				frappe.throw(_('Item:') + f' {item.item_code} ' +\
-					_('in Scrap/Loss Items table should have Is Process Loss checked.'))
+				frappe.throw(_('Scrap/Loss Item:') + f' {frappe.bold(item.item_code)} ' +\
+					_('should have') + ' ' + frappe.bold(_('Is Process Loss')) + ' ' + ('checked.'))
 			elif item.item_code != self.item and item.is_process_loss:
-				frappe.throw(_('Item:') + f' {item.item_code} ' +\
-					_('in Scrap/Loss Items table should not have Is Process Loss checked.'))
+				frappe.throw(_('Scrap/Loss Item:') + f' {frappe.bold(item.item_code)} ' +\
+					_('should not have') + ' ' + frappe.bold(_('Is Process Loss')) + ' ' + ('checked.'))
+
+			stock_uom = item.stock_uom
+			must_be_whole_number = frappe.get_value("UOM", stock_uom, "must_be_whole_number")
+			if item.is_process_loss and must_be_whole_number:
+				frappe.throw(_('Item:') + f' {frappe.bold(item.item_code)} ' +\
+					_('with Stock UOM:') + f' {frappe.bold(stock_uom)} '+\
+					_('cannot be a Scrap/Loss Item.'))
+
+			if item.is_process_loss and (item.stock_qty >= self.quantity):
+				frappe.throw(_('Scrap/Loss Item:') + f' {item.item_code} ' +\
+					_('should have') +' '+frappe.bold(_('Qty')) +\
+					' ' + _('less than finished goods') + ' ' +\
+					frappe.bold(_('Quantity.')))
+
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
