@@ -2,6 +2,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
+		this.hide_images = settings.hide_images;
 		this.allow_rate_change = settings.allow_rate_change;
 		this.allow_discount_change = settings.allow_discount_change;
 		this.current_item = {};
@@ -54,36 +55,28 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$dicount_section = this.$component.find('.discount-section');
 	}
 
-	has_item_has_changed(item) {
-		const { item_code, batch_no, uom, rate } = this.current_item;
-		const item_code_is_same = item && item_code === item.item_code;
-		const batch_is_same = item && batch_no == item.batch_no;
-		const uom_is_same = item && uom === item.uom;
-		const rate_is_same = item && rate === item.rate;
-		
-		if (!item)
-			return false;
-
-		if (item_code_is_same && batch_is_same && uom_is_same && rate_is_same)
-			return false;
-
-		return true;
+	compare_with_current_item(item) {
+		// returns true if `item` is currently being edited
+		return item && item.name == this.current_item.name;
 	}
 
 	toggle_item_details_section(item) {
-		this.item_has_changed = this.has_item_has_changed(item);
+		const current_item_changed = !this.compare_with_current_item(item);
 
-		this.events.toggle_item_selector(this.item_has_changed);
-		this.toggle_component(this.item_has_changed);
+		// if item is null or highlighted cart item is clicked twice
+		const hide_item_details = !Boolean(item) || !current_item_changed;
+		
+		this.events.toggle_item_selector(!hide_item_details);
+		this.toggle_component(!hide_item_details);
 
-		if (this.item_has_changed) {
+		if (item && current_item_changed) {
 			this.doctype = item.doctype;
 			this.item_meta = frappe.get_meta(this.doctype);
 			this.name = item.name;
 			this.item_row = item;
 			this.currency = this.events.get_frm().doc.currency;
 
-			this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom, rate: item.rate };
+			this.current_item = item;
 
 			this.render_dom(item);
 			this.render_discount_dom(item);
@@ -132,7 +125,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_name.html(item_name);
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
-		if (image) {
+		if (!this.hide_images && image) {
 			this.$item_image.html(
 				`<img 
 					onerror="cur_pos.item_details.handle_broken_image(this)"
@@ -180,7 +173,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				df: {
 					...field_meta,
 					onchange: function() {
-						me.events.form_updated(me.doctype, me.name, fieldname, this.value);
+						me.events.form_updated(me.current_item, fieldname, this.value);
 					}
 				},
 				parent: this.$form_container.find(`.${fieldname}-control`),
@@ -218,22 +211,17 @@ erpnext.PointOfSale.ItemDetails = class {
 	bind_custom_control_change_event() {
 		const me = this;
 		if (this.rate_control) {
-			if (this.allow_rate_change) {
-				this.rate_control.df.onchange = function() {
-					if (this.value || flt(this.value) === 0) {
-						me.events.set_value_in_current_cart_item('rate', this.value);
-						me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
-							const item_row = frappe.get_doc(me.doctype, me.name);
-							const doc = me.events.get_frm().doc;
-							me.$item_price.html(format_currency(item_row.rate, doc.currency));
-							me.render_discount_dom(item_row);
-						});
-						me.current_item.rate = this.value;
-					}
-				};
-			} else {
-				this.rate_control.df.read_only = 1;
-			}
+			this.rate_control.df.onchange = function() {
+				if (this.value || flt(this.value) === 0) {
+					me.events.form_updated(me.current_item, 'rate', this.value).then(() => {
+						const item_row = frappe.get_doc(me.doctype, me.name);
+						const doc = me.events.get_frm().doc;
+						me.$item_price.html(format_currency(item_row.rate, doc.currency));
+						me.render_discount_dom(item_row);
+					});
+				}
+			};
+			this.rate_control.df.read_only = !this.allow_rate_change;
 			this.rate_control.refresh();
 		}
 
@@ -246,7 +234,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.warehouse_control.df.reqd = 1;
 			this.warehouse_control.df.onchange = function() {
 				if (this.value) {
-					me.events.form_updated(me.doctype, me.name, 'warehouse', this.value).then(() => {
+					me.events.form_updated(me.current_item, 'warehouse', this.value).then(() => {
 						me.item_stock_map = me.events.get_item_stock_map();
 						const available_qty = me.item_stock_map[me.item_row.item_code][this.value];
 						if (available_qty === undefined) {
@@ -278,7 +266,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.serial_no_control.df.reqd = 1;
 			this.serial_no_control.df.onchange = async function() {
 				!me.current_item.batch_no && await me.auto_update_batch_no();
-				me.events.form_updated(me.doctype, me.name, 'serial_no', this.value);
+				me.events.form_updated(me.current_item, 'serial_no', this.value);
 			}
 			this.serial_no_control.refresh();
 		}
@@ -295,19 +283,12 @@ erpnext.PointOfSale.ItemDetails = class {
 					}
 				}
 			};
-			this.batch_no_control.df.onchange = function() {
-				me.events.set_value_in_current_cart_item('batch-no', this.value);
-				me.events.form_updated(me.doctype, me.name, 'batch_no', this.value);
-				me.current_item.batch_no = this.value;
-			}
 			this.batch_no_control.refresh();
 		}
 
 		if (this.uom_control) {
 			this.uom_control.df.onchange = function() {
-				me.events.set_value_in_current_cart_item('uom', this.value);
-				me.events.form_updated(me.doctype, me.name, 'uom', this.value);
-				me.current_item.uom = this.value;
+				me.events.form_updated(me.current_item, 'uom', this.value);
 
 				const item_row = frappe.get_doc(me.doctype, me.name);
 				me.conversion_factor_control.df.read_only = (item_row.stock_uom == this.value);
@@ -317,9 +298,9 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		frappe.model.on("POS Invoice Item", "*", (fieldname, value, item_row) => {
 			const field_control = this[`${fieldname}_control`];
-			const item_is_same = !this.has_item_has_changed(item_row);
+			const item_row_is_being_edited = this.compare_with_current_item(item_row);
 
-			if (item_is_same && field_control && field_control.get_value() !== value) {
+			if (item_row_is_being_edited && field_control && field_control.get_value() !== value) {
 				field_control.set_value(value);
 				cur_pos.update_cart_html(item_row);
 			}
@@ -337,7 +318,9 @@ erpnext.PointOfSale.ItemDetails = class {
 				fields: ["batch_no", "name"]
 			});
 			const batch_serial_map = serials_with_batch_no.reduce((acc, r) => {
-				acc[r.batch_no] || (acc[r.batch_no] = []);
+				if (!acc[r.batch_no]) {
+					acc[r.batch_no] = [];
+				}
 				acc[r.batch_no] = [...acc[r.batch_no], r.name];
 				return acc;
 			}, {});
@@ -353,12 +336,10 @@ erpnext.PointOfSale.ItemDetails = class {
 			if (serial_nos_belongs_to_other_batch) {
 				this.serial_no_control.set_value(batch_serial_nos);
 				this.qty_control.set_value(batch_serial_map[batch_no].length);
-			}
 
-			delete batch_serial_map[batch_no];
-
-			if (serial_nos_belongs_to_other_batch)
+				delete batch_serial_map[batch_no];
 				this.events.clone_new_batch_item_in_frm(batch_serial_map, this.current_item);
+			}
 		}
 	}
 
