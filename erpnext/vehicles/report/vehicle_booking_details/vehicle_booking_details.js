@@ -154,6 +154,10 @@ frappe.query_reports["Vehicle Booking Details"] = {
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
+		if (data.status == "Cancelled Booking") {
+			style['color'] = 'red';
+		}
+
 		if (data.original_item_code !== data.item_code && data.item_code !== data.variant_of) {
 			if (['item_code', 'item_name', 'previous_item_code'].includes(column.fieldname)) {
 				style['font-weight'] = 'bold';

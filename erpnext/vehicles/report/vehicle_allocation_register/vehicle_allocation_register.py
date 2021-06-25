@@ -32,7 +32,7 @@ class VehicleAllocationRegisterReport(object):
 			select m.name as vehicle_allocation, m.item_code, m.supplier, m.allocation_period, m.delivery_period,
 				m.sr_no, m.code, m.is_additional, m.booking_price, m.vehicle_color,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
-				item.variant_of, item.item_group, item.brand
+				item.variant_of, item.item_group, item.brand, m.is_expired
 			from `tabVehicle Allocation` m
 			inner join `tabItem` item on item.name = m.item_code
 			inner join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
@@ -43,6 +43,10 @@ class VehicleAllocationRegisterReport(object):
 		""".format(conditions=allocation_conditions), self.filters, as_dict=1)
 
 		self.filters.allocation_names = [d.vehicle_allocation for d in allocation_data]
+		if self.filters.allocation_names:
+			booking_where = "(m.vehicle_allocation in %(allocation_names)s or {0})".format(booking_conditions)
+		else:
+			booking_where = booking_conditions
 
 		booking_data = frappe.db.sql("""
 			select m.name as vehicle_booking_order, m.item_code, m.previous_item_code,
@@ -63,9 +67,9 @@ class VehicleAllocationRegisterReport(object):
 			left join `tabVehicle Allocation Period` dp on dp.name = m.delivery_period
 			left join `tabSales Team` sp on sp.parent = m.name and sp.parenttype = 'Vehicle Booking Order'
 			where m.docstatus = 1 and m.vehicle_allocation_required = 1
-				and (m.vehicle_allocation in %(allocation_names)s or {0})
+				and {0}
 			group by m.name
-		""".format(booking_conditions), self.filters, as_dict=1)
+		""".format(booking_where), self.filters, as_dict=1)
 
 		self.allocation_to_row = {}
 		for d in allocation_data:
@@ -106,6 +110,9 @@ class VehicleAllocationRegisterReport(object):
 			d.contact_number = d.contact_mobile or d.contact_phone
 
 			d.original_item_code = d.get('previous_item_code') or d.item_code
+
+			if d.vehicle_allocation and not d.vehicle_booking_order and d.is_expired:
+				d.status = "Expired"
 
 		self.set_payment_details()
 

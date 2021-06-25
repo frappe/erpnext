@@ -168,6 +168,10 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
+		if (data.is_expired || data.status == "Cancelled Booking") {
+			style['color'] = 'red';
+		}
+
 		if (data.original_item_code !== data.item_code && data.item_code !== data.variant_of) {
 			if (['item_code', 'code', 'previous_item_code'].includes(column.fieldname)) {
 				style['font-weight'] = 'bold';

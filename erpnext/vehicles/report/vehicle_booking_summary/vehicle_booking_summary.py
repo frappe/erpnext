@@ -26,7 +26,7 @@ class VehicleBookingSummaryReport(object):
 		]
 
 		self.count_fields = [
-			'qty_booked', 'qty_allocated', 'qty_priority',
+			'qty_booked', 'qty_cancelled', 'qty_expired', 'qty_allocated', 'qty_priority',
 			'qty_vehicle_received', 'qty_vehicle_delivered', 'qty_vehicle_in_stock',
 			'qty_invoice_received', 'qty_invoice_delivered', 'qty_invoice_in_hand',
 		]
@@ -49,7 +49,7 @@ class VehicleBookingSummaryReport(object):
 		self.allocation_data = frappe.db.sql("""
 			select m.name as vehicle_allocation, m.item_code, m.supplier, m.allocation_period, m.delivery_period,
 				m.is_additional, item.variant_of, item.brand, item.item_group,
-				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date
+				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date, m.is_expired
 			from `tabVehicle Allocation` m
 			inner join `tabItem` item on item.name = m.item_code
 			inner join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
@@ -65,7 +65,7 @@ class VehicleBookingSummaryReport(object):
 				m.invoice_total, m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
 				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
 				item.variant_of, item.brand, item.item_group,
-				m.vehicle_allocation_required, m.vehicle_allocation,
+				m.vehicle_allocation_required, m.vehicle_allocation, m.status,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
@@ -80,6 +80,9 @@ class VehicleBookingSummaryReport(object):
 			bucket = self.get_bucket(d)
 			bucket.qty_allocated += 1
 
+			if cint(d.is_expired):
+				bucket.qty_expired += 1
+
 		self.set_payment_details()
 
 		for d in self.booking_data:
@@ -92,6 +95,9 @@ class VehicleBookingSummaryReport(object):
 			bucket = self.get_bucket(d)
 
 			bucket.qty_booked += 1
+
+			if cint(d.status == "Cancelled Booking"):
+				bucket.qty_cancelled += 1
 
 			if cint(d.get('priority')):
 				bucket.qty_priority += 1
@@ -323,7 +329,9 @@ class VehicleBookingSummaryReport(object):
 			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 120},
 			{"label": _("Additional"), "fieldname": "is_additional", "fieldtype": "Check", "width": 55},
 			{"label": _("Allocated"), "fieldname": "qty_allocated", "fieldtype": "Int", "width": 75},
+			{"label": _("Expired"), "fieldname": "qty_expired", "fieldtype": "Int", "width": 65},
 			{"label": _("Booked"), "fieldname": "qty_booked", "fieldtype": "Int", "width": 65},
+			{"label": _("Cancelled"), "fieldname": "qty_cancelled", "fieldtype": "Int", "width": 77},
 			{"label": _("Priority"), "fieldname": "qty_priority", "fieldtype": "Int", "width": 65},
 			{"label": _("V. Received"), "fieldname": "qty_vehicle_received", "fieldtype": "Int", "width": 85},
 			{"label": _("V. Delivered"), "fieldname": "qty_vehicle_delivered", "fieldtype": "Int", "width": 90},
