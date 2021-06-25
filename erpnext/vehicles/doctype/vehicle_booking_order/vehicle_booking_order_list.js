@@ -11,6 +11,8 @@ frappe.listview_settings['Vehicle Booking Order'] = {
 			return [__(doc.status), "orange", `status,=,${doc.status}`];
 		} else if(["Payment Overdue", "Delivery Overdue"].includes(doc.status)) {
 			return [__(doc.status), "red", `status,=,${doc.status}`];
+		} else if(doc.status === "Cancelled Booking") {
+			return [__(doc.status), "darkgrey", `status,=,${doc.status}`];
 		}
 	},
 	onload: function(listview) {

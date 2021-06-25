@@ -126,7 +126,8 @@ class VehicleTransactionController(StockController):
 	def validate_vehicle_booking_order(self):
 		if self.vehicle_booking_order:
 			vbo = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order,
-				['docstatus', 'customer', 'financer', 'supplier', 'item_code', 'vehicle', 'vehicle_delivered_date'], as_dict=1)
+				['docstatus', 'status', 'customer', 'financer', 'supplier', 'item_code', 'vehicle', 'vehicle_delivered_date'],
+				as_dict=1)
 
 			if not vbo:
 				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
@@ -177,6 +178,10 @@ class VehicleTransactionController(StockController):
 				frappe.throw(_("Cannot make {0} against {1} because it is not submitted")
 					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
+			if vbo.status == "Cancelled Booking":
+				frappe.throw(_("Cannot make {0} against {1} because it is cancelled")
+					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+
 	def validate_project(self):
 		if self.get('project'):
 			project = frappe.db.get_value("Project", self.project,
@@ -203,6 +208,7 @@ class VehicleTransactionController(StockController):
 	def update_vehicle_booking_order(self):
 		if self.get('vehicle_booking_order'):
 			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
+			vbo.check_cancelled(throw=True)
 
 			if self.doctype in ['Vehicle Receipt', 'Vehicle Delivery']:
 				vbo.update_delivery_status(update=True)

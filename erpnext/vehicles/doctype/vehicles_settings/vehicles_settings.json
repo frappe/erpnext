@@ -5,6 +5,7 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
+  "defaults_section",
   "vehicle_price_list",
   "fni_price_list",
   "company_contact",
@@ -18,11 +19,13 @@
   "dealership_code",
   "section_break_14",
   "role_change_booking_after_payment",
-  "role_change_booking_after_vehicle_receipt",
-  "role_change_booking_after_vehicle_delivery",
-  "column_break_14",
   "role_change_payment_adjustment",
   "maximum_payment_adjustment",
+  "column_break_17",
+  "role_change_booking_after_vehicle_receipt",
+  "role_change_booking_after_vehicle_delivery",
+  "role_cancel_booking",
+  "column_break_14",
   "minimum_lead_time_days"
  ],
  "fields": [
@@ -50,7 +53,8 @@
   },
   {
    "fieldname": "section_break_11",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Allocation"
   },
   {
    "default": "Monthly",
@@ -67,7 +71,8 @@
   },
   {
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Permissions"
   },
   {
    "fieldname": "role_change_booking_after_payment",
@@ -127,11 +132,26 @@
    "fieldname": "minimum_lead_time_days",
    "fieldtype": "Int",
    "label": "Minimum Delivery Lead Time in Days"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "role_cancel_booking",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Cancel Bookings",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-06-23 14:16:39.903917",
+ "modified": "2021-06-25 13:31:07.086784",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

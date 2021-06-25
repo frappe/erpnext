@@ -71,7 +71,7 @@ class VehicleBookingPayment(Document):
 	def validate_vehicle_booking_order(self):
 		if self.vehicle_booking_order:
 			vbo = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order,
-				['docstatus', 'customer', 'company', 'financer', 'supplier'], as_dict=1)
+				['docstatus', 'status', 'customer', 'company', 'financer', 'supplier'], as_dict=1)
 
 			if not vbo:
 				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
@@ -91,7 +91,7 @@ class VehicleBookingPayment(Document):
 					frappe.throw(_("Supplier does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
-			if vbo.docstatus == 2:
+			if vbo.docstatus == 2 or vbo.status == "Cancelled Booking":
 				frappe.throw(_("Cannot make payment against {0} because it is cancelled")
 					.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
@@ -245,6 +245,7 @@ class VehicleBookingPayment(Document):
 	def update_vehicle_booking_order(self):
 		if self.vehicle_booking_order:
 			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
+			vbo.check_cancelled(throw=True)
 			vbo.update_paid_amount(update=True)
 			vbo.update_payment_status(update=True)
 			vbo.set_status(update=True)
@@ -315,7 +316,7 @@ def get_payment_entry(vehicle_booking_order, party_type):
 	if not party_type:
 		frappe.throw(_("Party Type is mandatory for Vehicle Booking Order"))
 
-	if vbo.docstatus == 2:
+	if vbo.docstatus == 2 or vbo.status == "Cancelled Booking":
 		frappe.throw(_("{0} is cancelled").format(frappe.get_desk_link("Vehicle Booking Order", vehicle_booking_order)))
 
 	if party_type == "Supplier" and vbo.vehicle_allocation_required and not vbo.vehicle_allocation:

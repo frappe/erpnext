@@ -15,13 +15,14 @@ def set_can_change_onload(vbo_doc):
 		"item": can_change_item(vbo_doc),
 		"payment_adjustment": can_change_payment_adjustment(vbo_doc),
 		"priority": can_change_priority(vbo_doc),
-		"vehicle_assign": can_assign_vehicle(),
-		"vehicle_receipt": can_receive_vehicle(),
-		"vehicle_delivery": can_deliver_vehicle(),
-		"vehicle_transfer": can_transfer_vehicle(),
-		"invoice_receipt": can_receive_invoice(),
-		"invoice_delivery": can_deliver_invoice(),
-		"allocation_assign": can_assign_allocation()
+		"cancellation": can_change_cancellation(vbo_doc),
+		"vehicle_receipt": can_receive_vehicle(vbo_doc),
+		"vehicle_delivery": can_deliver_vehicle(vbo_doc),
+		"vehicle_transfer": can_transfer_vehicle(vbo_doc),
+		"invoice_receipt": can_receive_invoice(vbo_doc),
+		"invoice_delivery": can_deliver_invoice(vbo_doc),
+		"vehicle_assign": can_assign_vehicle(vbo_doc),
+		"allocation_assign": can_assign_allocation(vbo_doc)
 	}
 	vbo_doc.set_onload("can_change", can_change)
 
@@ -56,13 +57,19 @@ def change_vehicle(vehicle_booking_order, vehicle):
 
 
 def can_change_vehicle(vbo_doc, throw=False):
-	if not can_assign_vehicle(throw=throw):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
+	if not can_assign_vehicle(vbo_doc, throw=throw):
 		return False
 
 	if not vbo_doc.vehicle_receipt and check_vehicle_received(vbo_doc, throw=throw):
 		return False
 
 	if check_vehicle_delivered(vbo_doc, throw=throw):
+		return False
+
+	if check_invoice_received(vbo_doc, throw=throw):
 		return False
 
 	return True
@@ -97,7 +104,10 @@ def change_allocation(vehicle_booking_order, vehicle_allocation):
 
 
 def can_change_allocation(vbo_doc, throw=False):
-	if not can_assign_allocation(throw=throw):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
+	if not can_assign_allocation(vbo_doc, throw=throw):
 		return False
 
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
@@ -138,6 +148,9 @@ def change_delivery_period(vehicle_booking_order, delivery_period):
 
 
 def can_change_delivery_period(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
 	if not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
@@ -173,6 +186,9 @@ def change_color(vehicle_booking_order, color_1, color_2, color_3):
 
 
 def can_change_color(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
 	if not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
@@ -218,6 +234,9 @@ def change_customer_details(vehicle_booking_order, customer_is_company=None, cus
 
 
 def can_change_customer_details(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
 
@@ -282,9 +301,14 @@ def change_item(vehicle_booking_order, item_code):
 
 
 def can_change_item(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
 	if check_vehicle_received(vbo_doc, throw=throw):
+		return False
+	if check_invoice_received(vbo_doc, throw=throw):
 		return False
 
 	return True
@@ -313,6 +337,9 @@ def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
 
 
 def can_change_payment_adjustment(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_change_payment_adjustment")
 	allowed = role_allowed and role_allowed in frappe.get_roles()
 	if not allowed:
@@ -347,6 +374,52 @@ def can_change_priority(vbo_doc, throw=False):
 		return False
 
 	return True
+
+
+@frappe.whitelist()
+def change_cancellation(vehicle_booking_order, cancelled):
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	can_change_cancellation(vbo_doc, throw=True)
+
+	cancelled = cint(cancelled)
+
+	if cancelled and vbo_doc.status == "Cancelled Booking":
+		frappe.throw(_("Booking is already cancelled"))
+	elif not cancelled and vbo_doc.status != "Cancelled Booking":
+		frappe.throw(_("Booking is not cancelled"))
+
+	vbo_doc.status = "Cancelled Booking" if cancelled else None
+	vbo_doc.update_payment_status()
+
+	save_vehicle_booking_for_update(vbo_doc)
+
+	if vbo_doc.status == "Cancelled Booking":
+		vbo_doc.add_status_comment(None)
+
+	message = "Booking Cancelled Successfully" if cancelled else "Booking Re-Opened Successfully"
+	frappe.msgprint(_(message), indicator='green', alert=True)
+
+
+def can_change_cancellation(vbo_doc, throw=False):
+	if not has_cancel_booking_permission(throw):
+		return False
+
+	if check_vehicle_received(vbo_doc, throw):
+		return False
+	if check_invoice_received(vbo_doc, throw):
+		return False
+
+	return True
+
+
+def has_cancel_booking_permission(throw=False):
+	role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_cancel_booking")
+	allowed = role_allowed and role_allowed in frappe.get_roles()
+
+	if throw and not allowed:
+		frappe.throw(_("You do not have permission to cancel bookings"))
+
+	return allowed
 
 
 def handle_delivery_period_changed(vbo_doc):
@@ -387,10 +460,30 @@ def save_vehicle_booking_for_update(vbo_doc, update_child_tables=True):
 	vbo_doc.save_version()
 
 
+def check_cancelled(vbo_doc, throw=False):
+	if vbo_doc.status == "Cancelled Booking":
+		if throw:
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because it is cancelled")
+				.format(frappe.bold(vbo_doc.name)))
+		return True
+
+	return False
+
+
 def check_vehicle_received(vbo_doc, throw=False):
 	if vbo_doc.delivery_status != 'To Receive':
 		if throw:
 			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Vehicle is already received")
+				.format(frappe.bold(vbo_doc.name)))
+		return True
+
+	return False
+
+
+def check_invoice_received(vbo_doc, throw=False):
+	if vbo_doc.invoice_status != 'To Receive':
+		if throw:
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Invoice is already received")
 				.format(frappe.bold(vbo_doc.name)))
 		return True
 
@@ -426,7 +519,6 @@ def check_allowed_after_vehicle_receipt(vbo_doc, throw=False):
 	return True
 
 
-
 def check_allowed_after_vehicle_delivery(vbo_doc, throw=False):
 	role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_change_booking_after_vehicle_delivery")
 	allowed = role_allowed and role_allowed in frappe.get_roles()
@@ -445,15 +537,24 @@ def check_allowed_after_supplier_payment(vbo_doc, throw=False):
 	return True
 
 
-def can_assign_vehicle(throw=False):
+def can_assign_vehicle(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	return frappe.has_permission("Vehicle", "create", throw=throw)
 
 
-def can_assign_allocation(throw=False):
+def can_assign_allocation(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	return frappe.has_permission("Vehicle Allocation", "write", throw=throw)
 
 
-def can_receive_vehicle(throw=False):
+def can_receive_vehicle(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if frappe.has_permission("Vehicle Receipt", "create"):
 		return True
 	else:
@@ -462,7 +563,10 @@ def can_receive_vehicle(throw=False):
 		return False
 
 
-def can_deliver_vehicle(throw=False):
+def can_deliver_vehicle(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if frappe.has_permission("Vehicle Delivery", "create"):
 		return True
 	else:
@@ -471,7 +575,10 @@ def can_deliver_vehicle(throw=False):
 		return False
 
 
-def can_transfer_vehicle(throw=False):
+def can_transfer_vehicle(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if frappe.has_permission("Vehicle Transfer Letter", "create"):
 		return True
 	else:
@@ -480,7 +587,10 @@ def can_transfer_vehicle(throw=False):
 		return False
 
 
-def can_receive_invoice(throw=False):
+def can_receive_invoice(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if frappe.has_permission("Vehicle Invoice Receipt", "create"):
 		return True
 	else:
@@ -489,7 +599,10 @@ def can_receive_invoice(throw=False):
 		return False
 
 
-def can_deliver_invoice(throw=False):
+def can_deliver_invoice(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
 	if frappe.has_permission("Vehicle Invoice Delivery", "create"):
 		return True
 	else:

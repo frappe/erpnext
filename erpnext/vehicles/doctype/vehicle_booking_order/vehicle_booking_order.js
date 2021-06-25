@@ -147,6 +147,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Vehicle Allocation" : "Select Allocation";
 			var select_delivery_period_label = this.frm.doc.delivery_period ? "Change Delivery Period" : "Select Delivery Period";
 			var change_priority_label = cint(this.frm.doc.priority) ? "Mark as Normal Priority" : "Mark as High Priority";
+			var change_cancellation_label = cint(this.frm.doc.status === "Cancelled Booking") ? "Re-Open Booking" : "Cancel Booking";
 
 			// Change Buttons
 			if (this.can_change('customer_details')) {
@@ -186,6 +187,11 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 			if (this.can_change('item')) {
 				this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.change_item(),
+					__("Change"));
+			}
+
+			if (this.can_change('cancellation')) {
+				this.frm.add_custom_button(__(change_cancellation_label), () => this.change_cancellation(),
 					__("Change"));
 			}
 
@@ -235,7 +241,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 		var payment_adjustment_color;
 		if (!me.frm.doc.payment_adjustment) {
-			payment_adjustment_color = 'grey';
+			payment_adjustment_color = 'darkgrey';
 		} else if (me.frm.doc.payment_adjustment > 0) {
 			payment_adjustment_color = 'blue';
 		} else {
@@ -297,26 +303,36 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 		// Notification Status
 		var booking_confirmation_count = me.get_notification_count('Booking Confirmation', 'SMS');
-		var booking_confirmation_color = booking_confirmation_count ? "green" : this.frm.doc.delivery_status == "To Receive" ? "yellow" : "grey";
+		var booking_confirmation_color = booking_confirmation_count ? "green"
+			: this.frm.doc.delivery_status == "To Receive" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
 
 		var balance_payment_count = me.get_notification_count('Balance Payment Request', 'SMS');
-		var balance_payment_color = balance_payment_count ? "green" : this.frm.doc.customer_outstanding ? "yellow" : "grey";
+		var balance_payment_color = balance_payment_count ? "green"
+			: this.frm.doc.customer_outstanding && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
 		var balance_payment_status = balance_payment_count ? __("{0} SMS", [balance_payment_count])
 			: __("Not Sent");
 
 		var ready_for_delivery_count = me.get_notification_count('Ready For Delivery', 'SMS');
-		var ready_for_delivery_color = ready_for_delivery_count ? "green" : this.frm.doc.delivery_status == "To Deliver" ? "yellow" : "grey";
+		var ready_for_delivery_color = ready_for_delivery_count ? "green"
+			: this.frm.doc.delivery_status == "To Deliver" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
 		var ready_for_delivery_status = ready_for_delivery_count ? __("{0} SMS", [ready_for_delivery_count])
 			: __("Not Sent");
 
 		var congratulations_count = me.get_notification_count('Congratulations', 'SMS');
-		var congratulations_color = congratulations_count ? "green" : this.frm.doc.invoice_status == "Delivered" ? "yellow" : "grey";
+		var congratulations_color = congratulations_count ? "green"
+			: this.frm.doc.invoice_status == "Delivered" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
 		var congratulations_status = congratulations_count ? __("{0} SMS", [congratulations_count])
 			: __("Not Sent");
 
-		me.add_indicator_section(__("Notification"), [
+		var booking_cancellation_count = me.get_notification_count('Booking Cancellation', 'SMS');
+		var booking_cancellation_color = booking_cancellation_count ? "green"
+			: this.frm.doc.status == "Cancelled Booking" ? "yellow" : "darkgrey";
+		var booking_cancellation_status = booking_cancellation_count ? __("{0} SMS", [booking_cancellation_count])
+			: __("Not Sent");
+
+		var indicator_items = [
 			{
 				contents: __('Booking Confirmation: {0}', [booking_confirmation_status]),
 				indicator: booking_confirmation_color
@@ -333,7 +349,16 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				contents: __('Congratulations: {0}', [congratulations_status]),
 				indicator: congratulations_color
 			},
-		]);
+		];
+
+		if (this.frm.doc.status == "Cancelled Booking") {
+			indicator_items.push({
+				contents: __('Booking Cancellation: {0}', [booking_cancellation_status]),
+				indicator: booking_cancellation_color
+			});
+		}
+
+		me.add_indicator_section(__("Notification"), indicator_items);
 	},
 
 	add_indicator_section: function (title, items) {
@@ -357,32 +382,39 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 	setup_notification: function() {
 		var me = this;
 		if(this.frm.doc.docstatus === 1) {
-			if (this.frm.doc.delivery_status == "To Receive") {
-				var booking_confirmation_count = this.get_notification_count('Booking Confirmation', 'SMS');
-				let label = __("Booking Confirmation{0}", [booking_confirmation_count ? " (Resend)" : ""]);
-				this.frm.add_custom_button(label, () => this.send_sms('Booking Confirmation'),
+			if (this.frm.doc.status == "Cancelled Booking") {
+				var booking_cancellation_count = this.get_notification_count('Booking Cancellation', 'SMS');
+				let label = __("Booking Cancellation{0}", [booking_cancellation_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Booking Cancellation'),
 					__("Notify"));
-			}
+			} else {
+				if (this.frm.doc.delivery_status == "To Receive") {
+					var booking_confirmation_count = this.get_notification_count('Booking Confirmation', 'SMS');
+					let label = __("Booking Confirmation{0}", [booking_confirmation_count ? " (Resend)" : ""]);
+					this.frm.add_custom_button(label, () => this.send_sms('Booking Confirmation'),
+						__("Notify"));
+				}
 
-			if (this.frm.doc.customer_outstanding) {
-				var balance_payment_count = this.get_notification_count('Balance Payment Request', 'SMS');
-				let label = __("Balance Payment Request{0}", [balance_payment_count ? " (Resend)" : ""]);
-				this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Request'),
-					__("Notify"));
-			}
+				if (this.frm.doc.customer_outstanding) {
+					var balance_payment_count = this.get_notification_count('Balance Payment Request', 'SMS');
+					let label = __("Balance Payment Request{0}", [balance_payment_count ? " (Resend)" : ""]);
+					this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Request'),
+						__("Notify"));
+				}
 
-			if (this.frm.doc.delivery_status == "To Deliver") {
-				var ready_for_delivery_count = this.get_notification_count('Ready For Delivery', 'SMS');
-				let label = __("Ready For Delivery{0}", [ready_for_delivery_count ? " (Resend)" : ""]);
-				this.frm.add_custom_button(label, () => this.send_sms('Ready For Delivery'),
-					__("Notify"));
-			}
+				if (this.frm.doc.delivery_status == "To Deliver") {
+					var ready_for_delivery_count = this.get_notification_count('Ready For Delivery', 'SMS');
+					let label = __("Ready For Delivery{0}", [ready_for_delivery_count ? " (Resend)" : ""]);
+					this.frm.add_custom_button(label, () => this.send_sms('Ready For Delivery'),
+						__("Notify"));
+				}
 
-			if (this.frm.doc.invoice_status == "Delivered") {
-				var congratulations_count = this.get_notification_count('Congratulations', 'SMS');
-				let label = __("Congratulations{0}", [congratulations_count ? " (Resend)" : ""]);
-				this.frm.add_custom_button(label, () => this.send_sms('Congratulations'),
-					__("Notify"));
+				if (this.frm.doc.invoice_status == "Delivered") {
+					var congratulations_count = this.get_notification_count('Congratulations', 'SMS');
+					let label = __("Congratulations{0}", [congratulations_count ? " (Resend)" : ""]);
+					this.frm.add_custom_button(label, () => this.send_sms('Congratulations'),
+						__("Notify"));
+				}
 			}
 
 			this.frm.add_custom_button(__("Custom Message"), () => this.send_sms('Custom Message'),
@@ -960,6 +992,30 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					args: {
 						vehicle_booking_order: me.frm.doc.name,
 						priority: new_priority
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
+			}
+		)
+	},
+
+	change_cancellation: function () {
+		var me = this;
+
+		var cancelled = cint(me.frm.doc.status === "Cancelled Booking") ? 0 : 1;
+		var cancellation_label = cancelled ? "Cancel Booking" : "Re-Open Booking";
+
+		frappe.confirm(__(`Are you sure you want to <b>${__(cancellation_label)}</b>`),
+			function() {
+				frappe.call({
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_cancellation",
+					args: {
+						vehicle_booking_order: me.frm.doc.name,
+						cancelled: cancelled
 					},
 					callback: function (r) {
 						if (!r.exc) {

@@ -205,10 +205,14 @@ class VehicleBookingOrder(VehicleBookingController):
 
 		self.payment_adjustment = flt(self.payment_adjustment, self.precision('payment_adjustment'))
 
-		self.customer_outstanding = flt(self.invoice_total - self.customer_advance + self.payment_adjustment,
-			self.precision('customer_outstanding'))
-		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance + self.payment_adjustment,
-			self.precision('supplier_outstanding'))
+		if self.status == "Cancelled Booking":
+			self.customer_outstanding = 0
+			self.supplier_outstanding = 0
+		else:
+			self.customer_outstanding = flt(self.invoice_total - self.customer_advance + self.payment_adjustment,
+				self.precision('customer_outstanding'))
+			self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance + self.payment_adjustment,
+				self.precision('supplier_outstanding'))
 
 		self.validate_outstanding_amount()
 
@@ -445,6 +449,9 @@ class VehicleBookingOrder(VehicleBookingController):
 		if self.docstatus == 2:
 			self.status = "Cancelled"
 
+		elif self.docstatus == 1 and self.status == "Cancelled Booking":
+			pass
+
 		elif self.docstatus == 1:
 			if self.customer_outstanding > 0 or self.supplier_outstanding > 0:
 				if self.customer_advance > self.supplier_advance:
@@ -490,6 +497,15 @@ class VehicleBookingOrder(VehicleBookingController):
 		if update:
 			self.db_set('status', self.status, update_modified=update_modified)
 
+	def check_cancelled(self, throw=False):
+		if self.status == "Cancelled Booking" or self.docstatus == 2:
+			if throw:
+				frappe.throw(_("Vehicle Booking Order {0} is cancelled").format(self.name))
+
+			return True
+
+		return False
+
 
 @frappe.whitelist()
 def get_next_document(vehicle_booking_order, doctype):
@@ -497,6 +513,8 @@ def get_next_document(vehicle_booking_order, doctype):
 
 	if doc.docstatus != 1:
 		frappe.throw(_("Vehicle Booking Order must be submitted"))
+
+	doc.check_cancelled(throw=True)
 
 	if doctype == "Vehicle Receipt":
 		return get_vehicle_receipt(doc)
@@ -515,7 +533,7 @@ def get_next_document(vehicle_booking_order, doctype):
 def get_vehicle_receipt(source):
 	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_receive_vehicle
 
-	can_receive_vehicle(throw=True)
+	can_receive_vehicle(source, throw=True)
 	check_if_doc_exists("Vehicle Receipt", source.name)
 
 	target = frappe.new_doc("Vehicle Receipt")
@@ -527,7 +545,7 @@ def get_vehicle_receipt(source):
 def get_vehicle_delivery(source):
 	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_deliver_vehicle
 
-	can_deliver_vehicle(throw=True)
+	can_deliver_vehicle(source, throw=True)
 	source.check_outstanding_payment_for_delivery()
 	check_if_doc_exists("Vehicle Delivery", source.name)
 
@@ -540,7 +558,7 @@ def get_vehicle_delivery(source):
 def get_vehicle_transfer_letter(source):
 	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_transfer_vehicle
 
-	can_transfer_vehicle(throw=True)
+	can_transfer_vehicle(source, throw=True)
 	check_if_doc_exists("Vehicle Transfer Letter", source.name)
 
 	if not has_previous_doc("Vehicle Delivery", source):
@@ -555,7 +573,7 @@ def get_vehicle_transfer_letter(source):
 def get_vehicle_invoice_receipt(source):
 	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_receive_invoice
 
-	can_receive_invoice(throw=True)
+	can_receive_invoice(source, throw=True)
 	check_if_doc_exists("Vehicle Invoice Receipt", source.name)
 
 	target = frappe.new_doc("Vehicle Invoice Receipt")
@@ -567,7 +585,7 @@ def get_vehicle_invoice_receipt(source):
 def get_vehicle_invoice_delivery(source):
 	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_deliver_invoice
 
-	can_deliver_invoice(throw=True)
+	can_deliver_invoice(source, throw=True)
 	check_if_doc_exists("Vehicle Invoice Delivery", source.name)
 
 	if not has_previous_doc("Vehicle Invoice Receipt", source):
@@ -716,6 +734,8 @@ def send_sms(receiver_list, msg, success_msg=True, type=None,
 
 	vbo_doc = frappe.get_doc("Vehicle Booking Order", reference_name)
 
+	if type != "Booking Cancellation" and vbo_doc.check_cancelled():
+		frappe.throw(_("Cannot send {0} SMS because Vehicle Booking Order is cancelled").format(type))
 	if type == "Booking Confirmation" and vbo_doc.delivery_status != "To Receive":
 		frappe.throw(_("Cannot send Booking Confirmation SMS after receiving Vehicle"))
 	if type == "Balance Payment Request" and not vbo_doc.customer_outstanding:
@@ -738,12 +758,12 @@ def update_overdue_status():
 	frappe.db.sql("""
 		update `tabVehicle Booking Order`
 		set customer_payment_status = 'Overdue'
-		where docstatus = 1 and due_date < CURDATE() and customer_outstanding > 0
+		where docstatus = 1 and due_date < CURDATE() and customer_outstanding > 0 and status != 'Cancelled Booking'
 	""")
 	frappe.db.sql("""
 		update `tabVehicle Booking Order`
 		set supplier_payment_status = 'Overdue'
-		where docstatus = 1 and due_date < CURDATE() and supplier_outstanding > 0
+		where docstatus = 1 and due_date < CURDATE() and supplier_outstanding > 0 and status != 'Cancelled Booking'
 	""")
 
 	frappe.db.sql("""
@@ -763,6 +783,7 @@ def update_overdue_status():
 			and delivery_date < CURDATE()
 			and customer_outstanding <= 0
 			and supplier_outstanding <= 0
+			and status != 'Cancelled Booking'
 	""")
 
 
