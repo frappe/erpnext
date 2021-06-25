@@ -389,6 +389,11 @@ def change_cancellation(vehicle_booking_order, cancelled):
 	elif not cancelled and vbo_doc.status != "Cancelled Booking":
 		frappe.throw(_("Booking is not cancelled"))
 
+	undeposited_amount = flt(vbo_doc.customer_advance - vbo_doc.supplier_advance, vbo_doc.precision('supplier_outstanding'))
+	if undeposited_amount > 0:
+		frappe.throw(_("Cannot cancel booking because there is an undeposited amount of {0}")
+			.format(frappe.format(undeposited_amount, df=vbo_doc.meta.get_field('supplier_outstanding'))))
+
 	vbo_doc.status = "Cancelled Booking" if cancelled else None
 	vbo_doc.update_payment_status()
 
