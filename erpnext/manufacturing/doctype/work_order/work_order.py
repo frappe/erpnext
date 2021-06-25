@@ -1,7 +1,6 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 import json
 import math
@@ -28,9 +27,6 @@ class ItemHasVariantError(frappe.ValidationError): pass
 
 from six import string_types
 
-form_grid_templates = {
-	"operations": "templates/form_grid/work_order_grid.html"
-}
 
 class WorkOrder(Document):
 	def onload(self):
@@ -393,46 +389,47 @@ class WorkOrder(Document):
 
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
-		self.set('operations', [])
 
+		def _get_operations(bom_no, qty=1):
+			return frappe.db.sql(
+					f"""select
+						operation, description, workstation, idx,
+						base_hour_rate as hour_rate, time_in_mins * {qty} as time_in_mins,
+						"Pending" as status, parent as bom, batch_size, sequence_id
+					from
+						`tabBOM Operation`
+					where
+						parent = %s order by idx
+					""", bom_no, as_dict=1)
+
+
+		self.set('operations', [])
 		if not self.bom_no:
 			return
 
-		if self.use_multi_level_bom:
-			bom_list = frappe.get_doc("BOM", self.bom_no).traverse_tree()
+		operations = []
+		if not self.use_multi_level_bom:
+			bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
+			operations.extend(_get_operations(self.bom_no, qty=1.0/bom_qty))
 		else:
-			bom_list = [self.bom_no]
+			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
+			bom_traversal = list(reversed(bom_tree.level_order_traversal()))
+			bom_traversal.append(bom_tree) # add operation on top level item last
 
-		operations = frappe.db.sql("""
-			select
-				operation, description, workstation, idx,
-				base_hour_rate as hour_rate, time_in_mins,
-				"Pending" as status, parent as bom, batch_size, sequence_id
-			from
-				`tabBOM Operation`
-			where
-				 parent in (%s) order by idx
-		"""	% ", ".join(["%s"]*len(bom_list)), tuple(bom_list), as_dict=1)
+			for d in bom_traversal:
+				if d.is_bom:
+					operations.extend(_get_operations(d.name, qty=d.exploded_qty))
+
+			for correct_index, operation in enumerate(operations, start=1):
+				operation.idx = correct_index
+
 
 		self.set('operations', operations)
-
-		if self.use_multi_level_bom and self.get('operations') and self.get('items'):
-			raw_material_operations = [d.operation for d in self.get('items')]
-			operations = [d.operation for d in self.get('operations')]
-
-			for operation in raw_material_operations:
-				if operation not in operations:
-					self.append('operations', {
-						'operation': operation
-					})
-
 		self.calculate_time()
 
 	def calculate_time(self):
-		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
-
 		for d in self.get("operations"):
-			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * (flt(self.qty) / flt(d.batch_size))
+			d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
 
 		self.calculate_operating_cost()
 
