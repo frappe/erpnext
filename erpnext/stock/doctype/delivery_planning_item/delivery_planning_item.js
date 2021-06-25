@@ -141,11 +141,9 @@ frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
 });
 
 frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
-    cur_frm.set_query("supplier", function() {
-        return {
-           "filters": {
-                "is_transporter": 1,
-            }
-        }
-    });
+    if(frm.doc.supplier_dc = 1)
+			{
+				frm.set_df_property('supplier','reqd',1)
+	            frm.refresh_field("supplier")
+			}
 });
