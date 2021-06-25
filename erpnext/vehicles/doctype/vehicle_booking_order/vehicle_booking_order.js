@@ -149,6 +149,12 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			var change_priority_label = cint(this.frm.doc.priority) ? "Mark as Normal Priority" : "Mark as High Priority";
 			var change_cancellation_label = cint(this.frm.doc.status === "Cancelled Booking") ? "Re-Open Booking" : "Cancel Booking";
 
+			// Status Buttons
+			if (this.can_change('cancellation')) {
+				this.frm.add_custom_button(__(change_cancellation_label), () => this.change_cancellation(),
+					__("Status"));
+			}
+
 			// Change Buttons
 			if (this.can_change('customer_details')) {
 				this.frm.add_custom_button(__("Update Customer Details"), () => this.change_customer_details(),
@@ -187,11 +193,6 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 			if (this.can_change('item')) {
 				this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.change_item(),
-					__("Change"));
-			}
-
-			if (this.can_change('cancellation')) {
-				this.frm.add_custom_button(__(change_cancellation_label), () => this.change_cancellation(),
 					__("Change"));
 			}
 
