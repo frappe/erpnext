@@ -404,6 +404,8 @@ def can_change_cancellation(vbo_doc, throw=False):
 	if not has_cancel_booking_permission(throw):
 		return False
 
+	if check_vehicle_assigned(vbo_doc, throw):
+		return False
 	if check_vehicle_received(vbo_doc, throw):
 		return False
 	if check_invoice_received(vbo_doc, throw):
@@ -464,6 +466,16 @@ def check_cancelled(vbo_doc, throw=False):
 	if vbo_doc.status == "Cancelled Booking":
 		if throw:
 			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because it is cancelled")
+				.format(frappe.bold(vbo_doc.name)))
+		return True
+
+	return False
+
+
+def check_vehicle_assigned(vbo_doc, throw=False):
+	if vbo_doc.vehicle:
+		if throw:
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Vehicle is already assigned")
 				.format(frappe.bold(vbo_doc.name)))
 		return True
 
