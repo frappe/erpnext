@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import getdate, cint
 from frappe.model.document import Document
 from six import string_types
 
@@ -14,10 +14,15 @@ class VehicleAllocation(Document):
 		self.validate_vehicle_item()
 		self.validate_duplicate()
 		self.validate_period()
+		self.validate_expired()
 		self.set_title()
+
+	def before_update_after_submit(self):
+		self.validate_expired()
 
 	def before_submit(self):
 		self.is_booked = 0
+		self.is_cancelled = 0
 
 	def set_title(self):
 		self.title = get_allocation_title(self)
@@ -57,6 +62,10 @@ class VehicleAllocation(Document):
 		if duplicates:
 			frappe.throw(_("Vehicle Allocation already exists for period {0}: {1}")
 				.format(self.allocation_period, get_allocation_title(self)))
+
+	def validate_expired(self):
+		if cint(self.is_expired) and cint(self.is_booked):
+			frappe.throw(_("Cannot set Vehicle Allocation as Expired if it is already booked"))
 
 
 @frappe.whitelist()

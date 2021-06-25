@@ -25,6 +25,7 @@ erpnext.vehicles.VehicleInvoiceDeliveryController = erpnext.vehicles.VehicleTran
 			return {
 				filters: {
 					docstatus: 1,
+					status: ['!=', 'Cancelled Booking'],
 					invoice_status: 'To Deliver'
 				}
 			};

@@ -129,6 +129,10 @@ class VehicleBookingOrder(VehicleBookingController):
 				frappe.throw(_("Vehicle Allocation {0} ({1}) is not submitted")
 					.format(self.allocation_title, self.vehicle_allocation))
 
+			if cint(allocation_doc.is_expired):
+				frappe.throw(_("Vehicle Allocation {0} ({1}) is expired")
+					.format(self.allocation_title, self.vehicle_allocation))
+
 			if allocation_doc.item_code != self.item_code and (not self.previous_item_code or allocation_doc.item_code != self.previous_item_code):
 				frappe.throw(_("Vehicle Allocation {0} ({1}) Vehicle Item {2} does not match Vehicle Booking Order Vehicle Item {3}")
 					.format(self.allocation_title, self.vehicle_allocation,
@@ -191,7 +195,8 @@ class VehicleBookingOrder(VehicleBookingController):
 	def update_allocation_status(self):
 		if self.vehicle_allocation:
 			is_booked = cint(self.docstatus == 1)
-			update_allocation_booked(self.vehicle_allocation, is_booked)
+			is_cancelled = cint(self.status == "Cancelled Booking")
+			update_allocation_booked(self.vehicle_allocation, is_booked, is_cancelled)
 
 	def validate_color_mandatory(self):
 		if not self.color_1:
@@ -792,6 +797,8 @@ def update_vehicle_booked(vehicle, is_booked):
 	frappe.db.set_value("Vehicle", vehicle, "is_booked", is_booked, notify=True)
 
 
-def update_allocation_booked(vehicle_allocation, is_booked):
+def update_allocation_booked(vehicle_allocation, is_booked, is_cancelled):
 	is_booked = cint(is_booked)
-	frappe.db.set_value("Vehicle Allocation", vehicle_allocation, "is_booked", is_booked, notify=True)
+	is_cancelled = cint(is_cancelled)
+	frappe.db.set_value("Vehicle Allocation", vehicle_allocation, {"is_booked": is_booked, "is_cancelled": is_cancelled},
+		notify=True)

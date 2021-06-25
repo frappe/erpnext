@@ -27,6 +27,7 @@ erpnext.vehicles.VehicleTransferLetterController = erpnext.vehicles.VehicleTrans
 			return {
 				filters: {
 					docstatus: 1,
+					status: ['!=', 'Cancelled Booking'],
 					vehicle: ['is', 'set']
 				}
 			};

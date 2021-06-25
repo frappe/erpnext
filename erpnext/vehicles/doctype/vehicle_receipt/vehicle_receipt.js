@@ -32,6 +32,7 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 			return {
 				filters: {
 					docstatus: 1,
+					status: ['!=', 'Cancelled Booking'],
 					delivery_status: 'To Receive'
 				}
 			};

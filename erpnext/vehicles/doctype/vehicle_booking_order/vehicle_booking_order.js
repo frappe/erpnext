@@ -74,8 +74,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			item_code: this.frm.doc.item_code,
 			supplier: this.frm.doc.supplier,
 			vehicle_color: this.frm.doc.color_1,
-			is_booked: 0,
-			docstatus: 1
+			is_booked: 0
 		}
 		if (!ignore_allocation_period && this.frm.doc.allocation_period) {
 			filters['allocation_period'] = this.frm.doc.allocation_period;

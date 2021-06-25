@@ -42,7 +42,8 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 		this.frm.set_query('vehicle_booking_order', function () {
 			var filters = {
 				docstatus: ['<', 2],
-				company: me.frm.doc.company
+				status: ['!=', 'Cancelled Booking'],
+				company: me.frm.doc.company,
 			}
 
 			if (me.frm.doc.party_type === "Customer") {

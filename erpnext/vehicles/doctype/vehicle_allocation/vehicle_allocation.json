@@ -29,7 +29,9 @@
   "booking_price",
   "vehicle_color",
   "status_section",
-  "is_booked"
+  "is_booked",
+  "is_cancelled",
+  "is_expired"
  ],
  "fields": [
   {
@@ -201,11 +203,31 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Is Cancelled",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_expired",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Is Expired",
+   "no_copy": 1,
+   "search_index": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-05-25 16:49:49.033701",
+ "modified": "2021-06-25 15:11:53.715543",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation",

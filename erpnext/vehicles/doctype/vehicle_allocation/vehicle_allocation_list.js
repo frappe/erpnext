@@ -1,8 +1,12 @@
 frappe.listview_settings['Vehicle Allocation'] = {
-	add_fields: ["is_booked"],
+	add_fields: ["is_booked", "is_cancelled", "is_expired"],
 	get_indicator: function (doc) {
-		if (doc.is_booked) {
+		if (doc.is_cancelled) {
+			return [__("Cancelled Booking"), "darkgrey", "is_cancelled,=,1"];
+		} else if (doc.is_booked) {
 			return [__("Booked"), "green", "is_booked,=,1"];
+		} else if (doc.is_expired) {
+			return [__("Expired"), "darkgrey", "is_expired,=,1"];
 		} else {
 			return [__("Available"), "blue", "is_booked,=,0"];
 		}

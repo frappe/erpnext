@@ -718,7 +718,8 @@ def vehicle_allocation_query(doctype, txt, searchfield, start, page_len, filters
 	return frappe.db.sql("""
 		select {fields}
 		from `tabVehicle Allocation`
-		where ({scond}) {fcond} {mcond}
+		where docstatus = 1 and is_expired = 0 and is_cancelled = 0
+			and ({scond}) {fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, title), locate(%(_txt)s, title), 99999),
 			is_additional, sr_no

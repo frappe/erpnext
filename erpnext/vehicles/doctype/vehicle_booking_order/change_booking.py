@@ -96,9 +96,10 @@ def change_allocation(vehicle_booking_order, vehicle_allocation):
 
 	save_vehicle_booking_for_update(vbo_doc)
 
-	update_allocation_booked(vehicle_allocation, 1)
+	is_cancelled = cint(vbo_doc.status == "Cancelled Booking")
+	update_allocation_booked(vehicle_allocation, 1, is_cancelled)
 	if previous_allocation:
-		update_allocation_booked(previous_allocation, 0)
+		update_allocation_booked(previous_allocation, 0, 0)
 
 	frappe.msgprint(_("Allocation Changed Successfully"), indicator='green', alert=True)
 
@@ -272,7 +273,7 @@ def change_item(vehicle_booking_order, item_code):
 	vbo_doc.item_code = item_code
 
 	if vbo_doc.vehicle_allocation and not flt(vbo_doc.supplier_advance):
-		update_allocation_booked(vbo_doc.vehicle_allocation, 0)
+		update_allocation_booked(vbo_doc.vehicle_allocation, 0, 0)
 		vbo_doc.vehicle_allocation = None
 
 	if vbo_doc.vehicle:
@@ -392,6 +393,7 @@ def change_cancellation(vehicle_booking_order, cancelled):
 	vbo_doc.update_payment_status()
 
 	save_vehicle_booking_for_update(vbo_doc)
+	vbo_doc.update_allocation_status()
 
 	if vbo_doc.status == "Cancelled Booking":
 		vbo_doc.add_status_comment(None)
