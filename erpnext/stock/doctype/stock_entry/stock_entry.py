@@ -203,11 +203,15 @@ class StockEntry(StockController):
 		if self.stock_entry_type=="Manufacture" and self.work_order:
 			doc=frappe.get_doc("Work Order",{"name":self.work_order})
 			a=[]
+			b=[]
 			for i in self.items:
 				if i.is_scrap_item==1:
 					a.append(i.qty)
-					b=sum(a)
-					doc.total_manufacture_of_scrap=b
+					b.append(i.base_amount)
+					d=sum(a)
+					c=sum(b)
+					doc.total_manufacture_of_scrap=d
+					doc.scrap_total_cost=c
 			doc.save(ignore_permissions=True)
 
 	def update_cost_in_project(self):

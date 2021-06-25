@@ -20,6 +20,7 @@
   "material_transferred_for_manufacturing",
   "produced_qty",
   "total_manufacture_of_scrap",
+  "scrap_total_cost",
   "work_order_total_cost",
   "sales_order",
   "project",
@@ -639,6 +640,11 @@
    "read_only": 1
   },
   {
+   "fieldname": "work_order_total_cost",
+   "fieldtype": "Data",
+   "label": "Work Order Total Cost"
+  },
+  {
    "allow_on_submit": 1,
    "fieldname": "total_manufacture_of_scrap",
    "fieldtype": "Float",
@@ -646,9 +652,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "work_order_total_cost",
-   "fieldtype": "Data",
-   "label": "Work Order Total Cost"
+   "fieldname": "scrap_total_cost",
+   "fieldtype": "Float",
+   "label": "Scrap Total Cost"
   }
  ],
  "icon": "fa fa-cogs",
@@ -656,7 +662,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-23 13:52:36.644889",
+ "modified": "2021-06-24 16:23:58.916846",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
