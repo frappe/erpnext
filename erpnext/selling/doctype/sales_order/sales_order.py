@@ -233,7 +233,7 @@ class SalesOrder(SellingController):
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql_list("""select t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""",
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus < 2""",
 			self.name)
 
 		if submit_rv:
