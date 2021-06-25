@@ -667,7 +667,7 @@ frappe.ui.form.on("BOM Scrap Item", {
 		const { item_code } = locals[cdt][cdn];
 		if (item_code === frm.doc.item) {
 			locals[cdt][cdn].is_process_loss = 1;
-			trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code)
+			trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code);
 		}
 	},
 });
