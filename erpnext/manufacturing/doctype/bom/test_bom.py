@@ -306,7 +306,7 @@ def create_process_loss_bom_items():
 	item_list = [
 		("_Test Item - Non Whole UOM", "Kg"),
 		("_Test Item - Whole UOM", "Unit"),
-		( "_Test PL BOM Item", "Unit")
+		("_Test PL BOM Item", "Unit")
 	]
 	return [create_process_loss_bom_item(it) for it in item_list]
 
