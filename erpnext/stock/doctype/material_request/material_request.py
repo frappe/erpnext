@@ -18,7 +18,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_it
 from erpnext.stock.doctype.item.item import get_item_defaults
 import math
 from six import string_types
-from frappe.utils import flt, today
+from frappe.utils import flt,today,cint
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -256,6 +256,14 @@ class MaterialRequest(BuyingController):
 				for itm in wo_wise_data:
 					float_precision = (frappe.db.get_default("float_precision")) or 2
 					qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
+
+					is_staging_enabled = cint(frappe.db.get_singles_value('Manufacturing Settings', 'enable_staging'))
+					if is_staging_enabled:
+						staging_warhouse = frappe.get_value("Staging Details",{'company':self.company},'staging_material_request_warehouse')
+						if staging_warhouse:
+							projected_qty = frappe.get_value('Bin', {'warehouse':staging_warhouse,'item_code':itm.item_code},'projected_qty')
+							if projected_qty:
+								qty = flt(itm.get('transferred_qty')) - flt(itm.get("consumed_qty")) - projected_qty
 					if qty > 0:
 						itm['qty'] = qty
 						itm['description'] = itm.get('description')
