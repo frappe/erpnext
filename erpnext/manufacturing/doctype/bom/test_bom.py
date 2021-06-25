@@ -123,7 +123,7 @@ class TestBOM(unittest.TestCase):
 		bom.items[0].conversion_factor = 5
 		bom.insert()
 
-		bom.update_cost()
+		bom.update_cost(update_hour_rate = False)
 
 		# test amounts in selected currency
 		self.assertEqual(bom.items[0].rate, 300)

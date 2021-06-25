@@ -19,6 +19,7 @@
   "is_finished_item",
   "is_scrap_item",
   "is_process_loss",
+  "quality_inspection",
   "subcontracted_item",
   "section_break_8",
   "description",
@@ -70,7 +71,6 @@
   "putaway_rule",
   "column_break_51",
   "reference_purchase_receipt",
-  "quality_inspection",
   "job_card_item"
  ],
  "fields": [
