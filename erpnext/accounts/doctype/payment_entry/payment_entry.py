@@ -660,8 +660,8 @@ def get_outstanding_reference_documents(args, print=1):
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
 	# Add cost center condition
-	if args.get("cost_center"):
-		condition += " and cost_center='%s'" % args.get("cost_center")
+	# if args.get("cost_center"):
+	# 	condition += " and cost_center='%s'" % args.get("cost_center")
 
 	date_fields_dict = {
 		'posting_date': ['from_posting_date', 'to_posting_date'],
