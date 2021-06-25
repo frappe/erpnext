@@ -207,7 +207,7 @@ class StockEntry(StockController):
 			for i in self.items:
 				if i.is_scrap_item==1:
 					a.append(i.qty)
-					b.append(i.base_amount)
+					b.append(i.basic_amount)
 					d=sum(a)
 					c=sum(b)
 					doc.total_manufacture_of_scrap=d
