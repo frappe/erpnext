@@ -6,10 +6,10 @@ QUnit.test("test manufacture from bom", function(assert) {
 	frappe.run_serially([
 		() => {
 			return frappe.tests.make("Stock Entry", [
-				{purpose:"Manufacture"},
-				{from_bom:1},
-				{bom_no:"BOM-_Test Item - Non Whole UOM-001"},
-				{fg_completed_qty:2}
+				{ purpose: "Manufacture" },
+				{ from_bom: 1 },
+				{ bom_no: "BOM-_Test Item - Non Whole UOM-001" },
+				{ fg_completed_qty: 2 }
 			]);
 		},
 		() => cur_frm.save(),
