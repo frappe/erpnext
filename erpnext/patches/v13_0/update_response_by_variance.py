@@ -12,7 +12,7 @@ def execute():
 		}, ["name", "response_by_variance", "timestampdiff(Second, `first_responded_on`, `response_by`) as variance"])
 
 		# issues which has response_by_variance set as -ve
-		# but didn't diff between first_responded_on & response_by is +ve i.e SLA isn't failed
+		# but diff between first_responded_on & response_by is +ve i.e SLA isn't failed
 		invalid_issues = [d for d in invalid_issues if d.get('variance') > 0]
 
 		for issue in invalid_issues:
@@ -24,7 +24,7 @@ def execute():
 		}, ["name", "resolution_by_variance", "timestampdiff(Second, `resolution_date`, `resolution_by`) as variance"])
 
 		# issues which has resolution_by_variance set as -ve
-		# but didn't diff between resolution_date & resolution_by is +ve i.e SLA isn't failed
+		# but diff between resolution_date & resolution_by is +ve i.e SLA isn't failed
 		invalid_issues = [d for d in invalid_issues if d.get('variance') > 0]
 
 		for issue in invalid_issues:
