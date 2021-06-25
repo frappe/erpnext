@@ -467,9 +467,13 @@ body.product-page {
 
 	.btn-change-address {
 		color: var(--blue-500);
-		box-shadow: none;
-		border: 1px solid var(--blue-500);
 	}
+}
+
+.btn-new-address:hover, .btn-change-address:hover {
+	box-shadow: none;
+	color: var(--blue-500) !important;
+	border: 1px solid var(--blue-500);
 }
 
 .modal .address-card {
