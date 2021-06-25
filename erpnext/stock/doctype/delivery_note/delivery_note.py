@@ -440,6 +440,12 @@ def make_sales_invoice(source_name, target_doc=None):
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
+		if not target.get('payment_terms_template'):
+			if target.get('items') and target.items[0].sales_order:
+				payment_terms_template = frappe.db.get_value('Sales Order', target.items[0].sales_order, 'payment_terms_template')
+				if payment_terms_template:
+					target.payment_terms_template = payment_terms_template
+
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
 
