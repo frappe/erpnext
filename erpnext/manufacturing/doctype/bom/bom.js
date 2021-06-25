@@ -693,7 +693,7 @@ function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
 		(data) => {
 			const row = locals[cdt][cdn];
 			row.stock_qty = (frm.doc.quantity * data.percent) / 100;
-			row.qty = row.stock_qty / (row.conversion_factor ?? 1);
+			row.qty = row.stock_qty / (row.conversion_factor || 1);
 			refresh_field("scrap_items");
 		},
 		__("Set Process Loss Item Quantity"),
