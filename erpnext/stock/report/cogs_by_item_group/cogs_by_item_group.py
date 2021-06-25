@@ -52,13 +52,13 @@ def get_data(filters):
 	assign_agg_values(leveled_dict)
 	
 	data = []
-	for _, i in leveled_dict.items():
+	for item in leveled_dict.items():
+		i = item[1]
 		if i['agg_value'] == 0:
 			continue
 		data.append(get_row(i['name'], i['agg_value'], i['is_group'], i['level']))
 		if i['self_value'] < i['agg_value'] and i['self_value'] > 0:
 			data.append(get_row(i['name'], i['self_value'], 0, i['level'] + 1))
-	# append_blank()
 	return data
 
 
@@ -76,9 +76,10 @@ def get_filtered_entries(filters):
 
 def get_stock_value_difference_list(filtered_entries):
 	voucher_nos = [fe.get('voucher_no') for fe in filtered_entries]
-	svd_list = frappe.get_list('Stock Ledger Entry',
-				 fields=['item_code','stock_value_difference'], 
-				 filters=[('voucher_no', 'in', voucher_nos)])
+	svd_list = frappe.get_list(
+		'Stock Ledger Entry', fields=['item_code','stock_value_difference'],
+		filters=[('voucher_no', 'in', voucher_nos)]
+	)
 	assign_item_groups_to_svd_list(svd_list)
 	return svd_list
 
@@ -155,22 +156,19 @@ def assign_item_groups_to_svd_list(svd_list):
 def get_item_groups_map(svd_list):
 	# for items in svd_list: [{'item_code':'item_group'}]
 	item_codes = set([i['item_code'] for i in svd_list])
-	ig_list = frappe.get_list('Item',
-				 fields=['item_code','item_group'], 
-				 filters=[('item_code', 'in', item_codes)])
+	ig_list = frappe.get_list(
+		'Item', fields=['item_code','item_group'],
+		filters=[('item_code', 'in', item_codes)]
+	)
 	return {i['item_code']:i['item_group'] for i in ig_list}
-
-
-def append_blank(data):
-	if len(data) == 0:
-		data.append(get_row("", 0, 0, 0))
 
 
 def get_item_groups_dict():
 	item_groups_list = frappe.get_all("Item Group", fields=("name", "is_group", "lft", "rgt"))
-	return { (i['lft'],i['rgt']):{'name':i['name'], 'is_group':i['is_group']}
-		for i in item_groups_list }
+	return {(i['lft'],i['rgt']):{'name':i['name'], 'is_group':i['is_group']}
+		for i in item_groups_list}
 
 
 def update_leveled_dict(leveled_dict):
-	for k in leveled_dict: leveled_dict[k].update({'self_value':0, 'agg_value':0})
+	for k in leveled_dict:
+		leveled_dict[k].update({'self_value':0, 'agg_value':0})

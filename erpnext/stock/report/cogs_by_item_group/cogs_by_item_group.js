@@ -11,24 +11,8 @@ frappe.query_reports["COGS By Item Group"] = {
       fieldtype: "Link",
       options: "Company",
       mandatory: true,
-			default: frappe.defaults.get_user_default("Company"),
+      default: frappe.defaults.get_user_default("Company"),
     },
-    // {
-      // label: __("Account"),
-      // fieldname: "account",
-      // fieldtype: "Link",
-      // options: "Account",
-      // mandatory: true,
-			// get_query() {
-				// const company = frappe.query_report.get_filter_value('company');
-				// return {
-					// "doctype": "Account",
-					// "filters": {
-						// "company": company,
-					// }
-				// }
-			// },
-    // },
     {
       label: __("From Date"),
       fieldname: "from_date",
