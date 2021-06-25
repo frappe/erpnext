@@ -438,6 +438,13 @@ def get_barcode_data(items_list):
 @frappe.whitelist()
 def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_tax_templates=None):
 	out = {}
+
+	if item_tax_templates is None:
+		item_tax_templates = {}
+	
+	if item_rates is None:
+		item_rates = {}
+
 	if isinstance(item_codes, (str,)):
 		item_codes = json.loads(item_codes)
 
@@ -453,7 +460,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 
 		out[item_code[1]] = {}
 		item = frappe.get_cached_doc("Item", item_code[0])
-		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates[item_code[1]]}
+		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates.get(item_code[1])}
 
 		if item_tax_templates:
 			args.update({"item_tax_template": item_tax_templates.get(item_code[1])})
