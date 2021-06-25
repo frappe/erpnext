@@ -318,9 +318,9 @@ class VehicleBookingOrder(VehicleBookingController):
 		self.lr_no = vehicle_receipt.lr_no
 
 		if not vehicle_receipt:
-			self.delivery_status = "To Receive"
+			self.delivery_status = "Not Received"
 		elif not vehicle_delivery:
-			self.delivery_status = "To Deliver"
+			self.delivery_status = "In Stock"
 		else:
 			self.delivery_status = "Delivered"
 
@@ -410,9 +410,9 @@ class VehicleBookingOrder(VehicleBookingController):
 				frappe.throw(_("Invoice Delivered Date cannot be before Invoice Received Date"))
 
 		if not vehicle_invoice_receipt:
-			self.invoice_status = "To Receive"
+			self.invoice_status = "Not Received"
 		elif not vehicle_invoice_delivery:
-			self.invoice_status = "To Deliver"
+			self.invoice_status = "In Hand"
 		else:
 			self.invoice_status = "Delivered"
 
@@ -479,16 +479,16 @@ class VehicleBookingOrder(VehicleBookingController):
 			elif not self.vehicle:
 				self.status = "To Assign Vehicle"
 
-			elif self.delivery_status == "To Receive":
+			elif self.delivery_status == "Not Received":
 				self.status = "To Receive Vehicle"
 
-			elif self.invoice_status == "To Receive":
+			elif self.invoice_status == "Not Received":
 				self.status = "To Receive Invoice"
 
-			elif self.delivery_status == "To Deliver":
+			elif self.delivery_status == "In Stock":
 				self.status = "To Deliver Vehicle"
 
-			elif self.invoice_status == "To Deliver":
+			elif self.invoice_status == "In Hand":
 				self.status = "To Deliver Invoice"
 
 			else:
@@ -741,12 +741,12 @@ def send_sms(receiver_list, msg, success_msg=True, type=None,
 
 	if type != "Booking Cancellation" and vbo_doc.check_cancelled():
 		frappe.throw(_("Cannot send {0} SMS because Vehicle Booking Order is cancelled").format(type))
-	if type == "Booking Confirmation" and vbo_doc.delivery_status != "To Receive":
+	if type == "Booking Confirmation" and vbo_doc.delivery_status != "Not Received":
 		frappe.throw(_("Cannot send Booking Confirmation SMS after receiving Vehicle"))
 	if type == "Balance Payment Request" and not vbo_doc.customer_outstanding:
 		frappe.throw(_("Cannot send Balance Payment Request SMS because Customer Outstanding amount is zero"))
-	if type == "Ready For Delivery" and vbo_doc.delivery_status != 'To Deliver':
-		frappe.throw(_("Cannot send Ready For Delivery SMS because delivery status is not 'To Deliver'"))
+	if type == "Ready For Delivery" and vbo_doc.delivery_status != 'In Stock':
+		frappe.throw(_("Cannot send Ready For Delivery SMS because delivery status is not 'In Stock'"))
 	if type == "Congratulations" and vbo_doc.invoice_status != 'Delivered':
 		frappe.throw(_("Cannot send Congratulations SMS because Invoice has not been delivered yet"))
 

@@ -30,7 +30,7 @@ erpnext.vehicles.VehicleDeliveryController = erpnext.vehicles.VehicleTransaction
 				filters: {
 					docstatus: 1,
 					status: ['!=', 'Cancelled Booking'],
-					delivery_status: 'To Deliver'
+					delivery_status: 'In Stock'
 				}
 			};
 		});

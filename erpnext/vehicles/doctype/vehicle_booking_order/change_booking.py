@@ -485,7 +485,7 @@ def check_vehicle_assigned(vbo_doc, throw=False):
 
 
 def check_vehicle_received(vbo_doc, throw=False):
-	if vbo_doc.delivery_status != 'To Receive':
+	if vbo_doc.delivery_status != 'Not Received':
 		if throw:
 			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Vehicle is already received")
 				.format(frappe.bold(vbo_doc.name)))
@@ -495,7 +495,7 @@ def check_vehicle_received(vbo_doc, throw=False):
 
 
 def check_invoice_received(vbo_doc, throw=False):
-	if vbo_doc.invoice_status != 'To Receive':
+	if vbo_doc.invoice_status != 'Not Received':
 		if throw:
 			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Invoice is already received")
 				.format(frappe.bold(vbo_doc.name)))

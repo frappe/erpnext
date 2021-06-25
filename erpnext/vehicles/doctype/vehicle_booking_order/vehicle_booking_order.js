@@ -116,11 +116,11 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 			// Receive/Deliver Vehicle and Invoice
 			if (this.frm.doc.vehicle) {
-				if (this.frm.doc.delivery_status === "To Receive") {
+				if (this.frm.doc.delivery_status === "Not Received") {
 					if (this.can_change('vehicle_receipt')) {
 						this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
 					}
-				} else if (this.frm.doc.delivery_status === "To Deliver") {
+				} else if (this.frm.doc.delivery_status === "In Stock") {
 					if (this.can_change('vehicle_delivery')) {
 						this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
 					}
@@ -130,11 +130,11 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					}
 				}
 
-				if (this.frm.doc.invoice_status === "To Receive") {
+				if (this.frm.doc.invoice_status === "Not Received") {
 					if (this.can_change('invoice_receipt')) {
 						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
 					}
-				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
+				} else if (this.frm.doc.invoice_status === "In Hand" && this.frm.doc.delivery_status === "Delivered") {
 					if (this.can_change('invoice_delivery')) {
 						this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
 					}
@@ -269,18 +269,18 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 		// Fulfilment Status
 		var delivery_status_color;
-		if (me.frm.doc.delivery_status == "To Receive") {
+		if (me.frm.doc.delivery_status == "Not Received") {
 			delivery_status_color = "blue";
-		} else if (me.frm.doc.delivery_status == "To Deliver") {
+		} else if (me.frm.doc.delivery_status == "In Stock") {
 			delivery_status_color = "orange";
 		} else if (me.frm.doc.delivery_status == "Delivered") {
 			delivery_status_color = "green";
 		}
 
 		var invoice_status_color;
-		if (me.frm.doc.invoice_status == "To Receive") {
+		if (me.frm.doc.invoice_status == "Not Received") {
 			invoice_status_color = "blue";
-		} else if (me.frm.doc.invoice_status == "To Deliver") {
+		} else if (me.frm.doc.invoice_status == "In Hand") {
 			invoice_status_color = "orange";
 		} else if (me.frm.doc.invoice_status == "Delivered") {
 			invoice_status_color = "green";
@@ -304,7 +304,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		// Notification Status
 		var booking_confirmation_count = me.get_notification_count('Booking Confirmation', 'SMS');
 		var booking_confirmation_color = booking_confirmation_count ? "green"
-			: this.frm.doc.delivery_status == "To Receive" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
+			: this.frm.doc.delivery_status == "Not Received" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
 
@@ -316,7 +316,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 		var ready_for_delivery_count = me.get_notification_count('Ready For Delivery', 'SMS');
 		var ready_for_delivery_color = ready_for_delivery_count ? "green"
-			: this.frm.doc.delivery_status == "To Deliver" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
+			: this.frm.doc.delivery_status == "In Stock" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "darkgrey";
 		var ready_for_delivery_status = ready_for_delivery_count ? __("{0} SMS", [ready_for_delivery_count])
 			: __("Not Sent");
 
@@ -388,7 +388,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				this.frm.add_custom_button(label, () => this.send_sms('Booking Cancellation'),
 					__("Notify"));
 			} else {
-				if (this.frm.doc.delivery_status == "To Receive") {
+				if (this.frm.doc.delivery_status == "Not Received") {
 					var booking_confirmation_count = this.get_notification_count('Booking Confirmation', 'SMS');
 					let label = __("Booking Confirmation{0}", [booking_confirmation_count ? " (Resend)" : ""]);
 					this.frm.add_custom_button(label, () => this.send_sms('Booking Confirmation'),
@@ -402,7 +402,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 						__("Notify"));
 				}
 
-				if (this.frm.doc.delivery_status == "To Deliver") {
+				if (this.frm.doc.delivery_status == "In Stock") {
 					var ready_for_delivery_count = this.get_notification_count('Ready For Delivery', 'SMS');
 					let label = __("Ready For Delivery{0}", [ready_for_delivery_count ? " (Resend)" : ""]);
 					this.frm.add_custom_button(label, () => this.send_sms('Ready For Delivery'),

@@ -26,7 +26,7 @@ erpnext.vehicles.VehicleInvoiceDeliveryController = erpnext.vehicles.VehicleTran
 				filters: {
 					docstatus: 1,
 					status: ['!=', 'Cancelled Booking'],
-					invoice_status: 'To Deliver'
+					invoice_status: 'In Hand'
 				}
 			};
 		});
