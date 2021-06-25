@@ -71,7 +71,6 @@ frappe.ui.form.on("BOM", {
 
 	refresh: function(frm) {
 		frm.toggle_enable("item", frm.doc.__islocal);
-		toggle_operations(frm);
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
@@ -655,12 +654,6 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 	erpnext.bom.calculate_rm_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
 });
-
-var toggle_operations = function(frm) {
-	frm.toggle_display("operations_section", cint(frm.doc.with_operations) == 1);
-	frm.toggle_display("transfer_material_against", cint(frm.doc.with_operations) == 1);
-	frm.toggle_reqd("transfer_material_against", cint(frm.doc.with_operations) == 1);
-};
 
 frappe.ui.form.on("BOM", "with_operations", function(frm) {
 	if(!cint(frm.doc.with_operations)) {

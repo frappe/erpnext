@@ -966,7 +966,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
 
 		# Create Purchase Order with TDS applied
-		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000)
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item')
 		po.apply_tds = 1
 		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
@@ -1002,6 +1002,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Create Purchase Invoice against Purchase Order
 		purchase_invoice = get_mapped_purchase_invoice(po.name)
 		purchase_invoice.allocate_advances_automatically = 1
+		purchase_invoice.items[0].item_code = '_Test Non Stock Item'
 		purchase_invoice.items[0].expense_account = '_Test Account Cost for Goods Sold - _TC'
 		purchase_invoice.save()
 		purchase_invoice.submit()
