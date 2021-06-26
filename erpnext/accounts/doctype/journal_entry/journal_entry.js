@@ -233,6 +233,8 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if(jvd.reference_type == "Employee Advance") {
 				party_account_field = "advance_account";
 				out.filters.push([jvd.reference_type, "status", "in", ['Unpaid', 'Unclaimed']]);
+			} else if (jvd.reference_type == "Loan") {
+				party_account_field = "loan_account";
 			}
 
 			if(party_account_field) {
@@ -252,6 +254,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 					}
 				} else if (jvd.reference_type.indexOf("Purchase")===0) {
 					party_field = "supplier";
+				} else if (jvd.reference_type == "Loan") {
+					out.filters.push([jvd.reference_type, "applicant_type", "=", jvd.party_type]);
+					party_field = "applicant";
 				} else if (['Employee Advance', 'Expense Claim'.includes(jvd.reference_type)]) {
 					party_field = "employee";
 				}

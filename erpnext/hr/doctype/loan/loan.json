@@ -264,7 +264,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:34:50.584451",
+ "modified": "2021-06-26 14:44:32.874702",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Loan",
@@ -289,8 +289,9 @@
    "role": "Employee"
   }
  ],
- "search_fields": "posting_date",
+ "search_fields": "applicant_name, posting_date, status, loan_amount",
  "sort_field": "creation",
  "sort_order": "DESC",
+ "title_field": "applicant_name",
  "track_changes": 1
 }
