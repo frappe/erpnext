@@ -202,16 +202,15 @@ def get_or_create_account(company_name, account):
 
 	existing_accounts = frappe.get_list('Account',
 		filters={
-			'account_name': account.get('account_name'),
-			'account_number': account.get('account_number', ''),
-			'company': company_name
+			'company': company_name,
+			'root_type': root_type
 		},
 		or_filters={
-			'company': company_name,
-			'root_type': root_type,
-			'is_group': 0
-		}
-	)
+			'account_name': account.get('account_name'),
+			'account_number': account.get('account_number')
+		})
+
+	print(company_name, account, existing_accounts)
 
 	if existing_accounts:
 		return frappe.get_doc('Account', existing_accounts[0].name)
