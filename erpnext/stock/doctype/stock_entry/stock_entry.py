@@ -163,10 +163,10 @@ class StockEntry(StockController):
 			doc=frappe.get_doc("Work Order",{"name":self.work_order})
 			if not doc.work_order_total_cost:
 				doc.work_order_total_cost=self.total_outgoing_value
-				doc.save(ignore_permissions=True)
 			if doc.work_order_total_cost:
 				doc.work_order_total_cost=doc.work_order_total_cost+self.total_outgoing_value
-				doc.save(ignore_permissions=True)
+			doc.save(ignore_permissions=True)
+			doc.reload()
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
