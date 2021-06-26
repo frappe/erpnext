@@ -11,7 +11,7 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
-from erpnext.accounts.utils import check_if_stock_and_account_balance_synced, get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -497,9 +497,6 @@ class StockController(AccountsController):
 		})
 		if future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
-		elif not is_reposting_pending():
-			check_if_stock_and_account_balance_synced(self.posting_date,
-				self.company, self.doctype, self.name)
 
 @frappe.whitelist()
 def make_quality_inspections(doctype, docname, items):
