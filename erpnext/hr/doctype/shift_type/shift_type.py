@@ -7,6 +7,7 @@ import itertools
 from datetime import timedelta
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, getdate, get_datetime
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
@@ -16,8 +17,13 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class ShiftType(Document):
 	def process_auto_attendance(self):
-		if not cint(self.enable_auto_attendance) or not self.process_attendance_after or not self.last_sync_of_checkin:
+		if not self.process_attendance_after:
+			frappe.msgprint(_("Cannot Process Auto Attendance because <b>'Process Attendance After'</b> is not set"))
 			return
+		if not self.last_sync_of_checkin:
+			frappe.msgprint(_("Cannot Process Auto Attendance because <b>'Last Sync of Checkin'</b> is not set"))
+			return
+
 		filters = {
 			'skip_auto_attendance':'0',
 			'attendance':('is', 'not set'),
@@ -92,7 +98,7 @@ class ShiftType(Document):
 		return assigned_employees
 
 def process_auto_attendance_for_all_shifts():
-	shift_list = frappe.get_all('Shift Type', 'name', {'enable_auto_attendance':'1'}, as_list=True)
+	shift_list = frappe.get_all('Shift Type', 'name', {'enable_auto_attendance': 1}, as_list=True)
 	for shift in shift_list:
 		doc = frappe.get_doc('Shift Type', shift[0])
 		doc.process_auto_attendance()

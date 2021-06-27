@@ -5,12 +5,18 @@ def get_data():
 	return {
 		'fieldname': 'shift',
 		'non_standard_fieldnames': {
+			'Employee': 'default_shift',
 			'Shift Request': 'shift_type',
 			'Shift Assignment': 'shift_type'
 		},
 		'transactions': [
 			{
-				'items': ['Attendance', 'Employee Checkin', 'Shift Request', 'Shift Assignment']
+				'label': _("Assignment"),
+				'items': ['Employee', 'Shift Request', 'Shift Assignment']
+			},
+			{
+				'label': _("Attendance"),
+				'items': ['Attendance', 'Employee Checkin']
 			}
 		]
 	}

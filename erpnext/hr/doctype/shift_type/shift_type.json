@@ -127,13 +127,11 @@
    "label": "Allow check-out after shift end time (in minutes)"
   },
   {
-   "depends_on": "enable_auto_attendance",
    "fieldname": "auto_attendance_settings_section",
    "fieldtype": "Section Break",
    "label": "Auto Attendance Settings"
   },
   {
-   "depends_on": "enable_auto_attendance",
    "fieldname": "grace_period_settings_auto_attendance_section",
    "fieldtype": "Section Break",
    "label": "Grace Period Settings For Auto Attendance"
@@ -158,7 +156,7 @@
    "label": "Last Sync of Checkin"
   }
  ],
- "modified": "2020-03-03 15:36:59.977214",
+ "modified": "2021-06-27 01:57:15.929129",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",
