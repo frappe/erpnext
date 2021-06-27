@@ -173,7 +173,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
@@ -248,6 +247,7 @@
   {
    "fieldname": "payment_days",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Payment Days",
    "oldfieldname": "payment_days",
    "oldfieldtype": "Float",
@@ -362,6 +362,7 @@
   {
    "fieldname": "gross_pay",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Gross Pay",
    "oldfieldname": "gross_pay",
    "oldfieldtype": "Currency",
@@ -566,7 +567,7 @@
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2021-03-16 16:39:18.537009",
+ "modified": "2021-06-27 03:59:59.435448",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",

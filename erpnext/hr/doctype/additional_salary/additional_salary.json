@@ -8,13 +8,13 @@
  "field_order": [
   "naming_series",
   "employee",
+  "employee_name",
   "salary_component",
   "amount",
   "overwrite_salary_structure_amount",
   "deduct_full_tax_on_selected_payroll_date",
   "column_break_5",
   "payroll_date",
-  "employee_name",
   "department",
   "company",
   "salary_slip",
@@ -108,6 +108,7 @@
    "fieldname": "salary_slip",
    "fieldtype": "Link",
    "label": "Salary Slip",
+   "no_copy": 1,
    "options": "Salary Slip",
    "read_only": 1
   },
@@ -129,7 +130,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-04-20 14:42:33.776719",
+ "modified": "2021-06-27 03:58:56.263346",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Additional Salary",
@@ -168,6 +169,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "employee",
+ "title_field": "employee_name",
  "track_changes": 1
 }

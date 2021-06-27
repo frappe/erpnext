@@ -23,6 +23,7 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee",
    "reqd": 1
@@ -46,6 +47,8 @@
   {
    "fieldname": "shift",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Shift",
    "options": "Shift Type",
    "read_only": 1
@@ -78,35 +81,38 @@
    "fieldname": "attendance",
    "fieldtype": "Link",
    "label": "Attendance Marked",
+   "no_copy": 1,
    "options": "Attendance",
    "read_only": 1
   },
   {
    "fieldname": "shift_start",
    "fieldtype": "Datetime",
-   "hidden": 1,
-   "label": "Shift Start"
+   "label": "Shift Start",
+   "read_only": 1
   },
   {
    "fieldname": "shift_end",
    "fieldtype": "Datetime",
-   "hidden": 1,
-   "label": "Shift End"
+   "label": "Shift End",
+   "read_only": 1
   },
   {
    "fieldname": "shift_actual_start",
    "fieldtype": "Datetime",
    "hidden": 1,
-   "label": "Shift Actual Start"
+   "label": "Shift Actual Start",
+   "read_only": 1
   },
   {
    "fieldname": "shift_actual_end",
    "fieldtype": "Datetime",
    "hidden": 1,
-   "label": "Shift Actual End"
+   "label": "Shift Actual End",
+   "read_only": 1
   }
  ],
- "modified": "2020-03-03 15:35:24.645198",
+ "modified": "2021-06-27 02:07:23.862071",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",
@@ -200,8 +206,9 @@
    "role": "Employee"
   }
  ],
- "sort_field": "modified",
- "sort_order": "ASC",
+ "search_fields": "employee_name, shift, time",
+ "sort_field": "time",
+ "sort_order": "DESC",
  "title_field": "employee_name",
  "track_changes": 1
 }

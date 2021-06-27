@@ -104,6 +104,7 @@
    "fieldname": "attendance_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Attendance Date",
    "oldfieldname": "attendance_date",
    "oldfieldtype": "Date",
@@ -145,9 +146,9 @@
    "read_only": 1
   },
   {
-   "depends_on": "working_hours",
    "fieldname": "working_hours",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Working Hours",
    "precision": "1",
    "read_only": 1
@@ -162,19 +163,21 @@
    "default": "0",
    "fieldname": "late_entry",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Late Entry"
   },
   {
    "default": "0",
    "fieldname": "early_exit",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Early Exit"
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-02-19 14:25:32.945842",
+ "modified": "2021-06-27 02:02:22.244097",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
@@ -223,7 +226,7 @@
   }
  ],
  "search_fields": "employee,employee_name,attendance_date,status",
- "sort_field": "modified",
+ "sort_field": "attendance_date",
  "sort_order": "DESC",
  "title_field": "employee_name"
 }

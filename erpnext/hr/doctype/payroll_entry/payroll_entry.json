@@ -53,6 +53,7 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Posting Date",
    "reqd": 1
   },
@@ -72,7 +73,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1,
@@ -86,7 +86,6 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Branch",
    "options": "Branch"
   },
@@ -155,12 +154,14 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Start Date",
    "reqd": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "End Date",
    "reqd": 1
   },
@@ -263,8 +264,8 @@
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2020-12-15 18:09:54.409686",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2021-06-27 03:52:30.188597",
+ "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",
  "owner": "Administrator",

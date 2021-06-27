@@ -45,6 +45,7 @@
   {
    "fieldname": "applicant_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Applicant Type",
    "options": "Employee\nMember",
    "reqd": 1
@@ -74,6 +75,7 @@
    "fieldname": "loan_type",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Loan Type",
    "options": "Loan Type",
    "reqd": 1
@@ -86,7 +88,6 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Posting Date",
    "no_copy": 1,
    "reqd": 1
@@ -103,6 +104,7 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "no_copy": 1,
    "options": "Draft\nSanctioned\nDisbursed\nRepaid/Closed",
@@ -123,6 +125,7 @@
   {
    "fieldname": "loan_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Loan Amount",
    "options": "Company:company:default_currency",
    "reqd": 1
@@ -139,11 +142,13 @@
    "depends_on": "eval:doc.status==\"Disbursed\"",
    "fieldname": "disbursement_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Disbursement Date"
   },
   {
    "fieldname": "repayment_start_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Repayment Start Date",
    "reqd": 1
   },
@@ -249,6 +254,7 @@
    "allow_on_submit": 1,
    "fieldname": "total_amount_paid",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total Amount Paid",
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -264,7 +270,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-06-26 14:44:32.874702",
+ "modified": "2021-06-27 04:07:20.561851",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Loan",
