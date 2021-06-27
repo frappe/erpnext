@@ -255,10 +255,10 @@ def calculate_first_response_time(issue, first_responded_on):
 
 			# both issue creation and first response were after working hours
 			else:
-				return 0.0
+				return 1.0		# this should ideally be zero, but it gets reset when the next response is sent if the value is zero
 			
 		else:
-			return 0.0
+			return 1.0
 
 	else:
 		# response on the next day
