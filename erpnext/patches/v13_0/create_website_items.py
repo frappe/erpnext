@@ -3,6 +3,8 @@ from erpnext.e_commerce.doctype.website_item.website_item import make_website_it
 
 def execute():
 	frappe.reload_doc("e_commerce", "doctype", "website_item")
+	frappe.reload_doc("e_commerce", "doctype", "website_item_tabbed_section")
+	frappe.reload_doc("e_commerce", "doctype", "website_offer")
 	frappe.reload_doc("stock", "doctype", "item")
 
 	item_fields = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
@@ -50,7 +52,7 @@ def execute():
 
 		# move Website Item Group & Website Specification table to Website Item
 		for doctype in ("Website Item Group", "Item Website Specification"):
-			web_item, item = website_item.name, item.item_code
+			web_item, item_code = website_item.name, item.item_code
 			frappe.db.sql(f"""
 				Update
 					`tab{doctype}`
@@ -59,5 +61,5 @@ def execute():
 					parent = '{web_item}'
 				where
 					parenttype = 'Item'
-					and parent = '{item}'
+					and parent = '{item_code}'
 				""")

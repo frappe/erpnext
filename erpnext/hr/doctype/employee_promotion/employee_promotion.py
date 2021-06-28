@@ -11,12 +11,12 @@ from erpnext.hr.utils import update_employee
 
 class EmployeePromotion(Document):
 	def validate(self):
-		if frappe.get_value("Employee", self.employee, "status") == "Left":
-			frappe.throw(_("Cannot promote Employee with status Left"))
+		if frappe.get_value("Employee", self.employee, "status") != "Active":
+			frappe.throw(_("Cannot promote Employee with status Left or Inactive"))
 
 	def before_submit(self):
 		if getdate(self.promotion_date) > getdate():
-			frappe.throw(_("Employee Promotion cannot be submitted before Promotion Date "),
+			frappe.throw(_("Employee Promotion cannot be submitted before Promotion Date"),
 				frappe.DocstatusTransitionError)
 
 	def on_submit(self):
