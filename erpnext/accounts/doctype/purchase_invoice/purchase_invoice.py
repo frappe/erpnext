@@ -517,7 +517,7 @@ class PurchaseInvoice(BuyingController):
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
-		purchase_receipt_details = self.get_purchase_receipt_details()
+		exchange_rate_map, net_rate_map = self.get_purchase_receipt_details()
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -636,31 +636,33 @@ class PurchaseInvoice(BuyingController):
 								"project": item.project or self.project
 							}, account_currency, item=item))
 
-						if purchase_receipt_details[item.item_code]["conversion_rate"] and \
-							self.conversion_rate != purchase_receipt_details[item.item_code]["conversion_rate"] and \
-							item.net_rate == purchase_receipt_details[item.item_code]["net_rate"]:
+						# check if the exchange rate has changed
+						if item.get('purchase_receipt'):
+							if exchange_rate_map[item.purchase_receipt] and \
+								self.conversion_rate != exchange_rate_map[item.purchase_receipt] and \
+								item.net_rate == net_rate_map[item.item_code]:
 
-							discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * \
-								(purchase_receipt_details[item.item_code]["conversion_rate"] - self.conversion_rate)
+								discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * \
+									(exchange_rate_map[item.purchase_receipt] - self.conversion_rate)
 
-							gl_entries.append(
-								self.get_gl_dict({
-									"account": expense_account,
-									"against": self.supplier,
-									"debit": discrepancy_caused_by_exchange_rate_difference,
-									"cost_center": item.cost_center,
-									"project": item.project or self.project
-								}, account_currency, item=item)
-							)
-							gl_entries.append(
-								self.get_gl_dict({
-									"account": self.get_company_default("exchange_gain_loss_account"),		
-									"against": self.supplier,
-									"credit": discrepancy_caused_by_exchange_rate_difference,
-									"cost_center": item.cost_center,
-									"project": item.project or self.project
-								}, account_currency, item=item)
-							)
+								gl_entries.append(
+									self.get_gl_dict({
+										"account": expense_account,
+										"against": self.supplier,
+										"debit": discrepancy_caused_by_exchange_rate_difference,
+										"cost_center": item.cost_center,
+										"project": item.project or self.project
+									}, account_currency, item=item)
+								)
+								gl_entries.append(
+									self.get_gl_dict({
+										"account": self.get_company_default("exchange_gain_loss_account"),		
+										"against": self.supplier,
+										"credit": discrepancy_caused_by_exchange_rate_difference,
+										"cost_center": item.cost_center,
+										"project": item.project or self.project
+									}, account_currency, item=item)
+								)
 
 					# If asset is bought through this document and not linked to PR
 					if self.update_stock and item.landed_cost_voucher_amount:
@@ -716,21 +718,22 @@ class PurchaseInvoice(BuyingController):
 								item.precision("item_tax_amount"))
 
 	def get_purchase_receipt_details(self):
-		purchase_receipt_details = {}
-		for item in self.items:
-			if item.purchase_receipt:
-				purchase_receipt = frappe.get_doc('Purchase Receipt', item.purchase_receipt)
-				pr_item_details = {
-					"conversion_rate" : purchase_receipt.conversion_rate
-				}
-				
-				for pr_item in purchase_receipt.items:
-					if pr_item.item_code == item.item_code:
-						pr_item_details["net_rate"] = pr_item.net_rate
+		purchase_receipts = []
+		pr_items = []
 
-				purchase_receipt_details[item.item_code] = pr_item_details
+		for item in self.get('items'):
+			if item.get('purchase_receipt'):
+				purchase_receipts.append(item.purchase_receipt)
+			if item.get('pr_detail'):
+				pr_items.append(item.pr_detail)
+			
+		exchange_rate_map = frappe._dict(frappe.get_all('Purchase Receipt', filters={'name': ('in',
+			purchase_receipts)}, fields=['name', 'conversion_rate'], as_list=1))
 
-		return purchase_receipt_details
+		net_rate_map = frappe._dict(frappe.get_all('Purchase Receipt Item', filters={'name': ('in',
+			pr_items)}, fields=['item_code', 'net_rate'], as_list=1))
+
+		return exchange_rate_map, net_rate_map
 
 	def get_asset_gl_entry(self, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
