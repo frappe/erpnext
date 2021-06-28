@@ -30,7 +30,7 @@ class AssetRepair(AccountsController):
 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 
 	def calculate_total_repair_cost(self):
-		self.total_repair_cost = self.repair_cost
+		self.total_repair_cost = flt(self.repair_cost)
 
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
 		self.total_repair_cost += total_value_of_stock_consumed
@@ -129,6 +129,7 @@ class AssetRepair(AccountsController):
 
 	def increase_stock_quantity(self):
 		stock_entry = frappe.get_doc('Stock Entry', self.stock_entry)
+		stock_entry.flags.ignore_links = True
 		stock_entry.cancel()
 
 	def make_gl_entries(self, cancel=False):
