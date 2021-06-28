@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, cstr, get_link_to_form, nowtime
-from frappe import _, bold,throw
+from frappe import _, bold, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -168,65 +168,96 @@ class SellingController(StockController):
 
 	def validate_selling_price(self):
 		def throw_message(idx, item_name, rate, ref_rate_field):
-			msg = _("""Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {}
-						<br><br>
-						You can alternatively disable selling price validation in {} to bypass this validation."""
-			).format(
+			throw(_("""Row #{0}: Selling rate for item {1} is lower than its {2}.
+					Selling {3} should be atleast {4}.<br><br>Alternatively,
+					you can disable selling price validation in {5} to bypass
+					this validation.""").format(
 				idx,
 				bold(item_name),
 				bold(ref_rate_field),
 				bold("net rate"),
 				bold(rate),
 				get_link_to_form("Selling Settings", "Selling Settings"),
-			)
-			throw(msg, title=_("Invalid Selling Price"))
+			), title=_("Invalid Selling Price"))
 
-		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+		if (
+			not frappe.db.get_single_value("Selling Settings", "validate_selling_price")
+			or (hasattr(self, "is_return") and self.is_return)
+		):
 			return
-		if hasattr(self, "is_return") and self.is_return:
-			return
 
-		valuation_rates_map = {
-			(item.item_code, item.warehouse): None for item in self.items
-		}
+		is_internal_customer = self.get('is_internal_customer')
+		valuation_rate_map = {}
 
-		or_condition = (
-			f"(item_code = {frappe.db.escape(valuation_rate[0])} and warehouse = {frappe.db.escape(valuation_rate[1])})"
-			for valuation_rate in valuation_rates_map
-		)
-
-		
-		query = f"""
-			select 
-				item_code, warehouse, valuation_rate 
-			from 
-				`tabBin`
-			where 
-				({" or ".join(or_condition)})
-				and valuation_rate > 0 
-		"""
-		
-		valuation_rates = frappe.db.sql(query)
-
-		for rate in valuation_rates:
-			valuation_rates_map[rate[:2]] = rate[2]
-		
 		for item in self.items:
 			if not item.item_code:
 				continue
-			
-			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", item.item_code, ["last_purchase_rate", "is_stock_item"])
-			last_purchase_rate_in_sales_uom = last_purchase_rate * (item.conversion_factor or 1)
+
+			last_purchase_rate, is_stock_item = frappe.get_cached_value(
+				"Item", item.item_code, ("last_purchase_rate", "is_stock_item")
+			)
+
+			last_purchase_rate_in_sales_uom = (
+				last_purchase_rate * (item.conversion_factor or 1)
+			)
+
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
-				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
+				throw_message(
+					item.idx,
+					item.item_name,
+					last_purchase_rate_in_sales_uom,
+					"last purchase rate"
+				)
 
-			last_valuation_rate = valuation_rates_map[(item.item_code, item.warehouse)]
+			if is_internal_customer or not is_stock_item:
+				continue
 
-			if last_valuation_rate:
-				last_valuation_rate_in_sales_uom = last_valuation_rate * (item.conversion_factor or 1)
-				if is_stock_item and flt(item.base_net_rate) < flt(last_valuation_rate_in_sales_uom) \
-								and not self.get('is_internal_customer'):
-					throw_message(item.idx, item.item_name, last_valuation_rate_in_sales_uom, "valuation rate")
+			valuation_rate_map[(item.item_code, item.warehouse)] = None
+
+		if not valuation_rate_map:
+			return
+
+		or_conditions = (
+			f"""(item_code = {frappe.db.escape(valuation_rate[0])}
+			and warehouse = {frappe.db.escape(valuation_rate[1])})"""
+			for valuation_rate in valuation_rate_map
+		)
+
+		valuation_rates = frappe.db.sql(f"""
+			select
+				item_code, warehouse, valuation_rate
+			from
+				`tabBin`
+			where
+				({" or ".join(or_conditions)})
+				and valuation_rate > 0
+		""")
+
+		for rate in valuation_rates:
+			valuation_rate_map[rate[:2]] = rate[2]
+
+		for item in self.items:
+			if not item.item_code:
+				continue
+
+			last_valuation_rate = valuation_rate_map.get(
+				(item.item_code, item.warehouse)
+			)
+
+			if not last_valuation_rate:
+				continue
+
+			last_valuation_rate_in_sales_uom = (
+				last_valuation_rate * (item.conversion_factor or 1)
+			)
+
+			if flt(item.base_net_rate) < flt(last_valuation_rate_in_sales_uom):
+				throw_message(
+					item.idx,
+					item.item_name,
+					last_valuation_rate_in_sales_uom,
+					"valuation rate"
+				)
 
 	def get_item_list(self):
 		il = []
