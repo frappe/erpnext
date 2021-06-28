@@ -210,8 +210,6 @@ def get_or_create_account(company_name, account):
 			'account_number': account.get('account_number')
 		})
 
-	print(company_name, account, existing_accounts)
-
 	if existing_accounts:
 		return frappe.get_doc('Account', existing_accounts[0].name)
 

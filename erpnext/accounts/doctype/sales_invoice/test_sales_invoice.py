@@ -2087,9 +2087,9 @@ def make_sales_invoice_for_ewaybill():
 	if not gst_account:
 		gst_settings.append("gst_accounts", {
 			"company": "_Test Company",
-			"cgst_account": "CGST - _TC",
-			"sgst_account": "SGST - _TC",
-			"igst_account": "IGST - _TC",
+			"cgst_account": "Output Tax CGST - _TC",
+			"sgst_account": "Output Tax SGST - _TC",
+			"igst_account": "Output Tax IGST - _TC",
 		})
 
 	gst_settings.save()
@@ -2106,7 +2106,7 @@ def make_sales_invoice_for_ewaybill():
 
 	si.append("taxes", {
 		"charge_type": "On Net Total",
-		"account_head": "CGST - _TC",
+		"account_head": "Output Tax CGST - _TC",
 		"cost_center": "Main - _TC",
 		"description": "CGST @ 9.0",
 		"rate": 9
@@ -2114,7 +2114,7 @@ def make_sales_invoice_for_ewaybill():
 
 	si.append("taxes", {
 		"charge_type": "On Net Total",
-		"account_head": "SGST - _TC",
+		"account_head": "Output Tax SGST - _TC",
 		"cost_center": "Main - _TC",
 		"description": "SGST @ 9.0",
 		"rate": 9
