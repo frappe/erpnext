@@ -517,7 +517,7 @@ class PurchaseInvoice(BuyingController):
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
-		exchange_rate_map, net_rate_map = self.get_purchase_receipt_details()
+		exchange_rate_map, net_rate_map = get_pr_or_pi_details(self)
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -716,24 +716,6 @@ class PurchaseInvoice(BuyingController):
 
 							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
 								item.precision("item_tax_amount"))
-
-	def get_purchase_receipt_details(self):
-		purchase_receipts = []
-		pr_items = []
-
-		for item in self.get('items'):
-			if item.get('purchase_receipt'):
-				purchase_receipts.append(item.purchase_receipt)
-			if item.get('pr_detail'):
-				pr_items.append(item.pr_detail)
-			
-		exchange_rate_map = frappe._dict(frappe.get_all('Purchase Receipt', filters={'name': ('in',
-			purchase_receipts)}, fields=['name', 'conversion_rate'], as_list=1))
-
-		net_rate_map = frappe._dict(frappe.get_all('Purchase Receipt Item', filters={'name': ('in',
-			pr_items)}, fields=['item_code', 'net_rate'], as_list=1))
-
-		return exchange_rate_map, net_rate_map
 
 	def get_asset_gl_entry(self, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
@@ -1188,6 +1170,36 @@ class PurchaseInvoice(BuyingController):
 
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
+
+# to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
+def get_pr_or_pi_details(doc):
+	if doc.doctype == 'Purchase Invoice':
+		pr_or_pi = 'purchase_receipt'
+		items_reference = 'pr_detail'
+		pr_or_pi_doctype = 'Purchase Receipt'
+		pr_or_pi_items_table = 'Purchase Receipt Item'
+	else:
+		pr_or_pi = 'purchase_invoice'
+		items_reference = 'purchase_invoice_item'
+		pr_or_pi_doctype = 'Purchase Invoice'
+		pr_or_pi_items_table = 'Purchase Invoice Item'
+
+	purchase_receipts_or_invoices = []
+	pr_or_pi_items = []
+
+	for item in doc.get('items'):
+		if item.get(pr_or_pi):
+			purchase_receipts_or_invoices.append(item.get(pr_or_pi))
+		if item.get(items_reference):
+			pr_or_pi_items.append(item.get(items_reference))
+	
+	exchange_rate_map = frappe._dict(frappe.get_all(pr_or_pi_doctype, filters={'name': ('in',
+		purchase_receipts_or_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
+
+	net_rate_map = frappe._dict(frappe.get_all(pr_or_pi_items_table, filters={'name': ('in',
+		pr_or_pi_items)}, fields=['item_code', 'net_rate'], as_list=1))
+
+	return exchange_rate_map, net_rate_map
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

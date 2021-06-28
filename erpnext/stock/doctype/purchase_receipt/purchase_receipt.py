@@ -254,6 +254,8 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_pr_or_pi_details
+
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
@@ -262,7 +264,7 @@ class PurchaseReceipt(BuyingController):
 		warehouse_with_no_account = []
 		stock_items = self.get_stock_items()
 
-		exchange_rate_map, net_rate_map = self.get_purchase_invoice_details()
+		exchange_rate_map, net_rate_map = get_pr_or_pi_details(self)
 
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
@@ -500,28 +502,6 @@ class PurchaseReceipt(BuyingController):
 
 		self.add_gl_entry(gl_entries, asset_account, item.cost_center, 0.0, flt(item.landed_cost_voucher_amount),
 			remarks, expenses_included_in_asset_valuation, project=item.project, item=item)
-
-	def get_purchase_invoice_details(self):
-		purchase_invoices = []
-		pi_items = []
-
-		for item in self.get('items'):
-			if item.get('purchase_invoice'):
-				purchase_invoices.append(item.purchase_invoice)
-			if item.get('purchase_invoice_item'):
-				pi_items.append(item.purchase_invoice_item)
-			
-		exchange_rate_map = frappe._dict(frappe.get_all('Purchase Invoice', filters={'name': ('in',
-			purchase_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
-		print("*"*50)
-		print("In get_purchase_invoice_details:")
-		print("exchange_rate_map: ", exchange_rate_map)
-
-		net_rate_map = frappe._dict(frappe.get_all('Purchase Invoice Item', filters={'name': ('in',
-			pi_items)}, fields=['item_code', 'net_rate'], as_list=1))
-		print("net_rate_map: ", net_rate_map)
-
-		return exchange_rate_map, net_rate_map
 
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all('Asset',
