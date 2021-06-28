@@ -443,7 +443,14 @@ def auto_make_serial_nos(args):
 	multiple_title = _("Serial Numbers Created")
 
 	if voucher_type:
+		docstatus = 0
+		voucher_no = args.get('voucher_no')
+		if voucher_no:
+			docstatus = frappe.db.get_value(voucher_type, voucher_no, "docstatus")
+
 		multiple_title = singular_title = _("{0} Created").format(voucher_type)
+		if docstatus:
+			multiple_title = singular_title = _("{0} Submitted").format(voucher_type)
 
 	if len(form_links) == 1:
 		frappe.msgprint(_("Serial No {0} Created").format(form_links[0]), singular_title)
