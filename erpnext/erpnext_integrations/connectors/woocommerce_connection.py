@@ -466,7 +466,8 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 		if frappe.db.exists("Item", {"name": sku}):
 			found_item = frappe.get_doc("Item", {"name": sku})
 		else:
-			frappe.throw("Item: {} is not found!").format(sku)
+			frappe.log_error(title="WooCommerce Item Mismatch", message="Item: {} is not found!".format(sku))
+			frappe.throw("Item: {} is not found!".format(sku))
 
 
 		# hard code part:
