@@ -83,6 +83,8 @@ class TransactionDeletionRecord(Document):
 					self.delete_version_log(docfield['parent'], docfield['fieldname'])
 					self.delete_communications(docfield['parent'], docfield['fieldname'])
 					self.populate_doctypes_table(tables, docfield['parent'], no_of_docs)
+
+					self.delete_child_tables(docfield['parent'], docfield['fieldname'])
 					self.delete_docs_linked_with_specified_company(docfield['parent'], docfield['fieldname'])
 
 					naming_series = frappe.db.get_value('DocType', docfield['parent'], 'autoname')
@@ -120,6 +122,21 @@ class TransactionDeletionRecord(Document):
 				'doctype_name' : doctype,
 				'no_of_docs' : no_of_docs
 			})		
+
+	def delete_child_tables(self, doctype, company_fieldname):
+		parent_docs_to_be_deleted = frappe.get_all(doctype, {
+			company_fieldname : self.company
+			}, pluck = 'name')
+
+		child_tables = frappe.get_all('DocField', filters = {
+			'fieldtype': 'Table', 
+			'parent': doctype
+			}, pluck = 'options')
+
+		for table in child_tables:
+			frappe.db.delete(table, {
+				'parent': ['in', parent_docs_to_be_deleted]
+				})
 
 	def delete_docs_linked_with_specified_company(self, doctype, company_fieldname):
 		frappe.db.delete(doctype, {
