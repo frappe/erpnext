@@ -19,7 +19,7 @@ def execute(filters=None):
 	return columns, data, None, chart_data
 
 def get_data(filters):
-	query_filters = {"docstatus": 1}
+	query_filters = {"docstatus": ("<", 2)}
 
 	fields = ["name", "status", "sales_order", "production_item", "qty", "produced_qty",
 		"planned_start_date", "planned_end_date", "actual_start_date", "actual_end_date", "lead_time"]
@@ -62,7 +62,8 @@ def get_chart_based_on_status(data):
 		"Not Started": 0,
 		"In Process": 0,
 		"Stopped": 0,
-		"Completed": 0
+		"Completed": 0,
+		"Draft": 0
 	}
 
 	for d in data:

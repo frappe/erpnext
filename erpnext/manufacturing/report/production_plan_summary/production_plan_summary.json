@@ -1,7 +1,7 @@
 {
- "add_total_row": 1,
+ "add_total_row": 0,
  "columns": [],
- "creation": "2020-04-20 12:00:21.436619",
+ "creation": "2020-12-27 11:43:39.781793",
  "disable_prepared_report": 0,
  "disabled": 0,
  "docstatus": 0,
@@ -9,28 +9,18 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "letter_head": "",
- "modified": "2020-12-30 11:49:21.713561",
+ "modified": "2020-12-27 11:43:42.677584",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "Job Card Summary",
+ "name": "Production Plan Summary",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Job Card",
- "report_name": "Job Card Summary",
+ "ref_doctype": "Production Plan",
+ "report_name": "Production Plan Summary",
  "report_type": "Script Report",
  "roles": [
   {
    "role": "Manufacturing User"
-  },
-  {
-   "role": "Stock User"
-  },
-  {
-   "role": "Manufacturing Manager"
-  },
-  {
-   "role": "Stock Manager"
   }
  ]
 }
