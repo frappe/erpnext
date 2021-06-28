@@ -126,17 +126,17 @@ class TransactionDeletionRecord(Document):
 	def delete_child_tables(self, doctype, company_fieldname):
 		parent_docs_to_be_deleted = frappe.get_all(doctype, {
 			company_fieldname : self.company
-			}, pluck = 'name')
+		}, pluck = 'name')
 
 		child_tables = frappe.get_all('DocField', filters = {
 			'fieldtype': 'Table', 
 			'parent': doctype
-			}, pluck = 'options')
+		}, pluck = 'options')
 
 		for table in child_tables:
 			frappe.db.delete(table, {
 				'parent': ['in', parent_docs_to_be_deleted]
-				})
+			})
 
 	def delete_docs_linked_with_specified_company(self, doctype, company_fieldname):
 		frappe.db.delete(doctype, {
