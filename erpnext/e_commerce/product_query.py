@@ -21,12 +21,12 @@ class ProductQuery:
 		self.page_length = self.settings.products_per_page or 20
 		self.fields = ['wi.web_item_name', 'wi.name', 'wi.item_name', 'wi.item_code', 'wi.website_image', 'wi.variant_of',
 			'wi.has_variants', 'wi.item_group', 'wi.image', 'wi.web_long_description', 'wi.description',
-			'wi.route', 'wi.website_warehouse']
+			'wi.route', 'wi.website_warehouse', 'wi.ranking']
 		self.conditions = ""
 		self.or_conditions = ""
 		self.substitutions = []
 
-	def query(self, attributes=None, fields=None, search_term=None, start=0):
+	def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None):
 		"""Summary
 
 		Args:
@@ -39,19 +39,37 @@ class ProductQuery:
 			list: List of results with set fields
 		"""
 		result, discount_list = [], []
+		website_item_groups = []
+
+		# if from item group page consider website item group table
+		if item_group:
+			website_item_groups = frappe.db.get_all(
+				"Item",
+				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
+				filters=[["Website Item Group", "item_group", "=", item_group]]
+			)
 
 		if fields:
 			self.build_fields_filters(fields)
 		if search_term:
 			self.build_search_filters(search_term)
 		if self.settings.hide_variants:
-			self.conditions += " and wi.variant_of is null"
+			self.conditions += " and wi.variant_of IS NULL"
 
 		if attributes:
 			result = self.query_items_with_attributes(attributes, start)
 		else:
 			result = self.query_items(self.conditions, self.or_conditions,
 				self.substitutions, start=start)
+
+		# Combine results having context of website item groups into item results
+		if item_group and website_item_groups:
+			items_list = {row.name for row in result}
+			for row in website_item_groups:
+				if row.wig_parent not in items_list:
+					result.append(row)
+
+		result = sorted(result, key=lambda x: x.get("ranking"), reverse=True)
 
 		# add price and availability info in results
 		for item in result:
@@ -140,7 +158,6 @@ class ProductQuery:
 				start=start, with_attributes=True)
 
 			items_dict = {item.name: item for item in items}
-			# TODO: Replace Variants by their parent templates
 
 			all_items.append(set(items_dict.keys()))
 

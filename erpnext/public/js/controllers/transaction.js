@@ -6,6 +6,7 @@ frappe.provide('erpnext.accounts.dimensions');
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
+		let me = this;
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
@@ -42,8 +43,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			cur_frm.cscript.calculate_taxes_and_totals();
 			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
 		});
-
-
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
@@ -121,7 +120,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		});
 
-		var me = this;
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
 				return me.set_query_for_batch(doc, cdt, cdn);
@@ -389,7 +387,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if(this.frm.doc.scan_barcode) {
 			frappe.call({
-				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_serial_or_batch_or_barcode_number",
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number",
 				args: { search_value: this.frm.doc.scan_barcode }
 			}).then(r => {
 				const data = r && r.message;
@@ -564,6 +562,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
 							qty: item.qty || 1,
+							net_rate: item.rate,
 							stock_qty: item.stock_qty,
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
@@ -720,29 +719,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
-	add_taxes_from_item_tax_template: function(item_tax_map) {
-		let me = this;
-
-		if(item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
-			if(typeof (item_tax_map) == "string") {
-				item_tax_map = JSON.parse(item_tax_map);
-			}
-
-			$.each(item_tax_map, function(tax, rate) {
-				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
-				if(!found) {
-					let child = frappe.model.add_child(me.frm.doc, "taxes");
-					child.charge_type = "On Net Total";
-					child.account_head = tax;
-					child.rate = 0;
-				}
-			});
-		}
-	},
-
 	serial_no: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+
+		if (item && item.doctype === 'Purchase Receipt Item Supplied') {
+			return;
+		}
 
 		if (item && item.serial_no) {
 			if (!item.item_code) {
@@ -843,9 +826,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				frappe.run_serially([
 					() => me.frm.script_manager.trigger("currency"),
-					() => me.update_item_tax_map(),
 					() => me.apply_default_taxes(),
-					() => me.apply_pricing_rule()
+					() => me.apply_pricing_rule(),
+					() => me.calculate_taxes_and_totals()
 				]);
 			}
 		}
@@ -884,9 +867,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 		}
-
-		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
-		else var date = this.frm.doc.transaction_date;
 
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
@@ -1824,7 +1804,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						item.item_tax_rate = r.message;
-						me.add_taxes_from_item_tax_template(item.item_tax_rate);
 						me.calculate_taxes_and_totals();
 					}
 				}
@@ -1835,43 +1814,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	update_item_tax_map: function() {
-		var me = this;
-		var item_codes = [];
-		$.each(this.frm.doc.items || [], function(i, item) {
-			if(item.item_code) {
-				item_codes.push(item.item_code);
-			}
-		});
 
-		if(item_codes.length) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_item_tax_info",
-				args: {
-					company: me.frm.doc.company,
-					tax_category: cstr(me.frm.doc.tax_category),
-					item_codes: item_codes
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
-								if (!item.item_tax_template) {
-									item.item_tax_template = r.message[item.item_code].item_tax_template;
-									item.item_tax_rate = r.message[item.item_code].item_tax_rate;
-								}
-								me.add_taxes_from_item_tax_template(item.item_tax_rate);
-							} else {
-								item.item_tax_template = "";
-								item.item_tax_rate = "{}";
-							}
-						});
-						me.calculate_taxes_and_totals();
-					}
-				}
-			});
-		}
-	},
 
 	is_recurring: function() {
 		// set default values for recurring documents
