@@ -1497,7 +1497,7 @@
    "options": "Supplier"
   },
   {
-   "default": "transporter.supplier_name",
+   "fetch_from": "transporter.supplier_name",
    "fieldname": "transporter_name",
    "fieldtype": "Data",
    "label": "Transporter Name"
@@ -1513,7 +1513,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-15 10:12:38.833732",
+ "modified": "2021-06-28 11:26:48.340946",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
