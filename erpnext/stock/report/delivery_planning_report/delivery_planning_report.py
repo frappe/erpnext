@@ -77,18 +77,20 @@ def get_data(conditions, group_by):
 							# po.name as purchase_order,
 							pl.company
 
-							from `tabDelivery Planning Item` dpi,
-							# inner join `tabDelivery Note` dn ON dn.related_delivery_planning = dpi.related_delivey_planning
-							# inner join `tabPick List` pl ON pl.customer = dn.customer
-							# inner join `tabPurchase Order` po ON dpi.related_delivey_planning = pl.related_delivery_planning
-							#
-							# Left join `tabCustomer` c ON dpi.customer = c.name
-							# Left join `tabSupplier` s ON dpi.transporter = s.name
-							`tabDelivery Note` dn,
-							`tabPick List` pl,
-							# `tabPurchase Order` po,
-							`tabCustomer` c,
-							`tabSupplier` s
+							from `tabDelivery Planning Item` dpi
+
+							Left join `tabDelivery Note` dn
+							ON dn.related_delivery_planning = dpi.related_delivey_planning
+
+							Left join `tabPick List` pl
+							ON pl.customer = dn.customer
+
+							Left join `tabPurchase Order` po
+							ON dpi.related_delivey_planning = pl.related_delivery_planning
+
+							Left join `tabCustomer` c ON dpi.customer = c.name
+							Left join `tabSupplier` s ON dpi.transporter = s.name
+
 
 							where pl.docstatus = 1 AND dn.docstatus = 1 AND dpi.approved = "Yes"
 							AND dn.related_delivery_planning = dpi.related_delivey_planning
