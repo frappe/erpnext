@@ -14,7 +14,8 @@ def get_context(context):
 	if is_enabled:
 		return context
 	else:
-		frappe.local.flags.redirect_location = '/404'
+		frappe.redirect_to_message("Appointment Scheduling Disabled","Enable appointment booking from appointment booking settings"
+									,http_status_code=302,indicator_color="red")
 		raise frappe.Redirect
 
 @frappe.whitelist(allow_guest=True)
