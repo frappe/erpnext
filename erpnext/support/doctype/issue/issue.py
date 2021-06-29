@@ -6,7 +6,7 @@ import frappe
 import json
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime, time_diff_in_seconds, get_datetime
+from frappe.utils import now_datetime, time_diff_in_seconds, get_datetime, date_diff
 from frappe.core.utils import get_parent_doc
 from datetime import timedelta
 from frappe.model.mapper import get_mapped_doc
@@ -265,7 +265,7 @@ def calculate_first_response_time(issue, first_responded_on):
 		if first_responded_on.day - issue_creation_date.day == 1:
 			first_response_time = 0
 		else:
-			first_response_time = calculate_initial_frt(issue_creation_date, first_responded_on.day - issue_creation_date.day - 1, support_hours)
+			first_response_time = calculate_initial_frt(issue_creation_date, date_diff(first_responded_on, issue_creation_date)- 1, support_hours)
 
 		# time taken on day of issue creation
 		if is_work_day(issue_creation_date, support_hours):
@@ -274,7 +274,7 @@ def calculate_first_response_time(issue, first_responded_on):
 			if is_during_working_hours(issue_creation_date, support_hours):
 				first_response_time += get_elapsed_time(issue_creation_time, end_time)
 			elif is_before_working_hours(issue_creation_date, support_hours):
-				first_response_time += get_elapsed_time(start_time, end_time)	
+				first_response_time += get_elapsed_time(start_time, end_time)
 
 		# time taken on day of first response
 		if is_work_day(first_responded_on, support_hours):
@@ -285,7 +285,10 @@ def calculate_first_response_time(issue, first_responded_on):
 			elif not is_before_working_hours(first_responded_on, support_hours):
 				first_response_time += get_elapsed_time(start_time, end_time)
 
+		if first_response_time:
 			return first_response_time
+		else:
+			return 1.0
 
 def get_time_in_seconds(date):
 	return timedelta(hours=date.hour, minutes=date.minute, seconds=date.second)
@@ -315,30 +318,14 @@ def get_elapsed_time(start_time, end_time):
 	return round(time_diff_in_seconds(end_time, start_time), 2)
 
 def calculate_initial_frt(issue_creation_date, days_in_between, support_hours):
-	fixed_working_hours = check_if_working_hours_are_the_same_everyday(support_hours)
-
-	if fixed_working_hours:
-		start_time = support_hours[0].start_time
-		end_time = support_hours[0].end_time
-		initial_frt = days_in_between * get_elapsed_time(start_time, end_time)
-	else:
-		initial_frt = 0
-		for i in range(days_in_between):
-			date = issue_creation_date + timedelta(days = (i+1))
-			if is_work_day(date, support_hours):
-				start_time, end_time = get_working_hours(date, support_hours)
-				initial_frt += get_elapsed_time(start_time, end_time)
+	initial_frt = 0
+	for i in range(days_in_between):
+		date = issue_creation_date + timedelta(days = (i+1))
+		if is_work_day(date, support_hours):
+			start_time, end_time = get_working_hours(date, support_hours)
+			initial_frt += get_elapsed_time(start_time, end_time)
 
 	return initial_frt
-
-def check_if_working_hours_are_the_same_everyday(support_hours):
-	start_time = support_hours[0].start_time
-	end_time = support_hours[0].end_time
-
-	for day in support_hours:
-		if not (day.start_time == start_time and day.end_time == end_time):
-			return False
-	return True
 
 def is_before_working_hours(date, support_hours):
 	start_time, end_time = get_working_hours(date, support_hours)
