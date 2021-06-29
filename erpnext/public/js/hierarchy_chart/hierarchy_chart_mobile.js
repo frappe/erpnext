@@ -322,7 +322,8 @@ erpnext.HierarchyChartMobile = class {
 			"M" +
 			(pos_parent_bottom.x) + "," + (pos_parent_bottom.y) + " " +
 			"L" +
-			(pos_parent_bottom.x) + "," + (pos_child_left.y) + " " +
+			(pos_parent_bottom.x) + "," + (pos_child_left.y - 10) + " " +
+			"a10,10 1 0 0 10,10 " +
 			"L" +
 			(pos_child_left.x) + "," + (pos_child_left.y);
 
