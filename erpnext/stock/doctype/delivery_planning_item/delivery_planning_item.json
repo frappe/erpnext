@@ -21,18 +21,24 @@
   "delivery_date",
   "current_stock",
   "available_stock",
-  "related_delivey_planning",
   "approved",
   "weight_per_unit",
   "supplier_dc",
   "supplier",
+  "supplier_name",
   "split",
   "uom",
   "conversion_factor",
-  "stock_uom"
+  "stock_uom",
+  "section_break_24",
+  "related_delivey_planning",
+  "delivery_note",
+  "purchase_order",
+  "d_status"
  ],
  "fields": [
   {
+   "depends_on": "eval: doc.supplier_dc == 0",
    "fieldname": "transporter",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -115,13 +121,13 @@
   {
    "fieldname": "current_stock",
    "fieldtype": "Float",
-   "label": "Current Stock ",
+   "label": "Projected Stock ",
    "read_only": 1
   },
   {
    "fieldname": "available_stock",
    "fieldtype": "Float",
-   "label": "Available Stock",
+   "label": "Actual Stock",
    "read_only": 1
   },
   {
@@ -194,11 +200,44 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Stock UOM"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "delivery_note",
+   "fieldtype": "Link",
+   "label": "Delivery Note",
+   "options": "Delivery Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "default": "Incomplete",
+   "fieldname": "d_status",
+   "fieldtype": "Select",
+   "label": "Document Status",
+   "options": "\nComplete\nIncomplete"
+  },
+  {
+   "depends_on": "eval: doc.supplier_dc == 1",
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-28 10:52:41.019205",
+ "modified": "2021-06-29 16:07:32.941289",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
