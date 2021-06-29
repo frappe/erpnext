@@ -5,7 +5,7 @@ $(() => {
 			let is_item_group_page = $(".item-group-content").data("item-group");
 			this.item_group = is_item_group_page || null;
 
-			let view_type = "List View";
+			let view_type = localStorage.getItem("product_view") || "List View";
 
 			// Render Product Views, Filters & Search
 			frappe.require('/assets/js/e-commerce.min.js', function() {

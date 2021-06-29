@@ -70,26 +70,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		context.page_length = cint(frappe.db.get_single_value('E Commerce Settings', 'products_per_page')) or 6
 		context.search_link = '/product_search'
 
-		if frappe.form_dict:
-			search = frappe.form_dict.search
-			field_filters = frappe.parse_json(frappe.form_dict.field_filters)
-			attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
-			start = frappe.parse_json(frappe.form_dict.start)
-		else:
-			search = None
-			attribute_filters = None
-			field_filters = {}
-			start = 0
-
-		if not field_filters:
-			field_filters = {}
-
-		# Ensure the query remains within current item group
-		field_filters['item_group'] = self.name
-
-		engine = ProductQuery()
-		context.items = engine.query(attribute_filters, field_filters, search, start, item_group=self.name)
-
 		filter_engine = ProductFiltersBuilder(self.name)
 
 		context.field_filters = filter_engine.get_field_filters()
