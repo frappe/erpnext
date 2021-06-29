@@ -18,16 +18,14 @@ class ProductQuery:
 		page_length (Int): Length of page for the query
 		settings (Document): E Commerce Settings DocType
 	"""
-
 	def __init__(self):
 		self.settings = frappe.get_doc("E Commerce Settings")
 		self.page_length = self.settings.products_per_page or 20
-		self.fields = ['wi.web_item_name', 'wi.name', 'wi.item_name', 'wi.item_code', 'wi.website_image', 'wi.variant_of',
-			'wi.has_variants', 'wi.item_group', 'wi.image', 'wi.web_long_description', 'wi.description',
-			'wi.route', 'wi.website_warehouse']
-		self.conditions = ""
-		self.or_conditions = ""
-		self.substitutions = []
+		self.fields = ['web_item_name', 'name', 'item_name', 'item_code', 'website_image',
+			'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description',
+			'description', 'route', 'website_warehouse', 'ranking']
+		self.filters = [["published", "=", 1]]
+		self.or_filters = []
 
 	def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None):
 		"""Summary
@@ -42,19 +40,28 @@ class ProductQuery:
 			list: List of results with set fields
 		"""
 		result, discount_list = [], []
+		website_item_groups = []
+
+		# if from item group page consider website item group table
+		if item_group:
+			website_item_groups = frappe.db.get_all(
+				"Website Item",
+				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
+				filters=[["Website Item Group", "item_group", "=", item_group]]
+			)
 
 		if fields:
 			self.build_fields_filters(fields)
 		if search_term:
 			self.build_search_filters(search_term)
 		if self.settings.hide_variants:
-			self.conditions += " and wi.variant_of is null"
+			self.filters.append(["variant_of", "is", "not set"])
 
+		count = 0
 		if attributes:
-			result = self.query_items_with_attributes(attributes, start)
+			result, count = self.query_items_with_attributes(attributes, start)
 		else:
-			result = self.query_items(self.conditions, self.or_conditions,
-				self.substitutions, start=start)
+			result, count = self.query_items(start=start)
 
 		# add price and availability info in results
 		for item in result:
@@ -78,7 +85,11 @@ class ProductQuery:
 			discount_percent = frappe.utils.flt(fields["discount"][0])
 			result = [row for row in result if row.get("discount_percent") and row.discount_percent >= discount_percent]
 
-		return result, discounts
+		return {
+			"items": result,
+			"items_count": count,
+			"discounts": discounts
+		}
 
 	def get_price_discount_info(self, item, price_object, discount_list):
 		"""Modify item object and add price details."""
@@ -104,51 +115,52 @@ class ProductQuery:
 		elif not frappe.db.get_value("Item", item.item_code, "is_stock_item"):
 			item.in_stock = "green" # non-stock item will always be available
 
-	def query_items(self, conditions, or_conditions, substitutions, start=0, with_attributes=False):
+	def query_items(self, start=0):
 		"""Build a query to fetch Website Items based on field filters."""
-		self.query_fields = ", ".join(self.fields)
+		count = frappe.db.get_all(
+			"Website Item",
+			fields=["count(*) as count"],
+			filters=self.filters,
+			or_filters=self.or_filters,
+			limit_start=start)[0].get("count")
 
-		attribute_table = ", `tabItem Variant Attribute` iva" if with_attributes else ""
+		items = frappe.db.get_all(
+			"Website Item",
+			fields=self.fields,
+			filters=self.filters,
+			or_filters=self.or_filters,
+			limit_page_length=self.page_length,
+			limit_start=start)
 
-		return frappe.db.sql(f"""
-			select distinct {self.query_fields}
-			from
-				`tabWebsite Item` wi {attribute_table}
-			where
-				wi.published = 1
-				{conditions}
-				{or_conditions}
-			limit {self.page_length} offset {start}
-			""",
-			tuple(substitutions),
-			as_dict=1)
+		return items, count or 0
 
 	def query_items_with_attributes(self, attributes, start=0):
 		"""Build a query to fetch Website Items based on field & attribute filters."""
 		all_items = []
-		self.conditions += " and iva.parent = wi.item_code"
+		item_codes = []
 
 		for attribute, values in attributes.items():
 			if not isinstance(values, list):
 				values = [values]
 
-			conditions_copy = self.conditions
-			substitutions_copy = self.substitutions.copy()
+			# get items that have selected attribute & value
+			item_code_list = frappe.db.get_all(
+				"Item",
+				fields=["item_code"],
+				filters=[
+					["published_in_website", "=", 1],
+					["Item Variant Attribute", "attribute", "=", attribute],
+					["Item Variant Attribute", "attribute_value", "in", values]
+				])
+			item_codes.append({x.item_code for x in item_code_list})
 
-			conditions_copy += " and iva.attribute = '{0}' and iva.attribute_value in ({1})" \
-				.format(attribute, (", ").join(['%s'] * len(values)))
-			substitutions_copy.extend(values)
+		if item_codes:
+			item_codes = list(set.intersection(*item_codes))
+			self.filters.append(["item_code", "in", item_codes])
 
-			items = self.query_items(conditions_copy, self.or_conditions, substitutions_copy,
-				start=start, with_attributes=True)
+		items, count = self.query_items(start=start)
 
-			items_dict = {item.name: item for item in items}
-			# TODO: Replace Variants by their parent templates
-
-			all_items.append(set(items_dict.keys()))
-
-		result = [items_dict.get(item) for item in set.intersection(*all_items)]
-		return result
+		return items, count
 
 	def build_fields_filters(self, filters):
 		"""Build filters for field values
@@ -171,11 +183,10 @@ class ProductQuery:
 					self.filters.append([child_doctype, fields[0].fieldname, 'IN', values])
 			elif isinstance(values, list):
 				# If value is a list use `IN` query
-				self.conditions += " and wi.{0} in ({1})".format(field, (', ').join(['%s'] * len(values)))
-				self.substitutions.extend(values)
+				self.filters.append([field, "in", values])
 			else:
 				# `=` will be faster than `IN` for most cases
-				self.conditions += " and wi.{0} = '{1}'".format(field, values)
+				self.filters.append([field, "=", values])
 
 	def build_search_filters(self, search_term):
 		"""Query search term in specified fields
@@ -198,4 +209,4 @@ class ProductQuery:
 		# Build or filters for query
 		search = '%{}%'.format(search_term)
 		for field in search_fields:
-			self.or_conditions += " or {0} like '{1}'".format(field, search)
+			self.or_filters.append([field, "like", search])

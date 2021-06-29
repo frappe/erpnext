@@ -2,11 +2,9 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 import json
 import itertools
-from six import string_types
 from frappe import _
 
 from frappe.website.website_generator import WebsiteGenerator
@@ -16,13 +14,12 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
 
-# SEARCH 
+# SEARCH
 from erpnext.e_commerce.website_item_indexing import (
-	insert_item_to_index, 
-	update_index_for_item, 
+	insert_item_to_index,
+	update_index_for_item,
 	delete_item_from_index
 )
-# -----
 
 class WebsiteItem(WebsiteGenerator):
 	website = frappe._dict(
@@ -397,7 +394,7 @@ def make_website_item(doc, save=True):
 	if not doc:
 		return
 
-	if isinstance(doc, string_types):
+	if isinstance(doc, str):
 		doc = json.loads(doc)
 
 	if frappe.db.exists("Website Item", {"item_code": doc.get("item_code")}):
@@ -419,7 +416,7 @@ def make_website_item(doc, save=True):
 
 	# Add to search cache
 	insert_item_to_index(website_item)
-	
+
 	return [website_item.name, website_item.web_item_name]
 
 def on_doctype_update():
@@ -443,37 +440,3 @@ def check_if_user_is_customer(user=None):
 				break
 
 	return True if customer else False
-
-@frappe.whitelist(allow_guest=True)
-def get_product_filter_data():
-	"""Get pre-rendered filtered products and discount filters on load."""
-	from erpnext.e_commerce.product_query import ProductQuery
-	from erpnext.e_commerce.filters import ProductFiltersBuilder
-	from erpnext.setup.doctype.item_group.item_group import get_child_groups
-
-	if frappe.form_dict:
-		search = frappe.form_dict.search
-		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
-		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
-		start = cint(frappe.parse_json(frappe.form_dict.start)) if frappe.form_dict.start else 0
-		item_group = frappe.form_dict.item_group
-	else:
-		search, attribute_filters, item_group = None, None, None
-		field_filters = {}
-		start = 0
-
-	sub_categories = []
-	if item_group:
-		field_filters['item_group'] = item_group
-		sub_categories = get_child_groups(item_group)
-
-	engine = ProductQuery()
-	items, discounts = engine.query(attribute_filters, field_filters, search_term=search, start=start)
-
-	# discount filter data
-	filters = {}
-	if discounts:
-		filter_engine = ProductFiltersBuilder()
-		filters["discount_filters"] = filter_engine.get_discount_filters(discounts)
-
-	return items or [], filters, engine.settings, sub_categories

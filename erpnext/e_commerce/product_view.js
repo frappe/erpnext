@@ -32,28 +32,31 @@ erpnext.ProductView =  class {
 		this.disable_view_toggler(true);
 
 		frappe.call({
-			method: 'erpnext.e_commerce.doctype.website_item.website_item.get_product_filter_data',
+			method: 'erpnext.e_commerce.api.get_product_filter_data',
 			args: args,
 			callback: function(result) {
 				if (!result.exc && result && result.message) {
-					if (me.item_group && result.message[3].length) {
-						me.render_item_sub_categories(result.message[3]);
+					if (me.item_group && result.message["sub_categories"].length) {
+						me.render_item_sub_categories(result.message["sub_categories"]);
 					}
 
-					if (!result.message[0].length) {
+					if (!result.message["items"].length) {
 						// if result has no items or result is empty
 						me.render_no_products_section();
+
+						me.bind_filters();
+						me.restore_filters_state();
 					} else {
-						me.render_filters(result.message[1]);
+						me.render_filters(result.message["filters"]);
 
 						// Render views
-						me.render_list_view(result.message[0], result.message[2]);
-						me.render_grid_view(result.message[0], result.message[2]);
-						me.products = result.message[0];
+						me.render_list_view(result.message["items"], result.message["settings"]);
+						me.render_grid_view(result.message["items"], result.message["settings"]);
+						me.products = result.message["items"];
 					}
 
 					// Bottom paging
-					me.add_paging_section(result.message[2]);
+					me.add_paging_section(result.message["settings"]);
 				} else {
 					me.render_no_products_section();
 				}
@@ -190,6 +193,7 @@ erpnext.ProductView =  class {
 
 			$("#products-grid-area").addClass("hidden");
 			$("#products-list-area").removeClass("hidden");
+			localStorage.setItem("product_view", "List View");
 		});
 
 		$("#image-view").click(function() {
@@ -200,6 +204,7 @@ erpnext.ProductView =  class {
 
 			$("#products-list-area").addClass("hidden");
 			$("#products-grid-area").removeClass("hidden");
+			localStorage.setItem("product_view", "Grid View");
 		});
 	}
 
