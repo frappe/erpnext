@@ -486,6 +486,9 @@ class OrgChartMobile {
 				if (company.get_value() && me.company != company.get_value()) {
 					me.company = company.get_value();
 
+					// svg for connectors
+					me.make_svg_markers()
+
 					if (me.$sibling_group)
 						me.$sibling_group.remove();
 
@@ -510,6 +513,31 @@ class OrgChartMobile {
 
 		company.refresh();
 		$(`[data-fieldname="company"]`).trigger('change');
+	}
+
+	make_svg_markers() {
+		$('#arrows').remove();
+
+		this.page.main.prepend(`
+			<svg id="arrows" width="100%" height="100%">
+				<defs>
+					<marker id="arrowhead-active" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="6" markerHeight="6" orient="auto" fill="var(--blue-500)">
+						<path d="M 0 0 L 10 5 L 0 10 z"></path>
+					</marker>
+					<marker id="arrowhead-collapsed" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="6" markerHeight="6" orient="auto" fill="var(--blue-300)">
+						<path d="M 0 0 L 10 5 L 0 10 z"></path>
+					</marker>
+
+					<marker id="arrowstart-active" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="8" markerHeight="8" orient="auto" fill="var(--blue-500)">
+						<circle cx="4" cy="4" r="3.5" fill="white" stroke="var(--blue-500)"/>
+					</marker>
+					<marker id="arrowstart-collapsed" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="8" markerHeight="8" orient="auto" fill="var(--blue-300)">
+						<circle cx="4" cy="4" r="3.5" fill="white" stroke="var(--blue-300)"/>
+					</marker>
+				</defs>
+				<g id="connectors" fill="none">
+				</g>
+			</svg>`);
 	}
 
 	render_root_node() {
@@ -553,6 +581,14 @@ class OrgChartMobile {
 			if (node.parent_id !== sibling_parent)
 				this.$sibling_group.empty();
 		}
+
+		// since the previous/parent node collapses, all connections to that node need to be rebuilt
+		// rebuild outgoing connections of parent
+		this.refresh_connectors(node.parent_id, node.id);
+
+		// rebuild incoming connections of parent
+		let grandparent = $(`#${node.parent_id}`).attr('data-parent');
+		this.refresh_connectors(grandparent, node.parent_id);
 
 		if (node.expandable && !node.expanded) {
 			return this.load_children(node);
@@ -629,6 +665,10 @@ class OrgChartMobile {
 				$.each(child_nodes, (_i, data) => {
 					this.add_node(node, data);
 					$(`#${data.name}`).addClass('active-child');
+
+					setTimeout(() => {
+						this.add_connector(node.id, data.name);
+					}, 250);
 				});
 			}
 		}
@@ -653,6 +693,83 @@ class OrgChartMobile {
 		});
 	}
 
+	add_connector(parent_id, child_id) {
+		let parent_node = document.querySelector(`#${parent_id}`);
+		let child_node = document.querySelector(`#${child_id}`);
+
+		// variable for the namespace
+		const svgns = 'http://www.w3.org/2000/svg';
+		let path = document.createElementNS(svgns, 'path');
+
+		let connector = undefined;
+
+		if ($(`#${parent_id}`).hasClass('active')) {
+			connector = this.get_connector_for_active_node(parent_node, child_node);
+		} else if ($(`#${parent_id}`).hasClass('active-path')) {
+			connector = this.get_connector_for_collapsed_node(parent_node, child_node);
+		}
+
+		path.setAttribute("d", connector);
+		this.set_path_attributes(path, parent_id, child_id);
+
+		$('#connectors').append(path);
+	}
+
+	get_connector_for_active_node(parent_node, child_node) {
+		// we need to connect the bottom left of the parent to the left side of the child node
+		let pos_parent_bottom = {
+			x: parent_node.offsetLeft + 20,
+			y: parent_node.offsetTop + parent_node.offsetHeight
+		};
+		let pos_child_left = {
+			x: child_node.offsetLeft - 5,
+			y: child_node.offsetTop + child_node.offsetHeight / 2
+		};
+
+		let connector =
+			"M" +
+			(pos_parent_bottom.x) + "," + (pos_parent_bottom.y) + " " +
+			"L" +
+			(pos_parent_bottom.x) + "," + (pos_child_left.y) + " " +
+			"L" +
+			(pos_child_left.x) + "," + (pos_child_left.y);
+
+		return connector;
+	}
+
+	get_connector_for_collapsed_node(parent_node, child_node) {
+		// we need to connect the bottom left of the parent to the top left of the child node
+		let pos_parent_bottom = {
+			x: parent_node.offsetLeft + 20,
+			y: parent_node.offsetTop + parent_node.offsetHeight
+		};
+		let pos_child_top = {
+			x: child_node.offsetLeft + 20,
+			y: child_node.offsetTop
+		};
+
+		let connector =
+			"M" +
+			(pos_parent_bottom.x) + "," + (pos_parent_bottom.y) + " " +
+			"L" +
+			(pos_child_top.x) + "," + (pos_child_top.y);
+
+		return connector;
+	}
+
+	set_path_attributes(path, parent_id, child_id) {
+		path.setAttribute("data-parent", parent_id);
+		path.setAttribute("data-child", child_id);
+
+		if ($(`#${parent_id}`).hasClass('active')) {
+			path.setAttribute("class", "active-connector");
+			path.setAttribute("marker-start", "url(#arrowstart-active)");
+			path.setAttribute("marker-end", "url(#arrowhead-active)");
+		} else if ($(`#${parent_id}`).hasClass('active-path')) {
+			path.setAttribute("class", "collapsed-connector");
+		}
+	}
+
 	set_selected_node(node) {
 		// remove .active class from the current node
 		$('.active').removeClass('active');
@@ -669,6 +786,7 @@ class OrgChartMobile {
 		node_element.click(function() {
 			if (node_element.is(':visible') && node_element.hasClass('active-path')) {
 				me.remove_levels_after_node(node);
+				me.remove_orphaned_connectors();
 			} else {
 				me.add_node_to_hierarchy(node, true);
 				me.collapse_node();
@@ -785,5 +903,25 @@ class OrgChartMobile {
 		node_object.$children = undefined;
 
 		level.empty().append(current_node);
+	}
+
+	remove_orphaned_connectors() {
+		let paths = $('#connectors > path');
+		$.each(paths, (_i, path) => {
+			let parent = $(path).data('parent');
+			let child = $(path).data('child');
+
+			if ($(parent).length || $(child).length)
+				return;
+
+			$(path).remove();
+		})
+	}
+
+	refresh_connectors(node_parent, node_id) {
+		if (!node_parent) return;
+
+		$(`path[data-parent="${node_parent}"]`).remove();
+		this.add_connector(node_parent, node_id);
 	}
 }
