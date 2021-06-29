@@ -215,7 +215,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding-top: 30px;
+	padding-top: 10px;
 	padding-left: 0px;
 }
 
@@ -250,6 +250,7 @@
 
 .collapsed-level {
 	margin-bottom: 16px;
+	width: 18rem;
 }
 
 .node-group {
@@ -281,4 +282,10 @@
 .node-group.collapsed {
 	width: 5rem;
 	margin-left: 12px;
+}
+
+.sibling-group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
