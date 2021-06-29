@@ -35,7 +35,9 @@
    "no_copy": 1,
    "options": "Loan Security Pledge",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fetch_from": "loan_application.applicant",
@@ -45,47 +47,63 @@
    "in_standard_filter": 1,
    "label": "Applicant",
    "options": "applicant_type",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "loan_security_details_section",
    "fieldtype": "Section Break",
-   "label": "Loan Security Details"
+   "label": "Loan Security Details",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "loan",
    "fieldtype": "Link",
    "label": "Loan",
-   "options": "Loan"
+   "options": "Loan",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "loan_application",
    "fieldtype": "Link",
    "label": "Loan Application",
-   "options": "Loan Application"
+   "options": "Loan Application",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total_security_value",
    "fieldtype": "Currency",
    "label": "Total Security Value",
    "options": "Company:company:default_currency",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "maximum_loan_value",
    "fieldtype": "Currency",
    "label": "Maximum Loan Value",
    "options": "Company:company:default_currency",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "loan_details_section",
    "fieldtype": "Section Break",
-   "label": "Loan  Details"
+   "label": "Loan  Details",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "Requested",
@@ -94,37 +112,49 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Requested\nUnpledged\nPledged\nPartially Pledged",
-   "read_only": 1
+   "options": "Requested\nUnpledged\nPledged\nPartially Pledged\nCancelled",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "pledge_time",
    "fieldtype": "Datetime",
    "label": "Pledge Time",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "securities",
    "fieldtype": "Table",
    "label": "Securities",
    "options": "Pledge",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break",
-   "label": "Totals"
+   "label": "Totals",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fetch_from": "loan.applicant_type",
@@ -132,35 +162,45 @@
    "fieldtype": "Select",
    "label": "Applicant Type",
    "options": "Employee\nMember\nCustomer",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
    "fieldname": "more_information_section",
    "fieldtype": "Section Break",
-   "label": "More Information"
+   "label": "More Information",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "reference_no",
    "fieldtype": "Data",
-   "label": "Reference No"
+   "label": "Reference No",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "description",
    "fieldtype": "Text",
-   "label": "Description"
+   "label": "Description",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:23:16.953305",
+ "modified": "2021-06-29 17:15:16.082256",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
