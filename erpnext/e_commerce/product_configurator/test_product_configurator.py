@@ -95,13 +95,16 @@ class TestProductConfigurator(unittest.TestCase):
 
 		# check if item is visible in its own Item Group's page
 		engine = ProductQuery()
-		items = engine.query({}, {"item_group": "Tech Items"}, None, start=0, item_group="Tech Items")
+		result = engine.query({}, {"item_group": "Tech Items"}, None, start=0, item_group="Tech Items")
+		items = result["items"]
+
 		self.assertEqual(len(items), 1)
 		self.assertEqual(items[0].item_code, "Portal Item")
 
 		# check if item is visible in configured foreign Item Group's page
 		engine = ProductQuery()
-		items = engine.query({}, {"item_group": "_Test Item Group Desktops"}, None, start=0, item_group="_Test Item Group Desktops")
+		result = engine.query({}, {"item_group": "_Test Item Group Desktops"}, None, start=0, item_group="_Test Item Group Desktops")
+		items = result["items"]
 		item_codes = [row.item_code for row in items]
 
 	def publish_items_on_website(self):
