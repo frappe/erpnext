@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -11,9 +10,9 @@
   "naming_series",
   "customer",
   "customer_name",
+  "client_name",
   "rtn",
   "tax_id",
-  "type_document",
   "is_pos",
   "pos_profile",
   "offline_pos_name",
@@ -27,19 +26,16 @@
   "reason_for_sale",
   "patient_statement",
   "amended_from",
+  "cai_info_section",
+  "cai",
+  "due_date_cai",
+  "authorized_range",
+  "cashier",
   "returns",
   "return_against",
   "column_break_21",
   "update_billed_amount_in_sales_order",
-  "billing",
-  "cashier",
-  "pos",
-  "branch_office",
-  "cai",
   "column_numeration",
-  "due_date_cai",
-  "numeration",
-  "authorized_range",
   "accounting_dimensions_section",
   "deadline_for_authorization",
   "project",
@@ -94,8 +90,12 @@
   "total_net_weight",
   "taxes_section",
   "exonerated",
-  "taxes_and_charges",
+  "sale_order",
+  "oc_exenta",
+  "reg_sag",
+  "n_reg_exonerados",
   "column_break_38",
+  "taxes_and_charges",
   "shipping_rule",
   "tax_category",
   "section_break_40",
@@ -126,6 +126,12 @@
   "additional_discount_percentage",
   "discount_amount",
   "totals",
+  "taxed_sales15",
+  "isv15",
+  "taxed_sales18",
+  "isv18",
+  "total_exempt",
+  "total_exonerated",
   "base_grand_total",
   "base_rounding_adjustment",
   "base_rounded_total",
@@ -202,7 +208,8 @@
   "auto_repeat",
   "update_auto_repeat_reference",
   "against_income_account",
-  "pos_total_qty"
+  "pos_total_qty",
+  "creation_date"
  ],
  "fields": [
   {
@@ -260,9 +267,9 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax Id",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "project",
@@ -442,8 +449,7 @@
    "fieldtype": "Link",
    "label": "Customer Address",
    "options": "Address",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "address_display",
@@ -757,8 +763,7 @@
    "oldfieldname": "charge",
    "oldfieldtype": "Link",
    "options": "Sales Taxes and Charges Template",
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_38",
@@ -770,16 +775,14 @@
    "label": "Shipping Rule",
    "oldfieldtype": "Button",
    "options": "Shipping Rule",
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "print_hide": 1
   },
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category",
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "print_hide": 1
   },
   {
    "fieldname": "section_break_40",
@@ -791,8 +794,7 @@
    "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
-   "options": "Sales Taxes and Charges",
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "options": "Sales Taxes and Charges"
   },
   {
    "collapsible": 1,
@@ -940,6 +942,7 @@
   {
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "label": "Totals",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money",
    "print_hide": 1
@@ -1042,6 +1045,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -1367,6 +1371,7 @@
    "width": "50%"
   },
   {
+   "allow_on_submit": 1,
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -1596,21 +1601,7 @@
    "fieldtype": "Link",
    "label": "Reason for sale",
    "options": "Reason for sale",
-   "print_hide": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "cashier",
-   "fieldtype": "Data",
-   "label": "Cashier",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "cai",
-   "fieldtype": "Data",
-   "label": "CAI",
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "authorized_range",
@@ -1625,25 +1616,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "billing",
-   "fieldtype": "Section Break",
-   "label": "Billing"
-  },
-  {
-   "fieldname": "numeration",
-   "fieldtype": "Data",
-   "label": "Numeration",
-   "read_only": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "type_document",
-   "fieldtype": "Link",
-   "label": "Type Document",
-   "options": "GType Document",
-   "print_hide": 1
-  },
-  {
    "fieldname": "patient_statement",
    "fieldtype": "Link",
    "label": "Patient Statement",
@@ -1653,25 +1625,11 @@
    "fetch_from": "customer.rtn",
    "fieldname": "rtn",
    "fieldtype": "Data",
-   "label": "RTN",
-   "read_only": 1
-  },
-  {
-   "fieldname": "pos",
-   "fieldtype": "Link",
-   "label": "Pos",
-   "options": "GPos",
-   "read_only": 1
+   "label": "RTN"
   },
   {
    "fieldname": "column_numeration",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "due_date_cai",
-   "fieldtype": "Date",
-   "label": "Due Date Cai",
-   "read_only": 1
   },
   {
    "fieldname": "partial_discount",
@@ -1709,17 +1667,95 @@
    "label": "Exonerated"
   },
   {
-   "fieldname": "branch_office",
+   "fieldname": "isv15",
+   "fieldtype": "Currency",
+   "label": "ISV 15%"
+  },
+  {
+   "fieldname": "isv18",
+   "fieldtype": "Currency",
+   "label": "ISV 18%"
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "label": "Total Exempt"
+  },
+  {
+   "fieldname": "total_exonerated",
+   "fieldtype": "Currency",
+   "label": "Total Exonerated"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "cai_info_section",
+   "fieldtype": "Section Break",
+   "label": "CAI Info"
+  },
+  {
+   "fieldname": "cai",
    "fieldtype": "Data",
-   "label": "Branch Office",
+   "label": "Cai",
    "read_only": 1
+  },
+  {
+   "fieldname": "due_date_cai",
+   "fieldtype": "Date",
+   "label": "Due Date CAI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Data",
+   "label": "Cashier",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "label": "Client Name"
+  },
+  {
+   "fieldname": "sale_order",
+   "fieldtype": "Data",
+   "label": "Sale Order"
+  },
+  {
+   "fieldname": "oc_exenta",
+   "fieldtype": "Data",
+   "label": "O/C Exenta"
+  },
+  {
+   "fieldname": "reg_sag",
+   "fieldtype": "Data",
+   "label": "N. de Reg. De La SAG"
+  },
+  {
+   "fieldname": "n_reg_exonerados",
+   "fieldtype": "Data",
+   "label": "N Reg de Exonerados"
+  },
+  {
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "label": "Creation Date"
+  },
+  {
+   "fieldname": "taxed_sales15",
+   "fieldtype": "Currency",
+   "label": "Taxed Sales15"
+  },
+  {
+   "fieldname": "taxed_sales18",
+   "fieldtype": "Currency",
+   "label": "Taxed Sales18"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-16 16:09:00.434463",
+ "modified": "2021-05-17 15:18:02.371296",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

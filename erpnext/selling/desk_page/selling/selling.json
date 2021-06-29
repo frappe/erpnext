@@ -1,0 +1,48 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Sales",
+   "links": "[\n    {\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Customer\",\n\t\t\"description\": \"Customer Database.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quotation\",\n\t\t\"description\": \"Quotes to Leads or Customers.\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\", \"Customer\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Sales Order\",\n\t\t\"description\": \"Confirmed orders from Customers.\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\", \"Customer\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Sales Invoice\",\n\t\t\"description\": \"Invoices for Costumers.\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\", \"Customer\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Blanket Order\",\n\t\t\"description\": \"Blanket Orders from Costumers.\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\", \"Customer\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Sales Partner\",\n\t\t\"description\": \"Manage Sales Partners.\",\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Sales Person\",\n\t\t\"name\": \"Sales Person\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"link\": \"Tree/Sales Person\",\n\t\t\"description\": \"Manage Sales Person Tree.\",\n\t\t\"dependencies\": [\"Item\", \"Customer\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Territory Target Variance (Item Group-Wise)\",\n\t\t\"route\": \"#query-report/Territory Target Variance Item Group-Wise\",\n\t\t\"doctype\": \"Territory\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sales Person Target Variance (Item Group-Wise)\",\n\t\t\"route\": \"#query-report/Sales Person Target Variance Item Group-Wise\",\n\t\t\"doctype\": \"Sales Person\",\n\t\t\"dependencies\": [\"Sales Person\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Items and Pricing",
+   "links": "[\n    {\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Item\",\n\t\t\"description\": \"All Products or Services.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Price\",\n\t\t\"description\": \"Multiple Item prices.\",\n\t\t\"route\": \"#Report/Item Price\",\n\t\t\"dependencies\": [\"Item\", \"Price List\"],\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Price List\",\n\t\t\"description\": \"Price List master.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Group\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"label\": \"Item Group\",\n\t\t\"link\": \"Tree/Item Group\",\n\t\t\"description\": \"Tree of Item Groups.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Product Bundle\",\n\t\t\"description\": \"Bundle items at time of sale.\",\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Promotional Scheme\",\n\t\t\"description\": \"Rules for applying different promotional schemes.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Pricing Rule\",\n\t\t\"description\": \"Rules for applying pricing and discount.\",\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Shipping Rule\",\n\t\t\"description\": \"Rules for adding shipping costs.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Coupon Code\",\n\t\t\"description\": \"Define coupon codes.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Selling Settings\",\n\t\t\"description\": \"Default settings for selling transactions.\",\n\t\t\"settings\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\":\"Terms and Conditions\",\n\t\t\"label\": \"Terms and Conditions Template\",\n\t\t\"description\": \"Template of terms or contract.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Sales Taxes and Charges Template\",\n\t\t\"description\": \"Tax template for selling transactions.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Lead Source\",\n\t\t\"description\": \"Track Leads by Lead Source.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Reason For Discount\",\n\t\t\"name\": \"Reason For Discount\",\n\t\t\"description\": \"Discount reason for invoices\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Customer Group\",\n\t\t\"name\": \"Customer Group\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"link\": \"Tree/Customer Group\",\n\t\t\"description\": \"Manage Customer Group Tree.\"\n\t},\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Contact\",\n\t\t\"description\": \"All Contacts.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Address\",\n\t\t\"description\": \"All Addresses.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Territory\",\n\t\t\"name\": \"Territory\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"link\": \"Tree/Territory\",\n\t\t\"description\": \"Manage Territory Tree.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Campaign\",\n\t\t\"description\": \"Sales campaigns.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Key Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sales Analytics\",\n\t\t\"doctype\": \"Sales Order\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"page\",\n\t\t\"name\": \"sales-funnel\",\n\t\t\"label\": \"Sales Funnel\",\n\t\t\"icon\": \"fa fa-bar-chart\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Customer Acquisition and Loyalty\",\n\t\t\"doctype\": \"Customer\",\n\t\t\"icon\": \"fa fa-bar-chart\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sold Products\",\n\t\t\"doctype\": \"Sold Products\",\n        \"dependencies\": [\"Sales Invoice\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sales Book\",\n\t\t\"doctype\": \"Sales Book\",\n        \"dependencies\": [\"Sales Invoice\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Inactive Customers\",\n\t\t\"doctype\": \"Sales Order\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Ordered Items To Be Delivered\",\n\t\t\"doctype\": \"Sales Order\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sales Person-wise Transaction Summary\",\n\t\t\"doctype\": \"Sales Order\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Item-wise Sales History\",\n\t    \"doctype\": \"Item\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Quotation Trends\",\n\t\t\"doctype\": \"Quotation\"\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sales Order Trends\",\n\t\t\"doctype\": \"Sales Order\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Other Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Lead Details\",\n\t\t\"doctype\": \"Lead\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Address And Contacts\",\n\t\t\"label\": \"Customer Addresses And Contacts\",\n\t\t\"doctype\": \"Address\",\n\t\t\"route_options\": {\n\t\t\t\t\t\t    \"party_type\": \"Customer\"\n\t\t            }\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"BOM Search\",\n\t\t\"doctype\": \"BOM\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Available Stock for Packing Items\",\n\t\t\"doctype\": \"Item\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Pending SO Items For Purchase Request\",\n\t\t\"doctype\": \"Sales Order\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Customer Credit Balance\",\n\t\t\"doctype\": \"Customer\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Customers Without Any Sales Transactions\",\n\t\t\"doctype\": \"Customer\"\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sales Partners Commission\",\n\t\t\"doctype\": \"Customer\"\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 15:26:41.705954",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Selling",
+ "modified": "2020-05-28 10:05:37.666101",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Selling",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

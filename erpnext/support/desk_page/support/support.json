@@ -1,0 +1,53 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Issues",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Issue\",\n\t\t\"description\": \"Support queries from customers.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Issue Type\",\n\t\t\"description\": \"Issue Type.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Issue Priority\",\n\t\t\"description\": \"Issue Priority.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Warranty",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Warranty Claim\",\n\t\t\"description\": \"Warranty Claim against Serial No.\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Serial No\",\n\t\t\"description\": \"Single unit of an Item.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Service Level Agreement",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Service Level\",\n\t\t\"description\": \"Service Level.\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Service Level Agreement\",\n\t\t\"description\": \"Service Level Agreement.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Maintenance",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Maintenance Schedule\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Maintenance Visit\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Reports",
+   "links": "[\n    {\n\t\t\"type\": \"page\",\n\t\t\"name\": \"support-analytics\",\n\t\t\"label\": \"Support Analytics\",\n\t\t\"icon\": \"fa fa-bar-chart\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Minutes to First Response for Issues\",\n\t\t\"doctype\": \"Issue\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Support Hours\",\n\t\t\"doctype\": \"Issue\",\n\t\t\"is_query_report\": \"True\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Support Settings\",\n\t\t\"label\": \"Support Settings\"\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 15:09:53.480866",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Support",
+ "modified": "2020-05-27 15:20:52.036513",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Support",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

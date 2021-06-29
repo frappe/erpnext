@@ -5,3 +5,4 @@ apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_bala
 DocType: Bank Statement Transaction Invoice Item,Outstanding Amount,Saldo Pendiente
 DocType: Payment Entry Reference,Outstanding,Pendiente
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be set if Opportunity is made from Lead,La Iniciativa se debe establecer si la Oportunidad está hecha desde una Iniciativa
+DocType: Sales Invoice,Client Name,Nombre del cliente

@@ -258,7 +258,7 @@ let make_bank_entry = function (frm) {
 			freeze_message: __("Creating Payment Entries......")
 		});
 	} else {
-		frappe.msgprint(__("Company, Payment Account, From Date and To Date is mandatory"));
+		frappe.msgprint(__("Company, Payment Account, From Date and To Date is mandatory"));		
 	}
 };
 

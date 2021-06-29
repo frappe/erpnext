@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -106,6 +105,7 @@
   "customer_details",
   "customer_items",
   "item_tax_section_break",
+  "tax_detail",
   "taxes",
   "inspection_criteria",
   "inspection_required_before_purchase",
@@ -1051,15 +1051,21 @@
    "fieldtype": "Link",
    "label": "Category for sale",
    "options": "Category for sale"
+  },
+  {
+   "default": "0",
+   "fieldname": "tax_detail",
+   "fieldtype": "Link",
+   "label": "Tax Detail",
+   "options": "Tax Detail"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
- "links": [],
  "max_attachments": 1,
- "modified": "2020-04-16 22:31:24.058339",
+ "modified": "2021-04-15 10:58:35.329255",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

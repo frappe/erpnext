@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "ACC-STA-PAY-.YYYY.-.#####",
  "creation": "2020-02-24 14:11:40.425150",
  "doctype": "DocType",
@@ -10,17 +9,21 @@
   "company_logo",
   "general_data",
   "patient_statement",
-  "type_document",
   "customer",
   "columna_general",
   "company",
-  "date",
-  "due_date",
   "reason_for_sale",
   "products_section",
   "products_table",
   "totals_section",
   "total",
+  "total_advance",
+  "outstanding_balance",
+  "discount",
+  "discount_check",
+  "discount_amount",
+  "total_sale",
+  "total_discount",
   "contact_section",
   "customer_address",
   "phone_number"
@@ -63,30 +66,11 @@
    "label": "General Data"
   },
   {
-   "fieldname": "type_document",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Type Document",
-   "options": "GType Document"
-  },
-  {
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
    "options": "Customer",
    "reqd": 1
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date"
-  },
-  {
-   "fieldname": "due_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Payment Due Date"
   },
   {
    "fieldname": "reason_for_sale",
@@ -136,11 +120,54 @@
   {
    "fieldname": "columna_general",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_advance",
+   "fieldtype": "Currency",
+   "label": "Total Advance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_balance",
+   "fieldtype": "Currency",
+   "label": "Outstanding Balance",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "discount",
+   "fieldtype": "Section Break",
+   "label": "Discount"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_check",
+   "fieldtype": "Check",
+   "label": "Apply Discount"
+  },
+  {
+   "depends_on": "discount_check",
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount"
+  },
+  {
+   "depends_on": "discount_check",
+   "fieldname": "total_sale",
+   "fieldtype": "Currency",
+   "label": "Total Sale Invoice",
+   "read_only": 1
+  },
+  {
+   "depends_on": "discount_check",
+   "fieldname": "total_discount",
+   "fieldtype": "Currency",
+   "label": "Total With Discount",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-03-20 00:33:51.555664",
+ "modified": "2021-06-29 14:56:41.311661",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",

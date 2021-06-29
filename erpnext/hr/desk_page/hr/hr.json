@@ -1,0 +1,98 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Employee",
+   "links": "[\n    {\n\t\t\"label\": \"Employee\",\n\t\t\"name\": \"Employee\",\n\t\t\"onboard\": 1,\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t\t\"label\": \"Employment Type\",\n\t\t\"name\": \"Employment Type\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n        \"label\": \"Branch\",\n\t\t\"name\": \"Branch\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t\t\"label\": \"Department\",\n\t\t\"name\": \"Department\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t    \"label\": \"Designation\",\n\t\t\"name\": \"Designation\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t\t\"label\": \"Employee Grade\",\n\t\t\"name\": \"Employee Grade\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t    \"label\": \"Employee Group\",\n\t\t\"name\": \"Employee Group\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"label\": \"Employee Health Insurance\",\n\t\t\"name\": \"Employee Health Insurance\",\n\t\t\"type\": \"doctype\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Attendance",
+   "links": "[\n    {\n        \"label\": \"Employee Attendance Tool\",\n\t\t\"name\": \"Employee Attendance Tool\",\n\t\t\"onboard\": 1,\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Attendance\",\n\t\t\"name\": \"Attendance\",\n\t\t\"onboard\": 1,\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Attendance Request\",\n\t\t\"name\": \"Attendance Request\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Upload Attendance\",\n\t\t\"name\": \"Upload Attendance\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Employee Checkin\",\n\t\t\"name\": \"Employee Checkin\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Monthly Attendance Sheet\",\n\t\t\"name\": \"Monthly Attendance Sheet\",\n\t\t\"type\": \"report\",\n\t\t\"doctype\": \"Attendance\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Leaves",
+   "links": "[\n    {\n        \"label\": \"Leave Application\",\n\t\t\"name\": \"Leave Application\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Leave Allocation\",\n\t\t\"name\": \"Leave Allocation\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Leave Policy\",\n\t\t\"name\": \"Leave Policy\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Leave Type\"]\n\t},\n\t{\n\t    \"label\": \"Leave Period\",\n\t\t\"name\": \"Leave Period\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\":\"Leave Type\",\n\t\t\"name\":\"Leave Type\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t    \"label\": \"Holiday List\",\n\t\t\"name\": \"Holiday List\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t    \"label\": \"Compensatory Leave Request\",\n\t\t\"name\": \"Compensatory Leave Request\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Leave Encashment\",\n\t\t\"name\": \"Leave Encashment\",\n\t\t\"type\": \"doctype\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"label\": \"Leave Block List\",\n\t\t\"name\": \"Leave Block List\",\n\t\t\"type\": \"doctype\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"label\": \"Employee Leave Balance\",\n\t\t\"name\": \"Employee Leave Balance\",\n\t\t\"doctype\": \"Leave Application\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"label\": \"Leave Ledger Entry\",\n\t\t\"name\": \"Leave Ledger Entry\",\n\t\t\"doctype\": \"Leave Ledger Entry\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Payroll",
+   "links": "[\n    {\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Salary Structure\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Salary Structure Assignment\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Salary Structure\", \"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Payroll Entry\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Salary Slip\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Assignment Salary Component\",\n\t\t\"dependencies\": [\"Payroll Entry\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Payroll Period\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Salary Component\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Additional Salary\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Retention Bonus\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Incentive\",\n\t\t\"dependencies\": [\"Employee\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Employee Tax and Benefits",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Tax Exemption Declaration\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Tax Exemption Proof Submission\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Benefit Application\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Benefit Claim\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Tax Exemption Category\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Tax Exemption Sub Category\",\n\t\t\"dependencies\": [\"Employee\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Employee Lifecycle",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Onboarding\",\n\t\t\"dependencies\": [\"Job Applicant\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Skill Map\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Promotion\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Employee Transfer\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Separation\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Onboarding Template\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Separation Template\",\n\t\t\"dependencies\": [\"Employee\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Recruitment",
+   "links": "[\n    {\n\t    \"type\": \"doctype\",\n\t    \"name\": \"Job Opening\",\n\t    \"onboard\": 1\n    },\n    {\n    \t\"type\": \"doctype\",\n    \t\"name\": \"Job Applicant\",\n    \t\"onboard\": 1\n    },\n    {\n    \t\"type\": \"doctype\",\n    \t\"name\": \"Job Offer\",\n    \t\"onboard\": 1\n    },\n    {\n    \t\"type\": \"doctype\",\n    \t\"name\": \"Staffing Plan\"\n    }\n]\n"
+  },
+  {
+   "hidden": 0,
+   "label": "Training",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Training Program\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Training Event\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Training Result\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Training Feedback\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Performance",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Appraisal\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Appraisal Template\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Energy Point Rule\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Energy Point Log\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Expense Claims",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Expense Claim\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Employee Advance\",\n\t\t\"dependencies\": [\"Employee\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Loans",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Loan Application\",\n\t\t\"dependencies\": [\"Employee\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Loan\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Loan Type\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Shift Management",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Shift Type\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Shift Request\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Shift Assignment\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Fleet Management",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Vehicle\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Vehicle Log\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Vehicle Expenses\",\n\t\t\"doctype\": \"Vehicle\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"HR Settings\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Daily Work Summary Group\"\n\t},\n\t{\n\t\t\"type\": \"page\",\n\t\t\"name\": \"team-updates\",\n\t\t\"label\": \"Team Updates\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Employee Birthday\",\n\t\t\"doctype\": \"Employee\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Employees working on a holiday\",\n\t\t\"doctype\": \"Employee\"\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Department Analytics\",\n\t\t\"doctype\": \"Employee\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Salary Register\",\n\t\t\"doctype\": \"Salary Slip\"\n\t},\n\t{\n    \t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n    \t\"name\": \"Salary Assignment Report\",\n    \t\"doctype\": \"Salary Assignment Report\",\n    \t\"dependencies\": [\"Assignment Salary Component\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Salary Register Detail\",\n\t\t\"doctype\": \"Salary Slip\"\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-26 14:48:16.914277",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "HR",
+ "modified": "2020-05-27 14:54:19.721622",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "HR",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

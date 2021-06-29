@@ -333,6 +333,24 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sales Partners Commission",
 					"doctype": "Customer"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sale for day",
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Daily summary",
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Detailed sales book per transaction",
+					"doctype": "Sales Invoice"
 				}
 			]
 		},

@@ -26,6 +26,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
+from frappe.utils.data import money_in_words
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -56,6 +57,58 @@ class PurchaseInvoice(BuyingController):
 		if not self.on_hold:
 			self.release_date = ''
 
+	def on_update(self):
+		self.calculated_taxes()
+		
+	def calculated_taxes(self):
+		taxed15 = 0
+		taxed18 = 0
+		exempt = 0
+		exonerated = 0
+
+		if self.taxes_and_charges:
+					if self.tax_included == 0:
+						exonerated += self.total
+		else:
+			if self.tax_included == 1:
+				items = frappe.get_all("Purchase Invoice Item", ["item_code", "amount"], filters = {"parent": self.name})
+
+				for item in items:
+					item_taxes = frappe.get_all("Item Tax", ['name', "item_tax_template"], filters = {"parent": item.item_code})
+					if len(item_taxes) >0:
+						for item_tax in item_taxes:
+							tax_tamplates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": item_tax.item_tax_template})
+							
+							for tax_tamplate in tax_tamplates:
+
+								tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
+								
+								for tax_detail in tax_details:
+
+									if tax_detail.tax_rate == 15:
+										taxed15 += item.amount * (tax_detail.tax_rate/100)
+								
+									if tax_detail.tax_rate == 18:
+										taxed18 += item.amount * (tax_detail.tax_rate/100)
+					else:
+						exempt += item.amount
+	
+		self.isv15 = taxed15
+		self.isv18 = taxed18
+		self.total_exonerated = exonerated
+		self.total_exempt = exempt
+		self.total_taxes_and_charges = taxed15 + taxed18
+		self.rounding_adjustment = 0
+
+		if self.tax_included == 1:
+			self.grand_total += self.total_taxes_and_charges
+			self.rounded_total = self.grand_total
+		else:
+			self.rounded_total = self.grand_total
+			self.total_exonerated = self.total
+		
+		self.outstanding_amount = self.grand_total - self.total_advance
+		self.in_words = money_in_words(self.grand_total)
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
@@ -101,6 +154,8 @@ class PurchaseInvoice(BuyingController):
 		self.create_remarks()
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
+		if self.docstatus == 1:
+			self.update_accounts_status()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
 	def validate_release_date(self):
@@ -117,6 +172,13 @@ class PurchaseInvoice(BuyingController):
 
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
+	def update_accounts_status(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.debit += self.grand_total
+			supplier.remaining_balance += self.grand_total
+			supplier.save()
+	
 	def create_remarks(self):
 		if not self.remarks:
 			if self.bill_no and self.bill_date:

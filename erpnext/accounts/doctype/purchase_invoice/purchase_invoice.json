@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -83,6 +82,7 @@
   "column_break_49",
   "shipping_rule",
   "section_break_51",
+  "tax_included",
   "taxes_and_charges",
   "taxes",
   "sec_tax_breakup",
@@ -102,6 +102,10 @@
   "additional_discount_percentage",
   "discount_amount",
   "section_break_49",
+  "isv15",
+  "isv18",
+  "total_exempt",
+  "total_exonerated",
   "base_grand_total",
   "base_rounding_adjustment",
   "base_rounded_total",
@@ -923,6 +927,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -1299,13 +1304,38 @@
    "fieldtype": "Data",
    "label": "RTN",
    "read_only": 1
+  },
+  {
+   "fieldname": "isv15",
+   "fieldtype": "Currency",
+   "label": "ISV 15%"
+  },
+  {
+   "fieldname": "isv18",
+   "fieldtype": "Currency",
+   "label": "ISV 18%"
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "label": "Total Exempt"
+  },
+  {
+   "fieldname": "total_exonerated",
+   "fieldtype": "Currency",
+   "label": "Total Exonerated"
+  },
+  {
+   "default": "0",
+   "fieldname": "tax_included",
+   "fieldtype": "Check",
+   "label": "Tax Included"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-14 23:03:51.540813",
+ "modified": "2021-04-23 16:17:49.047179",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

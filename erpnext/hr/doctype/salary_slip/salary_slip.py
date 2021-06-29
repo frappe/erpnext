@@ -312,7 +312,7 @@ class SalarySlip(TransactionBase):
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
-		self.rounded_total = rounded(self.net_pay)
+		self.rounded_total = self.net_pay
 
 	def calculate_component_amounts(self):
 		if not getattr(self, '_salary_structure_doc', None):

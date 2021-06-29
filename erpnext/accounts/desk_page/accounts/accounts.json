@@ -1,0 +1,103 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Accounts Receivable",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Sales Invoice\",\n\t\t\"description\": \"Bills raised to Customers.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Account Statement Payment\",\n\t\t\"description\": \"Bills raised to Patient Statement.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Reason for sale\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Customer\",\n\t\t\"description\": \"Customer database.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Payment Entry\",\n\t\t\"description\": \"Bank/Cash transactions against party or for internal transfer\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Payment Request\",\n\t\t\"description\": \"Payment Request\"\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"name\": \"Accounts Receivable\",\n\t\t\"doctype\": \"Sales Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Accounts Receivable Summary\",\n\t\t\"doctype\": \"Sales Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Sales Register\",\n\t\t\"doctype\": \"Sales Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Item-wise Sales Register\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Sales Invoice\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Ordered Items To Be Billed\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Sales Invoice\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Delivered Items To Be Billed\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Sales Invoice\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Accounts Payable",
+   "links": "[\n    {\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Purchase Invoice\",\n\t\t\"description\": \"Bills raised by Suppliers.\",\n\t    \"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Supplier\",\n\t\t\"description\": \"Supplier database.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Payment Entry\",\n\t\t\"description\": \"Bank/Cash transactions against party or for internal transfer\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Accounts Payable\",\n\t\t\"doctype\": \"Purchase Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Accounts Payable Summary\",\n\t\t\"doctype\": \"Purchase Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Purchase Register\",\n\t\t\"doctype\": \"Purchase Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Item-wise Purchase Register\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Purchase Invoice\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Purchase Order Items To Be Billed\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Purchase Invoice\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Received Items To Be Billed\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Purchase Invoice\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Accounting Masters",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Company\",\n\t\t\"description\": \"Company (not Customer or Supplier) master.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Account\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"label\": \"Chart of Accounts\",\n\t\t\"route\": \"#Tree/Account\",\n\t\t\"description\": \"Tree of financial accounts.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Accounts Settings\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Fiscal Year\",\n\t\t\"description\": \"Financial / accounting year.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Accounting Dimension\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Finance Book\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Accounting Period\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Payment Term\",\n\t\t\"description\": \"Payment Terms based on conditions\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Banking and Payments",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Match Payments with Invoices\",\n\t\t\"name\": \"Payment Reconciliation\",\n\t\t\"description\": \"Match non-linked Invoices and Payments.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Update Bank Transaction Dates\",\n\t\t\"name\": \"Bank Reconciliation\",\n\t\t\"description\": \"Update bank payment dates with journals.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Invoice Discounting\",\n\t\t\"name\": \"Invoice Discounting\"\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"name\": \"Bank Reconciliation Statement\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Journal Entry\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Bank Clearance Summary\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Journal Entry\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Bank Guarantee\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Cheque Print Template\",\n\t\t\"description\": \"Setup cheque dimensions for printing\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "General Ledger",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Journal Entry\",\n\t\t\"description\": \"Accounting journal entries.\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"General Ledger\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Customer Ledger Summary\",\n\t\t\"doctype\": \"Sales Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Supplier Ledger Summary\",\n\t\t\"doctype\": \"Sales Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Taxes",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Sales Taxes and Charges Template\",\n\t\t\"description\": \"Tax template for selling transactions.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Purchase Taxes and Charges Template\",\n\t\t\"description\": \"Tax template for buying transactions.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Tax Template\",\n\t\t\"description\": \"Tax template for item tax rates.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Tax Category\",\n\t\t\"description\": \"Tax Category for overriding tax rates.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Tax Rule\",\n\t\t\"description\": \"Tax Rule for transactions.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Tax Withholding Category\",\n\t\t\"description\": \"Tax Withholding rates to be applied on transactions.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Cost Center and Budgeting",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Cost Center\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"label\": \"Chart of Cost Centers\",\n\t\t\"route\": \"#Tree/Cost Center\",\n\t\t\"description\": \"Tree of financial Cost Centers.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Budget\",\n\t\t\"description\": \"Define budget for a financial year.\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Accounting Dimension\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t    \"name\": \"Budget Variance Report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Cost Center\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Monthly Distribution\",\n\t\t\"description\": \"Seasonality for setting budgets, targets etc.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Financial Statements",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Trial Balance\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Profit and Loss Statement\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Balance Sheet\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Cash Flow\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Consolidated Financial Statement\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Opening and Closing",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Opening Invoice Creation Tool\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Chart of Accounts Importer\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Period Closing Voucher\",\n\t\t\"description\": \"Close Balance Sheet and book Profit or Loss.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Multi Currency",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Currency\",\n\t\t\"description\": \"Enable / disable currencies.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Currency Exchange\",\n\t\t\"description\": \"Currency exchange rate master.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Exchange Rate Revaluation\",\n\t\t\"description\": \"Exchange Rate Revaluation master.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Payment Gateway Account\",\n\t\t\"description\": \"Setup Gateway accounts.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Terms and Conditions\",\n\t\t\"label\": \"Terms and Conditions Template\",\n\t\t\"description\": \"Template of terms or contract.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Mode of Payment\",\n\t\t\"description\": \"e.g. Bank, Cash, Credit Card\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Subscription Management",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Subscriber\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Subscription Plan\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Subscription\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Subscription Settings\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Bank Statement",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Bank\",\n\t\t\"name\": \"Bank\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"label\": \"Bank Account\",\n\t\t\"name\": \"Bank Account\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Bank Statement Transaction Entry\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Bank Statement Settings\",\n\t\t\"name\": \"Bank Statement Settings\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Profitability",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Gross Profit\",\n\t\t\"doctype\": \"Sales Invoice\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Profitability Analysis\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Sales Invoice Trends\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Sales Invoice\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Purchase Invoice Trends\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Purchase Invoice\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Trial Balance for Party\",\n\t\t\"doctype\": \"GL Entry\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Payment Period Based On Invoice Date\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Journal Entry\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Sales Partners Commission\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Sales Invoice\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Customer Credit Balance\",\n\t\t\"doctype\": \"Customer\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Sales Payment Summary\",\n\t\t\"doctype\": \"Sales Invoice\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Address And Contacts\",\n\t\t\"doctype\": \"Address\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Cash Report\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Share Management",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Shareholder\",\n\t\t\"description\": \"List of available Shareholders with folio numbers\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Share Transfer\",\n\t\t\"description\": \"List of all share transactions\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Share Ledger\",\n\t\t\"doctype\": \"Share Transfer\",\n\t\t\"is_query_report\": \"True\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Share Balance\",\n\t\t\"doctype\": \"Share Transfer\",\n\t\t\"is_query_report\": \"True\"\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 15:27:18.403722",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Accounts",
+ "modified": "2020-06-01 14:23:46.661570",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounts",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

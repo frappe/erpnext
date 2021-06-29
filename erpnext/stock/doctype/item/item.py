@@ -88,6 +88,7 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
+		self.isv15 = 100-(100/1.15)
 		super(Item, self).validate()
 
 		if not self.item_name:
@@ -124,13 +125,13 @@ class Item(WebsiteGenerator):
 		self.update_defaults_from_item_group()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
-		self.update_show_in_website()
+		self.update_show_in_website()		
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 					from `tabWebsite Item Group`
-					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
+					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)		
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
