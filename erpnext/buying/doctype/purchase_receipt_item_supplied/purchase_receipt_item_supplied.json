@@ -10,6 +10,7 @@
   "bom_detail_no",
   "col_break1",
   "rm_item_code",
+  "rm_item_name",
   "stock_uom",
   "conversion_factor",
   "reference_name",
@@ -91,9 +92,7 @@
    "fieldtype": "Float",
    "label": "Consumed Qty",
    "oldfieldname": "consumed_qty",
-   "oldfieldtype": "Currency",
-   "read_only": 1,
-   "reqd": 1
+   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "stock_uom",
@@ -183,12 +182,18 @@
   {
    "fieldname": "col_break4",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "rm_item_code.item_name",
+   "fieldname": "rm_item_name",
+   "fieldtype": "Data",
+   "label": "Raw material Item Name"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2021-06-19 14:01:04.515625",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",

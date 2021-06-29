@@ -65,7 +65,7 @@ class StockEntry(StockController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse()
-		self.validate_work_order()
+		#self.validate_work_order()
 		self.validate_bom()
 		self.mark_finished_and_scrap_items()
 		self.validate_finished_goods()
@@ -110,9 +110,16 @@ class StockEntry(StockController):
 
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
+		
+		if self.work_order and self.stock_entry_type == "Manufacture":
+			self.scrap_qty()
+
+		if self.work_order and self.stock_entry_type == "Material Consumption for Manufacture":
+			self.set_work_order_total_cost()
 
 		if self.purpose == 'Material Transfer' and self.add_to_transit:
 			self.set_material_request_transfer_status('In Transit')
+			
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('Completed')
 
@@ -151,6 +158,16 @@ class StockEntry(StockController):
 			self.from_bom = 1
 			self.bom_no = data.bom_no
 
+	def set_work_order_total_cost(self):
+		if self.stock_entry_type=="Material Consumption for Manufacture" and self.work_order:
+			doc=frappe.get_doc("Work Order",{"name":self.work_order})
+			if not doc.work_order_total_cost:
+				doc.work_order_total_cost=self.total_outgoing_value
+			if doc.work_order_total_cost:
+				doc.work_order_total_cost=doc.work_order_total_cost+self.total_outgoing_value
+			doc.save(ignore_permissions=True)
+			doc.reload()
+
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
 		if pro_doc.status == 'Completed':
@@ -182,6 +199,20 @@ class StockEntry(StockController):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
 				self.precision("transfer_qty", item))
+	def scrap_qty(self):
+		if self.stock_entry_type=="Manufacture" and self.work_order:
+			doc=frappe.get_doc("Work Order",{"name":self.work_order})
+			a=[]
+			b=[]
+			for i in self.items:
+				if i.is_scrap_item==1:
+					a.append(i.qty)
+					b.append(i.basic_amount)
+					d=sum(a)
+					c=sum(b)
+					doc.total_manufacture_of_scrap=d
+					doc.scrap_total_cost=c
+			doc.save(ignore_permissions=True)
 
 	def update_cost_in_project(self):
 		if (self.work_order and not frappe.db.get_value("Work Order",
@@ -1523,7 +1554,7 @@ class StockEntry(StockController):
 			}
 
 			self._update_percent_field_in_targets(args, update_modified=True)
-
+	
 	def update_quality_inspection(self):
 		if self.inspection_required:
 			reference_type = reference_name = ''
@@ -1630,6 +1661,30 @@ def make_stock_in_entry(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def referance_challan(reference_challan,name):
+	doc=frappe.db.get_all("Stock Entry Detail",{"parent":reference_challan,"docstatus":1},
+							['item_code','qty','subcontracted_item','uom','conversion_factor','stock_uom','transfer_qty','t_warehouse'])
+
+	return doc
+	
+
+@frappe.whitelist()
+def get_list(company):
+	list=[]
+	lst=[]
+	doc=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Send to Subcontractor","docstatus":1,"company":["!=", company]},['name'])
+	db=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Material Receipt","docstatus":1},['reference_challan'])
+	for i in db:
+		if i.reference_challan:
+			lst.append(i.reference_challan)
+	for i in doc:
+		if i.name not in lst:
+			list.append(i.name)
+	return list
+
+
 
 @frappe.whitelist()
 def get_work_order_details(work_order, company):

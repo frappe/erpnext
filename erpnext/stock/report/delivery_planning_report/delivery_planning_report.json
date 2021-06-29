@@ -1,0 +1,28 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2021-06-22 15:50:25.683371",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "json": "{}",
+ "modified": "2021-06-23 12:21:59.775248",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Planning Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "Select d.transporter, d.customer, d.item_code, d.item_name, d.ordered_qty, d.qty_to_deliver, d.delivery_date, \ndn.name, dn.posting_date,\np.name, p.total_weight\nfrom `tabDelivery Planning Item` d\njoin `tabDelivery Note` dn ON d.customer = dn.customer \njoin `tabPick List` p ON d.customer = p.customer\n\nwhere d.approved = \"Yes\"",
+ "ref_doctype": "Delivery Planning Item",
+ "report_name": "Delivery Planning Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

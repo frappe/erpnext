@@ -23,5 +23,16 @@ frappe.ui.form.on("Item Price", {
 				}
 			};
 		});
+	},
+	before_save : function(frm){
+		if(frm.is_dirty()){
+			frappe.call({
+				method: 'update_customer_pricing_rule_item',
+				doc: frm.doc,
+				callback: function(frm){
+					//
+				}
+			})
+		}
 	}
 });

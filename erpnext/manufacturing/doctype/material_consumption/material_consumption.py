@@ -64,12 +64,14 @@ class MaterialConsumption(Document):
             value = 0
             for row in self.materials_to_consume:
                 item = frappe.get_doc("Item", row.item)
-                value += flt(row.qty_issued)*flt(item.weight_per_unit)
+                if item.bom_item_type == "RM":
+                    value += flt(row.qty_issued)*flt(item.weight_per_unit)
         else:
             value = 0
             for row in self.pick_list_item:
                 item = frappe.get_doc("Item", row.item_code)
-                value += flt(row.picked_qty)*flt(item.weight_per_unit)
+                if item.bom_item_type == "RM":
+                    value += flt(row.picked_qty)*flt(item.weight_per_unit)
 
         self.weight_consumed = flt(value, self.precision('weight_consumed'))
 
@@ -82,15 +84,20 @@ class MaterialConsumption(Document):
 
     def calc_actual_rm_wt_on_wo(self):
         wo = frappe.get_doc("Work Order", self.work_order)
-        value = 0
+        actual_value = 0
         for row in wo.required_items:
             if row.consumed_qty > 0:
-                if row.type == "RM":
-                    item_wt = frappe.get_doc("Item", row.item_code)
-                    value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
-        wo.actual_rm_weight = flt(value, wo.precision('actual_rm_weight'))
-        # wo.db_update()
-        # return True
+                item_wt = frappe.get_doc("Item", row.item_code)
+                if item_wt.bom_item_type == "RM":
+                    actual_value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
+        wo.actual_rm_weight = flt(actual_value, wo.precision('actual_rm_weight'))
+
+        total_value = 0
+        for row in wo.required_items:
+            item_wt = frappe.get_doc("Item", row.item_code)
+            total_value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
+
+        wo.consumed_total_weight = flt(total_value, wo.precision('consumed_total_weight'))
 
     def make_stock_entry(self):
         precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("picked_qty"))
