@@ -486,6 +486,13 @@ class OrgChartMobile {
 				if (company.get_value() && me.company != company.get_value()) {
 					me.company = company.get_value();
 
+					if (me.$sibling_group)
+						me.$sibling_group.remove();
+
+					// setup sibling group wrapper
+					me.$sibling_group = $(`<div class="sibling-group mt-4 mb-4"></div>`);
+					me.page.main.append(me.$sibling_group);
+
 					if (me.$hierarchy)
 						me.$hierarchy.remove();
 
@@ -540,6 +547,12 @@ class OrgChartMobile {
 	expand_node(node) {
 		this.set_selected_node(node);
 		this.show_active_path(node);
+
+		if (this.$sibling_group) {
+			const sibling_parent = this.$sibling_group.find('.node-group').attr('data-parent');
+			if (node.parent_id !== sibling_parent)
+				this.$sibling_group.empty();
+		}
 
 		if (node.expandable && !node.expanded) {
 			return this.load_children(node);
@@ -719,8 +732,6 @@ class OrgChartMobile {
 
 			if (collapsed)
 				$node_group.addClass('collapsed');
-			else
-				$node_group.addClass('mb-4');
 
 			return $node_group;
 		}
@@ -746,13 +757,15 @@ class OrgChartMobile {
 			() => this.get_child_nodes(node_object.parent_id, node_object.id),
 			(child_nodes) => this.get_node_group(child_nodes, node_object.parent_id, false),
 			(node_group) => {
-				this.$hierarchy.empty().append(node_group) },
+				if (node_group)
+					this.$sibling_group.empty().append(node_group);
+			},
 			() => this.setup_node_group_action(),
 			() => {
-				this.$hierarchy.append(`
+				this.$hierarchy.empty().append(`
 					<li class="level"></li>
 				`);
-				this.$hierarchy.append(node);
+				this.$hierarchy.find('.level').append(node);
 				this.expand_node(node_object);
 			}
 		]);
