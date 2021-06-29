@@ -13,6 +13,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 	split: function(frm) {
 			var new_supplier;
 			var new_warehouse;
+			var new_date;
 			let d = new frappe.ui.Dialog({
 			title: 'Split Planning Item',
 			fields: [
@@ -23,6 +24,12 @@ frappe.ui.form.on('Delivery Planning Item', {
 				    options: "Supplier",
 				    default: frm.doc.transporter,
 
+				},
+				{
+					label: 'Deliver Date',
+					fieldname: 'delivery_date',
+					fieldtype: 'Date',
+					reqd: 1
 				},
 				{
 					label: 'Qty To Deliver',
@@ -87,7 +94,8 @@ frappe.ui.form.on('Delivery Planning Item', {
 							n_transporter : values.transporter,
 							n_qty : values.qty_to_deliver,
 							n_src_warehouse : new_warehouse,
-							n_supplier : new_supplier
+							n_supplier : new_supplier,
+							n_date : values.delivery_date
 						  },
 
 					callback: function(r){

@@ -596,7 +596,8 @@ class DeliveryPlanning(Document):
 												  "ordered_qty",
 												  "delivery_date",
 												  "sorce_warehouse",
-												  "sales_order"
+												  "sales_order",
+												  "name"
 												 ]
 												 )
 				print("0000000000000000000000000000", so_wise_data)
@@ -637,7 +638,10 @@ class DeliveryPlanning(Document):
 				# po.save()
 				# frappe.db.commit()
 				print("-----------Date 0purchase order create 111 -------------", q.delivery_date)
-
+				for i in so_wise_data:
+						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
+						newdoc.delivery_note = po.name
+						newdoc.save(ignore_permissions=True)
 
 			return 1
 
@@ -777,34 +781,47 @@ class DeliveryPlanning(Document):
 				dnote.taxes_and_charges = discount.taxes_and_charges
 				dnote.transporter = discount.transporter
 				dnote.save(ignore_permissions=True)
+
+				print('--------- Dnote ----  name ------------', dnote.name)
+
 			return 1
 
 		elif pl == []:
-			dpi = frappe.db.get_all('Delivery Planning Item',
-									filters={ 'related_delivey_planning': self.name,
-											  'approved': "Yes"},
-									group_by= 'customer',
-									fields = 'customer')
+			# dpi = frappe.db.get_all('Delivery Planning Item',
+			# 						filters={'related_delivey_planning': self.name,
+			# 								  'approved': "Yes"},
+			# 						group_by= 'customer','transporter',
+			# 						fields = ['customer','transporter'])
+			conditions = ""
+			conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
+			dpi = frappe.db.sql(""" Select customer, transporter
+							from `tabDelivery Planning Item`
+							where approved = 'Yes'
+							{conditions}
+							Group By customer, transporter
+							""".format(conditions=conditions), as_dict=1)
 			print("**********", dpi)
 			if dpi:
 				for d in dpi:
 					dnote = frappe.new_doc('Delivery Note')
 					dnote.customer = d.customer
 					dnote.related_delivery_planning = self.name
-
+					dnote.transporter = d.transporter
 
 					item = frappe.db.get_all('Delivery Planning Item',
 											filters={'related_delivey_planning': self.name,
 													 'approved': "Yes",
 													 'supplier_dc': 0,
-													 'customer': d.customer},
+													 'customer': d.customer,
+													 'transporter': d.transporter},
 											fields= ["item_code",
 													  "ordered_qty",
 													  'stock_uom',
 													  "uom",
 													  "conversion_factor",
 													  "sorce_warehouse",
-													  "sales_order"]
+													  "sales_order",
+													  "name"]
 											 )
 					print(" */*/*/  */*/*/  /*/", item)
 
@@ -820,7 +837,6 @@ class DeliveryPlanning(Document):
 							'stock_uom': i.stock_uom,
 							'conversion_factor': i.conversion_factor,
 							'against_sales_order': i.sales_order
-
 						})
 
 					discount = frappe.get_doc('Sales Order', salesno)
@@ -846,15 +862,44 @@ class DeliveryPlanning(Document):
 					dnote.apply_dicount_on = discount.apply_discount_on
 					dnote.taxes_and_charges = discount.taxes_and_charges
 					dnote.tc_name = discount.tc_name
-					dnote.transporter = discount.transporter
+					# dnote.transporter = discount.transporter
+
+
 					dnote.save(ignore_permissions=True)
+					for i in item:
+						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
+						newdoc.delivery_note = dnote.name
+						newdoc.save(ignore_permissions=True)
+
+
 				return 2
 
 		else : return 0
 
+	def on_cancel(self):
+		print('This is on_cancel')
+		dpi = frappe.get_all(doctype='Delivery Planning Item',
+							  filters={"related_delivey_planning" : self.name})
 
+		tdpi = frappe.get_all(doctype='Transporter Wise Planning Item',
+							  filters={"related_delivery_planning" : self.name})
 
+		popi = frappe.get_all(doctype='Purchase Orders Planning Item',
+					   filters={"related_delivery_planning": self.name})
 
+		if popi:
+			for p in popi:
+				popi = frappe.get_doc('Purchase Orders Planning Item', p.name)
+				popi.delete()
 
+		if tdpi:
+			for t in tdpi:
+				trans = frappe.get_doc('Transporter Wise Planning Item', t.name)
+				trans.delete()
 
+		if dpi:
+			for d in dpi:
+				ddpi = frappe.get_doc('Delivery Planning Item', d.name)
+				ddpi.delete()
 
+		frappe.msgprint(__('All Related Planning Items Deleted'));
