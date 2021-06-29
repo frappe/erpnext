@@ -1,8 +1,14 @@
 erpnext.HierarchyChartMobile = class {
-
-	constructor(wrapper) {
+	/* Options:
+		- wrapper: wrapper for the hierarchy view
+		- method:
+			- to get the data for each node
+			- this method should return id, name, title, image, and connections for each node
+	*/
+	constructor(wrapper, method) {
 		this.wrapper = $(wrapper);
 		this.page = wrapper.page;
+		this.method = method;
 
 		this.page.main.css({
 			'min-height': '300px',
@@ -123,8 +129,6 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	render_root_node() {
-		this.method = 'erpnext.hr.page.organizational_chart.organizational_chart.get_children';
-
 		let me = this;
 
 		frappe.call({
@@ -137,12 +141,12 @@ erpnext.HierarchyChartMobile = class {
 					let data = r.message[0];
 
 					let root_node = new me.Node({
-						id: data.name,
+						id: data.id,
 						parent: me.$hierarchy.find('.root-level'),
 						parent_id: undefined,
 						image: data.image,
-						name: data.employee_name,
-						title: data.designation,
+						name: data.name,
+						title: data.title,
 						expandable: true,
 						connections: data.connections,
 						is_root: true,
@@ -249,10 +253,10 @@ erpnext.HierarchyChartMobile = class {
 			if (child_nodes) {
 				$.each(child_nodes, (_i, data) => {
 					this.add_node(node, data);
-					$(`#${data.name}`).addClass('active-child');
+					$(`#${data.id}`).addClass('active-child');
 
 					setTimeout(() => {
-						this.add_connector(node.id, data.name);
+						this.add_connector(node.id, data.id);
 					}, 250);
 				});
 			}
@@ -266,12 +270,12 @@ erpnext.HierarchyChartMobile = class {
 		var $li = $('<li class="child-node"></li>');
 
 		return new this.Node({
-			id: data.name,
+			id: data.id,
 			parent: $li.appendTo(node.$children),
 			parent_id: node.id,
 			image: data.image,
-			name: data.employee_name,
-			title: data.designation,
+			name: data.name,
+			title: data.title,
 			expandable: data.expandable,
 			connections: data.connections,
 			children: undefined
@@ -418,7 +422,7 @@ erpnext.HierarchyChartMobile = class {
 				${html}
 				<span class="avatar avatar-small">
 					<div class="avatar-frame standard-image avatar-extra-count"
-						title="${extra_nodes.map(node => node.employee_name).join(', ')}">
+						title="${extra_nodes.map(node => node.name).join(', ')}">
 						+${extra_nodes.length}
 					</div>
 				</span>
@@ -443,7 +447,7 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	get_avatar(node) {
-		return `<span class="avatar avatar-small" title="${node.employee_name}">
+		return `<span class="avatar avatar-small" title="${node.name}">
 			<span class="avatar-frame" src=${node.image} style="background-image: url(${node.image})"></span>
 		</span>`
 	}

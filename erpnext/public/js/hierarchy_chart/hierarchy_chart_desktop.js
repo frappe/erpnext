@@ -1,8 +1,14 @@
 erpnext.HierarchyChart = class {
-
-	constructor(wrapper) {
+	/* Options:
+		- wrapper: wrapper for the hierarchy view
+		- method:
+			- to get the data for each node
+			- this method should return id, name, title, image, and connections for each node
+	*/
+	constructor(wrapper, method) {
 		this.wrapper = $(wrapper);
 		this.page = wrapper.page;
+		this.method = method;
 
 		this.page.main.css({
 			'min-height': '300px',
@@ -114,8 +120,6 @@ erpnext.HierarchyChart = class {
 	}
 
 	render_root_node() {
-		this.method = 'erpnext.hr.page.organizational_chart.organizational_chart.get_children';
-
 		let me = this;
 
 		frappe.call({
@@ -128,12 +132,12 @@ erpnext.HierarchyChart = class {
 					let data = r.message[0];
 
 					let root_node = new me.Node({
-						id: data.name,
+						id: data.id,
 						parent: me.$hierarchy.find('.root-level'),
 						parent_id: undefined,
 						image: data.image,
-						name: data.employee_name,
-						title: data.designation,
+						name: data.name,
+						title: data.title,
 						expandable: true,
 						connections: data.connections,
 						is_root: true,
@@ -225,7 +229,7 @@ erpnext.HierarchyChart = class {
 					this.add_node(node, data);
 
 					setTimeout(() => {
-						this.add_connector(node.id, data.name);
+						this.add_connector(node.id, data.id);
 					}, 250);
 				});
 			}
@@ -240,12 +244,12 @@ erpnext.HierarchyChart = class {
 		var $li = $('<li class="child-node"></li>');
 
 		return new this.Node({
-			id: data.name,
+			id: data.id,
 			parent: $li.appendTo(node.$children),
 			parent_id: node.id,
 			image: data.image,
-			name: data.employee_name,
-			title: data.designation,
+			name: data.name,
+			title: data.title,
 			expandable: data.expandable,
 			connections: data.connections,
 			children: undefined
@@ -333,7 +337,7 @@ erpnext.HierarchyChart = class {
 			(child_nodes) => {
 				if (child_nodes) {
 					$.each(child_nodes, (_i, data) => {
-						this.add_connector(node_parent, data.name);
+						this.add_connector(node_parent, data.id);
 					});
 				}
 			}

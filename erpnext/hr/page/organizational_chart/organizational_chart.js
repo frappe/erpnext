@@ -8,10 +8,12 @@ frappe.pages['organizational-chart'].on_page_load = function(wrapper) {
 	$(wrapper).bind('show', () => {
 		frappe.require('/assets/js/hierarchy-chart.min.js', () => {
 			let organizational_chart = undefined;
+			let method = 'erpnext.hr.page.organizational_chart.organizational_chart.get_children';
+
 			if (frappe.is_mobile()) {
-				organizational_chart = new erpnext.HierarchyChartMobile(wrapper);
+				organizational_chart = new erpnext.HierarchyChartMobile(wrapper, method);
 			} else {
-				organizational_chart = new erpnext.HierarchyChart(wrapper);
+				organizational_chart = new erpnext.HierarchyChart(wrapper, method);
 			}
 			organizational_chart.show();
 		});
