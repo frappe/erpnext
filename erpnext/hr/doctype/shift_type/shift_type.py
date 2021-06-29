@@ -32,7 +32,7 @@ class ShiftType(Document):
 			'shift': self.name
 		}
 		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
-		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start'])):
+		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_start'])):
 			single_shift_logs = list(group)
 			attendance_status, working_hours, late_entry, early_exit = self.get_attendance(single_shift_logs)
 			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, self.name)
