@@ -258,10 +258,10 @@
 	box-shadow: var(--shadow-sm);
 	border-radius: 0.5rem;
 	padding: 0.75rem;
-	margin-left: 12px;
-	width: 5rem;
+	width: 18rem;
 	height: 3rem;
 	overflow: hidden;
+	align-items: center;
 }
 
 .node-group .avatar-group {
@@ -276,4 +276,9 @@
 .node-group .avatar-frame {
 	width: 1.5rem;
 	height: 1.5rem;
+}
+
+.node-group.collapsed {
+	width: 5rem;
+	margin-left: 12px;
 }

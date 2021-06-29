@@ -565,11 +565,12 @@ class OrgChartMobile {
 
 			frappe.run_serially([
 				() => this.get_child_nodes(node.parent_id, node.id),
-				(child_nodes) => this.get_node_group(child_nodes, node.id),
+				(child_nodes) => this.get_node_group(child_nodes, node.parent_id),
 				(node_group) => {
 					node_parent.find('.collapsed-level')
 						.append(node_group);
-				}
+				},
+				() => this.setup_node_group_action()
 			]);
 		}
 	}
@@ -651,7 +652,6 @@ class OrgChartMobile {
 	setup_node_click_action(node) {
 		let me = this;
 		let node_element = $(`#${node.id}`);
-		let node_object = null;
 
 		node_element.click(function() {
 			if (node_element.is(':visible') && node_element.hasClass('active-path')) {
@@ -662,6 +662,15 @@ class OrgChartMobile {
 			}
 
 			me.expand_node(node);
+		});
+	}
+
+	setup_node_group_action() {
+		let me = this;
+
+		$('.node-group').on('click', function() {
+			let parent = $(this).attr('data-parent');
+			me.expand_sibling_group_node(parent);
 		});
 	}
 
@@ -676,7 +685,7 @@ class OrgChartMobile {
 		node.$link.appendTo(this.$hierarchy.find('.level:last'));
 	}
 
-	get_node_group(nodes, sibling) {
+	get_node_group(nodes, parent, collapsed=true) {
 		let limit = 2;
 		const display_nodes = nodes.slice(0, limit);
 		const extra_nodes = nodes.slice(limit);
@@ -700,20 +709,53 @@ class OrgChartMobile {
 			`;
 		}
 
-		const $node_group =
-			$(`<div class="node-group card cursor-pointer" data-sibling=${sibling}>
-				<div class="avatar-group right overlap">
-					${html}
-				</div>
-			</div>`);
+		if (html) {
+			const $node_group =
+				$(`<div class="node-group card cursor-pointer" data-parent=${parent}>
+					<div class="avatar-group right overlap">
+						${html}
+					</div>
+				</div>`);
 
-		return $node_group;
+			if (collapsed)
+				$node_group.addClass('collapsed');
+			else
+				$node_group.addClass('mb-4');
+
+			return $node_group;
+		}
+
+		return null;
 	}
 
 	get_avatar(node) {
 		return `<span class="avatar avatar-small" title="${node.employee_name}">
 			<span class="avatar-frame" src=${node.image} style="background-image: url(${node.image})"></span>
 		</span>`
+	}
+
+	expand_sibling_group_node(parent) {
+		let node_object = this.nodes[parent];
+		let node = node_object.$link;
+		node.removeClass('active-child active-path');
+		node_object.expanded = 0;
+		node_object.$children = undefined;
+
+		// show parent's siblings and expand parent node
+		frappe.run_serially([
+			() => this.get_child_nodes(node_object.parent_id, node_object.id),
+			(child_nodes) => this.get_node_group(child_nodes, node_object.parent_id, false),
+			(node_group) => {
+				this.$hierarchy.empty().append(node_group) },
+			() => this.setup_node_group_action(),
+			() => {
+				this.$hierarchy.append(`
+					<li class="level"></li>
+				`);
+				this.$hierarchy.append(node);
+				this.expand_node(node_object);
+			}
+		]);
 	}
 
 	remove_levels_after_node(node) {
