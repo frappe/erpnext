@@ -1,14 +1,16 @@
 erpnext.HierarchyChart = class {
 	/* Options:
+		- doctype
 		- wrapper: wrapper for the hierarchy view
 		- method:
 			- to get the data for each node
 			- this method should return id, name, title, image, and connections for each node
 	*/
-	constructor(wrapper, method) {
+	constructor(doctype, wrapper, method) {
 		this.wrapper = $(wrapper);
 		this.page = wrapper.page;
 		this.method = method;
+		this.doctype = doctype;
 
 		this.page.main.css({
 			'min-height': '300px',
@@ -36,6 +38,7 @@ erpnext.HierarchyChart = class {
 				me.nodes[this.id] = this;
 				me.make_node_element(this);
 				me.setup_node_click_action(this);
+				me.setup_edit_node_action(this);
 			}
 		}
 	}
@@ -360,6 +363,15 @@ erpnext.HierarchyChart = class {
 			}
 
 			me.expand_node(node);
+		});
+	}
+
+	setup_edit_node_action(node) {
+		let node_element = $(`#${node.id}`);
+		let me = this;
+
+		node_element.find('.btn-edit-node').click(function() {
+			frappe.set_route('Form', me.doctype, node.id);
 		});
 	}
 

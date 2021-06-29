@@ -11,9 +11,9 @@ frappe.pages['organizational-chart'].on_page_load = function(wrapper) {
 			let method = 'erpnext.hr.page.organizational_chart.organizational_chart.get_children';
 
 			if (frappe.is_mobile()) {
-				organizational_chart = new erpnext.HierarchyChartMobile(wrapper, method);
+				organizational_chart = new erpnext.HierarchyChartMobile('Employee', wrapper, method);
 			} else {
-				organizational_chart = new erpnext.HierarchyChart(wrapper, method);
+				organizational_chart = new erpnext.HierarchyChart('Employee', wrapper, method);
 			}
 			organizational_chart.show();
 		});
