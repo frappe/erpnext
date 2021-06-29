@@ -48,7 +48,6 @@
 	border-radius: 0.5rem;
 	padding: 0.75rem;
 	width: 18rem;
-	height: 5rem;
 
 	.btn-edit-node {
 		display: flex;
@@ -195,6 +194,7 @@
 
 .level {
 	margin-right: 8px;
+	align-items: flex-start;
 }
 
 #arrows {
