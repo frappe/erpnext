@@ -13,12 +13,15 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/accounts",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-10-30 15:41:15.547225",
+ "modified": "2021-06-29 15:09:26.981634",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",
  "owner": "Administrator",
  "steps": [
+  {
+   "step": "Company"
+  },
   {
    "step": "Chart of Accounts"
   },
