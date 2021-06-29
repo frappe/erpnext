@@ -18,36 +18,36 @@
   "item_name",
   "item_group",
   "is_item_from_hub",
-  "stock_uom",
+  "allow_alternative_item",
+  "is_fixed_asset",
   "column_break0",
   "disabled",
-  "allow_alternative_item",
   "is_stock_item",
+  "stock_uom",
   "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
   "standard_rate",
-  "is_fixed_asset",
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
+  "section_break_21",
   "over_delivery_receipt_allowance",
+  "column_break_23",
   "over_billing_allowance",
-  "image",
   "section_break_11",
+  "image",
   "brand",
   "description",
-  "sb_barcodes",
-  "barcodes",
   "inventory_section",
-  "shelf_life_in_days",
   "end_of_life",
   "default_material_request_type",
   "valuation_method",
   "column_break1",
-  "warranty_period",
   "weight_per_unit",
   "weight_uom",
+  "sb_barcodes",
+  "barcodes",
   "reorder_section",
   "reorder_levels",
   "unit_of_measure_conversion",
@@ -59,9 +59,11 @@
   "has_expiry_date",
   "retain_sample",
   "sample_quantity",
+  "shelf_life_in_days",
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+  "warranty_period",
   "variants_section",
   "has_variants",
   "variant_based_on",
@@ -77,6 +79,7 @@
   "lead_time_days",
   "last_purchase_rate",
   "is_customer_provided_item",
+  "is_sub_contracted_item",
   "customer",
   "supplier_details",
   "delivered_by_supplier",
@@ -111,7 +114,6 @@
   "inspection_required_before_delivery",
   "manufacturing",
   "default_bom",
-  "is_sub_contracted_item",
   "column_break_74",
   "customer_code",
   "default_item_manufacturer",
@@ -206,6 +208,7 @@
    "default": "0",
    "fieldname": "is_item_from_hub",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Item from Hub",
    "read_only": 1
   },
@@ -213,6 +216,7 @@
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Default Unit of Measure",
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Link",
@@ -258,10 +262,12 @@
    "label": "Opening Stock"
   },
   {
+   "allow_in_quick_entry": 1,
    "depends_on": "is_stock_item",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
-   "label": "Valuation Rate"
+   "label": "Valuation Rate",
+   "mandatory_depends_on": "opening_stock"
   },
   {
    "bold": 1,
@@ -360,6 +366,7 @@
   },
   {
    "default": "Purchase",
+   "description": "Value set here will be selected by default in the new Material Request",
    "fieldname": "default_material_request_type",
    "fieldtype": "Select",
    "label": "Default Material Request Type",
@@ -510,6 +517,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "attributes",
+   "depends_on": "is_stock_item",
    "fieldname": "variants_section",
    "fieldtype": "Section Break",
    "label": "Variants"
@@ -581,6 +589,7 @@
    "oldfieldtype": "Currency"
   },
   {
+   "depends_on": "is_stock_item",
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock"
@@ -590,6 +599,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "is_stock_item",
    "description": "Average time taken by the supplier to deliver",
    "fieldname": "lead_time_days",
    "fieldtype": "Int",
@@ -608,6 +618,7 @@
   },
   {
    "default": "0",
+   "depends_on": "is_stock_item",
    "fieldname": "is_customer_provided_item",
    "fieldtype": "Check",
    "label": "Is Customer Provided Item"
@@ -1058,6 +1069,14 @@
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
   }
  ],
  "has_web_view": 1,
@@ -1067,7 +1086,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-03-18 14:04:38.575519",
+ "modified": "2021-06-29 13:12:23.622952",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
