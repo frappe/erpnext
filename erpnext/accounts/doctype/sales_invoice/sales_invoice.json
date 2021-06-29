@@ -132,13 +132,11 @@
   "payments",
   "section_break_84",
   "base_paid_amount",
+  "base_change_amount",
+  "account_for_change_amount",
   "column_break_86",
   "paid_amount",
-  "section_break_88",
-  "base_change_amount",
-  "column_break_90",
   "change_amount",
-  "account_for_change_amount",
   "column_break4",
   "write_off_amount",
   "base_write_off_amount",
@@ -279,7 +277,7 @@
    "fieldtype": "Check",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Include Payment (POS)",
+   "label": "Is Paid (POS)",
    "oldfieldname": "is_pos",
    "oldfieldtype": "Check",
    "print_hide": 1
@@ -417,6 +415,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "po_no",
+   "depends_on": "customer",
    "fieldname": "customer_po_details",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -449,6 +448,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "customer",
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1376,12 +1376,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_88",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1
-  },
-  {
    "depends_on": "is_pos",
    "fieldname": "base_change_amount",
    "fieldtype": "Currency",
@@ -1392,12 +1386,6 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_90",
-   "fieldtype": "Column Break",
-   "hide_days": 1,
-   "hide_seconds": 1
   },
   {
    "depends_on": "is_pos",
@@ -1978,7 +1966,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-05-20 22:48:33.988881",
+ "modified": "2021-06-29 19:44:03.530198",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

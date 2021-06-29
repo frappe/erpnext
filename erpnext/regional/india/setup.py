@@ -143,7 +143,7 @@ def make_custom_fields(update=True):
 
 	purchase_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
-			insert_after='language', print_hide=1, collapsible=1),
+			insert_after='write_off_cost_center', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
 			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
