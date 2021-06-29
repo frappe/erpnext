@@ -19,6 +19,11 @@
   "total",
   "total_advance",
   "outstanding_balance",
+  "discount",
+  "discount_check",
+  "discount_amount",
+  "total_sale",
+  "total_discount",
   "contact_section",
   "customer_address",
   "phone_number"
@@ -127,10 +132,42 @@
    "fieldtype": "Currency",
    "label": "Outstanding Balance",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "discount",
+   "fieldtype": "Section Break",
+   "label": "Discount"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_check",
+   "fieldtype": "Check",
+   "label": "Apply Discount"
+  },
+  {
+   "depends_on": "discount_check",
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount"
+  },
+  {
+   "depends_on": "discount_check",
+   "fieldname": "total_sale",
+   "fieldtype": "Currency",
+   "label": "Total Sale Invoice",
+   "read_only": 1
+  },
+  {
+   "depends_on": "discount_check",
+   "fieldname": "total_discount",
+   "fieldtype": "Currency",
+   "label": "Total With Discount",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-06-29 09:19:30.831563",
+ "modified": "2021-06-29 14:56:41.311661",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
