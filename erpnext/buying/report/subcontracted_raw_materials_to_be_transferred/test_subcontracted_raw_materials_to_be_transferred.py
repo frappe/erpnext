@@ -60,7 +60,6 @@ def transfer_subcontracted_raw_materials(po):
 	rm_item = [
 		{
 			'name': po.supplied_items[0].name,
-<<<<<<< HEAD
 			'item_code': item_1,
 			'rm_item_code': item_1,
 			'item_name': item_1,
@@ -68,20 +67,10 @@ def transfer_subcontracted_raw_materials(po):
 			'warehouse': '_Test Warehouse - _TC',
 			'rate': 100,
 			'amount': 100 * transfer_qty_map[item_1],
-=======
-			'item_code': '_Test Item Home Desktop 100',
-			'rm_item_code': '_Test Item Home Desktop 100',
-			'item_name': '_Test Item Home Desktop 100',
-			'qty': 2,
-			'warehouse': '_Test Warehouse - _TC',
-			'rate': 100,
-			'amount': 200,
->>>>>>> c4d851e45f (fix: Test)
 			'stock_uom': 'Nos'
 		},
 		{
 			'name': po.supplied_items[1].name,
-<<<<<<< HEAD
 			'item_code': item_2,
 			'rm_item_code': item_2,
 			'item_name': item_2,
@@ -89,15 +78,6 @@ def transfer_subcontracted_raw_materials(po):
 			'warehouse': '_Test Warehouse - _TC',
 			'rate': 100,
 			'amount': 100 * transfer_qty_map[item_2],
-=======
-			'item_code': '_Test Item',
-			'rm_item_code': '_Test Item',
-			'item_name': '_Test Item',
-			'qty': 1,
-			'warehouse': '_Test Warehouse - _TC',
-			'rate': 100,
-			'amount': 100,
->>>>>>> c4d851e45f (fix: Test)
 			'stock_uom': 'Nos'
 		}
 	]
