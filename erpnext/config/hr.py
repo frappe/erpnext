@@ -60,6 +60,18 @@ def get_data():
 					"dependencies": ["Employee"]
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Monthly Attendance Sheet",
+					"doctype": "Attendance"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Checkin Sheet",
+					"doctype": "Employee Checkin"
+				},
+				{
 					"type": "doctype",
 					"name": "Upload Attendance",
 					"hide_count": True,
@@ -70,12 +82,6 @@ def get_data():
 					"name": "Employee Checkin",
 					"hide_count": True,
 					"dependencies": ["Employee"]
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Monthly Attendance Sheet",
-					"doctype": "Attendance"
 				},
 				{
 					"type": "doctype",

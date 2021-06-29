@@ -39,8 +39,10 @@
  ],
  "fields": [
   {
+   "default": "HR-LAP-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "options": "HR-LAP-.YYYY.-",
@@ -198,7 +200,7 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "1",
+   "default": "0",
    "fieldname": "follow_via_email",
    "fieldtype": "Check",
    "label": "Follow via Email",
@@ -213,7 +215,8 @@
    "fieldtype": "Link",
    "label": "Salary Slip",
    "options": "Salary Slip",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -246,7 +249,7 @@
  "idx": 1,
  "is_submittable": 1,
  "max_attachments": 3,
- "modified": "2020-09-23 18:53:11.608446",
+ "modified": "2021-06-29 23:21:03.040477",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
