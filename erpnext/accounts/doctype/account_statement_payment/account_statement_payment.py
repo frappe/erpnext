@@ -9,12 +9,9 @@ from frappe.model.document import Document
 from datetime import datetime, timedelta, date
 
 class AccountStatementPayment(Document):
-	# def validate(self):
-	# 	if self.docstatus == 1:
-	# 		self.create_new_sales_invoice()
-	
-	# def on_cancel(self):
-	# 	self.delete_new_sales_invoice()
+	def validate(self):
+		if self.docstatus == 0 and self.discount_check:
+			self.calculate_discount()
 	
 	def delete_new_sales_invoice(self):
 		sale_invoice = frappe.get_all("Sales Invoice", ["name"], filters = {"patient_statement": self.patient_statement})
@@ -56,3 +53,21 @@ class AccountStatementPayment(Document):
 
 		doc.insert()
 
+	def calculate_discount(self):
+		total_sale = 0
+		items = frappe.get_all("Account Statement Payment Item", ["item", "item_name", "quantity", "price", "net_pay", "sale_amount"], filters = {"parent": self.name})
+
+		for item in items:
+			if item.net_pay != item.sale_amount:
+				total_sale += item.sale_amount
+			else:
+				total_sale += item.price
+
+		self.total_sale = total_sale
+
+		self.total_discount = self.total_sale - self.discount_amount
+
+		# return {
+		# 	"total_sale": total_sale,
+		# 	"total_discount": total_discount
+		# }
