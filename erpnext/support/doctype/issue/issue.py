@@ -262,7 +262,7 @@ def calculate_first_response_time(issue, first_responded_on):
 
 	else:
 		# response on the next day
-		if first_responded_on.day - issue_creation_date.day == 1:
+		if date_diff(first_responded_on, issue_creation_date) == 1:
 			first_response_time = 0
 		else:
 			first_response_time = calculate_initial_frt(issue_creation_date, date_diff(first_responded_on, issue_creation_date)- 1, support_hours)
