@@ -146,7 +146,9 @@
   "commission_rate",
   "total_commission",
   "section_break1",
-  "sales_team"
+  "sales_team",
+  "section_break_140",
+  "related_delivery_planning"
  ],
  "fields": [
   {
@@ -1283,13 +1285,25 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "related_delivery_planning",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_140",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 23:55:49.620641",
+ "modified": "2021-06-21 12:52:48.665979",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

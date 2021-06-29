@@ -40,6 +40,9 @@
   "shipping_address",
   "customer_group",
   "territory",
+  "transporter_information_section",
+  "transporter",
+  "transporter_name",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1486,13 +1489,31 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "fetch_from": "transporter.supplier_name",
+   "fieldname": "transporter_name",
+   "fieldtype": "Data",
+   "label": "Transporter Name"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "transporter_information_section",
+   "fieldtype": "Section Break",
+   "label": "Transporter Information"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 23:55:13.439068",
+ "modified": "2021-06-28 11:26:48.340946",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

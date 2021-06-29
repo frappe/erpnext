@@ -59,7 +59,13 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def make_read_only(self):
-		return frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+		table = frappe.db.get_all("Staging Details", ["company","staging_picklist_warehouse"])
+		print("****"*200)
+		print(table)
+		if(len(table) > 0):
+			for t in table:
+				if(self.company == t.get('company')):
+					return 1
 	
 	@frappe.whitelist()
 	def get_warehouse(self):
@@ -269,8 +275,12 @@ class WorkOrder(Document):
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
+		
+		if self.production_plan and frappe.db.exists('Production Plan Item Reference',{'parent':self.production_plan}):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
 
-		self.update_work_order_qty_in_so()
 		self.update_reserved_qty_for_production()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -279,14 +289,20 @@ class WorkOrder(Document):
 		self.bom_details()
 		# self.scrap_cost_calc()
 		
-	def before_save(self):
-		bo = frappe.get_doc("BOM", self.bom_no)
+	def after_save(self):
 		for row1 in self.required_items:
-			for row2 in bo.items:
-				if row1.item_name == row2.item_name:
-					row1.type = row2.type
-					bo.db_update()
-					break
+			bo = frappe.get_doc("Item", row1.item_code)
+			row1.type = bo.bom_item_type
+		self.reload()
+		# bo = frappe.get_doc("BOM", self.bom_no)
+		# for row1 in self.required_items:
+		# 	for row2 in bo.items:
+		# 		if (row1.item_name == row2.item_name):
+		# 			row1.type = row2.type
+		# 			break
+
+
+
 		# value = 0
 		# for row in self.required_items:
 		# 	if row.type == "RM":
@@ -306,6 +322,7 @@ class WorkOrder(Document):
 
 	def on_change(self):
 		self.planned_rm_weight_calc()
+		self.total_weight()
 		self.calc_rm_weight_and_consump_dev()
 		self.transfered_rm_weight_calculation()
 		# self.bom_details()
@@ -322,8 +339,20 @@ class WorkOrder(Document):
 		# self.db_update()
 		# self.reload()
 
+	def total_weight(self):
+		total_trans = total_planned = 0
+		for row in self.required_items:
+			item_wt = frappe.get_doc("Item", row.item_code)
+			total_trans += flt(row.transferred_qty) * flt(item_wt.weight_per_unit)
+			total_planned += flt(row.required_qty) * flt(item_wt.weight_per_unit)
+		self.planned_total_weight = flt(total_planned, self.precision('planned_total_weight'))
+		self.transferred_total_weight = flt(total_trans, self.precision('transferred_total_weight'))
+		frappe.db.set_value("Work Order", self.name, "planned_total_weight", self.planned_total_weight)
+		frappe.db.set_value("Work Order", self.name, "transferred_total_weight", self.transferred_total_weight)
+
 	def actual_yeild_on_wo(self):
-		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(self.weight_per_unit), self.precision('actual_fg_weight'))
+		item_to_manuf_weight = frappe.db.get_value("Item", {'name':self.production_item},'weight_per_unit')
+		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(item_to_manuf_weight), self.precision('actual_fg_weight'))
 		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
 			self.actual_yeild = 0
 		else:
@@ -332,8 +361,8 @@ class WorkOrder(Document):
 	def planned_rm_weight_calc(self):
 		value = 0
 		for row in self.required_items:
-			if row.type == "RM":
-				item_wt = frappe.get_doc("Item", row.item_code)
+			item_wt = frappe.get_doc("Item", row.item_code)
+			if item_wt.bom_item_type == "RM":
 				value += flt(row.required_qty)*flt(item_wt.weight_per_unit)
 		self.planned_rm_weight = flt(value, self.precision('planned_rm_weight'))
 		frappe.db.set_value("Work Order", self.name, "planned_rm_weight", self.planned_rm_weight)
@@ -359,7 +388,8 @@ class WorkOrder(Document):
 		value = 0
 		for row in self.required_items:
 			item_wt = frappe.get_doc("Item", row.item_code)
-			value += flt(row.transferred_qty) * flt(item_wt.weight_per_unit)
+			if item_wt.bom_item_type == "RM":
+				value += flt(row.transferred_qty) * flt(item_wt.weight_per_unit)
 		self.transfered_rm_weight = flt(value, self.precision('qty'))
 		frappe.db.set_value("Work Order", self.name, "transfered_rm_weight", self.transfered_rm_weight)
 		# self.db_update()
@@ -401,8 +431,8 @@ class WorkOrder(Document):
 		# print("Changed on_change \n"*20)
 		value = 0
 		for row in self.required_items:
-			if row.type == "RM":
-				item_wt = frappe.get_doc("Item", row.item_code)
+			item_wt = frappe.get_doc("Item", row.item_code)
+			if item_wt.bom_item_type == "RM":
 				value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
 		self.actual_rm_weight = flt(value, self.precision('actual_rm_weight'))
 		frappe.db.set_value("Work Order", self.name, "actual_rm_weight", self.actual_rm_weight)
@@ -418,9 +448,13 @@ class WorkOrder(Document):
 
 	def on_cancel(self):
 		self.validate_cancel()
-
 		frappe.db.set(self,'status', 'Cancelled')
-		self.update_work_order_qty_in_so()
+
+		if self.production_plan and frappe.db.exists('Production Plan Item Reference',{'parent':self.production_plan}):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
+			
 		self.delete_job_card()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -525,7 +559,28 @@ class WorkOrder(Document):
 		work_order_qty = qty[0][0] if qty and qty[0][0] else 0
 		frappe.db.set_value('Sales Order Item',
 			self.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
+		
+	def update_work_order_qty_in_combined_so(self):
+		total_bundle_qty = 1
+		if self.product_bundle_item:
+			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
+				`tabProduct Bundle Item` where parent = %s""", (frappe.db.escape(self.product_bundle_item)))[0][0]
 
+			if not total_bundle_qty:
+				# product bundle is 0 (product bundle allows 0 qty for items)
+				total_bundle_qty = 1
+
+		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
+		item_reference = frappe.get_value('Production Plan Item', self.production_plan_item, 'sales_order_item')
+		
+		for plan_reference in prod_plan.prod_plan_references:
+			work_order_qty = 0.0
+			if plan_reference.item_reference == item_reference:
+				if self.docstatus == 1:
+					work_order_qty = flt(plan_reference.qty) / total_bundle_qty
+				frappe.db.set_value('Sales Order Item',
+					plan_reference.sales_order_item, 'work_order_qty', work_order_qty)
+	
 	def update_completed_qty_in_material_request(self):
 		if self.material_request:
 			frappe.get_doc("Material Request", self.material_request).update_completed_qty([self.material_request_item])

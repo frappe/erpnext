@@ -1,0 +1,223 @@
+{
+ "actions": [],
+ "autoname": "DPI-.YY.-.MM.-.#####.",
+ "creation": "2021-06-08 12:26:48.361381",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transporter",
+  "customer",
+  "item_code",
+  "item_name",
+  "ordered_qty",
+  "pending_qty",
+  "qty_to_deliver",
+  "weight_to_deliver",
+  "column_break_9",
+  "sales_order",
+  "sorce_warehouse",
+  "postal_code",
+  "delivery_date",
+  "current_stock",
+  "available_stock",
+  "related_delivey_planning",
+  "approved",
+  "weight_per_unit",
+  "supplier_dc",
+  "supplier",
+  "split",
+  "uom",
+  "conversion_factor",
+  "stock_uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "label": "Item Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Ordered Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_qty",
+   "fieldtype": "Float",
+   "label": "Pending Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty_to_deliver",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty to Deliver"
+  },
+  {
+   "fieldname": "weight_to_deliver",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weight to Deliver",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "postal_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Postal Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Delivery Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_stock",
+   "fieldtype": "Float",
+   "label": "Current Stock ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "available_stock",
+   "fieldtype": "Float",
+   "label": "Available Stock",
+   "read_only": 1
+  },
+  {
+   "fieldname": "related_delivey_planning",
+   "fieldtype": "Link",
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "No",
+   "fieldname": "approved",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Approved",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "weight_per_unit",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Weight per unit"
+  },
+  {
+   "fieldname": "sorce_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "supplier_dc",
+   "fieldtype": "Check",
+   "label": " Supplier delivers to Customer "
+  },
+  {
+   "depends_on": "eval: doc.supplier_dc == 1",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "mandatory_depends_on": "eval: doc.supplier_dc == 1",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "split",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Split"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "UOM Conversion Factor"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Stock UOM"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-06-28 10:52:41.019205",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Planning Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

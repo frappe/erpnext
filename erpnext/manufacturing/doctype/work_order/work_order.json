@@ -19,6 +19,9 @@
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
+  "total_manufacture_of_scrap",
+  "scrap_total_cost",
+  "work_order_total_cost",
   "sales_order",
   "project",
   "settings_section",
@@ -60,6 +63,9 @@
   "weight_details_section",
   "bom_yeild",
   "bom_weight",
+  "planned_total_weight",
+  "transferred_total_weight",
+  "consumed_total_weight",
   "column_break_53",
   "planned_rm_weight",
   "transfered_rm_weight",
@@ -611,6 +617,44 @@
    "label": "Transfered RM Weight",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "planned_total_weight",
+   "fieldtype": "Float",
+   "label": "Planned Total Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transferred_total_weight",
+   "fieldtype": "Float",
+   "label": "Transferred Total Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumed_total_weight",
+   "fieldtype": "Float",
+   "label": "Consumed Total Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_order_total_cost",
+   "fieldtype": "Data",
+   "label": "Work Order Total Cost"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_manufacture_of_scrap",
+   "fieldtype": "Float",
+   "label": "Total Manufacture Of Scrap",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scrap_total_cost",
+   "fieldtype": "Float",
+   "label": "Scrap Total Cost"
   }
  ],
  "icon": "fa fa-cogs",
@@ -618,7 +662,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-12 11:31:16.914657",
+ "modified": "2021-06-24 16:23:58.916846",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

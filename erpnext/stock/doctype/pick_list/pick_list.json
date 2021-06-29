@@ -22,12 +22,13 @@
   "section_break_6",
   "locations",
   "weight_details_section",
-  "total_weight",
+  "planned_rm_weight",
   "column_break_18",
   "total_stock_weight",
   "column_break_20",
   "total_picked_weight",
-  "amended_from"
+  "amended_from",
+  "related_delivery_planning"
  ],
  "fields": [
   {
@@ -148,20 +149,13 @@
    "label": "Weight Detais"
   },
   {
-   "fieldname": "total_weight",
-   "fieldtype": "Float",
-   "label": "Total Weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_stock_weight",
    "fieldtype": "Float",
-   "label": "Total Stock Weight",
+   "label": "Stock Weight",
    "no_copy": 1,
    "read_only": 1
   },
@@ -175,11 +169,24 @@
    "label": "Total Picked Weight",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "related_delivery_planning",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_rm_weight",
+   "fieldtype": "Read Only",
+   "label": "Planned RM Weight"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-14 16:07:22.750736",
+ "modified": "2021-06-17 14:46:54.727434",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
