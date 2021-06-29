@@ -573,6 +573,7 @@ class OrgChartMobile {
 	}
 
 	expand_node(node) {
+		const is_same_node = (this.selected_node && this.selected_node.id === node.id);
 		this.set_selected_node(node);
 		this.show_active_path(node);
 
@@ -582,13 +583,15 @@ class OrgChartMobile {
 				this.$sibling_group.empty();
 		}
 
-		// since the previous/parent node collapses, all connections to that node need to be rebuilt
-		// rebuild outgoing connections of parent
-		this.refresh_connectors(node.parent_id, node.id);
+		if (!is_same_node) {
+			// since the previous/parent node collapses, all connections to that node need to be rebuilt
+			// rebuild outgoing connections of parent
+			this.refresh_connectors(node.parent_id, node.id);
 
-		// rebuild incoming connections of parent
-		let grandparent = $(`#${node.parent_id}`).attr('data-parent');
-		this.refresh_connectors(grandparent, node.parent_id);
+			// rebuild incoming connections of parent
+			let grandparent = $(`#${node.parent_id}`).attr('data-parent');
+			this.refresh_connectors(grandparent, node.parent_id);
+		}
 
 		if (node.expandable && !node.expanded) {
 			return this.load_children(node);
@@ -884,6 +887,7 @@ class OrgChartMobile {
 					<li class="level"></li>
 				`);
 				this.$hierarchy.find('.level').append(node);
+				$(`#connectors`).empty();
 				this.expand_node(node_object);
 			}
 		]);
