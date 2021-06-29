@@ -4,7 +4,7 @@
 		"public/less/hub.less",
 		"public/scss/call_popup.scss",
 		"public/scss/point-of-sale.scss",
-		"public/scss/organizational_chart.scss"
+		"public/scss/hierarchy_chart.scss"
 	],
 	"css/marketplace.css": [
 		"public/less/hub.less"
@@ -44,7 +44,8 @@
 		"public/js/call_popup/call_popup.js",
 		"public/js/utils/dimension_tree_filter.js",
 		"public/js/telephony.js",
-		"public/js/templates/call_link.html"
+		"public/js/templates/call_link.html",
+		"public/js/templates/node_card.html"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",
@@ -67,5 +68,9 @@
 		"public/js/bank_reconciliation_tool/data_table_manager.js",
 		"public/js/bank_reconciliation_tool/number_card.js",
 		"public/js/bank_reconciliation_tool/dialog_manager.js"
+	],
+	"js/hierarchy-chart.min.js": [
+		"public/js/hierarchy_chart/hierarchy_chart_desktop.js",
+		"public/js/hierarchy_chart/hierarchy_chart_mobile.js"
 	]
 }
