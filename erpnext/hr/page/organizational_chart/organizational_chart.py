@@ -9,7 +9,7 @@ def get_children(parent=None, company=None, exclude_node=None, is_root=False, is
 		filters.append(['company', '=', company])
 
 	if not fields:
-		fields = ['employee_name', 'name', 'reports_to', 'image', 'designation']
+		fields = ['employee_name as name', 'name as id', 'reports_to', 'image', 'designation as title']
 
 	if is_root:
 		parent = ''
@@ -27,9 +27,9 @@ def get_children(parent=None, company=None, exclude_node=None, is_root=False, is
 
 	for employee in employees:
 		is_expandable = frappe.get_all('Employee', filters=[
-			['reports_to', '=', employee.get('name')]
+			['reports_to', '=', employee.get('id')]
 		])
-		employee.connections = get_connections(employee.name)
+		employee.connections = get_connections(employee.id)
 		employee.expandable = 1 if is_expandable else 0
 
 	return employees
