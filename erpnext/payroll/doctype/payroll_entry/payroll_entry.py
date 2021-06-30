@@ -680,6 +680,10 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	include_employees = []
 	emp_cond = ''
+
+	if not filters.payroll_frequency:
+		frappe.throw(_('Select Payroll Frequency.'))
+
 	if filters.start_date and filters.end_date:
 		employee_list = get_employee_list(filters)
 		emp = filters.get('employees')
