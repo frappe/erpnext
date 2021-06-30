@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 
 class AddAlternateItem(Document):
-	def before_save(self):
+	def on_submit(self):
 		self.alter_original_item_qty()
 		self.add_alternate_item()
 	@frappe.whitelist()
