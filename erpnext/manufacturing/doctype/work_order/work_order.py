@@ -425,7 +425,7 @@ class WorkOrder(Document):
 		frappe.db.set_value("Work Order", self.name, "planned_rm_cost", self.planned_rm_cost)
 		# return True
 	def on_update_after_submit(self):
-		self. wo_actual_volume()
+		self.wo_actual_volume()
 		
 	def wo_actual_volume(self):
 		if self.wo_specific_gravity>0  and self.actual_fg_weight > 0:
