@@ -70,7 +70,9 @@
   "default_commission_rate",
   "sales_team_section",
   "sales_team",
-  "customer_pos_id"
+  "customer_pos_id",
+  "tnc_status",
+  "tnc_hash"
  ],
  "fields": [
   {
@@ -514,6 +516,20 @@
    "hidden": 1,
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "tnc_status",
+   "fieldtype": "Data",
+   "label": "Tns Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tnc_hash",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Tnc Hash",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "icon": "fa fa-user",
@@ -528,7 +544,7 @@
    "link_fieldname": "customer"
   }
  ],
- "modified": "2021-06-22 16:05:10.010887",
+ "modified": "2021-06-29 17:50:27.024231",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
