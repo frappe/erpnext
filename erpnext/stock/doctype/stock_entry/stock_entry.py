@@ -164,7 +164,7 @@ class StockEntry(StockController):
 			if not doc.work_order_total_cost:
 				doc.work_order_total_cost=self.total_outgoing_value
 			if doc.work_order_total_cost:
-				doc.work_order_total_cost=doc.work_order_total_cost+self.total_outgoing_value
+				doc.work_order_total_cost=float(doc.work_order_total_cost) + float(self.total_outgoing_value)
 			doc.save(ignore_permissions=True)
 			doc.reload()
 
