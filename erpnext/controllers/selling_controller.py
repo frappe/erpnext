@@ -181,8 +181,8 @@ class SellingController(StockController):
 			), title=_("Invalid Selling Price"))
 
 		if (
-			not frappe.db.get_single_value("Selling Settings", "validate_selling_price")
-			or (hasattr(self, "is_return") and self.is_return)
+			self.get("is_return")
+			or not frappe.db.get_single_value("Selling Settings", "validate_selling_price")
 		):
 			return
 
@@ -231,10 +231,10 @@ class SellingController(StockController):
 			where
 				({" or ".join(or_conditions)})
 				and valuation_rate > 0
-		""")
+		""", as_dict=True)
 
 		for rate in valuation_rates:
-			valuation_rate_map[rate[:2]] = rate[2]
+			valuation_rate_map[(rate.item_code, rate.warehouse)] = rate.valuation_rate
 
 		for item in self.items:
 			if not item.item_code:
