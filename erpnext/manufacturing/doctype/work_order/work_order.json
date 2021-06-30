@@ -73,6 +73,7 @@
   "consumption_deviation",
   "column_break_56",
   "actual_fg_weight",
+  "wo_actual_volume",
   "actual_yeild",
   "yeild_deviation",
   "more_info",
@@ -655,6 +656,11 @@
    "fieldname": "scrap_total_cost",
    "fieldtype": "Float",
    "label": "Scrap Total Cost"
+  },
+  {
+   "fieldname": "wo_actual_volume",
+   "fieldtype": "Float",
+   "label": "WO Actual Volume"
   }
  ],
  "icon": "fa fa-cogs",
@@ -662,7 +668,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-24 16:23:58.916846",
+ "modified": "2021-06-30 16:48:24.410558",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

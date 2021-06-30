@@ -424,7 +424,12 @@ class WorkOrder(Document):
 		self.planned_rm_cost = flt(value, self.precision('planned_rm_cost'))
 		frappe.db.set_value("Work Order", self.name, "planned_rm_cost", self.planned_rm_cost)
 		# return True
-
+	def on_update_after_submit(self):
+		self. wo_actual_volume()
+		
+	def wo_actual_volume(self):
+		if self.wo_specific_gravity>0  and self.actual_fg_weight > 0:
+			self.wo_actual_volume=self.actual_fg_weight/self.wo_specific_gravity
 
 	# @frappe.whitelist()
 	def calc_rm_weight_and_consump_dev(self):
@@ -709,6 +714,11 @@ class WorkOrder(Document):
 		for d in self.operations:
 			if not d.time_in_mins > 0:
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
+
+	@frappe.whitelist()
+	def get_details(self):
+		doc=frappe.db.sql("""select value from `tabSingles` where field="enable_specific_gravity" """)
+		return doc
 
 	def update_required_items(self):
 		'''
@@ -1147,6 +1157,7 @@ def get_work_order_operation_data(work_order, operation, workstation):
 	for d in work_order.operations:
 		if d.operation == operation and d.workstation == workstation:
 			return d
+
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None, for_qty=None):
