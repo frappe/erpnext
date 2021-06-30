@@ -107,14 +107,29 @@ frappe.ui.form.on("Salary Slip", {
 
 	leave_without_pay: function(frm){
 		if (frm.doc.employee && frm.doc.start_date && frm.doc.end_date) {
-			return frappe.call({
+			return frm.call({
 				method: 'process_salary_based_on_leave',
 				doc: frm.doc,
-				args: {"lwp": frm.doc.leave_without_pay},
+				args: {
+					"lwp": frm.doc.leave_without_pay,
+					"late_days": frm.doc.late_days,
+				},
 				callback: function(r, rt) {
+					frm.dirty();
 					frm.refresh();
 				}
 			});
+		}
+	},
+
+	late_days: function (frm) {
+		frm.trigger('leave_without_pay');
+	},
+
+	set_lwp_manually: function (frm) {
+		frm.trigger("toggle_fields");
+		if (!frm.doc.set_lwp_manually) {
+			frm.trigger('leave_without_pay');
 		}
 	},
 
@@ -123,6 +138,9 @@ frappe.ui.form.on("Salary Slip", {
 
 		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
 			frm.doc.payroll_frequency!="");
+
+		frm.set_df_property('leave_without_pay', 'read_only', cint(frm.doc.set_lwp_manually) ? 0 : 1);
+		frm.set_df_property('late_days', 'read_only', cint(frm.doc.set_lwp_manually) ? 0 : 1);
 	},
 
 	get_emp_and_leave_details: function(frm) {
@@ -130,6 +148,7 @@ frappe.ui.form.on("Salary Slip", {
 			method: 'get_emp_and_leave_details',
 			doc: frm.doc,
 			callback: function(r, rt) {
+				frm.dirty();
 				frm.refresh();
 			}
 		});

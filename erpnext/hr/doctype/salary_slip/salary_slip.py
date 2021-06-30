@@ -46,7 +46,7 @@ class SalarySlip(TransactionBase):
 			# get details from salary structure
 			self.get_emp_and_leave_details()
 		else:
-			self.get_leave_details(lwp = self.leave_without_pay)
+			self.get_leave_details(lwp=self.leave_without_pay, late_days=self.late_days)
 
 		self.calculate_net_pay()
 
@@ -54,8 +54,8 @@ class SalarySlip(TransactionBase):
 		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
 		self.total_in_words = money_in_words(total, company_currency)
 
-		if frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet"):
-			max_working_hours = frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet")
+		if frappe.get_cached_value("HR Settings", None, "max_working_hours_against_timesheet"):
+			max_working_hours = frappe.get_cached_value("HR Settings", None, "max_working_hours_against_timesheet")
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
@@ -71,7 +71,7 @@ class SalarySlip(TransactionBase):
 			self.set_status()
 			self.update_status(self.name)
 			self.update_salary_slip_in_additional_salary()
-			if (frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
+			if (frappe.get_cached_value("HR Settings", None, "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
 	def on_cancel(self):
@@ -98,7 +98,7 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("To date cannot be before From date"))
 
 	def is_rounding_total_disabled(self):
-		return cint(frappe.db.get_single_value("HR Settings", "disable_rounded_total"))
+		return cint(frappe.get_cached_value("HR Settings", None, "disable_rounded_total"))
 
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:
@@ -207,10 +207,10 @@ class SalarySlip(TransactionBase):
 				AND attendance_date not in ('{0}')
 			""".format(holidays), {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
 
-		late_days = flt(late_days[0][0]) if late_days else 0
+		late_days = cint(late_days[0][0]) if late_days else 0
 		return late_days
 
-	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None, for_preview=0):
+	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=0, late_days=0, for_preview=0):
 		if not joining_date:
 			joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 				["date_of_joining", "relieving_date"])
@@ -221,30 +221,40 @@ class SalarySlip(TransactionBase):
 			self.payment_days = working_days
 			return
 
+		# Working Days
 		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
-		actual_lwp = self.calculate_lwp(holidays, working_days)
-		self.late_days = self.calculate_late_days(holidays) # get late days
-		no_of_late_days_as_lwp = frappe.db.get_value("HR Settings", None, "no_of_late_days")
-		if no_of_late_days_as_lwp:
-			late_lwp = self.late_days // int(no_of_late_days_as_lwp)
-		else:
-			late_lwp = 0
-		lwp_with_late = actual_lwp + late_lwp
-
-		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
+		if not cint(frappe.get_cached_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			working_days -= len(holidays)
 			if working_days < 0:
 				frappe.throw(_("There are more holidays than working days this month."))
 
-		if not lwp:
-			lwp = lwp_with_late
-		elif lwp != lwp_with_late:
-			frappe.msgprint(_("Leave Without Pay does not match with approved Leave Application records"))
-
 		self.total_working_days = working_days
-		self.leave_without_pay = flt(lwp)
 
-		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(lwp)
+		# LWP and Late calculation
+		no_of_late_days_as_lwp = cint(frappe.get_cached_value("HR Settings", None, "no_of_late_days"))
+
+		actual_lwp = self.calculate_lwp(holidays, working_days)
+		self.actual_late_days = self.calculate_late_days(holidays)
+		actual_late_lwp = self.actual_late_days // no_of_late_days_as_lwp if no_of_late_days_as_lwp else 0
+		actual_lwp_with_late = actual_lwp + actual_late_lwp
+		self.actual_leave_without_pay = flt(actual_lwp_with_late)
+
+		late_lwp = cint(late_days) // no_of_late_days_as_lwp if no_of_late_days_as_lwp else 0
+
+		if cint(self.set_lwp_manually):
+			self.late_days = cint(late_days)
+			self.leave_without_pay = flt(lwp)
+			if not self.leave_without_pay:
+				self.leave_without_pay = late_lwp
+		else:
+			self.late_days = cint(self.actual_late_days)
+			self.leave_without_pay = self.actual_leave_without_pay
+
+		if self.leave_without_pay != self.actual_leave_without_pay:
+			frappe.msgprint(_("Leave Without Pay does not match with Attendance and approved Leave Application records"),
+				indicator='orange', alert=1)
+
+		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(self.leave_without_pay)
 		self.payment_days = payment_days > 0 and payment_days or 0
 
 	def get_payment_days(self, joining_date, relieving_date):
@@ -265,7 +275,7 @@ class SalarySlip(TransactionBase):
 
 		payment_days = date_diff(end_date, start_date) + 1
 
-		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
+		if not cint(frappe.get_cached_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			holidays = self.get_holidays_for_employee(start_date, end_date)
 			payment_days -= len(holidays)
 		return payment_days
@@ -950,7 +960,7 @@ class SalarySlip(TransactionBase):
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
-		hr_settings = frappe.get_single("HR Settings")
+		hr_settings = frappe.get_cached_doc("HR Settings")
 		message = "Please see attachment"
 		password = None
 		if hr_settings.encrypt_salary_slips_in_emails:
@@ -1011,14 +1021,21 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 	def pull_emp_details(self):
-		emp = frappe.db.get_value("Employee", self.employee, ["salary_mode", "bank_name", "bank_ac_no"], as_dict=1)
+		emp = frappe.db.get_value("Employee", self.employee, ["salary_mode", "bank_name", "bank_ac_no", "date_of_joining", "relieving_date"],
+			as_dict=1)
 		if emp:
 			self.salary_mode = emp.salary_mode
 			self.bank_name = emp.bank_name if self.salary_mode == "Bank" else None
 			self.bank_account_no = emp.bank_ac_no if self.salary_mode == "Bank" else None
+			self.joining_date = emp.date_of_joining
 
-	def process_salary_based_on_leave(self, lwp=0):
-		self.get_leave_details(lwp=lwp)
+			if emp.relieving_date and self.start_date and self.end_date and getdate(self.start_date) <= getdate(emp.relieving_date) <= getdate(self.end_date):
+				self.relieving_date = emp.relieving_date
+			else:
+				self.relieving_date = None
+
+	def process_salary_based_on_leave(self, lwp=0, late_days=0):
+		self.get_leave_details(lwp=lwp, late_days=late_days)
 		self.calculate_net_pay()
 
 	def get_pending_advances(self):

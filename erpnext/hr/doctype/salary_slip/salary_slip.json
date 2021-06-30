@@ -8,7 +8,6 @@
   "posting_date",
   "employee",
   "employee_name",
-  "joining_date",
   "column_break1",
   "department",
   "designation",
@@ -17,23 +16,29 @@
   "tax_id",
   "column_break_10",
   "company",
-  "journal_entry",
   "payroll_entry",
+  "journal_entry",
   "amended_from",
   "section_break_10",
   "salary_slip_based_on_timesheet",
   "timesheets",
   "section_break_20",
+  "payroll_frequency",
   "start_date",
   "end_date",
-  "payroll_frequency",
-  "column_break_15",
+  "column_break_22",
   "total_working_days",
+  "joining_date",
+  "relieving_date",
+  "column_break_15",
+  "late_days",
   "leave_without_pay",
   "payment_days",
   "column_break_26",
-  "late_days",
   "salary_structure",
+  "actual_leave_without_pay",
+  "actual_late_days",
+  "set_lwp_manually",
   "deduct_tax_for_unclaimed_employee_benefits",
   "deduct_tax_for_unsubmitted_tax_exemption_proof",
   "hourly_wages",
@@ -62,9 +67,11 @@
   "advances",
   "section_break_43",
   "total_principal_amount",
+  "column_break_58",
   "total_interest_amount",
   "column_break_45",
   "total_loan_repayment",
+  "column_break_62",
   "total_advance_amount",
   "net_pay_info",
   "net_pay",
@@ -242,7 +249,8 @@
    "fieldtype": "Float",
    "label": "Leave Without Pay",
    "oldfieldname": "leave_without_pay",
-   "oldfieldtype": "Currency"
+   "oldfieldtype": "Currency",
+   "read_only": 1
   },
   {
    "fieldname": "payment_days",
@@ -434,7 +442,7 @@
    "label": "Net Pay Info"
   },
   {
-   "description": "Gross Pay - Total Deduction - Loan Repayment",
+   "description": "Gross Pay - Total Deduction - Loan Repayment - Advance Amount",
    "fieldname": "net_pay",
    "fieldtype": "Currency",
    "label": "Net Pay",
@@ -456,7 +464,6 @@
    "read_only": 1
   },
   {
-   "description": "Net Pay (in words) will be visible once you save the Salary Slip.",
    "fieldname": "total_in_words",
    "fieldtype": "Data",
    "label": "Total in words",
@@ -559,15 +566,57 @@
   },
   {
    "fieldname": "late_days",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "Late Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_58",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "relieving_date",
+   "fieldtype": "Date",
+   "label": "Relieving Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "set_lwp_manually",
+   "fieldtype": "Check",
+   "label": "Set Leave Without Pay Manually",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "eval:doc.actual_leave_without_pay != doc.leave_without_pay",
+   "fieldname": "actual_leave_without_pay",
+   "fieldtype": "Float",
+   "label": "Actual Leave Without Pay",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.actual_late_days != doc.actual_late_days",
+   "fieldname": "actual_late_days",
+   "fieldtype": "Int",
+   "label": "Actual Late Days",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2021-06-27 03:59:59.435448",
+ "modified": "2021-06-30 16:36:04.207320",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",

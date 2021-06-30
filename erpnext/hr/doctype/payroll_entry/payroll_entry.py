@@ -190,7 +190,6 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 		for count, ss in enumerate(sal_slips):
 			doc = frappe.get_doc("Salary Slip", ss.name)
-			doc.leave_without_pay = 0
 			doc.save()
 			if publish_progress:
 				frappe.publish_progress((count + 1) * 100 / len(sal_slips), title=_("Updating Salary Slips..."))
