@@ -32,6 +32,7 @@
   "total_working_days",
   "unmarked_days",
   "leave_without_pay",
+  "leave",
   "column_break_24",
   "absent_days",
   "payment_days",
@@ -625,13 +626,18 @@
    "label": "Leave Details",
    "options": "Salary Slip Leave",
    "read_only": 1
+  },
+  {
+   "fieldname": "leave",
+   "fieldtype": "Data",
+   "label": "Total Leave(Current Month)"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:44:09.772331",
+ "modified": "2021-06-30 16:49:58.734736",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
