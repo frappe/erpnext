@@ -254,7 +254,7 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_pr_or_pi_details
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_purchase_document_details
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
@@ -264,7 +264,7 @@ class PurchaseReceipt(BuyingController):
 		warehouse_with_no_account = []
 		stock_items = self.get_stock_items()
 
-		exchange_rate_map, net_rate_map = get_pr_or_pi_details(self)
+		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
@@ -312,7 +312,7 @@ class PurchaseReceipt(BuyingController):
 						if d.get('purchase_invoice'):
 							if exchange_rate_map[d.purchase_invoice] and \
 								self.conversion_rate != exchange_rate_map[d.purchase_invoice] and \
-								d.net_rate == net_rate_map[d.item_code]:
+								d.net_rate == net_rate_map[d.purchase_invoice_item]:
 
 								discrepancy_caused_by_exchange_rate_difference = (d.qty * d.net_rate) * \
 									(exchange_rate_map[d.purchase_invoice] - self.conversion_rate)

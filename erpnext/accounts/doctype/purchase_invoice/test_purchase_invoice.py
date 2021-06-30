@@ -231,12 +231,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_purchase_invoice_with_exchange_rate_difference(self):
-		set_gst_settings()
 		pr = make_purchase_receipt(currency = "USD", conversion_rate = 70)
 		pi = make_purchase_invoice(currency = "USD", conversion_rate = 80, do_not_save = "True")
 
-		for item in pi.items:
-			item.purchase_receipt = pr.name
+		pi.items[0].purchase_receipt = pr.name
+		pi.items[0].pr_detail = pr.items[0].name
 
 		pi.insert()
 		pi.submit()		
@@ -1072,24 +1071,6 @@ def update_tax_witholding_category(company, account, date):
 			'account': account
 		})
 		tds_category.save()
-def set_gst_settings():
-	gst_settings = frappe.get_doc("GST Settings")
-
-	gst_account = frappe.get_all(
-		"GST Account",
-		fields=["cgst_account", "sgst_account", "igst_account"],
-		filters = {"company": "_Test Company"}
-	)
-
-	if not gst_account:
-		gst_settings.append("gst_accounts", {
-			"company": "_Test Company",
-			"cgst_account": "CGST - _TC",
-			"sgst_account": "SGST - _TC",
-			"igst_account": "IGST - _TC",
-		})
-
-	gst_settings.save()
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

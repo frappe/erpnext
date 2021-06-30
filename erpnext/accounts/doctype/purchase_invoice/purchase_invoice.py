@@ -517,7 +517,7 @@ class PurchaseInvoice(BuyingController):
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
-		exchange_rate_map, net_rate_map = get_pr_or_pi_details(self)
+		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -640,7 +640,7 @@ class PurchaseInvoice(BuyingController):
 						if item.get('purchase_receipt'):
 							if exchange_rate_map[item.purchase_receipt] and \
 								self.conversion_rate != exchange_rate_map[item.purchase_receipt] and \
-								item.net_rate == net_rate_map[item.item_code]:
+								item.net_rate == net_rate_map[item.pr_detail]:
 
 								discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * \
 									(exchange_rate_map[item.purchase_receipt] - self.conversion_rate)
@@ -1172,32 +1172,32 @@ class PurchaseInvoice(BuyingController):
 			self.db_set('status', self.status, update_modified = update_modified)
 
 # to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
-def get_pr_or_pi_details(doc):
+def get_purchase_document_details(doc):
 	if doc.doctype == 'Purchase Invoice':
-		pr_or_pi = 'purchase_receipt'
+		doc_reference = 'purchase_receipt'
 		items_reference = 'pr_detail'
-		pr_or_pi_doctype = 'Purchase Receipt'
-		pr_or_pi_items_table = 'Purchase Receipt Item'
+		parent_doctype = 'Purchase Receipt'
+		child_doctype = 'Purchase Receipt Item'
 	else:
-		pr_or_pi = 'purchase_invoice'
+		doc_reference = 'purchase_invoice'
 		items_reference = 'purchase_invoice_item'
-		pr_or_pi_doctype = 'Purchase Invoice'
-		pr_or_pi_items_table = 'Purchase Invoice Item'
+		parent_doctype = 'Purchase Invoice'
+		child_doctype = 'Purchase Invoice Item'
 
 	purchase_receipts_or_invoices = []
-	pr_or_pi_items = []
+	items = []
 
 	for item in doc.get('items'):
-		if item.get(pr_or_pi):
-			purchase_receipts_or_invoices.append(item.get(pr_or_pi))
+		if item.get(doc_reference):
+			purchase_receipts_or_invoices.append(item.get(doc_reference))
 		if item.get(items_reference):
-			pr_or_pi_items.append(item.get(items_reference))
+			items.append(item.get(items_reference))
 	
-	exchange_rate_map = frappe._dict(frappe.get_all(pr_or_pi_doctype, filters={'name': ('in',
+	exchange_rate_map = frappe._dict(frappe.get_all(parent_doctype, filters={'name': ('in',
 		purchase_receipts_or_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
 
-	net_rate_map = frappe._dict(frappe.get_all(pr_or_pi_items_table, filters={'name': ('in',
-		pr_or_pi_items)}, fields=['item_code', 'net_rate'], as_list=1))
+	net_rate_map = frappe._dict(frappe.get_all(child_doctype, filters={'name': ('in',
+		items)}, fields=['name', 'net_rate'], as_list=1))
 
 	return exchange_rate_map, net_rate_map
 
