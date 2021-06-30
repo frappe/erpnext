@@ -1052,6 +1052,33 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', before_test_value)
 
+	def test_purchase_receipt_with_exchange_rate_difference(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice as create_purchase_invoice
+
+		pi = create_purchase_invoice(currency = "USD", conversion_rate = 70)
+
+		create_warehouse("_Test Warehouse for Valuation", company="_Test Company with perpetual inventory",
+			properties={"account": '_Test Account Stock In Hand - TCP1'})
+		
+		pr = make_purchase_receipt(warehouse = '_Test Warehouse for Valuation - TCP1', 
+			company="_Test Company with perpetual inventory", currency = "USD", conversion_rate = 80, 
+			do_not_save = "True")
+
+		pr.items[0].purchase_invoice = pi.name
+		pr.items[0].purchase_invoice_item = pi.items[0].name
+
+		pr.insert()
+		pr.submit()
+
+		# fetching the latest GL Entry with 'Exchange Gain/Loss - TCP1' account
+		gl_entries = frappe.get_all('GL Entry', filters = {'account': 'Exchange Gain/Loss - TCP1'})
+		voucher_no = frappe.get_value('GL Entry', gl_entries[0]['name'], 'voucher_no')
+		self.assertEqual(pr.name, voucher_no)
+
+		exchange_gain_loss_amount = frappe.get_value('GL Entry', gl_entries[0]['name'], 'debit')
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+		self.assertEqual(exchange_gain_loss_amount, discrepancy_caused_by_exchange_rate_diff)
+
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference
 		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
