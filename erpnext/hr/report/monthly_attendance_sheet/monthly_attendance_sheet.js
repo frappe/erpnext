@@ -52,6 +52,10 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 		var style = {};
 		var link;
 
+		if (['total_present', 'total_absent', 'total_leave', 'total_late_entry', 'total_early_exit'].includes(column.fieldname) && data.employee) {
+			link = `desk#query-report/Employee Checkin Sheet?employee=${encodeURIComponent(data.employee)}&from_date=${data.from_date}&to_date=${data.to_date}`;
+		}
+
 		if (column.day) {
 			var attendance_fieldname = "attendance_day_" + column.day;
 			var status_fieldname = "status_day_" + column.day;

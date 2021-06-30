@@ -32,7 +32,9 @@ def execute(filters=None):
 			'employee': employee,
 			'employee_name': employee_details.employee_name,
 			'department': employee_details.department,
-			'designation': employee_details.designation
+			'designation': employee_details.designation,
+			'from_date': filters.from_date,
+			'to_date': filters.to_date,
 		})
 
 		row['total_present'] = 0

@@ -3,17 +3,20 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, cint
 from frappe import _, scrub
 from frappe.desk.query_report import group_report_data
 
 
 def execute(filters=None):
-	if not filters: filters = {}
-	salary_slips = get_salary_slips(filters)
-	if not salary_slips: return [], []
+	filters = frappe._dict(filters)
+	filters.show_employee_name = frappe.get_cached_value("HR Settings", None, "emp_created_by") != "Full Name"
 
-	columns = get_columns(salary_slips)
+	salary_slips = get_salary_slips(filters)
+	if not salary_slips:
+		return [], []
+
+	columns = get_columns(salary_slips, filters)
 	ss_earning_map = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
 	doj_map = get_employee_doj_map()
@@ -25,6 +28,7 @@ def execute(filters=None):
 			"salary_slip_id": ss.name,
 			"employee": ss.employee,
 			"employee_name": ss.employee_name,
+			"disable_employee_formatter": cint(filters.show_employee_name),
 			"date_of_joining": doj_map.get(ss.employee),
 			"branch": ss.branch,
 			"department": ss.department,
@@ -32,6 +36,7 @@ def execute(filters=None):
 			"company": ss.company,
 			"start_date": ss.start_date,
 			"end_date": ss.end_date,
+			"late_days": ss.late_days,
 			"leave_without_pay": ss.leave_without_pay,
 			"payment_days": ss.payment_days,
 			"total_working_days": ss.total_working_days,
@@ -90,14 +95,16 @@ def get_grouped_data(columns, data, filters):
 	return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group)
 
 
-def get_columns(salary_slips):
-	branch = department = designation = leave_without_pay = loan_repayment = advance_deduction = no_salary_mode =\
-		cash_amount = cheque_amount = False
+def get_columns(salary_slips, filters):
+	branch = department = designation = leave_without_pay = late_days = loan_repayment = advance_deduction\
+		= no_salary_mode = cash_amount = cheque_amount = False
+
 	period_set = set()
 	for ss in salary_slips:
 		if ss.get('branch'): branch = True
 		if ss.get('department'): department = True
 		if ss.get('designation'): designation = True
+		if ss.get('late_days'): late_days = True
 		if ss.get('leave_without_pay'): leave_without_pay = True
 		if ss.get('total_loan_repayment'): loan_repayment = True
 		if ss.get('total_advance_amount'): advance_deduction = True
@@ -109,50 +116,59 @@ def get_columns(salary_slips):
 
 	columns = [
 		{
-			"label": _("Employee"),"fieldtype": "Link", "fieldname": "employee", "options": "Employee","width": 230
+			"label": _("Salary Slip"), "fieldtype": "Link", "fieldname": "salary_slip_id","options": "Salary Slip",
+			"width": 80
 		},
 		{
-			"label": _("Salary Slip ID"), "fieldtype": "Link", "fieldname": "salary_slip_id","options": "Salary Slip",
-			"width": 100
+			"label": _("Employee"), "fieldtype": "Link", "fieldname": "employee", "options": "Employee",
+			"width": 80 if filters.show_employee_name else 140
 		},
 	]
 
-	if frappe.get_cached_value("HR Settings", None, "emp_created_by") != "Full Name":
+	if filters.show_employee_name:
 		columns.append({
 			"label": _("Employee Name"), "fieldtype": "Data", "fieldname": "employee_name", "width": 140
 		})
 
 	columns += [
 		{
-			"label": _("Joining Date"), "fieldtype": "Date", "fieldname": "date_of_joining", "width": 80
+			"label": _("Join Date"), "fieldtype": "Date", "fieldname": "date_of_joining", "width": 80,
+			"keep": filters.show_date_of_joining
 		},
 		{
 			"label": _("Branch"), "fieldtype": "Link", "fieldname": "branch", "options": "Branch", "width": 120,
-			"keep": branch
+			"keep": branch and filters.show_branch
 		},
 		{
 			"label": _("Department"), "fieldtype": "Link", "fieldname": "department", "options": "Department",
-			"width": 100, "keep": department
+			"width": 100, "keep": department and filters.show_department
 		},
 		{
 			"label": _("Designation"), "fieldtype": "Link", "fieldname": "designation", "options": "Designation",
-			"width": 100, "keep": designation
+			"width": 100, "keep": designation and filters.show_designation
 		},
 		{
-			"label": _("Start Date"), "fieldtype": "Date", "fieldname": "start_date", "width": 80, "keep": len(period_set) > 1
+			"label": _("Start Date"), "fieldtype": "Date", "fieldname": "start_date", "width": 80,
+			"keep": len(period_set) > 1
 		},
 		{
-			"label": _("End Date"), "fieldtype": "Date", "fieldname": "end_date", "width": 80, "keep": len(period_set) > 1
+			"label": _("End Date"), "fieldtype": "Date", "fieldname": "end_date", "width": 80,
+			"keep": len(period_set) > 1
 		},
 		{
-			"label": _("Working Days"), "fieldtype": "Float", "fieldname": "total_working_days", "width": 100, "keep": len(period_set) > 1
+			"label": _("Work Days"), "fieldtype": "Float", "fieldname": "total_working_days", "width": 65, "precision": 1,
+			"keep": filters.show_working_days
 		},
 		{
-			"label": _("Leave Without Pay"), "fieldtype": "Float", "fieldname": "leave_without_pay", "width": 100,
+			"label": _("Late Days"), "fieldtype": "Float", "fieldname": "late_days", "width": 65, "precision": 1,
+			"keep": late_days
+		},
+		{
+			"label": _("Leave Without Pay"), "fieldtype": "Float", "fieldname": "leave_without_pay", "width": 65, "precision": 1,
 			"keep": leave_without_pay
 		},
 		{
-			"label": _("Payment Days"), "fieldtype": "Float", "fieldname": "payment_days", "width": 100
+			"label": _("Payment Days"), "fieldtype": "Float", "fieldname": "payment_days", "width": 65, "precision": 1,
 		}
 	]
 
@@ -168,53 +184,53 @@ def get_columns(salary_slips):
 
 	for e in salary_components[_("Earning")]:
 		columns.append({
-			"label": _(e), "fieldtype": "Currency", "fieldname": scrub(e), "is_earning": 1, "width": 120
+			"label": _(e), "fieldtype": "Currency", "fieldname": scrub(e), "is_earning": 1, "width": 90
 		})
 
 	columns.append({
-		"label": _("Gross Pay"), "fieldtype": "Currency", "fieldname": "gross_pay", "width": 120
+		"label": _("Gross Pay"), "fieldtype": "Currency", "fieldname": "gross_pay", "width": 90
 	})
 
 	for d in salary_components[_("Deduction")]:
 		columns.append({
-			"label": _(d), "fieldtype": "Currency", "fieldname": scrub(d), "is_deduction": 1, "width": 120
+			"label": _(d), "fieldtype": "Currency", "fieldname": scrub(d), "is_deduction": 1, "width": 90
 		})
 
 	columns += [
 		{
 			"label": _("Loan Repayment"), "fieldtype": "Currency",
-			"fieldname": "loan_repayment", "width": 120, "keep": loan_repayment
+			"fieldname": "loan_repayment", "width": 90, "keep": loan_repayment
 		},
 		{
 			"label": _("Advance Deduction"), "fieldtype": "Currency",
-			"fieldname": "advance_deduction", "width": 120, "keep": advance_deduction
+			"fieldname": "advance_deduction", "width": 90, "keep": advance_deduction
 		},
 		{
 			"label": _("Total Deduction"), "fieldtype": "Currency",
-			"fieldname": "total_deduction", "width": 120
+			"fieldname": "total_deduction", "width": 90
 		},
 		{
 			"label": _("Net Pay"), "fieldtype": "Currency",
-			"fieldname": "net_pay", "width": 120
+			"fieldname": "net_pay", "width": 90
 		},
 		{
 			"label": _("Rounded Total"), "fieldtype": "Currency",
-			"fieldname": "rounded_total", "width": 120
+			"fieldname": "rounded_total", "width": 90
 		}
 	]
 
 	columns += [
 		{
 			"label": _("No Salary Mode"), "fieldtype": "Currency",
-			"fieldname": "no_salary_mode", "width": 120, "keep": no_salary_mode
+			"fieldname": "no_salary_mode", "width": 90, "keep": no_salary_mode
 		},
 		{
 			"label": _("Cheque Amount"), "fieldtype": "Currency",
-			"fieldname": "cheque_amount", "width": 120, "keep": cheque_amount
+			"fieldname": "cheque_amount", "width": 90, "keep": cheque_amount
 		},
 		{
 			"label": _("Cash Amount"), "fieldtype": "Currency",
-			"fieldname": "cash_amount", "width": 120, "keep": cash_amount
+			"fieldname": "cash_amount", "width": 90, "keep": cash_amount
 		},
 	]
 
@@ -225,7 +241,7 @@ def get_columns(salary_slips):
 		columns += [
 			{
 				"label": _(bank_name + " Amount"), "fieldtype": "Currency",
-				"fieldname": 'bank_amount_' + scrub(bank_name), "width": 140
+				"fieldname": 'bank_amount_' + scrub(bank_name), "width": 90
 			},
 		]
 	columns = [c for c in columns if c.get('keep', True)]

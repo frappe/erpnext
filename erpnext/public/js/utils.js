@@ -865,7 +865,7 @@ frappe.form.link_formatters['Item'] = function(value, doc) {
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
 	var employee_name = doc.employee_name || (doc.party_type === "Employee" && doc.party_name);
-	if(doc && employee_name && employee_name !== value) {
+	if(doc && employee_name && employee_name !== value && !doc.disable_employee_formatter) {
 		return value? value + ': ' + employee_name: employee_name;
 	} else {
 		return value;
