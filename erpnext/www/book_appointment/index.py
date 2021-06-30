@@ -2,7 +2,7 @@ import frappe
 import datetime
 import json
 import pytz
-
+from frappe import _
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
