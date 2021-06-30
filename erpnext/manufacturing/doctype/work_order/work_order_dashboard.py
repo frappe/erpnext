@@ -11,7 +11,7 @@ def get_data():
 			},
 			{
 				'label': _('Material'),
-				'items': ['Material Request', 'Material Consumption', 'Material Produce']
+				'items': ['Material Request', 'Material Consumption', 'Material Produce','Add Alternate Item']
 			},
 		]
 	}
