@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from frappe.email.inbox import link_communication_to_document
-from erpnext.support.doctype.service_level_agreement import get_priority
+from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_priority
 
 class Issue(Document):
 	def get_feed(self):
