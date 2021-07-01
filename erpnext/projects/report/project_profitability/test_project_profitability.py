@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, nowdate, add_days
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.projects.doctype.timesheet.test_timesheet import make_salary_structure_for_timesheet, make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
@@ -16,17 +16,22 @@ class TestProjectProfitability(unittest.TestCase):
 		make_salary_structure_for_timesheet(emp, company='_Test Company')
 		self.timesheet = make_timesheet(emp, simulate = True, is_billable=1)
 		self.salary_slip = make_salary_slip(self.timesheet.name)
+		holidays = self.salary_slip.get_holidays_for_employee(nowdate(), nowdate())
+		if holidays:
+			frappe.db.set_value('Payroll Settings', None, 'include_holidays_in_total_working_days', 1)
+
 		self.salary_slip.submit()
 		self.sales_invoice = make_sales_invoice(self.timesheet.name, '_Test Item', '_Test Customer')
 		self.sales_invoice.due_date = nowdate()
 		self.sales_invoice.submit()
 
 		frappe.db.set_value('HR Settings', None, 'standard_working_hours', 8)
+		frappe.db.set_value('Payroll Settings', None, 'include_holidays_in_total_working_days', 0)
 
 	def test_project_profitability(self):
 		filters = {
 			'company': '_Test Company',
-			'start_date': getdate(),
+			'start_date': add_days(getdate(), -3),
 			'end_date': getdate()
 		}
 
