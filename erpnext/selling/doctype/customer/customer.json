@@ -520,7 +520,7 @@
   {
    "fieldname": "tnc_status",
    "fieldtype": "Data",
-   "label": "Tns Status",
+   "label": "Tnc Status",
    "read_only": 1
   },
   {
@@ -544,7 +544,7 @@
    "link_fieldname": "customer"
   }
  ],
- "modified": "2021-06-29 17:50:27.024231",
+ "modified": "2021-06-30 21:31:27.534063",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
