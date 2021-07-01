@@ -230,6 +230,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_purchase_invoice_with_exchange_rate_difference(self):
+		pr = make_purchase_receipt(currency = "USD", conversion_rate = 70)
+		pi = make_purchase_invoice(currency = "USD", conversion_rate = 80, do_not_save = "True")
+
+		pi.items[0].purchase_receipt = pr.name
+		pi.items[0].pr_detail = pr.items[0].name
+
+		pi.insert()
+		pi.submit()		
+
+		# fetching the latest GL Entry with 'Exchange Gain/Loss - _TC' account
+		gl_entries = frappe.get_all('GL Entry', filters = {'account': 'Exchange Gain/Loss - _TC'})
+		voucher_no = frappe.get_value('GL Entry', gl_entries[0]['name'], 'voucher_no')	
+
+		self.assertEqual(pi.name, voucher_no)
+
+		exchange_gain_loss_amount = frappe.get_value('GL Entry', gl_entries[0]['name'], 'debit')
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+
+		self.assertEqual(exchange_gain_loss_amount, discrepancy_caused_by_exchange_rate_diff)
+
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
@@ -966,7 +987,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
 
 		# Create Purchase Order with TDS applied
-		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000)
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item')
 		po.apply_tds = 1
 		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
@@ -1002,6 +1023,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Create Purchase Invoice against Purchase Order
 		purchase_invoice = get_mapped_purchase_invoice(po.name)
 		purchase_invoice.allocate_advances_automatically = 1
+		purchase_invoice.items[0].item_code = '_Test Non Stock Item'
 		purchase_invoice.items[0].expense_account = '_Test Account Cost for Goods Sold - _TC'
 		purchase_invoice.save()
 		purchase_invoice.submit()
