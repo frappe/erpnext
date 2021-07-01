@@ -112,7 +112,7 @@ class PaymentRequest(Document):
 		if not data_of_completed_requests:
 			return self.grand_total
 
-		request_amounts = sum([json.loads(d).get('request_amount') for d in data_of_completed_requests])
+		request_amounts = sum(json.loads(d).get('request_amount') for d in data_of_completed_requests)
 		return request_amounts
 
 	def on_cancel(self):

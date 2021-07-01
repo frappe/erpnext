@@ -310,7 +310,7 @@ class PaymentEntry(AccountsController):
 		for k, v in no_oustanding_refs.items():
 			frappe.msgprint(
 				_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.")
-					.format(k, frappe.bold(", ".join([d.reference_name for d in v])), frappe.bold("negative outstanding amount"))
+					.format(k, frappe.bold(", ".join(d.reference_name for d in v)), frappe.bold("negative outstanding amount"))
 				+ "<br><br>" + _("If this is undesirable please cancel the corresponding Payment Entry."),
 				title=_("Warning"), indicator="orange")
 
@@ -511,7 +511,7 @@ class PaymentEntry(AccountsController):
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
 		if self.party:
-			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+			total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount_after_tax + total_deductions \
 				and self.total_allocated_amount < self.paid_amount_after_tax + (total_deductions / self.source_exchange_rate):
@@ -536,7 +536,7 @@ class PaymentEntry(AccountsController):
 		else:
 			self.difference_amount = self.base_paid_amount_after_tax - flt(self.base_received_amount_after_tax)
 
-		total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
 
 		self.difference_amount = flt(self.difference_amount - total_deductions,
 			self.precision("difference_amount"))
@@ -552,8 +552,8 @@ class PaymentEntry(AccountsController):
 		if ((self.payment_type=="Pay" and self.party_type=="Customer")
 				or (self.payment_type=="Receive" and self.party_type=="Supplier")):
 
-			total_negative_outstanding = sum([abs(flt(d.outstanding_amount))
-				for d in self.get("references") if flt(d.outstanding_amount) < 0])
+			total_negative_outstanding = sum(abs(flt(d.outstanding_amount))
+				for d in self.get("references") if flt(d.outstanding_amount) < 0)
 
 			paid_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
 			additional_charges = sum([flt(d.amount) for d in self.deductions])
@@ -706,7 +706,7 @@ class PaymentEntry(AccountsController):
 			if account_currency != self.company_currency:
 				frappe.throw(_("Currency for {0} must be {1}").format(d.account_head, self.company_currency))
 
-			if self.payment_type == 'Pay':
+			if self.payment_type in ('Pay', 'Internal Transfer'):
 				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
 			elif self.payment_type == 'Receive':
 				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
@@ -761,7 +761,7 @@ class PaymentEntry(AccountsController):
 			return self.advance_tax_account
 		elif self.payment_type == 'Receive':
 			return self.paid_from
-		elif self.payment_type == 'Pay':
+		elif self.payment_type in ('Pay', 'Internal Transfer'):
 			return self.paid_to
 
 	def update_advance_paid(self):

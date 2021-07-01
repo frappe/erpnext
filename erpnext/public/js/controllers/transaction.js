@@ -723,6 +723,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
+		if (item && item.doctype === 'Purchase Receipt Item Supplied') {
+			return;
+		}
+
 		if (item && item.serial_no) {
 			if (!item.item_code) {
 				this.frm.trigger("item_code", cdt, cdn);
@@ -863,9 +867,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 		}
-
-		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
-		else var date = this.frm.doc.transaction_date;
 
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
