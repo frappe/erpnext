@@ -860,8 +860,7 @@ class WorkOrder(Document):
 					"status": "Not Assigned",
 					"qty_to_issue": flt(qty, precision),
 					"weight_per_unit": res.weight_per_unit,
-					"type": res.type,
-					"work_order_total_cost":self.work_order_total_cost
+					"type": res.type
 				})
 		# mc.insert(ignore_permissions=True)
 		return mc.as_dict()
@@ -1218,7 +1217,8 @@ def make_material_produce(doc_name,partial=0):
 		"type": "FG",
 		"scheduled_qty": wo_doc.qty,
 		"qty_produced": wo_doc.qty - wo_doc.produced_qty,
-		"qty_already_produced": wo_doc.produced_qty
+		"qty_already_produced": wo_doc.produced_qty,
+		"work_order_total_cost":wo_doc.work_order_total_cost
 	})
 	bom = frappe.get_doc("BOM",wo_doc.bom_no)
 	for res in bom.scrap_items:
@@ -1232,6 +1232,7 @@ def make_material_produce(doc_name,partial=0):
 			"status": "Not Set",
 			"type": "Scrap",
 			"scheduled_qty": res.stock_qty,
+			"work_order_total_cost":wo_doc.work_order_total_cost
 		})
 	if partial == "0":
 		total_cost_rm_consumed = total_cost_operation_consumed = 0

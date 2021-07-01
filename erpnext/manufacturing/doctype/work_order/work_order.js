@@ -679,8 +679,9 @@ erpnext.work_order = {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
 							args: {
-							  doc_name: frm.doc.name,
-							  partial: 1
+								doc_name: frm.doc.name,
+								partial: 1
+
 							},
 							callback: function(r){
 								if (r.message) {
@@ -694,8 +695,8 @@ erpnext.work_order = {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
 							args: {
-							  doc_name: frm.doc.name,
-							  partial: 0
+							  	doc_name: frm.doc.name,
+							  	partial: 0
 							},
 							callback: function(r){
 								if (r.message) {
