@@ -1,6 +1,10 @@
 name: Server
 
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches: [ develop ]
 
 jobs:
   test:
@@ -87,6 +91,7 @@ jobs:
           coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
           COVERALLS_FLAG_NAME: run-${{ matrix.container }}
           COVERALLS_SERVICE_NAME: ${{ github.event_name == 'pull_request' && 'github' || 'github-actions' }}
           COVERALLS_PARALLEL: true
