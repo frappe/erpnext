@@ -167,7 +167,14 @@ frappe.ui.form.on('Additional Item', {
 			}
 		})
 	},
-	refresh: function(frm){
+	refresh: function(frm,cdt,cdn){
+		var item_table = locals[cdt][cdn].items
+		if(item_table.length > 0){
+			frm.add_custom_button(__("Add Alternate Item"), ()=> {
+				frappe.new_doc("Add Alternate Item", {'add_additional_item':frm.doc.name})
+			})
+		}
+
 		if(frm.doc.work_order){
 			//set_filter_to_item(frm)
 		}
