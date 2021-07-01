@@ -219,6 +219,43 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		lead.reload()
 		self.assertEqual(lead.agreement_status, 'Fulfilled')
 
+	def test_changing_of_variance_after_response(self):
+		# create lead
+		doctype = "Lead"
+		lead_sla = create_service_level_agreement(
+			default_service_level_agreement=1,
+			holiday_list="__Test Holiday List",
+			entity_type=None, entity=None,
+			response_time=14400,
+			doctype=doctype,
+			sla_fulfilled_on=[{"status": "Replied"}],
+			apply_sla_for_resolution=0
+		)
+		creation = datetime.datetime(2019, 3, 4, 12, 0)
+		lead = make_lead(creation=creation, index=2)
+		self.assertEqual(lead.service_level_agreement, lead_sla.name)
+		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
+
+		# set lead as replied to set first responded on
+		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 15, 30)
+		lead.reload()
+		lead.status = 'Replied'
+		lead.save()
+		lead.reload()
+		self.assertEqual(lead.agreement_status, 'Fulfilled')
+
+		# check response_by_variance
+		self.assertEqual(lead.first_responded_on, frappe.flags.current_time)
+		self.assertEqual(lead.response_by_variance, 1800.0)
+
+		# make a change on the document &
+		# check response_by_variance is unchanged
+		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 18, 30)
+		lead.status = 'Open'
+		lead.save()
+		lead.reload()
+		self.assertEqual(lead.response_by_variance, 1800.0)
+
 	def tearDown(self):
 		for d in frappe.get_all("Service Level Agreement"):
 			frappe.delete_doc("Service Level Agreement", d.name, force=1)
