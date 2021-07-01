@@ -7,8 +7,9 @@
   "details",
   "operation",
   "bom",
-  "sequence_id",
+  "column_break_4",
   "description",
+  "sequence_id",
   "col_break1",
   "completed_qty",
   "status",
@@ -198,6 +199,10 @@
    "label": "Sequence ID",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
