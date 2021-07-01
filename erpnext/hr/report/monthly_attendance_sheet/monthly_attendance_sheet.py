@@ -40,6 +40,8 @@ def execute(filters=None):
 		row['total_present'] = 0
 		row['total_absent'] = 0
 		row['total_leave'] = 0
+		row['total_half_day'] = 0
+		row['total_half_day'] = 0
 		row['total_late_entry'] = 0
 		row['total_early_exit'] = 0
 
@@ -61,18 +63,17 @@ def execute(filters=None):
 
 			if attendance_status == "Present":
 				row['total_present'] += 1
+
+				if attendance_details.late_entry:
+					row['total_late_entry'] += 1
+				if attendance_details.early_exit:
+					row['total_early_exit'] += 1
 			elif attendance_status == "Absent":
 				row['total_absent'] += 1
 			elif attendance_status == "On Leave":
 				row['total_leave'] += 1
 			elif attendance_status == "Half Day":
-				row['total_present'] += 0.5
-				row['total_absent'] += 0.5
-
-			if attendance_details.late_entry:
-				row['total_late_entry'] += 1
-			if attendance_details.early_exit:
-				row['total_early_exit'] += 1
+				row['total_half_day'] += 1
 
 		if not filters.get("employee"):
 			filters.update({"employee": employee})
@@ -111,7 +112,7 @@ def get_columns(filters, leave_types):
 	columns = [
 		{"fieldname": "employee", "label": _("Employee"), "fieldtype": "Link", "options": "Employee", "width": 80},
 		{"fieldname": "employee_name", "label": _("Employee Name"), "fieldtype": "Data", "width": 140},
-		{"fieldname": "designation", "label": _("Designation"), "fieldtype": "Link", "options": "Designation", "width": 120},
+		{"fieldname": "designation", "label": _("Designation"), "fieldtype": "Link", "options": "Designation", "width": 100},
 	]
 
 	for day in range(filters["total_days_in_month"]):
@@ -121,9 +122,10 @@ def get_columns(filters, leave_types):
 	columns += [
 		{"fieldname": "total_present", "label": _("Present"), "fieldtype": "Float", "width": 70, "precision": 1},
 		{"fieldname": "total_absent", "label": _("Absent"), "fieldtype": "Float", "width": 70, "precision": 1},
-		{"fieldname": "total_leave", "label": _("On Leave"), "fieldtype": "Float", "width": 75, "precision": 1},
+		{"fieldname": "total_half_day", "label": _("Half Day"), "fieldtype": "Float", "width": 75, "precision": 1},
 		{"fieldname": "total_late_entry", "label": _("Late Entry"), "fieldtype": "Float", "width": 80, "precision": 1},
 		{"fieldname": "total_early_exit", "label": _("Early Exit"), "fieldtype": "Float", "width": 75, "precision": 1},
+		{"fieldname": "total_leave", "label": _("On Leave"), "fieldtype": "Float", "width": 75, "precision": 1},
 	]
 
 	for leave_type in leave_types:

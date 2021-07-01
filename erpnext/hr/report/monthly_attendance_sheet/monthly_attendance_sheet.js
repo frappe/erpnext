@@ -52,8 +52,27 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 		var style = {};
 		var link;
 
-		if (['total_present', 'total_absent', 'total_leave', 'total_late_entry', 'total_early_exit'].includes(column.fieldname) && data.employee) {
+		if (['total_present', 'total_absent', 'total_half_day', 'total_leave', 'total_late_entry', 'total_early_exit'].includes(column.fieldname) && data.employee) {
 			link = `desk#query-report/Employee Checkin Sheet?employee=${encodeURIComponent(data.employee)}&from_date=${data.from_date}&to_date=${data.to_date}`;
+		}
+
+		if (column.fieldname == 'total_present' && flt(value)) {
+			style['color'] = 'green';
+		}
+		if (column.fieldname == 'total_absent' && flt(value)) {
+			style['color'] = 'red';
+		}
+		if (column.fieldname == 'total_half_day' && flt(value)) {
+			style['color'] = 'orange';
+		}
+		if (column.fieldname == 'total_leave' && flt(value)) {
+			style['color'] = 'blue';
+		}
+		if (column.fieldname == 'total_late_entry' && flt(value)) {
+			style['color'] = 'orange';
+		}
+		if (column.fieldname == 'total_early_exit' && flt(value)) {
+			style['color'] = 'orange';
 		}
 
 		if (column.day) {
