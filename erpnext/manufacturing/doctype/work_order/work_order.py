@@ -860,7 +860,8 @@ class WorkOrder(Document):
 					"status": "Not Assigned",
 					"qty_to_issue": flt(qty, precision),
 					"weight_per_unit": res.weight_per_unit,
-					"type": res.type
+					"type": res.type,
+					"work_order_total_cost":self.work_order_total_cost
 				})
 		# mc.insert(ignore_permissions=True)
 		return mc.as_dict()
