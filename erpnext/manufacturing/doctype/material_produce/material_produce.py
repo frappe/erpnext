@@ -32,7 +32,6 @@ class MaterialProduce(Document):
             for res in self.material_produce_details:
                 total_qty += flt(res.qty_produced, res.precision('qty_produced'))
                 line_id = res.line_ref
-            w_doc=frappe.get_doc("Work Order",self.work_order)
             l_doc = frappe.get_doc("Material Produce Item", line_id)
             # if l_doc.qty_produced:
             #     if total_qty > l_doc.qty_produced:
@@ -41,6 +40,7 @@ class MaterialProduce(Document):
             lst = []
             for res in self.material_produce_details:
                 if res.qty_produced:
+                    w_doc=frappe.get_doc("Work Order",{"name":self.work_order})
                     lst.append({
                         "item_code": res.item_code,
                         "item_name": res.item_name,
