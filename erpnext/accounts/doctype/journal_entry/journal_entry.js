@@ -194,19 +194,19 @@ var update_jv_details = function(doc, r) {
 	refresh_field("accounts");
 }
 
-erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
-	onload: function() {
+erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Controller {
+	onload() {
 		this.load_defaults();
 		this.setup_queries();
 		this.setup_balance_formatter();
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
-	},
+	}
 
-	onload_post_render: function() {
+	onload_post_render() {
 		cur_frm.get_field("accounts").grid.set_multiple_add("account");
-	},
+	}
 
-	load_defaults: function() {
+	load_defaults() {
 		//this.frm.show_print_first = true;
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			frappe.model.set_default_values(this.frm.doc);
@@ -216,9 +216,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			var posting_date = this.frm.doc.posting_date;
 			if(!this.frm.doc.amended_from) this.frm.set_value('posting_date', posting_date || frappe.datetime.get_today());
 		}
-	},
+	}
 
-	setup_queries: function() {
+	setup_queries() {
 		var me = this;
 
 		me.frm.set_query("account", "accounts", function(doc, cdt, cdn) {
@@ -324,9 +324,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		});
 
 
-	},
+	}
 
-	setup_balance_formatter: function() {
+	setup_balance_formatter() {
 		const formatter = function(value, df, options, doc) {
 			var currency = frappe.meta.get_field_currency(df, doc);
 			var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
@@ -337,9 +337,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		};
 		this.frm.fields_dict.accounts.grid.update_docfield_property('balance', 'formatter', formatter);
 		this.frm.fields_dict.accounts.grid.update_docfield_property('party_balance', 'formatter', formatter);
-	},
+	}
 
-	reference_name: function(doc, cdt, cdn) {
+	reference_name(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 
 		if(d.reference_name) {
@@ -351,9 +351,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
 		}
-	},
+	}
 
-	get_outstanding: function(doctype, docname, company, child, due_date) {
+	get_outstanding(doctype, docname, company, child, due_date) {
 		var me = this;
 		var args = {
 			"doctype": doctype,
@@ -375,9 +375,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				}
 			}
 		});
-	},
+	}
 
-	accounts_add: function(doc, cdt, cdn) {
+	accounts_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		$.each(doc.accounts, function(i, d) {
 			if(d.account && d.party && d.party_type) {
@@ -400,9 +400,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		cur_frm.cscript.update_totals(doc);
 
 		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, 'accounts');
-	},
+	}
 
-});
+};
 
 cur_frm.script_manager.make(erpnext.accounts.JournalEntry);
 

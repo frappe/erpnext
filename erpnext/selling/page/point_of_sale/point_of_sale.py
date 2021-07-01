@@ -23,8 +23,8 @@ def search_by_term(search_term, warehouse, price_list):
 
 		item_stock_qty = get_stock_availability(item_code, warehouse)
 		price_list_rate, currency = frappe.db.get_value('Item Price', {
-				'price_list': price_list,
-				'item_code': item_code
+			'price_list': price_list,
+			'item_code': item_code
 		}, ["price_list_rate", "currency"]) or [None, None]
 
 		item_info.update({

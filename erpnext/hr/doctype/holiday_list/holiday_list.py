@@ -23,7 +23,7 @@ class HolidayList(Document):
 		last_idx = max([cint(d.idx) for d in self.get("holidays")] or [0,])
 		for i, d in enumerate(date_list):
 			ch = self.append('holidays', {})
-			ch.description = self.weekly_off
+			ch.description = _(self.weekly_off)
 			ch.holiday_date = d
 			ch.weekly_off = 1
 			ch.idx = last_idx + i + 1

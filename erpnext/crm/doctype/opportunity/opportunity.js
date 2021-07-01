@@ -145,8 +145,8 @@ frappe.ui.form.on("Opportunity", {
 })
 
 // TODO commonify this code
-erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
-	onload: function() {
+erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
+	onload() {
 
 		if(!this.frm.doc.status) {
 			frm.set_value('status', 'Open');
@@ -159,9 +159,9 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		}
 
 		this.setup_queries();
-	},
+	}
 
-	setup_queries: function() {
+	setup_queries() {
 		var me = this;
 
 		if(this.frm.fields_dict.contact_by.df.options.match(/^User/)) {
@@ -185,17 +185,17 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		else if (me.frm.doc.opportunity_from == "Customer") {
 			me.frm.set_query('party_name', erpnext.queries['customer']);
 		}
-	},
+	}
 
-	create_quotation: function() {
+	create_quotation() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 			frm: cur_frm
 		})
 	}
-});
+};
 
-$.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];

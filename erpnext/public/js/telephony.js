@@ -1,19 +1,19 @@
-frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
+frappe.ui.form.ControlData = class ControlData extends frappe.ui.form.ControlData  {
 	make_input() {
-		this._super();
+		super.make_input();
 		if (this.df.options == 'Phone') {
 			this.setup_phone();
 		}
 		if (this.frm && this.frm.fields_dict) {
 			Object.values(this.frm.fields_dict).forEach(function(field) {
-				if (field.df.read_only === 1 && field.df.options === 'Phone' 
+				if (field.df.read_only === 1 && field.df.options === 'Phone'
 					&& field.disp_area.style[0] != 'display' && !field.has_icon) {
 					field.setup_phone();
 					field.has_icon = true;
 				}
 			});
 		}
-	},
+	}
 	setup_phone() {
 		if (frappe.phone_call.handler) {
 			let control = this.df.read_only ? '.control-value' : '.control-input';
@@ -30,4 +30,4 @@ frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
 				});
 		}
 	}
-});
+};

@@ -71,7 +71,8 @@ class ProductQuery:
 					],
 					or_filters=self.or_filters,
 					start=start,
-					limit=self.page_length
+					limit=self.page_length,
+					order_by="weightage desc"
 				)
 
 				items_dict = {item.name: item for item in items}
