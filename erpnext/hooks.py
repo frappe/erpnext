@@ -158,6 +158,7 @@ website_route_rules = [
 			"parents": [{"label": _("Material Request"), "route": "material-requests"}]
 		}
 	},
+	{"from_route": "/project", "to_route": "Project"}
 ]
 
 standard_portal_menu_items = [
