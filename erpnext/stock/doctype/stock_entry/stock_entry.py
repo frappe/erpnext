@@ -113,6 +113,7 @@ class StockEntry(StockController):
 		
 		if self.work_order and self.stock_entry_type == "Manufacture":
 			self.scrap_qty()
+			self.set_material_produce_scrap_total()
 
 		if self.work_order and self.stock_entry_type == "Material Consumption for Manufacture":
 			self.set_work_order_total_cost()
@@ -122,6 +123,7 @@ class StockEntry(StockController):
 			
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('Completed')
+
 
 	def on_cancel(self):
 
@@ -212,6 +214,18 @@ class StockEntry(StockController):
 					c=sum(b)
 					doc.total_manufacture_of_scrap=d
 					doc.scrap_total_cost=c
+			doc.save(ignore_permissions=True)
+
+	def set_material_produce_scrap_total(self):
+		if self.stock_entry_type=="Manufacture" and self.work_order:
+			doc=frappe.get_doc("Material Produce",{"work_order":self.work_order})
+			a=[]
+			for i in self.items:
+				if i.is_scrap_item==1:
+					a.append(i.basic_amount)
+					d=sum(a)
+			for i in doc.material_produce_details:
+				i.scrap_total_qty=d
 			doc.save(ignore_permissions=True)
 
 	def update_cost_in_project(self):
