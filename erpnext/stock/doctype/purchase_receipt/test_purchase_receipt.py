@@ -421,10 +421,17 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(return_pr_2.items[0].qty, -3)
 
 		# Make PI against unreturned amount
+		buying_settings = frappe.get_single("Buying Settings")
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 0
+		buying_settings.save()
+
 		pi = make_purchase_invoice(pr.name)
 		pi.submit()
 
 		self.assertEqual(pi.items[0].qty, 3)
+
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 1
+		buying_settings.save()
 
 		pr.load_from_db()
 		# PR should be completed on billing all unreturned amount
@@ -767,8 +774,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1.items[0].purchase_receipt_item = pr.items[0].name
 		pr1.submit()
 
-		pi = make_purchase_invoice(pr.name)
-		self.assertEqual(pi.items[0].qty, 3)
+		pi1 = make_purchase_invoice(pr.name)
+		self.assertEqual(pi1.items[0].qty, 3)
 
 		pr1.cancel()
 		pr.reload()
@@ -1003,6 +1010,74 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertEqual(pr.status, "To Bill")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
+
+	def test_service_item_purchase_with_perpetual_inventory(self):
+		company = '_Test Company with perpetual inventory'
+		service_item = '_Test Non Stock Item'
+
+		before_test_value = frappe.db.get_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items')
+		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', 1)
+		srbnb_account = 'Stock Received But Not Billed - TCP1'
+		frappe.db.set_value('Company', company, 'service_received_but_not_billed', srbnb_account)
+
+		pr = make_purchase_receipt(
+			company=company, item=service_item,
+			warehouse='Finished Goods - TCP1', do_not_save=1
+		)
+		item_row_with_diff_rate = frappe.copy_doc(pr.items[0])
+		item_row_with_diff_rate.rate = 100
+		pr.append('items', item_row_with_diff_rate)
+
+		pr.save()
+		pr.submit()
+
+		item_one_gl_entry = frappe.db.get_all("GL Entry", {
+			'voucher_type': pr.doctype,
+			'voucher_no': pr.name,
+			'account': srbnb_account,
+			'voucher_detail_no': pr.items[0].name
+		}, pluck="name")
+
+		item_two_gl_entry = frappe.db.get_all("GL Entry", {
+			'voucher_type': pr.doctype,
+			'voucher_no': pr.name,
+			'account': srbnb_account,
+			'voucher_detail_no': pr.items[1].name
+		}, pluck="name")
+		
+		# check if the entries are not merged into one
+		# seperate entries should be made since voucher_detail_no is different
+		self.assertEqual(len(item_one_gl_entry), 1)
+		self.assertEqual(len(item_two_gl_entry), 1)
+
+		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', before_test_value)
+
+	def test_purchase_receipt_with_exchange_rate_difference(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice as create_purchase_invoice
+
+		pi = create_purchase_invoice(currency = "USD", conversion_rate = 70)
+
+		create_warehouse("_Test Warehouse for Valuation", company="_Test Company with perpetual inventory",
+			properties={"account": '_Test Account Stock In Hand - TCP1'})
+		
+		pr = make_purchase_receipt(warehouse = '_Test Warehouse for Valuation - TCP1', 
+			company="_Test Company with perpetual inventory", currency = "USD", conversion_rate = 80, 
+			do_not_save = "True")
+
+		pr.items[0].purchase_invoice = pi.name
+		pr.items[0].purchase_invoice_item = pi.items[0].name
+
+		pr.insert()
+		pr.submit()
+
+		# fetching the latest GL Entry with 'Exchange Gain/Loss - TCP1' account
+		gl_entries = frappe.get_all('GL Entry', filters = {'account': 'Exchange Gain/Loss - TCP1'})
+		voucher_no = frappe.get_value('GL Entry', gl_entries[0]['name'], 'voucher_no')
+		self.assertEqual(pr.name, voucher_no)
+
+		exchange_gain_loss_amount = frappe.get_value('GL Entry', gl_entries[0]['name'], 'debit')
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+		self.assertEqual(exchange_gain_loss_amount, discrepancy_caused_by_exchange_rate_diff)
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

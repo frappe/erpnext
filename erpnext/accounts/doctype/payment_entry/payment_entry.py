@@ -706,7 +706,7 @@ class PaymentEntry(AccountsController):
 			if account_currency != self.company_currency:
 				frappe.throw(_("Currency for {0} must be {1}").format(d.account_head, self.company_currency))
 
-			if self.payment_type == 'Pay':
+			if self.payment_type in ('Pay', 'Internal Transfer'):
 				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
 			elif self.payment_type == 'Receive':
 				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
@@ -761,7 +761,7 @@ class PaymentEntry(AccountsController):
 			return self.advance_tax_account
 		elif self.payment_type == 'Receive':
 			return self.paid_from
-		elif self.payment_type == 'Pay':
+		elif self.payment_type in ('Pay', 'Internal Transfer'):
 			return self.paid_to
 
 	def update_advance_paid(self):

@@ -41,6 +41,30 @@ class TestProductConfigurator(unittest.TestCase):
 				"show_variant_in_website": 1
 			}).insert()
 
+	def create_regular_web_item(self, name, item_group=None):
+		if not frappe.db.exists('Item', name):
+			doc = frappe.get_doc({
+				"description": name,
+				"item_code": name,
+				"item_name": name,
+				"doctype": "Item",
+				"is_stock_item": 1,
+				"item_group": item_group or "_Test Item Group",
+				"stock_uom": "_Test UOM",
+				"item_defaults": [{
+					"company": "_Test Company",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"expense_account": "_Test Account Cost for Goods Sold - _TC",
+					"buying_cost_center": "_Test Cost Center - _TC",
+					"selling_cost_center": "_Test Cost Center - _TC",
+					"income_account": "Sales - _TC"
+				}],
+				"show_in_website": 1
+			}).insert()
+		else:
+			doc = frappe.get_doc("Item", name)
+		return doc
+
 	def test_product_list(self):
 		template_items = frappe.get_all('Item', {'show_in_website': 1})
 		variant_items = frappe.get_all('Item', {'show_variant_in_website': 1})
@@ -77,3 +101,42 @@ class TestProductConfigurator(unittest.TestCase):
 			'Test Size': ['2XL']
 		})
 		self.assertEqual(len(items), 1)
+
+	def test_products_in_multiple_item_groups(self):
+		"""Check if product is visible on multiple item group pages barring its own."""
+		from erpnext.shopping_cart.product_query import ProductQuery
+
+		if not frappe.db.exists("Item Group", {"name": "Tech Items"}):
+			item_group_doc = frappe.get_doc({
+				"doctype": "Item Group",
+				"item_group_name": "Tech Items",
+				"parent_item_group": "All Item Groups",
+				"show_in_website": 1
+			}).insert()
+		else:
+			item_group_doc = frappe.get_doc("Item Group", "Tech Items")
+
+		doc = self.create_regular_web_item("Portal Item", item_group="Tech Items")
+		if not frappe.db.exists("Website Item Group", {"parent": "Portal Item"}):
+			doc.append("website_item_groups", {
+				"item_group": "_Test Item Group Desktops"
+			})
+			doc.save()
+
+		# check if item is visible in its own Item Group's page
+		engine = ProductQuery()
+		items = engine.query({}, {"item_group": "Tech Items"}, None, start=0, item_group="Tech Items")
+		self.assertEqual(len(items), 1)
+		self.assertEqual(items[0].item_code, "Portal Item")
+
+		# check if item is visible in configured foreign Item Group's page
+		engine = ProductQuery()
+		items = engine.query({}, {"item_group": "_Test Item Group Desktops"}, None, start=0, item_group="_Test Item Group Desktops")
+		item_codes = [row.item_code for row in items]
+
+		self.assertIn(len(items), [2, 3])
+		self.assertIn("Portal Item", item_codes)
+
+		# teardown
+		doc.delete()
+		item_group_doc.delete()

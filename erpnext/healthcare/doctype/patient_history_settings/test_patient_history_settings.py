@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 import json
-from frappe.utils import getdate
+from frappe.utils import getdate, strip_html
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
 
 class TestPatientHistorySettings(unittest.TestCase):
@@ -44,9 +44,9 @@ class TestPatientHistorySettings(unittest.TestCase):
 		self.assertTrue(medical_rec)
 
 		medical_rec = frappe.get_doc("Patient Medical Record", medical_rec)
-		expected_subject = "<b>Date: </b>{0}<br><b>Rating: </b>3<br><b>Feedback: </b>Test Patient History Settings<br>".format(
+		expected_subject = "Date: {0}Rating: 3Feedback: Test Patient History Settings".format(
 			frappe.utils.format_date(getdate()))
-		self.assertEqual(medical_rec.subject, expected_subject)
+		self.assertEqual(strip_html(medical_rec.subject), expected_subject)
 		self.assertEqual(medical_rec.patient, patient)
 		self.assertEqual(medical_rec.communication_date, getdate())
 
