@@ -41,6 +41,7 @@ class MaterialProduce(Document):
             for res in self.material_produce_details:
                 if res.qty_produced:
                     w_doc=frappe.get_doc("Work Order",{"name":self.work_order})
+                    print(w_doc.work_order_total_cost)
                     lst.append({
                         "item_code": res.item_code,
                         "item_name": res.item_name,
@@ -51,7 +52,7 @@ class MaterialProduce(Document):
                         "rate": flt(res.rate, res.precision('rate')),
                         "weight": res.weight,
                         "line_ref": res.line_ref,
-                        "work_order_total_cost":w_doc.work_order_total_cost
+                        "work_order_total_cost":res.work_order_total_cost
                     })
             if line_id:
                 l_doc = frappe.get_doc("Material Produce Item", line_id)
