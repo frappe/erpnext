@@ -13,6 +13,7 @@ from erpnext.stock.get_item_details import get_bin_details
 from fxnmrnth.integration_req_log import log_integration_request, log_exceptions
 
 from erpnext.exceptions import PartyFrozen, PartyDisabled
+from frappe.exceptions import ValidationError
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
@@ -113,6 +114,10 @@ def order(*args, **kwargs):
 		log_exceptions(order=order, status="Failed", internal_reason=str(exc))
 		return str(exc)
 	except PartyDisabled as exc:
+		order = json.loads(frappe.request.data)
+		log_exceptions(order=order, status="Failed", internal_reason=str(exc))
+		return str(exc)
+	except ValidationError as exc:
 		order = json.loads(frappe.request.data)
 		log_exceptions(order=order, status="Failed", internal_reason=str(exc))
 		return str(exc)
@@ -456,7 +461,7 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 
 		# check sku
 		if not sku:
-			frappe.throw("SKU is missing!")
+			frappe.throw(f"SKU is missing for {item.get('name', 'product')}")
 		
 		# if we detect the sku is "GPKITPD", we ignore it
 		if sku == "GPKITPD":
