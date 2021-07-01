@@ -174,6 +174,9 @@ def _order(woocommerce_settings, *args, **kwargs):
 			frappe.log_error(title="Error in guest order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 	else: # this is a user login, a practitioner
 		if woocommerce_settings.company == "RN Labs":
+			if pos_order_type not in order_type_mapping:
+				log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=None, status="Cancelled", data=json.dumps(order, indent=4), error="Order Type is not found on WooCommcerce Payload!", woocommerce_settings=woocommerce_settings)
+				frappe.throw('Order Type is not found on WooCommcerce Payload!')
 			order_type = order_type_mapping[pos_order_type]
 			edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 
@@ -181,7 +184,8 @@ def _order(woocommerce_settings, *args, **kwargs):
 				# apply 20% of the discount
 				test_order = 1
 				if pos_order_type == "self":
-					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
+					invoice_sending_option = "send receipt to patient" # this need to be added so that test kit is added for this type of orders
+					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, invoice_sending_option=invoice_sending_option, test_order=test_order)
 				else:
 					new_invoice, patient_invoice_doc = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order, patient_dob=patient_dob)
 					customer_accepts_backorder = 1
@@ -376,6 +380,7 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 					"company": woocommerce_settings.company}, "default_supplier")
 				invoice_doc.append("backorder_items", {
 					"item_code": item['item_code'], 
+					"item_name": item['item_name'], 
 					"supplier": supplier,
 					"qty": item["qty"],
 					"actual_qty":item["actual_qty"]
@@ -384,6 +389,10 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 				invoice_doc.append("items", item)
 				if item["item_group"] != "Tests":
 					item_tax = (item['rate'] * tax_rate) * item["qty"]
+
+			# We need to flag the update backorder if backorder_items has contents
+			if invoice_doc.get("backorder_items"):
+				invoice_doc.set("update_backorder", 1)
 
 		else: # item["is_stock_item"] == 0 
 			invoice_doc.append("items", item)
@@ -457,7 +466,8 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 		if frappe.db.exists("Item", {"name": sku}):
 			found_item = frappe.get_doc("Item", {"name": sku})
 		else:
-			frappe.throw("Item: {} is not found!").format(sku)
+			frappe.log_error(title="WooCommerce Item Mismatch", message="Item: {} is not found!".format(sku))
+			frappe.throw("Item: {} is not found!".format(sku))
 
 
 		# hard code part:

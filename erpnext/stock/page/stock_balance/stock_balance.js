@@ -39,6 +39,28 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		}
 	});
 
+	page.brand_field = page.add_field({
+		fieldname: 'brand',
+		label: 'Brand',
+		fieldtype:'Link',
+		options:'Brand',
+		change: function() {
+			page.item_dashboard.start = 0;
+			page.item_dashboard.refresh();
+		}
+	});
+
+	page.limit_field = page.add_field({
+		fieldname: 'limit',
+		label: 'Limit',
+		fieldtype:'Int',
+		default: 20,
+		change: function() {
+			page.item_dashboard.start = 0;
+			page.item_dashboard.refresh();
+		}
+	});
+
 	page.sort_selector = new frappe.ui.SortSelector({
 		parent: page.wrapper.find('.page-form'),
 		args: {
@@ -71,6 +93,8 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 			this.item_code = page.item_field.get_value();
 			this.warehouse = page.warehouse_field.get_value();
 			this.item_group = page.item_group_field.get_value();
+			this.brand = page.brand_field.get_value();
+			this.limit_page_length = page.limit_field.get_value();
 		}
 
 		page.item_dashboard.refresh();

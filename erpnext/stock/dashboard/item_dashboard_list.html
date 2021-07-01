@@ -1,6 +1,6 @@
 {% for d in data %}
 	<div class="dashboard-list-item">
-		<div class="row">
+		<div class="row" parent="{{ d.item_code }}">
 			<div class="col-sm-3 small" style="margin-top: 8px;">
 				<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
 			</div>
@@ -12,7 +12,7 @@
 					</a>
 				{% endif %}
 			</div>
-			<div class="col-sm-4 small">
+			<div class="col-sm-3 small">
 				<span class="inline-graph">
 					<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
 						<span class="inline-graph-count">{{ d.total_reserved }}</span>
@@ -38,6 +38,14 @@
 						</span>
 					</span>
 				</span>
+			</div>
+			<div class="col-sm-1 small" style="margin: 10px auto">
+				<a class="fas fa-chevron-circle-down pending-breakdown" data-item="{{ d.item_code }}" 
+				data-warehouse="{{ d.warehouse }}">
+				</a>
+				<a class="fas fa-chevron-circle-up to-collapse" data-item="{{ d.item_code }}" 
+				data-warehouse="{{ d.warehouse }}">
+				</a>
 			</div>
 			{% if can_write %}
 			<div class="col-sm-2 text-right" style="margin-top: 8px;">

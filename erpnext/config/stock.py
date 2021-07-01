@@ -60,6 +60,13 @@ def get_data():
 					"doctype": "Stock Ledger Entry",
 					"onboard": 1,
 					"dependencies": ["Item"],
+				},				
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Total Stock Summary",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",

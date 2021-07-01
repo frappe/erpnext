@@ -389,6 +389,50 @@ $.extend(erpnext.item, {
 				erpnext.item.item_dashboard.refresh();
 			});
 		}
+
+		// Show Brand and price
+		if (frm.doc.brand){
+			const brand = frm.doc.brand
+
+			// let item_default = frm.doc.item_defaults[0]
+			// const default_price_list = item_default.default_price_list;
+			// const expense_account = item_default.expense_account;
+			// const income_account = item_default.income_account;
+
+			// const item_default_display = `<div class="dashboard-list-item" style="margin-top: 8px;">\
+			// 	<div class="col-sm-3 small">Default price list: ${default_price_list}</div>\
+			// 	<div class="col-sm-3 small">Default Expense Account: ${expense_account}</div>\
+			// 	<div class="col-sm-3 small">Default Income Account: ${income_account}</div>\
+			// </div>`
+
+			// We want to display all the item prices ?
+			let template = `<div class="dashboard-list-item">\
+				<div class="row" parent="header">\
+					<div class="col-sm-3 "> Price List</div>\
+					<div class="col-sm-3 "> Currency</div>\
+					<div class="col-sm-3 "> Rate</div>\
+					<div class="col-sm-3 "> Valid From</div>\
+				</div>\
+			</div>`
+			frappe.db.get_list('Item Price', {
+				filters: {item_code: frm.doc.name, selling: 1},
+				fields: ['price_list', 'price_list_rate', 'valid_from', 'valid_upto', 'currency']
+			}).then(res => { 
+				let rows = res.reduce( (accumulator, cur_row) => {
+					return accumulator + (`<div class="row" parent=${cur_row.price_list}>\
+					<div class="col-sm-3 "> ${cur_row.price_list}</div>\
+					<div class="col-sm-3 "> ${cur_row.currency}</div>\
+					<div class="col-sm-3 "> $ ${cur_row.price_list_rate}</div>\
+					<div class="col-sm-3 "> ${cur_row.valid_from} To ${(cur_row.valid_upto? cur_row.valid_upto : "Now")}</div>\
+				</div>`)
+				}, "")
+				console.log("rows: ", rows)
+				let item_price_html = template + rows
+				frm.dashboard.add_section(` <h5 style="margin-top: 0px;">\
+				<a href="/desk#Form/Brand/${brand}">Brand: ${brand}</a></h5>` + item_price_html);
+			})
+		}
+
 	},
 
 	edit_prices_button: function(frm) {

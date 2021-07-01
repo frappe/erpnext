@@ -11,7 +11,7 @@ def get_data():
 			'Payment Request': 'reference_name',
 			'Sales Invoice': 'return_against',
 			'Auto Repeat': 'reference_document',
-			'Backorder': 'reference_doc',
+			# 'Backorder': 'backorder_references',
 			'Integration Request': 'reference_id_'
 		},
 		'internal_links': {
@@ -31,12 +31,16 @@ def get_data():
 			# 	'items': ['Timesheet', 'Delivery Note', 'Sales Order']
 			# },
 			{
-				'label': _('Returns & Backorder & Web'),
-				'items': ['Sales Invoice','Backorder', 'Integration Request']
+				'label': _('Returns & WooCommerce Integration'),
+				'items': ['Sales Invoice', 'Integration Request']
 			},
 			{
 				'label': _('Testing'),
 				'items': ['Sample']
+			},
+			{
+				'label': 'Shipments',
+				'items': ['Shipment Entry']
 			},
 			# {
 			# 	'label': _('Subscription'),

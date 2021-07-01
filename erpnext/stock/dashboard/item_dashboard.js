@@ -1,5 +1,15 @@
 frappe.provide('erpnext.stock');
 
+const CHART_COLORS = {
+	red: 'rgb(255, 99, 132)',
+	yellow: 'rgb(255, 205, 86)',
+	blue: 'rgb(54, 162, 235)',
+	orange: 'rgb(255, 159, 64)',
+	green: 'rgb(75, 192, 192)',
+	purple: 'rgb(153, 102, 255)',
+	grey: 'rgb(201, 203, 207)'
+};
+
 erpnext.stock.ItemDashboard = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
@@ -10,7 +20,8 @@ erpnext.stock.ItemDashboard = Class.extend({
 		this.start = 0;
 		if(!this.sort_by) {
 			this.sort_by = 'projected_qty';
-			this.sort_order = 'asc';
+			// this.sort_by = 'actual_qty';
+			this.sort_order = 'desc';
 		}
 
 		this.content = $(frappe.render_template('item_dashboard')).appendTo(this.parent);
@@ -23,6 +34,40 @@ erpnext.stock.ItemDashboard = Class.extend({
 		this.content.on('click', '.btn-add', function() {
 			handle_move_add($(this), "Add")
 		});
+
+		this.content.on('click', '.pending-breakdown', function() {
+			let item_code = unescape($(this).attr('data-item'));
+			let warehouse = unescape($(this).attr('data-warehouse'));
+
+			if ($(`#pending-breakdown-${item_code}`).length){
+				toggle_display(item_code, true);
+			} else {
+				let poi_results = get_coming_stocks(item_code, warehouse);
+				let boi_results = get_reserved_stocks(item_code);
+				append_breakdown($(this), item_code, poi_results, boi_results);
+			}
+		});
+
+		this.content.on('click', '.to-collapse', function() {
+			let item = unescape($(this).attr('data-item'));
+			// let warehouse = unescape($(this).attr('data-warehouse'));
+			// handle_breakdown($(this), item, warehouse);
+
+			if ($(`#pending-breakdown-${item}`).length){
+				toggle_display(item, false);
+			} else {
+				frappe.show_alert("Nothing to collapse")
+			}
+		});
+
+		function toggle_display(item, display) {
+			if (display) {
+				$(`#pending-breakdown-${item}`).removeClass('hide');
+			} else {
+				$(`#pending-breakdown-${item}`).addClass('hide');
+			}
+		}
+
 
 		function handle_move_add(element, action) {
 			let item = unescape(element.attr('data-item'));
@@ -76,6 +121,8 @@ erpnext.stock.ItemDashboard = Class.extend({
 				item_code: this.item_code,
 				warehouse: this.warehouse,
 				item_group: this.item_group,
+				brand: this.brand,
+				limit_page_length: this.limit_page_length,
 				start: this.start,
 				sort_by: this.sort_by,
 				sort_order: this.sort_order,
@@ -225,4 +272,206 @@ erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callb
 				frappe.set_route('Form', doc.doctype, doc.name);
 			})
 		});
+}
+
+
+function get_coming_stocks(item_code, warehouse) {
+	let result = "";
+	frappe.call({
+		method: "fxnmrnth.fxnmrnth.report.backorder_summary.backorder_summary.get_qty",
+		args: {
+			item_code: item_code,
+			warehouse: warehouse,
+		},
+		async: false,
+		callback: (r) => {
+			if (!r.exc) {
+				result = r.message;
+			} else {
+				frappe.show_alert(`Error happened: ${r.exc}`)
+			}
+		}
+	})
+	return result
+}
+
+function get_reserved_stocks(item_code, warehouse) {
+	let result = "";
+	frappe.call({
+		method: "fxnmrnth.fxnmrnth.report.backorder_analytics.backorder_analytics.get_bo_qty",
+		args: {
+			item_code: item_code,
+		},
+		async: false,
+		callback: (r) => {
+			if (!r.exc) {
+				result = r.message;
+			} else {
+				frappe.show_alert(`Error happened: ${r.exc}`)
+			}
+		}
+	})
+	return result
+}
+
+function append_breakdown(element, item_code, poi_results, boi_results) {
+	const $row = $(element).parents(`div[parent="${item_code}"]`)
+
+	// Parse poi_results
+	const poi_number_data = poi_results.map(r=> (r.qty-r.received_qty) )
+	const poi_total_number =  poi_results.reduce( (total, r)=>{
+		return total + (r.qty-r.received_qty)
+	}, 0)
+	const poi_label_data = poi_results.map(r=> `${r.parent} | ETA:${r.schedule_date}`)
+	const poi_backgroundColor = []
+	for (let i = 0; i < poi_results.length; i++) {
+		const colorIndex = i % Object.keys(CHART_COLORS).length;
+		poi_backgroundColor.push(Object.values(CHART_COLORS)[colorIndex])
+	}
+
+	// Setup poi chart
+	let po_dataset_label = "Purchase Order"
+	let po_options = {
+		responsive: true,
+		maintainAspectRatio: false,
+		plugins: {
+			legend: {
+				position: "bottom",
+				display: (poi_results.length >= 10) ? false : true,
+				align: "start",
+
+			},
+			title: {
+				display: true,
+				text: `Total ${poi_total_number} ${po_dataset_label} Breakdown`
+			}
+		},
+		// events: ['mousemove', 'mouseout', 'click'],
+	}
+	const po_config = setup(poi_number_data, poi_label_data, poi_backgroundColor, po_dataset_label, po_options);
+
+	// Parse boi_results
+	const boi_number_data = boi_results.map( r=> r.qty )
+	const boi_label_data = boi_results.map( r=> `${r.parent} | ${(r.customer_name)? (r.customer_name): "Customer Name Unset!"}`)
+	const boi_total_number =  boi_results.reduce((total, r)=>{
+		return total + r.qty
+	}, 0)
+	const boi_backgroundColor = []
+	for (let i = 0; i < boi_results.length; i++) {
+		const colorIndex = (i+5) % Object.keys(CHART_COLORS).length;
+		boi_backgroundColor.push(Object.values(CHART_COLORS)[colorIndex])
+	}
+
+
+	// Setup boi chart
+	let bo_dataset_label = "Backorder"
+	let bo_options = {
+		responsive: true,
+		maintainAspectRatio: false,
+		plugins: {
+			legend: {
+				position: "bottom",
+				display: (boi_results.length >= 10) ? false : true,
+				align: "start",
+			},
+			title: {
+				display: true,
+				text: `Total ${boi_total_number} ${bo_dataset_label} Breakdown`
+			}
+		},
+	}
+	const bo_config = setup(boi_number_data, boi_label_data, boi_backgroundColor, bo_dataset_label, bo_options);
+
+	
+	// Add div for canvas
+	let chartDisplay = `<div id="pending-breakdown-${item_code}" width="100%" class="col-sm-12" style="padding: 15px 15px;
+		border-top: 1px solid #d1d8dd; border-left: 6px solid deepskyblue;">
+		<div class="col-sm-6" width="48%">
+			<canvas id="bo-${item_code}"></canvas>
+		</div>
+		<div class="col-sm-6" width="48%">
+			<canvas id="po-${item_code}"></canvas>
+		</div>
+	</div>`
+
+	let empty_display = `<div id="pending-breakdown-${item_code}" width="100%" class="col-sm-12" style="padding: 15px 15px;
+		border-top: 1px solid #d1d8dd; border-left: 6px solid deepskyblue;">
+		<h2> Seems like there's nothing to display. </h2>
+		<h2> No stocks coming and no reserved quantity for any customers! </h2>
+	</div>`
+
+	if (poi_results.length > 0 || boi_results.length > 0) {
+		$row.append(chartDisplay)
+	} else {
+		$row.append(empty_display)
+	}
+
+	// Render the chart using our configuration
+	$.getScript("https://cdn.jsdelivr.net/npm/chart.js").done(function(){
+		if (poi_results.length > 0){
+			let po_ctx = document.getElementById(`po-${item_code}`);
+			let poChart = new Chart(po_ctx, po_config);
+	
+			// Open a new tab for purchase order review
+			po_ctx.onclick = function(evt){   
+				var activePoints = poChart.getActiveElements(evt);
+				if(activePoints.length > 0){
+					//get the internal index of slice in pie chart
+					var clickedElementindex = activePoints[0]["index"];
+	
+					//get specific label by index 
+					var label = poChart.data.labels[clickedElementindex];
+					let po_id  = label.split(" | ")[0]
+					window.open(frappe.urllib.get_full_url(`/desk#Form/Purchase%20Order/${po_id}`));
+	
+					//get value by index      
+					var value = poChart.data.datasets[0].data[clickedElementindex];
+				}
+			}
+		}
+
+		if (boi_results.length > 0){
+			let bo_ctx = document.getElementById(`bo-${item_code}`);
+			let boChart = new Chart(
+				bo_ctx,
+				bo_config
+			);
+
+			// Open a new tab for backorder review
+			bo_ctx.onclick = function(evt){   
+				var activePoints = boChart.getActiveElements(evt);
+				if(activePoints.length > 0){
+					//get the internal index of slice in pie chart
+					var clickedElementindex = activePoints[0]["index"];
+
+					//get specific label by index 
+					var label = boChart.data.labels[clickedElementindex];
+					let bo_id  = label.split(" | ")[0]
+					window.open(frappe.urllib.get_full_url(`/desk#Form/Backorder/${bo_id}`));
+
+					//get value by index      
+					var value = boChart.data.datasets[0].data[clickedElementindex];
+				}
+			}
+		}
+	});
+}
+
+// Setup for Purchase Order Item chart
+function setup(number_data, label_data, backgroundColor, dataset_label, options) {
+	const data = {
+		labels: label_data,
+		datasets: [{
+			label: dataset_label,
+			data: number_data,
+			backgroundColor: backgroundColor,
+			hoverOffset: 4
+		}]
+		};
+	const config = {
+		type: 'doughnut',
+		data,
+		options: options,
+	};
+	return config
 }

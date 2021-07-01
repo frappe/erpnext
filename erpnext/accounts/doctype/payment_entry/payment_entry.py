@@ -660,8 +660,8 @@ def get_outstanding_reference_documents(args, print=1):
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
 	# Add cost center condition
-	if args.get("cost_center"):
-		condition += " and cost_center='%s'" % args.get("cost_center")
+	# if args.get("cost_center"):
+	# 	condition += " and cost_center='%s'" % args.get("cost_center")
 
 	date_fields_dict = {
 		'posting_date': ['from_posting_date', 'to_posting_date'],
@@ -690,6 +690,8 @@ def get_outstanding_reference_documents(args, print=1):
 				)
 		if d.voucher_type in ("Purchase Invoice"):
 			d["bill_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_no")
+		elif d.voucher_type in ("Sales Invoice"):
+			d["customer_purchase_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "po_no")
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = []
