@@ -716,6 +716,7 @@
    "link_to": "GST Settings",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -726,6 +727,7 @@
    "link_to": "GST HSN Code",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -736,6 +738,7 @@
    "link_to": "GSTR-1",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -746,6 +749,7 @@
    "link_to": "GSTR-2",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -756,6 +760,7 @@
    "link_to": "GSTR 3B Report",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -766,6 +771,7 @@
    "link_to": "GST Sales Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -776,6 +782,7 @@
    "link_to": "GST Purchase Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -786,6 +793,7 @@
    "link_to": "GST Itemised Sales Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -796,6 +804,7 @@
    "link_to": "GST Itemised Purchase Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -806,6 +815,7 @@
    "link_to": "C-Form",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -816,6 +826,7 @@
    "link_to": "Lower Deduction Certificate",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -1074,7 +1085,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-06-02 23:35:26.269067",
+ "modified": "2021-06-10 03:17:31.427945",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

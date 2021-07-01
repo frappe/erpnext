@@ -263,6 +263,9 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			amount, base_amount = calculate_amount(doc, item, last_gl_entry,
 				total_days, total_booking_days, account_currency)
 
+		if not amount:
+			return
+
 		if via_journal_entry:
 			book_revenue_via_journal_entry(doc, credit_account, debit_account, against, amount,
 				base_amount, end_date, project, account_currency, item.cost_center, item, deferred_process, submit_journal_entry)

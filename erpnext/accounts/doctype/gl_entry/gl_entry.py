@@ -121,8 +121,7 @@ class GLEntry(Document):
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
-				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss" and \
-				self.voucher_type not in ['Purchase Invoice', 'Sales Invoice']:
+				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss":
 			frappe.throw(_("{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry")
 				.format(self.voucher_type, self.voucher_no, self.account))
 

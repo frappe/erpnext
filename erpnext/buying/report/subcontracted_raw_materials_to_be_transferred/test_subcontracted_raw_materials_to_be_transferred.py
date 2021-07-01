@@ -12,34 +12,80 @@ import json, frappe, unittest
 class TestSubcontractedItemToBeTransferred(unittest.TestCase):
 
 	def test_pending_and_transferred_qty(self):
-		po = create_purchase_order(item_code='_Test FG Item', is_subcontracted='Yes')
+		po = create_purchase_order(item_code='_Test FG Item', is_subcontracted='Yes', supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		# Material Receipt of RMs
 		make_stock_entry(item_code='_Test Item', target='_Test Warehouse - _TC', qty=100, basic_rate=100)
 		make_stock_entry(item_code='_Test Item Home Desktop 100', target='_Test Warehouse - _TC', qty=100, basic_rate=100)
-		transfer_subcontracted_raw_materials(po.name)
-		col, data = execute(filters=frappe._dict({'supplier': po.supplier,
-		   'from_date': frappe.utils.get_datetime(frappe.utils.add_to_date(po.transaction_date, days=-10)),
-		   'to_date': frappe.utils.get_datetime(frappe.utils.add_to_date(po.transaction_date, days=10))}))
-		self.assertEqual(data[0]['purchase_order'], po.name)
-		self.assertIn(data[0]['rm_item_code'], ['_Test Item', '_Test Item Home Desktop 100'])
-		self.assertIn(data[0]['p_qty'], [9, 18])
-		self.assertIn(data[0]['t_qty'], [1, 2])
 
-		self.assertEqual(data[1]['purchase_order'], po.name)
-		self.assertIn(data[1]['rm_item_code'], ['_Test Item', '_Test Item Home Desktop 100'])
-		self.assertIn(data[1]['p_qty'], [9, 18])
-		self.assertIn(data[1]['t_qty'], [1, 2])
+		se = transfer_subcontracted_raw_materials(po)
 
+		col, data = execute(filters=frappe._dict(
+			{
+				'supplier': po.supplier,
+				'from_date': frappe.utils.get_datetime(frappe.utils.add_to_date(po.transaction_date, days=-10)),
+				'to_date': frappe.utils.get_datetime(frappe.utils.add_to_date(po.transaction_date, days=10))
+			}
+		))
+		po.reload()
+
+		po_data = [row for row in data if row.get('purchase_order') == po.name]
+		# Alphabetically sort to be certain of order
+		po_data = sorted(po_data, key = lambda i: i['rm_item_code'])
+
+		self.assertEqual(len(po_data), 2)
+		self.assertEqual(po_data[0]['purchase_order'], po.name)
+
+		self.assertEqual(po_data[0]['rm_item_code'], '_Test Item')
+		self.assertEqual(po_data[0]['p_qty'], 8)
+		self.assertEqual(po_data[0]['transferred_qty'], 2)
+
+		self.assertEqual(po_data[1]['rm_item_code'], '_Test Item Home Desktop 100')
+		self.assertEqual(po_data[1]['p_qty'], 19)
+		self.assertEqual(po_data[1]['transferred_qty'], 1)
+
+		se.cancel()
+		po.cancel()
 
 def transfer_subcontracted_raw_materials(po):
+	# Order of supplied items fetched in PO is flaky
+	transfer_qty_map = {
+		'_Test Item': 2,
+		'_Test Item Home Desktop 100': 1
+	}
+
+	item_1 = po.supplied_items[0].rm_item_code
+	item_2 = po.supplied_items[1].rm_item_code
+
 	rm_item = [
-	 {'item_code': '_Test Item', 'rm_item_code': '_Test Item', 'item_name': '_Test Item', 'qty': 1,
-		'warehouse': '_Test Warehouse - _TC', 'rate': 100, 'amount': 100, 'stock_uom': 'Nos'},
-	 {'item_code': '_Test Item Home Desktop 100', 'rm_item_code': '_Test Item Home Desktop 100', 'item_name': '_Test Item Home Desktop 100', 'qty': 2,
-		'warehouse': '_Test Warehouse - _TC', 'rate': 100, 'amount': 200, 'stock_uom': 'Nos'}]
+		{
+			'name': po.supplied_items[0].name,
+			'item_code': item_1,
+			'rm_item_code': item_1,
+			'item_name': item_1,
+			'qty': transfer_qty_map[item_1],
+			'warehouse': '_Test Warehouse - _TC',
+			'rate': 100,
+			'amount': 100 * transfer_qty_map[item_1],
+			'stock_uom': 'Nos'
+		},
+		{
+			'name': po.supplied_items[1].name,
+			'item_code': item_2,
+			'rm_item_code': item_2,
+			'item_name': item_2,
+			'qty': transfer_qty_map[item_2],
+			'warehouse': '_Test Warehouse - _TC',
+			'rate': 100,
+			'amount': 100 * transfer_qty_map[item_2],
+			'stock_uom': 'Nos'
+		}
+	]
 	rm_item_string = json.dumps(rm_item)
-	se = frappe.get_doc(make_rm_stock_entry(po, rm_item_string))
-	se.from_warehouse = '_Test Warehouse 1 - _TC'
-	se.to_warehouse = '_Test Warehouse 1 - _TC'
+	se = frappe.get_doc(make_rm_stock_entry(po.name, rm_item_string))
+	se.from_warehouse = '_Test Warehouse - _TC'
+	se.to_warehouse = '_Test Warehouse - _TC'
 	se.stock_entry_type = 'Send to Subcontractor'
 	se.save()
 	se.submit()
+	return se

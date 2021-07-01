@@ -66,4 +66,8 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Patch Tests
-        run: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate
+        run: |
+          cd ~/frappe-bench/
+          wget https://erpnext.com/files/v10-erpnext.sql.gz
+          bench --site test_site --force restore ~/frappe-bench/v10-erpnext.sql.gz
+          bench --site test_site migrate
