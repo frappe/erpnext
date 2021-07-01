@@ -40,10 +40,6 @@ class MaterialProduce(Document):
             lst = []
             for res in self.material_produce_details:
                 if res.qty_produced:
-                    w_doc=frappe.get_doc("Work Order",{"name":self.work_order})
-                    print("*********************8888")
-                    print(w_doc.name)
-                    print(w_doc.work_order_total_cost)
                     lst.append({
                         "item_code": res.item_code,
                         "item_name": res.item_name,
