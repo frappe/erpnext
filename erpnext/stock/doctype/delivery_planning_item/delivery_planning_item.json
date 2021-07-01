@@ -101,7 +101,8 @@
    "fieldname": "postal_code",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Postal Code"
+   "label": "Postal Code",
+   "read_only": 1
   },
   {
    "fieldname": "delivery_date",
@@ -166,11 +167,13 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
+   "mandatory_depends_on": "eval: doc.supplier_dc == 1",
    "options": "Supplier"
   },
   {
    "fieldname": "split",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Split"
   },
   {
@@ -195,7 +198,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-22 12:30:39.946127",
+ "modified": "2021-06-28 10:52:41.019205",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
