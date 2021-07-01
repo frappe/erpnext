@@ -1299,7 +1299,8 @@ class SalarySlip(TransactionBase):
 		last_date_of_month = calendar.monthrange(cur_year, cur_month)
 		start = datetime(year=cur_year, month=cur_month, day=1).strftime("%Y-%m-%d")
 		end = datetime(year=cur_year, month=cur_month, day=int(last_date_of_month[1])).strftime("%Y-%m-%d")
-		all_leave_with_start_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "from_date":['between',[start,end]] },['from_date','to_date','total_leave_days'])
+
+		all_leave_with_start_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "from_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
 		
 		total_leave_list = []
 		for leave in all_leave_with_start_date:
@@ -1308,8 +1309,15 @@ class SalarySlip(TransactionBase):
 
 			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
 				total_leave_list.append(leave.get('total_leave_days'))
+			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] != [cur_month,cur_year]):
+				last_day_of_month = calendar.monthrange(cur_year, cur_month)[1]
+				month_date = datetime(cur_year, cur_month, last_day_of_month)
+				
+				leaves_in_cur_month = date_diff(month_date,leave.get('from_date')) + 1
+				total_leave_list.append(leaves_in_cur_month)
+			
 		
-		all_leave_with_end_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "to_date":['between',[start,end]] },['from_date','to_date','total_leave_days'])
+		all_leave_with_end_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "to_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
 		for leave in all_leave_with_end_date:
 			to_date_obj = leave.get('to_date')
 			from_date_obj = leave.get('from_date')
@@ -1318,9 +1326,6 @@ class SalarySlip(TransactionBase):
 				first_date_of_month = datetime(cur_year, cur_month, 1)
 				diff = date_diff(to_date_obj,first_date_of_month) + 1
 				total_leave_list.append(diff)
-		print(">>>> "*10)
-		print(total_leave_list)
-		print(sum(total_leave_list))
 		self.leave = sum(total_leave_list)
 	def add_leave_balances(self):
 		self.set('leave_details', [])
