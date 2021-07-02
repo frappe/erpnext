@@ -113,7 +113,7 @@ class StockEntry(StockController):
 		
 		if self.work_order and self.stock_entry_type == "Manufacture":
 			self.scrap_qty()
-			self.set_material_produce_scrap_total()
+			
 
 		if self.work_order and self.stock_entry_type == "Material Consumption for Manufacture":
 			self.set_work_order_total_cost()
@@ -216,17 +216,6 @@ class StockEntry(StockController):
 					doc.scrap_total_cost=c
 			doc.save(ignore_permissions=True)
 
-	def set_material_produce_scrap_total(self):
-		if self.stock_entry_type=="Manufacture" and self.work_order:
-			doc=frappe.get_doc("Material Produce",{"work_order":self.work_order})
-			a=[]
-			for i in self.items:
-				if i.is_scrap_item==1:
-					a.append(i.basic_amount)
-					d=sum(a)
-			for i in doc.material_produce_details:
-				i.scrap_total_qty=d
-			doc.save(ignore_permissions=True)
 
 	def update_cost_in_project(self):
 		if (self.work_order and not frappe.db.get_value("Work Order",

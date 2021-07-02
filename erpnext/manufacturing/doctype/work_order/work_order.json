@@ -647,15 +647,18 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "scrap_total_cost",
    "fieldtype": "Float",
-   "label": "Scrap Total Cost"
+   "label": "Scrap Total Cost",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "work_order_total_cost",
    "fieldtype": "Currency",
-   "label": "Work Order Total Cost"
+   "label": "Work Order Total Cost",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -663,7 +666,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-01 21:05:20.246840",
+ "modified": "2021-07-02 12:43:30.367234",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

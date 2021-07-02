@@ -369,7 +369,8 @@ class MaterialProduce(Document):
                                 "rate": flt(per_item_rate, precision4),
                                 "weight": item.weight_per_unit,
                                 "line_ref": line_id,
-                                "work_order_total_cost":wo.work_order_total_cost
+                                "work_order_total_cost":wo.work_order_total_cost,
+                                "scrap_total_cost":wo.scrap_total_cost
 
                             })
                         else:
@@ -383,7 +384,8 @@ class MaterialProduce(Document):
                                 "rate": flt(per_item_rate, precision4),
                                 "weight": item.weight_per_unit,
                                 "line_ref": line_id,
-                                "work_order_total_cost":wo.work_order_total_cost
+                                "work_order_total_cost":wo.work_order_total_cost,
+                                "scrap_total_cost":wo.scrap_total_cost
                             })
                             break
                         remaining_size -= batch_size
@@ -400,7 +402,8 @@ class MaterialProduce(Document):
                         "rate": flt(per_item_rate, precision4),
                         "weight": item.weight_per_unit,
                         "line_ref": line_id,
-                        "work_order_total_cost":wo.work_order_total_cost
+                        "work_order_total_cost":wo.work_order_total_cost,
+                        "scrap_total_cost":wo.scrap_total_cost
                     })
             else:
                 lst.append({
@@ -412,7 +415,8 @@ class MaterialProduce(Document):
                     "weight": item.weight_per_unit,
                     "rate": flt(per_item_rate, precision4),
                     "line_ref": line_id,
-                    "work_order_total_cost":wo.work_order_total_cost
+                    "work_order_total_cost":wo.work_order_total_cost,
+                    "scrap_total_cost":wo.scrap_total_cost
                 })
             self.cost_details_calculation()
             return lst
