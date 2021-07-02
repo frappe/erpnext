@@ -875,8 +875,6 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 def update_qty_in_future_sle(args, allow_negative_stock=None):
 	"""Recalculate Qty after Transaction in future SLEs based on current SLE."""
 	datetime_limit_condition = ""
-	last_balance = None
-
 	qty_shift = args.actual_qty
 
 	# find difference/shift in qty caused by stock reconciliation
@@ -937,7 +935,7 @@ def get_next_stock_reco(args):
 		select
 			name, posting_date, posting_time, creation, voucher_no
 		from
-			 `tabStock Ledger Entry`
+			`tabStock Ledger Entry`
 		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
@@ -954,8 +952,6 @@ def get_next_stock_reco(args):
 	""", args, as_dict=1)
 
 def get_datetime_limit_condition(detail):
-	if not detail: return None
-
 	return f"""
 		and
 		(timestamp(posting_date, posting_time) < timestamp('{detail.posting_date}', '{detail.posting_time}')
