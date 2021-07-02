@@ -34,14 +34,6 @@ frappe.ui.form.on('Loan', {
 			};
 		});
 
-		frm.set_query("applicant", function () {
-			return {
-				"filters": {
-					"company": frm.doc.company
-				}
-			};
-		});
-
 		$.each(["penalty_income_account", "interest_income_account"], function(i, field) {
 			frm.set_query(field, function () {
 				return {

@@ -21,13 +21,6 @@ frappe.ui.form.on('Loan Application', {
 				}
 			};
 		});
-		frm.set_query('applicant', () => {
-			return {
-				filters: {
-					company: frm.doc.company
-				}
-			};
-		});
 	},
 	repayment_method: function(frm) {
 		frm.doc.repayment_amount = frm.doc.repayment_periods = ""
