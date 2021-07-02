@@ -154,6 +154,24 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Grievance Type",
+   "link_to": "Grievance Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Grievance",
+   "link_to": "Employee Grievance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
@@ -823,7 +841,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-04-26 13:36:15.413819",
+ "modified": "2021-05-13 17:19:40.524444",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",

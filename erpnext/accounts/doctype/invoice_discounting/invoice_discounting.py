@@ -42,7 +42,7 @@ class InvoiceDiscounting(AccountsController):
 					record.idx, frappe.bold(actual_outstanding), frappe.bold(record.sales_invoice)))
 
 	def calculate_total_amount(self):
-		self.total_amount = sum([flt(d.outstanding_amount) for d in self.invoices])
+		self.total_amount = sum(flt(d.outstanding_amount) for d in self.invoices)
 
 	def on_submit(self):
 		self.update_sales_invoice()
