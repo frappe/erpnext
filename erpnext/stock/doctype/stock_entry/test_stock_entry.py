@@ -954,7 +954,115 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 
+<<<<<<< HEAD
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
+=======
+	def test_conversion_factor_change(self):
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		repack_entry = frappe.copy_doc(test_records[3])
+		repack_entry.posting_date = nowdate()
+		repack_entry.posting_time = nowtime()
+		repack_entry.set_stock_entry_type()
+		repack_entry.insert()
+
+		# check current uom and conversion factor
+		self.assertTrue(repack_entry.items[0].uom, "_Test UOM")
+		self.assertTrue(repack_entry.items[0].conversion_factor, 1)
+
+		# change conversion factor
+		repack_entry.items[0].uom = "_Test UOM 1"
+		repack_entry.items[0].stock_uom = "_Test UOM 1"
+		repack_entry.items[0].conversion_factor = 2
+		repack_entry.save()
+		repack_entry.submit()
+
+		self.assertEqual(repack_entry.items[0].conversion_factor, 2)
+		self.assertEqual(repack_entry.items[0].uom, "_Test UOM 1")
+		self.assertEqual(repack_entry.items[0].qty, 50)
+		self.assertEqual(repack_entry.items[0].transfer_qty, 100)
+
+		frappe.db.set_default("allow_negative_stock", 0)
+
+	def test_additional_cost_distribution_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Manufacture",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RM", basic_amount=10),
+					frappe._dict(item_code="FG", basic_amount=20, t_warehouse="X", is_finished_item=1),
+					frappe._dict(item_code="scrap", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
+
+	def test_additional_cost_distribution_non_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Material Receipt",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RECEIVED_1", basic_amount=20, t_warehouse="X"),
+					frappe._dict(item_code="RECEIVED_2", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([40.0, 60.0], distributed_costs)
+
+	def test_future_negative_sle(self):
+		# Initialize item, batch, warehouse, opening qty
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 0)
+
+		item_code = '_Test Future Neg Item'
+		batch_no = '_Test Future Neg Batch'
+		warehouses = [
+			'_Test Future Neg Warehouse Source',
+			'_Test Future Neg Warehouse Destination'
+		]
+		warehouse_names = initialize_records_for_future_negative_sle_test(
+			item_code, batch_no, warehouses,
+			opening_qty=2, posting_date='2021-07-01'
+		)
+
+		# Executing an illegal sequence should raise an error
+		sequence_of_entries = [
+			dict(item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[0],
+				to_warehouse=warehouse_names[1],
+				batch_no=batch_no,
+				posting_date='2021-07-03',
+				purpose='Material Transfer'),
+			dict(item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[1],
+				to_warehouse=warehouse_names[0],
+				batch_no=batch_no,
+				posting_date='2021-07-04',
+				purpose='Material Transfer'),
+			dict(item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[0],
+				to_warehouse=warehouse_names[1],
+				batch_no=batch_no,
+				posting_date='2021-07-02',          # Illegal SE
+				purpose='Material Transfer')
+		]
+
+		self.assertRaises(frappe.ValidationError, create_stock_entries, sequence_of_entries)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
+
+def make_serialized_item(**args):
+	args = frappe._dict(args)
+>>>>>>> 1cbeba5f1d (test: check execution of illegal stock entry seq)
 	se = frappe.copy_doc(test_records[0])
 	se.get("items")[0].item_code = item_code or "_Test Serialized Item With Series"
 	se.get("items")[0].serial_no = serial_no
@@ -1010,3 +1118,31 @@ def get_multiple_items():
 		]
 
 test_records = frappe.get_test_records('Stock Entry')
+
+def initialize_records_for_future_negative_sle_test(
+		item_code, batch_no, warehouses, opening_qty, posting_date):
+	from erpnext.stock.doctype.batch.test_batch import TestBatch, make_new_batch
+	from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+		create_stock_reconciliation,
+	)
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	TestBatch.make_batch_item(item_code)
+	make_new_batch(item_code=item_code, batch_id=batch_no)
+	warehouse_names = [create_warehouse(w) for w in warehouses]
+	create_stock_reconciliation(
+		purpose='Opening Stock',
+		posting_date=posting_date,
+		posting_time='20:00:20',
+		item_code=item_code,
+		warehouse=warehouse_names[0],
+		valuation_rate=100,
+		qty=opening_qty,
+		batch_no=batch_no,
+	)
+	return warehouse_names
+
+
+def create_stock_entries(sequence_of_entries):
+	for entry_detail in sequence_of_entries:
+		make_stock_entry(**entry_detail)
