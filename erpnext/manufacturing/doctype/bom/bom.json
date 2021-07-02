@@ -202,6 +202,7 @@
   },
   {
    "default": "Work Order",
+   "depends_on": "with_operations",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -244,6 +245,7 @@
   {
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "oldfieldtype": "Section Break"
   },
   {
@@ -254,6 +256,7 @@
    "options": "Routing"
   },
   {
+   "depends_on": "with_operations",
    "fieldname": "operations",
    "fieldtype": "Table",
    "label": "Operations",
@@ -574,7 +577,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-15 06:14:59.345619",
+ "modified": "2021-03-16 12:25:09.081968",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

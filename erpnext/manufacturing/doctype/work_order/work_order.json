@@ -24,6 +24,12 @@
   "scrap_total_cost",
   "sales_order",
   "project",
+  "serial_no_and_batch_for_finished_good_section",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_17",
+  "serial_no",
+  "batch_size",
   "settings_section",
   "allow_alternative_item",
   "use_multi_level_bom",
@@ -55,6 +61,7 @@
   "additional_operating_cost",
   "column_break_24",
   "actual_operating_cost",
+  "corrective_operation_cost",
   "total_operating_cost",
   "column_break_47",
   "planned_rm_cost",
@@ -657,7 +664,57 @@
    "allow_on_submit": 1,
    "fieldname": "work_order_total_cost",
    "fieldtype": "Currency",
-   "label": "Work Order Total Cost",
+   "label": "Work Order Total Cost"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "serial_no_and_batch_for_finished_good_section",
+   "fieldtype": "Section Break",
+   "label": "Serial No and Batch for Finished Good"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "production_item.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "production_item.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No",
+   "read_only": 1
+  },
+  {
+   "depends_on": "has_serial_no",
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial Nos",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "has_batch_no",
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Batch Size"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "From Corrective Job Card",
+   "fieldname": "corrective_operation_cost",
+   "fieldtype": "Currency",
+   "label": "Corrective Operation Cost",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   }
  ],
@@ -666,7 +723,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-02 12:43:30.367234",
+ "modified": "2021-06-20 15:19:14.902699",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
