@@ -153,8 +153,8 @@ frappe.ui.form.on("Customer", {
 		frappe.call({
 			method: "get_customer_group_details",
 			doc: frm.doc,
-			callback: function(r){
-				frm.refresh()
+			callback: function() {
+				frm.refresh();
 			}
 		});
 
