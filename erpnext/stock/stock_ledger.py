@@ -55,6 +55,11 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle_doc.as_dict()
+
+			if sle.get("voucher_type") == "Stock Reconciliation":
+				# preserve previous_qty_after_transaction for qty reposting
+				args.previous_qty_after_transaction = sle.get("previous_qty_after_transaction")
+
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
 
 def get_args_for_future_sle(row):
@@ -869,19 +874,21 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 def update_qty_in_future_sle(args, allow_negative_stock=None):
 	"""Recalculate Qty after Transaction in future SLEs based on current SLE."""
+	datetime_limit_condition = ""
+	last_balance = None
+
 	qty_shift = args.actual_qty
 
 	# find difference/shift in qty caused by stock reconciliation
 	if args.voucher_type == "Stock Reconciliation":
-		last_balance = get_previous_sle_of_current_voucher(
-			args,
-			exclude_current_voucher=True
-		).get("qty_after_transaction")
-		if last_balance is not None:
-			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
-		else:
-			stock_reco_qty_shift = args.qty_after_transaction
-		qty_shift = stock_reco_qty_shift
+		qty_shift = get_stock_reco_qty_shift(args)
+
+	# find the next nearest stock reco so that we only recalculate SLEs till that point
+	next_stock_reco_detail = get_next_stock_reco(args)
+	if next_stock_reco_detail:
+		detail = next_stock_reco_detail[0]
+		# add condition to update SLEs before this date & time
+		datetime_limit_condition = get_datetime_limit_condition(detail)
 
 	frappe.db.sql("""
 		update `tabStock Ledger Entry`
@@ -897,9 +904,66 @@ def update_qty_in_future_sle(args, allow_negative_stock=None):
 					and creation > %(creation)s
 				)
 			)
-	""".format(qty_shift=qty_shift), args)
+		{datetime_limit_condition}
+		""".format(qty_shift=qty_shift, datetime_limit_condition=datetime_limit_condition), args)
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
+
+def get_stock_reco_qty_shift(args):
+	stock_reco_qty_shift = 0
+	if args.get("is_cancelled"):
+		if args.get("previous_qty_after_transaction"):
+			# get qty (balance) that was set at submission
+			last_balance = args.get("previous_qty_after_transaction")
+			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
+		else:
+			stock_reco_qty_shift = flt(args.actual_qty)
+	else:
+		# reco is being submitted
+		last_balance = get_previous_sle_of_current_voucher(args,
+			exclude_current_voucher=True).get("qty_after_transaction")
+
+		if last_balance is not None:
+			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
+		else:
+			stock_reco_qty_shift = args.qty_after_transaction
+
+	return stock_reco_qty_shift
+
+def get_next_stock_reco(args):
+	"""Returns next nearest stock reconciliaton's details."""
+
+	return frappe.db.sql("""
+		select
+			name, posting_date, posting_time, creation, voucher_no
+		from
+			 `tabStock Ledger Entry`
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and voucher_type = 'Stock Reconciliation'
+			and voucher_no != %(voucher_no)s
+			and is_cancelled = 0
+			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
+				or (
+					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
+					and creation > %(creation)s
+				)
+			)
+		limit 1
+	""", args, as_dict=1)
+
+def get_datetime_limit_condition(detail):
+	if not detail: return None
+
+	return f"""
+		and
+		(timestamp(posting_date, posting_time) < timestamp('{detail.posting_date}', '{detail.posting_time}')
+			or (
+				timestamp(posting_date, posting_time) = timestamp('{detail.posting_date}', '{detail.posting_time}')
+				and creation < '{detail.creation}'
+			)
+		)"""
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=None):
 	allow_negative_stock = allow_negative_stock \
