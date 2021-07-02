@@ -473,16 +473,13 @@ def get_serial_nos(serial_no):
 		if s.strip()]
 
 def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
-	serial_no_doc.update({
-		"item_code": args.get("item_code"),
-		"company": args.get("company"),
-		"batch_no": args.get("batch_no"),
-		"via_stock_ledger": args.get("via_stock_ledger") or True,
-		"supplier": args.get("supplier"),
-		"location": args.get("location"),
-		"warehouse": (args.get("warehouse")
-			if args.get("actual_qty", 0) > 0 else None)
-	})
+	for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
+		if args.get(field):
+			serial_no_doc.set(field, args.get(field))
+
+	serial_no_doc.via_stock_ledger = args.get("via_stock_ledger") or True
+	serial_no_doc.warehouse = (args.get("warehouse")
+		if args.get("actual_qty", 0) > 0 else None)
 
 	if is_new:
 		serial_no_doc.serial_no = serial_no
@@ -613,7 +610,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 	batch_nos = filters.get("batch_no")
 	expiry_date = filters.get("expiry_date")
 	if batch_nos:
-		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join(["'%s'" % d for d in batch_nos]))
+		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join("'%s'" % d for d in batch_nos))
 
 	if expiry_date:
 		batch_join_selection = "LEFT JOIN `tabBatch` batch on sr.batch_no = batch.name "
