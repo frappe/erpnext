@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "creation": "2021-06-28 13:32:02.167317",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "component",
+  "reference_document_type",
+  "reference_document",
+  "account",
+  "considered_in_salary_slip",
+  "column_break_4",
+  "status",
+  "amount",
+  "remark"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Unsettled",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Settled\nUnsettled"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Small Text",
+   "label": "Remark"
+  },
+  {
+   "depends_on": "reference_document_type",
+   "fieldname": "reference_document",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Document",
+   "mandatory_depends_on": "reference_document_type",
+   "options": "reference_document_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "component",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Component",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "considered_in_salary_slip",
+   "fieldtype": "Check",
+   "label": "Considered In Salary Slip"
+  },
+  {
+   "fieldname": "reference_document_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reference Document Type",
+   "options": "DocType"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-07-02 12:43:33.258161",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Full And Final Outstanding Statements",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
