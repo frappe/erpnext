@@ -932,16 +932,18 @@ class SalesInvoice(SellingController):
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_movement(asset,
 							item.base_net_amount, item.finance_book, True)
+						asset.db_set("disposal_date", None)
 					else:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_movement(asset,
 							item.base_net_amount, item.finance_book)
+						asset.db_set("disposal_date", self.posting_date)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
-					asset.db_set("disposal_date", self.posting_date)
-					asset.set_status("Sold" if self.docstatus==1 else None)
+					self.set_asset_status(asset)
+				
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
