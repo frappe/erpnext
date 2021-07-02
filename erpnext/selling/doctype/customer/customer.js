@@ -104,7 +104,7 @@ frappe.ui.form.on("Customer", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.tnc_status == "Sent" || frm.doc.tnc_status == "Rejected"){
+		if(frm.doc.tnc_status != "Accepted"){
 			frm.add_custom_button(__('Resend T&C'), function(){
 				var docname = frm.doc.name;
 				frappe.confirm('Are you sure you want to resend T&C sms?',
