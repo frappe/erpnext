@@ -1342,7 +1342,7 @@ def make_material_produce(doc_name,partial=0):
 		"scheduled_qty": wo_doc.qty,
 		"qty_produced": wo_doc.qty - wo_doc.produced_qty,
 		"qty_already_produced": wo_doc.produced_qty,
-		"work_order_total_cost":wo_doc.work_order_total_cost
+		# "work_order_total_cost":wo_doc.work_order_total_cost
 	})
 	bom = frappe.get_doc("BOM",wo_doc.bom_no)
 	for res in bom.scrap_items:
@@ -1356,7 +1356,7 @@ def make_material_produce(doc_name,partial=0):
 			"status": "Not Set",
 			"type": "Scrap",
 			"scheduled_qty": res.stock_qty,
-			"work_order_total_cost":wo_doc.work_order_total_cost
+			# "work_order_total_cost":wo_doc.work_order_total_cost
 		})
 	if partial == "0":
 		total_cost_rm_consumed = total_cost_operation_consumed = 0

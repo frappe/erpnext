@@ -14,14 +14,11 @@
   "item_name",
   "image",
   "bom_no",
-  "work_order_total_cost",
   "column_break1",
   "company",
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
-  "total_manufacture_of_scrap",
-  "scrap_total_cost",
   "sales_order",
   "project",
   "serial_no_and_batch_for_finished_good_section",
@@ -647,26 +644,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "total_manufacture_of_scrap",
-   "fieldtype": "Float",
-   "label": "Total Manufacture Of Scrap",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "scrap_total_cost",
-   "fieldtype": "Float",
-   "label": "Scrap Total Cost",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "work_order_total_cost",
-   "fieldtype": "Currency",
-   "label": "Work Order Total Cost"
-  },
-  {
    "collapsible": 1,
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "serial_no_and_batch_for_finished_good_section",
@@ -723,7 +700,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-20 15:19:14.902699",
+ "modified": "2021-07-02 16:18:26.178227",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
