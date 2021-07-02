@@ -23,3 +23,9 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... });
+
+const slug = (name) => name.toLowerCase().replace(" ", "-");
+
+Cypress.Commands.add("go_to_doc", (doctype, name) => {
+	cy.visit(`/app/${slug(doctype)}/${encodeURIComponent(name)}`);
+});
