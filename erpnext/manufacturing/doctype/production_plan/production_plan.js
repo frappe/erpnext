@@ -306,8 +306,25 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	download_materials_required: function(frm) {
-		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
-		open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc });
+		const fields = [{
+			fieldname: 'warehouses',
+			fieldtype: 'Table MultiSelect',
+			label: __('Warehouses'),
+			default: frm.doc.from_warehouse,
+			options: "Production Plan Material Request Warehouse",
+			get_query: function () {
+				return {
+					filters: {
+						company: frm.doc.company
+					}
+				};
+			},
+		}];
+
+		frappe.prompt(fields, (row) => {
+			let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
+			open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc, warehouses: row.warehouses });
+		}, __('Select Warehouses to get Stock for Materials Planning'), __('Get Stock'));
 	},
 
 	show_progress: function(frm) {

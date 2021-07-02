@@ -17,6 +17,9 @@ from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note a
 # TODO: Prioritize SO or WO group warehouse
 
 class PickList(Document):
+	def validate(self):
+		self.validate_for_qty()
+
 	def before_save(self):
 		self.set_item_locations()
 
@@ -35,6 +38,7 @@ class PickList(Document):
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
+		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
@@ -106,6 +110,11 @@ class PickList(Document):
 			self.item_count_map[item_code] += item.stock_qty
 
 		return item_map.values()
+
+	def validate_for_qty(self):
+		if self.purpose == "Material Transfer for Manufacture" \
+				and (self.for_qty is None or self.for_qty == 0):
+			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
 
 
 def validate_item_locations(pick_list):
