@@ -10,7 +10,7 @@ erpnext.HierarchyChartMobile = class {
 		this.wrapper = $(wrapper);
 		this.page = wrapper.page;
 		this.method = method;
-		this.doctype = doctype
+		this.doctype = doctype;
 
 		this.page.main.css({
 			'min-height': '300px',
@@ -40,7 +40,7 @@ erpnext.HierarchyChartMobile = class {
 				me.setup_node_click_action(this);
 				me.setup_edit_node_action(this);
 			}
-		}
+		};
 	}
 
 	make_node_element(node) {
@@ -78,7 +78,7 @@ erpnext.HierarchyChartMobile = class {
 					me.company = company.get_value();
 
 					// svg for connectors
-					me.make_svg_markers()
+					me.make_svg_markers();
 
 					if (me.$sibling_group)
 						me.$sibling_group.remove();
@@ -158,7 +158,7 @@ erpnext.HierarchyChartMobile = class {
 					me.expand_node(root_node);
 				}
 			}
-		})
+		});
 	}
 
 	expand_node(node) {
@@ -248,8 +248,8 @@ erpnext.HierarchyChartMobile = class {
 	render_child_nodes(node, child_nodes) {
 		if (!node.$children) {
 			node.$children = $('<ul class="node-children"></ul>')
-					.hide()
-					.appendTo(node.$link.parent());
+				.hide()
+				.appendTo(node.$link.parent());
 
 			node.$children.empty();
 
@@ -462,7 +462,7 @@ erpnext.HierarchyChartMobile = class {
 	get_avatar(node) {
 		return `<span class="avatar avatar-small" title="${node.name}">
 			<span class="avatar-frame" src=${node.image} style="background-image: url(${node.image})"></span>
-		</span>`
+		</span>`;
 	}
 
 	expand_sibling_group_node(parent) {
@@ -518,7 +518,7 @@ erpnext.HierarchyChartMobile = class {
 				return;
 
 			$(path).remove();
-		})
+		});
 	}
 
 	refresh_connectors(node_parent, node_id) {
@@ -527,4 +527,4 @@ erpnext.HierarchyChartMobile = class {
 		$(`path[data-parent="${node_parent}"]`).remove();
 		this.add_connector(node_parent, node_id);
 	}
-}
+};

@@ -40,7 +40,7 @@ erpnext.HierarchyChart = class {
 				me.setup_node_click_action(this);
 				me.setup_edit_node_action(this);
 			}
-		}
+		};
 	}
 
 	make_node_element(node) {
@@ -76,7 +76,7 @@ erpnext.HierarchyChart = class {
 					me.company = company.get_value();
 
 					// svg for connectors
-					me.make_svg_markers()
+					me.make_svg_markers();
 
 					if (me.$hierarchy)
 						me.$hierarchy.remove();
@@ -149,7 +149,7 @@ erpnext.HierarchyChart = class {
 					me.expand_node(root_node);
 				}
 			}
-		})
+		});
 	}
 
 	expand_node(node) {
@@ -166,7 +166,7 @@ erpnext.HierarchyChart = class {
 
 			// rebuild incoming connections
 			let grandparent = $(`#${node.parent_id}`).attr('data-parent');
-			this.refresh_connectors(grandparent)
+			this.refresh_connectors(grandparent);
 		}
 
 		if (node.expandable && !node.expanded) {
@@ -176,8 +176,8 @@ erpnext.HierarchyChart = class {
 
 	collapse_node() {
 		if (this.selected_node.expandable) {
-			this.selected_node.$children.hide();
-			$(`path[data-parent="${this.selected_node.id}"]`).hide();
+			this.selected_node.$children.hide('fast');
+			$(`path[data-parent="${this.selected_node.id}"]`).hide('fast');
 			this.selected_node.expanded = false;
 		}
 	}
@@ -222,15 +222,14 @@ erpnext.HierarchyChart = class {
 
 		if (!node.$children) {
 			node.$children = $('<ul class="node-children"></ul>')
-					.hide()
-					.appendTo(this.$hierarchy.find('.level:last'));
+				.hide()
+				.appendTo(this.$hierarchy.find('.level:last'));
 
 			node.$children.empty();
 
 			if (child_nodes) {
 				$.each(child_nodes, (_i, data) => {
 					this.add_node(node, data);
-
 					setTimeout(() => {
 						this.add_connector(node.id, data.id);
 					}, 250);
@@ -238,8 +237,8 @@ erpnext.HierarchyChart = class {
 			}
 		}
 
-		node.$children.show();
-		$(`path[data-parent="${node.id}"]`).show();
+		node.$children.show('fast');
+		$(`path[data-parent="${node.id}"]`).show('fast');
 		node.expanded = true;
 	}
 
@@ -443,6 +442,6 @@ erpnext.HierarchyChart = class {
 				return;
 
 			$(path).remove();
-		})
+		});
 	}
-}
+};
