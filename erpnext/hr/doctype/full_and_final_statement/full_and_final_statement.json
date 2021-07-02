@@ -1,12 +1,5 @@
 {
- "actions": [
-  {
-   "action": "erpnext.hr.doctype.full_and_final_statement.full_and_final_statement.test_method",
-   "action_type": "Server Action",
-   "hidden": 1,
-   "label": "Create Journal Entry"
-  }
- ],
+ "actions": [],
  "autoname": "HR-FNF-.YYYY.-.#####",
  "creation": "2021-06-28 13:17:36.050459",
  "doctype": "DocType",
@@ -71,7 +64,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Paid\nUnpaid"
+   "options": "Paid\nUnpaid",
+   "read_only": 1
   },
   {
    "fetch_from": "employee.department",
@@ -185,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-02 14:14:06.245370",
+ "modified": "2021-07-03 04:34:17.653402",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Full And Final Statement",

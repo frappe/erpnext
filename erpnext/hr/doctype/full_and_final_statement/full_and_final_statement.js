@@ -9,7 +9,7 @@ frappe.ui.form.on('Full And Final Statement', {
 
 	set_queries: function(frm, type) {
 		frm.set_query('reference_document_type', type, function () {
-			let modules = ["HR", "Payroll", "Loan"];
+			let modules = ["HR", "Payroll", "Loan Management"];
 			return {
 				filters: {
 					istable: 0,
@@ -21,8 +21,10 @@ frappe.ui.form.on('Full And Final Statement', {
 	},
 
 	refresh: function(frm) {
-		if (frm.doc.docstatus == 1) {
-			frm.custom_buttons["Create Journal Entry"].show();
+		if (frm.doc.docstatus == 1 && frm.doc.status == "Unpaid") {
+			frm.add_custom_button(__('Create Journal Entry'), function () {
+				frm.events.create_journal_entry(frm);
+			});
 		}
 	},
 
@@ -35,11 +37,22 @@ frappe.ui.form.on('Full And Final Statement', {
 			frappe.call({
 				method: 'get_outstanding_statements',
 				doc: frm.doc,
-				callback: function () {
+				callback: function() {
 					frm.refresh();
 				}
 			});
 		}
+	},
+
+	create_journal_entry: function(frm) {
+		frappe.call({
+			method: "create_journal_entry",
+			doc: frm.doc,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
 	}
 });
 
@@ -63,7 +76,7 @@ frappe.ui.form.on('Full And Final Outstanding Statements', {
 		}
 	},
 
-	amount: function(frm, cdt, cdn) {
+	amount: function(frm) {
 		frm.doc.total_payable_amount = 0;
 		frm.doc.total_receivable_amount = 0;
 

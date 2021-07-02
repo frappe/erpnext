@@ -684,6 +684,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 		frappe.throw(_('Select Payroll Frequency.'))
 
 	if filters.start_date and filters.end_date:
+		from pprint import pprint
 		employee_list = get_employee_list(filters)
 		emp = filters.get('employees') or []
 		include_employees = [employee.employee for employee in employee_list if employee.employee not in emp]
