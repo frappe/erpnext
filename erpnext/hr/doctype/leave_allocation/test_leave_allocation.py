@@ -164,7 +164,6 @@ class TestLeaveAllocation(unittest.TestCase):
 		leave_allocation.cancel()
 		self.assertFalse(frappe.db.exists("Leave Ledger Entry", {'transaction_name':leave_allocation.name}))
 
-
 	def test_leave_addition_after_submit(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 		frappe.db.sql("delete from `tabLeave Ledger Entry`")
@@ -179,7 +178,6 @@ class TestLeaveAllocation(unittest.TestCase):
 	def test_leave_subtraction_after_submit(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 		frappe.db.sql("delete from `tabLeave Ledger Entry`")
-
 		leave_allocation = create_leave_allocation()
 		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 15)
@@ -199,8 +197,8 @@ class TestLeaveAllocation(unittest.TestCase):
 			"doctype": 'Leave Application',
 			"employee": employee.name,
 			"leave_type": "_Test Leave Type",
-			"from_date": nowdate(),
-			"to_date": add_days(nowdate(), 10),
+			"from_date": add_months(nowdate(), 2),
+			"to_date": add_months(add_days(nowdate(), 10), 2),
 			"company": erpnext.get_default_company() or "_Test Company",
 			"docstatus": 1,
 			"status": "Approved",

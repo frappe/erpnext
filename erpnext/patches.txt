@@ -290,3 +290,5 @@ erpnext.patches.v13_0.add_doctype_to_sla #14-06-2021
 erpnext.patches.v13_0.set_training_event_attendance
 erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
 erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
+erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
+erpnext.patches.v13_0.update_job_card_details
