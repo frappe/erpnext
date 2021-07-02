@@ -28,7 +28,8 @@ class TestCustomer(unittest.TestCase):
 		set_credit_limit('_Test Customer', '_Test Company', 0)
 
 	def test_get_customer_group_details(self):
-		doc = frappe.get_doc("Customer Group", "Commercial")
+		doc = frappe.new_doc("Customer Group")
+		doc.customer_group_name = "_Testing Customer Group"
 		doc.payment_terms = "_Test Payment Term Template 3"
 		doc.accounts = []
 		doc.default_price_list = "Standard Buying"
@@ -43,21 +44,24 @@ class TestCustomer(unittest.TestCase):
 		}
 		doc.append("accounts", test_account_details)
 		doc.append("credit_limits", test_credit_limits)
-		doc.save()
+		doc.insert()
 
-		doc = frappe.get_doc("Customer", "_Test Customer")
-		doc.customer_group = "Commercial"
-		doc.payment_terms = doc.default_price_list = ""
-		doc.accounts = doc.credit_limits= []
-		doc.save()
-		doc.get_customer_group_details()
-		self.assertEqual(doc.payment_terms, "_Test Payment Term Template 3")
+		c_doc = frappe.new_doc("Customer")
+		c_doc.customer_name = "Testing Customer"
+		c_doc.customer_group = "_Testing Customer Group"
+		c_doc.payment_terms = c_doc.default_price_list = ""
+		c_doc.accounts = c_doc.credit_limits= []
+		c_doc.insert()
+		c_doc.get_customer_group_details()
+		self.assertEqual(c_doc.payment_terms, "_Test Payment Term Template 3")
 
-		self.assertEqual(doc.accounts[0].company, "_Test Company")
-		self.assertEqual(doc.accounts[0].account, "Creditors - _TC")
+		self.assertEqual(c_doc.accounts[0].company, "_Test Company")
+		self.assertEqual(c_doc.accounts[0].account, "Creditors - _TC")
 
-		self.assertEqual(doc.credit_limits[0].company, "_Test Company")
-		self.assertEqual(doc.credit_limits[0].credit_limit, 350000 )
+		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
+		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
+		c_doc.delete()
+		doc.delete()
 
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
