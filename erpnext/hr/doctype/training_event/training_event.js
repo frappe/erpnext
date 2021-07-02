@@ -23,7 +23,7 @@ frappe.ui.form.on('Training Event', {
 		frm.events.set_employee_query(frm);
 	},
 
-	set_employee_query: function (frm) {
+	set_employee_query: function(frm) {
 		let emp = [];
 		for (let d in frm.doc.employees) {
 			if (frm.doc.employees[d].employee) {
@@ -45,5 +45,4 @@ frappe.ui.form.on("Training Event Employee", {
 		frm.events.set_employee_query(frm);
 	}
 });
-
 
