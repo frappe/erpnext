@@ -824,6 +824,46 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.db.set_default("allow_negative_stock", 0)
 
+	def test_future_negative_sle(self):
+		# Initialize item, batch, warehouse, opening qty
+		item_code = '_Test Future Neg Item'
+		batch_no = '_Test Future Neg Batch'
+		warehouses = [
+			'_Test Future Neg Warehouse Source',
+			'_Test Future Neg Warehouse Destination'
+		]
+		warehouse_names = initialize_records_for_future_negative_sle_test(
+			item_code, batch_no, warehouses,
+			opening_qty=2, posting_date='2021-07-01'
+		)
+
+		# Executing an illegal sequence should raise an error
+		illegal_sequence = [
+			dict(item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[0],
+				to_warehouse=warehouse_names[1],
+				batch_no=batch_no,
+				posting_date='2021-07-03',
+				purpose='Material Transfer'),
+			dict(item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[1],
+				to_warehouse=warehouse_names[0],
+				batch_no=batch_no,
+				posting_date='2021-07-04',
+				purpose='Material Transfer'),
+			dict(item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[0],
+				to_warehouse=warehouse_names[1],
+				batch_no=batch_no,
+				posting_date='2021-07-02',          # Illegal SE
+				purpose='Material Transfer')
+		]
+		illegal_sequence_executor = create_stock_entry_sequence_executor(illegal_sequence)
+		self.assertRaises(frappe.ValidationError, illegal_sequence_executor)
+
 def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
@@ -894,3 +934,31 @@ def get_multiple_items():
 		]
 
 test_records = frappe.get_test_records('Stock Entry')
+
+def initialize_records_for_future_negative_sle_test(
+		item_code, batch_no, warehouses, opening_qty, posting_date):
+	from erpnext.stock.doctype.batch.test_batch import TestBatch, make_new_batch
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+	from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+
+	TestBatch.make_batch_item(item_code)
+	make_new_batch(item_code=item_code, batch_id=batch_no)
+	warehouse_names = [create_warehouse(w) for w in warehouses]
+	create_stock_reconciliation(
+		purpose='Opening Stock',
+		posting_date=posting_date,
+		posting_time='20:00:20',
+		item_code=item_code,
+		warehouse=warehouse_names[0],
+		valuation_rate=100,
+		qty=opening_qty,
+		batch_no=batch_no,
+	)
+	return warehouse_names
+
+def create_stock_entry_sequence_executor(sequence_of_entries):
+	return lambda: create_stock_entries(sequence_of_entries)
+
+def create_stock_entries(sequence_of_entries):
+	for entry_detail in sequence_of_entries:
+		make_stock_entry(**entry_detail)
