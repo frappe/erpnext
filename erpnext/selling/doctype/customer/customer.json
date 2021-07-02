@@ -16,6 +16,7 @@
   "customer_name",
   "gender",
   "customer_type",
+  "tnc_status",
   "pan",
   "tax_withholding_category",
   "default_bank_account",
@@ -71,7 +72,6 @@
   "sales_team_section",
   "sales_team",
   "customer_pos_id",
-  "tnc_status",
   "tnc_hash"
  ],
  "fields": [
@@ -520,8 +520,7 @@
   {
    "fieldname": "tnc_status",
    "fieldtype": "Data",
-   "label": "Tnc Status",
-   "read_only": 1
+   "label": "Tnc Status"
   },
   {
    "fieldname": "tnc_hash",
@@ -544,7 +543,7 @@
    "link_fieldname": "customer"
   }
  ],
- "modified": "2021-06-30 21:31:27.534063",
+ "modified": "2021-07-02 12:54:23.979970",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
