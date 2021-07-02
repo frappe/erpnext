@@ -102,7 +102,7 @@
   }
  ],
  "links": [],
- "modified": "2020-01-28 16:16:45.447213",
+ "modified": "2021-06-30 12:09:14.228756",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -151,6 +151,18 @@
    "read": 1,
    "report": 1,
    "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
    "share": 1,
    "write": 1
   }

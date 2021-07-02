@@ -658,7 +658,13 @@ class calculate_taxes_and_totals(object):
 					item.margin_type = None
 					item.margin_rate_or_amount = 0.0
 
-			if item.margin_type and item.margin_rate_or_amount:
+			if not item.pricing_rules and flt(item.rate) > flt(item.price_list_rate):
+				item.margin_type = "Amount"
+				item.margin_rate_or_amount = flt(item.rate - item.price_list_rate,
+						item.precision("margin_rate_or_amount"))
+				item.rate_with_margin = item.rate
+
+			elif item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
 				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
 				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)

@@ -2,7 +2,7 @@ import frappe
 import datetime
 import json
 import pytz
-
+from frappe import _
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -14,7 +14,8 @@ def get_context(context):
 	if is_enabled:
 		return context
 	else:
-		frappe.local.flags.redirect_location = '/404'
+		frappe.redirect_to_message(_("Appointment Scheduling Disabled"), _("Appointment Scheduling has been disabled for this site"),
+			http_status_code=302, indicator_color="red")
 		raise frappe.Redirect
 
 @frappe.whitelist(allow_guest=True)
