@@ -28,21 +28,21 @@ def before_tests():
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 	if not frappe.get_list("Company"):
 		setup_complete({
-			"currency"			:"USD",
-			"full_name"			:"Test User",
-			"company_name"		:"Wind Power LLC",
-			"timezone"			:"America/New_York",
-			"company_abbr"		:"WP",
-			"industry"			:"Manufacturing",
-			"country"			:"United States",
-			"fy_start_date"		:"2011-01-01",
-			"fy_end_date"		:"2011-12-31",
-			"language"			:"english",
-			"company_tagline"	:"Testing",
-			"email"				:"test@erpnext.com",
-			"password"			:"test",
+			"currency"          :"USD",
+			"full_name"         :"Test User",
+			"company_name"      :"Wind Power LLC",
+			"timezone"          :"America/New_York",
+			"company_abbr"      :"WP",
+			"industry"          :"Manufacturing",
+			"country"           :"United States",
+			"fy_start_date"     :"2021-01-01",
+			"fy_end_date"       :"2021-12-31",
+			"language"          :"english",
+			"company_tagline"   :"Testing",
+			"email"             :"test@erpnext.com",
+			"password"          :"test",
 			"chart_of_accounts" : "Standard",
-			"domains"			: ["Manufacturing"],
+			"domains"           : ["Manufacturing"],
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
