@@ -14,11 +14,6 @@ frappe.ui.form.on('Loan Application', {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 		frm.trigger("add_toolbar_buttons");
-	},
-	repayment_method: function(frm) {
-		frm.doc.repayment_amount = frm.doc.repayment_periods = "";
-		frm.trigger("toggle_fields");
-		frm.trigger("toggle_required");
 		frm.set_query('loan_type', () => {
 			return {
 				filters: {
@@ -26,6 +21,11 @@ frappe.ui.form.on('Loan Application', {
 				}
 			};
 		});
+	},
+	repayment_method: function(frm) {
+		frm.doc.repayment_amount = frm.doc.repayment_periods = "";
+		frm.trigger("toggle_fields");
+		frm.trigger("toggle_required");
 	},
 	toggle_fields: function(frm) {
 		frm.toggle_enable("repayment_amount", frm.doc.repayment_method=="Repay Fixed Amount per Period")
