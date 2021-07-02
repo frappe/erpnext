@@ -72,8 +72,8 @@ frappe.ui.form.on("Supplier", {
 		frappe.call({
 			method: "get_supplier_group_details",
 			doc: frm.doc,
-			callback: function(r){
-				frm.refresh()
+			callback: function() {
+				frm.refresh();
 			}
 		});
 	},
