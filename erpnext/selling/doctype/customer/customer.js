@@ -104,24 +104,6 @@ frappe.ui.form.on("Customer", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.tnc_status != "Accepted"){
-			frm.add_custom_button(__('Resend T&C'), function(){
-				var docname = frm.doc.name;
-				frappe.confirm('Are you sure you want to resend T&C sms?',
-					() => {
-						frappe.xcall('praman_app.utils.internal_api.resend_sms',{docname: docname})
-						.then((doc) => {
-							frappe.model.sync(doc);
-							frm.reload_doc();
-							show_alert('Sms sent', 5);
-						});
-					}, () => {
-					})
-			})
-
-		}
-
-
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {
@@ -132,6 +114,7 @@ frappe.ui.form.on("Customer", {
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {
+
 			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
@@ -147,6 +130,25 @@ frappe.ui.form.on("Customer", {
 			// frm.add_custom_button(__('Pricing Rule'), function () {
 			// 	erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
 			// }, __('Create'));
+
+			if(frappe.perm.has_perm(frm.doctype, 0, "write", frm.doc)){
+				if(frm.doc.tnc_status != "Accepted"){
+					frm.add_custom_button(__('Resend T&C'), function(){
+						var docname = frm.doc.name;
+						frappe.confirm('Are you sure you want to resend T&C sms?',
+							() => {
+								frappe.xcall('praman_app.utils.internal_api.resend_sms',{docname: docname})
+								.then((doc) => {
+									frappe.model.sync(doc);
+									frm.reload_doc();
+									show_alert('Sms sent', 5);
+								});
+							}, () => {
+							})
+					})
+
+				}
+			}
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
