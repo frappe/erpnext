@@ -149,7 +149,7 @@ class SalesInvoice(SellingController):
 					if self.update_stock:
 						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-					elif asset.status in ("Scrapped", "Cancelled") or asset.status == "Sold" and not self.is_return:
+					elif asset.status in ("Scrapped", "Cancelled") or (asset.status == "Sold" and not self.is_return):
 						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
 
 	def validate_item_cost_centers(self):
