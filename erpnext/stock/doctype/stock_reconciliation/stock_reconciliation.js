@@ -48,37 +48,54 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	get_items: function(frm) {
-		frappe.prompt({label:"Warehouse", fieldname: "warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1,
+		let fields = [{
+			label: 'Warehouse', fieldname: 'warehouse', fieldtype: 'Link', options: 'Warehouse', reqd: 1,
 			"get_query": function() {
 				return {
 					"filters": {
 						"company": frm.doc.company,
 					}
-				}
-			}},
-			function(data) {
-				frappe.call({
-					method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
-					args: {
-						warehouse: data.warehouse,
-						posting_date: frm.doc.posting_date,
-						posting_time: frm.doc.posting_time,
-						company:frm.doc.company
-					},
-					callback: function(r) {
-						var items = [];
-						frm.clear_table("items");
-						for(var i=0; i< r.message.length; i++) {
-							var d = frm.add_child("items");
-							$.extend(d, r.message[i]);
-							if(!d.qty) d.qty = null;
-							if(!d.valuation_rate) d.valuation_rate = null;
-						}
-						frm.refresh_field("items");
-					}
-				});
+				};
 			}
-		, __("Get Items"), __("Update"));
+		}, {
+			label: "Item Code", fieldname: "item_code", fieldtype: "Link", options: "Item",
+			"get_query": function() {
+				return {
+					"filters": {
+						"disabled": 0,
+					}
+				};
+			}
+		}];
+
+		frappe.prompt(fields, function(data) {
+			frappe.call({
+				method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
+				args: {
+					warehouse: data.warehouse,
+					posting_date: frm.doc.posting_date,
+					posting_time: frm.doc.posting_time,
+					company: frm.doc.company,
+					item_code: data.item_code
+				},
+				callback: function(r) {
+					frm.clear_table("items");
+					for (var i=0; i<r.message.length; i++) {
+						var d = frm.add_child("items");
+						$.extend(d, r.message[i]);
+
+						if (!d.qty) {
+							d.qty = 0;
+						}
+
+						if (!d.valuation_rate) {
+							d.valuation_rate = 0;
+						}
+					}
+					frm.refresh_field("items");
+				}
+			});
+		}, __("Get Items"), __("Update"));
 	},
 
 	posting_date: function(frm) {

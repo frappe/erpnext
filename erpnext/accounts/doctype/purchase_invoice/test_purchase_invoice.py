@@ -621,8 +621,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(actual_qty_0, get_qty_after_transaction())
 
 	def test_subcontracting_via_purchase_invoice(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import update_backflush_based_on
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
+		update_backflush_based_on('BOM')
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC",
 			qty=100, basic_rate=100)
@@ -632,7 +634,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(len(pi.get("supplied_items")), 2)
 
-		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
+		rm_supp_cost = sum(d.amount for d in pi.get("supplied_items"))
 		self.assertEqual(flt(pi.get("items")[0].rm_supp_cost, 2), flt(rm_supp_cost, 2))
 
 	def test_rejected_serial_no(self):
@@ -964,7 +966,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
 
 		# Create Purchase Order with TDS applied
-		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000)
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item')
 		po.apply_tds = 1
 		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
@@ -1000,6 +1002,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Create Purchase Invoice against Purchase Order
 		purchase_invoice = get_mapped_purchase_invoice(po.name)
 		purchase_invoice.allocate_advances_automatically = 1
+		purchase_invoice.items[0].item_code = '_Test Non Stock Item'
 		purchase_invoice.items[0].expense_account = '_Test Account Cost for Goods Sold - _TC'
 		purchase_invoice.save()
 		purchase_invoice.submit()

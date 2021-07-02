@@ -101,7 +101,7 @@ def merge_similar_entries(gl_map, precision=None):
 
 def check_if_in_list(gle, gl_map, dimensions=None):
 	account_head_fieldnames = ['party_type', 'party', 'against_voucher', 'against_voucher_type',
-		'cost_center', 'project']
+		'cost_center', 'project', 'voucher_detail_no']
 
 	if dimensions:
 		account_head_fieldnames = account_head_fieldnames + dimensions
@@ -143,7 +143,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 		validate_expense_against_budget(args)
 
 def validate_cwip_accounts(gl_map):
-	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
+	cwip_enabled = any(cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting"))
 
 	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount

@@ -129,11 +129,12 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		if self._action != 'submit' and not self.is_return:
-			set_batch_nos(self, 'warehouse', True)
-
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
+
+		if self._action != 'submit' and not self.is_return:
+			set_batch_nos(self, 'warehouse', throw=True)
+			set_batch_nos(self, 'warehouse', throw=True, child_table="packed_items")
 
 		self.update_current_stock()
 
@@ -264,7 +265,7 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.get("items")]):
+		if not any(flt(d.get('packed_qty')) for d in self.get("items")):
 			return
 		has_error = False
 		for d in self.get("items"):
