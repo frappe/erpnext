@@ -239,14 +239,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						read_only:1,
 						in_list_view:1
 					},
-					{
-						fieldtype:'Data',
+					{	
+						fieldtype: "Link",
 						fieldname:'rm_item_code',
+						options: "Item",
 						label: __('Raw Material'),
 						read_only:1,
-						in_list_view:1
+						in_list_view:1,
 					},
-					{
+					{	
 						fieldtype:'Data',
 						fieldname:'rm_item_name',
 						label: __('Raw Material Name'),
@@ -300,14 +301,17 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		me.dialog = new frappe.ui.Dialog({
 			title: title, fields: fields
 		});
-
+		
 		if (me.frm.doc['supplied_items']) {
 			me.frm.doc['supplied_items'].forEach((item, index) => {
 			if (item.rm_item_code && item.main_item_code && item.required_qty - item.supplied_qty != 0) {
+				frappe.model.get_value('Item', {"item_code":item.rm_item_code}, 'item_name',
+							function(d) {
 					me.raw_material_data.push ({
 						'name':item.name,
 						'item_code': item.main_item_code,
 						'rm_item_code': item.rm_item_code,
+						'rm_item_name':d.item_name,
 						'item_name': item.rm_item_code,
 						'qty': item.required_qty - item.supplied_qty,
 						'warehouse':item.reserve_warehouse,
@@ -316,9 +320,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						'stock_uom':item.stock_uom
 					});
 					me.dialog.fields_dict.sub_con_rm_items.grid.refresh();
-				}
+				
 			})
 		}
+		})
+		}
+
 
 		me.dialog.get_field('sub_con_rm_items').check_all_rows()
 

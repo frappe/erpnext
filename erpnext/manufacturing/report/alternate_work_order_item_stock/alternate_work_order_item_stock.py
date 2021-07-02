@@ -107,21 +107,22 @@ def get_columns(filters):
 	return columns
 
 
-def get_condition(filters):
+# def get_condition(filters):
 
-	conditions=" "
-	if filters.get("from_date"):
-		conditions += " AND ip.planned_start_date>='%s'" % filters.get('from_date')
-	if filters.get("to_date"):
-		conditions += " AND ip.planned_end_date<='%s'" % filters.get('to_date')
-	if filters.get("item_code"):
-		conditions += "AND wo.production_item = '%s'" % filters.get('item_code')
-	if filters.get("name"):
-		conditions += "AND wo.name = '%s'" % filters.get('name')
-	return conditions
+# 	conditions=" "
+# 	if filters.get("from_date"):
+# 		conditions += " AND ip.planned_start_date>='%s'" % filters.get('from_date')
+# 	if filters.get("to_date"):
+# 		conditions += " AND ip.planned_end_date<='%s'" % filters.get('to_date')
+# 	if filters.get("item_code"):
+# 		conditions += "AND wo.production_item = '%s'" % filters.get('item_code')
+# 	if filters.get("name"):
+# 		conditions += "AND wo.name = '%s'" % filters.get('name')
+# 	return conditions
 
 
 def get_data(filters,columns):
+	doc=frappe.db.get_sql("select * from ")
 	filter={
 			"docstatus":1 ,"status":('!=','Completed')
 				}
