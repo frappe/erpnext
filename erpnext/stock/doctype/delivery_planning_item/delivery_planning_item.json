@@ -142,7 +142,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
    "fieldname": "approved",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -237,7 +236,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-29 16:07:32.941289",
+ "modified": "2021-06-30 10:26:25.465716",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",

@@ -21,6 +21,7 @@
   "column_break_13",
   "show_purchase_order_planning_item",
   "amended_from",
+  "section_break_16",
   "d_status"
  ],
  "fields": [
@@ -111,13 +112,17 @@
    "fieldname": "d_status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nPending Planning\nPartially Planned\nPlanned and To Deliver & Order\nTo Order\nTo Deliver\nCompleted"
+   "options": "Pending Planning\nPartially Planned\nPlanned and To Deliver & Order\nTo Order\nTo Deliver\nCompleted"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-29 10:09:54.104080",
+ "modified": "2021-07-01 16:59:45.607957",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning",
