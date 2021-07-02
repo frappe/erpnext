@@ -28,7 +28,16 @@ frappe.ui.form.on('Loan', {
 		frm.set_query("loan_type", function () {
 			return {
 				"filters": {
-					"docstatus": 1
+					"docstatus": 1,
+					"company": frm.doc.company
+				}
+			};
+		});
+
+		frm.set_query("applicant", function () {
+			return {
+				"filters": {
+					"company": frm.doc.company
 				}
 			};
 		});
