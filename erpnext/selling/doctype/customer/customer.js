@@ -104,6 +104,24 @@ frappe.ui.form.on("Customer", {
 	},
 
 	refresh: function(frm) {
+		if(frm.doc.tnc_status == "Sent" || frm.doc.tnc_status == "Rejected"){
+			frm.add_custom_button(__('Resend T&C'), function(){
+				var docname = frm.doc.name;
+				frappe.confirm('Are you sure you want to resend T&C sms?',
+					() => {
+						frappe.xcall('praman_app.utils.internal_api.resend_sms',{docname: docname})
+						.then((doc) => {
+							frappe.model.sync(doc);
+							frm.reload_doc();
+							show_alert('Sms sent', 5);
+						});
+					}, () => {
+					})
+			})
+
+		}
+
+
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {
@@ -117,18 +135,18 @@ frappe.ui.form.on("Customer", {
 			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
-			frm.add_custom_button(__('Accounting Ledger'), function() {
-				frappe.set_route('query-report', 'General Ledger',
-					{party_type:'Customer', party:frm.doc.name});
-			});
+			// frm.add_custom_button(__('Accounting Ledger'), function() {
+			// 	frappe.set_route('query-report', 'General Ledger',
+			// 		{party_type:'Customer', party:frm.doc.name});
+			// });
 
-			frm.add_custom_button(__('Accounts Receivable'), function() {
-				frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
-			});
+			// frm.add_custom_button(__('Accounts Receivable'), function() {
+			// 	frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
+			// });
 
-			frm.add_custom_button(__('Pricing Rule'), function () {
-				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
-			}, __('Create'));
+			// frm.add_custom_button(__('Pricing Rule'), function () {
+			// 	erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
+			// }, __('Create'));
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
