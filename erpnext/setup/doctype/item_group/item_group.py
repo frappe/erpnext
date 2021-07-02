@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import nowdate, cint, cstr
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
-from frappe.website.render import clear_cache
+from frappe.website.utils import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
@@ -91,7 +91,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		field_filters['item_group'] = self.name
 
 		engine = ProductQuery()
-		context.items = engine.query(attribute_filters, field_filters, search, start)
+		context.items = engine.query(attribute_filters, field_filters, search, start, item_group=self.name)
 
 		filter_engine = ProductFiltersBuilder(self.name)
 

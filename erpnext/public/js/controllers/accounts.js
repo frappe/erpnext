@@ -156,31 +156,31 @@ cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 	var d = locals[cdt][cdn];
 	var msg = "";
 
-	if(d.account_head && !d.description) {
+	if (d.account_head && !d.description) {
 		// set description from account head
 		d.description = d.account_head.split(' - ').slice(0, -1).join(' - ');
 	}
 
-	if(!d.charge_type && (d.row_id || d.rate || d.tax_amount)) {
+	if (!d.charge_type && (d.row_id || d.rate || d.tax_amount)) {
 		msg = __("Please select Charge Type first");
 		d.row_id = "";
 		d.rate = d.tax_amount = 0.0;
-	} else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
+	} else if ((d.charge_type == 'Actual' || d.charge_type == 'On Net Total' || d.charge_type == 'On Paid Amount') && d.row_id) {
 		msg = __("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'");
 		d.row_id = "";
-	} else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
+	} else if ((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
 		if (d.idx == 1) {
 			msg = __("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row");
 			d.charge_type = '';
 		} else if (!d.row_id) {
 			msg = __("Please specify a valid Row ID for row {0} in table {1}", [d.idx, __(d.doctype)]);
 			d.row_id = "";
-		} else if(d.row_id && d.row_id >= d.idx) {
+		} else if (d.row_id && d.row_id >= d.idx) {
 			msg = __("Cannot refer row number greater than or equal to current row number for this Charge type");
 			d.row_id = "";
 		}
 	}
-	if(msg) {
+	if (msg) {
 		frappe.validated = false;
 		refresh_field("taxes");
 		frappe.throw(msg);
