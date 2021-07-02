@@ -122,7 +122,7 @@ def get_columns(filters):
 
 
 def get_data(filters,columns):
-	doc=frappe.db.get_sql("select * from ")
+	doc=frappe.db.get_sql("""select count(item_code) from `tabItem Alternative` where """)
 	filter={
 			"docstatus":1 ,"status":('!=','Completed')
 				}

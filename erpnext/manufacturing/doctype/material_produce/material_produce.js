@@ -115,7 +115,8 @@ function add_details_line(frm,line_obj){
                     row.rate = flt(d.rate, precision('rate', row)),
                     row.weight = d.weight,
                     row.line_ref = d.line_ref,
-                    row.work_order_total_cost=d.work_order_total_cost
+                    row.work_order_total_cost=d.work_order_total_cost,
+                    row.scrap_total_cost=d.scrap_total_cost
                 }
                 frm.refresh_field('material_produce_details');
             }
