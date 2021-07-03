@@ -473,7 +473,7 @@ def get_ewb_data(dt, dn):
 		ewaybills.append(data)
 
 	data = {
-		'version': '1.0.1118',
+		'version': '1.0.0621',
 		'billLists': ewaybills
 	}
 
