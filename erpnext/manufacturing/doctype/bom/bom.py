@@ -1115,6 +1115,8 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 		},
 		'BOM Item': {
 			'doctype': 'BOM Item',
+			# stop get_mapped_doc copying parent bom_no to children
+			'field_no_map': ['bom_no'],
 			'condition': lambda doc: doc.has_variants == 0
 		},
 	}, target_doc, postprocess)
