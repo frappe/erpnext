@@ -12,6 +12,7 @@
   "role_allowed_to_over_bill",
   "make_payment_via_journal_entry",
   "column_break_11",
+  "enable_discount_accounting",
   "check_supplier_invoice_uniqueness",
   "unlink_payment_on_cancellation_of_invoice",
   "automatically_fetch_payment_terms",
@@ -261,6 +262,12 @@
    "fieldname": "post_change_gl_entries",
    "fieldtype": "Check",
    "label": "Create Ledger Entries for Change Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting"
   }
  ],
  "icon": "icon-cog",
@@ -268,7 +275,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-06-17 20:26:03.721202",
+ "modified": "2021-07-05 14:56:19.820731",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
