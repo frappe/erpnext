@@ -204,6 +204,7 @@ def create_mpesa_settings(payment_gateway_name="Express"):
 
 	doc = frappe.get_doc(dict( #nosec
 		doctype="Mpesa Settings",
+		sandbox=1,
 		payment_gateway_name=payment_gateway_name,
 		consumer_key="5sMu9LVI1oS3oBGPJfh3JyvLHwZOdTKn",
 		consumer_secret="VI1oS3oBGPJfh3JyvLHw",
