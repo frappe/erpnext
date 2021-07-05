@@ -83,7 +83,7 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			['CGST - _TC4',18.0, 0.0],
+			['Output Tax CGST - _TC4',18.0, 0.0],
 			[payable_account, 0.0, 218.0],
 			["Travel Expenses - _TC4", 200.0, 0.0]
 		])
