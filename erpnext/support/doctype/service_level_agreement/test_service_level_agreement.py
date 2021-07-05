@@ -103,7 +103,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		# check SLA docfields created
 		sla_fields = get_service_level_agreement_fields()
-		frappe.clear_cache(doctype=doctype)
+		frappe.clear_cache(doctype=doctype.doctype)
 		meta = frappe.get_meta(doctype.name, cached=False)
 
 		for field in sla_fields:
