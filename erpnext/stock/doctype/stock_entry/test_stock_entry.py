@@ -825,6 +825,9 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_default("allow_negative_stock", 0)
 
 	def test_future_negative_sle(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 0)
+
 		# Initialize item, batch, warehouse, opening qty
 		item_code = '_Test Future Neg Item'
 		batch_no = '_Test Future Neg Batch'
@@ -863,6 +866,7 @@ class TestStockEntry(unittest.TestCase):
 		]
 		illegal_sequence_executor = create_stock_entry_sequence_executor(illegal_sequence)
 		self.assertRaises(frappe.ValidationError, illegal_sequence_executor)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)

@@ -169,26 +169,28 @@ class StockLedgerEntry(Document):
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
 	def validate_future_sle_by_batch_for_outgoing_entries(self):
-		if self.actual_qty is None or self.actual_qty >= 0 or self.batch_no is None:
+		allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		if allow_neg or self.actual_qty is None or self.actual_qty >= 0 or self.batch_no is None:
 			return
 
 		future_negative_entries = frappe.db.sql("""select
 					voucher_type, voucher_no, item_code, warehouse, posting_date
 				from `tabStock Ledger Entry`
 				where
-					warehouse = %s
-					and item_code = %s
-					and batch_no = %s
-					and (actual_qty - %s) > 0
-					and timestamp(posting_date, posting_time) >= timestamp(%s, %s)
+					warehouse = %{warehouse}s
+					and item_code = %{item_code}s
+					and batch_no = %{batch_no}s
+					and (actual_qty - %{actual_qty}s) > 0
+					and timestamp(posting_date, posting_time) >= timestamp(%{posting_date}s, %{posting_time}s)
 					and is_cancelled = 0
-				order by timestamp(posting_date, posting_time)""", (
-					self.warehouse, self.item_code, self.batch_no,
-					self.actual_qty, self.posting_date, self.posting_time))
+				order by timestamp(posting_date, posting_time)""", dict(
+					warehouse=self.warehouse, item_code=self.item_code,
+					batch_no=self.batch_no, actual_qty=self.actual_qty,
+					posting_date=self.posting_date, posting_time=self.posting_time))
 
 		if len(future_negative_entries) > 0:
 			voucher_type, voucher_no, item_code, warehouse, posting_date = future_negative_entries[0]
-			frappe.throw( _('Quantity not available for') + ' ' +
+			frappe.throw(_('Quantity not available for') + ' ' +
 				frappe.bold(item_code) + ' ' + _('in warehouse') + ' ' +
 				frappe.bold(warehouse) + ' ' + _('for future') + ' ' +
 				frappe.bold(voucher_type) + ' ' + frappe.bold(voucher_no) +
