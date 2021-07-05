@@ -68,7 +68,7 @@ def create_mode_of_payment(gateway, payment_type="General"):
 		mode_of_payment.insert(ignore_permissions=True)
 
 		return mode_of_payment
-	else:
+	elif mode_of_payment:
 		return frappe.get_doc("Mode of Payment", mode_of_payment)
 
 def get_tracking_url(carrier, tracking_number):
