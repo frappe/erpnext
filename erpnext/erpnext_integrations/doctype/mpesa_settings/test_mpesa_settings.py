@@ -7,6 +7,7 @@ import frappe
 import unittest
 from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_settings import process_balance_info, verify_transaction
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.erpnext_integrations.utils import create_mode_of_payment
 
 class TestMpesaSettings(unittest.TestCase):
 	def setUp(self):
@@ -20,7 +21,7 @@ class TestMpesaSettings(unittest.TestCase):
 		frappe.db.sql('delete from `tabIntegration Request` where integration_request_service = "Mpesa"')
 
 	def test_creation_of_payment_gateway(self):
-		mode_of_payment = frappe.get_doc("Mode of Payment", "Mpesa-_Test")
+		mode_of_payment = create_mode_of_payment('Mpesa-_Test', payment_type="Phone")
 		self.assertTrue(frappe.db.exists("Payment Gateway Account", {'payment_gateway': "Mpesa-_Test"}))
 		self.assertTrue(mode_of_payment.name)
 		self.assertEqual(mode_of_payment.type, "Phone")
