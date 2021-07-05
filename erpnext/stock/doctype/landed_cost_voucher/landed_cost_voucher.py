@@ -60,8 +60,19 @@ class LandedCostVoucher(Document):
 		receipt_documents = []
 
 		for d in self.get("purchase_receipts"):
-			if frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus") != 1:
-				frappe.throw(_("Receipt document must be submitted"))
+			doc_data = frappe.db.get_values(
+					d.receipt_document_type,
+					d.receipt_document,
+					["docstatus", "update_stock"],
+					as_dict=1
+				)[0]
+			if doc_data.get("docstatus") != 1:
+				msg = f"Row {d.idx}: Receipt Document {frappe.bold(d.receipt_document)} must be submitted"
+				frappe.throw(_(msg), title=_("Invalid Document"))
+			elif d.receipt_document_type == "Purchase Invoice" and not doc_data.get("update_stock"):
+				msg = _(f"Row {d.idx}: Purchase Invoice {frappe.bold(d.receipt_document)} has no stock impact.")
+				msg += "<br>" + _("Please create Landed Cost Vouchers against Invoices with 'Update Stock' enabled.")
+				frappe.throw(msg, title=_("Incorrect Invoice"))
 			else:
 				receipt_documents.append(d.receipt_document)
 
