@@ -1042,6 +1042,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			where voucher_type='Purchase Invoice' and voucher_no=%s
 			order by account asc""", (purchase_invoice.name), as_dict=1)
 
+		print(gl_entries)
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.debit)
