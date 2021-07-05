@@ -846,6 +846,7 @@ class SalesInvoice(SellingController):
 		self.allocate_advance_taxes(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries)
 
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
@@ -958,6 +959,40 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	def make_discount_gl_entries(self, gl_entries):
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		if enable_discount_accounting:
+			for item in self.get("items"):
+				if item.get('discount_amount') and item.get('discount_account'):
+					account_currency = get_account_currency(item.discount_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.discount_account,
+							"against": self.customer,
+							"debit": flt(item.discount_amount),
+							"debit_in_account_currency": flt(item.discount_amount),
+							"cost_center": self.cost_center,
+							"project": self.project
+						}, account_currency, item=self)
+					)
+
+					income_account = (item.income_account
+						if (not item.enable_deferred_revenue or self.is_return) 
+						else item.deferred_revenue_account)
+
+					account_currency = get_account_currency(income_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": income_account,
+							"against": self.customer,
+							"credit": flt(item.discount_amount),
+							"credit_in_account_currency": flt(item.discount_amount),
+							"cost_center": item.cost_center,
+							"project": item.project or self.project
+						}, account_currency, item=item)
+					)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		if cint(self.redeem_loyalty_points):
