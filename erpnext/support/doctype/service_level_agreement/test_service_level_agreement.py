@@ -288,7 +288,7 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 		"doctype": "Service Level Agreement",
 		"enabled": 1,
 		"document_type": doctype,
-		"service_level": "__Test Service Level",
+		"service_level": "__Test {} SLA".format(entity_type if entity_type else "Default"),
 		"default_service_level_agreement": default_service_level_agreement,
 		"default_priority": "Medium",
 		"holiday_list": holiday_list,
