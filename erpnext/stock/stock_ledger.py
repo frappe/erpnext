@@ -128,13 +128,16 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 	distinct_item_warehouses = [(d.item_code, d.warehouse) for d in args]
 
 	i = 0
+	voucher_detail_no_dict = {}
+
 	while i < len(args):
 		obj = update_entries_after({
 			"item_code": args[i].item_code,
 			"warehouse": args[i].warehouse,
 			"posting_date": args[i].posting_date,
 			"posting_time": args[i].posting_time,
-			"creation": args[i].get("creation")
+			"creation": args[i].get("creation"),
+			"voucher_detail_no_dict": voucher_detail_no_dict
 		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
 		for item_wh, new_sle in iteritems(obj.new_items):
@@ -182,6 +185,8 @@ class update_entries_after(object):
 		self.get_precision()
 		self.valuation_method = get_valuation_method(self.item_code)
 		self.new_items = {}
+		self.voucher_detail_no_dict = (args.get('voucher_detail_no_dict')
+			if 'voucher_detail_no_dict' in args else {})
 
 		self.data = frappe._dict()
 		self.initialize_previous_data(self.args)
@@ -314,7 +319,9 @@ class update_entries_after(object):
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse == self.args.warehouse:
 			return entries_to_fix
 		elif dependant_sle.item_code != self.item_code:
-			if (dependant_sle.item_code, dependant_sle.warehouse) not in self.new_items:
+			key = (dependant_sle.item_code, dependant_sle.warehouse, sle.dependant_sle_voucher_detail_no)
+			if key not in self.voucher_detail_no_dict:
+				self.voucher_detail_no_dict[key] = True
 				self.new_items[(dependant_sle.item_code, dependant_sle.warehouse)] = dependant_sle
 			return entries_to_fix
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
