@@ -449,6 +449,8 @@ def install_defaults(args=None):
 	set_active_domains(args)
 	update_stock_settings()
 	update_shopping_cart_settings(args)
+
+	args.update({"set_default": 1})
 	create_bank_account(args)
 
 def set_global_defaults(args):
@@ -499,7 +501,10 @@ def create_bank_account(args):
 		try:
 			doc = bank_account.insert()
 
-			frappe.db.set_value("Company", args.get('company_name'), "default_bank_account", bank_account.name, update_modified=False)
+			if args.get('set_default'):
+				frappe.db.set_value("Company", args.get('company_name'), "default_bank_account", bank_account.name, update_modified=False)
+
+			return doc
 
 		except RootNotEditable:
 			frappe.throw(_("Bank account cannot be named as {0}").format(args.get('bank_account')))
