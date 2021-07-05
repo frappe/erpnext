@@ -15,17 +15,18 @@ class SpecificGravity(Document):
 		doc=frappe.get_doc("Stock Entry",{"work_order":self.work_order,"stock_entry_type":"Manufacture"})
 		lst=frappe.get_doc("Work Order",self.work_order)
 		for i in doc.items:
-			self.append('adjust_density', {
-					"batch":i.batch_no,
-					"old_specific_gravity":lst.specific_gravity,
-					"new_specific_gravity":lst.specific_gravity,
-					"old_quantity":lst.qty,
-					"new_quantity":lst.qty,
-					"old_weight":lst.actual_fg_weight,
-					"new_weight":lst.actual_fg_weight,
-					"mo_weight":lst.actual_fg_weight,
-					"mo_volume":lst.wo_actual_volume
-			})
+			if i.is_finished_item==1:
+				self.append('adjust_density', {
+						"batch":i.batch_no,
+						"old_specific_gravity":lst.specific_gravity,
+						"new_specific_gravity":lst.specific_gravity,
+						"old_quantity":lst.qty,
+						"new_quantity":lst.qty,
+						"old_weight":lst.planned_total_weight,
+						"new_weight":lst.planned_total_weight,
+						"mo_weight":lst.actual_fg_weight,
+						"mo_volume":lst.wo_actual_volume
+				})
 
 
 	#New Quantity
