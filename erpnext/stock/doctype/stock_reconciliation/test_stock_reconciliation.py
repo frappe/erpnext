@@ -273,6 +273,49 @@ class TestStockReconciliation(unittest.TestCase):
 		pr2.cancel()
 		pr1.cancel()
 
+	def test_backdated_stock_reco_future_negative_stock(self):
+		"""
+			Test if a backdated stock reco causes future negative stock and is blocked.
+			-------------------------------------------
+			Var		| Doc	|	Qty	| Balance
+			-------------------------------------------
+			PR1		| PR	|	10	|	10		(posting date: today-2)
+			SR3		| Reco	|	0	|	1		(posting date: today-1) [backdated & blocked]
+			DN2		| DN	|	-2	|	8(-1)	(posting date: today)
+		"""
+		from erpnext.stock.stock_ledger import NegativeStockError
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code = "Backdated-Reco-Item"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code)
+
+		negative_stock_setting = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 0)
+
+		pr1 = make_purchase_receipt(item_code=item_code, warehouse=warehouse, qty=10, rate=100,
+			posting_date=add_days(nowdate(), -2))
+		dn2 = create_delivery_note(item_code=item_code, warehouse=warehouse, qty=2, rate=120,
+			posting_date=nowdate())
+
+		pr1_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		dn2_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": dn2.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		self.assertEqual(pr1_balance, 10)
+		self.assertEqual(dn2_balance, 8)
+
+		# check if stock reco is blocked
+		sr3 = create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=1, rate=100,
+			posting_date=add_days(nowdate(), -1), do_not_submit=True)
+		self.assertRaises(NegativeStockError, sr3.submit)
+
+		# teardown
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", negative_stock_setting)
+		sr3.cancel()
+		dn2.cancel()
+		pr1.cancel()
+
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
