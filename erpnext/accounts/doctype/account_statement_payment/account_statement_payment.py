@@ -61,7 +61,7 @@ class AccountStatementPayment(Document):
 			if item.net_pay != item.sale_amount:
 				total_sale += item.sale_amount
 			else:
-				total_sale += item.price
+				total_sale += item.net_pay
 
 		self.total_sale = total_sale
 
