@@ -1,6 +1,8 @@
 erpnext.setup_einvoice_actions = (doctype) => {
 	frappe.ui.form.on(doctype, {
 		async refresh(frm) {
+			if (frm.doc.docstatus == 2) return;
+
 			const res = await frappe.call({
 				method: 'erpnext.regional.india.e_invoice.utils.validate_eligibility',
 				args: { doc: frm.doc }
