@@ -510,6 +510,14 @@ cur_frm.set_query("income_account", "items", function(doc) {
 	}
 });
 
+// Discount Account in Details Table
+// --------------------------------
+cur_frm.set_query("discount_account", "items", function(doc) {
+	return{
+		query: "erpnext.controllers.queries.get_income_account",
+		filters: {'company': doc.company}
+	}
+});
 
 // Cost Center in Details Table
 // -----------------------------
