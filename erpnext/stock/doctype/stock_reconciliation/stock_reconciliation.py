@@ -357,6 +357,7 @@ class StockReconciliation(StockController):
 			if row.current_qty:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
+				data.previous_qty_after_transaction = flt(row.qty)
 				data.valuation_rate = flt(row.current_valuation_rate)
 				data.stock_value = data.qty_after_transaction * data.valuation_rate
 				data.stock_value_difference = -1 * flt(row.amount_difference)

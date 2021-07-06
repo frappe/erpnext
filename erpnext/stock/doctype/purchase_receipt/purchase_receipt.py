@@ -386,6 +386,7 @@ class PurchaseReceipt(BuyingController):
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
+			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
