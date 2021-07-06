@@ -21,6 +21,7 @@ class AccountsSettings(Document):
 
 		self.validate_stale_days()
 		self.enable_payment_schedule_in_print()
+		self.toggle_discount_accounting_fields()
 
 	def validate_stale_days(self):
 		if not self.allow_stale and cint(self.stale_days) <= 0:
@@ -33,3 +34,9 @@ class AccountsSettings(Document):
 		for doctype in ("Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"):
 			make_property_setter(doctype, "due_date", "print_hide", show_in_print, "Check", validate_fields_for_doctype=False)
 			make_property_setter(doctype, "payment_schedule", "print_hide",  0 if show_in_print else 1, "Check", validate_fields_for_doctype=False)
+
+	def toggle_discount_accounting_fields(self):
+		enable_discount_accounting = cint(self.enable_discount_accounting)
+		
+		make_property_setter("Sales Invoice Item", "discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Item", "default_discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
