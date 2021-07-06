@@ -313,7 +313,7 @@ def validate_accounts(file_name):
 def validate_root(accounts):
 	roots = [accounts[d] for d in accounts if not accounts[d].get('parent_account')]
 	if len(roots) < 4:
-		return _("Number of root accounts cannot be less than 4")
+		frappe.throw(_("Number of root accounts cannot be less than 4"))
 
 	error_messages = []
 
@@ -324,7 +324,7 @@ def validate_root(accounts):
 			error_messages.append("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity".format(account.get("account_name")))
 
 	if error_messages:
-		return "<br>".join(error_messages)
+		frappe.throw(_("<br>".join(error_messages)))
 
 def get_root_types():
 	return ('Asset', 'Liability', 'Expense', 'Income', 'Equity')
