@@ -10,12 +10,13 @@ from frappe.utils import get_datetime, flt
 import datetime
 from datetime import timedelta
 
-class TestIssue(unittest.TestCase):
+class TestSetUp(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabService Level Agreement`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
+class TestIssue(TestSetUp):
 	def test_response_time_and_resolution_time_based_on_different_sla(self):
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
 
@@ -134,7 +135,7 @@ class TestIssue(unittest.TestCase):
 		issue.reload()
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
 
-	# tests for first_response_time(frt) calculation
+class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
 	# all dates are in the mm-dd-yyyy format
 
