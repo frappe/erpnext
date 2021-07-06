@@ -176,8 +176,8 @@ erpnext.HierarchyChart = class {
 
 	collapse_node() {
 		if (this.selected_node.expandable) {
-			this.selected_node.$children.hide('fast');
-			$(`path[data-parent="${this.selected_node.id}"]`).hide('fast');
+			this.selected_node.$children.hide();
+			$(`path[data-parent="${this.selected_node.id}"]`).hide();
 			this.selected_node.expanded = false;
 		}
 	}
@@ -237,8 +237,8 @@ erpnext.HierarchyChart = class {
 			}
 		}
 
-		node.$children.show('fast');
-		$(`path[data-parent="${node.id}"]`).show('fast');
+		node.$children.show();
+		$(`path[data-parent="${node.id}"]`).show();
 		node.expanded = true;
 	}
 
@@ -262,9 +262,7 @@ erpnext.HierarchyChart = class {
 		let parent_node = document.querySelector(`#${parent_id}`);
 		let child_node = document.querySelector(`#${child_id}`);
 
-		// variable for the namespace
-		const svgns = 'http://www.w3.org/2000/svg';
-		let path = document.createElementNS(svgns, 'path');
+		let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 		// we need to connect right side of the parent to the left side of the child node
 		let pos_parent_right = {
@@ -438,7 +436,7 @@ erpnext.HierarchyChart = class {
 			let parent = $(path).data('parent');
 			let child = $(path).data('child');
 
-			if ($(parent).length || $(child).length)
+			if ($(`#${parent}`).length && $(`#${child}`).length)
 				return;
 
 			$(path).remove();
