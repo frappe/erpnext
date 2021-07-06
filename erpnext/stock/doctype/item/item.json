@@ -91,6 +91,7 @@
   "is_sales_item",
   "column_break3",
   "max_discount",
+  "default_discount_account",
   "deferred_revenue",
   "deferred_revenue_account",
   "enable_deferred_revenue",
@@ -1058,6 +1059,12 @@
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
+  },
+  {
+   "fieldname": "default_discount_account",
+   "fieldtype": "Link",
+   "label": "Default Discount Account",
+   "options": "Account"
   }
  ],
  "has_web_view": 1,
@@ -1067,7 +1074,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-03-18 14:04:38.575519",
+ "modified": "2021-07-06 00:46:15.878648",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
