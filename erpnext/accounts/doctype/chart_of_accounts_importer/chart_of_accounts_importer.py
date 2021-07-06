@@ -13,7 +13,9 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file, read_xls_file_from_attached_file
 
 class ChartofAccountsImporter(Document):
-	pass
+	def validate(self):
+		validate_accounts(self.import_file)
+
 
 @frappe.whitelist()
 def validate_company(company):
@@ -301,10 +303,10 @@ def validate_accounts(file_name):
 		if account["parent_account"] and accounts_dict.get(account["parent_account"]):
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
-	message = validate_root(accounts_dict)
-	if message: return message
-	message = validate_account_types(accounts_dict)
-	if message: return message
+	validate_root(accounts_dict)
+	
+	validate_account_types(accounts_dict)
+	
 
 	return [True, len(accounts)]
 
@@ -356,7 +358,7 @@ def validate_account_types(accounts):
 
 	missing = list(set(account_types_for_ledger) - set(account_types))
 	if missing:
-		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
+		frappe.throw(_("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing)))
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
 	# fix logic bug
@@ -364,7 +366,7 @@ def validate_account_types(accounts):
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
-		return _("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing))
+		frappe.throw(_("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing)))
 
 def unset_existing_data(company):
 	linked = frappe.db.sql('''select fieldname from tabDocField
