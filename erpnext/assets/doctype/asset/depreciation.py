@@ -147,7 +147,7 @@ def scrap_asset(asset_name):
 	je.company = asset.company
 	je.remark = "Scrap Entry for asset {0}".format(asset_name)
 
-	for entry in get_gl_entries_on_asset_movement(asset):
+	for entry in get_gl_entries_on_asset_disposal_and_regain(asset):
 		entry.update({
 			"reference_type": "Asset",
 			"reference_name": asset_name
@@ -177,7 +177,7 @@ def restore_asset(asset_name):
 	asset.set_status()
 
 @frappe.whitelist()
-def get_gl_entries_on_asset_movement(asset, selling_amount=0, finance_book=None, is_return = False):
+def get_gl_entries_on_asset_disposal_and_regain(asset, selling_amount=0, finance_book=None, is_return = False):
 	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
