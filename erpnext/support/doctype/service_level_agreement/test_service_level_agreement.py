@@ -220,9 +220,9 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		lead.reload()
 		self.assertEqual(lead.agreement_status, 'Fulfilled')
 
-	# def tearDown(self):
-	# 	for d in frappe.get_all("Service Level Agreement"):
-	# 		frappe.delete_doc("Service Level Agreement", d.name, force=1)
+	def tearDown(self):
+		for d in frappe.get_all("Service Level Agreement"):
+			frappe.delete_doc("Service Level Agreement", d.name, force=1)
 
 
 def get_service_level_agreement(default_service_level_agreement=None, entity_type=None, entity=None, doctype="Issue"):
