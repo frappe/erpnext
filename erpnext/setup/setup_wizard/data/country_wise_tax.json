@@ -1164,33 +1164,292 @@
 	},
 
 	"India": {
+		"tax_categories": [
+			{
+				"title": "In-State",
+				"is_inter_state": 0,
+				"gst_state": ""
+			},
+			{
+				"title": "Out-State",
+				"is_inter_state": 1,
+				"gst_state": ""
+			},
+			{
+				"title": "Reverse Charge In-State",
+				"is_inter_state": 0,
+				"gst_state": ""
+			},
+			{
+				"title": "Reverse Charge Out-State",
+				"is_inter_state": 1,
+				"gst_state": ""
+			},
+			{
+				"title": "Registered Composition",
+				"is_inter_state": 0,
+				"gst_state": ""
+			}
+		],
 		"chart_of_accounts": {
 			"*": {
 				"item_tax_templates": [
 					{
-						"title": "In State GST",
+						"title": "GST 9%",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "SGST",
+									"account_name": "Output Tax SGST",
 									"tax_rate": 9.00
 								}
 							},
 							{
 								"tax_type": {
-									"account_name": "CGST",
+									"account_name": "Output Tax CGST",
 									"tax_rate": 9.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 18.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 9.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 9.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 18.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 9.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 9.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 18.00,
+									"root_type": "Asset"
 								}
 							}
 						]
 					},
 					{
-						"title": "Out of State GST",
+						"title": "GST 5%",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "IGST",
-									"tax_rate": 18.00
+									"account_name": "Output Tax SGST",
+									"tax_rate": 2.5
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax CGST",
+									"tax_rate": 2.5
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 5.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 2.5,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 2.5,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 5.0,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 2.50,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 2.50,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 5.00,
+									"root_type": "Asset"
+								}
+							}
+						]
+					},
+					{
+						"title": "GST 12%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Output Tax SGST",
+									"tax_rate": 6.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax CGST",
+									"tax_rate": 6.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 12.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 6.0,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 6.0,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 12.0,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 6.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 6.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 12.00,
+									"root_type": "Asset"
+								}
+							}
+						]
+					},
+					{
+						"title": "GST 28%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Output Tax SGST",
+									"tax_rate": 14.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax CGST",
+									"tax_rate": 14.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 28.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 14.0,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 14.0,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 28.0,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 14.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 14.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 28.00,
+									"root_type": "Asset"
 								}
 							}
 						]
@@ -1229,35 +1488,116 @@
 						]
 					}
 				],
-				"*": [
+				"sales_tax_templates": [
 					{
-						"title": "In State GST",
+						"title": "Output GST In-state",
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "SGST",
-									"tax_rate": 9.00
+									"account_name": "Output Tax SGST",
+									"tax_rate": 9.00,
+									"account_type": "Tax"
 								}
 							},
 							{
 								"account_head": {
-									"account_name": "CGST",
-									"tax_rate": 9.00
+									"account_name": "Output Tax CGST",
+									"tax_rate": 9.00,
+									"account_type": "Tax"
 								}
 							}
-						]
+						],
+						"tax_category": "In-State"
 					},
 					{
-						"title": "Out of State GST",
+						"title": "Output GST Out-state",
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "IGST",
-									"tax_rate": 18.00
+									"account_name": "Output Tax IGST",
+									"tax_rate": 18.00,
+									"account_type": "Tax"
 								}
 							}
-						]
+						],
+						"tax_category": "Out-State"
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Input GST In-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 9.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							},
+							{
+								"account_head": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 9.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							}
+						],
+						"tax_category": "In-State"
 					},
+					{
+						"title": "Input GST Out-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 18.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							}
+						],
+						"tax_category": "Out-State"
+					},
+					{
+						"title": "Input GST RCM In-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax SGST RCM",
+									"tax_rate": 9.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							},
+							{
+								"account_head": {
+									"account_name": "Input Tax CGST RCM",
+									"tax_rate": 9.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							}
+						],
+						"tax_category": "Reverse Charge In-State"
+					},
+					{
+						"title": "Input GST RCM Out-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax IGST RCM",
+									"tax_rate": 18.00,
+									"root_type": "Asset",
+									"account_type": "Tax"
+								}
+							}
+						],
+						"tax_category": "Reverse Charge Out-State"
+					}
+				],
+				"*": [
 					{
 						"title": "VAT 5%",
 						"taxes": [
@@ -1349,7 +1689,7 @@
 		"Italy VAT 4%":{
 			"account_name": "IVA 4%",
 			"tax_rate": 4.00
-		}		
+		}
 	},
 
 	"Ivory Coast": {
