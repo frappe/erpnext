@@ -76,12 +76,12 @@ class TestStockLedgerEntry(unittest.TestCase):
 		# Repack entry on 5-5-2020
 		repack = create_repack_entry(company=company, posting_date='2020-05-05', posting_time='14:00')
 
-		finished_item_sle = get_previous_sle({
+		finished_item_sle = frappe.db.get_value('Stock Ledger Entry', {
 			"item_code": "_Test Finished Item for Reposting",
 			"warehouse": "Finished Goods - _TC",
-			"posting_date": '2020-05-05',
-			"posting_time": '14:00'
-		})
+			"voucher_type": "Stock Entry",
+			"voucher_no": repack.name
+		}, ["incoming_rate", "valuation_rate"], as_dict=1)
 		self.assertEqual(finished_item_sle.get("incoming_rate"), 540)
 		self.assertEqual(finished_item_sle.get("valuation_rate"), 540)
 
