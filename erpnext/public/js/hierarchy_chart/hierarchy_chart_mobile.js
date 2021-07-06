@@ -289,9 +289,7 @@ erpnext.HierarchyChartMobile = class {
 		let parent_node = document.querySelector(`#${parent_id}`);
 		let child_node = document.querySelector(`#${child_id}`);
 
-		// variable for the namespace
-		const svgns = 'http://www.w3.org/2000/svg';
-		let path = document.createElementNS(svgns, 'path');
+		let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 		let connector = undefined;
 
@@ -514,7 +512,7 @@ erpnext.HierarchyChartMobile = class {
 			let parent = $(path).data('parent');
 			let child = $(path).data('child');
 
-			if ($(parent).length || $(child).length)
+			if ($(`#${parent}`).length && $(`#${child}`).length)
 				return;
 
 			$(path).remove();
