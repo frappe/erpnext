@@ -61,7 +61,7 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 	return 'reconciled'
 
 def add_payment_to_transaction(transaction, payment_entry, gl_entry):
-	gl_amount, transaction_amount = (gl_entry.credit, transaction.debit) if gl_entry.credit > 0 else (gl_entry.debit, transaction.credit)
+	gl_amount, transaction_amount = (gl_entry.credit_in_account_currency, transaction.debit) if gl_entry.credit_in_account_currency > 0 else (gl_entry.debit_in_account_currency, transaction.credit)
 	allocated_amount = gl_amount if gl_amount <= transaction_amount else transaction_amount
 	transaction.append("payment_entries", {
 		"payment_document": payment_entry.doctype,
