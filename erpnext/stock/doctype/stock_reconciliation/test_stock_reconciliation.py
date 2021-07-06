@@ -6,7 +6,7 @@
 
 from __future__ import unicode_literals
 import frappe, unittest
-from frappe.utils import flt, nowdate, nowtime
+from frappe.utils import flt, nowdate, nowtime, add_days
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError, get_items
@@ -14,6 +14,7 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 class TestStockReconciliation(unittest.TestCase):
 	@classmethod
@@ -203,6 +204,117 @@ class TestStockReconciliation(unittest.TestCase):
 		self.assertEqual(sr.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(sr.get("items")[0].valuation_rate, 0)
 		self.assertEqual(sr.get("items")[0].amount, 0)
+
+	def test_backdated_stock_reco_qty_reposting(self):
+		"""
+			Test if a backdated stock reco recalculates future qty until next reco.
+			-------------------------------------------
+			Var		| Doc	|	Qty	| Balance
+			-------------------------------------------
+			SR5		| Reco	|	0	|	8	(posting date: today-4) [backdated]
+			PR1		| PR	|	10	|	18	(posting date: today-3)
+			PR2		| PR	|	1	|	19	(posting date: today-2)
+			SR4		| Reco	|	0	|	6	(posting date: today-1) [backdated]
+			PR3		| PR	|	1	|	7	(posting date: today) # can't post future PR
+		"""
+		item_code = "Backdated-Reco-Item"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code)
+
+		pr1 = make_purchase_receipt(item_code=item_code, warehouse=warehouse, qty=10, rate=100,
+			posting_date=add_days(nowdate(), -3))
+		pr2 = make_purchase_receipt(item_code=item_code, warehouse=warehouse, qty=1, rate=100,
+			posting_date=add_days(nowdate(), -2))
+		pr3 = make_purchase_receipt(item_code=item_code, warehouse=warehouse, qty=1, rate=100,
+			posting_date=nowdate())
+
+		pr1_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		pr3_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr3.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		self.assertEqual(pr1_balance, 10)
+		self.assertEqual(pr3_balance, 12)
+
+		# post backdated stock reco in between
+		sr4 = create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=6, rate=100,
+			posting_date=add_days(nowdate(), -1))
+		pr3_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr3.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		self.assertEqual(pr3_balance, 7)
+
+		# post backdated stock reco at the start
+		sr5 = create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=8, rate=100,
+			posting_date=add_days(nowdate(), -4))
+		pr1_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		pr2_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr2.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		sr4_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": sr4.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		self.assertEqual(pr1_balance, 18)
+		self.assertEqual(pr2_balance, 19)
+		self.assertEqual(sr4_balance, 6) # check if future stock reco is unaffected
+
+		# cancel backdated stock reco and check future impact
+		sr5.cancel()
+		pr1_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		pr2_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr2.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		sr4_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": sr4.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		self.assertEqual(pr1_balance, 10)
+		self.assertEqual(pr2_balance, 11)
+		self.assertEqual(sr4_balance, 6) # check if future stock reco is unaffected
+
+		# teardown
+		sr4.cancel()
+		pr3.cancel()
+		pr2.cancel()
+		pr1.cancel()
+
+	def test_backdated_stock_reco_future_negative_stock(self):
+		"""
+			Test if a backdated stock reco causes future negative stock and is blocked.
+			-------------------------------------------
+			Var		| Doc	|	Qty	| Balance
+			-------------------------------------------
+			PR1		| PR	|	10	|	10		(posting date: today-2)
+			SR3		| Reco	|	0	|	1		(posting date: today-1) [backdated & blocked]
+			DN2		| DN	|	-2	|	8(-1)	(posting date: today)
+		"""
+		from erpnext.stock.stock_ledger import NegativeStockError
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code = "Backdated-Reco-Item"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code)
+
+		negative_stock_setting = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 0)
+
+		pr1 = make_purchase_receipt(item_code=item_code, warehouse=warehouse, qty=10, rate=100,
+			posting_date=add_days(nowdate(), -2))
+		dn2 = create_delivery_note(item_code=item_code, warehouse=warehouse, qty=2, rate=120,
+			posting_date=nowdate())
+
+		pr1_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		dn2_balance = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": dn2.name, "is_cancelled": 0},
+			"qty_after_transaction")
+		self.assertEqual(pr1_balance, 10)
+		self.assertEqual(dn2_balance, 8)
+
+		# check if stock reco is blocked
+		sr3 = create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=1, rate=100,
+			posting_date=add_days(nowdate(), -1), do_not_submit=True)
+		self.assertRaises(NegativeStockError, sr3.submit)
+
+		# teardown
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", negative_stock_setting)
+		sr3.cancel()
+		dn2.cancel()
+		pr1.cancel()
 
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
