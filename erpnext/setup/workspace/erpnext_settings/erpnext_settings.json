@@ -113,6 +113,7 @@
   },
   {
    "doc_view": "",
+   "icon": "retail",
    "label": "Products Settings",
    "link_to": "Products Settings",
    "type": "DocType"
