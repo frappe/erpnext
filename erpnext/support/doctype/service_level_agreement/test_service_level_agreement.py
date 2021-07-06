@@ -81,11 +81,9 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		# check SLA custom fields created for leads
 		sla_fields = get_service_level_agreement_fields()
-		frappe.clear_cache(doctype=doctype)
-		meta = frappe.get_meta(doctype, cached=False)
 
 		for field in sla_fields:
-			self.assertTrue(meta.has_field(field.get("fieldname")))
+			self.assertTrue(frappe.db.exists("Custom Field", {"dt": doctype, "fieldname": field.get("fieldname")}))
 
 	def test_docfield_creation_for_sla_on_custom_dt(self):
 		doctype = create_custom_doctype()
@@ -103,10 +101,9 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		# check SLA docfields created
 		sla_fields = get_service_level_agreement_fields()
-		meta = frappe.get_meta(doctype.name, cached=False)
 
 		for field in sla_fields:
-			self.assertTrue(meta.has_field(field.get("fieldname")))
+			self.assertTrue(frappe.db.exists("DocField", {"fieldname": field.get("fieldname"), "parent": doctype.name}))
 
 	def test_sla_application(self):
 		# Default Service Level Agreement
