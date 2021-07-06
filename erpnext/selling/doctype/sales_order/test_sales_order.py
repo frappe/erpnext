@@ -1217,6 +1217,19 @@ class TestSalesOrder(unittest.TestCase):
 		# To test if the SO does NOT have a Blanket Order
 		self.assertEqual(so_doc.items[0].blanket_order, None)
 
+	def test_so_cancellation_when_si_drafted(self):
+		"""
+			Test to check if Sales Order gets cancelled if Sales Invoice is in Draft state
+			Expected result: sales order should not get cancelled 
+		"""
+		so = make_sales_order()
+		so.submit()
+		si = make_sales_invoice(so.name)
+		si.save()
+
+		self.assertRaises(frappe.ValidationError, so.cancel)
+
+
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

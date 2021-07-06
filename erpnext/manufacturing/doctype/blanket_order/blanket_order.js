@@ -13,7 +13,7 @@ frappe.ui.form.on('Blanket Order', {
 
 	refresh: function(frm) {
 		erpnext.hide_company();
-		if (frm.doc.customer && frm.doc.docstatus === 1) {
+		if (frm.doc.customer && frm.doc.docstatus === 1 && frm.doc.to_date > frappe.datetime.get_today()) {
 			frm.add_custom_button(__("Sales Order"), function() {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_order",

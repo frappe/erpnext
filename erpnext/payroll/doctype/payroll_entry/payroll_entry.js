@@ -135,10 +135,26 @@ frappe.ui.form.on('Payroll Entry', {
 		});
 
 		frm.set_query('employee', 'employees', () => {
-			if (!frm.doc.company) {
-				frappe.msgprint(__("Please set a Company"));
-				return [];
+			let error_fields = [];
+			let mandatory_fields = ['company', 'payroll_frequency', 'start_date', 'end_date'];
+
+			let message = __('Mandatory fields required in {0}', [__(frm.doc.doctype)]);
+
+			mandatory_fields.forEach(field => {
+				if (!frm.doc[field]) {
+					error_fields.push(frappe.unscrub(field));
+				}
+			});
+
+			if (error_fields && error_fields.length) {
+				message = message + '<br><br><ul><li>' + error_fields.join('</li><li>') + "</ul>";
+				frappe.throw({
+					message: message,
+					indicator: 'red',
+					title: __('Missing Fields')
+				});
 			}
+
 			return {
 				query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.employee_query",
 				filters: frm.events.get_employee_filters(frm)
@@ -148,25 +164,22 @@ frappe.ui.form.on('Payroll Entry', {
 
 	get_employee_filters: function (frm) {
 		let filters = {};
-		filters['company'] = frm.doc.company;
-		filters['start_date'] = frm.doc.start_date;
-		filters['end_date'] = frm.doc.end_date;
 		filters['salary_slip_based_on_timesheet'] = frm.doc.salary_slip_based_on_timesheet;
-		filters['payroll_frequency'] = frm.doc.payroll_frequency;
-		filters['payroll_payable_account'] = frm.doc.payroll_payable_account;
-		filters['currency'] = frm.doc.currency;
 
-		if (frm.doc.department) {
-			filters['department'] = frm.doc.department;
-		}
-		if (frm.doc.branch) {
-			filters['branch'] = frm.doc.branch;
-		}
-		if (frm.doc.designation) {
-			filters['designation'] = frm.doc.designation;
-		}
+		let fields = ['company', 'start_date', 'end_date', 'payroll_frequency', 'payroll_payable_account',
+			'currency', 'department', 'branch', 'designation'];
+
+		fields.forEach(field => {
+			if (frm.doc[field]) {
+				filters[field] = frm.doc[field];
+			}
+		});
+
 		if (frm.doc.employees) {
-			filters['employees'] = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
+			let employees = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
+			if (employees && employees.length) {
+				filters['employees'] = employees;
+			}
 		}
 		return filters;
 	},

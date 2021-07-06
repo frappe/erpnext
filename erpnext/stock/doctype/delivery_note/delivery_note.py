@@ -129,11 +129,12 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		if self._action != 'submit' and not self.is_return:
-			set_batch_nos(self, 'warehouse', True)
-
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
+
+		if self._action != 'submit' and not self.is_return:
+			set_batch_nos(self, 'warehouse', throw=True)
+			set_batch_nos(self, 'warehouse', throw=True, child_table="packed_items")
 
 		self.update_current_stock()
 
@@ -181,9 +182,8 @@ class DeliveryNote(SellingController):
 		super(DeliveryNote, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
-				if not d['warehouse']:
-					frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
+			if not d['warehouse'] and frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
+				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 
 	def update_current_stock(self):
