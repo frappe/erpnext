@@ -317,9 +317,9 @@ def validate_root(accounts):
 
 	for account in roots:
 		if not account.get("root_type") and account.get("account_name"):
-			error_messages.append(_("Please enter Root Type for account- {0}".format(account.get("account_name"))))
+			error_messages.append(_("Please enter Root Type for account- {0}").format(account.get("account_name")))
 		elif account.get("root_type") not in get_root_types() and account.get("account_name"):
-			error_messages.append(_("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity".format(account.get("account_name"))))
+			error_messages.append(_("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity").format(account.get("account_name")))
 
 	if error_messages:
 		frappe.throw("<br>".join(error_messages))
