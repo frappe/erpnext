@@ -10,10 +10,10 @@ erpnext.ProductView =  class {
 		this.make();
 	}
 
-	make() {
+	make(from_filters=false) {
 		this.products_section.empty();
 		this.prepare_view_toggler();
-		this.get_item_filter_data();
+		this.get_item_filter_data(from_filters);
 	}
 
 	prepare_view_toggler() {
@@ -24,7 +24,7 @@ erpnext.ProductView =  class {
 		}
 	}
 
-	get_item_filter_data() {
+	get_item_filter_data(from_filters=false) {
 		// Get and render all Product related views
 		let me = this;
 		let args = this.get_query_filters();
@@ -43,16 +43,25 @@ erpnext.ProductView =  class {
 					if (!result.message["items"].length) {
 						// if result has no items or result is empty
 						me.render_no_products_section();
-
-						me.bind_filters();
-						me.restore_filters_state();
 					} else {
-						me.render_filters(result.message["filters"]);
+						// Add discount filters
+						me.get_discount_filter_html(result.message["filters"].discount_filters);
 
 						// Render views
 						me.render_list_view(result.message["items"], result.message["settings"]);
 						me.render_grid_view(result.message["items"], result.message["settings"]);
+
 						me.products = result.message["items"];
+						me.product_count = result.message["items_count"];
+					}
+
+					// Bind filter actions
+					if (!from_filters) {
+						// If `get_product_filter_data` was triggered after checking a filter,
+						// don't touch filters unnecessarily, only data must change
+						// filter persistence is handle on filter change event
+						me.bind_filters();
+						me.restore_filters_state();
 					}
 
 					// Bottom paging
@@ -69,12 +78,6 @@ erpnext.ProductView =  class {
 	disable_view_toggler(disable=false) {
 		$('#list').prop('disabled', disable);
 		$('#image-view').prop('disabled', disable);
-	}
-
-	render_filters(filter_data) {
-		this.get_discount_filter_html(filter_data.discount_filters);
-		this.bind_filters();
-		this.restore_filters_state();
 	}
 
 	render_grid_view(items, settings) {
@@ -143,10 +146,9 @@ erpnext.ProductView =  class {
 			let query_params = frappe.utils.get_query_params();
 			let start = query_params.start ? cint(JSON.parse(query_params.start)) : 0;
 			let page_length = settings.products_per_page || 0;
-			let no_of_products = this.products.length;
 
 			let prev_disable = start > 0 ? "" : "disabled";
-			let next_disable = (no_of_products > page_length || no_of_products == page_length) ? "" : "disabled";
+			let next_disable = (this.product_count > page_length) ? "" : "disabled";
 
 			paging_html += `
 				<button class="btn btn-default btn-prev" data-start="${ start - page_length }"
@@ -302,7 +304,9 @@ erpnext.ProductView =  class {
 				}
 				if (is_checked) {
 					this.field_filters[filter_name] = this.field_filters[filter_name] || [];
-					this.field_filters[filter_name].push(filter_value);
+					if (!in_list(this.field_filters[filter_name], filter_value)) {
+						this.field_filters[filter_name].push(filter_value);
+					}
 				} else {
 					this.field_filters[filter_name] = this.field_filters[filter_name] || [];
 					this.field_filters[filter_name] = this.field_filters[filter_name].filter(v => v !== filter_value);
@@ -322,7 +326,8 @@ erpnext.ProductView =  class {
 			window.history.pushState('filters', '', `${location.pathname}?` + query_string);
 
 			$('.page_content input').prop('disabled', true);
-			me.make();
+
+			me.make(from_filters=true);
 			$('.page_content input').prop('disabled', false);
 		});
 	}
