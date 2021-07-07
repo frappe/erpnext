@@ -3,22 +3,22 @@
 
 frappe.provide("erpnext.stock");
 
-erpnext.stock.StockController = frappe.ui.form.Controller.extend({
-	onload: function() {
+erpnext.stock.StockController = class StockController extends frappe.ui.form.Controller {
+	onload() {
 		// warehouse query if company
 		if (this.frm.fields_dict.company) {
 			this.setup_warehouse_query();
 		}
-	},
+	}
 
-	setup_warehouse_query: function() {
+	setup_warehouse_query() {
 		var me = this;
 		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(me.frm.doc);
 		});
-	},
+	}
 
-	setup_posting_date_time_check: function() {
+	setup_posting_date_time_check() {
 		// make posting date default and read only unless explictly checked
 		frappe.ui.form.on(this.frm.doctype, 'set_posting_date_and_time_read_only', function(frm) {
 			if(frm.doc.docstatus == 0 && frm.doc.set_posting_time) {
@@ -46,9 +46,9 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 				frm.trigger('set_posting_date_and_time_read_only');
 			}
 		});
-	},
+	}
 
-	show_stock_ledger: function() {
+	show_stock_ledger() {
 		var me = this;
 		if(this.frm.doc.docstatus > 0) {
 			cur_frm.add_custom_button(__("Stock Ledger"), function() {
@@ -63,9 +63,9 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 			}, __("View"));
 		}
 
-	},
+	}
 
-	show_general_ledger: function() {
+	show_general_ledger() {
 		var me = this;
 		if(this.frm.doc.docstatus > 0) {
 			cur_frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -81,4 +81,4 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 			}, __("View"));
 		}
 	}
-});
+};

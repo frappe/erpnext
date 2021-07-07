@@ -1,0 +1,122 @@
+{
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-03-12 14:47:51.166455",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "extends": "Settings",
+ "extends_another_page": 1,
+ "hide_custom": 0,
+ "icon": "settings",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "label": "ERPNext Settings",
+ "links": [],
+ "modified": "2021-06-12 01:58:11.399566",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "ERPNext Settings",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": [
+  {
+   "icon": "project",
+   "label": "Projects Settings",
+   "link_to": "Projects Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "accounting",
+   "label": "Accounts Settings",
+   "link_to": "Accounts Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "stock",
+   "label": "Stock Settings",
+   "link_to": "Stock Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "hr",
+   "label": "HR Settings",
+   "link_to": "HR Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "sell",
+   "label": "Selling Settings",
+   "link_to": "Selling Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "buying",
+   "label": "Buying Settings",
+   "link_to": "Buying Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "support",
+   "label": "Support Settings",
+   "link_to": "Support Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "retail",
+   "label": "Shopping Cart Settings",
+   "link_to": "Shopping Cart Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "website",
+   "label": "Portal Settings",
+   "link_to": "Portal Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "organization",
+   "label": "Manufacturing Settings",
+   "link_to": "Manufacturing Settings",
+   "restrict_to_domain": "Manufacturing",
+   "type": "DocType"
+  },
+  {
+   "icon": "education",
+   "label": "Education Settings",
+   "link_to": "Education Settings",
+   "restrict_to_domain": "Education",
+   "type": "DocType"
+  },
+  {
+   "icon": "organization",
+   "label": "Hotel Settings",
+   "link_to": "Hotel Settings",
+   "restrict_to_domain": "Hospitality",
+   "type": "DocType"
+  },
+  {
+   "icon": "non-profit",
+   "label": "Healthcare Settings",
+   "link_to": "Healthcare Settings",
+   "restrict_to_domain": "Healthcare",
+   "type": "DocType"
+  },
+  {
+   "icon": "setting",
+   "label": "Domain Settings",
+   "link_to": "Domain Settings",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "icon": "retail",
+   "label": "Products Settings",
+   "link_to": "Products Settings",
+   "type": "DocType"
+  }
+ ]
+}

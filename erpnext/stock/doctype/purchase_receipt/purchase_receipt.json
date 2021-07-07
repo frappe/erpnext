@@ -21,6 +21,7 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "apply_putaway_rule",
   "is_return",
   "return_against",
   "section_addresses",
@@ -47,6 +48,7 @@
   "set_warehouse",
   "rejected_warehouse",
   "col_break_warehouse",
+  "set_from_warehouse",
   "is_subcontracted",
   "supplier_warehouse",
   "items_section",
@@ -114,6 +116,7 @@
   "per_returned",
   "is_internal_supplier",
   "inter_company_reference",
+  "represents_company",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
@@ -511,8 +514,7 @@
    "oldfieldname": "pr_raw_material_details",
    "oldfieldtype": "Table",
    "options": "Purchase Receipt Item Supplied",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "section_break0",
@@ -759,6 +761,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -802,6 +805,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -1086,7 +1090,9 @@
    "fieldname": "inter_company_reference",
    "fieldtype": "Link",
    "label": "Inter Company Reference",
+   "no_copy": 1,
    "options": "Delivery Note",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1107,6 +1113,12 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
+  },
+  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "per_returned",
    "fieldtype": "Percent",
@@ -1114,13 +1126,29 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.is_internal_supplier",
+   "description": "Sets 'From Warehouse' in each row of the items table.",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 12:54:23.278500",
+ "modified": "2021-05-25 00:15:12.239017",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

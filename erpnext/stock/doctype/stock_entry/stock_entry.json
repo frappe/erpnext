@@ -27,6 +27,7 @@
   "set_posting_time",
   "inspection_required",
   "from_bom",
+  "apply_putaway_rule",
   "sb1",
   "bom_no",
   "fg_completed_qty",
@@ -58,10 +59,6 @@
   "supplier_name",
   "supplier_address",
   "address_display",
-  "column_break_39",
-  "customer",
-  "customer_name",
-  "customer_address",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -77,7 +74,8 @@
   "total_amount",
   "job_card",
   "amended_from",
-  "credit_note"
+  "credit_note",
+  "is_return"
  ],
  "fields": [
   {
@@ -434,13 +432,13 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval: in_list([\"Sales Return\", \"Purchase Return\", \"Send to Subcontractor\"], doc.purpose)",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
-   "label": "Customer or Supplier Details"
+   "label": "Supplier Details"
   },
   {
-   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -452,7 +450,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "label": "Supplier Name",
@@ -462,7 +460,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",
@@ -475,41 +473,6 @@
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address"
-  },
-  {
-   "fieldname": "column_break_39",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.purpose==\"Sales Return\"",
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "no_copy": 1,
-   "oldfieldname": "customer",
-   "oldfieldtype": "Link",
-   "options": "Customer",
-   "print_hide": 1
-  },
-  {
-   "bold": 1,
-   "depends_on": "eval:doc.purpose==\"Sales Return\"",
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "no_copy": 1,
-   "oldfieldname": "customer_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.purpose==\"Sales Return\"",
-   "fieldname": "customer_address",
-   "fieldtype": "Small Text",
-   "label": "Customer Address",
-   "no_copy": 1,
-   "oldfieldname": "customer_address",
-   "oldfieldtype": "Small Text"
   },
   {
    "collapsible": 1,
@@ -636,10 +599,29 @@
   {
    "default": "0",
    "depends_on": "eval: doc.purpose=='Material Transfer' && !doc.outgoing_stock_entry",
+   "fetch_from": "stock_entry_type.add_to_transit",
+   "fetch_if_empty": 1,
    "fieldname": "add_to_transit",
    "fieldtype": "Check",
    "label": "Add to Transit",
    "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list([\"Material Transfer\", \"Material Receipt\"], doc.purpose)",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_return",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Return",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -647,7 +629,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-09 12:59:02.508943",
+ "modified": "2021-05-26 17:07:58.015737",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

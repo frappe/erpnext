@@ -25,6 +25,16 @@ frappe.ui.form.on('Production Plan', {
 			}
 		});
 
+		frm.set_query('material_request', 'material_requests', function() {
+			return {
+				filters: {
+					material_request_type: "Manufacture",
+					docstatus: 1,
+					status: ["!=", "Stopped"],
+				}
+			};
+		});
+
 		frm.fields_dict['po_items'].grid.get_field('item_code').get_query = function(doc) {
 			return {
 				query: "erpnext.controllers.queries.item_query",
@@ -201,14 +211,25 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	get_items: function(frm) {
+	get_items: function (frm) {
+		frm.clear_table('prod_plan_references');
+
 		frappe.call({
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
-			callback: function() {
+			callback: function () {
 				refresh_field('po_items');
 			}
+		});
+	},
+	combine_items: function (frm) {
+		frm.clear_table('prod_plan_references');
+
+		frappe.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
 		});
 	},
 
@@ -251,7 +272,8 @@ frappe.ui.form.on('Production Plan', {
 
 	get_items_for_material_requests: function(frm, warehouses) {
 		const set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom', 'from_warehouse',
-			'min_order_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'material_request_type'];
+			'min_order_qty', 'required_bom_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'ordered_qty',
+			'reserved_qty_for_production', 'material_request_type'];
 
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
@@ -284,8 +306,25 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	download_materials_required: function(frm) {
-		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
-		open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc });
+		const fields = [{
+			fieldname: 'warehouses',
+			fieldtype: 'Table MultiSelect',
+			label: __('Warehouses'),
+			default: frm.doc.from_warehouse,
+			options: "Production Plan Material Request Warehouse",
+			get_query: function () {
+				return {
+					filters: {
+						company: frm.doc.company
+					}
+				};
+			},
+		}];
+
+		frappe.prompt(fields, (row) => {
+			let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
+			open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc, warehouses: row.warehouses });
+		}, __('Select Warehouses to get Stock for Materials Planning'), __('Get Stock'));
 	},
 
 	show_progress: function(frm) {

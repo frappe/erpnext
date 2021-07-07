@@ -8,18 +8,21 @@ from frappe import _
 from frappe.utils import nowdate, cint, cstr
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
-from frappe.website.render import clear_cache
+from frappe.website.utils import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
 from six.moves.urllib.parse import quote
+from erpnext.shopping_cart.product_query import ProductQuery
+from erpnext.shopping_cart.filters import ProductFiltersBuilder
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
 	website = frappe._dict(
 		condition_field = "show_in_website",
 		template = "templates/generators/item_group.html",
-		no_cache = 1
+		no_cache = 1,
+		no_breadcrumbs = 1
 	)
 
 	def autoname(self):
@@ -70,18 +73,58 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		context.page_length = cint(frappe.db.get_single_value('Products Settings', 'products_per_page')) or 6
 		context.search_link = '/product_search'
 
-		start = int(frappe.form_dict.start or 0)
-		if start < 0:
+		if frappe.form_dict:
+			search = frappe.form_dict.search
+			field_filters = frappe.parse_json(frappe.form_dict.field_filters)
+			attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
+			start = frappe.parse_json(frappe.form_dict.start)
+		else:
+			search = None
+			attribute_filters = None
+			field_filters = {}
 			start = 0
+
+		if not field_filters:
+			field_filters = {}
+
+		# Ensure the query remains within current item group
+		field_filters['item_group'] = self.name
+
+		engine = ProductQuery()
+		context.items = engine.query(attribute_filters, field_filters, search, start, item_group=self.name)
+
+		filter_engine = ProductFiltersBuilder(self.name)
+
+		context.field_filters = filter_engine.get_field_filters()
+		context.attribute_filters = filter_engine.get_attribute_fitlers()
+
 		context.update({
-			"items": get_product_list_for_group(product_group = self.name, start=start,
-				limit=context.page_length + 1, search=frappe.form_dict.get("search")),
 			"parents": get_parent_item_groups(self.parent_item_group),
 			"title": self.name
 		})
 
 		if self.slideshow:
-			context.update(get_slideshow(self))
+			values = {
+				'show_indicators': 1,
+				'show_controls': 0,
+				'rounded': 1,
+				'slider_name': self.slideshow
+			}
+			slideshow = frappe.get_doc("Website Slideshow", self.slideshow)
+			slides = slideshow.get({"doctype":"Website Slideshow Item"})
+			for index, slide in enumerate(slides):
+				values[f"slide_{index + 1}_image"] = slide.image
+				values[f"slide_{index + 1}_title"] = slide.heading
+				values[f"slide_{index + 1}_subtitle"] = slide.description
+				values[f"slide_{index + 1}_theme"] = slide.theme or "Light"
+				values[f"slide_{index + 1}_content_align"] = slide.content_align or "Centre"
+				values[f"slide_{index + 1}_primary_action_label"] = slide.label
+				values[f"slide_{index + 1}_primary_action"] = slide.url
+
+			context.slideshow = values
+
+		context.breadcrumbs = 0
+		context.title = self.website_title or self.name
 
 		return context
 
@@ -96,7 +139,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 			# return child item groups if the type is of "Is Group"
 			return get_child_groups_for_list_in_html(item_group, start, limit, search)
 
-	child_groups = ", ".join([frappe.db.escape(i[0]) for i in get_child_groups(product_group)])
+	child_groups = ", ".join(frappe.db.escape(i[0]) for i in get_child_groups(product_group))
 
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
@@ -196,7 +239,7 @@ def get_item_for_list_in_html(context):
 	return frappe.get_template(products_template).render(context)
 
 def get_group_item_count(item_group):
-	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
+	child_groups = ", ".join('"' + i[0] + '"' for i in get_child_groups(item_group))
 	return frappe.db.sql("""select count(*) from `tabItem`
 		where docstatus = 0 and show_in_website = 1
 		and (item_group in (%s)

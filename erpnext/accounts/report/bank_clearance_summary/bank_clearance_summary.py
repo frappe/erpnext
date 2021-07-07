@@ -15,15 +15,51 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns():
-	return [
-		_("Payment Document") + "::130",
-		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":110",
-		_("Posting Date") + ":Date:100",
-		_("Cheque/Reference No") + "::120",
-		_("Clearance Date") + ":Date:100",
-		_("Against Account") + ":Link/Account:170",
-		_("Amount") + ":Currency:120"
-	]
+	columns = [{
+			"label": _("Payment Document Type"),
+			"fieldname": "payment_document_type",
+			"fieldtype": "Link",
+			"options": "Doctype",
+			"width": 130
+		},
+		{
+			"label": _("Payment Entry"),
+			"fieldname": "payment_entry",
+			"fieldtype": "Dynamic Link",
+			"options": "payment_document_type",
+			"width": 140
+		},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 100
+		},
+		{
+			"label": _("Cheque/Reference No"),
+			"fieldname": "cheque_no",
+			"width": 120
+		},
+		{
+			"label": _("Clearance Date"),
+			"fieldname": "clearance_date",
+			"fieldtype": "Date",
+			"width": 100
+		},
+		{
+			"label": _("Against Account"),
+			"fieldname": "against",
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 170
+		},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"width": 120
+		}]
+
+	return columns
 
 def get_conditions(filters):
 	conditions = ""

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:28:02",
  "doctype": "DocType",
  "document_type": "Document",
@@ -29,6 +30,8 @@
    "options": "Item",
    "read_only": 1,
    "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "100px"
   },
   {
@@ -41,6 +44,8 @@
    "print_width": "300px",
    "read_only": 1,
    "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "120px"
   },
   {
@@ -50,7 +55,9 @@
    "no_copy": 1,
    "options": "Purchase Invoice\nPurchase Receipt",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "receipt_document",
@@ -59,25 +66,33 @@
    "no_copy": 1,
    "options": "receipt_document_type",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "col_break2",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate",
    "options": "Company:company:default_currency",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "amount",
@@ -88,14 +103,19 @@
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "applicable_charges",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Applicable Charges",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only_depends_on": "eval:parent.distribute_charges_based_on != 'Distribute Manually'",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "purchase_receipt_item",
@@ -104,22 +124,30 @@
    "label": "Purchase Receipt Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Dimensions",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -128,12 +156,15 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Fixed Asset",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-09-18 17:26:09.703215",
+ "links": [],
+ "modified": "2021-01-25 23:09:23.322282",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",

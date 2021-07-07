@@ -11,20 +11,24 @@
   "project",
   "issue",
   "type",
+  "color",
   "is_group",
+  "is_template",
   "column_break0",
   "status",
   "priority",
   "task_weight",
-  "completed_by",
-  "color",
   "parent_task",
+  "completed_by",
+  "completed_on",
   "sb_timeline",
   "exp_start_date",
   "expected_time",
+  "start",
   "column_break_11",
   "exp_end_date",
   "progress",
+  "duration",
   "is_milestone",
   "sb_details",
   "description",
@@ -112,7 +116,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nWorking\nPending Review\nOverdue\nCompleted\nCancelled"
+   "options": "Open\nWorking\nPending Review\nOverdue\nTemplate\nCompleted\nCancelled"
   },
   {
    "fieldname": "priority",
@@ -355,11 +359,37 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.status == \"Completed\"",
    "fieldname": "completed_by",
    "fieldtype": "Link",
    "label": "Completed By",
    "no_copy": 1,
    "options": "User"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_template",
+   "fieldtype": "Check",
+   "label": "Is Template"
+  },
+  {
+   "depends_on": "is_template",
+   "fieldname": "start",
+   "fieldtype": "Int",
+   "label": "Begin On (Days)"
+  },
+  {
+   "depends_on": "is_template",
+   "fieldname": "duration",
+   "fieldtype": "Int",
+   "label": "Duration (Days)"
+  },
+  {
+   "depends_on": "eval: doc.status == \"Completed\"",
+   "fieldname": "completed_on",
+   "fieldtype": "Date",
+   "label": "Completed On",
+   "mandatory_depends_on": "eval: doc.status == \"Completed\""
   }
  ],
  "icon": "fa fa-check",
@@ -367,7 +397,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-07-03 12:36:04.960457",
+ "modified": "2021-04-16 12:46:51.556741",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

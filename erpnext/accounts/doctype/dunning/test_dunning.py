@@ -29,7 +29,7 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(amounts.get('interest_amount'), 2), 0.44)
 		self.assertEqual(round(amounts.get('dunning_amount'), 2), 20.44)
 		self.assertEqual(round(amounts.get('grand_total'), 2), 120.44)
-	
+
 	def test_gl_entries(self):
 		dunning = create_dunning()
 		dunning.submit()
@@ -42,9 +42,9 @@ class TestDunning(unittest.TestCase):
 			['Sales - _TC',  0.0, 20.44]
 		])
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_payment_entry(self):
 		dunning = create_dunning()

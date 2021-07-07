@@ -39,6 +39,7 @@ class AccountingPeriod(Document):
 			frappe.throw(_("Accounting Period overlaps with {0}")
 				.format(existing_accounting_period[0].get("name")), OverlapError)
 
+	@frappe.whitelist()
 	def get_doctypes_for_closing(self):
 		docs_for_closing = []
 		doctypes = ["Sales Invoice", "Purchase Invoice", "Journal Entry", "Payroll Entry", \

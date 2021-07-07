@@ -2,9 +2,11 @@
 
 {% block navbar_right_extension %}
 	<li class="shopping-cart cart-icon hidden">
-		<a href="/cart" class="nav-link">
-			{{ _("Cart") }}
-			<span class="badge badge-primary" id="cart-count"></span>
+		<a class="nav-link" href="/cart">
+			<svg class="icon icon-lg">
+				<use href="#icon-assets"></use>
+			</svg>
+			<span class="badge badge-primary cart-badge" id="cart-count"></span>
 		</a>
 	 </li>
 {% endblock %}

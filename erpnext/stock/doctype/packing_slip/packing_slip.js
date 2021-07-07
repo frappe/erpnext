@@ -110,19 +110,4 @@ cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
 	refresh_many(['net_weight_pkg', 'net_weight_uom', 'gross_weight_uom', 'gross_weight_pkg']);
 }
 
-var make_row = function(title,val,bold){
-	var bstart = '<b>'; var bend = '</b>';
-	return '<tr><td class="datalabelcell">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-	+'<td class="datainputcell" style="text-align:left;">'+ val +'</td>'
-	+'</tr>'
-}
-
-cur_frm.pformat.net_weight_pkg= function(doc){
-	return '<table style="width:100%">' + make_row('Net Weight', doc.net_weight_pkg) + '</table>'
-}
-
-cur_frm.pformat.gross_weight_pkg= function(doc){
-	return '<table style="width:100%">' + make_row('Gross Weight', doc.gross_weight_pkg) + '</table>'
-}
-
 // TODO: validate gross weight field

@@ -6,22 +6,22 @@
 <div class="item-cart row mt-2" data-variant-item-code="{{ item_code }}">
 	<div class="col-md-12">
 		{% if cart_settings.show_price and product_info.price %}
-		<h4>
+		<div class="product-price">
 			{{ product_info.price.formatted_price_sales_uom }}
-			<small class="text-muted">({{ product_info.price.formatted_price }} / {{ product_info.uom }})</small>
-		</h4>
+			<small class="formatted-price">({{ product_info.price.formatted_price }} / {{ product_info.uom }})</small>
+		</div>
 		{% else %}
-			{{ _("Unit of Measurement") }} : {{ product_info.uom }}
+			{{ _("UOM") }} : {{ product_info.uom }}
 		{% endif %}
 
 		{% if cart_settings.show_stock_availability %}
 		<div>
 			{% if product_info.in_stock == 0 %}
-			<span class="text-danger">
+			<span class="text-danger no-stock">
 				{{ _('Not in stock') }}
 			</span>
 			{% elif product_info.in_stock == 1 %}
-			<span class="text-success">
+			<span class="text-success has-stock">
 				{{ _('In stock') }}
 				{% if product_info.show_stock_qty and product_info.stock_qty %}
 					({{ product_info.stock_qty[0][0] }})
@@ -30,7 +30,7 @@
 			{% endif %}
 		</div>
 		{% endif %}
-		<div class="mt-3">
+		<div class="mt-5 mb-5">
 			{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
 				<a href="/cart"
 					class="btn btn-light btn-view-in-cart {% if not product_info.qty %}hidden{% endif %}"
@@ -40,8 +40,13 @@
 				</a>
 				<button
 					data-item-code="{{item_code}}"
-					class="btn btn-outline-primary btn-add-to-cart {% if product_info.qty %}hidden{% endif %}"
+					class="btn btn-primary btn-add-to-cart {% if product_info.qty %}hidden{% endif %} w-100"
 				>
+					<span class="mr-2">
+						<svg class="icon icon-md">
+							<use href="#icon-assets"></use>
+						</svg>
+					</span>
 					{{ _("Add to Cart") }}
 				</button>
 			{% endif %}

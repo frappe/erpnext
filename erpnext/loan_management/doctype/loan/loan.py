@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe, math, json
 import erpnext
 from frappe import _
+from six import string_types
 from frappe.utils import flt, rounded, add_months, nowdate, getdate, now_datetime
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 from erpnext.controllers.accounts_controller import AccountsController
@@ -43,6 +44,7 @@ class Loan(AccountsController):
 
 	def on_cancel(self):
 		self.unlink_loan_security_pledge()
+		self.ignore_linked_doctypes = ['GL Entry']
 
 	def set_missing_fields(self):
 		if not self.company:
@@ -58,8 +60,9 @@ class Loan(AccountsController):
 			self.monthly_repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
 
 	def check_sanctioned_amount_limit(self):
-		total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
 		sanctioned_amount_limit = get_sanctioned_amount_limit(self.applicant_type, self.applicant, self.company)
+		if sanctioned_amount_limit:
+			total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
 
 		if sanctioned_amount_limit and flt(self.loan_amount) + flt(total_loan_amount) > flt(sanctioned_amount_limit):
 			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
@@ -69,7 +72,6 @@ class Loan(AccountsController):
 			frappe.throw(_("Repay From Salary can be selected only for term loans"))
 
 	def make_repayment_schedule(self):
-
 		if not self.repayment_start_date:
 			frappe.throw(_("Repayment Start Date is mandatory for term loans"))
 
@@ -77,10 +79,9 @@ class Loan(AccountsController):
 		payment_date = self.repayment_start_date
 		balance_amount = self.loan_amount
 		while(balance_amount > 0):
-			interest_amount = rounded(balance_amount * flt(self.rate_of_interest) / (12*100))
+			interest_amount = flt(balance_amount * flt(self.rate_of_interest) / (12*100))
 			principal_amount = self.monthly_repayment_amount - interest_amount
-			balance_amount = rounded(balance_amount + interest_amount - self.monthly_repayment_amount)
-
+			balance_amount = flt(balance_amount + interest_amount - self.monthly_repayment_amount)
 			if balance_amount < 0:
 				principal_amount += balance_amount
 				balance_amount = 0.0
@@ -155,9 +156,29 @@ def update_total_amount_paid(doc):
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_amount_paid)
 
 def get_total_loan_amount(applicant_type, applicant, company):
-	return frappe.db.get_value('Loan',
-		{'applicant_type': applicant_type, 'company': company, 'applicant': applicant, 'docstatus': 1},
-		'sum(loan_amount)')
+	pending_amount = 0
+	loan_details = frappe.db.get_all("Loan",
+		filters={"applicant_type": applicant_type, "company": company, "applicant": applicant, "docstatus": 1,
+			"status": ("!=", "Closed")},
+		fields=["status", "total_payment", "disbursed_amount", "total_interest_payable", "total_principal_paid",
+			"written_off_amount"])
+
+	interest_amount = flt(frappe.db.get_value("Loan Interest Accrual", {"applicant_type": applicant_type,
+		"company": company, "applicant": applicant, "docstatus": 1}, "sum(interest_amount - paid_interest_amount)"))
+
+	for loan in loan_details:
+		if loan.status in ("Disbursed", "Loan Closure Requested"):
+			pending_amount += flt(loan.total_payment) - flt(loan.total_interest_payable) \
+				- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
+		elif loan.status == "Partially Disbursed":
+			pending_amount += flt(loan.disbursed_amount) - flt(loan.total_interest_payable) \
+				- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
+		elif loan.status == "Sanctioned":
+			pending_amount += flt(loan.total_payment)
+
+	pending_amount += interest_amount
+
+	return pending_amount
 
 def get_sanctioned_amount_limit(applicant_type, applicant, company):
 	return frappe.db.get_value('Sanctioned Loan Amount',
@@ -194,14 +215,19 @@ def request_loan_closure(loan, posting_date=None):
 		posting_date = getdate()
 
 	amounts = calculate_amounts(loan, posting_date)
-	pending_amount = amounts['payable_amount'] + amounts['unaccrued_interest']
+	pending_amount = amounts['pending_principal_amount'] + amounts['unaccrued_interest'] + \
+		amounts['interest_amount'] + amounts['penalty_amount']
 
 	loan_type = frappe.get_value('Loan', loan, 'loan_type')
 	write_off_limit = frappe.get_value('Loan Type', loan_type, 'write_off_amount')
 
 	# checking greater than 0 as there may be some minor precision error
-	if pending_amount < write_off_limit:
-		# update status as loan closure requested
+	if not pending_amount:
+		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
+	elif pending_amount < write_off_limit:
+		# Auto create loan write off and update status as loan closure requested
+		write_off = make_loan_write_off(loan)
+		write_off.submit()
 		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
 	else:
 		frappe.throw(_("Cannot close loan as there is an outstanding of {0}").format(pending_amount))
@@ -259,7 +285,7 @@ def make_loan_write_off(loan, company=None, posting_date=None, amount=0, as_dict
 	pending_amount = amounts['pending_principal_amount']
 
 	if amount and (amount > pending_amount):
-		frappe.throw('Write Off amount cannot be greater than pending loan amount')
+		frappe.throw(_('Write Off amount cannot be greater than pending loan amount'))
 
 	if not amount:
 		amount = pending_amount
@@ -280,10 +306,13 @@ def make_loan_write_off(loan, company=None, posting_date=None, amount=0, as_dict
 		return write_off
 
 @frappe.whitelist()
-def unpledge_security(loan=None, loan_security_pledge=None, as_dict=0, save=0, submit=0, approve=0):
-	# if loan is passed it will be considered as full unpledge
+def unpledge_security(loan=None, loan_security_pledge=None, security_map=None, as_dict=0, save=0, submit=0, approve=0):
+	# if no security_map is passed it will be considered as full unpledge
+	if security_map and isinstance(security_map, string_types):
+		security_map = json.loads(security_map)
+
 	if loan:
-		pledge_qty_map = get_pledged_security_qty(loan)
+		pledge_qty_map = security_map or get_pledged_security_qty(loan)
 		loan_doc = frappe.get_doc('Loan', loan)
 		unpledge_request = create_loan_security_unpledge(pledge_qty_map, loan_doc.name, loan_doc.company,
 			loan_doc.applicant_type, loan_doc.applicant)
@@ -332,13 +361,23 @@ def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, a
 	return unpledge_request
 
 def validate_employee_currency_with_company_currency(applicant, company):
-		from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
-		if not applicant:
-			frappe.throw(_("Please select Applicant"))
-		if not company:
-			frappe.throw(_("Please select Company"))
-		employee_currency = get_employee_currency(applicant)
-		company_currency = erpnext.get_company_currency(company)
-		if employee_currency != company_currency:
-			frappe.throw(_("Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}")
-				.format(applicant, employee_currency))
+	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
+	if not applicant:
+		frappe.throw(_("Please select Applicant"))
+	if not company:
+		frappe.throw(_("Please select Company"))
+	employee_currency = get_employee_currency(applicant)
+	company_currency = erpnext.get_company_currency(company)
+	if employee_currency != company_currency:
+		frappe.throw(_("Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}")
+			.format(applicant, employee_currency))
+
+@frappe.whitelist()
+def get_shortfall_applicants():
+	loans = frappe.get_all('Loan Security Shortfall', {'status': 'Pending'}, pluck='loan')
+	applicants = set(frappe.get_all('Loan', {'name': ('in', loans)}, pluck='name'))
+
+	return {
+		"value": len(applicants),
+		"fieldtype": "Int"
+	}

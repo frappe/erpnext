@@ -136,6 +136,7 @@
    "width": "50%"
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -143,6 +144,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description",
@@ -236,7 +238,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-19 17:06:05.409963",
+ "modified": "2020-12-18 19:59:55.710300",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

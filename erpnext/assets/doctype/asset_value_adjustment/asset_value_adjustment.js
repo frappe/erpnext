@@ -1,6 +1,8 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+frappe.provide("erpnext.accounts.dimensions");
+
 frappe.ui.form.on('Asset Value Adjustment', {
 	setup: function(frm) {
 		frm.add_fetch('company', 'cost_center', 'cost_center');
@@ -13,11 +15,19 @@ frappe.ui.form.on('Asset Value Adjustment', {
 			}
 		});
 	},
+
 	onload: function(frm) {
 		if(frm.is_new() && frm.doc.asset) {
 			frm.trigger("set_current_asset_value");
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+	},
+
 	asset: function(frm) {
 		frm.trigger("set_current_asset_value");
 	},

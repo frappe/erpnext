@@ -88,7 +88,7 @@ def get_bom_stock(filters):
 			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom), as_dict=1)
 
 def get_manufacturer_records():
-	details = frappe.get_list('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no, parent"])
+	details = frappe.get_list('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no", "parent"])
 	manufacture_details = frappe._dict()
 	for detail in details:
 		dic = manufacture_details.setdefault(detail.get('parent'), {})

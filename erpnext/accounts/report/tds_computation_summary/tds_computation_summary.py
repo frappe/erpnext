@@ -55,7 +55,7 @@ def get_result(filters):
 		except IndexError:
 			account = []
 		total_invoiced_amount, tds_deducted = get_invoice_and_tds_amount(supplier.name, account,
-			filters.company, filters.from_date, filters.to_date)
+			filters.company, filters.from_date, filters.to_date, filters.fiscal_year)
 
 		if total_invoiced_amount or tds_deducted:
 			row = [supplier.pan, supplier.name]
@@ -68,7 +68,7 @@ def get_result(filters):
 
 	return out
 
-def get_invoice_and_tds_amount(supplier, account, company, from_date, to_date):
+def get_invoice_and_tds_amount(supplier, account, company, from_date, to_date, fiscal_year):
 	''' calculate total invoice amount and total tds deducted for given supplier  '''
 
 	entries = frappe.db.sql("""
@@ -78,7 +78,7 @@ def get_invoice_and_tds_amount(supplier, account, company, from_date, to_date):
 			and company=%s and posting_date between %s and %s
 	""", (supplier, company, from_date, to_date), as_dict=1)
 
-	supplier_credit_amount = flt(sum([d.credit for d in entries]))
+	supplier_credit_amount = flt(sum(d.credit for d in entries))
 
 	vouchers = [d.voucher_no for d in entries]
 	vouchers += get_advance_vouchers([supplier], company=company,
@@ -91,10 +91,12 @@ def get_invoice_and_tds_amount(supplier, account, company, from_date, to_date):
 			from `tabGL Entry`
 			where account=%s and posting_date between %s and %s
 				and company=%s and credit > 0 and voucher_no in ({0})
-		""".format(', '.join(["'%s'" % d for d in vouchers])),
+		""".format(', '.join("'%s'" % d for d in vouchers)),
 			(account, from_date, to_date, company))[0][0])
 
-	debit_note_amount = get_debit_note_amount([supplier], from_date, to_date, company=company)
+	date_range_filter = [fiscal_year, from_date, to_date]
+
+	debit_note_amount = get_debit_note_amount([supplier], date_range_filter, company=company)
 
 	total_invoiced_amount = supplier_credit_amount + tds_deducted - debit_note_amount
 

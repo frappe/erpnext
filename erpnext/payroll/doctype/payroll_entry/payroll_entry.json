@@ -129,8 +129,7 @@
    "fieldname": "employees",
    "fieldtype": "Table",
    "label": "Employee Details",
-   "options": "Payroll Employee Detail",
-   "read_only": 1
+   "options": "Payroll Employee Detail"
   },
   {
    "fieldname": "section_break_13",
@@ -290,7 +289,7 @@
  "icon": "fa fa-cog",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-23 13:00:33.753228",
+ "modified": "2020-12-17 15:13:17.766210",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Entry",

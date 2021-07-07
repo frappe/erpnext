@@ -33,21 +33,20 @@ class Patient(Document):
 		self.reload() # self.notify_update()
 
 	def on_update(self):
-		if self.customer:
-			customer = frappe.get_doc('Customer', self.customer)
-			if self.customer_group:
-				customer.customer_group = self.customer_group
-			if self.territory:
-				customer.territory = self.territory
-
-			customer.customer_name = self.patient_name
-			customer.default_price_list = self.default_price_list
-			customer.default_currency = self.default_currency
-			customer.language = self.language
-			customer.ignore_mandatory = True
-			customer.save(ignore_permissions=True)
-		else:
-			if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
+		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
+			if self.customer:
+				customer = frappe.get_doc('Customer', self.customer)
+				if self.customer_group:
+					customer.customer_group = self.customer_group
+				if self.territory:
+					customer.territory = self.territory
+				customer.customer_name = self.patient_name
+				customer.default_price_list = self.default_price_list
+				customer.default_currency = self.default_currency
+				customer.language = self.language
+				customer.ignore_mandatory = True
+				customer.save(ignore_permissions=True)
+			else:
 				create_customer(self)
 
 	def set_full_name(self):
@@ -108,9 +107,10 @@ class Patient(Document):
 		if self.dob:
 			dob = getdate(self.dob)
 			age = dateutil.relativedelta.relativedelta(getdate(), dob)
-			age_str = str(age.years) + ' year(s) ' + str(age.months) + ' month(s) ' + str(age.days) + ' day(s)'
+			age_str = str(age.years) + ' ' + _("Years(s)") + ' ' + str(age.months) + ' ' + _("Month(s)") + ' ' + str(age.days) + ' ' + _("Day(s)")
 		return age_str
 
+	@frappe.whitelist()
 	def invoice_patient_registration(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'registration_fee'):
 			company = frappe.defaults.get_user_default('company')

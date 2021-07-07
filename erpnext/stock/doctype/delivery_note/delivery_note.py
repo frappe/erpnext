@@ -83,7 +83,7 @@ class DeliveryNote(SellingController):
 			}
 		])
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
 			if self.get("print_without_amount"):
@@ -101,7 +101,7 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-		super(DeliveryNote, self).before_print()
+		super(DeliveryNote, self).before_print(settings)
 
 	def set_actual_qty(self):
 		for d in self.get('items'):
@@ -129,11 +129,12 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		if self._action != 'submit' and not self.is_return:
-			set_batch_nos(self, 'warehouse', True)
-
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
+
+		if self._action != 'submit' and not self.is_return:
+			set_batch_nos(self, 'warehouse', throw=True)
+			set_batch_nos(self, 'warehouse', throw=True, child_table="packed_items")
 
 		self.update_current_stock()
 
@@ -181,9 +182,8 @@ class DeliveryNote(SellingController):
 		super(DeliveryNote, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
-				if not d['warehouse']:
-					frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
+			if not d['warehouse'] and frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
+				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 
 	def update_current_stock(self):
@@ -264,7 +264,7 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.get("items")]):
+		if not any(flt(d.get('packed_qty')) for d in self.get("items")):
 			return
 		has_error = False
 		for d in self.get("items"):
@@ -664,7 +664,8 @@ def make_inter_company_purchase_receipt(source_name, target_doc=None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_transaction, get_inter_company_details
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_transaction,
+		get_inter_company_details, update_address, update_taxes, set_purchase_references)
 
 	if doctype == 'Delivery Note':
 		source_doc = frappe.get_doc(doctype, source_name)
@@ -682,6 +683,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		set_purchase_references(target)
 
 		if target.doctype == 'Purchase Receipt':
 			master_doctype = 'Purchase Taxes and Charges Template'
@@ -697,32 +699,50 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if target_doc.doctype == 'Purchase Receipt':
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
-			target_doc.supplier_address = source_doc.company_address
-			target_doc.shipping_address = source_doc.shipping_address_name or source_doc.customer_address
 			target_doc.buying_price_list = source_doc.selling_price_list
 			target_doc.is_internal_supplier = 1
 			target_doc.inter_company_reference = source_doc.name
+
+			# Invert the address on target doc creation
+			update_address(target_doc, 'supplier_address', 'address_display', source_doc.company_address)
+			update_address(target_doc, 'shipping_address', 'shipping_address_display', source_doc.customer_address)
+
+			update_taxes(target_doc, party=target_doc.supplier, party_type='Supplier', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.supplier_address,
+				company_address=target_doc.shipping_address)
 		else:
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.company_address = source_doc.supplier_address
-			target_doc.shipping_address_name = source_doc.shipping_address
 			target_doc.selling_price_list = source_doc.buying_price_list
 			target_doc.is_internal_customer = 1
 			target_doc.inter_company_reference = source_doc.name
 
-	doclist = get_mapped_doc(doctype, source_name,	{
+			# Invert the address on target doc creation
+			update_address(target_doc, 'company_address', 'company_address_display', source_doc.supplier_address)
+			update_address(target_doc, 'shipping_address_name', 'shipping_address', source_doc.shipping_address)
+			update_address(target_doc, 'customer_address', 'address_display', source_doc.shipping_address)
+
+			update_taxes(target_doc, party=target_doc.customer, party_type='Customer', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.customer_address,
+				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
+
+	doclist = get_mapped_doc(doctype, source_name, {
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
 			"field_no_map": [
-				"taxes_and_charges"
+				"taxes_and_charges",
+				"set_warehouse"
 			]
 		},
 		doctype +" Item": {
 			"doctype": target_doctype + " Item",
 			"field_map": {
-				source_document_warehouse_field: target_document_warehouse_field
+				source_document_warehouse_field: target_document_warehouse_field,
+				'name': 'delivery_note_item',
+				'batch_no': 'batch_no',
+				'serial_no': 'serial_no'
 			},
 			"field_no_map": [
 				"warehouse"

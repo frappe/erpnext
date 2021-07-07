@@ -8,8 +8,7 @@ import erpnext
 import calendar
 import random
 from erpnext.accounts.utils import get_fiscal_year
-from frappe.utils.make_random import get_random
-from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_day, get_last_day
+from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_day, get_last_day, cstr
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -21,6 +20,7 @@ from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_ta
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
 		setup_test()
+
 	def tearDown(self):
 		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
@@ -154,12 +154,14 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.gross_pay, 78000)
 
 	def test_payment_days(self):
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import create_salary_structure_assignment
+
 		no_of_days = self.get_no_of_days()
 		# Holidays not included in working days
 		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 1)
 
 		# set joinng date in the same month
-		make_employee("test_payment_days@salary.com")
+		employee = make_employee("test_payment_days@salary.com")
 		if getdate(nowdate()).day >= 15:
 			relieving_date = getdate(add_days(nowdate(),-10))
 			date_of_joining = getdate(add_days(nowdate(),-10))
@@ -173,25 +175,30 @@ class TestSalarySlip(unittest.TestCase):
 			date_of_joining = getdate(nowdate())
 			relieving_date = getdate(nowdate())
 
-		frappe.db.set_value("Employee", frappe.get_value("Employee",
-			{"employee_name":"test_payment_days@salary.com"}, "name"), "date_of_joining", date_of_joining)
-		frappe.db.set_value("Employee", frappe.get_value("Employee",
-			{"employee_name":"test_payment_days@salary.com"}, "name"), "relieving_date", None)
-		frappe.db.set_value("Employee", frappe.get_value("Employee",
-			{"employee_name":"test_payment_days@salary.com"}, "name"), "status", "Active")
+		frappe.db.set_value("Employee", employee, {
+			"date_of_joining": date_of_joining,
+			"relieving_date": None,
+			"status": "Active"
+		})
 
-		ss = make_employee_salary_slip("test_payment_days@salary.com", "Monthly", "Test Payment Days")
+		salary_structure = "Test Payment Days"
+		ss = make_employee_salary_slip("test_payment_days@salary.com", "Monthly", salary_structure)
 
 		self.assertEqual(ss.total_working_days, no_of_days[0])
 		self.assertEqual(ss.payment_days, (no_of_days[0] - getdate(date_of_joining).day + 1))
 
 		# set relieving date in the same month
-		frappe.db.set_value("Employee",frappe.get_value("Employee",
-			{"employee_name":"test_payment_days@salary.com"}, "name"), "date_of_joining", (add_days(nowdate(),-60)))
-		frappe.db.set_value("Employee", frappe.get_value("Employee",
-			{"employee_name":"test_payment_days@salary.com"}, "name"), "relieving_date", relieving_date)
-		frappe.db.set_value("Employee", frappe.get_value("Employee",
-			{"employee_name":"test_payment_days@salary.com"}, "name"), "status", "Left")
+		frappe.db.set_value("Employee", employee, {
+			"date_of_joining": add_days(nowdate(),-60),
+			"relieving_date": relieving_date,
+			"status": "Left"
+		})
+
+		if date_of_joining.day > 1:
+			self.assertRaises(frappe.ValidationError, ss.save)
+
+		create_salary_structure_assignment(employee, salary_structure)
+		ss.reload()
 		ss.save()
 
 		self.assertEqual(ss.total_working_days, no_of_days[0])
@@ -240,8 +247,12 @@ class TestSalarySlip(unittest.TestCase):
 			interest_income_account='Interest Income Account - _TC',
 			penalty_income_account='Penalty Income Account - _TC')
 
-		make_salary_structure("Test Loan Repayment Salary Structure", "Monthly", employee=applicant, currency='INR')
-		frappe.db.sql("""delete from `tabLoan""")
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+
+		make_salary_structure("Test Loan Repayment Salary Structure", "Monthly", employee=applicant, currency='INR',
+			payroll_period=payroll_period)
+
+		frappe.db.sql("delete from tabLoan")
 		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()
@@ -280,6 +291,7 @@ class TestSalarySlip(unittest.TestCase):
 
 	def test_multi_currency_salary_slip(self):
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
 		applicant = make_employee("test_multi_currency_salary_slip@salary.com", company="_Test Company")
 		frappe.db.sql("""delete from `tabSalary Structure` where name='Test Multi Currency Salary Slip'""")
 		salary_structure = make_salary_structure("Test Multi Currency Salary Slip", "Monthly", employee=applicant, company="_Test Company", currency='USD')
@@ -290,6 +302,66 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(salary_slip.gross_pay, 78000)
 		self.assertEqual(salary_slip.base_gross_pay, 78000*70)
 
+	def test_year_to_date_computation(self):
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
+		applicant = make_employee("test_ytd@salary.com", company="_Test Company")
+
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+
+		create_tax_slab(payroll_period, allow_tax_exemption=True, currency="INR", effective_date=getdate("2019-04-01"),
+			company="_Test Company")
+
+		salary_structure = make_salary_structure("Monthly Salary Structure Test for Salary Slip YTD",
+			"Monthly", employee=applicant, company="_Test Company", currency="INR", payroll_period=payroll_period)
+
+		# clear salary slip for this employee
+		frappe.db.sql("DELETE FROM `tabSalary Slip` where employee_name = 'test_ytd@salary.com'")
+
+		create_salary_slips_for_payroll_period(applicant, salary_structure.name,
+			payroll_period, deduct_random=False, num=6)
+
+		salary_slips = frappe.get_all('Salary Slip', fields=['year_to_date', 'net_pay'], filters={'employee_name':
+			'test_ytd@salary.com'}, order_by = 'posting_date')
+
+		year_to_date = 0
+		for slip in salary_slips:
+			year_to_date += flt(slip.net_pay)
+			self.assertEqual(slip.year_to_date, year_to_date)
+
+	def test_component_wise_year_to_date_computation(self):
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
+		employee_name = "test_component_wise_ytd@salary.com"
+		applicant = make_employee(employee_name, company="_Test Company")
+
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+
+		create_tax_slab(payroll_period, allow_tax_exemption=True, currency="INR", effective_date=getdate("2019-04-01"),
+			company="_Test Company")
+
+		salary_structure = make_salary_structure("Monthly Salary Structure Test for Salary Slip YTD",
+			"Monthly", employee=applicant, company="_Test Company", currency="INR", payroll_period=payroll_period)
+
+		# clear salary slip for this employee
+		frappe.db.sql("DELETE FROM `tabSalary Slip` where employee_name = '%s'" % employee_name)
+
+		create_salary_slips_for_payroll_period(applicant, salary_structure.name,
+			payroll_period, deduct_random=False, num=3)
+
+		salary_slips = frappe.get_all("Salary Slip", fields=["name"], filters={"employee_name":
+			employee_name}, order_by="posting_date")
+
+		year_to_date = dict()
+		for slip in salary_slips:
+			doc = frappe.get_doc("Salary Slip", slip.name)
+			for entry in doc.get("earnings"):
+				if not year_to_date.get(entry.salary_component):
+					year_to_date[entry.salary_component] = 0
+
+				year_to_date[entry.salary_component] += entry.amount
+				self.assertEqual(year_to_date[entry.salary_component], entry.year_to_date)
+
 	def test_tax_for_payroll_period(self):
 		data = {}
 		# test the impact of tax exemption declaration, tax exemption proof submission
@@ -297,7 +369,6 @@ class TestSalarySlip(unittest.TestCase):
 		# as per assigned salary structure 40500 in monthly salary so 236000*5/100/12
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
-		frappe.db.sql("""delete from `tabAdditional Salary`""")
 
 		payroll_period = create_payroll_period()
 
@@ -317,10 +388,10 @@ class TestSalarySlip(unittest.TestCase):
 
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import \
 			make_salary_structure, create_salary_structure_assignment
+
 		salary_structure = make_salary_structure("Stucture to test tax", "Monthly",
-			other_details={"max_benefits": 100000}, test_tax=True)
-		create_salary_structure_assignment(employee, salary_structure.name,
-			payroll_period.start_date)
+			other_details={"max_benefits": 100000}, test_tax=True,
+			employee=employee, payroll_period=payroll_period)
 
 		# create salary slip for whole period deducting tax only on last period
 		# to find the total tax amount paid
@@ -406,14 +477,13 @@ class TestSalarySlip(unittest.TestCase):
 
 def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 	from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
 	if not salary_structure:
 		salary_structure = payroll_frequency + " Salary Structure Test for Salary Slip"
 
+
 	employee = frappe.db.get_value("Employee", {"user_id": user})
-	if not frappe.db.exists('Salary Structure', salary_structure):
-		salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee)
-	else:
-		salary_structure_doc = frappe.get_doc('Salary Structure', salary_structure)
+	salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee=employee)
 	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})
 
 	if not salary_slip_name:
@@ -557,14 +627,6 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 			"amount": 200,
 			"exempted_from_income_tax": 1
 
-		},
-		{
-			"salary_component": 'TDS',
-			"abbr":'T',
-			"type": "Deduction",
-			"depends_on_payment_days": 0,
-			"variable_based_on_taxable_salary": 1,
-			"round_to_the_nearest_integer": 1
 		}
 	]
 	if not test_tax:
@@ -573,6 +635,15 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 			"abbr":'T',
 			"condition": 'employment_type=="Intern"',
 			"type": "Deduction",
+			"round_to_the_nearest_integer": 1
+		})
+	else:
+		data.append({
+			"salary_component": 'TDS',
+			"abbr":'T',
+			"type": "Deduction",
+			"depends_on_payment_days": 0,
+			"variable_based_on_taxable_salary": 1,
 			"round_to_the_nearest_integer": 1
 		})
 	if setup or test_tax:
@@ -631,8 +702,13 @@ def create_benefit_claim(employee, payroll_period, amount, component):
 	}).submit()
 	return claim_date
 
-def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False, currency=erpnext.get_default_currency()):
-	frappe.db.sql("""delete from `tabIncome Tax Slab`""")
+def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False, currency=None,
+	company=None):
+	if not currency:
+		currency = erpnext.get_default_currency()
+
+	if company:
+		currency = erpnext.get_company_currency(company)
 
 	slabs = [
 		{
@@ -652,31 +728,38 @@ def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption =
 		}
 	]
 
-	income_tax_slab = frappe.new_doc("Income Tax Slab")
-	income_tax_slab.name = "Tax Slab: " + payroll_period.name
-	income_tax_slab.effective_from = effective_date or add_days(payroll_period.start_date, -2)
-	income_tax_slab.currency = currency
+	income_tax_slab_name = frappe.db.get_value("Income Tax Slab", {"currency": currency})
+	if not income_tax_slab_name:
+		income_tax_slab = frappe.new_doc("Income Tax Slab")
+		income_tax_slab.name = "Tax Slab: " + payroll_period.name + " " + cstr(currency)
+		income_tax_slab.effective_from = effective_date or add_days(payroll_period.start_date, -2)
+		income_tax_slab.company = company or ''
+		income_tax_slab.currency = currency
 
-	if allow_tax_exemption:
-		income_tax_slab.allow_tax_exemption = 1
-		income_tax_slab.standard_tax_exemption_amount = 50000
+		if allow_tax_exemption:
+			income_tax_slab.allow_tax_exemption = 1
+			income_tax_slab.standard_tax_exemption_amount = 50000
 
-	for item in slabs:
-		income_tax_slab.append("slabs", item)
+		for item in slabs:
+			income_tax_slab.append("slabs", item)
 
-	income_tax_slab.append("other_taxes_and_charges", {
-		"description": "cess",
-		"percent": 4
-	})
+		income_tax_slab.append("other_taxes_and_charges", {
+			"description": "cess",
+			"percent": 4
+		})
 
-	income_tax_slab.save()
-	if not dont_submit:
-		income_tax_slab.submit()
+		income_tax_slab.save()
+		if not dont_submit:
+			income_tax_slab.submit()
 
-def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_period, deduct_random=True):
+		return income_tax_slab.name
+	else:
+		return income_tax_slab_name
+
+def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_period, deduct_random=True, num=12):
 	deducted_dates = []
 	i = 0
-	while i < 12:
+	while i < num:
 		slip = frappe.get_doc({"doctype": "Salary Slip", "employee": employee,
 				"salary_structure": salary_structure, "frequency": "Monthly"})
 		if i == 0:

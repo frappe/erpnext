@@ -39,7 +39,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party_details = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[party_type.lower()]
 
-	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
+	if not ignore_permissions and not (frappe.has_permission(party_type, "read", party) or frappe.has_permission(party_type, "select", party)):
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
@@ -457,7 +457,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":
-			if frappe.db.get_value("Employee", party_name, "status") == "Left":
+			if frappe.db.get_value("Employee", party_name, "status") != "Active":
 				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
 
 def get_timeline_data(doctype, name):
@@ -542,6 +542,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where party_type = %s and party=%s
+		and is_cancelled = 0
 		group by company""", (party_type, party)))
 
 	for d in companies:
@@ -617,6 +618,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 		FROM `tabGL Entry`
 		WHERE
 			party_type = %s and against_voucher is null
+			and is_cancelled = 0
 			and {1} GROUP BY party"""
 		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
 

@@ -36,5 +36,4 @@ def make_custom_fields(update=True):
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "irs_1099_form")
-	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
-		name in('IRS 1099 Form') """)
+	frappe.db.set_value("Print Format", "IRS 1099 Form", "disabled", 0)

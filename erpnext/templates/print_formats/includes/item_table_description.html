@@ -1,7 +1,7 @@
-{%- set compact = doc.flags.compact_item_print -%}
-{%- set compact_fields = doc.flags.compact_item_fields -%}
+{%- set compact = print_settings.compact_item_print -%}
+{%- set compact_fields = parent_doc.flags.compact_item_fields -%}
 {%- set display_columns = visible_columns|map(attribute="fieldname")| list -%}
-{%- set columns = doc.flags.format_columns(display_columns, compact_fields) -%}
+{%- set columns = parent_doc.flags.format_columns(display_columns, compact_fields) -%}
 
 {% if doc.in_format_data("image") and doc.get("image") and "image" in display_columns -%}
 <div class="pull-left" style="max-width: 40%; margin-right: 10px;">
@@ -11,11 +11,11 @@
 
 <div>
 	{% if doc.in_format_data("item_code") and "item_code" in display_columns -%}
-		<div class="primary">
-			{% if compact %}<strong>{% endif %}
-				{{ _(doc.item_code) }}
-			{% if compact %}</strong>{% endif %}
+		{% if compact %}
+		<div class="primary compact-item">
+			{{ _(doc.item_code) }}
 		</div>
+		{% endif %}
 	{%- endif %}
 
 	{%- if doc.in_format_data("item_name") and "item_name" in display_columns and

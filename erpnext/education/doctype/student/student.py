@@ -74,7 +74,6 @@ class Student(Document):
 			student_user.flags.ignore_permissions = True
 			student_user.add_roles("Student")
 			student_user.save()
-			update_password_link = student_user.reset_password()
 
 	def update_applicant_status(self):
 		"""Updates Student Applicant status to Admitted"""
@@ -114,7 +113,7 @@ class Student(Document):
 					status = check_content_completion(content.name, content.doctype, course_enrollment_name)
 					progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status})
 				elif content.doctype == 'Quiz':
-					status, score, result = check_quiz_completion(content, course_enrollment_name)
+					status, score, result, time_taken = check_quiz_completion(content, course_enrollment_name)
 					progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score, 'result': result})
 		return progress
 

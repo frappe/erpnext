@@ -1,0 +1,273 @@
+{
+ "__unsaved": 1,
+ "creation": "2020-11-17 15:35:05.285322",
+ "docstatus": 0,
+ "doctype": "Web Template",
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "subtitle",
+   "fieldtype": "Data",
+   "label": "Subtitle",
+   "reqd": 0
+  },
+  {
+   "__unsaved": 1,
+   "fieldname": "primary_action_label",
+   "fieldtype": "Data",
+   "label": "Primary Action Label",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "primary_action",
+   "fieldtype": "Data",
+   "label": "Primary Action",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_1",
+   "fieldtype": "Section Break",
+   "label": "Card 1",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_1_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_1_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_2",
+   "fieldtype": "Section Break",
+   "label": "Card 2",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_2_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_2_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_3",
+   "fieldtype": "Section Break",
+   "label": "Card 3",
+   "options": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_3_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_3_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_4",
+   "fieldtype": "Section Break",
+   "label": "Card 4",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_4_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_4_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_5",
+   "fieldtype": "Section Break",
+   "label": "Card 5",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_5_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_5_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_6",
+   "fieldtype": "Section Break",
+   "label": "Card 6",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_6_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_6_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_7",
+   "fieldtype": "Section Break",
+   "label": "Card 7",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_7_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_7_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_8",
+   "fieldtype": "Section Break",
+   "label": "Card 8",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_8_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_8_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_9",
+   "fieldtype": "Section Break",
+   "label": "Card 9",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_9_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_9_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_10",
+   "fieldtype": "Section Break",
+   "label": "Card 10",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_10_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_10_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_11",
+   "fieldtype": "Section Break",
+   "label": "Card 11",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_11_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_11_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_12",
+   "fieldtype": "Section Break",
+   "label": "Card 12",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_12_item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "card_12_featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "modified": "2020-11-19 18:48:52.633045",
+ "modified_by": "Administrator",
+ "module": "Shopping Cart",
+ "name": "Item Card Group",
+ "owner": "Administrator",
+ "standard": 1,
+ "template": "",
+ "type": "Section"
+}

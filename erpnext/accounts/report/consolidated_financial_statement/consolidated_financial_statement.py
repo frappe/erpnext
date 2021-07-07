@@ -94,7 +94,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 
 	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, company_currency, True)
+	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, company_currency, filters, True)
 
 	return data, None, chart, report_summary
 
@@ -149,9 +149,9 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			section_data.append(account_data)
 
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'],
-			companies, company_currency, summary_data, True)
+			companies, company_currency, summary_data, filters, True)
 
-	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, summary_data, True)
+	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, summary_data, filters, True)
 
 	report_summary = get_cash_flow_summary(summary_data, company_currency)
 
@@ -222,7 +222,7 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 
 		set_gl_entries_by_account(start_date,
 			end_date, root.lft, root.rgt, filters,
-			gl_entries_by_account, accounts_by_name, ignore_closing_entries=False)
+			gl_entries_by_account, accounts_by_name, accounts, ignore_closing_entries=False)
 
 	calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
@@ -240,8 +240,7 @@ def get_company_currency(filters=None):
 def calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters):
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
-			key = entry.account_number or entry.account_name
-			d = accounts_by_name.get(key)
+			d = accounts_by_name.get(entry.account_name)
 			if d:
 				for company in companies:
 					# check if posting date is within the period
@@ -256,7 +255,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
-			account = d.parent_account.split(' - ')[0].strip()
+			account = d.parent_account_name
+
 			if not accounts_by_name.get(account):
 				continue
 
@@ -267,15 +267,33 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 			accounts_by_name[account]["opening_balance"] = \
 				accounts_by_name[account].get("opening_balance", 0.0) + d.get("opening_balance", 0.0)
 
+
 def get_account_heads(root_type, companies, filters):
 	accounts = get_accounts(root_type, filters)
 
 	if not accounts:
 		return None, None
 
+	accounts = update_parent_account_names(accounts)
+
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
 	return accounts, accounts_by_name
+
+def update_parent_account_names(accounts):
+	"""Update parent_account_name in accounts list.
+
+		parent_name is `name` of parent account which could have other prefix
+		of account_number and suffix of company abbr. This function adds key called
+		`parent_account_name` which does not have such prefix/suffix.
+	"""
+	name_to_account_map = { d.name : d.account_name for d in accounts }
+
+	for account in accounts:
+		if account.parent_account:
+			account["parent_account_name"] = name_to_account_map[account.parent_account]
+
+	return accounts
 
 def get_companies(filters):
 	companies = {}
@@ -311,8 +329,9 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 		has_value = False
 		total = 0
 		row = frappe._dict({
-			"account_name": _(d.account_name),
-			"account": _(d.account_name),
+			"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
+				if d.account_number else _(d.account_name)),
+			"account": _(d.name),
 			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
 			"year_start_date": start_date,
@@ -339,7 +358,7 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 	return data
 
 def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account,
-	accounts_by_name, ignore_closing_entries=False):
+	accounts_by_name, accounts, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
 	company_lft, company_rgt = frappe.get_cached_value('Company',
@@ -361,7 +380,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
 			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
 			acc.account_name, acc.account_number
-			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s
+			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s and gl.is_cancelled = 0
 			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
 			order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
 			{
@@ -381,16 +400,32 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 			convert_to_presentation_currency(gl_entries, currency_info, filters.get('company'))
 
 		for entry in gl_entries:
-			key = entry.account_number or entry.account_name
-			validate_entries(key, entry, accounts_by_name)
-			gl_entries_by_account.setdefault(key, []).append(entry)
+			account_name =  entry.account_name
+			validate_entries(account_name, entry, accounts_by_name, accounts)
+			gl_entries_by_account.setdefault(account_name, []).append(entry)
 
 	return gl_entries_by_account
 
-def validate_entries(key, entry, accounts_by_name):
+def get_account_details(account):
+	return frappe.get_cached_value('Account', account, ['name', 'report_type', 'root_type', 'company',
+		'is_group', 'account_name', 'account_number', 'parent_account', 'lft', 'rgt'], as_dict=1)
+
+def validate_entries(key, entry, accounts_by_name, accounts):
 	if key not in accounts_by_name:
-		field = "Account number" if entry.account_number else "Account name"
-		frappe.throw(_("{0} {1} is not present in the parent company").format(field, key))
+		args = get_account_details(entry.account)
+
+		if args.parent_account:
+			parent_args = get_account_details(args.parent_account)
+
+			args.update({
+				'lft': parent_args.lft + 1,
+				'rgt': parent_args.rgt - 1,
+				'root_type': parent_args.root_type,
+				'report_type': parent_args.report_type
+			})
+
+		accounts_by_name.setdefault(key, args)
+		accounts.append(args)
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
@@ -436,8 +471,7 @@ def filter_accounts(accounts, depth=10):
 	parent_children_map = {}
 	accounts_by_name = {}
 	for d in accounts:
-		key = d.account_number or d.account_name
-		accounts_by_name[key] = d
+		accounts_by_name[d.account_name] = d
 		parent_children_map.setdefault(d.parent_account or None, []).append(d)
 
 	filtered_accounts = []

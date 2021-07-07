@@ -36,6 +36,8 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 			frm.dashboard.show_progress(data.title, (data.count / data.total) * 100, data.message);
 			frm.page.set_indicator(__('In Progress'), 'orange');
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -47,7 +49,15 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				doc: frm.doc,
 				btn: $(btn_primary),
 				method: "make_invoices",
-				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type])
+				freeze: 1,
+				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type]),
+				callback: function(r) {
+					if (r.message.length == 1) {
+						frappe.msgprint(__("{0} Invoice created successfully.", [frm.doc.invoice_type]));
+					} else if (r.message.length < 50) {
+						frappe.msgprint(__("{0} Invoices created successfully.", [frm.doc.invoice_type]));
+					}
+				}
 			});
 		});
 
@@ -100,6 +110,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				}
 			})
 		}
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	invoice_type: function(frm) {
@@ -118,7 +129,8 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				frappe.render_template('opening_invoice_creation_tool_dashboard', {
 					data: opening_invoices_summary,
 					max_count: max_count
-				})
+				}),
+				__("Opening Invoices Summary")
 			);
 
 			section.on('click', '.invoice-link', function() {

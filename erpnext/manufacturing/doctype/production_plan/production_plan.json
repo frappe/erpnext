@@ -28,10 +28,14 @@
   "material_requests",
   "select_items_to_manufacture_section",
   "get_items",
+  "combine_items",
   "po_items",
+  "section_break_25",
+  "prod_plan_references",
   "material_request_planning",
   "include_non_stock_items",
   "include_subcontracted_items",
+  "include_safety_stock",
   "ignore_existing_ordered_qty",
   "column_break_25",
   "for_warehouse",
@@ -309,13 +313,37 @@
    "fieldtype": "Select",
    "label": "Sales Order Status",
    "options": "\nTo Deliver and Bill\nTo Bill\nTo Deliver"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_safety_stock",
+   "fieldtype": "Check",
+   "label": "Include Safety Stock in Required Qty Calculation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+   "fieldname": "combine_items",
+   "fieldtype": "Check",
+   "label": "Consolidate Items"
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "prod_plan_references",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Production Plan Item Reference",
+   "options": "Production Plan Item Reference"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-10 18:01:54.991970",
+ "modified": "2021-05-24 16:59:03.643211",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

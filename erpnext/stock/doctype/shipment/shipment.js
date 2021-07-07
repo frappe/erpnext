@@ -150,7 +150,9 @@ frappe.ui.form.on('Shipment', {
 							frm.set_value('pickup_contact_name', '');
 							frm.set_value('pickup_contact', '');
 						}
-						frappe.throw(__("Email or Phone/Mobile of the Contact are mandatory to continue.") + "</br>" + __("Please set Email/Phone for the contact") + ` <a href='#Form/Contact/${contact_name}'>${contact_name}</a>`);
+						frappe.throw(__("Email or Phone/Mobile of the Contact are mandatory to continue.") 
+							+ "</br>" + __("Please set Email/Phone for the contact") 
+							+ ` <a href='/app/contact/${contact_name}'>${contact_name}</a>`);
 					}
 					let contact_display = r.message.contact_display;
 					if (r.message.contact_email) {
@@ -242,7 +244,9 @@ frappe.ui.form.on('Shipment', {
 					frm.set_value('pickup_company', '');
 					frm.set_value('pickup_contact', '');
 				}
-				frappe.throw(__("Last Name, Email or Phone/Mobile of the user are mandatory to continue.") + "</br>" + __("Please first set Last Name, Email and Phone for the user") + ` <a href="#Form/User/${frappe.session.user}">${frappe.session.user}</a>`);
+				frappe.throw(__("Last Name, Email or Phone/Mobile of the user are mandatory to continue.") + "</br>" 
+					+ __("Please first set Last Name, Email and Phone for the user") 
+					+ ` <a href="/app/user/${frappe.session.user}">${frappe.session.user}</a>`);
 			}
 			let contact_display = r.full_name;
 			if (r.email) {
@@ -359,43 +363,6 @@ frappe.ui.form.on('Shipment', {
 		if (frm.doc.pickup_date < frappe.datetime.get_today()) {
 			frappe.throw(__("Pickup Date cannot be before this day"));
 		}
-		if (frm.doc.pickup_date == frappe.datetime.get_today()) {
-			var pickup_time = frm.events.get_pickup_time(frm);
-			frm.set_value("pickup_from", pickup_time);
-			frm.trigger('set_pickup_to_time');
-		}
-	},
-	pickup_from: function(frm) {
-		var pickup_time = frm.events.get_pickup_time(frm);
-		if (frm.doc.pickup_from && frm.doc.pickup_date == frappe.datetime.get_today()) {
-			let current_hour = pickup_time.split(':')[0];
-			let current_min = pickup_time.split(':')[1];
-			let pickup_hour = frm.doc.pickup_from.split(':')[0];
-			let pickup_min = frm.doc.pickup_from.split(':')[1];
-			if (pickup_hour < current_hour || (pickup_hour == current_hour && pickup_min < current_min)) {
-				frm.set_value("pickup_from", pickup_time);
-				frappe.throw(__("Pickup Time cannot be in the past"));
-			}
-		}
-		frm.trigger('set_pickup_to_time');
-	},
-	get_pickup_time: function() {
-		let current_hour = new Date().getHours();
-		let current_min = new Date().toLocaleString('en-US', {minute: 'numeric'});
-		if (current_min < 30) {
-			current_min = '30';
-		} else {
-			current_min = '00';
-			current_hour = Number(current_hour)+1;
-		}
-		let pickup_time = current_hour +':'+ current_min;
-		return pickup_time;
-	},
-	set_pickup_to_time: function(frm) {
-		let pickup_to_hour = Number(frm.doc.pickup_from.split(':')[0])+5;
-		let pickup_to_min = frm.doc.pickup_from.split(':')[1];
-		let pickup_to = pickup_to_hour +':'+ pickup_to_min;
-		frm.set_value("pickup_to", pickup_to);
 	},
 	clear_pickup_fields: function(frm) {
 		let fields = ["pickup_address_name", "pickup_contact_name", "pickup_address", "pickup_contact", "pickup_contact_email", "pickup_contact_person"];

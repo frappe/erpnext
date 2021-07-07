@@ -359,6 +359,7 @@
   {
    "fieldname": "normal_test_items",
    "fieldtype": "Table",
+   "label": "Normal Test Result",
    "options": "Normal Test Result",
    "print_hide": 1
   },
@@ -380,6 +381,7 @@
   {
    "fieldname": "sensitivity_test_items",
    "fieldtype": "Table",
+   "label": "Sensitivity Test Result",
    "options": "Sensitivity Test Result",
    "print_hide": 1,
    "report_hide": 1
@@ -529,6 +531,7 @@
   {
    "fieldname": "descriptive_test_items",
    "fieldtype": "Table",
+   "label": "Descriptive Test Result",
    "options": "Descriptive Test Result",
    "print_hide": 1,
    "report_hide": 1
@@ -549,13 +552,14 @@
   {
    "fieldname": "organism_test_items",
    "fieldtype": "Table",
+   "label": "Organism Test Result",
    "options": "Organism Test Result",
    "print_hide": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-30 18:18:38.516215",
+ "modified": "2020-11-30 11:04:17.195848",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

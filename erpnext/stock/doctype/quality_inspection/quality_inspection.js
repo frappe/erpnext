@@ -4,6 +4,55 @@
 cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 
 frappe.ui.form.on("Quality Inspection", {
+
+	setup: function(frm) {
+		frm.set_query("batch_no", function() {
+			return {
+				filters: {
+					"item": frm.doc.item_code
+				}
+			};
+		});
+
+		// Serial No based on item_code
+		frm.set_query("item_serial_no", function() {
+			let filters = {};
+			if (frm.doc.item_code) {
+				filters = {
+					'item_code': frm.doc.item_code
+				};
+			}
+			return { filters: filters };
+		});
+
+		// item code based on GRN/DN
+		frm.set_query("item_code", function(doc) {
+			let doctype = doc.reference_type;
+
+			if (doc.reference_type !== "Job Card") {
+				doctype = (doc.reference_type == "Stock Entry") ?
+					"Stock Entry Detail" : doc.reference_type + " Item";
+			}
+
+			if (doc.reference_type && doc.reference_name) {
+				let filters = {
+					"from": doctype,
+					"inspection_type": doc.inspection_type
+				};
+
+				if (doc.reference_type == doctype)
+					filters["reference_name"] = doc.reference_name;
+				else
+					filters["parent"] = doc.reference_name;
+
+				return {
+					query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
+					filters: filters
+				};
+			}
+		});
+	},
+
 	refresh: function(frm) {
 		// Ignore cancellation of reference doctype on cancel all.
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type];
@@ -31,55 +80,5 @@ frappe.ui.form.on("Quality Inspection", {
 				}
 			});
 		}
-	}
-})
-
-// item code based on GRN/DN
-cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
-	let doctype = doc.reference_type;
-
-	if (doc.reference_type !== "Job Card") {
-		doctype = (doc.reference_type == "Stock Entry") ?
-			"Stock Entry Detail" : doc.reference_type + " Item";
-	}
-
-	if (doc.reference_type && doc.reference_name) {
-		let filters = {
-			"from": doctype,
-			"inspection_type": doc.inspection_type
-		};
-
-		if (doc.reference_type == doctype)
-			filters["reference_name"] = doc.reference_name;
-		else
-			filters["parent"] = doc.reference_name;
-
-		return {
-			query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
-			filters: filters
-		};
-	}
-},
-
-// Serial No based on item_code
-cur_frm.fields_dict['item_serial_no'].get_query = function(doc, cdt, cdn) {
-	var filters = {};
-	if (doc.item_code) {
-		filters = {
-			'item_code': doc.item_code
-		}
-	}
-	return { filters: filters }
-}
-
-cur_frm.set_query("batch_no", function(doc) {
-	return {
-		filters: {
-			"item": doc.item_code
-		}
-	}
-})
-
-cur_frm.add_fetch('item_code', 'item_name', 'item_name');
-cur_frm.add_fetch('item_code', 'description', 'description');
-
+	},
+});

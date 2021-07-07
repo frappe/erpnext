@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import today, now_datetime, getdate, get_datetime
+from frappe.utils import today, now_datetime, getdate, get_datetime, get_link_to_form
 from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond
 
@@ -50,15 +50,18 @@ class InpatientRecord(Document):
 
 		if ip_record:
 			msg = _(("Already {0} Patient {1} with Inpatient Record ").format(ip_record[0].status, self.patient) \
-				+ """ <b><a href="#Form/Inpatient Record/{0}">{0}</a></b>""".format(ip_record[0].name))
+				+ """ <b><a href="/app/Form/Inpatient Record/{0}">{0}</a></b>""".format(ip_record[0].name))
 			frappe.throw(msg)
 
+	@frappe.whitelist()
 	def admit(self, service_unit, check_in, expected_discharge=None):
 		admit_patient(self, service_unit, check_in, expected_discharge)
 
+	@frappe.whitelist()
 	def discharge(self):
 		discharge_patient(self)
 
+	@frappe.whitelist()
 	def transfer(self, service_unit, check_in, leave_from):
 		if leave_from:
 			patient_leave_service_unit(self, check_in, leave_from)
@@ -113,6 +116,7 @@ def schedule_inpatient(args):
 	inpatient_record.status = 'Admission Scheduled'
 	inpatient_record.save(ignore_permissions = True)
 
+
 @frappe.whitelist()
 def schedule_discharge(args):
 	discharge_order = json.loads(args)
@@ -126,15 +130,18 @@ def schedule_discharge(args):
 		frappe.db.set_value('Patient', discharge_order['patient'], 'inpatient_status', inpatient_record.status)
 		frappe.db.set_value('Patient Encounter', inpatient_record.discharge_encounter, 'inpatient_status', inpatient_record.status)
 
+
 def set_details_from_ip_order(inpatient_record, ip_order):
 	for key in ip_order:
 		inpatient_record.set(key, ip_order[key])
+
 
 def set_ip_child_records(inpatient_record, inpatient_record_child, encounter_child):
 	for item in encounter_child:
 		table = inpatient_record.append(inpatient_record_child)
 		for df in table.meta.get('fields'):
 			table.set(df.fieldname, item.get(df.fieldname))
+
 
 def check_out_inpatient(inpatient_record):
 	if inpatient_record.inpatient_occupancies:
@@ -144,53 +151,87 @@ def check_out_inpatient(inpatient_record):
 				inpatient_occupancy.check_out = now_datetime()
 				frappe.db.set_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "occupancy_status", "Vacant")
 
+
 def discharge_patient(inpatient_record):
-	validate_invoiced_inpatient(inpatient_record)
-	inpatient_record.discharge_date = today()
+	validate_inpatient_invoicing(inpatient_record)
+	inpatient_record.discharge_datetime = now_datetime()
 	inpatient_record.status = "Discharged"
 
 	inpatient_record.save(ignore_permissions = True)
 
-def validate_invoiced_inpatient(inpatient_record):
-	pending_invoices = []
+
+def validate_inpatient_invoicing(inpatient_record):
+	if frappe.db.get_single_value("Healthcare Settings", "allow_discharge_despite_unbilled_services"):
+		return
+
+	pending_invoices = get_pending_invoices(inpatient_record)
+
+	if pending_invoices:
+		message = _("Cannot mark Inpatient Record as Discharged since there are unbilled services. ")
+
+		formatted_doc_rows = ''
+
+		for doctype, docnames in pending_invoices.items():
+			formatted_doc_rows += """
+				<td>{0}</td>
+				<td>{1}</td>
+			</tr>""".format(doctype, docnames)
+
+		message += """
+			<table class='table'>
+				<thead>
+					<th>{0}</th>
+					<th>{1}</th>
+				</thead>
+				{2}
+			</table>
+		""".format(_("Healthcare Service"), _("Documents"), formatted_doc_rows)
+
+		frappe.throw(message, title=_("Unbilled Services"), is_minimizable=True, wide=True)
+
+
+def get_pending_invoices(inpatient_record):
+	pending_invoices = {}
 	if inpatient_record.inpatient_occupancies:
 		service_unit_names = False
 		for inpatient_occupancy in inpatient_record.inpatient_occupancies:
-			if inpatient_occupancy.invoiced != 1:
+			if not inpatient_occupancy.invoiced:
 				if service_unit_names:
 					service_unit_names += ", " + inpatient_occupancy.service_unit
 				else:
 					service_unit_names = inpatient_occupancy.service_unit
 		if service_unit_names:
-			pending_invoices.append("Inpatient Occupancy (" + service_unit_names + ")")
+			pending_invoices["Inpatient Occupancy"] = service_unit_names
 
 	docs = ["Patient Appointment", "Patient Encounter", "Lab Test", "Clinical Procedure"]
 
 	for doc in docs:
-		doc_name_list = get_inpatient_docs_not_invoiced(doc, inpatient_record)
+		doc_name_list = get_unbilled_inpatient_docs(doc, inpatient_record)
 		if doc_name_list:
 			pending_invoices = get_pending_doc(doc, doc_name_list, pending_invoices)
 
-	if pending_invoices:
-		frappe.throw(_("Can not mark Inpatient Record Discharged, there are Unbilled Invoices {0}").format(", "
-			.join(pending_invoices)), title=_('Unbilled Invoices'))
+	return pending_invoices
+
 
 def get_pending_doc(doc, doc_name_list, pending_invoices):
 	if doc_name_list:
 		doc_ids = False
 		for doc_name in doc_name_list:
+			doc_link = get_link_to_form(doc, doc_name.name)
 			if doc_ids:
-				doc_ids += ", "+doc_name.name
+				doc_ids += ", " + doc_link
 			else:
-				doc_ids = doc_name.name
+				doc_ids = doc_link
 		if doc_ids:
-			pending_invoices.append(doc + " (" + doc_ids + ")")
+			pending_invoices[doc] =  doc_ids
 
 	return pending_invoices
 
-def get_inpatient_docs_not_invoiced(doc, inpatient_record):
+
+def get_unbilled_inpatient_docs(doc, inpatient_record):
 	return frappe.db.get_list(doc, filters = {'patient': inpatient_record.patient,
 					'inpatient_record': inpatient_record.name, 'docstatus': 1, 'invoiced': 0})
+
 
 def admit_patient(inpatient_record, service_unit, check_in, expected_discharge=None):
 	inpatient_record.admitted_datetime = check_in
@@ -203,6 +244,7 @@ def admit_patient(inpatient_record, service_unit, check_in, expected_discharge=N
 	frappe.db.set_value('Patient', inpatient_record.patient, 'inpatient_status', 'Admitted')
 	frappe.db.set_value('Patient', inpatient_record.patient, 'inpatient_record', inpatient_record.name)
 
+
 def transfer_patient(inpatient_record, service_unit, check_in):
 	item_line = inpatient_record.append('inpatient_occupancies', {})
 	item_line.service_unit = service_unit
@@ -212,6 +254,7 @@ def transfer_patient(inpatient_record, service_unit, check_in):
 
 	frappe.db.set_value("Healthcare Service Unit", service_unit, "occupancy_status", "Occupied")
 
+
 def patient_leave_service_unit(inpatient_record, check_out, leave_from):
 	if inpatient_record.inpatient_occupancies:
 		for inpatient_occupancy in inpatient_record.inpatient_occupancies:
@@ -220,6 +263,7 @@ def patient_leave_service_unit(inpatient_record, check_out, leave_from):
 				inpatient_occupancy.check_out = check_out
 				frappe.db.set_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "occupancy_status", "Vacant")
 	inpatient_record.save(ignore_permissions = True)
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
