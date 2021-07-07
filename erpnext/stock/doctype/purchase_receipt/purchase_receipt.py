@@ -291,7 +291,7 @@ class PurchaseReceipt(BuyingController):
 							continue
 
 					self.add_gl_entry(gl_entries, warehouse_account_name, d.cost_center, stock_value_diff, 0.0, remarks,
-						stock_rbnb, account_currency=warehouse_account_currency, item=d)					
+						stock_rbnb, account_currency=warehouse_account_currency, item=d)
 
 					# GL Entry for from warehouse or Stock Received but not billed
 					# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
@@ -318,11 +318,11 @@ class PurchaseReceipt(BuyingController):
 									(exchange_rate_map[d.purchase_invoice] - self.conversion_rate)
 
 								self.add_gl_entry(gl_entries, account, d.cost_center, 0.0, discrepancy_caused_by_exchange_rate_difference,
-									remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference, 
+									remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 									account_currency=credit_currency, item=d)
 
-								self.add_gl_entry(gl_entries, self.get_company_default("exchange_gain_loss_account"), d.cost_center, discrepancy_caused_by_exchange_rate_difference, 0.0, 
-									remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference, 
+								self.add_gl_entry(gl_entries, self.get_company_default("exchange_gain_loss_account"), d.cost_center, discrepancy_caused_by_exchange_rate_difference, 0.0,
+									remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 									account_currency=credit_currency, item=d)
 
 					# Amount added through landed-cos-voucher
@@ -407,6 +407,7 @@ class PurchaseReceipt(BuyingController):
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
+			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
