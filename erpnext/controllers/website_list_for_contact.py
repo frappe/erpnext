@@ -26,7 +26,8 @@ def get_custom_website_context():
 def get_custom_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
 	""" Get List of transactions for custom doctypes """
 	from frappe.www.list import get_list
-	if not filters: filters = []
+	if not filters: 
+		filters = []
 	meta = frappe.get_meta(doctype)
 
 	for d in meta.fields:
