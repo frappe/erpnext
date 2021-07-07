@@ -230,6 +230,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_purchase_invoice_with_exchange_rate_difference(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as create_purchase_invoice
+
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse='Stores - TCP1',
+			currency = "USD", conversion_rate = 70)
+
+		pi = create_purchase_invoice(pr.name)
+		pi.conversion_rate = 80
+
+		pi.insert()
+		pi.submit()		
+
+		# Get exchnage gain and loss account
+		exchange_gain_loss_account = frappe.db.get_value('Company', pi.company, 'exchange_gain_loss_account')
+
+		# fetching the latest GL Entry with exchange gain and loss account account
+		amount = frappe.db.get_value('GL Entry', {'account': exchange_gain_loss_account, 'voucher_no': pi.name}, 'debit')
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+
+		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
+
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
@@ -1010,21 +1031,21 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Check GLE for Purchase Invoice
 		# Zero net effect on final TDS Payable on invoice
 		expected_gle = [
-			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
-			['_Test Account Excise Duty - _TC', 0, 3000],
-			['Creditors - _TC', 0, 27000],
-			['TDS Payable - _TC', 3000, 3000]
+			['_Test Account Cost for Goods Sold - _TC', 30000],
+			['_Test Account Excise Duty - _TC', -3000],
+			['Creditors - _TC', -27000],
+			['TDS Payable - _TC', 0]
 		]
 
-		gl_entries = frappe.db.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, sum(debit - credit) as amount
 			from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no=%s
+			group by account
 			order by account asc""", (purchase_invoice.name), as_dict=1)
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(expected_gle[i][1], gle.amount)
 
 def update_tax_witholding_category(company, account, date):
 	from erpnext.accounts.utils import get_fiscal_year
