@@ -113,7 +113,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
 				const action = () => {
-					let message = __('Cancellation of e-way bill is currently not supported. ');
+					let message = __('Cancellation of e-way bill is currently not supported.') + ' ';
 					message += '<br><br>';
 					message += __('You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system.');
 
