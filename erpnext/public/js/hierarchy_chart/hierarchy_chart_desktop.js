@@ -84,11 +84,13 @@ erpnext.HierarchyChart = class {
 					// setup hierarchy
 					me.$hierarchy = $(
 						`<ul class="hierarchy">
-							<li class="root-level level"></li>
+							<li class="root-level level">
+								<ul class="node-children"></ul>
+							</li>
 						</ul>`);
 
 					me.page.main.append(me.$hierarchy);
-					me.render_root_node();
+					me.render_root_nodes();
 				}
 			}
 		});
@@ -122,7 +124,7 @@ erpnext.HierarchyChart = class {
 			</svg>`);
 	}
 
-	render_root_node() {
+	render_root_nodes() {
 		let me = this;
 
 		frappe.call({
@@ -132,21 +134,28 @@ erpnext.HierarchyChart = class {
 			},
 			callback: function(r) {
 				if (r.message.length) {
-					let data = r.message[0];
+					let nodes = r.message;
+					let node = undefined;
+					let first_root = undefined;
 
-					let root_node = new me.Node({
-						id: data.id,
-						parent: me.$hierarchy.find('.root-level'),
-						parent_id: undefined,
-						image: data.image,
-						name: data.name,
-						title: data.title,
-						expandable: true,
-						connections: data.connections,
-						is_root: true,
+					$.each(nodes, (i, data) => {
+						node = new me.Node({
+							id: data.id,
+							parent: $('<li class="child-node"></li>').appendTo(me.$hierarchy.find('.node-children')),
+							parent_id: undefined,
+							image: data.image,
+							name: data.name,
+							title: data.title,
+							expandable: true,
+							connections: data.connections,
+							is_root: true
+						});
+
+						if (i == 0)
+							first_root = node;
 					});
 
-					me.expand_node(root_node);
+					me.expand_node(first_root);
 				}
 			}
 		});
@@ -344,12 +353,7 @@ erpnext.HierarchyChart = class {
 
 	collapse_previous_level_nodes(node) {
 		let node_parent = $(`#${node.parent_id}`);
-
 		let previous_level_nodes = node_parent.parent().parent().children('li');
-		if (node_parent.parent().hasClass('root-level')) {
-			previous_level_nodes = node_parent.parent().children('li');
-		}
-
 		let node_card = undefined;
 
 		previous_level_nodes.each(function() {
@@ -408,10 +412,6 @@ erpnext.HierarchyChart = class {
 
 	remove_levels_after_node(node) {
 		let level = $(`#${node.id}`).parent().parent().parent();
-
-		if ($(`#${node.id}`).parent().hasClass('root-level')) {
-			level = $(`#${node.id}`).parent();
-		}
 
 		level = $('.hierarchy > li:eq('+ level.index() + ')');
 		level.nextAll('li').remove();
