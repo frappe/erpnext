@@ -542,6 +542,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where party_type = %s and party=%s
+		and is_cancelled = 0
 		group by company""", (party_type, party)))
 
 	for d in companies:
