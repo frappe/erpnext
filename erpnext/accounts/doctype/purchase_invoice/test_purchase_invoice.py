@@ -1008,19 +1008,19 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.submit()
 
 		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 37500.0, 0.0],
-			["_Test Payable USD - _TC", 0.0, 37500.0],
-			["_Test Payable USD - _TC", 0.0, 2500.0],
-			["Exchange Gain/Loss - _TC", 2500.0, 0.0]
+			["_Test Account Cost for Goods Sold - _TC", 37500.0],
+			["_Test Payable USD - _TC", -40000.0],
+			["Exchange Gain/Loss - _TC", 2500.0]
 		]
 
-		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
-			where voucher_no=%s order by account asc, credit desc""", (pi.name), as_dict=1)
+		gl_entries = frappe.db.sql("""
+			select account, sum(debit - credit) as balance from `tabGL Entry`
+			where voucher_no=%s
+			group by account order by account asc""", (pi.name), as_dict=1)
 		
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(expected_gle[i][1], gle.balance)
 
 		pi_2 = make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
 			conversion_rate=73, rate=500, do_not_save=1, qty=1)
@@ -1038,31 +1038,33 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_2.submit()
 
 		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 36500.0, 0.0],
-			["_Test Payable USD - _TC", 0.0, 36500.0],
-			["_Test Payable USD - _TC", 0.0, 1500.0],
-			["Exchange Gain/Loss - _TC", 1500.0, 0.0]
+			["_Test Account Cost for Goods Sold - _TC", 36500.0],
+			["_Test Payable USD - _TC", -38000.0],
+			["Exchange Gain/Loss - _TC", 1500.0]
 		]
 
-		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
-			where voucher_no=%s order by account asc, credit desc""", (pi_2.name), as_dict=1)
+		gl_entries = frappe.db.sql("""
+			select account, sum(debit - credit) as balance from `tabGL Entry`
+			where voucher_no=%s
+			group by account order by account asc""", (pi_2.name), as_dict=1)
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(expected_gle[i][1], gle.balance)
 
-		expected_gle = [["_Test Payable USD - _TC", 35000.0, 0.0],
-			["_Test Payable USD - _TC", 35000.0, 0.0],
-			["Cash - _TC", 0.0, 70000.0]]
+		expected_gle = [
+			["_Test Payable USD - _TC", 70000.0],
+			["Cash - _TC", -70000.0]
+		]
 
-		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
-			where voucher_no=%s and is_cancelled=0 order by account asc""", (pay.name), as_dict=1)
+		gl_entries = frappe.db.sql("""
+			select account, sum(debit - credit) as balance from `tabGL Entry`
+			where voucher_no=%s and is_cancelled=0
+			group by account order by account asc""", (pay.name), as_dict=1)
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(expected_gle[i][1], gle.balance)
 
 		pi.reload()
 		pi.cancel()
