@@ -153,7 +153,7 @@ erpnext.HierarchyChart = class {
 	}
 
 	expand_node(node) {
-		let is_sibling = this.selected_node && this.selected_node.parent_id === node.parent_id;
+		const is_sibling = this.selected_node && this.selected_node.parent_id === node.parent_id;
 		this.set_selected_node(node);
 		this.show_active_path(node);
 		this.collapse_previous_level_nodes(node);
@@ -243,11 +243,9 @@ erpnext.HierarchyChart = class {
 	}
 
 	add_node(node, data) {
-		var $li = $('<li class="child-node"></li>');
-
 		return new this.Node({
 			id: data.id,
-			parent: $li.appendTo(node.$children),
+			parent: $('<li class="child-node"></li>').appendTo(node.$children),
 			parent_id: node.id,
 			image: data.image,
 			name: data.name,
@@ -259,8 +257,8 @@ erpnext.HierarchyChart = class {
 	}
 
 	add_connector(parent_id, child_id) {
-		let parent_node = document.querySelector(`#${parent_id}`);
-		let child_node = document.querySelector(`#${child_id}`);
+		const parent_node = document.querySelector(`#${parent_id}`);
+		const child_node = document.querySelector(`#${child_id}`);
 
 		let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
@@ -276,7 +274,7 @@ erpnext.HierarchyChart = class {
 
 		let connector = this.get_connector(pos_parent_right, pos_child_left);
 
-		path.setAttribute("d", connector);
+		path.setAttribute('d', connector);
 		this.set_path_attributes(path, parent_id, child_id);
 
 		$('#connectors').append(path);
@@ -385,7 +383,7 @@ erpnext.HierarchyChart = class {
 		let node_element = $(`#${node.id}`);
 
 		node_element.click(function() {
-			let is_sibling = me.selected_node.parent_id === node.parent_id;
+			const is_sibling = me.selected_node.parent_id === node.parent_id;
 
 			if (is_sibling) {
 				me.collapse_node();
