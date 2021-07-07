@@ -16,17 +16,7 @@ frappe.listview_settings['Sales Order'] = {
 				return [__("Overdue"), "red",
 					"per_delivered,<,100|delivery_date,<,Today|status,!=,Closed"];
 			} else if (flt(doc.grand_total) === 0) {
-				// not delivered (zero-amount order)onload: function (listview) {
-		var method = "one";
-
-		listview.page.add_menu_item(__("Close"), function () {
-			listview.call_for_selected_items(method, { "status": "Closed" });
-		});
-
-		listview.page.add_menu_item(__("Re-open"), function () {
-			listview.call_for_selected_items(method, { "status": "Submitted" });
-		});
-	}
+				// not delivered (zero-amount order)
 				return [__("To Deliver"), "orange",
 					"per_delivered,<,100|grand_total,=,0|status,!=,Closed"];
 			} else if (flt(doc.per_billed, 6) < 100) {
