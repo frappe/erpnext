@@ -79,7 +79,10 @@ class FullAndFinalStatement(Document):
 				outward_movements.append(movement)
 
 		for movement in inward_movements:
-			if movement.asset not in [movement.asset for movement in outward_movements]:
+			outwards_count = [movement.asset for movement in outward_movements].count(movement.asset)
+			inwards_counts = [movement.asset for movement in inward_movements].count(movement.asset)
+
+			if inwards_counts > outwards_count:
 				data.append({
 					"reference": movement.parent,
 					"asset_name": movement.asset_name,
