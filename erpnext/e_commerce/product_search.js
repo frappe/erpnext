@@ -39,6 +39,11 @@ erpnext.ProductSearch = class {
 		this.searchBox.on("input", (e) => {
 			let query = e.target.value;
 
+			if (query.length == 0) {
+				me.populateResults([]);
+				me.populateCategoriesList([]);
+			}
+
 			if (query.length < 3 || !query.length) return;
 
 			// Populate recent search chips
@@ -191,7 +196,7 @@ erpnext.ProductSearch = class {
 	}
 
 	populateResults(data) {
-		if (data.message.results.length === 0) {
+		if (data.length === 0 || data.message.results.length === 0) {
 			let empty_html = `
 				<div class="mt-6 w-100 text-muted" style="font-weight: 400; text-align: center;">
 					${ __('No results') }
@@ -220,7 +225,7 @@ erpnext.ProductSearch = class {
 	}
 
 	populateCategoriesList(data) {
-		if (data.message.results.length === 0) {
+		if (data.length === 0 || data.message.results.length === 0) {
 			let empty_html = `
 				<span class="text-muted" style="font-weight: 400;">
 					${__('No results')}

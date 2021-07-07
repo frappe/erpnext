@@ -117,12 +117,17 @@ class ProductQuery:
 
 	def query_items(self, start=0):
 		"""Build a query to fetch Website Items based on field filters."""
-		count = frappe.db.get_all(
+		# MySQL does not support offset without limit,
+		# frappe does not accept two parameters for limit
+		# https://dev.mysql.com/doc/refman/8.0/en/select.html#id4651989
+		count_items = frappe.db.get_all(
 			"Website Item",
-			fields=["count(*) as count"],
 			filters=self.filters,
 			or_filters=self.or_filters,
-			limit_start=start)[0].get("count")
+			limit_page_length=184467440737095516,
+			limit_start=start, # get all items from this offset for total count ahead
+			order_by="ranking desc")
+		count = len(count_items)
 
 		items = frappe.db.get_all(
 			"Website Item",
@@ -130,9 +135,10 @@ class ProductQuery:
 			filters=self.filters,
 			or_filters=self.or_filters,
 			limit_page_length=self.page_length,
-			limit_start=start)
+			limit_start=start,
+			order_by="ranking desc")
 
-		return items, count or 0
+		return items, count
 
 	def query_items_with_attributes(self, attributes, start=0):
 		"""Build a query to fetch Website Items based on field & attribute filters."""
