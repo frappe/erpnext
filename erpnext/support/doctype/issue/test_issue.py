@@ -175,7 +175,6 @@ class TestFirstResponseTime(TestSetUp):
 		issue = create_issue_and_communication(get_datetime("06-27-2021 10:00"), get_datetime("06-27-2021 11:00"))
 		self.assertEqual(issue.first_response_time, 1.0)
 
-
 	# issue creation and first response are on consecutive days
 	def test_first_response_time_case6(self):
 		"""
@@ -260,7 +259,6 @@ class TestFirstResponseTime(TestSetUp):
 		"""
 		issue = create_issue_and_communication(get_datetime("06-25-2021 20:00"), get_datetime("06-26-2021 11:00"))
 		self.assertEqual(issue.first_response_time, 1.0)
-
 
 	# issue creation and first response are a few days apart
 	def test_first_response_time_case18(self):
