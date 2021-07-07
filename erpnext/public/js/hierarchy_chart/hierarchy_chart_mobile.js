@@ -97,7 +97,7 @@ erpnext.HierarchyChartMobile = class {
 						</ul>`);
 
 					me.page.main.append(me.$hierarchy);
-					me.render_root_node();
+					me.render_root_nodes();
 				}
 			}
 		});
@@ -131,7 +131,7 @@ erpnext.HierarchyChartMobile = class {
 			</svg>`);
 	}
 
-	render_root_node() {
+	render_root_nodes() {
 		let me = this;
 
 		frappe.call({
@@ -141,21 +141,21 @@ erpnext.HierarchyChartMobile = class {
 			},
 			callback: function(r) {
 				if (r.message.length) {
-					let data = r.message[0];
+					let nodes = r.message;
 
-					let root_node = new me.Node({
-						id: data.id,
-						parent: me.$hierarchy.find('.root-level'),
-						parent_id: undefined,
-						image: data.image,
-						name: data.name,
-						title: data.title,
-						expandable: true,
-						connections: data.connections,
-						is_root: true,
+					$.each(nodes, (_i, data) => {
+						return new me.Node({
+							id: data.id,
+							parent: me.$hierarchy.find('.root-level'),
+							parent_id: undefined,
+							image: data.image,
+							name: data.name,
+							title: data.title,
+							expandable: true,
+							connections: data.connections,
+							is_root: true
+						});
 					});
-
-					me.expand_node(root_node);
 				}
 			}
 		});
@@ -375,7 +375,10 @@ erpnext.HierarchyChartMobile = class {
 		let node_element = $(`#${node.id}`);
 
 		node_element.click(function() {
-			if (node_element.is(':visible') && node_element.hasClass('active-path')) {
+			if (node.is_root) {
+				me.$hierarchy.empty();
+				me.add_node_to_hierarchy(node, true);
+			} else if (node_element.is(':visible') && node_element.hasClass('active-path')) {
 				me.remove_levels_after_node(node);
 				me.remove_orphaned_connectors();
 			} else {

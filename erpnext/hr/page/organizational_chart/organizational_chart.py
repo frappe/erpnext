@@ -17,7 +17,7 @@ def get_children(parent=None, company=None, exclude_node=None, is_root=False, is
 	if exclude_node:
 		filters.append(['name', '!=', exclude_node])
 
-	if parent and company and parent!=company:
+	if parent and company and parent != company:
 		filters.append(['reports_to', '=', parent])
 	else:
 		filters.append(['reports_to', '=', ''])
@@ -32,6 +32,7 @@ def get_children(parent=None, company=None, exclude_node=None, is_root=False, is
 		employee.connections = get_connections(employee.id)
 		employee.expandable = 1 if is_expandable else 0
 
+	employees.sort(key=lambda x: x['connections'], reverse=True)
 	return employees
 
 
