@@ -44,9 +44,16 @@ class WebsiteItem(WebsiteGenerator):
 		self.publish_unpublish_desk_item(publish=True)
 
 		if not self.get("__islocal"):
-			self.old_website_item_groups = frappe.db.sql_list("""select item_group
-					from `tabWebsite Item Group`
-					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
+			self.old_website_item_groups = frappe.db.sql_list("""
+				select
+					item_group
+				from
+					`tabWebsite Item Group`
+				where
+					parentfield='website_item_groups'
+					and parenttype='Website Item'
+					and parent=%s
+				""", self.name)
 
 	def on_update(self):
 		invalidate_cache_for_web_item(self)
@@ -389,6 +396,28 @@ def invalidate_cache_for_web_item(doc):
 
 	invalidate_item_variants_cache_for_website(doc)
 
+def on_doctype_update():
+	# since route is a Text column, it needs a length for indexing
+	frappe.db.add_index("Website Item", ["route(500)"])
+
+def check_if_user_is_customer(user=None):
+	from frappe.contacts.doctype.contact.contact import get_contact_name
+
+	if not user:
+		user = frappe.session.user
+
+	contact_name = get_contact_name(user)
+	customer = None
+
+	if contact_name:
+		contact = frappe.get_doc('Contact', contact_name)
+		for link in contact.links:
+			if link.link_doctype == "Customer":
+				customer = link.link_name
+				break
+
+	return True if customer else False
+
 @frappe.whitelist()
 def make_website_item(doc, save=True):
 	if not doc:
@@ -418,25 +447,3 @@ def make_website_item(doc, save=True):
 	insert_item_to_index(website_item)
 
 	return [website_item.name, website_item.web_item_name]
-
-def on_doctype_update():
-	# since route is a Text column, it needs a length for indexing
-	frappe.db.add_index("Website Item", ["route(500)"])
-
-def check_if_user_is_customer(user=None):
-	from frappe.contacts.doctype.contact.contact import get_contact_name
-
-	if not user:
-		user = frappe.session.user
-
-	contact_name = get_contact_name(user)
-	customer = None
-
-	if contact_name:
-		contact = frappe.get_doc('Contact', contact_name)
-		for link in contact.links:
-			if link.link_doctype == "Customer":
-				customer = link.link_name
-				break
-
-	return True if customer else False

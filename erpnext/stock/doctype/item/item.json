@@ -962,10 +962,20 @@
  "idx": 2,
  "image_field": "image",
  "index_web_pages_for_search": 1,
+<<<<<<< HEAD
  "links": [],
 <<<<<<< HEAD
  "modified": "2021-12-14 04:13:16.857534",
 =======
+=======
+ "links": [
+  {
+   "group": "E-commerce",
+   "link_doctype": "Website Item",
+   "link_fieldname": "item_code"
+  }
+ ],
+>>>>>>> 16abfd4410 (fix: Sync Website Items on Item Change, Short Website Description)
  "max_attachments": 1,
 <<<<<<< HEAD
  "modified": "2021-08-27 12:23:07.277077",
