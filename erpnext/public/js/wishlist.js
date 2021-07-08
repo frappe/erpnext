@@ -88,7 +88,9 @@ $.extend(wishlist, {
 				if (localStorage) {
 					localStorage.setItem("last_visited", window.location.pathname);
 				}
-				window.location.href = "/login";
+
+				this.redirect_guest();
+
 				return;
 			}
 
@@ -140,7 +142,7 @@ $.extend(wishlist, {
 			if (localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);
 			}
-			window.location.href = "/login";
+			this.redirect_guest();
 		} else {
 			let method = "erpnext.e_commerce.doctype.wishlist.wishlist.add_to_wishlist";
 			if (action === "remove") {
@@ -167,6 +169,12 @@ $.extend(wishlist, {
 				}
 			});
 		}
+	},
+
+	redirect_guest() {
+		frappe.call('erpnext.e_commerce.api.get_guest_redirect_on_action').then((res) => {
+			window.location.href = res.message || "/login";
+		});
 	},
 
 	render_empty_state() {
