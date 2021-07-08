@@ -102,7 +102,7 @@ erpnext.ProductList = class {
 				Item Code : ${ item.item_code }
 			</p>
 			<div class="text-muted mt-2">
-				${ item.description || '' }
+				${ item.short_description || '' }
 			</div>
 			<div class="product-price">
 				${ item.formatted_price || '' }
