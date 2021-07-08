@@ -144,7 +144,7 @@
 
 
 {%- macro wishlist_card(item, settings) %}
-{%- set title = item.item_name or item.item_code -%}
+{%- set title = item.web_item_name or ''-%}
 {%- set title = title[:50] + "..." if title|len > 50 else title -%}
 <div class="col-sm-3 wishlist-card">
 	<div class="card text-center" style="height: 100%">
@@ -167,15 +167,15 @@
 			</div>
 		</div>
 
-		{{ wishlist_card_body(item, settings) }}
+		{{ wishlist_card_body(item, title, settings) }}
 	</div>
 </div>
 {%- endmacro -%}
 
-{%- macro wishlist_card_body(item, settings) %}
+{%- macro wishlist_card_body(item, title, settings) %}
 <div class="card-body text-center" style="width: 100%;">
 	<div style="margin-top: 16px;">
-		<div class="product-title">{{ item.item_name or item.item_code or ''}}</div>
+		<div class="product-title">{{ title or ''}}</div>
 	</div>
 	<div class="product-price">
 		{{ item.formatted_price or '' }}
