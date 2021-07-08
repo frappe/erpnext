@@ -400,6 +400,9 @@ def on_doctype_update():
 	# since route is a Text column, it needs a length for indexing
 	frappe.db.add_index("Website Item", ["route(500)"])
 
+	frappe.db.add_index("Website Item", ["item_group"])
+	frappe.db.add_index("Website Item", ["brand"])
+
 def check_if_user_is_customer(user=None):
 	from frappe.contacts.doctype.contact.contact import get_contact_name
 

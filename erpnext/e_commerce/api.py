@@ -18,9 +18,15 @@ def get_product_filter_data():
 		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
 		start = cint(frappe.parse_json(frappe.form_dict.start)) if frappe.form_dict.start else 0
 		item_group = frappe.form_dict.item_group
+		from_filters = frappe.parse_json(frappe.form_dict.from_filters)
 	else:
-		search, attribute_filters, item_group = None, None, None
+		search, attribute_filters, item_group, from_filters = None, None, None, None
 		field_filters = {}
+		start = 0
+
+	if from_filters:
+		# if filter is checked, go to start
+		# and show filtered items from page 1
 		start = 0
 
 	sub_categories = []

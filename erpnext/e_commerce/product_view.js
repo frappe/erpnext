@@ -27,6 +27,7 @@ erpnext.ProductView =  class {
 	get_item_filter_data(from_filters=false) {
 		// Get and render all Product related views
 		let me = this;
+		this.from_filters = from_filters;
 		let args = this.get_query_filters();
 
 		this.disable_view_toggler(true);
@@ -36,6 +37,7 @@ erpnext.ProductView =  class {
 			args: args,
 			callback: function(result) {
 				if (!result.exc && result && result.message) {
+					// Sub Category results are independent of Items
 					if (me.item_group && result.message["sub_categories"].length) {
 						me.render_item_sub_categories(result.message["sub_categories"]);
 					}
@@ -45,7 +47,7 @@ erpnext.ProductView =  class {
 						me.render_no_products_section();
 					} else {
 						// Add discount filters
-						me.get_discount_filter_html(result.message["filters"].discount_filters);
+						me.re_render_discount_filters(result.message["filters"].discount_filters);
 
 						// Render views
 						me.render_list_view(result.message["items"], result.message["settings"]);
@@ -129,7 +131,8 @@ erpnext.ProductView =  class {
 			field_filters: field_filters,
 			attribute_filters: attribute_filters,
 			item_group: this.item_group,
-			start: filters.start || null
+			start: filters.start || null,
+			from_filters: this.from_filters || false
 		};
 	}
 
@@ -221,15 +224,31 @@ erpnext.ProductView =  class {
 	}
 
 	bind_paging_action() {
+		let me = this;
 		$('.btn-prev, .btn-next').click((e) => {
 			const $btn = $(e.target);
+			me.from_filters = false;
+
 			$btn.prop('disabled', true);
 			const start = $btn.data('start');
+
 			let query_params = frappe.utils.get_query_params();
 			query_params.start = start;
 			let path = window.location.pathname + '?' + frappe.utils.get_url_from_dict(query_params);
 			window.location.href = path;
 		});
+	}
+
+	re_render_discount_filters(filter_data) {
+		this.get_discount_filter_html(filter_data);
+		if (this.from_filters) {
+			// Bind filter action if triggered via filters
+			// if not from filter action, page load will bind actions
+			this.bind_discount_filter_action();
+		}
+		// discount filters are rendered with Items (later)
+		// unlike the other filters
+		this.restore_discount_filter();
 	}
 
 	get_discount_filter_html(filter_data) {
@@ -266,12 +285,56 @@ erpnext.ProductView =  class {
 		}
 	}
 
+	restore_discount_filter() {
+		const filters = frappe.utils.get_query_params();
+		let field_filters = filters.field_filters;
+		if (!field_filters) return;
+
+		field_filters = JSON.parse(field_filters);
+
+		if (field_filters && field_filters["discount"]) {
+			const values = field_filters["discount"];
+			const selector = values.map(value => {
+				return `input[data-filter-name="discount"][data-filter-value="${value}"]`;
+			}).join(',');
+			$(selector).prop('checked', true);
+			this.field_filters = field_filters;
+		}
+	}
+
+	bind_discount_filter_action() {
+		let me = this;
+		$('.discount-filter').on('change', (e) => {
+			const $checkbox = $(e.target);
+			const is_checked = $checkbox.is(':checked');
+
+			const {
+				filterValue: filter_value
+			} = $checkbox.data();
+
+			delete this.field_filters["discount"];
+
+			if (is_checked) {
+				this.field_filters["discount"] = []
+				this.field_filters["discount"].push(filter_value);
+			}
+
+			if (this.field_filters["discount"].length === 0) {
+				delete this.field_filters["discount"];
+			}
+
+			me.change_route_with_filters();
+		})
+	}
+
 	bind_filters() {
 		let me = this;
 		this.field_filters = {};
 		this.attribute_filters = {};
 
 		$('.product-filter').on('change', (e) => {
+			me.from_filters = true;
+
 			const $checkbox = $(e.target);
 			const is_checked = $checkbox.is(':checked');
 
@@ -317,19 +380,29 @@ erpnext.ProductView =  class {
 				}
 			}
 
-			let route_params = frappe.utils.get_query_params();
-			const query_string = me.get_query_string({
-				start: me.if_key_exists(route_params.start) || 0,
-				field_filters: JSON.stringify(me.if_key_exists(this.field_filters)),
-				attribute_filters: JSON.stringify(me.if_key_exists(this.attribute_filters)),
-			});
-			window.history.pushState('filters', '', `${location.pathname}?` + query_string);
-
-			$('.page_content input').prop('disabled', true);
-
-			me.make(true);
-			$('.page_content input').prop('disabled', false);
+			me.change_route_with_filters();
 		});
+	}
+
+	change_route_with_filters() {
+		let route_params = frappe.utils.get_query_params();
+
+		let start = this.if_key_exists(route_params.start) || 0;
+		if (this.from_filters) {
+			start = 0; // show items from first page if new filters are triggered
+		}
+
+		const query_string = this.get_query_string({
+			start: start,
+			field_filters: JSON.stringify(this.if_key_exists(this.field_filters)),
+			attribute_filters: JSON.stringify(this.if_key_exists(this.attribute_filters)),
+		});
+		window.history.pushState('filters', '', `${location.pathname}?` + query_string);
+
+		$('.page_content input').prop('disabled', true);
+
+		this.make(true);
+		$('.page_content input').prop('disabled', false);
 	}
 
 	restore_filters_state() {
