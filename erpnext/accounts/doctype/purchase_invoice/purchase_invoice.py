@@ -1180,10 +1180,14 @@ def set_payment_terms_from_po(doc):
 
 	purchase_order = doc.get('items')[0].get('purchase_order')
 	
-	if linked_po_has_payment_terms(doc, purchase_order) and all_items_have_same_po(doc, purchase_order):
+	if purchase_order and all_items_have_same_po(doc, purchase_order):
 		purchase_order = frappe.get_cached_doc('Purchase Order', purchase_order)
+	else:
+		return
+
+	if has_default_payment_terms(doc) and not has_default_payment_terms(purchase_order):
+		doc['payment_schedule'] = []
 		doc['payment_terms_template'] = purchase_order.payment_terms_template
-		doc['terms'] = purchase_order.payment_terms_template
 
 		for schedule in purchase_order.payment_schedule:
 			payment_schedule = {
@@ -1200,15 +1204,17 @@ def set_payment_terms_from_po(doc):
 
 		return doc
 
-def linked_po_has_payment_terms(doc, purchase_order):
-	return not doc.get('payment_schedule') and purchase_order
-
 def all_items_have_same_po(doc, purchase_order):
 	for item in doc.get('items'):
 		if item.get('purchase_order') != purchase_order:
 			return False
 	
 	return True
+
+def has_default_payment_terms(doc):
+	if doc.get('payment_schedule')[0].get('invoice_portion') == 100:
+		return True
+	return False
 
 # to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
 def get_purchase_document_details(doc):
