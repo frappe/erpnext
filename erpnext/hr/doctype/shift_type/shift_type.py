@@ -95,7 +95,7 @@ def process_auto_attendance_for_all_shifts():
 	shift_list = frappe.get_all('Shift Type', 'name', {'enable_auto_attendance':'1'}, as_list=True)
 	for shift in shift_list:
 		doc = frappe.get_doc('Shift Type', shift[0])
-		doc.process_auto_attendance()
+		#doc.process_auto_attendance()
 
 def get_filtered_date_list(employee, start_date, end_date, filter_attendance=True, holiday_list=None):
 	"""Returns a list of dates after removing the dates with attendance and holidays
