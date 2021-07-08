@@ -7,7 +7,6 @@ erpnext.HierarchyChart = class {
 			- this method should return id, name, title, image, and connections for each node
 	*/
 	constructor(doctype, wrapper, method) {
-		this.wrapper = $(wrapper);
 		this.page = wrapper.page;
 		this.method = method;
 		this.doctype = doctype;
@@ -61,6 +60,8 @@ erpnext.HierarchyChart = class {
 		frappe.breadcrumbs.add('HR');
 
 		let me = this;
+		if ($(`[data-fieldname="company"]`).length) return;
+
 		let company = this.page.add_field({
 			fieldtype: 'Link',
 			options: 'Company',
@@ -131,32 +132,30 @@ erpnext.HierarchyChart = class {
 			method: me.method,
 			args: {
 				company: me.company
-			},
-			callback: function(r) {
-				if (r.message.length) {
-					let nodes = r.message;
-					let node = undefined;
-					let first_root = undefined;
+			}
+		}).then(r => {
+			if (r.message.length) {
+				let node = undefined;
+				let first_root = undefined;
 
-					$.each(nodes, (i, data) => {
-						node = new me.Node({
-							id: data.id,
-							parent: $('<li class="child-node"></li>').appendTo(me.$hierarchy.find('.node-children')),
-							parent_id: undefined,
-							image: data.image,
-							name: data.name,
-							title: data.title,
-							expandable: true,
-							connections: data.connections,
-							is_root: true
-						});
-
-						if (i == 0)
-							first_root = node;
+				$.each(r.message, (i, data) => {
+					node = new me.Node({
+						id: data.id,
+						parent: $('<li class="child-node"></li>').appendTo(me.$hierarchy.find('.node-children')),
+						parent_id: undefined,
+						image: data.image,
+						name: data.name,
+						title: data.title,
+						expandable: true,
+						connections: data.connections,
+						is_root: true
 					});
 
-					me.expand_node(first_root);
-				}
+					if (i == 0)
+						first_root = node;
+				});
+
+				me.expand_node(first_root);
 			}
 		});
 	}
@@ -204,18 +203,14 @@ erpnext.HierarchyChart = class {
 	}
 
 	get_child_nodes(node_id) {
-		let me = this;
 		return new Promise(resolve => {
 			frappe.call({
 				method: this.method,
 				args: {
 					parent: node_id,
-					company: me.company
-				},
-				callback: (r) => {
-					resolve(r.message);
+					company: this.company
 				}
-			});
+			}).then(r => resolve(r.message));
 		});
 	}
 
@@ -266,27 +261,28 @@ erpnext.HierarchyChart = class {
 	}
 
 	add_connector(parent_id, child_id) {
+		// using pure javascript for better performance
 		const parent_node = document.querySelector(`#${parent_id}`);
 		const child_node = document.querySelector(`#${child_id}`);
 
 		let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 		// we need to connect right side of the parent to the left side of the child node
-		let pos_parent_right = {
+		const pos_parent_right = {
 			x: parent_node.offsetLeft + parent_node.offsetWidth,
 			y: parent_node.offsetTop + parent_node.offsetHeight / 2
 		};
-		let pos_child_left = {
+		const pos_child_left = {
 			x: child_node.offsetLeft - 5,
 			y: child_node.offsetTop + child_node.offsetHeight / 2
 		};
 
-		let connector = this.get_connector(pos_parent_right, pos_child_left);
+		const connector = this.get_connector(pos_parent_right, pos_child_left);
 
 		path.setAttribute('d', connector);
 		this.set_path_attributes(path, parent_id, child_id);
 
-		$('#connectors').append(path);
+		document.getElementById('connectors').appendChild(path);
 	}
 
 	get_connector(pos_parent_right, pos_child_left) {
@@ -330,12 +326,13 @@ erpnext.HierarchyChart = class {
 	set_path_attributes(path, parent_id, child_id) {
 		path.setAttribute("data-parent", parent_id);
 		path.setAttribute("data-child", child_id);
+		const parent = $(`#${parent_id}`);
 
-		if ($(`#${parent_id}`).hasClass('active')) {
+		if (parent.hasClass('active')) {
 			path.setAttribute("class", "active-connector");
 			path.setAttribute("marker-start", "url(#arrowstart-active)");
 			path.setAttribute("marker-end", "url(#arrowhead-active)");
-		} else if ($(`#${parent_id}`).hasClass('active-path')) {
+		} else if (parent.hasClass('active-path')) {
 			path.setAttribute("class", "collapsed-connector");
 			path.setAttribute("marker-start", "url(#arrowstart-collapsed)");
 			path.setAttribute("marker-end", "url(#arrowhead-collapsed)");
@@ -343,8 +340,9 @@ erpnext.HierarchyChart = class {
 	}
 
 	set_selected_node(node) {
-		// remove .active class from the current node
-		$('.active').removeClass('active');
+		// remove active class from the current node
+		if (this.selected_node)
+			this.selected_node.$link.removeClass('active');
 
 		// add active class to the newly selected node
 		this.selected_node = node;
@@ -411,9 +409,9 @@ erpnext.HierarchyChart = class {
 	}
 
 	remove_levels_after_node(node) {
-		let level = $(`#${node.id}`).parent().parent().parent();
+		let level = $(`#${node.id}`).parent().parent().parent().index();
 
-		level = $('.hierarchy > li:eq('+ level.index() + ')');
+		level = $('.hierarchy > li:eq('+ level + ')');
 		level.nextAll('li').remove();
 
 		let nodes = level.find('.node-card');
@@ -431,8 +429,8 @@ erpnext.HierarchyChart = class {
 	remove_orphaned_connectors() {
 		let paths = $('#connectors > path');
 		$.each(paths, (_i, path) => {
-			let parent = $(path).data('parent');
-			let child = $(path).data('child');
+			const parent = $(path).data('parent');
+			const child = $(path).data('child');
 
 			if ($(`#${parent}`).length && $(`#${child}`).length)
 				return;
