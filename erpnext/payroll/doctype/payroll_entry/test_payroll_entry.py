@@ -14,6 +14,7 @@ from erpnext.payroll.doctype.salary_slip.test_salary_slip import get_salary_comp
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure, create_salary_structure_assignment
 from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry, create_loan_type, create_loan_accounts
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import get_salary_component_for_overtime
 
 test_dependencies = ['Holiday List']
 
@@ -21,6 +22,9 @@ class TestPayrollEntry(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", '_Test Holiday List')
+		frappe.db.set_value("Payroll Settings", None, "overtime_salary_component", "Overtime Allowance")
+		get_salary_component_for_overtime()
+
 
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Component", "Salary Component Account",

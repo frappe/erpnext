@@ -474,7 +474,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		frappe.db.set_value("Payroll Settings", None, "overtime_based_on", "Attendance")
 		frappe.db.set_value("Payroll Settings", None, "fetch_standard_working_hours_from_shift_type", 0)
-		self.get_salary_component_for_overtime()
+		get_salary_component_for_overtime()
 		frappe.db.set_value("Payroll Settings", None, "overtime_salary_component", "Overtime Allowance")
 
 		overtime_type = create_overtime_type(employee = employee).name
@@ -505,17 +505,6 @@ class TestSalarySlip(unittest.TestCase):
 		# formula = sum(applicable_component)/(working_days)/ daily_standard_working_time * overtime hours * multiplier
 		self.assertEquals(flt(overtime_amount, 2), flt(overtime_component_details.amount, 2))
 
-	def get_salary_component_for_overtime(self):
-		component = [{
-			"salary_component": 'Overtime Allowance',
-			"abbr":'OA',
-			"type": "Earning",
-			"amount_based_on_formula": 0
-		}]
-
-		company = erpnext.get_default_company()
-		make_salary_component(component, test_tax = 0, company_list=[company])
-
 	def make_activity_for_employee(self):
 		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")
 		activity_type.billing_rate = 50
@@ -530,6 +519,17 @@ class TestSalarySlip(unittest.TestCase):
 			getdate(nowdate()).month) if i[6] != 0])
 
 		return [no_of_days_in_month[1], no_of_holidays_in_month]
+
+def get_salary_component_for_overtime():
+	component = [{
+		"salary_component": 'Overtime Allowance',
+		"abbr":'OA',
+		"type": "Earning",
+		"amount_based_on_formula": 0
+	}]
+
+	company = erpnext.get_default_company()
+	make_salary_component(component, test_tax = 0, company_list=[company])
 
 def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 	from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure

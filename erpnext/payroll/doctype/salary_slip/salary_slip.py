@@ -610,8 +610,10 @@ class SalarySlip(TransactionBase):
 				frappe.bold("Overtime Salary Component"), frappe.bold("Payroll Settings")
 			))
 		else:
+			component_data = frappe._dict(get_salary_component_data(overtime_salary_component) or {})
+			component_data.salary_component = overtime_salary_component
 			self.update_component_row(
-				get_salary_component_data(overtime_salary_component),
+				component_data,
 				sum(amounts),
 				'earnings',
 				processed_overtime_slips = processed_overtime_slips
