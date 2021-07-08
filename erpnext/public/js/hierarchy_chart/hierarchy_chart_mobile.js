@@ -88,7 +88,7 @@ erpnext.HierarchyChartMobile = class {
 					me.$sibling_group = $(`<div class="sibling-group mt-4 mb-4"></div>`);
 					me.page.main.append(me.$sibling_group);
 
-					me.setup_hierarchy()
+					me.setup_hierarchy();
 					me.render_root_nodes();
 				}
 			}
@@ -194,9 +194,9 @@ erpnext.HierarchyChartMobile = class {
 
 	collapse_node() {
 		let node = this.selected_node;
-		if (node.expandable) {
+		if (node.expandable && node.$children) {
 			node.$children.hide();
-			node.expanded = false;
+			node.expanded = 0;
 
 			// add a collapsed level to show the collapsed parent
 			// and a button beside it to move to that level
@@ -212,10 +212,7 @@ erpnext.HierarchyChartMobile = class {
 			frappe.run_serially([
 				() => this.get_child_nodes(node.parent_id, node.id),
 				(child_nodes) => this.get_node_group(child_nodes, node.parent_id),
-				(node_group) => {
-					node_parent.find('.collapsed-level')
-						.append(node_group);
-				},
+				(node_group) => node_parent.find('.collapsed-level').append(node_group),
 				() => this.setup_node_group_action()
 			]);
 		}
@@ -268,7 +265,7 @@ erpnext.HierarchyChartMobile = class {
 		}
 
 		node.$children.show();
-		node.expanded = true;
+		node.expanded = 1;
 	}
 
 	add_node(node, data) {
@@ -380,13 +377,16 @@ erpnext.HierarchyChartMobile = class {
 
 		node_element.click(function() {
 			if (node.is_root) {
+				var el = $(this).detach();
 				me.$hierarchy.empty();
-				me.add_node_to_hierarchy(node, true);
+				$(`#connectors`).empty();
+				me.add_node_to_hierarchy(el, node);
 			} else if (node_element.is(':visible') && node_element.hasClass('active-path')) {
 				me.remove_levels_after_node(node);
 				me.remove_orphaned_connectors();
 			} else {
-				me.add_node_to_hierarchy(node, true);
+				var el = $(this).detach();
+				me.add_node_to_hierarchy(el, node);
 				me.collapse_node();
 			}
 
@@ -417,15 +417,15 @@ erpnext.HierarchyChartMobile = class {
 		});
 	}
 
-	add_node_to_hierarchy(node) {
-		this.$hierarchy.append(`
-			<li class="level">
-				<div class="node-level d-flex flex-row">
-				</div>
-			</li>
-		`);
+	add_node_to_hierarchy(node_element, node) {
+		this.$hierarchy.append(`<li class="level"></li>`);
+		node_element.removeClass('active-child active-path');
+		this.$hierarchy.find('.level:last').append(node_element);
 
-		node.$link.appendTo(this.$hierarchy.find('.level:last'));
+		let node_object = this.nodes[node.id];
+		node_object.expanded = 0;
+		node_object.$children = undefined;
+		this.nodes[node.id] = node_object;
 	}
 
 	get_node_group(nodes, parent, collapsed=true) {
@@ -478,9 +478,11 @@ erpnext.HierarchyChartMobile = class {
 	expand_sibling_group_node(parent) {
 		let node_object = this.nodes[parent];
 		let node = node_object.$link;
+
 		node.removeClass('active-child active-path');
 		node_object.expanded = 0;
 		node_object.$children = undefined;
+		this.nodes[node.id] = node_object;
 
 		// show parent's siblings and expand parent node
 		frappe.run_serially([
@@ -491,15 +493,19 @@ erpnext.HierarchyChartMobile = class {
 					this.$sibling_group.empty().append(node_group);
 			},
 			() => this.setup_node_group_action(),
-			() => {
-				this.$hierarchy.empty().append(`
-					<li class="level"></li>
-				`);
-				this.$hierarchy.find('.level').append(node);
-				$(`#connectors`).empty();
-				this.expand_node(node_object);
-			}
+			() => this.reattach_and_expand_node(node, node_object)
 		]);
+	}
+
+	reattach_and_expand_node(node, node_object) {
+		var el = node.detach();
+
+		this.$hierarchy.empty().append(`
+			<li class="level"></li>
+		`);
+		this.$hierarchy.find('.level').append(el);
+		$(`#connectors`).empty();
+		this.expand_node(node_object);
 	}
 
 	remove_levels_after_node(node) {
