@@ -9,7 +9,8 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Link",
 			"width": "80",
 			"options": "Company",
-			"default": frappe.defaults.get_default("company")
+			"default": frappe.defaults.get_default("company"),
+			"reqd": 1
 		},
 		{
 			"fieldname":"from_date",
@@ -52,6 +53,7 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Link",
 			"width": "80",
 			"options": "Warehouse",
+			"reqd": 1,
 			get_query: () => {
 				var warehouse_type = frappe.query_report.get_filter_value('warehouse_type');
 				if(warehouse_type){
