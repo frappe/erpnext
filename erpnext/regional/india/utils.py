@@ -163,7 +163,8 @@ def validate_document_name(doc, method=None):
 		return
 
 	if len(doc.name) > 16:
-		frappe.throw(_("Maximum length of document number should be 16 characters as per GST rules. Please change the naming series."))
+		frappe.throw(_("Maximum length of document number should be 16 characters as per GST rules. Please change the naming series. \
+		Keep in mind that submittable documents will add \"-n\" to the end of document name upon on amending. Limit naming series to 14 characters in that case."))
 
 	if not GST_INVOICE_NUMBER_FORMAT.match(doc.name):
 		frappe.throw(_("Document name should only contain alphanumeric values, dash(-) and slash(/) characters as per GST rules. Please change the naming series."))
