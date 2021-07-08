@@ -257,7 +257,7 @@ def get_actual_start_end_datetime_of_shift(employee, for_datetime, consider_defa
 	actual_shift_start = actual_shift_end = shift_details = None
 	shift_timings_as_per_timestamp = get_employee_shift_timings(employee, for_datetime, consider_default_shift)
 
-	if not shift_timings_as_per_timestamp[0].allow_overtime:
+	if shift_timings_as_per_timestamp[0] and not shift_timings_as_per_timestamp[0].allow_overtime:
 		# If Shift is not allowed for automatic calculation of overtime, then previous, current and next
 		# shift will also should be considered for valid and invalid checkins.
 		# if checkin time is not in current shift thenit will check prev and next shift for checkin validation.

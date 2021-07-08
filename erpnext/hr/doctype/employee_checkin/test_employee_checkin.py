@@ -40,7 +40,8 @@ class TestEmployeeCheckin(unittest.TestCase):
 		log_names = [log.name for log in logs]
 		logs_count = frappe.db.count('Employee Checkin', {'name':['in', log_names], 'attendance':attendance.name})
 		self.assertEqual(logs_count, 4)
-		attendance_count = frappe.db.count('Attendance', {'status':'Present', 'working_hours':8.2,
+
+		attendance_count = frappe.db.count('Attendance', {'status':'Present', 'working_time': 29460,
 			'employee':employee, 'attendance_date':now_date})
 		self.assertEqual(attendance_count, 1)
 
