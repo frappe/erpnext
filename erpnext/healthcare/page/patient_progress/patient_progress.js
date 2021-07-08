@@ -383,7 +383,7 @@ class PatientProgress {
 							xIsSeries: 1
 						},
 						tooltipOptions: {
-							formatTooltipY: d => d + __(' out of ') + chart.max_score
+							formatTooltipY: d => __('{0} out of {1}', [d, chart.max_score])
 						}
 					});
 				} else {

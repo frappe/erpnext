@@ -236,7 +236,7 @@ class PatientHistory {
 		} else if (diff < 2) {
 			pdate = __('Yesterday');
 		} else {
-			pdate = __('on ') + frappe.datetime.global_date_format(date);
+			pdate = __('on {0}', [frappe.datetime.global_date_format(date)]);
 		}
 		data.date_sep = pdate;
 		return data;
