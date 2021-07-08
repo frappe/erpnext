@@ -11,8 +11,13 @@
   "year",
   "disabled",
   "is_short_year",
+  "section_break_4",
   "year_start_date",
   "year_end_date",
+  "column_break_6",
+  "v_start_date",
+  "v_end_date",
+  "section_break_9",
   "companies",
   "auto_created"
  ],
@@ -77,12 +82,34 @@
    "fieldtype": "Check",
    "label": "Is Short Year",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "v_start_date",
+   "fieldtype": "Data",
+   "label": "Vikram Year Start Date"
+  },
+  {
+   "fieldname": "v_end_date",
+   "fieldtype": "Data",
+   "label": "Vikram Year End Date"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2020-11-05 12:16:53.081573",
+ "modified": "2021-07-06 14:32:32.910557",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
