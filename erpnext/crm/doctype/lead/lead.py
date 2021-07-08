@@ -168,15 +168,16 @@ class Lead(SellingController):
 		if self.phone:
 			contact.append("phone_nos", {
 				"phone": self.phone,
-				"is_primary": 1
+				"is_primary_phone": 1
 			})
 
 		if self.mobile_no:
 			contact.append("phone_nos", {
-				"phone": self.mobile_no
+				"phone": self.mobile_no,
+				"is_primary_mobile_no":1
 			})
 
-		contact.insert()
+		contact.insert(ignore_permissions=True)
 
 		return contact
 
@@ -352,7 +353,7 @@ def get_lead_with_phone_number(number):
 	leads = frappe.get_all('Lead', or_filters={
 		'phone': ['like', '%{}'.format(number)],
 		'mobile_no': ['like', '%{}'.format(number)]
-	}, limit=1)
+	}, limit=1, order_by="creation DESC")
 
 	lead = leads[0].name if leads else None
 

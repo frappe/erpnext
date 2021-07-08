@@ -36,6 +36,8 @@ def execute(filters=None):
 	conditions, filters = get_conditions(filters)
 	columns, days = get_columns(filters)
 	att_map = get_attendance_list(conditions, filters)
+	if not att_map:
+		return columns, [], None, None
 
 	if filters.group_by:
 		emp_map, group_by_parameters = get_employee_details(filters.group_by, filters.company)
@@ -55,22 +57,26 @@ def execute(filters=None):
 
 	data = []
 
+	leave_types = frappe.db.get_list("Leave Type")
 	leave_list = None
 	if filters.summarized_view:
-		leave_types = frappe.db.sql("""select name from `tabLeave Type`""", as_list=True)
-		leave_list = [d[0] + ":Float:120" for d in leave_types]
+		leave_list = [d.name + ":Float:120" for d in leave_types]
 		columns.extend(leave_list)
 		columns.extend([_("Total Late Entries") + ":Float:120", _("Total Early Exits") + ":Float:120"])
 
 	if filters.group_by:
 		emp_att_map = {}
 		for parameter in group_by_parameters:
-			data.append([ "<b>"+ parameter + "</b>"])
-			record, aaa = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
-			emp_att_map.update(aaa)
-			data += record
+			emp_map_set = set([key for key in emp_map[parameter].keys()])
+			att_map_set = set([key for key in att_map.keys()])
+			if (att_map_set & emp_map_set):
+				parameter_row = ["<b>"+ parameter + "</b>"] + ['' for day in range(filters["total_days_in_month"] + 2)]
+				data.append(parameter_row)
+				record, emp_att_data = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, default_holiday_list, leave_types=leave_types)
+				emp_att_map.update(emp_att_data)
+				data += record
 	else:
-		record, emp_att_map = add_data(emp_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
+		record, emp_att_map = add_data(emp_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_types=leave_types)
 		data += record
 
 	chart_data = get_chart_data(emp_att_map, days)
@@ -120,7 +126,7 @@ def get_chart_data(emp_att_map, days):
 
 	return chart
 
-def add_data(employee_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=None):
+def add_data(employee_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_types=None):
 
 	record = []
 	emp_att_map = {}
@@ -198,9 +204,9 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, default_ho
 				else:
 					leaves[d.leave_type] = d.count
 
-			for d in leave_list:
-				if d in leaves:
-					row.append(leaves[d])
+			for d in leave_types:
+				if d.name in leaves:
+					row.append(leaves[d.name])
 				else:
 					row.append("0.0")
 
@@ -236,6 +242,9 @@ def get_attendance_list(conditions, filters):
 	attendance_list = frappe.db.sql("""select employee, day(attendance_date) as day_of_month,
 		status from tabAttendance where docstatus = 1 %s order by employee, attendance_date""" %
 		conditions, filters, as_dict=1)
+
+	if not attendance_list:
+		msgprint(_("No attendance record found"), alert=True, indicator="orange")
 
 	att_map = {}
 	for d in attendance_list:

@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, add_days, formatdate, get_datetime, date_diff
+from frappe.utils import flt, getdate, add_days, formatdate, get_datetime, cint
 from frappe.model.document import Document
 from datetime import date
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
@@ -27,15 +27,17 @@ class StockLedgerEntry(Document):
 
 	def validate(self):
 		self.flags.ignore_submit_comment = True
-		from erpnext.stock.utils import validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_company, validate_disabled_warehouse
 		self.validate_mandatory()
 		self.validate_item()
 		self.validate_batch()
+		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
+
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
@@ -106,17 +108,18 @@ class StockLedgerEntry(Document):
 		self.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
-		stock_frozen_upto = frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto') or ''
-		if stock_frozen_upto:
-			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
-			if getdate(self.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in frappe.get_roles():
-				frappe.throw(_("Stock transactions before {0} are frozen").format(formatdate(stock_frozen_upto)), StockFreezeError)
+		stock_settings = frappe.get_doc('Stock Settings', 'Stock Settings')
 
-		stock_frozen_upto_days = int(frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto_days') or 0)
+		if stock_settings.stock_frozen_upto:
+			if (getdate(self.posting_date) <= getdate(stock_settings.stock_frozen_upto)
+				and stock_settings.stock_auth_role not in frappe.get_roles()):
+				frappe.throw(_("Stock transactions before {0} are frozen")
+					.format(formatdate(stock_settings.stock_frozen_upto)), StockFreezeError)
+
+		stock_frozen_upto_days = cint(stock_settings.stock_frozen_upto_days)
 		if stock_frozen_upto_days:
-			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
 			older_than_x_days_ago = (add_days(getdate(self.posting_date), stock_frozen_upto_days) <= date.today())
-			if older_than_x_days_ago and not stock_auth_role in frappe.get_roles():
+			if older_than_x_days_ago and stock_settings.stock_auth_role not in frappe.get_roles():
 				frappe.throw(_("Not allowed to update stock transactions older than {0}").format(stock_frozen_upto_days), StockFreezeError)
 
 	def scrub_posting_time(self):

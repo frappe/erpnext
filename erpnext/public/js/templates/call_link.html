@@ -1,32 +1,31 @@
 <div class="call-detail-wrapper">
-	<div class="left-arrow"></div>
-	<div class="head text-muted">
+	<div class="head flex justify-between">
+		<div>
+			<span class="bold"> {{ type }} Call</span>
+			{% if (duration) %}
+			<span class="text-muted"> • {{ frappe.format(duration, { fieldtype: "Duration" }) }}</span>
+			{% endif %}
+			<span class="text-muted"> • {{ comment_when(creation) }}</span>
+		</div>
 		<span>
-			<i class="fa fa-phone"> </i>
-		<span>
-		<span> {{ type }} Call</span>
-		-
-		<span> {{ frappe.format(duration, { fieldtype: "Duration" }) }}</span>
-		-
-		<span> {{ comment_when(creation) }}</span>
-		-
-		<!-- <span> {{ status }}</span>
-		- -->
-		<a class="text-muted" href="#Form/Call Log/{{name}}">Details</a>
-		{% if (show_call_button) { %}
-			<a class="pull-right">Callback</a>
-		{% } %}
+			<a class="action-btn" href="/app/call-log/{{ name }}" title="{{ __("Open Call Log") }}">
+				<svg class="icon icon-sm">
+					<use href="#icon-link-url" class="like-icon"></use>
+				</svg>
+			</a>
+		</span>
 	</div>
-	<div class="body padding">
+
+
+	<div class="body pt-3">
 		{% if (type === "Incoming") { %}
 			<span> Incoming call from {{ from }}, received by {{ to }}</span>
 		{% } else { %}
 			<span> Outgoing Call made by {{ from }} to {{ to }}</span>
 		{% } %}
-		<hr>
-		<div class="summary">
+		<div class="summary pt-3">
 		{% if (summary) { %}
-			<span>{{ summary }}</span>
+			<i>{{ summary }}</i>
 		{% } else { %}
 			<i class="text-muted">{{ __("No Summary") }}</i>
 		{% } %}

@@ -5,6 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "gstin",
   "username",
   "password"
@@ -30,12 +31,20 @@
    "in_list_view": 1,
    "label": "Password",
    "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-22 15:10:53.466205",
+ "modified": "2021-03-22 12:16:56.365616",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice User",

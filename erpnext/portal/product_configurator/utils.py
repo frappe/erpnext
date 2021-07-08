@@ -298,7 +298,7 @@ def get_items_by_fields(field_filters):
 
 
 def get_items(filters=None, search=None):
-	start = frappe.form_dict.start or 0
+	start = frappe.form_dict.get('start', 0)
 	products_settings = get_product_settings()
 	page_length = products_settings.products_per_page
 
@@ -386,7 +386,8 @@ def get_items(filters=None, search=None):
 		r.description = r.web_long_description or r.description
 		r.image = r.website_image or r.image
 		product_info = get_product_info_for_website(r.item_code, skip_quotation_creation=True).get('product_info')
-		r.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
+		if product_info:
+			r.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
 
 	return results
 

@@ -48,7 +48,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		const email_dialog = new frappe.ui.Dialog({
 			title: 'Email Receipt',
 			fields: [
-				{fieldname:'email_id', fieldtype:'Data', options: 'Email', label:'Email ID'},
+				{fieldname: 'email_id', fieldtype: 'Data', options: 'Email', label: 'Email ID'},
 				// {fieldname:'remarks', fieldtype:'Text', label:'Remarks (if any)'}
 			],
 			primary_action: () => {
@@ -61,13 +61,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		const print_dialog = new frappe.ui.Dialog({
 			title: 'Print Receipt',
 			fields: [
-				{fieldname:'print', fieldtype:'Data', label:'Print Preview'}
+				{fieldname: 'print', fieldtype: 'Data', label: 'Print Preview'}
 			],
 			primary_action: () => {
-				const frm = this.events.get_frm();
-				frm.doc = this.doc;
-				frm.print_preview.lang_code = frm.doc.language;
-				frm.print_preview.printit(true);
+				this.print_receipt();
 			},
 			primary_action_label: __('Print'),
 		});
@@ -132,18 +129,17 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	get_taxes_html(doc) {
 		if (!doc.taxes.length) return '';
 
-		return `
-			<div class="taxes-wrapper">
-				${
-					doc.taxes.map((t, i) => {
-						const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
-						return `<div class="tax-row">
-									<div class="tax-label">${description}</div>
-									<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, doc.currency)}</div>
-								</div>`
-					}).join('')
-				}
-			</div>`;
+		let taxes_html = doc.taxes.map(t => {
+			const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+			return `
+				<div class="tax-row">
+					<div class="tax-label">${description}</div>
+					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, doc.currency)}</div>
+				</div>
+			`;
+		}).join('');
+
+		return `<div class="taxes-wrapper">${taxes_html}</div>`;
 	}
 
 	get_grand_total_html(doc) {
@@ -178,6 +174,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		this.$summary_container.on('click', '.delete-btn', () => {
 			this.events.delete_order(this.doc.name);
 			this.show_summary_placeholder();
+		});
+
+		this.$summary_container.on('click', '.delete-btn', () => {
+			this.events.delete_order(this.doc.name);
+			this.show_summary_placeholder();
 			// this.toggle_component(false);
 			// this.$component.find('.no-summary-placeholder').removeClass('d-none');
 			// this.$summary_wrapper.addClass('d-none');
@@ -196,11 +197,19 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		});
 
 		this.$summary_container.on('click', '.print-btn', () => {
-			const frm = this.events.get_frm();
-			frm.doc = this.doc;
-			frm.print_preview.lang_code = frm.doc.language;
-			frm.print_preview.printit(true);
+			this.print_receipt();
 		});
+	}
+
+	print_receipt() {
+		const frm = this.events.get_frm();
+		frappe.utils.print(
+			this.doc.doctype,
+			this.doc.name,
+			frm.pos_print_format,
+			this.doc.letter_head,
+			this.doc.language || frappe.boot.lang
+		);
 	}
 
 	attach_shortcuts() {
@@ -232,12 +241,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	send_email() {
 		const frm = this.events.get_frm();
-		const recipients = this.email_dialog.get_values().recipients;
+		const recipients = this.email_dialog.get_values().email_id;
 		const doc = this.doc || frm.doc;
 		const print_format = frm.pos_print_format;
 
 		frappe.call({
-			method:"frappe.core.doctype.communication.email.make",
+			method: "frappe.core.doctype.communication.email.make",
 			args: {
 				recipients: recipients,
 				subject: __(frm.meta.name) + ': ' + doc.name,
@@ -246,14 +255,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				send_email: 1,
 				print_format,
 				sender_full_name: frappe.user.full_name(),
-				_lang : doc.language
+				_lang: doc.language
 			},
 			callback: r => {
-				if(!r.exc) {
+				if (!r.exc) {
 					frappe.utils.play_sound("email");
-					if(r.message["emails_not_sent_to"]) {
+					if (r.message["emails_not_sent_to"]) {
 						frappe.msgprint(__(
-							"Email not sent to {0} (unsubscribed / disabled)", 
+							"Email not sent to {0} (unsubscribed / disabled)",
 							[ frappe.utils.escape_html(r.message["emails_not_sent_to"]) ]
 						));
 					} else {
@@ -309,10 +318,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	load_summary_of(doc, after_submission=false) {
 		after_submission ?
 			this.$component.css('grid-column', 'span 10 / span 10') :
-			this.$component.css('grid-column', 'span 6 / span 6')
-		
-		this.toggle_summary_placeholder(false)
-		
+			this.$component.css('grid-column', 'span 6 / span 6');
+
+		this.toggle_summary_placeholder(false);
+
 		this.doc = doc;
 
 		this.attach_document_info(doc);
@@ -338,7 +347,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	attach_items_info(doc) {
 		this.$items_container.html('');
-		doc.items.forEach((item, i) => {
+		doc.items.forEach(item => {
 			const item_dom = this.get_item_html(doc, item);
 			this.$items_container.append(item_dom);
 			this.set_dynamic_rate_header_width();

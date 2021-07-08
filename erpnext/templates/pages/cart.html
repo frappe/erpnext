@@ -62,6 +62,9 @@
 				<div class="col-8">
 					{% if doc.items %}
 					<div class="place-order-container">
+						<a class="btn btn-primary-light mr-2" href="/all-products">
+							{{ _("Continue Shopping") }}
+						</a>
 						{% if cart_settings.enable_checkout %}
 							<button class="btn btn-primary btn-place-order" type="button">
 								{{ _("Place Order") }}
@@ -136,9 +139,7 @@
 
 {% block base_scripts %}
 <!-- js should be loaded in body! -->
-<script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
-<script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
-<script type="text/javascript" src="/assets/js/control.min.js"></script>
-<script type="text/javascript" src="/assets/js/dialog.min.js"></script>
-<script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+{{ include_script("frappe-web.bundle.js") }}
+{{ include_script("controls.bundle.js") }}
+{{ include_script("dialog.bundle.js") }}
 {% endblock %}

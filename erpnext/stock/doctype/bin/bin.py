@@ -16,6 +16,7 @@ class Bin(Document):
 	def update_stock(self, args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		'''Called from erpnext.stock.utils.update_bin'''
 		self.update_qty(args)
+
 		if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
 			from erpnext.stock.stock_ledger import update_entries_after, update_qty_in_future_sle
 
@@ -34,11 +35,13 @@ class Bin(Document):
 				"posting_time": args.get("posting_time"),
 				"voucher_type": args.get("voucher_type"),
 				"voucher_no": args.get("voucher_no"),
-				"sle_id": args.name
+				"sle_id": args.name,
+				"creation": args.creation
 			}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
-			# Update qty_after_transaction in future SLEs of this item and warehouse
-			update_qty_in_future_sle(args)
+			# update qty in future ale and Validate negative qty
+			update_qty_in_future_sle(args, allow_negative_stock)
+
 
 	def update_qty(self, args):
 		# update the stock values (for current quantities)
@@ -112,7 +115,7 @@ class Bin(Document):
 		#Get Transferred Entries
 		materials_transferred = frappe.db.sql("""
 			select
-				ifnull(sum(transfer_qty),0)
+				ifnull(sum(CASE WHEN se.is_return = 1 THEN (transfer_qty * -1) ELSE transfer_qty END),0)
 			from
 				`tabStock Entry` se, `tabStock Entry Detail` sed, `tabPurchase Order` po
 			where

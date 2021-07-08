@@ -18,6 +18,7 @@ class QualityInspection(Document):
 		if self.readings:
 			self.inspect_and_set_status()
 
+	@frappe.whitelist()
 	def get_item_specification_details(self):
 		if not self.quality_inspection_template:
 			self.quality_inspection_template = frappe.db.get_value('Item',
@@ -32,6 +33,7 @@ class QualityInspection(Document):
 			child.update(d)
 			child.status = "Accepted"
 
+	@frappe.whitelist()
 	def get_quality_inspection_template(self):
 		template = ''
 		if self.bom_no:
@@ -62,17 +64,21 @@ class QualityInspection(Document):
 					(quality_inspection, self.modified, self.reference_name, self.item_code))
 
 		else:
+			args = [quality_inspection, self.modified, self.reference_name, self.item_code]
 			doctype = self.reference_type + ' Item'
+
 			if self.reference_type == 'Stock Entry':
 				doctype = 'Stock Entry Detail'
 
 			if self.reference_type and self.reference_name:
 				conditions = ""
 				if self.batch_no and self.docstatus == 1:
-					conditions += " and t1.batch_no = '%s'"%(self.batch_no)
+					conditions += " and t1.batch_no = %s"
+					args.append(self.batch_no)
 
 				if self.docstatus == 2: # if cancel, then remove qi link wherever same name
-					conditions += " and t1.quality_inspection = '%s'"%(self.name)
+					conditions += " and t1.quality_inspection = %s"
+					args.append(self.name)
 
 				frappe.db.sql("""
 					UPDATE
@@ -85,7 +91,7 @@ class QualityInspection(Document):
 						and t1.parent = t2.name
 						{conditions}
 				""".format(parent_doc=self.reference_type, child_doc=doctype, conditions=conditions),
-					(quality_inspection, self.modified, self.reference_name, self.item_code))
+					args)
 
 	def inspect_and_set_status(self):
 		for reading in self.readings:
@@ -97,7 +103,7 @@ class QualityInspection(Document):
 					self.set_status_based_on_acceptance_values(reading)
 
 	def set_status_based_on_acceptance_values(self, reading):
-		if cint(reading.non_numeric):
+		if not cint(reading.numeric):
 			result = reading.get("reading_value") == reading.get("value")
 		else:
 			# numeric readings
@@ -136,7 +142,7 @@ class QualityInspection(Document):
 
 	def get_formula_evaluation_data(self, reading):
 		data = {}
-		if cint(reading.non_numeric):
+		if not cint(reading.numeric):
 			data = {"reading_value": reading.get("reading_value")}
 		else:
 			# numeric readings

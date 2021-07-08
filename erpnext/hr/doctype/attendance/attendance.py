@@ -15,6 +15,7 @@ class Attendance(Document):
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home"])
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
+		self.validate_employee_status()
 		self.check_leave_record()
 
 	def validate_attendance_date(self):
@@ -35,7 +36,12 @@ class Attendance(Document):
 				and docstatus != 2
 		""", (self.employee, getdate(self.attendance_date), self.name))
 		if res:
-			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
+			frappe.throw(_("Attendance for employee {0} is already marked for the date {1}").format(
+				frappe.bold(self.employee), frappe.bold(self.attendance_date)))
+
+	def validate_employee_status(self):
+		if frappe.db.get_value("Employee", self.employee, "status") == "Inactive":
+			frappe.throw(_("Cannot mark attendance for an Inactive employee {0}").format(self.employee))
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""
@@ -131,6 +137,10 @@ def mark_bulk_attendance(data):
 		data = json.loads(data)
 	data = frappe._dict(data)
 	company = frappe.get_value('Employee', data.employee, 'company')
+	if not data.unmarked_days:
+		frappe.throw(_("Please select a date."))
+		return
+
 	for date in data.unmarked_days:
 		doc_dict = {
 			'doctype': 'Attendance',

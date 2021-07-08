@@ -34,6 +34,7 @@ class PatientHistorySettings(Document):
 				frappe.throw(_('Row #{0}: Field {1} in Document Type {2} is not a Date / Datetime field.').format(
 					entry.idx, frappe.bold(entry.date_fieldname), frappe.bold(entry.document_type)))
 
+	@frappe.whitelist()
 	def get_doctype_fields(self, document_type, fields):
 		multicheck_fields = []
 		doc_fields = frappe.get_meta(document_type).fields
@@ -49,6 +50,7 @@ class PatientHistorySettings(Document):
 
 		return multicheck_fields
 
+	@frappe.whitelist()
 	def get_date_field_for_dt(self, document_type):
 		meta = frappe.get_meta(document_type)
 		date_fields = meta.get('fields', {

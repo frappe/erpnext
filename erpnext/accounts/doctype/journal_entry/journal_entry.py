@@ -39,7 +39,11 @@ class JournalEntry(AccountsController):
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
 		self.validate_debit_credit_amount()
-		self.validate_total_debit_and_credit()
+
+		# Do not validate while importing via data import
+		if not frappe.flags.in_import:
+			self.validate_total_debit_and_credit()
+
 		self.validate_against_jv()
 		self.validate_reference_doc()
 		self.set_against_account()
@@ -102,7 +106,7 @@ class JournalEntry(AccountsController):
 			if account_currency == previous_account_currency:
 				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
-	
+
 	def validate_stock_accounts(self):
 		stock_accounts = get_stock_accounts(self.company, self.doctype, self.name)
 		for account in stock_accounts:
@@ -192,8 +196,8 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 
 	def check_credit_limit(self):
-		customers = list(set([d.party for d in self.get("accounts")
-			if d.party_type=="Customer" and d.party and flt(d.debit) > 0]))
+		customers = list(set(d.party for d in self.get("accounts")
+			if d.party_type=="Customer" and d.party and flt(d.debit) > 0))
 		if customers:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			for customer in customers:
@@ -229,11 +233,11 @@ class JournalEntry(AccountsController):
 			if d.reference_type=="Journal Entry":
 				account_root_type = frappe.db.get_value("Account", d.account, "root_type")
 				if account_root_type == "Asset" and flt(d.debit) > 0:
-					frappe.throw(_("For {0}, only credit accounts can be linked against another debit entry")
-						.format(d.account))
+					frappe.throw(_("Row #{0}: For {1}, you can select reference document only if account gets credited")
+						.format(d.idx, d.account))
 				elif account_root_type == "Liability" and flt(d.credit) > 0:
-					frappe.throw(_("For {0}, only debit accounts can be linked against another credit entry")
-						.format(d.account))
+					frappe.throw(_("Row #{0}: For {1}, you can select reference document only if account gets debited")
+						.format(d.idx, d.account))
 
 				if d.reference_name == self.name:
 					frappe.throw(_("You can not enter current voucher in 'Against Journal Entry' column"))
@@ -564,6 +568,7 @@ class JournalEntry(AccountsController):
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
 
+	@frappe.whitelist()
 	def get_balance(self):
 		if not self.get('accounts'):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
@@ -591,6 +596,7 @@ class JournalEntry(AccountsController):
 
 			self.validate_total_debit_and_credit()
 
+	@frappe.whitelist()
 	def get_outstanding_invoices(self):
 		self.set('accounts', [])
 		total = 0

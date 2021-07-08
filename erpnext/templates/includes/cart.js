@@ -35,7 +35,7 @@ $.extend(shopping_cart, {
 	},
 
 	get_update_address_dialog() {
-		return new frappe.ui.Dialog({
+		let d = new frappe.ui.Dialog({
 			title: "Select Address",
 			fields: [{
 				'fieldtype': 'HTML',
@@ -56,7 +56,7 @@ $.extend(shopping_cart, {
 					},
 					callback: function(r) {
 						d.hide();
-						if(!r.exc) {
+						if (!r.exc) {
 							$(".cart-tax-items").html(r.message.taxes);
 							shopping_cart.parent.find(
 								`.address-container[data-address-type="${address_type}"]`
@@ -66,6 +66,8 @@ $.extend(shopping_cart, {
 				});
 			}
 		});
+
+		return d;
 	},
 
 	get_address_template(type) {

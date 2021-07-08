@@ -15,12 +15,13 @@
  ],
  "fields": [
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Priority",
-   "options": "Issue Priority"
+   "options": "Issue Priority",
+   "reqd": 1
   },
   {
    "fieldname": "sb_00",
@@ -32,7 +33,6 @@
    "fieldtype": "Duration",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_list_view": 1,
    "label": "Resolution Time"
   },
   {
@@ -58,12 +58,13 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "in_list_view": 1,
-   "label": "First Response Time"
+   "label": "First Response Time",
+   "reqd": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-06-10 12:45:47.545915",
+ "modified": "2021-05-29 19:52:51.733248",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Priority",

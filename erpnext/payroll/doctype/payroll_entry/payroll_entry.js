@@ -133,45 +133,76 @@ frappe.ui.form.on('Payroll Entry', {
 				}
 			};
 		});
+
+		frm.set_query('employee', 'employees', () => {
+			let error_fields = [];
+			let mandatory_fields = ['company', 'payroll_frequency', 'start_date', 'end_date'];
+
+			let message = __('Mandatory fields required in {0}', [__(frm.doc.doctype)]);
+
+			mandatory_fields.forEach(field => {
+				if (!frm.doc[field]) {
+					error_fields.push(frappe.unscrub(field));
+				}
+			});
+
+			if (error_fields && error_fields.length) {
+				message = message + '<br><br><ul><li>' + error_fields.join('</li><li>') + "</ul>";
+				frappe.throw({
+					message: message,
+					indicator: 'red',
+					title: __('Missing Fields')
+				});
+			}
+
+			return {
+				query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.employee_query",
+				filters: frm.events.get_employee_filters(frm)
+			};
+		});
+	},
+
+	get_employee_filters: function (frm) {
+		let filters = {};
+		filters['salary_slip_based_on_timesheet'] = frm.doc.salary_slip_based_on_timesheet;
+
+		let fields = ['company', 'start_date', 'end_date', 'payroll_frequency', 'payroll_payable_account',
+			'currency', 'department', 'branch', 'designation'];
+
+		fields.forEach(field => {
+			if (frm.doc[field]) {
+				filters[field] = frm.doc[field];
+			}
+		});
+
+		if (frm.doc.employees) {
+			let employees = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
+			if (employees && employees.length) {
+				filters['employees'] = employees;
+			}
+		}
+		return filters;
 	},
 
 	payroll_frequency: function (frm) {
 		frm.trigger("set_start_end_dates").then( ()=> {
 			frm.events.clear_employee_table(frm);
-			frm.events.get_employee_with_salary_slip_and_set_query(frm);
-		});
-	},
-
-	employee_filters: function (frm, emp_list) {
-		frm.set_query('employee', 'employees', () => {
-			return {
-				filters: {
-					name: ["not in", emp_list]
-				}
-			};
-		});
-	},
-
-	get_employee_with_salary_slip_and_set_query: function (frm) {
-		frappe.db.get_list('Salary Slip', {
-			filters: {
-				start_date: frm.doc.start_date,
-				end_date: frm.doc.end_date,
-				docstatus: 1,
-			},
-			fields: ['employee']
-		}).then((emp) => {
-			var emp_list = [];
-			emp.forEach((employee_data) => {
-				emp_list.push(Object.values(employee_data)[0]);
-			});
-			frm.events.employee_filters(frm, emp_list);
 		});
 	},
 
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		frm.trigger("set_payable_account_and_currency");
+	},
+
+	set_payable_account_and_currency: function (frm) {
+		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_currency", (r) => {
+			frm.set_value('currency', r.default_currency);
+		});
+		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_payroll_payable_account", (r) => {
+			frm.set_value('payroll_payable_account', r.default_payroll_payable_account);
+		});
 	},
 
 	currency: function (frm) {
@@ -345,12 +376,3 @@ let render_employee_attendance = function (frm, data) {
 		})
 	);
 };
-
-frappe.ui.form.on('Payroll Employee Detail', {
-	employee: function(frm) {
-		frm.events.clear_employee_table(frm);
-		if (!frm.doc.payroll_frequency) {
-			frappe.throw(__("Please set a Payroll Frequency"));
-		}
-	}
-});

@@ -50,6 +50,7 @@
    "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
  "modified": "2021-01-30 19:16:39.934744",

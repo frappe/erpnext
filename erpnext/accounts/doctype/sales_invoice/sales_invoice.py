@@ -21,8 +21,10 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -44,7 +46,6 @@ class SalesInvoice(SellingController):
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_billed',
 			'source_field': 'amount',
-			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
 			'keyword': 'Billed',
@@ -75,6 +76,8 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
+
+		self.set_tax_withholding()
 
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -122,6 +125,8 @@ class SalesInvoice(SellingController):
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		if not self.is_return:
 			self.validate_serial_numbers()
+		else:
+			self.timesheets = []
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -153,6 +158,32 @@ class SalesInvoice(SellingController):
 			if cost_center_company != self.company:
 				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
 
+	def set_tax_withholding(self):
+		tax_withholding_details = get_party_tax_withholding_details(self)
+
+		if not tax_withholding_details:
+			return
+
+		accounts = []
+		tax_withholding_account = tax_withholding_details.get("account_head")
+
+		for d in self.taxes:
+			if d.account_head == tax_withholding_account:
+				d.update(tax_withholding_details)
+			accounts.append(d.account_head)
+
+		if not accounts or tax_withholding_account not in accounts:
+			self.append("taxes", tax_withholding_details)
+
+		to_remove = [d for d in self.taxes
+			if not d.tax_amount and d.charge_type == "Actual" and d.account_head == tax_withholding_account]
+
+		for d in to_remove:
+			self.remove(d)
+
+		# calculate totals again after applying TDS
+		self.calculate_taxes_and_totals()
+
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
@@ -181,6 +212,9 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
@@ -243,7 +277,7 @@ class SalesInvoice(SellingController):
 				pluck="pos_closing_entry"
 			)
 			if pos_closing_entry:
-				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}. ").format(
+				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
 					frappe.bold("Consolidated Sales Invoice"),
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
 				)
@@ -305,7 +339,7 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
-
+		self.unlink_sales_invoice_from_timesheets()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def update_status_updater_args(self):
@@ -361,6 +395,19 @@ class SalesInvoice(SellingController):
 		if validate_against_credit_limit:
 			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
+	def unlink_sales_invoice_from_timesheets(self):
+		for row in self.timesheets:
+			timesheet = frappe.get_doc('Timesheet', row.time_sheet)
+			for time_log in timesheet.time_logs:
+				if time_log.sales_invoice == self.name:
+					time_log.sales_invoice = None
+			timesheet.calculate_total_amounts()
+			timesheet.calculate_percentage_billed()
+			timesheet.flags.ignore_validate_update_after_submit = True
+			timesheet.set_status()
+			timesheet.db_update_all()
+
+	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
 
@@ -394,7 +441,7 @@ class SalesInvoice(SellingController):
 				timesheet.calculate_percentage_billed()
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
-				timesheet.save()
+				timesheet.db_update_all()
 
 	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
 		for data in timesheet.time_logs:
@@ -484,7 +531,7 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
+					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos, update_data=True)
 					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -515,12 +562,12 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			msg = _("Please ensure {} account is a Balance Sheet account. ").format(frappe.bold("Debit To"))
+			msg = _("Please ensure {} account is a Balance Sheet account.").format(frappe.bold("Debit To")) + " "
 			msg += _("You can change the parent account to a Balance Sheet account or select a different account.")
 			frappe.throw(msg, title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			msg = _("Please ensure {} account is a Receivable account. ").format(frappe.bold("Debit To"))
+			msg = _("Please ensure {} account is a Receivable account.").format(frappe.bold("Debit To")) + " "
 			msg += _("Change the account type to Receivable or select a different account.")
 			frappe.throw(msg, title=_("Invalid Account"))
 
@@ -700,6 +747,7 @@ class SalesInvoice(SellingController):
 		else:
 			self.calculate_billing_amount_for_timesheet()
 
+	@frappe.whitelist()
 	def add_timesheet_data(self):
 		self.set('timesheets', [])
 		if self.project:
@@ -707,8 +755,10 @@ class SalesInvoice(SellingController):
 				self.append('timesheets', {
 						'time_sheet': data.parent,
 						'billing_hours': data.billing_hours,
-						'billing_amount': data.billing_amt,
-						'timesheet_detail': data.name
+						'billing_amount': data.billing_amount,
+						'timesheet_detail': data.name,
+						'activity_type': data.activity_type,
+						'description': data.description
 					})
 
 			self.calculate_billing_amount_for_timesheet()
@@ -792,6 +842,8 @@ class SalesInvoice(SellingController):
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
+		self.allocate_advance_taxes(gl_entries)
+
 		self.make_item_gl_entries(gl_entries)
 
 		# merge gl entries before adding pos entries
@@ -799,7 +851,6 @@ class SalesInvoice(SellingController):
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
@@ -933,7 +984,13 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
+
+			skip_change_gl_entries = not cint(frappe.db.get_single_value('Accounts Settings', 'post_change_gl_entries'))
+
 			for payment_mode in self.payments:
+				if skip_change_gl_entries and payment_mode.account == self.account_for_change_amount:
+					payment_mode.base_amount -= flt(self.change_amount)
+
 				if payment_mode.amount:
 					# POS, make payment entries
 					gl_entries.append(
@@ -965,8 +1022,11 @@ class SalesInvoice(SellingController):
 						}, payment_mode_account_currency, item=self)
 					)
 
+			if not skip_change_gl_entries:
+				self.make_gle_for_change_amount(gl_entries)
+
 	def make_gle_for_change_amount(self, gl_entries):
-		if cint(self.is_pos) and self.change_amount:
+		if self.change_amount:
 			if self.account_for_change_amount:
 				gl_entries.append(
 					self.get_gl_dict({
@@ -1030,7 +1090,8 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
-		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment:
+		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment \
+			and not self.is_internal_transfer():
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 
@@ -1076,7 +1137,7 @@ class SalesInvoice(SellingController):
 			if not item.serial_no:
 				continue
 
-			for serial_no in item.serial_no.split("\n"):
+			for serial_no in get_serial_nos(item.serial_no):
 				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
 					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
@@ -1086,7 +1147,6 @@ class SalesInvoice(SellingController):
 		"""
 		self.set_serial_no_against_delivery_note()
 		self.validate_serial_against_delivery_note()
-		self.validate_serial_against_sales_invoice()
 
 	def set_serial_no_against_delivery_note(self):
 		for item in self.items:
@@ -1116,26 +1176,6 @@ class SalesInvoice(SellingController):
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
 				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
 					item.idx, item.qty, item.item_code, len(si_serial_nos)))
-
-	def validate_serial_against_sales_invoice(self):
-		""" check if serial number is already used in other sales invoice """
-		for item in self.items:
-			if not item.serial_no:
-				continue
-
-			for serial_no in item.serial_no.split("\n"):
-				serial_no_details = frappe.db.get_value("Serial No", serial_no,
-					["sales_invoice", "item_code"], as_dict=1)
-
-				if not serial_no_details:
-					continue
-
-				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
-					and self.name != serial_no_details.sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
-					if sales_invoice_company == self.company:
-						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}")
-							.format(serial_no, serial_no_details.sales_invoice))
 
 	def update_project(self):
 		if self.project:
@@ -1256,6 +1296,7 @@ class SalesInvoice(SellingController):
 				break
 
 	# Healthcare
+	@frappe.whitelist()
 	def set_healthcare_services(self, checked_values):
 		self.set("items", [])
 		from erpnext.stock.get_item_details import get_item_details
@@ -1719,15 +1760,10 @@ def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, wa
 		item.purchase_order = parent_child_map.get(sales_item_map.get(item.delivery_note_item))
 
 def get_delivery_note_details(internal_reference):
-	so_item_map = {}
-
 	si_item_details = frappe.get_all('Delivery Note Item', fields=['name', 'so_detail'],
 		filters={'parent': internal_reference})
 
-	for d in si_item_details:
-		so_item_map.setdefault(d.name, d.so_detail)
-
-	return so_item_map
+	return {d.name: d.so_detail for d in si_item_details if d.so_detail}
 
 def get_sales_invoice_details(internal_reference):
 	dn_item_map = {}

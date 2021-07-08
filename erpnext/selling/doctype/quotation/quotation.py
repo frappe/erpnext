@@ -50,7 +50,7 @@ class Quotation(SellingController):
 			self.customer_name = company_name or lead_name
 
 	def update_opportunity(self, status):
-		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
+		for opportunity in set(d.prevdoc_docname for d in self.get("items")):
 			if opportunity:
 				self.update_opportunity_status(status, opportunity)
 
@@ -64,6 +64,7 @@ class Quotation(SellingController):
 		opp = frappe.get_doc("Opportunity", opportunity)
 		opp.set_status(status=status, update=True)
 
+	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():
 			get_lost_reasons = frappe.get_list('Quotation Lost Reason',

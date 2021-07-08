@@ -1,0 +1,21 @@
+.call-popup {
+	a:hover {
+		text-decoration: underline;
+	}
+	.for-description {
+		max-height: 250px;
+		overflow: scroll;
+	}
+}
+
+audio {
+	height: 40px;
+	width: 100%;
+	max-width: 500px;
+	background-color: var(--control-bg);
+	border-radius: var(--border-radius-sm);
+	&-webkit-media-controls-panel {
+		background: var(--control-bg);
+	}
+	outline: none;
+}

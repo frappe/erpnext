@@ -209,6 +209,7 @@ class ItemConfigure {
 			__('{0} item found.', [filtered_items_count]) :
 			__('{0} items found.', [filtered_items_count]);
 
+		/* eslint-disable indent */
 		const item_found_status = exact_match.length === 1
 			? `<div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
 				<div><div>
@@ -230,6 +231,7 @@ class ItemConfigure {
 						${__('Clear values')}
 					</a>
 			</div>`;
+		/* eslint-disable indent */
 
 		return `
 			${item_found_status}

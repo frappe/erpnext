@@ -11,12 +11,12 @@ from erpnext.hr.utils import update_employee
 
 class EmployeeTransfer(Document):
 	def validate(self):
-		if frappe.get_value("Employee", self.employee, "status") == "Left":
-			frappe.throw(_("Cannot transfer Employee with status Left"))
+		if frappe.get_value("Employee", self.employee, "status") != "Active":
+			frappe.throw(_("Cannot transfer Employee with status Left or Inactive"))
 
 	def before_submit(self):
 		if getdate(self.transfer_date) > getdate():
-			frappe.throw(_("Employee Transfer cannot be submitted before Transfer Date "),
+			frappe.throw(_("Employee Transfer cannot be submitted before Transfer Date"),
 				frappe.DocstatusTransitionError)
 
 	def on_submit(self):
@@ -50,8 +50,9 @@ class EmployeeTransfer(Document):
 		employee = frappe.get_doc("Employee", self.employee)
 		if self.create_new_employee_id:
 			if self.new_employee_id:
-				frappe.throw(_("Please delete the Employee <a href='/app/Form/Employee/{0}'>{0}</a>\
-					to cancel this document").format(self.new_employee_id))
+				frappe.throw(_("Please delete the Employee {0} to cancel this document").format(
+					"<a href='/app/Form/Employee/{0}'>{0}</a>".format(self.new_employee_id)
+				))
 			#mark the employee as active
 			employee.status = "Active"
 			employee.relieving_date = ''

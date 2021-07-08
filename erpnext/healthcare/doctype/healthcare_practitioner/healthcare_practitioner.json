@@ -155,6 +155,7 @@
    "fieldname": "op_consulting_charge",
    "fieldtype": "Currency",
    "label": "Out Patient Consulting Charge",
+   "mandatory_depends_on": "op_consulting_charge_item",
    "options": "Currency"
   },
   {
@@ -170,7 +171,8 @@
   {
    "fieldname": "inpatient_visit_charge",
    "fieldtype": "Currency",
-   "label": "Inpatient Visit Charge"
+   "label": "Inpatient Visit Charge",
+   "mandatory_depends_on": "inpatient_visit_charge_item"
   },
   {
    "depends_on": "eval: !doc.__islocal",

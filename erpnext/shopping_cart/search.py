@@ -1,7 +1,6 @@
 import frappe
 from frappe.search.full_text_search import FullTextSearch
 from whoosh.fields import TEXT, ID, KEYWORD, Schema
-from frappe.website.render import render_page
 from frappe.utils import strip_html_tags
 from whoosh.qparser import MultifieldParser, FieldsPlugin, WildcardPlugin
 from whoosh.analysis import StemmingAnalyzer
@@ -52,7 +51,7 @@ class ProductSearch(FullTextSearch):
 
 			if item.web_long_description:
 				content = strip_html_tags(item.web_long_description)
-			elif description:
+			elif item.description:
 				content = strip_html_tags(item.description)
 
 			return frappe._dict(
