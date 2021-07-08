@@ -106,6 +106,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.production_item",
    "fetch_from": "production_item.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
