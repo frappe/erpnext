@@ -21,15 +21,15 @@ class ProductQuery:
 	def __init__(self):
 		self.settings = frappe.get_doc("E Commerce Settings")
 		self.page_length = self.settings.products_per_page or 20
+
+		self.or_filters = []
+		self.filters = [["published", "=", 1]]
 		self.fields = ['web_item_name', 'name', 'item_name', 'item_code', 'website_image',
 			'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description',
 			'short_description', 'route', 'website_warehouse', 'ranking']
-		self.filters = [["published", "=", 1]]
-		self.or_filters = []
 
 	def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None):
-		"""Summary
-
+		"""
 		Args:
 			attributes (dict, optional): Item Attribute filters
 			fields (dict, optional): Field level filters
@@ -37,18 +37,13 @@ class ProductQuery:
 			start (int, optional): Page start
 
 		Returns:
-			list: List of results with set fields
+			dict: Dict containing items, item count & discount range
 		"""
-		result, discount_list = [], []
-		website_item_groups = []
+		# track if discounts included in field filters
+		self.filter_with_discount = bool(fields.get("discount"))
+		result, discount_list, website_item_groups, count = [], [], [], 0
 
-		# if from item group page consider website item group table
-		if item_group:
-			website_item_groups = frappe.db.get_all(
-				"Website Item",
-				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
-				filters=[["Website Item Group", "item_group", "=", item_group]]
-			)
+		website_item_groups = self.get_website_item_group_results(item_group, website_item_groups)
 
 		if fields:
 			self.build_fields_filters(fields)
@@ -57,63 +52,29 @@ class ProductQuery:
 		if self.settings.hide_variants:
 			self.filters.append(["variant_of", "is", "not set"])
 
-		count = 0
+		# query results
 		if attributes:
 			result, count = self.query_items_with_attributes(attributes, start)
 		else:
 			result, count = self.query_items(start=start)
 
-		# add price and availability info in results
-		for item in result:
-			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
+		result = self.combine_web_item_group_results(item_group, result, website_item_groups)
 
-			if product_info and product_info['price']:
-				self.get_price_discount_info(item, product_info['price'], discount_list)
-
-			if self.settings.show_stock_availability:
-				self.get_stock_availability(item)
-
-			item.wished = False
-			if frappe.db.exists("Wishlist Item", {"item_code": item.item_code, "parent": frappe.session.user}):
-				item.wished = True
+		# sort combined results by ranking
+		result = sorted(result, key=lambda x: x.get("ranking"), reverse=True)
+		result, discount_list = self.add_display_details(result, discount_list)
 
 		discounts = []
 		if discount_list:
 			discounts = [min(discount_list), max(discount_list)]
 
-		if fields and "discount" in fields:
-			discount_percent = frappe.utils.flt(fields["discount"][0])
-			result = [row for row in result if row.get("discount_percent") and row.discount_percent >= discount_percent]
+		result = self.filter_results_by_discount(fields, result)
 
 		return {
 			"items": result,
 			"items_count": count,
 			"discounts": discounts
 		}
-
-	def get_price_discount_info(self, item, price_object, discount_list):
-		"""Modify item object and add price details."""
-		item.formatted_mrp = price_object.get('formatted_mrp')
-		item.formatted_price = price_object.get('formatted_price')
-
-		if price_object.get('discount_percent'):
-			item.discount_percent = flt(price_object.discount_percent)
-			discount_list.append(price_object.discount_percent)
-
-		if item.formatted_mrp:
-			item.discount = price_object.get('formatted_discount_percent') or \
-				price_object.get('formatted_discount_rate')
-		item.price = price_object.get('price_list_rate')
-
-	def get_stock_availability(self, item):
-		"""Modify item object and add stock details."""
-		if item.get("website_warehouse"):
-			stock_qty = frappe.utils.flt(
-				frappe.db.get_value("Bin", {"item_code": item.item_code, "warehouse": item.get("website_warehouse")},
-					"actual_qty"))
-			item.in_stock = "green" if stock_qty else "red"
-		elif not frappe.db.get_value("Item", item.item_code, "is_stock_item"):
-			item.in_stock = "green" # non-stock item will always be available
 
 	def query_items(self, start=0):
 		"""Build a query to fetch Website Items based on field filters."""
@@ -129,12 +90,18 @@ class ProductQuery:
 			order_by="ranking desc")
 		count = len(count_items)
 
+		# If discounts included, return all rows.
+		# Slice after filtering rows with discount (See `filter_results_by_discount`).
+		# Slicing before hand will miss discounted items on the 3rd or 4th page.
+		# Discounts are fetched on computing Pricing Rules so we cannot query them directly.
+		page_length = 184467440737095516 if self.filter_with_discount else self.page_length
+
 		items = frappe.db.get_all(
 			"Website Item",
 			fields=self.fields,
 			filters=self.filters,
 			or_filters=self.or_filters,
-			limit_page_length=self.page_length,
+			limit_page_length=page_length,
 			limit_start=start,
 			order_by="ranking desc")
 
@@ -215,3 +182,77 @@ class ProductQuery:
 		search = '%{}%'.format(search_term)
 		for field in search_fields:
 			self.or_filters.append([field, "like", search])
+
+	def get_website_item_group_results(self, item_group, website_item_groups):
+		"""Get Web Items for Item Group Page via Website Item Groups."""
+		if item_group:
+			website_item_groups = frappe.db.get_all(
+				"Website Item",
+				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
+				filters=[["Website Item Group", "item_group", "=", item_group]]
+			)
+		return website_item_groups
+
+	def add_display_details(self, result, discount_list):
+		"""Add price and availability details in result."""
+		for item in result:
+			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
+
+			if product_info and product_info['price']:
+				# update/mutate item and discount_list objects
+				self.get_price_discount_info(item, product_info['price'], discount_list)
+
+			if self.settings.show_stock_availability:
+				self.get_stock_availability(item)
+
+			item.wished = False
+			if frappe.db.exists("Wishlist Item", {"item_code": item.item_code, "parent": frappe.session.user}):
+				item.wished = True
+
+		return result, discount_list
+
+	def get_price_discount_info(self, item, price_object, discount_list):
+		"""Modify item object and add price details."""
+		fields = ["formatted_mrp", "formatted_price", "price_list_rate"]
+		for field in fields:
+			item[field] = price_object.get(field)
+
+		if price_object.get('discount_percent'):
+			item.discount_percent = flt(price_object.discount_percent)
+			discount_list.append(price_object.discount_percent)
+
+		if item.formatted_mrp:
+			item.discount = price_object.get('formatted_discount_percent') or \
+				price_object.get('formatted_discount_rate')
+
+	def get_stock_availability(self, item):
+		"""Modify item object and add stock details."""
+		if item.get("website_warehouse"):
+			stock_qty = frappe.utils.flt(
+				frappe.db.get_value("Bin", {"item_code": item.item_code, "warehouse": item.get("website_warehouse")},
+					"actual_qty"))
+			item.in_stock = "green" if stock_qty else "red"
+		elif not frappe.db.get_value("Item", item.item_code, "is_stock_item"):
+			item.in_stock = "green" # non-stock item will always be available
+
+	def combine_web_item_group_results(self, item_group, result, website_item_groups):
+		"""Combine results with context of website item groups into item results."""
+		if item_group and website_item_groups:
+			items_list = {row.name for row in result}
+			for row in website_item_groups:
+				if row.wig_parent not in items_list:
+					result.append(row)
+
+		return result
+
+	def filter_results_by_discount(self, fields, result):
+		if fields and fields.get("discount"):
+			discount_percent = frappe.utils.flt(fields["discount"][0])
+			result = [row for row in result if row.get("discount_percent") and row.discount_percent >= discount_percent]
+
+		if self.filter_with_discount:
+			# no limit was added to results while querying
+			# slice results manually
+			result[:self.page_length]
+
+		return result
