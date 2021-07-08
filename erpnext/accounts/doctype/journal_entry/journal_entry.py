@@ -101,10 +101,12 @@ class JournalEntry(AccountsController):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
 	def update_status_for_full_and_final_statement(self):
-		fnf_docname = [d.reference_name for d in self.accounts if d.reference_type=="Full And Final Statement"][0]
+		fnf_docname = [d.reference_name for d in self.accounts if d.reference_type=="Full And Final Statement"]
+		if len(fnf_docname):
+			fnf_docname = fnf_docname[0]
 		if self.docstatus == 1:
 			frappe.db.set_value("Full And Final Statement", fnf_docname, "status", "Paid")
-		if self.status == 2:
+		if self.docstatus == 2:
 			frappe.db.set_value("Full And Final Statement", fnf_docname, "status", "Unpaid")
 
 

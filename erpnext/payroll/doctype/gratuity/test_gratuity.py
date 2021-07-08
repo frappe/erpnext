@@ -133,7 +133,7 @@ def create_gratuity(**args):
 	gratuity.employee = args.employee
 	gratuity.posting_date = getdate()
 	gratuity.gratuity_rule = args.rule or "Rule Under Limited Contract (UAE)"
-	gratuity.expense_account =  args.expense_account or 'Payment Account - _TC'
+	gratuity.expense_account = args.expense_account or 'Payment Account - _TC'
 	gratuity.payable_account = args.payable_account or get_payable_account("_Test Company")
 	gratuity.mode_of_payment = args.mode_of_payment or 'Cash'
 

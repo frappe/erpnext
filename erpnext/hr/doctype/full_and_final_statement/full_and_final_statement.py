@@ -61,12 +61,13 @@ class FullAndFinalStatement(Document):
 
 	def get_assets_movement(self):
 		asset_movements = frappe.get_all("Asset Movement Item",
-			filters = {"docstatus": 1 },
+			filters = {"docstatus": 1},
 			fields = ["asset", "from_employee", "to_employee", "parent", "asset_name"],
 			or_filters = {
 				"from_employee": self.employee,
 				"to_employee": self.employee
-		})
+			}
+		)
 
 		data = []
 		inward_movements = []
@@ -135,7 +136,7 @@ class FullAndFinalStatement(Document):
 
 @frappe.whitelist()
 def get_account_and_amount(ref_doctype, ref_document):
-	if ref_doctype == "Salary Slip" and  ref_document:
+	if ref_doctype == "Salary Slip" and ref_document:
 		payroll, amount = frappe.db.get_value("Salary Slip", ref_document, ["payroll_entry", "net_pay"])
 		payable_account = frappe.db.get_value("Payroll Entry", payroll, "payroll_payable_account")
 		return [payable_account, amount]

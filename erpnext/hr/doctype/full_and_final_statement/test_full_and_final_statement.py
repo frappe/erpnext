@@ -36,8 +36,6 @@ class TestFullAndFinalStatement(unittest.TestCase):
 		#checking allocated asset
 		self.assertIn(movement, [asset.reference for asset in fnf.assets_allocated])
 
-
-
 def create_full_and_final_statement(employee):
 	fnf = frappe.new_doc("Full And Final Statement")
 	fnf.employee = employee
@@ -61,18 +59,13 @@ def create_asset_movement(employee):
 	movement.submit()
 	return movement.name
 
-
-
 def create_asset():
 	pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
 
 	asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
-	docstatus = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'docstatus')
 	asset = frappe.get_doc("Asset", asset_name)
 	asset.calculate_depreciation = 0
 	asset.available_for_use_date = today()
 	asset.submit()
 	return asset_name
-
-
