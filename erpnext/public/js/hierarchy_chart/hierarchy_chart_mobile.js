@@ -376,8 +376,9 @@ erpnext.HierarchyChartMobile = class {
 		let node_element = $(`#${node.id}`);
 
 		node_element.click(function() {
+			let el = $(this).detach();
+
 			if (node.is_root) {
-				var el = $(this).detach();
 				me.$hierarchy.empty();
 				$(`#connectors`).empty();
 				me.add_node_to_hierarchy(el, node);
@@ -385,7 +386,6 @@ erpnext.HierarchyChartMobile = class {
 				me.remove_levels_after_node(node);
 				me.remove_orphaned_connectors();
 			} else {
-				var el = $(this).detach();
 				me.add_node_to_hierarchy(el, node);
 				me.collapse_node();
 			}
