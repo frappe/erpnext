@@ -50,7 +50,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Supplier",
-   "options": "Supplier"
+   "options": "Supplier",
+   "read_only": 1
   },
   {
    "fieldname": "related_delivery_planning",
@@ -65,12 +66,13 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Related Delivery Planning Item",
-   "options": "Delivery Planning Item"
+   "options": "Delivery Planning Item",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-14 11:07:28.294949",
+ "modified": "2021-06-29 10:23:01.224678",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Orders Planning Item",

@@ -59,7 +59,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-06-17 12:15:56.019026",
+ "modified": "2021-07-01 11:11:44.285176",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock_DP",
@@ -68,8 +68,8 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "color": "#eb6010",
-   "doc_view": "List",
+   "color": "#ffae00",
+   "doc_view": "",
    "format": "{} Draft",
    "label": "Delivery Planning",
    "link_to": "Delivery Planning",
