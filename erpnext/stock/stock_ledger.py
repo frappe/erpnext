@@ -190,10 +190,20 @@ class update_entries_after(object):
 
 		# update current sle
 		sle.qty_after_transaction = self.qty_after_transaction
-		sle.valuation_rate = self.valuation_rate
+		#sle.valuation_rate = self.valuation_rate
 		sle.stock_value = self.stock_value
 		sle.stock_queue = json.dumps(self.stock_queue)
-		sle.stock_value_difference = stock_value_difference
+		#sle.stock_value_difference = stock_value_difference
+		if (sle.actual_qty < 0 or sle.incoming_rate != sle.valuation_rate) and sle.voucher_type == "Stock Entry":
+			if sle.actual_qty < 0:
+				sle.stock_value_difference = flt(flt(sle.actual_qty) * flt(sle.valuation_rate))
+			else:
+				sle.stock_value_difference = flt(flt(sle.actual_qty) * flt(sle.incoming_rate))
+				sle.valuation_rate = flt(self.valuation_rate)
+		else:
+			sle.stock_value_difference = stock_value_difference
+			sle.valuation_rate = flt(self.valuation_rate)
+
 		sle.doctype="Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
