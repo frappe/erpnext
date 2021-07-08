@@ -9,7 +9,7 @@ def execute():
 
 	products_settings_fields = [
 		"hide_variants", "home_page_is_products", "products_per_page",
-		"show_availability_status", "enable_attribute_filters", "enable_field_filters"
+		"enable_attribute_filters", "enable_field_filters"
 	]
 
 	shopping_cart_settings_fields = [

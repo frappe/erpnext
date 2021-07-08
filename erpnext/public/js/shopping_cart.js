@@ -75,10 +75,12 @@ $.extend(shopping_cart, {
 
 	update_cart: function(opts) {
 		if (frappe.session.user==="Guest") {
-			if(localStorage) {
+			if (localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);
 			}
-			window.location.href = "/login";
+			frappe.call('erpnext.e_commerce.api.get_guest_redirect_on_action').then((res) => {
+				window.location.href = res.message || "/login";
+			});
 		} else {
 			shopping_cart.freeze();
 			return frappe.call({

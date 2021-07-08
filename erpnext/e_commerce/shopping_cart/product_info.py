@@ -24,12 +24,19 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 
 	selling_price_list = cart_quotation.get("selling_price_list") if cart_quotation else _set_price_list(cart_settings, None)
 
-	price = get_price(
-		item_code,
-		selling_price_list,
-		cart_settings.default_customer_group,
-		cart_settings.company
-	)
+	price = []
+	if cart_settings.show_price:
+		is_guest = frappe.session.user == "Guest"
+		# Show Price if logged in.
+		# If not logged in, check if price is hidden for guest.
+		if not is_guest or not cart_settings.hide_price_for_guest:
+			price = get_price(
+				item_code,
+				selling_price_list,
+				cart_settings.default_customer_group,
+				cart_settings.company
+			)
+
 	stock_status = get_web_item_qty_in_stock(item_code, "website_warehouse")
 
 	product_info = {

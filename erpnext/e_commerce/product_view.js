@@ -327,7 +327,7 @@ erpnext.ProductView =  class {
 
 			$('.page_content input').prop('disabled', true);
 
-			me.make(from_filters=true);
+			me.make(true);
 			$('.page_content input').prop('disabled', false);
 		});
 	}
@@ -410,7 +410,7 @@ erpnext.ProductView =  class {
 	if_key_exists(obj) {
 		let exists = false;
 		for (let key in obj) {
-			if (obj.hasOwnProperty(key) && obj[key]) {
+			if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key]) {
 				exists = true;
 				break;
 			}

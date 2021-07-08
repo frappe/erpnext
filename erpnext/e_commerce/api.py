@@ -47,3 +47,7 @@ def get_product_filter_data():
 		"sub_categories": sub_categories,
 		"items_count": result["items_count"]
 	}
+
+@frappe.whitelist(allow_guest=True)
+def get_guest_redirect_on_action():
+	return frappe.db.get_single_value("E Commerce Settings", "redirect_on_action")
