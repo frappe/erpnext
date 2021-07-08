@@ -28,13 +28,13 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Wishlist Items"
+   "options": "Wishlist Item"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-24 20:42:58.402031",
+ "modified": "2021-07-08 13:11:21.693956",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Wishlist",
