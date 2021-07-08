@@ -106,7 +106,6 @@ class Item(Document):
 		self.update_defaults_from_item_group()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
-		self.update_show_in_website()
 		self.validate_item_tax_net_rate_range()
 
 		if not self.is_new():
@@ -117,6 +116,7 @@ class Item(Document):
 		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
+		self.update_website_item()
 
 	def validate_description(self):
 		'''Clean HTML description if set'''
@@ -213,9 +213,28 @@ class Item(Document):
 
 		[self.remove(d) for d in to_remove]
 
-	def update_show_in_website(self):
-		if self.disabled:
-			self.show_in_website = False
+	def update_website_item(self):
+		"""Update Website Item if change in Item impacts it."""
+		web_item = frappe.db.exists("Website Item", {"item_code": self.item_code})
+
+		if web_item:
+			changed = {}
+			editable_fields = ["item_name", "item_group", "stock_uom", "brand", "description",
+				"disabled"]
+			doc_before_save = self.get_doc_before_save()
+
+			for field in editable_fields:
+				if doc_before_save.get(field) != self.get(field):
+					if field == "disabled":
+						changed["published"] = not self.get(field)
+					else:
+						changed[field] = self.get(field)
+
+			if not changed: return
+
+			web_item_doc = frappe.get_doc("Website Item", web_item)
+			web_item_doc.update(changed)
+			web_item_doc.save()
 
 	def validate_item_tax_net_rate_range(self):
 		for tax in self.get('taxes'):

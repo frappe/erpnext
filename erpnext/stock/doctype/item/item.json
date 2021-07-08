@@ -938,9 +938,15 @@
  "idx": 2,
  "image_field": "image",
  "index_web_pages_for_search": 1,
- "links": [],
+ "links": [
+  {
+   "group": "E-commerce",
+   "link_doctype": "Website Item",
+   "link_fieldname": "item_code"
+  }
+ ],
  "max_attachments": 1,
- "modified": "2021-03-21 14:04:38.575519",
+ "modified": "2021-07-08 11:35:45.293013",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
