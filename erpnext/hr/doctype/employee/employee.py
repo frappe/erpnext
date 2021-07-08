@@ -63,7 +63,7 @@ class Employee(NestedSet):
 	def validate_user_details(self):
 		data = frappe.db.get_value('User',
 			self.user_id, ['enabled', 'user_image'], as_dict=1)
-		if data.get("user_image"):
+		if False and data.get("user_image"):
 			self.image = data.get("user_image")
 		self.validate_for_enabled_user_id(data.get("enabled", 0))
 		self.validate_duplicate_user_id()
@@ -127,7 +127,7 @@ class Employee(NestedSet):
 			user.gender = self.gender
 
 		if self.image:
-			if not user.user_image:
+			if not user.user_image  or (self.image and user.user_image and user.user_image != self.image):
 				user.user_image = self.image
 				try:
 					frappe.get_doc({
@@ -135,12 +135,12 @@ class Employee(NestedSet):
 						"file_name": self.image,
 						"attached_to_doctype": "User",
 						"attached_to_name": self.user_id
-					}).insert()
+					}).insert(ignore_permissions=True)
 				except frappe.DuplicateEntryError:
 					# already exists
 					pass
 
-		user.save()
+		user.save(ignore_permissions=True)
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
