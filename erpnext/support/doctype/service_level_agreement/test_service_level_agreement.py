@@ -232,7 +232,6 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
 		lead = make_lead(creation=creation, index=2)
 		self.assertEqual(lead.service_level_agreement, lead_sla.name)
-		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
 
 		# set lead as replied to set first responded on
 		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 15, 30)
