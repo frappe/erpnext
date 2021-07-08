@@ -210,9 +210,10 @@ erpnext.ProductSearch = class {
 		let search_results = data.message.results;
 
 		search_results.forEach((res) => {
+			let thumbnail = res.thumbnail || '/assets/erpnext/images/ui-states/cart-empty-state.png';
 			html += `
 				<div class="dropdown-item" style="display: flex;">
-					<img class="item-thumb col-2" src=${res.thumbnail || 'img/placeholder.png'} />
+					<img class="item-thumb col-2" src=${thumbnail} />
 					<div class="col-9" style="white-space: normal;">
 						<a href="/${res.route}">${res.web_item_name}</a><br>
 						<span class="brand-line">${res.brand ? "by " + res.brand : ""}</span>
