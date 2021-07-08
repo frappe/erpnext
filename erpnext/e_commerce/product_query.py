@@ -23,7 +23,7 @@ class ProductQuery:
 		self.page_length = self.settings.products_per_page or 20
 		self.fields = ['web_item_name', 'name', 'item_name', 'item_code', 'website_image',
 			'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description',
-			'description', 'route', 'website_warehouse', 'ranking']
+			'short_description', 'route', 'website_warehouse', 'ranking']
 		self.filters = [["published", "=", 1]]
 		self.or_filters = []
 
@@ -178,7 +178,7 @@ class ProductQuery:
 				continue
 
 			# handle multiselect fields in filter addition
-			meta = frappe.get_meta('Item', cached=True)
+			meta = frappe.get_meta('Website Item', cached=True)
 			df = meta.get_field(field)
 			if df.fieldtype == 'Table MultiSelect':
 				child_doctype = df.options
@@ -200,16 +200,16 @@ class ProductQuery:
 			search_term (str): Search candidate
 		"""
 		# Default fields to search from
-		default_fields = {'name', 'item_name', 'description', 'item_group'}
+		default_fields = {'item_code', 'item_name', 'web_long_description', 'item_group'}
 
 		# Get meta search fields
-		meta = frappe.get_meta("Item")
+		meta = frappe.get_meta("Website Item")
 		meta_fields = set(meta.get_search_fields())
 
 		# Join the meta fields and default fields set
 		search_fields = default_fields.union(meta_fields)
-		if frappe.db.count('Item', cache=True) > 50000:
-			search_fields.discard('description')
+		if frappe.db.count('Website Item', cache=True) > 50000:
+			search_fields.discard('web_long_description')
 
 		# Build or filters for query
 		search = '%{}%'.format(search_term)
