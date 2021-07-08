@@ -50,7 +50,7 @@ erpnext.HierarchyChartMobile = class {
 			image: node.image,
 			parent: node.parent_id,
 			connections: node.connections,
-			is_mobile: 1
+			is_mobile: true
 		});
 
 		node.parent.append(node_card);
