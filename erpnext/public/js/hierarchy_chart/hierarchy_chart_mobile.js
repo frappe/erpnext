@@ -88,16 +88,7 @@ erpnext.HierarchyChartMobile = class {
 					me.$sibling_group = $(`<div class="sibling-group mt-4 mb-4"></div>`);
 					me.page.main.append(me.$sibling_group);
 
-					if (me.$hierarchy)
-						me.$hierarchy.remove();
-
-					// setup hierarchy
-					me.$hierarchy = $(
-						`<ul class="hierarchy-mobile">
-							<li class="root-level level"></li>
-						</ul>`);
-
-					me.page.main.append(me.$hierarchy);
+					me.setup_hierarchy()
 					me.render_root_nodes();
 				}
 			}
@@ -132,6 +123,19 @@ erpnext.HierarchyChartMobile = class {
 			</svg>`);
 	}
 
+	setup_hierarchy() {
+		$(`#connectors`).empty();
+		if (this.$hierarchy)
+			this.$hierarchy.remove();
+
+		this.$hierarchy = $(
+			`<ul class="hierarchy-mobile">
+				<li class="root-level level"></li>
+			</ul>`);
+
+		this.page.main.append(this.$hierarchy);
+	}
+
 	render_root_nodes() {
 		let me = this;
 
@@ -142,10 +146,13 @@ erpnext.HierarchyChartMobile = class {
 			},
 		}).then(r => {
 			if (r.message.length) {
+				let root_level = me.$hierarchy.find('.root-level');
+				root_level.empty();
+
 				$.each(r.message, (_i, data) => {
 					return new me.Node({
 						id: data.id,
-						parent: me.$hierarchy.find('.root-level'),
+						parent: root_level,
 						parent_id: undefined,
 						image: data.image,
 						name: data.name,
@@ -401,7 +408,12 @@ erpnext.HierarchyChartMobile = class {
 
 		$('.node-group').on('click', function() {
 			let parent = $(this).attr('data-parent');
-			me.expand_sibling_group_node(parent);
+			if (parent === 'undefined') {
+				me.setup_hierarchy();
+				me.render_root_nodes();
+			} else {
+				me.expand_sibling_group_node(parent);
+			}
 		});
 	}
 
