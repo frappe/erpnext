@@ -74,7 +74,7 @@ class ProductQuery:
 				self.get_stock_availability(item)
 
 			item.wished = False
-			if frappe.db.exists("Wishlist Items", {"item_code": item.item_code, "parent": frappe.session.user}):
+			if frappe.db.exists("Wishlist Item", {"item_code": item.item_code, "parent": frappe.session.user}):
 				item.wished = True
 
 		discounts = []

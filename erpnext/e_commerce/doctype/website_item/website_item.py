@@ -195,7 +195,7 @@ class WebsiteItem(WebsiteGenerator):
 		get_item_reviews(self.name, 0, 4, context)
 
 		context.wished = False
-		if frappe.db.exists("Wishlist Items", {"item_code": self.item_code, "parent": frappe.session.user}):
+		if frappe.db.exists("Wishlist Item", {"item_code": self.item_code, "parent": frappe.session.user}):
 			context.wished = True
 
 		context.user_is_customer = check_if_user_is_customer()
