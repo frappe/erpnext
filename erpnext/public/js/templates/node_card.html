@@ -16,10 +16,16 @@
 			<div class="node-info d-flex flex-row mb-1">
 				<div class="node-title text-muted ellipsis">{{ title }}</div>
 
-				{% if connections == 1 %}
-					<div class="node-connections text-muted ml-2 ellipsis">· {{ connections }} Connection</div>
+				{% if is_mobile %}
+					<div class="node-connections text-muted ml-2 ellipsis">
+						· {{ connections }} <span class="fa fa-level-down"></span>
+					</div>
 				{% else %}
-					<div class="node-connections text-muted ml-2 ellipsis">· {{ connections }} Connections</div>
+					{% if connections == 1 %}
+						<div class="node-connections text-muted ml-2 ellipsis">· {{ connections }} Connection</div>
+					{% else %}
+						<div class="node-connections text-muted ml-2 ellipsis">· {{ connections }} Connections</div>
+					{% endif %}
 				{% endif %}
 			</div>
 		</div>
