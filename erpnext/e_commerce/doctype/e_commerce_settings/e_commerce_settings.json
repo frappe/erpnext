@@ -6,23 +6,26 @@
  "engine": "InnoDB",
  "field_order": [
   "home_page_is_products",
-  "show_availability_status",
-  "hide_variants",
   "column_break_4",
   "products_per_page",
   "display_settings_section",
-  "show_attachments",
-  "show_price",
-  "show_stock_availability",
+  "hide_variants",
   "enable_variants",
-  "column_break_13",
-  "show_contact_us_button",
+  "show_price",
+  "column_break_9",
+  "show_stock_availability",
   "show_quantity_in_website",
-  "show_apply_coupon_code_in_website",
   "allow_items_not_in_stock",
+  "column_break_13",
+  "show_apply_coupon_code_in_website",
+  "show_contact_us_button",
+  "show_attachments",
+  "guest_display_settings_section",
+  "hide_price_for_guest",
+  "redirect_on_action",
   "add_ons_section",
   "enable_wishlist",
-  "column_break_18",
+  "column_break_22",
   "enable_reviews",
   "section_break_18",
   "company",
@@ -59,12 +62,6 @@
    "fieldname": "home_page_is_products",
    "fieldtype": "Check",
    "label": "Home Page is Products"
-  },
-  {
-   "default": "0",
-   "fieldname": "show_availability_status",
-   "fieldtype": "Check",
-   "label": "Show Availability Status"
   },
   {
    "default": "6",
@@ -154,7 +151,7 @@
    "default": "0",
    "fieldname": "enable_variants",
    "fieldtype": "Check",
-   "label": "Enable Variants"
+   "label": "Enable Variant Selection"
   },
   {
    "fieldname": "column_break_13",
@@ -298,10 +295,6 @@
    "label": "Enable Wishlist"
   },
   {
-   "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "enable_reviews",
    "fieldtype": "Check",
@@ -347,12 +340,39 @@
    "fieldtype": "HTML",
    "label": "Redisearch Warning",
    "options": "<p class=\"alert alert-warning\">Redisearch module not loaded. If you want to use advanced product search features, refer documentation <a class=\"alert-link\" href=\"https://frappeframework.com/docs/user/en/installation\" target=\"_blank\">here</a>.</p>"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.show_price",
+   "fieldname": "hide_price_for_guest",
+   "fieldtype": "Check",
+   "label": "Hide Price for Guest"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "guest_display_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Guest Display Settings"
+  },
+  {
+   "description": "Link to redirect Guest on actions that need login such as add to cart, wishlist, etc. <b>E.g.: /login</b>",
+   "fieldname": "redirect_on_action",
+   "fieldtype": "Data",
+   "label": "Redirect on Action"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-28 07:09:32.639710",
+ "modified": "2021-07-07 21:32:17.363276",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
