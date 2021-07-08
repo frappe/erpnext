@@ -280,7 +280,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "production_item.item_name",
+   "fetch_from": "work_order.production_item.item_name",
    "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Read Only",
