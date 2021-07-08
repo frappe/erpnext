@@ -125,7 +125,7 @@ class PayrollEntry(Document):
 				"payroll_entry": self.name
 			})
 			if len(emp_list) > 30:
-				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
+				frappe.enqueue(create_salary_slips_for_employees, timeout=13600, employees=emp_list, args=args)
 			else:
 				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
 				# since this method is called via frm.call this doc needs to be updated manually
@@ -148,7 +148,7 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 		ss_list = self.get_sal_slip_list(ss_status=0)
 		if len(ss_list) > 30:
-			frappe.enqueue(submit_salary_slips_for_employees, timeout=600, payroll_entry=self, salary_slips=ss_list)
+			frappe.enqueue(submit_salary_slips_for_employees, timeout=13600, payroll_entry=self, salary_slips=ss_list)
 		else:
 			submit_salary_slips_for_employees(self, ss_list, publish_progress=False)
 
