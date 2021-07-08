@@ -135,8 +135,8 @@ erpnext.HierarchyChart = class {
 			}
 		}).then(r => {
 			if (r.message.length) {
+				let expand_node = undefined;
 				let node = undefined;
-				let first_root = undefined;
 
 				$.each(r.message, (i, data) => {
 					node = new me.Node({
@@ -151,11 +151,11 @@ erpnext.HierarchyChart = class {
 						is_root: true
 					});
 
-					if (i == 0)
-						first_root = node;
+					if (!expand_node && data.connections)
+						expand_node = node;
 				});
 
-				me.expand_node(first_root);
+				me.expand_node(expand_node);
 			}
 		});
 	}

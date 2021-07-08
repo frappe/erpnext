@@ -24,7 +24,6 @@ def get_children(parent=None, company=None):
 		employee.connections = get_connections(employee.id)
 		employee.expandable = 1 if is_expandable else 0
 
-	employees.sort(key=lambda x: x['connections'], reverse=True)
 	return employees
 
 
