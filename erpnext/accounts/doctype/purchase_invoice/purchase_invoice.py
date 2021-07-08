@@ -7,6 +7,8 @@ import frappe, erpnext
 from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form
 from frappe import _, throw
 import frappe.defaults
+import json
+import six
 
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.buying_controller import BuyingController
@@ -1170,6 +1172,43 @@ class PurchaseInvoice(BuyingController):
 
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
+
+@frappe.whitelist()
+def set_payment_terms_from_po(doc):
+	if isinstance(doc, six.string_types):
+		doc = json.loads(doc)
+
+	purchase_order = doc.get('items')[0].get('purchase_order')
+	
+	if linked_po_has_payment_terms(doc, purchase_order) and all_items_have_same_po(doc, purchase_order):
+		purchase_order = frappe.get_cached_doc('Purchase Order', purchase_order)
+		doc['payment_terms_template'] = purchase_order.payment_terms_template
+		doc['terms'] = purchase_order.payment_terms_template
+
+		for schedule in purchase_order.payment_schedule:
+			payment_schedule = {
+				'payment_term': schedule.payment_term,
+				'due_date': schedule.due_date,
+				'invoice_portion': schedule.invoice_portion,
+				'discount_type': schedule.discount_type,
+				'discount': schedule.discount,
+				'base_payment_amount': schedule.base_payment_amount,
+				'payment_amount': schedule.payment_amount,
+				'outstanding': schedule.outstanding
+			}
+			doc['payment_schedule'].append(payment_schedule)
+
+		return doc
+
+def linked_po_has_payment_terms(doc, purchase_order):
+	return not doc.get('payment_schedule') and purchase_order
+
+def all_items_have_same_po(doc, purchase_order):
+	for item in doc.get('items'):
+		if item.get('purchase_order') != purchase_order:
+			return False
+	
+	return True
 
 # to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
 def get_purchase_document_details(doc):
