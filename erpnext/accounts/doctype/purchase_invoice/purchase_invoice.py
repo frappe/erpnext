@@ -1142,6 +1142,79 @@ class PurchaseInvoice(BuyingController):
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
 
+@frappe.whitelist()
+def set_payment_terms_from_po(doc):
+	if isinstance(doc, six.string_types):
+		doc = json.loads(doc)
+
+	purchase_order = doc.get('items')[0].get('purchase_order')
+	
+	if purchase_order and all_items_have_same_po(doc, purchase_order):
+		purchase_order = frappe.get_cached_doc('Purchase Order', purchase_order)
+	else:
+		return
+
+	if has_default_payment_terms(doc) and not has_default_payment_terms(purchase_order):
+		doc['payment_schedule'] = []
+		doc['payment_terms_template'] = purchase_order.payment_terms_template
+
+		for schedule in purchase_order.payment_schedule:
+			payment_schedule = {
+				'payment_term': schedule.payment_term,
+				'due_date': schedule.due_date,
+				'invoice_portion': schedule.invoice_portion,
+				'discount_type': schedule.discount_type,
+				'discount': schedule.discount,
+				'base_payment_amount': schedule.base_payment_amount,
+				'payment_amount': schedule.payment_amount,
+				'outstanding': schedule.outstanding
+			}
+			doc['payment_schedule'].append(payment_schedule)
+
+		return doc
+
+def all_items_have_same_po(doc, purchase_order):
+	for item in doc.get('items'):
+		if item.get('purchase_order') != purchase_order:
+			return False
+	
+	return True
+
+def has_default_payment_terms(doc):
+	if doc.get('payment_schedule')[0].get('invoice_portion') == 100:
+		return True
+	return False
+
+# to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
+def get_purchase_document_details(doc):
+	if doc.doctype == 'Purchase Invoice':
+		doc_reference = 'purchase_receipt'
+		items_reference = 'pr_detail'
+		parent_doctype = 'Purchase Receipt'
+		child_doctype = 'Purchase Receipt Item'
+	else:
+		doc_reference = 'purchase_invoice'
+		items_reference = 'purchase_invoice_item'
+		parent_doctype = 'Purchase Invoice'
+		child_doctype = 'Purchase Invoice Item'
+
+	purchase_receipts_or_invoices = []
+	items = []
+
+	for item in doc.get('items'):
+		if item.get(doc_reference):
+			purchase_receipts_or_invoices.append(item.get(doc_reference))
+		if item.get(items_reference):
+			items.append(item.get(items_reference))
+	
+	exchange_rate_map = frappe._dict(frappe.get_all(parent_doctype, filters={'name': ('in',
+		purchase_receipts_or_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
+
+	net_rate_map = frappe._dict(frappe.get_all(child_doctype, filters={'name': ('in',
+		items)}, fields=['name', 'net_rate'], as_list=1))
+
+	return exchange_rate_map, net_rate_map
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
