@@ -180,9 +180,9 @@ def get_clinical_procedures_to_invoice(patient, company):
 
 			service_item = frappe.db.get_single_value('Healthcare Settings', 'clinical_procedure_consumable_item')
 			if not service_item:
-				msg = _('Please Configure Clinical Procedure Consumable Item in ')
-				msg += '''<b><a href='/app/Form/Healthcare Settings'>Healthcare Settings</a></b>'''
-				frappe.throw(msg, title=_('Missing Configuration'))
+				frappe.throw(_('Please configure Clinical Procedure Consumable Item in {0}').format(
+					frappe.utils.get_link_to_form('Healthcare Settings', 'Healthcare Settings')),
+					title=_('Missing Configuration'))
 
 			clinical_procedures_to_invoice.append({
 				'reference_type': 'Clinical Procedure',
@@ -706,9 +706,12 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 		# append to section html or doc html
 		if df.fieldtype == "Table":
 			items = doc.get(df.fieldname)
-			if not items: continue
+			if not items:
+				continue
 			child_meta = frappe.get_meta(df.options)
-			if not has_data: has_data = True
+
+			if not has_data:
+				has_data = True
 			table_head = table_row = ""
 			create_head = True
 
