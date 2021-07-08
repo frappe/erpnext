@@ -117,7 +117,6 @@ class PayrollEntry(Document):
 			Creates salary slip for selected employees if already not created
 		"""
 		self.check_permission('write')
-		self.created = 1
 		employees = [emp.employee for emp in self.employees]
 		if employees:
 			args = frappe._dict({
