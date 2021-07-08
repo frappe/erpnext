@@ -498,7 +498,7 @@ class StockEntry(StockController):
 						bom_items = self.get_bom_raw_materials(d.transfer_qty)
 						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
-					if raw_material_cost and self.purpose == "Manufacture":
+					if raw_material_cost and self.purpose == "Manufacture" and not d.allow_zero_valuation_rate:
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 					elif self.purpose == "Repack" and total_fg_qty:
@@ -658,6 +658,7 @@ class StockEntry(StockController):
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.s_warehouse),
 					"actual_qty": -flt(d.transfer_qty),
+					"valuation_rate": flt(d.basic_rate or d.valuation_rate),
 					"incoming_rate": 0
 				}))
 
@@ -666,7 +667,7 @@ class StockEntry(StockController):
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.t_warehouse),
 					"actual_qty": flt(d.transfer_qty),
-					"incoming_rate": flt(d.valuation_rate)
+					"incoming_rate": flt(d.valuation_rate) if d.additional_cost > 0 else flt(d.basic_rate or d.valuation_rate)
 				}))
 
 		# On cancellation, make stock ledger entry for
