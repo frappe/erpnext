@@ -45,10 +45,10 @@ def get_wishlist_items():
 	if frappe.db.exists("Wishlist", frappe.session.user):
 		return frappe.db.sql("""
 			Select
-				item_code, item_name, website_item, price,
+				web_item_name, item_code, item_name, website_item, price,
 				warehouse, image, item_group, route, formatted_price
 			from
-				`tabWishlist Items`
+				`tabWishlist Item`
 			where
 				parent=%(user)s""", {"user": frappe.session.user}, as_dict=1)
 	return

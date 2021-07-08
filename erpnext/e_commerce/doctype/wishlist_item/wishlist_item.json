@@ -7,6 +7,7 @@
  "field_order": [
   "item_code",
   "website_item",
+  "web_item_name",
   "column_break_3",
   "item_name",
   "item_group",
@@ -126,15 +127,23 @@
    "fieldname": "formatted_price",
    "fieldtype": "Data",
    "label": "Formatted Price"
+  },
+  {
+   "fetch_from": "website_item.web_item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "web_item_name",
+   "fieldtype": "Data",
+   "label": "Webiste Item Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-18 16:04:52.965613",
+ "modified": "2021-07-08 13:14:14.919749",
  "modified_by": "Administrator",
  "module": "E-commerce",
- "name": "Wishlist Items",
+ "name": "Wishlist Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
