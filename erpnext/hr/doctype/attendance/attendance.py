@@ -62,7 +62,7 @@ def get_events(start, end, filters=None):
 
 	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user})
 
-	if not employee:
+	if True or not employee:
 		return events
 
 	from frappe.desk.reportview import get_filters_cond
