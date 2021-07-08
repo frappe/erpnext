@@ -2,8 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()
-def get_children(parent=None, company=None):
-
+def get_children(parent=None, company=None, exclude_node=None):
 	filters = [['status', '!=', 'Left']]
 	if company and company != 'All Companies':
 		filters.append(['company', '=', company])
@@ -12,6 +11,9 @@ def get_children(parent=None, company=None):
 		filters.append(['reports_to', '=', parent])
 	else:
 		filters.append(['reports_to', '=', ''])
+
+	if exclude_node:
+		filters.append(['name', '!=', exclude_node])
 
 	employees = frappe.get_list('Employee',
 		fields=['employee_name as name', 'name as id', 'reports_to', 'image', 'designation as title'],
