@@ -142,7 +142,6 @@ class ProductQuery:
 
 	def query_items_with_attributes(self, attributes, start=0):
 		"""Build a query to fetch Website Items based on field & attribute filters."""
-		all_items = []
 		item_codes = []
 
 		for attribute, values in attributes.items():
