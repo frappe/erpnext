@@ -18,6 +18,7 @@ class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 class NotAnOptionalHoliday(frappe.ValidationError): pass
 
 from frappe.model.document import Document
+from nerp.utils import get_config_by_name
 class LeaveApplication(Document):
 	def get_feed(self):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
@@ -85,7 +86,7 @@ class LeaveApplication(Document):
 
 				frappe.throw(_("Half Day Date should be between From Date and To Date"))
 
-		if not is_lwp(self.leave_type):
+		if not is_lwp(self.leave_type) and self.leave_type not in get_config_by_name("ALLOWED_LEAVE_TYPES_TO_APPLY_WITHOUT_ALLOCATION", []):
 			self.validate_dates_across_allocation()
 			self.validate_back_dated_application()
 
@@ -194,7 +195,7 @@ class LeaveApplication(Document):
 			if self.total_leave_days <= 0:
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
 
-			if not is_lwp(self.leave_type):
+			if not is_lwp(self.leave_type) and self.leave_type not in get_config_by_name("ALLOWED_LEAVE_TYPES_TO_APPLY_WITHOUT_ALLOCATION", []):
 				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, self.to_date,
 					consider_all_leaves_in_the_allocation_period=True)
 				if self.status != "Rejected" and (self.leave_balance < self.total_leave_days or not self.leave_balance):
