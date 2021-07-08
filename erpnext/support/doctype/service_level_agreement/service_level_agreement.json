@@ -150,7 +150,8 @@
    "fieldtype": "Link",
    "label": "Document Type",
    "options": "DocType",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "1",
@@ -178,7 +179,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-29 13:35:41.956849",
+ "modified": "2021-07-08 12:28:46.283334",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
