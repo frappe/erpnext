@@ -7,7 +7,6 @@ erpnext.HierarchyChartMobile = class {
 			- this method should return id, name, title, image, and connections for each node
 	*/
 	constructor(doctype, wrapper, method) {
-		this.wrapper = $(wrapper);
 		this.page = wrapper.page;
 		this.method = method;
 		this.doctype = doctype;
@@ -63,6 +62,8 @@ erpnext.HierarchyChartMobile = class {
 		frappe.breadcrumbs.add('HR');
 
 		let me = this;
+		if ($(`[data-fieldname="company"]`).length) return;
+
 		let company = this.page.add_field({
 			fieldtype: 'Link',
 			options: 'Company',
@@ -139,24 +140,21 @@ erpnext.HierarchyChartMobile = class {
 			args: {
 				company: me.company
 			},
-			callback: function(r) {
-				if (r.message.length) {
-					let nodes = r.message;
-
-					$.each(nodes, (_i, data) => {
-						return new me.Node({
-							id: data.id,
-							parent: me.$hierarchy.find('.root-level'),
-							parent_id: undefined,
-							image: data.image,
-							name: data.name,
-							title: data.title,
-							expandable: true,
-							connections: data.connections,
-							is_root: true
-						});
+		}).then(r => {
+			if (r.message.length) {
+				$.each(r.message, (_i, data) => {
+					return new me.Node({
+						id: data.id,
+						parent: me.$hierarchy.find('.root-level'),
+						parent_id: undefined,
+						image: data.image,
+						name: data.name,
+						title: data.title,
+						expandable: true,
+						connections: data.connections,
+						is_root: true
 					});
-				}
+				});
 			}
 		});
 	}
@@ -237,11 +235,8 @@ erpnext.HierarchyChartMobile = class {
 					parent: node_id,
 					company: me.company,
 					exclude_node: exclude_node
-				},
-				callback: (r) => {
-					resolve(r.message);
 				}
-			});
+			}).then(r => resolve(r.message));
 		});
 	}
 
@@ -286,10 +281,10 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	add_connector(parent_id, child_id) {
-		let parent_node = document.querySelector(`#${parent_id}`);
-		let child_node = document.querySelector(`#${child_id}`);
+		const parent_node = document.querySelector(`#${parent_id}`);
+		const child_node = document.querySelector(`#${child_id}`);
 
-		let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 		let connector = undefined;
 
@@ -299,10 +294,10 @@ erpnext.HierarchyChartMobile = class {
 			connector = this.get_connector_for_collapsed_node(parent_node, child_node);
 		}
 
-		path.setAttribute("d", connector);
+		path.setAttribute('d', connector);
 		this.set_path_attributes(path, parent_id, child_id);
 
-		$('#connectors').append(path);
+		document.getElementById('connectors').appendChild(path);
 	}
 
 	get_connector_for_active_node(parent_node, child_node) {
@@ -351,19 +346,21 @@ erpnext.HierarchyChartMobile = class {
 	set_path_attributes(path, parent_id, child_id) {
 		path.setAttribute("data-parent", parent_id);
 		path.setAttribute("data-child", child_id);
+		const parent = $(`#${parent_id}`);
 
-		if ($(`#${parent_id}`).hasClass('active')) {
+		if (parent.hasClass('active')) {
 			path.setAttribute("class", "active-connector");
 			path.setAttribute("marker-start", "url(#arrowstart-active)");
 			path.setAttribute("marker-end", "url(#arrowhead-active)");
-		} else if ($(`#${parent_id}`).hasClass('active-path')) {
+		} else if (parent.hasClass('active-path')) {
 			path.setAttribute("class", "collapsed-connector");
 		}
 	}
 
 	set_selected_node(node) {
 		// remove .active class from the current node
-		$('.active').removeClass('active');
+		if (this.selected_node)
+			this.selected_node.$link.removeClass('active');
 
 		// add active class to the newly selected node
 		this.selected_node = node;
@@ -494,9 +491,9 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	remove_levels_after_node(node) {
-		let level = $(`#${node.id}`).parent().parent();
+		let level = $(`#${node.id}`).parent().parent().index();
 
-		level = $('.hierarchy-mobile > li:eq('+ (level.index()) + ')');
+		level = $('.hierarchy-mobile > li:eq('+ level + ')');
 		level.nextAll('li').remove();
 
 		let current_node = level.find(`#${node.id}`);
@@ -512,8 +509,8 @@ erpnext.HierarchyChartMobile = class {
 	remove_orphaned_connectors() {
 		let paths = $('#connectors > path');
 		$.each(paths, (_i, path) => {
-			let parent = $(path).data('parent');
-			let child = $(path).data('child');
+			const parent = $(path).data('parent');
+			const child = $(path).data('child');
 
 			if ($(`#${parent}`).length && $(`#${child}`).length)
 				return;
