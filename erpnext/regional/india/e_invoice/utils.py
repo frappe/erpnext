@@ -191,9 +191,10 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 
-		item.unit_rate = abs((abs(item.taxable_value) - item.discount_amount)/ item.qty)
-		item.gross_amount = abs(item.taxable_value) + item.discount_amount
+		item.unit_rate = abs(item.taxable_value / item.qty)
+		item.gross_amount = abs(item.taxable_value)
 		item.taxable_value = abs(item.taxable_value)
+		item.discount_amount = 0
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
