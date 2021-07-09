@@ -528,6 +528,7 @@ class PaymentEntry(AccountsController):
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
 				self.unallocated_amount = (self.received_amount + total_deductions -
 					self.base_total_allocated_amount) / self.source_exchange_rate
+				print(self.unallocated_amount, "#@#@#@#@#")
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
 				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
