@@ -2,14 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
+from collections import deque
 import unittest
 import frappe
 from frappe.utils import cstr, flt
 from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
-from six import string_types
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.tests.test_subcontracting import set_backflush_based_on
@@ -123,7 +122,7 @@ class TestBOM(unittest.TestCase):
 		bom.items[0].conversion_factor = 5
 		bom.insert()
 
-		bom.update_cost()
+		bom.update_cost(update_hour_rate = False)
 
 		# test amounts in selected currency
 		self.assertEqual(bom.items[0].rate, 300)
@@ -227,11 +226,88 @@ class TestBOM(unittest.TestCase):
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
 		self.assertEqual(bom_items, supplied_items)
 
+	def test_bom_tree_representation(self):
+		bom_tree = {
+			"Assembly": {
+				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
+				"SubAssembly2": {"ChildPart3": {}},
+				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
+				"ChildPart5": {},
+				"ChildPart6": {},
+				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
+			}
+		}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		created_tree = parent_bom.get_tree_representation()
+
+		reqd_order = level_order_traversal(bom_tree)[1:] # skip first item
+		created_order = created_tree.level_order_traversal()
+
+		self.assertEqual(len(reqd_order), len(created_order))
+
+		for reqd_item, created_item in zip(reqd_order, created_order):
+			self.assertEqual(reqd_item, created_item.item_code)
+
+
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
 
+
+
+
+def level_order_traversal(node):
+	traversal = []
+	q = deque()
+	q.append(node)
+
+	while q:
+		node = q.popleft()
+
+		for node_name, subtree in node.items():
+			traversal.append(node_name)
+			q.append(subtree)
+
+	return traversal
+
+def create_nested_bom(tree, prefix="_Test bom "):
+	""" Helper function to create a simple nested bom from tree describing item names. (along with required items)
+	"""
+
+	def create_items(bom_tree):
+		for item_code, subtree in bom_tree.items():
+			bom_item_code = prefix + item_code
+			if not frappe.db.exists("Item", bom_item_code):
+				frappe.get_doc(doctype="Item", item_code=bom_item_code, item_group="_Test Item Group").insert()
+			create_items(subtree)
+	create_items(tree)
+
+	def dfs(tree, node):
+		"""naive implementation for searching right subtree"""
+		for node_name, subtree in tree.items():
+			if node_name == node:
+				return subtree
+			else:
+				result = dfs(subtree, node)
+				if result is not None:
+					return result
+
+	order_of_creating_bom = reversed(level_order_traversal(tree))
+
+	for item in order_of_creating_bom:
+		child_items = dfs(tree, item)
+		if child_items:
+			bom_item_code = prefix + item
+			bom = frappe.get_doc(doctype="BOM", item=bom_item_code)
+			for child_item in child_items.keys():
+				bom.append("items", {"item_code": prefix + child_item})
+			bom.insert()
+			bom.submit()
+
+	return bom  # parent bom is last bom
+
+
 def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=None):
-	if warehouse_list and isinstance(warehouse_list, string_types):
+	if warehouse_list and isinstance(warehouse_list, str):
 		warehouse_list = [warehouse_list]
 
 	if not warehouse_list:
