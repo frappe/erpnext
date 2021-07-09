@@ -35,6 +35,7 @@ class JournalEntry(AccountsController):
 		self.clearance_date = None
 
 		self.validate_party()
+		self.validate_bank_entry()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
@@ -86,6 +87,17 @@ class JournalEntry(AccountsController):
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
+
+	def validate_bank_entry(self):
+		if self.voucher_type == 'Bank Entry':
+			accounts = [d.account for d in self.accounts]
+			account_types = frappe.get_all('Account', {'name': ['in', accounts]}, pluck='account_type')
+			if 'Bank' not in list(set(account_types)):
+				msg = _('To make a Bank Entry, you must have atleast one account of type Bank.') + ' '
+				msg += '<br><br>'
+				msg += _('If you have already selected a Bank Account,') + ' '
+				msg += _('then please make sure the Account Type of that account is set as Bank.')
+				frappe.throw(msg, title=_('Invalid Accounts Selected'))
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
