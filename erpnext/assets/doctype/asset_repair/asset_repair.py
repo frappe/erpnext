@@ -13,6 +13,10 @@ class AssetRepair(Document):
 		if self.repair_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Repair"))
 
+		if self.repair_status == 'Pending':
+			frappe.db.set_value('Asset', self.asset, 'status', 'Out of Order')
+		else:
+			frappe.db.set_value('Asset', self.asset, 'status', 'Submitted')
 
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
