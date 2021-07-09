@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/selling",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-06-29 21:23:24.510122",
+ "modified": "2020-07-08 14:05:37.669753",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -41,7 +41,7 @@
    "step": "Create a Quotation"
   },
   {
-   "step": "Create a Sales Order"
+   "step": "Create your first Sales Order"
   },
   {
    "step": "Selling Settings"
