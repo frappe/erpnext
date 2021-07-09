@@ -22,13 +22,14 @@ class ProductQuery:
 		self.settings = frappe.get_doc("Products Settings")
 		self.cart_settings = frappe.get_doc("Shopping Cart Settings")
 		self.page_length = self.settings.products_per_page or 20
-		self.fields = ['name', 'item_name', 'item_code', 'website_image', 'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description', 'description', 'route']
+		self.fields = ['name', 'item_name', 'item_code', 'website_image', 'variant_of', 'has_variants',
+			'item_group', 'image', 'web_long_description', 'description', 'route', 'weightage']
 		self.filters = []
 		self.or_filters = [['show_in_website', '=', 1]]
 		if not self.settings.get('hide_variants'):
 			self.or_filters.append(['show_variant_in_website', '=', 1])
 
-	def query(self, attributes=None, fields=None, search_term=None, start=0):
+	def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None):
 		"""Summary
 
 		Args:
@@ -44,6 +45,15 @@ class ProductQuery:
 		if search_term: self.build_search_filters(search_term)
 
 		result = []
+		website_item_groups = []
+
+		# if from item group page consider website item group table
+		if item_group:
+			website_item_groups = frappe.db.get_all(
+				"Item",
+				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
+				filters=[["Website Item Group", "item_group", "=", item_group]]
+			)
 
 		if attributes:
 			all_items = []
@@ -66,7 +76,6 @@ class ProductQuery:
 				)
 
 				items_dict = {item.name: item for item in items}
-				# TODO: Replace Variants by their parent templates
 
 				all_items.append(set(items_dict.keys()))
 
@@ -78,14 +87,22 @@ class ProductQuery:
 				filters=self.filters,
 				or_filters=self.or_filters,
 				start=start,
-				limit=self.page_length,
-				order_by="weightage desc"
+				limit=self.page_length
 			)
+
+		# Combine results having context of website item groups into item results
+		if item_group and website_item_groups:
+			items_list = {row.name for row in result}
+			for row in website_item_groups:
+				if row.wig_parent not in items_list:
+					result.append(row)
+
+		result = sorted(result, key=lambda x: x.get("weightage"), reverse=True)
 
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
 			if product_info:
-				item.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
+				item.formatted_price = (product_info.get('price') or {}).get('formatted_price')
 
 		return result
 
@@ -99,7 +116,16 @@ class ProductQuery:
 			if not values:
 				continue
 
-			if isinstance(values, list):
+			# handle multiselect fields in filter addition
+			meta = frappe.get_meta('Item', cached=True)
+			df = meta.get_field(field)
+			if df.fieldtype == 'Table MultiSelect':
+				child_doctype = df.options
+				child_meta = frappe.get_meta(child_doctype, cached=True)
+				fields = child_meta.get("fields")
+				if fields:
+					self.filters.append([child_doctype, fields[0].fieldname, 'IN', values])
+			elif isinstance(values, list):
 				# If value is a list use `IN` query
 				self.filters.append([field, 'IN', values])
 			else:

@@ -274,9 +274,9 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 	return true;
 }
 
-erpnext.utils.get_shipping_address = function(frm, callback){
+erpnext.utils.get_shipping_address = function(frm, callback) {
 	if (frm.doc.company) {
-		if (!(frm.doc.inter_com_order_reference || frm.doc.internal_invoice_reference ||
+		if ((frm.doc.inter_company_order_reference || frm.doc.internal_invoice_reference ||
 			frm.doc.internal_order_reference)) {
 			if (callback) {
 				return callback();

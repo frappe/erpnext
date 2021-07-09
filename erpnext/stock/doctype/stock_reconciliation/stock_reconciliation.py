@@ -357,6 +357,7 @@ class StockReconciliation(StockController):
 			if row.current_qty:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
+				data.previous_qty_after_transaction = flt(row.qty)
 				data.valuation_rate = flt(row.current_valuation_rate)
 				data.stock_value = data.qty_after_transaction * data.valuation_rate
 				data.stock_value_difference = -1 * flt(row.amount_difference)
@@ -481,45 +482,99 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company):
+def get_items(warehouse, posting_date, posting_time, company, item_code=None):
+	items = [frappe._dict({
+		'item_code': item_code,
+		'warehouse': warehouse
+	})]
+
+	if not item_code:
+		items = get_items_for_stock_reco(warehouse, company)
+
+	res = []
+	itemwise_batch_data = get_itemwise_batch(warehouse, posting_date, company, item_code)
+
+	for d in items:
+		if d.item_code in itemwise_batch_data:
+			stock_bal = get_stock_balance(d.item_code, d.warehouse,
+				posting_date, posting_time, with_valuation_rate=True)
+
+			for row in itemwise_batch_data.get(d.item_code):
+				args = get_item_data(row, row.qty, stock_bal[1])
+				res.append(args)
+		else:
+			stock_bal = get_stock_balance(d.item_code, d.warehouse, posting_date, posting_time,
+				with_valuation_rate=True , with_serial_no=cint(d.has_serial_no))
+
+			args = get_item_data(d, stock_bal[0], stock_bal[1],
+				stock_bal[2] if cint(d.has_serial_no) else '')
+
+			res.append(args)
+
+	return res
+
+def get_items_for_stock_reco(warehouse, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 	items = frappe.db.sql("""
-		select i.name, i.item_name, bin.warehouse, i.has_serial_no
+		select i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
 		from tabBin bin, tabItem i
-		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
-		and i.has_variants = 0 and i.has_batch_no = 0
-		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
-	""", (lft, rgt))
+		where i.name=bin.item_code and IFNULL(i.disabled, 0) = 0 and i.is_stock_item = 1
+		and i.has_variants = 0 and exists(
+			select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse
+		)
+	""", (lft, rgt), as_dict=1)
 
 	items += frappe.db.sql("""
-		select i.name, i.item_name, id.default_warehouse, i.has_serial_no
+		select i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
 		from tabItem i, `tabItem Default` id
 		where i.name = id.parent
 			and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse)
-			and i.is_stock_item = 1 and i.has_batch_no = 0
-			and i.has_variants = 0 and i.disabled = 0 and id.company=%s
+			and i.is_stock_item = 1 and i.has_variants = 0 and IFNULL(i.disabled, 0) = 0 and id.company=%s
 		group by i.name
-	""", (lft, rgt, company))
+	""", (lft, rgt, company), as_dict=1)
 
-	res = []
-	for d in set(items):
-		stock_bal = get_stock_balance(d[0], d[2], posting_date, posting_time,
-			with_valuation_rate=True , with_serial_no=cint(d[3]))
+	return items
 
-		if frappe.db.get_value("Item", d[0], "disabled") == 0:
-			res.append({
-				"item_code": d[0],
-				"warehouse": d[2],
-				"qty": stock_bal[0],
-				"item_name": d[1],
-				"valuation_rate": stock_bal[1],
-				"current_qty": stock_bal[0],
-				"current_valuation_rate": stock_bal[1],
-				"current_serial_no": stock_bal[2] if cint(d[3]) else '',
-				"serial_no": stock_bal[2] if cint(d[3]) else ''
-			})
+def get_item_data(row, qty, valuation_rate, serial_no=None):
+	return {
+		'item_code': row.item_code,
+		'warehouse': row.warehouse,
+		'qty': qty,
+		'item_name': row.item_name,
+		'valuation_rate': valuation_rate,
+		'current_qty': qty,
+		'current_valuation_rate': valuation_rate,
+		'current_serial_no': serial_no,
+		'serial_no': serial_no,
+		'batch_no': row.get('batch_no')
+	}
 
-	return res
+def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
+	from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import execute
+	itemwise_batch_data = {}
+
+	filters = frappe._dict({
+		'warehouse': warehouse,
+		'from_date': posting_date,
+		'to_date': posting_date,
+		'company': company
+	})
+
+	if item_code:
+		filters.item_code = item_code
+
+	columns, data = execute(filters)
+
+	for row in data:
+		itemwise_batch_data.setdefault(row[0], []).append(frappe._dict({
+			'item_code': row[0],
+			'warehouse': warehouse,
+			'qty': row[8],
+			'item_name': row[1],
+			'batch_no': row[4]
+		}))
+
+	return itemwise_batch_data
 
 @frappe.whitelist()
 def get_stock_balance_for(item_code, warehouse,
