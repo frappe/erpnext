@@ -86,7 +86,7 @@ def resolve_dunning(doc, state):
 	for reference in doc.references:
 		if reference.reference_doctype == 'Sales Invoice' and reference.outstanding_amount <= 0:
 			dunnings = frappe.get_list('Dunning', filters={
-				'sales_invoice': reference.reference_name, 'status': ('!=', 'Resolved')})
+				'sales_invoice': reference.reference_name, 'status': ('!=', 'Resolved')}, ignore_permissions=True)
 
 			for dunning in dunnings:
 				frappe.db.set_value("Dunning", dunning.name, "status", 'Resolved')
@@ -96,7 +96,7 @@ def calculate_interest_and_amount(posting_date, outstanding_amount, rate_of_inte
 	grand_total = 0
 	if rate_of_interest:
 		interest_per_year = flt(outstanding_amount) * flt(rate_of_interest) / 100
-		interest_amount = (interest_per_year * cint(overdue_days)) / 365 
+		interest_amount = (interest_per_year * cint(overdue_days)) / 365
 		grand_total = flt(outstanding_amount) + flt(interest_amount) + flt(dunning_fee)
 	dunning_amount = flt(interest_amount) + flt(dunning_fee)
 	return {

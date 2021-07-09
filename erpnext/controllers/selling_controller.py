@@ -330,9 +330,15 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
-					rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
-					if d.rate != rate:
-						d.rate = rate
+					if d.doctype == "Packed Item":
+						incoming_rate = flt(d.incoming_rate * d.conversion_factor, d.precision('incoming_rate'))
+						if d.incoming_rate != incoming_rate:
+							d.incoming_rate = incoming_rate
+					else:
+						rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
+						if d.rate != rate:
+							d.rate = rate
+
 						d.discount_percentage = 0
 						d.discount_amount = 0
 						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
