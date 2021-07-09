@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Sales Order",
+ "creation": "2021-06-29 21:22:54.204880",
+ "description": "A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n\nSales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-06-29 21:22:54.204880",
+ "modified_by": "Administrator",
+ "name": "Create a Sales Order",
+ "owner": "Administrator",
+ "reference_document": "Sales Order",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Create a Sales Order",
+ "validate_action": 1
+}
