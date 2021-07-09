@@ -8,10 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "asset_name",
   "column_break_2",
-  "item_code",
-  "item_name",
+  "asset",
+  "asset_name",
   "section_break_5",
   "failure_date",
   "assign_to",
@@ -31,15 +30,6 @@
  ],
  "fields": [
   {
-   "columns": 1,
-   "fieldname": "asset_name",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Asset",
-   "options": "Asset",
-   "reqd": 1
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
@@ -49,18 +39,6 @@
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "asset_name.item_code",
-   "fieldname": "item_code",
-   "fieldtype": "Read Only",
-   "label": "Item Code"
-  },
-  {
-   "fetch_from": "asset_name.item_name",
-   "fieldname": "item_name",
-   "fieldtype": "Read Only",
-   "label": "Item Name"
   },
   {
    "fieldname": "section_break_5",
@@ -159,12 +137,26 @@
    "options": "Asset Repair",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Asset",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset_name",
+   "fieldtype": "Read Only",
+   "label": "Asset Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 15:08:12.495850",
+ "modified": "2021-05-10 22:48:42.165513",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
