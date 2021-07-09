@@ -56,7 +56,7 @@ erpnext.PointOfSale.Payment = class {
 				);
 				let df_events = {
 					onchange: function() {
-						frm.set_value(this.df.fieldname, this.value);
+						frm.set_value(this.df.fieldname, this.get_value());
 					}
 				};
 				if (df.fieldtype == "Button") {
