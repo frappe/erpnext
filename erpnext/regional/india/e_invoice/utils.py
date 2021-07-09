@@ -42,7 +42,10 @@ def validate_eligibility(doc):
 	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
-	no_taxes_applied = not doc.get('taxes')
+
+	# if export invoice, then taxes can be empty
+	# invoice can only be ineligible if no taxes applied and is not an export invoice
+	no_taxes_applied = not doc.get('taxes') and not doc.get('gst_category') == 'Overseas'
 	has_non_gst_item = any(d for d in doc.get('items', []) if d.get('is_non_gst'))
 
 	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied or has_non_gst_item:
