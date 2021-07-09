@@ -31,7 +31,7 @@ frappe.ui.form.on('Asset Maintenance', {
 			frm.trigger('make_dashboard');
 		}
 
-		frm.toggle_display(['stock_consumption_details_section'], frm.doc.stock_consumption)
+		frm.toggle_display(['stock_consumption_details_section'], frm.doc.stock_consumption);
 	},
 
 	make_dashboard: (frm) => {
