@@ -152,7 +152,6 @@ class AssetRepair(Document):
 				extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
 				if extra_months != 0:
 					self.calculate_last_schedule_date(asset, row, extra_months)
-					# fix depreciation amount
 
 			asset.prepare_depreciation_data()
 			asset.save()

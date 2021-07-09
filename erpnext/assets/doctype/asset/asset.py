@@ -183,13 +183,12 @@ class Asset(AccountsController):
 			start = 0
 			for n in range (len(self.schedules)):
 				if not self.schedules[n].journal_entry:
-					print("*"*100)
 					del self.schedules[n:]
 					start = n
 					break
 
-			value_after_depreciation = (flt(self.gross_purchase_amount) -
-				flt(self.opening_accumulated_depreciation))
+			value_after_depreciation = (flt(self.asset_value) -
+				flt(self.opening_accumulated_depreciation)) - flt(d.expected_value_after_useful_life)
 
 			d.value_after_depreciation = value_after_depreciation
 
@@ -779,8 +778,12 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		depreciation_amount = (flt(row.value_after_depreciation) -
-			flt(row.expected_value_after_useful_life)) / depreciation_left
+		if not asset.to_date:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / depreciation_left
+		else:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
 	else:
 		depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
 
