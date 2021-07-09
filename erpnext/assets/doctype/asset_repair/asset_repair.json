@@ -13,20 +13,30 @@
   "asset_name",
   "section_break_5",
   "failure_date",
-  "assign_to",
-  "assign_to_name",
+  "repair_status",
   "column_break_6",
   "completion_date",
-  "repair_status",
-  "section_break_7",
+  "accounting_dimensions_section",
+  "cost_center",
+  "column_break_14",
+  "project",
+  "accounting_details",
   "repair_cost",
+  "capitalize_repair_cost",
+  "stock_consumption",
   "column_break_8",
-  "payable_account",
+  "total_repair_cost",
+  "purchase_invoice",
+  "stock_consumption_details_section",
+  "warehouse",
+  "stock_items",
+  "asset_depreciation_details_section",
+  "increase_in_asset_life",
   "section_break_9",
   "description",
   "column_break_9",
   "actions_performed",
-  "section_break_17",
+  "section_break_23",
   "downtime",
   "column_break_19",
   "amended_from"
@@ -54,20 +64,6 @@
    "fieldtype": "Datetime",
    "label": "Failure Date",
    "reqd": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "assign_to",
-   "fieldtype": "Link",
-   "label": "Assign To",
-   "options": "User"
-  },
-  {
-   "allow_on_submit": 1,
-   "fetch_from": "assign_to.full_name",
-   "fieldname": "assign_to_name",
-   "fieldtype": "Read Only",
-   "label": "Assign To Name"
   },
   {
    "fieldname": "column_break_6",
@@ -111,10 +107,6 @@
    "label": "Actions performed"
   },
   {
-   "fieldname": "section_break_17",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "downtime",
    "fieldtype": "Data",
@@ -151,30 +143,103 @@
    "reqd": 1
   },
   {
+   "fetch_from": "asset.asset_name",
    "fieldname": "asset_name",
    "fieldtype": "Read Only",
    "label": "Asset Name"
   },
   {
-   "fieldname": "payable_account",
-   "fieldtype": "Link",
-   "label": "Payable Account",
-   "options": "Account"
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_7",
+   "default": "0",
+   "fieldname": "capitalize_repair_cost",
+   "fieldtype": "Check",
+   "label": "Capitalize Repair Cost"
+  },
+  {
+   "fieldname": "accounting_details",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
   },
   {
-   "fieldname": "column_break_8",
+   "fieldname": "stock_items",
+   "fieldtype": "Table",
+   "label": "Stock Items",
+   "options": "Stock Item"
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "stock_consumption",
+   "fieldtype": "Check",
+   "label": "Stock Consumed During Repair"
+  },
+  {
+   "depends_on": "stock_consumption",
+   "fieldname": "stock_consumption_details_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Consumption Details"
+  },
+  {
+   "depends_on": "stock_consumption",
+   "fieldname": "total_repair_cost",
+   "fieldtype": "Currency",
+   "label": "Total Repair Cost"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "capitalize_repair_cost",
+   "fieldname": "asset_depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Depreciation Details"
+  },
+  {
+   "fieldname": "increase_in_asset_life",
+   "fieldtype": "Int",
+   "label": "Increase In Asset Life(Months)"
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-11 05:11:58.330860",
+ "modified": "2021-05-21 10:37:35.002238",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

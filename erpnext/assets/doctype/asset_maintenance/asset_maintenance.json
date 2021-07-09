@@ -12,13 +12,17 @@
   "column_break_3",
   "item_code",
   "item_name",
+  "stock_consumption",
   "section_break_6",
   "maintenance_team",
   "column_break_9",
   "maintenance_manager",
   "maintenance_manager_name",
   "section_break_8",
-  "asset_maintenance_tasks"
+  "asset_maintenance_tasks",
+  "stock_consumption_details_section",
+  "warehouse",
+  "stock_items"
  ],
  "fields": [
   {
@@ -100,10 +104,33 @@
    "label": "Maintenance Tasks",
    "options": "Asset Maintenance Task",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "stock_consumption",
+   "fieldtype": "Check",
+   "label": "Stock Consumed During Maintenance"
+  },
+  {
+   "fieldname": "stock_consumption_details_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Consumption Details"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "stock_items",
+   "fieldtype": "Table",
+   "label": "Stock Items",
+   "options": "Stock Item"
   }
  ],
  "links": [],
- "modified": "2020-05-28 20:28:32.993823",
+ "modified": "2021-05-13 05:24:58.480132",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance",
