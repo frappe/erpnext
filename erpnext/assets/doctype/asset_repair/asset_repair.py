@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, add_days, date_diff, add_months, flt, cint
+from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
 from frappe.model.document import Document
 from erpnext.accounts.general_ledger import make_gl_entries
 
