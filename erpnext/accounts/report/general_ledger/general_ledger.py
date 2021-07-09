@@ -222,7 +222,7 @@ def get_gl_entries(filters, accounting_dimensions):
 def get_conditions(filters):
 	conditions = []
 
-	if filters.get("account") and not filters.get("include_dimensions"):
+	if filters.get("account"):
 		filters.account = get_accounts_with_children(filters.account)
 		conditions.append("account in %(account)s")
 
