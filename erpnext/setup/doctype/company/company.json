@@ -83,6 +83,7 @@
   "disposal_account",
   "depreciation_cost_center",
   "capital_work_in_progress_account",
+  "repair_and_maintenance_account",
   "asset_received_but_not_billed",
   "budget_detail",
   "exception_budget_approver_role",
@@ -734,6 +735,12 @@
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
    "label": "Fixed Asset Defaults"
+  },
+  {
+   "fieldname": "repair_and_maintenance_account",
+   "fieldtype": "Link",
+   "label": "Repair and Maintenance Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -741,7 +748,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-05-11 21:45:22.803065",
+ "modified": "2021-05-12 16:51:08.187233",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

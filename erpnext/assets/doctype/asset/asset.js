@@ -132,7 +132,6 @@ frappe.ui.form.on('Asset', {
 				}, __("Manage"));
 			}
 
-			frm.page.set_inner_btn_group_as_primary(__("Manage"));
 			frm.trigger("setup_chart");
 		}
 

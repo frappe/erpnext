@@ -23,6 +23,7 @@
   "asset_name",
   "asset_category",
   "location",
+  "asset_value",
   "custodian",
   "department",
   "disposal_date",
@@ -53,6 +54,8 @@
   "next_depreciation_date",
   "section_break_14",
   "schedules",
+  "to_date",
+  "edit_dates",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -480,6 +483,24 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
+  },
+  {
+   "fieldname": "asset_value",
+   "fieldtype": "Currency",
+   "label": "Asset Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "To Date"
+  },
+  {
+   "fieldname": "edit_dates",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Edit Dates"
   }
  ],
  "idx": 72,
@@ -502,7 +523,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-01-22 12:38:59.091510",
+ "modified": "2021-05-21 12:05:29.424083",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

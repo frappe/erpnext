@@ -30,7 +30,10 @@ frappe.ui.form.on('Asset Maintenance', {
 		if(!frm.is_new()) {
 			frm.trigger('make_dashboard');
 		}
+
+		frm.toggle_display(['stock_consumption_details_section'], frm.doc.stock_consumption)
 	},
+
 	make_dashboard: (frm) => {
 		if(!frm.is_new()) {
 			frappe.call({
