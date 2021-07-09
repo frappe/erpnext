@@ -19,7 +19,7 @@ class AccountingDimension(Document):
 
 	def validate(self):
 		if self.document_type in core_doctypes_list + ('Accounting Dimension', 'Project',
-				'Cost Center', 'Accounting Dimension Detail', 'Company') :
+				'Cost Center', 'Accounting Dimension Detail', 'Company', 'Account') :
 
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
