@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2013-05-24 12:15:51",
@@ -8,9 +7,9 @@
  "field_order": [
   "disabled",
   "section_break_2",
+  "naming_series",
   "cai",
   "number",
-  "naming_series",
   "customer",
   "company",
   "country",
@@ -75,11 +74,10 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Series",
-   "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "[Select]",
-   "read_only": 1
+   "options": "ACC-SINV-.YYYY.-",
+   "reqd": 1
   },
   {
    "fieldname": "customer",
@@ -399,8 +397,7 @@
  ],
  "icon": "icon-cog",
  "idx": 1,
- "links": [],
- "modified": "2020-04-02 10:27:56.947182",
+ "modified": "2021-07-09 14:42:40.497773",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
