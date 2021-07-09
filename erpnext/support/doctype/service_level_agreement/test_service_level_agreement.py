@@ -328,16 +328,11 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 			"entity": entity
 		})
 
-	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", filters)
+	sla = frappe.db.exists("Service Level Agreement", filters)
+	if sla:
+		frappe.delete_doc("Service Level Agreement", sla, force=1)
 
-	if not service_level_agreement_exists:
-		doc = frappe.get_doc(service_level_agreement).insert(ignore_permissions=True)
-	else:
-		doc = frappe.get_doc("Service Level Agreement", service_level_agreement_exists)
-		doc.update(service_level_agreement)
-		doc.save()
-
-	return doc
+	return frappe.get_doc(service_level_agreement).insert(ignore_permissions=True)
 
 
 def create_customer():
