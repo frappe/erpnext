@@ -991,7 +991,7 @@ frappe.help.help_links["Form/BOM"] = [
 		label: "Nested BOM Structure",
 		url:
 			docsUrl +
-			"user/manual/en/manufacturing/articles/nested-bom-structure",
+			"user/manual/en/manufacturing/articles/managing-multi-level-bom",
 	},
 ];
 
