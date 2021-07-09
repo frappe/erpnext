@@ -515,12 +515,6 @@ def get_time_in_timedelta(time):
 	"""
 		Converts datetime.time(10, 36, 55, 961454) to datetime.timedelta(seconds=38215)
 	"""
-<<<<<<< HEAD
-	import datetime
-	return datetime.timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
-<<<<<<< HEAD
-=======
-=======
 	return timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
 
 def set_first_response_time(communication, method):
@@ -531,11 +525,10 @@ def set_first_response_time(communication, method):
 			issue.db_set("first_response_time", first_response_time)
 
 def is_first_response(issue):
-	responses = frappe.get_all('Communication', filters = {'reference_name': issue.name})
+	responses = frappe.get_all('Communication', filters = {'reference_type': 'Issue', 'reference_name': issue.name, 'sent_or_received': 'Sent'})
 	if len(responses) == 1: 
 		return True
 	return False
->>>>>>> 23a4792f7a (fix(Issue): Fix Sider issues)
 
 def calculate_first_response_time(issue, first_responded_on):
 	issue_creation_date = issue.creation
@@ -639,4 +632,8 @@ def is_before_working_hours(date, support_hours):
 	if time < start_time:
 		return True
 	return False
->>>>>>> 0a9271d3b7 (fix(Issue): Address edge cases for first_response_time calculation)
+
+def get_holidays(holiday_list_name):
+	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
+	holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
+	return holidays
