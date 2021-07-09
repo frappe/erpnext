@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Asset Repair', {
+	refresh: function(frm) {
+		frm.toggle_display(['completion_date', 'repair_status'], !(frm.doc.__islocal));
+	},
+
 	repair_status: (frm) => {
 		if (frm.doc.completion_date && frm.doc.repair_status == "Completed") {
 			frappe.call ({
