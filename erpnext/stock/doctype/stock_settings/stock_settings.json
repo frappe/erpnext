@@ -301,10 +301,14 @@
  "issingle": 1,
  "links": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2021-06-28 17:02:26.683002",
 =======
  "modified": "2021-06-21 16:17:42.159829",
 >>>>>>> 9ac9a4ef21 (feat: Optionally allow rejected quality inspection on submission)
+=======
+ "modified": "2021-07-10 16:17:42.159829",
+>>>>>>> f67f13c384 (chore: Test case for QI Rejection in Stock Entry)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

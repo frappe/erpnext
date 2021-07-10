@@ -413,6 +413,7 @@ class StockController(AccountsController):
 	def validate_qi_submission(self, row):
 		"""Check if QI is submitted on row level, during submission"""
 		action = frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_not_submitted")
+<<<<<<< HEAD
 =======
 			msg = _(f"Row #{row.idx}: Quality Inspection is required for Item {frappe.bold(row.item_code)}")
 =======
@@ -427,6 +428,8 @@ class StockController(AccountsController):
 		"""Check if QI is submitted on row level, during submission"""
 		action = frappe.get_doc('Stock Settings').action_if_quality_inspection_is_not_submitted or "Stop"
 >>>>>>> 9ac9a4ef21 (feat: Optionally allow rejected quality inspection on submission)
+=======
+>>>>>>> f67f13c384 (chore: Test case for QI Rejection in Stock Entry)
 		qa_docstatus = frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus")
 
 		if not qa_docstatus == 1:
@@ -454,8 +457,12 @@ class StockController(AccountsController):
 
 	def validate_qi_rejection(self, row):
 		"""Check if QI is rejected on row level, during submission"""
+<<<<<<< HEAD
 		action = frappe.get_doc('Stock Settings').action_if_quality_inspection_is_rejected or "Stop"
 >>>>>>> 9ac9a4ef21 (feat: Optionally allow rejected quality inspection on submission)
+=======
+		action = frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_rejected")
+>>>>>>> f67f13c384 (chore: Test case for QI Rejection in Stock Entry)
 		qa_status = frappe.db.get_value("Quality Inspection", row.quality_inspection, "status")
 
 		if qa_status == "Rejected":
