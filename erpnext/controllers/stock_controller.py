@@ -395,7 +395,7 @@ class StockController(AccountsController):
 
 	def validate_qi_submission(self, row):
 		"""Check if QI is submitted on row level, during submission"""
-		action = frappe.get_doc('Stock Settings').action_if_quality_inspection_is_not_submitted or "Stop"
+		action = frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_not_submitted")
 		qa_docstatus = frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus")
 
 		if not qa_docstatus == 1:
@@ -408,7 +408,7 @@ class StockController(AccountsController):
 
 	def validate_qi_rejection(self, row):
 		"""Check if QI is rejected on row level, during submission"""
-		action = frappe.get_doc('Stock Settings').action_if_quality_inspection_is_rejected or "Stop"
+		action = frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_rejected")
 		qa_status = frappe.db.get_value("Quality Inspection", row.quality_inspection, "status")
 
 		if qa_status == "Rejected":
