@@ -281,7 +281,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		# Update membership values
 		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
 		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
-		member.subscription_activated = 1
+		member.subscription_status = "Active"
 		member.flags.ignore_mandatory = True
 		member.save()
 
