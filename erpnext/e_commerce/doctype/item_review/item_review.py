@@ -61,7 +61,7 @@ def add_item_review(web_item, title, rating, comment=None):
 		doc.published_on = datetime.today().strftime("%d %B %Y")
 		doc.insert()
 
-def get_customer():
+def get_customer(silent=False):
 	user = frappe.session.user
 	contact_name = get_contact_name(user)
 	customer = None
@@ -75,5 +75,7 @@ def get_customer():
 
 	if customer:
 		return frappe.db.get_value("Customer", customer)
+	elif silent:
+		return None
 	else:
 		frappe.throw(_("You are not verified to write a review yet. Please contact us for verification."))

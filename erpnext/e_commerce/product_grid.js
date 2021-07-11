@@ -22,7 +22,7 @@ erpnext.ProductGrid = class {
 
 		this.items.forEach(item => {
 			let title = item.web_item_name || item.item_name || item.item_code || "";
-			title =  title.length > 50 ? title.substr(0, 50) + "..." : title;
+			title =  title.length > 90 ? title.substr(0, 90) + "..." : title;
 
 			html += `<div class="col-sm-4 item-card"><div class="card text-left">`;
 			html += me.get_image_html(item, title);
@@ -60,13 +60,20 @@ erpnext.ProductGrid = class {
 
 	get_card_body_html(item, title, settings) {
 		let body_html = `
-			<div class="card-body text-left" style="width:100%">
+			<div class="card-body text-left card-body-flex" style="width:100%">
 				<div style="margin-top: 16px; display: flex;">
 		`;
-		body_html += this.get_title_with_indicator(item, title, settings);
+		body_html += this.get_title(item, title);
 
-		if (!item.has_variants && settings.enable_wishlist) {
-			body_html += this.get_wishlist_icon(item);
+		// get floating elements
+		if (!item.has_variants) {
+			if (settings.enable_wishlist) {
+				body_html += this.get_wishlist_icon(item);
+			}
+			if (settings.enabled) {
+				body_html += this.get_cart_indicator(item);
+			}
+
 		}
 
 		body_html += `</div>`; // close div on line 50
@@ -76,35 +83,42 @@ erpnext.ProductGrid = class {
 			body_html += this.get_price_html(item);
 		}
 
+		body_html += this.get_stock_availability(item, settings);
 		body_html += this.get_primary_button(item, settings);
 		body_html += `</div>`; // close div on line 49
 
 		return body_html;
 	}
 
-	get_title_with_indicator(item, title, settings) {
+	get_title(item, title) {
 		let title_html = `
 			<a href="/${ item.route || '#' }">
 				<div class="product-title">
 					${ title || '' }
+				</div>
+			</a>
 		`;
-		if (item.in_stock && settings.show_stock_availability) {
-			title_html += `<span class="indicator ${ item.in_stock } card-indicator"></span>`;
-		}
-		title_html += `</div></a>`;
 		return title_html;
 	}
 
 	get_wishlist_icon(item) {
 		let icon_class = item.wished ? "wished" : "not-wished";
 		return `
-			<div class="like-action"
+			<div class="like-action ${ item.wished ? "like-action-wished" : ''}"
 				data-item-code="${ item.item_code }"
 				data-price="${ item.price || '' }"
 				data-formatted-price="${ item.formatted_price || '' }">
 				<svg class="icon sm">
 					<use class="${ icon_class } wish-icon" href="#icon-heart"></use>
 				</svg>
+			</div>
+		`;
+	}
+
+	get_cart_indicator(item) {
+		return `
+			<div class="cart-indicator ${item.in_cart ? '' : 'hidden'}" data-item-code="${ item.item_code }">
+				1
 			</div>
 		`;
 	}
@@ -117,16 +131,23 @@ erpnext.ProductGrid = class {
 
 		if (item.formatted_mrp) {
 			price_html += `
-				<small class="ml-1 text-muted">
-					<s>${ item.formatted_mrp }</s>
+				<small class="striked-price">
+					<s>${ item.formatted_mrp ? item.formatted_mrp.replace(/ +/g, "") : "" }</s>
 				</small>
-				<small class="ml-1" style="color: #F47A7A; font-weight: 500;">
+				<small class="ml-1 product-info-green">
 					${ item.discount } OFF
 				</small>
 			`;
 		}
 		price_html += `</div>`;
 		return price_html;
+	}
+
+	get_stock_availability(item, settings) {
+		if (!item.has_variants && !item.in_stock && settings.show_stock_availability) {
+			return `<span class="out-of-stock">Out of stock</span>`;
+		}
+		return ``;
 	}
 
 	get_primary_button(item, settings) {
@@ -138,13 +159,29 @@ erpnext.ProductGrid = class {
 					</div>
 				</a>
 			`;
-		} else if (settings.enabled && (settings.allow_items_not_in_stock || item.in_stock !== "red")) {
+		} else if (settings.enabled && (settings.allow_items_not_in_stock || item.in_stock)) {
 			return `
 				<div id="${ item.name }" class="btn
-					btn-sm btn-add-to-cart-list not-added w-100 mt-4"
+					btn-sm btn-primary btn-add-to-cart-list
+					w-100 mt-4 ${ item.in_cart ? 'hidden' : '' }"
 					data-item-code="${ item.item_code }">
+					<span class="mr-2">
+						<svg class="icon icon-md">
+							<use href="#icon-assets"></use>
+						</svg>
+					</span>
 					${ __('Add to Cart') }
 				</div>
+
+				<a href="/cart">
+					<div id="${ item.name }" class="btn
+						btn-sm btn-primary btn-add-to-cart-list
+						w-100 mt-4 go-to-cart-grid
+						${ item.in_cart ? '' : 'hidden' }"
+						data-item-code="${ item.item_code }">
+						${ __('Go to Cart') }
+					</div>
+				</a>
 			`;
 		} else {
 			return ``;

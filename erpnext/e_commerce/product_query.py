@@ -2,7 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-
+from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
+from erpnext.e_commerce.doctype.item_review.item_review import get_customer
 from frappe.utils import flt
 
 from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
@@ -41,7 +42,7 @@ class ProductQuery:
 		"""
 		# track if discounts included in field filters
 		self.filter_with_discount = bool(fields.get("discount"))
-		result, discount_list, website_item_groups, count = [], [], [], 0
+		result, discount_list, website_item_groups, cart_items, count = [], [], [], [], 0
 
 		website_item_groups = self.get_website_item_group_results(item_group, website_item_groups)
 
@@ -62,7 +63,11 @@ class ProductQuery:
 
 		# sort combined results by ranking
 		result = sorted(result, key=lambda x: x.get("ranking"), reverse=True)
-		result, discount_list = self.add_display_details(result, discount_list)
+
+		if self.settings.enabled:
+			cart_items = self.get_cart_items()
+
+		result, discount_list = self.add_display_details(result, discount_list, cart_items)
 
 		discounts = []
 		if discount_list:
@@ -193,7 +198,7 @@ class ProductQuery:
 			)
 		return website_item_groups
 
-	def add_display_details(self, result, discount_list):
+	def add_display_details(self, result, discount_list, cart_items):
 		"""Add price and availability details in result."""
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
@@ -204,6 +209,8 @@ class ProductQuery:
 
 			if self.settings.show_stock_availability:
 				self.get_stock_availability(item)
+
+			item.in_cart = item.item_code in cart_items
 
 			item.wished = False
 			if frappe.db.exists("Wishlist Item", {"item_code": item.item_code, "parent": frappe.session.user}):
@@ -227,13 +234,31 @@ class ProductQuery:
 
 	def get_stock_availability(self, item):
 		"""Modify item object and add stock details."""
+		item.in_stock = False
+
 		if item.get("website_warehouse"):
 			stock_qty = frappe.utils.flt(
 				frappe.db.get_value("Bin", {"item_code": item.item_code, "warehouse": item.get("website_warehouse")},
 					"actual_qty"))
-			item.in_stock = "green" if stock_qty else "red"
-		elif not frappe.db.get_value("Item", item.item_code, "is_stock_item"):
-			item.in_stock = "green" # non-stock item will always be available
+			item.in_stock = bool(stock_qty)
+
+	def get_cart_items(self):
+		customer = get_customer(silent=True)
+		if customer:
+			quotation = frappe.get_all("Quotation", fields=["name"], filters=
+				{"party_name": customer, "order_type": "Shopping Cart", "docstatus": 0},
+				order_by="modified desc", limit_page_length=1)
+			if quotation:
+				items = frappe.get_all(
+					"Quotation Item",
+					fields=["item_code"],
+					filters={
+						"parent": quotation[0].get("name")
+					})
+				items = [row.item_code for row in items]
+				return items
+
+		return []
 
 	def combine_web_item_group_results(self, item_group, result, website_item_groups):
 		"""Combine results with context of website item groups into item results."""
