@@ -196,11 +196,14 @@ def make_invoice(membership, member, plan, settings):
 	return invoice
 
 
-def get_member_based_on_subscription(subscription_id, email):
-	members = frappe.get_all("Member", filters={
-					"subscription_id": subscription_id,
-					"email_id": email
-				}, order_by="creation desc")
+def get_member_based_on_subscription(subscription_id, email=None, customer_id=None):
+	filters = {"subscription_id": subscription_id}
+	if email:
+		filters.update({"email_id": email})
+	if customer_id:
+		filters.update({"customer_id": customer_id})
+
+	members = frappe.get_all("Member", filters=filters, order_by="creation desc")
 
 	try:
 		return frappe.get_doc("Member", members[0]["name"])
@@ -225,16 +228,7 @@ def verify_signature(data, endpoint="Membership"):
 @frappe.whitelist(allow_guest=True)
 def trigger_razorpay_subscription(*args, **kwargs):
 	data = frappe.request.get_data(as_text=True)
-	try:
-		verify_signature(data)
-	except Exception as e:
-		log = frappe.log_error(e, "Membership Webhook Verification Error")
-		notify_failure(log)
-		return { "status": "Failed", "reason": e}
-
-	if isinstance(data, six.string_types):
-		data = json.loads(data)
-	data = frappe._dict(data)
+	data = process_request_data(data)
 
 	subscription = data.payload.get("subscription", {}).get("entity", {})
 	subscription = frappe._dict(subscription)
@@ -297,6 +291,58 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		return { "status": "Failed", "reason": e}
 
 	return { "status": "Success" }
+
+
+@frappe.whitelist(allow_guest=True)
+def update_halted_razorpay_subscription(*args, **kwargs):
+	"""
+	When all retries have been exhausted, Razorpay moves the subscription to the halted state.
+	The customer has to manually retry the charge or change the card linked to the subscription,
+	for the subscription to move back to the active state.
+	"""
+	data = frappe.request.get_data(as_text=True)
+	data = process_request_data(data)
+
+	if not data.event == "subscription.halted":
+		return
+
+	subscription = data.payload.get("subscription", {}).get("entity", {})
+	subscription = frappe._dict(subscription)
+
+	try:
+		member = get_member_based_on_subscription(subscription.id, customer_id=subscription.customer_id)
+		if not member:
+			frappe.throw(_("Member {0} not found"))
+
+		member.subscription_status = "Halted"
+		member.flags.ignore_mandatory = True
+		member.save()
+
+		if subscription.get("notes"):
+			member.add_comment("Comment", notes)
+
+	except Exception as e:
+		message = "{0}\n\n{1}".format(e, frappe.get_traceback())
+		log = frappe.log_error(message, _("Error updating halted status for member {0}").format(member.name))
+		notify_failure(log)
+		return { "status": "Failed", "reason": e }
+
+	return { "status": "Success" }
+
+
+def process_request_data(data):
+	try:
+		verify_signature(data)
+	except Exception as e:
+		log = frappe.log_error(e, "Membership Webhook Verification Error")
+		notify_failure(log)
+		return { "status": "Failed", "reason": e }
+
+	if isinstance(data, six.string_types):
+		data = json.loads(data)
+	data = frappe._dict(data)
+
+	return data
 
 
 def get_company_for_memberships():
