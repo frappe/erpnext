@@ -310,7 +310,7 @@
   {
    "description": "Short Description for List View",
    "fieldname": "short_description",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Short Website Description"
   }
  ],
@@ -318,7 +318,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-08 19:25:15.115746",
+ "modified": "2021-07-11 20:49:45.415421",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",
