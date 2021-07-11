@@ -10,8 +10,6 @@ erpnext.ProductSearch = class {
 	setupSearchDropDown() {
 		this.search_area = $("#dropdownMenuSearch");
 		this.setupSearchResultContainer();
-		this.setupProductsContainer();
-		this.setupCategoryRecentsContainer();
 		this.populateRecentSearches();
 	}
 
@@ -82,60 +80,46 @@ erpnext.ProductSearch = class {
 			<div class="overflow-hidden shadow dropdown-menu w-100 hidden"
 				id="search-results-container"
 				aria-labelledby="dropdownMenuSearch"
-				style="display: flex;">
+				style="display: flex; flex-direction: column;">
 			</div>
 		`).find("#search-results-container");
+
+		this.setupCategoryContainer()
+		this.setupProductsContainer();
+		this.setupRecentsContainer();
 	}
 
 	setupProductsContainer() {
-		let $products_section = this.search_dropdown.append(`
-			<div class="col-7 mr-2 mt-1"
-				id="product-results"
-				style="border-right: 1px solid var(--gray-200);">
-			</div>
-		`).find("#product-results");
-
-		this.products_container = $products_section.append(`
-			<div id="product-scroll" style="overflow: scroll; max-height: 300px">
-				<div class="mt-6 w-100 text-muted" style="font-weight: 400; text-align: center;">
-					${ __("Type something ...") }
+		this.products_container = this.search_dropdown.append(`
+			<div id="product-results mt-2">
+				<div id="product-scroll" style="overflow: scroll; max-height: 300px">
 				</div>
 			</div>
 		`).find("#product-scroll");
 	}
 
-	setupCategoryRecentsContainer() {
-		let $category_recents_section = $("#search-results-container").append(`
-			<div id="category-recents-container"
-				class="col-5 mt-2 h-100"
-				style="margin-left: -15px;">
-			</div>
-		`).find("#category-recents-container");
-
-		this.category_container = $category_recents_section.append(`
-			<div class="category-container">
-				<div class="mb-2"
-					style="border-bottom: 1px solid var(--gray-200);">
-					${ __("Categories") }
-				</div>
-				<div class="categories">
-					<span class="text-muted" style="font-weight: 400;"> ${ __('No results') } <span>
+	setupCategoryContainer() {
+		this.category_container = this.search_dropdown.append(`
+			<div class="category-container mt-2 mb-1">
+				<div class="category-chips">
 				</div>
 			</div>
-		`).find(".categories");
+		`).find(".category-chips");
+	}
 
-		let $recents_section = $("#category-recents-container").append(`
-			<div class="mb-2 mt-4 recent-searches">
-				<div style="border-bottom: 1px solid var(--gray-200);">
-					${ __("Recent") }
+	setupRecentsContainer() {
+		let $recents_section = this.search_dropdown.append(`
+			<div class="mb-2 mt-2 recent-searches">
+				<div>
+					<b>${ __("Recent") }</b>
 				</div>
 			</div>
 		`).find(".recent-searches");
 
 		this.recents_container = $recents_section.append(`
-			<div id="recent-chips" style="padding: 1rem 0;">
+			<div id="recents" style="padding: .25rem 0 1rem 0;">
 			</div>
-		`).find("#recent-chips");
+		`).find("#recents");
 	}
 
 	getRecentSearches() {
@@ -144,12 +128,12 @@ erpnext.ProductSearch = class {
 
 	attachEventListenersToChips() {
 		let me  = this;
-		const chips = $(".recent-chip");
+		const chips = $(".recent-search");
 		window.chips = chips;
 
 		for (let chip of chips) {
 			chip.addEventListener("click", () => {
-				me.searchBox[0].value = chip.innerText;
+				me.searchBox[0].value = chip.innerText.trim();
 
 				// Start search with `recent query`
 				me.searchBox.trigger("input");
@@ -179,15 +163,22 @@ erpnext.ProductSearch = class {
 		let recents = this.getRecentSearches();
 
 		if (!recents.length) {
+			this.recents_container.html(`<span class=""text-muted">No searches yet.</span>`);
 			return;
 		}
 
 		let html = "";
 		recents.forEach((key) => {
 			html += `
-				<button class="btn btn-sm recent-chip mr-1 mb-2" style="font-size: 13px">
+				<div class="recent-search mr-1" style="font-size: 13px">
+					<span class="mr-2">
+						<svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z" stroke="var(--gray-500)"" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M8.00027 5.20947V8.00017L10 10" stroke="var(--gray-500)" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</span>
 					${ key }
-				</button>
+				</div>
 			`;
 		});
 
@@ -197,11 +188,7 @@ erpnext.ProductSearch = class {
 
 	populateResults(data) {
 		if (data.length === 0 || data.message.results.length === 0) {
-			let empty_html = `
-				<div class="mt-6 w-100 text-muted" style="font-weight: 400; text-align: center;">
-					${ __('No results') }
-				</div>
-			`;
+			let empty_html = ``;
 			this.products_container.html(empty_html);
 			return;
 		}
@@ -228,21 +215,27 @@ erpnext.ProductSearch = class {
 	populateCategoriesList(data) {
 		if (data.length === 0 || data.message.results.length === 0) {
 			let empty_html = `
-				<span class="text-muted" style="font-weight: 400;">
-					${__('No results')}
-				</span>
+				<div class="category-container mt-2">
+					<div class="category-chips">
+					</div>
+				</div>
 			`;
 			this.category_container.html(empty_html);
 			return;
 		}
 
-		let html = "";
+		let html = `
+			<div class="mb-2">
+				<b>${ __("Categories") }</b>
+			</div>
+		`;
 		let search_results = data.message.results;
 		search_results.forEach((category) => {
 			html += `
-				<div class="mb-2" style="font-weight: 400;">
-					<a href="/${category.route}">${category.name}</a>
-				</div>
+				<a href="/${category.route}" class="btn btn-sm category-chip mr-2 mb-2"
+					style="font-size: 13px" role="button">
+				${ category.name }
+				</button>
 			`;
 		});
 

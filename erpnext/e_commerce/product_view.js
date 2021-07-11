@@ -12,11 +12,25 @@ erpnext.ProductView =  class {
 
 	make(from_filters=false) {
 		this.products_section.empty();
-		this.prepare_view_toggler();
+		this.prepare_toolbar();
 		this.get_item_filter_data(from_filters);
 	}
 
+	prepare_toolbar() {
+		this.products_section.append(`
+			<div class="toolbar d-flex">
+			</div>
+		`);
+		this.prepare_search();
+		this.prepare_view_toggler();
+
+		frappe.require('/assets/js/e-commerce.min.js', function() {
+			new erpnext.ProductSearch();
+		});
+	}
+
 	prepare_view_toggler() {
+
 		if (!$("#list").length || !$("#image-view").length) {
 			this.render_view_toggler();
 			this.bind_view_toggler_actions();
@@ -173,19 +187,45 @@ erpnext.ProductView =  class {
 		}
 	}
 
+	prepare_search() {
+		$(".toolbar").append(`
+			<div class="input-group col-6">
+				<div class="dropdown w-100" id="dropdownMenuSearch">
+					<input type="search" name="query" id="search-box" class="form-control font-md"
+						placeholder="Search for Products"
+						aria-label="Product" aria-describedby="button-addon2">
+					<div class="search-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							stroke-linejoin="round"
+							class="feather feather-search">
+							<circle cx="11" cy="11" r="8"></circle>
+							<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+						</svg>
+					</div>
+					<!-- Results dropdown rendered in product_search.js -->
+				</div>
+			</div>
+		`);
+	}
+
 	render_view_toggler() {
+		$(".toolbar").append(`<div class="toggle-container col-6"></div>`);
+
 		["btn-list-view", "btn-grid-view"].forEach(view => {
 			let icon = view === "btn-list-view" ? "list" : "image-view";
-			this.products_section.append(`
-			<div class="form-group mb-0" id="toggle-view">
-				<button id="${ icon }" class="btn ${ view } mr-2">
-					<span>
-						<svg class="icon icon-md">
-							<use href="#icon-${ icon }"></use>
-						</svg>
-					</span>
-				</button>
-			</div>`);
+			$(".toggle-container").append(`
+				<div class="form-group mb-0" id="toggle-view">
+					<button id="${ icon }" class="btn ${ view } mr-2">
+						<span>
+							<svg class="icon icon-md">
+								<use href="#icon-${ icon }"></use>
+							</svg>
+						</span>
+					</button>
+				</div>
+			`);
 		});
 	}
 
@@ -448,9 +488,6 @@ erpnext.ProductView =  class {
 	render_item_sub_categories(categories) {
 		if (categories && categories.length) {
 			let sub_group_html = `
-				<div class="sub-category-container">
-					<div class="heading"> ${ __('Sub Categories') } </div>
-				</div>
 				<div class="sub-category-container scroll-categories">
 			`;
 

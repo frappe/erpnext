@@ -166,19 +166,6 @@ $.extend(shopping_cart, {
 		});
 	},
 
-	animate_add_to_cart(button) {
-		// Create 'added to cart' animation
-		let btn_id = "#" + button[0].id;
-		this.toggle_button_class(button, 'not-added', 'added-to-cart');
-		$(btn_id).text('Added to Cart');
-
-		// undo
-		setTimeout(() => {
-			this.toggle_button_class(button, 'added-to-cart', 'not-added');
-			$(btn_id).text('Add to Cart');
-		}, 2000);
-	},
-
 	toggle_button_class(button, remove, add) {
 		button.removeClass(remove);
 		button.addClass(add);
@@ -189,7 +176,10 @@ $.extend(shopping_cart, {
 			const $btn = $(e.currentTarget);
 			$btn.prop('disabled', true);
 
-			this.animate_add_to_cart($btn);
+			$btn.addClass('hidden');
+			$btn.parent().find('.go-to-cart').removeClass('hidden');
+			$btn.parent().find('.go-to-cart-grid').removeClass('hidden');
+			$btn.parent().find('.cart-indicator').removeClass('hidden');
 
 			const item_code = $btn.data('item-code');
 			e_commerce.shopping_cart.update_cart({
