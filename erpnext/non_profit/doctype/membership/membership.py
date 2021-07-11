@@ -288,9 +288,9 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), _("Payment ID"), payment.id)
 		log = frappe.log_error(message, _("Error creating membership entry for {0}").format(member.name))
 		notify_failure(log)
-		return { "status": "Failed", "reason": e}
+		return {"status": "Failed", "reason": e}
 
-	return { "status": "Success" }
+	return {"status": "Success"}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -319,15 +319,15 @@ def update_halted_razorpay_subscription(*args, **kwargs):
 		member.save()
 
 		if subscription.get("notes"):
-			member.add_comment("Comment", notes)
+			member.add_comment("Comment", subscription.get("notes"))
 
 	except Exception as e:
 		message = "{0}\n\n{1}".format(e, frappe.get_traceback())
 		log = frappe.log_error(message, _("Error updating halted status for member {0}").format(member.name))
 		notify_failure(log)
-		return { "status": "Failed", "reason": e }
+		return {"status": "Failed", "reason": e}
 
-	return { "status": "Success" }
+	return {"status": "Success"}
 
 
 def process_request_data(data):
@@ -336,7 +336,7 @@ def process_request_data(data):
 	except Exception as e:
 		log = frappe.log_error(e, "Membership Webhook Verification Error")
 		notify_failure(log)
-		return { "status": "Failed", "reason": e }
+		return {"status": "Failed", "reason": e}
 
 	if isinstance(data, six.string_types):
 		data = json.loads(data)
