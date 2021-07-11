@@ -9,8 +9,6 @@ $(() => {
 
 			// Render Product Views, Filters & Search
 			frappe.require('/assets/js/e-commerce.min.js', function() {
-				new erpnext.ProductSearch();
-
 				new erpnext.ProductView({
 					view_type: view_type,
 					products_section: $('#product-listing'),

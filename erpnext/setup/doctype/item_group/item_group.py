@@ -102,6 +102,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		context.no_breadcrumbs = False
 		context.title = self.website_title or self.name
 		context.name = self.name
+		context.item_group_name = self.item_group_name
 
 		return context
 

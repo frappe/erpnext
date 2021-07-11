@@ -24,8 +24,8 @@ erpnext.ProductList = class {
 			let title = item.web_item_name || item.item_name || item.item_code || "";
 			title =  title.length > 200 ? title.substr(0, 200) + "..." : title;
 
-			html += `<div class='row mt-6 w-100' style="border-bottom: 1px solid var(--table-border-color); padding-bottom: 1rem;">`;
-			html += me.get_image_html(item, title);
+			html += `<div class='row list-row w-100'>`;
+			html += me.get_image_html(item, title, me.settings);
 			html += me.get_row_body_html(item, title, me.settings);
 			html += `</div>`;
 		});
@@ -34,20 +34,23 @@ erpnext.ProductList = class {
 		$product_wrapper.append(html);
 	}
 
-	get_image_html(item, title) {
+	get_image_html(item, title, settings) {
 		let image = item.website_image || item.image;
+		let wishlist_enabled = !item.has_variants && settings.enable_wishlist;
+		let image_html = ``;
 
 		if (image) {
-			return `
+			image_html += `
 				<div class="col-2 border text-center rounded list-image">
 					<a class="product-link product-list-link" href="/${ item.route || '#' }">
 						<img itemprop="image" class="website-image h-100 w-100" alt="${ title }"
 							src="${ image }">
 					</a>
+					${ wishlist_enabled ? this.get_wishlist_icon(item): '' }
 				</div>
 			`;
 		} else {
-			return `
+			image_html += `
 				<div class="col-2 border text-center rounded list-image">
 					<a class="product-link product-list-link" href="/${ item.route || '#' }"
 						style="text-decoration: none">
@@ -55,13 +58,16 @@ erpnext.ProductList = class {
 							${ frappe.get_abbr(title) }
 						</div>
 					</a>
+					${ wishlist_enabled ? this.get_wishlist_icon(item): '' }
 				</div>
 			`;
 		}
+
+		return image_html;
 	}
 
 	get_row_body_html(item, title, settings) {
-		let body_html = `<div class='col-9 text-left'>`;
+		let body_html = `<div class='col-10 text-left'>`;
 		body_html += this.get_title_html(item, title, settings);
 		body_html += this.get_item_details(item, settings);
 		body_html += `</div>`;
@@ -76,18 +82,11 @@ erpnext.ProductList = class {
 					style="color: var(--gray-800); font-weight: 500;">
 					${ title }
 				</a>
+			</div>
 		`;
 
-		if (item.in_stock && settings.show_stock_availability) {
-			title_html += `<span class="indicator ${ item.in_stock } card-indicator"></span>`;
-		}
-		title_html += `</div>`;
-
-		if (settings.enable_wishlist || settings.enabled) {
+		if (settings.enabled) {
 			title_html += `<div class="col-4" style="display:flex">`;
-			if (!item.has_variants && settings.enable_wishlist) {
-				title_html += this.get_wishlist_icon(item);
-			}
 			title_html += this.get_primary_button(item, settings);
 			title_html += `</div>`;
 		}
@@ -96,12 +95,12 @@ erpnext.ProductList = class {
 		return title_html;
 	}
 
-	get_item_details(item) {
+	get_item_details(item, settings) {
 		let details = `
 			<p class="product-code">
-				Item Code : ${ item.item_code }
+				${ item.item_group } | Item Code : ${ item.item_code }
 			</p>
-			<div class="text-muted mt-2">
+			<div class="mt-2" style="color: var(--gray-600) !important; font-size: 13px;">
 				${ item.short_description || '' }
 			</div>
 			<div class="product-price">
@@ -110,24 +109,33 @@ erpnext.ProductList = class {
 
 		if (item.formatted_mrp) {
 			details += `
-				<small class="ml-1 text-muted">
-					<s>${ item.formatted_mrp }</s>
+				<small class="striked-price">
+					<s>${ item.formatted_mrp ? item.formatted_mrp.replace(/ +/g, "") : "" }</s>
 				</small>
-				<small class="ml-1" style="color: #F47A7A; font-weight: 500;">
+				<small class="ml-1 product-info-green">
 					${ item.discount } OFF
 				</small>
 			`;
 		}
+
+		details += this.get_stock_availability(item, settings);
 		details += `</div>`;
 
 		return details;
+	}
+
+	get_stock_availability(item, settings) {
+		if (!item.has_variants && !item.in_stock && settings.show_stock_availability) {
+			return `<br><span class="out-of-stock mt-2">Out of stock</span>`;
+		}
+		return ``;
 	}
 
 	get_wishlist_icon(item) {
 		let icon_class = item.wished ? "wished" : "not-wished";
 
 		return `
-			<div class="like-action mr-4"
+			<div class="like-action-list ${ item.wished ? "like-action-wished" : ''}"
 			data-item-code="${ item.item_code }"
 			data-price="${ item.price || '' }"
 			data-formatted-price="${ item.formatted_price || '' }">
@@ -142,19 +150,43 @@ erpnext.ProductList = class {
 		if (item.has_variants) {
 			return `
 				<a href="/${ item.route || '#' }">
-					<div class="btn btn-sm btn-explore-variants" style="margin-bottom: 0; margin-top: 4px; max-height: 30px;">
+					<div class="btn btn-sm btn-explore-variants btn"
+					style="margin-bottom: 0; max-height: 30px; float: right;
+						padding: 0.25rem 1rem; min-width: 135px;">
 						${ __('Explore') }
 					</div>
 				</a>
 			`;
-		} else if (settings.enabled && (settings.allow_items_not_in_stock || item.in_stock !== "red")) {
+		} else if (settings.enabled && (settings.allow_items_not_in_stock || item.in_stock)) {
 			return `
 				<div id="${ item.name }" class="btn
-					btn-sm btn-add-to-cart-list not-added"
+					btn-sm btn-primary btn-add-to-cart-list
+					${ item.in_cart ? 'hidden' : '' }"
 					data-item-code="${ item.item_code }"
-					style="margin-bottom: 0; margin-top: 0px; max-height: 30px;">
+					style="margin-bottom: 0; margin-top: 0px !important; max-height: 30px; float: right;
+						padding: 0.25rem 1rem; min-width: 135px;">
+					<span class="mr-2">
+						<svg class="icon icon-md">
+							<use href="#icon-assets"></use>
+						</svg>
+					</span>
 					${ __('Add to Cart') }
 				</div>
+
+				<div class="cart-indicator ${item.in_cart ? '' : 'hidden'}" style="position: unset;">
+					1
+				</div>
+
+				<a href="/cart">
+					<div id="${ item.name }" class="btn
+						btn-sm btn-primary btn-add-to-cart-list
+						ml-4 go-to-cart
+						${ item.in_cart ? '' : 'hidden' }"
+						data-item-code="${ item.item_code }"
+						style="padding: 0.25rem 1rem; min-width: 135px;">
+						${ __('Go to Cart') }
+					</div>
+				</a>
 			`;
 		} else {
 			return ``;
