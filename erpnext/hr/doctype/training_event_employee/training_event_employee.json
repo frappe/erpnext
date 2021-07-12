@@ -19,6 +19,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Employee",
+   "no_copy": 1,
    "options": "Employee"
   },
   {
@@ -68,7 +69,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-21 12:41:59.336237",
+ "modified": "2021-07-02 17:20:27.630176",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Training Event Employee",

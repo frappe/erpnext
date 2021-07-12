@@ -1318,9 +1318,9 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 	return frappe._dict({
 		"due_date": ref_doc.get("due_date"),
-		"total_amount": total_amount,
-		"outstanding_amount": outstanding_amount,
-		"exchange_rate": exchange_rate,
+		"total_amount": flt(total_amount),
+		"outstanding_amount": flt(outstanding_amount),
+		"exchange_rate": flt(exchange_rate),
 		"bill_no": bill_no
 	})
 
