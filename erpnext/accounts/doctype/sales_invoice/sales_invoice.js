@@ -510,15 +510,6 @@ cur_frm.set_query("income_account", "items", function(doc) {
 	}
 });
 
-// Discount Account in Details Table
-// --------------------------------
-cur_frm.set_query("discount_account", "items", function(doc) {
-	return{
-		query: "erpnext.controllers.queries.get_income_account",
-		filters: {'company': doc.company}
-	}
-});
-
 // Cost Center in Details Table
 // -----------------------------
 cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
@@ -615,6 +606,19 @@ frappe.ui.form.on('Sales Invoice', {
 
 		// expense account
 		frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
+				return {
+					filters: {
+						'report_type': 'Profit and Loss',
+						'company': doc.company,
+						"is_group": 0
+					}
+				}
+			}
+		}
+
+		// discount account
+		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
 					filters: {
