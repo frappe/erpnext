@@ -119,26 +119,25 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None,
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 
-	if not frappe.db.exists('Salary Structure', salary_structure):
-		details = {
-			"doctype": "Salary Structure",
-			"name": salary_structure,
-			"company": company or erpnext.get_default_company(),
-			"earnings": make_earning_salary_component(setup=True,  test_tax=test_tax, company_list=["_Test Company"]),
-			"deductions": make_deduction_salary_component(setup=True, test_tax=test_tax, company_list=["_Test Company"]),
-			"payroll_frequency": payroll_frequency,
-			"payment_account": get_random("Account", filters={'account_currency': currency}),
-			"currency": currency
-		}
-		if other_details and isinstance(other_details, dict):
-			details.update(other_details)
-		salary_structure_doc = frappe.get_doc(details)
-		salary_structure_doc.insert()
-		if not dont_submit:
-			salary_structure_doc.submit()
+	if frappe.db.exists("Salary Structure", salary_structure):
+		frappe.db.delete("Salary Structure", salary_structure)
 
-	else:
-		salary_structure_doc = frappe.get_doc("Salary Structure", salary_structure)
+	details = {
+		"doctype": "Salary Structure",
+		"name": salary_structure,
+		"company": company or erpnext.get_default_company(),
+		"earnings": make_earning_salary_component(setup=True,  test_tax=test_tax, company_list=["_Test Company"]),
+		"deductions": make_deduction_salary_component(setup=True, test_tax=test_tax, company_list=["_Test Company"]),
+		"payroll_frequency": payroll_frequency,
+		"payment_account": get_random("Account", filters={'account_currency': currency}),
+		"currency": currency
+	}
+	if other_details and isinstance(other_details, dict):
+		details.update(other_details)
+	salary_structure_doc = frappe.get_doc(details)
+	salary_structure_doc.insert()
+	if not dont_submit:
+		salary_structure_doc.submit()
 
 	filters = {'employee':employee, 'docstatus': 1}
 	if not from_date and payroll_period:
