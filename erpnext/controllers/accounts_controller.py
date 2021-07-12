@@ -741,6 +741,51 @@ class AccountsController(TransactionBase):
 							tax_map[tax.account_head] -= allocated_amount
 							allocated_tax_map[tax.account_head] -= allocated_amount
 
+	def make_discount_gl_entries(self, gl_entries):
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		if enable_discount_accounting:
+			for item in self.get("items"):
+				if item.get('discount_amount') and item.get('discount_account'):
+					if self.doctype == "Purchase Invoice":
+						dr_or_cr = "credit"
+						rev_dr_cr = "debit"
+						supplier_or_customer = self.supplier
+						income_or_expense_account = (item.expense_account
+							if (not item.enable_deferred_expense or self.is_return) 
+							else item.deferred_expense_account)
+					else:
+						dr_or_cr = "debit"
+						rev_dr_cr = "credit"
+						supplier_or_customer = self.customer
+						income_or_expense_account = (item.income_account
+							if (not item.enable_deferred_revenue or self.is_return) 
+							else item.deferred_revenue_account)
+
+					account_currency = get_account_currency(item.discount_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.discount_account,
+							"against": supplier_or_customer,
+							dr_or_cr: flt(item.discount_amount),
+							dr_or_cr + "_in_account_currency": flt(item.discount_amount),
+							"cost_center": self.cost_center,
+							"project": self.project
+						}, account_currency, item=self)
+					)
+
+					account_currency = get_account_currency(income_or_expense_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": income_or_expense_account,
+							"against": supplier_or_customer,
+							rev_dr_cr: flt(item.discount_amount),
+							rev_dr_cr + "_in_account_currency": flt(item.discount_amount),
+							"cost_center": item.cost_center,
+							"project": item.project or self.project
+						}, account_currency, item=item)
+					)
+
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
 		for pe in self.get("advances"):
