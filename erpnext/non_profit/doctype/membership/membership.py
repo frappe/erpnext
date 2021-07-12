@@ -312,7 +312,7 @@ def update_halted_razorpay_subscription(*args, **kwargs):
 	try:
 		member = get_member_based_on_subscription(subscription.id, customer_id=subscription.customer_id)
 		if not member:
-			frappe.throw(_("Member {0} not found"))
+			frappe.throw(_("Member with Razorpay Subscription ID {0} not found").format(subscription.id))
 
 		member.subscription_status = "Halted"
 		member.flags.ignore_mandatory = True
