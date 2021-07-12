@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, has_common
 from frappe.utils.user import is_website_user
+from frappe.modules.utils import get_module_app
 
 def get_list_context(context=None):
 	return {
@@ -18,12 +19,14 @@ def get_list_context(context=None):
 		"get_list": get_transaction_list
 	}
 
-def get_custom_website_context():
+def get_list_context_for_custom_webform(module):
+	if get_module_app(module) != 'erpnext':
+		return
 	return {
-		"get_list": get_custom_transaction_list
+		"get_list": get_transaction_list_for_custom_webform
 	}
 
-def get_custom_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
+def get_transaction_list_for_custom_webform(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
 	""" Get List of transactions for custom doctypes """
 	from frappe.www.list import get_list
 	if not filters: 
