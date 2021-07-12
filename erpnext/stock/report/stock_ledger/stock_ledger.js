@@ -79,6 +79,12 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Batch"
 		},
 		{
+			"fieldname":"serial_no",
+			"label": __("Serial No"),
+			"fieldtype": "Link",
+			"options": "Serial No"
+		},
+		{
 			"fieldname":"brand",
 			"label": __("Brand"),
 			"fieldtype": "Link",

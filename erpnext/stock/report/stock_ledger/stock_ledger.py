@@ -231,6 +231,14 @@ def get_sle_conditions(filters):
 	if filters.get("party"):
 		conditions.append("party=%(party)s")
 
+	if filters.get("serial_no"):
+		conditions.append("(serial_no = {0} or serial_no like {1} or serial_no like {2} or serial_no like {3})".format(
+			frappe.db.escape(filters.get("serial_no")),
+			frappe.db.escape("{0}\n%".format(filters.get("serial_no"))),
+			frappe.db.escape("%\n{0}".format(filters.get("serial_no"))),
+			frappe.db.escape("%\n{0}\n%".format(filters.get("serial_no"))),
+		))
+
 	match_conditions = build_match_conditions("Stock Ledger Entry")
 	if match_conditions:
 		conditions.append(match_conditions)
