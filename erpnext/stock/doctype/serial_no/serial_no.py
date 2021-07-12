@@ -251,9 +251,13 @@ def validate_serial_no(sle, item_det):
 								sle.item_code), SerialNoItemError)
 
 					if cint(sle.actual_qty) > 0 and has_serial_no_exists(sr, sle):
-						doc_name = frappe.bold(get_link_to_form(sr.purchase_document_type, sr.purchase_document_no))
-						frappe.throw(_("Serial No {0} has already been received in the {1} #{2}")
-							.format(frappe.bold(serial_no), sr.purchase_document_type, doc_name), SerialNoDuplicateError)
+						if sr.purchase_document_type is None or sr.purchase_document_no is None:
+							frappe.throw(_("Serial No {0} has already been received")
+								.format(frappe.bold(serial_no)), SerialNoDuplicateError)
+						else:
+							doc_name = frappe.bold(get_link_to_form(sr.purchase_document_type, sr.purchase_document_no))
+							frappe.throw(_("Serial No {0} has already been received in the {1} #{2}")
+								.format(frappe.bold(serial_no), sr.purchase_document_type, doc_name), SerialNoDuplicateError)
 
 					if (sr.delivery_document_no and sle.voucher_type not in ['Stock Entry', 'Stock Reconciliation']
 						and sle.voucher_type == sr.delivery_document_type):
