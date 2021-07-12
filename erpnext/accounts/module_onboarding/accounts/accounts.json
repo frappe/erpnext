@@ -13,7 +13,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/accounts",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-06-29 15:09:26.981634",
+ "modified": "2021-06-29 16:42:33.415322",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",
@@ -44,7 +44,7 @@
    "step": "Create Your First Sales Invoice"
   },
   {
-   "step": "Configure Account Settings"
+   "step": "Accounts Settings"
   }
  ],
  "subtitle": "Accounts, Invoices, Taxation, and more.",
