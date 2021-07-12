@@ -662,7 +662,7 @@ class BOM(WebsiteGenerator):
 			self.get_routing()
 
 	def validate_operations(self):
-		if self.with_operations and not self.get('operations'):
+		if self.with_operations and not self.get('operations') and self.docstatus == 1:
 			frappe.throw(_("Operations cannot be left blank"))
 
 		if self.with_operations:
@@ -1100,6 +1100,8 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 		},
 		'BOM Item': {
 			'doctype': 'BOM Item',
+			# stop get_mapped_doc copying parent bom_no to children
+			'field_no_map': ['bom_no'],
 			'condition': lambda doc: doc.has_variants == 0
 		},
 	}, target_doc, postprocess)
