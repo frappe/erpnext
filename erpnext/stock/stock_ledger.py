@@ -6,12 +6,13 @@ import frappe
 import erpnext
 import copy
 from frappe import _
-from frappe.utils import cint, flt, cstr, now, get_link_to_form
+from frappe.utils import cint, flt, cstr, now, get_link_to_form, getdate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.utils import get_valuation_method, get_incoming_outgoing_rate_for_cancel
 from erpnext.stock.utils import get_bin
 import json
 from six import iteritems
+
 
 # future reposting
 class NegativeStockError(frappe.ValidationError): pass
@@ -130,7 +131,13 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 	if not args and voucher_type and voucher_no:
 		args = get_args_for_voucher(voucher_type, voucher_no)
 
-	distinct_item_warehouses = [(d.item_code, d.warehouse) for d in args]
+	distinct_item_warehouses = {}
+	for i, d in enumerate(args):
+		distinct_item_warehouses.setdefault((d.item_code, d.warehouse), frappe._dict({
+			"reposting_status": False,
+			"sle": d,
+			"args_idx": i
+		}))
 
 	i = 0
 	while i < len(args):
@@ -139,13 +146,21 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 			"warehouse": args[i].warehouse,
 			"posting_date": args[i].posting_date,
 			"posting_time": args[i].posting_time,
-			"creation": args[i].get("creation")
+			"creation": args[i].get("creation"),
+			"distinct_item_warehouses": distinct_item_warehouses
 		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
-		for item_wh, new_sle in iteritems(obj.new_items):
-			if item_wh not in distinct_item_warehouses:
-				args.append(new_sle)
+		distinct_item_warehouses[(args[i].item_code, args[i].warehouse)].reposting_status = True
 
+		if obj.new_items_found:
+			for item_wh, data in iteritems(distinct_item_warehouses):
+				if ('args_idx' not in data and not data.reposting_status) or (data.sle_changed and data.reposting_status):
+					data.args_idx = len(args)
+					args.append(data.sle)
+				elif data.sle_changed and not data.reposting_status:
+					args[data.args_idx] = data.sle
+				
+				data.sle_changed = False
 		i += 1
 
 def get_args_for_voucher(voucher_type, voucher_no):
@@ -186,11 +201,12 @@ class update_entries_after(object):
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.get_precision()
 		self.valuation_method = get_valuation_method(self.item_code)
-		self.new_items = {}
+
+		self.new_items_found = False
+		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
 
 		self.data = frappe._dict()
 		self.initialize_previous_data(self.args)
-
 		self.build()
 
 	def get_precision(self):
@@ -296,11 +312,29 @@ class update_entries_after(object):
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse == self.args.warehouse:
 			return entries_to_fix
 		elif dependant_sle.item_code != self.item_code:
-			if (dependant_sle.item_code, dependant_sle.warehouse) not in self.new_items:
-				self.new_items[(dependant_sle.item_code, dependant_sle.warehouse)] = dependant_sle
+			self.update_distinct_item_warehouses(dependant_sle)
 			return entries_to_fix
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
 			return entries_to_fix
+		else:
+			return self.append_future_sle_for_dependant(dependant_sle, entries_to_fix)
+
+	def update_distinct_item_warehouses(self, dependant_sle):
+		key = (dependant_sle.item_code, dependant_sle.warehouse)
+		val = frappe._dict({
+			"sle": dependant_sle
+		})
+		if key not in self.distinct_item_warehouses:
+			self.distinct_item_warehouses[key] = val
+			self.new_items_found = True
+		else:
+			existing_sle_posting_date = self.distinct_item_warehouses[key].get("sle", {}).get("posting_date")
+			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
+				val.sle_changed = True
+				self.distinct_item_warehouses[key] = val
+				self.new_items_found = True
+
+	def append_future_sle_for_dependant(self, dependant_sle, entries_to_fix):
 		self.initialize_previous_data(dependant_sle)
 
 		args = self.data[dependant_sle.warehouse].previous_sle \
@@ -393,6 +427,7 @@ class update_entries_after(object):
 		rate = 0
 		# Material Transfer, Repack, Manufacturing
 		if sle.voucher_type == "Stock Entry":
+			self.recalculate_amounts_in_stock_entry(sle.voucher_no)
 			rate = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "valuation_rate")
 		# Sales and Purchase Return
 		elif sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice"):
@@ -442,7 +477,11 @@ class update_entries_after(object):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no, for_update=True)
+		if not sle.dependant_sle_voucher_detail_no:
+			self.recalculate_amounts_in_stock_entry(sle.voucher_no)
+
+	def recalculate_amounts_in_stock_entry(self, voucher_no):
+		stock_entry = frappe.get_doc("Stock Entry", voucher_no, for_update=True)
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		for d in stock_entry.items:
