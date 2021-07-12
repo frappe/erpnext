@@ -8,7 +8,7 @@ from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
-	get_datetime, getdate, nowdate, today, unique)
+	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
 
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
@@ -20,6 +20,7 @@ class EmployeeBoardingController(Document):
 		Assign to the concerned person and roles as per the onboarding/separation template
 	'''
 	def validate(self):
+		validate_active_employee(self.employee)
 		# remove the task if linked before submitting the form
 		if self.amended_from:
 			for activity in self.activities:
@@ -522,3 +523,10 @@ def share_doc_with_approver(doc, user):
 		approver = approvers.get(doc.doctype)
 		if doc_before_save.get(approver) != doc.get(approver):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
+
+def validate_active_employee(employee):
+	# allowing suspended employee because some organizations still process payroll,
+	# create additional salary, attendance records for a Suspended employee
+	if frappe.db.get_value("Employee", employee, "status") in ["Left", "Inactive"]:
+		frappe.throw(_("Employee {0} with a non-active status cannot be used for this transaction.").format(
+			get_link_to_form("Employee", employee)))
