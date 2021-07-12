@@ -13,7 +13,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/accounts",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-06-29 16:42:33.415322",
+ "modified": "2021-07-12 11:39:12.780397",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",
@@ -29,22 +29,10 @@
    "step": "Setup Taxes"
   },
   {
-   "step": "Create a Product"
-  },
-  {
-   "step": "Create a Supplier"
+   "step": "Accounts Settings"
   },
   {
    "step": "Create Your First Purchase Invoice"
-  },
-  {
-   "step": "Create a Customer"
-  },
-  {
-   "step": "Create Your First Sales Invoice"
-  },
-  {
-   "step": "Accounts Settings"
   }
  ],
  "subtitle": "Accounts, Invoices, Taxation, and more.",
