@@ -365,7 +365,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row,
-			["expense_account", "cost_center", "project"]);
+			["expense_account", "discount_account", "cost_center", "project"]);
 	},
 
 	on_submit: function() {
