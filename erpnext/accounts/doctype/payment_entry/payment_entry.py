@@ -524,16 +524,19 @@ class PaymentEntry(AccountsController):
 		self.unallocated_amount = 0
 		if self.party:
 			total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
+			included_taxes = self.get_included_taxes()
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
 				self.unallocated_amount = (self.received_amount + total_deductions -
 					self.base_total_allocated_amount) / self.source_exchange_rate
+				self.unallocated_amount -= included_taxes
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
 				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
 				self.unallocated_amount = (self.base_paid_amount - (total_deductions +
 					self.base_total_allocated_amount)) / self.target_exchange_rate
+				self.unallocated_amount -= included_taxes
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate)
@@ -549,9 +552,21 @@ class PaymentEntry(AccountsController):
 			self.difference_amount = self.base_paid_amount - flt(self.base_received_amount)
 
 		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
+		included_taxes = self.get_included_taxes()
 
-		self.difference_amount = flt(self.difference_amount - total_deductions,
+		self.difference_amount = flt(self.difference_amount - total_deductions - included_taxes,
 			self.precision("difference_amount"))
+
+	def get_included_taxes(self):
+		included_taxes = 0
+		for tax in self.get('taxes'):
+			if tax.included_in_paid_amount:
+				if tax.add_deduct_tax == 'Add':
+					included_taxes += tax.base_tax_amount
+				else:
+					included_taxes -= tax.base_tax_amount
+
+		return included_taxes
 
 	# Paid amount is auto allocated in the reference document by default.
 	# Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
@@ -726,6 +741,10 @@ class PaymentEntry(AccountsController):
 				against = self.party or self.paid_to
 
 			payment_or_advance_account = self.get_party_account_for_taxes()
+			tax_amount = d.tax_amount
+
+			if self.advance_tax_account:
+				tax_amount = -1* tax_amount
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -739,16 +758,17 @@ class PaymentEntry(AccountsController):
 				}, account_currency, item=d))
 
 			#Intentionally use -1 to get net values in party account
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": payment_or_advance_account,
-					"against": against,
-					dr_or_cr: -1 * d.base_tax_amount,
-					dr_or_cr + "_in_account_currency": -1*d.base_tax_amount
-					if account_currency==self.company_currency
-					else d.tax_amount,
-					"cost_center": self.cost_center,
-				}, account_currency, item=d))
+			if not d.included_in_paid_amount or self.advance_tax_account:
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": payment_or_advance_account,
+						"against": against,
+						dr_or_cr: -1 * d.base_tax_amount,
+						dr_or_cr + "_in_account_currency": -1*d.base_tax_amount
+						if account_currency==self.company_currency
+						else d.tax_amount,
+						"cost_center": self.cost_center,
+					}, account_currency, item=d))
 
 	def add_deductions_gl_entries(self, gl_entries):
 		for d in self.get("deductions"):
