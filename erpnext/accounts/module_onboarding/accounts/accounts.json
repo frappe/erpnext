@@ -13,7 +13,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/accounts",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-07-12 11:39:12.780397",
+ "modified": "2021-07-12 12:08:48.778906",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",
@@ -32,7 +32,16 @@
    "step": "Accounts Settings"
   },
   {
+   "step": "Cost Centers for Report and Budgeting"
+  },
+  {
    "step": "Create Your First Purchase Invoice"
+  },
+  {
+   "step": "Updating Opening Balances"
+  },
+  {
+   "step": "Financial Statements"
   }
  ],
  "subtitle": "Accounts, Invoices, Taxation, and more.",
