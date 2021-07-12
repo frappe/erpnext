@@ -12,7 +12,10 @@ from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 from frappe.utils import today
 
 def setup(company=None, patch=True):
-	setup_company_independent_fixtures(patch=patch)
+	# Company independent fixtures should be called only once at the first company setup
+	if frappe.db.count('Company', {'country': 'India'}) <=1:
+		setup_company_independent_fixtures(patch=patch)
+
 	if not patch:
 		make_fixtures(company)
 
@@ -122,8 +125,8 @@ def add_print_formats():
 def make_property_setters(patch=False):
 	# GST rules do not allow for an invoice no. bigger than 16 characters
 	journal_entry_types = frappe.get_meta("Journal Entry").get_options("voucher_type").split("\n") + ['Reversal Of ITC']
-	sales_invoice_series = frappe.get_meta("Sales Invoice").get_options("naming_series").split("\n") + ['SINV-.YY.-', 'SRET-.YY.-', '']
-	purchase_invoice_series = frappe.get_meta("Purchase Invoice").get_options("naming_series").split("\n") + ['PINV-.YY.-', 'PRET-.YY.-', '']
+	sales_invoice_series = ['SINV-.YY.-', 'SRET-.YY.-', ''] + frappe.get_meta("Sales Invoice").get_options("naming_series").split("\n")
+	purchase_invoice_series = ['PINV-.YY.-', 'PRET-.YY.-', ''] + frappe.get_meta("Purchase Invoice").get_options("naming_series").split("\n")
 
 	if not patch:
 		make_property_setter('Sales Invoice', 'naming_series', 'options', '\n'.join(sales_invoice_series), '')
@@ -788,7 +791,7 @@ def set_tax_withholding_category(company):
 			doc.flags.ignore_mandatory = True
 			doc.insert()
 		else:
-			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
+			doc = frappe.get_doc("Tax Withholding Category", d.get("name"), for_update=True)
 
 			if accounts:
 				doc.append("accounts", accounts[0])
