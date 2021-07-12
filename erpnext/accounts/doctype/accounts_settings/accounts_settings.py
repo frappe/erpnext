@@ -38,5 +38,7 @@ class AccountsSettings(Document):
 	def toggle_discount_accounting_fields(self):
 		enable_discount_accounting = cint(self.enable_discount_accounting)
 		
-		make_property_setter("Sales Invoice Item", "discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
+		for doctype in ["Sales Invoice Item", "Purchase Invoice Item"]:
+			make_property_setter(doctype, "discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
+
 		make_property_setter("Item", "default_discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
