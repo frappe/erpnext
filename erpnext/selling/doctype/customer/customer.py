@@ -84,25 +84,22 @@ class Customer(TransactionBase):
 		self.accounts = self.credit_limits = []
 		self.payment_terms = self.default_price_list = ""
 
-		if not self.accounts and doc.accounts:
-			for account in doc.accounts:
-				child = self.append('accounts')
-				child.company = account.company
-				child.account = account.account
-			self.save()
+		tables = [["accounts", "account"], ["credit_limits", "credit_limit"]]
+		fields = ["payment_terms", "default_price_list"]
 
-		if not self.credit_limits and doc.credit_limits:
-			for credit in doc.credit_limits:
-				child = self.append('credit_limits')
-				child.company = credit.company
-				child.credit_limit = credit.credit_limit
-			self.save()
+		for row in tables:
+			table, field = row[0], row[1]
+			if not doc.get(table): continue
 
-		if not self.payment_terms and doc.payment_terms:
-			self.payment_terms = doc.payment_terms
+			for entry in doc.get(table):
+				child = self.append(table)
+				child.update({"company": entry.company, field: entry.get(field)})
 
-		if not self.default_price_list and doc.default_price_list:
-			self.default_price_list = doc.default_price_list
+		for field in fields:
+			if not doc.get(field): continue
+			self.update({field: doc.get(field)})
+
+		self.save()
 
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
