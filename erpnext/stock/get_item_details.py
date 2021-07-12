@@ -590,8 +590,8 @@ def get_default_expense_account(args, item, item_group, brand):
 		or brand.get("expense_account")
 		or args.expense_account)
 
-def get_default_discount_account(args, item_defaults):
-	return (item_defaults.default_discount_account
+def get_default_discount_account(args, item):
+	return (item.get("default_discount_account")
 		or args.discount_account)
 
 def get_default_deferred_account(args, item, fieldname=None):
