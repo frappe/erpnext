@@ -446,6 +446,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries)
 
 		if self.check_asset_cwip_enabled():
 			self.get_asset_gl_entry(gl_entries)
