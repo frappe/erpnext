@@ -14,7 +14,8 @@
   "total_amount",
   "outstanding_amount",
   "allocated_amount",
-  "exchange_rate"
+  "exchange_rate",
+  "exchange_gain_loss"
  ],
  "fields": [
   {
@@ -90,12 +91,19 @@
    "fieldtype": "Link",
    "label": "Payment Term",
    "options": "Payment Term"
+  },
+  {
+   "fieldname": "exchange_gain_loss",
+   "fieldtype": "Currency",
+   "label": "Exchange Gain/Loss",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-10 11:25:47.144392",
+ "modified": "2021-04-21 13:30:11.605388",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

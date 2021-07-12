@@ -183,6 +183,13 @@ class PaymentEntry(AccountsController):
 					d.reference_name, self.party_account_currency)
 
 				for field, value in iteritems(ref_details):
+					if d.exchange_gain_loss:
+						# for cases where gain/loss is booked into invoice
+						# exchange_gain_loss is calculated from invoice & populated 
+						# and row.exchange_rate is already set to payment entry's exchange rate
+						# refer -> `update_reference_in_payment_entry()` in utils.py
+						continue
+
 					if field == 'exchange_rate' or not d.get(field) or force:
 						d.db_set(field, value)
 
@@ -684,8 +691,8 @@ class PaymentEntry(AccountsController):
 				gl_entries.append(gle)
 
 			if self.unallocated_amount:
-				base_unallocated_amount = self.unallocated_amount * \
-					(self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate)
+				exchange_rate = self.get_exchange_rate()
+				base_unallocated_amount = (self.unallocated_amount * exchange_rate)
 
 				gle = party_gl_dict.copy()
 
@@ -831,9 +838,16 @@ class PaymentEntry(AccountsController):
 
 		if account_details:
 			row.update(account_details)
+		
+		if not row.get('amount'):
+			# if no difference amount
+			return
 
 		self.append('deductions', row)
 		self.set_unallocated_amount()
+
+	def get_exchange_rate(self):
+		return self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate
 
 	def initialize_taxes(self):
 		for tax in self.get("taxes"):
@@ -1343,9 +1357,9 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 	return frappe._dict({
 		"due_date": ref_doc.get("due_date"),
-		"total_amount": total_amount,
-		"outstanding_amount": outstanding_amount,
-		"exchange_rate": exchange_rate,
+		"total_amount": flt(total_amount),
+		"outstanding_amount": flt(outstanding_amount),
+		"exchange_rate": flt(exchange_rate),
 		"bill_no": bill_no
 	})
 

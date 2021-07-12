@@ -23,7 +23,10 @@
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
+  "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
+  "column_break_21",
+  "action_if_quality_inspection_is_rejected",
   "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
   "set_qty_in_transactions_based_on_serial_no_input",
@@ -264,6 +267,22 @@
   {
    "fieldname": "column_break_31",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_inspection_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Quality Inspection Settings"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Stop",
+   "fieldname": "action_if_quality_inspection_is_rejected",
+   "fieldtype": "Select",
+   "label": "Action If Quality Inspection Is Rejected",
+   "options": "Stop\nWarn"
   }
  ],
  "icon": "icon-cog",
@@ -271,7 +290,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-30 17:27:42.709231",
+ "modified": "2021-07-10 16:17:42.159829",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
