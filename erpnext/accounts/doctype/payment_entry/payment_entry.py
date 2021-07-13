@@ -436,6 +436,7 @@ class PaymentEntry(AccountsController):
 			return
 
 		tax_withholding_details.update({
+			'add_deduct_tax': 'Add',
 			'cost_center': self.cost_center or erpnext.get_default_cost_center(self.company)
 		})
 
@@ -742,16 +743,18 @@ class PaymentEntry(AccountsController):
 
 			payment_or_advance_account = self.get_party_account_for_taxes()
 			tax_amount = d.tax_amount
+			base_tax_amount = d.base_tax_amount
 
 			if self.advance_tax_account:
-				tax_amount = -1* tax_amount
+				tax_amount = -1 * tax_amount
+				base_tax_amount = -1 * base_tax_amount
 
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": d.account_head,
 					"against": against,
-					dr_or_cr: d.base_tax_amount,
-					dr_or_cr + "_in_account_currency": d.base_tax_amount
+					dr_or_cr: tax_amount,
+					dr_or_cr + "_in_account_currency": base_tax_amount
 					if account_currency==self.company_currency
 					else d.tax_amount,
 					"cost_center": d.cost_center
@@ -763,8 +766,8 @@ class PaymentEntry(AccountsController):
 					self.get_gl_dict({
 						"account": payment_or_advance_account,
 						"against": against,
-						dr_or_cr: -1 * d.base_tax_amount,
-						dr_or_cr + "_in_account_currency": -1*d.base_tax_amount
+						dr_or_cr: -1 * tax_amount,
+						dr_or_cr + "_in_account_currency": -1 * base_tax_amount
 						if account_currency==self.company_currency
 						else d.tax_amount,
 						"cost_center": self.cost_center,
