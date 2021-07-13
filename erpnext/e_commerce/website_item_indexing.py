@@ -11,6 +11,7 @@ WEBSITE_ITEM_NAME_AUTOCOMPLETE = 'website_items_name_dict'
 WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE = 'website_items_category_dict'
 
 ALLOWED_INDEXABLE_FIELDS_SET = {
+	'web_item_name',
 	'item_code',
 	'item_name',
 	'item_group',

@@ -27,6 +27,8 @@
   "enable_wishlist",
   "column_break_22",
   "enable_reviews",
+  "column_break_23",
+  "enable_recommendations",
   "section_break_18",
   "company",
   "price_list",
@@ -367,12 +369,22 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_recommendations",
+   "fieldtype": "Check",
+   "label": "Enable Recommendations"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-07-07 21:32:17.363276",
+ "modified": "2021-07-13 16:30:14.715949",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",

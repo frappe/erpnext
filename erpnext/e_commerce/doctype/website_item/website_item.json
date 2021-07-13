@@ -39,6 +39,8 @@
   "display_additional_information_section",
   "show_tabbed_section",
   "tabs",
+  "recommended_items_section",
+  "recommended_items",
   "offers_section",
   "offers",
   "section_break_6",
@@ -312,13 +314,25 @@
    "fieldname": "short_description",
    "fieldtype": "Small Text",
    "label": "Short Website Description"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "recommended_items_section",
+   "fieldtype": "Section Break",
+   "label": "Recommended Items"
+  },
+  {
+   "fieldname": "recommended_items",
+   "fieldtype": "Table",
+   "label": "Recommended/Similar Items",
+   "options": "Recommended Items"
   }
  ],
  "has_web_view": 1,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-11 20:49:45.415421",
+ "modified": "2021-07-12 21:00:04.065803",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",
@@ -373,10 +387,10 @@
    "write": 1
   }
  ],
- "search_fields": "item_code, item_name ,item_group",
+ "search_fields": "web_item_name, item_code, item_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "item_name",
+ "title_field": "web_item_name",
  "track_changes": 1
 }

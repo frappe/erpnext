@@ -176,6 +176,16 @@ $.extend(shopping_cart, {
 			const $btn = $(e.currentTarget);
 			$btn.prop('disabled', true);
 
+			if (frappe.session.user==="Guest") {
+				if (localStorage) {
+					localStorage.setItem("last_visited", window.location.pathname);
+				}
+				frappe.call('erpnext.e_commerce.api.get_guest_redirect_on_action').then((res) => {
+					window.location.href = res.message || "/login";
+				});
+				return;
+			}
+
 			$btn.addClass('hidden');
 			$btn.parent().find('.go-to-cart').removeClass('hidden');
 			$btn.parent().find('.go-to-cart-grid').removeClass('hidden');
