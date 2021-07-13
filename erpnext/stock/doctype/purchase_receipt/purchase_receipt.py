@@ -254,6 +254,8 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_purchase_document_details
+
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
@@ -261,6 +263,8 @@ class PurchaseReceipt(BuyingController):
 
 		warehouse_with_no_account = []
 		stock_items = self.get_stock_items()
+
+		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
@@ -303,6 +307,23 @@ class PurchaseReceipt(BuyingController):
 						self.add_gl_entry(gl_entries, account, d.cost_center,
 							-1 * flt(d.base_net_amount, d.precision("base_net_amount")), 0.0, remarks, warehouse_account_name,
 							debit_in_account_currency=-1 * credit_amount, account_currency=credit_currency, item=d)
+
+						# check if the exchange rate has changed
+						if d.get('purchase_invoice'):
+							if exchange_rate_map[d.purchase_invoice] and \
+								self.conversion_rate != exchange_rate_map[d.purchase_invoice] and \
+								d.net_rate == net_rate_map[d.purchase_invoice_item]:
+
+								discrepancy_caused_by_exchange_rate_difference = (d.qty * d.net_rate) * \
+									(exchange_rate_map[d.purchase_invoice] - self.conversion_rate)
+
+								self.add_gl_entry(gl_entries, account, d.cost_center, 0.0, discrepancy_caused_by_exchange_rate_difference,
+									remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
+									account_currency=credit_currency, item=d)
+
+								self.add_gl_entry(gl_entries, self.get_company_default("exchange_gain_loss_account"), d.cost_center, discrepancy_caused_by_exchange_rate_difference, 0.0,
+									remarks, self.supplier, debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
+									account_currency=credit_currency, item=d)
 
 					# Amount added through landed-cos-voucher
 					if d.landed_cost_voucher_amount and landed_cost_entries:
@@ -386,6 +407,7 @@ class PurchaseReceipt(BuyingController):
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
+			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
@@ -581,7 +603,6 @@ def update_billing_percentage(pr_doc, update_modified=True):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc('Purchase Receipt', source_name)
@@ -601,11 +622,16 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
+		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+			target_doc.rejected_qty = 0
 		target_doc.stock_qty = flt(target_doc.qty) * flt(target_doc.conversion_factor, target_doc.precision("conversion_factor"))
 		returned_qty_map[source_doc.name] = returned_qty
 
 	def get_pending_qty(item_row):
-		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
+		qty = item_row.qty
+		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+			qty = item_row.received_qty
+		pending_qty = qty - invoiced_qty_map.get(item_row.name, 0)
 		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
 		if returned_qty:
 			if returned_qty >= pending_qty:

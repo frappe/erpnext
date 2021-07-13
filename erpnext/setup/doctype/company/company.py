@@ -395,7 +395,7 @@ class Company(NestedSet):
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
-	kwargs = dict(company=company, old=old, new=new)
+	kwargs = dict(queue="long", company=company, old=old, new=new)
 	frappe.enqueue('erpnext.setup.doctype.company.company.replace_abbr', **kwargs)
 
 
@@ -407,8 +407,6 @@ def replace_abbr(company, old, new):
 
 	frappe.only_for("System Manager")
 
-	frappe.db.set_value("Company", company, "abbr", new)
-
 	def _rename_record(doc):
 		parts = doc[0].rsplit(" - ", 1)
 		if len(parts) == 1 or parts[1].lower() == old.lower():
@@ -419,11 +417,18 @@ def replace_abbr(company, old, new):
 		doc = (d for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company))
 		for d in doc:
 			_rename_record(d)
+	try:
+		frappe.db.auto_commit_on_many_writes = 1
+		frappe.db.set_value("Company", company, "abbr", new)
+		for dt in ["Warehouse", "Account", "Cost Center", "Department",
+				"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
+			_rename_records(dt)
+			frappe.db.commit()
 
-	for dt in ["Warehouse", "Account", "Cost Center", "Department",
-			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
-		_rename_records(dt)
-		frappe.db.commit()
+	except Exception:
+		frappe.log_error(title=_('Abbreviation Rename Error'))
+	finally:
+		frappe.db.auto_commit_on_many_writes = 0
 
 
 def get_name_with_abbr(name, company):

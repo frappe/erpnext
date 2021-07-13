@@ -797,7 +797,7 @@ def set_response_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("response_by"):
 		doc.response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 
-	if meta.has_field("response_by_variance"):
+	if meta.has_field("response_by_variance") and not doc.get('first_responded_on'):
 		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
 		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_time), 2)
 
@@ -805,7 +805,7 @@ def set_resolution_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("resolution_by"):
 		doc.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 
-	if meta.has_field("resolution_by_variance"):
+	if meta.has_field("resolution_by_variance") and not doc.get("resolution_date"):
 		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
 		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_time), 2)
 

@@ -421,10 +421,17 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(return_pr_2.items[0].qty, -3)
 
 		# Make PI against unreturned amount
+		buying_settings = frappe.get_single("Buying Settings")
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 0
+		buying_settings.save()
+
 		pi = make_purchase_invoice(pr.name)
 		pi.submit()
 
 		self.assertEqual(pi.items[0].qty, 3)
+
+		buying_settings.bill_for_rejected_quantity_in_purchase_invoice = 1
+		buying_settings.save()
 
 		pr.load_from_db()
 		# PR should be completed on billing all unreturned amount
@@ -767,8 +774,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1.items[0].purchase_receipt_item = pr.items[0].name
 		pr1.submit()
 
-		pi = make_purchase_invoice(pr.name)
-		self.assertEqual(pi.items[0].qty, 3)
+		pi1 = make_purchase_invoice(pr.name)
+		self.assertEqual(pi1.items[0].qty, 3)
 
 		pr1.cancel()
 		pr.reload()
@@ -1003,6 +1010,74 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertEqual(pr.status, "To Bill")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
+
+	def test_service_item_purchase_with_perpetual_inventory(self):
+		company = '_Test Company with perpetual inventory'
+		service_item = '_Test Non Stock Item'
+
+		before_test_value = frappe.db.get_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items')
+		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', 1)
+		srbnb_account = 'Stock Received But Not Billed - TCP1'
+		frappe.db.set_value('Company', company, 'service_received_but_not_billed', srbnb_account)
+
+		pr = make_purchase_receipt(
+			company=company, item=service_item,
+			warehouse='Finished Goods - TCP1', do_not_save=1
+		)
+		item_row_with_diff_rate = frappe.copy_doc(pr.items[0])
+		item_row_with_diff_rate.rate = 100
+		pr.append('items', item_row_with_diff_rate)
+
+		pr.save()
+		pr.submit()
+
+		item_one_gl_entry = frappe.db.get_all("GL Entry", {
+			'voucher_type': pr.doctype,
+			'voucher_no': pr.name,
+			'account': srbnb_account,
+			'voucher_detail_no': pr.items[0].name
+		}, pluck="name")
+
+		item_two_gl_entry = frappe.db.get_all("GL Entry", {
+			'voucher_type': pr.doctype,
+			'voucher_no': pr.name,
+			'account': srbnb_account,
+			'voucher_detail_no': pr.items[1].name
+		}, pluck="name")
+		
+		# check if the entries are not merged into one
+		# seperate entries should be made since voucher_detail_no is different
+		self.assertEqual(len(item_one_gl_entry), 1)
+		self.assertEqual(len(item_two_gl_entry), 1)
+
+		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', before_test_value)
+
+	def test_purchase_receipt_with_exchange_rate_difference(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice as create_purchase_invoice
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt as create_purchase_receipt
+		
+		pi = create_purchase_invoice(company="_Test Company with perpetual inventory",
+			cost_center = "Main - TCP1",
+			warehouse = "Stores - TCP1",
+			expense_account ="_Test Account Cost for Goods Sold - TCP1",
+			currency = "USD", conversion_rate = 70)
+		
+		pr = create_purchase_receipt(pi.name)
+		pr.conversion_rate = 80
+		pr.items[0].purchase_invoice = pi.name
+		pr.items[0].purchase_invoice_item = pi.items[0].name
+
+		pr.save()
+		pr.submit()
+
+		# Get exchnage gain and loss account
+		exchange_gain_loss_account = frappe.db.get_value('Company', pr.company, 'exchange_gain_loss_account')
+
+		# fetching the latest GL Entry with exchange gain and loss account account
+		amount = frappe.db.get_value('GL Entry', {'account': exchange_gain_loss_account, 'voucher_no': pr.name}, 'credit')
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+
+		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

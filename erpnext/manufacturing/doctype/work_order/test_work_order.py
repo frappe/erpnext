@@ -389,17 +389,12 @@ class TestWorkOrder(unittest.TestCase):
 		ste.submit()
 		stock_entries.append(ste)
 
-		job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name})
+		job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name}, order_by='creation asc')
 		self.assertEqual(len(job_cards), len(bom.operations))
 
 		for i, job_card in enumerate(job_cards):
 			doc = frappe.get_doc("Job Card", job_card)
-			doc.append("time_logs", {
-				"from_time": add_to_date(None, i),
-				"hours": 1,
-				"to_time": add_to_date(None, i + 1),
-				"completed_qty": doc.for_quantity
-			})
+			doc.time_logs[0].completed_qty = 1
 			doc.submit()
 
 		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
