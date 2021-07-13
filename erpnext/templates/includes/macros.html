@@ -7,8 +7,8 @@
 </div>
 {% endmacro %}
 
-{% macro product_image(website_image, css_class="product-image", alt="") %}
-	<div class="border text-center rounded {{ css_class }}" style="overflow: hidden;">
+{% macro product_image(website_image, css_class="product-image", alt="", no_border=False) %}
+	<div class="{{ 'border' if not no_border else ''}} text-center rounded {{ css_class }}" style="overflow: hidden;">
 		{% if website_image %}
 			<img itemprop="image" class="website-image h-100 w-100" alt="{{ alt }}" src="{{ frappe.utils.quoted(website_image) | abs_url }}">
 		{% else %}
@@ -208,9 +208,12 @@
 </div>
 {%- endmacro -%}
 
-{%- macro ratings_with_title(avg_rating, title, size, rating_header_class) -%}
-<div style="display: flex;">
-	<div class="rating">
+{%- macro ratings_with_title(avg_rating, title, size, rating_header_class, for_summary=False) -%}
+<div class="{{ 'd-flex' if not for_summary else '' }}">
+	<p class="mr-4 {{ rating_header_class }}">
+		<span>{{ title }}</span>
+	</p>
+	<div class="rating {{ 'ratings-pill' if for_summary else ''}}">
 		{% for i in range(1,6) %}
 			{% set fill_class = 'star-click' if i <= avg_rating else '' %}
 			<svg class="icon icon-{{ size }} {{ fill_class }}">
@@ -218,44 +221,50 @@
 			</svg>
 		{% endfor %}
 	</div>
-	<p class="ml-4 {{ rating_header_class }}">
-		<span>{{ title }}</span>
-	</p>
 </div>
 {%- endmacro -%}
 
-{%- macro ratings_summary(reviews, reviews_per_rating, average_rating, average_whole_rating)-%}
-<!-- Ratings Summary -->
-<h2 class="reviews-header">
-	{{ _("Customer Ratings") }}
-</h2>
-
-{% if reviews %}
-	{% set rating_title = frappe.utils.cstr(average_rating) + " " + _("out of 5") %}
-	{{ ratings_with_title(average_whole_rating, rating_title, "lg", "rating-summary-title") }}
-{% endif %}
-
-<!-- Rating Progress Bars -->
-<div class="rating-progress-bar-section">
-	{% for percent in reviews_per_rating %}
-		<div class="mt-4 col-sm-4 small rating-bar-title">
-			{{ loop.index }} star
+{%- macro ratings_summary(reviews, reviews_per_rating, average_rating, average_whole_rating, for_summary=False, total_reviews=None)-%}
+<div class="rating-summary-section mt-4">
+	<div class="rating-summary-numbers col-3">
+		<h2 style="font-size: 2rem;">
+			{{ average_rating or 0 }}
+		</h2>
+		<div class="mb-2" style="margin-top: -.5rem;">
+			{{ frappe.utils.cstr(total_reviews) + " " + _("ratings") }}
 		</div>
-		<div class="row">
-			<div class="col-md-7">
-				<div class="progress rating-progress-bar" title="{{ percent }} % of reviews are {{ loop.index }} star">
-					<div class="progress-bar" role="progressbar"
-						aria-valuenow="{{ percent }}"
-						aria-valuemin="0" aria-valuemax="100"
-						style="width: {{ percent }}%; background-color: var(--text-on-green);">
+
+		<!-- Ratings Summary -->
+		{% if reviews %}
+			{% set rating_title = frappe.utils.cstr(average_rating) + " " + _("out of 5") if not for_summary else ''%}
+			{{ ratings_with_title(average_whole_rating, rating_title, "md", "rating-summary-title", for_summary) }}
+		{% endif %}
+
+		<div class="mt-2">{{ frappe.utils.cstr(average_rating or 0) + " " + _("out of 5") }}</div>
+	</div>
+
+	<!-- Rating Progress Bars -->
+	<div class="rating-progress-bar-section col-4 ml-4">
+		{% for percent in reviews_per_rating %}
+			<div class="col-sm-4 small rating-bar-title">
+				{{ loop.index }} star
+			</div>
+			<div class="row">
+				<div class="col-md-7">
+					<div class="progress rating-progress-bar" title="{{ percent }} % of reviews are {{ loop.index }} star">
+						<div class="progress-bar progress-bar-cosmetic" role="progressbar"
+							aria-valuenow="{{ percent }}"
+							aria-valuemin="0" aria-valuemax="100"
+							style="width: {{ percent }}%;">
+						</div>
 					</div>
 				</div>
+				<div class="col-sm-1 small">
+					{{ percent }}%
+				</div>
 			</div>
-			<div class="col-sm-1 small">
-				{{ percent }}%
-			</div>
-		</div>
-	{% endfor %}
+		{% endfor %}
+	</div>
 </div>
 {%- endmacro -%}
 
@@ -264,16 +273,18 @@
 <div class="user-reviews">
 	{% for review in reviews %}
 		<div class="mb-3 review">
-			{{ ratings_with_title(review.rating, _(review.review_title), "md", "user-review-title") }}
+			{{ ratings_with_title(review.rating, _(review.review_title), "sm", "user-review-title") }}
 
-			<div class="review-signature">
-				<span class="reviewer">{{ _(review.customer) }}</span>
-				<span>{{ review.published_on }}</span>
-			</div>
-			<div class="product-description mb-4 mt-4">
+			<div class="product-description mb-4">
 				<p>
 					{{ _(review.comment) }}
 				</p>
+			</div>
+
+			<div class="review-signature mb-2">
+				<span class="reviewer">{{ _(review.customer) }}</span>
+				<span class="indicator grey" style="--text-on-gray: var(--gray-300);"></span>
+				<span class="reviewer">{{ review.published_on }}</span>
 			</div>
 		</div>
 	{% endfor %}
@@ -346,4 +357,43 @@
 		{% endif %}
 	</div>
 {% endfor %}
+{%- endmacro -%}
+
+{%- macro recommended_item_row(item)-%}
+<div class="recommended-item mb-6 d-flex">
+	<div class="r-item-image">
+		{% if item.website_item_thumbnail %}
+			{{ product_image(item.website_item_thumbnail, alt="item.website_item_name", no_border=True) }}
+		{% else %}
+			<div class = "no-image-r-item">
+				{{ frappe.utils.get_abbr(item.website_item_name) or "NA" }}
+			</div>
+		{% endif %}
+	</div>
+	<div class="r-item-info">
+		<a href="/{{ item.route or '#'}}" target="_blank">
+			{% set title = item.website_item_name %}
+			{{ title[:70] + "..." if title|len > 70 else title }}
+		</a>
+
+		{% if item.get('price_info') %}
+			{% set price = item.get('price_info') %}
+			<div class="mt-2">
+				<span class="item-price">
+					{{ price.get('formatted_price') or '' }}
+				</span>
+
+				{% if price.get('formatted_mrp') %}
+					<br>
+					<span class="striked-item-price">
+						<s>MRP {{ price.formatted_mrp }}</s>
+					</span>
+					<span class="in-green">
+						- {{ price.get('formatted_discount_percent') or price.get('formatted_discount_rate')}}
+					</span>
+				{% endif %}
+			</div>
+		{% endif %}
+	</div>
+</div>
 {%- endmacro -%}
