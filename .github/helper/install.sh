@@ -42,5 +42,5 @@ sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
 bench get-app erpnext "${GITHUB_WORKSPACE}"
-bench start &
+bench start &> bench_run_logs.txt &
 bench --site test_site reinstall --yes
