@@ -10,7 +10,7 @@ from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.assets.doctype.asset.test_asset import create_asset
+from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
@@ -1071,11 +1071,11 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
 
 	def test_gle_made_when_asset_is_returned(self):
-		create_item(item_code="_Test Item linked with Asset", is_stock_item = 0, is_fixed_asset=1, asset_category="Computers")
-		asset = create_asset(item_code="_Test Item linked with Asset")
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro")
 	
-		si = create_sales_invoice(item_code="_Test Item linked with Asset", asset=asset.name, qty=1, rate=90000)
-		return_si = create_sales_invoice(is_return=1, return_against=si.name, item_code="_Test Item linked with Asset", asset=asset.name, qty=-1, rate=90000)
+		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
+		return_si = create_sales_invoice(is_return=1, return_against=si.name, item_code="Macbook Pro", asset=asset.name, qty=-1, rate=90000)
 
 		disposal_account = frappe.get_cached_value("Company", "_Test Company", "disposal_account")
 
