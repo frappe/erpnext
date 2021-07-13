@@ -1984,6 +1984,18 @@ class TestSalesInvoice(unittest.TestCase):
 		sales_invoice.save()
 		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
 
+	def test_sales_invoice_with_discount_accounting_enabled(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+
+		enable_discount_accounting()
+
+		discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		si = create_sales_invoice(discount_account=discount_account, discount_amount=100)
+
+		discount_amount = frappe.db.get_value('GL Entry', {'account': discount_account, 'voucher_no': si.name}, 'debit')
+		self.assertEqual(discount_amount, 100)
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
@@ -2152,6 +2164,7 @@ def create_sales_invoice(**args):
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
 	si.naming_series = args.naming_series or "T-SINV-"
+	si.cost_center = args.cost_center or "_Test Cost Center - _TC"
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -2165,6 +2178,8 @@ def create_sales_invoice(**args):
 		"rate": args.rate if args.get("rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"discount_account": args.discount_account or None,
+		"discount_amount": args.discount_amount or 0,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"conversion_factor": 1

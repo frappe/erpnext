@@ -230,6 +230,16 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_purchase_invoice_with_discount_accounting_enabled(self):
+		enable_discount_accounting()
+
+		discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		pi = make_purchase_invoice(discount_account=discount_account, discount_amount=100)
+
+		discount_amount = frappe.db.get_value('GL Entry', {'account': discount_account, 'voucher_no': pi.name}, 'credit')
+		self.assertEqual(discount_amount, 100)
+
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
@@ -1170,6 +1180,11 @@ def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
 	accounts_settings.save()
 
+def enable_discount_accounting(enable=1):
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	accounts_settings.enable_discount_accounting = enable
+	accounts_settings.save()
+
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
 	args = frappe._dict(args)
@@ -1192,6 +1207,7 @@ def make_purchase_invoice(**args):
 	pi.return_against = args.return_against
 	pi.is_subcontracted = args.is_subcontracted or "No"
 	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
+	pi.cost_center = args.cost_center or "_Test Cost Center - _TC"
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -1200,7 +1216,9 @@ def make_purchase_invoice(**args):
 		"received_qty": args.received_qty or 0,
 		"rejected_qty": args.rejected_qty or 0,
 		"rate": args.rate or 50,
-		'expense_account': args.expense_account or '_Test Account Cost for Goods Sold - _TC',
+		"expense_account": args.expense_account or '_Test Account Cost for Goods Sold - _TC',
+		"discount_account": args.discount_account or None,
+		"discount_amount": args.discount_amount or 0,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.uom or "_Test UOM",
