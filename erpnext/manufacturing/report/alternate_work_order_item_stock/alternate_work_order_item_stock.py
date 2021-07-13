@@ -156,25 +156,25 @@ def get_data(filters,columns):
 			for it in d:
 				data_list['uom1']=it.stock_uom
 				data_list['available_qty_at_source_warehouse']=i.available_qty_at_source_warehouse
-				# for j in b:
-				# 	data_list['alternative_item_code']=j.alternative_item_code
-				# 	c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
-				# 	actual=[]
-				# 	for k in c:
-				# 		actual.append(k.actual_qty)
-				# 		data_list['actual_qty']=sum(actual)
+				for j in b:
+					data_list['alternative_item_code']=j.alternative_item_code
+					c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
+					actual=[]
+					for k in c:
+						actual.append(k.actual_qty)
+						data_list['actual_qty']=sum(actual)
 			data.append(data_list)
-	a=max(f)
-	print(a)
-	for i in range(a):
-		columns += [("Alternative Item Code")+":Int:54"]
-		columns += [("Alternate Item Stock")+":Int:54"]
-		for j in b:
-			data += [j.alternative_item_code] if j.alternative_item_code else 1
-			c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
-			actual=[]
-			for k in c:
-				actual.append(k.actual_qty)
-				data_list['actual_qty']=sum(actual)
+	# a=max(f)
+	# print(a)
+	# for i in range(a):
+	# 	columns += [("Alternative Item Code")+":Int:54"]
+	# 	columns += [("Alternate Item Stock")+":Int:54"]
+	# 	for j in b:
+	# 		data += [j.alternative_item_code] if j.alternative_item_code else 1
+	# 		c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
+	# 		actual=[]
+	# 		for k in c:
+	# 			actual.append(k.actual_qty)
+	# 			data_list['actual_qty']=sum(actual)
 	return data
 
