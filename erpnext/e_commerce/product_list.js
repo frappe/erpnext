@@ -126,7 +126,10 @@ erpnext.ProductList = class {
 
 	get_stock_availability(item, settings) {
 		if (!item.has_variants && !item.in_stock && settings.show_stock_availability) {
-			return `<br><span class="out-of-stock mt-2">Out of stock</span>`;
+			return `
+				<br>
+				<span class="out-of-stock mt-2">${ __("Out of stock") }</span>
+			`;
 		}
 		return ``;
 	}

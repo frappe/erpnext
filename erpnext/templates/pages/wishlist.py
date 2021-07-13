@@ -21,6 +21,7 @@ def get_context(context):
 		)
 
 		if price_details:
+			item.formatted_price = price_details.get('formatted_price')
 			item.formatted_mrp = price_details.get('formatted_mrp')
 			if item.formatted_mrp:
 				item.discount = price_details.get('formatted_discount_percent') or \
@@ -42,13 +43,16 @@ def get_stock_availability(item_code, warehouse):
 	return bool(stock_qty)
 
 def get_wishlist_items():
-	if frappe.db.exists("Wishlist", frappe.session.user):
-		return frappe.db.sql("""
-			Select
-				web_item_name, item_code, item_name, website_item, price,
-				warehouse, image, item_group, route, formatted_price
-			from
-				`tabWishlist Item`
-			where
-				parent=%(user)s""", {"user": frappe.session.user}, as_dict=1)
-	return
+	if not frappe.db.exists("Wishlist", frappe.session.user):
+		return []
+
+	return frappe.db.get_all(
+		"Wishlist Item",
+		filters={
+			"parent": frappe.session.user
+		},
+		fields=[
+			"web_item_name", "item_code", "item_name",
+			"website_item", "price", "warehouse",
+			"image", "item_group", "route"
+		])
