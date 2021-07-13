@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="item-group-content" itemscope itemtype="http://schema.org/Product">
+<div class="item-group-content" itemscope itemtype="http://schema.org/Product" data-item-group="{{ name }}">
 	<div class="item-group-slideshow">
 		{% if slideshow %}<!-- slideshow -->
 			{{ web_block(
