@@ -227,7 +227,7 @@ class AccountsController(TransactionBase):
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year"):
-			date_field = ""
+			date_field = None
 			if self.meta.get_field("posting_date"):
 				date_field = "posting_date"
 			elif self.meta.get_field("transaction_date"):
@@ -369,6 +369,11 @@ class AccountsController(TransactionBase):
 
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
+
+					# Double check for cost center
+					# Items add via promotional scheme may not have cost center set
+					if hasattr(item, 'cost_center') and not item.get('cost_center'):
+						item.set('cost_center', self.get('cost_center') or erpnext.get_default_cost_center(self.company))
 
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
@@ -605,8 +610,8 @@ class AccountsController(TransactionBase):
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
 
-		order_list = list(set([d.get(order_field)
-			for d in self.get("items") if d.get(order_field)]))
+		order_list = list(set(d.get(order_field)
+			for d in self.get("items") if d.get(order_field)))
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
 			amount_field, order_doctype, order_list, include_unallocated)
@@ -630,8 +635,8 @@ class AccountsController(TransactionBase):
 
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
-		order_list = list(set([d.get(order_field)
-			for d in self.get("items") if d.get(order_field)]))
+		order_list = list(set(d.get(order_field)
+			for d in self.get("items") if d.get(order_field)))
 
 		if not order_list: return
 
@@ -823,8 +828,14 @@ class AccountsController(TransactionBase):
 					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
 
 					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
-						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
-							.format(item.item_code, item.idx, max_allowed_amt))
+						if self.doctype != "Purchase Invoice":
+							self.throw_overbill_exception(item, max_allowed_amt)
+						elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
+							self.throw_overbill_exception(item, max_allowed_amt)
+
+	def throw_overbill_exception(self, item, max_allowed_amt):
+		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
+			.format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default
@@ -1090,7 +1101,6 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-			print(grand_total, base_grand_total)
 			if total != flt(grand_total, self.precision("grand_total")) or \
 				base_total != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
@@ -1207,21 +1217,20 @@ def validate_inclusive_tax(tax, doc):
 	def _on_previous_row_error(row_range):
 		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx, row_range))
 
-	for fieldname in ['included_in_print_rate', 'included_in_paid_amount']:
-		if cint(getattr(tax, fieldname, None)):
-			if tax.charge_type == "Actual":
-				# inclusive tax cannot be of type Actual
-				throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount").format(tax.idx))
-			elif tax.charge_type == "On Previous Row Amount" and \
-					not cint(doc.get("taxes")[cint(tax.row_id) - 1].get(fieldname)):
-				# referred row should also be inclusive
-				_on_previous_row_error(tax.row_id)
-			elif tax.charge_type == "On Previous Row Total" and \
-					not all([cint(t.get(fieldname) for t in doc.get("taxes")[:cint(tax.row_id) - 1])]):
-				# all rows about the referred tax should be inclusive
-				_on_previous_row_error("1 - %d" % (cint(tax.row_id),))
-			elif tax.get("category") == "Valuation":
-				frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
+	if cint(getattr(tax, "included_in_print_rate", None)):
+		if tax.charge_type == "Actual":
+			# inclusive tax cannot be of type Actual
+			throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount").format(tax.idx))
+		elif tax.charge_type == "On Previous Row Amount" and \
+				not cint(doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate):
+			# referred row should also be inclusive
+			_on_previous_row_error(tax.row_id)
+		elif tax.charge_type == "On Previous Row Total" and \
+				not all([cint(t.included_in_print_rate) for t in doc.get("taxes")[:cint(tax.row_id) - 1]]):
+			# all rows about the referred tax should be inclusive
+			_on_previous_row_error("1 - %d" % (tax.row_id,))
+		elif tax.get("category") == "Valuation":
+			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
 def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_rate=None, company_currency=None):
@@ -1527,6 +1536,7 @@ def validate_and_delete_children(parent, data):
 
 	for d in deleted_children:
 		update_bin_on_delete(d, parent.doctype)
+
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
