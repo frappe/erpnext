@@ -6,8 +6,6 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import getdate, add_days, add_years, cstr
 from dateutil.relativedelta import relativedelta
-import datetime
-import nepali_datetime
 
 from frappe.model.document import Document
 
@@ -95,23 +93,6 @@ class FiscalYear(Document):
 					frappe.throw(_("Year start date or end date is overlapping with {0}. To avoid please set company")
 						.format(existing.name), frappe.NameError)
 
-	#custom code for AD to BS conversion Vikram Calendar 
-	@frappe.whitelist()
-	def vikram_date(self):
-		print(" --------- in vikram date -         -------",self.year_start_date)
-		adate = getdate(self.year_start_date)
-		sdate = nepali_datetime.date.from_datetime_date(adate)
-		print(" --------- tyrpr -         -------",type(sdate))
-		return str(sdate)		
-
-	@frappe.whitelist()
-	def vikram_date_end(self):
-		print(" --------- in vikram date  endddd--------",self.year_end_date)
-		adate = getdate(self.year_end_date)
-		sdate = nepali_datetime.date.from_datetime_date(adate)
-		print(" --------- tyrpr -         -------",type(sdate))
-		return str(sdate)	
-
 @frappe.whitelist()
 def check_duplicate_fiscal_year(doc):
 	year_start_end_dates = frappe.db.sql("""select name, year_start_date, year_end_date from `tabFiscal Year` where name!=%s""", (doc.name))
@@ -146,4 +127,3 @@ def get_from_and_to_date(fiscal_year):
 		"year_end_date as to_date"
 	]
 	return frappe.db.get_value("Fiscal Year", fiscal_year, fields, as_dict=1)
-
