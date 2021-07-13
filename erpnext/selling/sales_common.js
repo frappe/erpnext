@@ -26,7 +26,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			};
 		});
+<<<<<<< HEAD
 	},
+=======
+	}	
+>>>>>>> 5265ba39f0 (feat: Added fields for dispatch address in Sales Order, Sales Invoice, Delivery Note for Eway Bill)
 
 	setup_queries: function() {
 		var me = this;
@@ -83,9 +87,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	},
 
+<<<<<<< HEAD
 	refresh: function() {
 		this._super();
 
+=======
+	refresh() {
+		super.refresh();
+		
+>>>>>>> 5265ba39f0 (feat: Added fields for dispatch address in Sales Order, Sales Invoice, Delivery Note for Eway Bill)
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		this.frm.toggle_display("customer_name",
@@ -114,7 +124,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
 	},
 
-	sales_partner: function() {
+	dispatch_address_name() {
+		erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
+	}
+
+	sales_partner() {
 		this.apply_pricing_rule();
 	},
 
