@@ -56,6 +56,7 @@ def validate_filters(filters, account_details):
 				frappe.throw(_("Account {0} does not exists").format(account))
 
 	if (filters.get("account") and filters.get("group_by") == _('Group by Account')):
+		filters.account = frappe.parse_json(filters.get('account'))
 		for account in filters.account:
 			if account_details[account].is_group == 0:
 				frappe.throw(_("Can not filter based on Child Account, if grouped by Account"))
