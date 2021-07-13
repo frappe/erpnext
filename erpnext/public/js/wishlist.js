@@ -81,51 +81,53 @@ $.extend(wishlist, {
 		// 'wish'('like') or 'unwish' item in product listing
 		$('.page_content').on('click', '.like-action, .like-action-list', (e) => {
 			const $btn = $(e.currentTarget);
-			const $wish_icon = $btn.find('.wish-icon');
-			let me = this;
-
-			if (frappe.session.user==="Guest") {
-				if (localStorage) {
-					localStorage.setItem("last_visited", window.location.pathname);
-				}
-
-				this.redirect_guest();
-
-				return;
-			}
-
-			let success_action = function() {
-				e_commerce.wishlist.set_wishlist_count();
-			};
-
-			if ($wish_icon.hasClass('wished')) {
-				// un-wish item
-				$btn.removeClass("like-animate");
-				$btn.addClass("like-action-wished");
-				this.toggle_button_class($wish_icon, 'wished', 'not-wished');
-
-				let args = { item_code: $btn.data('item-code') };
-				let failure_action = function() {
-					me.toggle_button_class($wish_icon, 'not-wished', 'wished');
-				};
-				this.add_remove_from_wishlist("remove", args, success_action, failure_action);
-			} else {
-				// wish item
-				$btn.addClass("like-animate");
-				$btn.addClass("like-action-wished");
-				this.toggle_button_class($wish_icon, 'not-wished', 'wished');
-
-				let args = {
-					item_code: $btn.data('item-code'),
-					price: $btn.data('price'),
-					formatted_price: $btn.data('formatted-price')
-				};
-				let failure_action = function() {
-					me.toggle_button_class($wish_icon, 'wished', 'not-wished');
-				};
-				this.add_remove_from_wishlist("add", args, success_action, failure_action);
-			}
+			this.wishlist_action($btn);
 		});
+	},
+
+	wishlist_action(btn) {
+		const $wish_icon = btn.find('.wish-icon');
+		let me = this;
+
+		if (frappe.session.user==="Guest") {
+			if (localStorage) {
+				localStorage.setItem("last_visited", window.location.pathname);
+			}
+			this.redirect_guest();
+			return;
+		}
+
+		let success_action = function() {
+			e_commerce.wishlist.set_wishlist_count();
+		};
+
+		if ($wish_icon.hasClass('wished')) {
+			// un-wish item
+			btn.removeClass("like-animate");
+			btn.addClass("like-action-wished");
+			this.toggle_button_class($wish_icon, 'wished', 'not-wished');
+
+			let args = { item_code: btn.data('item-code') };
+			let failure_action = function() {
+				me.toggle_button_class($wish_icon, 'not-wished', 'wished');
+			};
+			this.add_remove_from_wishlist("remove", args, success_action, failure_action);
+		} else {
+			// wish item
+			btn.addClass("like-animate");
+			btn.addClass("like-action-wished");
+			this.toggle_button_class($wish_icon, 'not-wished', 'wished');
+
+			let args = {
+				item_code: btn.data('item-code'),
+				price: btn.data('price'),
+				formatted_price: btn.data('formatted-price')
+			};
+			let failure_action = function() {
+				me.toggle_button_class($wish_icon, 'wished', 'not-wished');
+			};
+			this.add_remove_from_wishlist("add", args, success_action, failure_action);
+		}
 	},
 
 	toggle_button_class(button, remove, add) {

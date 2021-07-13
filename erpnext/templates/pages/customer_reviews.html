@@ -4,25 +4,30 @@
 {% block title %} {{ _("Customer Reviews") }} {% endblock %}
 
 {% block page_content %}
-<div class="product-container col-md-12">
-<div style="display: flex;">
-	<div class="col-md-4 order-md-1 mt-8" style="max-width: 300px;">
-		{{ ratings_summary(reviews, reviews_per_rating, average_rating, average_whole_rating) }}
+<div class="product-container reviews-full-page col-md-12">
+	<!-- Title and Action -->
+	<div class="w-100 mb-6 d-flex">
+		<div class="reviews-header col-9">
+			{{ _("Customer Reviews") }}
+		</div>
 
-		<!-- Write a Review for legitimate users -->
-		{% if frappe.session.user != "Guest" %}
-		<button class="btn btn-light btn-write-review mr-2 mt-4 mb-4 w-100"
-			data-web-item="{{ web_item }}">
-			{{ _("Write a Review") }}
-		</button>
-		{% endif %}
+		<div class="write-a-review-btn col-3">
+			<!-- Write a Review for legitimate users -->
+			{% if frappe.session.user != "Guest" and user_is_customer %}
+				<button class="btn btn-write-review"
+					data-web-item="{{ web_item }}">
+					{{ _("Write a Review") }}
+				</button>
+			{% endif %}
+		</div>
 	</div>
 
+	<!-- Summary -->
+	{{ ratings_summary(reviews, reviews_per_rating, average_rating, average_whole_rating, for_summary=True, total_reviews=total_reviews) }}
+
+
 	<!-- Reviews and Comments -->
-	<div class="col-12 order-2 col-md-9 order-md-2 mt-8 ml-16">
-		<h2 class="reviews-header">
-			{{ _("Reviews") }}
-		</h2>
+	<div class="mt-8">
 		{% if reviews %}
 			{{ user_review(reviews) }}
 
@@ -39,7 +44,6 @@
 			</h6>
 		{% endif %}
 	</div>
-</div>
 </div>
 
 {% endblock %}

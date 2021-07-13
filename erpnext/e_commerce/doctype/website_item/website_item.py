@@ -13,6 +13,8 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
+from erpnext.e_commerce.shopping_cart.cart import _set_price_list
+from erpnext.utilities.product import get_price
 
 # SEARCH
 from erpnext.e_commerce.website_item_indexing import (
@@ -199,6 +201,12 @@ class WebsiteItem(WebsiteGenerator):
 			context.wished = True
 
 		context.user_is_customer = check_if_user_is_customer()
+
+		context.recommended_items = None
+		settings = context.shopping_cart.cart_settings
+		if settings.enable_recommendations:
+			context.recommended_items = self.get_recommended_items(settings)
+
 		return context
 
 	def set_variant_context(self, context):
@@ -378,6 +386,38 @@ class WebsiteItem(WebsiteGenerator):
 			tab_values[f"tab_{row.idx + 1}_content"] = row.content
 
 		return tab_values
+
+	def get_recommended_items(self, settings):
+		items = frappe.db.sql(f"""
+			select
+				ri.website_item_thumbnail, ri.website_item_name,
+				ri.route, ri.item_code
+			from
+				`tabRecommended Items` ri, `tabWebsite Item` wi
+			where
+				ri.item_code = wi.item_code
+				and ri.parent = '{self.name}'
+				and wi.published = 1
+			order by ri.idx
+		""", as_dict=1)
+
+		if settings.show_price:
+			is_guest = frappe.session.user == "Guest"
+			# Show Price if logged in.
+			# If not logged in and price is hidden for guest, skip price fetch.
+			if is_guest and settings.hide_price_for_guest:
+				return items
+
+			selling_price_list = _set_price_list(settings, None)
+			for item in items:
+				item.price_info = get_price(
+					item.item_code,
+					selling_price_list,
+					settings.default_customer_group,
+					settings.company
+				)
+
+		return items
 
 def invalidate_cache_for_web_item(doc):
 	"""Invalidate Website Item Group cache and rebuild ItemVariantsCacheManager."""
