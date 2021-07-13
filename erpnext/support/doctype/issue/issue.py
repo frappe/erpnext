@@ -226,7 +226,7 @@ def set_first_response_time(communication, method):
 			issue.db_set("first_response_time", first_response_time)
 
 def is_first_response(issue):
-	responses = frappe.get_all('Communication', filters = {'reference_type': 'Issue', 'reference_name': issue.name, 'sent_or_received': 'Sent'})
+	responses = frappe.get_all('Communication', filters = {'reference_name': issue.name, 'sent_or_received': 'Sent'})
 	if len(responses) == 1: 
 		return True
 	return False
