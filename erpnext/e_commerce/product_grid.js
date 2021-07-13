@@ -61,7 +61,7 @@ erpnext.ProductGrid = class {
 	get_card_body_html(item, title, settings) {
 		let body_html = `
 			<div class="card-body text-left card-body-flex" style="width:100%">
-				<div style="margin-top: 16px; display: flex;">
+				<div style="margin-top: 1rem; display: flex;">
 		`;
 		body_html += this.get_title(item, title);
 
@@ -76,7 +76,7 @@ erpnext.ProductGrid = class {
 
 		}
 
-		body_html += `</div>`; // close div on line 50
+		body_html += `</div>`;
 		body_html += `<div class="product-category">${ item.item_group || '' }</div>`;
 
 		if (item.formatted_price) {
@@ -145,7 +145,7 @@ erpnext.ProductGrid = class {
 
 	get_stock_availability(item, settings) {
 		if (!item.has_variants && !item.in_stock && settings.show_stock_availability) {
-			return `<span class="out-of-stock">Out of stock</span>`;
+			return `<span class="out-of-stock">${ __("Out of stock") }</span>`;
 		}
 		return ``;
 	}

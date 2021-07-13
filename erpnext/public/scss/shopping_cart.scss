@@ -193,6 +193,10 @@ body.product-page {
 	.wishlist-card {
 		padding: var(--padding-sm);
 		min-width: 260px;
+		.card-body-flex {
+			display: flex;
+			flex-direction: column;
+		}
 	}
 }
 
@@ -974,30 +978,18 @@ body.product-page {
 	float: right;
 }
 
-.wishlist-cart-not-added {
-	color: var(--blue-500);
-	background-color: white;
-	border: 1px solid var(--blue-500);
-	--icon-stroke: var(--blue-500);
-	font-size: 14px;
-
-	&:hover {
-		background-color: var(--blue-500);
-		color: white;
-		--icon-stroke: white;
-	}
-}
-
 .remove-wish {
-	background-color: var(--gray-200);
+	background-color: white;
 	position: absolute;
 	cursor: pointer;
 	top:10px;
 	right: 20px;
+	width: 32px;
+	height: 32px;
+
 	border-radius: 50%;
 	border: 1px solid var(--gray-100);
-	width: 25px;
-	height: 25px;
+	box-shadow: 0px 2px 6px rgba(17, 43, 66, 0.08), 0px 1px 4px rgba(17, 43, 66, 0.1);
 }
 
 .wish-removed {

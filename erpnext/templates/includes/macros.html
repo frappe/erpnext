@@ -145,9 +145,9 @@
 
 {%- macro wishlist_card(item, settings) %}
 {%- set title = item.web_item_name or ''-%}
-{%- set title = title[:50] + "..." if title|len > 50 else title -%}
+{%- set title = title[:90] + "..." if title|len > 90 else title -%}
 <div class="col-sm-3 wishlist-card">
-	<div class="card text-center" style="height: 100%">
+	<div class="card text-center">
 		<div class="card-img-container">
 			<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
 				{% if item.image %}
@@ -159,11 +159,9 @@
 				{% endif %}
 			</a>
 			<div class="remove-wish" data-item-code="{{ item.item_code }}">
-				<span style="padding-bottom: 2px;">
-					<svg class="icon sm remove-wish-icon" style="margin-bottom: 4px; margin-left: 0.5px;">
-						<use class="close" href="#icon-close"></use>
-					</svg>
-				</span>
+				<svg class="icon icon-md remove-wish-icon">
+					<use class="close" href="#icon-delete"></use>
+				</svg>
 			</div>
 		</div>
 
@@ -173,18 +171,19 @@
 {%- endmacro -%}
 
 {%- macro wishlist_card_body(item, title, settings) %}
-<div class="card-body text-center" style="width: 100%;">
-	<div style="margin-top: 16px;">
+<div class="card-body card-body-flex text-left" style="width: 100%;">
+	<div class="mt-4">
 		<div class="product-title">{{ title or ''}}</div>
+		<div class="product-category">{{ item.item_group or '' }}</div>
 	</div>
 	<div class="product-price">
-		{{ item.formatted_price or '' }}
+		{{ item.get("formatted_price") or '' }}
 
 		{% if item.get("formatted_mrp") %}
-			<small class="ml-1 text-muted">
+			<small class="ml-1 striked-price">
 				<s>{{ item.formatted_mrp }}</s>
 			</small>
-			<small class="ml-1" style="color: #F47A7A; font-weight: 500;">
+			<small class="ml-1 product-info-green" >
 				{{ item.discount }} OFF
 			</small>
 		{% endif %}
@@ -192,7 +191,8 @@
 
 	{% if (item.available and settings.show_stock_availability) or (not settings.show_stock_availability) %}
 		<!-- Show move to cart button if in stock or if showing stock availability is disabled -->
-		<button data-item-code="{{ item.item_code}}" class="btn btn-add-to-cart w-100 wishlist-cart-not-added mt-2">
+		<button data-item-code="{{ item.item_code}}"
+			class="btn btn-primary btn-add-to-cart-list btn-add-to-cart mt-2 w-100">
 			<span class="mr-2">
 				<svg class="icon icon-md">
 					<use href="#icon-assets"></use>
@@ -201,8 +201,8 @@
 			{{ _("Move to Cart") }}
 		</button>
 	{% else %}
-		<div class="mt-4" style="color: #F47A7A; width: 100%;">
-			{{ _("Not in Stock") }}
+		<div class="out-of-stock">
+			{{ _("Out of stock") }}
 		</div>
 	{% endif %}
 </div>
