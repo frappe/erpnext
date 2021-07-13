@@ -310,7 +310,7 @@ class GSTR3BReport(Document):
 								self.report_dict['sup_details']['osup_det']['txval'] += taxable_value
 
 								gst_category = self.invoice_detail_map.get(inv, {}).get('gst_category')
-								place_of_supply = self.invoice_detail_map.get(inv, {}).get('place_of_supply', '00-Other Territory')
+								place_of_supply = self.invoice_detail_map.get(inv, {}).get('place_of_supply') or '00-Other Territory'
 
 								if gst_category in ['Unregistered', 'Registered Composition', 'UIN Holders'] and \
 								self.gst_details.get("gst_state") != place_of_supply.split("-")[1]:
