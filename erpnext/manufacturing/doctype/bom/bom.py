@@ -713,7 +713,8 @@ def get_bom_item_rate(args, bom_doc):
 			"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 			"conversion_factor": args.get("conversion_factor") or 1,
 			"plc_conversion_rate": 1,
-			"ignore_party": True
+			"ignore_party": True,
+			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 		out = frappe._dict()
