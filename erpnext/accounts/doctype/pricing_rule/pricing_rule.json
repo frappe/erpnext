@@ -94,9 +94,7 @@
    "fieldname": "title",
    "fieldtype": "Data",
    "label": "Title",
-   "no_copy": 1,
-   "reqd": 1,
-   "unique": 1
+   "no_copy": 1
   },
   {
    "default": "0",
@@ -575,7 +573,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2021-03-06 22:01:24.840422",
+ "modified": "2021-07-13 22:01:24.840422",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
