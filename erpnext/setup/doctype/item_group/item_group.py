@@ -91,7 +91,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		field_filters['item_group'] = self.name
 
 		engine = ProductQuery()
-		context.items = engine.query(attribute_filters, field_filters, search, start)
+		context.items = engine.query(attribute_filters, field_filters, search, start, item_group=self.name)
 
 		filter_engine = ProductFiltersBuilder(self.name)
 
@@ -139,7 +139,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 			# return child item groups if the type is of "Is Group"
 			return get_child_groups_for_list_in_html(item_group, start, limit, search)
 
-	child_groups = ", ".join([frappe.db.escape(i[0]) for i in get_child_groups(product_group)])
+	child_groups = ", ".join(frappe.db.escape(i[0]) for i in get_child_groups(product_group))
 
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
@@ -239,7 +239,7 @@ def get_item_for_list_in_html(context):
 	return frappe.get_template(products_template).render(context)
 
 def get_group_item_count(item_group):
-	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
+	child_groups = ", ".join('"' + i[0] + '"' for i in get_child_groups(item_group))
 	return frappe.db.sql("""select count(*) from `tabItem`
 		where docstatus = 0 and show_in_website = 1
 		and (item_group in (%s)

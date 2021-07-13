@@ -94,7 +94,7 @@ def get_report_pdf(doc, consolidated=True):
 			continue
 
 		html = frappe.render_template(template_path, \
-			{"filters": filters, "data": res, "ageing": ageing[0] if doc.include_ageing else None,
+			{"filters": filters, "data": res, "ageing": ageing[0] if (doc.include_ageing and ageing) else None,
 				"letter_head": letter_head if doc.letter_head else None,
 				"terms_and_conditions": frappe.db.get_value('Terms and Conditions', doc.terms_and_conditions, 'terms')
 					if doc.terms_and_conditions else None})
@@ -207,10 +207,9 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 @frappe.whitelist()
 def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=True):
 	billing_email = frappe.db.sql("""
-		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent \
-		WHERE l.link_doctype='Customer' and l.link_name='""" + customer_name + """' and \
-		c.is_billing_contact=1 \
-		order by c.creation desc""")
+		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent
+		WHERE l.link_doctype='Customer' and l.link_name=%s and c.is_billing_contact=1
+		order by c.creation desc""", customer_name)
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:
