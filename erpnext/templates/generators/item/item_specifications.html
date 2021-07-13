@@ -3,13 +3,15 @@
 <div class="mt-5 item-website-specification">
 	<div class="col-md-11">
 		{% if not show_tabs %}
-			<h3 class="product-title mb-5 mt-8">Product Details</h3>
+			<div class="product-title mb-5 mt-8">
+				Product Details
+			</div>
 		{% endif %}
-		<table class="table table-bordered table-hover">
+		<table class="table">
 		{% for d in website_specifications -%}
 			<tr>
-				<td class="text-muted" style="width: 30%; font-weight: bold;">{{ d.label }}</td>
-				<td>{{ d.description }}</td>
+				<td class="spec-label">{{ d.label }}</td>
+				<td class="spec-content">{{ d.description }}</td>
 			</tr>
 		{%- endfor %}
 		</table>
