@@ -89,19 +89,19 @@ def get_columns(filters):
 				"options":"Batch",
 				"width": 100
 			},
-			# {
-			# 	"label": _("Alternate Item Name "),
-			# 	"fieldname": 'alternative_item_code',
-			# 	"fieldtype": "Link",
-			# 	"options":"Item",
-			# 	"width": 100
-			# },
-			# {
-			# 	"label": _("Alternate item stock "),
-			# 	"fieldname": 'actual_qty',
-			# 	"fieldtype": "Data",
-			# 	"width": 100
-			# },
+			{
+				"label": _("Alternate Item Name "),
+				"fieldname": 'alternative_item_code',
+				"fieldtype": "Link",
+				"options":"Item",
+				"width": 100
+			},
+			{
+				"label": _("Alternate item stock "),
+				"fieldname": 'actual_qty',
+				"fieldtype": "Data",
+				"width": 100
+			},
 		
 	]
 	return columns
