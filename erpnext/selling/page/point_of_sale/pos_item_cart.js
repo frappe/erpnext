@@ -965,8 +965,23 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 	}
 
+	attach_refresh_field_event(frm) {
+		$(frm.wrapper).off('refresh-fields');
+		$(frm.wrapper).on('refresh-fields', () => {
+			if (frm.doc.items.length) {
+				frm.doc.items.forEach(item => {
+					this.update_item_html(item);
+				});
+			}
+			this.update_totals_section(frm);
+		});
+	}
+
 	load_invoice() {
 		const frm = this.events.get_frm();
+		
+		this.attach_refresh_field_event(frm);
+
 		this.fetch_customer_details(frm.doc.customer).then(() => {
 			this.events.customer_details_updated(this.customer_info);
 			this.update_customer_section();
