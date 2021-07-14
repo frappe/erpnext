@@ -769,7 +769,7 @@ class SalarySlip(TransactionBase):
 			tax_row = get_salary_component_data(d)
 			self.update_component_row(tax_row, tax_amount, "deductions")
 
-	def update_component_row(self, component_data, amount, component_type, additional_salary=None, processed_overtime_slips =[]):
+	def update_component_row(self, component_data, amount, component_type, additional_salary=None, processed_overtime_slips =[], is_recurring=0):
 		component_row = None
 		for d in self.get(component_type):
 			if d.salary_component != component_data.salary_component:

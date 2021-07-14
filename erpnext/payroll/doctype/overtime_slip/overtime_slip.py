@@ -116,7 +116,7 @@ class OvertimeSlip(Document):
 	def get_attendance_record(self):
 		if self.from_date and self.to_date:
 			records = frappe.db.sql("""SELECT overtime_duration, name, attendance_date, overtime_type, standard_working_time
-				FROM `TabAttendance`
+				FROM `tabAttendance`
 				WHERE
 					attendance_date >= %s AND attendance_date <= %s
 					AND employee = %s
@@ -132,7 +132,7 @@ class OvertimeSlip(Document):
 		if self.from_date and self.to_date:
 
 			records = frappe.db.sql("""SELECT ts.name, ts.start_date, ts.end_date, tsd.overtime_on, tsd.overtime_type, tsd.overtime_hours
-				FROM `TabTimesheet` AS ts
+				FROM `tabTimesheet` AS ts
 				INNER JOIN `tabTimesheet Detail` As tsd ON tsd.parent = ts.name
 				WHERE
 					ts.docstatus = 1
