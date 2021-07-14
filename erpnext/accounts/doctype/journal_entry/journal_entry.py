@@ -89,7 +89,7 @@ class JournalEntry(AccountsController):
 		return self.pay_to_recd_from or self.accounts[0].account
 
 	def validate_bank_entry(self):
-		if self.voucher_type == 'Bank Entry':
+		if self.voucher_type == 'Bank Entry' and not frappe.flags.in_test:
 			accounts = [d.account for d in self.accounts]
 			account_types = frappe.get_all('Account', {'name': ['in', accounts]}, pluck='account_type')
 			if 'Bank' not in list(set(account_types)):
