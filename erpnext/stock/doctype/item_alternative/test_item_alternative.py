@@ -18,6 +18,9 @@ class TestItemAlternative(unittest.TestCase):
 		make_items()
 
 	def test_alternative_item_for_subcontract_rm(self):
+		frappe.db.set_value('Buying Settings', None,
+			'backflush_raw_materials_of_subcontract_based_on', 'BOM')
+
 		create_stock_reconciliation(item_code='Alternate Item For A RW 1', warehouse='_Test Warehouse - _TC',
 			qty=5, rate=2000)
 		create_stock_reconciliation(item_code='Test FG A RW 2', warehouse='_Test Warehouse - _TC',
@@ -65,6 +68,8 @@ class TestItemAlternative(unittest.TestCase):
 				status = True
 
 		self.assertEqual(status, True)
+		frappe.db.set_value('Buying Settings', None,
+			'backflush_raw_materials_of_subcontract_based_on', 'Material Transferred for Subcontract')
 
 	def test_alternative_item_for_production_rm(self):
 		create_stock_reconciliation(item_code='Alternate Item For A RW 1',

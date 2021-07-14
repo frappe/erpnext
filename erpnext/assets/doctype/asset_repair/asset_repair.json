@@ -7,38 +7,43 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
-  "asset_name",
+  "asset",
+  "company",
   "column_break_2",
-  "item_code",
-  "item_name",
+  "asset_name",
+  "naming_series",
   "section_break_5",
   "failure_date",
-  "assign_to",
-  "assign_to_name",
+  "repair_status",
   "column_break_6",
   "completion_date",
-  "repair_status",
+  "accounting_dimensions_section",
+  "cost_center",
+  "column_break_14",
+  "project",
+  "accounting_details",
   "repair_cost",
+  "capitalize_repair_cost",
+  "stock_consumption",
+  "column_break_8",
+  "purchase_invoice",
+  "stock_consumption_details_section",
+  "warehouse",
+  "stock_items",
+  "total_repair_cost",
+  "stock_entry",
+  "asset_depreciation_details_section",
+  "increase_in_asset_life",
   "section_break_9",
   "description",
   "column_break_9",
   "actions_performed",
-  "section_break_17",
+  "section_break_23",
   "downtime",
   "column_break_19",
   "amended_from"
  ],
  "fields": [
-  {
-   "columns": 1,
-   "fieldname": "asset_name",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Asset",
-   "options": "Asset",
-   "reqd": 1
-  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -49,18 +54,6 @@
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "asset_name.item_code",
-   "fieldname": "item_code",
-   "fieldtype": "Read Only",
-   "label": "Item Code"
-  },
-  {
-   "fetch_from": "asset_name.item_name",
-   "fieldname": "item_name",
-   "fieldtype": "Read Only",
-   "label": "Item Name"
   },
   {
    "fieldname": "section_break_5",
@@ -75,32 +68,19 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "assign_to",
-   "fieldtype": "Link",
-   "label": "Assign To",
-   "options": "User"
-  },
-  {
-   "allow_on_submit": 1,
-   "fetch_from": "assign_to.full_name",
-   "fieldname": "assign_to_name",
-   "fieldtype": "Read Only",
-   "label": "Assign To Name"
-  },
-  {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "completion_date",
    "fieldtype": "Datetime",
-   "label": "Completion Date"
+   "label": "Completion Date",
+   "no_copy": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "Pending",
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "repair_status",
    "fieldtype": "Select",
    "label": "Repair Status",
@@ -116,25 +96,18 @@
   {
    "fieldname": "description",
    "fieldtype": "Long Text",
-   "label": "Error Description",
-   "reqd": 1
+   "label": "Error Description"
   },
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "actions_performed",
    "fieldtype": "Long Text",
    "label": "Actions performed"
   },
   {
-   "fieldname": "section_break_17",
-   "fieldtype": "Section Break"
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "downtime",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -146,7 +119,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "repair_cost",
    "fieldtype": "Currency",
    "label": "Repair Cost"
@@ -159,12 +132,139 @@
    "options": "Asset Repair",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Asset",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "asset.asset_name",
+   "fieldname": "asset_name",
+   "fieldtype": "Read Only",
+   "label": "Asset Name"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "capitalize_repair_cost",
+   "fieldtype": "Check",
+   "label": "Capitalize Repair Cost"
+  },
+  {
+   "fieldname": "accounting_details",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "stock_items",
+   "fieldtype": "Table",
+   "label": "Stock Items",
+   "mandatory_depends_on": "stock_consumption",
+   "options": "Asset Repair Consumed Item"
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "stock_consumption",
+   "fieldtype": "Check",
+   "label": "Stock Consumed During Repair"
+  },
+  {
+   "depends_on": "stock_consumption",
+   "fieldname": "stock_consumption_details_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Consumption Details"
+  },
+  {
+   "depends_on": "eval: doc.stock_consumption && doc.total_repair_cost > 0",
+   "description": "Sum of Repair Cost and Value of Consumed Stock Items.",
+   "fieldname": "total_repair_cost",
+   "fieldtype": "Currency",
+   "label": "Total Repair Cost",
+   "read_only": 1
+  },
+  {
+   "depends_on": "stock_consumption",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "capitalize_repair_cost",
+   "fieldname": "asset_depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Depreciation Details"
+  },
+  {
+   "fieldname": "increase_in_asset_life",
+   "fieldtype": "Int",
+   "label": "Increase In Asset Life(Months)",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0",
+   "no_copy": 1,
+   "options": "Purchase Invoice"
+  },
+  {
+   "fetch_from": "asset.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock Entry",
+   "options": "Stock Entry",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 15:08:12.495850",
+ "modified": "2021-06-25 13:14:38.307723",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
@@ -203,6 +303,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "asset_name",
  "track_changes": 1,
  "track_seen": 1
 }
