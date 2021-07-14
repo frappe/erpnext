@@ -309,7 +309,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 				'description': time_log.description
 			})
 
-	target.run_method("calculate_billing_amount_for_timesheet")
+	target.run_method("calculate_billing_amount_and_hours_for_timesheet")
 	target.run_method("set_missing_values")
 
 	return target
