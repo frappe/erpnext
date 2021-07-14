@@ -16,6 +16,7 @@ from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valua
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
+
 class TestStockReconciliation(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
@@ -315,6 +316,26 @@ class TestStockReconciliation(unittest.TestCase):
 		sr3.cancel()
 		dn2.cancel()
 		pr1.cancel()
+
+	def test_valid_batch(self):
+		create_batch_item_with_batch("Testing Batch Item 1", "001")
+		create_batch_item_with_batch("Testing Batch Item 2", "002")
+		sr = create_stock_reconciliation(item_code="Testing Batch Item 1", qty=1, rate=100, batch_no="002"
+			, do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, sr.submit)
+
+def create_batch_item_with_batch(item_name, batch_id):
+	batch_item_doc = create_item(item_name, is_stock_item=1)
+	if not batch_item_doc.has_batch_no:
+		batch_item_doc.has_batch_no = 1
+		batch_item_doc.create_new_batch = 1
+		batch_item_doc.save(ignore_permissions=True)
+
+	if not frappe.db.exists('Batch', batch_id):
+		b = frappe.new_doc('Batch')
+		b.item = item_name
+		b.batch_id = batch_id
+		b.save()
 
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
