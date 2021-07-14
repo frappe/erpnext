@@ -38,6 +38,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	refresh: function(doc, dt, dn) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.posting_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("nepali_date",resp.message)
+				}
+			}
+		})
+
+
 		const me = this;
 		this._super();
 		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
@@ -139,7 +152,59 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 	},
-
+	due_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.due_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("payment_due_datenepali",resp.message)
+				}
+			}
+		})
+	},
+	po_date: function(doc){
+		console.log(">>>!!")
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.po_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("customers_purchase_order_datenepali",resp.message)
+				}
+			}	
+		})
+	},
+	from_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.from_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("from_datenepali",resp.message)
+				}
+			}	
+		})
+	},
+	to_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.to_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("to_datenepali",resp.message)
+				}
+			}	
+		})
+	},
 	make_maintenance_schedule: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",

@@ -9,6 +9,9 @@ from dateutil.relativedelta import relativedelta
 import datetime
 import nepali_datetime
 from datetime import timedelta
+#from nepali_date import NepaliDate
+# from nepali.datetime import NepaliDateTime
+#from nepali_date import NepaliDate
 
 from frappe.model.document import Document
 
@@ -116,8 +119,8 @@ class FiscalYear(Document):
 			converted_date = nepali_datetime.date.from_datetime_date(start_date)
 			self.append("nepali_date_table",{
 				"gregorian_date" : start_date,
-				"nepali_date" : converted_date.strftime("%d-%m-%Y"),
-				"nepali_month" : converted_date.strftime("%B")
+				"nepali_date" : converted_date.strftime("%D-%n-%K"),
+				"nepali_month" : converted_date.strftime("%N")
 			})
 			start_date += delta
 		
