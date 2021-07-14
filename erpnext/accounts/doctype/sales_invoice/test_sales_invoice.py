@@ -10,6 +10,7 @@ from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
@@ -1069,6 +1070,36 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(si1.outstanding_amount)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
 
+	def test_gle_made_when_asset_is_returned(self):
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro")
+	
+		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
+		return_si = create_sales_invoice(is_return=1, return_against=si.name, item_code="Macbook Pro", asset=asset.name, qty=-1, rate=90000)
+
+		disposal_account = frappe.get_cached_value("Company", "_Test Company", "disposal_account")
+
+		# Asset value is 100,000 but it was sold for 90,000, so there should be a loss of 10,000
+		loss_for_si = frappe.get_all(
+			"GL Entry", 
+			filters = {
+				"voucher_no": si.name,
+				"account": disposal_account
+			},
+			fields = ["credit", "debit"]
+		)[0]
+
+		loss_for_return_si = frappe.get_all(
+			"GL Entry", 
+			filters = {
+				"voucher_no": return_si.name,
+				"account": disposal_account
+			},
+			fields = ["credit", "debit"]
+		)[0]
+
+		self.assertEqual(loss_for_si['credit'], loss_for_return_si['debit'])
+		self.assertEqual(loss_for_si['debit'], loss_for_return_si['credit'])
 
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
@@ -2164,6 +2195,7 @@ def create_sales_invoice(**args):
 		"rate": args.rate if args.get("rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"conversion_factor": 1

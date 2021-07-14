@@ -339,16 +339,6 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 				"workday": "Friday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Saturday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Sunday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
 			}
 		]
 	})
