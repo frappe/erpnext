@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "creation": "2021-07-14 12:25:30.263289",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "gregorian_date",
+  "nepali_date",
+  "nepali_month"
+ ],
+ "fields": [
+  {
+   "fieldname": "gregorian_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Gregorian Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nepali_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nepali Date"
+  },
+  {
+   "fieldname": "nepali_month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nepali Month"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-07-14 12:26:31.520868",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Nepali Date Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
