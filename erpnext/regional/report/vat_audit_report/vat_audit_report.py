@@ -150,7 +150,7 @@ class VATAuditReport(object):
 
 		for rate, section in consolidated_data.items():
 			rate = int(rate)
-			label = frappe.bold(_("Standard Rate ") + section_name + " " + str(rate) + "%")
+			label = frappe.bold(_("Standard Rate") + " " + section_name + " " + str(rate) + "%")
 			section_head = {"posting_date": label}
 			total_gross = total_tax = total_net = 0
 			self.data.append(section_head)

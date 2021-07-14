@@ -11,7 +11,6 @@ frappe.ui.form.on('South Africa VAT Settings', {
 			};
 		});
 		frm.set_query("account", "vat_accounts", function(doc, cdt, cdn) {
-			var row = locals[cdt][cdn];
 			return {
 				filters: {
 					company: frm.doc.company,
