@@ -67,6 +67,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	calculate_discount_amount(){
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount")) {
+			this.calculate_item_values();
+			this.calculate_net_total();
 			this.set_discount_amount();
 			this.apply_discount_amount();
 		}
