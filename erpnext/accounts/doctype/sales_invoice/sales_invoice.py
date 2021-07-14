@@ -745,7 +745,7 @@ class SalesInvoice(SellingController):
 		if not self.timesheets and self.project:
 			self.add_timesheet_data()
 		else:
-			self.calculate_billing_amount_for_timesheet()
+			self.calculate_billing_amount_and_hours_for_timesheet()
 
 	@frappe.whitelist()
 	def add_timesheet_data(self):
@@ -761,15 +761,17 @@ class SalesInvoice(SellingController):
 						'description': data.description
 					})
 
-			self.calculate_billing_amount_for_timesheet()
+			self.calculate_billing_amount_and_hours_for_timesheet()
 
-	def calculate_billing_amount_for_timesheet(self):
-		total_billing_amount = 0.0
+	def calculate_billing_amount_and_hours_for_timesheet(self):
+		total_billing_amount = total_billing_hours = 0.0
 		for data in self.timesheets:
 			if data.billing_amount:
+				total_billing_hours += data.billing_hours
 				total_billing_amount += data.billing_amount
 
 		self.total_billing_amount = total_billing_amount
+		self.total_billing_hours = total_billing_hours
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`

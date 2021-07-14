@@ -71,6 +71,7 @@
   "product_bundle_help",
   "time_sheet_list",
   "timesheets",
+  "total_billing_hours",
   "total_billing_amount",
   "section_break_30",
   "total_qty",
@@ -1966,6 +1967,12 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "total_billing_hours",
+   "fieldtype": "Float",
+   "label": "Total Billing Hours",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -1978,7 +1985,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-05-20 22:48:33.988881",
+ "modified": "2021-07-15 00:18:08.557290",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
