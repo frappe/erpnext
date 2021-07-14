@@ -155,6 +155,9 @@ def _order(woocommerce_settings, *args, **kwargs):
 	# pre-process to parse payload (parameter: meta_data, billing)
 	customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address, patient_dob = pre_process_payload(order.get('meta_data'), order.get('billing'))
 
+	if pos_order_type == "marketing material":
+		return "Marketing Material detected, we will ignore in ERPNext"
+
 	# Validate customer code, output payment_category and accepts_backorders 
 	payment_category, accepts_backorders = validate_customer_code_erpnext(customer_code)
 
