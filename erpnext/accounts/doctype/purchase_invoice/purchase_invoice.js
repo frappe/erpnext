@@ -26,9 +26,62 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			};
 		});
 	},
-
 	company: function() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+	from_date: function(doc){
+		console.log(">>>>>>>>>>>")
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.from_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("from_datenepali",resp.message)
+				}
+			}	
+		})
+	},
+	to_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.to_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("to_datenepali",resp.message)
+				}
+			}	
+		})
+	},
+	bill_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.bill_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("supplier_invoice_datenepali",resp.message)
+				}
+			}	
+		})
+	},
+
+	due_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.due_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("due_datenepali",resp.message)
+				}
+			}	
+		})
 	},
 
 	onload: function() {
@@ -51,6 +104,17 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	refresh: function(doc) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.posting_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("datenepali",resp.message)
+				}
+			}	
+		})
 		const me = this;
 		this._super();
 
