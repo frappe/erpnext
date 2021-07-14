@@ -49,7 +49,8 @@ erpnext.HierarchyChart = class {
 			title: node.title,
 			image: node.image,
 			parent: node.parent_id,
-			connections: node.connections
+			connections: node.connections,
+			is_mobile: false
 		});
 
 		node.parent.append(node_card);
