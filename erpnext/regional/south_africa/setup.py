@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe, os, json
+# import frappe, os, json
 from frappe.permissions import add_permission, update_permission_property
 
 def setup():

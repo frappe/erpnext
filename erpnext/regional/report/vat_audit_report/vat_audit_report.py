@@ -2,10 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
+import json
 from frappe import _
-from frappe.utils import flt, formatdate, now_datetime, getdate
-from datetime import date
+from frappe.utils import formatdate
 
 def execute(filters=None):
 	return VATAuditReport(filters).run()
@@ -39,7 +39,7 @@ class VATAuditReport(object):
 		return self.columns, self.data
 
 	def get_sa_vat_accounts(self):
-		self.sa_vat_accounts = frappe.get_list("South Africa VAT Account", \
+		self.sa_vat_accounts = frappe.get_list("South Africa VAT Account",
 			filters = {"parent":self.filters.company}, pluck="account")
 		if not self.sa_vat_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 			frappe.throw(_("Please set VAT Accounts in South Africa VAT Settings"))
@@ -84,7 +84,7 @@ class VATAuditReport(object):
 
 	def get_items_based_on_tax_rate(self,doctype):
 		self.items_based_on_tax_rate = frappe._dict()
-		self.tax_doctype =  "Purchase Taxes and Charges" if doctype=="Purchase Invoice" \
+		self.tax_doctype = "Purchase Taxes and Charges" if doctype=="Purchase Invoice" \
 			else "Sales Taxes and Charges"
 		self.tax_details = frappe.db.sql("""
 			SELECT
@@ -125,10 +125,10 @@ class VATAuditReport(object):
 		item_amount_map = self.item_tax_rate.setdefault(parent, {}) \
 			.setdefault(item_code, [])
 		amount_dict = {
-		"tax_rate": tax_rate,
-		"gross_amount": gross_amount,
-		"tax_amount": tax_amount,
-		"net_amount": net_amount
+			"tax_rate": tax_rate,
+			"gross_amount": gross_amount,
+			"tax_amount": tax_amount,
+			"net_amount": net_amount
 		}
 		item_amount_map.append(amount_dict)
 
@@ -139,19 +139,19 @@ class VATAuditReport(object):
 		for opts in (("company", " and company=%(company)s"),
 			("from_date", " and posting_date>=%(from_date)s"),
 			("to_date", " and posting_date<=%(to_date)s")):
-				if self.filters.get(opts[0]):
-					conditions += opts[1]
+			if self.filters.get(opts[0]):
+				conditions += opts[1]
 
 		return conditions
 
 	def get_data(self,doctype):
 		consolidated_data = self.get_consolidated_data()
-		section_name =  _("Purchases ") if doctype == "Purchase Invoice" else _("Sales ")
+		section_name = _("Purchases") if doctype == "Purchase Invoice" else _("Sales")
 
 		for rate, section in consolidated_data.items():
 			rate = int(rate)
-			label = frappe.bold(_("Standard Rate ") + section_name + str(rate) + "%")
-			section_head = {"posting_date": label }
+			label = frappe.bold(_("Standard Rate ") + section_name + " " + str(rate) + "%")
+			section_head = {"posting_date": label}
 			total_gross = total_tax = total_net = 0
 			self.data.append(section_head)
 			for row in section.get("data"):
@@ -178,11 +178,11 @@ class VATAuditReport(object):
 				for item in items:
 					row = {}
 					item_details = self.item_tax_rate.get(inv).get(item)
-					row["account"]  = inv_data.get("account")
+					row["account"] = inv_data.get("account")
 					row["posting_date"] = formatdate(inv_data.get("posting_date"), 'dd-mm-yyyy')
 					row["invoice_number"] = inv
-					row["party"] =  inv_data.get("party")
-					row["remarks"] =  inv_data.get("remarks")
+					row["party"] = inv_data.get("party")
+					row["remarks"] = inv_data.get("remarks")
 					row["gross_amount"]= item_details[0].get("gross_amount")
 					row["tax_amount"]= item_details[0].get("tax_amount")
 					row["net_amount"]= item_details[0].get("net_amount")
