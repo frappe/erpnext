@@ -131,17 +131,17 @@ def get_data(filters,columns):
 		filter['production_item'] = filters.get('item_code')
 	lst=frappe.db.get_all("Work Order",filter,["name","status","production_item","item_name","qty","stock_uom"])
 	data=[]
-	row=[]
-	f=[]
 	for i in lst:
 		doc=frappe.get_doc("Work Order",i.name)
 		
 		for i in doc.required_items:
 			# l=frappe.db.sql("""select count(ia.item_code) from `tabItem Alternative` ia,`tabItem` i where ia.item_code= '%s'""".format(i.item_code),as_dict=1)
 			# print(l)
-			b=frappe.db.get_all("Item Alternative",{"Item_code":i.item_code},["alternative_item_code"])
-			c=frappe.db.count("Item Alternative",{"Item_code":i.item_code},["alternative_item_code"])
-			f.append(c)
+			b=frappe.db.get_all("Item Alternative",{"Item_code":i.item_code},["alternative_item_code","item_code"])
+			z=frappe.db.get_all("Item Alternative",{"alternative_item_code":i.item_code},["item_code","alternative_item_code"])
+
+			# c=frappe.db.count("Item Alternative",{"Item_code":i.item_code},["alternative_item_code"])
+			# f.append(c)
 			d=frappe.db.get_all("Item",{"item_code":i.item_code},['stock_uom'])
 			data_list={}
 			data_list['name']=doc.name
@@ -157,12 +157,21 @@ def get_data(filters,columns):
 				data_list['uom1']=it.stock_uom
 				data_list['available_qty_at_source_warehouse']=i.available_qty_at_source_warehouse
 				for j in b:
-					data_list['alternative_item_code']=j.alternative_item_code
-					c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
-					actual=[]
-					for k in c:
-						actual.append(k.actual_qty)
-						data_list['actual_qty']=sum(actual)
+					if i.item_code==j.item_code:
+						data_list['alternative_item_code']=j.alternative_item_code
+						c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
+						actual=[]
+						for k in c:
+							actual.append(k.actual_qty)
+							data_list['actual_qty']=sum(actual)
+				for v in z:
+					if v.alternative_item_code==i.item_code:
+						data_list['alternative_item_code']=v.item_code
+						t=frappe.db.get_all("Bin",{"item_code":v.item_code},['actual_qty'])
+						actual=[]
+						for y in t:
+							actual.append(y.actual_qty)
+							data_list['actual_qty']=sum(actual)
 			data.append(data_list)
 	# a=max(f)
 	# print(a)
