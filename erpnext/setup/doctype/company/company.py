@@ -291,7 +291,7 @@ class Company(NestedSet):
 		cash = frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name')
 		if cash and self.default_cash_account \
 			and not frappe.db.get_value('Mode of Payment Account', {'company': self.name, 'parent': cash}):
-			mode_of_payment = frappe.get_doc('Mode of Payment', cash)
+			mode_of_payment = frappe.get_doc('Mode of Payment', cash, for_update=True)
 			mode_of_payment.append('accounts', {
 				'company': self.name,
 				'default_account': self.default_cash_account
@@ -395,7 +395,7 @@ class Company(NestedSet):
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
-	kwargs = dict(company=company, old=old, new=new)
+	kwargs = dict(queue="long", company=company, old=old, new=new)
 	frappe.enqueue('erpnext.setup.doctype.company.company.replace_abbr', **kwargs)
 
 
