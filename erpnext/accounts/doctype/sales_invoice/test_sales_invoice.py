@@ -1072,6 +1072,15 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_gle_made_when_asset_is_returned(self):
 		create_asset_data()
+
+		pi = frappe.new_doc('Purchase Invoice')
+		pi.supplier = '_Test Supplier'
+		pi.append('items', {
+			'item_code': 'Macbook Pro',
+			'qty': 1
+		})
+		pi.set_missing_values()
+		
 		asset = create_asset(item_code="Macbook Pro")
 	
 		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
