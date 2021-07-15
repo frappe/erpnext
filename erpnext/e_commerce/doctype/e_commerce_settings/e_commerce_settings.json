@@ -39,8 +39,9 @@
   "quotation_series",
   "checkout_settings_section",
   "enable_checkout",
-  "save_quotations_as_draft",
+  "show_price_in_quotation",
   "column_break_27",
+  "save_quotations_as_draft",
   "payment_gateway_account",
   "payment_success_url",
   "filter_categories_section",
@@ -379,12 +380,19 @@
    "fieldname": "enable_recommendations",
    "fieldtype": "Check",
    "label": "Enable Recommendations"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_checkout == 0",
+   "fieldname": "show_price_in_quotation",
+   "fieldtype": "Check",
+   "label": "Show Price in Quotation"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-07-13 16:30:14.715949",
+ "modified": "2021-07-15 16:50:50.087281",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
