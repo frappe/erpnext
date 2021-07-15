@@ -632,8 +632,3 @@ def is_before_working_hours(date, support_hours):
 	if time < start_time:
 		return True
 	return False
-
-def get_holidays(holiday_list_name):
-	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
-	holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
-	return holidays
