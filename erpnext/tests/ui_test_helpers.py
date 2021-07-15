@@ -1,10 +1,9 @@
 import frappe
-from frappe import _
 from frappe.utils import getdate
 
 @frappe.whitelist()
 def create_employee_records():
-	company = create_company()
+	create_company()
 	create_missing_designation()
 
 	emp1 = create_employee('Test Employee 1', 'CEO')
