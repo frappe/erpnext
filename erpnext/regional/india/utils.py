@@ -767,6 +767,15 @@ def update_itc_availed_fields(doc, method):
 		if tax.account_head in gst_accounts.get('cess_account', []):
 			doc.itc_cess_amount += flt(tax.base_tax_amount_after_discount_amount)
 
+def update_place_of_supply(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+	if country != 'India':
+		return
+
+	address = frappe.db.get_value("Address", doc.customer_address, ["gst_state", "gst_state_number"], as_dict=1)
+	if address and address.gst_state and address.gst_state_number:
+		doc.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
+
 @frappe.whitelist()
 def get_regional_round_off_accounts(company, account_list):
 	country = frappe.get_cached_value('Company', company, 'country')
