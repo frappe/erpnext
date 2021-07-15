@@ -121,7 +121,7 @@ $.extend(shopping_cart, {
 			$(".cart-items").html('Cart is Empty');
 			$(".cart-tax-items").hide();
 			$(".btn-place-order").hide();
-			$(".cart-addresses").hide();
+			$(".cart-payment-addresses").hide();
 		}
 		else {
 			$cart.css("display", "inline");

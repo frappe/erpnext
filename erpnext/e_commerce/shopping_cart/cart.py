@@ -271,8 +271,12 @@ def guess_territory():
 
 def decorate_quotation_doc(doc):
 	for d in doc.get("items", []):
-		d.update(frappe.db.get_value("Website Item", {"item_code": d.item_code},
-			["thumbnail", "website_image", "description", "route"], as_dict=True))
+		d.update(frappe.db.get_value(
+			"Website Item",
+			{"item_code": d.item_code},
+			["web_item_name", "thumbnail", "website_image", "description", "route"],
+			as_dict=True)
+		)
 
 	return doc
 
