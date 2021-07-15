@@ -29,7 +29,7 @@ context('Organizational Chart', () => {
 		// check children of first node
 		cy.get('@employee_records').then(employee_records => {
 			// children of 1st root visible
-			cy.get(`[data-parent="${employee_records.message[0]}"]`).as('child-node')
+			cy.get(`[data-parent="${employee_records.message[0]}"]`).as('child-node');
 			cy.get('@child-node')
 				.should('have.length', 1)
 				.should('be.visible');
@@ -39,7 +39,7 @@ context('Organizational Chart', () => {
 			cy.get(`path[data-parent="${employee_records.message[0]}"]`)
 				.should('be.visible')
 				.invoke('attr', 'data-child')
-  				.should('equal', employee_records.message[2]);
+				.should('equal', employee_records.message[2]);
 		});
 	});
 
