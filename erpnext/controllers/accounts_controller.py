@@ -785,6 +785,42 @@ class AccountsController(TransactionBase):
 							"project": item.project or self.project
 						}, account_currency, item=item)
 					)
+			
+			if self.get('discount_amount') and self.get('additional_discount_account'):
+				self.make_gle_for_additional_discount_applied_on_taxes(gl_entries)
+
+	def make_gle_for_additional_discount_applied_on_taxes(self, gl_entries):
+		for tax in self.get("taxes"):
+			if flt(tax.base_tax_amount_after_discount_amount) and flt(tax.base_tax_amount):
+				account_currency = get_account_currency(tax.account_head)
+				additional_discount_applied_on_taxes = flt(tax.base_tax_amount) - flt(tax.base_tax_amount_after_discount_amount)
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": tax.account_head,
+						"against": self.customer,
+						"credit": flt(additional_discount_applied_on_taxes,
+							tax.precision("tax_amount_after_discount_amount")),
+						"credit_in_account_currency": (flt(additional_discount_applied_on_taxes,
+							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
+							flt(additional_discount_applied_on_taxes, tax.precision("tax_amount_after_discount_amount"))),
+						"cost_center": tax.cost_center
+					}, account_currency, item=tax)
+				)
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.additional_discount_account,
+						"against": self.customer,
+						"debit": flt(additional_discount_applied_on_taxes,
+							tax.precision("tax_amount_after_discount_amount")),
+						"debit_in_account_currency": (flt(additional_discount_applied_on_taxes,
+							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
+							flt(additional_discount_applied_on_taxes, tax.precision("tax_amount_after_discount_amount"))),
+						"cost_center": tax.cost_center
+					}, account_currency, item=tax)
+				)
+				
 
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
