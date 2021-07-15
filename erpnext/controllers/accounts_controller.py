@@ -751,11 +751,11 @@ class AccountsController(TransactionBase):
 					account_currency = get_account_currency(tax.account_head)
 
 					if self.doctype == "Purchase Invoice":
-						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-					else:
 						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+					else:
+						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 
 					party = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 					unallocated_amount = tax.tax_amount - tax.allocated_amount
