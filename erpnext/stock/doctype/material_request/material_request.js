@@ -118,10 +118,33 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	refresh: function(frm) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("transaction_datenepali",resp.message)
+				}
+			}	
+		})
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 	},
-
+	schedule_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.schedule_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("required_bynepali",resp.message)
+				}
+			}	
+		})
+	},
 	set_from_warehouse: function(frm) {
 		if (frm.doc.material_request_type == "Material Transfer"
 			&& frm.doc.set_from_warehouse) {
