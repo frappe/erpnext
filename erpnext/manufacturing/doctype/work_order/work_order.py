@@ -239,7 +239,7 @@ class WorkOrder(Document):
 		self.create_serial_no_batch_no()
 
 	def on_submit(self):
-		if not self.wip_warehouse:
+		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
