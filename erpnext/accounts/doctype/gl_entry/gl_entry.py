@@ -29,7 +29,7 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
-
+		self.set_nepali_date()
 		if not self.flags.from_repost:
 			self.check_mandatory()
 			self.validate_cost_center()
@@ -51,7 +51,13 @@ class GLEntry(Document):
 				and self.against_voucher and self.flags.update_outstanding == 'Yes'):
 					update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 						self.against_voucher)
-
+	
+	def set_nepali_date(self):
+		from erpnext.nepali_date import get_converted_date
+		if self.posting_date:
+			nepali_date = get_converted_date(self.posting_date)
+			self.posting_datenepali = nepali_date
+			
 	def check_mandatory(self):
 		mandatory = ['account','voucher_type','voucher_no','company']
 		for k in mandatory:
