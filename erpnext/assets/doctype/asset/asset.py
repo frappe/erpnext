@@ -228,7 +228,7 @@ class Asset(AccountsController):
 						self.to_date = add_months(self.available_for_use_date,
 							n * cint(d.frequency_of_depreciation))
 
-					depreciation_amount, days, months = get_pro_rata_amt(d,
+					depreciation_amount, days, months = self.get_pro_rata_amt(d,
 						depreciation_amount, schedule_date, self.to_date)
 
 					monthly_schedule_date = add_months(schedule_date, 1)
