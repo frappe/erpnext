@@ -282,8 +282,8 @@ $.extend(erpnext.item, {
 					'company': row.company,
 					"is_group": 0
 				}
-			}
-		}
+			};
+		};
 
 		frm.fields_dict["item_defaults"].grid.get_field("buying_cost_center").get_query = function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
