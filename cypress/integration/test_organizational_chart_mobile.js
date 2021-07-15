@@ -43,7 +43,7 @@ context('Organizational Chart Mobile', () => {
 
 			// children of active root node
 			cy.get('.hierarchy-mobile').find('.level').first().find('ul.node-children').children()
-				.should('have.length', 2)
+				.should('have.length', 2);
 
 			cy.get(`[data-parent="${employee_records.message[1]}"]`).first().as('child-node');
 			cy.get('@child-node').should('be.visible');
@@ -56,7 +56,7 @@ context('Organizational Chart Mobile', () => {
 			cy.get(`path[data-parent="${employee_records.message[1]}"]`).as('connectors');
 			cy.get('@connectors')
 				.should('have.length', 2)
-				.should('be.visible')
+				.should('be.visible');
 
 			cy.get('@connectors')
 				.first()
@@ -104,7 +104,7 @@ context('Organizational Chart Mobile', () => {
 			cy.get('@sibling_group')
 				.should('have.attr', 'data-parent', 'undefined')
 				.should('have.class', 'node-group')
-				.and('have.class', 'collapsed')
+				.and('have.class', 'collapsed');
 
 			cy.get('@sibling_group').get('.avatar-group').children().as('siblings');
 			cy.get('@siblings').should('have.length', 1);
@@ -137,7 +137,7 @@ context('Organizational Chart Mobile', () => {
 	it('expands sibling group', () => {
 		cy.get('@employee_records').then(employee_records => {
 			// sibling group visible for parent
-			cy.get(`#${employee_records.message[6]}`).click()
+			cy.get(`#${employee_records.message[6]}`).click();
 
 			cy.get(`#${employee_records.message[3]}`)
 				.next()
