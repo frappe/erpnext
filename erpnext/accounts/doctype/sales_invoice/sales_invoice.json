@@ -104,6 +104,7 @@
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
@@ -1966,6 +1967,12 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-file-text",
@@ -1978,7 +1985,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-05-20 22:48:33.988881",
+ "modified": "2021-07-15 21:57:17.544279",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
