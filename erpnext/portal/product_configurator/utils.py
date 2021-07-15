@@ -101,7 +101,7 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 	return html
 
 def set_item_group_filters(field_filters):
-	if 'item_group' in field_filters:
+	if field_filters is not None and 'item_group' in field_filters:
 		field_filters['item_group'] = [ig[0] for ig in get_child_groups(field_filters['item_group'])]
 
 
