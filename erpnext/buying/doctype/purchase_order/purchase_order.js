@@ -83,6 +83,17 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	refresh: function(doc, cdt, cdn) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("datenepali",resp.message)
+				}
+			}
+		})
 		var me = this;
 		this._super();
 		var allow_receipt = false;
@@ -556,8 +567,57 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	items_on_form_rendered: function() {
 		set_schedule_date(this.frm);
 	},
-
-	schedule_date: function() {
+	from_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.from_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("from_datenepali",resp.message)
+				}
+			}
+		})
+	},
+	from_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.from_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("from_datenepali",resp.message)
+				}
+			}
+		})
+	},
+	to_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.to_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("to_datenepali",resp.message)
+				}
+			}
+		})
+	},
+	schedule_date: function(doc) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.schedule_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("required_bynepal",resp.message)
+				}
+			}
+		})
 		set_schedule_date(this.frm);
 	}
 });
