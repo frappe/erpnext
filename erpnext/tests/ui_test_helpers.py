@@ -11,10 +11,11 @@ def create_employee_records():
 	emp2 = create_employee('Test Employee 2', 'CTO')
 	emp3 = create_employee('Test Employee 3', 'Head of Marketing and Sales', emp1)
 	emp4 = create_employee('Test Employee 4', 'Project Manager', emp2)
-	emp5 = create_employee('Test Employee 5', 'Analyst', emp3)
-	emp6 = create_employee('Test Employee 6', 'Software Developer', emp4)
+	emp5 = create_employee('Test Employee 5', 'Engineer', emp2)
+	emp6 = create_employee('Test Employee 6', 'Analyst', emp3)
+	emp7 = create_employee('Test Employee 7', 'Software Developer', emp4)
 
-	employees = [emp1, emp2, emp3, emp4, emp5, emp6]
+	employees = [emp1, emp2, emp3, emp4, emp5, emp6, emp7]
 	return employees
 
 def create_company():

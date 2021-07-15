@@ -128,6 +128,9 @@ erpnext.HierarchyChartMobile = class {
 		if (this.$hierarchy)
 			this.$hierarchy.remove();
 
+		if (this.$sibling_group)
+			this.$sibling_group.empty();
+
 		this.$hierarchy = $(
 			`<ul class="hierarchy-mobile">
 				<li class="root-level level"></li>
@@ -173,7 +176,7 @@ erpnext.HierarchyChartMobile = class {
 
 		if (this.$sibling_group) {
 			const sibling_parent = this.$sibling_group.find('.node-group').attr('data-parent');
-			if (node.parent_id !== sibling_parent)
+			if (node.parent_id !== undefined && node.parent_id != sibling_parent)
 				this.$sibling_group.empty();
 		}
 
@@ -376,9 +379,10 @@ erpnext.HierarchyChartMobile = class {
 		let node_element = $(`#${node.id}`);
 
 		node_element.click(function() {
-			let el = $(this).detach();
+			let el = undefined;
 
 			if (node.is_root) {
+				el = $(this).detach();
 				me.$hierarchy.empty();
 				$(`#connectors`).empty();
 				me.add_node_to_hierarchy(el, node);
@@ -386,6 +390,7 @@ erpnext.HierarchyChartMobile = class {
 				me.remove_levels_after_node(node);
 				me.remove_orphaned_connectors();
 			} else {
+				el = $(this).detach();
 				me.add_node_to_hierarchy(el, node);
 				me.collapse_node();
 			}
@@ -514,10 +519,10 @@ erpnext.HierarchyChartMobile = class {
 		level = $('.hierarchy-mobile > li:eq('+ level + ')');
 		level.nextAll('li').remove();
 
-		let current_node = level.find(`#${node.id}`);
 		let node_object = this.nodes[node.id];
-
+		let current_node = level.find(`#${node.id}`).detach();
 		current_node.removeClass('active-child active-path');
+
 		node_object.expanded = 0;
 		node_object.$children = undefined;
 
