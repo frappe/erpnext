@@ -18,7 +18,7 @@ class TransactionDeletionRecord(Document):
 		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
 		for doctype in self.doctypes_to_be_ignored:
 			if doctype.doctype_name not in doctypes_to_be_ignored_list:
-				frappe.throw(_("DocTypes should not be added manually to the 'Excluded DocTypes' table. You are only allowed to remove entries from it. "), 
+				frappe.throw(_("DocTypes should not be added manually to the 'Excluded DocTypes' table. You are only allowed to remove entries from it."),
 					title=_("Not Allowed"))
 
 	def before_submit(self):
