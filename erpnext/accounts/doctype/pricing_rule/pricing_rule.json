@@ -54,7 +54,9 @@
   "is_recursive",
   "section_break_23",
   "valid_from",
+  "valid_fromnepal",
   "valid_upto",
+  "valid_uptonepal",
   "col_break1",
   "company",
   "currency",
@@ -570,12 +572,24 @@
    "fieldname": "is_recursive",
    "fieldtype": "Check",
    "label": "Is Recursive"
+  },
+  {
+   "fieldname": "valid_fromnepal",
+   "fieldtype": "Data",
+   "label": "Valid From(Nepal)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "valid_uptonepal",
+   "fieldtype": "Data",
+   "label": "Valid Upto(Nepal)",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2021-03-06 22:01:24.840422",
+ "modified": "2021-07-15 18:20:17.600276",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
