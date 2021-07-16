@@ -719,6 +719,10 @@ class StockEntry(StockController):
 			frappe.throw(_("Multiple items cannot be marked as finished item"))
 
 		if self.purpose == "Manufacture":
+			if not finished_items:
+				frappe.throw(_('Finished Good has not set in the stock entry {0}')
+					.format(self.name))
+
 			allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 				"overproduction_percentage_for_work_order"))
 
