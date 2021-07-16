@@ -1,14 +1,14 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Full And Final Statement', {
+frappe.ui.form.on('Full and Final Statement', {
 	onload: function(frm) {
 		frm.events.set_queries(frm, "payables");
 		frm.events.set_queries(frm, "receivables");
 	},
 
 	set_queries: function(frm, type) {
-		frm.set_query('reference_document_type', type, function () {
+		frm.set_query("reference_document_type", type, function () {
 			let modules = ["HR", "Payroll", "Loan Management"];
 			return {
 				filters: {
@@ -22,7 +22,7 @@ frappe.ui.form.on('Full And Final Statement', {
 
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 1 && frm.doc.status == "Unpaid") {
-			frm.add_custom_button(__('Create Journal Entry'), function () {
+			frm.add_custom_button(__("Create Journal Entry"), function () {
 				frm.events.create_journal_entry(frm);
 			});
 		}
@@ -35,7 +35,7 @@ frappe.ui.form.on('Full And Final Statement', {
 	get_outstanding_statements: function(frm) {
 		if (frm.doc.employee) {
 			frappe.call({
-				method: 'get_outstanding_statements',
+				method: "get_outstanding_statements",
 				doc: frm.doc,
 				callback: function() {
 					frm.refresh();
@@ -56,12 +56,28 @@ frappe.ui.form.on('Full And Final Statement', {
 	}
 });
 
-frappe.ui.form.on('Full And Final Outstanding Statements', {
+frappe.ui.form.on("Full and Final Outstanding Statement", {
+	// Not seems to be Working
+	// reference_document_type: function(frm, cdt, cdn) {
+	// 	let child = locals[cdt][cdn];
+	// 	console.log("Here")
+	// 	if (child.reference_document_type) {
+	// 		console.log("Here tooo")
+	// 		frm.set_query("reference_document", child.parentfield, function () {
+	// 			return {
+	// 				filters: {
+	// 					employee: frm.employee
+	// 				}
+	// 			};
+	// 		});
+	// 	}
+	// },
+
 	reference_document: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if (child.reference_document_type && child.reference_document) {
 			frappe.call({
-				method: 'erpnext.hr.doctype.full_and_final_statement.full_and_final_statement.get_account_and_amount',
+				method: "erpnext.hr.doctype.full_and_final_statement.full_and_final_statement.get_account_and_amount",
 				args: {
 					ref_doctype: child.reference_document_type,
 					ref_document: child.reference_document
@@ -81,13 +97,13 @@ frappe.ui.form.on('Full And Final Outstanding Statements', {
 		frm.doc.total_receivable_amount = 0;
 
 		frm.doc.payables.forEach(element => {
-			frm.doc.total_payable_amount += element.amount;
+			frm.doc.total_payable_amount += flt(element.amount);
 		});
 
 		frm.doc.receivables.forEach(element => {
-			frm.doc.total_receivable_amount += element.amount;
+			frm.doc.total_receivable_amount += flt(element.amount);
 		});
-		cur_frm.refresh_field("total_payable_amount");
-		cur_frm.refresh_field("total_receivable_amount");
+		frm.refresh_field("total_payable_amount");
+		frm.refresh_field("total_receivable_amount");
 	}
 });

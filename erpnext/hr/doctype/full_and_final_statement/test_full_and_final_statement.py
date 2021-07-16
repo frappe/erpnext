@@ -8,18 +8,18 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from frappe.utils import today, add_days
 import unittest
 
-class TestFullAndFinalStatement(unittest.TestCase):
+class TestFullandFinalStatement(unittest.TestCase):
 
 	def setUp(self):
 		create_asset_data()
 
 	def tearDown(self):
-		frappe.db.sql("Delete from `tabFull And Final Statement`")
+		frappe.db.sql("Delete from `tabFull and Final Statement`")
 		frappe.db.sql("Delete from `tabAsset`")
 		frappe.db.sql("Delete from `tabAsset Movement`")
 
 	def test_check_bootstraped_data_asset_movement_and_jv_creation(self):
-		employee = make_employee("test_fnf@example.com", company='_Test Company')
+		employee = make_employee("test_fnf@example.com", company="_Test Company")
 		movement = create_asset_movement(employee)
 		frappe.db.set_value("Employee", employee, "relieving_date", add_days(today(), 30))
 		fnf = create_full_and_final_statement(employee)
@@ -37,7 +37,7 @@ class TestFullAndFinalStatement(unittest.TestCase):
 		self.assertIn(movement, [asset.reference for asset in fnf.assets_allocated])
 
 def create_full_and_final_statement(employee):
-	fnf = frappe.new_doc("Full And Final Statement")
+	fnf = frappe.new_doc("Full and Final Statement")
 	fnf.employee = employee
 	fnf.transaction_date = today()
 	fnf.save()
@@ -46,8 +46,8 @@ def create_full_and_final_statement(employee):
 def create_asset_movement(employee):
 	asset_name = create_asset()
 	movement = frappe.new_doc("Asset Movement")
-	movement.company = '_Test Company'
-	movement.purpose = 'Issue'
+	movement.company = "_Test Company"
+	movement.purpose = "Issue"
 	movement.transaction_date = today()
 
 	movement.append("assets", {
@@ -63,7 +63,7 @@ def create_asset():
 	pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
 
-	asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+	asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 	asset = frappe.get_doc("Asset", asset_name)
 	asset.calculate_depreciation = 0
 	asset.available_for_use_date = today()

@@ -4,5 +4,5 @@
 # import frappe
 import unittest
 
-class TestFullAndFinalAssets(unittest.TestCase):
+class TestFullandFinalAsset(unittest.TestCase):
 	pass

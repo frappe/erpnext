@@ -6,6 +6,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "transaction_date",
+  "column_break_12",
+  "status",
   "employee_details_section",
   "employee",
   "employee_name",
@@ -15,10 +18,6 @@
   "designation",
   "department",
   "company",
-  "section_break_9",
-  "transaction_date",
-  "column_break_12",
-  "status",
   "amended_from",
   "section_break_8",
   "payables",
@@ -80,23 +79,24 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Full And Final Statement",
+   "options": "Full and Final Statement",
    "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "section_break_8",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Payables"
   },
   {
    "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Receivables"
   },
   {
    "fieldname": "assets_allocated",
    "fieldtype": "Table",
-   "label": "Assets Allocated",
-   "options": "Full And Final Assets"
+   "options": "Full and Final Asset"
   },
   {
    "fetch_from": "employee.relieving_date",
@@ -115,7 +115,8 @@
   },
   {
    "fieldname": "section_break_15",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Assets Allocated"
   },
   {
    "fetch_from": "employee.company",
@@ -126,24 +127,18 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "payables",
    "fieldtype": "Table",
-   "label": "Payables",
-   "options": "Full And Final Outstanding Statements"
+   "options": "Full and Final Outstanding Statement"
   },
   {
    "fieldname": "receivables",
    "fieldtype": "Table",
-   "label": "Receivables",
-   "options": "Full And Final Outstanding Statements"
+   "options": "Full and Final Outstanding Statement"
   },
   {
    "fieldname": "employee_details_section",
@@ -164,7 +159,8 @@
   {
    "fieldname": "total_payable_amount",
    "fieldtype": "Currency",
-   "label": "Total Payable Amount"
+   "label": "Total Payable Amount",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_21",
@@ -173,16 +169,17 @@
   {
    "fieldname": "total_receivable_amount",
    "fieldtype": "Currency",
-   "label": "Total Receivable Amount,"
+   "label": "Total Receivable Amount,",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-03 04:34:17.653402",
+ "modified": "2021-07-15 15:25:03.926328",
  "modified_by": "Administrator",
  "module": "HR",
- "name": "Full And Final Statement",
+ "name": "Full and Final Statement",
  "owner": "Administrator",
  "permissions": [
   {
