@@ -981,8 +981,16 @@ def get_non_stock_items(purchase_order, fg_item_code):
 
 
 def set_serial_nos(raw_material, consumed_serial_nos, qty):
-	serial_nos = set(get_serial_nos(raw_material.serial_nos)) - \
-		set(get_serial_nos(consumed_serial_nos))
+	consumed_serial_nos_list = []
+
+	if isinstance(consumed_serial_nos, list):
+		for row in consumed_serial_nos:
+			consumed_serial_nos_list.extend(get_serial_nos(row))
+	else:
+		consumed_serial_nos_list = get_serial_nos(row)
+
+	serial_nos = set(get_serial_nos(raw_material.serial_nos)) - set(consumed_serial_nos_list)
+
 	if serial_nos and qty <= len(serial_nos):
 		raw_material.serial_no = '\n'.join(list(serial_nos)[0:frappe.utils.cint(qty)])
 
