@@ -59,8 +59,14 @@ class ShiftType(Document):
 		else:
 			checkins_log = itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start']))
 
+		print("------------>>>Checkins_log")
+		from pprint import pprint
+
 		for key, group in checkins_log:
 			single_shift_logs = list(group)
+
+			pprint(single_shift_logs)
+
 			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
 
 			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, in_time, out_time, self.name)

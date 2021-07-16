@@ -54,6 +54,7 @@ class OvertimeSlip(Document):
 		if overtime_based_on == "Attendance":
 			records = self.get_attendance_record()
 			if len(records):
+				print("Going to Create")
 				self.create_overtime_details_row_for_attendance(records)
 		elif overtime_based_on == "Timesheet":
 			records = self.get_timesheet_record()
@@ -80,6 +81,7 @@ class OvertimeSlip(Document):
 					frappe.throw(_('Please Set "Standard Working Hours" in HR settings'))
 
 			if record.overtime_duration:
+				print("Appending Row")
 				self.append("overtime_details", {
 					"reference_document_type": "Attendance",
 					"reference_document": record.name,
@@ -124,7 +126,10 @@ class OvertimeSlip(Document):
 					AND (
 						overtime_duration IS NOT NULL OR overtime_duration != '00:00:00.000000'
 					)
-			""", (getdate(self.from_date), getdate(self.to_date), self.employee), as_dict=1)
+			""", (getdate(self.from_date), getdate(self.to_date), self.employee), as_dict=1, debug=1)
+			from pprint import pprint
+			print("----->>> Records")
+			pprint(records)
 			return records
 		return []
 

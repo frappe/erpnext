@@ -46,6 +46,8 @@ class TestOvertimeSlip(unittest.TestCase):
 		shift_type.last_sync_of_checkin = get_datetime(add_days(today(), 1))
 		shift_type.save()
 
+		print(shift_type.standard_working_time, shift_type.allow_overtime)
+
 		employee = make_employee("test_employee@overtime.com", company='_Test Company')
 		make_salary_structure("structure for Overtime", "Monthly", employee=employee)
 
@@ -54,19 +56,26 @@ class TestOvertimeSlip(unittest.TestCase):
 		checkin = make_checkin(employee, time = get_datetime(today()) + timedelta(hours=9), log_type="IN")
 		checkout = make_checkin(employee, time = get_datetime(today()) + timedelta(hours=20), log_type="OUT")
 
+		print("Checkins Asserted")
+		print(checkin.name)
+		print(checkout.name)
 		self.assertEqual(checkin.shift, shift_type.name)
 		self.assertEqual(checkout.shift, shift_type.name)
-		shift_type.reload()
-
-		shift_type.process_auto_attendance()
 
 		create_overtime_type(employee=employee)
+		shift_type.reload()
+		shift_type.process_auto_attendance()
+		print(employee)
+
 
 		checkin.reload()
 
 		attendance_records = frappe.get_all("Attendance", filters = {
 			'shift': shift_type.name, 'status': 'Present'
 		}, fields = ["name", "overtime_duration", "overtime_type", "attendance_date"])
+
+		from pprint import pprint
+		pprint(attendance_records)
 
 		records = {}
 		for record in attendance_records:

@@ -9,7 +9,7 @@ class TestOvertimeType(unittest.TestCase):
 
 def create_overtime_type(**args):
 	args = frappe._dict(args)
-
+	print(args.employee)
 	overtime_type = frappe.new_doc("Overtime Type")
 	overtime_type.name = "Test Overtime"
 	overtime_type.applicable_for = args.applicable_for or "Employee"
