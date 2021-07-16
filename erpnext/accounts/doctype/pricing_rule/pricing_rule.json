@@ -2,7 +2,6 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:title",
  "creation": "2014-02-21 15:02:51",
  "doctype": "DocType",
  "engine": "InnoDB",
