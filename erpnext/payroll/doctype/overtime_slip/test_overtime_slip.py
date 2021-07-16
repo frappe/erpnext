@@ -51,15 +51,17 @@ class TestOvertimeSlip(unittest.TestCase):
 
 		frappe.db.set_value("Employee", employee, "default_shift", shift_type.name)
 
-		checkin = make_checkin(employee, time = get_datetime(today()) + timedelta(hours=9))
+		checkin = make_checkin(employee, time = get_datetime(today()) + timedelta(hours=9), log_type="IN")
 		checkout = make_checkin(employee, time = get_datetime(today()) + timedelta(hours=20), log_type="OUT")
 
 		self.assertEqual(checkin.shift, shift_type.name)
 		self.assertEqual(checkout.shift, shift_type.name)
+		shift_type.reload()
+
+		shift_type.process_auto_attendance()
 
 		create_overtime_type(employee=employee)
 
-		shift_type.process_auto_attendance()
 		checkin.reload()
 
 		attendance_records = frappe.get_all("Attendance", filters = {
