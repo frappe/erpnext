@@ -50,6 +50,8 @@ class LandedCostVoucher(Document):
 		self.set_applicable_charges_on_item()
 		self.validate_applicable_charges_for_item()
 
+	def before_save(self):
+		self.get_value()
 
 	def check_mandatory(self):
 		if not self.get("purchase_receipts"):
@@ -180,6 +182,11 @@ class LandedCostVoucher(Document):
 						if d.docstatus == 1:
 							frappe.throw(_('{2} <b>{0}</b> has submitted Assets. Remove Item <b>{1}</b> from table to continue.').format(
 									item.receipt_document, item.item_code, item.receipt_document_type))
+
+	def get_value(self):
+		for i in self.items:
+			i.landed__amount=i.amount+i.applicable_charges
+			i.landed_rate=i.amount+i.applicable_charges/i.qty
 
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
