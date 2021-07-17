@@ -2001,6 +2001,35 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, nowdate())
 
+	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+
+		enable_discount_accounting()
+		additional_discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		
+		si = create_sales_invoice(rate=75000, do_not_save=1)
+		si.apply_discount_on = "Grand Total"
+		si.additional_discount_account = additional_discount_account
+		si.additional_discount_percentage = 10
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "CGST - _TC",
+			"cost_center": "Main - _TC",
+			"description": "CGST @ 9.0",
+			"rate": 9
+		})
+		si.submit()
+
+		expected_gle = [
+			["Sales - _TC", 0.0,  67500.0, nowdate()],
+			["Discount Account - _TC", 675.0, 0.0, nowdate()],
+			["CGST - _TC", 0.0, 6750.0, nowdate()],
+			["Debtors - _TC", 73575.0, 0.0, nowdate()]
+		]
+
+		check_gl_entries(self, si.name, expected_gle, nowdate())
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
