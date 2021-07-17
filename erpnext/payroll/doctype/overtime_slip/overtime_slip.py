@@ -54,7 +54,6 @@ class OvertimeSlip(Document):
 		if overtime_based_on == "Attendance":
 			records = self.get_attendance_record()
 			if len(records):
-				print("Going to Create")
 				self.create_overtime_details_row_for_attendance(records)
 		elif overtime_based_on == "Timesheet":
 			records = self.get_timesheet_record()
@@ -81,7 +80,6 @@ class OvertimeSlip(Document):
 					frappe.throw(_('Please Set "Standard Working Hours" in HR settings'))
 
 			if record.overtime_duration:
-				print("Appending Row")
 				self.append("overtime_details", {
 					"reference_document_type": "Attendance",
 					"reference_document": record.name,
@@ -126,16 +124,12 @@ class OvertimeSlip(Document):
 					AND (
 						overtime_duration IS NOT NULL OR overtime_duration != '00:00:00.000000'
 					)
-			""", (getdate(self.from_date), getdate(self.to_date), self.employee), as_dict=1, debug=1)
-			from pprint import pprint
-			print("----->>> Records")
-			pprint(records)
+			""", (getdate(self.from_date), getdate(self.to_date), self.employee), as_dict=1)
 			return records
 		return []
 
 	def get_timesheet_record(self):
 		if self.from_date and self.to_date:
-
 			records = frappe.db.sql("""SELECT ts.name, ts.start_date, ts.end_date, tsd.overtime_on, tsd.overtime_type, tsd.overtime_hours
 				FROM `tabTimesheet` AS ts
 				INNER JOIN `tabTimesheet Detail` As tsd ON tsd.parent = ts.name
@@ -158,7 +152,7 @@ def get_standard_working_hours(employee, date):
 		AND start_date < %(date)s
 		and (end_date > %(date)s or end_date is NULL or end_date = "") ''', {
 			"employee": employee, "date": get_datetime(date)}
-		, as_dict=1, debug=1)
+		, as_dict=1)
 
 	standard_working_time = 0
 

@@ -106,8 +106,6 @@ class Attendance(Document):
 	def calculate_overtime_duration(self):
 		#this method is only for Calculation of overtime based on Attendance through Employee Checkins
 		self.overtime_duration = None
-		print("From calculate_overtime_duration")
-		print(self.working_time, self.standard_working_time, self.shift)
 
 		if not self.standard_working_time and self.shift:
 			self.standard_working_time = frappe.db.get_value("Shift Type", self.shift, "standard_working_time")
@@ -164,11 +162,6 @@ def get_overtime_type(employee):
 		"applicable_for": "Employee", "employee": employee}, fields=['name'])
 	if len(overtime_type_doc):
 		overtime_type = overtime_type_doc[0].name
-
-	print("-------------->>> setting Overtime Type")
-	print(employee)
-	print(overtime_type)
-
 	return overtime_type
 
 @frappe.whitelist()
@@ -225,7 +218,6 @@ def mark_attendance(employee, attendance_date, status, shift=None, leave_type=No
 @frappe.whitelist()
 def mark_bulk_attendance(data):
 	import json
-	from pprint import pprint
 	if isinstance(data, frappe.string_types):
 		data = json.loads(data)
 	data = frappe._dict(data)

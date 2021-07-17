@@ -112,9 +112,6 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				from erpnext.hr.doctype.shift_type.shift_type import convert_time_into_duration
 				working_time = convert_time_into_duration(working_timedelta)
 
-			from pprint import pprint
-			print("------->>>>> mark_attendance_and_link_log")
-
 			doc_dict = {
 				'doctype': 'Attendance',
 				'employee': employee,
@@ -128,11 +125,7 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				'in_time': in_time,
 				'out_time': out_time
 			}
-			pprint(doc_dict)
-
 			attendance = frappe.get_doc(doc_dict).insert()
-			print("--------------->>>>>>>>>> Allow Overtime")
-			print(frappe.db.get_value("Shift Type", shift, "allow_overtime"))
 			if frappe.db.get_value("Shift Type", shift, "allow_overtime"):
 				attendance.calculate_overtime_duration()
 			attendance.save()
