@@ -499,6 +499,16 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Payment Entry': 'Payment'
 		}
 
+		frm.set_query("additional_discount_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					root_type: "Profit and Loss",
+				}
+			};
+		});
+
 		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {
 			return {
 				filters: {
