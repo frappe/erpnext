@@ -41,5 +41,7 @@ class AccountsSettings(Document):
 		for doctype in ["Sales Invoice Item", "Purchase Invoice Item"]:
 			make_property_setter(doctype, "discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
 
+		for doctype in ["Sales Invoice", "Purchase Invoice"]:
+			make_property_setter(doctype, "additional_discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
+
 		make_property_setter("Item", "default_discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
-		make_property_setter("Sales Invoice", "additional_discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
