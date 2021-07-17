@@ -1992,9 +1992,14 @@ class TestSalesInvoice(unittest.TestCase):
 		discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		si = create_sales_invoice(discount_account=discount_account, discount_amount=100)
+		
+		expected_gle = [
+			["Discount Account - _TC", 100.0, 0.0, nowdate()],
+			["Sales - _TC", 0.0, 200.0, nowdate()],
+			["Debtors - _TC", 100.0, 0.0, nowdate()]
+		]
 
-		discount_amount = frappe.db.get_value('GL Entry', {'account': discount_account, 'voucher_no': si.name}, 'debit')
-		self.assertEqual(discount_amount, 100)
+		check_gl_entries(self, si.name, expected_gle, nowdate())
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
