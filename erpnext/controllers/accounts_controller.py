@@ -858,14 +858,22 @@ class AccountsController(TransactionBase):
 			if flt(tax.base_tax_amount_after_discount_amount) and flt(tax.base_tax_amount):
 				account_currency = get_account_currency(tax.account_head)
 				additional_discount_applied_on_taxes = flt(tax.base_tax_amount) - flt(tax.base_tax_amount_after_discount_amount)
+				if self.doctype == 'Purchase Invoice':
+					against = self.supplier
+					dr_or_cr = "debit"
+					rev_dr_cr = "credit"
+				else:
+					against = self.customer
+					dr_or_cr = "credit"
+					rev_dr_cr = "debit"
 
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
-						"against": self.customer,
-						"credit": flt(additional_discount_applied_on_taxes,
+						"against": against,
+						dr_or_cr: flt(additional_discount_applied_on_taxes,
 							tax.precision("tax_amount_after_discount_amount")),
-						"credit_in_account_currency": (flt(additional_discount_applied_on_taxes,
+						dr_or_cr + "_in_account_currency": (flt(additional_discount_applied_on_taxes,
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
 							flt(additional_discount_applied_on_taxes, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center
@@ -875,17 +883,16 @@ class AccountsController(TransactionBase):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.additional_discount_account,
-						"against": self.customer,
-						"debit": flt(additional_discount_applied_on_taxes,
+						"against": against,
+						rev_dr_cr: flt(additional_discount_applied_on_taxes,
 							tax.precision("tax_amount_after_discount_amount")),
-						"debit_in_account_currency": (flt(additional_discount_applied_on_taxes,
+						rev_dr_cr + "_in_account_currency": (flt(additional_discount_applied_on_taxes,
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
 							flt(additional_discount_applied_on_taxes, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)
 				)
 				
-
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
 		for pe in self.get("advances"):
