@@ -231,14 +231,21 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_purchase_invoice_with_discount_accounting_enabled(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import check_gl_entries
+
 		enable_discount_accounting()
 
 		discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		pi = make_purchase_invoice(discount_account=discount_account, discount_amount=100)
 
-		discount_amount = frappe.db.get_value('GL Entry', {'account': discount_account, 'voucher_no': pi.name}, 'credit')
-		self.assertEqual(discount_amount, 100)
+		expected_gle = [
+			["Discount Account - _TC", 0.0, 100.0, nowdate()],
+			["_Test Account Cost for Goods Sold - _TC", 350.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 250.0, nowdate()]
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
