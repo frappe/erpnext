@@ -785,9 +785,6 @@ class AccountsController(TransactionBase):
 							"project": item.project or self.project
 						}, account_currency, item=item)
 					)
-			
-			if self.get('discount_amount') and self.get('additional_discount_account'):
-				self.make_gle_for_additional_discount_applied_on_taxes(gl_entries)
 
 	def make_gle_for_additional_discount_applied_on_taxes(self, gl_entries):
 		for tax in self.get("taxes"):

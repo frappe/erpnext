@@ -917,6 +917,11 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.remarks or "Accounting Entry for Stock"
 						}, item=tax))
 
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		if enable_discount_accounting and self.get('discount_amount') and self.get('additional_discount_account'):
+			self.make_gle_for_additional_discount_applied_on_taxes(gl_entries)
+
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
 			account_currency = get_account_currency(self.unrealized_profit_loss_account)
