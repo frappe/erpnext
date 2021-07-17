@@ -21,14 +21,14 @@ class Attendance(Document):
 		self.set_overtime_type()
 		self.set_default_shift()
 
-		if not frappe.db.get_single_value('Payroll Settings', 'fetch_standard_working_hours_from_shift_type'):
+		if not frappe.db.get_single_value("Payroll Settings", "fetch_standard_working_hours_from_shift_type"):
 			self.standard_working_time = None
 
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 		# leaves can be marked for future dates
-		if self.status != 'On Leave' and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
+		if self.status != "On Leave" and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
 			frappe.throw(_("Attendance can not be marked for future dates"))
 		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
 			frappe.throw(_("Attendance date can not be less than employee's joining date"))
@@ -81,11 +81,11 @@ class Attendance(Document):
 			for d in leave_record:
 				self.leave_type = d.leave_type
 				if d.half_day_date == getdate(self.attendance_date):
-					self.status = 'Half Day'
+					self.status = "Half Day"
 					frappe.msgprint(_("Employee {0} on Half day on {1}")
 						.format(self.employee, formatdate(self.attendance_date)))
 				else:
-					self.status = 'On Leave'
+					self.status = "On Leave"
 					frappe.msgprint(_("Employee {0} is on Leave on {1}")
 						.format(self.employee, formatdate(self.attendance_date)))
 
@@ -146,7 +146,7 @@ def get_overtime_type(employee):
 	emp_department = frappe.db.get_value("Employee", employee, "department")
 	if emp_department:
 		overtime_type_doc = frappe.get_list("Overtime Type", filters={
-			"applicable_for": "Department", "department": emp_department}, fields=['name'])
+			"applicable_for": "Department", "department": emp_department}, fields=["name"])
 		if len(overtime_type_doc):
 			overtime_type = overtime_type_doc[0].name
 	emp_grade = frappe.db.get_value("Employee", employee, "grade")
@@ -154,12 +154,12 @@ def get_overtime_type(employee):
 	if emp_grade:
 		overtime_type_doc = frappe.get_list("Overtime Type", filters={
 			"applicable_for": "Employee Grade", "employee_grade": emp_grade},
-			fields=['name'])
+			fields=["name"])
 		if len(overtime_type_doc):
 			overtime_type = overtime_type_doc[0].name
 
 	overtime_type_doc = frappe.get_list("Overtime Type", filters={
-		"applicable_for": "Employee", "employee": employee}, fields=['name'])
+		"applicable_for": "Employee", "employee": employee}, fields=["name"])
 	if len(overtime_type_doc):
 		overtime_type = overtime_type_doc[0].name
 	return overtime_type
@@ -267,7 +267,7 @@ def get_unmarked_days(employee, month):
 	month_start, month_end = dates_of_month[0], dates_of_month[length-1]
 
 
-	records = frappe.get_all("Attendance", fields = ['attendance_date', 'employee'] , filters = [
+	records = frappe.get_all("Attendance", fields = ["attendance_date", "employee"] , filters = [
 		["attendance_date", ">=", month_start],
 		["attendance_date", "<=", month_end],
 		["employee", "=", employee],

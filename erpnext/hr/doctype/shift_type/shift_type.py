@@ -20,8 +20,8 @@ class ShiftType(Document):
 		self.set_working_hours()
 
 	def set_working_hours(self):
-		end_time = self.end_time.split(":")
-		start_time = self.start_time.split(":")
+		end_time = self.end_time.split(':')
+		start_time = self.start_time.split(':')
 
 		shift_end = timedelta(hours = int(end_time[0]), minutes = int(end_time[1]), seconds = int(end_time[2]))
 		shift_start = timedelta(hours = int(start_time[0]), minutes = int(start_time[1]), seconds = int(start_time[2]))
@@ -34,7 +34,7 @@ class ShiftType(Document):
 		self.standard_working_time = convert_time_into_duration(time_difference)
 
 	def validate_overtime(self):
-		if not frappe.db.get_single_value("Payroll Settings", "fetch_standard_working_hours_from_shift_type") and self.allow_overtime:
+		if not frappe.db.get_single_value('Payroll Settings', 'fetch_standard_working_hours_from_shift_type') and self.allow_overtime:
 			frappe.throw(_('Please enable "Fetch Standard Working Hours from Shift Type" in payroll Settings for Overtime.'))
 
 		if frappe.db.get_single_value("Payroll Settings", "overtime_based_on") != "Attendance" and self.allow_overtime:
@@ -168,5 +168,5 @@ def get_filtered_date_list(employee, start_date, end_date, filter_attendance=Tru
 
 
 def convert_time_into_duration(time_difference):
-	time_difference = str(time_difference).split(":")
+	time_difference = str(time_difference).split(':')
 	return (int(time_difference[0]) * 3600) + (int(time_difference[1]) * 60) + int(time_difference[2])

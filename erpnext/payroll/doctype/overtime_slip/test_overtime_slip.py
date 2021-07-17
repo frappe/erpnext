@@ -24,7 +24,7 @@ class TestOvertimeSlip(unittest.TestCase):
 		frappe.db.set_value("Payroll Settings", None, "fetch_standard_working_hours_from_shift_type", 0)
 		frappe.db.set_value("HR Settings", None, "standard_working_hours", 7)
 
-		employee = make_employee("test_employee@overtime.com", company='_Test Company')
+		employee = make_employee("test_employee@overtime.com", company="_Test Company")
 		make_salary_structure("structure for Overtime", "Monthly", employee=employee)
 		overtime_type = create_overtime_type(employee=employee)
 		attendance_record = create_attendance_records_for_overtime(employee, overtime_type.name)
@@ -46,7 +46,7 @@ class TestOvertimeSlip(unittest.TestCase):
 		shift_type.last_sync_of_checkin = get_datetime(add_days(today(), 1))
 		shift_type.save()
 
-		employee = make_employee("test_employee@overtime.com", company='_Test Company')
+		employee = make_employee("test_employee@overtime.com", company="_Test Company")
 		make_salary_structure("structure for Overtime", "Monthly", employee=employee)
 
 		frappe.db.set_value("Employee", employee, "default_shift", shift_type.name)
@@ -63,7 +63,7 @@ class TestOvertimeSlip(unittest.TestCase):
 		checkin.reload()
 
 		attendance_records = frappe.get_all("Attendance", filters = {
-			'shift': shift_type.name, 'status': 'Present'
+			"shift": shift_type.name, "status": "Present"
 		}, fields = ["name", "overtime_duration", "overtime_type", "attendance_date"])
 
 		records = {}
@@ -86,7 +86,7 @@ class TestOvertimeSlip(unittest.TestCase):
 		frappe.db.set_value("Payroll Settings", None, "overtime_based_on", "Timesheet")
 		frappe.db.set_value("HR Settings", None, "standard_working_hours", 7)
 
-		employee = make_employee("test_employee@overtime.com", company='_Test Company')
+		employee = make_employee("test_employee@overtime.com", company="_Test Company")
 		make_salary_structure("structure for Overtime", "Monthly", employee=employee)
 		overtime_type = create_overtime_type(employee=employee)
 		time_log, timesheet = create_timesheet_record_for_overtime(employee, overtime_type.name)
@@ -101,12 +101,12 @@ class TestOvertimeSlip(unittest.TestCase):
 def create_attendance_records_for_overtime(employee, overtime_type):
 	records = {}
 	for x in range(2):
-		attendance = frappe.new_doc('Attendance')
+		attendance = frappe.new_doc("Attendance")
 		attendance.employee = employee
-		attendance.status = 'Present'
+		attendance.status = "Present"
 		attendance.attendance_date = add_days(today(), -(x))
 		attendance.overtime_type = overtime_type
-		#for convertion to duration
+		#to convert to duration
 		attendance.overtime_duration = 2 * 3600
 
 		attendance.save()

@@ -177,8 +177,8 @@ def get_standard_working_hours(employee, date):
 def get_frequency_and_dates(employee, date):
 	salary_structure = get_salary_structure(employee)
 	if salary_structure:
-		payroll_frequency = frappe.db.get_value('Salary Structure', salary_structure, 'payroll_frequency')
-		date_details = get_start_end_dates(payroll_frequency, date, frappe.db.get_value('Employee', employee, 'company'))
+		payroll_frequency = frappe.db.get_value("Salary Structure", salary_structure, "payroll_frequency")
+		date_details = get_start_end_dates(payroll_frequency, date, frappe.db.get_value('Employee', employee, "company"))
 		return [date_details, payroll_frequency]
 	else:
 		frappe.throw(_("No Salary Structure Assignment found for Employee: {0}").format(employee))
