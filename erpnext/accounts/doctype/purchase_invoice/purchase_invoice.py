@@ -7,8 +7,6 @@ import frappe, erpnext
 from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form
 from frappe import _, throw
 import frappe.defaults
-import json
-import six
 
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.buying_controller import BuyingController
