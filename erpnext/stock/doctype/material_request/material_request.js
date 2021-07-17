@@ -42,31 +42,9 @@ frappe.ui.form.on('Material Request', {
 			}
 		});
 	},
-	onload: function(frm,cdt,cdn) {
+
+	onload: function(frm) {
 		// add item, if previous view was item
-		var prev_route = frappe.get_prev_route();
-		if (prev_route[1] === 'Work Order') {
-			frm.set_value("manufacturing_staging", 1);
-			frm.set_value("material_request_type","Material Transfer");
-			frm.set_value("schedule_date",frappe.datetime.get_today());
-			frappe.call({
-				method: "get_wo_items",
-				doc:frm.doc,
-				args:{
-					work_order: prev_route[2]
-				},
-				callback: function(r){
-					if (r.message === 'Item not found') {
-						frappe.throw(__(r.message));
-					} 
-					if(r.message > 0) {
-						frm.refresh_field('items')
-					}
-				}
-			})
-
-		}
-
 		erpnext.utils.add_item(frm);
 
 		// set schedule_date
@@ -139,8 +117,7 @@ frappe.ui.form.on('Material Request', {
 		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.status != 'Stopped') {
-			let precision = frappe.defaults.get_default("float_precision");
-			if (flt(frm.doc.per_ordered, precision) < 100) {
+			if (flt(frm.doc.per_ordered, 2) < 100) {
 				let add_create_pick_list_button = () => {
 					frm.add_custom_button(__('Pick List'),
 						() => frm.events.create_pick_list(frm), __('Create'));
@@ -273,31 +250,50 @@ frappe.ui.form.on('Material Request', {
 		var d = new frappe.ui.Dialog({
 			title: __("Get Items from Work Order"),
 			fields: [
-				{"fieldname":"schedule_start_from", "fieldtype":"Date", "label":__("Schedule Start From"),reqd:1, mandatory_depends_on:'eval:doc.schedule_start_to',depends_on: 'eval:doc.single_wo===0'},
-				{"fieldname":"schedule_start_to", "fieldtype":"Date", "label":__("Schedule Start To"),reqd:1,mandatory_depends_on:'eval:doc.schedule_start_from',depends_on: 'eval:doc.single_wo===0'},
-				{"fieldname":"item_to_manufacture", "fieldtype":"Link","label":__("Item To Manufacture"), options:"Item",depends_on: 'eval:doc.single_wo===0'},
-				{"fieldname":"work_order", "fieldtype":"Link", "label":__("Work Order"),options:"Work Order",depends_on: 'eval:doc.single_wo===1'},
-				{"fieldname":"single_wo", "fieldtype":"Check","label":__("Single Work Order")},
+				{"fieldname":"schedule_start_from", "fieldtype":"Date", "label":__("Schedule Start From"),
+				reqd: 1 },
+				{"fieldname":"schedule_start_to", "fieldtype":"Date", "label":__("Schedule Start To"),
+				reqd: 1 },
+				{"fieldname":"item_to_manufacture", "fieldtype":"Link",
+					"label":__("Item To Manufacture"), options:"Item"}
 			],
 			primary_action_label: 'Get Items',
 			primary_action(values) {
-				values.company = frm.doc.company
 				if(!values) return;
 				frappe.call({
-					method: "get_wo_items",
-					doc:frm.doc,
+					method: "erpnext.stock.doctype.material_request.material_request.get_wo_items",
 					args: values,
 					callback: function(r) {
-						if (r.message === 'Item not found') {
+						if (!r.message) {
+							frappe.throw(__("Item not found"));
+						} else {
 							erpnext.utils.remove_empty_first_row(frm, "items");
-							refresh_field("items");
-							d.hide();
-							frappe.throw(__(r.message));
+							$.each(r.message, function(i, item) {
+								console.log(item)
+								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
+								d.item_code = item.item_code;
+								d.item_name = item.item_name;
+								d.description = item.desc;
+								d.warehouse = frm.doc.set_warehouse;
+								d.uom = item.stock_uom;
+								//d.stock_uom = item.stock_uom;
+								d.cost_center = item.cost_center;
+								d.expense_account = item.expense_account
+								//d.warehouse = item.default_warehouse;
+								d.multi_order_qty = item.multi_order_qty;
+								d.conversion_factor = 1;
+								d.qty = item.qty;
+								d.production_item_name = item.production_item_name;
+								d.projected_qty = item.projected_qty;
+								d.actual_qty = item.actual_qty;
+								d.rate = item.valuation_rate;
+								d.min_order_qty = item.min_order_qty;
+								d.amount = item.valuation_rate * item.qty;
+								// d.project = item.project;
+							});
 						}
 						d.hide();
-						frm.set_df_property("work_order_detail",'read_only',1)
 						refresh_field("items");
-						refresh_field("work_order_detail");
 					}
 				});
 			}
