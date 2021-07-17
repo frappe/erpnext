@@ -12,6 +12,7 @@
   "sender",
   "column_break_4",
   "start_date",
+  "start_date_nepali",
   "end_date",
   "status"
  ],
@@ -69,10 +70,16 @@
    "fieldtype": "Link",
    "label": "Sender",
    "options": "User"
+  },
+  {
+   "fieldname": "start_date_nepali",
+   "fieldtype": "Data",
+   "label": "Start Date(Nepali)",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-07-15 12:43:25.548682",
+ "modified": "2021-07-16 15:08:21.167096",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Email Campaign",
