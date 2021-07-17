@@ -39,6 +39,7 @@ class SalarySlip(TransactionBase):
 
 	def before_save(self):
 		self.get_total_leave_in_current_month()
+		self.get_payroll()
 
 	def validate(self):
 		self.status = self.get_status()
@@ -353,6 +354,18 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
+	def get_payroll(self):
+		doc=frappe.get_doc("Payroll Period",{"company":self.company})
+		lst=frappe.get_doc("Empoyee",{"employee":self.employee})
+		if doc.start_date <=lst.date_of_joining<=doc.end_date:
+			end_date = datetime.datetime(lst.date_of_joining)
+			start_date = datetime.datetime(doc.start_date)
+			num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+			self.months_of_service_in_payment_period=num_months
+		else:
+			self.months_of_service_in_payment_period=12
+
+		
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
 		holidays = "','".join(holidays)
