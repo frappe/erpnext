@@ -744,7 +744,6 @@
    "fieldname": "asset",
    "fieldtype": "Link",
    "label": "Asset",
-   "no_copy": 1,
    "options": "Asset"
   },
   {

@@ -48,17 +48,18 @@ def validate_filters(filters, account_details):
 
 	if not filters.get("from_date") and not filters.get("to_date"):
 		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date"))))
-
-	for account in filters.account:
-		if not account_details.get(account):
-			frappe.throw(_("Account {0} does not exists").format(account))
 			
 	if filters.get('account'):
 		filters.account = frappe.parse_json(filters.get('account'))
+		for account in filters.account:
+			if not account_details.get(account):
+				frappe.throw(_("Account {0} does not exists").format(account))
 
-	if (filters.get("account") and filters.get("group_by") == _('Group by Account')
-		and account_details[filters.account].is_group == 0):
-		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
+	if (filters.get("account") and filters.get("group_by") == _('Group by Account')):
+		filters.account = frappe.parse_json(filters.get('account'))
+		for account in filters.account:
+			if account_details[account].is_group == 0:
+				frappe.throw(_("Can not filter based on Child Account, if grouped by Account"))
 
 	if (filters.get("voucher_no")
 		and filters.get("group_by") in [_('Group by Voucher')]):
