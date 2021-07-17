@@ -36,52 +36,7 @@ class PickList(Document):
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
 
-	# def get_available_item_locations_for_batched_item_in_consumer_material(self,item_code, from_warehouses, required_qty, company):
-	# 	print('self is',self)
-	# if from_warehouses:
-	# 	#warehouse_condition = "and warehouse = '{0}'".format(from_warehouses)
-	# 	warehouse_condition = 'and warehouse in %(warehouses)s'
-	# else:
-	# 	warehouse_condition = "and warehouse = '{0}'".format(from_warehouses) if from_warehouses else ''
-	# 	#warehouse_condition = 'and warehouse in %(warehouses)s'
-	# 	#warehouse_condition = 'and warehouse in %(warehouses)s' if from_warehouses else ''
-	# print("## "*300)
-	# print(from_warehouses)
-	# print(warehouse_condition)
-	# # print("***************************cond: ")
-	# # if 1 == 1:
-	# # 	warehouse_condition = 'and warehouse = "{0}"'.format(from_warehouses)
-	# query = """
-	# 	SELECT
-	# 		sle.`warehouse`,
-	# 		sle.`batch_no`,
-	# 		SUM(sle.`actual_qty`) AS `qty`
-	# 	FROM
-	# 		`tabStock Ledger Entry` sle, `tabBatch` batch
-	# 	WHERE
-	# 		sle.batch_no = batch.name
-	# 		and sle.`item_code`=%(item_code)s
-	# 		and sle.`company` = %(company)s
-	# 		and batch.disabled = 0
-	# 		and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
-	# 		{warehouse_condition}
-	# 	GROUP BY
-	# 		`warehouse`,
-	# 		`batch_no`,
-	# 		`item_code`
-	# 	HAVING `qty` > 0
-	# 	ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
-	# """.format(warehouse_condition=warehouse_condition)
-	# print(query)
-	# batch_locations = frappe.db.sql(query, { #nosec
-	# 	'item_code': item_code,
-	# 	'company': company,
-	# 	'today': today(),
-	# 	'warehouses': from_warehouses
-	# }, as_dict=1)
-
-	# return batch_locations
-
+	
 	def weight_details(self):
 		total_weight = total_stock_weight = total_picked_weight =0
 		if self.locations:
@@ -90,12 +45,6 @@ class PickList(Document):
 				total_weight += flt(row.qty)*flt(item_wt.weight_per_unit)
 				total_stock_weight += flt(row.stock_qty)*flt(item_wt.weight_per_unit)
 				total_picked_weight += flt(row.picked_qty)*flt(item_wt.weight_per_unit)
-
-        # self.total_weight = flt(total_weight, self.precision('total_weight'))
-		# 		item_wt = frappe.get_doc("Item", row.item_code)
-		# 		total_weight += flt(row.qty) + flt(item_wt.weight_per_unit)
-		# 		total_stock_weight += flt(row.stock_qty)*flt(item_wt.weight_per_unit)
-		# 		total_picked_weight += flt(row.picked_qty)*flt(item_wt.weight_per_unit)
 
 		self.total_weight = flt(total_weight, 3)
 		self.total_stock_weight = flt(total_stock_weight, self.precision('total_stock_weight'))
