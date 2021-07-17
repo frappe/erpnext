@@ -629,13 +629,11 @@ frappe.ui.form.on('Sales Invoice', {
 
 		// discount account
 		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
-			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
-				return {
-					filters: {
-						'report_type': 'Profit and Loss',
-						'company': doc.company,
-						"is_group": 0
-					}
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
+					'company': doc.company,
+					"is_group": 0
 				}
 			}
 		}
