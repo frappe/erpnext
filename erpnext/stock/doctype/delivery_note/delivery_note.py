@@ -414,6 +414,8 @@ def get_returned_qty_map(delivery_note):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
+	from erpnext.controllers.accounts_controller import fetch_payment_terms_from_order
+
 	doc = frappe.get_doc('Delivery Note', source_name)
 
 	to_make_invoice_qty_map = {}
@@ -502,6 +504,10 @@ def make_sales_invoice(source_name, target_doc=None):
 			"add_if_empty": True
 		}
 	}, target_doc, set_missing_values)
+
+	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
+	if automatically_fetch_payment_terms:
+		fetch_payment_terms_from_order(doc)
 
 	return doc
 

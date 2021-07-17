@@ -508,8 +508,6 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
-
-		frm.events.set_payment_terms(frm);
 	},
 
 	refresh: function(frm) {
@@ -571,22 +569,5 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	company: function(frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
-	},
-
-	set_payment_terms: function (frm) {
-		frappe.call({
-			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.set_payment_terms_from_po',
-			'args': {
-				doc: frm.doc
-			},
-			'callback': (r) => {
-				if (r.message) {
-					var doc = frappe.model.sync(r.message)[0];
-					console.log("doc: ", doc)
-					frappe.set_route("Form", doc.doctype, doc.name);
-				}
-			}
-			
-		});
 	},
 })
