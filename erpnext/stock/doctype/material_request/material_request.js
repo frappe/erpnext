@@ -42,9 +42,32 @@ frappe.ui.form.on('Material Request', {
 			}
 		});
 	},
-
-	onload: function(frm) {
+	onload: function(frm,cdt,cdn) {
+		frm.doc.schedule_date = frappe.datetime.nowdate()
 		// add item, if previous view was item
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] === 'Work Order') {
+			frm.set_value("manufacturing_staging", 1);
+			frm.set_value("material_request_type","Material Transfer");
+			frm.set_value("schedule_date",frappe.datetime.get_today());
+			frappe.call({
+				method: "get_wo_items",
+				doc:frm.doc,
+				args:{
+					work_order: prev_route[2]
+				},
+				callback: function(r){
+					if (r.message === 'Item not found') {
+						frappe.throw(__(r.message));
+					} 
+					if(r.message > 0) {
+						frm.refresh_field('items')
+					}
+				}
+			})
+
+		}
+
 		erpnext.utils.add_item(frm);
 
 		// set schedule_date
@@ -86,7 +109,22 @@ frappe.ui.form.on('Material Request', {
 			set_target_warehouse(frm)
 		}
 		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
-			frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+			//frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+			frm.add_custom_button(__('Work Order'), function(){
+				erpnext.utils.map_current_doc({
+					method: "erpnext.stock.doctype.material_request.material_request.make_material_request",
+					source_doctype: "Work Order",
+					target: frm.doc,
+					
+					setters: {
+						bom_no: frm.doc.bom_no || undefined,
+						company: frm.doc.company || undefined
+					},
+					get_query_filters: {
+						docstatus: 1,
+					}
+				})
+			},
 				__("Get Items From"));
 		}
 	},
@@ -96,8 +134,33 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	refresh: function(frm) {
+		var d = frm.doc.work_order_detail
+		if(d.length > 0){
+			frm.set_df_property("items",'read_only',1)
+		}
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
+
+		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
+			//frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+			frm.add_custom_button(__('Work Order'), function(){
+				erpnext.utils.map_current_doc({
+					method: "erpnext.stock.doctype.material_request.material_request.make_material_request",
+					source_doctype: "Work Order",
+					target: frm.doc,
+					
+					setters: {
+						bom_no: frm.doc.bom_no || undefined,
+						company: frm.doc.company || undefined
+					},
+					get_query_filters: {
+						docstatus: 1,
+					}
+				})
+			},
+				__("Get Items From"));
+		}
+
 	},
 
 	set_from_warehouse: function(frm) {
@@ -244,62 +307,6 @@ frappe.ui.form.on('Material Request', {
 				}
 			}
 		});
-	},
-
-	get_items_from_wo: function(frm) {
-		var d = new frappe.ui.Dialog({
-			title: __("Get Items from Work Order"),
-			fields: [
-				{"fieldname":"schedule_start_from", "fieldtype":"Date", "label":__("Schedule Start From"),
-				reqd: 1 },
-				{"fieldname":"schedule_start_to", "fieldtype":"Date", "label":__("Schedule Start To"),
-				reqd: 1 },
-				{"fieldname":"item_to_manufacture", "fieldtype":"Link",
-					"label":__("Item To Manufacture"), options:"Item"}
-			],
-			primary_action_label: 'Get Items',
-			primary_action(values) {
-				if(!values) return;
-				frappe.call({
-					method: "erpnext.stock.doctype.material_request.material_request.get_wo_items",
-					args: values,
-					callback: function(r) {
-						if (!r.message) {
-							frappe.throw(__("Item not found"));
-						} else {
-							erpnext.utils.remove_empty_first_row(frm, "items");
-							$.each(r.message, function(i, item) {
-								console.log(item)
-								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
-								d.item_code = item.item_code;
-								d.item_name = item.item_name;
-								d.description = item.desc;
-								d.warehouse = frm.doc.set_warehouse;
-								d.uom = item.stock_uom;
-								//d.stock_uom = item.stock_uom;
-								d.cost_center = item.cost_center;
-								d.expense_account = item.expense_account
-								//d.warehouse = item.default_warehouse;
-								d.multi_order_qty = item.multi_order_qty;
-								d.conversion_factor = 1;
-								d.qty = item.qty;
-								d.production_item_name = item.production_item_name;
-								d.projected_qty = item.projected_qty;
-								d.actual_qty = item.actual_qty;
-								d.rate = item.valuation_rate;
-								d.min_order_qty = item.min_order_qty;
-								d.amount = item.valuation_rate * item.qty;
-								// d.project = item.project;
-							});
-						}
-						d.hide();
-						refresh_field("items");
-					}
-				});
-			}
-		});
-
-		d.show();
 	},
 
 	get_items_from_bom: function(frm) {
