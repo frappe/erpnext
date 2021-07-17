@@ -45,6 +45,18 @@ frappe.ui.form.on("Sales Order", {
 		});
 	},
 	refresh: function(frm) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("transaction_date_nepali",resp.message)
+				}
+			}
+		});
+
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
 			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
 			frm.add_custom_button(__('Update Items'), () => {
@@ -82,7 +94,60 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
-	}
+	},
+
+	transaction_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("transaction_date_nepali",resp.message)
+				}
+			}
+		})
+	},
+	delivery_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.delivery_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("delivery_date_nepali",resp.message)
+				}
+			}
+		})
+	},
+	from_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.from_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("from_date_nepali",resp.message)
+				}
+			}
+		})
+	},
+	to_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.to_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("to_date_nepali",resp.message)
+				}
+			}
+		})
+	},
 });
 
 frappe.ui.form.on("Sales Order Item", {
