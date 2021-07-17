@@ -1803,3 +1803,46 @@ def validate_regional(doc):
 @erpnext.allow_regional
 def validate_einvoice_fields(doc):
 	pass
+
+def fetch_payment_terms_from_order(doc):
+	"""
+		Fetch Payment Terms from Purchase/Sales Order on creating a new Purchase/Sales Invoice.
+	"""
+
+	if doc.doctype == "Sales Invoice":
+		po_or_so = doc.get('items')[0].get('sales_order')
+		po_or_so_doctype = "Sales Order"
+		po_or_so_doctype_name = "sales_order"
+	else:
+		po_or_so = doc.get('items')[0].get('purchase_order')
+		po_or_so_doctype = "Purchase Order"
+		po_or_so_doctype_name = "purchase_order"
+
+	if po_or_so and all_items_have_same_po_or_so(doc, po_or_so, po_or_so_doctype_name):
+		po_or_so = frappe.get_cached_doc(po_or_so_doctype, po_or_so)
+	else:
+		doc.set_payment_schedule()
+		return
+
+	doc.payment_schedule = []
+	doc.payment_terms_template = po_or_so.payment_terms_template
+
+	for schedule in po_or_so.payment_schedule:
+		payment_schedule = {
+			'payment_term': schedule.payment_term,
+			'due_date': schedule.due_date,
+			'invoice_portion': schedule.invoice_portion,
+			'discount_type': schedule.discount_type,
+			'discount': schedule.discount,
+			'base_payment_amount': schedule.base_payment_amount,
+			'payment_amount': schedule.payment_amount,
+			'outstanding': schedule.outstanding
+		}
+		doc.append("payment_schedule", payment_schedule)
+
+def all_items_have_same_po_or_so(doc, po_or_so, po_or_so_fieldname):
+	for item in doc.get('items'):
+		if item.get(po_or_so_fieldname) != po_or_so:
+			return False
+	
+	return True
