@@ -110,7 +110,7 @@ class Company(NestedSet):
 				self.create_default_warehouses()
 
 		if frappe.flags.country_change:
-			install_country_fixtures(self.name)
+			install_country_fixtures(self.name, self.country)
 			self.create_default_tax_template()
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
@@ -440,16 +440,15 @@ def get_name_with_abbr(name, company):
 
 	return " - ".join(parts)
 
-def install_country_fixtures(company):
-	company_doc = frappe.get_doc("Company", company)
-	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(company_doc.country))
+def install_country_fixtures(company, country):
+	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
 	if os.path.exists(path.encode("utf-8")):
 		try:
-			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(company_doc.country))
-			frappe.get_attr(module_name)(company_doc, False)
+			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(country))
+			frappe.get_attr(module_name)(company, False)
 		except Exception as e:
 			frappe.log_error()
-			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(company_doc.country)))
+			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(country)))
 
 
 def update_company_current_month_sales(company):

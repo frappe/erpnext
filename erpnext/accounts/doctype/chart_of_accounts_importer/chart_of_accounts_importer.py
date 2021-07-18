@@ -16,7 +16,6 @@ class ChartofAccountsImporter(Document):
 	def validate(self):
 		validate_accounts(self.import_file)
 
-
 @frappe.whitelist()
 def validate_company(company):
 	parent_company, allow_account_creation_against_child_company = frappe.db.get_value('Company',
@@ -304,9 +303,8 @@ def validate_accounts(file_name):
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
 	validate_root(accounts_dict)
-	
+
 	validate_account_types(accounts_dict)
-	
 
 	return [True, len(accounts)]
 
