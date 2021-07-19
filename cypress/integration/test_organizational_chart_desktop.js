@@ -5,7 +5,7 @@ context('Organizational Chart', () => {
 		cy.awesomebar('Organizational Chart');
 
 		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-		cy.get('@input').type('Test Org Chart');
+		cy.get('@input').clear().type('Test Org Chart');
 
 		cy.get('body').click();
 		cy.wait(500);
