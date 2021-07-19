@@ -836,7 +836,7 @@ class AccountsController(TransactionBase):
 							"against": supplier_or_customer,
 							dr_or_cr: flt(item.discount_amount),
 							dr_or_cr + "_in_account_currency": flt(item.discount_amount),
-							"cost_center": self.cost_center,
+							"cost_center": item.cost_center,
 							"project": self.project
 						}, account_currency, item=self)
 					)
