@@ -192,21 +192,29 @@ class JobCard(Document):
 						"completed_qty": args.get("completed_qty") or 0.0
 					})
 		elif args.get("start_time"):
-			for name in employees:
-				self.append("time_logs", {
-					"from_time": get_datetime(args.get("start_time")),
-					"employee": name.get('employee'),
-					"operation": args.get("sub_operation"),
-					"completed_qty": 0.0
-				})
+			new_args = {
+				"from_time": get_datetime(args.get("start_time")),
+				"operation": args.get("sub_operation"),
+				"completed_qty": 0.0
+			}
 
-		if not self.employee:
+			if employees:
+				for name in employees:
+					new_args.employee = name.get('employee')
+					self.add_start_time_log(new_args)
+			else:
+				self.add_start_time_log(new_args)
+
+		if not self.employee and employees:
 			self.set_employees(employees)
 
 		if self.status == "On Hold":
 			self.current_time = time_diff_in_seconds(last_row.to_time, last_row.from_time)
 
 		self.save()
+
+	def add_start_time_log(self, args):
+		self.append("time_logs", args)
 
 	def set_employees(self, employees):
 		for name in employees:
