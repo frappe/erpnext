@@ -838,7 +838,7 @@ class AccountsController(TransactionBase):
 							dr_or_cr + "_in_account_currency": flt(item.discount_amount),
 							"cost_center": item.cost_center,
 							"project": item.project
-						}, account_currency, item=self)
+						}, account_currency, item=item)
 					)
 
 					account_currency = get_account_currency(income_or_expense_account)
