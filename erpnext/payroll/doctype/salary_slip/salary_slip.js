@@ -162,6 +162,33 @@ frappe.ui.form.on("Salary Slip", {
 		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields, false);
 		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
 		frm.trigger("set_dynamic_labels");
+
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.posting_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					console.log("Coming inside nepali")
+					cur_frm.set_value("posting_date_nepali",resp.message)
+				}
+			}
+		})
+	},
+
+	posting_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.posting_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("posting_date_nepali",resp.message)
+				}
+			}
+		})
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {
