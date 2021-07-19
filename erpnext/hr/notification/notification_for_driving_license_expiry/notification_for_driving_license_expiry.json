@@ -1,0 +1,35 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.employee and doc.expiry_date",
+ "creation": "2021-07-19 16:23:09.924041",
+ "date_changed": "expiry_date",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Driver",
+ "enabled": 1,
+ "event": "Days After",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "Hello, \n\n{{ _(\"Driving license for Employee:\") }} {{doc.Employee}} {{_(\"is set to expire on\")}} {{doc.expiry_date}}.",
+ "modified": "2021-07-19 16:23:27.496735",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Notification for Driving License Expiry",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "receiver_by_role": "HR Manager"
+  },
+  {
+   "receiver_by_role": "HR Manager"
+  },
+  {
+   "receiver_by_role": "Fleet Manager"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Notification for Driving License Expiry"
+}

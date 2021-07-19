@@ -26,6 +26,7 @@
   "gender",
   "date_of_birth",
   "date_of_joining",
+  "contract_type",
   "employee_number",
   "emergency_contact_details",
   "person_to_be_contacted",
@@ -82,17 +83,30 @@
   "company_email",
   "current_accommodation_type",
   "current_address",
+  "residential_details_section",
+  "country",
+  "residence_proof",
+  "column_break_76",
+  "residential_id",
+  "residential_expiry_date_if_applicable",
+  "passport_details_section",
+  "passport",
+  "passport_number",
+  "passport_expiry_date",
+  "column_break_84",
+  "passport_issue_date",
+  "place_of_issue",
+  "visa_details_section",
+  "visa_type",
+  "expiry_date",
+  "family_visa_expiry_date",
   "sb53",
   "bio",
   "personal_details",
-  "passport_number",
-  "date_of_issue",
-  "valid_upto",
-  "place_of_issue",
   "marital_status",
-  "blood_group",
-  "column_break6",
   "family_background",
+  "column_break6",
+  "blood_group",
   "health_details",
   "educational_qualification",
   "education",
@@ -567,16 +581,6 @@
    "label": "Passport Number"
   },
   {
-   "fieldname": "date_of_issue",
-   "fieldtype": "Date",
-   "label": "Date of Issue"
-  },
-  {
-   "fieldname": "valid_upto",
-   "fieldtype": "Date",
-   "label": "Valid Upto"
-  },
-  {
    "fieldname": "place_of_issue",
    "fieldtype": "Data",
    "label": "Place of Issue"
@@ -794,6 +798,7 @@
    "options": "User"
   },
   {
+   "collapsible": 1,
    "fieldname": "approvers_section",
    "fieldtype": "Section Break",
    "label": "Approvers"
@@ -807,13 +812,101 @@
    "fieldtype": "Link",
    "label": "Shift Request Approver",
    "options": "User"
+  },
+  {
+   "fieldname": "passport_issue_date",
+   "fieldtype": "Date",
+   "label": "Passport Issue Date"
+  },
+  {
+   "fieldname": "passport_expiry_date",
+   "fieldtype": "Date",
+   "label": "Passport Expiry Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "passport_details_section",
+   "fieldtype": "Section Break",
+   "label": "Passport Details"
+  },
+  {
+   "fieldname": "column_break_84",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "residential_details_section",
+   "fieldtype": "Section Break",
+   "label": "Residential Details"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "residence_proof",
+   "fieldtype": "Attach",
+   "label": "Residence proof"
+  },
+  {
+   "description": "Example: Like QID in Qatar, Emirates ID in UAE, etc.",
+   "fieldname": "residential_id",
+   "fieldtype": "Data",
+   "label": "Residential ID"
+  },
+  {
+   "fieldname": "residential_expiry_date_if_applicable",
+   "fieldtype": "Date",
+   "label": "Residential Expiry Date (if Applicable)"
+  },
+  {
+   "fieldname": "passport",
+   "fieldtype": "Attach",
+   "label": "Passport"
+  },
+  {
+   "fieldname": "column_break_76",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "visa_details_section",
+   "fieldtype": "Section Break",
+   "label": "Visa Details"
+  },
+  {
+   "fieldname": "visa_type",
+   "fieldtype": "Select",
+   "label": "Visa Type",
+   "options": "Family\nWork Permit\nVisit Visa\nTemporary Work Permit"
+  },
+  {
+   "depends_on": "eval: doc.visa_type != \"Family\"",
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date"
+  },
+  {
+   "depends_on": "eval: doc.visa_type == 'Family'",
+   "fieldname": "family_visa_expiry_date",
+   "fieldtype": "Table",
+   "label": "Expiry Date",
+   "options": "Family Visa Expiry Date"
+  },
+  {
+   "fieldname": "contract_type",
+   "fieldtype": "Select",
+   "label": "Contract Type",
+   "options": "Limited\nUnlimited"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2021-06-17 11:31:37.730760",
+ "modified": "2021-07-19 15:34:27.970875",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

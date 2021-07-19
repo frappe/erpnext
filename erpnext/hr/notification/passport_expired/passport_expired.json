@@ -1,0 +1,32 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.passport_expiry_date",
+ "creation": "2021-07-19 16:10:46.787092",
+ "date_changed": "passport_expiry_date",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Employee",
+ "enabled": 1,
+ "event": "Days After",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "Hello, \n\n{{_(\"Passport for Employee:\")}} {{doc.name}} {{_(\"is set to expire on\")}} {{doc.passport_expiry_date}}.",
+ "modified": "2021-07-19 16:17:22.176998",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Passport Expired",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "receiver_by_role": "HR Manager"
+  },
+  {
+   "receiver_by_role": "HR User"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Notification for Passport Expiry"
+}

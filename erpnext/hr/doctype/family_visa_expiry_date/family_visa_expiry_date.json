@@ -1,0 +1,37 @@
+{
+ "actions": [],
+ "creation": "2021-07-19 15:00:28.112834",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "member",
+  "visa_expiry_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "member",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Member"
+  },
+  {
+   "fieldname": "visa_expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Visa Expiry Date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-07-19 15:00:28.112834",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Family Visa Expiry Date",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
