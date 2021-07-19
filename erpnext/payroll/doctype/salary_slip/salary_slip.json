@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
+  "posting_date_nepali",
   "employee",
   "employee_name",
   "department",
@@ -631,13 +632,19 @@
    "fieldname": "leave",
    "fieldtype": "Data",
    "label": "Total Leave(Current Month)"
+  },
+  {
+   "fieldname": "posting_date_nepali",
+   "fieldtype": "Data",
+   "label": "Posting Date(Nepali)",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-30 16:49:58.734736",
+ "modified": "2021-07-19 11:19:25.130478",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
