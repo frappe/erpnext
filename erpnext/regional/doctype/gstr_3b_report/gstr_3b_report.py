@@ -322,6 +322,9 @@ class GSTR3BReport(Document):
 									inter_state_supply_details[(gst_category, place_of_supply)]['txval'] += taxable_value
 									inter_state_supply_details[(gst_category, place_of_supply)]['iamt'] += (taxable_value * rate /100)
 
+			if self.invoice_cess.get(inv):
+				self.report_dict['sup_details']['osup_det']['csamt'] += flt(self.invoice_cess.get(inv), 2)
+
 		self.set_inter_state_supply(inter_state_supply_details)
 
 	def set_supplies_liable_to_reverse_charge(self):
