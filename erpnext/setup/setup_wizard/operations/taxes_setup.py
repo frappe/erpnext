@@ -183,16 +183,6 @@ def make_item_tax_template(company_name, template):
 	doc.insert(ignore_permissions=True)
 	return doc
 
-def make_tax_category(tax_category):
-	""" Make tax category based on title if not already created """
-	doctype = 'Tax Category'
-	if not frappe.db.exists(doctype, tax_category['title']):
-		tax_category['doctype'] = doctype
-		doc = frappe.get_doc(tax_category)
-		doc.flags.ignore_links = True
-		doc.flags.ignore_validate = True
-		doc.insert(ignore_permissions=True)
-
 def get_or_create_account(company_name, account):
 	"""
 	Check if account already exists. If not, create it.
@@ -284,7 +274,7 @@ def get_or_create_tax_group(company_name, root_type):
 	return tax_group_name
 
 
-def make_tax_catgory(tax_category):
+def make_tax_category(tax_category):
 	doctype = 'Tax Category'
 	if isinstance(tax_category, str):
 		tax_category = {'title': tax_category}
