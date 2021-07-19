@@ -346,6 +346,8 @@ class SalesInvoice(SellingController):
 	def check_sales_return_linked_with_payment_entry(self):
 		# If a Sales Return is linked with payment entry along with other invoices,
 		# the cancellation of the Sales Return causes a problem between paid and allocated amount
+
+		payment_entries = []
 		if self.is_return:
 			payment_entries = frappe.db.sql_list("""
 				SELECT
