@@ -34,9 +34,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
 	},
 
-	calculate_taxes_and_totals: function(update_paid_amount) {
+	calculate_taxes_and_totals: async function(update_paid_amount) {
 		this.discount_amount_applied = false;
-		this._calculate_taxes_and_totals();
+		await this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
 
 		// Advance calculation applicable to Sales /Purchase Invoice
@@ -72,19 +72,20 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 	},
 
-	_calculate_taxes_and_totals: function() {
-		frappe.run_serially([
-			() => this.validate_conversion_rate(),
-			() => this.calculate_item_values(),
-			() => this.update_item_tax_map(),
-			() => this.initialize_taxes(),
-			() => this.determine_exclusive_rate(),
-			() => this.calculate_net_total(),
-			() => this.calculate_taxes(),
-			() => this.manipulate_grand_total_for_inclusive_tax(),
-			() => this.calculate_totals(),
-			() => this._cleanup()
-		]);
+	_calculate_taxes_and_totals: async function() {
+		this.validate_conversion_rate();
+		this.calculate_item_values();
+		await this.update_item_tax_map();
+	},
+
+	_calculate_tax_values : function() {
+		this.initialize_taxes();
+		this.determine_exclusive_rate();
+		this.calculate_net_total();
+		this.calculate_taxes();
+		this.manipulate_grand_total_for_inclusive_tax();
+		this.calculate_totals();
+		this._cleanup();
 	},
 
 	validate_conversion_rate: function() {
@@ -105,7 +106,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_item_values: function() {
-		var me = this;
+		let me = this;
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.round_floats_in(item);
@@ -266,7 +267,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 	},
 
-	update_item_tax_map: function() {
+	update_item_tax_map: async function() {
 		let me = this;
 		let item_codes = [];
 		let item_rates = {};
@@ -301,6 +302,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							}
 						});
 					}
+
+					me._calculate_tax_values();
 				}
 			});
 		}
