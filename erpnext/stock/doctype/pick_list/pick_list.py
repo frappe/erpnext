@@ -19,6 +19,9 @@ from frappe.model.meta import get_field_precision
 # TODO: Prioritize SO or WO group warehouse
 
 class PickList(Document):
+	def validate(self):
+		self.validate_for_qty()
+
 	def before_save(self):
 		self.weight_details()
 		self.set_item_locations()
@@ -55,6 +58,7 @@ class PickList(Document):
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
+		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
@@ -161,6 +165,10 @@ class PickList(Document):
 				"stock_qty": flt(data.get('stock_qty'), precision1)
 			})
 		return True
+	def validate_for_qty(self):
+		if self.purpose == "Material Transfer for Manufacture" \
+				and (self.for_qty is None or self.for_qty == 0):
+			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
 
 
 def validate_item_locations(pick_list):
