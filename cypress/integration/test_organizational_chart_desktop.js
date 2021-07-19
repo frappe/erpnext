@@ -5,16 +5,15 @@ context('Organizational Chart', () => {
 		cy.awesomebar('Organizational Chart');
 
 		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-		cy.get('@input').clear().type('Test Org Chart');
+		cy.get('@input').clear().wait(200).type('Test Org Chart');
+		cy.get('@input').type('{enter}', { delay: 100 });
+		cy.get('@input').blur();
 
-		cy.visit(`app/organizational-chart`);
-		cy.fill_field('company', 'Test Org Chart');
-		cy.get('body').click();
 		cy.wait(500);
 	});
 
 	beforeEach(() => {
-		cy.window().its('frappe').then(frappe => {
+		return cy.window().its('frappe').then(frappe => {
 			return frappe.call('erpnext.tests.ui_test_helpers.create_employee_records');
 		}).as('employee_records');
 	});

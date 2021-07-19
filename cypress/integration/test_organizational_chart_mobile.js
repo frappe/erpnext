@@ -6,12 +6,10 @@ context('Organizational Chart Mobile', () => {
 		cy.awesomebar('Organizational Chart');
 
 		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-		cy.get('@input').clear().type('Test Org Chart');
+		cy.get('@input').clear().wait(200).type('Test Org Chart');
+		cy.get('@input').type('{enter}', { delay: 100 });
+		cy.get('@input').blur();
 
-		cy.visit(`app/organizational-chart`);
-		cy.wait(500);
-		cy.fill_field('company', 'Test Org Chart');
-		cy.get('body').click();
 		cy.wait(500);
 	});
 
@@ -19,7 +17,7 @@ context('Organizational Chart Mobile', () => {
 		cy.viewport(375, 667);
 		cy.wait(500);
 
-		cy.window().its('frappe').then(frappe => {
+		return cy.window().its('frappe').then(frappe => {
 			return frappe.call('erpnext.tests.ui_test_helpers.create_employee_records');
 		}).as('employee_records');
 	});
@@ -166,13 +164,15 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('goes to the respective level after clicking on non-collapsed sibling group', () => {
-		// click on non-collapsed sibling group
-		cy.get('.hierarchy-mobile')
-			.prev()
-			.click();
+		cy.get('@employee_records').then(() => {
+			// click on non-collapsed sibling group
+			cy.get('.hierarchy-mobile')
+				.prev()
+				.click();
 
-		// should take you to that level
-		cy.get('.hierarchy-mobile').find('li.level .node-card').should('have.length', 2);
+			// should take you to that level
+			cy.get('.hierarchy-mobile').find('li.level .node-card').should('have.length', 2);
+		});
 	});
 
 	it('edit node navigates to employee master', () => {
