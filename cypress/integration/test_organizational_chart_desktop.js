@@ -4,10 +4,10 @@ context('Organizational Chart', () => {
 		cy.visit('/app/website');
 		cy.awesomebar('Organizational Chart');
 
-		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-		cy.get('@input').clear().wait(200).type('Test Org Chart');
+		cy.get('.frappe-control[data-fieldname=company] input').first().focus().as('input');
+		cy.get('@input').clear().wait(200).type('Test Org Chart', { force: true });
 		cy.get('@input').type('{enter}', { delay: 100 });
-		cy.get('@input').blur();
+		cy.get('@input').blur({ force: true });
 
 		cy.wait(500);
 	});
