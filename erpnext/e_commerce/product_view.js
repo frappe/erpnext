@@ -355,7 +355,7 @@ erpnext.ProductView =  class {
 			delete this.field_filters["discount"];
 
 			if (is_checked) {
-				this.field_filters["discount"] = []
+				this.field_filters["discount"] = [];
 				this.field_filters["discount"].push(filter_value);
 			}
 
@@ -364,7 +364,7 @@ erpnext.ProductView =  class {
 			}
 
 			me.change_route_with_filters();
-		})
+		});
 	}
 
 	bind_filters() {

@@ -532,6 +532,7 @@ class TestItem(ERPNextTestCase):
 			self.assertIsInstance(count, int)
 			self.assertTrue(count >= 0)
 
+<<<<<<< HEAD
 	def test_index_creation(self):
 		"check if index is getting created in db"
 
@@ -543,6 +544,8 @@ class TestItem(ERPNextTestCase):
 		if expected_columns:
 			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")
 
+=======
+>>>>>>> 3fd929c4ee (test: Website Item basic test & removed product configurator tests)
 	def test_attribute_completions(self):
 		expected_attrs = {"Small", "Extra Small", "Extra Large", "Large", "2XL", "Medium"}
 

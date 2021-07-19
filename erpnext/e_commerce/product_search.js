@@ -84,7 +84,7 @@ erpnext.ProductSearch = class {
 			</div>
 		`).find("#search-results-container");
 
-		this.setupCategoryContainer()
+		this.setupCategoryContainer();
 		this.setupProductsContainer();
 		this.setupRecentsContainer();
 	}
