@@ -365,7 +365,7 @@ class SalesInvoice(SellingController):
 				if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 					if len(payment_entry.references) > 1:
 						frappe.throw(_("Please cancel and amend the Payment Entry {0} to unallocate the amount of \
-							this Credit Note {1}") \
+							this Credit Note {1}")
 							.format(get_link_to_form("Payment Entry", payment_entry.name), self.name))
 
 
