@@ -984,6 +984,8 @@ class SalesInvoice(SellingController):
 		asset.flags.ignore_validate_update_after_submit = True
 		asset.prepare_depreciation_data(self.posting_date)
 		asset.save()
+		
+		post_depreciation_entries(self.posting_date)
 
 	def reset_depreciation_schedule(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
