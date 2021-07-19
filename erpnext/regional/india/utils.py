@@ -432,7 +432,7 @@ def get_ewb_data(dt, dn):
 		billing_address = frappe.get_doc('Address', doc.customer_address)
 
 		#added dispatch address
-		dispatch_address = frappe.get_doc('Address', doc.dispatch_address_name)
+		dispatch_address = frappe.get_doc('Address', doc.dispatch_address_name) if doc.dispatch_address_name else company_address
 		shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
 
 		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
@@ -524,7 +524,7 @@ def get_gstins_for_company(company):
 def get_address_details(data, doc, company_address, billing_address, dispatch_address):
 	data.fromPincode = validate_pincode(company_address.pincode, 'Company Address')
 	data.fromStateCode = validate_state_code(company_address.gst_state_number, 'Company Address')
-	data.actualFromStateCode = validate_state_code(dispatch_address.gst_state_number, 'Company Address')
+	data.actualFromStateCode = validate_state_code(dispatch_address.gst_state_number, 'Dispatch Address')
 
 	if not doc.billing_address_gstin or len(doc.billing_address_gstin) < 15:
 		data.toGstin = 'URP'
