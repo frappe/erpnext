@@ -596,7 +596,7 @@ frappe.ui.form.on('Sales Invoice', {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
-					root_type: "Profit and Loss",
+					report_type: "Profit and Loss",
 				}
 			};
 		});
