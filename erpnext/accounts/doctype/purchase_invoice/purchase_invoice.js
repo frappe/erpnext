@@ -504,7 +504,7 @@ frappe.ui.form.on("Purchase Invoice", {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
-					root_type: "Profit and Loss",
+					report_type: "Profit and Loss",
 				}
 			};
 		});
