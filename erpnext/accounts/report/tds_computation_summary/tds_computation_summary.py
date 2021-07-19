@@ -75,7 +75,8 @@ def get_invoice_and_tds_amount(supplier, account, company, from_date, to_date, f
 		select voucher_no, credit
 		from `tabGL Entry`
 		where party in (%s) and credit > 0
-			and company=%s and posting_date between %s and %s
+			and company=%s and is_cancelled = 0
+			and posting_date between %s and %s
 	""", (supplier, company, from_date, to_date), as_dict=1)
 
 	supplier_credit_amount = flt(sum(d.credit for d in entries))

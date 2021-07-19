@@ -124,6 +124,10 @@ $(() => {
 				attribute_filters: if_key_exists(attribute_filters)
 			};
 
+			const item_group = $(".item-group-content").data('item-group');
+			if (item_group) {
+				Object.assign(field_filters, { item_group });
+			}
 			return new Promise((resolve, reject) => {
 				frappe.call('erpnext.portal.product_configurator.utils.get_products_html_for_website', args)
 					.then(r => {

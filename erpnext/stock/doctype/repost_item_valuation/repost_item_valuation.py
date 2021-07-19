@@ -133,6 +133,6 @@ def repost_entries():
 
 def get_repost_item_valuation_entries():
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
-		WHERE status != 'Completed' and creation <= %s and docstatus = 1
+		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
 	""", now(), as_dict=1)
