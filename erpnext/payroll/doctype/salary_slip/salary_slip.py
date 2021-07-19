@@ -356,7 +356,7 @@ class SalarySlip(TransactionBase):
 
 	def get_payroll(self):
 		doc=frappe.get_doc("Payroll Period",{"company":self.company})
-		lst=frappe.get_doc("Empoyee",{"employee":self.employee})
+		lst=frappe.get_doc("Employee",{"employee":self.employee})
 		if doc.start_date <=lst.date_of_joining<=doc.end_date:
 			end_date = datetime.datetime(lst.date_of_joining)
 			start_date = datetime.datetime(doc.start_date)
