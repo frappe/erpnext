@@ -13,7 +13,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.assets.doctype.asset.depreciation \
-	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal, get_gl_entries_on_asset_regain
+	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal, get_gl_entries_on_asset_regain, post_depreciation_entries
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -918,17 +918,7 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
-					if item.get('asset'):
-						asset = frappe.get_doc("Asset", item.asset)
-					else:
-						frappe.throw(_(
-							"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
-							title=_("Missing Asset")
-						)
-					if (len(asset.finance_books) > 1 and not item.finance_book
-						and asset.finance_books[0].finance_book):
-						frappe.throw(_("Select finance book for the item {0} at row {1}")
-							.format(item.item_code, item.idx))
+					asset = self.get_asset(item)
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(asset,
@@ -971,6 +961,24 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	def get_asset(self, item):
+		if item.get('asset'):
+			asset = frappe.get_doc("Asset", item.asset)
+		else:
+			frappe.throw(_(
+				"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
+				title=_("Missing Asset")
+			)
+
+		self.check_finance_books(item, asset)
+		return asset
+
+	def check_finance_books(self, item, asset):
+		if (len(asset.finance_books) > 1 and not item.finance_book
+			and asset.finance_books[0].finance_book):
+			frappe.throw(_("Select finance book for the item {0} at row {1}")
+				.format(item.item_code, item.idx))
 
 	def depreciate_asset(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
