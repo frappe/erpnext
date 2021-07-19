@@ -186,7 +186,7 @@ class LandedCostVoucher(Document):
 	def get_value(self):
 		for i in self.items:
 			i.landed__amount=i.amount+i.applicable_charges
-			i.landed_rate=i.amount+i.applicable_charges/i.qty
+			i.landed_rate=i.landed__amount/i.qty
 
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
