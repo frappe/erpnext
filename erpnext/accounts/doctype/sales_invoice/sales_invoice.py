@@ -934,10 +934,12 @@ class SalesInvoice(SellingController):
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(asset,
 							item.base_net_amount, item.finance_book)
 						asset.db_set("disposal_date", None)
+						self.reset_depreciation_schedule(asset)
 					else:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
 							item.base_net_amount, item.finance_book)
 						asset.db_set("disposal_date", self.posting_date)
+						self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -969,6 +971,33 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	def depreciate_asset(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.prepare_depreciation_data(self.posting_date)
+		asset.save()
+
+	def reset_depreciation_schedule(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+
+		# recreate original depreciation schedule of the asset
+		asset.prepare_depreciation_data()
+
+		self.modify_depreciation_schedule_for_asset_repairs(asset)
+		asset.save()	
+
+	def modify_depreciation_schedule_for_asset_repairs(self, asset):
+		asset_repairs = frappe.get_all(
+			'Asset Repair',
+			filters = {'asset': asset.name},
+			fields = ['name', 'increase_in_asset_life']
+		)
+
+		for repair in asset_repairs:
+			if repair.increase_in_asset_life:
+				asset_repair = frappe.get_doc('Asset Repair', repair.name)
+				asset_repair.modify_depreciation_schedule()
+				asset.prepare_depreciation_data()
 
 	def set_asset_status(self, asset):
 		if self.is_return:
