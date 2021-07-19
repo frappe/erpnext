@@ -1,17 +1,16 @@
 context('Organizational Chart', () => {
 	before(() => {
 		cy.login();
-		cy.visit('/app');
-
-		cy.call('erpnext.tests.ui_test_helpers.create_employee_records');
+		cy.visit('/app/website');
 		cy.awesomebar('Organizational Chart');
 
-		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-		cy.get('@input')
-			.clear({ force: true })
-			.type('Test Org Chart', { force: true });
-		cy.wait(200);
-		cy.get('@input').blur({ force: true });
+		cy.call('erpnext.tests.ui_test_helpers.create_employee_records').then(() => {
+			cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+			cy.get('@input')
+				.clear({ force: true })
+				.type('Test Org Chart{enter}', { force: true })
+				.blur({ force: true });
+		});
 	});
 
 	it('renders root nodes and loads children for the first expandable node', () => {
@@ -27,7 +26,7 @@ context('Organizational Chart', () => {
 
 		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			// children of 1st root visible
-			cy.get(`[data-parent="${employee_records.message[0]}"]`).as('child-node');
+			cy.get(`div[data-parent="${employee_records.message[0]}"]`).as('child-node');
 			cy.get('@child-node')
 				.should('have.length', 1)
 				.should('be.visible');
