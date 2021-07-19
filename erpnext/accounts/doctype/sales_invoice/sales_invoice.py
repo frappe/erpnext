@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, getdate, add_days, cstr, nowdate, get_link_to_form, formatdate
+from frappe.utils import cint, flt, getdate, add_days, add_months, cstr, nowdate, get_link_to_form, formatdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
 from frappe.model.mapper import get_mapped_doc
@@ -994,7 +994,9 @@ class SalesInvoice(SellingController):
 		asset.prepare_depreciation_data()
 
 		self.modify_depreciation_schedule_for_asset_repairs(asset)
-		asset.save()	
+		asset.save()
+
+		self.delete_depreciation_entry_made_after_sale(asset)
 
 	def modify_depreciation_schedule_for_asset_repairs(self, asset):
 		asset_repairs = frappe.get_all(
@@ -1008,6 +1010,40 @@ class SalesInvoice(SellingController):
 				asset_repair = frappe.get_doc('Asset Repair', repair.name)
 				asset_repair.modify_depreciation_schedule()
 				asset.prepare_depreciation_data()
+
+	def delete_depreciation_entry_made_after_sale(self, asset):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
+
+		row = -1
+		finance_book = asset.get('schedules')[0].get('finance_book')
+		for schedule in asset.get('schedules'):
+			if schedule.finance_book != finance_book:
+				row = 0
+				finance_book = schedule.finance_book
+			else:
+				row += 1
+			
+			if schedule.schedule_date == posting_date_of_original_invoice:
+				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice):
+					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry.posting_date = nowdate()
+					reverse_journal_entry.submit()
+
+	def get_posting_date_of_sales_invoice(self):
+		return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
+
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone 
+	def sale_was_made_on_original_schedule_date(self, asset, schedule, row, posting_date_of_original_invoice):
+		for finance_book in asset.get('finance_books'):
+			if schedule.finance_book == finance_book.finance_book:
+				orginal_schedule_date = add_months(finance_book.depreciation_start_date,
+					row * cint(finance_book.frequency_of_depreciation))
+			
+				if orginal_schedule_date == posting_date_of_original_invoice:
+					return True
+		return False
 
 	def set_asset_status(self, asset):
 		if self.is_return:
