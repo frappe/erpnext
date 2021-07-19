@@ -611,7 +611,11 @@ class PurchaseInvoice(BuyingController):
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
 
 					if not item.is_fixed_asset:
-						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
+						if frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'):
+							amount = flt(item.base_amount, item.precision("base_amount"))
+						else:
+							amount = flt(item.base_net_amount, item.precision("base_net_amount"))
+
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
@@ -917,11 +921,6 @@ class PurchaseInvoice(BuyingController):
 							"credit": valuation_tax[tax.name],
 							"remarks": self.remarks or "Accounting Entry for Stock"
 						}, item=tax))
-
-		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
-
-		if enable_discount_accounting and self.get('discount_amount') and self.get('additional_discount_account'):
-			self.make_gle_for_additional_discount_applied_on_taxes(gl_entries)
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
