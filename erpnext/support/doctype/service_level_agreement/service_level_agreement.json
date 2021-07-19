@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:SLA-{document_type}-{service_level}-{####}",
+ "autoname": "format:SLA-{document_type}-{service_level}",
  "creation": "2018-12-26 21:08:15.448812",
  "doctype": "DocType",
  "editable_grid": 1,

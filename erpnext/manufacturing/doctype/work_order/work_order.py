@@ -239,7 +239,7 @@ class WorkOrder(Document):
 		self.create_serial_no_batch_no()
 
 	def on_submit(self):
-		if not self.wip_warehouse:
+		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
@@ -483,7 +483,7 @@ class WorkOrder(Document):
 
 
 		self.set('operations', [])
-		if not self.bom_no:
+		if not self.bom_no or not frappe.get_cached_value('BOM', self.bom_no, 'with_operations'):
 			return
 
 		operations = []
@@ -590,6 +590,7 @@ class WorkOrder(Document):
 	def validate_operation_time(self):
 		for d in self.operations:
 			if not d.time_in_mins > 0:
+				print(self.bom_no, self.production_item)
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 
 	def update_required_items(self):

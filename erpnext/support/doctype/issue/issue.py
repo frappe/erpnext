@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe import _
-from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now_datetime
-from datetime import datetime, timedelta
+from frappe.utils import now_datetime, time_diff_in_seconds, get_datetime, date_diff
+from frappe.core.utils import get_parent_doc
+from datetime import timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from frappe.email.inbox import link_communication_to_document
@@ -211,6 +211,128 @@ def make_issue_from_communication(communication, ignore_communication_links=Fals
 	link_communication_to_document(doc, "Issue", issue.name, ignore_communication_links)
 
 	return issue.name
+
+def get_time_in_timedelta(time):
+	"""
+		Converts datetime.time(10, 36, 55, 961454) to datetime.timedelta(seconds=38215)
+	"""
+	return timedelta(hours=time.hour, minutes=time.minute, seconds=time.second)
+
+def set_first_response_time(communication, method):
+	if communication.get('reference_doctype') == "Issue":
+		issue = get_parent_doc(communication)
+		if is_first_response(issue):
+			first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
+			issue.db_set("first_response_time", first_response_time)
+
+def is_first_response(issue):
+	responses = frappe.get_all('Communication', filters = {'reference_name': issue.name, 'sent_or_received': 'Sent'})
+	if len(responses) == 1: 
+		return True
+	return False
+
+def calculate_first_response_time(issue, first_responded_on):
+	issue_creation_date = issue.creation
+	issue_creation_time = get_time_in_seconds(issue_creation_date)
+	first_responded_on_in_seconds = get_time_in_seconds(first_responded_on)
+	support_hours = frappe.get_cached_doc("Service Level Agreement", issue.service_level_agreement).support_and_resolution
+
+	if issue_creation_date.day == first_responded_on.day:
+		if is_work_day(issue_creation_date, support_hours):
+			start_time, end_time = get_working_hours(issue_creation_date, support_hours)
+
+			# issue creation and response on the same day during working hours
+			if is_during_working_hours(issue_creation_date, support_hours) and is_during_working_hours(first_responded_on, support_hours):
+				return get_elapsed_time(issue_creation_date, first_responded_on)
+
+			# issue creation is during working hours, but first response was after working hours
+			elif is_during_working_hours(issue_creation_date, support_hours):
+				return get_elapsed_time(issue_creation_time, end_time)
+
+			# issue creation was before working hours but first response is during working hours
+			elif is_during_working_hours(first_responded_on, support_hours):
+				return get_elapsed_time(start_time, first_responded_on_in_seconds)
+
+			# both issue creation and first response were after working hours
+			else:
+				return 1.0		# this should ideally be zero, but it gets reset when the next response is sent if the value is zero
+			
+		else:
+			return 1.0
+
+	else:
+		# response on the next day
+		if date_diff(first_responded_on, issue_creation_date) == 1:
+			first_response_time = 0
+		else:
+			first_response_time = calculate_initial_frt(issue_creation_date, date_diff(first_responded_on, issue_creation_date)- 1, support_hours)
+
+		# time taken on day of issue creation
+		if is_work_day(issue_creation_date, support_hours):
+			start_time, end_time = get_working_hours(issue_creation_date, support_hours)
+
+			if is_during_working_hours(issue_creation_date, support_hours):
+				first_response_time += get_elapsed_time(issue_creation_time, end_time)
+			elif is_before_working_hours(issue_creation_date, support_hours):
+				first_response_time += get_elapsed_time(start_time, end_time)
+
+		# time taken on day of first response
+		if is_work_day(first_responded_on, support_hours):
+			start_time, end_time = get_working_hours(first_responded_on, support_hours)
+
+			if is_during_working_hours(first_responded_on, support_hours):
+				first_response_time += get_elapsed_time(start_time, first_responded_on_in_seconds)
+			elif not is_before_working_hours(first_responded_on, support_hours):
+				first_response_time += get_elapsed_time(start_time, end_time)
+
+		if first_response_time:
+			return first_response_time
+		else:
+			return 1.0
+
+def get_time_in_seconds(date):
+	return timedelta(hours=date.hour, minutes=date.minute, seconds=date.second)
+
+def get_working_hours(date, support_hours):
+	if is_work_day(date, support_hours):
+		weekday = frappe.utils.get_weekday(date)
+		for day in support_hours:
+			if day.workday == weekday:
+				return day.start_time, day.end_time
+
+def is_work_day(date, support_hours):
+	weekday = frappe.utils.get_weekday(date)
+	for day in support_hours:
+		if day.workday == weekday:
+			return True
+	return False
+
+def is_during_working_hours(date, support_hours):
+	start_time, end_time = get_working_hours(date, support_hours)
+	time = get_time_in_seconds(date)
+	if time >= start_time and time <= end_time:
+		return True
+	return False
+
+def get_elapsed_time(start_time, end_time):
+	return round(time_diff_in_seconds(end_time, start_time), 2)
+
+def calculate_initial_frt(issue_creation_date, days_in_between, support_hours):
+	initial_frt = 0
+	for i in range(days_in_between):
+		date = issue_creation_date + timedelta(days = (i+1))
+		if is_work_day(date, support_hours):
+			start_time, end_time = get_working_hours(date, support_hours)
+			initial_frt += get_elapsed_time(start_time, end_time)
+
+	return initial_frt
+
+def is_before_working_hours(date, support_hours):
+	start_time, end_time = get_working_hours(date, support_hours)
+	time = get_time_in_seconds(date)
+	if time < start_time:
+		return True
+	return False
 
 def get_holidays(holiday_list_name):
 	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
