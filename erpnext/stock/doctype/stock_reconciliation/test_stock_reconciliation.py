@@ -6,7 +6,7 @@
 
 from __future__ import unicode_literals
 import frappe, unittest
-from frappe.utils import flt, nowdate, nowtime, add_days
+from frappe.utils import flt, nowdate, nowtime, random_string, add_days
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError, get_items
@@ -15,6 +15,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
 
 class TestStockReconciliation(unittest.TestCase):
 	@classmethod
@@ -143,6 +144,42 @@ class TestStockReconciliation(unittest.TestCase):
 
 		valuation_rate = get_incoming_rate(args)
 		self.assertEqual(valuation_rate, 300)
+
+		to_delete_records.append(sr.name)
+		to_delete_records.reverse()
+
+		for d in to_delete_records:
+			stock_doc = frappe.get_doc("Stock Reconciliation", d)
+			stock_doc.cancel()
+
+
+	def test_stock_reco_for_merge_serialized_item(self):
+		to_delete_records = []
+
+		# Add new serial nos
+		serial_item_code = "Stock-Reco-Serial-Item-2"
+		serial_warehouse = "_Test Warehouse for Stock Reco1 - _TC"
+
+		sr = create_stock_reconciliation(item_code=serial_item_code, serial_no=random_string(6),
+			warehouse = serial_warehouse, qty=1, rate=100, do_not_submit=True, purpose='Opening Stock')
+
+		for i in range(3):
+			sr.append('items', {
+				'item_code': serial_item_code,
+				'warehouse': serial_warehouse,
+				'qty': 1,
+				'valuation_rate': 100,
+				'serial_no': random_string(6)
+			})
+
+		sr.save()
+		sr.submit()
+
+		sle_entries = frappe.get_all('Stock Ledger Entry', filters= {'voucher_no': sr.name},
+			fields = ['name', 'incoming_rate'])
+
+		self.assertEqual(len(sle_entries), 1)
+		self.assertEqual(sle_entries[0].incoming_rate, 100)
 
 		to_delete_records.append(sr.name)
 		to_delete_records.reverse()
@@ -316,6 +353,26 @@ class TestStockReconciliation(unittest.TestCase):
 		dn2.cancel()
 		pr1.cancel()
 
+	def test_valid_batch(self):
+		create_batch_item_with_batch("Testing Batch Item 1", "001")
+		create_batch_item_with_batch("Testing Batch Item 2", "002")
+		sr = create_stock_reconciliation(item_code="Testing Batch Item 1", qty=1, rate=100, batch_no="002"
+			, do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, sr.submit)
+
+def create_batch_item_with_batch(item_name, batch_id):
+	batch_item_doc = create_item(item_name, is_stock_item=1)
+	if not batch_item_doc.has_batch_no:
+		batch_item_doc.has_batch_no = 1
+		batch_item_doc.create_new_batch = 1
+		batch_item_doc.save(ignore_permissions=True)
+
+	if not frappe.db.exists('Batch', batch_id):
+		b = frappe.new_doc('Batch')
+		b.item = item_name
+		b.batch_id = batch_id
+		b.save()
+
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
@@ -341,6 +398,12 @@ def create_batch_or_serial_no_items():
 	if not serial_item_doc.has_serial_no:
 		serial_item_doc.has_serial_no = 1
 		serial_item_doc.serial_no_series = "SRSI.####"
+		serial_item_doc.save(ignore_permissions=True)
+
+	serial_item_doc = create_item("Stock-Reco-Serial-Item-2", is_stock_item=1)
+	if not serial_item_doc.has_serial_no:
+		serial_item_doc.has_serial_no = 1
+		serial_item_doc.serial_no_series = "SRSII.####"
 		serial_item_doc.save(ignore_permissions=True)
 
 	batch_item_doc = create_item("Stock-Reco-batch-Item-1", is_stock_item=1)
