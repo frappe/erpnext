@@ -17,6 +17,12 @@ def create_employee_records():
 	employees = [emp1, emp2, emp3, emp4, emp5, emp6, emp7]
 	return employees
 
+@frappe.whitelist()
+def get_employee_records():
+	return frappe.db.get_list('Employee', filters={
+		'company': 'Test Org Chart'
+	}, pluck='name', order_by='name')
+
 def create_company():
 	company = frappe.db.exists('Company', 'Test Org Chart')
 	if not company:
