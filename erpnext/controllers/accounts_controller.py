@@ -812,19 +812,23 @@ class AccountsController(TransactionBase):
 		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
 		if enable_discount_accounting:
+			if self.doctype == "Purchase Invoice":
+				dr_or_cr = "credit"
+				rev_dr_cr = "debit"
+				supplier_or_customer = self.supplier
+	
+			else:
+				dr_or_cr = "debit"
+				rev_dr_cr = "credit"
+				supplier_or_customer = self.customer
+
 			for item in self.get("items"):
 				if item.get('discount_amount') and item.get('discount_account'):
 					if self.doctype == "Purchase Invoice":
-						dr_or_cr = "credit"
-						rev_dr_cr = "debit"
-						supplier_or_customer = self.supplier
 						income_or_expense_account = (item.expense_account
 							if (not item.enable_deferred_expense or self.is_return) 
 							else item.deferred_expense_account)
 					else:
-						dr_or_cr = "debit"
-						rev_dr_cr = "credit"
-						supplier_or_customer = self.customer
 						income_or_expense_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) 
 							else item.deferred_revenue_account)
@@ -853,46 +857,16 @@ class AccountsController(TransactionBase):
 						}, account_currency, item=item)
 					)
 
-	def make_gle_for_additional_discount_applied_on_taxes(self, gl_entries):
-		for tax in self.get("taxes"):
-			if flt(tax.base_tax_amount_after_discount_amount) and flt(tax.base_tax_amount):
-				account_currency = get_account_currency(tax.account_head)
-				additional_discount_applied_on_taxes = flt(tax.base_tax_amount) - flt(tax.base_tax_amount_after_discount_amount)
-				if self.doctype == 'Purchase Invoice':
-					against = self.supplier
-					dr_or_cr = "debit"
-					rev_dr_cr = "credit"
-				else:
-					against = self.customer
-					dr_or_cr = "credit"
-					rev_dr_cr = "debit"
-
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": tax.account_head,
-						"against": against,
-						dr_or_cr: flt(additional_discount_applied_on_taxes,
-							tax.precision("tax_amount_after_discount_amount")),
-						dr_or_cr + "_in_account_currency": (flt(additional_discount_applied_on_taxes,
-							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
-							flt(additional_discount_applied_on_taxes, tax.precision("tax_amount_after_discount_amount"))),
-						"cost_center": tax.cost_center
-					}, account_currency, item=tax)
-				)
-
+			if self.get('discount_amount') and self.get('additional_discount_account'):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.additional_discount_account,
-						"against": against,
-						rev_dr_cr: flt(additional_discount_applied_on_taxes,
-							tax.precision("tax_amount_after_discount_amount")),
-						rev_dr_cr + "_in_account_currency": (flt(additional_discount_applied_on_taxes,
-							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
-							flt(additional_discount_applied_on_taxes, tax.precision("tax_amount_after_discount_amount"))),
-						"cost_center": tax.cost_center
-					}, account_currency, item=tax)
-				)
-				
+						"against": supplier_or_customer,
+						dr_or_cr: self.discount_amount,
+						"cost_center": self.cost_center
+					}, item=self)
+				)		
+										
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
 		for pe in self.get("advances"):
