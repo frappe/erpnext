@@ -252,8 +252,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
 	def test_purchase_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import check_gl_entries
-
 		enable_discount_accounting()
 
 		discount_account = create_account(account_name="Discount Account",
@@ -261,38 +259,45 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(discount_account=discount_account, discount_amount=100)
 
 		expected_gle = [
-			["Discount Account - _TC", 0.0, 100.0, nowdate()],
 			["_Test Account Cost for Goods Sold - _TC", 350.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 250.0, nowdate()]
+			["Creditors - _TC", 0.0, 250.0, nowdate()],
+			["Discount Account - _TC", 0.0, 100.0, nowdate()]
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
 
 	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import check_gl_entries
-
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		
-		pi = make_purchase_invoice(qty=1, rate=75000, do_not_save=1)
+		pi = make_purchase_invoice(qty=1, rate=100, do_not_save=1)
 		pi.apply_discount_on = "Grand Total"
 		pi.additional_discount_account = additional_discount_account
-		pi.additional_discount_percentage = 10
+		pi.additional_discount_percentage = 20
 		pi.append("taxes", {
 			"charge_type": "On Net Total",
 			"account_head": "CGST - _TC",
 			"cost_center": "Main - _TC",
 			"description": "CGST @ 9.0",
-			"rate": 9
+			"base_tax_amount": 20,
+			"base_tax_amount_after_discount_amount": 20
 		})
 		pi.submit()
 
+		# gle = frappe.get_all(
+		# 	"GL Entry",
+		# 	fields = ['account', 'debit', 'credit', 'posting_date'],
+		# 	filters = {'voucher_no': pi.name}
+		# )
+		# for gl in gle:
+		# 	print(gl, "\n")
+
 		expected_gle = [
-			["Discount Account - _TC", 0.0, 675.0, nowdate()],
-			["CGST - _TC", 6750.0, 0.0, nowdate()],
-			["_Test Account Cost for Goods Sold - _TC", 67500.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 73575.0, nowdate()]
+			["CGST - _TC", 20.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 96.0, nowdate()],
+			["Discount Account - _TC", 0.0, 24.0, nowdate()],
+			["_Test Account Cost for Goods Sold - _TC", 100.0, 0.0, nowdate()]
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
@@ -1206,6 +1211,18 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.amount)
+
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
+		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+	for i, gle in enumerate(gl_entries):
+		doc.assertEqual(expected_gle[i][0], gle.account)
+		doc.assertEqual(expected_gle[i][1], gle.debit)
+		doc.assertEqual(expected_gle[i][2], gle.credit)
+		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 def update_tax_witholding_category(company, account, date):
 	from erpnext.accounts.utils import get_fiscal_year
