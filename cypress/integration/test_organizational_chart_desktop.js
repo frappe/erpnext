@@ -2,9 +2,11 @@ context('Organizational Chart', () => {
 	before(() => {
 		cy.login();
 		cy.visit('/app/website');
+		cy.awesomebar('Organizational Chart');
 
-		cy.visit(`app/organizational-chart`);
-		cy.fill_field('company', 'Test Org Chart');
+		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+		cy.get('@input').type('Test Org Chart');
+
 		cy.get('body').click();
 		cy.wait(500);
 	});
