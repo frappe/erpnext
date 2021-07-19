@@ -2,17 +2,16 @@ context('Organizational Chart Mobile', () => {
 	before(() => {
 		cy.login();
 		cy.viewport(375, 667);
-		cy.visit('/app');
-
-		cy.call('erpnext.tests.ui_test_helpers.create_employee_records');
+		cy.visit('/app/website');
 		cy.awesomebar('Organizational Chart');
 
-		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-		cy.get('@input')
-			.clear({ force: true })
-			.type('Test Org Chart', { force: true });
-		cy.wait(200);
-		cy.get('@input').blur({ force: true });
+		cy.call('erpnext.tests.ui_test_helpers.create_employee_records').then(() => {
+			cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+			cy.get('@input')
+				.clear({ force: true })
+				.type('Test Org Chart{enter}', { force: true })
+				.blur({ force: true });
+		});
 	});
 
 	it('renders root nodes', () => {
@@ -40,7 +39,7 @@ context('Organizational Chart Mobile', () => {
 			cy.get('.hierarchy-mobile').find('.level').first().find('ul.node-children').children()
 				.should('have.length', 2);
 
-			cy.get(`[data-parent="${employee_records.message[1]}"]`).first().as('child-node');
+			cy.get(`div[data-parent="${employee_records.message[1]}"]`).first().as('child-node');
 			cy.get('@child-node').should('be.visible');
 
 			cy.get('@child-node')
