@@ -290,6 +290,7 @@ class SalesInvoice(SellingController):
 		self.update_time_sheet(None)
 
 	def on_cancel(self):
+		self.check_sales_return_linked_with_payment_entry()
 		super(SalesInvoice, self).on_cancel()
 
 		self.check_sales_order_on_hold_or_close("sales_order")
@@ -341,6 +342,30 @@ class SalesInvoice(SellingController):
 			manage_invoice_submit_cancel(self, "on_cancel")
 		self.unlink_sales_invoice_from_timesheets()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
+
+	def check_sales_return_linked_with_payment_entry(self):
+		# If a Sales Return is linked with payment entry along with other invoices,
+		# the cancellation of the Sales Return causes a problem between paid and allocated amount
+		if self.is_return:
+			payment_entries = frappe.db.sql_list("""
+				SELECT
+					t1.name
+				FROM
+					`tabPayment Entry` t1, `tabPayment Entry Reference` t2
+				WHERE
+					t1.name = t2.parent
+					and t1.docstatus = 1
+					and t2.reference_name = %s
+				""", self.name)
+		if payment_entries:
+			for pe in payment_entries:
+				payment_entry = frappe.get_doc("Payment Entry", pe)
+				if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+					if len(payment_entry.references) > 1:
+						frappe.throw(_("Please cancel and amend the Payment Entry {0} to unallocate the amount of \
+							this Credit Note {1}") \
+							.format(get_link_to_form("Payment Entry", payment_entry.name), self.name))
+
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -922,7 +947,7 @@ class SalesInvoice(SellingController):
 						asset = frappe.get_doc("Asset", item.asset)
 					else:
 						frappe.throw(_(
-							"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
+							"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name),
 							title=_("Missing Asset")
 						)
 					if (len(asset.finance_books) > 1 and not item.finance_book
@@ -944,7 +969,7 @@ class SalesInvoice(SellingController):
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					self.set_asset_status(asset)
-				
+
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
@@ -973,7 +998,7 @@ class SalesInvoice(SellingController):
 	def set_asset_status(self, asset):
 		if self.is_return:
 			asset.set_status()
-		else: 	
+		else:
 			asset.set_status("Sold" if self.docstatus==1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
