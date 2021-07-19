@@ -4,50 +4,76 @@
 frappe.ui.form.on('Sales Incentive Calculator', {
 	get_invoice:function(frm,cdt,cdn){
         frappe.call({
-        method:"nextsales.customer_incentive.doctype.sales_incentive_calculator.sales_incentive_calculator.fetch_details",
+        method:"erpnext.selling.doctype.sales_incentive_calculator.sales_incentive_calculator.fetch_details",
         args:{
-                "fd":frm.doc.from_date,
-                "td":frm.doc.to_date
+            "customer_sales_incentive":frm.doc.customer_sales_incentive    
         },
         callback: function(r) {
+            frm.clear_table('invoice_list');
             $.each(r.message,function(index,row)
             {
                 var child=frm.add_child("invoice_list")
                 child.sales_invoice=row.name,
                 child.customer=row.customer,
-                child.amount=row.outstanding_amount,
-                child.date=row.posting_date
+                child.amount=row.amount,
+                child.date=row.posting_date,
+                child.item=row.item_code,
+                child.item_name=row.item_name,
+                child.rate=row.rate,
+                child.customer_name=row.customer_name,
+                child.qty=row.qty
             });frm.refresh_field('invoice_list');
-
+            frm.set_df_property('get_invoice', 'hidden', 1);
         }
     });
 
   },
   get_payment:function(frm,cdt,cdn){
         frappe.call({
-        method:"nextsales.customer_incentive.doctype.sales_incentive_calculator.sales_incentive_calculator.get_payment",
+        method:"erpnext.selling.doctype.sales_incentive_calculator.sales_incentive_calculator.get_payment",
         args:{
-                "fd":frm.doc.from_date,
-                "td":frm.doc.to_date
+            "customer_sales_incentive":frm.doc.customer_sales_incentive
+            
         },
         callback: function(r) {
-        console.log(r.message)
+            frm.clear_table('invoice_list');
             $.each(r.message,function(index,row)
             {
-                console.log(index)
-                console.log(row)
-                var child=frm.add_child("payment_list")
-                child.payment_id=row.name,
-                child.customer=row.party_name,
-                child.amount=row.total_allocated_amount,
-                child.date=row.posting_date
-            }
-
-            );frm.refresh_field('payment_list');
-
+                var child=frm.add_child("invoice_list")
+                child.sales_invoice=row.name,
+                child.customer=row.customer,
+                child.amount=row.amount,
+                child.date=row.posting_date,
+                child.item=row.item_code,
+                child.item_name=row.item_name,
+                child.qty=row.qty,
+                child.rate=row.rate,
+                child.customer_name=row.customer_name
+            });frm.refresh_field('invoice_list');
+            frm.set_df_property('get_payment', 'hidden', 1);
         }
+        
     });
 
-  }
+  },
+  onload:function(frm){
+    frm.call({
+            method: "erpnext.selling.doctype.sales_incentive_calculator.sales_incentive_calculator.get_list",
+            callback: function(r) {
+                console.log(r.message)
+                if (r.message) {
+                    frm.set_query("customer_sales_incentive", function() {
+                        return {
+                            filters: [
+                                ["name", "in", r.message]
+                            ]
+                        }
+                    });
+                }
+            }
+
+    });
+},
+
 
 });

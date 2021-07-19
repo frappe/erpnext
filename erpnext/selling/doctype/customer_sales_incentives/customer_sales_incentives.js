@@ -12,7 +12,7 @@ frappe.ui.form.on('Customer Sales Incentives', {
 
 	set_options: function(frm) {
 		let aggregate_based_on_fields = [];
-		const doctype = 'Sales Invoice' || 'Payment Entry';
+		const doctype = 'Sales Invoice';
 
 		if (doctype) {
 			frappe.model.with_doctype(doctype, () => {
@@ -46,6 +46,8 @@ frappe.ui.form.on('Customer Sales Incentives', {
 			</thead>
 			<tbody></tbody>
 		</table>`).appendTo(wrapper);
+		$(`<p class="text-muted small">${__("Click table to edit")}</p>`).appendTo(wrapper);
+
 
 		frm.filters = JSON.parse(frm.doc.filters_json || '[]');
 
@@ -74,7 +76,7 @@ frappe.ui.form.on('Customer Sales Incentives', {
 
 			frm.filter_group = new frappe.ui.FilterGroup({
 				parent: dialog.get_field('filter_area').$wrapper,
-				doctype: 'Sales Invoice' || 'Payment Entry',
+				doctype: 'Sales Invoice',
 				on_change: () => {},
 			});
 
@@ -107,8 +109,6 @@ frappe.ui.form.on('Customer Sales Incentives', {
 	},
 
 
-
-
 });
 
 frappe.ui.form.on('Customer Sales Incentives', {
@@ -120,5 +120,31 @@ frappe.ui.form.on('Customer Sales Incentives', {
 				]
 			}
 		});
+	},
+	refresh:function(frm){
+			frappe.call({
+				 method: "get_item_list",
+				 doc:frm.doc,
+				callback: function(r){
+					if (r.message) {
+						cur_frm.fields_dict['items'].grid.get_field('item').get_query = function(doc, cdt, cdn) {
+							return {
+								filters: [
+									['name', 'in' , r.message]
+								]
+							}
+						}
+					}
+				frm.refresh_field("items")
+				frm.set_query("credit_item", function() {
+					return {
+						filters: [
+							['name', 'in' , r.message]
+						]
+					}
+				});
+				}
+				
+			});
 	}
 });
