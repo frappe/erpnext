@@ -207,10 +207,9 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 @frappe.whitelist()
 def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=True):
 	billing_email = frappe.db.sql("""
-		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent \
-		WHERE l.link_doctype='Customer' and l.link_name='""" + customer_name + """' and \
-		c.is_billing_contact=1 \
-		order by c.creation desc""")
+		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent
+		WHERE l.link_doctype='Customer' and l.link_name=%s and c.is_billing_contact=1
+		order by c.creation desc""", customer_name)
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:

@@ -380,7 +380,8 @@ $.extend(erpnext.item, {
 		// Show Stock Levels only if is_stock_item
 		if (frm.doc.is_stock_item) {
 			frappe.require('item-dashboard.bundle.js', function() {
-				const section = frm.dashboard.add_section('', __("Stock Levels"));
+				frm.dashboard.parent.find('.stock-levels').remove();
+				const section = frm.dashboard.add_section('', __("Stock Levels"), 'stock-levels');
 				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 					parent: section,
 					item_code: frm.doc.name,
