@@ -18,12 +18,7 @@
   "get_payment",
   "invoice_list_section",
   "invoice_list",
-  "payment_list_section",
-  "payment_list",
-  "calculate_scheme_benifits_section",
-  "type_of_benefits",
-  "discount_on_item",
-  "credit_note"
+  "amended_from"
  ],
  "fields": [
   {
@@ -56,6 +51,7 @@
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -63,6 +59,7 @@
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -83,10 +80,9 @@
   {
    "fieldname": "get_payment",
    "fieldtype": "Button",
-   "label": "Get Payment"
+   "label": "Get Paid Invoice"
   },
   {
-   "depends_on": "eval:doc.based_on=='Invoice'",
    "fieldname": "invoice_list_section",
    "fieldtype": "Section Break",
    "label": "Invoice List"
@@ -98,46 +94,19 @@
    "options": "Sales Incentive Calculator Invoice"
   },
   {
-   "depends_on": "eval:doc.based_on==='Payment'",
-   "fieldname": "payment_list_section",
-   "fieldtype": "Section Break",
-   "label": "Payment List"
-  },
-  {
-   "fieldname": "payment_list",
-   "fieldtype": "Table",
-   "label": "Payment List",
-   "options": "Sales Incentive Calculator Payment"
-  },
-  {
-   "fieldname": "calculate_scheme_benifits_section",
-   "fieldtype": "Section Break",
-   "label": "Calculate Scheme Benifits"
-  },
-  {
-   "fetch_from": "customer_sales_incentive.type_of_benifits",
-   "fieldname": "type_of_benefits",
-   "fieldtype": "Read Only",
-   "label": "Type Of Benefits"
-  },
-  {
-   "depends_on": "eval:doc.type_of_benefits==='Discount on item'",
-   "fieldname": "discount_on_item",
-   "fieldtype": "Table",
-   "label": "Discount On Item",
-   "options": "Sales Incentive Calculator Discount on item"
-  },
-  {
-   "depends_on": "eval:doc.type_of_benefits==='Credit Note'",
-   "fieldname": "credit_note",
-   "fieldtype": "Table",
-   "label": "Credit note",
-   "options": "Sales Incentive Calculator Credit Note"
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Incentive Calculator",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2021-06-06 20:07:24.273983",
+ "modified": "2021-07-19 11:51:00.816276",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Incentive Calculator",
@@ -156,7 +125,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
