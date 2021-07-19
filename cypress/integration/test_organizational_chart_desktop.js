@@ -1,21 +1,17 @@
 context('Organizational Chart', () => {
 	before(() => {
 		cy.login();
-		cy.visit('/app/website');
+		cy.visit('/app');
+
+		cy.call('erpnext.tests.ui_test_helpers.create_employee_records');
 		cy.awesomebar('Organizational Chart');
 
-		cy.get('.frappe-control[data-fieldname=company] input').first().focus().as('input');
-		cy.get('@input').clear().wait(200).type('Test Org Chart', { force: true });
-		cy.get('@input').type('{enter}', { delay: 100 });
+		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+		cy.get('@input')
+			.clear({ force: true })
+			.type('Test Org Chart', { force: true });
+		cy.wait(200);
 		cy.get('@input').blur({ force: true });
-
-		cy.wait(500);
-	});
-
-	beforeEach(() => {
-		return cy.window().its('frappe').then(frappe => {
-			return frappe.call('erpnext.tests.ui_test_helpers.create_employee_records');
-		}).as('employee_records');
 	});
 
 	it('renders root nodes and loads children for the first expandable node', () => {
@@ -29,8 +25,7 @@ context('Organizational Chart', () => {
 		cy.get('@first-child').get('.node-info').find('.node-title').contains('CEO');
 		cy.get('@first-child').get('.node-info').find('.node-connections').contains('· 2 Connections');
 
-		// check children of first node
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			// children of 1st root visible
 			cy.get(`[data-parent="${employee_records.message[0]}"]`).as('child-node');
 			cy.get('@child-node')
@@ -47,7 +42,7 @@ context('Organizational Chart', () => {
 	});
 
 	it('hides active nodes children and connectors on expanding sibling node', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			// click sibling
 			cy.get(`#${employee_records.message[1]}`)
 				.click()
@@ -60,7 +55,7 @@ context('Organizational Chart', () => {
 	});
 
 	it('collapses previous level nodes and refreshes connectors on expanding child node', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			// click child node
 			cy.get(`#${employee_records.message[3]}`)
 				.click()
@@ -81,7 +76,7 @@ context('Organizational Chart', () => {
 	});
 
 	it('expands previous level nodes', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			cy.get(`#${employee_records.message[0]}`)
 				.click()
 				.should('have.class', 'active');
@@ -95,7 +90,7 @@ context('Organizational Chart', () => {
 	});
 
 	it('edit node navigates to employee master', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			cy.get(`#${employee_records.message[0]}`).find('.btn-edit-node')
 				.click();
 

@@ -2,24 +2,17 @@ context('Organizational Chart Mobile', () => {
 	before(() => {
 		cy.login();
 		cy.viewport(375, 667);
-		cy.visit('/app/website');
+		cy.visit('/app');
+
+		cy.call('erpnext.tests.ui_test_helpers.create_employee_records');
 		cy.awesomebar('Organizational Chart');
 
-		cy.get('.frappe-control[data-fieldname=company] input').first().focus().as('input');
-		cy.get('@input').clear().wait(200).type('Test Org Chart', { force: true });
-		cy.get('@input').type('{enter}', { delay: 100 });
+		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+		cy.get('@input')
+			.clear({ force: true })
+			.type('Test Org Chart', { force: true });
+		cy.wait(200);
 		cy.get('@input').blur({ force: true });
-
-		cy.wait(500);
-	});
-
-	beforeEach(() => {
-		cy.viewport(375, 667);
-		cy.wait(500);
-
-		return cy.window().its('frappe').then(frappe => {
-			return frappe.call('erpnext.tests.ui_test_helpers.create_employee_records');
-		}).as('employee_records');
 	});
 
 	it('renders root nodes', () => {
@@ -35,7 +28,7 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('expands root node', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			cy.get(`#${employee_records.message[1]}`)
 				.click()
 				.should('have.class', 'active');
@@ -68,7 +61,7 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('expands child node', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			cy.get(`#${employee_records.message[3]}`)
 				.click()
 				.should('have.class', 'active')
@@ -97,7 +90,7 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('renders sibling group', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			// sibling group visible for parent
 			cy.get(`#${employee_records.message[1]}`)
 				.next()
@@ -118,7 +111,7 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('expands previous level nodes', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			cy.get(`#${employee_records.message[6]}`)
 				.click()
 				.should('have.class', 'active');
@@ -137,7 +130,7 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('expands sibling group', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			// sibling group visible for parent
 			cy.get(`#${employee_records.message[6]}`).click();
 
@@ -164,7 +157,7 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('goes to the respective level after clicking on non-collapsed sibling group', () => {
-		cy.get('@employee_records').then(() => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(() => {
 			// click on non-collapsed sibling group
 			cy.get('.hierarchy-mobile')
 				.prev()
@@ -176,7 +169,7 @@ context('Organizational Chart Mobile', () => {
 	});
 
 	it('edit node navigates to employee master', () => {
-		cy.get('@employee_records').then(employee_records => {
+		cy.call('erpnext.tests.ui_test_helpers.get_employee_records').then(employee_records => {
 			cy.get(`#${employee_records.message[0]}`).find('.btn-edit-node')
 				.click();
 
