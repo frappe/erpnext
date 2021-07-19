@@ -3,10 +3,11 @@ context('Organizational Chart Mobile', () => {
 		cy.login();
 		cy.viewport(375, 667);
 		cy.visit('/app/website');
+		cy.awesomebar('Organizational Chart');
 
-		cy.visit(`app/organizational-chart`);
-		cy.wait(500);
-		cy.fill_field('company', 'Test Org Chart');
+		cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+		cy.get('@input').type('Test Org Chart');
+
 		cy.get('body').click();
 		cy.wait(500);
 	});
