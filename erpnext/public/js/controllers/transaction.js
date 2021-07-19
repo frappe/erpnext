@@ -1037,15 +1037,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				this.set_actual_charges_based_on_company_currency();
 			}
 
-			if(this.frm.doc.ignore_pricing_rule) {
-				this.calculate_taxes_and_totals();
-			} else if (!this.in_apply_price_list){
-				// if (!cint(this.frm.doc.calculate_tax_on_company_currency)) {
-				// 	this.set_actual_charges_based_on_currency();
-				// }
-				this.apply_price_list();
-			}
-
+			this.calculate_taxes_and_totals();
 		}
 		// Make read only if Accounts Settings doesn't allow stale rates
 		this.frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
