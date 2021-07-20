@@ -13,12 +13,17 @@ class FullandFinalStatement(Document):
 		if self.docstatus == 1:
 			self.validate_settlement("payables")
 			self.validate_settlement("receivables")
+			self.validate_asset()
 
 	def validate_settlement(self, type):
 		for data in self.get(type,[]):
 			if data.status == "Unsettled":
 				frappe.throw(_("Settled all Payables and Receivable before submission"))
 
+	def validate_asset(self):
+		for data in self.assets_allocated:
+			if data.status == "Owned":
+				frappe.throw(_("All allocated assets should be returned before submission"))
 
 	@frappe.whitelist()
 	def get_outstanding_statements(self):
