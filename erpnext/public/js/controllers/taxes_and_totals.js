@@ -587,8 +587,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				tax.item_wise_tax_detail = JSON.stringify(tax.item_wise_tax_detail);
 			});
 		}
-
-		this.frm.refresh_fields();
 	},
 
 	set_discount_amount: function() {
