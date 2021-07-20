@@ -212,8 +212,6 @@ def get_member_based_on_subscription(subscription_id, email=None, customer_id=No
 
 
 def verify_signature(data, endpoint="Membership"):
-	if frappe.flags.in_test or os.environ.get("CI"):
-		return True
 	signature = frappe.request.headers.get("X-Razorpay-Signature")
 
 	settings = frappe.get_doc("Non Profit Settings")
@@ -300,8 +298,14 @@ def update_halted_razorpay_subscription(*args, **kwargs):
 	The customer has to manually retry the charge or change the card linked to the subscription,
 	for the subscription to move back to the active state.
 	"""
-	data = frappe.request.get_data(as_text=True)
-	data = process_request_data(data)
+	if frappe.request:
+		data = frappe.request.get_data(as_text=True)
+		data = process_request_data(data)
+	elif frappe.flags.in_test:
+		data = kwargs.get("data")
+		data = frappe._dict(data)
+	else:
+		return
 
 	if not data.event == "subscription.halted":
 		return
@@ -319,7 +323,7 @@ def update_halted_razorpay_subscription(*args, **kwargs):
 		member.save()
 
 		if subscription.get("notes"):
-			member.add_comment("Comment", subscription.get("notes"))
+			member = get_additional_notes(member, subscription)
 
 	except Exception as e:
 		message = "{0}\n\n{1}".format(e, frappe.get_traceback())
