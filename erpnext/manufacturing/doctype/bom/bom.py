@@ -156,6 +156,9 @@ class BOM(WebsiteGenerator):
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
 		self.set_bom_level()
 
+	# def after_save(self):
+	# 	self.get_volume()
+
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
 
@@ -188,6 +191,7 @@ class BOM(WebsiteGenerator):
 
 	def before_save(self):
 		self.weight_calculation()
+		self.get_volume()
 
 	def weight_calculation(self):
 		value1 = value2 = value3 = 0
@@ -208,6 +212,10 @@ class BOM(WebsiteGenerator):
 			self.yeild = 0
 		else:
 			self.yeild = flt((self.fg_weight/self.rm_weight)*100, self.precision('yeild'))
+	
+	def get_volume(self):
+		if self.fg_specific_gravity>0  and self.bom_weight > 0:
+			self.bom_volume=self.bom_weight/self.fg_specific_gravity
 
 	@frappe.whitelist()
 	def get_routing(self):

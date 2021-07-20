@@ -77,6 +77,7 @@
   "consumption_deviation",
   "column_break_56",
   "actual_fg_weight",
+  "wo_actual_volume",
   "actual_yeild",
   "yeild_deviation",
   "more_info",
@@ -687,7 +688,13 @@
    "depends_on": "has_batch_no",
    "fieldname": "batch_size",
    "fieldtype": "Float",
+
    "label": "Batch Size"
+  },
+  {
+   "fieldname": "wo_actual_volume",
+   "fieldtype": "Float",
+   "label": "WO Actual Volume"
   },
   {
    "allow_on_submit": 1,
@@ -713,7 +720,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-28 16:19:14.902699",
+ "modified": "2021-06-30 16:48:24.410558",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

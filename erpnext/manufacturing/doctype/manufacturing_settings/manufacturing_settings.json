@@ -13,6 +13,7 @@
   "disable_capacity_planning",
   "allow_overtime",
   "allow_production_on_holidays",
+  "enable_specific_gravity",
   "column_break_5",
   "capacity_planning_for_days",
   "mins_between_operations",
@@ -30,6 +31,8 @@
   "staging_section",
   "enable_staging",
   "staging_details",
+  "allowed_consumption_deviation_percentage",
+  "allowed_production_deviation_percentage",
   "add_corrective_operation_cost_in_finished_good_valuation",
   "column_break_23",
   "make_serial_no_batch_from_work_order"
@@ -191,6 +194,12 @@
    "label": "Allowed Production Deviation percentage"
   },
   {
+   "default": "0",
+   "fieldname": "enable_specific_gravity",
+   "fieldtype": "Check",
+   "label": "Enable Specific Gravity"
+  },
+  {
    "fieldname": "column_break_23",
    "fieldtype": "Column Break"
   },
@@ -212,7 +221,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-16 15:54:38.967341",
+ "modified": "2021-06-25 18:39:37.716874",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
