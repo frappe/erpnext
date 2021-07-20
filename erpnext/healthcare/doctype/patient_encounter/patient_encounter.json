@@ -30,6 +30,7 @@
   "invoiced",
   "sb_symptoms",
   "symptoms",
+  "get_applicable_treatment_plans",
   "symptoms_in_print",
   "physical_examination",
   "diagnosis",
@@ -324,11 +325,16 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "get_applicable_treatment_plans",
+   "fieldtype": "Button",
+   "label": "Get Applicable Treatment Plans"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 10:39:00.783119",
+ "modified": "2021-06-11 15:40:56.687260",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

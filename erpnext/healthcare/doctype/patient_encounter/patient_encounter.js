@@ -185,7 +185,53 @@ frappe.ui.form.on('Patient Encounter', {
 			};
 			frm.set_value(values);
 		}
-	}
+	},
+
+	get_applicable_treatment_plans: function(frm) {
+		frappe.call({
+			method: 'get_applicable_treatment_plans',
+			doc: frm.doc,
+			freeze: true,
+			freeze_message: __('Fetching Treatment Plans'),
+			callback: function() {
+				console.log(frm.patient_age);
+//				if (frm.patient.patient_age) {
+//				};
+				new frappe.ui.form.MultiSelectDialog({
+					doctype: "Treatment Plan Template",
+					target: this.cur_frm,
+					setters: {
+						template_name: "",
+						medical_department: "",
+					},
+//					date_field: "transaction_date",
+					get_query() {
+						return {
+							filters: {
+//								patient_age_from: ['<', frm.patient_age]
+							}
+						}
+					},
+					action(selections) {
+						console.log(selections);
+						frappe.call({
+							method: 'fill_treatment_plan',
+							doc: frm.doc,
+							args: selections,
+						});
+						refresh_field('drug_prescription');
+						refresh_field('procedure_prescription');
+						refresh_field('lab_test_prescription');
+						refresh_field('therapies');
+//						cur_dialog.hide();
+					}
+				});
+
+
+			}
+		});
+	},
+
 });
 
 var schedule_inpatient = function(frm) {

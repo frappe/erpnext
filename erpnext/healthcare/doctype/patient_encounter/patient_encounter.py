@@ -33,6 +33,84 @@ class PatientEncounter(Document):
 		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
 			self.practitioner_name or self.practitioner)[:100]
 
+	@frappe.whitelist(allow_guest=True)
+	@staticmethod
+	def get_applicable_treatment_plans(patient=None, symptoms=None, diagnosis=None):
+		plans = frappe.db.get_list('Treatment Plan Template', fields='*')
+		print(plans)
+		return plans
+		filters = {}
+		if symptoms:
+			filters['']
+
+	@frappe.whitelist(allow_guest=True)
+	def fill_treatment_plan(self, treatment_plan=None):
+		plan = frappe.db.get_list('Treatment Plan Template', fields='*')[0]
+		print(plan)
+		plan_items = frappe.db.sql("""
+		select
+			*
+		from
+			`tabTreatment Plan Template Item`
+		where
+			parent=%s
+		""", plan['name'], as_dict=1)
+		for plan_item in plan_items:
+			self.fill_treatment_plan_item(plan_item)
+
+		drugs = frappe.db.sql("""
+			select
+				*
+			from
+				`tabDrug Prescription`
+			where
+				parent=%s
+			""", plan['name'], as_dict=1)
+		print(drugs)
+		for drug in drugs:
+			self.fill_treatment_plan_drug(drug)
+
+		return plan
+		filters = {}
+		if symptoms:
+			filters['']
+
+	@frappe.whitelist(allow_guest=True)
+	def fill_treatment_plan_drug(self, drug=None):
+		doc = frappe.new_doc('Drug Prescription')
+		doc.drug_code = drug['drug_code']
+		doc.dosage = drug['dosage']
+		doc.dosage_form = drug['dosage_form']
+		doc.period = drug['period']
+		doc.parenttype = drug['parenttype']
+		doc.parent = drug['parent']
+		doc.insert()
+		self.append('drug_prescription', doc)
+		self.save()
+
+	@frappe.whitelist(allow_guest=True)
+	def fill_treatment_plan_item(self, plan_item=None):
+		if plan_item['type'] == 'Clinical Procedure Template':
+			doc = frappe.new_doc('Procedure Prescription')
+			doc.procedure = plan_item['template']
+			child_field = 'procedure_prescription'
+
+		if plan_item['type'] == 'Lab Test Template':
+			doc = frappe.new_doc('Lab Prescription')
+			doc.lab_test_code = plan_item['template']
+			child_field = 'lab_test_prescription'
+
+		if plan_item['type'] == 'Therapy Type':
+			doc = frappe.new_doc('Therapy Plan Detail')
+			doc.therapy_type = plan_item['template']
+			child_field = 'therapies'
+
+		doc.parent = plan_item['parent']
+		doc.parenttype = plan_item['parenttype']
+		doc.insert()
+		self.append(child_field, doc)
+		self.save()
+
 @frappe.whitelist()
 def make_ip_medication_order(source_name, target_doc=None):
 	def set_missing_values(source, target):

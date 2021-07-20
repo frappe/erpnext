@@ -26,6 +26,7 @@
    "options": "type"
   },
   {
+   "depends_on": "type==='Therapy Type'",
    "fieldname": "qty",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -41,7 +42,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-10 11:53:40.365294",
+ "modified": "2021-06-11 12:37:06.470594",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Treatment Plan Template Item",
