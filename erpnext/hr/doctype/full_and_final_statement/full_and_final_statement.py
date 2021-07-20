@@ -40,6 +40,7 @@ class FullandFinalStatement(Document):
 		for component in components:
 			self.append(component_type, {
 				"status": "Unsettled",
+				"reference_document_type": component if component != "Bonus" else "Additional Salary",
 				"component": component
 			})
 
@@ -55,7 +56,7 @@ class FullandFinalStatement(Document):
 
 	def get_receivable_component(self):
 		return [
-			"Loans",
+			"Loan",
 			"Employee Advance",
 		]
 
@@ -103,7 +104,7 @@ class FullandFinalStatement(Document):
 		difference = self.total_payable_amount - self.total_receivable_amount
 
 		for data in self.payables:
-			if data.amount > 0 and not data.considered_in_salary_slip:
+			if data.amount > 0 and not data.paid_via_salary_slip:
 				account_dict = {
 					"account": data.account,
 					"debit_in_account_currency": flt(data.amount, precision)
@@ -139,32 +140,31 @@ def get_account_and_amount(ref_doctype, ref_document):
 	if not ref_doctype or not ref_document:
 		return None
 
-	if ref_doctype == "Salary Slip" and ref_document:
-		payroll, amount = frappe.db.get_value("Salary Slip", ref_document, ["payroll_entry", "net_pay"])
-		payable_account = None
-		if payroll:
-			payable_account = frappe.db.get_value("Payroll Entry", payroll, "payroll_payable_account")
-			return [payable_account, amount]
+	if ref_doctype == "Salary Slip":
+		salary_details = frappe.db.get_value("Salary Slip", ref_document, ["payroll_entry", "net_pay"], as_dict=1)
+		amount = salary_details.net_pay
+		payable_account = frappe.db.get_value("Payroll Entry", salary_details.payroll_entry, "payroll_payable_account") if salary_details.payroll_entry else None
+		return [payable_account, amount]
 
-	if ref_doctype == "Gratuity" and ref_document:
+	if ref_doctype == "Gratuity":
 		payable_account, amount = frappe.db.get_value("Gratuity", ref_document, ["payable_account", "amount"])
 		return [payable_account, amount]
 
-	if ref_doctype == "Expense Claim" and ref_document:
+	if ref_doctype == "Expense Claim":
 		details = frappe.db.get_value("Expense Claim", ref_document,
 			["payable_account", "grand_total", "total_amount_reimbursed", "total_advance_amount"], as_dict=True)
 		payable_account = details.payable_account
 		amount = details.grand_total - (details.total_amount_reimbursed + details.total_advance_amount)
 		return [payable_account, amount]
 
-	if ref_doctype == "Loan" and ref_document:
+	if ref_doctype == "Loan":
 		details = frappe.db.get_value("Loan", ref_document,
 			["payment_account", "total_payment", "total_amount_paid"], as_dict=1)
 		payment_account = details.payment_account
 		amount = details.total_payment - details.total_amount_paid
 		return [payment_account, amount]
 
-	if ref_doctype == "Employee Advance" and ref_document:
+	if ref_doctype == "Employee Advance":
 		details = frappe.db.get_value("Employee Advance", ref_document,
 			["advance_account","paid_amount", "claimed_amount", "return_amount"], as_dict = 1)
 		payment_account = details.advance_account

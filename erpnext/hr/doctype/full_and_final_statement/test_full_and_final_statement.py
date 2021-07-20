@@ -27,7 +27,7 @@ class TestFullandFinalStatement(unittest.TestCase):
 		payables_bootstraped_component = ["Salary Slip", "Gratuity",
 			"Expense Claim", "Bonus", "Leave Encashment"]
 
-		receivable_bootstraped_component = ["Loans", "Employee Advance"]
+		receivable_bootstraped_component = ["Loan", "Employee Advance"]
 
 		#checking payable s and receivables bootstraped value
 		self.assertEqual([payable.component for payable in fnf.payables], payables_bootstraped_component)

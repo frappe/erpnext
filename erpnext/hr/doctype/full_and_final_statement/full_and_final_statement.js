@@ -18,6 +18,15 @@ frappe.ui.form.on('Full and Final Statement', {
 				}
 			};
 		});
+
+		frm.set_query("reference_document", type, function () {
+			return {
+				filters: {
+					employee: frm.doc.employee,
+					company: frm.doc.company,
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -57,22 +66,6 @@ frappe.ui.form.on('Full and Final Statement', {
 });
 
 frappe.ui.form.on("Full and Final Outstanding Statement", {
-	// Not seems to be Working
-	// reference_document_type: function(frm, cdt, cdn) {
-	// 	let child = locals[cdt][cdn];
-	// 	console.log("Here")
-	// 	if (child.reference_document_type) {
-	// 		console.log("Here tooo")
-	// 		frm.set_query("reference_document", child.parentfield, function () {
-	// 			return {
-	// 				filters: {
-	// 					employee: frm.employee
-	// 				}
-	// 			};
-	// 		});
-	// 	}
-	// },
-
 	reference_document: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if (child.reference_document_type && child.reference_document) {
@@ -93,17 +86,17 @@ frappe.ui.form.on("Full and Final Outstanding Statement", {
 	},
 
 	amount: function(frm) {
-		frm.doc.total_payable_amount = 0;
-		frm.doc.total_receivable_amount = 0;
+		var total_payable_amount = 0;
+		var total_receivable_amount = 0;
 
 		frm.doc.payables.forEach(element => {
-			frm.doc.total_payable_amount += flt(element.amount);
+			total_payable_amount = total_payable_amount + element.amount;
 		});
 
 		frm.doc.receivables.forEach(element => {
-			frm.doc.total_receivable_amount += flt(element.amount);
+			total_receivable_amount = total_receivable_amount + element.amount;
 		});
-		frm.refresh_field("total_payable_amount");
-		frm.refresh_field("total_receivable_amount");
+		frm.set_value("total_payable_amount", flt(total_payable_amount));
+		frm.set_value("total_receivable_amount", flt(total_receivable_amount));
 	}
 });
