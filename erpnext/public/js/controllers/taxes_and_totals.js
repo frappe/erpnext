@@ -67,6 +67,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_discount_amount: function(){
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount")) {
+			this.calculate_item_values();
+			this.calculate_net_total();
 			this.set_discount_amount();
 			this.apply_discount_amount();
 		}
@@ -270,11 +272,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		let me = this;
 		let item_codes = [];
 		let item_rates = {};
+		let item_tax_templates = {};
+
 		$.each(this.frm.doc.items || [], function(i, item) {
 			if (item.item_code) {
 				// Use combination of name and item code in case same item is added multiple times
 				item_codes.push([item.item_code, item.name]);
 				item_rates[item.name] = item.net_rate;
+				item_tax_templates[item.name] = item.item_tax_template;
 			}
 		});
 
@@ -285,18 +290,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					company: me.frm.doc.company,
 					tax_category: cstr(me.frm.doc.tax_category),
 					item_codes: item_codes,
-					item_rates: item_rates
+					item_rates: item_rates,
+					item_tax_templates: item_tax_templates
 				},
 				callback: function(r) {
 					if (!r.exc) {
 						$.each(me.frm.doc.items || [], function(i, item) {
-							if (item.name && r.message.hasOwnProperty(item.name)) {
+							if (item.name && r.message.hasOwnProperty(item.name) && r.message[item.name].item_tax_template) {
 								item.item_tax_template = r.message[item.name].item_tax_template;
 								item.item_tax_rate = r.message[item.name].item_tax_rate;
 								me.add_taxes_from_item_tax_template(item.item_tax_rate);
-							} else {
-								item.item_tax_template = "";
-								item.item_tax_rate = "{}";
 							}
 						});
 					}

@@ -42,6 +42,7 @@
   "manufacturer_part_no",
   "col_break_mfg",
   "bom_no",
+  "work_order",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -444,13 +445,19 @@
   {
    "fieldname": "qty_info_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-02 11:44:36.553064",
+ "modified": "2021-07-17 16:22:17.788913",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

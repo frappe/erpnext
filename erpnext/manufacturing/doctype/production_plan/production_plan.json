@@ -32,6 +32,9 @@
   "po_items",
   "section_break_25",
   "prod_plan_references",
+  "section_break_24",
+  "get_sub_assembly_items",
+  "sub_assembly_items",
   "material_request_planning",
   "include_non_stock_items",
   "include_subcontracted_items",
@@ -187,7 +190,7 @@
    "depends_on": "get_items_from",
    "fieldname": "get_items",
    "fieldtype": "Button",
-   "label": "Get Items For Work Order"
+   "label": "Get Finished Goods for Manufacture"
   },
   {
    "fieldname": "po_items",
@@ -199,7 +202,7 @@
   {
    "fieldname": "material_request_planning",
    "fieldtype": "Section Break",
-   "label": "Material Request Planning"
+   "label": "Material Requirement Planning"
   },
   {
    "default": "1",
@@ -237,12 +240,13 @@
   },
   {
    "fieldname": "section_break_27",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "fieldname": "mr_items",
    "fieldtype": "Table",
-   "label": "Material Request Plan Item",
+   "label": "Raw Materials",
    "no_copy": 1,
    "options": "Material Request Plan Item"
   },
@@ -337,13 +341,30 @@
    "hidden": 1,
    "label": "Production Plan Item Reference",
    "options": "Production Plan Item Reference"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "sub_assembly_items",
+   "fieldtype": "Table",
+   "label": "Sub Assembly Items",
+   "no_copy": 1,
+   "options": "Production Plan Sub Assembly Item"
+  },
+  {
+   "fieldname": "get_sub_assembly_items",
+   "fieldtype": "Button",
+   "label": "Get Sub Assembly Items"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-24 16:59:03.643211",
+ "modified": "2021-06-28 20:00:33.905114",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

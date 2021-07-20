@@ -481,6 +481,7 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 	if not salary_structure:
 		salary_structure = payroll_frequency + " Salary Structure Test for Salary Slip"
 
+
 	employee = frappe.db.get_value("Employee", {"user_id": user})
 	salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee=employee)
 	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})

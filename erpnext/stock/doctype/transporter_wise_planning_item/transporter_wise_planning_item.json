@@ -28,7 +28,8 @@
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Delivery Date"
+   "label": "Delivery Date",
+   "read_only": 1
   },
   {
    "fieldname": "weight_to_deliver",
@@ -49,7 +50,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Source Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only": 1
   },
   {
    "fieldname": "related_delivery_planning",
@@ -73,7 +75,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-14 12:47:53.487699",
+ "modified": "2021-06-29 12:46:09.649071",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Transporter Wise Planning Item",

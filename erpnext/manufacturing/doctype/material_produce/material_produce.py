@@ -32,7 +32,6 @@ class MaterialProduce(Document):
             for res in self.material_produce_details:
                 total_qty += flt(res.qty_produced, res.precision('qty_produced'))
                 line_id = res.line_ref
-
             l_doc = frappe.get_doc("Material Produce Item", line_id)
             # if l_doc.qty_produced:
             #     if total_qty > l_doc.qty_produced:
@@ -287,7 +286,7 @@ class MaterialProduce(Document):
 
 
     @frappe.whitelist()
-    def add_details_line(self, partial_produce, bom, type, line_id, work_order, item_code, warehouse,qty_produced=None,batch_size=None, data=None, amount=None):
+    def add_details_line(self, partial_produce, bom, type,line_id, work_order, item_code, warehouse,qty_produced=None,batch_size=None, data=None, amount=None):
         precision1 = get_field_precision(frappe.get_meta("Material Produce Detail").get_field("qty_produced"))
         precision2 = get_field_precision(frappe.get_meta("Material Produce").get_field("batch_size"))
         precision3 = get_field_precision(frappe.get_meta("Material Produce").get_field("amount"))
@@ -354,6 +353,7 @@ class MaterialProduce(Document):
             else:
                 per_item_rate = 0
 
+            wo = frappe.get_doc("Work Order", self.work_order)
             if item.has_batch_no:
                 remaining_size = qty_produced
                 if batch_size:
@@ -368,7 +368,10 @@ class MaterialProduce(Document):
                                 "batch": batch_option if item.has_batch_no else None,
                                 "rate": flt(per_item_rate, precision4),
                                 "weight": item.weight_per_unit,
-                                "line_ref": line_id
+                                "line_ref": line_id,
+                                # "work_order_total_cost":wo.work_order_total_cost,
+                                # "scrap_total_cost":wo.scrap_total_cost
+
                             })
                         else:
                             lst.append({
@@ -380,7 +383,9 @@ class MaterialProduce(Document):
                                 "batch": batch_option if item.has_batch_no else None,
                                 "rate": flt(per_item_rate, precision4),
                                 "weight": item.weight_per_unit,
-                                "line_ref": line_id
+                                "line_ref": line_id,
+                                # "work_order_total_cost":wo.work_order_total_cost,
+                                # "scrap_total_cost":wo.scrap_total_cost
                             })
                             break
                         remaining_size -= batch_size
@@ -396,7 +401,9 @@ class MaterialProduce(Document):
                         "batch": batch_option if item.has_batch_no else None,
                         "rate": flt(per_item_rate, precision4),
                         "weight": item.weight_per_unit,
-                        "line_ref": line_id
+                        "line_ref": line_id,
+                        # "work_order_total_cost":wo.work_order_total_cost,
+                        # "scrap_total_cost":wo.scrap_total_cost
                     })
             else:
                 lst.append({
@@ -407,7 +414,9 @@ class MaterialProduce(Document):
                     "has_batch_no": item.has_batch_no,
                     "weight": item.weight_per_unit,
                     "rate": flt(per_item_rate, precision4),
-                    "line_ref": line_id
+                    "line_ref": line_id,
+                    # "work_order_total_cost":wo.work_order_total_cost,
+                    # "scrap_total_cost":wo.scrap_total_cost
                 })
             self.cost_details_calculation()
             return lst
