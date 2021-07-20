@@ -817,12 +817,8 @@ def update_taxable_values(doc, method):
 				considered_rows.append(prev_row_id)
 
 	for item in doc.get('items'):
-		if doc.apply_discount_on == 'Grand Total' and doc.discount_amount:
-			proportionate_value = item.base_amount if doc.base_total else item.qty
-			total_value = doc.base_total if doc.base_total else doc.total_qty
-		else:
-			proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
-			total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
+		proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
+		total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
 
 		applicable_charges = flt(flt(proportionate_value * (flt(additional_taxes) / flt(total_value)),
 			item.precision('taxable_value')))
@@ -838,8 +834,16 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		depreciation_amount = (flt(row.value_after_depreciation) -
-			flt(row.expected_value_after_useful_life)) / depreciation_left
+		# if the Depreciation Schedule is being prepared for the first time
+		if not asset.flags.increase_in_asset_life:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / depreciation_left
+
+		# if the Depreciation Schedule is being modified after Asset Repair
+		else:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
+		
 	else:
 		rate_of_depreciation = row.rate_of_depreciation
 		# if its the first depreciation
