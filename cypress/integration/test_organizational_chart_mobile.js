@@ -7,25 +7,25 @@ context('Organizational Chart Mobile', () => {
 
 		cy.window().its('frappe.csrf_token').then(csrf_token => {
 			return cy.request({
-				url: `/api/method/erpnext.tests.ui_test_helpers.create_employee_records`,
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-					'X-Frappe-CSRF-Token': csrf_token
-				},
-				timeout: 60000
-			})
-			.then(res => {
-				expect(res.status).eq(200);
-				cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-				cy.get('@input')
-					.clear({ force: true })
-					.type('Test Org Chart{enter}', { force: true })
-					.blur({ force: true });
+					url: `/api/method/erpnext.tests.ui_test_helpers.create_employee_records`,
+					method: 'POST',
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+						'X-Frappe-CSRF-Token': csrf_token
+					},
+					timeout: 60000
+				})
+				.then(res => {
+					expect(res.status).eq(200);
+					cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+					cy.get('@input')
+						.clear({ force: true })
+						.type('Test Org Chart{enter}', { force: true })
+						.blur({ force: true });
 
-				cy.get('body').click();
-			});
+					cy.get('body').click();
+				});
 		});
 	});
 
