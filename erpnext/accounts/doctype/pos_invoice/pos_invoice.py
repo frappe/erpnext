@@ -140,6 +140,7 @@ class POSInvoice(SalesInvoice):
 					return
 
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
+
 				item_code, warehouse, qty = frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty)
 				if flt(available_stock) <= 0:
 					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.')
@@ -213,8 +214,9 @@ class POSInvoice(SalesInvoice):
 		for d in self.get("items"):
 			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
 			if not is_stock_item:
-				frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice. ")
-					.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
+				if not frappe.db.exists('Product Bundle', d.item_code):
+					frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice.")
+						.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
@@ -455,15 +457,36 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
+	if frappe.db.get_value('Item', item_code, 'is_stock_item'):
+		bin_qty = get_bin_qty(item_code, warehouse)
+		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
+		return bin_qty - pos_sales_qty
+	else:
+		if frappe.db.exists('Product Bundle', item_code):
+			return get_bundle_availability(item_code, warehouse)
+
+def get_bundle_availability(bundle_item_code, warehouse):
+	product_bundle = frappe.get_doc('Product Bundle', bundle_item_code)
+
+	bundle_bin_qty = 1000000
+	for item in product_bundle.items:
+		item_bin_qty = get_bin_qty(item.item_code, warehouse)
+		item_pos_reserved_qty = get_pos_reserved_qty(item.item_code, warehouse)
+		available_qty = item_bin_qty - item_pos_reserved_qty
+
+		max_available_bundles = available_qty / item.qty
+		if bundle_bin_qty > max_available_bundles:
+			bundle_bin_qty = max_available_bundles
+
+	pos_sales_qty = get_pos_reserved_qty(bundle_item_code, warehouse)
+	return bundle_bin_qty - pos_sales_qty
+
+def get_bin_qty(item_code, warehouse):
 	bin_qty = frappe.db.sql("""select actual_qty from `tabBin`
 		where item_code = %s and warehouse = %s
 		limit 1""", (item_code, warehouse), as_dict=1)
 
-	pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
-
-	bin_qty = bin_qty[0].actual_qty or 0 if bin_qty else 0
-
-	return bin_qty - pos_sales_qty
+	return bin_qty[0].actual_qty or 0 if bin_qty else 0
 
 def get_pos_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql("""select sum(p_item.qty) as qty
