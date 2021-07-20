@@ -21,8 +21,6 @@ context('Organizational Chart', () => {
 					.clear({ force: true })
 					.type('Test Org Chart{enter}', { force: true })
 					.blur({ force: true });
-
-				cy.get('body').click();
 			});
 		});
 	});
