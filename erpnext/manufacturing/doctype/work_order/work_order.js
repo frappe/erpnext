@@ -176,7 +176,23 @@ frappe.ui.form.on("Work Order", {
 		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
 			frm.set_intro(__("Submit this Work Order for further processing."));
 		}
-
+		
+		if(frm.doc.status === "Completed" || frm.doc.status === "Closed"){
+		frappe.call({
+			method: "get_details",
+			doc: frm.doc,
+			callback: function(r){
+				if (r.message==1) {
+					frm.add_custom_button(__('Adjust Specific Gravity'),function() {
+						var usr = frappe.session.user
+						frappe.new_doc("Specific Gravity", {"work_order" : frm.doc.name,"item_for_manufacturing":frm.doc.production_item ,
+						"item_name":frm.doc.item_name,"quantity_manufactured":frm.doc.qty,"actual_fg_weight":frm.doc.actual_fg_weight,"yeild":frm.doc.actual_yeild})
+					
+					});
+				}
+			}
+		});
+		}
 		if (frm.doc.docstatus===1) {
 			frm.trigger('show_progress_for_items');
 			frm.trigger('show_progress_for_operations');
