@@ -14,6 +14,7 @@
  "hide_custom": 0,
  "icon": "crm",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "CRM",
  "links": [
@@ -100,16 +101,6 @@
    "is_query_report": 0,
    "label": "Appointment",
    "link_to": "Appointment",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Newsletter",
-   "link_to": "Newsletter",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -256,16 +247,6 @@
    "type": "Link"
   },
   {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Social Media Post",
-   "link_to": "Social Media Post",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Settings",
@@ -303,34 +284,12 @@
    "type": "Link"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "SMS Center",
-   "link_to": "SMS Center",
+   "label": "Marketing",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "SMS Log",
-   "link_to": "SMS Log",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "SMS Settings",
-   "link_to": "SMS Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "type": "Card Break"
   },
   {
    "dependencies": "",
@@ -338,6 +297,26 @@
    "is_query_report": 0,
    "label": "Email Group",
    "link_to": "Email Group",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Newsletter",
+   "link_to": "Newsletter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "LinkedIn Settings",
+   "link_to": "LinkedIn Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -356,14 +335,52 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "LinkedIn Settings",
-   "link_to": "LinkedIn Settings",
+   "label": "Social Media Post",
+   "link_to": "Social Media Post",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SMS Campaign",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SMS Settings",
+   "link_to": "SMS Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SMS Center",
+   "link_to": "SMS Center",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SMS Log",
+   "link_to": "SMS Log",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:36.871352",
+ "modified": "2021-07-21 00:39:59.581899",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
