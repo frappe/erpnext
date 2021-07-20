@@ -62,9 +62,8 @@ class ProductionPlan(Document):
 			mr_filter += " and mr.transaction_date <= %(to_date)s"
 		if self.warehouse:
 			mr_filter += " and mr_item.warehouse = %(warehouse)s"
-
 		if self.item_code:
-			item_filter += " and mr_item.item_code = %(item)s"
+			item_filter += " and mr_item.item_code like %(item)s"
 
 		pending_mr = frappe.db.sql("""
 			select distinct mr.name, mr.transaction_date
@@ -79,7 +78,7 @@ class ProductionPlan(Document):
 				"from_date": self.from_date,
 				"to_date": self.to_date,
 				"warehouse": self.warehouse,
-				"item": self.item_code,
+				"item": '%' + self.item_code + '%',
 				"company": self.company
 			}, as_dict=1)
 
@@ -118,7 +117,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code like {0}'.format(frappe.db.escape('%'+ self.item_code +'%'))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
@@ -127,9 +126,6 @@ class ProductionPlan(Document):
 			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
 					and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
-
-		if self.item_code:
-			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
@@ -154,7 +150,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
+			item_condition = " and mr_item.item_code like {0}".format(frappe.db.escape('%'+ self.item_code +'%'))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description,
 			(qty - ordered_qty) * conversion_factor as pending_qty
@@ -693,9 +689,8 @@ def get_sales_orders(self):
 		so_filter += " and so.project = %(project)s"
 	if self.sales_order_status:
 		so_filter += "and so.status = %(sales_order_status)s"
-
 	if self.item_code:
-		item_filter += " and so_item.item_code = %(item)s"
+		item_filter += " and so_item.item_code like %(item)s"
 
 	open_so = frappe.db.sql("""
 		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
@@ -715,7 +710,7 @@ def get_sales_orders(self):
 			"to_date": self.to_date,
 			"customer": self.customer,
 			"project": self.project,
-			"item": self.item_code,
+			"item": '%' + self.item_code + '%',
 			"company": self.company,
 			"sales_order_status": self.sales_order_status
 		}, as_dict=1)

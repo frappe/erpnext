@@ -98,11 +98,10 @@
    "label": "Filters"
   },
   {
+   "description": "Searches for item codes like this string",
    "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item Code",
-   "options": "Item"
+   "fieldtype": "Data",
+   "label": "Item Code"
   },
   {
    "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
@@ -364,7 +363,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-28 20:00:33.905114",
+ "modified": "2021-07-20 17:55:37.164051",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

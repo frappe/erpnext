@@ -42,7 +42,7 @@ frappe.ui.form.on('Production Plan', {
 					'is_stock_item': 1,
 				}
 			}
-		}
+		};
 
 		frm.fields_dict['po_items'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
@@ -52,7 +52,7 @@ frappe.ui.form.on('Production Plan', {
 					filters:{'item': cstr(d.item_code)}
 				}
 			} else frappe.msgprint(__("Please enter Item first"));
-		}
+		};
 
 		frm.fields_dict['mr_items'].grid.get_field('warehouse').get_query = function(doc) {
 			return {
@@ -60,7 +60,7 @@ frappe.ui.form.on('Production Plan', {
 					company: doc.company
 				}
 			}
-		}
+		};
 	},
 
 	refresh: function(frm) {
