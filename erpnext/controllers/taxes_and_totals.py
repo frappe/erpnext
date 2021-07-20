@@ -898,8 +898,9 @@ class calculate_taxes_and_totals(object):
 						item.margin_type = None
 						item.margin_rate_or_amount = 0.0
 
-			if item.margin_type and flt(item.rate) > flt(item.price_list_rate):
-				margin_amount = flt(item.rate) - flt(item.price_list_rate)
+			rate_before_discount = flt(item.rate) + flt(item.discount_amount)
+			if item.margin_type and rate_before_discount > flt(item.price_list_rate):
+				margin_amount = rate_before_discount - flt(item.price_list_rate)
 				if item.margin_type == "Amount":
 					item.margin_rate_or_amount = margin_amount
 				elif item.margin_type == "Percentage":
