@@ -1010,21 +1010,21 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Check GLE for Purchase Invoice
 		# Zero net effect on final TDS Payable on invoice
 		expected_gle = [
-			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
-			['_Test Account Excise Duty - _TC', 0, 3000],
-			['Creditors - _TC', 0, 27000],
-			['TDS Payable - _TC', 3000, 3000]
+			['_Test Account Cost for Goods Sold - _TC', 30000],
+			['_Test Account Excise Duty - _TC', -3000],
+			['Creditors - _TC', -27000],
+			['TDS Payable - _TC', 0]
 		]
 
-		gl_entries = frappe.db.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, sum(debit - credit) as amount
 			from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no=%s
+			group by account
 			order by account asc""", (purchase_invoice.name), as_dict=1)
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(expected_gle[i][1], gle.amount)
 
 def update_tax_witholding_category(company, account, date):
 	from erpnext.accounts.utils import get_fiscal_year

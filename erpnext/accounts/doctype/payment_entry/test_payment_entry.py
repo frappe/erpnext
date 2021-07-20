@@ -589,9 +589,9 @@ class TestPaymentEntry(unittest.TestCase):
 		party_account_balance = get_balance_on(account=pe.paid_from, cost_center=pe.cost_center)
 
 		self.assertEqual(pe.cost_center, si.cost_center)
-		self.assertEqual(expected_account_balance, account_balance)
-		self.assertEqual(expected_party_balance, party_balance)
-		self.assertEqual(expected_party_account_balance, party_account_balance)
+		self.assertEqual(flt(expected_account_balance), account_balance)
+		self.assertEqual(flt(expected_party_balance), party_balance)
+		self.assertEqual(flt(expected_party_account_balance), party_account_balance)
 
 def create_payment_terms_template():
 
