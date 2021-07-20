@@ -195,7 +195,6 @@ frappe.ui.form.on('Patient Encounter', {
 			freeze: true,
 			freeze_message: __('Fetching Treatment Plans'),
 			callback: function() {
-				console.log(frm.patient_age);
 				new frappe.ui.form.MultiSelectDialog({
 					doctype: "Treatment Plan Template",
 					target: this.cur_frm,
@@ -206,10 +205,9 @@ frappe.ui.form.on('Patient Encounter', {
 						return {
 							filters: {
 							}
-						}
+						};
 					},
 					action(selections) {
-						console.log(selections);
 						frappe.call({
 							method: 'fill_treatment_plan',
 							doc: frm.doc,
