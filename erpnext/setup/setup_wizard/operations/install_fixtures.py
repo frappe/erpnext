@@ -448,6 +448,8 @@ def install_defaults(args=None):
 	set_active_domains(args)
 	update_stock_settings()
 	update_shopping_cart_settings(args)
+
+	args.update({"set_default": 1})
 	create_bank_account(args)
 
 def set_global_defaults(args):
@@ -479,17 +481,17 @@ def update_stock_settings():
 	stock_settings.save()
 
 def create_bank_account(args):
-	if not args.bank_account:
+	if not args.get('bank_account'):
 		return
 
-	company_name = args.company_name
+	company_name = args.get('company_name')
 	bank_account_group =  frappe.db.get_value("Account",
 		{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
 			"company": company_name})
 	if bank_account_group:
 		bank_account = frappe.get_doc({
 			"doctype": "Account",
-			'account_name': args.bank_account,
+			'account_name': args.get('bank_account'),
 			'parent_account': bank_account_group,
 			'is_group':0,
 			'company': company_name,
@@ -498,10 +500,13 @@ def create_bank_account(args):
 		try:
 			doc = bank_account.insert()
 
-			frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
+			if args.get('set_default'):
+				frappe.db.set_value("Company", args.get('company_name'), "default_bank_account", bank_account.name, update_modified=False)
+
+			return doc
 
 		except RootNotEditable:
-			frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
+			frappe.throw(_("Bank account cannot be named as {0}").format(args.get('bank_account')))
 		except frappe.DuplicateEntryError:
 			# bank account same as a CoA entry
 			pass
