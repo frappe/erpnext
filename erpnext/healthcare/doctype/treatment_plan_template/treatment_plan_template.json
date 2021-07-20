@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "autoname": "field:template_name",
  "creation": "2021-06-10 10:14:17.901273",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -68,7 +69,8 @@
   {
    "fieldname": "template_name",
    "fieldtype": "Data",
-   "label": "Name"
+   "label": "Name",
+   "unique": 1
   },
   {
    "fieldname": "patient_age_from",
@@ -132,7 +134,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-11 16:01:08.299516",
+ "modified": "2021-07-20 14:35:19.789203",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Treatment Plan Template",

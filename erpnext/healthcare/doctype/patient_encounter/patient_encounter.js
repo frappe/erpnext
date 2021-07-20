@@ -201,7 +201,7 @@ frappe.ui.form.on('Patient Encounter', {
 					doctype: "Treatment Plan Template",
 					target: this.cur_frm,
 					setters: {
-						template_name: "",
+						name: "",
 						medical_department: "",
 					},
 //					date_field: "transaction_date",
