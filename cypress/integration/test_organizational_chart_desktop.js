@@ -14,8 +14,7 @@ context('Organizational Chart', () => {
 					'X-Frappe-CSRF-Token': csrf_token
 				},
 				timeout: 60000
-			})
-			.then(res => {
+			}).then(res => {
 				expect(res.status).eq(200);
 				cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
 				cy.get('@input')
