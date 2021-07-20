@@ -37,43 +37,32 @@ class PatientEncounter(Document):
 	@staticmethod
 	def get_applicable_treatment_plans(patient=None, symptoms=None, diagnosis=None):
 		plans = frappe.db.get_list('Treatment Plan Template', fields='*')
-		print(plans)
 		return plans
-		filters = {}
-		if symptoms:
-			filters['']
 
 	@frappe.whitelist(allow_guest=True)
 	def fill_treatment_plan(self, treatment_plan=None):
 		plan = frappe.db.get_list('Treatment Plan Template', fields='*')[0]
-		print(plan)
 		plan_items = frappe.db.sql("""
-		select
+		SELECT
 			*
-		from
+		FROM
 			`tabTreatment Plan Template Item`
-		where
+		WHERE
 			parent=%s
 		""", plan['name'], as_dict=1)
 		for plan_item in plan_items:
 			self.fill_treatment_plan_item(plan_item)
 
 		drugs = frappe.db.sql("""
-			select
+			SELECT
 				*
-			from
+			FROM
 				`tabDrug Prescription`
-			where
+			WHERE
 				parent=%s
 			""", plan['name'], as_dict=1)
-		print(drugs)
 		for drug in drugs:
 			self.fill_treatment_plan_drug(drug)
-
-		return plan
-		filters = {}
-		if symptoms:
-			filters['']
 
 	@frappe.whitelist(allow_guest=True)
 	def fill_treatment_plan_drug(self, drug=None):

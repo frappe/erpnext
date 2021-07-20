@@ -191,24 +191,20 @@ frappe.ui.form.on('Patient Encounter', {
 		frappe.call({
 			method: 'get_applicable_treatment_plans',
 			doc: frm.doc,
+			args: [frm.doc.patient],
 			freeze: true,
 			freeze_message: __('Fetching Treatment Plans'),
 			callback: function() {
 				console.log(frm.patient_age);
-//				if (frm.patient.patient_age) {
-//				};
 				new frappe.ui.form.MultiSelectDialog({
 					doctype: "Treatment Plan Template",
 					target: this.cur_frm,
 					setters: {
-						name: "",
 						medical_department: "",
 					},
-//					date_field: "transaction_date",
 					get_query() {
 						return {
 							filters: {
-//								patient_age_from: ['<', frm.patient_age]
 							}
 						}
 					},
@@ -223,7 +219,7 @@ frappe.ui.form.on('Patient Encounter', {
 						refresh_field('procedure_prescription');
 						refresh_field('lab_test_prescription');
 						refresh_field('therapies');
-//						cur_dialog.hide();
+						cur_dialog.hide();
 					}
 				});
 
