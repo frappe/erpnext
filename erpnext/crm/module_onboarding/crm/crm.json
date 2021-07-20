@@ -16,7 +16,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/CRM",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-08 14:05:42.644448",
+ "modified": "2021-07-21 00:33:00.007265",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -32,7 +32,16 @@
    "step": "Create Opportunity"
   },
   {
-   "step": "Create and Send Quotation"
+   "step": "Campaign"
+  },
+  {
+   "step": "Email Group"
+  },
+  {
+   "step": "Newsletter"
+  },
+  {
+   "step": "Social Media Post"
   }
  ],
  "subtitle": "Lead, Opportunity, Customer, and more.",

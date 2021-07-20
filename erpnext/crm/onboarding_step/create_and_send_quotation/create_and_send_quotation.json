@@ -5,7 +5,6 @@
  "doctype": "Onboarding Step",
  "idx": 0,
  "is_complete": 0,
- "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
  "modified": "2020-05-28 21:07:11.461172",
@@ -13,6 +12,7 @@
  "name": "Create and Send Quotation",
  "owner": "Administrator",
  "reference_document": "Quotation",
+ "show_form_tour": 0,
  "show_full_form": 1,
  "title": "Create and Send Quotation",
  "validate_action": 1

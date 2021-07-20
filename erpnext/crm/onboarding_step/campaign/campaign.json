@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Let\u2019s create a new Campaign",
+ "creation": "2021-07-21 00:25:12.886075",
+ "description": "# Campaign\n\nA Campaign is an implementation of a sales strategy to promote your product or service.\n\nYou can tag a campaign in Lead, Opportunity, and Quotation and get a report on the effectiveness of a particular campaign. Also, you can automate email campaigning for the Leads.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-07-21 00:25:12.886075",
+ "modified_by": "Administrator",
+ "name": "Campaign",
+ "owner": "Administrator",
+ "reference_document": "Campaign",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Campaign",
+ "validate_action": 1
+}

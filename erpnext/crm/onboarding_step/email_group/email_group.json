@@ -1,0 +1,21 @@
+{
+ "action": "Go to Page",
+ "action_label": "Click here to learn more",
+ "creation": "2021-07-21 00:27:28.112277",
+ "description": "# Email Group\n\nAn Email Group is a list of subscriber email IDs to which you send newsletters. You can pull emails into Email Groups from various documents like Lead, Opportunity, Contacts, Employees to list a few.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-07-21 00:27:28.112277",
+ "modified_by": "Administrator",
+ "name": "Email Group",
+ "owner": "Administrator",
+ "path": "https://docs.erpnext.com/docs/v13/user/manual/en/CRM/email_group",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Email Group",
+ "validate_action": 1
+}

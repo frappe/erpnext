@@ -1,0 +1,21 @@
+{
+ "action": "Go to Page",
+ "action_label": "Click here to learn more about Newsletter",
+ "creation": "2021-07-21 00:28:41.649039",
+ "description": "# Newsletter\nA newsletter is an email that is sent to a specific group of subscribers periodically.\n\nYou can draft Newsletters in ERPNext, with text and images, tag the Email Group to whom it will be sent and schedule to send it at a preferred time.\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-07-21 00:28:41.649039",
+ "modified_by": "Administrator",
+ "name": "Newsletter",
+ "owner": "Administrator",
+ "path": "https://docs.erpnext.com/docs/v13/user/manual/en/CRM/newsletter",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Newsletter",
+ "validate_action": 1
+}
