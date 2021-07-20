@@ -34,9 +34,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
 	},
 
-	calculate_taxes_and_totals: async function(update_paid_amount) {
+	calculate_taxes_and_totals: function(update_paid_amount) {
 		this.discount_amount_applied = false;
-		await this._calculate_taxes_and_totals();
+		this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
 
 		// Advance calculation applicable to Sales /Purchase Invoice
@@ -65,20 +65,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.refresh_fields();
 	},
 
-	calculate_discount_amount: function(){
+	calculate_discount_amount: function() {
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount")) {
 			this.set_discount_amount();
 			this.apply_discount_amount();
 		}
 	},
 
-	_calculate_taxes_and_totals: async function() {
+	_calculate_taxes_and_totals: function() {
 		this.validate_conversion_rate();
 		this.calculate_item_values();
-		await this.update_item_tax_map();
-	},
-
-	_calculate_tax_values : function() {
 		this.initialize_taxes();
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
@@ -265,48 +261,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			});
 
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
-	},
-
-	update_item_tax_map: async function() {
-		let me = this;
-		let item_codes = [];
-		let item_rates = {};
-		let item_tax_templates = {};
-
-		$.each(this.frm.doc.items || [], function(i, item) {
-			if (item.item_code) {
-				// Use combination of name and item code in case same item is added multiple times
-				item_codes.push([item.item_code, item.name]);
-				item_rates[item.name] = item.net_rate;
-				item_tax_templates[item.name] = item.item_tax_template;
-			}
-		});
-
-		if (item_codes.length) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_item_tax_info",
-				args: {
-					company: me.frm.doc.company,
-					tax_category: cstr(me.frm.doc.tax_category),
-					item_codes: item_codes,
-					item_rates: item_rates,
-					item_tax_templates: item_tax_templates
-				},
-				callback: function(r) {
-					if (!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if (item.name && r.message.hasOwnProperty(item.name) && r.message[item.name].item_tax_template) {
-								item.item_tax_template = r.message[item.name].item_tax_template;
-								item.item_tax_rate = r.message[item.name].item_tax_rate;
-								me.add_taxes_from_item_tax_template(item.item_tax_rate);
-							}
-						});
-					}
-
-					me._calculate_tax_values();
-				}
-			});
-		}
 	},
 
 	add_taxes_from_item_tax_template: function(item_tax_map) {
