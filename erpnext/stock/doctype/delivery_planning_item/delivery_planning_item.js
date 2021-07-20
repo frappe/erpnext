@@ -13,6 +13,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 	split: function(frm) {
 			var new_supplier;
 			var new_warehouse;
+			var new_date;
 			let d = new frappe.ui.Dialog({
 			title: 'Split Planning Item',
 			fields: [
@@ -22,7 +23,14 @@ frappe.ui.form.on('Delivery Planning Item', {
 					fieldtype: 'Link',
 				    options: "Supplier",
 				    default: frm.doc.transporter,
+				    depends_on: "eval: doc.supplier_dc == 0",
 
+				},
+				{
+					label: 'Deliver Date',
+					fieldname: 'delivery_date',
+					fieldtype: 'Date',
+					reqd: 1
 				},
 				{
 					label: 'Qty To Deliver',
@@ -87,7 +95,8 @@ frappe.ui.form.on('Delivery Planning Item', {
 							n_transporter : values.transporter,
 							n_qty : values.qty_to_deliver,
 							n_src_warehouse : new_warehouse,
-							n_supplier : new_supplier
+							n_supplier : new_supplier,
+							n_date : values.delivery_date
 						  },
 
 					callback: function(r){
@@ -140,12 +149,25 @@ frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
     });
 });
 
-frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
-    cur_frm.set_query("supplier", function() {
-        return {
-           "filters": {
-                "is_transporter": 1,
-            }
-        }
-    });
+frappe.ui.form.on("Delivery Planning Item", "before_save", function(frm) {
+
+		if(frm.doc.approved == "Yes" || frm.doc.approved == "No")
+			{
+				frm.set_df_property('transporter','read_only',1)
+				frm.set_df_property('sorce_warehouse','read_only',1)
+				frm.set_df_property('qty_to_deliver','read_only',1)
+				frm.set_df_property('approved','read_only',1)
+				frm.set_df_property('supplier_dc','read_only',1)
+				frm.set_df_property('supplier','read_only',1)
+				frm.set_df_property('split','hidden',1)
+				frm.refresh_field("transporter")
+				frm.refresh_field("sorce_warehouse")
+				frm.refresh_field("qty_to_deliver")
+				frm.refresh_field("supplier_dc")
+				frm.refresh_field("approved")
+				frm.refresh_field("supplier")
+	            frm.refresh_field("split")
+			}
+
 });
+
