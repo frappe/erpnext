@@ -239,6 +239,10 @@ class TestProductionPlan(unittest.TestCase):
 			"planned_qty": 3
 		})
 
+		mr_items = get_items_for_material_requests(pln.as_dict())
+		for d in mr_items:
+			pln.append('mr_items', d)
+
 		pln.get_sub_assembly_items('In House')
 		pln.submit()
 		pln.make_work_order()
