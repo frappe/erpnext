@@ -120,7 +120,7 @@ class ProductionPlan(Document):
 		if self.item_code:
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
-		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
+		items = frappe.db.sql("""select distinct parent, item_code, warehouse, delivery_date,
 			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and qty > work_order_qty
@@ -157,7 +157,7 @@ class ProductionPlan(Document):
 			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description,
-			(qty - ordered_qty) * conversion_factor as pending_qty
+			(qty - ordered_qty) * conversion_factor as pending_qty, schedule_date as delivery_date
 			from `tabMaterial Request Item` mr_item
 			where parent in (%s) and docstatus = 1 and qty > ordered_qty
 			and exists (select name from `tabBOM` bom where bom.item=mr_item.item_code
@@ -169,8 +169,11 @@ class ProductionPlan(Document):
 
 	def add_items(self, items):
 		refs = {}
+		mfr_days = frappe.db.get_single_value('Manufacturing Settings', 'production_lead_time_days')
 		for data in items:
 			item_details = get_item_details(data.item_code)
+			del_date = data.get('delivery_date')
+			start_date = add_days(del_date, -cint(mfr_days)) if del_date else nowdate()
 			if self.combine_items:
 				if item_details.bom_no in refs:
 					refs[item_details.bom_no]['so_details'].append({
@@ -179,12 +182,14 @@ class ProductionPlan(Document):
 						'qty': data.pending_qty
 					})
 					refs[item_details.bom_no]['qty'] += data.pending_qty
+					refs[item_details.bom_no]['start_date'] = min(start_date, refs[item_details.bom_no]['start_date'])
 					continue
 
 				else:
 					refs[item_details.bom_no] = {
 						'qty': data.pending_qty,
 						'po_item_ref': data.name,
+						'start_date': start_date,
 						'so_details': []
 					}
 					refs[item_details.bom_no]['so_details'].append({
@@ -202,7 +207,7 @@ class ProductionPlan(Document):
 				'bom_no': item_details and item_details.bom_no or '',
 				'planned_qty': data.pending_qty,
 				'pending_qty': data.pending_qty,
-				'planned_start_date': now_datetime(),
+				'planned_start_date': start_date,
 				'product_bundle_item': data.parent_item
 			})
 
@@ -221,6 +226,7 @@ class ProductionPlan(Document):
 				po_item.planned_qty = refs[po_item.bom_no]['qty']
 				po_item.pending_qty = refs[po_item.bom_no]['qty']
 				po_item.sales_order = ''
+				po_item.planned_start_date = refs[po_item.bom_no]['start_date']
 			self.add_pp_ref(refs)
 
 	def add_pp_ref(self, refs):
