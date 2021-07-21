@@ -6,6 +6,7 @@ import unittest
 import frappe
 import erpnext
 from erpnext.non_profit.doctype.member.member import create_member
+from erpnext.non_profit.doctype.membership.membership import update_halted_razorpay_subscription
 from frappe.utils import nowdate, add_months
 
 class TestMembership(unittest.TestCase):
@@ -13,11 +14,16 @@ class TestMembership(unittest.TestCase):
 		plan = setup_membership()
 
 		# make test member
-		self.member_doc = create_member(frappe._dict({
-				'fullname': "_Test_Member",
-				'email': "_test_member_erpnext@example.com",
-				'plan_id': plan.name
-		}))
+		self.member_doc = create_member(
+			frappe._dict({
+				"fullname": "_Test_Member",
+				"email": "_test_member_erpnext@example.com",
+				"plan_id": plan.name,
+				"subscription_id": "sub_DEX6xcJ1HSW4CR",
+				"customer_id": "cust_C0WlbKhp3aLA7W",
+				"subscription_status": "Active"
+			})
+		)
 		self.member_doc.make_customer_and_link()
 		self.member = self.member_doc.name
 
@@ -50,6 +56,20 @@ class TestMembership(unittest.TestCase):
 			"from_date": add_months(nowdate(), 2),
 			"to_date": add_months(nowdate(), 3),
 		})
+
+	def test_halted_memberships(self):
+		make_membership(self.member, {
+			"from_date": add_months(nowdate(), 2),
+			"to_date": add_months(nowdate(), 3)
+		})
+
+		self.assertEqual(frappe.db.get_value("Member", self.member, "subscription_status"), "Active")
+		payload = get_subscription_payload()
+		update_halted_razorpay_subscription(data=payload)
+		self.assertEqual(frappe.db.get_value("Member", self.member, "subscription_status"), "Halted")
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 def set_config(key, value):
 	frappe.db.set_value("Non Profit Settings", None, key, value)
@@ -116,3 +136,27 @@ def setup_membership():
 		plan = frappe.get_doc("Membership Type", "_rzpy_test_milythm")
 
 	return plan
+
+def get_subscription_payload():
+	return {
+		"entity": "event",
+		"account_id": "acc_BFQ7uQEaa7j2z7",
+		"event": "subscription.halted",
+		"contains": [
+			"subscription"
+		],
+		"payload": {
+			"subscription": {
+				"entity": {
+					"id": "sub_DEX6xcJ1HSW4CR",
+					"entity": "subscription",
+					"plan_id": "_rzpy_test_milythm",
+					"customer_id": "cust_C0WlbKhp3aLA7W",
+					"status": "halted",
+					"notes": {
+						"Important": "Notes for Internal Reference"
+					},
+				}
+			}
+		}
+	}
