@@ -49,8 +49,10 @@
   "yeild",
   "column_break_48",
   "fg_weight",
+  "fg_specific_gravity",
   "column_break_50",
   "bom_weight",
+  "bom_volume",
   "costing",
   "operating_cost",
   "raw_material_cost",
@@ -575,6 +577,18 @@
    "label": "Allow Adding Items other than BOM Items"
   },
   {
+   "fetch_from": "item.specific_gravity",
+   "fieldname": "fg_specific_gravity",
+   "fieldtype": "Float",
+   "label": "FG Specific Gravity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_volume",
+   "fieldtype": "Float",
+   "label": "Bom Volume"
+  },
+  {
    "fieldname": "column_break_31",
    "fieldtype": "Column Break"
   },
@@ -596,7 +610,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-16 12:25:09.081968",
+ "modified": "2021-06-30 15:17:34.084403",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

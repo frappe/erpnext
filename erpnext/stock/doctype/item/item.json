@@ -23,6 +23,7 @@
   "allowed_in_wo_staging",
   "staging_multiple",
   "stock_uom",
+  "specific_gravity",
   "column_break0",
   "disabled",
   "allow_alternative_item",
@@ -1096,6 +1097,11 @@
    "fieldname": "intercompany_item_name",
    "fieldtype": "Data",
    "label": "Intercompany Item Name"
+  },
+  {
+   "fieldname": "specific_gravity",
+   "fieldtype": "Float",
+   "label": "Specific Gravity"
   }
  ],
  "has_web_view": 1,
@@ -1105,7 +1111,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-06-03 18:36:41.622077",
+ "modified": "2021-06-30 15:02:23.562888",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
