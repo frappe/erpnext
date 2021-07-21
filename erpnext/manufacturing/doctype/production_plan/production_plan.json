@@ -194,6 +194,7 @@
   {
    "fieldname": "po_items",
    "fieldtype": "Table",
+   "label": "Work Order Items",
    "no_copy": 1,
    "options": "Production Plan Item",
    "reqd": 1
@@ -332,12 +333,12 @@
   },
   {
    "fieldname": "section_break_25",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "prod_plan_references",
    "fieldtype": "Table",
-   "hidden": 1,
    "label": "Production Plan Item Reference",
    "options": "Production Plan Item Reference"
   },
