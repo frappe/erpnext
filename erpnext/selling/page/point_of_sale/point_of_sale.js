@@ -596,6 +596,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			frm.refresh(name);
 			frm.doc.items = [];
 			frm.doc.is_pos = 1;
+			frm.doc.naming_series = ''
 
 			return frm;
 		}
