@@ -36,7 +36,11 @@ erpnext.HierarchyChart = class {
 
 				me.nodes[this.id] = this;
 				me.make_node_element(this);
-				me.setup_node_click_action(this);
+
+				if (!me.all_nodes_expanded) {
+					me.setup_node_click_action(this);
+				}
+
 				me.setup_edit_node_action(this);
 			}
 		};
@@ -60,8 +64,9 @@ erpnext.HierarchyChart = class {
 	show() {
 		frappe.breadcrumbs.add('HR');
 
-		let me = this;
+		this.setup_actions();
 		if ($(`[data-fieldname="company"]`).length) return;
+		let me = this;
 
 		let company = this.page.add_field({
 			fieldtype: 'Link',
@@ -79,26 +84,51 @@ erpnext.HierarchyChart = class {
 
 					// svg for connectors
 					me.make_svg_markers();
-
-					if (me.$hierarchy)
-						me.$hierarchy.remove();
-
-					// setup hierarchy
-					me.$hierarchy = $(
-						`<ul class="hierarchy">
-							<li class="root-level level">
-								<ul class="node-children"></ul>
-							</li>
-						</ul>`);
-
-					me.page.main.append(me.$hierarchy);
+					me.setup_hierarchy()
 					me.render_root_nodes();
+					me.all_nodes_expanded = false;
 				}
 			}
 		});
 
 		company.refresh();
 		$(`[data-fieldname="company"]`).trigger('change');
+	}
+
+	setup_actions() {
+		let me = this;
+		this.page.add_inner_button(__('Expand All'), function() {
+			me.load_children(me.root_node, true);
+			me.all_nodes_expanded = true;
+
+			me.page.remove_inner_button(__('Expand All'));
+			me.page.add_inner_button(__('Collapse All'), function() {
+				me.setup_hierarchy();
+				me.render_root_nodes();
+				me.all_nodes_expanded = false;
+
+				me.page.remove_inner_button(__('Collapse All'));
+				me.setup_actions();
+			});
+		});
+	}
+
+	setup_hierarchy() {
+		if (this.$hierarchy)
+			this.$hierarchy.remove();
+
+		$(`#connectors`).empty();
+
+		// setup hierarchy
+		this.$hierarchy = $(
+			`<ul class="hierarchy">
+				<li class="root-level level">
+					<ul class="node-children"></ul>
+				</li>
+			</ul>`);
+
+		this.page.main.append(this.$hierarchy);
+		this.nodes = {};
 	}
 
 	make_svg_markers() {
@@ -126,7 +156,7 @@ erpnext.HierarchyChart = class {
 			</svg>`);
 	}
 
-	render_root_nodes() {
+	render_root_nodes(expanded_view=false) {
 		let me = this;
 
 		frappe.call({
@@ -156,7 +186,10 @@ erpnext.HierarchyChart = class {
 						expand_node = node;
 				});
 
-				me.expand_node(expand_node);
+				if (!expanded_view) {
+					me.root_node = expand_node;
+					me.expand_node(expand_node);
+				}
 			}
 		});
 	}
@@ -196,11 +229,20 @@ erpnext.HierarchyChart = class {
 		$(`#${node.parent_id}`).addClass('active-path');
 	}
 
-	load_children(node) {
-		frappe.run_serially([
-			() => this.get_child_nodes(node.id),
-			(child_nodes) => this.render_child_nodes(node, child_nodes)
-		]);
+	load_children(node, deep=false) {
+		if (!deep) {
+			frappe.run_serially([
+				() => this.get_child_nodes(node.id),
+				(child_nodes) => this.render_child_nodes(node, child_nodes)
+			]);
+		} else {
+			frappe.run_serially([
+				() => this.setup_hierarchy(),
+				() => this.render_root_nodes(true),
+				() => this.get_all_nodes(node.id, node.name),
+				(data_list) => this.render_children_of_all_nodes(data_list)
+			]);
+		}
 	}
 
 	get_child_nodes(node_id) {
@@ -240,6 +282,70 @@ erpnext.HierarchyChart = class {
 					}, 250);
 				});
 			}
+		}
+
+		node.$children.show();
+		$(`path[data-parent="${node.id}"]`).show();
+		node.expanded = true;
+	}
+
+	get_all_nodes(node_id, node_name) {
+		return new Promise(resolve => {
+			frappe.call({
+				method: 'erpnext.utilities.hierarchy_chart.get_all_nodes',
+				args: {
+					method: this.method,
+					company: this.company,
+					parent: node_id,
+					parent_name: node_name
+				},
+				callback: (r) => {
+					resolve(r.message);
+				}
+			});
+		});
+	}
+
+	render_children_of_all_nodes(data_list) {
+		let entry = undefined;
+		let node = undefined;
+
+		while(data_list.length) {
+			// to avoid overlapping connectors
+			entry = data_list.shift();
+			node = this.nodes[entry.parent];
+			if (node) {
+				this.render_child_nodes_for_expanded_view(node, entry.data);
+			} else {
+				data_list.push(entry);
+			}
+		}
+	}
+
+	render_child_nodes_for_expanded_view(node, child_nodes) {
+		node.$children = $('<ul class="node-children"></ul>')
+
+		const last_level = this.$hierarchy.find('.level:last').index();
+		const node_level = $(`#${node.id}`).parent().parent().parent().index();
+
+		if (last_level === node_level) {
+			this.$hierarchy.append(`
+				<li class="level"></li>
+			`);
+			node.$children.appendTo(this.$hierarchy.find('.level:last'));
+		} else {
+			node.$children.appendTo(this.$hierarchy.find('.level:eq(' + (node_level + 1) + ')'));
+		}
+
+		node.$children.hide().empty();
+
+		if (child_nodes) {
+			$.each(child_nodes, (_i, data) => {
+				this.add_node(node, data);
+				setTimeout(() => {
+					this.add_connector(node.id, data.id);
+				}, 250);
+			});
 		}
 
 		node.$children.show();
@@ -333,7 +439,7 @@ erpnext.HierarchyChart = class {
 			path.setAttribute("class", "active-connector");
 			path.setAttribute("marker-start", "url(#arrowstart-active)");
 			path.setAttribute("marker-end", "url(#arrowhead-active)");
-		} else if (parent.hasClass('active-path')) {
+		} else {
 			path.setAttribute("class", "collapsed-connector");
 			path.setAttribute("marker-start", "url(#arrowstart-collapsed)");
 			path.setAttribute("marker-end", "url(#arrowhead-collapsed)");
