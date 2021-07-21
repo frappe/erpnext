@@ -2014,16 +2014,17 @@ class TestSalesInvoice(unittest.TestCase):
 		si.additional_discount_percentage = 20
 		si.append("taxes", {
 			"charge_type": "Actual",
-			"account_head": "CGST - _TC",
+			"account_head": "_Test Account VAT - _TC",
 			"cost_center": "Main - _TC",
-			"description": "CGST @ 9.0",
+			"parent_cost_center": "Main - _TC",
+			"description": "Test",
 			"rate": 0,
 			"tax_amount": 20
 		})
 		si.submit()
 
 		expected_gle = [
-			["CGST - _TC", 0.0, 20.0, nowdate()],
+			["_Test Account VAT - _TC", 0.0, 20.0, nowdate()],
 			["Debtors - _TC", 96.0, 0.0, nowdate()],
 			["Discount Account - _TC", 24.0, 0.0, nowdate()],
 			["Sales - _TC", 0.0, 100.0, nowdate()]
@@ -2199,7 +2200,7 @@ def create_sales_invoice(**args):
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
 	si.naming_series = args.naming_series or "T-SINV-"
-	si.cost_center = args.cost_center or "_Test Cost Center - _TC"
+	si.cost_center = args.parent_cost_center
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
