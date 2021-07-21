@@ -280,6 +280,7 @@ class MaterialRequest(BuyingController):
 					"bom": wo_doc.get('bom_no'),
 					"work_order": item.get('work_order'),
 					"item_code": item.get('item_code'),
+					"item_name": item.get('item_name'),
 					"qty": item.get('qty'),
 					"item_to_manufacture": wo_doc.get('production_item'),
 					"qty_to_manufacture": wo_doc.get("qty")
@@ -678,6 +679,7 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 		company = frappe.get_doc("Work Order",{'name': parent}).get('company')
 		float_precision = (frappe.db.get_default("float_precision")) or 2
 		qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
+		(qty)
 		is_staging_enabled = cint(frappe.db.get_singles_value('Manufacturing Settings', 'enable_staging'))
 		if is_staging_enabled:
 			staging_warhouse = frappe.get_value("Staging Details",{'company':company},'staging_material_request_warehouse')
@@ -685,11 +687,16 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 				projected_qty = frappe.get_value('Bin', {'warehouse':staging_warhouse,'item_code':itm.item_code},'projected_qty')
 				if projected_qty:
 					qty = flt(itm.get('transferred_qty')) - flt(itm.get("consumed_qty")) - projected_qty
-
-		if qty < 0:
-			qty = 0
+					item=frappe.get_doc("Item",itm.get('item_code'))
+					if item.allowed_in_wo_staging=="Yes" and item.staging_multiple > 0:
+						sqty=math.ceil(qty/item.staging_multiple)
+						final_qty=item.staging_multiple*sqty
+						if final_qty > 0:
+							target.qty = final_qty
+		else:
+			if qty < 0:
+				qty = 0
 		target.qty = qty
-
 		uom = frappe.get_value("Item",{'item_code':itm.get('item_code')},'stock_uom')
 		target.uom = uom
 
