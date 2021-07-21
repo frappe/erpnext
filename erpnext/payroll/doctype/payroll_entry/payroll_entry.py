@@ -117,7 +117,6 @@ class PayrollEntry(Document):
 			Creates salary slip for selected employees if already not created
 		"""
 		self.check_permission('write')
-		self.created = 1
 		employees = [emp.employee for emp in self.employees]
 		if employees:
 			args = frappe._dict({
@@ -459,6 +458,7 @@ def get_emp_list(sal_struct, cond, end_date, payroll_payable_account):
 			where
 				t1.name = t2.employee
 				and t2.docstatus = 1
+				and t1.status != 'Inactive'
 		%s order by t2.from_date desc
 		""" % cond, {"sal_struct": tuple(sal_struct), "from_date": end_date, "payroll_payable_account": payroll_payable_account}, as_dict=True)
 
@@ -679,9 +679,13 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	include_employees = []
 	emp_cond = ''
+
+	if not filters.payroll_frequency:
+		frappe.throw(_('Select Payroll Frequency.'))
+
 	if filters.start_date and filters.end_date:
 		employee_list = get_employee_list(filters)
-		emp = filters.get('employees')
+		emp = filters.get('employees') or []
 		include_employees = [employee.employee for employee in employee_list if employee.employee not in emp]
 		filters.pop('start_date')
 		filters.pop('end_date')

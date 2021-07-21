@@ -325,8 +325,7 @@ frappe.ui.form.on("BOM", {
 			freeze: true,
 			args: {
 				update_parent: true,
-				from_child_bom:false,
-				save: frm.doc.docstatus === 1 ? true : false
+				from_child_bom:false
 			},
 			callback: function(r) {
 				refresh_field("items");
