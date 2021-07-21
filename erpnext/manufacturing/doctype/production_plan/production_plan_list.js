@@ -1,4 +1,5 @@
 frappe.listview_settings['Production Plan'] = {
+	hide_name_column: true,
 	add_fields: ["status"],
 	filters: [["status", "!=", "Closed"]],
 	get_indicator: function (doc) {
