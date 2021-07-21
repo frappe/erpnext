@@ -1,7 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from typing import List
+from collections import deque
 import frappe, erpnext
 from frappe.utils import cint, cstr, flt, today
 from frappe import _
@@ -16,13 +17,84 @@ from frappe.model.mapper import get_mapped_doc
 
 import functools
 
-from six import string_types
-
 from operator import itemgetter
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
+
+
+class BOMTree:
+	"""Full tree representation of a BOM"""
+
+	# specifying the attributes to save resources
+	# ref: https://docs.python.org/3/reference/datamodel.html#slots
+	__slots__ = ["name", "child_items", "is_bom", "item_code", "exploded_qty", "qty"]
+
+	def __init__(self, name: str, is_bom: bool = True, exploded_qty: float = 1.0, qty: float = 1) -> None:
+		self.name = name  # name of node, BOM number if is_bom else item_code
+		self.child_items: List["BOMTree"] = []  # list of child items
+		self.is_bom = is_bom   # true if the node is a BOM and not a leaf item
+		self.item_code: str = None  # item_code associated with node
+		self.qty = qty  # required unit quantity to make one unit of parent item.
+		self.exploded_qty = exploded_qty  # total exploded qty required for making root of tree.
+		if not self.is_bom:
+			self.item_code = self.name
+		else:
+			self.__create_tree()
+
+	def __create_tree(self):
+		bom = frappe.get_cached_doc("BOM", self.name)
+		self.item_code = bom.item
+
+		for item in bom.get("items", []):
+			qty = item.qty / bom.quantity  # quantity per unit
+			exploded_qty = self.exploded_qty * qty
+			if item.bom_no:
+				child = BOMTree(item.bom_no, exploded_qty=exploded_qty, qty=qty)
+				self.child_items.append(child)
+			else:
+				self.child_items.append(
+					BOMTree(item.item_code, is_bom=False, exploded_qty=exploded_qty, qty=qty)
+				)
+
+	def level_order_traversal(self) -> List["BOMTree"]:
+		"""Get level order traversal of tree.
+		E.g. for following tree the traversal will return list of nodes in order from top to bottom.
+		BOM:
+			- SubAssy1
+				- item1
+				- item2
+			- SubAssy2
+				- item3
+			- item4
+
+		returns = [SubAssy1, item1, item2, SubAssy2, item3, item4]
+		"""
+		traversal = []
+		q = deque()
+		q.append(self)
+
+		while q:
+			node = q.popleft()
+
+			for child in node.child_items:
+				traversal.append(child)
+				q.append(child)
+
+		return traversal
+
+	def __str__(self) -> str:
+		return (
+			f"{self.item_code}{' - ' + self.name if self.is_bom else ''} qty(per unit): {self.qty}"
+			f" exploded_qty: {self.exploded_qty}"
+		)
+
+	def __repr__(self, level: int = 0) -> str:
+		rep = "┃  " * (level - 1) + "┣━ " * (level > 0) + str(self) + "\n"
+		for child in self.child_items:
+			rep += child.__repr__(level=level + 1)
+		return rep
 
 class BOM(WebsiteGenerator):
 	website = frappe._dict(
@@ -83,6 +155,7 @@ class BOM(WebsiteGenerator):
 		self.update_stock_qty()
 		self.validate_scrap_items()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
+		self.set_bom_level()
 
 
 	def get_context(self, context):
@@ -154,7 +227,7 @@ class BOM(WebsiteGenerator):
 		if not args:
 			args = frappe.form_dict.get('args')
 
-		if isinstance(args, string_types):
+		if isinstance(args, str):
 			import json
 			args = json.loads(args)
 
@@ -602,6 +675,7 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
+
 	def validate_scrap_items(self):
 		for item in self.scrap_items:
 			if item.item_code == self.item and not item.is_process_loss:
@@ -628,6 +702,24 @@ class BOM(WebsiteGenerator):
 					' ' + _('set to 0 because') + ' ' +
 					frappe.bold(_('Is Process Loss')) + ' ' + _('is checked'))
 
+	def get_tree_representation(self) -> BOMTree:
+		"""Get a complete tree representation preserving order of child items."""
+		return BOMTree(self.name)
+
+	def set_bom_level(self, update=False):
+		levels = []
+
+		self.bom_level = 0
+		for row in self.items:
+			if row.bom_no:
+				levels.append(frappe.get_cached_value("BOM", row.bom_no, "bom_level") or 0)
+
+		if levels:
+			self.bom_level = max(levels) + 1
+
+		if update:
+			self.db_set("bom_level", self.bom_level)
+
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
 		rate = get_valuation_rate(args) * (args.get("conversion_factor") or 1)
@@ -650,7 +742,8 @@ def get_bom_item_rate(args, bom_doc):
 			"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 			"conversion_factor": args.get("conversion_factor") or 1,
 			"plc_conversion_rate": 1,
-			"ignore_party": True
+			"ignore_party": True,
+			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 		out = frappe._dict()
@@ -814,7 +907,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		frappe.form_dict.parent = parent
 
 	if frappe.form_dict.parent:
-		bom_doc = frappe.get_doc("BOM", frappe.form_dict.parent)
+		bom_doc = frappe.get_cached_doc("BOM", frappe.form_dict.parent)
 		frappe.has_permission("BOM", doc=bom_doc, throw=True)
 
 		bom_items = frappe.get_all('BOM Item',
@@ -825,7 +918,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		item_names = tuple(d.get('item_code') for d in bom_items)
 
 		items = frappe.get_list('Item',
-			fields=['image', 'description', 'name', 'stock_uom', 'item_name'],
+			fields=['image', 'description', 'name', 'stock_uom', 'item_name', 'is_sub_contracted_item'],
 			filters=[['name', 'in', item_names]]) # to get only required item dicts
 
 		for bom_item in bom_items:
@@ -838,6 +931,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 
 			bom_item.parent_bom_qty = bom_doc.quantity
 			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
+			bom_item.image = frappe.db.escape(bom_item.image)
 
 		return bom_items
 
@@ -1054,6 +1148,8 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 		},
 		'BOM Item': {
 			'doctype': 'BOM Item',
+			# stop get_mapped_doc copying parent bom_no to children
+			'field_no_map': ['bom_no'],
 			'condition': lambda doc: doc.has_variants == 0
 		},
 	}, target_doc, postprocess)

@@ -308,6 +308,7 @@
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",
+   "no_copy": 1,
    "options": "Quality Inspection"
   },
   {

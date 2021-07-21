@@ -87,8 +87,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		if not field_filters:
 			field_filters = {}
 
-		# Ensure the query remains within current item group
-		field_filters['item_group'] = self.name
+		# Ensure the query remains within current item group & sub group
+		field_filters['item_group'] = [ig[0] for ig in get_child_groups(self.name)]
 
 		engine = ProductQuery()
 		context.items = engine.query(attribute_filters, field_filters, search, start, item_group=self.name)
