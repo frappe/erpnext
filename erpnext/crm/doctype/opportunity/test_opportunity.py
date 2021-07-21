@@ -60,6 +60,10 @@ class TestOpportunity(unittest.TestCase):
 		self.assertTrue(opp_doc.party_name)
 		self.assertEqual(opp_doc.opportunity_from, "Customer")
 		self.assertEqual(opp_doc.party_name, customer.name)
+	
+	def test_opportunity_item(self):
+		opportunity_doc = make_opportunity(with_items=1, rate=1100, qty=2)
+		self.assertEqual(opportunity_doc.total, 2200)
 
 def make_opportunity(**args):
 	args = frappe._dict(args)
