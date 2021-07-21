@@ -826,9 +826,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				frappe.run_serially([
 					() => me.frm.script_manager.trigger("currency"),
+					() => me.update_item_tax_map(),
 					() => me.apply_default_taxes(),
-					() => me.apply_pricing_rule(),
-					() => me.calculate_taxes_and_totals()
+					() => me.apply_pricing_rule()
 				]);
 			}
 		}
