@@ -41,7 +41,7 @@ frappe.ui.form.on('Production Plan', {
 				filters:{
 					'is_stock_item': 1,
 				}
-			}
+			};
 		};
 
 		frm.fields_dict['po_items'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
@@ -50,17 +50,17 @@ frappe.ui.form.on('Production Plan', {
 				return {
 					query: "erpnext.controllers.queries.bom",
 					filters:{'item': cstr(d.item_code)}
-				}
+				};
 			} else frappe.msgprint(__("Please enter Item first"));
-		};
+		}
 
 		frm.fields_dict['mr_items'].grid.get_field('warehouse').get_query = function(doc) {
 			return {
 				filters: {
 					company: doc.company
 				}
-			}
-		};
+			};
+		}
 	},
 
 	refresh: function(frm) {
