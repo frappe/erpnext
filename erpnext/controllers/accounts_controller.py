@@ -808,6 +808,27 @@ class AccountsController(TransactionBase):
 							tax_map[tax.account_head] -= allocated_amount
 							allocated_tax_map[tax.account_head] -= allocated_amount
 
+	def get_amount_and_base_amount(self, item, enable_discount_accounting):
+		amount = item.net_amount
+		base_amount = item.base_net_amount
+
+		if enable_discount_accounting and self.get('discount_amount') and self.get('additional_discount_account'):
+			amount = item.amount
+			base_amount = item.base_amount
+
+		return amount, base_amount
+
+	def get_tax_amounts(self, tax, enable_discount_accounting):
+		amount = tax.tax_amount_after_discount_amount
+		base_amount = tax.base_tax_amount_after_discount_amount
+
+		if enable_discount_accounting and self.get('discount_amount') and self.get('additional_discount_account') \
+			and self.get('apply_discount_on') == 'Grand Total':
+			amount = tax.tax_amount
+			base_amount = tax.base_tax_amount
+
+		return amount, base_amount
+
 	def make_discount_gl_entries(self, gl_entries):
 		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
