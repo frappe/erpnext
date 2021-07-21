@@ -139,8 +139,8 @@ def create_dunning_type_with_zero_interest_rate():
 	dunning_type.append(
 		"dunning_letter_text", {
 			'language': 'en',
-			'body_text': 'We have still not received payment for our invoice ',
+			'body_text': 'We have still not received payment for our invoice ',
 			'closing_text': 'We kindly request that you pay the outstanding amount immediately, and late fees.'
 		}
 	)
-	dunning_type.save()
+	dunning_type.save() 
