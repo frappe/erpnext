@@ -271,17 +271,16 @@ class TestPurchaseInvoice(unittest.TestCase):
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		
-		pi = make_purchase_invoice(qty=1, rate=100, do_not_save=1)
+		pi = make_purchase_invoice(qty=1, rate=100, do_not_save=1, parent_cost_center="Main - _TC")
 		pi.apply_discount_on = "Grand Total"
 		pi.additional_discount_account = additional_discount_account
 		pi.additional_discount_percentage = 20
 		pi.append("taxes", {
-			"charge_type": "On Net Total",
-			"account_head": "CGST - _TC",
+			"charge_type": "Actual",
+			"account_head": "_Test Account VAT - _TC",
 			"cost_center": "Main - _TC",
-			"description": "CGST @ 9.0",
-			"base_tax_amount": 20,
-			"base_tax_amount_after_discount_amount": 20
+			"description": "Test",
+			"tax_amount": 20
 		})
 		pi.submit()
 
@@ -294,10 +293,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# 	print(gl, "\n")
 
 		expected_gle = [
-			["CGST - _TC", 20.0, 0.0, nowdate()],
+			["_Test Account Cost for Goods Sold - _TC", 100.0, 0.0, nowdate()],
+			["_Test Account VAT - _TC", 20.0, 0.0, nowdate()],
 			["Creditors - _TC", 0.0, 96.0, nowdate()],
-			["Discount Account - _TC", 0.0, 24.0, nowdate()],
-			["_Test Account Cost for Goods Sold - _TC", 100.0, 0.0, nowdate()]
+			["Discount Account - _TC", 0.0, 24.0, nowdate()]
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
@@ -1218,6 +1217,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
 		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
 
+	print(gl_entries)
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
@@ -1281,7 +1281,7 @@ def make_purchase_invoice(**args):
 	pi.return_against = args.return_against
 	pi.is_subcontracted = args.is_subcontracted or "No"
 	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
-	pi.cost_center = args.cost_center or "_Test Cost Center - _TC"
+	pi.cost_center = args.parent_cost_center
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
