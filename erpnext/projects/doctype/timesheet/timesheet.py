@@ -87,8 +87,8 @@ class Timesheet(Document):
 
 	def set_dates(self):
 		if self.docstatus < 2 and self.time_logs:
-			start_date = min([getdate(d.from_time) for d in self.time_logs])
-			end_date = max([getdate(d.to_time) for d in self.time_logs])
+			start_date = min(getdate(d.from_time) for d in self.time_logs)
+			end_date = max(getdate(d.to_time) for d in self.time_logs)
 
 			if start_date and end_date:
 				self.start_date = getdate(start_date)

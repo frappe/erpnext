@@ -169,7 +169,7 @@ class TestProductionPlan(unittest.TestCase):
 		pln.get_items()
 		pln.submit()
 
-		self.assertTrue(pln.po_items[0].planned_qty, 3)	
+		self.assertTrue(pln.po_items[0].planned_qty, 3)
 
 		pln.make_work_order()
 		work_order = frappe.db.get_value('Work Order', {
@@ -193,10 +193,10 @@ class TestProductionPlan(unittest.TestCase):
 		for so_item in so_items:
 			so_wo_qty = frappe.db.get_value('Sales Order Item', so_item, 'work_order_qty')
 			self.assertEqual(so_wo_qty, 0.0)
-		
+
 		latest_plan = frappe.get_doc('Production Plan', pln.name)
 		latest_plan.cancel()
-	
+
 	def test_pp_to_mr_customer_provided(self):
 		#Material Request from Production Plan for Customer Provided
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
@@ -236,10 +236,10 @@ class TestProductionPlan(unittest.TestCase):
 		pln.append("po_items", {
 			"item_code": item_code,
 			"bom_no": frappe.db.get_value('BOM', {'item': "Test BOM 1"}),
-			"planned_qty": 3,
-			"make_work_order_for_sub_assembly_items": 1
+			"planned_qty": 3
 		})
 
+		pln.get_sub_assembly_items('In House')
 		pln.submit()
 		pln.make_work_order()
 
