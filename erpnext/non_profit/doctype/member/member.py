@@ -28,7 +28,7 @@ class Member(Document):
 	def setup_subscription(self):
 		non_profit_settings = frappe.get_doc('Non Profit Settings')
 		if not non_profit_settings.enable_razorpay_for_memberships:
-			frappe.throw('Please check Enable Razorpay for Memberships in {0} to setup subscription').format(
+			frappe.throw(_('Please check Enable Razorpay for Memberships in {0} to setup subscription')).format(
 				get_link_to_form('Non Profit Settings', 'Non Profit Settings'))
 
 		controller = get_payment_gateway_controller("Razorpay")
@@ -84,7 +84,9 @@ def create_member(user_details):
 		"email_id": user_details.email,
 		"pan_number": user_details.pan or None,
 		"membership_type": user_details.plan_id,
-		"subscription_id": user_details.subscription_id or None
+		"customer_id": user_details.customer_id or None,
+		"subscription_id": user_details.subscription_id or None,
+		"subscription_status": user_details.subscription_status or ""
 	})
 
 	member.insert(ignore_permissions=True)

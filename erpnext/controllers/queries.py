@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
+import json
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate
 from collections import defaultdict
@@ -18,7 +19,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Employee", ["name", "employee_name"])
 
 	return frappe.db.sql("""select {fields} from `tabEmployee`
-		where status = 'Active'
+		where status in ('Active', 'Suspended')
 			and docstatus < 2
 			and ({key} like %(txt)s
 				or employee_name like %(txt)s)
@@ -87,7 +88,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Customer", fields)
 
 	searchfields = frappe.get_meta("Customer").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2
@@ -198,13 +199,16 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
 	#Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
 
 	if "description" in searchfields:
 		searchfields.remove("description")
-	
+
 	columns = ''
 	extra_searchfields = [field for field in searchfields
 		if not field in ["name", "item_group", "description"]]
@@ -216,9 +220,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
-	if filters.get('supplier'):
-		item_group_list = frappe.get_all('Supplier Item Group', filters = {'supplier': filters.get('supplier')}, fields = ['item_group'])
-		
+	if filters and isinstance(filters, dict) and filters.get('supplier'):
+		item_group_list = frappe.get_all('Supplier Item Group',
+			filters = {'supplier': filters.get('supplier')}, fields = ['item_group'])
+
 		item_groups = []
 		for i in item_group_list:
 			item_groups.append(i.item_group)
@@ -227,7 +232,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 		if item_groups:
 			filters['item_group'] = ['in', item_groups]
-		
+
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
@@ -310,7 +315,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select {fields} from `tabProject`
 		where
 			`tabProject`.status not in ("Completed", "Cancelled")
-			and {cond} {match_cond} {scond}
+			and {cond} {scond} {match_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc,
