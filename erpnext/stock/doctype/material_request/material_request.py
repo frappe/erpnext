@@ -693,9 +693,9 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 						final_qty=item.staging_multiple*sqty
 						if final_qty > 0:
 							target.qty = final_qty
-		else:
-			if qty < 0:
-				qty = 0
+		
+		if qty < 0:
+			qty = 0
 		target.qty = qty
 		uom = frappe.get_value("Item",{'item_code':itm.get('item_code')},'stock_uom')
 		target.uom = uom
