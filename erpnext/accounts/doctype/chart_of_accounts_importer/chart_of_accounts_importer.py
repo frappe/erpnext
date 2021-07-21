@@ -300,7 +300,7 @@ def validate_accounts(file_name):
 			msg += _("Alternatively, you can download the template and fill your data in.")
 			frappe.throw(msg, title=_("Parent Account Missing"))
 		if account["parent_account"] and accounts_dict.get(account["parent_account"]):
-			accounts_dict[account["parent_account"]]["is_group"] = 1
+			accounts_dict[account["parent_account"]]["is_group"] = '1'
 
 	validate_root(accounts_dict)
 
@@ -352,7 +352,7 @@ def get_mandatory_account_types():
 
 def validate_account_types(accounts):
 	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
-	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group'] == 1]
+	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group'] == '1']
 
 	missing = list(set(account_types_for_ledger) - set(account_types))
 	if missing:
@@ -360,7 +360,7 @@ def validate_account_types(accounts):
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
 	# fix logic bug
-	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] == 1]
+	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] == '1']
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
