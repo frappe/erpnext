@@ -1229,7 +1229,42 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, so.cancel)
 
+	def test_payment_terms_are_fetched_when_creating_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
+		automatically_fetch_payment_terms()
+
+		so = make_sales_order(uom="Nos", do_not_save=1)
+		create_payment_terms_template()
+		so.payment_terms_template = 'Test Receivable Template'
+		so.submit()
+
+		si = create_sales_invoice(qty=10, do_not_save=1)
+		si.items[0].sales_order = so.name
+		si.items[0].so_detail = so.items[0].name
+		si.insert()
+
+		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
+		compare_payment_schedules(self, so, si)
+
+def automatically_fetch_payment_terms(enable=1):
+ 	accounts_settings = frappe.get_doc("Accounts Settings")
+ 	accounts_settings.automatically_fetch_payment_terms = enable
+ 	accounts_settings.save()
+
+def compare_payment_schedules(doc, doc1, doc2):
+	payment_schedule1 = frappe.db.sql("""select payment_term, description, due_date, mode_of_payment, invoice_portion, payment_amount
+		from `tabPayment Schedule`
+		where parenttype=%s and parent=%s
+		order by payment_term asc""", (doc1.doctype, doc1.name), as_dict=1)
+
+	payment_schedule2 = frappe.db.sql("""select payment_term, description, due_date, mode_of_payment, invoice_portion, payment_amount
+		from `tabPayment Schedule`
+		where parenttype=%s and parent=%s
+		order by payment_term asc""", (doc2.doctype, doc2.name), as_dict=1)
+
+	doc.assertEqual(payment_schedule1, payment_schedule2)
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
