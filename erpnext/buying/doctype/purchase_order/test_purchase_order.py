@@ -968,8 +968,25 @@ class TestPurchaseOrder(unittest.TestCase):
 		# To test if the PO does NOT have a Blanket Order
 		self.assertEqual(po_doc.items[0].blanket_order, None)
 
+	def test_payment_terms_are_fetched_when_creating_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
 
+		automatically_fetch_payment_terms()
 
+		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		create_payment_terms_template()
+		po.payment_terms_template = 'Test Receivable Template'
+		po.submit()
+
+		pi = make_purchase_invoice(qty=10, rate=100, do_not_save=1)
+		pi.items[0].purchase_order = po.name
+		pi.items[0].po_detail = po.items[0].name
+		pi.insert()
+
+		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
+		compare_payment_schedules(self, po, pi)
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
