@@ -1249,9 +1249,9 @@ class TestSalesOrder(unittest.TestCase):
 		compare_payment_schedules(self, so, si)
 
 def automatically_fetch_payment_terms(enable=1):
- 	accounts_settings = frappe.get_doc("Accounts Settings")
- 	accounts_settings.automatically_fetch_payment_terms = enable
- 	accounts_settings.save()
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	accounts_settings.automatically_fetch_payment_terms = enable
+	accounts_settings.save()
 
 def compare_payment_schedules(doc, doc1, doc2):
 	payment_schedule1 = frappe.db.sql("""select payment_term, description, due_date, mode_of_payment, invoice_portion, payment_amount
