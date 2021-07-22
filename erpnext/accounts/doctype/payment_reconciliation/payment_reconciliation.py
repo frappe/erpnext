@@ -36,8 +36,8 @@ class PaymentReconciliation(Document):
 		for entry in payment_entries:
 			if(entry.get('reference_type') == 'Payment Entry'):
 				posting_date = frappe.db.get_value("Payment Entry", {'name': entry.get('reference_name')}, ['posting_date'])
-                entry['payment_date'] = posting_date
-                data_list.append(entry)
+				entry['payment_date'] = posting_date
+				data_list.append(entry)
 		return data_list
 
 	def get_jv_entries(self):
