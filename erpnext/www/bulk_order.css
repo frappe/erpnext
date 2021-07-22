@@ -1,0 +1,84 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+.submit-btn {
+    background-color: rgb(97, 87, 241);
+    color: white;
+    float: right;
+}
+
+.outer {
+    display:flex;
+    /* flex: 2;
+    justify-content: center;
+    flex-direction: row; */
+  }
+  
+  .left {
+    flex: 1;
+    justify-content: start;
+  }
+
+  .right {
+    flex: 1;
+    justify-content: end;
+  }
+
+  .next {
+    display: flex;
+    justify-content: space-between;
+    width: 70rem;
+    /* border: .1rem red solid; */
+  }
+  .step-progress {
+    width: 100%;
+    margin-bottom: 80px;
+  }
+  .progressbar {
+    counter-reset: step;
+  }
+  .progressbar li {
+    list-style-type: none;
+    float: left;
+    width: 33.33%;
+    position: relative;
+    text-align: center;
+  }
+  .progressbar li:before {
+    content: counter(step);
+    counter-increment: step;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #ddd;
+    display: block;
+    text-align: center;
+    margin: 0 auto 10px  auto;
+    background-color: white;
+  }
+
+  .progressbar li:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: #ddd;
+    top: 15px;
+    left: -50%;
+    z-index: -1;
+  }
+  .progressbar li:first-child:after {
+    content: none;
+  }
+  /* .progressbar li.active {
+    color: green;
+  }
+  .progressbar li.active:before {
+    border-color: green;
+  }
+  .progressbar li.active + li:after {
+    background-color: green;
+  } */

@@ -57,7 +57,7 @@ frappe.ui.form.on("Sales Order", {
 			});
 		}
 	},
-	onload: function(frm) {
+	onload: function(frm,cdt,cdn) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
 		}
@@ -75,6 +75,19 @@ frappe.ui.form.on("Sales Order", {
 		});
 
 		erpnext.queries.setup_warehouse_query(frm);
+
+		frappe.call({
+			method: 'erpnext.selling.doctype.customer_pricing_rule.customer_pricing_rule.fetch_order_warehouse_num',
+			args: {
+				'so_num': frm.doc.name
+			},
+			callback: function(resp){
+				if(resp.message && frm.doc.docstatus !== 1){
+					frappe.model.set_value(cdt,cdn,'order_warehouse_rule_number', resp.message[0])
+					frappe.model.set_value(cdt,cdn,'set_warehouse', resp.message[1])
+				}
+			}
+		})
 	},
 
 	delivery_date: function(frm) {
@@ -82,8 +95,56 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
-	}
+	},
+	customer: function(frm,cdt,cdn) {
+	
+		frm.call({
+			method:"erpnext.selling.doctype.sales_order.sales_order.get_list",
+			args: {
+				"customer": frm.doc.customer,
+			},
+			callback: function(r)
+			{
+				if (r.message) {
+					cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
+						return {
+							filters: [
+									   ['item_code', 'in' , r.message]
+							]
+						}
+					}
+				}
+				frm.refresh_field("items")
+			}
+		});
+	 },
 });
+
+function set_filter(frm){
+    frm.fields_dict["items"].grid.get_field("uom").get_query = function(doc,cdt,cdn){
+        var item = locals[cdt][cdn];
+        let p = `${frm.doc.customer}${item.item_code}`
+        return frappe.call({
+             method: "erpnext.selling.doctype.customer_pricing_rule.customer_pricing_rule.fetch_uom",
+                args: {
+                        "parent":p
+                },
+                callback: function(resp){
+                     if(resp){
+                          return{
+                                filters: {
+                                    'name':    ['in',resp.message]
+                                }
+                          }
+                     }
+                        frm.refresh_field("items")
+                        console.log("refresh...")
+                        
+                }
+        });
+        }
+}
+
 
 frappe.ui.form.on("Sales Order Item", {
 	item_code: function(frm,cdt,cdn) {

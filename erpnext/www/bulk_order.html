@@ -1,0 +1,69 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ _("Shopping Cart") }} {% endblock %}
+
+{% block header %}
+<div class="step-progress">
+      <ul class="progressbar">
+          <li>Select Item</li>
+          <li>Place Order</li>
+          <li>Payment</li>
+      </ul>
+</div>
+<div class="next">
+    
+    <div class="left"><h1>{{ _("Products") }}</h1></div> 
+    <!-- <a href="/cart"></a> -->
+    <div class="right"><input class = "submit-btn" type="submit" name="next" value="Next" id="next" onclick="handleNext()"></div>
+</div>
+
+{% endblock %}
+
+{% block header_actions %}
+{% endblock %}
+    {% block page_content %}
+    <label><b>Delivery date:</b></label>
+    <input class = "date" type="date" id = "del_date"  onchange="handle_date(document.getElementById('del_date').value)">
+    <table class="table table-striped" id="owned_stock_table">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>Item Name</th>
+            <th>Item code</th>
+            <th>Stock</th>
+            <!-- <th>Price</th> -->
+            <th>Select Qty</th>
+            <!-- <th>Add to Cart</th> -->
+        </tr>
+    </thead>
+    {% for item in items %}
+    {% set avl_qty = frappe.db.get_value("Stock Ledger Entry", {'item_code':item.item_code} , "qty_after_transaction") %}
+    {% if not warehouse %}
+    {% set website_warehouse = frappe.db.get_value("Item", {'item_code':item.item_code} , "website_warehouse") %}
+    {% set avl_qty = frappe.db.get_value("Stock Ledger Entry", {'item_code':item.item_code ,'warehouse': website_warehouse} , "qty_after_transaction") %}
+    {% endif %}
+
+    {% if warehouse %}
+    {% set avl_qty = frappe.db.get_value("Stock Ledger Entry", {'item_code':item.item_code ,'warehouse': warehouse} , "qty_after_transaction") %}
+    {% endif %}
+    <!-- {% set price = frappe.db.get_value("Item Price", {'item_code':item.item_code } , "price_list_rate") %} -->
+      <tr>
+          {% if item.website_image %}
+          <td><img  src={{ item.website_image}} alt="NA" style="width:70px;height:50px;"></td>
+          {% else %}
+          <td> Image not found</td>
+          {% endif %}
+         <td>{{item.item_name}}</td>
+         <td>{{item.item_code}}</td>
+         {% if avl_qty %}
+         <td>{{ avl_qty }}</td>
+         {% else %}
+         <td>Not in stock</td>
+         {% endif %}
+         
+         <td><input type="number" id="{{item.item_code}}+date" name="quantity" min="0" max="1000" value="0" onchange="handle_qty('{{item.item_code}}', document.getElementById('{{item.item_code}}+date').value)" style="width: 70px;"></td>
+         
+      </tr>
+      {% endfor %}
+    </table>
+    {%  endblock %}
