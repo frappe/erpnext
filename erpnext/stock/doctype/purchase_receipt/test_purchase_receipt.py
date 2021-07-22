@@ -1079,7 +1079,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
-	def test_payment_terms_are_fetched_when_creating_invoice(self):
+	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, make_pr_against_po

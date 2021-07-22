@@ -1229,7 +1229,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, so.cancel)
 
-	def test_payment_terms_are_fetched_when_creating_invoice(self):
+	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
