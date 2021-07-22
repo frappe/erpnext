@@ -701,7 +701,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-05-13 13:10:24.914983",
+ "modified": "2021-06-08 19:58:55.090977",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -771,6 +771,12 @@
    "link_to": "Stock",
    "stats_filter": "",
    "type": "Dashboard"
+  },
+  {
+   "doc_view": "",
+   "label": "Inter Company Challan Reconciliation",
+   "link_to": "Inter Company Challan Reconciliation",
+   "type": "Report"
   }
  ],
  "shortcuts_label": "Quick Access"

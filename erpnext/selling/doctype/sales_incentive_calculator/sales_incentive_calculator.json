@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2021-06-06 19:56:11.241595",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer_sales_incentive",
+  "column_break_3",
+  "based_on",
+  "from_date",
+  "to_date",
+  "section_break_6",
+  "get_invoice",
+  "section_break_9",
+  "get_payment",
+  "invoice_list_section",
+  "invoice_list",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "options": "SA-IN-CC",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_sales_incentive",
+   "fieldtype": "Link",
+   "label": "Customer Sales Incentive",
+   "options": "Customer Sales Incentives",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer_sales_incentive.based_on",
+   "fieldname": "based_on",
+   "fieldtype": "Read Only",
+   "label": "Based On"
+  },
+  {
+   "fetch_from": "customer_sales_incentive.scheme_start_date",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer_sales_incentive.scheme_end_date",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.based_on=='Invoice'",
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_invoice",
+   "fieldtype": "Button",
+   "label": "Get Invoice"
+  },
+  {
+   "depends_on": "eval:doc.based_on==='Payment'",
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_payment",
+   "fieldtype": "Button",
+   "label": "Get Paid Invoice"
+  },
+  {
+   "fieldname": "invoice_list_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice List"
+  },
+  {
+   "fieldname": "invoice_list",
+   "fieldtype": "Table",
+   "label": "Invoice List",
+   "options": "Sales Incentive Calculator Invoice"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Incentive Calculator",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-07-19 11:51:00.816276",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Sales Incentive Calculator",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "creation": "2021-06-05 12:29:08.484191",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_name",
+  "item_group",
+  "brand",
+  "base_price",
+  "additional_price",
+  "list_price",
+  "type",
+  "discount_margin"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "item.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Item Group"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "item.brand",
+   "fieldname": "brand",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Brand"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "item_price.price_list_rate",
+   "fieldname": "base_price",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Base Price"
+  },
+  {
+   "columns": 2,
+   "fieldname": "additional_price",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Additional Price",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "list_price",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "List Price"
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nDiscount\nMargin",
+   "reqd": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "discount_margin",
+   "fieldtype": "Currency",
+   "label": " Discount/Margin"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-06-08 10:57:12.954127",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer Pricing Rule Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
