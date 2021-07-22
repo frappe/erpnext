@@ -443,8 +443,6 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 	frappe.response.location = '/purchase-invoices/' + doc.name
 
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
-	from erpnext.controllers.accounts_controller import fetch_payment_terms_from_order	
-
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
@@ -496,7 +494,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 	if automatically_fetch_payment_terms:
-		fetch_payment_terms_from_order(doc)
+		doc.set_payment_schedule()
 
 	return doc
 

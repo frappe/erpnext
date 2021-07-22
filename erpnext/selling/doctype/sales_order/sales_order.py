@@ -621,8 +621,6 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
-	from erpnext.controllers.accounts_controller import fetch_payment_terms_from_order
-
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
@@ -697,7 +695,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 	if automatically_fetch_payment_terms:
-		fetch_payment_terms_from_order(doclist)
+		doclist.set_payment_schedule()
 
 	return doclist
 
