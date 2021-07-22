@@ -2039,7 +2039,7 @@ class TestSalesInvoice(unittest.TestCase):
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		
-		si = create_sales_invoice(rate=100, do_not_save=1)
+		si = create_sales_invoice(rate=100, parent_cost_center='Main - _TC', do_not_save=1)
 		si.apply_discount_on = "Grand Total"
 		si.additional_discount_account = additional_discount_account
 		si.additional_discount_percentage = 20
@@ -2047,7 +2047,6 @@ class TestSalesInvoice(unittest.TestCase):
 			"charge_type": "Actual",
 			"account_head": "_Test Account VAT - _TC",
 			"cost_center": "Main - _TC",
-			"parent_cost_center": "Main - _TC",
 			"description": "Test",
 			"rate": 0,
 			"tax_amount": 20
