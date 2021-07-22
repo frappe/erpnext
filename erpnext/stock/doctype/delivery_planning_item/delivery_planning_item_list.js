@@ -1,46 +1,127 @@
 frappe.listview_settings['Delivery Planning Item'] = {
+	add_fields: ["transporter", "sales_order", "customer", "customer_name","postal_code", "item_code", "item_name",
+					"delivery_date", "ordered_qty", "approved", "weight_to_deliver"],
     onload: function(listview) {
+
 		listview.page.add_action_item(__("Approve"), function() {
-            console.log(" ----------- checked items",event.view.cur_list.$checks)
+			const selected_docs = listview.get_checked_items();
+			const docnames = listview.get_checked_items(true);
+
+			
+			if (selected_docs.length > 0) {
+				for (let doc of selected_docs) {
+						console.log(doc.name)
+				};
+			}
+				// console.log(selected)
+           
 			frappe.call({
-				method:'approve_function',
-                doc: frm.doc,
-				callback: function() {
-					listview.refresh();
-				}
+				// method:'erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function',
+                // args: { selected_docs : selected_docs,
+				// selected_docs: selected_docs },
+				// callback: function(r) {
+				// 	listview.refresh();
+				// }
+
+				type: "POST",
+						method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function",
+							args: {
+								"source_names": docnames
+							},
+							callback: function (r) {
+								console.log(r.message)
+								if (!r.exc) {
+									frappe.model.sync(r.message);
+									console.log(r.message)
+									cur_frm.dirty();
+									cur_frm.refresh();
+								}
+							}
 			});
 		});
 
         listview.page.add_action_item(__("Reject"), function() {
-            console.log(" ------retectr----- checked items",event.view.cur_list.$checks)
-            let selected = [];
-                        for (let check of event.view.cur_list.$checks) {
-                            selected.push(check.dataset.name);
-                        }
+			const selected_docs = listview.get_checked_items();
+			const docnames = listview.get_checked_items(true);
+
+			
+			if (selected_docs.length > 0) {
+				for (let doc of selected_docs) {
+						console.log(doc.name)
+				};
+			}
+				// console.log(selected)
+           
 			frappe.call({
-				method:'reject_function',
-                doc: frm.doc,
-				callback: function() {
-					listview.refresh();
-				}
+				// method:'erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function',
+                // args: { selected_docs : selected_docs,
+				// selected_docs: selected_docs },
+				// callback: function(r) {
+				// 	listview.refresh();
+				// }
+
+				type: "POST",
+						method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.reject_function",
+							args: {
+								"source_names": docnames
+							},
+							callback: function (r) {
+								console.log(r.message)
+								if (!r.exc) {
+									frappe.model.sync(r.message);
+									console.log(r.message)
+									cur_frm.dirty();
+									cur_frm.refresh();
+								}
+							}
 			});
 		});
 
-        listview.page.add_action_item(__("Split"), function() {
-            console.log(" -----split------ checked items",event.view.cur_list.$checks)
-            let selected = [];
-                        for (let check of event.view.cur_list.$checks) {
-                            selected.push(check.dataset.name);
-                        }
-                        console.log(" -----split------ checked items",selected)            
-			frappe.call({
-				method:'split_function',
-                doc: frm.doc,
-				callback: function() {
-					listview.refresh();
-				}
-			});
+		listview.page.add_action_item(__("Split"), function() {
+			const selected_docs = listview.get_checked_items();
+			const docnames = listview.get_checked_items(true);
+
+			
+			if (selected_docs.length > 0) {
+				for (let doc of selected_docs) {
+						console.log(doc.name)
+				};
+			}
+				// console.log(selected)
+			if(docnames == 1){
+				frappe.call({
+					// method:'erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function',
+					// args: { selected_docs : selected_docs,
+					// selected_docs: selected_docs },
+					// callback: function(r) {
+					// 	listview.refresh();
+					// }
+
+					type: "POST",
+							method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.split_function",
+								args: {
+									"source_names": docnames
+								},
+								callback: function (r) {
+									console.log(r.message)
+									if (!r.exc) {
+										frappe.model.sync(r.message);
+										console.log(r.message)
+										cur_frm.dirty();
+										cur_frm.refresh();
+									}
+								}
+				});
+			}
+			else{
+				frappe.msgprint({
+					title: __('Notification'),
+					indicator: 'Red',
+					message: __('Please select only one item to split')
+				});
+			}
 		});
+
 	}
 
 };

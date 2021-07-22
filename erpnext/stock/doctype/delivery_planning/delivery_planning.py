@@ -715,7 +715,7 @@ class DeliveryPlanning(Document):
 		salesno = 0
 		discount = []
 		transporter = ""
-		print("************* In side Delivery Note ************")
+		print("********** In side Delivery Note ************")
 		pl = frappe.db.get_all('Pick List',
 							   filters={
        							 'docstatus': 1,
