@@ -64,6 +64,9 @@ def get_report_pdf(doc, consolidated=True):
 		tax_id = frappe.get_doc('Customer', entry.customer).tax_id
 		presentation_currency = get_party_account_currency('Customer', entry.customer, doc.company) \
 				or doc.currency or get_company_currency(doc.company)
+		if doc.letter_head:
+			from frappe.www.printview import get_letter_head
+			letter_head = get_letter_head(doc, 0)
 
 		filters= frappe._dict({
 			'from_date': doc.from_date,
@@ -91,7 +94,10 @@ def get_report_pdf(doc, consolidated=True):
 			continue
 
 		html = frappe.render_template(template_path, \
-			{"filters": filters, "data": res, "ageing": ageing[0] if (doc.include_ageing and ageing) else None})
+			{"filters": filters, "data": res, "ageing": ageing[0] if (doc.include_ageing and ageing) else None,
+				"letter_head": letter_head if doc.letter_head else None,
+				"terms_and_conditions": frappe.db.get_value('Terms and Conditions', doc.terms_and_conditions, 'terms')
+					if doc.terms_and_conditions else None})
 
 		html = frappe.render_template(base_template_path, {"body": html, \
 			"css": get_print_style(), "title": "Statement For " + entry.customer})
@@ -201,10 +207,9 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 @frappe.whitelist()
 def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=True):
 	billing_email = frappe.db.sql("""
-		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent \
-		WHERE l.link_doctype='Customer' and l.link_name='""" + customer_name + """' and \
-		c.is_billing_contact=1 \
-		order by c.creation desc""")
+		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent
+		WHERE l.link_doctype='Customer' and l.link_name=%s and c.is_billing_contact=1
+		order by c.creation desc""", customer_name)
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:

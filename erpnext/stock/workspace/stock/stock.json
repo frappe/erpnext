@@ -264,6 +264,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Settings",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -500,8 +501,8 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
-   "label": "Inter Company  Challan Reconciliation ",
+   "is_query_report": 1,
+   "label": "Inter Company Challan Reconciliation",
    "link_to": "Inter Company Challan Reconciliation",
    "link_type": "Report",
    "onboard": 0,
@@ -663,6 +664,41 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Incorrect Data Report",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Incorrect Serial No Qty and Valuation",
+   "link_to": "Incorrect Serial No Valuation",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Incorrect Balance Qty After Transaction",
+   "link_to": "Incorrect Balance Qty After Transaction",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock and Account Value Comparison",
+   "link_to": "Stock and Account Value Comparison",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
  "modified": "2021-06-08 19:58:55.090977",
@@ -704,6 +740,15 @@
    "type": "DocType"
   },
   {
+   "color": "#CB2929",
+   "doc_view": "",
+   "format": "{} Draft",
+   "label": "Delivery Planning",
+   "link_to": "Delivery Planning",
+   "stats_filter": "{ \"status\" : \"Draft\"}",
+   "type": "DocType"
+  },
+  {
    "color": "Yellow",
    "format": "{} To Bill",
    "label": "Delivery Note",
@@ -724,6 +769,7 @@
   {
    "label": "Dashboard",
    "link_to": "Stock",
+   "stats_filter": "",
    "type": "Dashboard"
   },
   {
