@@ -55,8 +55,7 @@ def get_datev_csv(data, filters, csv_class):
 		quoting=QUOTE_NONNUMERIC
 	)
 
-	if not six.PY2:
-		data = data.encode('latin_1', errors='replace')
+	data = data.encode('latin_1', errors='replace')
 
 	header = get_header(filters, csv_class)
 	header = ';'.join(header).encode('latin_1', errors='replace')

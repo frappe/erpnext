@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "autoname": "DP-.YY.-.MM.-.#####.",
+ "creation": "2021-06-03 10:08:40.679934",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "transporter",
+  "cb1",
+  "delivery_date_from",
+  "delivery_date_to",
+  "cb2",
+  "pincode_from",
+  "pincode_to",
+  "section_break_9",
+  "show_delivery_planning_item",
+  "column_break_11",
+  "show_transporter_planning_item",
+  "column_break_13",
+  "show_purchase_order_planning_item",
+  "amended_from",
+  "section_break_16",
+  "d_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Delivery Planning",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "address.pincode",
+   "fieldname": "pincode_from",
+   "fieldtype": "Data",
+   "label": "Shipping Postal From"
+  },
+  {
+   "fetch_from": "address.pincode",
+   "fieldname": "pincode_to",
+   "fieldtype": "Data",
+   "label": "Shipping Postal To "
+  },
+  {
+   "fieldname": "delivery_date_from",
+   "fieldtype": "Date",
+   "label": "Delivery Date From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "delivery_date_to",
+   "fieldtype": "Date",
+   "label": "Deliver Date To",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 1",
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_transporter_planning_item",
+   "fieldtype": "Button",
+   "label": "Show Transporter Planning Item"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_delivery_planning_item",
+   "fieldtype": "Button",
+   "label": "Show Delivery Planning Item"
+  },
+  {
+   "fieldname": "show_purchase_order_planning_item",
+   "fieldtype": "Button",
+   "label": "Show Purchase Order Planning Item"
+  },
+  {
+   "fieldname": "d_status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending Planning\nPartially Planned\nPlanned and To Deliver & Order\nTo Order\nTo Deliver\nCompleted"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-07-01 16:59:45.607957",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Planning",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

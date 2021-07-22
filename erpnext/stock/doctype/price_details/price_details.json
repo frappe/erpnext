@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "creation": "2021-07-03 18:12:18.832646",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product",
+  "classifications",
+  "costunit",
+  "weight",
+  "volume",
+  "uom",
+  "min_qty",
+  "brand",
+  "brand_cost",
+  "brand_list_price",
+  "addpkg_cost",
+  "list_priceweight",
+  "list_pricevolume",
+  "list_priceunit"
+ ],
+ "fields": [
+  {
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "product.item_group",
+   "fieldname": "classifications",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Classifications",
+   "options": "Item Group"
+  },
+  {
+   "fetch_from": "product.valuation_rate",
+   "fieldname": "costunit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cost/Unit"
+  },
+  {
+   "fetch_from": "product.weight_per_unit",
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weight"
+  },
+  {
+   "fieldname": "volume",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Volume"
+  },
+  {
+   "fetch_from": "product.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Uom",
+   "options": "UOM"
+  },
+  {
+   "default": "1",
+   "fieldname": "min_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Min Qty"
+  },
+  {
+   "fetch_from": "product.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Brand",
+   "options": "Brand"
+  },
+  {
+   "fieldname": "brand_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Brand Cost"
+  },
+  {
+   "fieldname": "addpkg_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Add./Pkg Cost"
+  },
+  {
+   "fieldname": "list_pricevolume",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "List price/Volume"
+  },
+  {
+   "fieldname": "list_priceunit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "List price/Unit"
+  },
+  {
+   "fieldname": "brand_list_price",
+   "fieldtype": "Float",
+   "label": "Brand List Price"
+  },
+  {
+   "fieldname": "list_priceweight",
+   "fieldtype": "Float",
+   "label": "List price/Weight"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-07-05 11:40:53.744312",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Price Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

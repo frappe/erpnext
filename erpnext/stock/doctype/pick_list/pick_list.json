@@ -29,7 +29,9 @@
   "total_picked_weight",
   "amended_from",
   "transaction_date",
-  "delivery_note_done"
+  "delivery_note_done",
+  "related_delivery_planning"
+
  ],
  "fields": [
   {
@@ -172,6 +174,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "related_delivery_planning",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning",
+   "read_only": 1
+  },
+  {
    "fieldname": "planned_rm_weight",
    "fieldtype": "Read Only",
    "label": "Planned RM Weight"
@@ -192,7 +202,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-08 11:12:40.969719",
+ "modified": "2021-06-17 14:46:54.727434",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

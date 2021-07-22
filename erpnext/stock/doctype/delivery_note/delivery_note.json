@@ -162,7 +162,9 @@
   "ewaybill",
   "port_code",
   "shipping_bill_number",
-  "shipping_bill_date"
+  "shipping_bill_date",
+  "section_break_140",
+  "related_delivery_planning
  ],
  "fields": [
   {
@@ -571,8 +573,7 @@
    "oldfieldname": "packing_details",
    "oldfieldtype": "Table",
    "options": "Packed Item",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "product_bundle_help",
@@ -1407,13 +1408,25 @@
    "label": " GST Category",
    "options": "\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders",
    "translatable": 1
+  },
+  {
+   "fieldname": "related_delivery_planning",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Related Delivery Planning",
+   "options": "Delivery Planning",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_140",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-09 13:06:07.122609",
+ "modified": "2021-06-11 19:27:30.901112",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

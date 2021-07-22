@@ -13,7 +13,8 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file, read_xls_file_from_attached_file
 
 class ChartofAccountsImporter(Document):
-	pass
+	def validate(self):
+		validate_accounts(self.import_file)
 
 @frappe.whitelist()
 def validate_company(company):
@@ -22,7 +23,7 @@ def validate_company(company):
 		'allow_account_creation_against_child_company'])
 
 	if parent_company and (not allow_account_creation_against_child_company):
-		msg = _("{} is a child company. ").format(frappe.bold(company))
+		msg = _("{} is a child company.").format(frappe.bold(company)) + " "
 		msg += _("Please import accounts against parent company or enable {} in company master.").format(
 			frappe.bold('Allow Account Creation Against Child Company'))
 		frappe.throw(msg, title=_('Wrong Company'))
@@ -56,7 +57,7 @@ def get_file(file_name):
 	extension = extension.lstrip(".")
 
 	if extension not in ('csv',  'xlsx', 'xls'):
-		frappe.throw("Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload")
+		frappe.throw(_("Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload"))
 
 	return  file_doc, extension
 
@@ -293,7 +294,7 @@ def validate_accounts(file_name):
 	accounts_dict = {}
 	for account in accounts:
 		accounts_dict.setdefault(account["account_name"], account)
-		if not hasattr(account, "parent_account"):
+		if "parent_account" not in account:
 			msg = _("Please make sure the file you are using has 'Parent Account' column present in the header.")
 			msg += "<br><br>"
 			msg += _("Alternatively, you can download the template and fill your data in.")
@@ -301,28 +302,27 @@ def validate_accounts(file_name):
 		if account["parent_account"] and accounts_dict.get(account["parent_account"]):
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
-	message = validate_root(accounts_dict)
-	if message: return message
-	message = validate_account_types(accounts_dict)
-	if message: return message
+	validate_root(accounts_dict)
+
+	validate_account_types(accounts_dict)
 
 	return [True, len(accounts)]
 
 def validate_root(accounts):
 	roots = [accounts[d] for d in accounts if not accounts[d].get('parent_account')]
 	if len(roots) < 4:
-		return _("Number of root accounts cannot be less than 4")
+		frappe.throw(_("Number of root accounts cannot be less than 4"))
 
 	error_messages = []
 
 	for account in roots:
 		if not account.get("root_type") and account.get("account_name"):
-			error_messages.append("Please enter Root Type for account- {0}".format(account.get("account_name")))
+			error_messages.append(_("Please enter Root Type for account- {0}").format(account.get("account_name")))
 		elif account.get("root_type") not in get_root_types() and account.get("account_name"):
-			error_messages.append("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity".format(account.get("account_name")))
+			error_messages.append(_("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity").format(account.get("account_name")))
 
 	if error_messages:
-		return "<br>".join(error_messages)
+		frappe.throw("<br>".join(error_messages))
 
 def get_root_types():
 	return ('Asset', 'Liability', 'Expense', 'Income', 'Equity')
@@ -356,7 +356,7 @@ def validate_account_types(accounts):
 
 	missing = list(set(account_types_for_ledger) - set(account_types))
 	if missing:
-		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
+		frappe.throw(_("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing)))
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
 	# fix logic bug
@@ -364,7 +364,7 @@ def validate_account_types(accounts):
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
-		return _("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing))
+		frappe.throw(_("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing)))
 
 def unset_existing_data(company):
 	linked = frappe.db.sql('''select fieldname from tabDocField
