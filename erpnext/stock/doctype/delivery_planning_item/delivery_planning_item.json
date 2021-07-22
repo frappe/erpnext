@@ -8,12 +8,14 @@
  "field_order": [
   "transporter",
   "customer",
+  "customer_name",
   "item_code",
   "item_name",
   "ordered_qty",
   "pending_qty",
   "qty_to_deliver",
   "weight_to_deliver",
+  "d_status",
   "column_break_9",
   "sales_order",
   "sorce_warehouse",
@@ -32,9 +34,10 @@
   "stock_uom",
   "section_break_24",
   "related_delivey_planning",
+  "column_break_28",
   "delivery_note",
-  "purchase_order",
-  "d_status"
+  "column_break_30",
+  "purchase_order"
  ],
  "fields": [
   {
@@ -44,12 +47,15 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Transporter",
-   "options": "Supplier"
+   "mandatory_depends_on": "eval: doc.supplier_dc == 0",
+   "options": "Supplier",
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
    "options": "Customer",
    "read_only": 1,
@@ -58,6 +64,8 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "read_only": 1
   },
@@ -72,6 +80,7 @@
    "fieldname": "ordered_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Ordered Qty",
    "read_only": 1
   },
@@ -85,7 +94,8 @@
    "fieldname": "qty_to_deliver",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty to Deliver"
+   "label": "Qty to Deliver",
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
   },
   {
    "fieldname": "weight_to_deliver",
@@ -114,6 +124,7 @@
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Delivery Date",
    "read_only": 1,
    "reqd": 1
@@ -147,7 +158,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Approved",
-   "options": "\nYes\nNo"
+   "options": "\nYes\nNo",
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
   },
   {
    "fieldname": "weight_per_unit",
@@ -158,28 +170,34 @@
   {
    "fieldname": "sorce_warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Source Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
   },
   {
    "default": "0",
    "fieldname": "supplier_dc",
    "fieldtype": "Check",
-   "label": " Supplier delivers to Customer "
+   "label": " Supplier delivers to Customer ",
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
   },
   {
    "depends_on": "eval: doc.supplier_dc == 1",
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Supplier",
    "mandatory_depends_on": "eval: doc.supplier_dc == 1",
-   "options": "Supplier"
+   "options": "Supplier",
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
   },
   {
    "fieldname": "split",
    "fieldtype": "Button",
    "hidden": 1,
-   "label": "Split"
+   "label": "Split",
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
   },
   {
    "fieldname": "uom",
@@ -222,21 +240,42 @@
    "default": "Incomplete",
    "fieldname": "d_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Document Status",
-   "options": "\nComplete\nIncomplete"
+   "options": "\nComplete\nIncomplete",
+   "read_only": 1
   },
   {
    "depends_on": "eval: doc.supplier_dc == 1",
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Supplier Name",
+   "read_only": 1,
+   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Customer Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-30 10:26:25.465716",
+ "modified": "2021-07-22 14:57:42.348205",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
@@ -255,7 +294,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_field": "name",
+ "sort_order": "ASC",
  "track_changes": 1
 }

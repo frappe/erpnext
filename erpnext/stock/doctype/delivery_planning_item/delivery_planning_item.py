@@ -48,7 +48,96 @@ class DeliveryPlanningItem(Document):
 			return 1
 		else: return 0
 
-frappe.db.set_value('Task', 'TASK00002', {
-    'subject': 'New Subject',
-    'description': 'New Description'
-})
+
+@frappe.whitelist()
+def approve_function(source_names):
+	print("------------------------------items",source_names)
+	names = list(source_names.split(","))
+	print("------------------------------items",names)
+	for name in names:
+		print("------- 444444444444444 name --------",name)
+		x = name.translate({ord(i): None for i in ']"['})
+		print(" --- xxxxxxxxxx ------ ",x)
+		doc = frappe.get_doc('Delivery Planning Item', x)
+		if doc.approved:
+			print("Already Approved", x ," status", doc.approved)
+			frappe.msgprint(
+				msg='This plan is allready approved',
+				title='Approval Error',
+			)
+		else:
+			doc.approved = 'Yes'
+			doc.save()
+			frappe.msgprint(
+				msg='Plan Approved',
+				title='Approval message',
+			)
+			
+	return 1
+
+@frappe.whitelist()
+def approve_function(source_names):
+	print("------------------------------items",source_names)
+	names = list(source_names.split(","))
+	print("------------------------------items",names)
+	for name in names:
+		print("------- 444444444444444 name --------",name)
+		x = name.translate({ord(i): None for i in ']"['})
+		print(" --- xxxxxxxxxx ------ ",x)
+		doc = frappe.get_doc('Delivery Planning Item', x)
+		if doc.approved:
+			print("Already Approved", x ," status", doc.approved)
+			frappe.msgprint(
+				msg='Approval status for planning item {item} is already set to {approve}'.format(item = doc.name, approve = doc.approved),
+				title='Approval Error',
+			)
+		else:
+			doc.approved = 'Yes'
+			doc.save()
+			frappe.msgprint(
+				msg='Plannig item {item} Approved'.format(item = doc.name),
+				title='Approval message',
+			)
+			
+	return 1
+
+# reject_function
+@frappe.whitelist()
+def reject_function(source_names):
+	print("------------------------------items",source_names)
+	names = list(source_names.split(","))
+	print("------------------------------items",names)
+	for name in names:
+		print("------- 444444444444444 name --------",name)
+		x = name.translate({ord(i): None for i in ']"['})
+		print(" --- xxxxxxxxxx ------ ",x)
+		doc = frappe.get_doc('Delivery Planning Item', x)
+		if doc.approved == "": 
+			doc.approved = 'No'
+			doc.save()			
+			frappe.msgprint(
+				msg='Plannig item {item} Rejected'.format(item = doc.name),
+				title='Rejection message',
+			)
+		else:
+			print("Already Approved", x ," status", doc.approved)
+			frappe.msgprint(
+				msg='Approval status for planning item {item} is already set to {approve}'.format(item = doc.name, approve = doc.approved),
+				title='Approval Error',
+			)
+			
+	return 1	
+
+# split_function
+@frappe.whitelist()
+def split_function(source_names):
+	print("------------------------------items",source_names)
+	names = list(source_names.split(","))
+	print("------------------------------items",names)
+	for name in names:
+		print("------- 444444444444444 name --------",name)
+		x = name.translate({ord(i): None for i in ']"['})
+		print(" --- xxxxxxxxxx ------ ",x)
+		doc = frappe.get_doc('Delivery Planning Item', x)
+
+	return 1

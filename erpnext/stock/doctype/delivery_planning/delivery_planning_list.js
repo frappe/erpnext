@@ -26,7 +26,7 @@ frappe.listview_settings['Sales Order'] = {
 };
 
 
-//Pending Planning
+///Pending Planning
 //Partially Planned
 //Planned and To Deliver & Order
 //To Order

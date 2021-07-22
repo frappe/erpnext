@@ -59,7 +59,7 @@ frappe.ui.form.on('Delivery Planning', {
 					}
 				});
 
-//		code for create and calcluate custom button
+//	 	code for create and calcluate custom button
 
 		frm.call({
 				method : 'check_po_in_dpi',

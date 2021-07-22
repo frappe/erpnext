@@ -131,11 +131,16 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
 	console.log(" in side split button",frm.doc.ordered_qty)
-		if(frm.doc.ordered_qty > 1)
-			{
-				frm.set_df_property('split','hidden',0)
-	            frm.refresh_field("split")
-			}
+	if (frm.doc.approved)
+		{
+			frm.set_df_property('split','hidden',1)
+	        frm.refresh_field("split")
+		}	
+	else if(frm.doc.ordered_qty > 1)
+		{
+			frm.set_df_property('split','hidden',0)
+			frm.refresh_field("split")
+		}
 
 });
 
