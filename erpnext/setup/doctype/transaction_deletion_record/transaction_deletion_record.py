@@ -11,8 +11,15 @@ from frappe.desk.notifications import clear_notifications
 
 class TransactionDeletionRecord(Document):
 	def validate(self):
-		frappe.only_for('System Manager')
+		self.validate_user()
 		self.validate_doctypes_to_be_ignored()
+
+	def validate_user(self):
+		frappe.only_for('System Manager')
+
+		if not frappe.has_permission("Transaction Deletion Record", "submit"):
+			if 'System Manager' in frappe.get_roles(frappe.session.user):
+				self.flags.ignore_permissions = 1
 
 	def validate_doctypes_to_be_ignored(self):
 		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
