@@ -31,6 +31,8 @@
   "pick_list",
   "contact_info",
   "shipping_address_name",
+  "customer_gstin",
+  "place_of_supply1",
   "shipping_address",
   "contact_person",
   "contact_display",
@@ -38,9 +40,11 @@
   "contact_email",
   "col_break21",
   "customer_address",
+  "billing_address_gstin",
   "tax_id",
   "address_display",
   "company_address",
+  "company_gstin",
   "company_address_display",
   "currency_and_price_list",
   "currency",
@@ -76,6 +80,9 @@
   "shipping_rule",
   "section_break_41",
   "taxes_and_charges",
+  "column_break_70",
+  "cost_center",
+  "section_break_72",
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
@@ -103,15 +110,20 @@
   "terms_section_break",
   "tc_name",
   "terms",
+  "gst_transporter_id",
   "transporter_info",
   "transporter",
   "driver",
+  "distance",
   "lr_no",
   "vehicle_no",
   "col_break34",
   "transporter_name",
+  "mode_of_transport",
   "driver_name",
   "lr_date",
+  "gst_vehicle_type",
+  "gst_category",
   "more_info",
   "project",
   "campaign",
@@ -147,8 +159,12 @@
   "total_commission",
   "section_break1",
   "sales_team",
+  "ewaybill",
+  "port_code",
+  "shipping_bill_number",
+  "shipping_bill_date",
   "section_break_140",
-  "related_delivery_planning"
+  "related_delivery_planning
  ],
  "fields": [
   {
@@ -515,6 +531,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Scan Barcode"
   },
   {
@@ -783,6 +800,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounded Total (Company Currency)",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
@@ -837,6 +855,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounded Total",
    "oldfieldname": "rounded_total_export",
    "oldfieldtype": "Currency",
@@ -849,6 +868,7 @@
    "description": "In Words (Export) will be visible once you save the Delivery Note.",
    "fieldname": "in_words",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words_export",
@@ -1284,6 +1304,110 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fetch_from": "shipping_address_name.gstin",
+   "fieldname": "company_gstin",
+   "fieldtype": "Data",
+   "label": "Company GSTIN",
+   "print_hide": 1,
+   "read_only": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "column_break_70",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "section_break_72",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:(doc.docstatus === 1)",
+   "fieldname": "ewaybill",
+   "fieldtype": "Data",
+   "label": " E-Way Bill No."
+  },
+  {
+   "depends_on": "eval:doc.gst_category=='Overseas'",
+   "fieldname": "port_code",
+   "fieldtype": "Data",
+   "label": " Port Code"
+  },
+  {
+   "depends_on": "eval:doc.gst_category=='Overseas'",
+   "fieldname": "shipping_bill_number",
+   "fieldtype": "Data",
+   "label": " Shipping Bill Number"
+  },
+  {
+   "depends_on": "eval:doc.gst_category=='Overseas'",
+   "fieldname": "shipping_bill_date",
+   "fieldtype": "Data",
+   "label": " Shipping Bill Date"
+  },
+  {
+   "fetch_from": "shipping_address_name.gstin",
+   "fieldname": "customer_gstin",
+   "fieldtype": "Data",
+   "label": "Customer GSTIN"
+  },
+  {
+   "fetch_from": "customer_address.gstin",
+   "fieldname": "billing_address_gstin",
+   "fieldtype": "Data",
+   "label": "Billing Address GSTIN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "place_of_supply1",
+   "fieldtype": "Data",
+   "label": "Place of Supply",
+   "print_hide": 1,
+   "read_only": 1,
+   "translatable": 1
+  },
+  {
+   "fetch_from": "transporter.gst_transporter_id",
+   "fieldname": "gst_transporter_id",
+   "fieldtype": "Data",
+   "label": "GST Transporter ID",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "distance",
+   "fieldtype": "Float",
+   "label": "Distance (in km)",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "mode_of_transport",
+   "fieldtype": "Select",
+   "label": "Mode of Transport",
+   "options": "\nRoad\nAir\nRail\nShip"
+  },
+  {
+   "default": "Regular",
+   "depends_on": "eval:(doc.mode_of_transport === \"Road\")",
+   "fieldname": "gst_vehicle_type",
+   "fieldtype": "Select",
+   "label": "GST Vehicle Type",
+   "options": "Regular\nOver Dimensional Cargo (ODC)"
+  },
+  {
+   "fetch_from": "customer.gst_category",
+   "fetch_if_empty": 1,
+   "fieldname": "gst_category",
+   "fieldtype": "Select",
+   "label": " GST Category",
+   "options": "\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders",
+   "translatable": 1
   },
   {
    "fieldname": "related_delivery_planning",
