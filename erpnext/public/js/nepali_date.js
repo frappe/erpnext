@@ -90,6 +90,10 @@ var doctype_data = [
 
     // Income Tax Slab
     {name:"Income Tax Slab", gregorian:"effective_from", vikram_samvat: "effective_from_nepal"},
+
+    // // Fiscal Year
+    // {name:"Fiscal Year", gregorian:"year_start_date", vikram_samvat: "year_start_date_nepal"},
+    // {name:"Fiscal Year", gregorian:"year_end_date", vikram_samvat: "year_end_date_nepal"},
 ]
 
 $(document).on('app_ready', function() {
@@ -127,4 +131,15 @@ $(document).on('app_ready', function() {
        })
 
     })
+    frappe.ui.form.on("Fiscal Year",{
+        refresh: function(frm){
+            frappe.db.get_single_value("System Settings", "country", (r) => {
+                if(r.message){
+                    if(r.message.country === "Nepal"){
+                        frm.set_df_property("date_tablenepal", "hidden",0)
+                    }
+                }
+            });
+    },
+})
 })
