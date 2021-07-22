@@ -1,0 +1,236 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ _("Order Summary") }} {% endblock %}
+
+{% block header %}
+<!-- <h2>{{ _("Order Summary") }}</h2> -->
+<div class="step-progress">
+    <ul class="progressbar">
+        <li class="active">Select Item</li>
+        <li> Place Order</li>
+        <li>Payment</li>
+    </ul>
+</div>
+<div class="next">
+    <div class="left"><h2>{{ _("Order Summary") }}</h2></div> 
+    <!-- <a href="/cart"></a> -->
+    <div class="right"><input class = "submit-btn" type="submit" name="submit sales order" value="submit sales order" id="submit_so" onclick="submit_so()"></div>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+{% endblock %}
+{% block page_content %}
+
+<div class="page">
+    {% if def_customer_add %}
+    <div>
+        <label><b>Order Date :</b></label>
+        {{order_date}}
+    </div>
+    <div>
+        <label><b>Customer Name :</b></label>
+        {{user}}
+    </div>
+    <!-- <div>
+        <label><b>Series :</b></label>
+    <select name="activity">
+        {% for name in naming_series %}
+            <option value="{{ activity }}">{{ name[0] }}</option>
+        {% endfor %}
+    </select>
+    </div> -->
+    <div>
+        <label><b>Sales order number :</b></label>
+        {{so_num}}
+    </div>
+    <div>
+        <label><b>Delivery Date :</b></label>
+        {{del_date}}
+    </div>
+    <div>
+        <label><b>Order Type :</b></label>
+        Shopping Cart
+    </div>
+    <hr>
+    <div style="float: left;">
+        <div>
+            <label><b>Customer Address :</b></label>
+            <select id="cust_add_opt" name="customer_address" style="height: 30px;" onchange='handleCustomerAddress(event)'>
+                {% for address in address_list %}
+                    {% if default_cust_add == address.name %}
+                        <option id = "id" value="{{default_cust_add}}" selected>{{ default_cust_add }}</option>
+                        {% else %}
+                        <option id = "id" value="{{ address.name }}" >{{ address.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label><b>Billing Address GSTIN :</b></label>
+            <p class ="text" id="bill_add_gst">{{def_cust_add.gstin}}</p>
+        </div>
+        <div>
+            <label><b>Address</b></label>
+            <address id="cust_add">
+                {% if def_cust_add.address_line1%}
+                {{def_cust_add.address_line1}}
+                {% endif %}
+
+                {% if def_cust_add.address_line2 %}
+                {{def_cust_add.address_line2     }}
+                {% endif %}
+                <br/>
+
+                {% if def_cust_add.city%}
+                {{def_cust_add.city}}
+                {% endif %}
+
+                {% if def_cust_add.county %}
+                {{def_cust_add.county }}
+                {% endif %}
+                <br/>
+
+                {% if def_cust_add.state%}
+                {{def_cust_add.state}}
+                {% endif %}
+
+                {% if def_cust_add.country %}
+                {{def_cust_add.country }}
+                {% endif %}
+                <br/>
+
+                {% if def_cust_add.pincode %}
+                <b>Pincode: </b> {{def_cust_add.pincode }}
+                {% endif %}
+
+
+            </address>
+            <!-- <input id="cust_add" type="text" value="colors"> -->
+        </div>
+        <!-- <div>
+            <label><b>Contact Person</b></label>
+            {{test}}
+        </div>
+        <div>
+            <label><b>Contact</b></label>
+            table
+        </div> -->
+    </div>
+
+    <div style="float: right;">
+        <div>
+            <label><b>Shipping Address Name</b></label>
+            <select name="shipping_address" style="height: 30px;" onchange='handleShippingAddress(event)'>
+                {% for address in address_list %}
+                    {% if default_ship_add == address.name %}
+                        <option id = "id_ship" value="{{address.name}}" selected>{{ address.name }}</option>
+                        {% else %}
+                        <option id = "id_ship" value="{{ address.name }}" >{{ address.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label><b>Customer GSTIN</b></label>
+            <p class ="text" id="ship_add_gst">{{def_ship_add.gstin}}</p>
+        </div>
+        <div>
+            <label><b>Place of Supply</b></label>
+            {% if address_list[0].gst_state%}
+                <p class ="text" id="place_of_supply">{{def_ship_add.gst_state_number}}{{def_ship_add.gst_state}}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label><b>Shipping Address</b></label>
+            <address id="shipping_add">
+                {% if def_ship_add.address_line1%}
+                {{def_ship_add.address_line1}}
+                {% endif %}
+
+                {% if def_ship_add.address_line2 %}
+                {{def_ship_add.address_line2     }}
+                {% endif %}
+                <br/>
+
+                {% if def_ship_add.city%}
+                {{def_ship_add.city}}
+                {% endif %}
+
+                {% if def_ship_add.county %}
+                {{def_ship_add.county }}
+                {% endif %}
+                <br/>
+
+                {% if def_ship_add.state%}
+                {{def_ship_add.state}}
+                {% endif %}
+
+                {% if def_ship_add.country %}
+                {{def_ship_add.country }}
+                {% endif %}
+                <br/>
+
+                {% if def_ship_add.pincode %}
+                <b>Pincode: </b> {{def_ship_add.pincode }}
+                {% endif %}
+            </address>
+        </div>
+        <!-- <div>
+            <label><b>Territory</b></label>
+            table
+        </div> -->
+    </div>
+    {% else %}
+    <div>
+        <p style="color:red">Customer address not found</p>
+    </div>
+    {% endif %}
+    
+    <table class="table table-striped" id="owned_stock_table">
+        <thead>
+        <tr>
+            <th>Item image</th>
+            <th>Item Code</th>
+            <th>Item Name</th>
+            <!-- <th>Delivery Date</th> -->
+            <th>Quantity</th>
+            <th>Rate</th>
+            <th>Amount</th>
+            <!-- <th>Add to Cart</th> -->
+        </tr>
+    </thead>
+    {% for item in item_details %}
+      <tr>
+          {% if item.website_image %}
+          <td><img  src={{ item.website_image}} alt="NA" style="width:70px;height:50px;"></td>
+          {% else %}
+          <td> Image not found</td>
+          {% endif %}
+         <td>{{item.item_code}}</td>
+         <td>{{item.item_name}}</td>
+         <!-- <td>{{item.del_date}}</td> -->
+         <td>{{item.qty}}</td>
+         <!-- <td>NA</td> -->
+         <td>{{item.rate}}</td>
+         <td>{{item.amount}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <hr>
+
+        <div style="display: flex; justify-content: flex-end">
+            <label style="margin-right: 4px;"><b>Grand Total :</b></label>
+            {{grand_total}}
+        </div>
+        <div style="display: flex; justify-content: flex-end">
+            <label style="margin-right: 4px;"><b>Rounding Adjustment : </b></label>
+            {{rounding_adjustment}}
+        </div>
+        <div style="display: flex; justify-content: flex-end"> 
+            <label style="margin-right: 4px;"><b>Rounded Total :</b></label>
+            {{rounded_up_total}}
+        </div>
+</div>
+
+{% endblock %}

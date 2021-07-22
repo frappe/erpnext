@@ -37,8 +37,8 @@ class SalarySlip(TransactionBase):
 	def autoname(self):
 		self.name = make_autoname(self.series)
 
+		
 	def before_save(self):
-		self.get_total_leave_in_current_month()
 		self.get_payroll()
 
 	def validate(self):
@@ -1305,6 +1305,7 @@ class SalarySlip(TransactionBase):
 
 		return period_start_date, period_end_date
 
+	@frappe.whitelist()
 	def get_total_leave_in_current_month(self):
 		date = self.start_date.split('-')
 		cur_month = int(date[1])
