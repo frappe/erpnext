@@ -583,7 +583,6 @@ def update_billing_percentage(pr_doc, update_modified=True):
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	from erpnext.accounts.party import get_payment_terms_template
-	from erpnext.controllers.accounts_controller import fetch_payment_terms_from_order
 
 	doc = frappe.get_doc('Purchase Receipt', source_name)
 	returned_qty_map = get_returned_qty_map(source_name)
@@ -657,7 +656,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 	if automatically_fetch_payment_terms:
-		fetch_payment_terms_from_order(doclist)
+		doc.set_payment_schedule()
 
 	return doclist
 
