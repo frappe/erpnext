@@ -14,7 +14,8 @@
   "year_start_date",
   "year_end_date",
   "companies",
-  "auto_created"
+  "auto_created",
+  "date_tablenepal"
  ],
  "fields": [
   {
@@ -77,12 +78,19 @@
    "fieldtype": "Check",
    "label": "Is Short Year",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "date_tablenepal",
+   "fieldtype": "Table",
+   "label": "Date Table(Nepal)",
+   "options": "Nepali Date",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2020-11-05 12:16:53.081573",
+ "modified": "2021-07-22 15:04:13.724137",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
