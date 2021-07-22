@@ -39,7 +39,9 @@
   "terms",
   "reference",
   "job_card",
-  "requesting_work_order"
+  "requesting_work_order",
+  "work_order_details_section",
+  "work_order_detail"
  ],
  "fields": [
   {
@@ -323,13 +325,25 @@
    "label": "Requesting Work Order",
    "options": "Work Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "work_order_details_section",
+   "fieldtype": "Section Break",
+   "label": "Work Order Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_order_detail",
+   "fieldtype": "Table",
+   "label": "Work Order Detail",
+   "options": "Material Request Work Order"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-20 15:50:57.126189",
+ "modified": "2021-06-17 19:30:59.295549",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

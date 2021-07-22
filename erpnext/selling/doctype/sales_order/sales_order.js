@@ -806,3 +806,14 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	}
 });
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
+
+
+frappe.ui.form.on("Sales Order", "onload", function(frm) {
+    cur_frm.set_query("transporter", function() {
+        return {
+           "filters": {
+                "is_transporter": 1,
+            }
+        }
+    });
+});

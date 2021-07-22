@@ -41,7 +41,7 @@ def build_conditions(process_type, account, company):
 	if account:
 		conditions += "AND %s='%s'"%(deferred_account, account)
 	elif company:
-		conditions += "AND p.company='%s'"%(company)
+		conditions += f"AND p.company = {frappe.db.escape(company)}"
 
 	return conditions
 
@@ -263,6 +263,9 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			amount, base_amount = calculate_amount(doc, item, last_gl_entry,
 				total_days, total_booking_days, account_currency)
 
+		if not amount:
+			return
+
 		if via_journal_entry:
 			book_revenue_via_journal_entry(doc, credit_account, debit_account, against, amount,
 				base_amount, end_date, project, account_currency, item.cost_center, item, deferred_process, submit_journal_entry)
@@ -298,17 +301,21 @@ def process_deferred_accounting(posting_date=None):
 	start_date = add_months(today(), -1)
 	end_date = add_days(today(), -1)
 
-	for record_type in ('Income', 'Expense'):
-		doc = frappe.get_doc(dict(
-			doctype='Process Deferred Accounting',
-			posting_date=posting_date,
-			start_date=start_date,
-			end_date=end_date,
-			type=record_type
-		))
+	companies = frappe.get_all('Company')
 
-		doc.insert()
-		doc.submit()
+	for company in companies:
+		for record_type in ('Income', 'Expense'):
+			doc = frappe.get_doc(dict(
+				doctype='Process Deferred Accounting',
+				company=company.name,
+				posting_date=posting_date,
+				start_date=start_date,
+				end_date=end_date,
+				type=record_type
+			))
+
+			doc.insert()
+			doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
 	amount, base_amount, posting_date, project, account_currency, cost_center, item, deferred_process=None):
@@ -360,12 +367,10 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			frappe.flags.deferred_accounting_error = True
 
 def send_mail(deferred_process):
-	title = _("Error while processing deferred accounting for {0}".format(deferred_process))
-	content = _("""
-		Deferred accounting failed for some invoices:
-		Please check Process Deferred Accounting {0}
-		and submit manually after resolving errors
-	""").format(get_link_to_form('Process Deferred Accounting', deferred_process))
+	title = _("Error while processing deferred accounting for {0}").format(deferred_process)
+	link = get_link_to_form('Process Deferred Accounting', deferred_process)
+	content = _("Deferred accounting failed for some invoices:") + "\n"
+	content += _("Please check Process Deferred Accounting {0} and submit manually after resolving errors.").format(link)
 	sendmail_to_system_managers(title, content)
 
 def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,

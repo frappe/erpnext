@@ -10,8 +10,8 @@ from frappe.utils import getdate
 
 class RetentionBonus(Document):
 	def validate(self):
-		if frappe.get_value('Employee', self.employee, 'status') == 'Left':
-			frappe.throw(_('Cannot create Retention Bonus for left Employees'))
+		if frappe.get_value('Employee', self.employee, 'status') != 'Active':
+			frappe.throw(_('Cannot create Retention Bonus for Left or Inactive Employees'))
 		if getdate(self.bonus_payment_date) < getdate():
 			frappe.throw(_('Bonus Payment Date cannot be a past date'))
 
