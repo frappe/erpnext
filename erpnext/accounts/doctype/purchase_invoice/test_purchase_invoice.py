@@ -263,14 +263,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		})
 		pi.submit()
 
-		# gle = frappe.get_all(
-		# 	"GL Entry",
-		# 	fields = ['account', 'debit', 'credit', 'posting_date'],
-		# 	filters = {'voucher_no': pi.name}
-		# )
-		# for gl in gle:
-		# 	print(gl, "\n")
-
 		expected_gle = [
 			["_Test Account Cost for Goods Sold - _TC", 100.0, 0.0, nowdate()],
 			["_Test Account VAT - _TC", 20.0, 0.0, nowdate()],
@@ -1196,7 +1188,6 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
 		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
 
-	print(gl_entries)
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
