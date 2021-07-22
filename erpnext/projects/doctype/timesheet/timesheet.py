@@ -234,6 +234,17 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 				and tsd.sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
 
 @frappe.whitelist()
+def get_timesheet_detail_rate(timelog, currency):
+	timelog_detail = frappe.db.sql("""SELECT tsd.billing_amount as billing_amount, 
+		ts.currency as currency FROM `tabTimesheet Detail` tsd 
+		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent 
+		WHERE tsd.name = '{0}'""".format(timelog), as_dict = 1)[0]
+
+	exchange_rate = get_exchange_rate(timelog_detail.currency, currency)
+	
+	return timelog_detail.billing_amount * exchange_rate
+
+@frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 	if not filters: filters = {}
