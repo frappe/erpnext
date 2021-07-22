@@ -966,7 +966,7 @@ class GSPConnector():
 			"attached_to_doctype": doctype,
 			"attached_to_name": docname,
 			"attached_to_field": "qrcode_image",
-			"is_private": 1,
+			"is_private": 0,
 			"content": qr_image.getvalue()})
 		_file.save()
 		frappe.db.commit()
