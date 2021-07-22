@@ -748,7 +748,7 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 	""".format(conditions=conditions), { "item_code": row['item_code'] }, as_dict=1)
 
 def get_warehouse_list(warehouses, warehouse_list=None):
-	if not warehouse_list:
+	if warehouse_list is not None:
 		warehouse_list = []
 
 	if isinstance(warehouses, str):
