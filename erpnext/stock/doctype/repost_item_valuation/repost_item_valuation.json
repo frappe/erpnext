@@ -21,7 +21,10 @@
   "allow_zero_rate",
   "amended_from",
   "error_section",
-  "error_log"
+  "error_log",
+  "items_to_be_repost",
+  "distinct_item_and_warehouse",
+  "current_index"
  ],
  "fields": [
   {
@@ -142,12 +145,39 @@
    "fieldname": "allow_zero_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Rate"
+  },
+  {
+   "fieldname": "items_to_be_repost",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Items to Be Repost",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "distinct_item_and_warehouse",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Distinct Item and Warehouse",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_index",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Current Index",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-10 07:52:12.476589",
+ "modified": "2021-07-22 18:59:43.057878",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
