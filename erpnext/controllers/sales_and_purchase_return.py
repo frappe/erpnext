@@ -32,7 +32,9 @@ def validate_return_against(doc):
 			return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
 			ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
 
-			if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
+			return_posting_datetime, ref_posting_datetime = convert_to_offset_naive_datetime_objects(return_posting_datetime, ref_posting_datetime)
+
+			if return_posting_datetime < ref_posting_datetime:
 				frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
 
 			# validate same exchange rate
@@ -44,6 +46,17 @@ def validate_return_against(doc):
 			if doc.doctype == "Sales Invoice" and doc.update_stock and not ref_doc.update_stock:
 					frappe.throw(_("'Update Stock' can not be checked because items are not delivered via {0}")
 						.format(doc.return_against))
+
+def convert_to_offset_naive_datetime_objects(datetime_obj1, datetime_obj2):
+	datetime_obj1 = get_datetime(datetime_obj1)
+	datetime_obj2 = get_datetime(datetime_obj2)
+
+	if datetime_obj1.tzinfo:
+		datetime_obj1.replace(tzinfo=None)
+	if datetime_obj2.tzinfo:
+		datetime_obj2.replace(tzinfo=None)
+
+	return datetime_obj1, datetime_obj2
 
 def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
