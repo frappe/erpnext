@@ -1,7 +1,8 @@
 frappe.listview_settings['Delivery Planning Item'] = {
 	add_fields: ["transporter", "sales_order", "customer", "customer_name","postal_code", "item_code", "item_name",
 					"delivery_date", "ordered_qty", "approved", "weight_to_deliver"],
-    onload: function(listview) {
+	hide_name_column: true,
+	onload: function(listview) {
 
 		listview.page.add_action_item(__("Approve"), function() {
 			const selected_docs = listview.get_checked_items();

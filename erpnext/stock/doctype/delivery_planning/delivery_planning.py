@@ -640,7 +640,8 @@ class DeliveryPlanning(Document):
 				print("-----------Date 0purchase order create 111 -------------", q.delivery_date)
 				for i in so_wise_data:
 						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
-						newdoc.delivery_note = po.name
+						newdoc.purchase_order = po.name 
+						newdoc.d_status = "Complete"
 						newdoc.save(ignore_permissions=True)
 
 			return 1
@@ -869,6 +870,7 @@ class DeliveryPlanning(Document):
 					for i in item:
 						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
 						newdoc.delivery_note = dnote.name
+						newdoc.d_status = "Complete"
 						newdoc.save(ignore_permissions=True)
 
 
@@ -969,12 +971,14 @@ class DeliveryPlanning(Document):
 												"supplier_dc": 1,
 												"related_delivey_planning": self.name,
 												})
+			print("--------------- dpi_po", len(dpi_po))
 
 			dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
 									   filters={"approved": "Yes",
 												"supplier_dc": 0,
 												"related_delivey_planning": self.name,
 												})
+			print("--------------- dpi_pn", len(dpi_dn))
 
 			dpi = frappe.db.get_all(doctype='Delivery Planning Item',
 									filters={"related_delivey_planning": self.name})
@@ -983,42 +987,55 @@ class DeliveryPlanning(Document):
 									   filters={"approved": "Yes",
 												"supplier_dc": 1,
 												"related_delivey_planning": self.name,
-												"purchase_order": ["!=", "null"]
+												"d_status" : "Complete",
 												})
+			print("--------------- a_dpi_po", len(a_dpi_po))									
 			# {"autoname": ["is", "not set"]}
 			a_dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
 									   filters={"approved": "Yes",
 												"supplier_dc": 0,
 												"related_delivey_planning": self.name,
-												"delivery_note": ["!=", "null"],
+												"d_status" : 'Complete',
 												})
 
-			print("0000011111111112222222211111", count)
+			print("--------------- a_dpi_dn", len(a_dpi_dn))
+
 			if dpi_dn and dpi_po:
 				count = len(dpi_dn) + len(dpi_po)
 			elif dpi_po:
 				count = len(dpi_po)
-			elif dpi_dn:
-				count = len(dpi_dn)
+			else:
+				count = len(dpi_dn) 
 			print("00000111111111122222222222222222", count)
 			if a_dpi_dn and a_dpi_po:
 				a_count = len(a_dpi_dn) + len(a_dpi_po)
 			elif a_dpi_po:
 				a_count = len(a_dpi_po)
-			elif dpi_dn:
+			else:
 				a_count = len(a_dpi_dn)
 			print("00000111111111122222222333333333333", a_count)
-			if count == 0:
-				self.d_status = "Pending Planning"
-			elif count == len(dpi):
-				self.d_status = "Partially Planned"
+
+			
+			if count == a_count:
+				self.db_set('d_status', "Completed", update_modified=False)
+				print("------- in if 1 --------", count, a_count)
+			elif count > 1 and count < len(dpi) :
+				self.db_set('d_status', "Partially Planned", update_modified=False)
+				print("------- in if 2  ---------", count, len(dpi))
 			elif a_count == 0 and count > 0:
-				self.d_status = "Planned and To Deliver & Order "
+				self.db_set('d_status', "Planned and To Deliver & Order", update_modified=False)
+				print("------- in if 3 ---------", count)
 			elif len(a_dpi_po) > 0:
-				self.d_status = "To Deliver"
+				self.db_set('d_status', "To Deliver", update_modified=False)
+				print("------- in if 1 ---------", len(a_dpi_po))
 			elif len(a_dpi_dn) > 0:
-				self.d_status = "To Order"
-			elif count == a_count:
-				self.d_status == "Completed"
+				self.db_set('d_status', "To Order", update_modified=False)
+				print("------- in if 1 ---------", len(a_dpi_dn))
+			else:
+				self.db_set('d_status', "Pending Planning", update_modified=False)
+				print("------- in if PP1 ---------", count)
+
+			# self.save(ignore_permissions=True)
+			return 1
 
 

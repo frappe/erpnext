@@ -21,6 +21,16 @@ frappe.ui.form.on('Delivery Planning', {
 		if( frm.doc.docstatus === 1){
 
 //		frm.call('refresh_status')
+		frm.call({
+			method:'refresh_status',
+			doc: frm.doc,
+			callback: function(r){
+				if(r.message){
+					frm.refresh_field('d_status')
+				}
+			}
+				
+		});
 
 		// code to show Delivery palnning button
 		frm.call({
@@ -302,14 +312,14 @@ frappe.ui.form.on('Delivery Planning', {
 
 
 	 refresh: function(frm) {
-				//status update
-		frm.call({
-			method:'refresh_status',
-			doc: frm.doc
+		// 		//status update
+		// frm.call({
+		// 	method:'refresh_status',
+		// 	doc: frm.doc
 
-		});
+		// });
 
-		frm.set('status','To Deliver')
+		// frm.set('status','To Deliver')
 //	if(frm.doc.docstatus === 1)
 //	{
 //

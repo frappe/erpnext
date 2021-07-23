@@ -8,6 +8,13 @@ frappe.ui.form.on('Delivery Planning Item', {
 //
 //
 //	},
+	onload: function(frm){
+		frm.call({
+			doc:frm.doc,
+			method: 'update_stock',
+			
+		});
+	},
 
 
 	split: function(frm) {

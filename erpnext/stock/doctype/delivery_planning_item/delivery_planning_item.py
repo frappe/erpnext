@@ -6,6 +6,12 @@ from frappe.model.document import Document
 
 class DeliveryPlanningItem(Document):
 
+	# @frappe.whitelist()
+	# def d_status_update(self, dname):
+	# 	doc = frappe.get_doc("Delivery Planning Item", 'dname')
+	# 	doc.d_status = "Complete"
+	# 	doc.save(ignore_permissions=True)
+
 	@frappe.whitelist()
 	def split_dp_item(self,n_transporter, n_qty, n_src_warehouse, n_supplier, n_date):
 		new_qty = 0
@@ -48,32 +54,21 @@ class DeliveryPlanningItem(Document):
 			return 1
 		else: return 0
 
-
-@frappe.whitelist()
-def approve_function(source_names):
-	print("------------------------------items",source_names)
-	names = list(source_names.split(","))
-	print("------------------------------items",names)
-	for name in names:
-		print("------- 444444444444444 name --------",name)
-		x = name.translate({ord(i): None for i in ']"['})
-		print(" --- xxxxxxxxxx ------ ",x)
-		doc = frappe.get_doc('Delivery Planning Item', x)
-		if doc.approved:
-			print("Already Approved", x ," status", doc.approved)
-			frappe.msgprint(
-				msg='This plan is allready approved',
-				title='Approval Error',
-			)
-		else:
-			doc.approved = 'Yes'
-			doc.save()
-			frappe.msgprint(
-				msg='Plan Approved',
-				title='Approval message',
-			)
-			
-	return 1
+	@frappe.whitelist()
+	def update_stock(self):	
+		docs = frappe.db.get_all(doctype='Bin',
+								filters={"warehouse": self.sorce_warehouse,
+										"item_code": self.item_code},
+								fields= ["projected_qty","actual_qty"])
+		print("---------- docs ---------",docs)		
+					
+		if(docs):
+			for doc in docs:
+				print("----- doc.actual_qtu", doc.actual_qty)		
+				frappe.db.set_value('Delivery Planning Item', self.name, {
+						'available_stock' : doc.actual_qty,
+						'current_stock' : doc.projected_qty
+					})
 
 @frappe.whitelist()
 def approve_function(source_names):
