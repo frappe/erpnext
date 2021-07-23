@@ -6,7 +6,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import get_fullname, flt, cstr, get_link_to_form
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name, share_doc_with_approver
+from erpnext.hr.utils import set_employee_name, share_doc_with_approver, validate_active_employee
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
@@ -23,6 +23,7 @@ class ExpenseClaim(AccountsController):
 			'make_payment_via_journal_entry')
 
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.validate_advances()
 		self.validate_sanctioned_amount()
 		self.calculate_total_amount()
