@@ -3,13 +3,12 @@
 
 import erpnext
 import frappe
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, InactiveEmployeeStatusError
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
 	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
-
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
 
@@ -529,4 +528,4 @@ def validate_active_employee(employee):
 	# create additional salary, attendance records for a Suspended employee
 	if frappe.db.get_value("Employee", employee, "status") in ["Left", "Inactive"]:
 		frappe.throw(_("Employee {0} with a non-active status cannot be used for this transaction.").format(
-			get_link_to_form("Employee", employee)))
+			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)
