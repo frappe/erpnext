@@ -3,13 +3,12 @@
 
 import erpnext
 import frappe
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, InactiveEmployeeStatusError
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
-	get_datetime, getdate, nowdate, today, unique)
-
+	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
 
@@ -20,6 +19,7 @@ class EmployeeBoardingController(Document):
 		Assign to the concerned person and roles as per the onboarding/separation template
 	'''
 	def validate(self):
+		validate_active_employee(self.employee)
 		# remove the task if linked before submitting the form
 		if self.amended_from:
 			for activity in self.activities:
@@ -522,3 +522,8 @@ def share_doc_with_approver(doc, user):
 		approver = approvers.get(doc.doctype)
 		if doc_before_save.get(approver) != doc.get(approver):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
+
+def validate_active_employee(employee):
+	if frappe.db.get_value("Employee", employee, "status") == "Inactive":
+		frappe.throw(_("Transactions cannot be created for an Inactive Employee {0}.").format(
+			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)
