@@ -15,12 +15,15 @@ from erpnext.manufacturing.doctype.workstation.workstation import (check_if_with
 	WorkstationHolidayError)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.hr.utils import validate_active_employee
 
 class OverlapError(frappe.ValidationError): pass
 class OverWorkLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
 	def validate(self):
+		if self.employee:
+			validate_active_employee(self.employee)
 		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()

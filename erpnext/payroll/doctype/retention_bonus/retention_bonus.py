@@ -7,11 +7,10 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import getdate
-
+from erpnext.hr.utils import validate_active_employee
 class RetentionBonus(Document):
 	def validate(self):
-		if frappe.get_value('Employee', self.employee, 'status') != 'Active':
-			frappe.throw(_('Cannot create Retention Bonus for Left or Inactive Employees'))
+		validate_active_employee(self.employee)
 		if getdate(self.bonus_payment_date) < getdate():
 			frappe.throw(_('Bonus Payment Date cannot be a past date'))
 
