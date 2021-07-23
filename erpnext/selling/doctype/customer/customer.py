@@ -136,7 +136,7 @@ class Customer(TransactionBase):
 		if self.lead_name:
 			lead = frappe.get_doc('Lead', self.lead_name)
 			lead.status = 'Converted'
-			lead.save()
+			lead.save(ignore_permissions=True)
 
 	def create_lead_address_contact(self):
 		if self.lead_name:
