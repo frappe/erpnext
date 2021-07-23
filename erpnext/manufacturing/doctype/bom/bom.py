@@ -330,7 +330,7 @@ class BOM(WebsiteGenerator):
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
 
 		if not from_child_bom:
-			frappe.msgprint(_("Cost Updated"))
+			frappe.msgprint(_("Cost Updated"), alert=True)
 
 	def update_parent_cost(self):
 		if self.total_cost:
