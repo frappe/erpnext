@@ -524,8 +524,6 @@ def share_doc_with_approver(doc, user):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
 
 def validate_active_employee(employee):
-	# allowing suspended employee because some organizations still process payroll,
-	# create additional salary, attendance records for a Suspended employee
-	if frappe.db.get_value("Employee", employee, "status") in ["Left", "Inactive"]:
-		frappe.throw(_("Employee {0} with a non-active status cannot be used for this transaction.").format(
+	if frappe.db.get_value("Employee", employee, "status") == "Inactive":
+		frappe.throw(_("Transactions cannot be created for an Inactive Employee {0}.").format(
 			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)

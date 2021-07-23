@@ -13,8 +13,10 @@ from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
 
-class EmployeeUserDisabledError(frappe.ValidationError): pass
-class InactiveEmployeeStatusError(frappe.ValidationError): pass
+class EmployeeUserDisabledError(frappe.ValidationError):
+	pass
+class InactiveEmployeeStatusError(frappe.ValidationError):
+	pass
 
 class Employee(NestedSet):
 	nsm_parent_field = 'reports_to'
