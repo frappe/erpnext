@@ -27,7 +27,8 @@
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail"
+  "item_wise_tax_detail",
+  "dont_recompute_tax"
  ],
  "fields": [
   {
@@ -200,13 +201,22 @@
    "fieldname": "included_in_paid_amount",
    "fieldtype": "Check",
    "label": "Considered In Paid Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "dont_recompute_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Dont Recompute tax",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-14 01:44:36.899147",
+ "modified": "2021-07-27 12:40:59.051803",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",

@@ -152,7 +152,7 @@ class calculate_taxes_and_totals(object):
 				validate_taxes_and_charges(tax)
 				validate_inclusive_tax(tax, self.doc)
 
-			if not self.doc.get('is_consolidated'):
+			if not (self.doc.get('is_consolidated') or tax.get("dont_recompute_tax")):
 				tax.item_wise_tax_detail = {}
 
 			tax_fields = ["total", "tax_amount_after_discount_amount",
@@ -347,7 +347,7 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
-		if not self.doc.get("is_consolidated"):
+		if not (self.doc.get("is_consolidated") or tax.get("dont_recompute_tax")):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
 		return current_tax_amount
@@ -455,7 +455,8 @@ class calculate_taxes_and_totals(object):
 	def _cleanup(self):
 		if not self.doc.get('is_consolidated'):
 			for tax in self.doc.get("taxes"):
-				tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
+				if not tax.get("dont_recompute_tax"):
+					tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:
