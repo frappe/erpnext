@@ -80,4 +80,5 @@ def make_employee(user, company=None, **kwargs):
 		employee.insert()
 		return employee.name
 	else:
+		frappe.db.set_value("Employee", {"employee_name":user}, "status", "Active")
 		return frappe.get_value("Employee", {"employee_name":user}, "name")
