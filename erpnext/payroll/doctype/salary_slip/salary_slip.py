@@ -5,14 +5,15 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 import calendar
+from datetime import datetime, timedelta
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate, get_first_day
 from frappe.model.naming import make_autoname
-from datetime import datetime, timedelta
 from frappe import msgprint, _
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
+from frappe.utils import today
 from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
 from erpnext.payroll.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
@@ -358,8 +359,8 @@ class SalarySlip(TransactionBase):
 		doc=frappe.get_doc("Payroll Period",{"company":self.company})
 		lst=frappe.get_doc("Employee",{"employee":self.employee})
 		if doc.start_date <=lst.date_of_joining<=doc.end_date:
-			end_date = datetime.datetime(lst.date_of_joining)
-			start_date = datetime.datetime(doc.start_date)
+			end_date = getdate(lst.date_of_joining)
+			start_date = getdate(doc.start_date)
 			num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
 			self.months_of_service_in_payment_period=num_months
 		else:
