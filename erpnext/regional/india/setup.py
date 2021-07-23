@@ -641,7 +641,6 @@ def make_custom_fields(update=True):
 				'label': 'Export Type',
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
-				'default': 'Without Payment of Tax',
 				'depends_on':'eval:in_list(["SEZ", "Overseas"], doc.gst_category)',
 				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
 			}
@@ -660,7 +659,6 @@ def make_custom_fields(update=True):
 				'label': 'Export Type',
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
-				'default': 'Without Payment of Tax',
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
 			}
