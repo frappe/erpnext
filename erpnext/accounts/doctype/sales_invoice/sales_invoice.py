@@ -70,8 +70,8 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	def after_insert(self):
-		self.set_last_sales_invoice()
+	# def after_insert(self):
+	# 	self.set_last_sales_invoice()
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
@@ -187,13 +187,13 @@ class SalesInvoice(SellingController):
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
 
-	def set_last_sales_invoice(self):
-		if self.name:
-			s = str(self.name[:3]) + '%'
-			query = frappe.db.sql("""select name from `tabSales Invoice` where name != %s and name like %s order by creation desc limit 1""",(self.name,s),as_list=1)
-			if query:
-				self.previous_sales_invoice = query[0][0]
-				self.db_update()
+	# def set_last_sales_invoice(self):
+	# 	if self.name:
+	# 		s = str(self.name[:3]) + '%'
+	# 		query = frappe.db.sql("""select name from `tabSales Invoice` where name != %s and name like %s order by creation desc limit 1""",(self.name,s),as_list=1)
+	# 		if query:
+	# 			self.previous_sales_invoice = query[0][0]
+	# 			self.db_update()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)

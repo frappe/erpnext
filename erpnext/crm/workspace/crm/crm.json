@@ -14,6 +14,7 @@
  "hide_custom": 0,
  "icon": "crm",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "CRM",
  "links": [
@@ -193,6 +194,15 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Address Report",
+   "link_to": "Customer Address Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Maintenance",
    "onboard": 0,
@@ -363,7 +373,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:36.871352",
+ "modified": "2021-07-23 16:56:44.922088",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
