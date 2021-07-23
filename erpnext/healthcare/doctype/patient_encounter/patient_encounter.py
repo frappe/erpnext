@@ -35,13 +35,24 @@ class PatientEncounter(Document):
 
 	@frappe.whitelist(allow_guest=True)
 	@staticmethod
-	def get_applicable_treatment_plans(patient=None, symptoms=None, diagnosis=None):
-		plans = frappe.db.get_list('Treatment Plan Template', fields='*')
+	def get_applicable_treatment_plans(encounter=None):
+		filters = {}
+		age = encounter['patient_age']
+		if age:
+			filters['patient_age_from'] = ['>=', age]
+			filters['patient_age_to'] = ['<=', age]
+
+		print(filters)
+		plans = frappe.db.get_list('Treatment Plan Template', fields='*', filters=filters)
 		return plans
 
 	@frappe.whitelist(allow_guest=True)
-	def fill_treatment_plan(self, treatment_plan=None):
-		plan = frappe.db.get_list('Treatment Plan Template', fields='*')[0]
+	def fill_treatment_plans(self, treatment_plans=None):
+		print(treatment_plans)
+		for treatment_plan in treatment_plans:
+			self.fill_treatment_plan(treatment_plan)
+
+	def fill_treatment_plan(self, plan=None):
 		plan_items = frappe.db.sql("""
 		SELECT
 			*
@@ -49,7 +60,7 @@ class PatientEncounter(Document):
 			`tabTreatment Plan Template Item`
 		WHERE
 			parent=%s
-		""", plan['name'], as_dict=1)
+		""", plan, as_dict=1)
 		for plan_item in plan_items:
 			self.fill_treatment_plan_item(plan_item)
 
@@ -60,7 +71,7 @@ class PatientEncounter(Document):
 				`tabDrug Prescription`
 			WHERE
 				parent=%s
-			""", plan['name'], as_dict=1)
+			""", plan, as_dict=1)
 		for drug in drugs:
 			self.fill_treatment_plan_drug(drug)
 

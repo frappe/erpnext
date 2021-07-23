@@ -191,7 +191,7 @@ frappe.ui.form.on('Patient Encounter', {
 		frappe.call({
 			method: 'get_applicable_treatment_plans',
 			doc: frm.doc,
-			args: [frm.doc.patient],
+			args: {'encounter': frm.doc},
 			freeze: true,
 			freeze_message: __('Fetching Treatment Plans'),
 			callback: function() {
@@ -205,11 +205,11 @@ frappe.ui.form.on('Patient Encounter', {
 						return {
 							filters: {
 							}
-						};
+						}
 					},
 					action(selections) {
 						frappe.call({
-							method: 'fill_treatment_plan',
+							method: 'fill_treatment_plans',
 							doc: frm.doc,
 							args: selections,
 						});
