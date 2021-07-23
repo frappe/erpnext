@@ -487,8 +487,8 @@ class WorkOrder(Document):
 			return
 
 		operations = []
+		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
 		if not self.use_multi_level_bom:
-			bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
 			operations.extend(_get_operations(self.bom_no, qty=1.0/bom_qty))
 		else:
 			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
@@ -497,7 +497,7 @@ class WorkOrder(Document):
 
 			for d in bom_traversal:
 				if d.is_bom:
-					operations.extend(_get_operations(d.name, qty=d.exploded_qty))
+					operations.extend(_get_operations(d.name, qty=d.exploded_qty/bom_qty))
 
 			for correct_index, operation in enumerate(operations, start=1):
 				operation.idx = correct_index
