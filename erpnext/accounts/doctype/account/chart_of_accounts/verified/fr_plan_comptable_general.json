@@ -72,16 +72,14 @@
                 "138-Autres subventions d'investissement (m\u00eame ventilation que celle du compte 131)": {}, 
                 "139-Subventions d'investissement inscrites au compte de r\u00e9sultat": {
                     "1391-Subventions d'\u00e9quipement": {
-                        "13911-Subventions d'\u00e9quipement": {
-                            "13911-Etat": {}, 
-                            "13912-R\u00e9gions": {}, 
-                            "13913-D\u00e9partements": {}, 
-                            "13914-Communes": {}, 
-                            "13915-Collectivit\u00e9s publiques": {}, 
-                            "13916-Entreprises publiques": {}, 
-                            "13917-Entreprises et organismes priv\u00e9s": {}, 
-                            "13918-Autres": {}
-                        }
+                        "13911-Etat": {},
+                        "13912-R\u00e9gions": {},
+                        "13913-D\u00e9partements": {},
+                        "13914-Communes": {},
+                        "13915-Collectivit\u00e9s publiques": {},
+                        "13916-Entreprises publiques": {},
+                        "13917-Entreprises et organismes priv\u00e9s": {},
+                        "13918-Autres": {}
                     }, 
                     "1398-Autres subventions d'investissement (m\u00eame ventilation que celle du compte 1391)": {}
                 }
@@ -536,8 +534,8 @@
                     "3312-Produits en cours P2": {}
                 }, 
                 "335-Travaux en cours": {
-                    "Travaux en cours T1": {}, 
-                    "Travaux en cours T2": {}
+                    "3351-Travaux en cours T1": {},
+                    "3352-Travaux en cours T2": {}
                 }
             }, 
             "34-En-cours de production de services": {
@@ -595,7 +593,9 @@
                 "371-Marchandises (ou groupe) A": {}, 
                 "372-Marchandises (ou groupe) B": {}
             }, 
-            "38-Stocks en voie d'acheminement, mis en d\u00e9p\u00f4t ou donn\u00e9s en consignation (en cas d'inventaire permanent en comptabilit\u00e9 g\u00e9n\u00e9rale)": {}, 
+            "38-Stocks en voie d'acheminement, mis en d\u00e9p\u00f4t ou donn\u00e9s en consignation (en cas d'inventaire permanent en comptabilit\u00e9 g\u00e9n\u00e9rale)": {
+                "account_type": "Stock"
+            },
             "39-D\u00e9pr\u00e9ciations des stocks et en-cours": {
                 "391-D\u00e9pr\u00e9ciations des mati\u00e8res premi\u00e8res (et fournitures)": {
                     "3911-Mati\u00e8res (ou groupe) A": {}, 

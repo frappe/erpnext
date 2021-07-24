@@ -169,7 +169,7 @@ class ShareTransfer(Document):
 
 	def folio_no_validation(self):
 		shareholders = ['from_shareholder', 'to_shareholder']
-		shareholders = [shareholder for shareholder in shareholders if self.get(shareholder) is not '']
+		shareholders = [shareholder for shareholder in shareholders if self.get(shareholder) != '']
 		for shareholder in shareholders:
 			doc = self.get_shareholder_doc(self.get(shareholder))
 			if doc.company != self.company:

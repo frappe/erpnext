@@ -77,7 +77,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
-		out.update(get_pos_profile_item_details(args.company, args))
+		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
 
 	if out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
@@ -104,7 +104,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	get_gross_profit(out)
 	if args.doctype == 'Material Request':
 		out.rate = args.rate or out.price_list_rate
-		out.amount = flt(args.qty * out.rate)
+		out.amount = flt(args.qty) * flt(out.rate)
 
 	return out
 

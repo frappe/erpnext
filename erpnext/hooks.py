@@ -246,7 +246,7 @@ doc_events = {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
 		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 		"on_trash": "erpnext.regional.check_deletion_permission",
-		"validate": "erpnext.regional.india.utils.set_transporter_address"
+		"validate": ["erpnext.regional.india.utils.set_transporter_address", "erpnext.regional.india.utils.update_taxable_values", "erpnext.regional.india.utils.validate_document_name"]
 	},
 	"Purchase Invoice": {
 		"validate": "erpnext.regional.india.utils.update_grand_total_for_rcm"
@@ -260,9 +260,6 @@ doc_events = {
 	},
 	('Sales Invoice', 'Sales Order', 'Delivery Note', 'Purchase Invoice', 'Purchase Order', 'Purchase Receipt'): {
 		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
-	},
-	('Sales Invoice', 'Purchase Invoice'): {
-		'validate': ['erpnext.regional.india.utils.validate_document_name']
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",

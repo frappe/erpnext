@@ -450,7 +450,7 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
+					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos, update_data=True)
 					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -539,7 +539,7 @@ class SalesInvoice(SellingController):
 	def add_remarks(self):
 		if not self.remarks:
 			if self.po_no and self.po_date:
-				self.remarks = _("Against Customer Order {0} dated {1}").format(self.po_no, 
+				self.remarks = _("Against Customer Order {0} dated {1}").format(self.po_no,
 					formatdate(self.po_date))
 			else:
 				self.remarks = _("No Remarks")
