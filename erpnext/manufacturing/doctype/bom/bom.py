@@ -154,6 +154,7 @@ class BOM(WebsiteGenerator):
 		self.calculate_cost()
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
+		self.set_bom_level()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -329,7 +330,7 @@ class BOM(WebsiteGenerator):
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
 
 		if not from_child_bom:
-			frappe.msgprint(_("Cost Updated"))
+			frappe.msgprint(_("Cost Updated"), alert=True)
 
 	def update_parent_cost(self):
 		if self.total_cost:
@@ -676,6 +677,19 @@ class BOM(WebsiteGenerator):
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)
 
+	def set_bom_level(self, update=False):
+		levels = []
+
+		self.bom_level = 0
+		for row in self.items:
+			if row.bom_no:
+				levels.append(frappe.get_cached_value("BOM", row.bom_no, "bom_level") or 0)
+
+		if levels:
+			self.bom_level = max(levels) + 1
+
+		if update:
+			self.db_set("bom_level", self.bom_level)
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
@@ -699,7 +713,8 @@ def get_bom_item_rate(args, bom_doc):
 			"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 			"conversion_factor": args.get("conversion_factor") or 1,
 			"plc_conversion_rate": 1,
-			"ignore_party": True
+			"ignore_party": True,
+			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 		out = frappe._dict()
@@ -860,7 +875,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		frappe.form_dict.parent = parent
 
 	if frappe.form_dict.parent:
-		bom_doc = frappe.get_doc("BOM", frappe.form_dict.parent)
+		bom_doc = frappe.get_cached_doc("BOM", frappe.form_dict.parent)
 		frappe.has_permission("BOM", doc=bom_doc, throw=True)
 
 		bom_items = frappe.get_all('BOM Item',
@@ -871,7 +886,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		item_names = tuple(d.get('item_code') for d in bom_items)
 
 		items = frappe.get_list('Item',
-			fields=['image', 'description', 'name', 'stock_uom', 'item_name'],
+			fields=['image', 'description', 'name', 'stock_uom', 'item_name', 'is_sub_contracted_item'],
 			filters=[['name', 'in', item_names]]) # to get only required item dicts
 
 		for bom_item in bom_items:
@@ -884,6 +899,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 
 			bom_item.parent_bom_qty = bom_doc.quantity
 			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
+			bom_item.image = frappe.db.escape(bom_item.image)
 
 		return bom_items
 
