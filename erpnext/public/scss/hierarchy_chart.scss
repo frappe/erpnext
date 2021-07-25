@@ -21,6 +21,10 @@
 	}
 }
 
+.node-card.exported {
+	box-shadow: none
+}
+
 .node-image {
 	width: 3.0rem;
 	height: 3.0rem;
@@ -178,9 +182,12 @@
 }
 
 // horizontal hierarchy tree view
+#hierarchy-chart-wrapper {
+	padding-top: 30px;
+}
+
 .hierarchy {
 	display: flex;
-	padding-top: 30px;
 }
 
 .hierarchy li {
@@ -200,6 +207,7 @@
 #arrows {
 	position: absolute;
 	overflow: visible;
+	margin-top: -80px;
 }
 
 .active-connector {
