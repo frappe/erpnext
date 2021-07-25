@@ -124,6 +124,8 @@ class AccountsController(TransactionBase):
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
 
+			self.set_advance_gain_or_loss()
+
 			if self.is_return:
 				self.validate_qty()
 			else:
@@ -584,15 +586,18 @@ class AccountsController(TransactionBase):
 				allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
-			self.append("advances", {
+			advance_row = {
 				"doctype": self.doctype + " Advance",
 				"reference_type": d.reference_type,
 				"reference_name": d.reference_name,
 				"reference_row": d.reference_row,
 				"remarks": d.remarks,
 				"advance_amount": flt(d.amount),
-				"allocated_amount": allocated_amount
-			})
+				"allocated_amount": allocated_amount,
+				"ref_exchange_rate": flt(d.exchange_rate) # exchange_rate of advance entry
+			}
+
+			self.append("advances", advance_row)
 
 	def get_advance_entries(self, include_unallocated=True):
 		if self.doctype == "Sales Invoice":
@@ -650,6 +655,66 @@ class AccountsController(TransactionBase):
 						"Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.")
 							.format(d.reference_name, d.against_order))
 
+	def set_advance_gain_or_loss(self):
+		if not self.get("advances"):
+			return
+
+		for d in self.get("advances"):
+			advance_exchange_rate = d.ref_exchange_rate
+			if (d.allocated_amount and self.conversion_rate != 1
+				and self.conversion_rate != advance_exchange_rate):
+
+				base_allocated_amount_in_ref_rate = advance_exchange_rate * d.allocated_amount
+				base_allocated_amount_in_inv_rate = self.conversion_rate * d.allocated_amount
+				difference = base_allocated_amount_in_ref_rate - base_allocated_amount_in_inv_rate
+
+				d.exchange_gain_loss = difference
+
+	def make_exchange_gain_loss_gl_entries(self, gl_entries):
+		if self.get('doctype') in ['Purchase Invoice', 'Sales Invoice']:
+			for d in self.get("advances"):
+				if d.exchange_gain_loss:
+					party = self.supplier if self.get('doctype') == 'Purchase Invoice' else self.customer
+					party_account = self.credit_to if self.get('doctype') == 'Purchase Invoice' else self.debit_to
+					party_type = "Supplier" if self.get('doctype') == 'Purchase Invoice' else "Customer"
+
+					gain_loss_account = frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
+					account_currency = get_account_currency(gain_loss_account)
+					if account_currency != self.company_currency:
+						frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
+
+					# for purchase
+					dr_or_cr = 'debit' if d.exchange_gain_loss > 0 else 'credit'
+					# just reverse for sales?
+					dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": gain_loss_account,
+							"account_currency": account_currency,
+							"against": party,
+							dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
+							dr_or_cr: abs(d.exchange_gain_loss),
+							"cost_center": self.cost_center,
+							"project": self.project
+						}, item=d)
+					)
+
+					dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": party_account,
+							"party_type": party_type,
+							"party": party,
+							"against": gain_loss_account,
+							dr_or_cr + "_in_account_currency": flt(abs(d.exchange_gain_loss) / self.conversion_rate),
+							dr_or_cr: abs(d.exchange_gain_loss),
+							"cost_center": self.cost_center,
+							"project": self.project
+						}, self.party_account_currency, item=self)
+					)
+
 	def update_against_document_in_jv(self):
 		"""
 			Links invoice and advance voucher:
@@ -690,7 +755,9 @@ class AccountsController(TransactionBase):
 						if self.party_account_currency != self.company_currency else 1),
 					'grand_total': (self.base_grand_total
 						if self.party_account_currency == self.company_currency else self.grand_total),
-					'outstanding_amount': self.outstanding_amount
+					'outstanding_amount': self.outstanding_amount,
+					'difference_account': frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account'),
+					'exchange_gain_loss': flt(d.get('exchange_gain_loss'))
 				})
 				lst.append(args)
 
@@ -751,11 +818,11 @@ class AccountsController(TransactionBase):
 					account_currency = get_account_currency(tax.account_head)
 
 					if self.doctype == "Purchase Invoice":
-						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-					else:
 						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+					else:
+						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 
 					party = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 					unallocated_amount = tax.tax_amount - tax.allocated_amount
@@ -1289,6 +1356,8 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	currency_field = "paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
+	exchange_rate_field = "source_exchange_rate" if payment_type == "Receive" else "target_exchange_rate"
+
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
 
@@ -1305,27 +1374,28 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 				"Payment Entry" as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
 				t2.reference_name as against_order, t1.posting_date,
-				t1.{0} as currency
+				t1.{0} as currency, t1.{4} as exchange_rate
 			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
 			where
 				t1.name = t2.parent and t1.{1} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
 				and t2.reference_doctype = %s {2}
 			order by t1.posting_date {3}
-		""".format(currency_field, party_account_field, reference_condition, limit_cond),
+		""".format(currency_field, party_account_field, reference_condition, limit_cond, exchange_rate_field),
 													  [party_account, payment_type, party_type, party,
 													   order_doctype] + order_list, as_dict=1)
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
 				select "Payment Entry" as reference_type, name as reference_name,
-				remarks, unallocated_amount as amount
+				remarks, unallocated_amount as amount, {2} as exchange_rate
 				from `tabPayment Entry`
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
 					and docstatus = 1 and unallocated_amount > 0
 				order by posting_date {1}
-			""".format(party_account_field, limit_cond), (party_account, party_type, party, payment_type), as_dict=1)
+			""".format(party_account_field, limit_cond, exchange_rate_field),
+			(party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
