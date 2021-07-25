@@ -82,7 +82,7 @@ class ExchangeRateRevaluation(Document):
 				from `tabGL Entry`
 				where account in (%s)
 				and posting_date <= %s
-				group by account, party_type, party
+				group by account, NULLIF(party_type,''), NULLIF(party,'')
 				having sum(debit) != sum(credit)
 				order by account
 			""" % (', '.join(['%s']*len(accounts)), '%s'), tuple(accounts + [self.posting_date]), as_dict=1)
