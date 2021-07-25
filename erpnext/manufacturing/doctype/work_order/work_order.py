@@ -333,7 +333,7 @@ class WorkOrder(Document):
 		self.scrap_cost_calc()
 		self.actual_yeild_on_wo()
 		self.yeild_calc()
-		self.wo_actual_volume()
+		self.wo_actual_volume_list()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
@@ -429,7 +429,7 @@ class WorkOrder(Document):
 		frappe.db.set_value("Work Order", self.name, "planned_rm_cost", self.planned_rm_cost)
 		# return True
 		
-	def wo_actual_volume(self):
+	def wo_actual_volume_list(self):
 		if self.wo_specific_gravity > 0.0 and self.actual_fg_weight >0.0:
 			self.wo_actual_volume=self.actual_fg_weight/self.wo_specific_gravity
 
