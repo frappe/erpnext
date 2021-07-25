@@ -173,7 +173,7 @@ erpnext.HierarchyChart = class {
 	}
 
 	make_svg_markers() {
-		$('#arrows').remove();
+		$('#hierarchy-chart-wrapper').remove();
 
 		this.page.main.append(`
 			<div id="hierarchy-chart-wrapper">
