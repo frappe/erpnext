@@ -27,6 +27,9 @@ class ExchangeRateRevaluation(Document):
 		if not (self.company and self.posting_date):
 			frappe.throw(_("Please select Company and Posting Date to getting entries"))
 
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry')
+
 	@frappe.whitelist()
 	def check_journal_entry_condition(self):
 		total_debit = frappe.db.get_value("Journal Entry Account", {
