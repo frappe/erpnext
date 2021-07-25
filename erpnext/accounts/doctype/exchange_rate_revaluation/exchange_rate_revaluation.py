@@ -82,7 +82,6 @@ class ExchangeRateRevaluation(Document):
 				from `tabGL Entry`
 				where account in (%s)
 				and posting_date <= %s
-				and is_cancelled = 0
 				group by account, party_type, party
 				having sum(debit) != sum(credit)
 				order by account
