@@ -1,3 +1,4 @@
+import html2canvas from 'html2canvas';
 erpnext.HierarchyChart = class {
 	/* Options:
 		- doctype
@@ -11,16 +12,20 @@ erpnext.HierarchyChart = class {
 		this.method = method;
 		this.doctype = doctype;
 
+		this.setup_page_style();
+		this.page.main.addClass('frappe-card');
+
+		this.nodes = {};
+		this.setup_node_class();
+	}
+
+	setup_page_style() {
 		this.page.main.css({
 			'min-height': '300px',
 			'max-height': '600px',
 			'overflow': 'auto',
 			'position': 'relative'
 		});
-		this.page.main.addClass('frappe-card');
-
-		this.nodes = {};
-		this.setup_node_class();
 	}
 
 	setup_node_class() {
@@ -84,7 +89,7 @@ erpnext.HierarchyChart = class {
 
 					// svg for connectors
 					me.make_svg_markers();
-					me.setup_hierarchy()
+					me.setup_hierarchy();
 					me.render_root_nodes();
 					me.all_nodes_expanded = false;
 				}
@@ -97,6 +102,10 @@ erpnext.HierarchyChart = class {
 
 	setup_actions() {
 		let me = this;
+		this.page.add_inner_button(__('Export'), function() {
+			me.export_chart();
+		});
+
 		this.page.add_inner_button(__('Expand All'), function() {
 			me.load_children(me.root_node, true);
 			me.all_nodes_expanded = true;
@@ -113,6 +122,36 @@ erpnext.HierarchyChart = class {
 		});
 	}
 
+	export_chart() {
+		this.page.main.css({
+			'min-height': '',
+			'max-height': '',
+			'overflow': 'visible',
+			'position': 'fixed',
+			'left': '0',
+			'top': '0'
+		});
+
+		$('.node-card').addClass('exported');
+
+		html2canvas(document.querySelector('#hierarchy-chart-wrapper'), {
+			scrollY: -window.scrollY,
+			scrollX: 0
+		}).then(function(canvas) {
+			// Export the canvas to its data URI representation
+			let dataURL = canvas.toDataURL('image/png');
+
+			// download the image
+			let a = document.createElement('a');
+			a.href = dataURL;
+			a.download = 'hierarchy_chart';
+			a.click();
+		});
+
+		this.setup_page_style();
+		$('.node-card').removeClass('exported');
+	}
+
 	setup_hierarchy() {
 		if (this.$hierarchy)
 			this.$hierarchy.remove();
@@ -127,33 +166,37 @@ erpnext.HierarchyChart = class {
 				</li>
 			</ul>`);
 
-		this.page.main.append(this.$hierarchy);
+		this.page.main
+			.find('#hierarchy-chart-wrapper')
+			.append(this.$hierarchy);
 		this.nodes = {};
 	}
 
 	make_svg_markers() {
 		$('#arrows').remove();
 
-		this.page.main.prepend(`
-			<svg id="arrows" width="100%" height="100%">
-				<defs>
-					<marker id="arrowhead-active" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="6" markerHeight="6" orient="auto" fill="var(--blue-500)">
-						<path d="M 0 0 L 10 5 L 0 10 z"></path>
-					</marker>
-					<marker id="arrowhead-collapsed" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="6" markerHeight="6" orient="auto" fill="var(--blue-300)">
-						<path d="M 0 0 L 10 5 L 0 10 z"></path>
-					</marker>
+		this.page.main.append(`
+			<div id="hierarchy-chart-wrapper">
+				<svg id="arrows" width="100%" height="100%">
+					<defs>
+						<marker id="arrowhead-active" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="6" markerHeight="6" orient="auto" fill="var(--blue-500)">
+							<path d="M 0 0 L 10 5 L 0 10 z"></path>
+						</marker>
+						<marker id="arrowhead-collapsed" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="6" markerHeight="6" orient="auto" fill="var(--blue-300)">
+							<path d="M 0 0 L 10 5 L 0 10 z"></path>
+						</marker>
 
-					<marker id="arrowstart-active" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="8" markerHeight="8" orient="auto" fill="var(--blue-500)">
-						<circle cx="4" cy="4" r="3.5" fill="white" stroke="var(--blue-500)"/>
-					</marker>
-					<marker id="arrowstart-collapsed" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="8" markerHeight="8" orient="auto" fill="var(--blue-300)">
-						<circle cx="4" cy="4" r="3.5" fill="white" stroke="var(--blue-300)"/>
-					</marker>
-				</defs>
-				<g id="connectors" fill="none">
-				</g>
-			</svg>`);
+						<marker id="arrowstart-active" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="8" markerHeight="8" orient="auto" fill="var(--blue-500)">
+							<circle cx="4" cy="4" r="3.5" fill="white" stroke="var(--blue-500)"/>
+						</marker>
+						<marker id="arrowstart-collapsed" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="8" markerHeight="8" orient="auto" fill="var(--blue-300)">
+							<circle cx="4" cy="4" r="3.5" fill="white" stroke="var(--blue-300)"/>
+						</marker>
+					</defs>
+					<g id="connectors" fill="none">
+					</g>
+				</svg>
+			</div>`);
 	}
 
 	render_root_nodes(expanded_view=false) {
@@ -310,7 +353,7 @@ erpnext.HierarchyChart = class {
 		let entry = undefined;
 		let node = undefined;
 
-		while(data_list.length) {
+		while (data_list.length) {
 			// to avoid overlapping connectors
 			entry = data_list.shift();
 			node = this.nodes[entry.parent];
@@ -323,7 +366,7 @@ erpnext.HierarchyChart = class {
 	}
 
 	render_child_nodes_for_expanded_view(node, child_nodes) {
-		node.$children = $('<ul class="node-children"></ul>')
+		node.$children = $('<ul class="node-children"></ul>');
 
 		const last_level = this.$hierarchy.find('.level:last').index();
 		const node_level = $(`#${node.id}`).parent().parent().parent().index();

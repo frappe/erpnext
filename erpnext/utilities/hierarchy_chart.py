@@ -3,14 +3,16 @@
 
 from __future__ import unicode_literals
 import frappe
+import os
 from frappe import _
+from frappe.utils.pdf import get_pdf
 
 @frappe.whitelist()
 def get_all_nodes(parent, parent_name, method, company):
 	'''Recursively gets all data from nodes'''
 	method = frappe.get_attr(method)
 
-	if not method in frappe.whitelisted:
+	if method not in frappe.whitelisted:
 		frappe.throw(_('Not Permitted'), frappe.PermissionError)
 
 	data = method(parent, company)
