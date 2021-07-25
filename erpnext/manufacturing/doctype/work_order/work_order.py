@@ -430,7 +430,7 @@ class WorkOrder(Document):
 		# return True
 		
 	def wo_actual_volume_list(self):
-		if self.wo_specific_gravity > 0.0 and self.actual_fg_weight >0.0:
+		if self.wo_specific_gravity and self.actual_fg_weight:
 			self.wo_actual_volume=self.actual_fg_weight/self.wo_specific_gravity
 
 	# @frappe.whitelist()
