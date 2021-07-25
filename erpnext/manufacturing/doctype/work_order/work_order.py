@@ -333,6 +333,7 @@ class WorkOrder(Document):
 		self.scrap_cost_calc()
 		self.actual_yeild_on_wo()
 		self.yeild_calc()
+		self.wo_actual_volume()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
