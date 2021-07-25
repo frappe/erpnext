@@ -104,7 +104,7 @@ class ExchangeRateRevaluation(Document):
 				where account in (%s)
 				and posting_date <= %s
 				and is_cancelled = 0
-				group by account, party_type, party
+				group by account, NULLIF(party_type,''), NULLIF(party,'')
 				having sum(debit) != sum(credit)
 				order by account
 			""" % (', '.join(['%s']*len(accounts)), '%s'), tuple(accounts + [self.posting_date]), as_dict=1)
