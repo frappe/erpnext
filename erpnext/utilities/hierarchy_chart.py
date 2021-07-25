@@ -3,9 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-import os
 from frappe import _
-from frappe.utils.pdf import get_pdf
 
 @frappe.whitelist()
 def get_all_nodes(parent, parent_name, method, company):
