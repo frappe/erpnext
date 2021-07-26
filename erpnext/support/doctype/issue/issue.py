@@ -12,6 +12,7 @@ from datetime import timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from frappe.email.inbox import link_communication_to_document
+from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
 
 class Issue(Document):
 	def get_feed(self):
@@ -25,6 +26,32 @@ class Issue(Document):
 			self.raised_by = frappe.session.user
 
 		self.set_lead_contact(self.raised_by)
+
+		if self.status == "Open":
+			self.notify_on_reopening_resolved_issue()
+
+	def notify_on_reopening_resolved_issue(self):
+		previous_status = frappe.get_value(self.doctype, self.name, "status")
+		if previous_status == "Resolved":
+			self.create_reopening_notification()
+
+	def create_reopening_notification(self):
+		user_name = frappe.get_cached_value('User', frappe.session.user, 'full_name')
+		user_name = frappe.bold(user_name)
+		issue_title = frappe.bold(self.subject)
+		subject = _('Issue {0} has been reopened by {1}.').format(issue_title, user_name)
+
+		notification_doc = {
+			'type': 'Assignment',
+			'document_type': self.doctype,
+			'subject': subject,
+			'document_name': self.name,
+			'from_user': frappe.session.user,
+			'for_user': self.owner
+			# 'email_content': description_html
+		}
+
+		enqueue_create_notification(frappe.session.user, notification_doc)
 
 	def on_update(self):
 		# Add a communication in the issue timeline
