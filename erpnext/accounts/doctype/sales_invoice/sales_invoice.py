@@ -683,12 +683,10 @@ class SalesInvoice(SellingController):
 			self.calculate_billing_amount_for_timesheet()
 
 	def calculate_billing_amount_for_timesheet(self):
-		total_billing_amount = 0.0
-		for data in self.timesheets:
-			if data.billing_amount:
-				total_billing_amount += data.billing_amount
+		timesheet_sum = lambda field: sum((ts.get(field) or 0.0 )for ts in self.timesheets)
 
-		self.total_billing_amount = total_billing_amount
+		self.total_billing_amount = timesheet_sum('billing_amount')
+		self.total_billing_hours = timesheet_sum('billing_hours')
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
