@@ -975,8 +975,17 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.save()
 
 	def test_gain_loss_with_advance_entry(self):
-		unlink_enabled = frappe.db.get_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice")
-		frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", 1)
+		unlink_enabled = frappe.db.get_value(
+			"Accounts Settings", "Accounts Settings",
+			"unlink_payment_on_cancel_of_invoice")
+		
+		frappe.db.set_value(
+			"Accounts Settings", "Accounts Settings",
+			"unlink_payment_on_cancel_of_invoice", 1)
+
+		original_account = frappe.db.get_value("Company", "_Test Company", "exchange_gain_loss_account")
+		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", "Exchange Gain/Loss - _TC")
+
 		pay = frappe.get_doc({
 			'doctype': 'Payment Entry',
 			'company': '_Test Company',
@@ -1016,7 +1025,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		gl_entries = frappe.db.sql("""
 			select account, sum(debit - credit) as balance from `tabGL Entry`
 			where voucher_no=%s
-			group by account order by account asc""", (pi.name), as_dict=1)
+			group by account
+			order by account asc""", (pi.name), as_dict=1)
 		
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
@@ -1076,6 +1086,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pay.cancel()
 
 		frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled)
+		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
