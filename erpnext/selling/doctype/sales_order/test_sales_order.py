@@ -673,6 +673,8 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.cancel()
 
+		dn.load_from_db()
+
 		self.assertRaises(frappe.CancelledLinkError, dn.submit)
 
 	def test_service_type_product_bundle(self):
