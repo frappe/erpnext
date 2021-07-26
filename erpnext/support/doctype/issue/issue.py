@@ -46,12 +46,14 @@ class Issue(Document):
 			'document_type': self.doctype,
 			'subject': subject,
 			'document_name': self.name,
-			'from_user': frappe.session.user,
-			'for_user': self.owner
+			'from_user': frappe.session.user
 			# 'email_content': description_html
 		}
 
-		enqueue_create_notification(frappe.session.user, notification_doc)
+		assigned_to = frappe.db.get_value(self.doctype, self.name, '_assign')
+		assigned_to = frappe.parse_json(assigned_to)
+
+		enqueue_create_notification(assigned_to, notification_doc)
 
 	def on_update(self):
 		# Add a communication in the issue timeline
