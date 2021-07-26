@@ -9,7 +9,7 @@ from frappe.utils import flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name
+from erpnext.hr.utils import set_employee_name, validate_active_employee
 
 class Appraisal(Document):
 	def validate(self):
@@ -19,6 +19,7 @@ class Appraisal(Document):
 		if not self.goals:
 			frappe.throw(_("Goals cannot be empty"))
 
+		validate_active_employee(self.employee)
 		set_employee_name(self)
 		self.validate_dates()
 		self.validate_existing_appraisal()

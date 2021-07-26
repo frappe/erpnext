@@ -7,12 +7,13 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff, add_days, getdate, cint, format_date
 from frappe.model.document import Document
-from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, \
+from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, validate_active_employee, \
 	get_holidays_for_employee, create_additional_leave_ledger_entry
 
 class CompensatoryLeaveRequest(Document):
 
 	def validate(self):
+		validate_active_employee(self.employee)
 		validate_dates(self, self.work_from_date, self.work_end_date)
 		if self.half_day:
 			if not self.half_day_date:
