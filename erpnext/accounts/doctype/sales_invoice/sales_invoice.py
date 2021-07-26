@@ -73,10 +73,18 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	def set_cost_center(self):
+		company = frappe.get_all("Company", ["cost_center"], filters = {"name": self.company})
+
+		self.db_set('cost_center', company[0].cost_center, update_modified=False)
+
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 		self.discount_product()
+
+		if self.docstatus == 0:
+			self.set_cost_center()
 
 		if not self.is_pos:
 			self.so_dn_required()
@@ -229,6 +237,7 @@ class SalesInvoice(SellingController):
 				self.grand_total = self.total
 		
 		self.outstanding_amount = self.grand_total - self.total_advance
+		self.rounded_total = self.grand_total
 		self.in_words = money_in_words(self.grand_total)
 
 		# if self.status == 'Draft' or self.docstatus == 1:
@@ -1035,6 +1044,9 @@ class SalesInvoice(SellingController):
 
 		self.make_customer_gl_entry(gl_entries)
 
+		if self.exonerated and self.account_head == None:
+			frappe.throw(_("You need to fill the account head field"))
+
 		self.make_tax_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
@@ -1077,21 +1089,33 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
-		for tax in self.get("taxes"):
-			if flt(tax.base_tax_amount_after_discount_amount):
-				account_currency = get_account_currency(tax.account_head)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": tax.account_head,
-						"against": self.customer,
-						"credit": flt(tax.base_tax_amount_after_discount_amount,
-							tax.precision("tax_amount_after_discount_amount")),
-						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
-							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
-							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
-						"cost_center": tax.cost_center
-					}, account_currency)
-				)
+		if self.exonerated:
+			account_currency = get_account_currency(self.account_head)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.account_head,
+					"against": self.customer,
+					"debit": flt(self.total_taxes_and_charges),
+					"debit_in_account_currency": (flt(self.total_taxes_and_charges)),
+					"cost_center": self.cost_center
+				}, account_currency)
+			)
+		else:
+			for tax in self.get("taxes"):
+				if flt(tax.base_tax_amount_after_discount_amount):
+					account_currency = get_account_currency(tax.account_head)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": tax.account_head,
+							"against": self.customer,
+							"credit": flt(tax.base_tax_amount_after_discount_amount,
+								tax.precision("tax_amount_after_discount_amount")),
+							"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
+								tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
+								flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
+							"cost_center": tax.cost_center
+						}, account_currency)
+					)
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
