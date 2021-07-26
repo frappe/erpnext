@@ -1055,7 +1055,7 @@ def get_ageing_data(ageing_range, age_as_on, entry_date, outstanding_amount):
 	outstanding_range = [0.0] * (len(ageing_range) + 1)
 
 	if not (age_as_on and entry_date):
-		return [0] + outstanding_range
+		return 0, outstanding_range
 
 	age = (getdate(age_as_on) - getdate(entry_date)).days or 0
 	index = None
