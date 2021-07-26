@@ -8,12 +8,13 @@ from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits
-from erpnext.hr.utils import get_previous_claimed_amount
+from erpnext.hr.utils import get_previous_claimed_amount, validate_active_employee
 from erpnext.payroll.doctype.payroll_period.payroll_period import get_payroll_period
 from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 
 class EmployeeBenefitClaim(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		max_benefits = get_max_benefits(self.employee, self.claim_date)
 		if not max_benefits or max_benefits <= 0:
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
