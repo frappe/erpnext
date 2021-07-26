@@ -13,8 +13,10 @@ from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
 
-class EmployeeUserDisabledError(frappe.ValidationError): pass
-class EmployeeLeftValidationError(frappe.ValidationError): pass
+class EmployeeUserDisabledError(frappe.ValidationError):
+	pass
+class InactiveEmployeeStatusError(frappe.ValidationError):
+	pass
 
 class Employee(NestedSet):
 	nsm_parent_field = 'reports_to'
@@ -196,7 +198,7 @@ class Employee(NestedSet):
 				message += "<br><br><ul><li>" + "</li><li>".join(link_to_employees)
 				message += "</li></ul><br>"
 				message += _("Please make sure the employees above report to another Active employee.")
-				throw(message, EmployeeLeftValidationError, _("Cannot Relieve Employee"))
+				throw(message, InactiveEmployeeStatusError, _("Cannot Relieve Employee"))
 			if not self.relieving_date:
 				throw(_("Please enter relieving date."))
 
