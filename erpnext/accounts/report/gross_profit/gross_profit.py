@@ -241,6 +241,7 @@ class GrossProfitGenerator(object):
 						sle.voucher_detail_no == row.item_row:
 							previous_stock_value = len(my_sle) > i+1 and \
 								flt(my_sle[i+1].stock_value) or 0.0
+
 							if previous_stock_value:
 								return (previous_stock_value - flt(sle.stock_value)) * flt(row.qty) / abs(flt(sle.qty))
 							else:
@@ -335,7 +336,7 @@ class GrossProfitGenerator(object):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
 				voucher_detail_no, stock_value, warehouse, actual_qty as qty
 			from `tabStock Ledger Entry`
-			where company=%(company)s
+			where company=%(company)s and is_cancelled = 0
 			order by
 				item_code desc, warehouse desc, posting_date desc,
 				posting_time desc, creation desc""", self.filters, as_dict=True)

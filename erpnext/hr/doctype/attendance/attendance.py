@@ -8,11 +8,13 @@ from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, get_datetime, formatdate
+from erpnext.hr.utils import validate_active_employee
 
 class Attendance(Document):
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home"])
+		validate_active_employee(self.employee)
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.validate_employee_status()

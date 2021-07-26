@@ -482,14 +482,19 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 		salary_structure = payroll_frequency + " Salary Structure Test for Salary Slip"
 
 
-	employee = frappe.db.get_value("Employee", {"user_id": user})
-	salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee=employee)
+	employee = frappe.db.get_value("Employee",
+					{
+						"user_id": user
+					},
+					["name", "company", "employee_name"],
+					as_dict=True)
+
+	salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee=employee.name, company=employee.company)
 	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})
 
 	if not salary_slip_name:
-		salary_slip = make_salary_slip(salary_structure_doc.name, employee = employee)
-		salary_slip.employee_name = frappe.get_value("Employee",
-			{"name":frappe.db.get_value("Employee", {"user_id": user})}, "employee_name")
+		salary_slip = make_salary_slip(salary_structure_doc.name, employee = employee.name)
+		salary_slip.employee_name = employee.employee_name
 		salary_slip.payroll_frequency = payroll_frequency
 		salary_slip.posting_date = nowdate()
 		salary_slip.insert()
