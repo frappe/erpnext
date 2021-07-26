@@ -4,9 +4,9 @@
 frappe.ui.form.on('Salary Component', {
 	setup: function(frm) {
 		frm.set_query("account", "accounts", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
+			let d = frappe.get_doc(cdt, cdn);
 
-			var root_type = "Liability";
+			let root_type = "Liability";
 			if (frm.doc.type == "Deduction") {
 				root_type = "Expense";
 			}
