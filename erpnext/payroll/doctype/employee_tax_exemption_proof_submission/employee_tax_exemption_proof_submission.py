@@ -7,11 +7,12 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import flt
-from erpnext.hr.utils import validate_tax_declaration, get_total_exemption_amount, \
+from erpnext.hr.utils import validate_tax_declaration, get_total_exemption_amount, validate_active_employee, \
 	calculate_hra_exemption_for_period, validate_duplicate_exemption_for_payroll_period
 
 class EmployeeTaxExemptionProofSubmission(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		validate_tax_declaration(self.tax_exemption_proofs)
 		self.set_total_actual_amount()
 		self.set_total_exemption_amount()
