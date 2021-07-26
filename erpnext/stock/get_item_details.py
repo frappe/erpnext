@@ -74,7 +74,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	
+
 	get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
@@ -651,14 +651,14 @@ def get_price_list_rate(args, item_doc, out):
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
-		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
+		price_list_rate = get_price_list_rate_for(args, item_doc.name)
 
 		# variant
-		if not price_list_rate and item_doc.variant_of:
+		if price_list_rate is None and item_doc.variant_of:
 			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
 		# insert in database
-		if not price_list_rate:
+		if price_list_rate is None:
 			if args.price_list and args.rate:
 				insert_item_price(args)
 			return {}
