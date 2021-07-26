@@ -281,9 +281,15 @@ class GSTR3BReport(Document):
 		if self.get('invoice_items'):
 			# Build itemised tax for export invoices, nil and exempted where tax table is blank
 			for invoice, items in iteritems(self.invoice_items):
-				if invoice not in self.items_based_on_tax_rate and (self.invoice_detail_map.get(invoice, {}).get('export_type')
-					== "Without Payment of Tax"):
+				if invoice not in self.items_based_on_tax_rate and self.invoice_detail_map.get(invoice, {}).get('export_type') \
+					== "Without Payment of Tax" and self.invoice_detail_map.get(invoice, {}).get('gst_category') == "Overseas":
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
+				else:
+					for item in items.keys():
+						if item in self.is_nil_exempt + self.is_non_gst and \
+							item not in self.items_based_on_tax_rate.get(invoice, {}).get(0, []):
+								self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, [])
+								self.items_based_on_tax_rate[invoice][0].append(item)
 
 	def set_outward_taxable_supplies(self):
 		inter_state_supply_details = {}
