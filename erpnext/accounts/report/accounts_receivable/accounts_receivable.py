@@ -652,9 +652,9 @@ class ReceivablePayableReport(object):
 
 		# ageing data
 		if self.filters.ageing_based_on == "Due Date":
-			entry_date = due_date
+			entry_date = due_date or gle.posting_date
 		elif self.filters.ageing_based_on == "Supplier Invoice Date":
-			entry_date = bill_date
+			entry_date = bill_date or gle.posting_date
 		else:
 			entry_date = gle.posting_date
 
