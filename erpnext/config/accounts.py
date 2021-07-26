@@ -264,7 +264,7 @@ def get_data():
 			"items": [
 				{
 					"type": "report",
-					"name": "FBR Tax Report",
+					"name": "Sales Tax Summary",
 					"doctype": "Sales Invoice",
 					"is_query_report": True
 				},
@@ -285,30 +285,6 @@ def get_data():
 					"name": "FBR Advance Tax Report",
 					"doctype": "Sales Invoice",
 					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Sales Register",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Sales Register",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Purchase Register",
-					"doctype": "Purchase Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Purchase Register",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
 				},
 			]
 		},

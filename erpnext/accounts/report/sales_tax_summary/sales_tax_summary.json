@@ -7,14 +7,14 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:30.154189",
+ "modified": "2021-07-18 14:49:24.422566",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "FBR Tax Report",
+ "name": "Sales Tax Summary",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Sales Invoice",
- "report_name": "FBR Tax Report",
+ "report_name": "Sales Tax Summary",
  "report_type": "Script Report",
  "roles": [
   {

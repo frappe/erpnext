@@ -6,7 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt
 
-class FBRInvoiceWiseTaxes(object):
+class SalesInvoiceWiseTaxes(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
@@ -235,4 +235,4 @@ def execute(filters=None):
 		"party_type": "Customer",
 		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
-	return FBRInvoiceWiseTaxes(filters).run(args)
+	return SalesInvoiceWiseTaxes(filters).run(args)

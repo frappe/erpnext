@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["FBR Tax Report"] = {
+frappe.query_reports["Sales Tax Summary"] = {
 	"filters": [
 		{
 			fieldname: "company",
