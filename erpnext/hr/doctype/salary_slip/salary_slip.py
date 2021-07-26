@@ -869,8 +869,8 @@ class SalarySlip(TransactionBase):
 				`tabRepayment Schedule` as rps, `tabLoan` as l
 			where
 				l.name = rps.parent and rps.payment_date between %s and %s and
-				l.repay_from_salary = 1 and l.docstatus = 1 and l.applicant = %s""",
-			(self.start_date, self.end_date, self.employee), as_dict=True) or []
+				l.repay_from_salary = 1 and l.docstatus = 1 and l.applicant = %s and l.company = %s""",
+			(self.start_date, self.end_date, self.employee, self.company), as_dict=True) or []
 
 	def update_salary_slip_in_additional_salary(self):
 		salary_slip = self.name if self.docstatus==1 else None
