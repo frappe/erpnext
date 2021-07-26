@@ -1140,10 +1140,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			cint(this.frm.doc.plc_conversion_rate) != cint(this.frm.doc.conversion_rate)) {
 			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 		}
-
-		if(!this.in_apply_price_list) {
-			this.apply_price_list(null, true);
-		}
 	},
 
 	uom: function(doc, cdt, cdn) {
