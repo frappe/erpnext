@@ -40,7 +40,7 @@ class VATAuditReport(object):
 
 	def get_sa_vat_accounts(self):
 		self.sa_vat_accounts = frappe.get_list("South Africa VAT Account",
-			filters = {"parent":self.filters.company}, pluck="account")
+			filters = {"parent": self.filters.company}, pluck="account")
 		if not self.sa_vat_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 			frappe.throw(_("Please set VAT Accounts in South Africa VAT Settings"))
 
@@ -144,7 +144,7 @@ class VATAuditReport(object):
 
 		return conditions
 
-	def get_data(self,doctype):
+	def get_data(self, doctype):
 		consolidated_data = self.get_consolidated_data()
 		section_name = _("Purchases") if doctype == "Purchase Invoice" else _("Sales")
 
@@ -173,20 +173,21 @@ class VATAuditReport(object):
 	def get_consolidated_data(self):
 		consolidated_data_map={}
 		for inv, inv_data in self.invoices.items():
-			for rate, items in self.items_based_on_tax_rate.get(inv).items():
-				consolidated_data_map.setdefault(rate, {"data": []})
-				for item in items:
-					row = {}
-					item_details = self.item_tax_rate.get(inv).get(item)
-					row["account"] = inv_data.get("account")
-					row["posting_date"] = formatdate(inv_data.get("posting_date"), 'dd-mm-yyyy')
-					row["invoice_number"] = inv
-					row["party"] = inv_data.get("party")
-					row["remarks"] = inv_data.get("remarks")
-					row["gross_amount"]= item_details[0].get("gross_amount")
-					row["tax_amount"]= item_details[0].get("tax_amount")
-					row["net_amount"]= item_details[0].get("net_amount")
-					consolidated_data_map[rate]["data"].append(row)
+			if self.items_based_on_tax_rate.get(inv):
+				for rate, items in self.items_based_on_tax_rate.get(inv).items():
+					consolidated_data_map.setdefault(rate, {"data": []})
+					for item in items:
+						row = {}
+						item_details = self.item_tax_rate.get(inv).get(item)
+						row["account"] = inv_data.get("account")
+						row["posting_date"] = formatdate(inv_data.get("posting_date"), 'dd-mm-yyyy')
+						row["invoice_number"] = inv
+						row["party"] = inv_data.get("party")
+						row["remarks"] = inv_data.get("remarks")
+						row["gross_amount"]= item_details[0].get("gross_amount")
+						row["tax_amount"]= item_details[0].get("tax_amount")
+						row["net_amount"]= item_details[0].get("net_amount")
+						consolidated_data_map[rate]["data"].append(row)
 
 		return consolidated_data_map
 

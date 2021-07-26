@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 # import frappe, os, json
 from frappe.permissions import add_permission, update_permission_property
 
-def setup():
+def setup(company=None, patch=True):
 	add_permissions()
 
 def add_permissions():
