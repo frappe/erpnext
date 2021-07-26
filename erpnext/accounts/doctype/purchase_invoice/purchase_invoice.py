@@ -27,6 +27,8 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
 
+class WarehouseMissingError(frappe.ValidationError): pass
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
@@ -207,8 +209,8 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock and for_validate:
 			for d in self.get('items'):
 				if not d.warehouse:
-					frappe.throw(_("Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}").
-						format(d.idx, d.item_code, self.company))
+					frappe.throw(_("Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}").
+						format(d.idx, d.item_code, self.company), exc=WarehouseMissingError)
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
