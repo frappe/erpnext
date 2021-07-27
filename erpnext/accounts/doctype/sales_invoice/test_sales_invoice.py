@@ -2019,19 +2019,21 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
 
 	def test_asset_depreciation_on_sale(self):
-		"""If an asset was set to depreciate yearly, every Dec 1, but gets sold on June 1, an additional depreciation entry must be made on June 1."""
+		"""
+			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on Sept 30.
+		"""
 
 		create_asset_data()
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
-		post_depreciation_entries(add_days(nowdate(), 1))
+		post_depreciation_entries(getdate("2021-09-30"))
 
-		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
+		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-09-30"))
 		asset.load_from_db()
 
 		expected_values = [
 			["2020-06-30", 1311.48, 1311.48],
 			["2021-06-30", 20000.0, 21311.48],
-			["2021-07-27", 1164.16, 22475.64]
+			["2021-09-30", 3966.76, 25278.24]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
