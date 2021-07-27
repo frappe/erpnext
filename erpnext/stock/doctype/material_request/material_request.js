@@ -43,6 +43,7 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 	onload: function(frm,cdt,cdn) {
+		frm.doc.schedule_date = frappe.datetime.nowdate()
 		// add item, if previous view was item
 		var prev_route = frappe.get_prev_route();
 		if (prev_route[1] === 'Work Order') {
@@ -108,7 +109,22 @@ frappe.ui.form.on('Material Request', {
 			set_target_warehouse(frm)
 		}
 		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
-			frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+			//frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+			frm.add_custom_button(__('Work Order'), function(){
+				erpnext.utils.map_current_doc({
+					method: "erpnext.stock.doctype.material_request.material_request.make_material_request",
+					source_doctype: "Work Order",
+					target: frm.doc,
+					
+					setters: {
+						bom_no: frm.doc.bom_no || undefined,
+						company: frm.doc.company || undefined
+					},
+					get_query_filters: {
+						docstatus: 1,
+					}
+				})
+			},
 				__("Get Items From"));
 		}
 	},
@@ -118,8 +134,33 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	refresh: function(frm) {
+		var d = frm.doc.work_order_detail
+		if(d.length > 0){
+			frm.set_df_property("items",'read_only',1)
+		}
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
+
+		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
+			//frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+			frm.add_custom_button(__('Work Order'), function(){
+				erpnext.utils.map_current_doc({
+					method: "erpnext.stock.doctype.material_request.material_request.make_material_request",
+					source_doctype: "Work Order",
+					target: frm.doc,
+					
+					setters: {
+						bom_no: frm.doc.bom_no || undefined,
+						company: frm.doc.company || undefined
+					},
+					get_query_filters: {
+						docstatus: 1,
+					}
+				})
+			},
+				__("Get Items From"));
+		}
+
 	},
 
 	set_from_warehouse: function(frm) {
@@ -266,43 +307,6 @@ frappe.ui.form.on('Material Request', {
 				}
 			}
 		});
-	},
-
-	get_items_from_wo: function(frm) {
-		var d = new frappe.ui.Dialog({
-			title: __("Get Items from Work Order"),
-			fields: [
-				{"fieldname":"schedule_start_from", "fieldtype":"Date", "label":__("Schedule Start From"),reqd:1, mandatory_depends_on:'eval:doc.schedule_start_to',depends_on: 'eval:doc.single_wo===0'},
-				{"fieldname":"schedule_start_to", "fieldtype":"Date", "label":__("Schedule Start To"),reqd:1,mandatory_depends_on:'eval:doc.schedule_start_from',depends_on: 'eval:doc.single_wo===0'},
-				{"fieldname":"item_to_manufacture", "fieldtype":"Link","label":__("Item To Manufacture"), options:"Item",depends_on: 'eval:doc.single_wo===0'},
-				{"fieldname":"work_order", "fieldtype":"Link", "label":__("Work Order"),options:"Work Order",depends_on: 'eval:doc.single_wo===1'},
-				{"fieldname":"single_wo", "fieldtype":"Check","label":__("Single Work Order")},
-			],
-			primary_action_label: 'Get Items',
-			primary_action(values) {
-				values.company = frm.doc.company
-				if(!values) return;
-				frappe.call({
-					method: "get_wo_items",
-					doc:frm.doc,
-					args: values,
-					callback: function(r) {
-						if (r.message === 'Item not found') {
-							erpnext.utils.remove_empty_first_row(frm, "items");
-							refresh_field("items");
-							d.hide();
-							frappe.throw(__(r.message));
-						}
-						d.hide();
-						frm.set_df_property("work_order_detail",'read_only',1)
-						refresh_field("items");
-						refresh_field("work_order_detail");
-					}
-				});
-			}
-		});
-
-		d.show();
 	},
 
 	get_items_from_bom: function(frm) {

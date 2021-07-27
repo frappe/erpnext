@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2021-06-05 12:25:46.192677",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer",
+  "column_break_2",
+  "company",
+  "customer_group",
+  "quantity_and_amount_section",
+  "min_qty",
+  "max_qty",
+  "column_break_9",
+  "min_amt",
+  "max_amt",
+  "period_settings_section",
+  "valid_from",
+  "valid_upto",
+  "column_break_11",
+  "for_price_list",
+  "currency",
+  "section_break_13",
+  "update_base_price",
+  "item_details",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CUST-PRICE-RULE-.YYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "customer.customer_group",
+   "fieldname": "customer_group",
+   "fieldtype": "Read Only",
+   "label": "Customer Group "
+  },
+  {
+   "fieldname": "quantity_and_amount_section",
+   "fieldtype": "Section Break",
+   "label": "QUANTITY AND AMOUNT"
+  },
+  {
+   "fieldname": "min_qty",
+   "fieldtype": "Data",
+   "label": "Min Qty"
+  },
+  {
+   "fieldname": "max_qty",
+   "fieldtype": "Data",
+   "label": "Max Qty"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "min_amt",
+   "fieldtype": "Data",
+   "label": "Min Amt"
+  },
+  {
+   "fieldname": "max_amt",
+   "fieldtype": "Data",
+   "label": "Max Amt"
+  },
+  {
+   "fieldname": "period_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Period Settings"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "label": "Valid From"
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Date",
+   "label": "Valid Upto"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "for_price_list",
+   "fieldtype": "Link",
+   "label": "For Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "update_base_price",
+   "fieldtype": "Button",
+   "label": "Update Base Price"
+  },
+  {
+   "fieldname": "item_details",
+   "fieldtype": "Table",
+   "label": "Item Details",
+   "options": "Customer Pricing Rule Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Customer Pricing Rule",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-06-05 12:25:46.192677",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer Pricing Rule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

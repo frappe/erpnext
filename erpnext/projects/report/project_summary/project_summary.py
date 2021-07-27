@@ -122,7 +122,7 @@ def get_report_summary(data):
 	if not data:
 		return None
 
-	avg_completion = sum([project.percent_complete for project in data]) / len(data)
+	avg_completion = sum(project.percent_complete for project in data) / len(data)
 	total = sum([project.total_tasks for project in data])
 	total_overdue = sum([project.overdue_tasks for project in data])
 	completed = sum([project.completed_tasks for project in data])

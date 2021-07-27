@@ -128,12 +128,14 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
-
-		if self._action != 'submit' and not self.is_return:
-			set_batch_nos(self, 'warehouse', True)
+		self.pick_update_validate()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
+
+		if self._action != 'submit' and not self.is_return:
+			set_batch_nos(self, 'warehouse', throw=True)
+			set_batch_nos(self, 'warehouse', throw=True, child_table="packed_items")
 
 		self.update_current_stock()
 
@@ -177,13 +179,25 @@ class DeliveryNote(SellingController):
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
+	def pick_update_validate(self):
+		if self.pick_list:
+			doc = frappe.get_doc("Pick List",self.pick_list)
+			doc.delivery_note_done =1
+			doc.db_update()
+
+	def update_pick_lists():
+		pick_list = frappe.db.sql("""select pick_list from `tabDelivery Note` where pick_list is not null""", as_dict =True)
+		for p in pick_list:
+			doc = frappe.get_doc("Pick List", p.get("pick_list"))
+			doc.delivery_note_done = 1
+			doc.db_update()
+
 	def validate_warehouse(self):
 		super(DeliveryNote, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
-				if not d['warehouse']:
-					frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
+			if not d['warehouse'] and frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
+				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 
 	def update_current_stock(self):
@@ -228,6 +242,7 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
+		self.pick_update_cancel()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
@@ -237,6 +252,13 @@ class DeliveryNote(SellingController):
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
+
+
+	def pick_update_cancel(self):
+		if self.pick_list:
+			doc = frappe.get_doc("Pick List",self.pick_list)
+			doc.delivery_note_done = 0
+			doc.db_update()
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -264,7 +286,7 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.get("items")]):
+		if not any(flt(d.get('packed_qty')) for d in self.get("items")):
 			return
 		has_error = False
 		for d in self.get("items"):

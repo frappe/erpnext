@@ -1,0 +1,206 @@
+{
+ "actions": [],
+ "autoname": "SPCP-.#####.",
+ "creation": "2021-06-05 12:11:51.012816",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "brand",
+  "customer_group",
+  "column_break_2",
+  "based_on",
+  "customer",
+  "sales_partner",
+  "column_break_6",
+  "from_date",
+  "commission_item",
+  "territory",
+  "column_break_12",
+  "to_date",
+  "item_group",
+  "sales_partner_type",
+  "column_break_15",
+  "show_return_entries",
+  "already_submitted",
+  "section_break_18",
+  "sales_order_table",
+  "sales_invoice_table",
+  "delivery_note_table",
+  "amended_from",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "label": "Brand",
+   "options": "Brand"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "based_on",
+   "fieldtype": "Select",
+   "label": "Based on",
+   "options": "Sales Order\nDelivery Note\nSales Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "sales_partner",
+   "fieldtype": "Link",
+   "label": "Sales Partner",
+   "options": "Sales Partner"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "commission_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Commission Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "sales_partner_type",
+   "fieldtype": "Link",
+   "label": "Sales Partner Type",
+   "options": "Sales Partner Type"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_return_entries",
+   "fieldtype": "Check",
+   "label": "Show Return Entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "already_submitted",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Already Submitted"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sales_order_table",
+   "fieldtype": "Table",
+   "label": "Sales Order Table",
+   "options": "Sales Order Table"
+  },
+  {
+   "fieldname": "sales_invoice_table",
+   "fieldtype": "Table",
+   "label": "Sales Invoice Table",
+   "options": "Sales Invoice Table"
+  },
+  {
+   "fieldname": "delivery_note_table",
+   "fieldtype": "Table",
+   "label": "Delivery Note Table",
+   "options": "Delivery Note Table"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Partner Commission Payment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Partner Commission Payment",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-06-05 12:11:51.012816",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Sales Partner Commission Payment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

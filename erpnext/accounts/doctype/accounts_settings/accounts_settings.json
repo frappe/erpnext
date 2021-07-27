@@ -257,9 +257,10 @@
   },
   {
    "default": "1",
+   "description": "If enabled, ledger entries will be posted for change amount in POS transactions",
    "fieldname": "post_change_gl_entries",
    "fieldtype": "Check",
-   "label": "Post Ledger Entries for Given Change"
+   "label": "Create Ledger Entries for Change Amount"
   }
  ],
  "icon": "icon-cog",
@@ -267,7 +268,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-25 12:34:05.858669",
+ "modified": "2021-06-17 20:26:03.721202",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

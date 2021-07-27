@@ -4,15 +4,16 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
-
+import calendar
+from datetime import datetime, timedelta
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate, get_first_day
 from frappe.model.naming import make_autoname
-
 from frappe import msgprint, _
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
+from frappe.utils import today
 from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
 from erpnext.payroll.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
@@ -36,6 +37,10 @@ class SalarySlip(TransactionBase):
 
 	def autoname(self):
 		self.name = make_autoname(self.series)
+
+		
+	def before_save(self):
+		self.get_payroll()
 
 	def validate(self):
 		self.status = self.get_status()
@@ -350,6 +355,18 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
+	def get_payroll(self):
+		doc=frappe.get_doc("Payroll Period",{"company":self.company})
+		lst=frappe.get_doc("Employee",{"employee":self.employee})
+		if doc.start_date <=lst.date_of_joining<=doc.end_date:
+			end_date = getdate(lst.date_of_joining)
+			start_date = getdate(doc.start_date)
+			num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+			self.months_of_service_in_payment_period=num_months
+		else:
+			self.months_of_service_in_payment_period=12
+
+		
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
 		holidays = "','".join(holidays)
@@ -1289,6 +1306,42 @@ class SalarySlip(TransactionBase):
 
 		return period_start_date, period_end_date
 
+	@frappe.whitelist()
+	def get_total_leave_in_current_month(self):
+		date = self.start_date.split('-')
+		cur_month = int(date[1])
+		cur_year = int(date[0])
+		last_date_of_month = calendar.monthrange(cur_year, cur_month)
+		start = datetime(year=cur_year, month=cur_month, day=1).strftime("%Y-%m-%d")
+		end = datetime(year=cur_year, month=cur_month, day=int(last_date_of_month[1])).strftime("%Y-%m-%d")
+
+		all_leave_with_start_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "from_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+		
+		total_leave_list = []
+		for leave in all_leave_with_start_date:
+			to_date_obj = leave.get('to_date')
+			from_date_obj = leave.get('from_date')
+
+			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+				total_leave_list.append(leave.get('total_leave_days'))
+			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] != [cur_month,cur_year]):
+				last_day_of_month = calendar.monthrange(cur_year, cur_month)[1]
+				month_date = datetime(cur_year, cur_month, last_day_of_month)
+				
+				leaves_in_cur_month = date_diff(month_date,leave.get('from_date')) + 1
+				total_leave_list.append(leaves_in_cur_month)
+			
+		
+		all_leave_with_end_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "to_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+		for leave in all_leave_with_end_date:
+			to_date_obj = leave.get('to_date')
+			from_date_obj = leave.get('from_date')
+			
+			if([from_date_obj.month,from_date_obj.year] != [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+				first_date_of_month = datetime(cur_year, cur_month, 1)
+				diff = date_diff(to_date_obj,first_date_of_month) + 1
+				total_leave_list.append(diff)
+		self.leave = sum(total_leave_list)
 	def add_leave_balances(self):
 		self.set('leave_details', [])
 

@@ -84,6 +84,10 @@
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
+  "hra_section1",
+  "basic_component",
+  "hra_component",
+  "arrear_component",
   "budget_detail",
   "exception_budget_approver_role",
   "company_info",
@@ -101,7 +105,10 @@
   "registration_details",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "upi_section",
+  "upi_id",
+  "upi_qr_code_image"
  ],
  "fields": [
   {
@@ -734,6 +741,45 @@
    "fieldtype": "Link",
    "label": "Default Payment Discount Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "hra_section1",
+   "fieldtype": "Section Break",
+   "label": "HRA Settings"
+  },
+  {
+   "fieldname": "upi_qr_code_image",
+   "fieldtype": "Attach Image",
+   "label": "UPI QR Code Image"
+  },
+  {
+   "fieldname": "basic_component",
+   "fieldtype": "Link",
+   "label": "Basic Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "hra_component",
+   "fieldtype": "Link",
+   "label": "HRA Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "arrear_component",
+   "fieldtype": "Link",
+   "label": "Arrear Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "upi_section",
+   "fieldtype": "Section Break",
+   "label": "UPI Details"
+  },
+  {
+   "fieldname": "upi_id",
+   "fieldtype": "Data",
+   "label": " UPI ID",
+   "translatable": 1
   }
  ],
  "icon": "fa fa-building",
@@ -741,7 +787,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-05-07 03:11:28.189740",
+ "modified": "2021-06-08 10:43:22.483787",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

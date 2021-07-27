@@ -1957,6 +1957,33 @@ class TestSalesInvoice(unittest.TestCase):
 		einvoice = make_einvoice(si)
 		validate_totals(einvoice)
 
+	def test_item_tax_net_range(self):
+		item = create_item("T Shirt")
+
+		item.set('taxes', [])
+		item.append("taxes", {
+			"item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
+			"minimum_net_rate": 0,
+			"maximum_net_rate": 500
+		})
+
+		item.append("taxes", {
+			"item_tax_template": "_Test Account Excise Duty @ 12 - _TC",
+			"minimum_net_rate": 501,
+			"maximum_net_rate": 1000
+		})
+
+		item.save()
+
+		sales_invoice = create_sales_invoice(item = "T Shirt", rate=700, do_not_submit=True)
+		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 12 - _TC")
+
+		# Apply discount
+		sales_invoice.apply_discount_on = 'Net Total'
+		sales_invoice.discount_amount = 300
+		sales_invoice.save()
+		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
@@ -1985,32 +2012,6 @@ def get_sales_invoice_for_e_invoice():
 
 	return si
 
-	def test_item_tax_net_range(self):
-		item = create_item("T Shirt")
-
-		item.set('taxes', [])
-		item.append("taxes", {
-			"item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
-			"minimum_net_rate": 0,
-			"maximum_net_rate": 500
-		})
-
-		item.append("taxes", {
-			"item_tax_template": "_Test Account Excise Duty @ 12 - _TC",
-			"minimum_net_rate": 501,
-			"maximum_net_rate": 1000
-		})
-
-		item.save()
-
-		sales_invoice = create_sales_invoice(item = "T Shirt", rate=700, do_not_submit=True)
-		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 12 - _TC")
-
-		# Apply discount
-		sales_invoice.apply_discount_on = 'Net Total'
-		sales_invoice.discount_amount = 300
-		sales_invoice.save()
-		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
 
 def make_test_address_for_ewaybill():
 	if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
@@ -2087,9 +2088,9 @@ def make_sales_invoice_for_ewaybill():
 	if not gst_account:
 		gst_settings.append("gst_accounts", {
 			"company": "_Test Company",
-			"cgst_account": "CGST - _TC",
-			"sgst_account": "SGST - _TC",
-			"igst_account": "IGST - _TC",
+			"cgst_account": "Output Tax CGST - _TC",
+			"sgst_account": "Output Tax SGST - _TC",
+			"igst_account": "Output Tax IGST - _TC",
 		})
 
 	gst_settings.save()
@@ -2106,7 +2107,7 @@ def make_sales_invoice_for_ewaybill():
 
 	si.append("taxes", {
 		"charge_type": "On Net Total",
-		"account_head": "CGST - _TC",
+		"account_head": "Output Tax CGST - _TC",
 		"cost_center": "Main - _TC",
 		"description": "CGST @ 9.0",
 		"rate": 9
@@ -2114,7 +2115,7 @@ def make_sales_invoice_for_ewaybill():
 
 	si.append("taxes", {
 		"charge_type": "On Net Total",
-		"account_head": "SGST - _TC",
+		"account_head": "Output Tax SGST - _TC",
 		"cost_center": "Main - _TC",
 		"description": "SGST @ 9.0",
 		"rate": 9
