@@ -73,6 +73,7 @@ def make_opportunity(**args):
 		"company": args.company or "_Test Company",
 		"opportunity_from": args.opportunity_from or "Customer",
 		"opportunity_type": "Sales",
+		"conversion_rate": 1.0,
 		"with_items": args.with_items or 0,
 		"transaction_date": today()
 	})
