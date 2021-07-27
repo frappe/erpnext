@@ -48,13 +48,11 @@ class PatientEncounter(Document):
 		if gender:
 			filters['gender'] = gender
 
-		print(filters)
 		plans = frappe.db.get_list('Treatment Plan Template', fields='*', filters=filters)
 		return plans
 
 	@frappe.whitelist(allow_guest=True)
 	def fill_treatment_plans(self, treatment_plans=None):
-		print(treatment_plans)
 		for treatment_plan in treatment_plans:
 			self.fill_treatment_plan(treatment_plan)
 

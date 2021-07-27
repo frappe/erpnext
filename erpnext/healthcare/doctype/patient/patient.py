@@ -104,10 +104,11 @@ class Patient(Document):
 
 	@property
 	def age(self):
-		if self.dob:
-			dob = getdate(self.dob)
-			age = dateutil.relativedelta.relativedelta(getdate(), dob)
-			return age
+		if not self.dob:
+			return
+		dob = getdate(self.dob)
+		age = dateutil.relativedelta.relativedelta(getdate(), dob)
+		return age
 
 	def get_age(self):
 		age = self.age
