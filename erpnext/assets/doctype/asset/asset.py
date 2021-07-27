@@ -395,7 +395,7 @@ class Asset(AccountsController):
 			if ignore_booked_entry and d.journal_entry:
 				continue
 
-			if d.finance_book_id not in finance_books:
+			if int(d.finance_book_id) not in finance_books:
 				accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 				value_after_depreciation = flt(self.get_value_after_depreciation(d.finance_book_id))
 				finance_books.append(int(d.finance_book_id))
