@@ -69,7 +69,7 @@
   {
    "fieldname": "template_name",
    "fieldtype": "Data",
-   "label": "Name",
+   "label": "Template Name",
    "unique": 1
   },
   {
@@ -134,7 +134,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-20 14:35:19.789203",
+ "modified": "2021-07-27 12:42:54.919016",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Treatment Plan Template",

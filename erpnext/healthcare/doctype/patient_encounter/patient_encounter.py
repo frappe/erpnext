@@ -36,11 +36,17 @@ class PatientEncounter(Document):
 	@frappe.whitelist(allow_guest=True)
 	@staticmethod
 	def get_applicable_treatment_plans(encounter=None):
+		patient = frappe.get_doc('Patient', encounter['patient'])
+
 		filters = {}
-		age = encounter['patient_age']
+		age = patient.age
 		if age:
-			filters['patient_age_from'] = ['>=', age]
-			filters['patient_age_to'] = ['<=', age]
+			filters['patient_age_from'] = ['>=', age.years]
+			filters['patient_age_to'] = ['<=', age.years]
+
+		gender = patient.sex
+		if gender:
+			filters['gender'] = gender
 
 		print(filters)
 		plans = frappe.db.get_list('Treatment Plan Template', fields='*', filters=filters)
