@@ -78,12 +78,130 @@ class SalesInvoice(SellingController):
 
 		self.db_set('cost_center', company[0].cost_center, update_modified=False)
 
+	def set_new_row_item(self, item, rate, taxed_sales, is_exonerated):
+		row = self.append("items", {})
+		row.item_code = item.item_code
+		row.qty = item.qty
+		row.rate = rate
+		row.amount = taxed_sales
+		row.parent = self.name
+		row.uom = item.uom
+		row.description = item.description
+		row.item_name = item.item_name
+		row.conversion_factor = item.conversion_factor
+		row.base_rate = item.base_rate
+		row.base_amount = item.base_amount
+		row.income_account = item.income_account
+		row.cost_center = item.cost_center
+		row.tax_detail = item.tax_detail
+		row.barcode = item.barcode
+		row.is_exonerated = is_exonerated
+		row.category_for_sale = item.category_for_sale
+		row.customer_item_code = item.customer_item_code
+		row.description_section = item.description_section
+		row.item_group = item.item_group
+		row.brand = item.brand
+		row.image = item.image
+		row.image_view = item.image_view
+		row.stock_uom = item.stock_uom
+		row.stock_qty = item.stock_qty
+		row.purchase_rate = item.purchase_rate
+		row.price_list_rate = item.price_list_rate
+		row.base_price_list_rate = item.base_price_list_rate
+		row.discount_and_margin = item.discount_and_margin
+		row.discount_reason = item.discount_reason
+		row.margin_type = item.margin_type
+		row.margin_rate_or_amount = item.margin_rate_or_amount
+		row.rate_with_margin = item.rate_with_margin
+		row.discount_percentage = item.discount_percentage
+		row.discount_amount = item.discount_amount
+		row.base_rate_with_margin = item.base_rate_with_margin
+		row.item_tax_template = item.item_tax_template
+		row.tax_detail = item.tax_detail
+		row.pricing_rules = item.pricing_rules
+		row.is_free_item = item.is_free_item
+		row.net_rate = item.net_rate
+		row.net_amount = item.net_amount
+		row.base_net_rate = item.base_net_rate
+		row.base_net_amount = item.base_net_amount
+		row.is_fixed_asset = item.is_fixed_asset
+		row.asset = item.asset
+		row.finance_book = item.finance_book
+		row.expense_account = item.expense_account
+		row.deferred_revenue_account = item.deferred_revenue_account
+		row.service_stop_date = item.service_stop_date
+		row.enable_deferred_revenue = item.enable_deferred_revenue
+		row.service_start_date = item.service_start_date
+		row.service_end_date = item.service_end_date
+		row.weight_per_unit = item.weight_per_unit
+		row.total_weight = item.total_weight
+		row.weight_uom = item.weight_uom
+		row.warehouse = item.warehouse
+		row.target_warehouse = item.target_warehouse
+		row.quality_inspection = item.quality_inspection
+		row.batch_no = item.batch_no
+		row.allow_zero_valuation_rate = item.allow_zero_valuation_rate
+		row.serial_no = item.serial_no
+		row.item_tax_rate = item.item_tax_rate
+		row.actual_batch_qty = item.actual_batch_qty
+		row.actual_qty = item.actual_qty
+		row.edit_references = item.edit_references
+		row.sales_order = item.sales_order
+		row.so_detail = item.so_detail
+		row.delivery_note = item.delivery_note
+		row.dn_detail = item.dn_detail
+		row.delivered_qty = item.delivered_qty
+		row.cost_center = item.cost_center
+		row.page_break = item.page_break
+	
+	def caculate_items_amount(self):
+		items = frappe.get_all("Sales Invoice Item", ["*"], filters = {"parent": self.name})
+
+		if self.exonerated:
+			for item in items:
+				if item.is_exonerated != 1:
+					item_taxes = frappe.get_all("Item Tax", ['name', "item_tax_template"], filters = {"parent": item.item_code})
+					if len(item_taxes) >0:
+						for item_tax in item_taxes:
+							tax_tamplates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": item_tax.item_tax_template})
+								
+							for tax_tamplate in tax_tamplates:
+
+								tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
+									
+								for tax_detail in tax_details:
+
+									if tax_detail.tax_rate == 15:
+										taxed_sales15 = item.amount/1.15
+										rate = taxed_sales15/item.qty
+
+										self.set_new_row_item(item, rate, taxed_sales15, 1)										
+									
+									if tax_detail.tax_rate == 18:
+										taxed_sales18 = item.amount/1.18
+										rate = taxed_sales18/item.qty
+										
+										self.set_new_row_item(item, rate, taxed_sales18, 1)
+									
+									frappe.delete_doc('Sales Invoice Item', item.name)
+		else:
+			for item in items:
+				if item.is_exonerated == 1:
+					product_price = frappe.get_all("Item Price", ["price_list_rate"], filters = {"item_code": item.item_code, "price_list": self.selling_price_list})
+
+					amount = item.qty * product_price[0].price_list_rate
+
+					self.set_new_row_item(item, product_price[0].price_list_rate, amount, 0)
+					frappe.delete_doc('Sales Invoice Item', item.name)
+
+
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 		self.discount_product()
 
 		if self.docstatus == 0:
+			self.caculate_items_amount()
 			self.set_cost_center()
 
 		if not self.is_pos:
@@ -199,18 +317,18 @@ class SalesInvoice(SellingController):
 
 								if tax_detail.tax_rate == 15:
 									if self.exonerated == 1:
-										taxed_sales15 += item.amount/1.15
-										taxed15 += item.amount - (item.amount/1.15)
-										exonerated += item.amount
+										taxed_sales15 += item.amount
+										taxed15 += item.amount * 0.15
+										exonerated += taxed_sales15 + taxed15
 									else:
 										taxed_sales15 += item.amount/1.15
 										taxed15 += item.amount - (item.amount/1.15)
 								
 								if tax_detail.tax_rate == 18:
 									if self.exonerated == 1:
-										taxed_sales18 += item.amount/1.18
-										taxed18 += item.amount - (item.amount/1.18)
-										exonerated += item.amount
+										taxed_sales18 += item.amount
+										taxed18 += item.amount * 0.18
+										exonerated += taxed_sales18 + taxed18
 									else:
 										taxed_sales18 += item.amount/1.18
 										taxed18 += item.amount - (item.amount/1.18)
@@ -227,9 +345,9 @@ class SalesInvoice(SellingController):
 
 		if self.exonerated == 1:
 			if self.discount_amount:
-				self.grand_total = self.grand_total = self.total - self.total_taxes_and_charges - self.discount_amount
+				self.grand_total = self.total - self.discount_amount
 			else:
-				self.grand_total = self.grand_total = self.total - self.total_taxes_and_charges			
+				self.grand_total = self.total			
 		else:
 			if self.discount_amount:
 				self.grand_total = self.total - self.discount_amount
@@ -1089,33 +1207,21 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
-		if self.exonerated:
-			account_currency = get_account_currency(self.account_head)
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.account_head,
-					"against": self.customer,
-					"debit": flt(self.total_taxes_and_charges),
-					"debit_in_account_currency": (flt(self.total_taxes_and_charges)),
-					"cost_center": self.cost_center
-				}, account_currency)
-			)
-		else:
-			for tax in self.get("taxes"):
-				if flt(tax.base_tax_amount_after_discount_amount):
-					account_currency = get_account_currency(tax.account_head)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": tax.account_head,
-							"against": self.customer,
-							"credit": flt(tax.base_tax_amount_after_discount_amount,
-								tax.precision("tax_amount_after_discount_amount")),
-							"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
-								tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
-								flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
-							"cost_center": tax.cost_center
-						}, account_currency)
-					)
+		for tax in self.get("taxes"):
+			if flt(tax.base_tax_amount_after_discount_amount):
+				account_currency = get_account_currency(tax.account_head)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": tax.account_head,
+						"against": self.customer,
+						"credit": flt(tax.base_tax_amount_after_discount_amount,
+							tax.precision("tax_amount_after_discount_amount")),
+						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
+							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
+							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
+						"cost_center": tax.cost_center
+					}, account_currency)
+				)
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries

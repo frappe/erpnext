@@ -99,7 +99,8 @@
   "cost_center",
   "dimension_col_break",
   "section_break_54",
-  "page_break"
+  "page_break",
+  "is_exonerated"
  ],
  "fields": [
   {
@@ -828,11 +829,17 @@
    "in_list_view": 1,
    "label": "Tax Detail",
    "options": "Tax Detail"
+  },
+  {
+   "fieldname": "is_exonerated",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "is_exonerated"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-05-21 12:28:34.587487",
+ "modified": "2021-07-26 15:39:08.270049",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
