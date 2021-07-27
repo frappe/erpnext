@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "transporter",
+  "transporter_name",
   "customer",
   "customer_name",
   "item_code",
@@ -48,8 +49,7 @@
    "in_standard_filter": 1,
    "label": "Transporter",
    "mandatory_depends_on": "eval: doc.supplier_dc == 0",
-   "options": "Supplier",
-   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+   "options": "Supplier"
   },
   {
    "fieldname": "customer",
@@ -94,8 +94,7 @@
    "fieldname": "qty_to_deliver",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty to Deliver",
-   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+   "label": "Qty to Deliver"
   },
   {
    "fieldname": "weight_to_deliver",
@@ -158,8 +157,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Approved",
-   "options": "\nYes\nNo",
-   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "weight_per_unit",
@@ -172,15 +170,14 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Source Warehouse",
-   "options": "Warehouse",
-   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+   "options": "Warehouse"
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.transporter == \"\"",
    "fieldname": "supplier_dc",
    "fieldtype": "Check",
-   "label": " Supplier delivers to Customer ",
-   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+   "label": " Supplier delivers to Customer "
   },
   {
    "depends_on": "eval: doc.supplier_dc == 1",
@@ -189,15 +186,13 @@
    "in_list_view": 1,
    "label": "Supplier",
    "mandatory_depends_on": "eval: doc.supplier_dc == 1",
-   "options": "Supplier",
-   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+   "options": "Supplier"
   },
   {
    "fieldname": "split",
    "fieldtype": "Button",
    "hidden": 1,
-   "label": "Split",
-   "read_only_depends_on": "eval: doc.approved == \"Yes\" || doc.approved == \"No\""
+   "label": "Split"
   },
   {
    "fieldname": "uom",
@@ -242,7 +237,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Document Status",
-   "options": "\nComplete\nIncomplete",
+   "options": "Incomplete\nComplete",
    "read_only": 1
   },
   {
@@ -271,11 +266,20 @@
   {
    "fieldname": "column_break_30",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.supplier_dc == 0",
+   "fetch_from": "transporter.supplier_name",
+   "fieldname": "transporter_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Transporter Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-22 14:57:42.348205",
+ "modified": "2021-07-27 16:21:08.878989",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
