@@ -229,7 +229,7 @@ frappe.ui.form.on('Delivery Planning', {
 						}
 
 					else if(r.message == 3 ){
-						console.log("----- 3 --- --Nothing 85068 89977 nothing  ---  ---  ",r.message);
+						console.log("----- 3 --- --Nothing 89977 nothing  ---  ---  ",r.message);
 
 //							Transporter Summary inside Calcluate button
 							frm.add_custom_button(__("Transporter Summary"), function() {

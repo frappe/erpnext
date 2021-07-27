@@ -2,18 +2,67 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Delivery Planning Item', {
-//	 refresh: function(frm) {
-//
-//
-//
-//
-//	},
-	onload: function(frm){
-		frm.call({
-			doc:frm.doc,
-			method: 'update_stock',
+
+
+	before_save: function(frm){
+		if(frm.doc.approved == "Yes" || frm.doc.approved == "No")
+			{
+				frm.set_df_property('transporter','read_only',1)
+				frm.set_df_property('sorce_warehouse','read_only',1)
+				frm.set_df_property('qty_to_deliver','read_only',1)
+				frm.set_df_property('approved','read_only',1)
+				frm.set_df_property('supplier_dc','read_only',1)
+				frm.set_df_property('supplier','read_only',1)
+				frm.set_df_property('split','hidden',1)
+				frm.refresh_field("transporter")
+				frm.refresh_field("sorce_warehouse")
+				frm.refresh_field("qty_to_deliver")
+				frm.refresh_field("supplier_dc")
+				frm.refresh_field("approved")
+				frm.refresh_field("supplier")
+	            frm.refresh_field("split")
+			}
+	},
+
+	// refresh: function(frm){
+	// 	frm.call({
+	// 		doc:frm.doc,
+	// 		method: 'update_stock',
 			
-		});
+	// 	});
+	// },
+	
+	
+	onload: function(frm){
+		if(frm.transporter){
+			frm.set_df_property('supplier_dc','hidden',1)
+			frm.refresh_field("supplier_dc")
+		}
+
+		frm.call({
+					doc:frm.doc,
+					method: 'update_stock',
+					
+				});
+
+		if(frm.doc.approved == "Yes" || frm.doc.approved == "No")
+			{
+				frm.set_df_property('transporter','read_only',1)
+				frm.set_df_property('sorce_warehouse','read_only',1)
+				frm.set_df_property('qty_to_deliver','read_only',1)
+				frm.set_df_property('approved','read_only',1)
+				frm.set_df_property('supplier_dc','read_only',1)
+				frm.set_df_property('supplier','read_only',1)
+				frm.set_df_property('split','hidden',1)
+				frm.refresh_field("transporter")
+				frm.refresh_field("sorce_warehouse")
+				frm.refresh_field("qty_to_deliver")
+				frm.refresh_field("supplier_dc")
+				frm.refresh_field("approved")
+				frm.refresh_field("supplier")
+	            frm.refresh_field("split")
+			}
+		
 	},
 
 
@@ -161,25 +210,4 @@ frappe.ui.form.on("Delivery Planning Item", "onload", function(frm) {
     });
 });
 
-frappe.ui.form.on("Delivery Planning Item", "before_save", function(frm) {
-
-		if(frm.doc.approved == "Yes" || frm.doc.approved == "No")
-			{
-				frm.set_df_property('transporter','read_only',1)
-				frm.set_df_property('sorce_warehouse','read_only',1)
-				frm.set_df_property('qty_to_deliver','read_only',1)
-				frm.set_df_property('approved','read_only',1)
-				frm.set_df_property('supplier_dc','read_only',1)
-				frm.set_df_property('supplier','read_only',1)
-				frm.set_df_property('split','hidden',1)
-				frm.refresh_field("transporter")
-				frm.refresh_field("sorce_warehouse")
-				frm.refresh_field("qty_to_deliver")
-				frm.refresh_field("supplier_dc")
-				frm.refresh_field("approved")
-				frm.refresh_field("supplier")
-	            frm.refresh_field("split")
-			}
-
-});
 

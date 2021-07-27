@@ -84,7 +84,7 @@ def approve_function(source_names):
 			print("Already Approved", x ," status", doc.approved)
 			frappe.msgprint(
 				msg='Approval status for planning item {item} is already set to {approve}'.format(item = doc.name, approve = doc.approved),
-				title='Approval Error',
+				title='Approval message',
 			)
 		else:
 			doc.approved = 'Yes'
@@ -118,7 +118,7 @@ def reject_function(source_names):
 			print("Already Approved", x ," status", doc.approved)
 			frappe.msgprint(
 				msg='Approval status for planning item {item} is already set to {approve}'.format(item = doc.name, approve = doc.approved),
-				title='Approval Error',
+				title='Rejection message',
 			)
 			
 	return 1	

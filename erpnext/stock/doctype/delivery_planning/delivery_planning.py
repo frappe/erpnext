@@ -194,6 +194,7 @@ class DeliveryPlanning(Document):
 	# 		doc.save()
 	def on_delivery_planning_submit(self):
 		conditions = ""
+		pinc = ""
 		if self.company:
 			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
 
@@ -206,11 +207,41 @@ class DeliveryPlanning(Document):
 		if self.delivery_date_to:
 			conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
 
-		# if self.pincode_from:
-		# 	conditions += "And add.pincode >= '%s" % self.pincode_from
-		#
-		# if self.pincode_to:
-		# 	conditions += "And add.pincode <= '%s" % self.pincode_to
+		if self.pincode_from:
+			pincodefrom = self.pincode_from
+		
+		if self.pincode_to:
+			pincodeto = self.pincode_to
+
+		if(self.pincode_from and self.pincode_to):
+			pin = frappe.db.sql("""Select dl.link_name from `tabDynamic Link` as dl,
+								`tabAddress` as a
+								where dl.parent = a.name
+								and dl.parenttype = "Address" 
+								and dl.link_doctype = "Customer"
+								and a.pincode between {pinfrom} and {pinto} 
+								""".format( pinfrom = pincodefrom, pinto = pincodeto), as_dict= 1)	
+
+			print("-------------------- pin ------------- ",pin)
+		
+
+			if pin:
+				count = len(pin)
+				ct =0 
+				print("****len pin",count)
+				for p in pin:
+					pinc += "'"+ p.link_name +"'"
+					ct += 1
+					if ct != count:
+						pinc += ","
+					# x = name.translate({ord(i): None for i in ']"['})
+				print("============pinc ======",)
+
+				# pp = pinc.translate({ord(i): None for i in ']['})
+				print("-----------------pinc---------------", pinc)
+				conditions += " AND so.customer in ({0})".format(pinc)
+				# conditions += "AND so.customer in ('Lenovo Global','HP Computers','Realme')"
+				# print(" ------------ customers", pp )				
 
 		query = frappe.db.sql(""" select
 									so.customer,
@@ -229,11 +260,13 @@ class DeliveryPlanning(Document):
 									soi.supplier,
 									soi.uom,
 									soi.conversion_factor,
-									soi.stock_uom
+									soi.stock_uom,
+									a.pincode
 
 
 									from `tabSales Order Item` soi
 									join `tabSales Order` so ON soi.parent = so.name
+									join `tabAddress` a  ON so.customer = a.address_title
 
 									where so.docstatus = 1
 									{conditions} """.format(conditions=conditions), as_dict=1)
@@ -252,7 +285,7 @@ class DeliveryPlanning(Document):
 			dp_item.weight_to_deliver = i.weight_per_unit * i.qty
 			dp_item.sales_order = i.name
 			dp_item.sorce_warehouse = i.warehouse
-			dp_item.postal_code = 0
+			dp_item.postal_code = i.pincode
 			dp_item.delivery_date = i.delivery_date
 			dp_item.current_stock = i.projected_qty - i.stock_qty
 			dp_item.available_stock = i.projected_qty
@@ -919,6 +952,9 @@ class DeliveryPlanning(Document):
 										  "related_delivey_planning": self.name,
 										  })
 
+		print(" -----==== dpi po =======----- ",dpi_po)			
+		print(" -----==== dpi po =======----- ",dpi_dn)							  
+
 		if dpi_po and dpi_dn:
 			return 1
 		elif dpi_po :
@@ -1016,7 +1052,7 @@ class DeliveryPlanning(Document):
 			print("00000111111111122222222333333333333", a_count)
 
 			
-			if count == a_count:
+			if count == a_count and count > 0:
 				self.db_set('d_status', "Completed", update_modified=False)
 				print("------- in if 1 --------", count, a_count)
 			elif count > 1 and count < len(dpi) :
