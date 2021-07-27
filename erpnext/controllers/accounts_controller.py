@@ -818,11 +818,11 @@ class AccountsController(TransactionBase):
 					account_currency = get_account_currency(tax.account_head)
 
 					if self.doctype == "Purchase Invoice":
-						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-					else:
 						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+					else:
+						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 
 					party = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 					unallocated_amount = tax.tax_amount - tax.allocated_amount
@@ -1112,8 +1112,11 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
-					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
 					d.outstanding = d.payment_amount
+				elif not d.invoice_portion:
+					d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
+
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]

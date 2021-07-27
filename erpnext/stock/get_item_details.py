@@ -74,9 +74,8 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	if not doc or cint(doc.get('is_return')) == 0:
-		# get price list rate only if the invoice is not a credit or debit note
-		get_price_list_rate(args, item, out)
+	
+	get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
@@ -441,7 +440,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 
 	if item_tax_templates is None:
 		item_tax_templates = {}
-	
+
 	if item_rates is None:
 		item_rates = {}
 
@@ -807,9 +806,13 @@ def check_packing_list(price_list_rate_name, desired_qty, item_code):
 def validate_conversion_rate(args, meta):
 	from erpnext.controllers.accounts_controller import validate_conversion_rate
 
-	if (not args.conversion_rate
-		and args.currency==frappe.get_cached_value('Company',  args.company,  "default_currency")):
+	company_currency = frappe.get_cached_value('Company',  args.company,  "default_currency")
+	if (not args.conversion_rate and args.currency==company_currency):
 		args.conversion_rate = 1.0
+
+	if (not args.ignore_conversion_rate and args.conversion_rate == 1 and args.currency!=company_currency):
+		args.conversion_rate = get_exchange_rate(args.currency,
+			company_currency, args.transaction_date, "for_buying") or 1.0
 
 	# validate currency conversion rate
 	validate_conversion_rate(args.currency, args.conversion_rate,
