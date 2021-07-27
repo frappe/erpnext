@@ -39,6 +39,19 @@ frappe.ui.form.on("Customer", {
 			frm.set_value("represents_company", "");
 		}
 
+		frm.set_query("city", function(doc) {
+			return {
+				filters: {"district": doc.district }
+			}
+		});
+
+
+		frm.set_query("district", function(doc) {
+			return {
+				filters: {"state": doc.state }
+			}
+		});
+
 		frm.set_query('customer_primary_contact', function(doc) {
 			return {
 				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_contact",
