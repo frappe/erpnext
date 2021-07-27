@@ -368,7 +368,7 @@ class update_entries_after(object):
 					# If no entry found with outgoing rate, collapse stack
 					if index == None:
 						new_stock_value = sum((d[0]*d[1] for d in self.stock_queue)) - qty_to_pop*outgoing_rate
-						new_stock_qty = sum((d[0] for d in self.stock_queue)) - qty_to_pop
+						new_stock_qty = sum((round(d[0],6) for d in self.stock_queue)) - qty_to_pop
 						self.stock_queue = [[new_stock_qty, new_stock_value/new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
 						break
 				else:
