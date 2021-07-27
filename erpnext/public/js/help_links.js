@@ -54,7 +54,7 @@ frappe.help.help_links["permission-manager"] = [
 
 frappe.help.help_links["Form/System Settings"] = [
 	{
-		label: "Naming Series",
+		label: "System Settings",
 		url: docsUrl + "user/manual/en/setting-up/settings/system-settings",
 	},
 ];
@@ -206,7 +206,7 @@ frappe.help.help_links["Form/PayPal Settings"] = [
 		label: "PayPal Settings",
 		url:
 			docsUrl +
-			"user/manual/en/setting-up/integrations/paypal-integration",
+			"user/manual/en/erpnext_integration/paypal-integration",
 	},
 ];
 
@@ -215,14 +215,14 @@ frappe.help.help_links["Form/Razorpay Settings"] = [
 		label: "Razorpay Settings",
 		url:
 			docsUrl +
-			"user/manual/en/setting-up/integrations/razorpay-integration",
+			"user/manual/en/erpnext_integration/razorpay-integration",
 	},
 ];
 
 frappe.help.help_links["Form/Dropbox Settings"] = [
 	{
 		label: "Dropbox Settings",
-		url: docsUrl + "user/manual/en/setting-up/integrations/dropbox-backup",
+		url: docsUrl + "user/manual/en/erpnext_integration/dropbox-backup",
 	},
 ];
 
@@ -230,7 +230,7 @@ frappe.help.help_links["Form/LDAP Settings"] = [
 	{
 		label: "LDAP Settings",
 		url:
-			docsUrl + "user/manual/en/setting-up/integrations/ldap-integration",
+			docsUrl + "user/manual/en/erpnext_integration/ldap-integration",
 	},
 ];
 
@@ -239,7 +239,7 @@ frappe.help.help_links["Form/Stripe Settings"] = [
 		label: "Stripe Settings",
 		url:
 			docsUrl +
-			"user/manual/en/setting-up/integrations/stripe-integration",
+			"user/manual/en/erpnext_integration/stripe-integration",
 	},
 ];
 
@@ -991,7 +991,7 @@ frappe.help.help_links["Form/BOM"] = [
 		label: "Nested BOM Structure",
 		url:
 			docsUrl +
-			"user/manual/en/manufacturing/articles/nested-bom-structure",
+			"user/manual/en/manufacturing/articles/managing-multi-level-bom",
 	},
 ];
 

@@ -217,9 +217,8 @@ class Gstr1Report(object):
 
 		for d in items:
 			if d.item_code not in self.invoice_items.get(d.parent, {}):
-				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
-					sum((i.get('taxable_value', 0) or i.get('base_net_amount', 0)) for i in items
-						if i.item_code == d.item_code and i.parent == d.parent))
+				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
+				self.invoice_items[d.parent][d.item_code] += d.get('taxable_value', 0) or d.get('base_net_amount', 0)
 
 				item_tax_rate = {}
 
@@ -584,7 +583,7 @@ class Gstr1Report(object):
 def get_json(filters, report_name, data):
 	filters = json.loads(filters)
 	report_data = json.loads(data)
-	gstin = get_company_gstin_number(filters["company"], filters["company_address"])
+	gstin = get_company_gstin_number(filters.get("company"), filters.get("company_address"))
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
