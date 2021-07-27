@@ -40,7 +40,6 @@
   "deadline_for_authorization",
   "project",
   "dimension_col_break",
-  "cost_center",
   "customer_po_details",
   "po_no",
   "column_break_23",
@@ -95,7 +94,10 @@
   "reg_sag",
   "n_reg_exonerados",
   "column_break_38",
+  "charge_type",
+  "account_head",
   "taxes_and_charges",
+  "cost_center",
   "shipping_rule",
   "tax_category",
   "section_break_40",
@@ -332,6 +334,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "exonerated",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -1750,12 +1753,27 @@
    "fieldname": "taxed_sales18",
    "fieldtype": "Currency",
    "label": "Taxed Sales18"
+  },
+  {
+   "default": "company.account_head",
+   "depends_on": "exonerated",
+   "fieldname": "account_head",
+   "fieldtype": "Link",
+   "label": "Account Head",
+   "options": "Account"
+  },
+  {
+   "depends_on": "exonerated",
+   "fieldname": "charge_type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-05-17 15:18:02.371296",
+ "modified": "2021-07-23 16:03:59.938195",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
