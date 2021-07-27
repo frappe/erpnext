@@ -28,7 +28,6 @@
   "campaign_name",
   "section_break_12",
   "contact_by",
-  "lead_followup_detail",
   "column_break_14",
   "contact_date",
   "column_break_22",
@@ -465,12 +464,6 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "lead_followup_detail",
-   "fieldtype": "Table",
-   "label": "Lead Followup Detail",
-   "options": "Lead Followup Detail"
   }
  ],
  "icon": "fa fa-user",
