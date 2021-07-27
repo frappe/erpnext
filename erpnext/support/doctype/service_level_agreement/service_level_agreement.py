@@ -3,13 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.core.utils import get_parent_doc
 from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
-	get_time_zone, to_timedelta, get_datetime_str, get_link_to_form, cint
+	get_time_zone, to_timedelta, get_datetime_str, get_link_to_form, cint, nowdate
 from datetime import datetime
+from frappe.utils.safe_exec import get_safe_globals
 from erpnext.support.doctype.issue.issue import get_holidays
 
 class ServiceLevelAgreement(Document):
@@ -18,6 +20,7 @@ class ServiceLevelAgreement(Document):
 		self.validate_status_field()
 		self.check_priorities()
 		self.check_support_and_resolution()
+		self.validate_condition()
 
 	def check_priorities(self):
 		priorities = []
@@ -95,6 +98,14 @@ class ServiceLevelAgreement(Document):
 		if not meta.get_field("status"):
 			frappe.throw(_("The Document Type {0} must have a Status field to configure Service Level Agreement").format(
 				frappe.bold(self.document_type)))
+
+	def validate_condition(self):
+		temp_doc = frappe.new_doc(self.document_type)
+		if self.condition:
+			try:
+				frappe.safe_eval(self.condition, None, get_context(temp_doc))
+			except Exception:
+				frappe.throw(_("The Condition '{0}' is invalid").format(self.condition))
 
 	def get_service_level_agreement_priority(self, priority):
 		priority = frappe.get_doc("Service Level Priority", {"priority": priority, "parent": self.name})
@@ -205,34 +216,51 @@ def check_agreement_status():
 			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "enabled", 0)
 
 
-def get_active_service_level_agreement_for(doctype, priority, customer=None, service_level_agreement=None):
-	if doctype == "Issue" and not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+def get_active_service_level_agreement_for(doc):
+	if doc.get('doctype') == "Issue" and not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 		return
 
 	filters = [
-		["Service Level Agreement", "document_type", "=", doctype],
+		["Service Level Agreement", "document_type", "=", doc.get('doctype')],
 		["Service Level Agreement", "enabled", "=", 1]
 	]
-	if priority:
-		filters.append(["Service Level Priority", "priority", "=", priority])
+	if doc.get('priority'):
+		filters.append(["Service Level Priority", "priority", "=", doc.get('priority')])
 
 	or_filters = []
-	if service_level_agreement:
+	if doc.get('service_level_agreement'):
 		or_filters = [
-			["Service Level Agreement", "name", "=", service_level_agreement],
+			["Service Level Agreement", "name", "=", doc.get('service_level_agreement')],
 		]
 
+	customer = doc.get('customer')
 	if customer:
 		or_filters.append(
 			["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer)]]
 		)
-	or_filters.append(["Service Level Agreement", "default_service_level_agreement", "=", 1])
 
-	agreement = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
-		fields=["name", "default_priority", "apply_sla_for_resolution"])
+	default_sla_filter = filters + [["Service Level Agreement", "default_service_level_agreement", "=", 1]]
+	default_sla = frappe.get_all("Service Level Agreement", filters=default_sla_filter,
+		fields=["name", "default_priority", "apply_sla_for_resolution", "condition"])
 
-	return agreement[0] if agreement else None
+	filters += [["Service Level Agreement", "default_service_level_agreement", "=", 0]]
+	agreements = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
+		fields=["name", "default_priority", "apply_sla_for_resolution", "condition"])
+	
+	# check if the current document on which SLA is to be applied fulfills all the conditions
+	filtered_agreements = []
+	for agreement in agreements:
+		condition = agreement.get('condition')
+		if not condition or (condition and frappe.safe_eval(condition, None, get_context(doc))):
+			filtered_agreements.append(agreement)
 
+	# if any default sla
+	filtered_agreements += default_sla
+
+	return filtered_agreements[0] if filtered_agreements else None
+
+def get_context(doc):
+	return {"doc": doc.as_dict(), "nowdate": nowdate, "frappe": frappe._dict(utils=get_safe_globals().get("frappe").get("utils"))}
 
 def get_customer_group(customer):
 	return frappe.db.get_value("Customer", customer, "customer_group") if customer else None
@@ -298,8 +326,7 @@ def apply(doc, method=None):
 		doc.doctype not in get_documents_with_active_service_level_agreement():
 		return
 
-	service_level_agreement = get_active_service_level_agreement_for(doctype=doc.get("doctype"), priority=doc.get("priority"),
-		customer=doc.get("customer"), service_level_agreement=doc.get("service_level_agreement"))
+	service_level_agreement = get_active_service_level_agreement_for(doc)
 
 	if not service_level_agreement:
 		return
