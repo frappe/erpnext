@@ -180,7 +180,7 @@ class StockLedgerEntry(Document):
 					warehouse = %{warehouse}s
 					and item_code = %{item_code}s
 					and batch_no = %{batch_no}s
-					and (actual_qty - %{actual_qty}s) > 0
+					and (qty_after_transaction + %{actual_qty}s) < 0
 					and timestamp(posting_date, posting_time) >= timestamp(%{posting_date}s, %{posting_time}s)
 					and is_cancelled = 0
 				order by timestamp(posting_date, posting_time)""", dict(
