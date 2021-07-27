@@ -15,6 +15,10 @@
   "item_name",
   "section_break_5",
   "description",
+  "gst_hsn_code",
+  "is_nil_exempt",
+  "is_non_gst",
+  "data_12",
   "item_group",
   "brand",
   "image_section",
@@ -48,6 +52,7 @@
   "pricing_rules",
   "stock_uom_rate",
   "is_free_item",
+  "rate_of_stock_uom",
   "section_break_24",
   "net_rate",
   "net_amount",
@@ -69,6 +74,8 @@
   "warehouse",
   "target_warehouse",
   "prevdoc_docname",
+  "quotation_item",
+  "quotation_quantity",
   "col_break4",
   "against_blanket_order",
   "blanket_order",
@@ -789,12 +796,54 @@
    "no_copy": 1,
    "options": "currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "gst_hsn_code",
+   "fieldtype": "Data",
+   "label": "HSN/SAC"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_nil_exempt",
+   "fieldname": "is_nil_exempt",
+   "fieldtype": "Check",
+   "label": "Is nil rated or exempted"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_non_gst",
+   "fieldname": "is_non_gst",
+   "fieldtype": "Check",
+   "label": "Is Non GST"
+  },
+  {
+   "fieldname": "data_12",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "rate_of_stock_uom",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM"
+  },
+  {
+   "fetch_from": "Quotation Item",
+   "fieldname": "quotation_item",
+   "fieldtype": "Link",
+   "label": "Quotation Item",
+   "options": "Quotation Item"
+  },
+  {
+   "fieldname": "quotation_quantity",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": " Quotation Quantity",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-23 01:15:05.803091",
+ "modified": "2021-06-09 11:18:51.267423",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

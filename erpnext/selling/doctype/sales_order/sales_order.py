@@ -151,7 +151,7 @@ class SalesOrder(SellingController):
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	def update_prevdoc_status(self, flag=None):
-		for quotation in list(set([d.prevdoc_docname for d in self.get("items")])):
+		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
 				if doc.docstatus==2:
@@ -233,7 +233,7 @@ class SalesOrder(SellingController):
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql_list("""select t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""",
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus < 2""",
 			self.name)
 
 		if submit_rv:
@@ -1077,6 +1077,38 @@ def create_pick_list(source_name, target_doc=None):
 	doc.set_item_locations()
 
 	return doc
+
+@frappe.whitelist()
+def defsellinguom(doc_name=None):
+    if doc_name != None:
+        doc = frappe.get_doc("Item",doc_name)
+        if doc.sales_uom:
+            sale_uom = doc.sales_uom
+            res = frappe.db.sql(""" select uom,conversion_factor from `tabUOM Conversion Detail` where parent = %(p)s and uom = %(u)s """,
+                          {'p':doc_name,'u':sale_uom},as_dict= True)
+            return res
+        else:
+            return 1
+@frappe.whitelist()
+def get_price(customer,item_code,stock_qty):
+    doc_name = '{0}{1}'.format(customer,item_code)
+    discount_amount = frappe.db.get_value('Pricing Rule', {'name':doc_name},['discount_amount'])
+    base_price = frappe.db.get_value('Item Price', {'item_code':item_code},['price_list_rate','uom'])
+    price_per_unit = base_price - discount_amount
+    return float(stock_qty) * float(price_per_unit)
+
+@frappe.whitelist()
+def get_list(customer=None):
+    items = []
+    doclist = frappe.get_list("Customer Pricing Rule",filters={"customer":customer},fields=['name'],limit=1)
+    if doclist:
+        doc = frappe.get_doc('Customer Pricing Rule',doclist[0].name)
+        for i in doc.get('item_details'):
+            j=i.get('item')
+            items.append(j)
+            print(items)
+        return items
+    return False
 
 def update_produced_qty_in_so_item(sales_order, sales_order_item):
 	#for multiple work orders against same sales order item

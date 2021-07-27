@@ -31,10 +31,14 @@ class PaymentReconciliation(Document):
 
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
-		payment_entries = get_advance_payment_entries(self.party_type, self.party,
-			self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.limit)
-
-		return payment_entries
+		payment_entries = get_advance_payment_entries(self.party_type, self.party,self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.limit)
+		data_list = []
+		for entry in payment_entries:
+			if(entry.get('reference_type') == 'Payment Entry'):
+				posting_date = frappe.db.get_value("Payment Entry", {'name': entry.get('reference_name')}, ['posting_date'])
+				entry['payment_date'] = posting_date
+				data_list.append(entry)
+		return data_list
 
 	def get_jv_entries(self):
 		dr_or_cr = ("credit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'

@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2021-03-08 16:01:18.772738",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "scheme_start_date",
+  "scheme_end_date",
+  "column_break_4",
+  "scheme_applicable",
+  "based_on",
+  "customer_section",
+  "customer",
+  "customer_group_section",
+  "customer_group",
+  "filters_section",
+  "filters_json",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "options": "CS-SS-YY",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scheme_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Scheme Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scheme_end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Scheme End Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "scheme_applicable",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Scheme Applicable",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "based_on",
+   "fieldtype": "Select",
+   "label": "Based on",
+   "options": "\nInvoice\nPayment"
+  },
+  {
+   "depends_on": "eval:doc.scheme_applicable==='Customer'",
+   "fieldname": "customer_section",
+   "fieldtype": "Section Break",
+   "label": "Customer"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "customer",
+   "fieldtype": "Table",
+   "label": "Customer",
+   "options": "Customer Sales Incentives Customer"
+  },
+  {
+   "depends_on": "eval:doc.scheme_applicable=='Customer Group'",
+   "fieldname": "customer_group_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Group"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "customer_group",
+   "fieldtype": "Table",
+   "label": "Customer Group",
+   "options": "Customer Sales Incentives Customer Group"
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "filters_json",
+   "fieldtype": "Code",
+   "label": "Filters Json",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Customer Sales Incentives",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-07-17 17:49:17.523628",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer Sales Incentives",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

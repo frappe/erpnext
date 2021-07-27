@@ -139,6 +139,6 @@ def get_invoiced_item_gross_margin(sales_invoice=None, item_code=None, company=N
 	gross_profit_data = GrossProfitGenerator(filters)
 	result = gross_profit_data.grouped_data
 	if not with_item_data:
-		result = sum([d.gross_profit for d in result])
+		result = sum(d.gross_profit for d in result)
 
 	return result
