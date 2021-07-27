@@ -192,11 +192,11 @@ class JobCard(Document):
 						"completed_qty": args.get("completed_qty") or 0.0
 					})
 		elif args.get("start_time"):
-			new_args = {
+			new_args = frappe._dict({
 				"from_time": get_datetime(args.get("start_time")),
 				"operation": args.get("sub_operation"),
 				"completed_qty": 0.0
-			}
+			})
 
 			if employees:
 				for name in employees:
