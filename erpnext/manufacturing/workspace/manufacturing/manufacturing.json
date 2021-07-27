@@ -250,6 +250,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Work Order Item Tracking",
+   "link_to": "Work Order Item Tracking",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Tools",
    "onboard": 0,
    "type": "Card Break"
@@ -357,6 +366,12 @@
   {
    "label": "Production Planning Report",
    "link_to": "Production Planning Report",
+   "type": "Report"
+  },
+  {
+   "doc_view": "",
+   "label": "Work Order Item Tracking",
+   "link_to": "Work Order Item Tracking",
    "type": "Report"
   },
   {

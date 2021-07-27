@@ -15,6 +15,9 @@ from erpnext.exceptions import InvalidAccountCurrency, InvalidAccountDimensionEr
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
 from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
 from six import iteritems
+import datetime
+import nepali_datetime
+from datetime import timedelta
 
 exclude_from_linked_with = True
 class GLEntry(Document):
@@ -36,6 +39,9 @@ class GLEntry(Document):
 			self.check_pl_account()
 			self.validate_party()
 			self.validate_currency()
+		company = frappe.db.get_single_value("System Settings",'country')
+		if company == 'Nepal':
+			self.set_nepali_date()
 
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
@@ -82,7 +88,11 @@ class GLEntry(Document):
 					self.voucher_type)
 
 				frappe.throw(msg, title=_("Missing Cost Center"))
-
+	def set_nepali_date(self):
+		from erpnext.nepali_date import get_converted_date
+		if self.posting_date:
+			nepali_date = get_converted_date(self.posting_date)
+			self.posting_datenepali = nepali_date
 	def validate_dimensions_for_pl_and_bs(self):
 		account_type = frappe.db.get_value("Account", self.account, "report_type")
 
@@ -121,8 +131,7 @@ class GLEntry(Document):
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
-				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss" and \
-				self.voucher_type not in ['Purchase Invoice', 'Sales Invoice']:
+				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss":
 			frappe.throw(_("{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry")
 				.format(self.voucher_type, self.voucher_no, self.account))
 

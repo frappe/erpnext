@@ -11,7 +11,8 @@ from datetime import date
 
 def execute(filters=None):
 	columns=get_columns(filters)
-	data = get_data(filters)
+	data = get_data(filters,columns)
+	# a=add_column(columns)
 	return columns,data
 
 
@@ -39,7 +40,7 @@ def get_columns(filters):
 			},
 			{
 				"label": _("FG Item Name"),
-				"fieldname": 'item_name',
+				"fieldname": 'item_name1',
 				"fieldtype": "Read Only",
 				"width": 100
 			},
@@ -92,7 +93,7 @@ def get_columns(filters):
 				"label": _("Alternate Item Name "),
 				"fieldname": 'alternative_item_code',
 				"fieldtype": "Link",
-				"options":"Batch",
+				"options":"Item",
 				"width": 100
 			},
 			{
@@ -106,36 +107,83 @@ def get_columns(filters):
 	return columns
 
 
-def get_condition(filters):
+# def get_condition(filters):
 
-	conditions=" "
-	if filters.get("from_date"):
-		conditions += " AND ip.planned_start_date>='%s'" % filters.get('from_date')
-	if filters.get("to_date"):
-		conditions += " AND ip.planned_end_date<='%s'" % filters.get('to_date')
-	if filters.get("item_code"):
-		conditions += "AND wo.production_item = '%s'" % filters.get('item_code')
-	if filters.get("name"):
-		conditions += "AND wo.name = '%s'" % filters.get('name')
-	return conditions
+# 	conditions=" "
+# 	if filters.get("from_date"):
+# 		conditions += " AND ip.planned_start_date>='%s'" % filters.get('from_date')
+# 	if filters.get("to_date"):
+# 		conditions += " AND ip.planned_end_date<='%s'" % filters.get('to_date')
+# 	if filters.get("item_code"):
+# 		conditions += "AND wo.production_item = '%s'" % filters.get('item_code')
+# 	if filters.get("name"):
+# 		conditions += "AND wo.name = '%s'" % filters.get('name')
+# 	return conditions
 
 
-def get_data(filters):
-	
-	conditions = get_condition(filters)
-	doc = frappe.db.sql("""select wo.name ,wo.status,wo.production_item,wo.item_name,wo.qty,wo.stock_uom,woi.item_code,
-						woi.item_name,woi.required_qty,i.stock_uom as uom1,woi.available_qty_at_source_warehouse,
-						case
-						when ai.alternative_item_code is not null then ai.alternative_item_code
-						when ai.alternative_item_code is null then null
-						end as alternative_item_code,sum(ledger.actual_qty) as actual_qty
-						from `tabWork Order` wo inner Join  `tabWork Order Item` woi ON woi.parent=wo.name
-						inner join `tabItem` i ON i.item_code=woi.item_code
-						left outer Join `tabItem Alternative` ai ON ai.item_code=woi.item_code 
-						left outer Join `tabBin` ledger on ai.alternative_item_code=ledger.item_code and ledger.actual_qty != 0
-						left outer JOIN `tabWarehouse` warehouse
-							ON warehouse.name = ledger.warehouse
-						where wo.docstatus=1 {conditions}
-						group by wo.name
-						""".format(conditions=conditions),filters, as_dict=1)
-	return doc
+def get_data(filters,columns):
+	filter={
+			"docstatus":1 ,"status":('!=','Completed')
+				}
+	if(filters.get('name')):
+		filter['name'] = filters.get('name')
+	if(filters.get('item_code')):
+		filter['production_item'] = filters.get('item_code')
+	lst=frappe.db.get_all("Work Order",filter,["name","status","production_item","item_name","qty","stock_uom"])
+	data=[]
+	for i in lst:
+		doc=frappe.get_doc("Work Order",i.name)
+		
+		for i in doc.required_items:
+			# l=frappe.db.sql("""select count(ia.item_code) from `tabItem Alternative` ia,`tabItem` i where ia.item_code= '%s'""".format(i.item_code),as_dict=1)
+			# print(l)
+			b=frappe.db.get_all("Item Alternative",{"Item_code":i.item_code},["alternative_item_code","item_code"])
+			z=frappe.db.get_all("Item Alternative",{"alternative_item_code":i.item_code},["item_code","alternative_item_code"])
+
+			# c=frappe.db.count("Item Alternative",{"Item_code":i.item_code},["alternative_item_code"])
+			# f.append(c)
+			d=frappe.db.get_all("Item",{"item_code":i.item_code},['stock_uom'])
+			data_list={}
+			data_list['name']=doc.name
+			data_list['status']=doc.status
+			data_list['production_item']=doc.production_item
+			data_list['item_name1']=doc.item_name
+			data_list['qty']=doc.qty
+			data_list['stock_uom']=doc.stock_uom
+			data_list['item_code']=i.item_code
+			data_list['item_name']=i.item_name
+			data_list['required_qty']=i.required_qty
+			for it in d:
+				data_list['uom1']=it.stock_uom
+				data_list['available_qty_at_source_warehouse']=i.available_qty_at_source_warehouse
+				for j in b:
+					if i.item_code==j.item_code:
+						data_list['alternative_item_code']=j.alternative_item_code
+						c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
+						actual=[]
+						for k in c:
+							actual.append(k.actual_qty)
+							data_list['actual_qty']=sum(actual)
+				for v in z:
+					if v.alternative_item_code==i.item_code:
+						data_list['alternative_item_code']=v.item_code
+						t=frappe.db.get_all("Bin",{"item_code":v.item_code},['actual_qty'])
+						actual=[]
+						for y in t:
+							actual.append(y.actual_qty)
+							data_list['actual_qty']=sum(actual)
+			data.append(data_list)
+	# a=max(f)
+	# print(a)
+	# for i in range(a):
+	# 	columns += [("Alternative Item Code")+":Int:54"]
+	# 	columns += [("Alternate Item Stock")+":Int:54"]
+	# 	for j in b:
+	# 		data += [j.alternative_item_code] if j.alternative_item_code else 1
+	# 		c=frappe.db.get_all("Bin",{"item_code":j.alternative_item_code},['actual_qty'])
+	# 		actual=[]
+	# 		for k in c:
+	# 			actual.append(k.actual_qty)
+	# 			data_list['actual_qty']=sum(actual)
+	return data
+

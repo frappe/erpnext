@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "creation": "2021-06-25 13:49:13.621678",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "batch",
+  "old_specific_gravity",
+  "new_specific_gravity",
+  "old_quantity",
+  "new_quantity",
+  "old_weight",
+  "new_weight",
+  "mo_weight",
+  "mo_volume"
+ ],
+ "fields": [
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Batch",
+   "options": "Batch",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_specific_gravity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Old Specific Gravity",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "new_specific_gravity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "New Specific Gravity",
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Old Quantity",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "new_quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "New Quantity",
+   "search_index": 1
+  },
+  {
+   "fieldname": "mo_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "MO Weight",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "mo_volume",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "MO Volume",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Old Weight",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "new_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "New Weight",
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-06-30 18:30:58.665686",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Adjust Density",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

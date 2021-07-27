@@ -28,7 +28,10 @@
   "column_break_20",
   "total_picked_weight",
   "amended_from",
+  "transaction_date",
+  "delivery_note_done",
   "related_delivery_planning"
+
  ],
  "fields": [
   {
@@ -182,6 +185,19 @@
    "fieldname": "planned_rm_weight",
    "fieldtype": "Read Only",
    "label": "Planned RM Weight"
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Transaction Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "delivery_note_done",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": " Delivery Note done"
   }
  ],
  "is_submittable": 1,

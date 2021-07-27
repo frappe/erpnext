@@ -232,7 +232,11 @@ erpnext.PointOfSale.ItemSelector = class {
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
 
-			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom, rate }});
+			me.events.item_selected({
+				field: 'qty',
+				value: "+1",
+				item: { item_code, batch_no, serial_no, uom, rate }
+			});
 			me.set_search_value('');
 		});
 

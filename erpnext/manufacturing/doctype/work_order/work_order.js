@@ -176,14 +176,29 @@ frappe.ui.form.on("Work Order", {
 		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
 			frm.set_intro(__("Submit this Work Order for further processing."));
 		}
-
+		
+		if(frm.doc.status === "Completed" || frm.doc.status === "Closed"){
+		frappe.call({
+			method: "get_details",
+			doc: frm.doc,
+			callback: function(r){
+				if (r.message==1) {
+					frm.add_custom_button(__('Adjust Specific Gravity'),function() {
+						var usr = frappe.session.user
+						frappe.new_doc("Specific Gravity", {"work_order" : frm.doc.name,"item_for_manufacturing":frm.doc.production_item ,
+						"item_name":frm.doc.item_name,"quantity_manufactured":frm.doc.qty,"actual_fg_weight":frm.doc.actual_fg_weight,"yeild":frm.doc.actual_yeild})
+					
+					});
+				}
+			}
+		});
+		}
 		if (frm.doc.docstatus===1) {
 			frm.trigger('show_progress_for_items');
 			frm.trigger('show_progress_for_operations');
 		}
 		if (frm.doc.docstatus === 1
-			&& frm.doc.operations && frm.doc.operations.length
-			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
+			&& frm.doc.operations && frm.doc.operations.length) {
 
 			const not_completed = frm.doc.operations.filter(d => {
 				if(d.status != 'Completed') {
@@ -199,21 +214,25 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		if(frm.doc.required_items && frm.doc.allow_alternative_item) {
-			const has_alternative = frm.doc.required_items.find(i => i.allow_alternative_item === 1);
-			if (frm.doc.docstatus == 0 && has_alternative) {
-				frm.add_custom_button(__('Alternate Item'), () => {
-					erpnext.utils.select_alternate_items({
-						frm: frm,
-						child_docname: "required_items",
-						warehouse_field: "source_warehouse",
-						child_doctype: "Work Order Item",
-						original_item_field: "original_item",
-						condition: (d) => {
-							if (d.allow_alternative_item) {return true;}
-						}
-					});
-				});
-			}
+				frm.add_custom_button(__("Add Alternate Item"), ()=> {
+					frappe.new_doc("Add Alternate Item", {'work_order':frm.doc.name})
+				})
+			
+			// const has_alternative = frm.doc.required_items.find(i => i.allow_alternative_item === 1);
+			// if (frm.doc.docstatus == 0 && has_alternative) {
+			// 	frm.add_custom_button(__('Alternate Item'), () => {
+			// 		erpnext.utils.select_alternate_items({
+			// 			frm: frm,
+			// 			child_docname: "required_items",
+			// 			warehouse_field: "source_warehouse",
+			// 			child_doctype: "Work Order Item",
+			// 			original_item_field: "original_item",
+			// 			condition: (d) => {
+			// 				if (d.allow_alternative_item) {return true;}
+			// 			}
+			// 		});
+			// 	});
+			// }
 		}
 
 		if (frm.doc.status == "Completed" &&
@@ -238,35 +257,41 @@ frappe.ui.form.on("Work Order", {
 		const dialog = frappe.prompt({fieldname: 'operations', fieldtype: 'Table', label: __('Operations'),
 			fields: [
 				{
-					fieldtype:'Link',
-					fieldname:'operation',
+					fieldtype: 'Link',
+					fieldname: 'operation',
 					label: __('Operation'),
-					read_only:1,
-					in_list_view:1
+					read_only: 1,
+					in_list_view: 1
 				},
 				{
-					fieldtype:'Link',
-					fieldname:'workstation',
+					fieldtype: 'Link',
+					fieldname: 'workstation',
 					label: __('Workstation'),
-					read_only:1,
-					in_list_view:1
+					read_only: 1,
+					in_list_view: 1
 				},
 				{
-					fieldtype:'Data',
-					fieldname:'name',
+					fieldtype: 'Data',
+					fieldname: 'name',
 					label: __('Operation Id')
 				},
 				{
-					fieldtype:'Float',
-					fieldname:'pending_qty',
+					fieldtype: 'Float',
+					fieldname: 'pending_qty',
 					label: __('Pending Qty'),
 				},
 				{
-					fieldtype:'Float',
-					fieldname:'qty',
+					fieldtype: 'Float',
+					fieldname: 'qty',
 					label: __('Quantity to Manufacture'),
-					read_only:0,
-					in_list_view:1,
+					read_only: 0,
+					in_list_view: 1,
+				},
+				{
+					fieldtype: 'Float',
+					fieldname: 'batch_size',
+					label: __('Batch Size'),
+					read_only: 1
 				},
 			],
 			data: operations_data,
@@ -277,9 +302,13 @@ frappe.ui.form.on("Work Order", {
 		}, function(data) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.make_job_card",
+				freeze: true,
 				args: {
 					work_order: frm.doc.name,
 					operations: data.operations,
+				},
+				callback: function() {
+					frm.reload_doc();
 				}
 			});
 		}, __("Job Card"), __("Create"));
@@ -291,13 +320,16 @@ frappe.ui.form.on("Work Order", {
 			if(data.completed_qty != frm.doc.qty) {
 				pending_qty = frm.doc.qty - flt(data.completed_qty);
 
-				dialog.fields_dict.operations.df.data.push({
-					'name': data.name,
-					'operation': data.operation,
-					'workstation': data.workstation,
-					'qty': pending_qty,
-					'pending_qty': pending_qty,
-				});
+				if (pending_qty) {
+					dialog.fields_dict.operations.df.data.push({
+						'name': data.name,
+						'operation': data.operation,
+						'workstation': data.workstation,
+						'batch_size': data.batch_size,
+						'qty': pending_qty,
+						'pending_qty': pending_qty
+					});
+				}
 			}
 		});
 		dialog.fields_dict.operations.grid.refresh();
@@ -675,8 +707,9 @@ erpnext.work_order = {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
 							args: {
-							  doc_name: frm.doc.name,
-							  partial: 1
+								doc_name: frm.doc.name,
+								partial: 1
+
 							},
 							callback: function(r){
 								if (r.message) {
@@ -690,8 +723,8 @@ erpnext.work_order = {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
 							args: {
-							  doc_name: frm.doc.name,
-							  partial: 0
+							  	doc_name: frm.doc.name,
+							  	partial: 0
 							},
 							callback: function(r){
 								if (r.message) {
@@ -846,6 +879,8 @@ erpnext.work_order = {
 	stop_work_order: function(frm, status) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
+			freeze: true,
+			freeze_message: __("Updating Work Order status"),
 			args: {
 				work_order: frm.doc.name,
 				status: status

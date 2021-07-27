@@ -129,6 +129,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Customer Pricing Rule",
+   "link_to": "Customer Pricing Rule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Stock Transactions",
    "onboard": 0,
    "type": "Card Break"
@@ -385,6 +394,24 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Stock Settings",
+   "link_to": "Stock Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Order Warehouse Rule",
+   "link_to": "Order Warehouse Rule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Serial No and Batch",
    "onboard": 0,
    "type": "Card Break"
@@ -519,6 +546,24 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Bulk Delivery Note Pick List Creation Tool",
+   "link_to": "Bulk Delivery Note from Pick List Creation Tool",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bulk Pick List Creation Tool",
+   "link_to": "Bulk Pick List Creation Tool",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Key Reports",
    "onboard": 0,
    "type": "Card Break"
@@ -615,6 +660,15 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Material Purchase To Billied",
+   "link_to": "Indent to Bill Cycle Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Other Reports",
    "onboard": 0,
@@ -699,9 +753,44 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Incorrect Data Report",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Incorrect Serial No Qty and Valuation",
+   "link_to": "Incorrect Serial No Valuation",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Incorrect Balance Qty After Transaction",
+   "link_to": "Incorrect Balance Qty After Transaction",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock and Account Value Comparison",
+   "link_to": "Stock and Account Value Comparison",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2021-07-22 15:13:06.666391",
+ "modified": "2021-07-23 17:46:20.195972",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -771,6 +860,12 @@
    "link_to": "Stock",
    "stats_filter": "",
    "type": "Dashboard"
+  },
+  {
+   "doc_view": "",
+   "label": "Inter Company Challan Reconciliation",
+   "link_to": "Inter Company Challan Reconciliation",
+   "type": "Report"
   }
  ],
  "shortcuts_label": "Quick Access"
