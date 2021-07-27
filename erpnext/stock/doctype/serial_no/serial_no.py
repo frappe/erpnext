@@ -446,7 +446,7 @@ def auto_make_serial_nos(args):
 		docstatus = 0
 		voucher_no = args.get('voucher_no')
 		if voucher_no:
-			docstatus = frappe.db.get_value(voucher_type, voucher_no, "docstatus")
+			docstatus = frappe.db.get_cached_value(voucher_type, voucher_no, "docstatus")
 
 		multiple_title = singular_title = _("{0} Created").format(voucher_type)
 		if docstatus:
