@@ -87,7 +87,7 @@ def make_opportunity(**args):
 		opp_doc.append('items', {
 			"item_code": args.item_code or "_Test Item",
 			"qty": args.qty or 1,
-			"rate": args.rate or 1000
+			"rate": args.rate or 1000,
 			"uom": "_Test UOM"
 		})
 
