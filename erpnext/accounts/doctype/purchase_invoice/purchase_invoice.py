@@ -22,7 +22,7 @@ from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accoun
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
+	unlink_inter_company_doc, check_if_return_invoice_linked_with_payment_entry
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
@@ -657,7 +657,7 @@ class PurchaseInvoice(BuyingController):
 								)
 								gl_entries.append(
 									self.get_gl_dict({
-										"account": self.get_company_default("exchange_gain_loss_account"),		
+										"account": self.get_company_default("exchange_gain_loss_account"),
 										"against": self.supplier,
 										"credit": discrepancy_caused_by_exchange_rate_difference,
 										"cost_center": item.cost_center,
@@ -1012,6 +1012,8 @@ class PurchaseInvoice(BuyingController):
 				}, item=self))
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(PurchaseInvoice, self).on_cancel()
 
 		self.check_on_hold_or_closed_status()
@@ -1193,7 +1195,7 @@ def get_purchase_document_details(doc):
 			purchase_receipts_or_invoices.append(item.get(doc_reference))
 		if item.get(items_reference):
 			items.append(item.get(items_reference))
-	
+
 	exchange_rate_map = frappe._dict(frappe.get_all(parent_doctype, filters={'name': ('in',
 		purchase_receipts_or_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
 

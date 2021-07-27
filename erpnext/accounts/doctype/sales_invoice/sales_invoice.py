@@ -290,7 +290,8 @@ class SalesInvoice(SellingController):
 		self.update_time_sheet(None)
 
 	def on_cancel(self):
-		self.check_sales_return_linked_with_payment_entry()
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(SalesInvoice, self).on_cancel()
 
 		self.check_sales_order_on_hold_or_close("sales_order")
@@ -342,32 +343,6 @@ class SalesInvoice(SellingController):
 			manage_invoice_submit_cancel(self, "on_cancel")
 		self.unlink_sales_invoice_from_timesheets()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
-
-	def check_sales_return_linked_with_payment_entry(self):
-		# If a Sales Return is linked with payment entry along with other invoices,
-		# the cancellation of the Sales Return causes a problem between paid and allocated amount
-
-		payment_entries = []
-		if self.is_return:
-			payment_entries = frappe.db.sql_list("""
-				SELECT
-					t1.name
-				FROM
-					`tabPayment Entry` t1, `tabPayment Entry Reference` t2
-				WHERE
-					t1.name = t2.parent
-					and t1.docstatus = 1
-					and t2.reference_name = %s
-				""", self.name)
-		if payment_entries:
-			for pe in payment_entries:
-				payment_entry = frappe.get_doc("Payment Entry", pe)
-				if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-					if len(payment_entry.references) > 1:
-						frappe.throw(_("Please cancel and amend the Payment Entry {0} to unallocate the amount of \
-							this Credit Note {1}")
-							.format(get_link_to_form("Payment Entry", payment_entry.name), self.name))
-
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -1968,3 +1943,41 @@ def create_dunning(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 	return doclist
+
+def check_if_return_invoice_linked_with_payment_entry(self):
+	# If a Return invoice is linked with payment entry along with other invoices,
+	# the cancellation of the Return causes allocated amount to be greater than paid
+
+	if not frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+		return
+
+	payment_entries = []
+	if self.is_return and self.return_against:
+		invoice = self.return_against
+	else:
+		invoice = self.name
+
+	payment_entries = frappe.db.sql_list("""
+		SELECT
+			t1.name
+		FROM
+			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
+		WHERE
+			t1.name = t2.parent
+			and t1.docstatus = 1
+			and t2.reference_name = %s
+			and t2.allocated_amount < 0
+		""", invoice)
+
+	links_to_pe = []
+	if payment_entries:
+		for payment in payment_entries:
+			payment_entry = frappe.get_doc("Payment Entry", payment)
+			if len(payment_entry.references) > 1:
+				links_to_pe.append(payment_entry.name)
+		if links_to_pe:
+			payment_entries_link = [get_link_to_form('Payment Entry', name, label=name) for name in links_to_pe]
+			message = _("Please cancel and amend the Payment Entry ")
+			message += " " + " ".join(payment_entries_link)
+			message += _(" to unallocate the amount of this Return Invoice before cancelling it")
+			frappe.throw(message)
