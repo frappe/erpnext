@@ -26,7 +26,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 				}
 			};
 		});
-	}
+	}	
 
 	setup_queries() {
 		var me = this;
@@ -85,7 +85,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 
 	refresh() {
 		super.refresh();
-
+		
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		this.frm.toggle_display("customer_name",
@@ -112,6 +112,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	shipping_address_name() {
 		erpnext.utils.get_address_display(this.frm, "shipping_address_name", "shipping_address");
 		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
+	}
+
+	dispatch_address_name() {
+		erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
 	}
 
 	sales_partner() {

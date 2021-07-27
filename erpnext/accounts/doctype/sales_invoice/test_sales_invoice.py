@@ -1939,6 +1939,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
+		self.assertEqual(data['billLists'][0]['actualFromStateCode'],7)
+		self.assertEqual(data['billLists'][0]['fromStateCode'],27)
 
 	def test_einvoice_submission_without_irn(self):
 		# init
@@ -2092,6 +2094,30 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
+	if not frappe.db.exists('Address', '_Test Dispatch-Address for Eway bill-Shipping'):
+		address = frappe.get_doc({
+			"address_line1": "_Test Dispatch Address Line 1",
+			"address_title": "_Test Dispatch-Address for Eway bill",
+			"address_type": "Shipping",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+			"doctype": "Address",
+			"is_primary_address": 0,
+			"phone": "+910000000000",
+			"gstin": "07AAACC1206D1ZI",
+			"gst_state": "Delhi",
+			"gst_state_number": "07",
+			"pincode": "1100101"
+		}).insert()
+
+		address.append("links", {
+			"link_doctype": "Company",
+			"link_name": "_Test Company"
+		})
+
+		address.save()
+
 def make_test_transporter_for_ewaybill():
 	if not frappe.db.exists('Supplier', '_Test Transporter'):
 		frappe.get_doc({
@@ -2130,6 +2156,7 @@ def make_sales_invoice_for_ewaybill():
 	si.distance = 2000
 	si.company_address = "_Test Address for Eway bill-Billing"
 	si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+	si.dispatch_address_name = "_Test Dispatch-Address for Eway bill-Shipping"
 	si.vehicle_no = "KA12KA1234"
 	si.gst_category = "Registered Regular"
 	si.mode_of_transport = 'Road'

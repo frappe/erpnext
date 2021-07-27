@@ -83,7 +83,7 @@ frappe.ui.form.on("BOM", {
 
 		if (!frm.doc.__islocal && frm.doc.docstatus<2) {
 			frm.add_custom_button(__("Update Cost"), function() {
-				frm.events.update_cost(frm);
+				frm.events.update_cost(frm, true);
 			});
 			frm.add_custom_button(__("Browse BOM"), function() {
 				frappe.route_options = {
@@ -318,14 +318,15 @@ frappe.ui.form.on("BOM", {
 		})
 	},
 
-	update_cost: function(frm) {
+	update_cost: function(frm, save_doc=false) {
 		return frappe.call({
 			doc: frm.doc,
 			method: "update_cost",
 			freeze: true,
 			args: {
 				update_parent: true,
-				from_child_bom:false
+				save: save_doc,
+				from_child_bom: false
 			},
 			callback: function(r) {
 				refresh_field("items");
