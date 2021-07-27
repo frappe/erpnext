@@ -11,6 +11,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry,
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
@@ -2014,6 +2015,28 @@ class TestSalesInvoice(unittest.TestCase):
 		sales_invoice.discount_amount = 300
 		sales_invoice.save()
 		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+
+	def test_asset_depreciation_on_sale(self):
+		"""If an asset was set to depreciate yearly, every Dec 1, but gets sold on June 1, an additional depreciation entry must be made on June 1."""
+
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
+		post_depreciation_entries(add_days(nowdate(), 1))
+
+		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
+		asset.load_from_db()
+
+		expected_values = [
+			["2020-06-30", 1311.48, 1311.48],
+			["2021-06-30", 20000.0, 21311.48],
+			["2021-07-27", 1164.16, 22475.64]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+			self.assertTrue(schedule.journal_entry)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
