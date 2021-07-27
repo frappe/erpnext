@@ -16,6 +16,7 @@
  "hide_custom": 1,
  "icon": "sell",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Selling",
  "links": [
@@ -293,6 +294,23 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Tools",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bulk Sales Invoice Creation Tool",
+   "link_to": "Bulk Sale Invoice Creation Tool",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Key Reports",
    "onboard": 0,
    "type": "Card Break"
@@ -305,6 +323,15 @@
    "link_to": "Sales Analytics",
    "link_type": "Report",
    "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Analytics Sales Partner",
+   "link_to": "Sales Analytics Sales Partner",
+   "link_type": "Report",
+   "onboard": 0,
    "type": "Link"
   },
   {
@@ -383,6 +410,24 @@
    "is_query_report": 1,
    "label": "Item-wise Sales History",
    "link_to": "Item-wise Sales History",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Pending Quotation Reports",
+   "link_to": "Pending Quotation Reports",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Price List  Version report",
+   "link_to": "Price List Versions Report",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -513,9 +558,26 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Commission",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Partner Commision Payment",
+   "link_to": "Sales Partner Commission Payment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:35.971277",
+ "modified": "2021-07-23 17:51:56.388547",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",

@@ -10,6 +10,7 @@
   "applicability_section",
   "title",
   "disable",
+  "customer_pricing_rule_id",
   "apply_on",
   "price_or_product_discount",
   "warehouse",
@@ -570,12 +571,19 @@
    "fieldname": "is_recursive",
    "fieldtype": "Check",
    "label": "Is Recursive"
+  },
+  {
+   "fieldname": "customer_pricing_rule_id",
+   "fieldtype": "Link",
+   "label": "Customer Pricing Rule Id",
+   "options": "Customer Pricing Rule",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2021-03-06 22:01:24.840422",
+ "modified": "2021-06-08 10:50:48.173307",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

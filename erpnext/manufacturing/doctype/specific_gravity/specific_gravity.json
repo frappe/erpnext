@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "autoname": "WO",
+ "creation": "2021-06-25 13:51:06.163436",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "work_order",
+  "item_for_manufacturing",
+  "item_name",
+  "quantity_manufactured",
+  "fg_weight",
+  "yeild",
+  "adjust_density",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order"
+  },
+  {
+   "fieldname": "item_for_manufacturing",
+   "fieldtype": "Link",
+   "label": "Item For Manufacturing",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "quantity_manufactured",
+   "fieldtype": "Data",
+   "label": "Quantity Manufactured"
+  },
+  {
+   "fieldname": "fg_weight",
+   "fieldtype": "Data",
+   "label": "FG Weight"
+  },
+  {
+   "fieldname": "yeild",
+   "fieldtype": "Data",
+   "label": "Yeild"
+  },
+  {
+   "fieldname": "adjust_density",
+   "fieldtype": "Table",
+   "label": "Adjust Density",
+   "options": "Adjust Density"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Specific Gravity",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-06-28 19:21:04.229541",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Specific Gravity",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

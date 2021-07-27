@@ -15,9 +15,12 @@
   "quotation_to",
   "party_name",
   "customer_name",
+  "party_balance",
+  "cost_center",
   "column_break1",
   "amended_from",
   "company",
+  "company_address",
   "transaction_date",
   "valid_till",
   "order_type",
@@ -33,6 +36,7 @@
   "shipping_address",
   "customer_group",
   "territory",
+  "company_address_display",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -665,6 +669,7 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounded Total (Company Currency)",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
@@ -704,6 +709,7 @@
    "bold": 1,
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounded Total",
    "oldfieldname": "rounded_total_export",
    "oldfieldtype": "Currency",
@@ -714,6 +720,7 @@
   {
    "fieldname": "in_words",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "In Words",
    "length": 240,
    "oldfieldname": "in_words_export",
@@ -926,6 +933,31 @@
    "label": "Lost Reasons",
    "options": "Quotation Lost Reason Detail",
    "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "party_balance",
+   "fieldtype": "Currency",
+   "label": "Party Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company_address_display",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Company Address Display",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -933,7 +965,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-10-30 13:58:59.212060",
+ "modified": "2021-07-22 13:59:46.196082",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

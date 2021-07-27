@@ -15,6 +15,8 @@
   "naming_series",
   "customer",
   "customer_name",
+  "_party_balance",
+  "update_party_balance",
   "order_type",
   "skip_delivery_note",
   "column_break1",
@@ -23,10 +25,12 @@
   "transaction_date",
   "delivery_date",
   "po_no",
+  "order_warehouse_rule_number",
   "po_date",
   "tax_id",
   "contact_info",
   "customer_address",
+  "billing_address_gstin",
   "address_display",
   "contact_person",
   "contact_display",
@@ -34,9 +38,12 @@
   "contact_mobile",
   "contact_email",
   "company_address",
+  "company_gstin",
+  "place_of_supply",
   "company_address_display",
   "col_break46",
   "shipping_address_name",
+  "customer_gstin",
   "shipping_address",
   "customer_group",
   "territory",
@@ -73,6 +80,9 @@
   "shipping_rule",
   "section_break_40",
   "taxes_and_charges",
+  "column_break_62",
+  "cost_center",
+  "section_break_64",
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
@@ -1489,6 +1499,66 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "section_break_64",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "_party_balance",
+   "fieldtype": "Currency",
+   "label": "Party Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "update_party_balance",
+   "fieldtype": "Button",
+   "label": "Update Party Balance"
+  },
+  {
+   "fieldname": "order_warehouse_rule_number",
+   "fieldtype": "Read Only",
+   "label": "Order Warehouse Rule Number"
+  },
+  {
+   "fieldname": "billing_address_gstin",
+   "fieldtype": "Data",
+   "label": "Billing Address GSTIN",
+   "print_hide": 1,
+   "read_only": 1,
+   "translatable": 1
+  },
+  {
+   "fetch_from": "company_address.gstin",
+   "fieldname": "company_gstin",
+   "fieldtype": "Data",
+   "label": "Company GSTIN",
+   "print_hide": 1,
+   "read_only": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "place_of_supply",
+   "fieldtype": "Data",
+   "label": "Place of Supply"
+  },
+  {
+   "fetch_from": "shipping_address_name.gstin",
+   "fieldname": "customer_gstin",
+   "fieldtype": "Data",
+   "label": "Customer GSTIN",
+   "print_hide": 1,
+   "translatable": 1
   },
   {
    "fieldname": "transporter",

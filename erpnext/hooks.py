@@ -157,6 +157,7 @@ website_route_rules = [
 			"parents": [{"label": _("Material Request"), "route": "material-requests"}]
 		}
 	},
+	{"from_route": "/project", "to_route": "Project"}
 ]
 
 standard_portal_menu_items = [
@@ -363,7 +364,8 @@ scheduler_events = {
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
-		"erpnext.non_profit.doctype.membership.membership.set_expired_status"
+		"erpnext.non_profit.doctype.membership.membership.set_expired_status",
+		"erpnext.stock.doctype.delivery_note.delivery_note.update_pick_lists"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
