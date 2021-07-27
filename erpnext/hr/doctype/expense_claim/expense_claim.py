@@ -36,8 +36,8 @@ class ExpenseClaim(AccountsController):
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
 
-	def set_status(self):
-		self.status = {
+	def set_status(self, update=False):
+		status = {
 			"0": "Draft",
 			"1": "Submitted",
 			"2": "Cancelled"
@@ -45,14 +45,18 @@ class ExpenseClaim(AccountsController):
 
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
 		precision = self.precision("grand_total")
-		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
-			and flt(self.grand_total, precision) ==  flt(paid_amount, precision))) \
-			and self.docstatus == 1 and self.approval_status == 'Approved':
-				self.status = "Paid"
+		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1
+			and flt(self.grand_total, precision) == flt(paid_amount, precision))) and self.approval_status == 'Approved':
+			status = "Paid"
 		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
-			self.status = "Unpaid"
+			status = "Unpaid"
 		elif self.docstatus == 1 and self.approval_status == 'Rejected':
-			self.status = 'Rejected'
+			status = 'Rejected'
+
+		if update:
+			self.db_set("status", status)
+		else:
+			self.status = status
 
 	def on_update(self):
 		share_doc_with_approver(self, self.expense_approver)
@@ -75,7 +79,7 @@ class ExpenseClaim(AccountsController):
 		if self.is_paid:
 			update_reimbursed_amount(self)
 
-		self.set_status()
+		self.set_status(update=True)
 		self.update_claimed_amount_in_employee_advance()
 
 	def on_cancel(self):
@@ -87,7 +91,6 @@ class ExpenseClaim(AccountsController):
 		if self.is_paid:
 			update_reimbursed_amount(self)
 
-		self.set_status()
 		self.update_claimed_amount_in_employee_advance()
 
 	def update_claimed_amount_in_employee_advance(self):
