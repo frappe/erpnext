@@ -94,7 +94,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 
 	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, company_currency, True)
+	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, company_currency, filters, True)
 
 	return data, None, chart, report_summary
 
@@ -149,9 +149,9 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			section_data.append(account_data)
 
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'],
-			companies, company_currency, summary_data, True)
+			companies, company_currency, summary_data, filters, True)
 
-	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, summary_data, True)
+	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, summary_data, filters, True)
 
 	report_summary = get_cash_flow_summary(summary_data, company_currency)
 
@@ -329,8 +329,9 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 		has_value = False
 		total = 0
 		row = frappe._dict({
-			"account_name": _(d.account_name),
-			"account": _(d.account_name),
+			"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
+				if d.account_number else _(d.account_name)),
+			"account": _(d.name),
 			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
 			"year_start_date": start_date,
@@ -379,7 +380,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
 			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
 			acc.account_name, acc.account_number
-			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s
+			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s and gl.is_cancelled = 0
 			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
 			order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
 			{

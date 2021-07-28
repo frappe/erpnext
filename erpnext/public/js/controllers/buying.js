@@ -84,13 +84,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			if (me.frm.doc.is_subcontracted == "Yes") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'is_sub_contracted_item': 1 }
+					filters:{ 'supplier': me.frm.doc.supplier, 'is_sub_contracted_item': 1 }
 				}
 			}
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_purchase_item': 1}
+					filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1 }
 				}
 			}
 		});
@@ -122,7 +122,18 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			this.set_from_product_bundle();
 		}
 
+		this.toggle_subcontracting_fields();
 		this._super();
+	},
+
+	toggle_subcontracting_fields: function() {
+		if (in_list(['Purchase Receipt', 'Purchase Invoice'], this.frm.doc.doctype)) {
+			this.frm.fields_dict.supplied_items.grid.update_docfield_property('consumed_qty',
+				'read_only', this.frm.doc.__onload && this.frm.doc.__onload.backflush_based_on === 'BOM');
+
+			this.frm.set_df_property('supplied_items', 'cannot_add_rows', 1);
+			this.frm.set_df_property('supplied_items', 'cannot_delete_rows', 1);
+		}
 	},
 
 	supplier: function() {
@@ -216,7 +227,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				child: item,
 				args: {
 					item_code: item.item_code,
-					warehouse: item.warehouse
+					warehouse: item.warehouse,
+					company: doc.company
 				}
 			});
 		}

@@ -172,12 +172,12 @@ def get_bin(item_code, warehouse):
 		bin_obj.flags.ignore_permissions = 1
 		bin_obj.insert()
 	else:
-		bin_obj = frappe.get_cached_doc('Bin', bin)
+		bin_obj = frappe.get_doc('Bin', bin, for_update=True)
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
 def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	is_stock_item = frappe.db.get_value('Item', args.get("item_code"), 'is_stock_item')
+	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
 	if is_stock_item:
 		bin = get_bin(args.get("item_code"), args.get("warehouse"))
 		bin.update_stock(args, allow_negative_stock, via_landed_cost_voucher)
@@ -314,13 +314,16 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 	for row_idx, row in enumerate(result):
 		data = row.items() if is_dict_obj else enumerate(row)
 		for key, value in data:
-			if key not in convertible_columns or not conversion_factors[row_idx-1]:
+			if key not in convertible_columns:
 				continue
+			# If no conversion factor for the UOM, defaults to 1
+			if not conversion_factors[row_idx]:
+				conversion_factors[row_idx] = 1
 
 			if convertible_columns.get(key) == 'rate':
-				new_value = flt(value) * conversion_factors[row_idx-1]
+				new_value = flt(value) * conversion_factors[row_idx]
 			else:
-				new_value = flt(value) / conversion_factors[row_idx-1]
+				new_value = flt(value) / conversion_factors[row_idx]
 
 			if not is_dict_obj:
 				row.insert(key+1, new_value)

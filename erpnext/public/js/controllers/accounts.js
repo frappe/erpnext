@@ -156,31 +156,31 @@ cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 	var d = locals[cdt][cdn];
 	var msg = "";
 
-	if(d.account_head && !d.description) {
+	if (d.account_head && !d.description) {
 		// set description from account head
 		d.description = d.account_head.split(' - ').slice(0, -1).join(' - ');
 	}
 
-	if(!d.charge_type && (d.row_id || d.rate || d.tax_amount)) {
+	if (!d.charge_type && (d.row_id || d.rate || d.tax_amount)) {
 		msg = __("Please select Charge Type first");
 		d.row_id = "";
 		d.rate = d.tax_amount = 0.0;
-	} else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
+	} else if ((d.charge_type == 'Actual' || d.charge_type == 'On Net Total' || d.charge_type == 'On Paid Amount') && d.row_id) {
 		msg = __("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'");
 		d.row_id = "";
-	} else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
+	} else if ((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
 		if (d.idx == 1) {
 			msg = __("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row");
 			d.charge_type = '';
 		} else if (!d.row_id) {
 			msg = __("Please specify a valid Row ID for row {0} in table {1}", [d.idx, __(d.doctype)]);
 			d.row_id = "";
-		} else if(d.row_id && d.row_id >= d.idx) {
+		} else if (d.row_id && d.row_id >= d.idx) {
 			msg = __("Cannot refer row number greater than or equal to current row number for this Charge type");
 			d.row_id = "";
 		}
 	}
-	if(msg) {
+	if (msg) {
 		frappe.validated = false;
 		refresh_field("taxes");
 		frappe.throw(msg);
@@ -275,75 +275,4 @@ erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(grid_row) {
 			grid_row.toggle_reqd("tax_amount", false);
 		}
 	}
-}
-
-
-// For customizing print
-cur_frm.pformat.total = function(doc) { return ''; }
-cur_frm.pformat.discount_amount = function(doc) { return ''; }
-cur_frm.pformat.grand_total = function(doc) { return ''; }
-cur_frm.pformat.rounded_total = function(doc) { return ''; }
-cur_frm.pformat.in_words = function(doc) { return ''; }
-
-cur_frm.pformat.taxes= function(doc){
-	//function to make row of table
-	var make_row = function(title, val, bold, is_negative) {
-		var bstart = '<b>'; var bend = '</b>';
-		return '<tr><td style="width:50%;">' + (bold?bstart:'') + title + (bold?bend:'') + '</td>'
-			+ '<td style="width:50%;text-align:right;">' + (is_negative ? '- ' : '')
-		+ format_currency(val, doc.currency) + '</td></tr>';
-	}
-
-	function print_hide(fieldname) {
-		var doc_field = frappe.meta.get_docfield(doc.doctype, fieldname, doc.name);
-		return doc_field.print_hide;
-	}
-
-	out ='';
-	if (!doc.print_without_amount) {
-		var cl = doc.taxes || [];
-
-		// outer table
-		var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 60%"></td><td>';
-
-		// main table
-
-		out +='<table class="noborder" style="width:100%">';
-
-		if(!print_hide('total')) {
-			out += make_row('Total', doc.total, 1);
-		}
-
-		// Discount Amount on net total
-		if(!print_hide('discount_amount') && doc.apply_discount_on == "Net Total" && doc.discount_amount)
-			out += make_row('Discount Amount', doc.discount_amount, 0, 1);
-
-		// add rows
-		if(cl.length){
-			for(var i=0;i<cl.length;i++) {
-				if(cl[i].tax_amount!=0 && !cl[i].included_in_print_rate)
-					out += make_row(cl[i].description, cl[i].tax_amount, 0);
-			}
-		}
-
-		// Discount Amount on grand total
-		if(!print_hide('discount_amount') && doc.apply_discount_on == "Grand Total" && doc.discount_amount)
-			out += make_row('Discount Amount', doc.discount_amount, 0, 1);
-
-		// grand total
-		if(!print_hide('grand_total'))
-			out += make_row('Grand Total', doc.grand_total, 1);
-
-		if(!print_hide('rounded_total'))
-			out += make_row('Rounded Total', doc.rounded_total, 1);
-
-		if(doc.in_words && !print_hide('in_words')) {
-			out +='</table></td></tr>';
-			out += '<tr><td colspan = "2">';
-			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';
-			out += '<td style="width:50%;">' + doc.in_words + '</td></tr>';
-		}
-		out += '</table></td></tr></table></div>';
-	}
-	return out;
 }

@@ -20,9 +20,11 @@ def execute():
 	frappe.clear_cache()
 	frappe.flags.warehouse_account_map = {}
 
+	company_list = []
+
 	data = frappe.db.sql('''
 		SELECT
-			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time
+			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company
 		FROM
 			`tabStock Ledger Entry`
 		WHERE
@@ -36,6 +38,9 @@ def execute():
 	total_sle = len(data)
 	i = 0
 	for d in data:
+		if d.company not in company_list:
+			company_list.append(d.company)
+
 		update_entries_after({
 			"item_code": d.item_code,
 			"warehouse": d.warehouse,
@@ -53,8 +58,10 @@ def execute():
 
 	print("Reposting General Ledger Entries...")
 
-	for row in frappe.get_all('Company', filters= {'enable_perpetual_inventory': 1}):
-		update_gl_entries_after(posting_date, posting_time, company=row.name)
+	if data:
+		for row in frappe.get_all('Company', filters= {'enable_perpetual_inventory': 1}):
+			if row.name in company_list:
+				update_gl_entries_after(posting_date, posting_time, company=row.name)
 
 	frappe.db.auto_commit_on_many_writes = 0
 

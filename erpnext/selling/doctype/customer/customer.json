@@ -212,7 +212,8 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "unique": 1
   },
   {
    "depends_on": "represents_company",

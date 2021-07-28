@@ -17,10 +17,12 @@ class AmazonMWSSettings(Document):
 		else:
 			self.enable_sync = 0
 
+	@frappe.whitelist()
 	def get_products_details(self):
 		if self.enable_amazon == 1:
 			frappe.enqueue('erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_methods.get_products_details')
 
+	@frappe.whitelist()
 	def get_order_details(self):
 		if self.enable_amazon == 1:
 			after_date = dateutil.parser.parse(self.after_date).strftime("%Y-%m-%d")

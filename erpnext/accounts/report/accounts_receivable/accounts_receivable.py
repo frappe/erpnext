@@ -99,7 +99,6 @@ class ReceivablePayableReport(object):
 					voucher_no = gle.voucher_no,
 					party = gle.party,
 					posting_date = gle.posting_date,
-					remarks = gle.remarks,
 					account_currency = gle.account_currency,
 					invoiced = 0.0,
 					paid = 0.0,
@@ -364,7 +363,7 @@ class ReceivablePayableReport(object):
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
+				ps.due_date, ps.payment_term, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
@@ -394,7 +393,7 @@ class ReceivablePayableReport(object):
 			"due_date": d.due_date,
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
-			"payment_term": d.description,
+			"payment_term": d.description or d.payment_term,
 			"paid": d.paid_amount + d.discounted_amount,
 			"credit_note": 0.0,
 			"outstanding": invoiced - d.paid_amount - d.discounted_amount
@@ -579,11 +578,12 @@ class ReceivablePayableReport(object):
 		self.gl_entries = frappe.db.sql("""
 			select
 				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
-				against_voucher_type, against_voucher, account_currency, remarks, {0}
+				against_voucher_type, against_voucher, account_currency, {0}
 			from
 				`tabGL Entry`
 			where
 				docstatus < 2
+				and is_cancelled = 0
 				and party_type=%s
 				and (party is not null and party != '')
 				{1} {2} {3}"""
@@ -790,8 +790,6 @@ class ReceivablePayableReport(object):
 		if self.filters.party_type == "Supplier":
 			self.add_column(label=_('Supplier Group'), fieldname='supplier_group', fieldtype='Link',
 				options='Supplier Group')
-
-		self.add_column(label=_('Remarks'), fieldname='remarks', fieldtype='Text', width=200)
 
 	def add_column(self, label, fieldname=None, fieldtype='Currency', options=None, width=120):
 		if not fieldname: fieldname = scrub(label)

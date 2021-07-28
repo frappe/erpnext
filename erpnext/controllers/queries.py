@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
+import json
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate
 from collections import defaultdict
@@ -18,7 +19,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Employee", ["name", "employee_name"])
 
 	return frappe.db.sql("""select {fields} from `tabEmployee`
-		where status = 'Active'
+		where status in ('Active', 'Suspended')
 			and docstatus < 2
 			and ({key} like %(txt)s
 				or employee_name like %(txt)s)
@@ -87,7 +88,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Customer", fields)
 
 	searchfields = frappe.get_meta("Customer").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2
@@ -198,6 +199,9 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
 	#Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
@@ -216,11 +220,23 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
+	if filters and isinstance(filters, dict) and filters.get('supplier'):
+		item_group_list = frappe.get_all('Supplier Item Group',
+			filters = {'supplier': filters.get('supplier')}, fields = ['item_group'])
+
+		item_groups = []
+		for i in item_group_list:
+			item_groups.append(i.item_group)
+
+		del filters['supplier']
+
+		if item_groups:
+			filters['item_group'] = ['in', item_groups]
+
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
-
 	return frappe.db.sql("""select tabItem.name,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
@@ -292,11 +308,14 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		cond = """(`tabProject`.customer = %s or
 			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
-	fields = get_fields("Project", ["name"])
+	fields = get_fields("Project", ["name", "project_name"])
+	searchfields = frappe.get_meta("Project").get_search_fields()
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	return frappe.db.sql("""select {fields} from `tabProject`
-		where `tabProject`.status not in ("Completed", "Cancelled")
-			and {cond} `tabProject`.name like %(txt)s {match_cond}
+		where
+			`tabProject`.status not in ("Completed", "Cancelled")
+			and {cond} {scond} {match_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc,
@@ -304,6 +323,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		limit {start}, {page_len}""".format(
 			fields=", ".join(['`tabProject`.{0}'.format(f) for f in fields]),
 			cond=cond,
+			scond=searchfields,
 			match_cond=get_match_cond(doctype),
 			start=start,
 			page_len=page_len), {
@@ -325,7 +345,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 			and status not in ("Stopped", "Closed") %(fcond)s
 			and (
 				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
-				or `tabDelivery Note`.grand_total = 0
+				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
 				or (
 					`tabDelivery Note`.is_return = 1
 					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
@@ -387,6 +407,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 			where
 				batch.disabled = 0
+				and sle.is_cancelled = 0
 				and sle.item_code = %(item_code)s
 				and sle.warehouse = %(warehouse)s
 				and (sle.batch_no like %(txt)s
@@ -713,7 +734,9 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		return [(d,) for d in set(taxes)]
 
 
-def get_fields(doctype, fields=[]):
+def get_fields(doctype, fields=None):
+	if fields is None:
+		fields = []
 	meta = frappe.get_meta(doctype)
 	fields.extend(meta.get_search_fields())
 

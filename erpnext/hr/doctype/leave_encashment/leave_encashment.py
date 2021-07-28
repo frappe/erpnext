@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate, flt
-from erpnext.hr.utils import set_employee_name
+from erpnext.hr.utils import set_employee_name, validate_active_employee
 from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
@@ -15,6 +15,7 @@ from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leav
 class LeaveEncashment(Document):
 	def validate(self):
 		set_employee_name(self)
+		validate_active_employee(self.employee)
 		self.get_leave_details_for_encashment()
 		self.validate_salary_structure()
 

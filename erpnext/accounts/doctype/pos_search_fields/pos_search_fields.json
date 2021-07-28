@@ -1,0 +1,37 @@
+{
+ "actions": [],
+ "creation": "2021-04-19 14:56:06.652327",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "field",
+  "fieldname"
+ ],
+ "fields": [
+  {
+   "fieldname": "fieldname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Fieldname"
+  },
+  {
+   "fieldname": "field",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Field"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-04-21 11:12:54.632093",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "POS Search Fields",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

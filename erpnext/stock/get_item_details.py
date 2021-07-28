@@ -74,19 +74,18 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	if not doc or cint(doc.get('is_return')) == 0:
-		# get price list rate only if the invoice is not a credit or debit note
-		get_price_list_rate(args, item, out)
+	
+	get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
-		out.update(get_pos_profile_item_details(args.company, args))
+		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
 
 	if (args.get("doctype") == "Material Request" and
 		args.get("material_request_type") == "Material Transfer"):
 		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		out.update(get_bin_details(args.item_code, out.warehouse))
+		out.update(get_bin_details(args.item_code, out.warehouse, args.company))
 
 	# update args with out, if key or value not exists
 	for key, value in iteritems(out):
@@ -309,8 +308,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
 		"is_fixed_asset": item.is_fixed_asset,
-		"weight_per_unit":item.weight_per_unit,
-		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
 		"against_blanket_order": args.get("against_blanket_order"),
@@ -438,18 +435,37 @@ def get_barcode_data(items_list):
 	return itemwise_barcode
 
 @frappe.whitelist()
-def get_item_tax_info(company, tax_category, item_codes):
+def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_tax_templates=None):
 	out = {}
-	if isinstance(item_codes, string_types):
+
+	if item_tax_templates is None:
+		item_tax_templates = {}
+
+	if item_rates is None:
+		item_rates = {}
+
+	if isinstance(item_codes, (str,)):
 		item_codes = json.loads(item_codes)
 
+	if isinstance(item_rates, (str,)):
+		item_rates = json.loads(item_rates)
+
+	if isinstance(item_tax_templates, (str,)):
+		item_tax_templates = json.loads(item_tax_templates)
+
 	for item_code in item_codes:
-		if not item_code or item_code in out:
+		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
 			continue
-		out[item_code] = {}
-		item = frappe.get_cached_doc("Item", item_code)
-		get_item_tax_template({"company": company, "tax_category": tax_category}, item, out[item_code])
-		out[item_code]["item_tax_rate"] = get_item_tax_map(company, out[item_code].get("item_tax_template"), as_json=True)
+
+		out[item_code[1]] = {}
+		item = frappe.get_cached_doc("Item", item_code[0])
+		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates.get(item_code[1])}
+
+		if item_tax_templates:
+			args.update({"item_tax_template": item_tax_templates.get(item_code[1])})
+
+		get_item_tax_template(args, item, out[item_code[1]])
+		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(company, out[item_code[1]].get("item_tax_template"), as_json=True)
 
 	return out
 
@@ -461,9 +477,7 @@ def get_item_tax_template(args, item, out):
 		}
 	"""
 	item_tax_template = args.get("item_tax_template")
-
-	if not item_tax_template:
-		item_tax_template = _get_item_tax_template(args, item.taxes, out)
+	item_tax_template = _get_item_tax_template(args, item.taxes, out)
 
 	if not item_tax_template:
 		item_group = item.item_group
@@ -472,18 +486,21 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-def _get_item_tax_template(args, taxes, out={}, for_validate=False):
+def _get_item_tax_template(args, taxes, out=None, for_validate=False):
+	if out is None:
+		out = {}
 	taxes_with_validity = []
 	taxes_with_no_validity = []
 
 	for tax in taxes:
 		tax_company = frappe.get_value("Item Tax Template", tax.item_tax_template, 'company')
-		if tax.valid_from and tax_company == args['company']:
+		if (tax.valid_from or tax.maximum_net_rate) and tax_company == args['company']:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
 			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
 
-			if getdate(tax.valid_from) <= getdate(validation_date):
+			if getdate(tax.valid_from) <= getdate(validation_date) \
+				and is_within_valid_range(args, tax):
 				taxes_with_validity.append(tax)
 		else:
 			if tax_company == args['company']:
@@ -502,11 +519,25 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	if not taxes_with_validity and (not taxes_with_no_validity):
 		return None
 
+	# do not change if already a valid template
+	if args.get('item_tax_template') in {t.item_tax_template for t in taxes}:
+		out["item_tax_template"] = args.get('item_tax_template')
+		return args.get('item_tax_template')
+
 	for tax in taxes:
 		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
 			out["item_tax_template"] = tax.item_tax_template
 			return tax.item_tax_template
 	return None
+
+def is_within_valid_range(args, tax):
+	if not flt(tax.maximum_net_rate):
+		# No range specified, just ignore
+		return True
+	elif flt(tax.minimum_net_rate) <= flt(args.get('net_rate')) <= flt(tax.maximum_net_rate):
+		return True
+
+	return False
 
 @frappe.whitelist()
 def get_item_tax_map(company, item_tax_template, as_json=True):
@@ -611,8 +642,12 @@ def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
 
 	if meta.get_field("currency") or args.get('currency'):
-		pl_details = get_price_list_currency_and_exchange_rate(args)
-		args.update(pl_details)
+		if not args.get("price_list_currency") or not args.get("plc_conversion_rate"):
+			# if currency and plc_conversion_rate exist then
+			# `get_price_list_currency_and_exchange_rate` has already been called
+			pl_details = get_price_list_currency_and_exchange_rate(args)
+			args.update(pl_details)
+
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
@@ -771,9 +806,13 @@ def check_packing_list(price_list_rate_name, desired_qty, item_code):
 def validate_conversion_rate(args, meta):
 	from erpnext.controllers.accounts_controller import validate_conversion_rate
 
-	if (not args.conversion_rate
-		and args.currency==frappe.get_cached_value('Company',  args.company,  "default_currency")):
+	company_currency = frappe.get_cached_value('Company',  args.company,  "default_currency")
+	if (not args.conversion_rate and args.currency==company_currency):
 		args.conversion_rate = 1.0
+
+	if (not args.ignore_conversion_rate and args.conversion_rate == 1 and args.currency!=company_currency):
+		args.conversion_rate = get_exchange_rate(args.currency,
+			company_currency, args.transaction_date, "for_buying") or 1.0
 
 	# validate currency conversion rate
 	validate_conversion_rate(args.currency, args.conversion_rate,
@@ -922,10 +961,19 @@ def get_projected_qty(item_code, warehouse):
 		{"item_code": item_code, "warehouse": warehouse}, "projected_qty")}
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse):
-	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
+def get_bin_details(item_code, warehouse, company=None):
+	bin_details = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty", "reserved_qty"], as_dict=True, cache=True) \
 			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+	if company:
+		bin_details['company_total_stock'] = get_company_total_stock(item_code, company)
+	return bin_details
+
+def get_company_total_stock(item_code, company):
+	return frappe.db.sql("""SELECT sum(actual_qty) from
+		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name)
+		WHERE `tabWarehouse`.company = %s and `tabBin`.item_code = %s""",
+		(company, item_code))[0][0]
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
@@ -993,6 +1041,8 @@ def apply_price_list(args, as_doc=False):
 	args = process_args(args)
 
 	parent = get_price_list_currency_and_exchange_rate(args)
+	args.update(parent)
+
 	children = []
 
 	if "items" in args:
@@ -1057,7 +1107,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
 		"price_list_uom_dependant": price_list_uom_dependant,
-		"plc_conversion_rate": plc_conversion_rate
+		"plc_conversion_rate": plc_conversion_rate or 1
 	})
 
 @frappe.whitelist()

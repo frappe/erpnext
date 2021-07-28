@@ -56,7 +56,7 @@ erpnext.PointOfSale.Payment = class {
 				);
 				let df_events = {
 					onchange: function() {
-						frm.set_value(this.df.fieldname, this.value);
+						frm.set_value(this.df.fieldname, this.get_value());
 					}
 				};
 				if (df.fieldtype == "Button") {
@@ -171,7 +171,7 @@ erpnext.PointOfSale.Payment = class {
 
 		this.setup_listener_for_payments();
 
-		this.$payment_modes.on('click', '.shortcut', () => {
+		this.$payment_modes.on('click', '.shortcut', function() {
 			const value = $(this).attr('data-value');
 			me.selected_mode.set_value(value);
 		});
@@ -246,6 +246,41 @@ erpnext.PointOfSale.Payment = class {
 		const doc = this.events.get_frm().doc;
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
 		const remaining_amount = grand_total - doc.paid_amount;
+		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
+		if (!current_value && remaining_amount > 0 && this.selected_mode) {
+			this.selected_mode.set_value(remaining_amount);
+		}
+	}
+
+	setup_listener_for_payments() {
+		frappe.realtime.on("process_phone_payment", (data) => {
+			const doc = this.events.get_frm().doc;
+			const { response, amount, success, failure_message } = data;
+			let message, title;
+
+			if (success) {
+				title = __("Payment Received");
+				if (amount >= doc.grand_total) {
+					frappe.dom.unfreeze();
+					message = __("Payment of {0} received successfully.", [format_currency(amount, doc.currency, 0)]);
+					this.events.submit_invoice();
+					cur_frm.reload_doc();
+
+				} else {
+					message = __("Payment of {0} received successfully. Waiting for other requests to complete...", [format_currency(amount, doc.currency, 0)]);
+				}
+			} else if (failure_message) {
+				message = failure_message;
+				title = __("Payment Failed");
+			}
+
+			frappe.msgprint({ "message": message, "title": title });
+		});
+	}
+
+	auto_set_remaining_amount() {
+		const doc = this.events.get_frm().doc;
+		const remaining_amount = doc.grand_total - doc.paid_amount;
 		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
 		if (!current_value && remaining_amount > 0 && this.selected_mode) {
 			this.selected_mode.set_value(remaining_amount);
@@ -446,7 +481,7 @@ erpnext.PointOfSale.Payment = class {
 		const amount = doc.loyalty_amount > 0 ? format_currency(doc.loyalty_amount, doc.currency) : '';
 		this.$payment_modes.append(
 			`<div class="payment-mode-wrapper">
-				<div class="mode-of-payment" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
+				<div class="mode-of-payment loyalty-card" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
 					Redeem Loyalty Points
 					<div class="loyalty-amount-amount pay-amount">${amount}</div>
 					<div class="loyalty-amount-name">${loyalty_program}</div>
