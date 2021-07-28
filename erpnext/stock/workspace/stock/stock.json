@@ -272,6 +272,50 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Dispatch Planning",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Planning",
+   "link_to": "Delivery Planning",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Planning Item",
+   "link_to": "Delivery Planning Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transporter Wise Planning Item",
+   "link_to": "Transporter Wise Planning Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Orders Planning Item",
+   "link_to": "Purchase Orders Planning Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Settings",
    "link_type": "DocType",
    "onboard": 0,
@@ -545,15 +589,6 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Inter Company Challan Reconciliation",
-   "link_to": "Inter Company Challan Reconciliation",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
@@ -794,12 +829,12 @@
    "type": "DocType"
   },
   {
-   "color": "#CB2929",
+   "color": "#ECAD4B",
    "doc_view": "",
    "format": "{} Draft",
    "label": "Delivery Planning",
    "link_to": "Delivery Planning",
-   "stats_filter": "{ \"status\" : \"Draft\"}",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
    "type": "DocType"
   },
   {
