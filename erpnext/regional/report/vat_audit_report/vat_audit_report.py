@@ -20,10 +20,10 @@ class VATAuditReport(object):
 
 	def run(self):
 		self.get_sa_vat_accounts()
+		self.get_columns()
 		for doctype in self.doctypes:
-			self.get_columns(doctype)
 			self.select_columns = """
-			name as invoice_number,
+			name as voucher_no,
 			posting_date, remarks"""
 			columns = ", supplier as party, credit_to as account" if doctype=="Purchase Invoice" \
 				else ", customer as party, debit_to as account"
@@ -44,7 +44,7 @@ class VATAuditReport(object):
 		if not self.sa_vat_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 			frappe.throw(_("Please set VAT Accounts in South Africa VAT Settings"))
 
-	def get_invoice_data(self,doctype):
+	def get_invoice_data(self, doctype):
 		conditions = self.get_conditions()
 		self.invoices = frappe._dict()
 
@@ -62,9 +62,9 @@ class VATAuditReport(object):
 				where_conditions=conditions), self.filters, as_dict=1)
 
 		for d in invoice_data:
-			self.invoices.setdefault(d.invoice_number, d)
+			self.invoices.setdefault(d.voucher_no, d)
 
-	def get_invoice_items(self,doctype):
+	def get_invoice_items(self, doctype):
 		self.invoice_items = frappe._dict()
 		self.item_tax_rate = frappe._dict()
 
@@ -82,7 +82,7 @@ class VATAuditReport(object):
 				sum((i.get('taxable_value', 0) or i.get('base_net_amount', 0)) for i in items
 				if i.item_code == d.item_code and i.parent == d.parent))
 
-	def get_items_based_on_tax_rate(self,doctype):
+	def get_items_based_on_tax_rate(self, doctype):
 		self.items_based_on_tax_rate = frappe._dict()
 		self.tax_doctype = "Purchase Taxes and Charges" if doctype=="Purchase Invoice" \
 			else "Sales Taxes and Charges"
@@ -107,6 +107,9 @@ class VATAuditReport(object):
 					else:
 						continue
 					for item_code, taxes in item_wise_tax_detail.items():
+						is_zero_rated = frappe.get_value("Item", item_code, "is_zero_rated")
+						if taxes[0] == 0 and not is_zero_rated:
+							continue
 						tax_rate, item_amount_map = self.get_item_amount_map(parent, item_code, taxes)
 
 						if tax_rate is not None:
@@ -145,12 +148,12 @@ class VATAuditReport(object):
 		return conditions
 
 	def get_data(self, doctype):
-		consolidated_data = self.get_consolidated_data()
+		consolidated_data = self.get_consolidated_data(doctype)
 		section_name = _("Purchases") if doctype == "Purchase Invoice" else _("Sales")
 
 		for rate, section in consolidated_data.items():
 			rate = int(rate)
-			label = frappe.bold(_("Standard Rate") + " " + section_name + " " + str(rate) + "%")
+			label = frappe.bold(section_name + "- " + "Rate" + " " + str(rate) + "%")
 			section_head = {"posting_date": label}
 			total_gross = total_tax = total_net = 0
 			self.data.append(section_head)
@@ -170,7 +173,7 @@ class VATAuditReport(object):
 			self.data.append(total)
 			self.data.append({})
 
-	def get_consolidated_data(self):
+	def get_consolidated_data(self, doctype):
 		consolidated_data_map={}
 		for inv, inv_data in self.invoices.items():
 			if self.items_based_on_tax_rate.get(inv):
@@ -181,8 +184,8 @@ class VATAuditReport(object):
 						item_details = self.item_tax_rate.get(inv).get(item)
 						row["account"] = inv_data.get("account")
 						row["posting_date"] = formatdate(inv_data.get("posting_date"), 'dd-mm-yyyy')
-						row["invoice_number"] = inv
-						row["party"] = inv_data.get("party")
+						row["voucher_type"] = doctype
+						row["voucher_no"] = inv
 						row["remarks"] = inv_data.get("remarks")
 						row["gross_amount"]= item_details[0].get("gross_amount")
 						row["tax_amount"]= item_details[0].get("tax_amount")
@@ -191,7 +194,7 @@ class VATAuditReport(object):
 
 		return consolidated_data_map
 
-	def get_columns(self,doctype):
+	def get_columns(self):
 		self.columns = [
 			{
 				"fieldname": "posting_date",
@@ -204,44 +207,44 @@ class VATAuditReport(object):
 				"label": "Account",
 				"fieldtype": "Link",
 				"options": "Account",
-				"width": 140
+				"width": 150
 			},
 			{
-				"fieldname": "invoice_number",
+				"fieldname": "voucher_type",
+				"label": "Voucher Type",
+				"fieldtype": "Data",
+				"width": 140,
+				"hidden": 1
+			},
+			{
+				"fieldname": "voucher_no",
 				"label": "Reference",
-				"fieldtype": "Link",
-				"options": doctype,
-				"width": 140
-			},
-			{
-				"fieldname": "party",
-				"label": "Party",
-				"fieldtype": "Link",
-				"options": "Supplier" if doctype == "Purchase Invoice" else "Customer",
-				"width": 140
+				"fieldtype": "Dynamic Link",
+				"options": "voucher_type",
+				"width": 150
 			},
 			{
 				"fieldname": "remarks",
 				"label": "Details",
 				"fieldtype": "Data",
-				"width": 140
+				"width": 150
 			},
 			{
 				"fieldname": "net_amount",
 				"label": "Net Amount",
 				"fieldtype": "Currency",
-				"width": 140
+				"width": 150
 			},
 			{
 				"fieldname": "tax_amount",
 				"label": "Tax Amount",
 				"fieldtype": "Currency",
-				"width": 140
+				"width": 150
 			},
 			{
 				"fieldname": "gross_amount",
 				"label": "Gross Amount",
 				"fieldtype": "Currency",
-				"width": 140
+				"width": 150
 			},
 		]
