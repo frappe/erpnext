@@ -1069,13 +1069,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if barcodes:
 			or_cond_filters["name"] = ("in", barcodes)
 
-	for cond in get_match_cond(doctype, as_condition=False):
-		for key, value in cond.items():
-			if key == doctype:
-				key = "name"
-
-			query_filters[key] = ("in", value)
-
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")
 		if not has_variants:
@@ -1084,7 +1077,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters and filters.get("is_stock_item"):
 		query_filters["is_stock_item"] = 1
 
-	return frappe.get_all("Item",
+	return frappe.get_list("Item",
 		fields = fields, filters=query_filters,
 		or_filters = or_cond_filters, order_by=order_by,
 		limit_start=start, limit_page_length=page_len, as_list=1)
