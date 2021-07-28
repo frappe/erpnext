@@ -78,7 +78,24 @@ class Lead(SellingController):
 	def on_trash(self):
 		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""", self.name)
 
+		self.unlink_dynamic_links()
 		self.delete_events()
+
+	def unlink_dynamic_links(self):
+		links = frappe.get_all('Dynamic Link', filters={'link_doctype': self.doctype, 'link_name': self.name}, fields=['parent', 'parenttype'])
+
+		for link in links:
+			linked_doc = frappe.get_doc(link['parenttype'], link['parent'])
+
+			if len(linked_doc.get('links')) == 1:
+				linked_doc.delete()
+			else:
+				to_remove = None
+				for d in linked_doc.get('links'):
+					if d.link_doctype == self.doctype and d.link_name == self.name:
+						to_remove = d
+				if to_remove:
+					link_doctype.remove(to_remove)
 
 	def has_customer(self):
 		return frappe.db.get_value("Customer", {"lead_name": self.name})
