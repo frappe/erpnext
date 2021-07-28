@@ -35,6 +35,7 @@
   {
    "fieldname": "medical_department",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Medical Department",
    "options": "Medical Department"
   },
@@ -69,7 +70,9 @@
   {
    "fieldname": "template_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Template Name",
+   "reqd": 1,
    "unique": 1
   },
   {
@@ -134,7 +137,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-27 12:42:54.919016",
+ "modified": "2021-07-28 07:53:59.361435",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Treatment Plan Template",
