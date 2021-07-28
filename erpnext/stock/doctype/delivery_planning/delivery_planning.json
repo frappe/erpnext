@@ -111,8 +111,9 @@
   {
    "fieldname": "d_status",
    "fieldtype": "Select",
-   "label": "Status",
-   "options": "Pending Planning\nPartially Planned\nPlanned and To Deliver & Order\nTo Order\nTo Deliver\nCompleted"
+   "label": "Plan Status",
+   "options": "Pending Planning\nPartially Planned\nPlanned and To Deliver & Order\nTo Order\nTo Deliver\nCompleted",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_16",
@@ -122,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-01 16:59:45.607957",
+ "modified": "2021-07-23 11:12:01.000352",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning",
