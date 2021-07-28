@@ -8,7 +8,7 @@ frappe.ui.form.on('Treatment Plan Template', {
 				filters: {
 					'name': ['in', ['Lab Test Template', 'Clinical Procedure Template', 'Therapy Type']],
 				}
-			}
+			};
 		});
 	},
 });
