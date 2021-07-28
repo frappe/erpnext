@@ -243,10 +243,13 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 		'docstatus': 1
 	}
 
+	field = 'sum(net_total)'
+
 	if not cint(tax_details.consider_party_ledger_amount):
 		invoice_filters.update({'apply_tds': 1})
+		field = 'sum(grand_total)'
 
-	supp_credit_amt = frappe.db.get_value('Purchase Invoice', invoice_filters, 'sum(net_total)') or 0.0
+	supp_credit_amt = frappe.db.get_value('Purchase Invoice', invoice_filters, field) or 0.0
 
 	supp_jv_credit_amt = frappe.db.get_value('Journal Entry Account', {
 		'parent': ('in', vouchers), 'docstatus': 1,
