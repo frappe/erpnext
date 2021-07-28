@@ -3,16 +3,33 @@
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence,
 
-manufacturing/          @rohitwaghchaure @marination
-accounts/               @deepeshgarg007 @nextchamp-saqib
-loan_management/        @deepeshgarg007 @rohitwaghchaure
-pos*                    @nextchamp-saqib @rohitwaghchaure
-assets/                 @nextchamp-saqib @deepeshgarg007
-stock/                  @marination @rohitwaghchaure
-buying/                 @marination @deepeshgarg007
-hr/                     @Anurag810 @rohitwaghchaure
-projects/               @hrwX @nextchamp-saqib
-support/                @hrwX @marination
-healthcare/             @ruchamahabal @marination
-erpnext_integrations/   @Mangesh-Khairnar @nextchamp-saqib
-requirements.txt        @gavindsouza
+erpnext/accounts/               @nextchamp-saqib @deepeshgarg007
+erpnext/assets/                 @nextchamp-saqib @deepeshgarg007
+erpnext/erpnext_integrations/   @nextchamp-saqib
+erpnext/loan_management/        @nextchamp-saqib @deepeshgarg007
+erpnext/regional                @nextchamp-saqib @deepeshgarg007
+erpnext/selling                 @nextchamp-saqib @deepeshgarg007
+erpnext/support/                @nextchamp-saqib @deepeshgarg007
+pos*                            @nextchamp-saqib
+
+erpnext/buying/                 @marination @rohitwaghchaure @ankush
+erpnext/e_commerce/             @marination
+erpnext/maintenance/            @marination @rohitwaghchaure
+erpnext/manufacturing/          @marination @rohitwaghchaure @ankush
+erpnext/portal/                 @marination
+erpnext/quality_management/     @marination @rohitwaghchaure
+erpnext/shopping_cart/          @marination
+erpnext/stock/                  @marination @rohitwaghchaure @ankush
+
+erpnext/crm/                    @ruchamahabal @pateljannat
+erpnext/education/              @ruchamahabal @pateljannat
+erpnext/healthcare/             @ruchamahabal @pateljannat @chillaranand
+erpnext/hr/                     @ruchamahabal @pateljannat
+erpnext/non_profit/             @ruchamahabal
+erpnext/payroll                 @ruchamahabal @pateljannat
+erpnext/projects/               @ruchamahabal @pateljannat
+
+erpnext/controllers             @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure @marination
+
+.github/                        @surajshetty3416 @ankush
+requirements.txt                @gavindsouza

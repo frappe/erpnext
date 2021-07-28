@@ -7,16 +7,21 @@ import frappe
 import unittest
 from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_settings import process_balance_info, verify_transaction
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.erpnext_integrations.utils import create_mode_of_payment
 
 class TestMpesaSettings(unittest.TestCase):
+	def setUp(self):
+		# create payment gateway in setup
+		create_mpesa_settings(payment_gateway_name="_Test")
+		create_mpesa_settings(payment_gateway_name="_Account Balance")
+		create_mpesa_settings(payment_gateway_name="Payment")
+
 	def tearDown(self):
 		frappe.db.sql('delete from `tabMpesa Settings`')
 		frappe.db.sql('delete from `tabIntegration Request` where integration_request_service = "Mpesa"')
 
 	def test_creation_of_payment_gateway(self):
-		create_mpesa_settings(payment_gateway_name="_Test")
-
-		mode_of_payment = frappe.get_doc("Mode of Payment", "Mpesa-_Test")
+		mode_of_payment = create_mode_of_payment('Mpesa-_Test', payment_type="Phone")
 		self.assertTrue(frappe.db.exists("Payment Gateway Account", {'payment_gateway': "Mpesa-_Test"}))
 		self.assertTrue(mode_of_payment.name)
 		self.assertEqual(mode_of_payment.type, "Phone")
@@ -47,7 +52,6 @@ class TestMpesaSettings(unittest.TestCase):
 		integration_request.delete()
 
 	def test_processing_of_callback_payload(self):
-		create_mpesa_settings(payment_gateway_name="Payment")
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
 		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
 		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "KES")
@@ -90,7 +94,6 @@ class TestMpesaSettings(unittest.TestCase):
 		pos_invoice.delete()
 
 	def test_processing_of_multiple_callback_payload(self):
-		create_mpesa_settings(payment_gateway_name="Payment")
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
 		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
 		frappe.db.set_value("Mpesa Settings", "Payment", "transaction_limit", "500")
@@ -141,7 +144,6 @@ class TestMpesaSettings(unittest.TestCase):
 		pos_invoice.delete()
 
 	def test_processing_of_only_one_succes_callback_payload(self):
-		create_mpesa_settings(payment_gateway_name="Payment")
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
 		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
 		frappe.db.set_value("Mpesa Settings", "Payment", "transaction_limit", "500")
@@ -202,6 +204,7 @@ def create_mpesa_settings(payment_gateway_name="Express"):
 
 	doc = frappe.get_doc(dict( #nosec
 		doctype="Mpesa Settings",
+		sandbox=1,
 		payment_gateway_name=payment_gateway_name,
 		consumer_key="5sMu9LVI1oS3oBGPJfh3JyvLHwZOdTKn",
 		consumer_secret="VI1oS3oBGPJfh3JyvLHw",
