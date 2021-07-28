@@ -10,13 +10,9 @@ from frappe.utils import getdate
 from erpnext.hr.utils import update_employee
 
 class EmployeeTransfer(Document):
-	def validate(self):
-		if frappe.get_value("Employee", self.employee, "status") == "Left":
-			frappe.throw(_("Cannot transfer Employee with status Left"))
-
 	def before_submit(self):
 		if getdate(self.transfer_date) > getdate():
-			frappe.throw(_("Employee Transfer cannot be submitted before Transfer Date "),
+			frappe.throw(_("Employee Transfer cannot be submitted before Transfer Date"),
 				frappe.DocstatusTransitionError)
 
 	def on_submit(self):

@@ -1,0 +1,44 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2021-04-16 15:50:28.914872",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2021-04-16 15:50:48.490866",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project Profitability",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Timesheet",
+ "report_name": "Project Profitability",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Employee"
+  },
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Employee Self Service"
+  },
+  {
+   "role": "HR Manager"
+  }
+ ]
+}

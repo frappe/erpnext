@@ -7,7 +7,6 @@ erpnext.PointOfSale.ItemCart = class {
 		this.allowed_customer_groups = settings.customer_groups;
 		this.allow_rate_change = settings.allow_rate_change;
 		this.allow_discount_change = settings.allow_discount_change;
-
 		this.init_component();
 	}
 
@@ -182,10 +181,8 @@ erpnext.PointOfSale.ItemCart = class {
 				me.$totals_section.find(".edit-cart-btn").click();
 			}
 
-			const item_code = unescape($cart_item.attr('data-item-code'));
-			const batch_no = unescape($cart_item.attr('data-batch-no'));
-			const uom = unescape($cart_item.attr('data-uom'));
-			me.events.cart_item_clicked(item_code, batch_no, uom);
+			const item_row_name = unescape($cart_item.attr('data-row-name'));
+			me.events.cart_item_clicked({ name: item_row_name });
 			this.numpad_value = '';
 		});
 
@@ -370,15 +367,16 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount-field"></div>`
 		);
 		const me = this;
+		const frm = me.events.get_frm();
+		let discount = frm.doc.additional_discount_percentage;
 
 		this.discount_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Discount'),
 				fieldtype: 'Data',
-				placeholder: __('Enter discount percentage.'),
+				placeholder: ( discount ? discount + '%' :  __('Enter discount percentage.') ),
 				input_class: 'input-xs',
 				onchange: function() {
-					const frm = me.events.get_frm();
 					if (flt(this.value) != 0) {
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
 						me.hide_discount_control(this.value);
@@ -475,12 +473,7 @@ erpnext.PointOfSale.ItemCart = class {
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
 		this.render_grand_total(grand_total);
 
-		const taxes = frm.doc.taxes.map(t => {
-			return {
-				description: t.description, rate: t.rate
-			};
-		});
-		this.render_taxes(frm.doc.total_taxes_and_charges, taxes);
+		this.render_taxes(frm.doc.taxes);
 	}
 
 	render_net_total(value) {
@@ -505,14 +498,14 @@ erpnext.PointOfSale.ItemCart = class {
 		);
 	}
 
-	render_taxes(value, taxes) {
+	render_taxes(taxes) {
 		if (taxes.length) {
 			const currency = this.events.get_frm().doc.currency;
 			const taxes_html = taxes.map(t => {
 				const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
 				return `<div class="tax-row">
 					<div class="tax-label">${description}</div>
-					<div class="tax-value">${format_currency(value, currency)}</div>
+					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, currency)}</div>
 				</div>`;
 			}).join('');
 			this.$totals_section.find('.taxes-container').css('display', 'flex').html(taxes_html);
@@ -521,15 +514,14 @@ erpnext.PointOfSale.ItemCart = class {
 		}
 	}
 
-	get_cart_item({ item_code, batch_no, uom }) {
-		const batch_attr = `[data-batch-no="${escape(batch_no)}"]`;
-		const item_code_attr = `[data-item-code="${escape(item_code)}"]`;
-		const uom_attr = `[data-uom="${escape(uom)}"]`;
-
-		const item_selector = batch_no ?
-			`.cart-item-wrapper${batch_attr}${uom_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}`;
-
+	get_cart_item({ name }) {
+		const item_selector = `.cart-item-wrapper[data-row-name="${escape(name)}"]`;
 		return this.$cart_items_wrapper.find(item_selector);
+	}
+
+	get_item_from_frm(item) {
+		const doc = this.events.get_frm().doc;
+		return doc.items.find(i => i.name == item.name);
 	}
 
 	update_item_html(item, remove_item) {
@@ -538,11 +530,7 @@ erpnext.PointOfSale.ItemCart = class {
 		if (remove_item) {
 			$item && $item.next().remove() && $item.remove();
 		} else {
-			const { item_code, batch_no, uom } = item;
-			const search_field = batch_no ? 'batch_no' : 'item_code';
-			const search_value = batch_no || item_code;
-			const item_row = this.events.get_frm().doc.items.find(i => i[search_field] === search_value && i.uom === uom);
-
+			const item_row = this.get_item_from_frm(item);
 			this.render_cart_item(item_row, $item);
 		}
 
@@ -558,10 +546,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		if (!$item_to_update.length) {
 			this.$cart_items_wrapper.append(
-				`<div class="cart-item-wrapper"
-						data-item-code="${escape(item_data.item_code)}" data-uom="${escape(item_data.uom)}"
-						data-batch-no="${escape(item_data.batch_no || '')}">
-				</div>
+				`<div class="cart-item-wrapper" data-row-name="${escape(item_data.name)}"></div>
 				<div class="seperator"></div>`
 			)
 			$item_to_update = this.get_cart_item(item_data);
@@ -636,12 +621,22 @@ erpnext.PointOfSale.ItemCart = class {
 
 		function get_item_image_html() {
 			const { image, item_name } = item_data;
-			if (image) {
-				return `<div class="item-image"><img src="${image}" alt="${image}""></div>`;
+			if (!me.hide_images && image) {
+				return `
+					<div class="item-image">
+						<img
+							onerror="cur_pos.cart.handle_broken_image(this)"
+							src="${image}" alt="${frappe.get_abbr(item_name)}"">
+					</div>`;
 			} else {
 				return `<div class="item-image item-abbr">${frappe.get_abbr(item_name)}</div>`;
 			}
 		}
+	}
+
+	handle_broken_image($img) {
+		const item_abbr = $($img).attr('alt');
+		$($img).parent().replaceWith(`<div class="item-image item-abbr">${item_abbr}</div>`);
 	}
 
 	scroll_to_item($item) {
@@ -971,8 +966,23 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 	}
 
+	attach_refresh_field_event(frm) {
+		$(frm.wrapper).off('refresh-fields');
+		$(frm.wrapper).on('refresh-fields', () => {
+			if (frm.doc.items.length) {
+				frm.doc.items.forEach(item => {
+					this.update_item_html(item);
+				});
+			}
+			this.update_totals_section(frm);
+		});
+	}
+
 	load_invoice() {
 		const frm = this.events.get_frm();
+		
+		this.attach_refresh_field_event(frm);
+
 		this.fetch_customer_details(frm.doc.customer).then(() => {
 			this.events.customer_details_updated(this.customer_info);
 			this.update_customer_section();

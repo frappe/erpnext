@@ -8,13 +8,16 @@ from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, get_datetime, formatdate
+from erpnext.hr.utils import validate_active_employee
 
 class Attendance(Document):
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home"])
+		validate_active_employee(self.employee)
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
+		self.validate_employee_status()
 		self.check_leave_record()
 
 	def validate_attendance_date(self):
@@ -35,7 +38,12 @@ class Attendance(Document):
 				and docstatus != 2
 		""", (self.employee, getdate(self.attendance_date), self.name))
 		if res:
-			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
+			frappe.throw(_("Attendance for employee {0} is already marked for the date {1}").format(
+				frappe.bold(self.employee), frappe.bold(self.attendance_date)))
+
+	def validate_employee_status(self):
+		if frappe.db.get_value("Employee", self.employee, "status") == "Inactive":
+			frappe.throw(_("Cannot mark attendance for an Inactive employee {0}").format(self.employee))
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""

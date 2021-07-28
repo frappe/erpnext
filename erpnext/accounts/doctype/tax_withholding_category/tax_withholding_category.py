@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate
+from frappe.utils import flt, getdate, cint
 from erpnext.accounts.utils import get_fiscal_year
 
 class TaxWithholdingCategory(Document):
@@ -21,7 +21,10 @@ def get_party_details(inv):
 	else:
 		party_type = 'Supplier'
 		party = inv.supplier
-	
+
+	if not party:
+		frappe.throw(_("Please select {0} first").format(party_type))
+
 	return party_type, party
 
 def get_party_tax_withholding_details(inv, tax_withholding_category=None):
@@ -46,7 +49,7 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	if not parties:
 		parties.append(party)
 
-	fiscal_year = get_fiscal_year(inv.posting_date, company=inv.company)
+	fiscal_year = get_fiscal_year(inv.get('posting_date') or inv.get('transaction_date'), company=inv.company)
 	tax_details = get_tax_withholding_details(tax_withholding_category, fiscal_year[0], inv.company)
 
 	if not tax_details:
@@ -83,7 +86,10 @@ def get_tax_withholding_details(tax_withholding_category, fiscal_year, company):
 				"rate": tax_rate_detail.tax_withholding_rate,
 				"threshold": tax_rate_detail.single_threshold,
 				"cumulative_threshold": tax_rate_detail.cumulative_threshold,
-				"description": tax_withholding.category_name if tax_withholding.category_name else tax_withholding_category
+				"description": tax_withholding.category_name if tax_withholding.category_name else tax_withholding_category,
+				"consider_party_ledger_amount": tax_withholding.consider_party_ledger_amount,
+				"tax_on_excess_amount": tax_withholding.tax_on_excess_amount,
+				"round_off_tax_amount": tax_withholding.round_off_tax_amount
 			})
 
 def get_tax_withholding_rates(tax_withholding, fiscal_year):
@@ -151,7 +157,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, fiscal_year_details, p
 		tax_deducted = get_deducted_tax(taxable_vouchers, fiscal_year, tax_details)
 
 	tax_amount = 0
-	posting_date = inv.posting_date
+	posting_date = inv.get('posting_date') or inv.get('transaction_date')
 	if party_type == 'Supplier':
 		ldc = get_lower_deduction_certificate(fiscal_year, pan_no)
 		if tax_deducted:
@@ -232,10 +238,18 @@ def get_deducted_tax(taxable_vouchers, fiscal_year, tax_details):
 
 def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_deducted, vouchers):
 	tds_amount = 0
+	invoice_filters = {
+		'name': ('in', vouchers), 
+		'docstatus': 1
+	}
 
-	supp_credit_amt = frappe.db.get_value('Purchase Invoice', {
-		'name': ('in', vouchers), 'docstatus': 1, 'apply_tds': 1
-	}, 'sum(net_total)') or 0.0
+	field = 'sum(net_total)'
+
+	if not cint(tax_details.consider_party_ledger_amount):
+		invoice_filters.update({'apply_tds': 1})
+		field = 'sum(grand_total)'
+
+	supp_credit_amt = frappe.db.get_value('Purchase Invoice', invoice_filters, field) or 0.0
 
 	supp_jv_credit_amt = frappe.db.get_value('Journal Entry Account', {
 		'parent': ('in', vouchers), 'docstatus': 1,
@@ -251,15 +265,21 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 	threshold = tax_details.get('threshold', 0)
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
 
-	if ((threshold and supp_credit_amt >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
+	if ((threshold and inv.net_total >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
+		if (cumulative_threshold and supp_credit_amt >= cumulative_threshold) and cint(tax_details.tax_on_excess_amount):
+			supp_credit_amt -= cumulative_threshold
+
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
-			inv.posting_date, tax_deducted,
+			inv.get('posting_date') or inv.get('transaction_date'), tax_deducted,
 			inv.net_total, ldc.certificate_limit
 		):
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
+	
+	if cint(tax_details.round_off_tax_amount):
+		tds_amount = round(tds_amount)
 
 	return tds_amount
 
@@ -324,7 +344,7 @@ def get_tds_amount_from_ldc(ldc, parties, fiscal_year, pan_no, tax_details, post
 		net_total, ldc.certificate_limit
 	):
 		tds_amount = get_ltds_amount(net_total, limit_consumed, ldc.certificate_limit, ldc.rate, tax_details)
-	
+
 	return tds_amount
 
 def get_debit_note_amount(suppliers, fiscal_year_details, company=None):

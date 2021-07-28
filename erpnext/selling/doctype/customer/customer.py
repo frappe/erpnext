@@ -38,11 +38,19 @@ class Customer(TransactionBase):
 			set_name_by_naming_series(self)
 
 	def get_customer_name(self):
-		if frappe.db.get_value("Customer", self.customer_name):
+
+		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			count = frappe.db.sql("""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
 				 where name like %s""", "%{0} - %".format(self.customer_name), as_list=1)[0][0]
 			count = cint(count) + 1
-			return "{0} - {1}".format(self.customer_name, cstr(count))
+
+			new_customer_name = "{0} - {1}".format(self.customer_name, cstr(count))
+
+			msgprint(_("Changed customer name to '{}' as '{}' already exists.")
+					.format(new_customer_name, self.customer_name),
+					title=_("Note"), indicator="yellow")
+
+			return new_customer_name
 
 		return self.customer_name
 
@@ -67,7 +75,7 @@ class Customer(TransactionBase):
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
 		if self.sales_team:
-			if sum([member.allocated_percentage or 0 for member in self.sales_team]) != 100:
+			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
 	def check_customer_group_change(self):
@@ -482,7 +490,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
 	# Outstanding based on Sales Order
-	outstanding_based_on_so = 0.0
+	outstanding_based_on_so = 0
 
 	# if credit limit check is bypassed at sales order level,
 	# we should not consider outstanding Sales Orders, when customer credit balance report is run
@@ -493,9 +501,11 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			where customer=%s and docstatus = 1 and company=%s
 			and per_billed < 100 and status != 'Closed'""", (customer, company))
 
-		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
+		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0
 
 	# Outstanding based on Delivery Note, which are not created against Sales Order
+	outstanding_based_on_dn = 0
+
 	unmarked_delivery_note_items = frappe.db.sql("""select
 			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
@@ -507,15 +517,29 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			and ifnull(dn_item.against_sales_invoice, '') = ''
 		""", (customer, company), as_dict=True)
 
-	outstanding_based_on_dn = 0.0
+	if not unmarked_delivery_note_items:
+		return outstanding_based_on_gle + outstanding_based_on_so
+
+	si_amounts = frappe.db.sql("""
+		SELECT
+			dn_detail, sum(amount) from `tabSales Invoice Item`
+		WHERE
+			docstatus = 1
+			and dn_detail in ({})
+		GROUP BY dn_detail""".format(", ".join(
+			frappe.db.escape(dn_item.name)
+			for dn_item in unmarked_delivery_note_items
+		))
+	)
+
+	si_amounts = {si_item[0]: si_item[1] for si_item in si_amounts}
 
 	for dn_item in unmarked_delivery_note_items:
-		si_amount = frappe.db.sql("""select sum(amount)
-			from `tabSales Invoice Item`
-			where dn_detail = %s and docstatus = 1""", dn_item.name)[0][0]
+		dn_amount = flt(dn_item.amount)
+		si_amount = flt(si_amounts.get(dn_item.name))
 
-		if flt(dn_item.amount) > flt(si_amount) and dn_item.base_net_total:
-			outstanding_based_on_dn += ((flt(dn_item.amount) - flt(si_amount)) \
+		if dn_amount > si_amount and dn_item.base_net_total:
+			outstanding_based_on_dn += ((dn_amount - si_amount)
 				/ dn_item.base_net_total) * dn_item.base_grand_total
 
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn

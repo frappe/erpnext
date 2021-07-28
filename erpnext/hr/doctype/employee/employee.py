@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
+from frappe.utils import getdate, validate_email_address, today, add_years, cstr
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -12,10 +12,11 @@ from frappe.permissions import add_user_permission, remove_user_permission, \
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
-from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
-class EmployeeUserDisabledError(frappe.ValidationError): pass
-class EmployeeLeftValidationError(frappe.ValidationError): pass
+class EmployeeUserDisabledError(frappe.ValidationError):
+	pass
+class InactiveEmployeeStatusError(frappe.ValidationError):
+	pass
 
 class Employee(NestedSet):
 	nsm_parent_field = 'reports_to'
@@ -37,7 +38,7 @@ class Employee(NestedSet):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
+		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
 
 		self.employee = self.name
 		self.set_employee_name()
@@ -197,7 +198,7 @@ class Employee(NestedSet):
 				message += "<br><br><ul><li>" + "</li><li>".join(link_to_employees)
 				message += "</li></ul><br>"
 				message += _("Please make sure the employees above report to another Active employee.")
-				throw(message, EmployeeLeftValidationError, _("Cannot Relieve Employee"))
+				throw(message, InactiveEmployeeStatusError, _("Cannot Relieve Employee"))
 			if not self.relieving_date:
 				throw(_("Please enter relieving date."))
 
@@ -478,7 +479,7 @@ def get_employee_emails(employee_list):
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
 
-	filters = [['status', '!=', 'Left']]
+	filters = [['status', '=', 'Active']]
 	if company and company != 'All Companies':
 		filters.append(['company', '=', company])
 

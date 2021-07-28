@@ -1,9 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// print heading
-cur_frm.pformat.print_heading = 'Invoice';
-
 {% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
 
@@ -20,7 +17,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		var me = this;
 		this._super();
 
-		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice'];
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log', 'POS Closing Entry'];
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
 			this.frm.set_df_property("debit_to", "print_hide", 0);
@@ -359,11 +356,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	items_on_form_rendered: function() {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	packed_items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	make_sales_return: function() {
@@ -585,6 +582,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("adjustment_against", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					customer: frm.doc.customer,
+					docstatus: 1
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Return / Credit Note',
@@ -688,14 +695,16 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	project: function(frm){
-		frm.call({
-			method: "add_timesheet_data",
-			doc: frm.doc,
-			callback: function(r, rt) {
-				refresh_field(['timesheets'])
-			}
-		})
-		frm.refresh();
+		if (!frm.doc.is_return) {
+			frm.call({
+				method: "add_timesheet_data",
+				doc: frm.doc,
+				callback: function(r, rt) {
+					refresh_field(['timesheets'])
+				}
+			})
+			frm.refresh();
+		}
 	},
 
 	onload: function(frm) {
@@ -810,14 +819,27 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 
+	add_timesheet_row: function(frm, row, exchange_rate) {
+		frm.add_child('timesheets', {
+			'activity_type': row.activity_type,
+			'description': row.description,
+			'time_sheet': row.parent,
+			'billing_hours': row.billing_hours,
+			'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
+			'timesheet_detail': row.name
+		});
+		frm.refresh_field('timesheets');
+		calculate_total_billing_amount(frm);
+	},
+
 	refresh: function(frm) {
-		if (frm.doc.project) {
+		if (frm.doc.docstatus===0 && !frm.doc.is_return) {
 			frm.add_custom_button(__('Fetch Timesheet'), function() {
 				let d = new frappe.ui.Dialog({
 					title: __('Fetch Timesheet'),
 					fields: [
 						{
-							"label" : "From",
+							"label" : __("From"),
 							"fieldname": "from_time",
 							"fieldtype": "Date",
 							"reqd": 1,
@@ -827,11 +849,18 @@ frappe.ui.form.on('Sales Invoice', {
 							fieldname: 'col_break_1',
 						},
 						{
-							"label" : "To",
+							"label" : __("To"),
 							"fieldname": "to_time",
 							"fieldtype": "Date",
 							"reqd": 1,
-						}
+						},
+						{
+							"label" : __("Project"),
+							"fieldname": "project",
+							"fieldtype": "Link",
+							"options": "Project",
+							"default": frm.doc.project
+						},
 					],
 					primary_action: function() {
 						let data = d.get_values();
@@ -840,27 +869,35 @@ frappe.ui.form.on('Sales Invoice', {
 							args: {
 								from_time: data.from_time,
 								to_time: data.to_time,
-								project: frm.doc.project
+								project: data.project
 							},
 							callback: function(r) {
-								if(!r.exc) {
-									if(r.message.length > 0) {
-										frm.clear_table('timesheets')
-										r.message.forEach((d) => {
-											frm.add_child('timesheets',{
-												'time_sheet': d.parent,
-												'billing_hours': d.billing_hours,
-												'billing_amount': d.billing_amt,
-												'timesheet_detail': d.name
+								if (!r.exc && r.message.length > 0) {
+									frm.clear_table('timesheets')
+									r.message.forEach((d) => {
+										let exchange_rate = 1.0;
+										if (frm.doc.currency != d.currency) {
+											frappe.call({
+												method: 'erpnext.setup.utils.get_exchange_rate',
+												args: {
+													from_currency: d.currency,
+													to_currency: frm.doc.currency
+												},
+												callback: function(r) {
+													if (r.message) {
+														exchange_rate = r.message;
+														frm.events.add_timesheet_row(frm, d, exchange_rate);
+													}
+												}
 											});
-										});
-										frm.refresh_field('timesheets')
-									}
-									else {
-										frappe.msgprint(__('No Timesheet Found.'))
-									}
-									d.hide();
+										} else {
+											frm.events.add_timesheet_row(frm, d, exchange_rate);
+										}
+									});
+								} else {
+									frappe.msgprint(__('No Timesheets found with the selected filters.'))
 								}
+								d.hide();
 							}
 						});
 					},
@@ -868,6 +905,10 @@ frappe.ui.form.on('Sales Invoice', {
 				});
 				d.show();
 			})
+		}
+
+		if (frm.doc.is_debit_note) {
+			frm.set_df_property('return_against', 'label', 'Adjustment Against');
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {
@@ -916,7 +957,7 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 				},
 				callback: function(r, rt) {
 					if(r.message){
-						data = r.message;
+						let data = r.message;
 						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
 						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
 						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);

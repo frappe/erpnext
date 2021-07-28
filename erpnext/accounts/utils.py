@@ -406,9 +406,10 @@ def check_if_advance_entry_modified(args):
 		throw(_("""Payment Entry has been modified after you pulled it. Please pull it again."""))
 
 def validate_allocated_amount(args):
+	precision = args.get('precision') or frappe.db.get_single_value("System Settings", "currency_precision")
 	if args.get("allocated_amount") < 0:
 		throw(_("Allocated amount cannot be negative"))
-	elif args.get("allocated_amount") > args.get("unadjusted_amount"):
+	elif flt(args.get("allocated_amount"), precision) > flt(args.get("unadjusted_amount"), precision):
 		throw(_("Allocated amount cannot be greater than unadjusted amount"))
 
 def update_reference_in_journal_entry(d, jv_obj):
@@ -471,7 +472,8 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate
+		"exchange_rate": d.exchange_rate if not d.exchange_gain_loss else payment_entry.get_exchange_rate(),
+		"exchange_gain_loss": d.exchange_gain_loss # only populated from invoice in case of advance allocation
 	}
 
 	if d.voucher_detail_no:
@@ -497,12 +499,15 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	payment_entry.set_amounts()
 
 	if d.difference_amount and d.difference_account:
-		payment_entry.set_gain_or_loss(account_details={
+		account_details = {
 			'account': d.difference_account,
 			'cost_center': payment_entry.cost_center or frappe.get_cached_value('Company',
-				payment_entry.company, "cost_center"),
-			'amount': d.difference_amount
-		})
+				payment_entry.company, "cost_center")
+		}
+		if d.difference_amount:
+			account_details['amount'] = d.difference_amount
+
+		payment_entry.set_gain_or_loss(account_details=account_details)
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
@@ -634,7 +639,7 @@ def get_held_invoices(party_type, party):
 			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
 			as_dict=1
 		)
-		held_invoices = set([d['name'] for d in held_invoices])
+		held_invoices = set(d['name'] for d in held_invoices)
 
 	return held_invoices
 
@@ -783,7 +788,7 @@ def get_children(doctype, parent, company, is_root=False):
 	return acc
 
 def create_payment_gateway_account(gateway, payment_channel="Email"):
-	from erpnext.setup.setup_wizard.operations.company_setup import create_bank_account
+	from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
 	if not company:
