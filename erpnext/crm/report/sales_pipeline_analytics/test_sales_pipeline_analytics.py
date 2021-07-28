@@ -197,7 +197,6 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'opportunity_type':"Sales",
             'company':"__Test Company",
             'opportunity_source':'Cold Calling',
-            'opportunity_type':"Sales",
             'from_date': '2021-08-01',
             'to_date':'2021-08-31'
         }
