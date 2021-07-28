@@ -145,7 +145,6 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "salutation",
    "fieldtype": "Link",
    "label": "Salutation",
@@ -283,7 +282,6 @@
    "options": "Country"
   },
   {
-   "collapsible_depends_on": "eval: doc.__islocal",
    "fieldname": "pincode",
    "fieldtype": "Data",
    "label": "Postal Code"
@@ -299,7 +297,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "phone",
    "fieldtype": "Data",
    "label": "Phone",
@@ -308,7 +305,6 @@
    "options": "Phone"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile No.",
@@ -317,7 +313,6 @@
    "options": "Phone"
   },
   {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "fax",
    "fieldtype": "Data",
    "label": "Fax",
