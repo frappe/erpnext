@@ -55,7 +55,8 @@ class SalesPipelineAnalytics(object):
 				'fieldname': "opportunity_owner",
 				'label': "Opportunity Owner",
 				'width':200
-				})
+			})
+
 		elif self.filters.get("pipeline_by") == "Sales Stage":
 			self.columns.insert(0,{
 				'fieldname':"sales_stage",
@@ -96,7 +97,7 @@ class SalesPipelineAnalytics(object):
 					row = {'opportunity_owner': customer}
 					for info in self.query_result:
 						period = info.get('month')
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 					self.data.append(row)
 				
@@ -107,7 +108,7 @@ class SalesPipelineAnalytics(object):
 					row = {'sales_stage': sales_stage}
 					for info in self.query_result:
 						period = info.get('month')
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 					self.data.append(row)
 
@@ -126,7 +127,7 @@ class SalesPipelineAnalytics(object):
 					row = {'opportunity_owner': user}
 					for info in self.query_result:
 						period = info.get('month')
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 
 					self.data.append(row)
@@ -137,7 +138,7 @@ class SalesPipelineAnalytics(object):
 					row = {'sales_stage': sales_stage}
 					for info in self.query_result:
 						period = info.get('month')
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 
 					self.data.append(row)
@@ -164,7 +165,7 @@ class SalesPipelineAnalytics(object):
 					row = {'opportunity_owner': customer}
 					for info in self.query_result:
 						period = "Q" + str(info.get('quarter'))
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 					self.data.append(row)
 
@@ -176,7 +177,7 @@ class SalesPipelineAnalytics(object):
 					row = {'sales_stage': customer}
 					for info in self.query_result:
 						period = "Q" + str(info.get('quarter'))
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 					self.data.append(row)
 
@@ -194,7 +195,7 @@ class SalesPipelineAnalytics(object):
 					row = {'opportunity_owner': customer}
 					for info in self.query_result:
 						period = "Q" + str(info.get('quarter'))
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 					self.data.append(row)
 
@@ -204,14 +205,14 @@ class SalesPipelineAnalytics(object):
 					row = {'sales_stage': sales_stage}
 					for info in self.query_result:
 						period = "Q" + str(info.get('quarter'))
-						count  = period_data.get(period,0.0)
+						count = period_data.get(period,0.0)
 						row[period] = count
 					self.data.append(row)
 
 			return self.data
 			
 	def get_conditions(self):
-		current_date =  datetime.date(datetime.now())
+		current_date = datetime.date(datetime.now())
 		conditions = []
 		if self.filters.get("opportunity_source"):
 			conditions.append('source=%(opportunity_source)s')
@@ -388,7 +389,6 @@ class SalesPipelineAnalytics(object):
 		if temp:
 			if len(temp) > 1:
 				if self.filters.get("assigned_to"):
-					print(temp)
 					for user in temp:
 						if self.filters.get("assigned_to") == user:
 							value = user
