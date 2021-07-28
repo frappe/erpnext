@@ -1977,7 +1977,6 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 				links_to_pe.append(payment_entry.name)
 		if links_to_pe:
 			payment_entries_link = [get_link_to_form('Payment Entry', name, label=name) for name in links_to_pe]
-			print("payment_entries_link....",payment_entries_link)
 			message = _("Please cancel and amend the Payment Entry")
 			message += " " + ", ".join(payment_entries_link) + " "
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
