@@ -194,6 +194,7 @@ class DeliveryPlanning(Document):
 	# 		doc.save()
 	def on_delivery_planning_submit(self):
 		conditions = ""
+		pinc = ""
 		if self.company:
 			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
 
@@ -206,11 +207,41 @@ class DeliveryPlanning(Document):
 		if self.delivery_date_to:
 			conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
 
-		# if self.pincode_from:
-		# 	conditions += "And add.pincode >= '%s" % self.pincode_from
-		#
-		# if self.pincode_to:
-		# 	conditions += "And add.pincode <= '%s" % self.pincode_to
+		if self.pincode_from:
+			pincodefrom = self.pincode_from
+		
+		if self.pincode_to:
+			pincodeto = self.pincode_to
+
+		if(self.pincode_from and self.pincode_to):
+			pin = frappe.db.sql("""Select dl.link_name from `tabDynamic Link` as dl,
+								`tabAddress` as a
+								where dl.parent = a.name
+								and dl.parenttype = "Address" 
+								and dl.link_doctype = "Customer"
+								and a.pincode between {pinfrom} and {pinto} 
+								""".format( pinfrom = pincodefrom, pinto = pincodeto), as_dict= 1)	
+
+			print("-------------------- pin ------------- ",pin)
+		
+
+			if pin:
+				count = len(pin)
+				ct =0 
+				print("****len pin",count)
+				for p in pin:
+					pinc += "'"+ p.link_name +"'"
+					ct += 1
+					if ct != count:
+						pinc += ","
+					# x = name.translate({ord(i): None for i in ']"['})
+				print("============pinc ======",)
+
+				# pp = pinc.translate({ord(i): None for i in ']['})
+				print("-----------------pinc---------------", pinc)
+				conditions += " AND so.customer in ({0})".format(pinc)
+				# conditions += "AND so.customer in ('Lenovo Global','HP Computers','Realme')"
+				# print(" ------------ customers", pp )				
 
 		query = frappe.db.sql(""" select
 									so.customer,
@@ -229,11 +260,13 @@ class DeliveryPlanning(Document):
 									soi.supplier,
 									soi.uom,
 									soi.conversion_factor,
-									soi.stock_uom
+									soi.stock_uom,
+									a.pincode
 
 
 									from `tabSales Order Item` soi
 									join `tabSales Order` so ON soi.parent = so.name
+									join `tabAddress` a  ON so.customer = a.address_title
 
 									where so.docstatus = 1
 									{conditions} """.format(conditions=conditions), as_dict=1)
@@ -252,7 +285,7 @@ class DeliveryPlanning(Document):
 			dp_item.weight_to_deliver = i.weight_per_unit * i.qty
 			dp_item.sales_order = i.name
 			dp_item.sorce_warehouse = i.warehouse
-			dp_item.postal_code = 0
+			dp_item.postal_code = i.pincode
 			dp_item.delivery_date = i.delivery_date
 			dp_item.current_stock = i.projected_qty - i.stock_qty
 			dp_item.available_stock = i.projected_qty
@@ -640,7 +673,8 @@ class DeliveryPlanning(Document):
 				print("-----------Date 0purchase order create 111 -------------", q.delivery_date)
 				for i in so_wise_data:
 						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
-						newdoc.delivery_note = po.name
+						newdoc.purchase_order = po.name 
+						newdoc.d_status = "Complete"
 						newdoc.save(ignore_permissions=True)
 
 			return 1
@@ -715,7 +749,7 @@ class DeliveryPlanning(Document):
 		salesno = 0
 		discount = []
 		transporter = ""
-		print("************* In side Delivery Note ************")
+		print("********** In side Delivery Note ************")
 		pl = frappe.db.get_all('Pick List',
 							   filters={
        							 'docstatus': 1,
@@ -869,6 +903,7 @@ class DeliveryPlanning(Document):
 					for i in item:
 						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
 						newdoc.delivery_note = dnote.name
+						newdoc.d_status = "Complete"
 						newdoc.save(ignore_permissions=True)
 
 
@@ -916,6 +951,9 @@ class DeliveryPlanning(Document):
 										  "supplier_dc": 0,
 										  "related_delivey_planning": self.name,
 										  })
+
+		print(" -----==== dpi po =======----- ",dpi_po)			
+		print(" -----==== dpi po =======----- ",dpi_dn)							  
 
 		if dpi_po and dpi_dn:
 			return 1
@@ -969,12 +1007,14 @@ class DeliveryPlanning(Document):
 												"supplier_dc": 1,
 												"related_delivey_planning": self.name,
 												})
+			print("--------------- dpi_po", len(dpi_po))
 
 			dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
 									   filters={"approved": "Yes",
 												"supplier_dc": 0,
 												"related_delivey_planning": self.name,
 												})
+			print("--------------- dpi_pn", len(dpi_dn))
 
 			dpi = frappe.db.get_all(doctype='Delivery Planning Item',
 									filters={"related_delivey_planning": self.name})
@@ -983,42 +1023,55 @@ class DeliveryPlanning(Document):
 									   filters={"approved": "Yes",
 												"supplier_dc": 1,
 												"related_delivey_planning": self.name,
-												"purchase_order": ["!=", "null"]
+												"d_status" : "Complete",
 												})
+			print("--------------- a_dpi_po", len(a_dpi_po))									
 			# {"autoname": ["is", "not set"]}
 			a_dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
 									   filters={"approved": "Yes",
 												"supplier_dc": 0,
 												"related_delivey_planning": self.name,
-												"delivery_note": ["!=", "null"],
+												"d_status" : 'Complete',
 												})
 
-			print("0000011111111112222222211111", count)
+			print("--------------- a_dpi_dn", len(a_dpi_dn))
+
 			if dpi_dn and dpi_po:
 				count = len(dpi_dn) + len(dpi_po)
 			elif dpi_po:
 				count = len(dpi_po)
-			elif dpi_dn:
-				count = len(dpi_dn)
+			else:
+				count = len(dpi_dn) 
 			print("00000111111111122222222222222222", count)
 			if a_dpi_dn and a_dpi_po:
 				a_count = len(a_dpi_dn) + len(a_dpi_po)
 			elif a_dpi_po:
 				a_count = len(a_dpi_po)
-			elif dpi_dn:
+			else:
 				a_count = len(a_dpi_dn)
 			print("00000111111111122222222333333333333", a_count)
-			if count == 0:
-				self.d_status = "Pending Planning"
-			elif count == len(dpi):
-				self.d_status = "Partially Planned"
+
+			
+			if count == a_count and count > 0:
+				self.db_set('d_status', "Completed", update_modified=False)
+				print("------- in if 1 --------", count, a_count)
+			elif count > 1 and count < len(dpi) :
+				self.db_set('d_status', "Partially Planned", update_modified=False)
+				print("------- in if 2  ---------", count, len(dpi))
 			elif a_count == 0 and count > 0:
-				self.d_status = "Planned and To Deliver & Order "
+				self.db_set('d_status', "Planned and To Deliver & Order", update_modified=False)
+				print("------- in if 3 ---------", count)
 			elif len(a_dpi_po) > 0:
-				self.d_status = "To Deliver"
+				self.db_set('d_status', "To Deliver", update_modified=False)
+				print("------- in if 1 ---------", len(a_dpi_po))
 			elif len(a_dpi_dn) > 0:
-				self.d_status = "To Order"
-			elif count == a_count:
-				self.d_status == "Completed"
+				self.db_set('d_status', "To Order", update_modified=False)
+				print("------- in if 1 ---------", len(a_dpi_dn))
+			else:
+				self.db_set('d_status', "Pending Planning", update_modified=False)
+				print("------- in if PP1 ---------", count)
+
+			# self.save(ignore_permissions=True)
+			return 1
 
 
