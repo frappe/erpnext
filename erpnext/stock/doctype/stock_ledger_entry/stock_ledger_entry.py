@@ -177,11 +177,11 @@ class StockLedgerEntry(Document):
 					voucher_type, voucher_no, item_code, warehouse, posting_date
 				from `tabStock Ledger Entry`
 				where
-					warehouse = %{warehouse}s
-					and item_code = %{item_code}s
-					and batch_no = %{batch_no}s
-					and (qty_after_transaction + %{actual_qty}s) < 0
-					and timestamp(posting_date, posting_time) >= timestamp(%{posting_date}s, %{posting_time}s)
+					warehouse = %(warehouse)s
+					and item_code = %(item_code)s
+					and batch_no = %(batch_no)s
+					and (qty_after_transaction + %(actual_qty)s) < 0
+					and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 					and is_cancelled = 0
 				order by timestamp(posting_date, posting_time)""", dict(
 					warehouse=self.warehouse, item_code=self.item_code,
@@ -190,12 +190,10 @@ class StockLedgerEntry(Document):
 
 		if len(future_negative_entries) > 0:
 			voucher_type, voucher_no, item_code, warehouse, posting_date = future_negative_entries[0]
-			frappe.throw(_('Quantity not available for') + ' ' +
-				frappe.bold(item_code) + ' ' + _('in warehouse') + ' ' +
-				frappe.bold(warehouse) + ' ' + _('for future') + ' ' +
-				frappe.bold(voucher_type) + ' ' + frappe.bold(voucher_no) +
-				' ' + _('at the date of posting') + ' ' +
-				'(' + posting_date.isoformat() + ')')
+			frappe.throw(_('Quantity not available for {} in warehouse {} for future {} {} at the date of posting ({})').format(
+					frappe.bold(item_code), frappe.bold(warehouse), frappe.bold(voucher_type), 
+					frappe.bold(voucher_no), posting_date
+				))
 
 def on_doctype_update():
 	if not frappe.db.has_index('tabStock Ledger Entry', 'posting_sort_index'):
