@@ -94,7 +94,7 @@
   {
    "description": "Checking this will round off the tax amount to the nearest integer",
    "fieldname": "round_off_tax_amount",
-   "fieldtype": "Data",
+   "fieldtype": "Check",
    "label": "Round Off Tax Amount",
    "show_days": 1,
    "show_seconds": 1
@@ -102,7 +102,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-26 21:47:34.396071",
+ "modified": "2021-07-27 21:47:34.396071",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Category",
