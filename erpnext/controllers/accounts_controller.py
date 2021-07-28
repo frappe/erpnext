@@ -845,6 +845,7 @@ class AccountsController(TransactionBase):
 
 			for item in self.get("items"):
 				if item.get('discount_amount') and item.get('discount_account'):
+					discount_amount = item.discount_amount * item.qty
 					if self.doctype == "Purchase Invoice":
 						income_or_expense_account = (item.expense_account
 							if (not item.enable_deferred_expense or self.is_return) 
@@ -859,8 +860,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict({
 							"account": item.discount_account,
 							"against": supplier_or_customer,
-							dr_or_cr: flt(item.discount_amount),
-							dr_or_cr + "_in_account_currency": flt(item.discount_amount),
+							dr_or_cr: flt(discount_amount, item.precision('discount_amount')),
+							dr_or_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'), 
+								item.precision('discount_amount')),
 							"cost_center": item.cost_center,
 							"project": item.project
 						}, account_currency, item=item)
@@ -871,8 +873,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict({
 							"account": income_or_expense_account,
 							"against": supplier_or_customer,
-							rev_dr_cr: flt(item.discount_amount),
-							rev_dr_cr + "_in_account_currency": flt(item.discount_amount),
+							rev_dr_cr: flt(discount_amount, item.precision('discount_amount')),
+							rev_dr_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'), 
+								item.precision('discount_amount')),
 							"cost_center": item.cost_center,
 							"project": item.project or self.project
 						}, account_currency, item=item)
