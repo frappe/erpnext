@@ -17,10 +17,3 @@ class TreatmentPlanTemplate(Document):
 		if self.patient_age_to and self.patient_age_from and \
 			self.patient_age_to < self.patient_age_from:
 			frappe.throw(_('Patient Age To cannot be less than Patient Age From'))
-
-	@frappe.whitelist(allow_guest=True)
-	@staticmethod
-	def get_applicable_treatment_plans(encounter=None):
-		print(encounter)
-		plans = frappe.db.get_list('Treatment Plan Template', fields='*')
-		return plans
