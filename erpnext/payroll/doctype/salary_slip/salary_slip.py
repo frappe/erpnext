@@ -39,9 +39,7 @@ class SalarySlip(TransactionBase):
 		self.name = make_autoname(self.series)
 
 		
-	def before_save(self):
-		self.get_payroll()
-
+	
 	def validate(self):
 		self.status = self.get_status()
 		self.validate_dates()
@@ -355,6 +353,7 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
+	@frappe.whitelist()
 	def get_payroll(self):
 		from datetime import date
 		a = date(date.today().year, 1, 1)
@@ -364,10 +363,10 @@ class SalarySlip(TransactionBase):
 			end_date = getdate(lst.date_of_joining)
 			start_date = getdate(a)
 			num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
-			self.months_of_service_in_payment_period=num_months
 		else:
-			self.months_of_service_in_payment_period=12
-		
+			num_months=12
+		return num_months
+
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
 		holidays = "','".join(holidays)
@@ -1342,7 +1341,7 @@ class SalarySlip(TransactionBase):
 				first_date_of_month = datetime(cur_year, cur_month, 1)
 				diff = date_diff(to_date_obj,first_date_of_month) + 1
 				total_leave_list.append(diff)
-		self.leave = sum(total_leave_list)
+		return sum(total_leave_list)
 	def add_leave_balances(self):
 		self.set('leave_details', [])
 
