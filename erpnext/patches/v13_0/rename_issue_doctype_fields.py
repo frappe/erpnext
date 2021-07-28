@@ -37,7 +37,7 @@ def execute():
 
 	if frappe.db.exists('DocType', 'Opportunity'):
 		opportunities = frappe.db.get_all('Opportunity', fields=['name', 'mins_to_first_response'], order_by='creation desc')
-		frappe.reload_doc('crm', 'doctype', 'opportunity')
+		frappe.reload_doctype('Opportunity', force=True)
 		rename_field('Opportunity', 'mins_to_first_response', 'first_response_time')
 
 		# change fieldtype to duration
