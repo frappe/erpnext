@@ -42,6 +42,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 
 		if (!this.frm.is_new()) {
 			frappe.contacts.render_address_and_contact(this.frm);
+			cur_frm.trigger('render_basic_info_html');
 		} else {
 			frappe.contacts.clear_address_and_contact(this.frm);
 		}
@@ -80,6 +81,45 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			d.add(1, "day");
 			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
 		}
+	}
+
+	render_basic_info_html() {
+		let html='';
+		if (cur_frm.doc.lead_owner){
+			html += `<div class="col-xs-2">
+				<span><b> Lead Owner </b></span>
+			</div>
+			<div class="col-xs-10">
+				<span> ${cur_frm.doc.lead_owner} </span>
+			</div>` ;
+		}
+
+		if (cur_frm.doc.email_id){
+			html += `<div class="col-xs-2">
+				<span><b> Email </b></span>
+			</div>
+			<div class="col-xs-10">
+				<span> ${cur_frm.doc.email_id} </span>
+			</div>` ;
+		}
+
+		if (cur_frm.doc.mobile_no){
+			html += `<div class="col-xs-2">
+				<span><b> Mobile </b></span>
+			</div>
+			<div class="col-xs-10">
+				<span> ${cur_frm.doc.mobile_no} </span>
+			</div>` ;
+		}
+
+		html += `<div class="col-xs-2">
+				<span><b> Status </b></span>
+			</div>
+			<div class="col-xs-10">
+				<span> ${cur_frm.doc.status} </span>
+			</div>` ;
+		html = `<div class="row">${html}</div>`;
+		cur_frm.dashboard.set_headline_alert(html);
 	}
 };
 
