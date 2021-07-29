@@ -114,7 +114,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								qty: qty,
 								item_code: me.item_code,
 								batch_no: me.item.batch_no,
-								warehouse: me.warehouse_details.name,
+								warehouse: cstr(me.warehouse_details.name),
 								sales_order_item: me.item.so_detail
 							}
 						});
