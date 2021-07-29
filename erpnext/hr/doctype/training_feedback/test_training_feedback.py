@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import today, add_days
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
 from erpnext.hr.doctype.training_event.test_training_event import create_training_program, create_training_event
 class TestTrainingFeedback(unittest.TestCase):
