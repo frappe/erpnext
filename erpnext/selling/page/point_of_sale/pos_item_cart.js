@@ -367,15 +367,16 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount-field"></div>`
 		);
 		const me = this;
+		const frm = me.events.get_frm();
+		let discount = frm.doc.additional_discount_percentage;
 
 		this.discount_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Discount'),
 				fieldtype: 'Data',
-				placeholder: __('Enter discount percentage.'),
+				placeholder: ( discount ? discount + '%' :  __('Enter discount percentage.') ),
 				input_class: 'input-xs',
 				onchange: function() {
-					const frm = me.events.get_frm();
 					if (flt(this.value) != 0) {
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
 						me.hide_discount_control(this.value);
@@ -472,12 +473,7 @@ erpnext.PointOfSale.ItemCart = class {
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
 		this.render_grand_total(grand_total);
 
-		const taxes = frm.doc.taxes.map(t => {
-			return {
-				description: t.description, rate: t.rate
-			};
-		});
-		this.render_taxes(frm.doc.total_taxes_and_charges, taxes);
+		this.render_taxes(frm.doc.taxes);
 	}
 
 	render_net_total(value) {
@@ -502,14 +498,14 @@ erpnext.PointOfSale.ItemCart = class {
 		);
 	}
 
-	render_taxes(value, taxes) {
+	render_taxes(taxes) {
 		if (taxes.length) {
 			const currency = this.events.get_frm().doc.currency;
 			const taxes_html = taxes.map(t => {
 				const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
 				return `<div class="tax-row">
 					<div class="tax-label">${description}</div>
-					<div class="tax-value">${format_currency(value, currency)}</div>
+					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, currency)}</div>
 				</div>`;
 			}).join('');
 			this.$totals_section.find('.taxes-container').css('display', 'flex').html(taxes_html);
@@ -970,8 +966,23 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 	}
 
+	attach_refresh_field_event(frm) {
+		$(frm.wrapper).off('refresh-fields');
+		$(frm.wrapper).on('refresh-fields', () => {
+			if (frm.doc.items.length) {
+				frm.doc.items.forEach(item => {
+					this.update_item_html(item);
+				});
+			}
+			this.update_totals_section(frm);
+		});
+	}
+
 	load_invoice() {
 		const frm = this.events.get_frm();
+		
+		this.attach_refresh_field_event(frm);
+
 		this.fetch_customer_details(frm.doc.customer).then(() => {
 			this.events.customer_details_updated(this.customer_info);
 			this.update_customer_section();

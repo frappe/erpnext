@@ -1088,6 +1088,7 @@ class SalarySlip(TransactionBase):
 				"applicant": self.employee,
 				"docstatus": 1,
 				"repay_from_salary": 1,
+				"company": self.company
 			})
 
 	def make_loan_repayment_entry(self):
