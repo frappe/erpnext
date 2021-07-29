@@ -355,11 +355,11 @@ def get_or_create_course_enrollment(course, program):
 	student = get_current_student()
 	course_enrollment = get_enrollment("course", course, student.name)
 	if not course_enrollment:
-		program_enrollment = get_enrollment('program', program, student.name)
+		program_enrollment = get_enrollment('program', program.name, student.name)
 		if not program_enrollment:
 			frappe.throw(_("You are not enrolled in program {0}").format(program))
 			return
-		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program, student.name))
+		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program.name, student.name))
 	else:
 		return frappe.get_doc('Course Enrollment', course_enrollment)
 

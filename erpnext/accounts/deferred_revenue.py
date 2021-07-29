@@ -301,17 +301,21 @@ def process_deferred_accounting(posting_date=None):
 	start_date = add_months(today(), -1)
 	end_date = add_days(today(), -1)
 
-	for record_type in ('Income', 'Expense'):
-		doc = frappe.get_doc(dict(
-			doctype='Process Deferred Accounting',
-			posting_date=posting_date,
-			start_date=start_date,
-			end_date=end_date,
-			type=record_type
-		))
+	companies = frappe.get_all('Company')
 
-		doc.insert()
-		doc.submit()
+	for company in companies:
+		for record_type in ('Income', 'Expense'):
+			doc = frappe.get_doc(dict(
+				doctype='Process Deferred Accounting',
+				company=company.name,
+				posting_date=posting_date,
+				start_date=start_date,
+				end_date=end_date,
+				type=record_type
+			))
+
+			doc.insert()
+			doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
 	amount, base_amount, posting_date, project, account_currency, cost_center, item, deferred_process=None):

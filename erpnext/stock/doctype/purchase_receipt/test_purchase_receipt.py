@@ -1054,30 +1054,30 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_purchase_receipt_with_exchange_rate_difference(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice as create_purchase_invoice
-
-		pi = create_purchase_invoice(currency = "USD", conversion_rate = 70)
-
-		create_warehouse("_Test Warehouse for Valuation", company="_Test Company with perpetual inventory",
-			properties={"account": '_Test Account Stock In Hand - TCP1'})
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt as create_purchase_receipt
 		
-		pr = make_purchase_receipt(warehouse = '_Test Warehouse for Valuation - TCP1', 
-			company="_Test Company with perpetual inventory", currency = "USD", conversion_rate = 80, 
-			do_not_save = "True")
-
+		pi = create_purchase_invoice(company="_Test Company with perpetual inventory",
+			cost_center = "Main - TCP1",
+			warehouse = "Stores - TCP1",
+			expense_account ="_Test Account Cost for Goods Sold - TCP1",
+			currency = "USD", conversion_rate = 70)
+		
+		pr = create_purchase_receipt(pi.name)
+		pr.conversion_rate = 80
 		pr.items[0].purchase_invoice = pi.name
 		pr.items[0].purchase_invoice_item = pi.items[0].name
 
-		pr.insert()
+		pr.save()
 		pr.submit()
 
-		# fetching the latest GL Entry with 'Exchange Gain/Loss - TCP1' account
-		gl_entries = frappe.get_all('GL Entry', filters = {'account': 'Exchange Gain/Loss - TCP1'})
-		voucher_no = frappe.get_value('GL Entry', gl_entries[0]['name'], 'voucher_no')
-		self.assertEqual(pr.name, voucher_no)
+		# Get exchnage gain and loss account
+		exchange_gain_loss_account = frappe.db.get_value('Company', pr.company, 'exchange_gain_loss_account')
 
-		exchange_gain_loss_amount = frappe.get_value('GL Entry', gl_entries[0]['name'], 'debit')
+		# fetching the latest GL Entry with exchange gain and loss account account
+		amount = frappe.db.get_value('GL Entry', {'account': exchange_gain_loss_account, 'voucher_no': pr.name}, 'credit')
 		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
-		self.assertEqual(exchange_gain_loss_amount, discrepancy_caused_by_exchange_rate_diff)
+
+		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

@@ -130,6 +130,10 @@ frappe.ui.form.on("Customer", {
 				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
 			}, __('Create'));
 
+			frm.add_custom_button(__('Get Customer Group Details'), function () {
+				frm.trigger("get_customer_group_details");
+			}, __('Actions'));
+
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
 
@@ -145,4 +149,15 @@ frappe.ui.form.on("Customer", {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 
 	},
+	get_customer_group_details: function(frm) {
+		frappe.call({
+			method: "get_customer_group_details",
+			doc: frm.doc,
+			callback: function() {
+				frm.refresh();
+			}
+		});
+
+	}
 });
+
