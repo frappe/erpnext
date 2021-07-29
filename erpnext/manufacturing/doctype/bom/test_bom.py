@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import cstr, flt
 from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+from erpnext.manufacturing.doctype.bom.bom import make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -247,6 +248,37 @@ class TestBOM(unittest.TestCase):
 
 		for reqd_item, created_item in zip(reqd_order, created_order):
 			self.assertEqual(reqd_item, created_item.item_code)
+
+	def test_generated_variant_bom(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template_item = make_item(
+			"_TestTemplateItem", {"has_variants": 1, "attributes": [{"attribute": "Test Size"},]}
+		)
+		variant = create_variant(template_item.item_code, {"Test Size": "Large"})
+		variant.insert(ignore_if_duplicate=True)
+
+		bom_tree = {
+			template_item.item_code: {
+				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
+				"ChildPart5": {},
+			}
+		}
+		template_bom = create_nested_bom(bom_tree, prefix="")
+		variant_bom = make_variant_bom(
+			template_bom.name, template_bom.name, variant.item_code, variant_items=[]
+		)
+		variant_bom.save()
+
+		reqd_order = template_bom.get_tree_representation().level_order_traversal()
+		created_order = variant_bom.get_tree_representation().level_order_traversal()
+
+		self.assertEqual(len(reqd_order), len(created_order))
+
+		for reqd_item, created_item in zip(reqd_order, created_order):
+			self.assertEqual(reqd_item.item_code, created_item.item_code)
+			self.assertEqual(reqd_item.qty, created_item.qty)
+			self.assertEqual(reqd_item.exploded_qty, created_item.exploded_qty)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):

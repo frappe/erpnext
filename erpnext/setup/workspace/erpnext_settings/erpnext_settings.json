@@ -11,10 +11,11 @@
  "hide_custom": 0,
  "icon": "settings",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "ERPNext Settings",
  "links": [],
- "modified": "2020-12-01 13:38:37.759596",
+ "modified": "2021-06-12 01:58:11.399566",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",
@@ -108,6 +109,13 @@
    "icon": "setting",
    "label": "Domain Settings",
    "link_to": "Domain Settings",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "icon": "retail",
+   "label": "Products Settings",
+   "link_to": "Products Settings",
    "type": "DocType"
   }
  ]
