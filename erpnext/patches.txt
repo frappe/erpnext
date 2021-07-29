@@ -711,3 +711,4 @@ erpnext.patches.v12_0.set_service_person_name
 erpnext.patches.v12_0.set_vehicle_invoice_receipt_in_delivery
 erpnext.patches.v12_0.rename_booking_delivery_invoice_status
 execute:frappe.delete_doc_if_exists("Report", "FBR Tax Report")
+erpnext.patches.v12_0.rebuild_sle_posting_sort_index
