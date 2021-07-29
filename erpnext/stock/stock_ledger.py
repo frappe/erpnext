@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
 import json
+import datetime
 
 from six import iteritems
 
@@ -285,7 +286,7 @@ class update_entries_after(object):
 			if not allow_zero_rate:
 				self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, sle.batch_no, self.allow_zero_rate,
-					currency=erpnext.get_company_currency(sle.company), batch_wise_valuation=0)
+					currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_wise_valuation=0)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -404,7 +405,7 @@ class update_entries_after(object):
 					if not allow_zero_valuation_rate:
 						_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 							sle.voucher_type, sle.voucher_no, sle.batch_no, self.allow_zero_rate,
-							currency=erpnext.get_company_currency(sle.company))
+							currency=erpnext.get_company_currency(sle.company), company=sle.company)
 					else:
 						_rate = 0
 
@@ -475,6 +476,8 @@ class update_entries_after(object):
 		self.set_stock_reconciliation_actual_qty(sle)
 
 		if self.batch_wise_valuation:
+			self.qty_after_transaction += sle.actual_qty
+
 			self.batch_data.batch_valuation_rate = sle.batch_valuation_rate
 			self.batch_data.batch_qty_after_transaction = sle.batch_qty_after_transaction
 
@@ -482,6 +485,9 @@ class update_entries_after(object):
 				self.batch_data.batch_valuation_rate)
 			stock_value_difference = self.batch_data.batch_stock_value - self.batch_data.prev_batch_stock_value
 			self.stock_value = self.prev_stock_value + stock_value_difference
+
+			if self.qty_after_transaction:
+				self.valuation_rate = self.stock_value / self.qty_after_transaction
 
 			if flt(sle.actual_qty) > 0:
 				sle.incoming_rate = stock_value_difference / sle.actual_qty
@@ -614,7 +620,7 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_date"] = "1900-01-01"
-	if not previous_sle.get("posting_time"):
+	if not previous_sle.get("posting_time") and type(previous_sle.get("posting_time")) != datetime.timedelta:
 		previous_sle["posting_time"] = "00:00"
 
 	if batch_sle:
