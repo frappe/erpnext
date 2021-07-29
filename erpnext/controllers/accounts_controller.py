@@ -1109,7 +1109,7 @@ class AccountsController(TransactionBase):
 			elif self.doctype in ["Sales Invoice", "Purchase Invoice"]:
 				po_or_so, doctype, fieldname = self.get_order_details()
 
-				if self.linked_order_has_payment_terms(po_or_so, fieldname):
+				if self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
 					self.fetch_payment_terms_from_order(po_or_so, doctype)
 
 			elif self.doctype not in ["Purchase Receipt"]:
@@ -1138,9 +1138,9 @@ class AccountsController(TransactionBase):
 		
 		return po_or_so, po_or_so_doctype, po_or_so_doctype_name
 
-	def linked_order_has_payment_terms(self, po_or_so, fieldname):
+	def linked_order_has_payment_terms(self, po_or_so, fieldname, doctype):
 		if po_or_so and self.all_items_have_same_po_or_so(po_or_so, fieldname):
-			if self.linked_order_has_payment_terms_template(po_or_so):
+			if self.linked_order_has_payment_terms_template(po_or_so, doctype):
 				return True
 			elif self.linked_order_has_payment_schedule(po_or_so):
 				return True
@@ -1154,8 +1154,8 @@ class AccountsController(TransactionBase):
 		
 		return True
 
-	def linked_order_has_payment_terms_template(self, po_or_so):
-		return frappe.get_value('Sales Order', po_or_so, 'payment_terms_template')
+	def linked_order_has_payment_terms_template(self, po_or_so, doctype):
+		return frappe.get_value(doctype, po_or_so, 'payment_terms_template')
 
 	def linked_order_has_payment_schedule(self, po_or_so):
 		return frappe.get_all('Payment Schedule', filters={'parent': po_or_so})
