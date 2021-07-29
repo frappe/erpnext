@@ -231,8 +231,7 @@ class Issue(Document):
 				self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
-		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
-			customer=self.customer, service_level_agreement=service_level_agreement)
+		service_level_agreement = get_active_service_level_agreement_for(self)
 
 		if not service_level_agreement:
 			if frappe.db.get_value("Issue", self.name, "service_level_agreement"):
