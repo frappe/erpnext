@@ -455,7 +455,7 @@ def make_custom_fields(update=True):
 		'Sales Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Delivery Note Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
-		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],

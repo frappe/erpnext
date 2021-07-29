@@ -110,4 +110,3 @@ erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
 		frappe.show_alert({ message: __('Plaid Link Updated'), indicator: 'green' });
 	}
 };
-

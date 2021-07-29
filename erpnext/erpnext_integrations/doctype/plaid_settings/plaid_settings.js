@@ -15,6 +15,10 @@ frappe.ui.form.on('Plaid Settings', {
 			frm.add_custom_button(__('Link a new bank account'), () => {
 				new erpnext.integrations.plaidLink(frm);
 			});
+
+			frm.add_custom_button(__('Reset Plaid Link'), () => {
+				new erpnext.integrations.plaidLink(frm);
+			});
 		}
 	}
 });

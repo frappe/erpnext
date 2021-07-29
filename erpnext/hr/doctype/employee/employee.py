@@ -57,6 +57,9 @@ class Employee(NestedSet):
 				remove_user_permission(
 					"Employee", self.name, existing_user_id)
 
+	def after_rename(self, old, new, merge):
+		self.db_set("employee", new)
+
 	def set_employee_name(self):
 		self.employee_name = ' '.join(filter(lambda x: x, [self.first_name, self.middle_name, self.last_name]))
 

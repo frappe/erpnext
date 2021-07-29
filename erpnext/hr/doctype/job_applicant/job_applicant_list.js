@@ -2,7 +2,7 @@
 // MIT License. See license.txt
 
 frappe.listview_settings['Job Applicant'] = {
-	add_fields: ["company", "designation", "job_applicant", "status"],
+	add_fields: ["status"],
 	get_indicator: function (doc) {
 		if (doc.status == "Accepted") {
 			return [__(doc.status), "green", "status,=," + doc.status];
