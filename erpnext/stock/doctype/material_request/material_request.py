@@ -162,8 +162,15 @@ class MaterialRequest(BuyingController):
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 						(self.name, d.name))[0][0])
+					mr_qty_allowance = frappe.db.get_single_value('Stock Settings', 'mr_qty_allowance')
 
-					if d.ordered_qty and d.ordered_qty > d.stock_qty:
+					if mr_qty_allowance:
+						allowed_qty = d.qty + (d.qty * (mr_qty_allowance/100))
+						if d.ordered_qty and d.ordered_qty > allowed_qty:
+							frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
+								cannot be greater than allowed requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, allowed_qty, d.item_code))
+
+					elif d.ordered_qty and d.ordered_qty > d.stock_qty:
 						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
 							cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
 
