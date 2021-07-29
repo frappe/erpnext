@@ -422,7 +422,7 @@ class StockEntry(StockController):
 				d.basic_rate = get_incoming_rate(args)
 			elif d.allow_zero_valuation_rate and not d.s_warehouse:
 				d.basic_rate = 0.0
-			elif d.t_warehouse and not d.basic_rate:
+			elif d.t_warehouse and not d.basic_rate and not self.is_finished_good_item(d):
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, d.name, d.batch_no, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company)
@@ -771,7 +771,7 @@ class StockEntry(StockController):
 						sle.additional_cost = flt(d.additional_cost)
 						sle.dependencies = []
 						for dep_row in self.get("items"):
-							if self.is_scrap_item(dep_row) or (dep_row.s_warehouse and not dep_row.t_warehouse):
+							if flt(dep_row.transfer_qty) and (self.is_scrap_item(dep_row) or (dep_row.s_warehouse and not dep_row.t_warehouse)):
 								sle.dependencies.append({
 									"dependent_voucher_type": self.doctype,
 									"dependent_voucher_no": self.name,
