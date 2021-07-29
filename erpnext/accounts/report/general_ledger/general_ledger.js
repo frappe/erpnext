@@ -171,6 +171,12 @@ frappe.query_reports["General Ledger"] = {
 			"default": 1
 		},
 		{
+			"fieldname": "merge_dimensions",
+			"label": __("Merge Dimensions"),
+			"fieldtype": "Check",
+			"default": 0
+		},
+		{
 			"fieldname": "merge_linked_parties",
 			"label": __("Merge Linked Parties"),
 			"fieldtype": "Check"

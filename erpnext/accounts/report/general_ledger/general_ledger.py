@@ -196,9 +196,13 @@ def merge_similar_entries(filters, gl_entries, supplier_invoice_details):
 		if gle.is_opening == "Yes" or gle.posting_date < getdate(filters.from_date):
 			out.append(gle)
 		else:
-			key = (gle.voucher_type, gle.voucher_no, gle.account, cstr(gle.party_type), cstr(gle.party), cstr(gle.cost_center),
-			cstr(gle.project), cstr(gle.remarks), cstr(gle.reference_no), cstr(gle.reference_date))
+			key = [gle.voucher_type, gle.voucher_no, gle.account, cstr(gle.party_type), cstr(gle.party),
+				cstr(gle.remarks), cstr(gle.reference_no), cstr(gle.reference_date)]
 
+			if not filters.merge_dimensions:
+				key += [cstr(gle.cost_center), cstr(gle.project)]
+
+			key = tuple(key)
 			if key not in merged_gles:
 				gle.update({"dr_cr": 0, "against_voucher_set": set(), "against_voucher_list": [], "against_set": set()})
 				group = merged_gles[key] = gle
