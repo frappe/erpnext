@@ -244,6 +244,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 						finance_type: me.frm.doc.finance_type,
 						transaction_date: me.frm.doc.transaction_date,
 						item_code: me.frm.doc.item_code,
+						do_not_apply_withholding_tax: cint(me.frm.doc.do_not_apply_withholding_tax)
 					}
 				},
 				callback: function (r) {
@@ -275,6 +276,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 						party_name: me.frm.doc.party_name,
 						financer: me.frm.doc.financer,
 						finance_type: me.frm.doc.finance_type,
+						do_not_apply_withholding_tax: cint(me.frm.doc.do_not_apply_withholding_tax)
 					}
 				},
 				callback: function (r) {
@@ -576,6 +578,11 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (me.frm.doc.company && me.frm.doc.item_code && me.frm.doc.vehicle_price_list) {
+			var tax_status = cstr(me.frm.doc.tax_status);
+			if (!tax_status && me.frm.doc.doctype == "Vehicle Quotation") {
+				tax_status = "Filer";
+			}
+
 			return me.frm.call({
 				method: "erpnext.vehicles.vehicle_booking_controller.get_vehicle_price",
 				child: me.frm.doc,
@@ -585,7 +592,8 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 					vehicle_price_list: me.frm.doc.vehicle_price_list,
 					fni_price_list: me.frm.doc.fni_price_list,
 					transaction_date: me.frm.doc.transaction_date,
-					tax_status: me.frm.doc.tax_status,
+					tax_status: tax_status,
+					do_not_apply_withholding_tax: cint(me.frm.doc.do_not_apply_withholding_tax)
 				},
 				callback: function (r) {
 					if (!r.exc) {
@@ -593,6 +601,40 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 					}
 				}
 			});
+		}
+	},
+
+	do_not_apply_withholding_tax: function () {
+		if (cint(this.frm.doc.do_not_apply_withholding_tax)) {
+			this.frm.set_value('withholding_tax_amount', 0);
+		} else {
+			this.get_withholding_tax_amount();
+		}
+	},
+
+	get_withholding_tax_amount: function () {
+		var me = this;
+
+		if (me.frm.doc.item_code && me.frm.doc.company) {
+			var tax_status = cstr(me.frm.doc.tax_status);
+			if (!tax_status && me.frm.doc.doctype == "Vehicle Quotation") {
+				tax_status = "Filer";
+			}
+
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule.get_withholding_tax_amount",
+				args: {
+					date: cstr(me.frm.doc.transaction_date),
+					item_code: me.frm.doc.item_code,
+					tax_status: tax_status,
+					company: me.frm.doc.company
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.set_value('withholding_tax_amount', flt(r.message));
+					}
+				}
+			})
 		}
 	},
 

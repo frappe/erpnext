@@ -285,8 +285,11 @@ def get_customer_details(args, get_withholding_tax=True):
 		if args.doctype == "Vehicle Quotation":
 			tax_status = tax_status or 'Filer'
 
-		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, tax_status, args.company)
 		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
+		if not cint(args.do_not_apply_withholding_tax):
+			out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, tax_status, args.company)
+		else:
+			out.withholding_tax_amount = 0
 
 	return out
 
@@ -487,7 +490,8 @@ def get_item_details(args):
 	out.exempt_from_vehicle_withholding_tax = cint(item.exempt_from_vehicle_withholding_tax)
 
 	if out.vehicle_price_list:
-		out.update(get_vehicle_price(args.company, item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, tax_status))
+		out.update(get_vehicle_price(args.company, item.name, out.vehicle_price_list, out.fni_price_list,
+			args.transaction_date, tax_status, cint(args.do_not_apply_withholding_tax)))
 
 	if not args.payment_terms_template:
 		out.payment_terms_template = item.default_payment_terms
@@ -544,7 +548,8 @@ def get_vehicle_default_supplier(item_code, company):
 
 
 @frappe.whitelist()
-def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=None, transaction_date=None, tax_status=None):
+def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=None, transaction_date=None,
+		tax_status=None, do_not_apply_withholding_tax=False):
 	if not item_code:
 		frappe.throw(_("Variant Item Code is mandatory"))
 	if not vehicle_price_list:
@@ -566,7 +571,10 @@ def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=Non
 	vehicle_item_price = vehicle_item_price[0][1] if vehicle_item_price else 0
 	out.vehicle_amount = flt(vehicle_item_price)
 
-	out.withholding_tax_amount = get_withholding_tax_amount(transaction_date, item_code, tax_status, company)
+	if not cint(do_not_apply_withholding_tax):
+		out.withholding_tax_amount = get_withholding_tax_amount(transaction_date, item_code, tax_status, company)
+	else:
+		out.withholding_tax_amount = 0
 
 	if fni_price_list:
 		fni_price_args = vehicle_price_args.copy()
