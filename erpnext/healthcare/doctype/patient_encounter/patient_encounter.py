@@ -10,6 +10,7 @@ from frappe.utils import cstr, getdate, add_days
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
+
 class PatientEncounter(Document):
 	def validate(self):
 		self.set_title()
@@ -114,6 +115,7 @@ class PatientEncounter(Document):
 		doc.insert()
 		self.append(child_field, doc)
 		self.save()
+
 
 @frappe.whitelist()
 def make_ip_medication_order(source_name, target_doc=None):
