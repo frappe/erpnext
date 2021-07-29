@@ -966,7 +966,7 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 		for e in existing_gle:
 			if entry.account == e.account:
 				account_existed = True
-			if (entry.account == e.account and entry.against_account == e.against_account
+			if (entry.account == e.account
 					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center)
 					and ( flt(entry.debit, precision) != flt(e.debit, precision) or
 						flt(entry.credit, precision) != flt(e.credit, precision))):
