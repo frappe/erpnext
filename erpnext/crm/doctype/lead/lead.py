@@ -95,7 +95,7 @@ class Lead(SellingController):
 					if d.link_doctype == self.doctype and d.link_name == self.name:
 						to_remove = d
 				if to_remove:
-					link_doctype.remove(to_remove)
+					linked_doc.remove(to_remove)
 
 	def has_customer(self):
 		return frappe.db.get_value("Customer", {"lead_name": self.name})

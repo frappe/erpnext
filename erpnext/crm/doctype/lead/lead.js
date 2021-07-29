@@ -85,7 +85,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 
 	render_basic_info_html() {
 		let html='';
-		if (cur_frm.doc.lead_owner){
+		if (cur_frm.doc.lead_owner) {
 			html += `<div class="col-xs-2">
 				<span><b> Lead Owner </b></span>
 			</div>
@@ -94,7 +94,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			</div>` ;
 		}
 
-		if (cur_frm.doc.email_id){
+		if (cur_frm.doc.email_id) {
 			html += `<div class="col-xs-2">
 				<span><b> Email </b></span>
 			</div>
@@ -103,7 +103,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			</div>` ;
 		}
 
-		if (cur_frm.doc.mobile_no){
+		if (cur_frm.doc.mobile_no) {
 			html += `<div class="col-xs-2">
 				<span><b> Mobile </b></span>
 			</div>
