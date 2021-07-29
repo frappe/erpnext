@@ -1,0 +1,82 @@
+{
+ "creation": "2021-07-26 13:59:51.386464",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "dependent_voucher_type",
+  "dependent_voucher_no",
+  "dependent_voucher_detail_no",
+  "dependency_type",
+  "dependency_percentage",
+  "dependency_qty_filter"
+ ],
+ "fields": [
+  {
+   "fieldname": "dependent_voucher_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Dependent Voucher Type",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "dependent_voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Dependent Voucher No",
+   "options": "dependent_voucher_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "dependent_voucher_detail_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dependent Voucher Detail No",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "dependency_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Dependency Type",
+   "options": "Amount\nRate",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "default": "100",
+   "fieldname": "dependency_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Dependency Percentage",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "dependency_qty_filter",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Dependency Qty Filter",
+   "options": "\nPositive\nNegative",
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-07-27 22:38:37.774919",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Ledger Entry Dependency",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

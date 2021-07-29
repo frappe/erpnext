@@ -643,22 +643,26 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
+						sle.update({
+							"outgoing_rate": flt(d.valuation_rate, val_rate_db_precision)
+						})
+
 						purchase_receipt = self.return_against if self.doctype == "Purchase Receipt" else d.get('purchase_receipt')
 						if d.get('pr_detail') and purchase_receipt:
-							original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-								{"voucher_type": "Purchase Receipt", "voucher_no": purchase_receipt,
-									"voucher_detail_no": d.pr_detail}, "incoming_rate")
+							sle.dependencies = [{
+								"dependent_voucher_type": "Purchase Receipt",
+								"dependent_voucher_no": purchase_receipt,
+								"dependent_voucher_detail_no": d.pr_detail,
+								"dependency_type": "Rate"
+							}]
 						elif self.doctype == "Purchase Invoice" and d.get('pi_detail') and self.get('return_against')\
 								and frappe.db.get_value("Purchase Invoice", self.return_against, 'update_stock', cache=1):
-							original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-								{"voucher_type": "Purchase Invoice", "voucher_no": self.return_against,
-								"voucher_detail_no": d.pi_detail}, "incoming_rate")
-						else:
-							original_incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
-
-						sle.update({
-							"outgoing_rate": original_incoming_rate
-						})
+							sle.dependencies = [{
+								"dependent_voucher_type": "Purchase Invoice",
+								"dependent_voucher_no": self.return_against,
+								"dependent_voucher_detail_no": d.pi_detail,
+								"dependency_type": "Rate"
+							}]
 					else:
 						incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
 						sle.update({

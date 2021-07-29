@@ -477,16 +477,11 @@ class StockEntry(StockController):
 
 	def set_basic_rate(self, force=False, update_finished_item_rate=True, raise_error_if_no_rate=True):
 		"""get stock and incoming rate on posting date"""
-		raw_material_cost = 0.0
-		scrap_material_cost = 0.0
-		fg_basic_rate = 0.0
-
 		for d in self.get('items'):
 			if self.customer_provided and not d.s_warehouse:
 				d.basic_rate = 0
 				d.basic_amount = 0
 
-			if d.t_warehouse: fg_basic_rate = flt(d.basic_rate)
 			args = self.get_args_for_incoming_rate(d)
 
 			# get basic rate
@@ -497,25 +492,17 @@ class StockEntry(StockController):
 						d.basic_rate = basic_rate
 
 				d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
-				if not d.t_warehouse:
-					raw_material_cost += flt(d.basic_amount)
 
 			# get scrap items basic rate
-			if d.bom_no:
-				if not flt(d.basic_rate) and not d.allow_zero_valuation_rate and \
-					getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
+			if self.is_scrap_item(d):
+				if not flt(d.basic_rate) and not d.allow_zero_valuation_rate:
 					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
 					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 
-				if getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
-
-					scrap_material_cost += flt(d.basic_amount)
-
-		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
-		if self.purpose in ("Manufacture", "Repack") or (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
-			self.set_basic_rate_for_finished_goods(raw_material_cost, scrap_material_cost)
+		if self.purpose in ("Manufacture", "Repack") and update_finished_item_rate:
+			self.set_basic_rate_for_finished_goods()
 
 	def get_args_for_incoming_rate(self, item):
 		return frappe._dict({
@@ -532,41 +519,82 @@ class StockEntry(StockController):
 			"allow_zero_valuation": item.allow_zero_valuation_rate,
 		})
 
-	def set_basic_rate_for_finished_goods(self, raw_material_cost=0, scrap_material_cost=0):
-		if not raw_material_cost and self.get("items"):
-			raw_material_cost = sum([flt(row.basic_amount) for row in self.items
-				if row.s_warehouse and not row.t_warehouse])
+	def set_basic_rate_for_finished_goods(self):
+		for d in self.get("items"):
+			d.cost_percentage = 0
 
-		total_fg_qty = sum([flt(row.qty) for row in self.items
-			if row.t_warehouse and not row.s_warehouse])
+		if self.purpose not in ["Manufacture", "Repack"]:
+			return
 
-		if self.purpose in ["Manufacture", "Repack"]:
-			for d in self.get("items"):
-				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
-					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
+		# Calculate costs and qtys
+		raw_material_cost = 0
+		scrap_material_cost = 0
+		total_fg_qty = 0
+		total_fg_stock_qty = 0
+		total_fg_items = 0
+		for d in self.get("items"):
+			if self.is_scrap_item(d):
+				scrap_material_cost += flt(d.basic_amount)
+			elif d.s_warehouse and not d.t_warehouse:
+				raw_material_cost += flt(d.basic_amount)
+			elif self.is_finished_good_item(d):
+				total_fg_qty += flt(d.qty)
+				total_fg_stock_qty += flt(d.transfer_qty)
+				total_fg_items += 1
 
-					if (self.work_order and self.purpose == "Manufacture"
-						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption")):
-						bom_items = self.get_bom_raw_materials(d.transfer_qty)
-						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
+		if not total_fg_stock_qty or not total_fg_items:
+			return
 
-					if raw_material_cost and self.purpose == "Manufacture":
-						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
-						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
-					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
-						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
-						d.basic_amount = d.basic_rate * flt(d.qty)
+		# Use raw material cost from BOM if allow_multiple_material_consumption
+		allow_multiple_material_consumption = frappe.get_cached_value("Manufacturing Settings", None, "material_consumption")
+		if self.purpose == "Manufacture" and self.work_order and total_fg_stock_qty and allow_multiple_material_consumption:
+			bom_items = self.get_bom_raw_materials(total_fg_stock_qty)
+			raw_material_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
+
+		# set fg rate
+		if self.purpose == "Manufacture":
+			basic_rate = (raw_material_cost - scrap_material_cost) / total_fg_stock_qty if total_fg_stock_qty else 0
+		else:
+			basic_rate = (raw_material_cost - scrap_material_cost) / total_fg_qty if total_fg_qty else 0
+
+		for d in self.get("items"):
+			if self.is_finished_good_item(d) and not d.set_basic_rate_manually:
+				if self.purpose == "Manufacture":
+					d.basic_rate = basic_rate
+					d.basic_amount = flt(d.basic_rate * flt(d.transfer_qty), d.precision("basic_amount"))
+					d.cost_percentage = flt(d.transfer_qty) / total_fg_stock_qty * 100 if total_fg_stock_qty else 0
+				else:
+					d.basic_rate = basic_rate
+					d.basic_amount = flt(d.basic_rate * flt(d.qty), d.precision("basic_amount"))
+					d.cost_percentage = flt(d.qty) / total_fg_qty * 100 if total_fg_qty else 0
+
+	def is_scrap_item(self, d):
+		pro_doc = getattr(self, "pro_doc", frappe._dict())
+		return (self.purpose in ('Manufacture', 'Repack')
+			and d.bom_no
+			and d.t_warehouse
+			and pro_doc.scrap_warehouse == d.t_warehouse)
+
+	def is_finished_good_item(self, d):
+		return (self.purpose in ('Manufacture', 'Repack')
+			and (d.bom_no or d.t_warehouse)
+			and not d.s_warehouse
+			and not self.is_scrap_item(d))
 
 	def distribute_additional_costs(self):
 		if self.purpose == "Material Issue":
 			self.additional_costs = []
 
 		self.total_additional_costs = sum([flt(t.amount) for t in self.get("additional_costs")])
-		total_basic_amount = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+		total_basic_amount = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse and not self.is_scrap_item(t)])
+		total_qty = sum([flt(t.qty) for t in self.get("items") if t.t_warehouse and not self.is_scrap_item(t)])
 
 		for d in self.get("items"):
-			if d.t_warehouse and total_basic_amount:
-				d.additional_cost = (flt(d.basic_amount) / total_basic_amount) * self.total_additional_costs
+			if d.t_warehouse and not self.is_scrap_item(d) and (total_basic_amount or total_qty):
+				if total_basic_amount:
+					d.additional_cost = (flt(d.basic_amount) / total_basic_amount) * self.total_additional_costs
+				else:
+					d.additional_cost = (flt(d.qty) / total_qty) * self.total_additional_costs
 			else:
 				d.additional_cost = 0
 
@@ -710,11 +738,49 @@ class StockEntry(StockController):
 
 		for d in self.get('items'):
 			if cstr(d.t_warehouse):
-				sl_entries.append(self.get_sl_entries(d, {
+				sle = self.get_sl_entries(d, {
 					"warehouse": cstr(d.t_warehouse),
 					"actual_qty": flt(d.transfer_qty),
 					"incoming_rate": flt(d.valuation_rate)
-				}))
+				})
+
+				# SLE Dependency
+				if self.docstatus == 1:
+					# Material Transfer dependency
+					if cstr(d.s_warehouse):
+						sle.additional_cost = flt(d.additional_cost)
+						sle.dependencies = [{
+							"dependent_voucher_type": self.doctype,
+							"dependent_voucher_no": self.name,
+							"dependent_voucher_detail_no": d.name,
+							"dependency_type": "Amount",
+						}]
+
+					# Receive at Warehouse dependency
+					elif d.against_stock_entry and d.ste_detail:
+						sle.dependencies = [{
+							"dependent_voucher_type": d.against_stock_entry,
+							"dependent_voucher_no": d.ste_detail,
+							"dependent_voucher_detail_no": d.name,
+							"dependency_type": "Rate",
+							"dependency_qty_filter": "Positive"
+						}]
+
+					# Manufacture / Repack dependency
+					elif self.is_finished_good_item(d) and not d.set_basic_rate_manually and d.cost_percentage:
+						sle.additional_cost = flt(d.additional_cost)
+						sle.dependencies = []
+						for dep_row in self.get("items"):
+							if self.is_scrap_item(dep_row) or (dep_row.s_warehouse and not dep_row.t_warehouse):
+								sle.dependencies.append({
+									"dependent_voucher_type": self.doctype,
+									"dependent_voucher_no": self.name,
+									"dependent_voucher_detail_no": dep_row.name,
+									"dependency_type": "Amount",
+									"dependency_percentage": d.cost_percentage
+								})
+
+				sl_entries.append(sle)
 
 		# On cancellation, make stock ledger entry for
 		# target warehouse first, to update serial no values properly

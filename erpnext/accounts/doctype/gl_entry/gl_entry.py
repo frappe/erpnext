@@ -295,9 +295,25 @@ def rename_gle_sle_docs():
 
 def rename_temporarily_named_docs(doctype):
 	"""Rename temporarily named docs using autoname options"""
+	meta = frappe.get_meta(doctype)
+	table_fields = meta.get_table_fields()
+
 	docs_to_rename = frappe.get_all(doctype, {"to_rename": "1"}, order_by="creation", limit=50000)
 	for doc in docs_to_rename:
 		oldname = doc.name
-		set_name_from_naming_options(frappe.get_meta(doctype).autoname, doc)
+
+		set_name_from_naming_options(meta.autoname, doc)
 		newname = doc.name
-		frappe.db.sql("""UPDATE `tab{}` SET name = %s, to_rename = 0 where name = %s""".format(doctype), (newname, oldname))
+
+		frappe.db.sql("""
+			UPDATE `tab{0}`
+			SET name = %s, to_rename = 0
+			where name = %s
+		""".format(doctype), (newname, oldname))
+
+		for df in table_fields:
+			frappe.db.sql("""
+				UPDATE `tab{0}`
+				SET parent = %s
+				where parent = %s
+			""".format(df.options), (newname, oldname))

@@ -343,14 +343,29 @@ class SellingController(StockController):
 			if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
 				if flt(d.conversion_factor)==0.0:
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
+
 				return_rate = 0
+				return_dependency = []
+
 				if cint(self.is_return) and self.docstatus==1:
 					delivery_note = self.return_against if self.doctype == "Delivery Note" else d.get('delivery_note')
 					if d.get('dn_detail') and delivery_note:
+						return_dependency = [{
+							"dependent_voucher_type": "Delivery Note",
+							"dependent_voucher_no": delivery_note,
+							"dependent_voucher_detail_no": d.dn_detail,
+							"dependency_type": "Rate"
+						}]
 						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.dn_detail,
 							against_document_type="Delivery Note", against_document=delivery_note)
 					elif self.doctype == "Sales Invoice" and d.get('si_detail') and self.get('return_against')\
 							and frappe.db.get_value("Sales Invoice", self.return_against, 'update_stock', cache=1):
+						return_dependency = [{
+							"dependent_voucher_type": "Sales Invoice",
+							"dependent_voucher_no": self.return_against,
+							"dependent_voucher_detail_no": d.si_detail,
+							"dependency_type": "Rate"
+						}]
 						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.si_detail,
 							against_document_type="Sales Invoice", against_document=self.return_against)
 					else:
@@ -367,10 +382,25 @@ class SellingController(StockController):
 							"incoming_rate": return_rate
 						}))
 
+				target_warehouse_dependency = []
 				if d.target_warehouse:
+					if self.docstatus == 1:
+						target_warehouse_dependency = [{
+							"dependent_voucher_type": self.doctype,
+							"dependent_voucher_no": self.name,
+							"dependent_voucher_detail_no": d.name,
+							"dependency_type": "Amount",
+						}]
+
+					if self.is_return:
+						target_warehouse_dependency, return_dependency = return_dependency, target_warehouse_dependency
+						if target_warehouse_dependency:
+							target_warehouse_dependency[0]['dependency_qty_filter'] = 'Positive'
+
 					target_warehouse_sle = self.get_sl_entries(d, {
 						"actual_qty": flt(d.qty),
-						"warehouse": d.target_warehouse
+						"warehouse": d.target_warehouse,
+						"dependencies": target_warehouse_dependency
 					})
 
 					if self.docstatus == 1:
@@ -401,7 +431,8 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==1)):
 						sl_entries.append(self.get_sl_entries(d, {
 							"actual_qty": -1*flt(d.qty),
-							"incoming_rate": return_rate
+							"incoming_rate": return_rate,
+							"dependencies": return_dependency
 						}))
 		self.make_sl_entries(sl_entries)
 

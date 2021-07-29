@@ -59,8 +59,17 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	return sle.name
 
 def delete_cancelled_entry(voucher_type, voucher_no):
-	frappe.db.sql("""delete from `tabStock Ledger Entry`
-		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
+	frappe.db.sql("""
+		delete dep
+		from `tabStock Ledger Entry Dependency` dep
+		inner join `tabStock Ledger Entry` sle on dep.parent = sle.name
+		where sle.voucher_type=%s and sle.voucher_no=%s
+	""", (voucher_type, voucher_no))
+
+	frappe.db.sql("""
+		delete from `tabStock Ledger Entry`
+		where voucher_type=%s and voucher_no=%s
+	""", (voucher_type, voucher_no))
 
 def get_allow_negative_stock(sle=None):
 	if sle and sle.get('allow_negative_stock'):
@@ -107,8 +116,9 @@ class update_entries_after(object):
 			setattr(self, key, flt(self.previous_sle.get(key)))
 
 		self.company = frappe.db.get_value("Warehouse", self.warehouse, "company")
-		self.precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"),
+		self.value_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"),
 			currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
+		self.value_db_precision = 6 if cint(self.value_precision) <= 6 else 9
 
 		self.qty_db_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("actual_qty"))
 		self.qty_db_precision = 6 if cint(self.qty_db_precision) <= 6 else 9
@@ -116,6 +126,11 @@ class update_entries_after(object):
 		self.val_rate_db_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("valuation_rate"),
 			currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
 		self.val_rate_db_precision = 6 if cint(self.qty_db_precision) <= 6 else 9
+
+		if not frappe.flags.stock_ledger_vouchers_reposted:
+			frappe.flags.stock_ledger_vouchers_reposted = []
+			frappe.flags.stock_ledger_vouchers_visited = set()
+			frappe.flags.stock_ledger_vouchers_value_changed = set()
 
 		self.prev_stock_value = self.previous_sle.stock_value or 0.0
 		self.stock_queue = json.loads(self.previous_sle.stock_queue or "[]")
@@ -126,6 +141,8 @@ class update_entries_after(object):
 	def build(self):
 		# includes current entry!
 		entries_to_fix = self.get_sle_after_datetime()
+		self.sle_dependency_map = self.get_sle_dependency_map(entries_to_fix)
+		dependent_entries = self.get_dependent_entries_to_fix(entries_to_fix)
 
 		for sle in entries_to_fix:
 			self.process_sle(sle)
@@ -134,6 +151,16 @@ class update_entries_after(object):
 			self.raise_exceptions()
 
 		self.update_bin()
+
+		for d in dependent_entries:
+			update_entries_after({
+				"item_code": d.item_code,
+				"warehouse": d.warehouse,
+				"batch_no": d.batch_no,
+				"posting_date": d.posting_date,
+				"posting_time": d.posting_time,
+				"voucher_no": d.voucher_no
+			}, allow_negative_stock=self.allow_negative_stock, via_landed_cost_voucher=self.via_landed_cost_voucher)
 
 	def update_bin(self):
 		# update bin
@@ -177,6 +204,8 @@ class update_entries_after(object):
 				self.qty_after_transaction += flt(sle.actual_qty)
 				return
 
+		self.get_dependent_values(sle)
+
 		serial_nos = get_serial_nos(sle.serial_no)
 		if serial_nos:
 			if sle.voucher_type == "Stock Reconciliation" and not sle.reset_rate:
@@ -202,15 +231,17 @@ class update_entries_after(object):
 					self.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 
 		# rounding as per precision
-		self.stock_value = flt(self.stock_value, self.precision)
+		self.stock_value = flt(self.stock_value, self.value_precision)
 
 		stock_value_difference = self.stock_value - self.prev_stock_value
 
 		self.prev_stock_value = self.stock_value
 
 		if self.batch_wise_valuation:
-			self.batch_data.batch_stock_value = flt(self.batch_data.batch_stock_value, self.precision)
+			self.batch_data.batch_stock_value = flt(self.batch_data.batch_stock_value, self.value_precision)
 			self.batch_data.prev_batch_stock_value = self.batch_data.batch_stock_value
+
+		stock_value_difference_changed = flt(stock_value_difference, self.value_db_precision) != sle.stock_value_difference
 
 		# update current sle
 		sle.qty_after_transaction = self.qty_after_transaction
@@ -234,6 +265,8 @@ class update_entries_after(object):
 		for serial_no in serial_nos:
 			sr_doc = frappe.get_doc("Serial No", serial_no)
 			update_args_for_serial_no(sr_doc, serial_no, sle)
+
+		self.add_sle_to_reposted_flags(sle, stock_value_difference_changed)
 
 	def validate_negative_stock(self, sle, validate_batch=False):
 		"""
@@ -498,6 +531,119 @@ class update_entries_after(object):
 			else:
 				sle.incoming_rate = 0
 
+	def get_dependent_values(self, sle):
+		dependencies = self.sle_dependency_map.get(sle.name)
+		if dependencies:
+			dependency_keys = list(dependencies.keys())
+
+			dependency_sles = frappe.db.sql("""
+				select voucher_type, voucher_no, voucher_detail_no,
+					stock_value_difference, incoming_rate, outgoing_rate, actual_qty
+				from `tabStock Ledger Entry`
+				where (voucher_type, voucher_no, voucher_detail_no) in %s
+					and name != %s
+					and ifnull(is_cancelled, 'No')='No'
+			""", [dependency_keys, sle.name], as_dict=1)
+
+			dependent_sle_value = flt(sle.additional_cost)
+
+			for dep_sle in dependency_sles:
+				dependency_key = (dep_sle.voucher_type, dep_sle.voucher_no, dep_sle.voucher_detail_no)
+				dependency_details = dependencies[dependency_key]
+
+				if dependency_details.dependency_qty_filter == "Positive" and dep_sle.actual_qty <= 0:
+					continue
+				if dependency_details.dependency_qty_filter == "Negative" and dep_sle.actual_qty >= 0:
+					continue
+
+				if dependency_details.dependency_type == "Rate":
+					rate = dep_sle.stock_value_difference / dep_sle.actual_qty
+					current_dependency_value = rate * sle.actual_qty
+				else:
+					current_dependency_value = -1 * dep_sle.stock_value_difference
+
+				dependent_sle_value += current_dependency_value * dependency_details.dependency_percentage / 100
+
+			dependent_sle_value = flt(dependent_sle_value, self.value_precision)
+			rate = flt(dependent_sle_value / sle.actual_qty, self.val_rate_db_precision)
+
+			if sle.actual_qty > 0:
+				sle.incoming_rate = rate
+				sle.outgoing_rate = 0
+			elif sle.actual_qty < 0:
+				sle.outgoing_rate = rate
+				sle.incoming_rate = 0
+
+	def get_sle_dependency_map(self, sles):
+		names = [d.name for d in sles]
+		if not names:
+			return []
+
+		dependencies = frappe.db.sql("""
+			select parent, dependent_voucher_type, dependent_voucher_no, dependent_voucher_detail_no,
+				dependency_type, dependency_percentage, dependency_qty_filter
+			from `tabStock Ledger Entry Dependency`
+			where parent in %s
+		""", [names], as_dict=1)
+
+		dependency_map = {}
+		for d in dependencies:
+			dependency_key = (d.dependent_voucher_type, d.dependent_voucher_no, d.dependent_voucher_detail_no)
+			sle_dependencies = dependency_map.setdefault(d.parent, {})
+			sle_dependencies[dependency_key] = d
+
+		return dependency_map
+
+	def get_dependent_entries_to_fix(self, sles):
+		dependency_keys = [(d.voucher_type, d.voucher_no, d.voucher_detail_no) for d in sles]
+		if not dependency_keys:
+			return []
+
+		date_condition = ""
+		if self.previous_sle:
+			date_condition = """ and timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
+				and name != %(name)s"""
+
+		# exclude cancelled entries
+		# future entries only
+		# cannot be same (item_code, warehouse) since it'll already be in the SLEs to fix list
+		# must be referenced by SLE Dependency Key
+		# filter by qty positive or negative
+		dependent_entries = frappe.db.sql("""
+			select sle.item_code, sle.warehouse, sle.batch_no, sle.posting_date, sle.posting_time,
+				sle.voucher_type, sle.voucher_no
+			from `tabStock Ledger Entry` sle
+			where ifnull(is_cancelled, 'No')='No'
+				and (sle.item_code, sle.warehouse) != (%(item_code)s, %(warehouse)s)
+				and exists(select dep.name from `tabStock Ledger Entry Dependency` dep where dep.parent = sle.name
+					and (dep.dependent_voucher_type, dep.dependent_voucher_no, dep.dependent_voucher_detail_no) in %(dependency_keys)s
+					and CASE
+						WHEN dep.dependency_qty_filter = 'Positive' then sle.actual_qty > 0
+						WHEN dep.dependency_qty_filter = 'Negative' then sle.actual_qty < 0
+						ELSE true
+					END)
+				{0}
+			order by timestamp(sle.posting_date, sle.posting_time), sle.creation
+			for update
+		""".format(date_condition), {
+			'posting_date': self.previous_sle.posting_date if self.previous_sle else "1900-01-01",
+			'posting_time': self.previous_sle.posting_time if self.previous_sle else "00:00",
+			'name': self.previous_sle.name if self.previous_sle else "",
+			'item_code': self.args.get("item_code"),
+			'warehouse': self.args.get("warehouse"),
+			'dependency_keys': dependency_keys
+		}, as_dict=1)
+
+		to_repost = []
+		added_to_repost = set()
+		for d in dependent_entries:
+			bin_key = (d.item_code, d.warehouse)
+			if bin_key not in added_to_repost:
+				to_repost.append(d)
+				added_to_repost.add(bin_key)
+
+		return to_repost
+
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = ""
 
@@ -570,6 +716,22 @@ class update_entries_after(object):
 			frappe.throw(msg, NegativeStockError, title='Insufficient Stock')
 		else:
 			raise NegativeStockError(msg)
+
+	def add_sle_to_reposted_flags(self, sle, stock_value_difference_changed):
+		voucher_tuple = (sle.voucher_type, sle.voucher_no)
+
+		if stock_value_difference_changed:
+			frappe.flags.stock_ledger_vouchers_value_changed.add(voucher_tuple)
+
+		if voucher_tuple not in frappe.flags.stock_ledger_vouchers_visited:
+			frappe.flags.stock_ledger_vouchers_visited.add(voucher_tuple)
+
+			frappe.flags.stock_ledger_vouchers_reposted.append(frappe._dict({
+				"posting_date": sle.posting_date,
+				"posting_time": sle.posting_time,
+				"voucher_type": sle.voucher_type,
+				"voucher_no": sle.voucher_no,
+			}))
 
 def get_previous_sle(args, for_update=False):
 	"""
