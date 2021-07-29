@@ -11,6 +11,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-18.04
+    timeout-minutes: 60
 
     name: Patch Test
 
