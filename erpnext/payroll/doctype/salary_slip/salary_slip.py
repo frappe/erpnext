@@ -360,8 +360,8 @@ class SalarySlip(TransactionBase):
 		b = date(date.today().year, 12, 31)
 		lst=frappe.get_doc("Employee",{"employee":self.employee})
 		if a <lst.date_of_joining<=b:
-			end_date = getdate(lst.date_of_joining)
-			start_date = getdate(a)
+			end_date = getdate(b)
+			start_date = getdate(lst.date_of_joining)
 			num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
 		else:
 			num_months=12
