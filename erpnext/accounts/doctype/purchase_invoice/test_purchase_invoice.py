@@ -1018,8 +1018,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		expected_gle = [
 			["_Test Account Cost for Goods Sold - _TC", 37500.0],
-			["_Test Payable USD - _TC", -40000.0],
-			["Exchange Gain/Loss - _TC", 2500.0]
+			["_Test Payable USD - _TC", -35000.0],
+			["Exchange Gain/Loss - _TC", -2500.0]
 		]
 
 		gl_entries = frappe.db.sql("""
@@ -1049,8 +1049,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		expected_gle = [
 			["_Test Account Cost for Goods Sold - _TC", 36500.0],
-			["_Test Payable USD - _TC", -38000.0],
-			["Exchange Gain/Loss - _TC", 1500.0]
+			["_Test Payable USD - _TC", -35000.0],
+			["Exchange Gain/Loss - _TC", -1500.0]
 		]
 
 		gl_entries = frappe.db.sql("""
