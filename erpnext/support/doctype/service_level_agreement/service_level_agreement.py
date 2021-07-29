@@ -96,7 +96,7 @@ class ServiceLevelAgreement(Document):
 				frappe.throw(_("Service Level Agreement with Entity Type {0} and Entity {1} already exists.").format(self.entity_type, self.entity))
 
 	def validate_condition(self):
-		temp_doc = frappe.new_doc(self.document_type)
+		temp_doc = frappe.new_doc('Issue')
 		if self.condition:
 			try:
 				frappe.safe_eval(self.condition, None, get_context(temp_doc))
