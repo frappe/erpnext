@@ -425,11 +425,10 @@ class StockEntry(StockController):
 			elif d.t_warehouse and not d.basic_rate:
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, d.name, d.batch_no, d.allow_zero_valuation_rate,
-					currency=erpnext.get_company_currency(self.company), company=self.company)
+					currency=erpnext.get_company_currency(self.company), company=self.company,
+					raise_error_if_no_rate=False)
 
 	def set_actual_qty(self):
-		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
-
 		for d in self.get('items'):
 			previous_sle = get_previous_sle({
 				"item_code": d.item_code,
@@ -440,15 +439,6 @@ class StockEntry(StockController):
 
 			# get actual stock at source warehouse
 			d.actual_qty = previous_sle.get("qty_after_transaction") or 0
-
-			# validate qty during submit
-			# if d.docstatus==1 and d.s_warehouse and not allow_negative_stock and flt(d.actual_qty, d.precision("actual_qty")) < flt(d.transfer_qty, d.precision("actual_qty")):
-			# 	frappe.throw(_("Row {0}: Quantity not available for {4} in warehouse {1} at posting time of the entry ({2} {3})").format(d.idx,
-			# 		frappe.bold(d.s_warehouse), formatdate(self.posting_date),
-			# 		format_time(self.posting_time), frappe.bold(d.item_code))
-			# 		+ '<br><br>' + _("Available quantity is {0}, you need {1}").format(frappe.bold(d.actual_qty),
-			# 			frappe.bold(d.transfer_qty)),
-			# 		NegativeStockError, title=_('Insufficient Stock'))
 
 	def set_serial_nos(self, work_order):
 		previous_se = frappe.db.get_value("Stock Entry", {"work_order": work_order,
