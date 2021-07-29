@@ -11,8 +11,8 @@ frappe.ui.form.on("Email Digest", {
 						name: frm.doc.name
 					},
 					callback: function(r) {
-						var d = new frappe.ui.Dialog({
-							title: __('Email Digest: ') + frm.doc.name,
+						let d = new frappe.ui.Dialog({
+							title: __('Email Digest: {0}', [frm.doc.name]),
 							width: 800
 						});
 						$(d.body).html(r.message);
