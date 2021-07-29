@@ -55,37 +55,27 @@ class ProductFiltersBuilder:
 
 		return filter_data
 
-	def get_attribute_fitlers(self):
+	def get_attribute_filters(self):
 		attributes = [row.attribute for row in self.doc.filter_attributes]
-		attribute_docs = [
-			frappe.get_doc('Item Attribute', attribute) for attribute in attributes
-		]
+		result = frappe.db.sql(
+			"""
+			select
+				distinct attribute, attribute_value
+			from
+				`tabItem Variant Attribute`
+			where
+				attribute in %(attributes)s
+				and attribute_value is not null
+		""",
+			{"attributes": attributes},
+			as_dict=1,
+		)
 
-		valid_attributes = []
+		attribute_value_map = {}
+		for d in result:
+			attribute_value_map.setdefault(d.attribute, []).append(d.attribute_value)
 
-		for attr_doc in attribute_docs:
-			selected_attributes = []
-			for attr in attr_doc.item_attribute_values:
-				or_filters = []
-				filters= [
-					["Item Variant Attribute", "attribute", "=", attr.parent],
-					["Item Variant Attribute", "attribute_value", "=", attr.attribute_value]
-				]
-				if self.item_group:
-					or_filters.extend([
-						["item_group", "=", self.item_group],
-						["Website Item Group", "item_group", "=", self.item_group]
-					])
-
-				if frappe.db.get_all("Item", filters, or_filters=or_filters, limit=1):
-					selected_attributes.append(attr)
-
-			if selected_attributes:
-				valid_attributes.append(
-					_dict(
-						item_attribute_values=selected_attributes,
-						name=attr_doc.name
-					)
-				)
-
-		return valid_attributes
+		out = []
+		for name, values in attribute_value_map.items():
+			out.append(frappe._dict(name=name, item_attribute_values=values))
+		return out
