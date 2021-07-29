@@ -166,7 +166,7 @@ class LinkedInSettings(Document):
 			response = requests.delete(url="https://api.linkedin.com/v2/shares/urn:li:share:{0}".format(post_id), headers=self.get_headers())
 			if response.status_code !=200:
 				raise
-		except Exception as e:
+		except Exception:
 			self.api_error(response)
 	
 	def get_post(self, post_id):
@@ -177,7 +177,7 @@ class LinkedInSettings(Document):
 			if response.status_code !=200:
 				raise
 	
-		except Exception as e:
+		except Exception:
 			self.api_error(response)
 
 		response = frappe.parse_json(response.content.decode())
