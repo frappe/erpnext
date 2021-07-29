@@ -1,19 +1,21 @@
 {
  "action": "Update Settings",
+ "action_label": "Let\u2019s walk through few Buying Settings",
  "creation": "2020-05-06 15:53:44.667414",
+ "description": "## Buying Settings\nBuying module\u2019s features are highly configurable as per your business needs. Buying Settings is the place where you can set your preferences for:\n\n- Supplier naming and default values\n- Billing and shipping preference in buying transactions\n",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "idx": 0,
  "is_complete": 0,
- "is_mandatory": 0,
- "is_single": 0,
+ "is_single": 1,
  "is_skipped": 0,
- "modified": "2020-05-12 18:30:06.323797",
+ "modified": "2021-07-27 15:35:11.068464",
  "modified_by": "Administrator",
  "name": "Buying Settings",
  "owner": "Administrator",
  "reference_document": "Buying Settings",
+ "show_form_tour": 0,
  "show_full_form": 0,
  "title": "Configure Buying Settings.",
- "validate_action": 1
+ "validate_action": 0
 }

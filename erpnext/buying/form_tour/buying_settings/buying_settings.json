@@ -1,0 +1,101 @@
+{
+ "creation": "2021-07-28 11:51:42.319984",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-07-28 11:54:24.942423",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying Settings",
+ "owner": "Administrator",
+ "reference_doctype": "Buying Settings",
+ "save_on_complete": 0,
+ "steps": [
+  {
+   "description": "When a Supplier is saved, system generates a unique identity or name for that Supplier which can be used to refer the Supplier in various Buying transactions.",
+   "field": "",
+   "fieldname": "supp_master_name",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Supplier Naming By",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Supplier Naming By"
+  },
+  {
+   "description": "Configure what should be the default value of Supplier Group when creating a new Supplier. For example, if most of your suppliers supply you hardware, you can set the default as 'Hardware'.",
+   "field": "",
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Default Supplier Group",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Default Supplier Group"
+  },
+  {
+   "description": "Configure what should be the default Price List when creating a new Buying transaction, the default is set as 'Standard Buying'. Item prices will be fetched from this Price List. You can modify the 'Price List' by using the arrow at the right-end of the field to change the currency and country.",
+   "field": "",
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Default Buying Price List",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Default Buying Price List"
+  },
+  {
+   "description": "If this option is configured \"Yes\", ERPNext will prevent you from creating a Purchase Invoice or a Purchase Receipt directly without creating a Purchase Order first. If retail transactions are involved where the order happens offline, then Purchase Orders can be skipped. If you're accepting sample Items, you can directly create a Purchase Receipt to receive the Items to your Warehouse.",
+   "field": "",
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Purchase Order Required"
+  },
+  {
+   "description": "If this option is configured \"Yes\", ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. In case the Item being transacted is a service, it'll not require a receipt, you can directly create an Invoice.",
+   "field": "",
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Purchase Receipt Required"
+  },
+  {
+   "description": "If this is enabled, ERPNext will validate whether an Item's price is changing in a Purchase Invoice or Purchase Receipt created from a Purchase Order, i.e. it will help you maintain the same rate throughout the purchase cycle.",
+   "field": "",
+   "fieldname": "maintain_same_rate",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Maintain Same Rate Throughout the Purchase Cycle",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Maintain Same Rate Throughout Purchase Cycle"
+  },
+  {
+   "description": "When this checkbox is unchecked, an item cannot be added multiple times in the same Purchase Order. However, you can still explicitly change the quantity. ",
+   "field": "",
+   "fieldname": "allow_multiple_items",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Allow Item To Be Added Multiple Times in a Transaction",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Allow Item to be added multiple times in a transaction"
+  }
+ ],
+ "title": "Buying Settings"
+}
