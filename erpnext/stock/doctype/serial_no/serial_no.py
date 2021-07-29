@@ -253,16 +253,27 @@ class SerialNo(StockController):
 
 	def after_rename(self, old, new, merge=False):
 		"""rename serial_no text fields"""
-		for dt in frappe.db.sql("""select parent from tabDocField
-			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text', 'Long Text')"""):
+		docfields = frappe.db.sql("""
+			select distinct parent, fieldname
+			from tabDocField
+			where fieldname in ('serial_no', 'rejected_serial_no', 'current_serial_no')
+				and fieldtype in ('Text', 'Small Text', 'Long Text')
+		""")
 
-			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
+		for dt, fieldname in docfields:
+			rows = frappe.db.sql("""
+				select name, `{0}`
+				from `tab{1}`
+				where `{0}` like {2}
+			""".format(fieldname, dt, frappe.db.escape('%' + old + '%')))
 
-				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
-				frappe.db.sql("""update `tab%s` set serial_no = %s
-					where name=%s""" % (dt[0], '%s', '%s'),
-					('\n'.join(list(serial_nos)), item[0]))
+			for row_name, serial_text in rows:
+				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, get_serial_nos(serial_text))
+				frappe.db.sql("""
+					update `tab{0}`
+					set `{1}` = %s
+					where name = %s
+				""".format(dt, fieldname), ('\n'.join(list(serial_nos)), row_name))
 
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
