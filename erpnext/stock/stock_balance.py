@@ -359,3 +359,7 @@ def repost_all_stock_vouchers():
 	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 0)
 	frappe.db.commit()
 	frappe.db.auto_commit_on_many_writes = 0
+
+	if os.path.isfile(filename):
+		print("Deleting Checkpoint")
+		os.remove(filename)
