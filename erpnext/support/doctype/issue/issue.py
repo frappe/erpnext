@@ -242,7 +242,8 @@ class Issue(Document):
 			frappe.throw(_("This Service Level Agreement is specific to Customer {0}").format(service_level_agreement.customer))
 
 		self.service_level_agreement = service_level_agreement.name
-		self.priority = service_level_agreement.default_priority if not priority else priority
+		if not self.priority:
+			self.priority = service_level_agreement.default_priority
 
 		priority = get_priority(self)
 
