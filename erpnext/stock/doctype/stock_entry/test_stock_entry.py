@@ -870,6 +870,59 @@ class TestStockEntry(unittest.TestCase):
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
 
+	def test_batchwise_item_valuation_fifo(self):
+		item, warehouses, batches = setup_batchwise_item_valuation_test("FIFO")
+
+		# Incoming Entries for Stock Value check
+		pr_entry_list = [
+			(item, warehouses[0], batches[0], 1, 100),
+			(item, warehouses[1], batches[0], 1,  25),
+			(item, warehouses[0], batches[1], 1,  50),
+			(item, warehouses[0], batches[0], 1, 150),
+		]
+		expected_sv = [100, 25, 50, 250]
+		prs = create_pr_entries_for_batchwise_item_valuation_test(pr_entry_list)
+		sv_list = frappe.db.sql("""
+			SELECT stock_value
+			FROM `tabstock Ledger Entry`
+			WHERE
+				voucher_no IN %(voucher_nos)s
+			ORDER BY posting_time ASC
+		""", dict(
+			voucher_nos=[pr.name for pr in prs]
+		))
+		sv_list = [i[0] for i in sv_list]
+		abs_sv_diff = [abs(x - y) for x, y in zip(expected_sv, sv_list)]
+
+		# Outgoing Entries for Stock Value Difference check
+		dn_entry_list = [
+			(item, warehouses[0], batches[1], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200),
+			(item, warehouses[1], batches[0], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200)
+		]
+		expected_incoming_rates = expected_abs_svd = [50, 100, 25, 150]
+		dns = create_dn_entries_for_batchwise_item_valuation_test(dn_entry_list)
+		svd_list = frappe.db.sql("""
+			SELECT stock_value_difference
+			FROM `tabstock Ledger Entry`
+			WHERE
+				voucher_no IN %(voucher_nos)s
+			ORDER BY posting_time ASC
+		""", dict(
+			voucher_nos=[dn.name for dn in dns]
+		))
+		svd_list = [i[0] for i in svd_list]
+		abs_svd_diff = [abs(x + y) for x, y in zip(expected_abs_svd, svd_list)]
+
+		self.assertTrue(sum(abs_sv_diff) == 0, "Incorrect 'Stock Value' values")
+		self.assertTrue(sum(abs_svd_diff) == 0, "Incorrect 'Stock Value Difference' values")
+		for dn, incoming_rate in zip(dns, expected_incoming_rates):
+			self.assertEqual(
+				dn.items[0].incoming_rate, incoming_rate,
+				"Incorrect 'Incoming Rate' values fetched for DN items"
+			)
+
 def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
@@ -940,3 +993,48 @@ def get_multiple_items():
 		]
 
 test_records = frappe.get_test_records('Stock Entry')
+
+def setup_batchwise_item_valuation_test(valuation_method):
+	from erpnext.stock.doctype.batch.batch import make_batch
+	from erpnext.stock.doctype.item.test_item import make_item
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	item = make_item("BWIV - Test Item A", dict(valuation_method=valuation_method, has_batch_no=1))
+	warehouses = [create_warehouse(f"BWIV - Test Warehouse {i}") for i in ['J', 'K']]
+	batches = [f"BWIV - Test Batch {i}" for i in ['X', 'Y']]
+
+	for batch_id in batches:
+		if not frappe.db.exists("Batch", batch_id):
+			make_batch(frappe._dict(batch_id=batch_id, item=item.item_code))
+
+	return item.item_code, warehouses, batches
+
+def create_pr_entries_for_batchwise_item_valuation_test(pr_entry_list):
+	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+	prs = []
+
+	for item, warehouse, batch_no, qty, rate in pr_entry_list:
+		pr = make_purchase_receipt(item=item, warehouse=warehouse, qty=qty, rate=rate, batch_no=batch_no)
+		prs.append(pr)
+
+	return prs
+
+def create_dn_entries_for_batchwise_item_valuation_test(dn_entry_list):
+	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+	dns = []
+	for item, warehouse, batch_no, qty, rate in dn_entry_list:
+		so = make_sales_order(
+			rate=rate,
+			qty=qty,
+			item=item,
+			warehouse=warehouse,
+			against_blanket_order=0
+		)
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].batch_no = batch_no
+		dn.insert()
+		dn.submit()
+		dns.append(dn)
+	return dns

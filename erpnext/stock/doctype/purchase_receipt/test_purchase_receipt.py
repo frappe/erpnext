@@ -1249,6 +1249,9 @@ def make_purchase_receipt(**args):
 		"asset_location": args.location or "Test Location"
 	})
 
+	if args.batch_no:
+		pr.items[0].batch_no = args.batch_no
+
 	if args.get_multiple_items:
 		pr.items = []
 		for item in get_items(warehouse= args.warehouse, cost_center = args.cost_center or frappe.get_cached_value('Company', pr.company, 'cost_center')):
