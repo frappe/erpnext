@@ -22,7 +22,7 @@ frappe.ui.form.on('Social Media Post', {
     },
 
     validate_tweet_length: function(frm) {
-        if (frm.doc?.text?.length > 280){
+        if (frm.doc.text && frm.doc.text.length > 280){
             frappe.throw(__("Tweet length Must be less than 280."))
         }
     },
@@ -43,7 +43,7 @@ frappe.ui.form.on('Social Media Post', {
                     }
 
                     let datasets = [],colors = []
-                    if (r.message?.twitter) {
+                    if (r.message && r.message.twitter) {
                         window.post = r.message
                         colors.push('#1DA1F2')
                         datasets.push({
@@ -51,7 +51,7 @@ frappe.ui.form.on('Social Media Post', {
                             values: [r.message.twitter.favorite_count, r.message.twitter.retweet_count]
                         })
                     }
-                    if (r.message?.linkedin) {
+                    if (r.message && r.message.linkedin) {
                         colors.push('#0077b5')
                         datasets.push({
                             name: 'LinkedIn',
