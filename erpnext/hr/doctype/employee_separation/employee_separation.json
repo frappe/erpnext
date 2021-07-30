@@ -50,11 +50,12 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "Pending",
    "fieldname": "boarding_status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nPending\nIn Process\nCompleted",
-   "reqd": 1
+   "options": "Pending\nIn Process\nCompleted",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -147,7 +148,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-28 15:58:36.020196",
+ "modified": "2021-06-03 18:02:54.007313",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Separation",
