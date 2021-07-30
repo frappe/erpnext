@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
-from frappe.utils import flt, unique
+from frappe.utils import flt, unique, add_days
 
 class EmployeeBoardingController(Document):
 	'''
@@ -52,7 +52,9 @@ class EmployeeBoardingController(Document):
 				'description': activity.description,
 				'department': self.department,
 				'company': self.company,
-				'task_weight': activity.task_weight
+				'task_weight': activity.task_weight,
+				'exp_start_date': add_days(self.boarding_begins_on, activity.begin_on),
+				'exp_end_date': add_days(self.boarding_begins_on, activity.begin_on + activity.duration)
 			}).insert(ignore_permissions=True)
 			activity.db_set('task', task.name)
 
@@ -103,7 +105,8 @@ class EmployeeBoardingController(Document):
 @frappe.whitelist()
 def get_onboarding_details(parent, parenttype):
 	return frappe.get_all('Employee Boarding Activity',
-		fields=['activity_name', 'role', 'user', 'required_for_employee_creation', 'description', 'task_weight'],
+		fields=['activity_name', 'role', 'user', 'required_for_employee_creation',
+			'description', 'task_weight', 'begin_on', 'duration'],
 		filters={'parent': parent, 'parenttype': parenttype},
 		order_by= 'idx')
 
