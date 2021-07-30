@@ -332,7 +332,25 @@ class TestPurchaseReceipt(ERPNextTestCase):
 
 		pr1.submit()
 		self.assertRaises(frappe.ValidationError, pr2.submit)
+<<<<<<< HEAD
 		frappe.db.rollback()
+=======
+
+		pr1.cancel()
+		se.cancel()
+		se1.cancel()
+		se2.cancel()
+		se3.cancel()
+		po.reload()
+		pr2.load_from_db()
+
+		if pr2.docstatus == 1 and frappe.db.get_value('Stock Ledger Entry',
+			{'voucher_no': pr2.name, 'is_cancelled': 0}, 'name'):
+			pr2.cancel()
+
+			po.load_from_db()
+			po.cancel()
+>>>>>>> 2a14f255cf (fix: COGS account in purchase receipt)
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -1055,6 +1073,7 @@ class TestPurchaseReceipt(ERPNextTestCase):
 
 		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', before_test_value)
 
+<<<<<<< HEAD
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
@@ -1070,6 +1089,22 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		)
 
 		automatically_fetch_payment_terms()
+=======
+	def test_purchase_receipt_with_exchange_rate_difference(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice as create_purchase_invoice
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt as create_purchase_receipt
+
+		pi = create_purchase_invoice(company="_Test Company with perpetual inventory",
+			cost_center = "Main - TCP1",
+			warehouse = "Stores - TCP1",
+			expense_account ="_Test Account Cost for Goods Sold - TCP1",
+			currency = "USD", conversion_rate = 70)
+
+		pr = create_purchase_receipt(pi.name)
+		pr.conversion_rate = 80
+		pr.items[0].purchase_invoice = pi.name
+		pr.items[0].purchase_invoice_item = pi.items[0].name
+>>>>>>> 2a14f255cf (fix: COGS account in purchase receipt)
 
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
