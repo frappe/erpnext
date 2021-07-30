@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe.utils import cstr, cint, get_fullname
+from frappe.utils import cstr, cint, get_fullname, flt
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
@@ -42,8 +42,8 @@ class Opportunity(TransactionBase):
 	def calculate_totals(self):
 		total = base_total = 0
 		for item in self.get('items'):
-			item.amount = item.rate * item.qty
-			item.basic_rate = self.conversion_rate * item.rate
+			item.amount = flt(item.rate) * flt(item.qty)
+			item.base_rate = self.conversion_rate * item.rate
 			item.base_amount = self.conversion_rate * item.amount
 			total += item.amount
 			base_total += item.base_amount

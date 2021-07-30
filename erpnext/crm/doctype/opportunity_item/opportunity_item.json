@@ -18,7 +18,7 @@
   "image",
   "image_view",
   "quantity_and_rate_section",
-  "basic_rate",
+  "base_rate",
   "base_amount",
   "column_break_16",
   "rate",
@@ -39,6 +39,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "1",
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -115,17 +116,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "basic_rate",
-   "fieldtype": "Currency",
-   "label": "Rate (Company Currency)",
-   "oldfieldname": "basic_rate",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -159,12 +149,23 @@
    "options": "currency",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Currency",
+   "label": "Rate (Company Currency)",
+   "oldfieldname": "basic_rate",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-20 03:47:44.398982",
+ "modified": "2021-07-30 16:39:09.775720",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Item",

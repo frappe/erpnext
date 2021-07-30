@@ -141,6 +141,7 @@ frappe.ui.form.on("Opportunity", {
 			});
 		}
 		frm.trigger('opportunity_amount');
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	opportunity_amount: function(frm) {
@@ -202,7 +203,7 @@ frappe.ui.form.on("Opportunity Item", {
 	calculate: function(frm, cdt, cdn) {
 		let row = frappe.get_doc(cdt, cdn);
 		frappe.model.set_value(cdt, cdn, "amount", flt(row.qty) * flt(row.rate));
-		frappe.model.set_value(cdt, cdn, "basic_rate", flt(frm.doc.conversion_rate) * flt(row.rate));
+		frappe.model.set_value(cdt, cdn, "base_rate", flt(frm.doc.conversion_rate) * flt(row.rate));
 		frappe.model.set_value(cdt, cdn, "base_amount", flt(frm.doc.conversion_rate) * flt(row.amount));
 		frm.trigger("calculate_total");
 	},
