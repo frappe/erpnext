@@ -19,6 +19,7 @@
   "department",
   "designation",
   "employee_grade",
+  "holiday_list",
   "column_break_13",
   "date_of_joining",
   "boarding_begins_on",
@@ -159,11 +160,17 @@
    "fieldtype": "Date",
    "label": "Onboarding Begins On",
    "reqd": 1
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "label": "Holiday List",
+   "options": "Holiday List"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-30 13:49:51.906914",
+ "modified": "2021-07-30 14:55:04.560683",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Onboarding",

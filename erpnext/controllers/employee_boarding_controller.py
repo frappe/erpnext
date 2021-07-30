@@ -6,6 +6,8 @@ from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import flt, unique, add_days
+from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class EmployeeBoardingController(Document):
 	'''
@@ -41,9 +43,13 @@ class EmployeeBoardingController(Document):
 
 	def create_task_and_notify_user(self):
 		# create the task for the given project and assign to the concerned person
+		holiday_list = self.get_holiday_list()
+
 		for activity in self.activities:
 			if activity.task:
 				continue
+
+			dates = self.get_task_dates(activity, holiday_list)
 
 			task = frappe.get_doc({
 				'doctype': 'Task',
@@ -53,8 +59,8 @@ class EmployeeBoardingController(Document):
 				'department': self.department,
 				'company': self.company,
 				'task_weight': activity.task_weight,
-				'exp_start_date': add_days(self.boarding_begins_on, activity.begin_on),
-				'exp_end_date': add_days(self.boarding_begins_on, activity.begin_on + activity.duration)
+				'exp_start_date': dates[0],
+				'exp_end_date': dates[1]
 			}).insert(ignore_permissions=True)
 			activity.db_set('task', task.name)
 
@@ -80,6 +86,36 @@ class EmployeeBoardingController(Document):
 			# assign the task the users
 			if users:
 				self.assign_task_to_users(task, users)
+
+	def get_holiday_list(self):
+		if self.doctype == 'Employee Separation':
+			return get_holiday_list_for_employee(self.employee)
+		else:
+			if self.employee:
+				return get_holiday_list_for_employee(self.employee)
+			else:
+				if not self.holiday_list:
+					frappe.throw(_('Please set the Holiday List.'), frappe.MandatoryError)
+				else:
+					return self.holiday_list
+
+	def get_task_dates(self, activity, holiday_list):
+		start_date = end_date = None
+
+		if activity.begin_on:
+			start_date = add_days(self.boarding_begins_on, activity.begin_on)
+			start_date = self.update_if_holiday(start_date, holiday_list)
+
+			if activity.duration:
+				end_date = add_days(self.boarding_begins_on, activity.begin_on + activity.duration)
+				end_date = self.update_if_holiday(end_date, holiday_list)
+
+		return [start_date, end_date]
+
+	def update_if_holiday(self, date, holiday_list):
+		while is_holiday(holiday_list, date):
+			date = add_days(date, 1)
+		return date
 
 	def assign_task_to_users(self, task, users):
 		for user in users:
