@@ -36,7 +36,7 @@ force_fields = [
 ]
 force_fields += address_fields
 
-dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image']
+dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image', 'fni_amount']
 
 
 class VehicleBookingController(AccountsController):
