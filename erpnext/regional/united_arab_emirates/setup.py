@@ -3,7 +3,8 @@
 
 from __future__ import unicode_literals
 
-import frappe, os, json
+import frappe
+from erpnext.regional.qatar.setup import add_roles_and_permission_for_wps
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission, update_permission_property
 from erpnext.payroll.doctype.gratuity_rule.gratuity_rule import get_gratuity_rule
@@ -13,6 +14,7 @@ def setup(company=None, patch=True):
 	add_print_formats()
 	add_custom_roles_for_reports()
 	add_permissions()
+	add_roles_and_permission_for_wps()
 	create_gratuity_rule()
 
 def make_custom_fields():
@@ -82,6 +84,8 @@ def make_custom_fields():
 			fieldtype='Date', insert_after='item_name', print_hide=1)
 	]
 
+	wps_fields_for_company, wps_fields_for_employee = get_custom_fields_for_wps()
+
 	custom_fields = {
 		'Item': [
 			dict(fieldname='tax_code', label='Tax Code',
@@ -121,6 +125,8 @@ def make_custom_fields():
 		'Purchase Order Item': invoice_item_fields,
 		'Purchase Receipt Item': invoice_item_fields,
 		'Supplier Quotation Item': invoice_item_fields,
+		'Company': wps_fields_for_company,
+		'Employee': wps_fields_for_employee
 	}
 
 	create_custom_fields(custom_fields)
@@ -244,3 +250,17 @@ def get_slab_for_unlimited_contract_on_resignation():
 		"to_year":0,
 		"fraction_of_applicable_earnings": fraction_3
 	}]
+
+
+def get_custom_fields_for_wps():
+	wps_fields_for_company = [
+		dict(fieldname='employer_establishment_id', label='Employer Establishment ID',
+			fieldtype='Data', insert_after='date_of_establishment', print_hide=1),
+	]
+
+	wps_fields_for_employee = [
+		dict(fieldname='agent_id', label='Agent ID', description = 'Used while generating Salary Information file',
+			fieldtype='Data', insert_after='payroll_cost_center', print_hide=1)
+	]
+
+	return wps_fields_for_company, wps_fields_for_employee

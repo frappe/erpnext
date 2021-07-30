@@ -12,6 +12,7 @@ from frappe.permissions import add_user_permission, remove_user_permission, \
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
+from erpnext.accounts.doctype.bank_account.bank_account import validate_iban
 
 class EmployeeUserDisabledError(frappe.ValidationError):
 	pass
@@ -49,6 +50,8 @@ class Employee(NestedSet):
 		self.validate_preferred_email()
 		if self.job_applicant:
 			self.validate_onboarding_process()
+
+		validate_iban(self.iban)
 
 		if self.user_id:
 			self.validate_user_details()

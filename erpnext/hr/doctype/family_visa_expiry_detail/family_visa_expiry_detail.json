@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "member",
+  "relation",
+  "visa_id",
   "visa_expiry_date"
  ],
  "fields": [
@@ -20,15 +22,27 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Visa Expiry Date"
+  },
+  {
+   "fieldname": "relation",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Relation"
+  },
+  {
+   "fieldname": "visa_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Visa ID"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-19 15:00:28.112834",
+ "modified": "2021-07-28 15:17:50.739194",
  "modified_by": "Administrator",
  "module": "HR",
- "name": "Family Visa Expiry Date",
+ "name": "Family Visa Expiry Detail",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

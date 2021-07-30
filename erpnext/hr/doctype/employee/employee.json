@@ -65,9 +65,11 @@
   "salary_information",
   "salary_mode",
   "payroll_cost_center",
-  "column_break_52",
   "bank_name",
+  "column_break_52",
   "bank_ac_no",
+  "bank_abbr",
+  "iban",
   "health_insurance_section",
   "health_insurance_provider",
   "health_insurance_no",
@@ -98,6 +100,7 @@
   "place_of_issue",
   "visa_details_section",
   "visa_type",
+  "visa_id",
   "expiry_date",
   "family_visa_expiry_date",
   "sb53",
@@ -893,20 +896,36 @@
    "fieldname": "family_visa_expiry_date",
    "fieldtype": "Table",
    "label": "Expiry Date",
-   "options": "Family Visa Expiry Date"
+   "options": "Family Visa Expiry Detail"
   },
   {
    "fieldname": "contract_type",
    "fieldtype": "Select",
    "label": "Contract Type",
    "options": "Limited\nUnlimited"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
+  },
+  {
+   "depends_on": "eval: doc.visa_type != \"Family\"",
+   "fieldname": "visa_id",
+   "fieldtype": "Data",
+   "label": "Visa ID"
+  },
+  {
+   "fieldname": "bank_abbr",
+   "fieldtype": "Data",
+   "label": "Bank Short Name/Abbr"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2021-07-19 15:34:27.970875",
+ "modified": "2021-07-28 15:28:16.610258",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

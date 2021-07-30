@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "autoname": "HR-SIF-.YYYY.-.#####",
+ "creation": "2021-07-27 13:16:42.584738",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "month",
+  "year",
+  "column_break_4",
+  "creation_date",
+  "creation_time",
+  "employer_details_section",
+  "employer_establishment_id",
+  "column_break_10",
+  "number_of_records",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+   "reqd": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Now",
+   "fieldname": "creation_time",
+   "fieldtype": "Time",
+   "label": "Creation Time",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "label": "Creation Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employer Details"
+  },
+  {
+   "fetch_from": "company.employer_establishment_id",
+   "fieldname": "employer_establishment_id",
+   "fieldtype": "Data",
+   "label": "Employer Establishment ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_of_records",
+   "fieldtype": "Int",
+   "label": "Number of Records",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Salary Information File",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-07-30 15:21:02.120138",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "Salary Information File",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

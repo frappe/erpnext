@@ -13,6 +13,7 @@
   "bank_name",
   "swift_number",
   "column_break_1",
+  "bank_short_name",
   "website",
   "address_and_contact",
   "address_html",
@@ -98,10 +99,16 @@
    "label": "Plaid Access Token",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "bank_short_name",
+   "fieldtype": "Data",
+   "label": "Bank Short Name/Abbr"
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-07-17 14:00:13.105433",
+ "modified": "2021-07-29 18:54:37.105844",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank",
