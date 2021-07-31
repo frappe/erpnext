@@ -100,8 +100,8 @@ def merge_similar_entries(gl_map, precision=None):
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_map, dimensions=None):
-	account_head_fieldnames = ['party_type', 'party', 'against_voucher', 'against_voucher_type',
-		'cost_center', 'project', 'voucher_detail_no']
+	account_head_fieldnames = ['voucher_detail_no', 'party', 'against_voucher',
+			'cost_center', 'against_voucher_type', 'party_type', 'project']
 
 	if dimensions:
 		account_head_fieldnames = account_head_fieldnames + dimensions
@@ -110,10 +110,12 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 		same_head = True
 		if e.account != gle.account:
 			same_head = False
+			continue
 
 		for fieldname in account_head_fieldnames:
 			if cstr(e.get(fieldname)) != cstr(gle.get(fieldname)):
 				same_head = False
+				break
 
 		if same_head:
 			return e
