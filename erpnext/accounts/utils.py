@@ -566,10 +566,10 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
-def get_company_default(company, fieldname):
-	value = frappe.get_cached_value('Company',  company,  fieldname)
+def get_company_default(company, fieldname, ignore_validation=False):
+	value = frappe.get_cached_value('Company', company, fieldname)
 
-	if not value:
+	if not ignore_validation and not value:
 		throw(_("Please set default {0} in Company {1}")
 			.format(frappe.get_meta("Company").get_label(fieldname), company))
 
