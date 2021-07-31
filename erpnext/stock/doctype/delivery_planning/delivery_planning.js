@@ -3,6 +3,13 @@
 
 frappe.ui.form.on('Delivery Planning', {
 
+	// onsubmit: function(frm){
+		
+	// },
+	before_save: function(frm){
+		if(frm.doc.delivery_date_from > frm.doc.delivery_date_to)
+		{ frappe.throw(__('Delivery Date To should be greater or equal to Date From '))}
+	},
 	 onload: function(frm){
 ////	 To fetch pin code from Address and set in Postal code from and to
 //	 	console.log("--------------000000000---------------")
@@ -17,7 +24,7 @@ frappe.ui.form.on('Delivery Planning', {
 //				frm.refresh_field('pincode_to');
 //			}
 //		});
-
+		
 		if( frm.doc.docstatus === 1){
 
 //		frm.call('refresh_status')
@@ -88,6 +95,7 @@ frappe.ui.form.on('Delivery Planning', {
 										if(r.message == 1){
 											console.log("-----  --- --item--  ---  ---  ",r);
 											frappe.msgprint("  Transporter wise Delivery Plan created  ");
+											frm.reload();
 										}
 										else{
 										frappe.msgprint(" Unable to create Transporter wise Delivery Plan   ");
@@ -422,7 +430,7 @@ frappe.ui.form.on('Delivery Planning', {
 		show_delivery_planning_item: function(frm) {
 
 			frappe.route_options = {"related_delivey_planning": frm.doc.docname };
-			frappe.set_route("Report", "Delivery Planning Item", {
+			frappe.set_route("List","Delivery Planning Item", {
    				"related_delivey_planning": frm.doc.name
 			});
 		},

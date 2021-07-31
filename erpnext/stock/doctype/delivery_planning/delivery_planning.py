@@ -245,10 +245,12 @@ class DeliveryPlanning(Document):
 
 		query = frappe.db.sql(""" select
 									so.customer,
+									soi.name as dname,
 									soi.item_code,
 									soi.item_name,
 									soi.warehouse,
 									soi.qty,
+									soi.rate,
 									soi.stock_qty,
 									so.name,
 									soi.name as soi_item,
@@ -277,8 +279,9 @@ class DeliveryPlanning(Document):
 			dp_item.transporter = i.transporter
 			dp_item.customer = i.customer
 			dp_item.item_code = i.item_code
-			dp_item.item_name = i.item_name
-
+			# dp_item.item_name = i.item_name
+			dp_item.item_dname = i.dname
+			# dp_item.rate = i.rate
 			dp_item.ordered_qty = i.qty
 			dp_item.pending_qty = i.qty
 			dp_item.qty_to_deliver = i.qty
@@ -293,10 +296,15 @@ class DeliveryPlanning(Document):
 			dp_item.weight_per_unit = i.weight_per_unit
 			dp_item.supplier_dc = i.delivered_by_supplier
 			dp_item.supplier = i.supplier
-			dp_item.uom = i.uom
+			# dp_item.uom = i.uom
 			dp_item.conversion_factor = i.conversion_factor
 			dp_item.stock_uom = i.stock_uom
-			dp_item.save(ignore_permissions = True)
+			dp_item.save(ignore_permissions = True);
+		if query:	
+			frappe.msgprint(
+			msg='Delivery Planning Item Created',
+			title='Success')
+			self.reload()
 
 	def on_transporter_planning(self):
 		conditions = ""
