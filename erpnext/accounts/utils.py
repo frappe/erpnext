@@ -960,6 +960,9 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	return gl_entries
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
+	if len(existing_gle) != len(expected_gle):
+		return False
+
 	matched = True
 	for entry in expected_gle:
 		account_existed = False
