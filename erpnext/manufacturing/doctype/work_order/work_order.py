@@ -357,11 +357,13 @@ class WorkOrder(Document):
 	def actual_yeild_on_wo(self):
 		item_to_manuf_weight = frappe.db.get_value("Item", {'name':self.production_item},'weight_per_unit')
 		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(item_to_manuf_weight), self.precision('actual_fg_weight'))
+		frappe.db.set_value("Work Order", self.name, "actual_fg_weight", self.actual_fg_weight)
 		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
 			self.actual_yeild = 0
 		else:
 			self.actual_yeild = flt((flt(self.actual_fg_weight)/flt(self.actual_rm_weight))*100)
-	
+		frappe.db.set_value("Work Order", self.name, "actual_yeild", self.actual_yeild)
+
 	def planned_rm_weight_calc(self):
 		value = 0
 		for row in self.required_items:
