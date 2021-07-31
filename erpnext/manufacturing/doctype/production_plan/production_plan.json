@@ -93,12 +93,13 @@
    "collapsible": 1,
    "collapsible_depends_on": "eval: doc.__islocal",
    "depends_on": "eval: doc.get_items_from",
+   "description": "These filters are used in searches triggered by the buttons below",
    "fieldname": "filters",
    "fieldtype": "Section Break",
    "label": "Filters"
   },
   {
-   "description": "Searches for item codes like this string",
+   "description": "Look for item codes like this text",
    "fieldname": "item_code",
    "fieldtype": "Data",
    "label": "Item Code"

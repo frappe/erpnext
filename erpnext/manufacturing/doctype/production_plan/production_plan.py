@@ -78,7 +78,7 @@ class ProductionPlan(Document):
 				"from_date": self.from_date,
 				"to_date": self.to_date,
 				"warehouse": self.warehouse,
-				"item": '%' + self.item_code + '%',
+				"item": f'%{self.item_code}%',
 				"company": self.company
 			}, as_dict=1)
 
@@ -117,7 +117,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = ' and so_item.item_code like {0}'.format(frappe.db.escape('%'+ self.item_code +'%'))
+			item_condition = ' and so_item.item_code like {0}'.format(frappe.db.escape(f'%{self.item_code}%'))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
@@ -150,7 +150,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = " and mr_item.item_code like {0}".format(frappe.db.escape('%'+ self.item_code +'%'))
+			item_condition = " and mr_item.item_code like {0}".format(frappe.db.escape(f'%{self.item_code}%'))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description,
 			(qty - ordered_qty) * conversion_factor as pending_qty
@@ -710,7 +710,7 @@ def get_sales_orders(self):
 			"to_date": self.to_date,
 			"customer": self.customer,
 			"project": self.project,
-			"item": '%' + self.item_code + '%',
+			"item": f'%{self.item_code}%',
 			"company": self.company,
 			"sales_order_status": self.sales_order_status
 		}, as_dict=1)
