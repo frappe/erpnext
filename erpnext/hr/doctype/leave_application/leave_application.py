@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, get_fullname, add_days, nowdate
-from erpnext.hr.utils import set_employee_name, get_leave_period, share_doc_with_approver
+from erpnext.hr.utils import set_employee_name, get_leave_period, share_doc_with_approver, validate_active_employee
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import daterange
@@ -22,6 +22,7 @@ class LeaveApplication(Document):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
 
 	def validate(self):
+		validate_active_employee(self.employee)
 		set_employee_name(self)
 		self.validate_dates()
 		self.validate_balance_leaves()
