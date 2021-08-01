@@ -487,21 +487,20 @@ class WorkOrder(Document):
 			return
 
 		operations = []
-		if not self.use_multi_level_bom:
-			bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
-			operations.extend(_get_operations(self.bom_no, qty=1.0/bom_qty))
-		else:
+
+		if self.use_multi_level_bom:
 			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
-			bom_traversal = list(reversed(bom_tree.level_order_traversal()))
-			bom_traversal.append(bom_tree) # add operation on top level item last
+			bom_traversal = reversed(bom_tree.level_order_traversal())
 
-			for d in bom_traversal:
-				if d.is_bom:
-					operations.extend(_get_operations(d.name, qty=d.exploded_qty))
+			for node in bom_traversal:
+				if node.is_bom:
+					operations.extend(_get_operations(node.name, qty=node.exploded_qty))
 
-			for correct_index, operation in enumerate(operations, start=1):
-				operation.idx = correct_index
+		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
+		operations.extend(_get_operations(self.bom_no, qty=1.0/bom_qty))
 
+		for correct_index, operation in enumerate(operations, start=1):
+			operation.idx = correct_index
 
 		self.set('operations', operations)
 		self.calculate_time()
