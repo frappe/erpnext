@@ -26,15 +26,19 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 
 		for sle in sl_entries:
 			sle_id = None
+			creation = None
 			if sle.get('is_cancelled') == 'Yes':
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
-				sle_id = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+				sle_id = sle_doc.get('name')
+				creation = sle_doc.get('creation')
 
 			args = sle.copy()
 			args.update({
 				"sle_id": sle_id,
+				"creation": creation,
 				"is_amended": is_amended
 			})
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
@@ -56,7 +60,7 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
 	sle.insert()
 	sle.submit()
-	return sle.name
+	return sle
 
 def delete_cancelled_entry(voucher_type, voucher_no):
 	meta = frappe.get_meta("Stock Ledger Entry")
@@ -163,6 +167,7 @@ class update_entries_after(object):
 				"batch_no": d.batch_no,
 				"posting_date": d.posting_date,
 				"posting_time": d.posting_time,
+				"creation": d.creation,
 				"voucher_no": d.voucher_no
 			}, allow_negative_stock=self.allow_negative_stock, via_landed_cost_voucher=self.via_landed_cost_voucher)
 
@@ -605,7 +610,7 @@ class update_entries_after(object):
 
 		date_condition = ""
 		if self.previous_sle:
-			date_condition = """ and timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
+			date_condition = """ and (posting_date, posting_time, creation) >= (%(posting_date)s, %(posting_time)s, %(creation)s)
 				and name != %(name)s"""
 
 		# exclude cancelled entries
@@ -614,7 +619,7 @@ class update_entries_after(object):
 		# must be referenced by SLE Dependency Key
 		# filter by qty positive or negative
 		dependent_entries = frappe.db.sql("""
-			select sle.item_code, sle.warehouse, sle.batch_no, sle.posting_date, sle.posting_time,
+			select sle.item_code, sle.warehouse, sle.batch_no, sle.posting_date, sle.posting_time, sle.creation,
 				sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
 			where ifnull(is_cancelled, 'No')='No'
@@ -666,13 +671,16 @@ class update_entries_after(object):
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
-		return get_stock_ledger_entries(self.args, "<", "desc", "limit 1", for_update=True)
+		if self.args.get('sle_id'):
+			self.args['name'] = self.args.get('sle_id')
+
+		return get_stock_ledger_entries(self.args, "<=", "desc", "limit 1", for_update=True)
 
 	def get_sle_after_datetime(self):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
 		return get_stock_ledger_entries(self.previous_sle or frappe._dict({
 				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse") }),
-			">", "asc", for_update=True)
+			">=", "asc", for_update=True)
 
 	def get_previous_batch_sle(self, sle):
 		self.batch_data = self.previous_batch_sle_dict.get(sle.batch_no)
@@ -765,7 +773,11 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
+	if previous_sle.get('creation'):
+		conditions = " and (posting_date, posting_time, creation) {0} (%(posting_date)s, %(posting_time)s, %(creation)s)".format(operator)
+	else:
+		conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
+
 	if previous_sle.get("warehouse"):
 		conditions += " and warehouse = %(warehouse)s"
 	elif previous_sle.get("warehouse_condition"):
@@ -785,7 +797,7 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if batch_sle:
 		conditions += " and batch_no = %(batch_no)s"
 
-	if operator in (">", "<=") and previous_sle.get("name"):
+	if operator in (">", ">=", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
 	return frappe.db.sql("""
