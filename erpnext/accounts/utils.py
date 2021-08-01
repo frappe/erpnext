@@ -553,10 +553,14 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
 		for pe in linked_pe:
-			pe_doc = frappe.get_doc("Payment Entry", pe)
-			pe_doc.set_total_allocated_amount()
-			pe_doc.set_unallocated_amount()
-			pe_doc.clear_unallocated_reference_document_rows()
+			try:
+				pe_doc = frappe.get_doc("Payment Entry", pe)
+				pe_doc.validate(on_reference_unlink=True)
+			except Exception as e:
+				msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
+				msg += '<br>'
+				msg += _("Please cancel payment entry manually first and then resubmit")
+				frappe.throw(msg, title=_("Payment Unlink Error"))
 
 			frappe.db.sql("""update `tabPayment Entry` set total_allocated_amount=%s,
 				base_total_allocated_amount=%s, unallocated_amount=%s, modified=%s, modified_by=%s

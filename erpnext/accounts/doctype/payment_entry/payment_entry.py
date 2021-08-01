@@ -45,7 +45,7 @@ class PaymentEntry(AccountsController):
 			self.party_account = self.paid_to
 			self.party_account_currency = self.paid_to_account_currency
 
-	def validate(self):
+	def validate(self, on_reference_unlink=False):
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.validate_payment_type()
@@ -64,8 +64,9 @@ class PaymentEntry(AccountsController):
 		self.set_title()
 		self.set_remarks()
 		self.validate_duplicate_entry()
-		self.validate_allocated_amount()
-		self.validate_paid_invoices()
+		if not on_reference_unlink:
+			self.validate_allocated_amount()
+			self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
 
@@ -529,8 +530,10 @@ class PaymentEntry(AccountsController):
 				base_total_allocated_amount += flt(flt(d.allocated_amount) * flt(d.exchange_rate),
 					self.precision("base_paid_amount"))
 
-		self.total_allocated_amount = abs(total_allocated_amount)
-		self.base_total_allocated_amount = abs(base_total_allocated_amount)
+		# Do not use absolute values as only credit notes could be allocated
+		# and total allocated should be negative in that scenario
+		self.total_allocated_amount = total_allocated_amount
+		self.base_total_allocated_amount = base_total_allocated_amount
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
