@@ -367,15 +367,16 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount-field"></div>`
 		);
 		const me = this;
+		const frm = me.events.get_frm();
+		let discount = frm.doc.additional_discount_percentage;
 
 		this.discount_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Discount'),
 				fieldtype: 'Data',
-				placeholder: __('Enter discount percentage.'),
+				placeholder: ( discount ? discount + '%' :  __('Enter discount percentage.') ),
 				input_class: 'input-xs',
 				onchange: function() {
-					const frm = me.events.get_frm();
 					if (flt(this.value) != 0) {
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
 						me.hide_discount_control(this.value);
