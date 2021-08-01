@@ -59,12 +59,16 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	return sle.name
 
 def delete_cancelled_entry(voucher_type, voucher_no):
-	frappe.db.sql("""
-		delete dep
-		from `tabStock Ledger Entry Dependency` dep
-		inner join `tabStock Ledger Entry` sle on dep.parent = sle.name
-		where sle.voucher_type=%s and sle.voucher_no=%s
-	""", (voucher_type, voucher_no))
+	meta = frappe.get_meta("Stock Ledger Entry")
+	table_fields = meta.get_table_fields()
+
+	for df in table_fields:
+		frappe.db.sql("""
+			delete ch
+			from `tab{0}` ch
+			inner join `tabStock Ledger Entry` sle on ch.parent = sle.name
+			where sle.voucher_type=%s and sle.voucher_no=%s
+		""".format(df.options), (voucher_type, voucher_no))
 
 	frappe.db.sql("""
 		delete from `tabStock Ledger Entry`
@@ -668,7 +672,7 @@ class update_entries_after(object):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
 		return get_stock_ledger_entries(self.previous_sle or frappe._dict({
 				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse") }),
-			">", "asc", for_update=True, check_serial_no=False)
+			">", "asc", for_update=True)
 
 	def get_previous_batch_sle(self, sle):
 		self.batch_data = self.previous_batch_sle_dict.get(sle.batch_no)
@@ -757,8 +761,10 @@ def get_previous_sle(args, for_update=False):
 	return sle and sle[0] or {}
 
 def get_stock_ledger_entries(previous_sle, operator=None,
-	order="desc", limit=None, for_update=False, batch_sle=False, debug=False, check_serial_no=True):
+	order="desc", limit=None, for_update=False, batch_sle=False, debug=False, check_serial_no=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
 	if previous_sle.get("warehouse"):
 		conditions += " and warehouse = %(warehouse)s"
@@ -766,13 +772,10 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		conditions += " and " + previous_sle.get("warehouse_condition")
 
 	if check_serial_no and previous_sle.get("serial_no"):
-		serial_no = previous_sle.get("serial_no")
-		conditions += """ and (
-				serial_no = '{0}'
-				OR serial_no like '{0}\n%%'
-				OR serial_no like '%%\n{0}'
-				OR serial_no like '%%\n{0}\n%%'
-			) and actual_qty > 0""".format(serial_no)
+		serial_nos = get_serial_nos(previous_sle.get("serial_no"))
+		serial_nos = [frappe.db.escape(d) for d in serial_nos]
+		conditions += """exists(select sr.name from `tabStock Ledger Entry Serial No` sr
+			where sr.parent = `tabStock Ledger Entry`.name and sr.serial_no in ({0}))""".format(', '.join(serial_nos))
 
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_date"] = "1900-01-01"
@@ -785,23 +788,25 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
-	return frappe.db.sql("""select *, timestamp(posting_date, posting_time) as "timestamp" from `tabStock Ledger Entry`
-		where item_code = %%(item_code)s
+	return frappe.db.sql("""
+		select *, timestamp(posting_date, posting_time) as timestamp
+		from `tabStock Ledger Entry`
+		where item_code = %(item_code)s
 		and ifnull(is_cancelled, 'No')='No'
-		%(conditions)s
-		order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
-		%(limit)s %(for_update)s""" % {
-			"conditions": conditions,
-			"limit": limit or "",
-			"for_update": for_update and "for update" or "",
-			"order": order
-		}, previous_sle, as_dict=1, debug=debug)
+		{conditions}
+		order by timestamp(posting_date, posting_time) {order}, creation {order}
+		{limit} {for_update}
+	""".format(
+		conditions=conditions,
+		limit=limit or "",
+		for_update=for_update and "for update" or "",
+		order=order
+	), previous_sle, as_dict=1, debug=debug)
 
 def get_serial_nos_after_sle(args, for_update=False):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	data = get_stock_ledger_entries(args, "<=", "asc", batch_sle=args.get('batch_no'), check_serial_no=False,
-		for_update=for_update)
+	data = get_stock_ledger_entries(args, "<=", "asc", batch_sle=args.get('batch_no'), for_update=for_update)
 
 	serial_nos = set()
 	for d in data:

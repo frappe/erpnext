@@ -315,5 +315,5 @@ def rename_temporarily_named_docs(doctype):
 			frappe.db.sql("""
 				UPDATE `tab{0}`
 				SET parent = %s
-				where parent = %s
-			""".format(df.options), (newname, oldname))
+				where parent = %s and parenttype = %s
+			""".format(df.options), (newname, oldname, doctype))

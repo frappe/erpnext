@@ -208,44 +208,27 @@ class SerialNo(StockController):
 		if not serial_no:
 			serial_no = self.name
 
-		for sle in frappe.db.sql("""
+		sl_entries = frappe.db.sql("""
 			SELECT voucher_type, voucher_no, voucher_detail_no,
 				posting_date, posting_time, incoming_rate, actual_qty, serial_no
 			FROM
 				`tabStock Ledger Entry`
 			WHERE
 				item_code=%s AND company = %s AND ifnull(is_cancelled, 'No')='No'
-				AND (serial_no = %s
-					OR serial_no like %s
-					OR serial_no like %s
-					OR serial_no like %s
-				)
+				AND exists(select sr.name from `tabStock Ledger Entry Serial No` sr
+					where sr.parent = `tabStock Ledger Entry`.name and sr.serial_no = %s)
 			ORDER BY
-				posting_date desc, posting_time desc, creation desc""",
-			(self.item_code, self.company,
-				serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'), as_dict=1):
-				if serial_no.upper() in get_serial_nos(sle.serial_no):
-					if cint(sle.actual_qty) > 0:
-						sle_dict.setdefault("incoming", []).append(sle)
-					else:
-						sle_dict.setdefault("outgoing", []).append(sle)
+				posting_date desc, posting_time desc, creation desc
+		""", (self.item_code, self.company, serial_no), as_dict=1)
+
+		for sle in sl_entries:
+			if serial_no.upper() in get_serial_nos(sle.serial_no):
+				if cint(sle.actual_qty) > 0:
+					sle_dict.setdefault("incoming", []).append(sle)
+				else:
+					sle_dict.setdefault("outgoing", []).append(sle)
 
 		return sle_dict
-
-	def on_trash(self):
-		sl_entries = frappe.db.sql("""select serial_no from `tabStock Ledger Entry`
-			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'""",
-			("%%%s%%" % self.name, self.item_code), as_dict=True)
-
-		# Find the exact match
-		sle_exists = False
-		for d in sl_entries:
-			if self.name.upper() in get_serial_nos(d.serial_no):
-				sle_exists = True
-				break
-
-		if sle_exists:
-			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
 	def before_rename(self, old, new, merge=False):
 		if merge:

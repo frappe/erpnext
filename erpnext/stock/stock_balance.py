@@ -310,6 +310,8 @@ def repost_all_stock_vouchers():
 
 		print("Deleting SLEs")
 		frappe.db.sql("delete from `tabStock Ledger Entry`")
+		frappe.db.sql("delete from `tabStock Ledger Entry Dependency`")
+		frappe.db.sql("delete from `tabStock Ledger Entry Serial No`")
 
 		print("Deleting GLEs")
 		for voucher_type, voucher_no in vouchers:
