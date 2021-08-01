@@ -221,8 +221,6 @@ class update_entries_after(object):
 				self.set_stock_reconciliation_incoming_rate(sle)
 
 			self.get_serialized_values(sle)
-			self.qty_after_transaction += flt(sle.actual_qty)
-			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
 			if sle.voucher_type=="Stock Reconciliation" and sle.reset_rate:
 				self.get_stock_reconciliation_reset_values(sle)
@@ -233,11 +231,8 @@ class update_entries_after(object):
 
 				if self.valuation_method == "Moving Average":
 					self.get_moving_average_values(sle)
-					# self.qty_after_transaction and self.stock_value already set in self.get_moving_average_values()
 				else:
 					self.get_fifo_values(sle)
-					self.qty_after_transaction += flt(sle.actual_qty)
-					self.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.value_precision)
@@ -328,6 +323,9 @@ class update_entries_after(object):
 				self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, sle.batch_no, self.allow_zero_rate,
 					currency=erpnext.get_company_currency(sle.company), batch_wise_valuation=0)
+
+		self.qty_after_transaction += flt(sle.actual_qty)
+		self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -495,6 +493,9 @@ class update_entries_after(object):
 
 		if not self.stock_queue:
 			self.stock_queue.append([0, flt(sle.incoming_rate or sle.outgoing_rate or self.valuation_rate, self.val_rate_db_precision)])
+
+		self.qty_after_transaction += flt(sle.actual_qty)
+		self.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 
 	def set_stock_reconciliation_actual_qty(self, sle):
 		if self.batch_wise_valuation:
