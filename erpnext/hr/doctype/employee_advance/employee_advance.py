@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.hr.utils import validate_active_employee
 
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
@@ -18,6 +19,7 @@ class EmployeeAdvance(Document):
 			'make_payment_via_journal_entry')
 
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.set_status()
 
 	def on_cancel(self):

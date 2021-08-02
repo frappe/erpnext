@@ -336,10 +336,13 @@ class TestPurchaseReceipt(unittest.TestCase):
 		se3.cancel()
 		po.reload()
 		pr2.load_from_db()
-		pr2.cancel()
 
-		po.load_from_db()
-		po.cancel()
+		if pr2.docstatus == 1 and frappe.db.get_value('Stock Ledger Entry',
+			{'voucher_no': pr2.name, 'is_cancelled': 0}, 'name'):
+			pr2.cancel()
+
+			po.load_from_db()
+			po.cancel()
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -1044,7 +1047,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			'account': srbnb_account,
 			'voucher_detail_no': pr.items[1].name
 		}, pluck="name")
-		
+
 		# check if the entries are not merged into one
 		# seperate entries should be made since voucher_detail_no is different
 		self.assertEqual(len(item_one_gl_entry), 1)
@@ -1055,13 +1058,13 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_purchase_receipt_with_exchange_rate_difference(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice as create_purchase_invoice
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt as create_purchase_receipt
-		
+
 		pi = create_purchase_invoice(company="_Test Company with perpetual inventory",
 			cost_center = "Main - TCP1",
 			warehouse = "Stores - TCP1",
 			expense_account ="_Test Account Cost for Goods Sold - TCP1",
 			currency = "USD", conversion_rate = 70)
-		
+
 		pr = create_purchase_receipt(pi.name)
 		pr.conversion_rate = 80
 		pr.items[0].purchase_invoice = pi.name
