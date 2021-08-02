@@ -78,9 +78,9 @@ class VATAuditReport(object):
 		for d in items:
 			if d.item_code not in self.invoice_items.get(d.parent, {}):
 				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {}) \
-					.setdefault("net_amount", sum((i.get("taxable_value", 0) \
-					or i.get("base_net_amount", 0)) for i in items \
-					if (i.item_code == d.item_code and i.parent == d.parent)))
+					.setdefault("net_amount", sum((i.get("taxable_value", 0)
+					or i.get("base_net_amount", 0)) for i in items
+					if(i.item_code == d.item_code and i.parent == d.parent)))
 
 				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {}) \
 					.setdefault("is_zero_rated", d.is_zero_rated)
