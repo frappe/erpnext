@@ -1,1 +1,0 @@
-Sales campaign / promotion, like special discount, exhibition, newsletter etc.

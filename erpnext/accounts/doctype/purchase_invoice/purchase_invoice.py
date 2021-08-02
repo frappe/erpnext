@@ -27,6 +27,8 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
 
+class WarehouseMissingError(frappe.ValidationError): pass
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
@@ -207,8 +209,8 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock and for_validate:
 			for d in self.get('items'):
 				if not d.warehouse:
-					frappe.throw(_("Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}").
-						format(d.idx, d.item_code, self.company))
+					frappe.throw(_("Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}").
+						format(d.idx, d.item_code, self.company), exc=WarehouseMissingError)
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
@@ -246,7 +248,7 @@ class PurchaseInvoice(BuyingController):
 				and (not item.po_detail or
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
-				if self.update_stock and (not item.from_warehouse):
+				if self.update_stock and item.warehouse and (not item.from_warehouse):
 					if for_validate and item.expense_account and item.expense_account != warehouse_account[item.warehouse]["account"]:
 						msg = _("Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account").format(
 							item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]), frappe.bold(item.expense_account), frappe.bold(item.warehouse))
@@ -657,7 +659,7 @@ class PurchaseInvoice(BuyingController):
 								)
 								gl_entries.append(
 									self.get_gl_dict({
-										"account": self.get_company_default("exchange_gain_loss_account"),		
+										"account": self.get_company_default("exchange_gain_loss_account"),
 										"against": self.supplier,
 										"credit": discrepancy_caused_by_exchange_rate_difference,
 										"cost_center": item.cost_center,
@@ -1193,7 +1195,7 @@ def get_purchase_document_details(doc):
 			purchase_receipts_or_invoices.append(item.get(doc_reference))
 		if item.get(items_reference):
 			items.append(item.get(items_reference))
-	
+
 	exchange_rate_map = frappe._dict(frappe.get_all(parent_doctype, filters={'name': ('in',
 		purchase_receipts_or_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
 
