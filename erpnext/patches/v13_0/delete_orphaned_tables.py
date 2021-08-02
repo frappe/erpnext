@@ -63,6 +63,4 @@ def check_for_new_doc_with_same_name_as_deleted_parent(doc, doctype):
     parent_creation_time = frappe.db.get_value(doc['parenttype'], doc['parent'], 'creation')
     child_creation_time = frappe.db.get_value(doctype, doc, 'creation')
 
-    if getdate(parent_creation_time) > getdate(child_creation_time):
-        return True
-    return False
+    return getdate(parent_creation_time) > getdate(child_creation_time)
