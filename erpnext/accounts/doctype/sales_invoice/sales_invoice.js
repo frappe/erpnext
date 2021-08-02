@@ -829,7 +829,7 @@ frappe.ui.form.on('Sales Invoice', {
 			'timesheet_detail': row.name
 		});
 		frm.refresh_field('timesheets');
-		calculate_total_billing_amount(frm);
+		frm.trigger("calculate_timesheet_totals");
 	},
 
 	refresh: function(frm) {
@@ -937,50 +937,46 @@ frappe.ui.form.on('Sales Invoice', {
 			frm: frm
 		});
 	},
+
 	create_dunning: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 			frm: frm
 		});
-	}
-})
+	},
 
-frappe.ui.form.on('Sales Invoice Timesheet', {
+	calculate_timesheet_totals: function(frm) {
+		frm.set_value("total_billing_amount",
+			frm.doc.timesheets.reduce((a, b) => a + (b["billing_amount"] || 0.0), 0.0));
+		frm.set_value("total_billing_hours",
+			frm.doc.timesheets.reduce((a, b) => a + (b["billing_hours"] || 0.0), 0.0));
+	}
+});
+
+
+frappe.ui.form.on("Sales Invoice Timesheet", {
 	time_sheet: function(frm, cdt, cdn){
 		var d = locals[cdt][cdn];
 		if(d.time_sheet) {
 			frappe.call({
 				method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
 				args: {
-					'name': d.time_sheet,
-					'project': frm.doc.project || null
+					"name": d.time_sheet,
+					"project": frm.doc.project || null
 				},
-				callback: function(r, rt) {
-					if(r.message){
-						let data = r.message;
-						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
-						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
-						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
-						calculate_total_billing_amount(frm)
+				callback: function(r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, "billing_hours", r.message.billing_hours);
+						frappe.model.set_value(cdt, cdn, "billing_amount", r.message.billing_amount);
+						frappe.model.set_value(cdt, cdn, "timesheet_detail", r.message.timesheet_detail);
+						frm.trigger("calculate_timesheet_totals");
 					}
 				}
-			})
+			});
 		}
 	}
-})
+});
 
-var calculate_total_billing_amount =  function(frm) {
-	var doc = frm.doc;
-
-	doc.total_billing_amount = 0.0
-	if(doc.timesheets) {
-		$.each(doc.timesheets, function(index, data){
-			doc.total_billing_amount += data.billing_amount
-		})
-	}
-
-	refresh_field('total_billing_amount')
-}
 
 var select_loyalty_program = function(frm, loyalty_programs) {
 	var dialog = new frappe.ui.Dialog({
