@@ -224,16 +224,34 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 	if from_time and to_time:
 		condition += "AND CAST(tsd.from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
 
-	return frappe.db.sql("""SELECT tsd.name as name,
-				tsd.parent as parent, tsd.billing_hours as billing_hours,
-				tsd.billing_amount as billing_amount, tsd.activity_type as activity_type,
-				tsd.description as description, ts.currency as currency
-			FROM `tabTimesheet Detail` tsd
-			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent
-			WHERE tsd.parenttype = 'Timesheet'
-				and tsd.docstatus=1 {0}
-				and tsd.is_billable = 1
-				and tsd.sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
+	return frappe.db.sql("""
+		SELECT
+
+			tsd.name as name,
+			tsd.parent as time_sheet,
+			tsd.from_time as from_time,
+			tsd.to_time as to_time,
+			tsd.billing_hours as billing_hours,
+			tsd.billing_amount as billing_amount,
+			tsd.activity_type as activity_type,
+			tsd.description as description,
+			ts.currency as currency
+
+		FROM `tabTimesheet Detail` tsd
+
+			INNER JOIN `tabTimesheet` ts
+			ON ts.name = tsd.parent
+
+		WHERE tsd.parenttype = 'Timesheet'
+			AND tsd.docstatus=1 {0}
+			AND tsd.is_billable = 1
+			AND tsd.sales_invoice is null
+		""".format(condition), {
+			'project': project,
+			'parent': parent,
+			'from_time': from_time,
+			'to_time': to_time
+		}, as_dict=1)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
