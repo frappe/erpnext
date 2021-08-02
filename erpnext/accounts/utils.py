@@ -472,7 +472,8 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate
+		"exchange_rate": d.exchange_rate if not d.exchange_gain_loss else payment_entry.get_exchange_rate(),
+		"exchange_gain_loss": d.exchange_gain_loss # only populated from invoice in case of advance allocation
 	}
 
 	if d.voucher_detail_no:
@@ -498,12 +499,15 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	payment_entry.set_amounts()
 
 	if d.difference_amount and d.difference_account:
-		payment_entry.set_gain_or_loss(account_details={
+		account_details = {
 			'account': d.difference_account,
 			'cost_center': payment_entry.cost_center or frappe.get_cached_value('Company',
-				payment_entry.company, "cost_center"),
-			'amount': d.difference_amount
-		})
+				payment_entry.company, "cost_center")
+		}
+		if d.difference_amount:
+			account_details['amount'] = d.difference_amount
+
+		payment_entry.set_gain_or_loss(account_details=account_details)
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
@@ -962,7 +966,7 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 		for e in existing_gle:
 			if entry.account == e.account:
 				account_existed = True
-			if (entry.account == e.account and entry.against_account == e.against_account
+			if (entry.account == e.account
 					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center)
 					and ( flt(entry.debit, precision) != flt(e.debit, precision) or
 						flt(entry.credit, precision) != flt(e.credit, precision))):
