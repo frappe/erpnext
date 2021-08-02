@@ -240,7 +240,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.conversion_rate = 80
 
 		pi.insert()
-		pi.submit()		
+		pi.submit()
 
 		# Get exchnage gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value('Company', pi.company, 'exchange_gain_loss_account')
@@ -978,7 +978,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		unlink_enabled = frappe.db.get_value(
 			"Accounts Settings", "Accounts Settings",
 			"unlink_payment_on_cancel_of_invoice")
-		
+
 		frappe.db.set_value(
 			"Accounts Settings", "Accounts Settings",
 			"unlink_payment_on_cancel_of_invoice", 1)
@@ -1018,8 +1018,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		expected_gle = [
 			["_Test Account Cost for Goods Sold - _TC", 37500.0],
-			["_Test Payable USD - _TC", -40000.0],
-			["Exchange Gain/Loss - _TC", 2500.0]
+			["_Test Payable USD - _TC", -35000.0],
+			["Exchange Gain/Loss - _TC", -2500.0]
 		]
 
 		gl_entries = frappe.db.sql("""
@@ -1027,7 +1027,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			where voucher_no=%s
 			group by account
 			order by account asc""", (pi.name), as_dict=1)
-		
+
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.balance)
@@ -1049,8 +1049,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		expected_gle = [
 			["_Test Account Cost for Goods Sold - _TC", 36500.0],
-			["_Test Payable USD - _TC", -38000.0],
-			["Exchange Gain/Loss - _TC", 1500.0]
+			["_Test Payable USD - _TC", -35000.0],
+			["Exchange Gain/Loss - _TC", -1500.0]
 		]
 
 		gl_entries = frappe.db.sql("""
