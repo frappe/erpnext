@@ -36,20 +36,23 @@ def get_child_doctypes_whose_parent_doctypes_were_affected():
 
 def get_affected_doctypes():
     affected_doctypes = []
-
     tdr_docs = frappe.get_all('Transaction Deletion Record', pluck="name")
     
     for tdr in tdr_docs:
         tdr_doc = frappe.get_doc("Transaction Deletion Record", tdr)
 
         for doctype in tdr_doc.doctypes:
-            if (doctype.doctype_name not in affected_doctypes) and is_not_child_table(doctype.doctype_name):
+            if is_not_child_table(doctype.doctype_name):
                 affected_doctypes.append(doctype.doctype_name)
 
+    affected_doctypes = remove_duplicate_items(affected_doctypes)
     return affected_doctypes
 
 def is_not_child_table(doctype):
     return not bool(frappe.get_value('DocType', doctype, 'istable'))
+
+def remove_duplicate_items(affected_doctypes):
+    return list(set(affected_doctypes))
 
 def check_for_new_doc_with_same_name_as_deleted_parent(doc, doctype):
     """
