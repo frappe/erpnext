@@ -12,7 +12,7 @@ jobs:
       - name: Checkout Actions
         uses: actions/checkout@v2
         with:
-          repository: "ankush/backport"
+          repository: "frappe/backport"
           path: ./actions
           ref: develop
       - name: Install Actions
