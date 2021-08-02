@@ -686,8 +686,8 @@ class SalesInvoice(SellingController):
 		def timesheet_sum(field):
 			return sum((ts.get(field) or 0.0) for ts in self.timesheets)
 
-		self.total_billing_amount = timesheet_sum('billing_amount')
-		self.total_billing_hours = timesheet_sum('billing_hours')
+		self.total_billing_amount = timesheet_sum("billing_amount")
+		self.total_billing_hours = timesheet_sum("billing_hours")
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
