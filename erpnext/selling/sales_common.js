@@ -87,9 +87,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	},
 
+<<<<<<< HEAD
+	refresh: function() {
+		this._super();
+
+=======
 	refresh() {
 		super.refresh();
 		
+>>>>>>> 5265ba39f0 (feat: Added fields for dispatch address in Sales Order, Sales Invoice, Delivery Note for Eway Bill)
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		this.frm.toggle_display("customer_name",
