@@ -19,7 +19,7 @@ def execute():
                 if not frappe.db.exists(doc['parenttype'], doc['parent']):
                     frappe.db.delete(doctype, {'name': doc['name']})
 
-                elif check_for_new_doc_with_same_name_as_deleted_parent(doc, doctype):
+                elif check_for_new_doc_with_same_name_as_deleted_parent(doc):
                     frappe.db.delete(doctype, {'name': doc['name']})
 
 def has_deleted_company_transactions():
@@ -56,7 +56,7 @@ def is_not_child_table(doctype):
 def remove_duplicate_items(affected_doctypes):
     return list(set(affected_doctypes))
 
-def check_for_new_doc_with_same_name_as_deleted_parent(doc, doctype):
+def check_for_new_doc_with_same_name_as_deleted_parent(doc):
     """
         Compares creation times of parent and child docs.
         Since Transaction Deletion Record resets the naming series after deletion,
