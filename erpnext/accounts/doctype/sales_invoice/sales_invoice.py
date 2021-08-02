@@ -753,7 +753,7 @@ class SalesInvoice(SellingController):
 		if self.project:
 			for data in get_projectwise_timesheet_data(self.project):
 				self.append('timesheets', {
-						'time_sheet': data.parent,
+						'time_sheet': data.time_sheet,
 						'billing_hours': data.billing_hours,
 						'billing_amount': data.billing_amount,
 						'timesheet_detail': data.name,
