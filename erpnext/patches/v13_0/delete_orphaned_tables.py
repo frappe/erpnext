@@ -49,9 +49,7 @@ def get_affected_doctypes():
     return affected_doctypes
 
 def is_not_child_table(doctype):
-    if frappe.get_value('DocType', doctype, 'istable'):
-        return False
-    return True
+    return not bool(frappe.get_value('DocType', doctype, 'istable'))
 
 def check_for_new_doc_with_same_name_as_deleted_parent(doc, doctype):
     """
