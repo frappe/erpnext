@@ -1101,16 +1101,16 @@ class AccountsController(TransactionBase):
 				base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
 
 		if not self.get("payment_schedule"):
+			if self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.get("payment_terms_template"):
+				po_or_so, doctype, fieldname = self.get_order_details()
+
 			if self.get("payment_terms_template"):
 				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total, base_grand_total)
 				for item in data:
 					self.append("payment_schedule", item)
 
-			elif self.doctype in ["Sales Invoice", "Purchase Invoice"]:
-				po_or_so, doctype, fieldname = self.get_order_details()
-
-				if self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
-					self.fetch_payment_terms_from_order(po_or_so, doctype)
+			elif self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
+				self.fetch_payment_terms_from_order(po_or_so, doctype)
 
 			elif self.doctype not in ["Purchase Receipt"]:
 				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, base_payment_amount=base_grand_total)
