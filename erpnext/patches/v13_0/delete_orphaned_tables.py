@@ -13,7 +13,7 @@ def execute():
         child_doctypes = get_child_doctypes_whose_parent_doctypes_were_affected()
 
         for doctype in child_doctypes:
-            docs = frappe.get_all(doctype, fields=['name', 'parent', 'parenttype'])
+            docs = frappe.get_all(doctype, fields=['name', 'parent', 'parenttype', 'creation'])
 
             for doc in docs:
                 if not frappe.db.exists(doc['parenttype'], doc['parent']):
@@ -64,6 +64,6 @@ def check_for_new_doc_with_same_name_as_deleted_parent(doc, doctype):
     """
 
     parent_creation_time = frappe.db.get_value(doc['parenttype'], doc['parent'], 'creation')
-    child_creation_time = frappe.db.get_value(doctype, doc, 'creation')
+    child_creation_time = doc['creation']
 
     return getdate(parent_creation_time) > getdate(child_creation_time)
