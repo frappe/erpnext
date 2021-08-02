@@ -48,6 +48,8 @@
   "shipping_address",
   "company_address",
   "company_address_display",
+  "dispatch_address_name",
+  "dispatch_address",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1966,6 +1968,21 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address_name",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Name",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address",
+   "fieldtype": "Small Text",
+   "label": "Dispatch Address",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -1978,7 +1995,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-05-20 22:48:33.988881",
+ "modified": "2021-07-08 14:03:55.502522",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
