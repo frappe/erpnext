@@ -81,7 +81,7 @@ def repost(doc):
 def repost_sl_entries(doc):
 	if doc.based_on == 'Transaction':
 		repost_future_sle(voucher_type=doc.voucher_type, voucher_no=doc.voucher_no,
-			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
+			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher, doc=doc)
 	else:
 		repost_future_sle(args=[frappe._dict({
 			"item_code": doc.item_code,
