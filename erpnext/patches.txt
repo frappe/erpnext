@@ -296,3 +296,4 @@ erpnext.patches.v13_0.update_subscription_status_in_memberships
 erpnext.patches.v13_0.update_export_type_for_gst
 erpnext.patches.v13_0.update_tds_check_field #3
 erpnext.patches.v13_0.update_recipient_email_digest
+erpnext.patches.v13_0.shopify_deprecation_warning
