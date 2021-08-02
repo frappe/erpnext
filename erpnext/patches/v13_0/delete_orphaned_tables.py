@@ -7,6 +7,8 @@ import frappe
 from frappe.utils import getdate
 
 def execute():
+    frappe.reload_doc('setup', 'doctype', 'transaction_deletion_record')
+
     if has_deleted_company_transactions():
         child_doctypes = get_child_doctypes_whose_parent_doctypes_were_affected()
 
