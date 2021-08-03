@@ -948,12 +948,16 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 
 def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	gl_entries = {}
-	if future_stock_vouchers:
-		for d in frappe.db.sql("""select * from `tabGL Entry`
-			where posting_date >= %s and voucher_no in (%s)""" %
-			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
-			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
-				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+	if not future_stock_vouchers:
+		return gl_entries
+
+	voucher_nos = [d[1] for d in future_stock_vouchers]
+
+	for d in frappe.db.sql("""select * from `tabGL Entry`
+		where posting_date >= %s and voucher_no in (%s)""" %
+		('%s', ', '.join(['%s'] * len(voucher_nos))),
+		tuple([posting_date] + voucher_nos), as_dict=1):
+			gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
 	return gl_entries
 
