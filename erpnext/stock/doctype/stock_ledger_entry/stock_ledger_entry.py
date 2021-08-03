@@ -60,7 +60,7 @@ class StockLedgerEntry(Document):
 		if self.batch_no and not self.get("allow_negative_stock"):
 			batch_bal_after_transaction = flt(frappe.db.sql("""select sum(actual_qty)
 				from `tabStock Ledger Entry`
-				where warehouse=%s and item_code=%s and batch_no=%s""",
+				where is_cancelled =0 and warehouse=%s and item_code=%s and batch_no=%s""",
 				(self.warehouse, self.item_code, self.batch_no))[0][0])
 
 			if batch_bal_after_transaction < 0:
@@ -152,7 +152,7 @@ class StockLedgerEntry(Document):
 				last_transaction_time = frappe.db.sql("""
 					select MAX(timestamp(posting_date, posting_time)) as posting_time
 					from `tabStock Ledger Entry`
-					where docstatus = 1 and item_code = %s
+					where docstatus = 1 and is_cancelled = 0 and item_code = %s
 					and warehouse = %s""", (self.item_code, self.warehouse))[0][0]
 
 				cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
