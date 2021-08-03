@@ -202,6 +202,10 @@ def get_transactions(filters, as_dict=1):
 	def run(params_method, filters):
 		extra_fields, extra_joins, extra_filters = params_method(filters)
 		return run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=as_dict)
+	
+	def sort_by(row):
+		# "Belegdatum" is in the fifth column when list format is used
+		return row["Belegdatum" if as_dict else 5]
 
 	def sort_by(row):
 		# "Belegdatum" is in the fifth column when list format is used
