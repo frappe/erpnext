@@ -239,10 +239,7 @@ def create_lead():
         doc.insert()
 
 def create_opportunity():
-    doc = frappe.db.exists({
-        "doctype":"Opportunity",
-        "title":"Client Company"
-        })
+    doc = frappe.db.exists({"doctype":"Opportunity","title":"Client Company"})
     if not doc:
         doc = frappe.new_doc("Opportunity")
         doc.opportunity_from = "Lead"
