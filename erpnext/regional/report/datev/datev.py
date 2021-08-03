@@ -200,6 +200,10 @@ def get_transactions(filters, as_dict=1):
 	def run(params_method, filters):
 		extra_fields, extra_joins, extra_filters = params_method(filters)
 		return run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=as_dict)
+	
+	def sort_by(row):
+		# "Belegdatum" is in the fifth column when list format is used
+		return row["Belegdatum" if as_dict else 5]
 
 	type_map = {
 		# specific query methods for some voucher types
@@ -221,11 +225,6 @@ def get_transactions(filters, as_dict=1):
 		# generic query method for all other voucher types
 		filters["exclude_voucher_types"] = type_map.keys()
 		transactions.extend(run(params_method=get_generic_params, filters=filters))
-
-	if as_dict:
-		sort_by = lambda row: row["Belegdatum"]
-	else:
-		sort_by = lambda row: row[5]
 
 	return sorted(transactions, key=sort_by)
 
