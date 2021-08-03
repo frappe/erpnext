@@ -32,6 +32,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Inventory Download",
+					"onboard": 1,
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
 					"name": "Pick List",
 					"onboard": 1,
 					"dependencies": ["Item"],

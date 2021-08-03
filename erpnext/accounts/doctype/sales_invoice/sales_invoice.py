@@ -798,6 +798,7 @@ class SalesInvoice(SellingController):
 		self.set_paid_amount()
 		self.exonerated_value()
 		self.calculated_taxes()
+		self.reload()
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
