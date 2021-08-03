@@ -947,17 +947,27 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 
 def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
+	""" Get voucherwise list of GL entries.
+
+	Only fetches GLE fields required for comparing with new GLE.
+	Check compare_existing_and_expected_gle function below.
+	"""
 	gl_entries = {}
 	if not future_stock_vouchers:
 		return gl_entries
 
 	voucher_nos = [d[1] for d in future_stock_vouchers]
 
-	for d in frappe.db.sql("""select * from `tabGL Entry`
-		where posting_date >= %s and voucher_no in (%s)""" %
+	gles = frappe.db.sql("""
+		select name, account, credit, debit, cost_center, project
+			from `tabGL Entry`
+		where
+			posting_date >= %s and voucher_no in (%s)""" %
 		('%s', ', '.join(['%s'] * len(voucher_nos))),
-		tuple([posting_date] + voucher_nos), as_dict=1):
-			gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+		tuple([posting_date] + voucher_nos), as_dict=1)
+
+	for d in gles:
+		gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
 	return gl_entries
 
