@@ -77,13 +77,10 @@ class VATAuditReport(object):
 			""" % (doctype, ", ".join(["%s"]*len(self.invoices))), tuple(self.invoices), as_dict=1)
 		for d in items:
 			if d.item_code not in self.invoice_items.get(d.parent, {}):
-				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {}) \
-					.setdefault("net_amount", sum((i.get("taxable_value", 0)
-					or i.get("base_net_amount", 0)) for i in items
-					if(i.item_code == d.item_code and i.parent == d.parent)))
-
-				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {}) \
-					.setdefault("is_zero_rated", d.is_zero_rated)
+				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {
+					'net_amount': 0.0})
+				self.invoice_items[d.parent][d.item_code]['net_amount'] += d.get('taxable_value', 0) or d.get('base_net_amount', 0)
+				self.invoice_items[d.parent][d.item_code]['is_zero_rated'] = d.is_zero_rated
 
 	def get_items_based_on_tax_rate(self, doctype):
 		self.items_based_on_tax_rate = frappe._dict()
