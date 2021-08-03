@@ -632,7 +632,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			else:
 				raise Exception
 
-	def test_terms_does_not_copy(self):
+	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
 		po = create_purchase_order()
 
 		self.assertTrue(po.get('payment_schedule'))
