@@ -852,3 +852,14 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
 
 	return depreciation_amount
+
+def set_item_tax_from_hsn_code(item):
+	if not item.taxes and item.gst_hsn_code: 
+		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
+
+		for tax in hsn_doc.taxes:
+			item.append('taxes', {
+				'item_tax_template': tax.item_tax_template,
+				'tax_category': tax.tax_category,
+				'valid_from': tax.valid_from
+			})
