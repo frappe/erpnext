@@ -308,7 +308,8 @@ class SalesPipelineAnalytics(object):
 				period = info.get('month')
 				value = info.get('opportunity_owner')
 				count = info.get('count')
-				temp = json.loads(value)
+				if value:
+					temp = json.loads(value)
 
 				if self.filters.get("assigned_to"):
 					for data in json.loads(info.get('opportunity_owner')):
@@ -336,7 +337,8 @@ class SalesPipelineAnalytics(object):
 				period = info.get('month')
 				value = info.get('opportunity_owner')
 				amount = info.get('amount')
-				temp = json.loads(value)
+				if value:
+					temp = json.loads(value)
 
 				if self.filters.get("assigned_to"):
 					for data in json.loads(info.get('opportunity_owner')):
@@ -349,7 +351,8 @@ class SalesPipelineAnalytics(object):
 				period = "Q" + str(info.get('quarter'))
 				value = info.get('opportunity_owner')
 				count = info.get('count')
-				temp = json.loads(value)
+				if value:
+					temp = json.loads(value)
 
 				if self.filters.get("assigned_to"):
 					for data in json.loads(info.get('opportunity_owner')):
@@ -369,7 +372,8 @@ class SalesPipelineAnalytics(object):
 				period = "Q" + str(info.get('quarter'))
 				value = info.get('opportunity_owner')
 				amount = info.get('amount')
-				temp = json.loads(value)
+				if value:
+					temp = json.loads(value)
 
 				if self.filters.get("assigned_to"):
 					for data in json.loads(info.get('opportunity_owner')):
@@ -393,17 +397,22 @@ class SalesPipelineAnalytics(object):
 						if self.filters.get("assigned_to") == user:
 							value = user
 							self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
-							self.periodic_data[value][period]= val
+							self.periodic_data[value][period] += val
 				else:
 					for user in temp:
 						value = user
 						self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
-						self.periodic_data[value][period]= val
+						self.periodic_data[value][period] += val
 			else:
 				value = temp[0]
 				self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
-				self.periodic_data[value][period]= val
+				self.periodic_data[value][period] += val
+
+		elif not temp:
+			value = value
+			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
+			self.periodic_data[value][period] += val
 
 		else:
 			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
-			self.periodic_data[value][period]= val
+			self.periodic_data[value][period] += val
