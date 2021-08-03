@@ -218,7 +218,6 @@ def create_company():
     if not doc:
         doc = frappe.new_doc('Company')
         doc.company_name = '__Test Company'
-        doc.abbr = "_TC"
         doc.default_currency = "INR"
         doc.insert()
 
