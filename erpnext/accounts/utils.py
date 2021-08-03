@@ -920,7 +920,6 @@ def repost_gle_for_stock_vouchers(stock_vouchers, posting_date, company=None, wa
 			_delete_gl_entries(voucher_type, voucher_no)
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
-	future_stock_vouchers = []
 
 	values = []
 	condition = ""
@@ -936,17 +935,16 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 		condition += " and company = %s"
 		values.append(company)
 
-	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+	future_stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where
 			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
 			and is_cancelled = 0
 			{condition}
 		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
-		tuple([posting_date, posting_time] + values), as_dict=True):
-			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+		tuple([posting_date, posting_time] + values), as_dict=True)
 
-	return future_stock_vouchers
+	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 
 def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	gl_entries = {}
