@@ -224,7 +224,7 @@ def get_avg_purchase_rate(serial_nos):
 
 def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
-	val_method = frappe.db.get_value('Item', item_code, 'valuation_method')
+	val_method = frappe.db.get_value('Item', item_code, 'valuation_method', cache=True)
 	if not val_method:
 		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method") or "FIFO"
 	return val_method
