@@ -75,13 +75,15 @@ class OpportunitySummaryBySalesStage(object):
 		filter_data = self.filters.get('status')
 		
 		if self.filters.get("data_based_on") == "Number":
-			self.filters.update({'status':tuple(filter_data)})
+			if self.filters.get('status'):
+				self.filters.update({'status':tuple(filter_data)})
 			self.query_result = frappe.db.sql("""select sales_stage,count(name) as count,{sql} from tabOpportunity
 			where {conditions} 
 			group by sales_stage,{sql}""".format(conditions=self.get_conditions(),sql=sql),self.filters,as_dict=1)
 
 		if self.filters.get("data_based_on") == "Amount":
-			self.filters.update({'status':tuple(filter_data)})
+			if self.filters.get('status'):
+				self.filters.update({'status':tuple(filter_data)})
 			self.query_result = frappe.db.sql("""select sales_stage,sum(opportunity_amount) as amount,{sql} from tabOpportunity
 			where {conditions} 
 			group by sales_stage,{sql}""".format(conditions=self.get_conditions(),sql=sql),self.filters,as_dict=1)
@@ -149,29 +151,42 @@ class OpportunitySummaryBySalesStage(object):
 			if self.filters.get("based_on") == "Opportunity Owner":
 				if self.filters.get("data_based_on") == "Number":
 					temp = json.loads(d.get("_assign"))
-					if len(temp) > 1:
-						sales_stage = d.get('sales_stage')
-						count = d.get('count')
-						for owner in temp:
-							self.helper(owner,sales_stage,count)
+					if temp:
+						if len(temp) > 1:
+							sales_stage = d.get('sales_stage')
+							count = d.get('count')
+							for owner in temp:
+								self.helper(owner,sales_stage,count)
 
+						else:
+							owner = temp[0]
+							sales_stage = d.get('sales_stage')
+							count = d.get('count')
+							self.helper(owner,sales_stage,count)
 					else:
-						owner = temp[0]
+						owner = "Not Assigned"
 						sales_stage = d.get('sales_stage')
 						count = d.get('count')
 						self.helper(owner,sales_stage,count)
 
+
 				if self.filters.get("data_based_on") == "Amount":
 
 					temp = json.loads(d.get("_assign"))
-					if len(temp) > 1:
-						sales_stage = d.get('sales_stage')
-						amount = d.get('amount')
-						for owner in temp:
-							self.helper(owner,sales_stage,amount)
+					if temp:
+						if len(temp) > 1:
+							sales_stage = d.get('sales_stage')
+							amount = d.get('amount')
+							for owner in temp:
+								self.helper(owner,sales_stage,amount)
 
+						else:
+							owner = temp[0]
+							sales_stage = d.get('sales_stage')
+							amount = d.get('amount')
+							self.helper(owner,sales_stage,amount)
 					else:
-						owner = temp[0]
+						owner = "Not Assigned"
 						sales_stage = d.get('sales_stage')
 						amount = d.get('amount')
 						self.helper(owner,sales_stage,amount)
