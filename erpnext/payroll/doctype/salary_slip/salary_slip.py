@@ -19,6 +19,7 @@ from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_appli
 from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.hr.utils import validate_active_employee
 from six import iteritems
 
 class SalarySlip(TransactionBase):
@@ -39,6 +40,7 @@ class SalarySlip(TransactionBase):
 
 	def validate(self):
 		self.status = self.get_status()
+		validate_active_employee(self.employee)
 		self.validate_dates()
 		self.check_existing()
 		if not self.salary_slip_based_on_timesheet:
