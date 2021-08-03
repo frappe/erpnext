@@ -34,16 +34,6 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Shopify Settings",
-   "link_to": "Shopify Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Amazon MWS Settings",
    "link_to": "Amazon MWS Settings",
    "link_type": "DocType",

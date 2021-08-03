@@ -9,10 +9,12 @@ from frappe.model.document import Document
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, now_datetime, nowdate
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+from erpnext.hr.utils import validate_active_employee
 from datetime import timedelta, datetime
 
 class ShiftAssignment(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.validate_overlapping_dates()
 
 		if self.end_date and self.end_date <= self.start_date:
