@@ -637,3 +637,31 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });
+
+frappe.tour['Purchase Order'] = [
+	{
+		fieldname: "supplier",
+		title: "Supplier",
+		description: __("Select the Supplier."),
+	},
+	{
+		fieldname: "schedule_date",
+		title: "Required By",
+		description: __("Select the date by when the material needs to be delivered."),
+	},
+	{
+		fieldname: "set_warehouse",
+		title: "Target Warehouse",
+		description: __("Optionally, you can set the default target Warehouse where the purchased Items will be delivered. This will be fetched into the Item table rows."),
+	},
+	{
+		fieldname: "items",
+		title: "Items",
+		description: __("Select the item by code and set the quantity, you can change the warehouse and required by date for each item."),
+	},
+	{
+		fieldname: "taxes",
+		title: "Taxes and Charges",
+		description: __("If your Supplier is going to charge you additional taxes or charge like a shipping or insurance charge, you can add it here. "),
+	}
+];

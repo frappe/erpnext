@@ -480,3 +480,26 @@ function set_schedule_date(frm) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
 	}
 }
+
+frappe.tour['Material Request'] = [
+	{
+		fieldname: "schedule_date",
+		title: "Required By Date",
+		description: __("Select the date by when the material needs to be delivered."),
+	},
+	{
+		fieldname: "material_request_type",
+		title: "Purpose",
+		description: __("Select one of the purposes for the Material Request."),
+	},
+	{
+		fieldname: "set_warehouse",
+		title: "Target Warehouse",
+		description: __("Optionally, you can set the default target Warehouse where the purchased Items will be delivered. This will be fetched into the Item table rows."),
+	},
+	{
+		fieldname: "items",
+		title: "Items",
+		description: __("Select the Item and Quantity. The Required Date and Warehouse can also be set for individual items here."),
+	},
+];
