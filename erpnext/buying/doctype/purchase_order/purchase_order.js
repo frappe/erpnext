@@ -662,6 +662,6 @@ frappe.tour['Purchase Order'] = [
 	{
 		fieldname: "taxes",
 		title: "Taxes and Charges",
-		description: __("If your Supplier is going to charge you additional taxes or charge like a shipping or insurance charge, you can add it here. "),
+		description: __("If your Supplier is going to charge you additional taxes or charge like a shipping or insurance charge, you can add it here."),
 	}
 ];

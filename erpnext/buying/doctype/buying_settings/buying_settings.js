@@ -11,7 +11,7 @@ frappe.tour['Buying Settings'] = [
 	{
 		fieldname: "supp_master_name",
 		title: "Supplier Naming By",
-		description: __("By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a  ") + "<a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a>" + __(" choose the 'Naming Series' option."),
+		description: __("By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."),
 	},
 	{
 		fieldname: "supplier_group",
@@ -41,6 +41,6 @@ frappe.tour['Buying Settings'] = [
 	{
 		fieldname: "allow_multiple_items",
 		title: "Allow Item to be added multiple times in a transaction",
-		description: __("When this checkbox is unchecked, an item cannot be added multiple times in the same Purchase Order. However, you can still explicitly change the quantity. ")
+		description: __("When this checkbox is unchecked, an item cannot be added multiple times in the same Purchase Order. However, you can still explicitly change the quantity.")
 	}
 ];
