@@ -1545,6 +1545,7 @@
    "fieldname": "consolidated_invoice",
    "fieldtype": "Link",
    "label": "Consolidated Sales Invoice",
+   "no_copy": 1,
    "options": "Sales Invoice",
    "read_only": 1
   }
@@ -1552,7 +1553,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-02-01 15:03:33.800707",
+ "modified": "2021-07-29 13:37:20.636171",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
