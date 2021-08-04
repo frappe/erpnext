@@ -174,8 +174,7 @@ def validate_bank_details_and_generate_csv(doc, method):
 
 	company_bank_details = company_bank_details[0]
 
-	month = get_month_map()[doc.month]
-	employee_records, missing_fields_for_employees = get_employee_record_details_row(month, doc.year, doc.company)
+	employee_records, missing_fields_for_employees = get_employee_record_details_row(doc.month, doc.year, doc.company)
 	salary_control_record = get_salary_control_record(doc, company_bank_details, len(employee_records))
 
 	genrate_csv(doc.name, employee_records, salary_control_record)
@@ -189,7 +188,13 @@ def get_employee_record_details_row(month, year, company):
 	employee_records = []
 	missing_fields_for_employees= {}
 
-	data = itertools.groupby(get_salary_slip(month, year, company), key=lambda x: (x['employee']))
+	month_abbr = get_month_map()[month]
+	salary_slips =  get_salary_slip(month_abbr, year, company)
+
+	if not len(salary_slips):
+		frappe.throw(_("Salary Slip not found {0}, {1}").format(month, year))
+
+	data = itertools.groupby(salary_slips, key=lambda x: (x['employee']))
 
 	for employee, group in data:
 		group = list(group)
@@ -232,7 +237,8 @@ def get_salary_control_record(doc, company_bank_details, no_of_records):
 
 	month = get_month_map()[doc.month]
 
-	salary_month_and_year = (str(month) if month>10 else "0"+str(month)) + str(doc.year) #MMYYY
+	# format: MMYYY
+	salary_month_and_year = (str(month) if month>10 else "0"+str(month)) + str(doc.year)
 
 	row = [
 		doc.employer_establishment_id,

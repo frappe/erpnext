@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 import frappe
-import os
 import csv
 import itertools
 from frappe.utils import comma_and, get_link_to_form, get_datetime
@@ -15,19 +14,18 @@ frequency = {
 }
 
 def validate_payer_details(doc, method):
-	if frappe.get_cached_value('Company', doc.company, 'country') == "Qatar":
-		if doc.payer_establishment_id:
-			mandatory_fields = []
-			if not doc.payer_bank:
-				mandatory_fields.append("Bank")
-			if not doc.payer_bank_short_name:
-				mandatory_fields.append("Bank Short Name")
-			if not doc.iban:
-				mandatory_fields.append("IBAN")
+	if frappe.get_cached_value('Company', doc.company, 'country') == "Qatar" and doc.payer_establishment_id:
+		mandatory_fields = []
+		if not doc.payer_bank:
+			mandatory_fields.append("Bank")
+		if not doc.payer_bank_short_name:
+			mandatory_fields.append("Bank Short Name")
+		if not doc.iban:
+			mandatory_fields.append("IBAN")
 
-			if len(mandatory_fields):
-				frappe.throw(_("fill {0} in {1} or leave it blank if Employer is Payer").format(
-					comma_and(mandatory_fields), get_link_to_form("Company", doc.company)
+		if len(mandatory_fields):
+			frappe.throw(_("fill {0} in {1} or leave it blank if Employer is Payer").format(
+				comma_and(mandatory_fields), get_link_to_form("Company", doc.company)
 			))
 
 def validate_bank_details_and_generate_csv(doc, method):
@@ -83,7 +81,7 @@ def create_and_attach_file(doc):
 
 
 def get_sif_header_column():
-	return ["Employer EID", "File Creation Date", "File Creation Time", "Payer EID", "Payer QID", "Payer Bank"
+	return ["Employer EID", "File Creation Date", "File Creation Time", "Payer EID", "Payer QID", "Payer Bank",
 		"Short Name", "Payer IBAN", "Salary Year and Month", "Total Salaries", "Total Records", "SIF Version"]
 
 def get_sif_records_column():
@@ -126,9 +124,14 @@ def get_sif_record_data(month, year, company):
 	total_salaries = 0
 	missing_fields_for_employee = {}
 	employee_records = []
-	month = get_month_map()[month]
+	month_abbr = get_month_map()[month]
 
-	data = itertools.groupby(get_salary_slip(month, year, company), key=lambda x: (x['employee']))
+	salary_slips = get_salary_slip(month_abbr, year, company)
+
+	if not len(salary_slips):
+		frappe.throw(_("Salary Slip not found {0}, {1}").format(month, year))
+
+	data = itertools.groupby(salary_slips, key=lambda x: (x['employee']))
 
 	for employee, group in data:
 		employee_detail = get_employee_data(employee)
@@ -202,8 +205,9 @@ def get_salary_slip(month, year, company):
 		WHERE sd.parent = ss.name
 		AND MONTH(ss.start_date) = %(month)s
 		AND YEAR(ss.start_date) = %(year)s
+		AND company = %(company)s
 		AND ss.docstatus = 1
-	""", {"month": month, "year": year}, as_dict=1)
+	""", {"month": month, "year": year, "company": company}, as_dict=1)
 
 
 def get_basic_components():
