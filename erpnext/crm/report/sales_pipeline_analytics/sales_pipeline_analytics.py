@@ -311,12 +311,12 @@ class SalesPipelineAnalytics(object):
 				if value:
 					temp = json.loads(value)
 
-				if self.filters.get("assigned_to"):
-					for data in json.loads(info.get('opportunity_owner')):
-						if data == self.filters.get("assigned_to"):
-							self.helper(period,data,count,temp)
-				else:
-					self.helper(period,value,count,temp)							
+					if self.filters.get("assigned_to"):
+						for data in json.loads(info.get('opportunity_owner')):
+							if data == self.filters.get("assigned_to"):
+								self.helper(period,data,count,temp)
+					else:
+						self.helper(period,value,count,temp)							
 
 				
 			if self.filters.get("range") == "Monthly" and self.filters.get("based_on") == "Number" and self.filters.get("pipeline_by") == "Sales Stage":
@@ -340,12 +340,12 @@ class SalesPipelineAnalytics(object):
 				if value:
 					temp = json.loads(value)
 
-				if self.filters.get("assigned_to"):
-					for data in json.loads(info.get('opportunity_owner')):
-						if data == self.filters.get("assigned_to"):
-							self.helper(period,data,amount,temp)
-				else:
-					self.helper(period,value,amount,temp)	
+					if self.filters.get("assigned_to"):
+						for data in json.loads(info.get('opportunity_owner')):
+							if data == self.filters.get("assigned_to"):
+								self.helper(period,data,amount,temp)
+					else:
+						self.helper(period,value,amount,temp)	
 
 			if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Number" and self.filters.get("pipeline_by") == "Owner":
 				period = "Q" + str(info.get('quarter'))
@@ -354,12 +354,12 @@ class SalesPipelineAnalytics(object):
 				if value:
 					temp = json.loads(value)
 
-				if self.filters.get("assigned_to"):
-					for data in json.loads(info.get('opportunity_owner')):
-						if data == self.filters.get("assigned_to"):
-							self.helper(period,data,count,temp)
-				else:
-					self.helper(period,value,count,temp)							
+					if self.filters.get("assigned_to"):
+						for data in json.loads(info.get('opportunity_owner')):
+							if data == self.filters.get("assigned_to"):
+								self.helper(period,data,count,temp)
+					else:
+						self.helper(period,value,count,temp)							
 
 			if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Number" and self.filters.get("pipeline_by") == "Sales Stage":
 				period = "Q" + str(info.get('quarter'))
@@ -375,12 +375,12 @@ class SalesPipelineAnalytics(object):
 				if value:
 					temp = json.loads(value)
 
-				if self.filters.get("assigned_to"):
-					for data in json.loads(info.get('opportunity_owner')):
-						if data == self.filters.get("assigned_to"):
-							self.helper(period,data,amount,temp)
-				else:
-					self.helper(period,value,amount,temp)	
+					if self.filters.get("assigned_to"):
+						for data in json.loads(info.get('opportunity_owner')):
+							if data == self.filters.get("assigned_to"):
+								self.helper(period,data,amount,temp)
+					else:
+						self.helper(period,value,amount,temp)	
 			
 			if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Amount" and self.filters.get("pipeline_by") == "Sales Stage":
 				period = "Q" + str(info.get('quarter'))
@@ -408,11 +408,11 @@ class SalesPipelineAnalytics(object):
 				self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
 				self.periodic_data[value][period] += val
 
-		elif not temp:
+		else:
 			value = value
 			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
 			self.periodic_data[value][period] += val
 
-		else:
-			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
-			self.periodic_data[value][period] += val
+		# else:
+		# 	self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
+		# 	self.periodic_data[value][period] += val
