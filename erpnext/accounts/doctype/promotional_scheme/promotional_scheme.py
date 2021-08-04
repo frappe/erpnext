@@ -81,7 +81,7 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 	new_doc = []
 	args = get_args_for_pricing_rule(doc)
 	applicable_for = frappe.scrub(doc.get('applicable_for'))
-	for d in doc.get(child_doc):
+	for idx, d in enumerate(doc.get(child_doc)):
 		if d.name in rules:
 			for applicable_for_value in args.get(applicable_for):
 				temp_args = args.copy()
@@ -93,24 +93,24 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 						applicable_for: applicable_for_value
 					}
 				)
-					
+
 				if docname:
 					pr = frappe.get_doc('Pricing Rule', docname[0].get('name'))
 					temp_args[applicable_for] = applicable_for_value
 					pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
 				else:
 					pr = frappe.new_doc("Pricing Rule")
-					pr.title = make_autoname("{0}/.####".format(doc.name))
+					pr.title = doc.name
 					temp_args[applicable_for] = applicable_for_value
 					pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
-				
+
 				new_doc.append(pr)
-				
+
 		else:
 			for i in range(len(args.get(applicable_for))) :
 
 				pr = frappe.new_doc("Pricing Rule")
-				pr.title = make_autoname("{0}/.####".format(doc.name))
+				pr.title = doc.name
 				temp_args = args.copy()
 				temp_args[applicable_for] = args[applicable_for][i]
 				pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
@@ -144,13 +144,13 @@ def set_args(args, pr, doc, child_doc, discount_fields, child_doc_fields):
 def get_args_for_pricing_rule(doc):
 	args = { 'promotional_scheme': doc.name }
 	applicable_for = frappe.scrub(doc.get('applicable_for'))
-	
+
 	for d in pricing_rule_fields:
 		if d == applicable_for:
 			items = []
 			for applicable_for_values in doc.get(applicable_for):
-				items.append(applicable_for_values.get(applicable_for))	
-			args[d] = items	
+				items.append(applicable_for_values.get(applicable_for))
+			args[d] = items
 		else:
 			args[d] = doc.get(d)
 	return args
