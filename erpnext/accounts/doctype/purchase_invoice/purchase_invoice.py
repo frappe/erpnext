@@ -1142,36 +1142,6 @@ class PurchaseInvoice(BuyingController):
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
 
-# to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
-def get_purchase_document_details(doc):
-	if doc.doctype == 'Purchase Invoice':
-		doc_reference = 'purchase_receipt'
-		items_reference = 'pr_detail'
-		parent_doctype = 'Purchase Receipt'
-		child_doctype = 'Purchase Receipt Item'
-	else:
-		doc_reference = 'purchase_invoice'
-		items_reference = 'purchase_invoice_item'
-		parent_doctype = 'Purchase Invoice'
-		child_doctype = 'Purchase Invoice Item'
-
-	purchase_receipts_or_invoices = []
-	items = []
-
-	for item in doc.get('items'):
-		if item.get(doc_reference):
-			purchase_receipts_or_invoices.append(item.get(doc_reference))
-		if item.get(items_reference):
-			items.append(item.get(items_reference))
-	
-	exchange_rate_map = frappe._dict(frappe.get_all(parent_doctype, filters={'name': ('in',
-		purchase_receipts_or_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
-
-	net_rate_map = frappe._dict(frappe.get_all(child_doctype, filters={'name': ('in',
-		items)}, fields=['name', 'net_rate'], as_list=1))
-
-	return exchange_rate_map, net_rate_map
-
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
