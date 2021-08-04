@@ -127,7 +127,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 					fieldname: 'src_warehouse',
 					fieldtype: 'Link',
 					options: "Warehouse",
-					depends_on: "eval: doc.supplier_dc == 0",
+					default: frm.doc.sorce_warehouse
 
 				},
 				{
