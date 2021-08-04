@@ -21,18 +21,24 @@ class Lead(SellingController):
 		self.get("__onload").is_customer = customer
 		load_address_and_contact(self)
 
+	def set_full_name(self):
+		self.lead_name = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
+
 	def validate(self):
+		self.set_full_name()
 		self.set_lead_name()
 		self.set_title()
+		self.set_status()
+		self.check_email_id_is_unique()
+		self.validate_email_id()
+		self.validate_contact_date()
 		self._prev = frappe._dict({
 			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if (not cint(self.is_new())) else None,
 			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if (not cint(self.is_new())) else None,
 			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if (not cint(self.is_new())) else None,
 		})
-
-		self.set_status()
-		self.check_email_id_is_unique()
-
+		
+	def validate_email_id(self):
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
 				validate_email_address(self.email_id, throw=True)
@@ -46,6 +52,7 @@ class Lead(SellingController):
 			if self.is_new() or not self.image:
 				self.image = has_gravatar(self.email_id)
 
+	def validate_contact_date(self):
 		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
@@ -88,7 +95,7 @@ class Lead(SellingController):
 			linked_doc = frappe.get_doc(link['parenttype'], link['parent'])
 
 			if len(linked_doc.get('links')) == 1:
-				linked_doc.delete()
+				linked_doc.delete(ignore_permissions=True)
 			else:
 				to_remove = None
 				for d in linked_doc.get('links'):
@@ -96,6 +103,7 @@ class Lead(SellingController):
 						to_remove = d
 				if to_remove:
 					linked_doc.remove(to_remove)
+					linked_doc.save(ignore_permissions=True)
 
 	def has_customer(self):
 		return frappe.db.get_value("Customer", {"lead_name": self.name})

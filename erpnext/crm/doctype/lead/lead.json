@@ -16,37 +16,36 @@
   "middle_name",
   "last_name",
   "lead_name",
-  "email_id",
-  "mobile_no",
-  "phone",
   "col_break123",
   "status",
   "company_name",
   "designation",
   "gender",
+  "contact_details_section",
+  "email_id",
+  "mobile_no",
+  "whatsapp_no",
+  "column_break_16",
+  "phone",
+  "phone_ext",
   "additional_information_section",
   "no_of_employees",
   "industry",
   "market_segment",
-  "type",
-  "request_type",
   "column_break_22",
-  "whatsapp_no",
   "fax",
   "website",
+  "type",
+  "request_type",
   "address_section",
   "address_html",
-  "address_type",
-  "address_title",
-  "address_line1",
-  "address_line2",
   "city",
+  "pincode",
   "county",
   "column_break2",
   "contact_html",
   "state",
   "country",
-  "pincode",
   "section_break_12",
   "lead_owner",
   "ends_on",
@@ -91,9 +90,9 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Full Name",
-   "mandatory_depends_on": "eval: !(doc.company_name)",
    "oldfieldname": "lead_name",
    "oldfieldtype": "Data",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -102,7 +101,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Organization Name",
-   "mandatory_depends_on": "eval: !(doc.lead_name)",
+   "mandatory_depends_on": "eval: !(doc.first_name)",
    "oldfieldname": "company_name",
    "oldfieldtype": "Data"
   },
@@ -240,23 +239,6 @@
    "fieldtype": "HTML",
    "label": "Address HTML",
    "read_only": 1
-  },
-  {
-   "description": "Home, Work, etc.",
-   "fieldname": "address_title",
-   "fieldtype": "Data",
-   "label": "Address Title"
-  },
-  {
-   "fieldname": "address_line1",
-   "fieldtype": "Data",
-   "label": "Address Line 1",
-   "mandatory_depends_on": "eval: doc.address_title && doc.address_type"
-  },
-  {
-   "fieldname": "address_line2",
-   "fieldtype": "Data",
-   "label": "Address Line 2"
   },
   {
    "fieldname": "city",
@@ -407,13 +389,6 @@
    "options": "Designation"
   },
   {
-   "default": "Billing",
-   "fieldname": "address_type",
-   "fieldtype": "Select",
-   "label": "Address Type",
-   "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther"
-  },
-  {
    "fieldname": "language",
    "fieldtype": "Link",
    "label": "Print Language",
@@ -422,7 +397,8 @@
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
-   "label": "First Name"
+   "label": "First Name",
+   "mandatory_depends_on": "eval: !(doc.company_name)"
   },
   {
    "fieldname": "middle_name",
@@ -457,7 +433,7 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval: !doc.__islocal",
    "fieldname": "address_section",
    "fieldtype": "Section Break",
    "label": "Address"
@@ -475,13 +451,27 @@
    "fieldname": "other_information_section",
    "fieldtype": "Section Break",
    "label": "Other Information"
+  },
+  {
+   "fieldname": "contact_details_section",
+   "fieldtype": "Section Break",
+   "label": "Contact Details"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone_ext",
+   "fieldtype": "Data",
+   "label": "Phone Ext."
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2021-07-28 00:20:37.768449",
+ "modified": "2021-08-04 00:24:57.208590",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

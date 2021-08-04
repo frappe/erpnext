@@ -12,7 +12,8 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			'Opportunity': this.make_opportunity
 		};
 
-		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
+		// For avoiding integration issues.
+		this.frm.set_df_property('first_name', 'reqd', true);
 	}
 
 	onload () {
@@ -84,42 +85,16 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	}
 
 	render_basic_info_html() {
-		let html='';
-		if (cur_frm.doc.lead_owner) {
-			html += `<div class="col-xs-2">
-				<span><b> Lead Owner </b></span>
-			</div>
-			<div class="col-xs-10">
-				<span> ${cur_frm.doc.lead_owner} </span>
-			</div>` ;
+		if (cur_frm.doc.contact_date) {
+			let contact_date = frappe.datetime.obj_to_str(cur_frm.doc.contact_date)
+			let diff_days = frappe.datetime.get_day_diff(contact_date, frappe.datetime.get_today());
+			let color = diff_days > 0 ? "orange" : "green";
+			let message = diff_days > 0 ? __("Next Contact Date") : __("Last Contact Date");
+			let html = `<div class="col-xs-12">
+						<span class="indicator whitespace-nowrap ${color}"><span> ${message} : ${contact_date}</span></span>
+					</div>` ;
+			cur_frm.dashboard.set_headline_alert(html);
 		}
-
-		if (cur_frm.doc.email_id) {
-			html += `<div class="col-xs-2">
-				<span><b> Email </b></span>
-			</div>
-			<div class="col-xs-10">
-				<span> ${cur_frm.doc.email_id} </span>
-			</div>` ;
-		}
-
-		if (cur_frm.doc.mobile_no) {
-			html += `<div class="col-xs-2">
-				<span><b> Mobile </b></span>
-			</div>
-			<div class="col-xs-10">
-				<span> ${cur_frm.doc.mobile_no} </span>
-			</div>` ;
-		}
-
-		html += `<div class="col-xs-2">
-				<span><b> Status </b></span>
-			</div>
-			<div class="col-xs-10">
-				<span> ${cur_frm.doc.status} </span>
-			</div>` ;
-		html = `<div class="row">${html}</div>`;
-		cur_frm.dashboard.set_headline_alert(html);
 	}
 };
 
