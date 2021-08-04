@@ -501,7 +501,7 @@ class PurchaseReceipt(BuyingController):
 		self.add_gl_entry(gl_entries, expenses_included_in_asset_valuation, item.cost_center, 0.0, flt(item.landed_cost_voucher_amount),
 			remarks, asset_account, project=item.project, item=item)
 
-		self.add_gl_entry(gl_entries, asset_account, item.cost_center, 0.0, flt(item.landed_cost_voucher_amount),
+		self.add_gl_entry(gl_entries, asset_account, item.cost_center, flt(item.landed_cost_voucher_amount), 0.0,
 			remarks, expenses_included_in_asset_valuation, project=item.project, item=item)
 
 	def update_assets(self, item, valuation_rate):
