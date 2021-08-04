@@ -1,6 +1,6 @@
 {
  "action": "Create Entry",
- "action_label": "Let\u2019s create an Operations",
+ "action_label": "Let\u2019s create an Operation",
  "creation": "2020-05-12 16:15:31.706756",
  "description": "# Create Operations\n\nAn Operation refers to any manufacturing operation performed on the raw materials to process it further in the manufacturing path. As an example, if you are into garments manufacturing, you will create Operations like fabric cutting, stitching, and washing as some of the operations.",
  "docstatus": 0,
@@ -9,7 +9,7 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2021-08-03 11:30:57.604978",
+ "modified": "2021-08-04 17:45:57.435805",
  "modified_by": "Administrator",
  "name": "Operation",
  "owner": "Administrator",

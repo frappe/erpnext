@@ -17,3 +17,21 @@ frappe.ui.form.on("Workstation", {
 		}
 	}
 })
+
+frappe.tour['Workstation'] = [
+	{
+		fieldname: "workstation_name",
+		title: "Workstation Name",
+		description: __("You can set it as a machine name or operation type. For example, stiching machine 12")
+	},
+	{
+		fieldname: "production_capacity",
+		title: "Production Capacity",
+		description: __("No. of parallel job cards which can be allowed on this workstation. Example: 2 would mean this workstation can process production for two Work Orders at a time.")
+	},
+	{
+		fieldname: "working_hours_section",
+		title: "Working Hours",
+		description: "Enter working hours for operation"
+	}
+];

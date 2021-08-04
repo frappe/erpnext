@@ -12,3 +12,16 @@ frappe.ui.form.on('Operation', {
 		});
 	}
 });
+
+frappe.tour['Operation'] = [
+	{
+		fieldname: "__newname",
+		title: "Operation Name",
+		description: __("Enter a name for the Operation, for example, Cutting.")
+	},
+	{
+		fieldname: "workstation",
+		title: "Default Workstation",
+		description: __("Select the Default Workstation where the Operation will be performed. This will be fetched in BOMs and Work Orders.")
+	}
+];

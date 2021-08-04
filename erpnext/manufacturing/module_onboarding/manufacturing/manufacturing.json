@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/manufacturing",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-08-04 17:26:25.411840",
+ "modified": "2021-08-04 17:48:04.463686",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -29,10 +29,10 @@
    "step": "Explore Manufacturing Settings"
   },
   {
-   "step": "Operation"
+   "step": "Workstation"
   },
   {
-   "step": "Workstation"
+   "step": "Operation"
   },
   {
    "step": "Routing"
