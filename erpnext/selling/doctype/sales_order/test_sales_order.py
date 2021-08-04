@@ -5,7 +5,7 @@ import json
 import unittest
 import frappe
 import frappe.permissions
-from frappe.utils import flt, add_days, nowdate
+from frappe.utils import flt, add_days, nowdate, getdate
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
@@ -1256,17 +1256,11 @@ def automatically_fetch_payment_terms(enable=1):
 	accounts_settings.save()
 
 def compare_payment_schedules(doc, doc1, doc2):
-	payment_schedule1 = frappe.db.sql("""select payment_term, description, due_date, mode_of_payment, invoice_portion, payment_amount
-		from `tabPayment Schedule`
-		where parenttype=%s and parent=%s
-		order by payment_term asc""", (doc1.doctype, doc1.name), as_dict=1)
-
-	payment_schedule2 = frappe.db.sql("""select payment_term, description, due_date, mode_of_payment, invoice_portion, payment_amount
-		from `tabPayment Schedule`
-		where parenttype=%s and parent=%s
-		order by payment_term asc""", (doc2.doctype, doc2.name), as_dict=1)
-
-	doc.assertEqual(payment_schedule1, payment_schedule2)
+	for index, schedule in enumerate(doc1.get('payment_schedule')):
+		doc.assertEqual(schedule.payment_term, doc2.payment_schedule[index].payment_term)
+		doc.assertEqual(getdate(schedule.due_date), doc2.payment_schedule[index].due_date)
+		doc.assertEqual(schedule.invoice_portion, doc2.payment_schedule[index].invoice_portion)
+		doc.assertEqual(schedule.payment_amount, doc2.payment_schedule[index].payment_amount)
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
