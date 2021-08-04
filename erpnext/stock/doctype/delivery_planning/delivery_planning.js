@@ -11,6 +11,7 @@ frappe.ui.form.on('Delivery Planning', {
 		{ frappe.throw(__('Delivery Date To should be greater or equal to Date From '))}
 	},
 	 onload: function(frm){
+		
 ////	 To fetch pin code from Address and set in Postal code from and to
 //	 	console.log("--------------000000000---------------")
 //         frappe.call({
@@ -94,8 +95,12 @@ frappe.ui.form.on('Delivery Planning', {
 									callback : function(r){
 										if(r.message == 1){
 											console.log("-----  --- --item--  ---  ---  ",r);
-											frappe.msgprint("  Transporter wise Delivery Plan created  ");
-											frm.reload();
+											
+											// frm.refresh();
+											// location.reload();
+											frappe.msgprint("  Transporter wise Delivery Plan created");
+											console.log("msg = 1 create trabsport ")
+											frm.reload_doc();	
 										}
 										else{
 										frappe.msgprint(" Unable to create Transporter wise Delivery Plan   ");
@@ -115,6 +120,7 @@ frappe.ui.form.on('Delivery Planning', {
 									if(r.message == 1){
 											console.log("-----  --- --item--  ---  ---  ",r);
 											frappe.msgprint(" Purchase Order Plan Items created  ");
+											frm.reload_doc();
 										}
 									else{
 										frappe.msgprint(" Unable to create Purchase Delivery Plan Item   ");
@@ -132,6 +138,7 @@ frappe.ui.form.on('Delivery Planning', {
 										if(r.message == 1){
 											console.log("-----  --- --PO Create-  ---  ---  ",r);
 											frappe.msgprint("  Purchase Order created ");
+											frm.reload_doc();
 										}
 										else{
 											frappe.msgprint(" Unable to create Purchase Order ");
@@ -148,8 +155,9 @@ frappe.ui.form.on('Delivery Planning', {
 									doc: frm.doc,
 									callback : function(r){
 										if(r.message == 1){
-											console.log("-----  --- --PO Create-  ---  ---  ",r);
-											frappe.msgprint("  Purchase Pick List created ");
+											console.log("-----  --- --Pick List Create-  ---  ---  ",r);
+											frappe.msgprint(" Pick List created ");
+											frm.reload_doc();
 										}
 										else{
 											frappe.msgprint(" Unable to create Pick List ");
@@ -187,6 +195,7 @@ frappe.ui.form.on('Delivery Planning', {
 											indicator: 'orange'
 										});
 										}
+										frm.reload_doc();
 								   }
 								});
 							}, __('Create'));
@@ -249,6 +258,12 @@ frappe.ui.form.on('Delivery Planning', {
 										if(r.message == 1){
 											console.log("-----  --- --item--  ---  ---  ",r);
 											frappe.msgprint("  Transporter wise Delivery Plan created  ");
+											console.log("msg = 3 create transporter ")
+											// location.reload();
+											// frm.dirty();
+											// frm.refresh();
+											frm.reload_doc();
+											
 										}
 										else{
 										frappe.msgprint(" Unable to create Transporter wise Delivery Plan   ");
@@ -265,8 +280,8 @@ frappe.ui.form.on('Delivery Planning', {
 									doc: frm.doc,
 									callback : function(r){
 										if(r.message == 1){
-											console.log("-----  --- --PO Create-  ---  ---  ",r);
-											frappe.msgprint("  Purchase Pick List created ");
+											console.log("-----  --- --Pick List Create-  ---  ---  ",r);
+											frappe.msgprint(" Pick List created ");
 										}
 										else{
 											frappe.msgprint(" Unable to create Pick List ");

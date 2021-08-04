@@ -39,11 +39,15 @@
   "delivery_note",
   "column_break_30",
   "purchase_order",
+  "column_break_34",
+  "pick_list",
   "section_break_34",
   "is_split",
   "split_from_item",
+  "sd_item",
   "item_dname",
   "rate",
+  "is_updated",
   "amended_from"
  ],
  "fields": [
@@ -183,11 +187,9 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.transporter != \"\" \neval: doc.transporter != null",
    "fieldname": "supplier_dc",
    "fieldtype": "Check",
-   "label": " Supplier delivers to Customer ",
-   "read_only_depends_on": "eval: doc.transporter != null"
+   "label": " Supplier delivers to Customer "
   },
   {
    "depends_on": "eval: doc.supplier_dc == 1",
@@ -247,7 +249,7 @@
    "fieldname": "d_status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Document Status",
+   "label": "Item Planning Status",
    "options": "Incomplete\nComplete",
    "read_only": 1
   },
@@ -290,7 +292,6 @@
   {
    "fieldname": "item_dname",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Item_dname"
   },
   {
@@ -323,12 +324,33 @@
    "options": "Delivery Planning Item",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "sd_item",
+   "fieldtype": "Data",
+   "label": "Split D Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_updated",
+   "fieldtype": "Check",
+   "label": "Is Updated"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pick_list",
+   "fieldtype": "Link",
+   "label": "Pick List",
+   "options": "Pick List"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-31 12:31:08.559276",
+ "modified": "2021-08-04 15:33:20.635968",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
@@ -344,6 +366,20 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

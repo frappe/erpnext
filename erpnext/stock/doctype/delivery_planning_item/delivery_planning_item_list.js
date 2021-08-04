@@ -158,7 +158,7 @@ frappe.listview_settings['Delivery Planning Item'] = {
 							fieldname: 'src_warehouse',
 							fieldtype: 'Link',
 							options: "Warehouse",
-							depends_on: "eval: doc.supplier_dc == 0",
+							default: selected_docs[0].sorce_warehouse,
 		
 						},
 						{
@@ -305,6 +305,21 @@ frappe.listview_settings['Delivery Planning Item'] = {
 			
 		});
 
+	},
+	gantt_custom_popup_html: function(ganttobj, task) {
+		var html = `<h5><a style="text-decoration:underline"\
+			href="/app/task/${ganttobj.id}""> ${ganttobj.name} </a></h5>`;
+
+		if(task.project) html += `<p>Project: ${task.project}</p>`;
+		html += `<p>Progress: ${ganttobj.progress}</p>`;
+
+		if(task._assign_list) {
+			html += task._assign_list.reduce(
+				(html, user) => html + frappe.avatar(user)
+			, '');
+		}
+
+		return html;
 	}
 
 };

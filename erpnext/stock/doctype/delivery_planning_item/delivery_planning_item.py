@@ -8,12 +8,135 @@ from erpnext.controllers.accounts_controller import update_child_qty_rate
 
 class DeliveryPlanningItem(Document):
 
-	# @frappe.whitelist()
-	# def d_status_update(self, dname):
-	# 	doc = frappe.get_doc("Delivery Planning Item", 'dname')
-	# 	doc.d_status = "Complete"
-	# 	doc.save(ignore_permissions=True)
+	def before_save(self):
+		if not self.is_new():
+			old_doc = self.get_doc_before_save()
+			print("-===== b4save =====--------- old_doc______-", old_doc)
+			if old_doc.sorce_warehouse != self.sorce_warehouse or old_doc.qty_to_deliver != self.qty_to_deliver or old_doc.supplier != self.supplier:
+			# price changed
+				print("--------------- in side old value----------",old_doc)
+				print("old waarehosue and newware house",old_doc.sorce_warehouse, self.sorce_warehouse)
+				self.is_updated =1
+	
+	def on_submit(self):
+		
+		newname = ""
+		old_doc = self.get_doc_before_save()
+		# print("-==========--------- old_doc______-", old_doc)
+		# if old_doc.sorce_warehouse != self.sorce_warehouse or old_doc.qty_to_deliver != self.qty_to_deliver or old_doc.supplier != self.supplier:
+  		#   # price changed
+		# 	print("--------------- in side old value",old_doc)
 
+		print("-------- Inside on_submit----------")
+		if self.is_split == 1:
+			# code to add split item SOI of So
+			print("--------- In side is-split is true----------")
+
+			# retriving info from DPI used to split
+			pdpi = frappe.get_doc('Delivery Planning Item', self.sd_item)
+			print("------- previous DPI of split==== ",pdpi)
+
+			# SOI used in split and updating the SOI
+			ref_soi = frappe.get_doc('Sales Order Item', self.split_from_item)
+			print("---------- ref SOI --------  ",ref_soi)
+			# ref_soi.qty = pdpi.qty_to_deliver,
+			# ref_soi.stock_qty = pdpi.qty_to_deliver,
+			# ref_soi.amount = pdpi.qty_to_deliver * pdpi.rate
+			# ref_soi.save(ignore_permissions=True)
+			frappe.db.set_value('Sales Order Item', self.split_from_item,
+						{'qty' : pdpi.qty_to_deliver,
+						'stock_qty' : pdpi.qty_to_deliver,
+						'amount' : pdpi.qty_to_deliver * pdpi.rate,
+						})
+			print("--------------- Soi old updated ----")
+			
+
+			# getting length soi for sales order child table items for IDX of new SOI
+			sos = frappe.get_all(doctype = 'Sales Order Item', filters={ 'parent': self.sales_order})
+			print("---------------- sos=============",sos, len(sos))
+
+			# creating new SOI for splitted DPI
+			soi = frappe.new_doc('Sales Order Item')
+			soi.stock_qty = self.qty_to_deliver
+			soi.idx = len(sos)+1
+			soi.rate = self.rate
+			soi.amount = self.rate * self.qty_to_deliver
+			soi.parentfield = "items"
+			soi.docstatus = 1
+			soi.item_name = self.item_name
+			soi.description = ref_soi.description
+			soi.parent = self.sales_order
+			soi.parenttype = "Sales Order"
+			soi.item_code = self.item_code
+			soi.delivery_date = self.delivery_date	
+			soi.qty = self.qty_to_deliver
+			soi.delivered_by_supplier = self.supplier_dc
+			soi.supplier = self.supplier
+			soi.uom = self.uom
+			soi.warehouse = self.sorce_warehouse
+			soi.conversion_factor = self.conversion_factor
+			print("----------====== new soi ---------========", soi, soi.item_name)
+			soi.save(ignore_permissions=True)
+			# newname = soi.name
+
+			frappe.db.set_value('Delivery Planning Item', self.name, 'item_dname', soi.name)
+
+			if soi:
+				print("new soi created ----------- ",soi.name )
+				frappe.msgprint(
+					msg='Sales Order Item {soi} added in Sales Order {so}'.format(soi = soi.name, so = self.sales_order),
+					title='Approval message',
+				)
+
+
+			# Updating new SOI.name into new splitted DPI 
+			
+
+			# frappe.db.set_value('Sales Order Item', self.split_from_item,
+			# 					{ 'qty' : pdpi.qty_to_deliver,
+			# 					'stock_qty': pdpi.qty_to_deliver,
+			# 					'amount' : pdpi.qty_to_deliver * pdpi.rate
+			# 					})
+
+			# soi1 = frappe.db.sql(""" Select name, item_code, item_name, rate, description 
+			# 						from `tabSales Order Item` where name = '{0}'
+			# 						""".format(self.item_dname),as_dict=1)
+			# print("----------s01 ============",soi1)															
+			
+			# if soi1:
+			# 	for s in soi1:
+			# 		sidesc = s.description
+			# 		siname = s.item_name 	
+			# 		sirate = s.rate	
+			# 		sname = s.name	
+			# 		sitem_code = s.item_code
+							
+			# print("----------======= name, desc -----=========",sidesc , siname,sname, sirate)
+			# soi1.qty = new_qty	
+			# soi1.stock_qty = new_qty
+			# soi1.amount = sirate * new_qty
+			# soi1.save(ignore_permissions=True)
+			# if (n_transporter):
+			# 	frappe.db.set_value('Sales Order', self.sales_order, 'transporter', n_transporter
+
+		if self.is_updated == 1 and self.is_split == 0:
+			# IF doc is updated then pusing same updates on SOI 
+			print("updated -------------",self.is_updated)
+			ref_soi = frappe.get_doc('Sales Order Item', self.item_dname)
+			ref_soi.qty = self.qty_to_deliver,
+			ref_soi.stock_qty = self.qty_to_deliver,
+			ref_soi.amount = self.qty_to_deliver * self.rate
+			ref_soi.delivered_by_supplier = self.supplier_dc
+			ref_soi.supplier = self.supplier
+			ref_soi.save(ignore_permissions=True)
+			
+			if(ref_soi):
+				print("DOC updated",ref_soi.name)
+				frappe.msgprint(
+					msg='Sales Order Item {soi} added in Sales Order {so}'.format(soi = soi.name, so = self.sales_order),
+					title='Approval message',
+				)
+		
 	@frappe.whitelist()
 	def split_dp_item(self,n_transporter, n_qty, n_src_warehouse,n_supplier_dc, n_supplier, n_date):
 		new_qty = 0
@@ -21,20 +144,12 @@ class DeliveryPlanningItem(Document):
 		sidesc = ""
 		sname = ""
 		sirate = 0
-		newname = ""
 		if(n_transporter, n_supplier, n_src_warehouse, n_qty):
 			if n_qty != self.ordered_qty:
 				new_qty = int(self.ordered_qty) - n_qty
 				print("------- per unit ---------- ",self.weight_per_unit,"-------- new Qty ------- ", n_qty)
-				n_weight = float(self.weight_per_unit) * n_qty
-				print("===== new n weight ===== ", n_weight)
-				
 
-				# dp_item.save(ignore_permissions=True)
-				print("------- per unit ---------- ",self.weight_per_unit,"-------- new Qty ------- ", new_qty)
-
-				n_weight = float(self.weight_per_unit) * new_qty
-				# update old dpi 
+				# updateing old dpi 
 				frappe.db.set_value('Delivery Planning Item', self.name, {
 					'ordered_qty': new_qty,
 					'pending_qty': new_qty,
@@ -42,102 +157,30 @@ class DeliveryPlanningItem(Document):
 					'weight_to_deliver': float(new_qty) * float(self.weight_per_unit)
 				})
 			print("----------- values -------------", self.sales_order, self.item_code)
-			# soi1 = frappe.get_value( doctype='Sales Order Item', name = self.item_dname,
-			# 						fields =['name', 'item_name','item_code',
-			# 															'description','rate'],  as_dict=1)	
-
-			soi1 = frappe.db.sql(""" Select name, item_code, item_name, rate, description 
-									from `tabSales Order Item` where name = '{0}'
-									""".format(self.item_dname),as_dict=1)
-			print("----------s01 ============",soi1)															
+		
+			# soi1 = frappe.db.sql(""" Select name, item_code, item_name, rate, description 
+			# 						from `tabSales Order Item` where name = '{0}'
+			# 						""".format(self.item_dname),as_dict=1)
+			# print("----------s01 ============",soi1)															
 			
-			if soi1:
-				for s in soi1:
-					sidesc = s.description
-					siname = s.item_name 	
-					sirate = s.rate	
-					sname = s.name	
-					sitem_code = s.item_code
+			# if soi1:
+			# 	for s in soi1:
+			# 		sidesc = s.description
+			# 		siname = s.item_name 	
+			# 		sirate = s.rate	
+			# 		sname = s.name	
+			# 		sitem_code = s.item_code
 							
-			print("----------======= name, desc -----=========",sidesc , siname,sname, sirate)
-			# soi1.qty = new_qty	
-			# soi1.stock_qty = new_qty
-			# soi1.amount = sirate * new_qty
-			# soi1.save(ignore_permissions=True)
-			if (n_transporter):
-				frappe.db.set_value('Sales Order', self.sales_order, 'transporter', n_transporter)
-
-			sos = frappe.get_all(doctype = 'Sales Order Item', filters={ 'parent': self.sales_order})
-			print("---------------- sos=============",sos, len(sos))
-			# sales_order = frappe.get_doc("Sales Order", self.sales_order)
-			# print("---------======= sales order ==========------------", sales_order)
-			# sales_order.append("items",{
-			# 	"item_name" : siname,
-			#	"idx" : len(soi1)
-			# 	"description" : sidesc,
-			# 	"parent" : self.sales_order,
-			# 	"parenttype" : "Sales Order",
-			# 	"item_code" : self.item_code,
-			# 	"delivery_date" : n_date,
-			# 	"qty" : n_qty,
-			# 	"delivered_by_supplier" : n_supplier_dc,
-			# 	"supplier" : n_supplier,
-			# 	"uom" : self.uom,
-			#	"stock_qty" : n_qty,
-			# 	"conversion_factor" : self.conversion_factor
-			# })
-			# sales_order.save(ignore_permissions=True)
-
-
-			soi = frappe.new_doc('Sales Order Item')
-			soi.stock_qty = n_qty
-			soi.idx = len(sos)+1
-			soi.rate = sirate
-			soi.amount = sirate * n_qty 
-			soi.parentfield = "items"
-			soi.docstatus = 1
-			soi.item_name = siname
-			soi.description = sidesc
-			soi.parent = self.sales_order
-			soi.parenttype = "Sales Order"
-			soi.item_code = self.item_code
-			soi.delivery_date = n_date	
-			soi.qty = n_qty
-			soi.delivered_by_supplier = n_supplier_dc
-			soi.supplier = n_supplier
-			soi.uom = self.uom
-			soi.warehouse = n_src_warehouse
-			soi.conversion_factor = self.conversion_factor
-			print("----------====== new soi ---------========", soi, soi.item_name)
-			soi.save(ignore_permissions=True)
-			newname = soi.name
-
-			frappe.db.set_value('Sales Order Item', self.item_dname,
-								{ 'qty' : new_qty,
-								'stock_qty': new_qty,
-								'amount' : new_qty * sirate
-								})
+			# print("----------======= name, desc -----=========",sidesc , siname,sname, sirate)
 			
-			# trans_items = frappe.get_all("Sales Order Item", filters = {'parent': self.sales_order},
-			# 							fields= ['conversion_factor','delivery_date','idx',
-			# 							'item_code','name','qty','rate','uom'])
-			# print("----------- trans items ===========", trans_items)
-			# for t in trans_items:
-				
-			# 	t['docname'] = t.name
-			# 	print("inn  99999999",t)
-
-			# print("updated docname",trans_items)	
-			# update_child_qty_rate("Sales Order", str(trans_items), self.sales_order, "items")
-
-			#  Item Name 1,Description 1, UOM Conversion Factor 1,parent, parenttype, idx6280
-			# accounts_controller.py 1542 Update update_child_qty_rate
-			# utils.js 467 update_child_items 
+			# if (n_transporter):
+			# 	frappe.db.set_value('Sales Order', self.sales_order, 'transporter', n_transporter)
 
 			# creating new DPI after split
 			dp_item = frappe.new_doc("Delivery Planning Item")
-			dp_item.item_dname = newname
-			dp_item.transporter = n_transporter
+			if(n_supplier_dc == 0):
+				dp_item.transporter = n_transporter
+
 			dp_item.customer = self.customer
 			dp_item.item_code = self.item_code
 			dp_item.item_name = self.item_name
@@ -157,6 +200,10 @@ class DeliveryPlanningItem(Document):
 			dp_item.supplier = n_supplier
 			dp_item.uom = self.uom
 			dp_item.conversion_factor = self.conversion_factor
+			dp_item.is_split = 1
+			dp_item.split_from_item = self.item_dname
+			dp_item.sd_item = self.name
+			dp_item.stock_uom = n_qty
 			dp_item.save(ignore_permissions=True)
 
 			return 1
@@ -280,7 +327,9 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		print("----------- values -------------", doc.sales_order, doc.item_code)
 		dp_item = frappe.new_doc("Delivery Planning Item")
 		# dp_item.item_dname = newname
-		dp_item.transporter = n_transporter
+		if(n_supplier_dc == 0):
+				dp_item.transporter = n_transporter
+		
 		dp_item.customer = doc.customer
 		dp_item.item_code = doc.item_code
 		dp_item.item_name = doc.item_name
@@ -301,7 +350,9 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		dp_item.uom = doc.uom
 		dp_item.conversion_factor = doc.conversion_factor
 		dp_item.is_split = 1
-		dp_item.split_from_item = doc.name
+		dp_item.split_from_item = doc.item_dname
+		dp_item.sd_item = doc.name
+		dp_item.stock_uom = n_qty
 		dp_item.save(ignore_permissions=True)
 
 	return 1
