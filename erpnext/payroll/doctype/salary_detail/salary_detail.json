@@ -12,6 +12,7 @@
   "year_to_date",
   "section_break_5",
   "additional_salary",
+  "is_recurring_additional_salary",
   "statistical_component",
   "hide_from_salary_slip",
   "depends_on_payment_days",
@@ -244,6 +245,14 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Hide From Salary Slip"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parenttype=='Salary Slip' && doc.parentfield=='earnings' && doc.additional_salary",
+   "fieldname": "is_recurring_additional_salary",
+   "fieldtype": "Check",
+   "label": "Is Recurring Additional Salary",
+   "read_only": 1
   }
  ],
  "istable": 1,
