@@ -785,6 +785,8 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
 
+		automatically_fetch_payment_terms(enable=0)
+
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
