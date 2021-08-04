@@ -1248,6 +1248,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
 
+		automatically_fetch_payment_terms(enable=0)		
+
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.automatically_fetch_payment_terms = enable
