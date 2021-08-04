@@ -84,7 +84,7 @@ def make_custom_fields():
 			fieldtype='Date', insert_after='item_name', print_hide=1)
 	]
 
-	wps_fields_for_company, wps_fields_for_employee = get_custom_fields_for_wps()
+	wps_fields_for_company, wps_fields_for_employee, wps_fields_for_salary_component = get_custom_fields_for_wps()
 
 	custom_fields = {
 		'Item': [
@@ -126,7 +126,8 @@ def make_custom_fields():
 		'Purchase Receipt Item': invoice_item_fields,
 		'Supplier Quotation Item': invoice_item_fields,
 		'Company': wps_fields_for_company,
-		'Employee': wps_fields_for_employee
+		'Employee': wps_fields_for_employee,
+		'Salary Component': wps_fields_for_salary_component
 	}
 
 	create_custom_fields(custom_fields)
@@ -256,11 +257,19 @@ def get_custom_fields_for_wps():
 	wps_fields_for_company = [
 		dict(fieldname='employer_establishment_id', label='Employer Establishment ID',
 			fieldtype='Data', insert_after='date_of_establishment', print_hide=1),
+		dict(fieldname='employer_reference_number', label='Employer Reference number',
+			fieldtype='Data', insert_after='employer_establishment_id', print_hide=1),
 	]
 
 	wps_fields_for_employee = [
 		dict(fieldname='agent_id', label='Agent ID', description = 'Used while generating Salary Information file',
 			fieldtype='Data', insert_after='payroll_cost_center', print_hide=1)
 	]
+	wps_fields_for_salary_component = [
+		dict(fieldname='is_fixed_component', label='Is Fixed Component',
+			fieldtype='Check', insert_after='is_tax_applicable', print_hide=1),
+		dict(fieldname='is_variable_component', label='Is Variable Component',
+			fieldtype='Check', insert_after='is_fixed_component', print_hide=1)
+	]
 
-	return wps_fields_for_company, wps_fields_for_employee
+	return wps_fields_for_company, wps_fields_for_employee, wps_fields_for_salary_component

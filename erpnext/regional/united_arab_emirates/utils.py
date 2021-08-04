@@ -1,10 +1,15 @@
 from __future__ import unicode_literals
+from erpnext.hr.doctype.attendance.attendance import get_month_map
 import frappe
+import itertools
 from frappe import _
 import erpnext
+from erpnext.regional.qatar.utils import create_and_attach_file, get_salary_slip, get_total_component_amount, set_missing_fields_data
 from frappe.utils import flt, round_based_on_smallest_currency_fraction, money_in_words
+from erpnext.regional.doctype.salary_information_file.salary_information_file import get_company_bank_details
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from six import iteritems
+from frappe.utils import get_datetime
 
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return
@@ -159,3 +164,110 @@ def validate_returns(doc, method):
 		frappe.throw(_(
 			"Recoverable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"
 		))
+
+def validate_bank_details_and_generate_csv(doc, method):
+	if frappe.get_cached_value("Company", doc.company, "country") == "United Arab Emirates":
+		company_bank_details = get_company_bank_details(doc.company)
+
+	if not len(company_bank_details):
+		frappe.throw(_("Please create Bank Account for Company: {0}").format(doc.company))
+
+	company_bank_details = company_bank_details[0]
+
+	month = get_month_map()[doc.month]
+	employee_records, missing_fields_for_employees = get_employee_record_details_row(month, doc.year, doc.company)
+	salary_control_record = get_salary_control_record(doc, company_bank_details, len(employee_records))
+
+	genrate_csv(doc.name, employee_records, salary_control_record)
+	create_and_attach_file(doc)
+
+	if missing_fields_for_employees:
+		frappe.throw("Hello")
+
+
+def get_employee_record_details_row(month, year, company):
+	employee_records = []
+	missing_fields_for_employees= {}
+
+	data = itertools.groupby(get_salary_slip(month, year, company), key=lambda x: (x['employee']))
+
+	for employee, group in data:
+		group = list(group)
+
+		employee_details = get_employee_details(employee)
+		if not (employee_details.residential_id):
+			missing_fields_for_employees = set_missing_fields_data(employee, "Residential Id", missing_fields_for_employees)
+
+		if not (employee_details.agent_id):
+			missing_fields_for_employees = set_missing_fields_data(employee, "Agent Id", missing_fields_for_employees)
+
+		if not (employee_details.bank_ac_no):
+			missing_fields_for_employees = set_missing_fields_data(employee, "Bank A/c No.", missing_fields_for_employees)
+
+		fixed_components = get_fixed_salary_component()
+		variable_components = get_variable_salary_component()
+
+		fixed_compoenet_amount = get_total_component_amount(group, fixed_components)
+		variable_component_amount = get_total_component_amount(group, variable_components)
+
+		row = [
+			employee_details.residential_id,
+			employee_details.agent_id,
+			employee_details.bank_ac_no,
+			get_datetime(group[0]["start_date"]).strftime("%Y-%m-%d"),
+			get_datetime(group[0]["end_date"]).strftime("%Y-%m-%d"),
+			group[0]["total_working_days"],
+			fixed_compoenet_amount,
+			variable_component_amount,
+			group[0]["leave_without_pay"]
+		]
+		employee_records.append(row)
+		return employee_records, missing_fields_for_employees
+
+def get_salary_control_record(doc, company_bank_details, no_of_records):
+	bank_short_name = frappe.db.get_value("Bank", company_bank_details.bank, "bank_short_name")
+
+	if not bank_short_name:
+		frappe.throw(_("Enter Bank Short Name/Abbr. for Bank: {0}").format(company_bank_details.bank))
+
+	month = get_month_map()[doc.month]
+
+	salary_month_and_year = (str(month) if month>10 else "0"+str(month)) + str(doc.year) #MMYYY
+
+	row = [
+		doc.employer_establishment_id,
+		bank_short_name,
+		company_bank_details.iban,
+		get_datetime(doc.creation_date).strftime("%y-%m-%d"),
+		get_datetime(doc.creation_time).strftime("%H%M"),
+		salary_month_and_year,
+		no_of_records,
+		frappe.db.get_value("Company", doc.company, "default_currency"),
+		frappe.db.get_value("Company", doc.company, "employer_reference_number") or ""
+	]
+	return row
+
+def genrate_csv(name ,employee_records, salary_control_record):
+	import csv
+	site_path = frappe.utils.get_site_path()
+
+	with open(site_path + '/public/files/'+name+'.csv', 'w+', newline='') as file:
+		writer = csv.writer(file)
+
+		for record in employee_records:
+			record.insert(0, "EDR")
+			writer.writerow(record)
+
+		salary_control_record.insert(0, "SDR")
+		writer.writerow(salary_control_record)
+
+
+def get_fixed_salary_component():
+	return frappe.get_all("Salary Component", filters = {"is_fixed_component": 1}, as_list=1)
+
+def get_variable_salary_component():
+	return frappe.get_all("Salary Component", filters = {"is_variable_component": 1}, as_list=1)
+
+def get_employee_details(employee):
+	return frappe.db.get_value("Employee", employee, ["residential_id", "agent_id",
+		"bank_abbr", "bank_ac_no"], as_dict=1)

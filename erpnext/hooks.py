@@ -305,7 +305,7 @@ doc_events = {
 	},
 	"Salary Information File": {
 		"validate": "erpnext.regional.qatar.utils.validate_payer_details",
-		"on_submit": "erpnext.regional.qatar.utils.validate_bank_details_and_generate_csv"
+		"on_submit": ["erpnext.regional.qatar.utils.validate_bank_details_and_generate_csv", "erpnext.regional.united_arab_emirates.utils.validate_bank_details_and_generate_csv"]
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"

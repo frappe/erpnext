@@ -103,12 +103,11 @@
   {
    "fieldname": "bank_short_name",
    "fieldtype": "Data",
-   "label": "Bank Short Name/Abbr"
+   "label": "Bank Short Name/Abbr."
   }
  ],
- "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-29 18:54:37.105844",
+ "modified": "2021-08-04 12:57:59.588145",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank",

@@ -5,7 +5,6 @@ import csv
 import itertools
 from frappe.utils import comma_and, get_link_to_form, get_datetime
 from frappe import _
-from pprint import pprint
 
 from erpnext.regional.doctype.salary_information_file.salary_information_file import get_company_bank_details
 from erpnext.hr.doctype.attendance.attendance import get_month_map
@@ -14,7 +13,6 @@ frequency = {
 	"Monthly": "M",
 	"Bimonthly": "B"
 }
-
 
 def validate_payer_details(doc, method):
 	if frappe.get_cached_value('Company', doc.company, 'country') == "Qatar":
@@ -43,21 +41,18 @@ def validate_bank_details_and_generate_csv(doc, method):
 		sif_header_column = get_sif_header_column()
 		sif_records_column = get_sif_records_column()
 
-		employee_records, missing_fields_for_employee, total_salaries = get_sif_record_data(doc.month, doc.year)
-
-		pprint(missing_fields_for_employee)
+		employee_records, missing_fields_for_employee, total_salaries = get_sif_record_data(doc.month, doc.year, doc.company)
 
 		sif_header_data = get_sif_header_data(doc, company_bank_details)
 		sif_header_data.append(total_salaries)
 		sif_header_data.append(len(employee_records))
 
-	if not missing_fields_for_employee:
-		doc.number_of_records = len(employee_records)
-		generate_csv(sif_header_column, sif_header_data, sif_records_column, employee_records, doc.name)
-		create_and_attach_file(doc)
-	else:
-		print(missing_fields_for_employee)
-		frappe.throw("Hello")
+		if not missing_fields_for_employee:
+			doc.number_of_records = len(employee_records)
+			generate_csv(sif_header_column, sif_header_data, sif_records_column, employee_records, doc.name)
+			create_and_attach_file(doc)
+		else:
+			frappe.throw("Hello")
 
 def generate_csv(sif_header_column, sif_header_data, sif_records_column, employee_records, name):
 	site_path = frappe.utils.get_site_path()
@@ -127,13 +122,13 @@ def get_sif_header_data(doc, company_bank_details):
 	return row
 
 
-def get_sif_record_data(month, year):
+def get_sif_record_data(month, year, company):
 	total_salaries = 0
 	missing_fields_for_employee = {}
 	employee_records = []
 	month = get_month_map()[month]
 
-	data = itertools.groupby(get_salary_slip(month, year), key=lambda x: (x['employee']))
+	data = itertools.groupby(get_salary_slip(month, year, company), key=lambda x: (x['employee']))
 
 	for employee, group in data:
 		employee_detail = get_employee_data(employee)
@@ -199,9 +194,10 @@ def set_missing_fields_data(key, field, missing_fields_for_employee):
 	return missing_fields_for_employee
 
 
-def get_salary_slip(month, year):
+def get_salary_slip(month, year, company):
 	return frappe.db.sql("""SELECT ss.name, ss.employee, ss.payroll_frequency, ss.total_deduction,
-		ss.total_working_days, ss.net_pay, sd.parentfield, sd.salary_component, sd.amount, ss.gross_pay
+		ss.total_working_days, ss.net_pay, sd.parentfield, sd.salary_component, sd.amount, ss.gross_pay,
+		ss.start_date, ss.end_date, ss.leave_without_pay
 		FROM `tabSalary Slip` as ss, `tabSalary Detail` as sd
 		WHERE sd.parent = ss.name
 		AND MONTH(ss.start_date) = %(month)s
