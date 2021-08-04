@@ -988,6 +988,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+		automatically_fetch_payment_terms(enable=0)	
+
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
 	pr.get("items")[0].qty = received_qty or 5

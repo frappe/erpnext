@@ -1107,6 +1107,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+		automatically_fetch_payment_terms(enable=0)
+
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference
 		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
