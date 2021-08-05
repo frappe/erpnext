@@ -37,7 +37,7 @@ class TestLead(unittest.TestCase):
 	def test_create_lead_and_unlinking_dynamic_links(self):
 		lead_doc = make_lead(first_name = "Lorem", last_name="Ipsum")
 		lead_doc_1 = make_lead()
-		address = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Address",
 			"address_type": "Billing",
 			"city": "Mumbai",
@@ -55,14 +55,16 @@ class TestLead(unittest.TestCase):
 			"address_line1": "Baner",
 			"city": "Pune",
 			"country": "India",
-			"links": [{
-				"link_doctype": "Lead",
-				"link_name": lead_doc.name
-			},
-			{
-				"link_doctype": "Lead",
-				"link_name": lead_doc_1.name
-			}]
+			"links": [
+				{
+					"link_doctype": "Lead",
+					"link_name": lead_doc.name
+				},
+				{
+					"link_doctype": "Lead",
+					"link_name": lead_doc_1.name
+				}
+			]
 		}).insert()
 
 		lead_doc.delete()

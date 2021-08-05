@@ -86,7 +86,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 
 	render_contact_day_html() {
 		if (cur_frm.doc.contact_date) {
-			let contact_date = frappe.datetime.obj_to_str(cur_frm.doc.contact_date)
+			let contact_date = frappe.datetime.obj_to_str(cur_frm.doc.contact_date);
 			let diff_days = frappe.datetime.get_day_diff(contact_date, frappe.datetime.get_today());
 			let color = diff_days > 0 ? "orange" : "green";
 			let message = diff_days > 0 ? __("Next Contact Date") : __("Last Contact Date");
