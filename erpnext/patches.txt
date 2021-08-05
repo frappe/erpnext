@@ -45,7 +45,6 @@ erpnext.patches.v11_0.make_location_from_warehouse
 erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
 erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
 erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018 #19-06-2019
-erpnext.patches.v11_0.refactor_erpnext_shopify #2018-09-07
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
 erpnext.patches.v11_0.inter_state_field_for_gst
@@ -143,7 +142,6 @@ erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
 erpnext.patches.v12_0.rename_bank_account_field_in_journal_entry_account
 erpnext.patches.v12_0.create_default_energy_point_rules
 erpnext.patches.v12_0.set_produced_qty_field_in_sales_order_for_work_order
-erpnext.patches.v12_0.set_default_shopify_app_type
 erpnext.patches.v12_0.set_cwip_and_delete_asset_settings
 erpnext.patches.v12_0.set_expense_account_in_landed_cost_voucher_taxes
 erpnext.patches.v12_0.replace_accounting_with_accounts_in_home_settings
@@ -244,7 +242,6 @@ erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
 execute:frappe.delete_doc("Report", "Quoted Item Comparison")
 erpnext.patches.v13_0.update_member_email_address
-erpnext.patches.v13_0.update_custom_fields_for_shopify
 erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_leave_policy
 erpnext.patches.v13_0.update_pos_closing_entry_in_merge_log
@@ -296,3 +293,8 @@ erpnext.patches.v13_0.update_job_card_details
 erpnext.patches.v13_0.update_level_in_bom #1234sswef
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
+erpnext.patches.v13_0.update_amt_in_work_order_required_items
+erpnext.patches.v13_0.update_export_type_for_gst
+erpnext.patches.v13_0.update_tds_check_field #3
+erpnext.patches.v13_0.add_custom_field_for_south_africa
+erpnext.patches.v13_0.shopify_deprecation_warning

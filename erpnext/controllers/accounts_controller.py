@@ -674,19 +674,24 @@ class AccountsController(TransactionBase):
 		if self.get('doctype') in ['Purchase Invoice', 'Sales Invoice']:
 			for d in self.get("advances"):
 				if d.exchange_gain_loss:
-					party = self.supplier if self.get('doctype') == 'Purchase Invoice' else self.customer
-					party_account = self.credit_to if self.get('doctype') == 'Purchase Invoice' else self.debit_to
-					party_type = "Supplier" if self.get('doctype') == 'Purchase Invoice' else "Customer"
+					is_purchase_invoice = self.get('doctype') == 'Purchase Invoice'
+					party = self.supplier if is_purchase_invoice else self.customer
+					party_account = self.credit_to if is_purchase_invoice else self.debit_to
+					party_type = "Supplier" if is_purchase_invoice else "Customer"
 
 					gain_loss_account = frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
+					if not gain_loss_account:
+						frappe.throw(_("Please set Default Exchange Gain/Loss Account in Company {}")
+							.format(self.get('company')))
 					account_currency = get_account_currency(gain_loss_account)
 					if account_currency != self.company_currency:
-						frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
+						frappe.throw(_("Currency for {0} must be {1}").format(gain_loss_account, self.company_currency))
 
 					# for purchase
 					dr_or_cr = 'debit' if d.exchange_gain_loss > 0 else 'credit'
-					# just reverse for sales?
-					dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
+					if not is_purchase_invoice:
+						# just reverse for sales?
+						dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
 
 					gl_entries.append(
 						self.get_gl_dict({
@@ -904,9 +909,9 @@ class AccountsController(TransactionBase):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 			.format(item.item_code, item.idx, max_allowed_amt))
 
-	def get_company_default(self, fieldname):
+	def get_company_default(self, fieldname, ignore_validation=False):
 		from erpnext.accounts.utils import get_company_default
-		return get_company_default(self.company, fieldname)
+		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
 		stock_items = []
@@ -1112,8 +1117,11 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
-					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
 					d.outstanding = d.payment_amount
+				elif not d.invoice_portion:
+					d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
+
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
