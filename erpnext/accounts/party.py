@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from re import template
 
 import frappe, erpnext
 from frappe import _, msgprint, scrub
@@ -60,10 +59,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			billing_address=party_address, shipping_address=shipping_address)
 
 	if fetch_payment_terms_template:
-		payment_terms_template = get_payment_terms_template(party.name, party_type, company)
-
-		if payment_terms_template:
-			party_details["payment_terms_template"] = payment_terms_template
+		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
 
 	if not party_details.get("currency"):
 		party_details["currency"] = currency
