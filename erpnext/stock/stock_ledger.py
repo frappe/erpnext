@@ -168,6 +168,7 @@ class update_entries_after(object):
 				"posting_date": d.posting_date,
 				"posting_time": d.posting_time,
 				"creation": d.creation,
+				"sle_id": d.name,
 				"voucher_no": d.voucher_no
 			}, allow_negative_stock=self.allow_negative_stock, via_landed_cost_voucher=self.via_landed_cost_voucher)
 
@@ -620,7 +621,7 @@ class update_entries_after(object):
 		# must be referenced by SLE Dependency Key
 		# filter by qty positive or negative
 		dependent_entries = frappe.db.sql("""
-			select sle.item_code, sle.warehouse, sle.batch_no, sle.posting_date, sle.posting_time, sle.creation,
+			select sle.name, sle.item_code, sle.warehouse, sle.batch_no, sle.posting_date, sle.posting_time, sle.creation,
 				sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
 			where ifnull(is_cancelled, 'No')='No'
@@ -638,6 +639,7 @@ class update_entries_after(object):
 		""".format(date_condition), {
 			'posting_date': self.previous_sle.posting_date if self.previous_sle else "1900-01-01",
 			'posting_time': self.previous_sle.posting_time if self.previous_sle else "00:00",
+			'creation': self.previous_sle.creation if self.previous_sle else "1900-01-01 00:00",
 			'name': self.previous_sle.name if self.previous_sle else "",
 			'item_code': self.args.get("item_code"),
 			'warehouse': self.args.get("warehouse"),
@@ -675,7 +677,8 @@ class update_entries_after(object):
 		if self.args.get('sle_id'):
 			self.args['name'] = self.args.get('sle_id')
 
-		return get_stock_ledger_entries(self.args, "<=", "desc", "limit 1", for_update=True)
+		operator = "<=" if self.args.get('name') and self.args.get('creation') else "<"
+		return get_stock_ledger_entries(self.args, operator, "desc", "limit 1", for_update=True)
 
 	def get_sle_after_datetime(self):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
@@ -787,7 +790,7 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if check_serial_no and previous_sle.get("serial_no"):
 		serial_nos = get_serial_nos(previous_sle.get("serial_no"))
 		serial_nos = [frappe.db.escape(d) for d in serial_nos]
-		conditions += """exists(select sr.name from `tabStock Ledger Entry Serial No` sr
+		conditions += """ and exists(select sr.name from `tabStock Ledger Entry Serial No` sr
 			where sr.parent = `tabStock Ledger Entry`.name and sr.serial_no in ({0}))""".format(', '.join(serial_nos))
 
 	if not previous_sle.get("posting_date"):
@@ -800,6 +803,9 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 
 	if operator in (">", ">=", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
+
+	if previous_sle.get('conditions'):
+		conditions += " and " + previous_sle.get('conditions')
 
 	return frappe.db.sql("""
 		select *, timestamp(posting_date, posting_time) as timestamp
