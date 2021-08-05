@@ -301,7 +301,7 @@ class update_entries_after(object):
 			incoming_rate = self.valuation_rate
 
 		stock_value_change = 0
-		if incoming_rate:
+		if actual_qty > 0:
 			stock_value_change = actual_qty * incoming_rate
 		elif actual_qty < 0:
 			# In case of delivery/stock issue, get average purchase rate
@@ -329,32 +329,24 @@ class update_entries_after(object):
 		self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
-		# get rate from serial nos within same company
-		all_serial_nos = frappe.get_all("Serial No",
-			fields=["purchase_rate", "name", "company"],
-			filters = {'name': ('in', serial_nos)})
+		previous_sle_map = get_previous_serial_no_sles(sle, incoming_only=True)
 
-		incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
+		incoming_values = 0
+		for serial_no in serial_nos:
+			previous_sle = previous_sle_map.get(serial_no)
+			if not previous_sle:
+				serial_no_link = frappe.get_desk_link("Serial No", serial_no)
+				voucher_link = frappe.get_desk_link(sle.voucher_type, sle.voucher_no)
+				warehouse_link = frappe.get_desk_link("Warehouse", sle.warehouse)
+				frappe.throw(_("Incoming Rate for {0} in {1} cannot be found to process Stock Ledger Entries for {2} on {3} {4}")
+					.format(serial_no_link,
+						warehouse_link,
+						voucher_link,
+						frappe.format(sle.posting_date),
+						frappe.format(sle.posting_time))
+				)
 
-		# Get rate for serial nos which has been transferred to other company
-		invalid_serial_nos = [d.name for d in all_serial_nos if d.company!=sle.company]
-		for serial_no in invalid_serial_nos:
-			incoming_rate = frappe.db.sql("""
-				select incoming_rate
-				from `tabStock Ledger Entry`
-				where
-					company = %s
-					and actual_qty > 0
-					and (serial_no = %s
-						or serial_no like %s
-						or serial_no like %s
-						or serial_no like %s
-					)
-				order by posting_date desc
-				limit 1
-			""", (sle.company, serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'))
-
-			incoming_values += flt(incoming_rate[0][0]) if incoming_rate else 0
+			incoming_values += flt(previous_sle.incoming_rate)
 
 		return incoming_values
 
@@ -836,6 +828,24 @@ def get_serial_nos_after_sle(args, for_update=False):
 			serial_nos = serial_nos - sle_serial_nos
 
 	return '\n'.join(serial_nos)
+
+def get_previous_serial_no_sles(sle, incoming_only=True):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	args = sle.copy()
+	args['conditions'] = 'company = %(company)s'
+	if incoming_only:
+		args['conditions'] += ' and actual_qty > 0'
+
+	previous_serial_sles = get_stock_ledger_entries(args, '<=', order='desc', check_serial_no=True)
+	previous_sle_map = {}
+	for previous_sle in previous_serial_sles:
+		previous_sle_serial_nos = get_serial_nos(previous_sle.serial_no)
+		for sr in previous_sle_serial_nos:
+			if sr not in previous_sle_map:
+				previous_sle_map[sr] = previous_sle
+
+	return previous_sle_map
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=None,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True, batch_wise_valuation=None):
