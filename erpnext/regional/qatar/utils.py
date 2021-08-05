@@ -2,8 +2,9 @@ from __future__ import unicode_literals
 import frappe
 import csv
 import itertools
-from frappe.utils import comma_and, get_link_to_form, get_datetime
+import json
 from frappe import _
+from frappe.utils import comma_and, get_link_to_form, get_datetime
 
 from erpnext.regional.doctype.salary_information_file.salary_information_file import get_company_bank_details
 from erpnext.hr.doctype.attendance.attendance import get_month_map
@@ -39,18 +40,29 @@ def validate_bank_details_and_generate_csv(doc, method):
 		sif_header_column = get_sif_header_column()
 		sif_records_column = get_sif_records_column()
 
-		employee_records, missing_fields_for_employee, total_salaries = get_sif_record_data(doc.month, doc.year, doc.company)
+		employee_records, missing_fields_for_employees, total_salaries = get_sif_record_data(doc.month, doc.year, doc.company)
 
 		sif_header_data = get_sif_header_data(doc, company_bank_details)
 		sif_header_data.append(total_salaries)
 		sif_header_data.append(len(employee_records))
 
-		if not missing_fields_for_employee:
+		generate_csv(sif_header_column, sif_header_data, sif_records_column, employee_records, doc.name)
+		create_and_attach_file(doc)
+
+		update_document = 0
+		if len(employee_records) != doc.number_of_records or not missing_fields_for_employees:
+			doc.missing_fields = None
 			doc.number_of_records = len(employee_records)
-			generate_csv(sif_header_column, sif_header_data, sif_records_column, employee_records, doc.name)
-			create_and_attach_file(doc)
-		else:
-			frappe.throw("Hello")
+			update_document = 1
+
+		if missing_fields_for_employees and doc.missing_fields != json.dumps(missing_fields_for_employees):
+			doc.missing_fields = json.dumps(missing_fields_for_employees)
+			frappe.msgprint(_("Mandatory Fields Missing for employee, Reload page to check"))
+			update_document = 1
+
+		if update_document == 1:
+			doc.save()
+
 
 def generate_csv(sif_header_column, sif_header_data, sif_records_column, employee_records, name):
 	site_path = frappe.utils.get_site_path()
@@ -69,6 +81,9 @@ def generate_csv(sif_header_column, sif_header_data, sif_records_column, employe
 			writer.writerow(record)
 
 def create_and_attach_file(doc):
+	if frappe.db.exists("File", {"file_name": doc.name+".csv"}):
+		return
+
 	file_name = doc.name+".csv"
 	file = frappe.new_doc("File")
 	file.attached_to_doctype = "Salary information file"
@@ -205,7 +220,6 @@ def get_salary_slip(month, year, company):
 		WHERE sd.parent = ss.name
 		AND MONTH(ss.start_date) = %(month)s
 		AND YEAR(ss.start_date) = %(year)s
-		AND company = %(company)s
 		AND ss.docstatus = 1
 	""", {"month": month, "year": year, "company": company}, as_dict=1)
 

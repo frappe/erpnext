@@ -1,0 +1,29 @@
+{% if not jQuery.isEmptyObject(data) %}
+	<div>
+		<h5><span class="indicator red"></span>{{__("Missing data for some Employees. Please, check below and update them in their respective documents. You can still download file from attachment.") }}</h5>
+	</div>
+	<table class="table table-bordered small">
+		<thead>
+			<tr>
+				<th style="width: 16%">{{ __("Employee") }}</th>
+				<th style="width: 16%">{{ __("Missing Fields") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for(const [key, values] of Object.entries(data)) { %}
+			<tr>
+				<td> {%= key %} </td>
+				<td>
+					<ul>
+						{% for (value in values){ %}
+						<li>
+							{%= values[value] }}
+						</li>
+						{% } %}
+					</ul>
+				</td>
+			</tr>
+		{% } %}
+		</tbody>
+{% endif %}
+

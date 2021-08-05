@@ -1,15 +1,16 @@
 from __future__ import unicode_literals
-from erpnext.hr.doctype.attendance.attendance import get_month_map
+import json
 import frappe
 import itertools
-from frappe import _
 import erpnext
+from six import iteritems
+from frappe import _
+from frappe.utils import get_datetime
+from erpnext.hr.doctype.attendance.attendance import get_month_map
 from erpnext.regional.qatar.utils import create_and_attach_file, get_salary_slip, get_total_component_amount, set_missing_fields_data
 from frappe.utils import flt, round_based_on_smallest_currency_fraction, money_in_words
 from erpnext.regional.doctype.salary_information_file.salary_information_file import get_company_bank_details
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
-from six import iteritems
-from frappe.utils import get_datetime
 
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return
@@ -43,8 +44,7 @@ def get_account_currency(account):
 		account_currency, company = frappe.get_cached_value(
 			"Account",
 			account,
-			["account_currency",
-			"company"]
+			["account_currency","company"]
 		)
 		if not account_currency:
 			account_currency = frappe.get_cached_value('Company',  company,  "default_currency")
@@ -180,16 +180,27 @@ def validate_bank_details_and_generate_csv(doc, method):
 	genrate_csv(doc.name, employee_records, salary_control_record)
 	create_and_attach_file(doc)
 
-	if missing_fields_for_employees:
-		frappe.throw("Hello")
+	update_document = 0
+	if len(employee_records) != doc.number_of_records:
+		doc.missing_fields = None
+		doc.number_of_records = len(employee_records)
+		update_document = 1
 
+	if doc.missing_fields != json.dumps(missing_fields_for_employees):
+		doc.missing_fields = json.dumps(missing_fields_for_employees)
+		if missing_fields_for_employees:
+			frappe.msgprint(_("Mandatory Fields Missing for employee, Reload page to check"))
+		update_document = 1
+
+	if update_document == 1:
+		doc.save()
 
 def get_employee_record_details_row(month, year, company):
 	employee_records = []
 	missing_fields_for_employees= {}
 
 	month_abbr = get_month_map()[month]
-	salary_slips =  get_salary_slip(month_abbr, year, company)
+	salary_slips = get_salary_slip(month_abbr, year, company)
 
 	if not len(salary_slips):
 		frappe.throw(_("Salary Slip not found {0}, {1}").format(month, year))
@@ -197,17 +208,19 @@ def get_employee_record_details_row(month, year, company):
 	data = itertools.groupby(salary_slips, key=lambda x: (x['employee']))
 
 	for employee, group in data:
+		print(employee, group)
 		group = list(group)
 
 		employee_details = get_employee_details(employee)
-		if not (employee_details.residential_id):
-			missing_fields_for_employees = set_missing_fields_data(employee, "Residential Id", missing_fields_for_employees)
 
 		if not (employee_details.agent_id):
 			missing_fields_for_employees = set_missing_fields_data(employee, "Agent Id", missing_fields_for_employees)
 
 		if not (employee_details.bank_ac_no):
 			missing_fields_for_employees = set_missing_fields_data(employee, "Bank A/c No.", missing_fields_for_employees)
+
+		if not (employee_details.residential_id):
+			missing_fields_for_employees = set_missing_fields_data(employee, "Residential Id", missing_fields_for_employees)
 
 		fixed_components = get_fixed_salary_component()
 		variable_components = get_variable_salary_component()
@@ -227,7 +240,7 @@ def get_employee_record_details_row(month, year, company):
 			group[0]["leave_without_pay"]
 		]
 		employee_records.append(row)
-		return employee_records, missing_fields_for_employees
+	return employee_records, missing_fields_for_employees
 
 def get_salary_control_record(doc, company_bank_details, no_of_records):
 	bank_short_name = frappe.db.get_value("Bank", company_bank_details.bank, "bank_short_name")
@@ -244,7 +257,7 @@ def get_salary_control_record(doc, company_bank_details, no_of_records):
 		doc.employer_establishment_id,
 		bank_short_name,
 		company_bank_details.iban,
-		get_datetime(doc.creation_date).strftime("%y-%m-%d"),
+		get_datetime(doc.creation_date).strftime("%Y-%m-%d"),
 		get_datetime(doc.creation_time).strftime("%H%M"),
 		salary_month_and_year,
 		no_of_records,

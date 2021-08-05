@@ -16,7 +16,9 @@
   "employer_establishment_id",
   "column_break_10",
   "number_of_records",
-  "amended_from"
+  "error_log_section",
+  "missing_fields",
+  "error_log_html"
  ],
  "fields": [
   {
@@ -84,19 +86,25 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Salary Information File",
-   "print_hide": 1,
-   "read_only": 1
+   "depends_on": "eval: doc.missing_fields && doc.missing_fields != \"{}\"",
+   "fieldname": "error_log_section",
+   "fieldtype": "Section Break",
+   "label": "Mandatory Data Missing"
+  },
+  {
+   "fieldname": "missing_fields",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Missing Fields"
+  },
+  {
+   "fieldname": "error_log_html",
+   "fieldtype": "HTML"
   }
  ],
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2021-07-30 15:21:02.120138",
+ "modified": "2021-08-05 16:25:07.201171",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Salary Information File",
@@ -104,5 +112,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "company",
  "track_changes": 1
 }
