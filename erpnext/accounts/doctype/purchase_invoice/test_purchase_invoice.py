@@ -256,39 +256,41 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
-		pi = make_purchase_invoice(discount_account=discount_account, discount_amount=100)
+		pi = make_purchase_invoice(discount_account=discount_account, rate=45)
 
 		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 350.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 250.0, nowdate()],
-			["Discount Account - _TC", 0.0, 100.0, nowdate()]
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 225.0, nowdate()],
+			["Discount Account - _TC", 0.0, 25.0, nowdate()]
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		enable_discount_accounting(enable=0)
 
 	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		
-		pi = make_purchase_invoice(qty=1, rate=100, do_not_save=1, parent_cost_center="Main - _TC")
+		pi = make_purchase_invoice(do_not_save=1, parent_cost_center="Main - _TC")
 		pi.apply_discount_on = "Grand Total"
 		pi.additional_discount_account = additional_discount_account
-		pi.additional_discount_percentage = 20
+		pi.additional_discount_percentage = 10
+		pi.disable_rounded_total = 1
 		pi.append("taxes", {
-			"charge_type": "Actual",
+			"charge_type": "On Net Total",
 			"account_head": "_Test Account VAT - _TC",
 			"cost_center": "Main - _TC",
 			"description": "Test",
-			"tax_amount": 20
+			"rate": 10
 		})
 		pi.submit()
 
 		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 100.0, 0.0, nowdate()],
-			["_Test Account VAT - _TC", 20.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 96.0, nowdate()],
-			["Discount Account - _TC", 0.0, 24.0, nowdate()]
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
+			["_Test Account VAT - _TC", 25.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 247.5, nowdate()],
+			["Discount Account - _TC", 0.0, 27.5, nowdate()]
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
@@ -1281,6 +1283,7 @@ def make_purchase_invoice(**args):
 		"received_qty": args.received_qty or 0,
 		"rejected_qty": args.rejected_qty or 0,
 		"rate": args.rate or 50,
+		"price_list_rate": args.price_list_rate or 50,
 		"expense_account": args.expense_account or '_Test Account Cost for Goods Sold - _TC',
 		"discount_account": args.discount_account or None,
 		"discount_amount": args.discount_amount or 0,
