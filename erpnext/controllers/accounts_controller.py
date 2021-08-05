@@ -1180,10 +1180,7 @@ class AccountsController(TransactionBase):
 				'due_date': schedule.due_date,
 				'invoice_portion': schedule.invoice_portion,
 				'discount_type': schedule.discount_type,
-				'discount': schedule.discount,
-				'base_payment_amount': schedule.base_payment_amount,
-				'payment_amount': schedule.payment_amount,
-				'outstanding': schedule.outstanding
+				'discount': schedule.discount
 			}
 			self.append("payment_schedule", payment_schedule)
 
