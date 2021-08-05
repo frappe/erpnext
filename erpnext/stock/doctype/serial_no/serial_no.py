@@ -588,7 +588,7 @@ def auto_make_serial_nos(sle, item_details):
 	if not serial_nos:
 		return
 
-	existing_serial_nos = [d.name for d in frappe.get_all('Serial No', filters={'name': ['in', serial_nos]})]
+	existing_serial_nos = [cstr(d.name).upper() for d in frappe.get_all('Serial No', filters={'name': ['in', serial_nos]})]
 	serial_nos_to_create = [sr for sr in serial_nos if sr not in existing_serial_nos]
 
 	created_serial_nos = []
