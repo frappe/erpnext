@@ -7,17 +7,16 @@ frappe.views.calendar["Delivery Planning Item"] = {
 		"start": "delivery_date",
         "end": "delivery_date",
 		"id": "name",
-		"title": "customer_name",
-		"allDay": "allDay",
-		// "progress": "progress"
+		"title": "name",
 	},
+
 	gantt: true,
 	filters: [
 		{
-			"fieldtype": "Link",
-			"fieldname": "related_delivey_planning",
-			"options": "Delivery Planning",
-			"label": __("Project")
+			"fieldtype": "Select",
+			"fieldname": "docstatus",
+			"options": 1,
+			"label": __("Document Status")
 		}
 	],
 	get_events_method: "frappe.desk.calendar.get_events"
