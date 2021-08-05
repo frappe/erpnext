@@ -43,7 +43,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 
 		if (!this.frm.is_new()) {
 			frappe.contacts.render_address_and_contact(this.frm);
-			cur_frm.trigger('render_basic_info_html');
+			cur_frm.trigger('render_contact_day_html');
 		} else {
 			frappe.contacts.clear_address_and_contact(this.frm);
 		}
@@ -84,14 +84,14 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		}
 	}
 
-	render_basic_info_html() {
+	render_contact_day_html() {
 		if (cur_frm.doc.contact_date) {
 			let contact_date = frappe.datetime.obj_to_str(cur_frm.doc.contact_date)
 			let diff_days = frappe.datetime.get_day_diff(contact_date, frappe.datetime.get_today());
 			let color = diff_days > 0 ? "orange" : "green";
 			let message = diff_days > 0 ? __("Next Contact Date") : __("Last Contact Date");
 			let html = `<div class="col-xs-12">
-						<span class="indicator whitespace-nowrap ${color}"><span> ${message} : ${contact_date}</span></span>
+						<span class="indicator whitespace-nowrap ${color}"><span> ${message} : ${frappe.datetime.global_date_format(contact_date)}</span></span>
 					</div>` ;
 			cur_frm.dashboard.set_headline_alert(html);
 		}
