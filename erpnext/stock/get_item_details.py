@@ -57,7 +57,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	if doc and doc.get('doctype') == 'Purchase Invoice':
 		args['bill_date'] = doc.get('bill_date')
-
+	
 	if doc:
 		args['posting_date'] = doc.get('posting_date')
 		args['transaction_date'] = doc.get('transaction_date')
@@ -74,7 +74,17 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	if not doc or cint(doc.get('is_return')) == 0:
 		# get price list rate only if the invoice is not a credit or debit note
+
+		# we do not send customer args for price list rate in case of purchase order but we save it for latter use
+		if doc and doc.get('doctype') == 'Purchase Order':
+			customer = args['customer']
+			args['customer'] = ''
+
 		get_price_list_rate(args, item, out)
+
+		# Can be use latter we set it again
+		if doc and doc.get('doctype') == 'Purchase Order':
+			args['customer'] = customer
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
