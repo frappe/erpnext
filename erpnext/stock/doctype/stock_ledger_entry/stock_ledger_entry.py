@@ -107,7 +107,7 @@ class StockLedgerEntry(Document):
 		self.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
-		stock_settings = frappe.get_doc('Stock Settings', 'Stock Settings')
+		stock_settings = frappe.get_cached_doc('Stock Settings')
 
 		if stock_settings.stock_frozen_upto:
 			if (getdate(self.posting_date) <= getdate(stock_settings.stock_frozen_upto)
