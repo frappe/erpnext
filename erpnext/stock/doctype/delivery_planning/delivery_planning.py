@@ -529,16 +529,19 @@ class DeliveryPlanning(Document):
 														  "approved": "Yes",
 														  "docstatus" : 1,
 														  "supplier_dc" : 0},
-														 ["sales_order","item_name",
+														 ["sales_order","item_name","item_code","customer",
 														  "ordered_qty","weight_to_deliver"]
 														 )
 						print("000000000000000 1 if 0000000000000",so_wise_data)
 						if(so_wise_data):
 							for s in so_wise_data:
 								dp_item.append("items",{"sales_order": s.sales_order,
+														"item_code":s.item_code,
 														"item_name": s.item_name,
 														"qty": s.ordered_qty,
-														"weight": s.weight_to_deliver
+														"weight": s.weight_to_deliver,
+														"customer": s.customer,
+														"item_code": s.item_code
 														})
 						dp_item.save(ignore_permissions=True)
 
