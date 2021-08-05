@@ -13,7 +13,8 @@
   "posting_date",
   "start_date",
   "end_date",
-  "amended_from"
+  "amended_from",
+  "original_name"
  ],
  "fields": [
   {
@@ -64,6 +65,7 @@
    "fieldname": "account",
    "fieldtype": "Link",
    "label": "Account",
+   "mandatory_depends_on": "eval: doc.type",
    "options": "Account"
   },
   {
@@ -72,12 +74,21 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "original_name",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Original Name",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-03 18:07:02.463754",
+ "modified": "2021-08-05 19:20:16.831810",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Deferred Accounting",
