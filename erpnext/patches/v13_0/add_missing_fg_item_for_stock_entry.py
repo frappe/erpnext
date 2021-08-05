@@ -10,6 +10,7 @@ def execute():
 	if not frappe.db.has_column('Work Order', 'has_batch_no'):
 		return
 
+	frappe.reload_doc('manufacturing', 'doctype', 'manufacturing_settings')
 	if cint(frappe.db.get_single_value('Manufacturing Settings', 'make_serial_no_batch_from_work_order')):
 		return
 
