@@ -1174,9 +1174,14 @@ class AccountsController(TransactionBase):
 				'payment_term': schedule.payment_term,
 				'due_date': schedule.due_date,
 				'invoice_portion': schedule.invoice_portion,
-				'discount_type': schedule.discount_type,
-				'discount': schedule.discount
+				'mode_of_payment': schedule.mode_of_payment,
+				'description': schedule.description
 			}
+
+			if schedule.discount_type == 'Percentage':
+				payment_schedule['discount_type'] = schedule.discount_type
+				payment_schedule['discount'] = schedule.discount
+
 			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
