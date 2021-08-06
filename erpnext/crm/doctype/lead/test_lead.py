@@ -77,7 +77,7 @@ def make_lead(**args):
 
 	lead_doc = frappe.get_doc({
 		"doctype": "Lead",
-		"first_name": args.first_name or "Test",
+		"first_name": args.first_name or "_Test",
 		"last_name": args.last_name or "Lead",
 		"email_id": args.email_id or "new_lead_{}@example.com".format(random_string(5)),
 	}).insert()
