@@ -36,6 +36,7 @@
   {
    "fieldname": "transporter",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Transporter",
    "options": "Supplier"
   },
@@ -60,23 +61,27 @@
    "fetch_from": "address.pincode",
    "fieldname": "pincode_from",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Shipping Postal From"
   },
   {
    "fetch_from": "address.pincode",
    "fieldname": "pincode_to",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Shipping Postal To "
   },
   {
    "fieldname": "delivery_date_from",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Delivery Date From",
    "reqd": 1
   },
   {
    "fieldname": "delivery_date_to",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Deliver Date To",
    "reqd": 1
   },
@@ -123,7 +128,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-23 11:12:01.000352",
+ "modified": "2021-08-04 16:16:15.584903",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning",
@@ -139,6 +144,21 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

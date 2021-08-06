@@ -245,10 +245,12 @@ class DeliveryPlanning(Document):
 
 		query = frappe.db.sql(""" select
 									so.customer,
+									soi.name as dname,
 									soi.item_code,
 									soi.item_name,
 									soi.warehouse,
 									soi.qty,
+									soi.rate,
 									soi.stock_qty,
 									so.name,
 									soi.name as soi_item,
@@ -273,12 +275,14 @@ class DeliveryPlanning(Document):
 		print("00000000000.0000000000.000000",query)
 		for i in query:
 			dp_item = frappe.new_doc("Delivery Planning Item")
-
-			dp_item.transporter = i.transporter
+			if i.delivered_by_supplier == 0:
+				dp_item.transporter = i.transporter
+				
 			dp_item.customer = i.customer
 			dp_item.item_code = i.item_code
-			dp_item.item_name = i.item_name
-
+			# dp_item.item_name = i.item_name
+			dp_item.item_dname = i.dname
+			# dp_item.rate = i.rate
 			dp_item.ordered_qty = i.qty
 			dp_item.pending_qty = i.qty
 			dp_item.qty_to_deliver = i.qty
@@ -293,10 +297,15 @@ class DeliveryPlanning(Document):
 			dp_item.weight_per_unit = i.weight_per_unit
 			dp_item.supplier_dc = i.delivered_by_supplier
 			dp_item.supplier = i.supplier
-			dp_item.uom = i.uom
+			# dp_item.uom = i.uom
 			dp_item.conversion_factor = i.conversion_factor
 			dp_item.stock_uom = i.stock_uom
-			dp_item.save(ignore_permissions = True)
+			dp_item.save(ignore_permissions = True);
+		if query:	
+			frappe.msgprint(
+			msg='Delivery Planning Item Created',
+			title='Success')
+			self.reload_doc()
 
 	def on_transporter_planning(self):
 		conditions = ""
@@ -381,10 +390,11 @@ class DeliveryPlanning(Document):
 	# on click of custom button Calculate Purchase Order Plan Summary create new PODPI
 	@frappe.whitelist()
 	def purchase_order_call(self):
-
+		print("<<<<<<<<<<Calculate Po plan >>>>>>>>>>>>>>>>>")
 		item = frappe.get_all(doctype='Delivery Planning Item',
 							  filters={"approved": "Yes",
 									   "supplier_dc": 1,
+									   "docstatus" : 1,
 									   "related_delivey_planning" : self.name})
 		print("<<<<<<<<<< Po plan >>>>>>>>>>>>>>>>>",item)
 
@@ -415,7 +425,7 @@ class DeliveryPlanning(Document):
 
 									from `tabDelivery Planning Item`
 
-									where supplier_dc = 1
+									where supplier_dc = 1 and docstatus = 1
 									{conditions} """.format(conditions=conditions), as_dict=1)
 
 					for q in query:
@@ -442,7 +452,7 @@ class DeliveryPlanning(Document):
 
 											from `tabDelivery Planning Item`
 
-											where supplier_dc = 1
+											where supplier_dc = 1 and docstatus = 1
 											{conditions} """.format(conditions=conditions), as_dict=1)
 
 					for q in query:
@@ -467,6 +477,7 @@ class DeliveryPlanning(Document):
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={"approved": "Yes",
 										  "supplier_dc": 0,
+										  "docstatus" :1,
 										  "related_delivey_planning": self.name})
 		print("<<<<<<<<<<>>  Transporter wise delivery >>>>>>>>>>>>>>>", item)
 
@@ -496,6 +507,7 @@ class DeliveryPlanning(Document):
 
 											where approved = "Yes"
 											AND supplier_dc = 0
+											AND docstatus = 1
 											{conditions}
 											group by transporter, delivery_date
 											""".format(conditions=conditions), as_dict=1)
@@ -515,17 +527,21 @@ class DeliveryPlanning(Document):
 														  "transporter" : q.transporter,
 														  "delivery_date" : q.delivery_date,
 														  "approved": "Yes",
+														  "docstatus" : 1,
 														  "supplier_dc" : 0},
-														 ["sales_order","item_name",
+														 ["sales_order","item_name","item_code","customer",
 														  "ordered_qty","weight_to_deliver"]
 														 )
 						print("000000000000000 1 if 0000000000000",so_wise_data)
 						if(so_wise_data):
 							for s in so_wise_data:
 								dp_item.append("items",{"sales_order": s.sales_order,
+														"item_code":s.item_code,
 														"item_name": s.item_name,
 														"qty": s.ordered_qty,
-														"weight": s.weight_to_deliver
+														"weight": s.weight_to_deliver,
+														"customer": s.customer,
+														"item_code": s.item_code
 														})
 						dp_item.save(ignore_permissions=True)
 
@@ -544,7 +560,7 @@ class DeliveryPlanning(Document):
 
 										from `tabDelivery Planning Item`
 
-										where approved = "Yes"
+										where approved = "Yes" AND docstatus = 1
 										{conditions}
 										group by transporter, delivery_date
 										""".format(conditions=conditions), as_dict=1)
@@ -591,6 +607,7 @@ class DeliveryPlanning(Document):
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={"approved": "Yes",
 										  "supplier_dc": 1,
+										  "docstatus" : 1,
 										  "related_delivey_planning": self.name})
 		print("<<<<<<<<<<>>  Create PO after item >>>>>>>>>>>>>>>", item)
 		if (item):
@@ -608,6 +625,7 @@ class DeliveryPlanning(Document):
 
 										where dpi.supplier_dc = 1
 										AND dpi.approved = "Yes"
+										AND dpi.docstatus = 1
 
 										{conditions}
 										group by dpi.supplier
@@ -630,7 +648,9 @@ class DeliveryPlanning(Document):
 												  "delivery_date",
 												  "sorce_warehouse",
 												  "sales_order",
-												  "name"
+												  "item_dname",
+												  "name",
+												  "docstatus"
 												 ]
 												 )
 				print("0000000000000000000000000000", so_wise_data)
@@ -641,7 +661,10 @@ class DeliveryPlanning(Document):
 											 "item_name": s.item_name,
 											 "schedule_date":s.delivery_date,
 											 "qty": s.ordered_qty,
-											 "warehouse": s.sorce_warehouse
+											 "warehouse": s.sorce_warehouse,
+											 "sales_order": s.sales_order,
+											 "delivered_by_supplier" : 1,
+											 "sales_order_item" : s.item_dname
 											 })
 
 				discount = frappe.get_doc('Sales Order', salesno)
@@ -672,10 +695,14 @@ class DeliveryPlanning(Document):
 				# frappe.db.commit()
 				print("-----------Date 0purchase order create 111 -------------", q.delivery_date)
 				for i in so_wise_data:
-						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
-						newdoc.purchase_order = po.name 
-						newdoc.d_status = "Complete"
-						newdoc.save(ignore_permissions=True)
+						# newdoc = frappe.get_doc('Delivery Planning Item', i.name)
+						# newdoc.purchase_order = po.name 
+						# newdoc.d_status = "Complete"
+						# newdoc.save(ignore_permissions=True)
+						frappe.db.set_value('Delivery Planning Item', i.name,
+						{'purchase_order' : po.name,
+						'd_status' : "Complete",
+						})
 
 			return 1
 
@@ -686,28 +713,30 @@ class DeliveryPlanning(Document):
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={"approved": "Yes",
 										  "supplier_dc": 0,
+										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
 										  })
 		print("<<<<<<<<<<>>  Create pi after item >>>>>>>>>>>>>>>", item)
 		if (item):
 			print("-----------D gfhgfhfg --------------", item)
-			for i in item:
-				conditions = ""
-				conditions += "AND dpi.related_delivey_planning = %s" % frappe.db.escape(self.name)
-				print("Condition000000000000000000 ", conditions)
-				query = frappe.db.sql(""" select
-										transporter,
-										customer,
-										sum(dpi.weight_to_deliver) t_weight
+			# for i in item:
+			conditions = ""
+			conditions += "AND dpi.related_delivey_planning = %s" % frappe.db.escape(self.name)
+			print("Condition000000000000000000 ", conditions)
+			query = frappe.db.sql(""" select
+									transporter,
+									customer,
+									sum(dpi.weight_to_deliver) t_weight
 
-										from `tabDelivery Planning Item`dpi
+									from `tabDelivery Planning Item`dpi
 
-										where dpi.supplier_dc = 0
-										AND dpi.approved = "Yes"
-										AND dpi.transporter IS NOT NULL
-										{conditions}
-										group by dpi.transporter, dpi.customer
-										""".format(conditions=conditions), as_dict=1)
+									where dpi.supplier_dc = 0
+									AND dpi.approved = "Yes"
+									AND dpi.transporter IS NOT NULL
+									AND dpi.docstatus = 1
+									{conditions}
+									group by dpi.transporter, dpi.customer
+									""".format(conditions=conditions), as_dict=1)
 			for q in query:
 				print(" query -------", q)
 				pi = frappe.new_doc("Pick List")
@@ -719,7 +748,8 @@ class DeliveryPlanning(Document):
 												 {"related_delivey_planning": self.name,
 												  "transporter": q.transporter,
 												  "customer": q.customer,
-												  "approved": "Yes"},
+												  "approved": "Yes",
+												  "docstatus":1},
 												 ["item_code",
 												  "item_name",
 												  "ordered_qty",
@@ -727,7 +757,9 @@ class DeliveryPlanning(Document):
 												  "uom",
 												  "conversion_factor",
 												  "sorce_warehouse",
-												  "sales_order"]
+												  "sales_order",
+												  "docstatus",
+												  "name"]
 												 )
 				print("0000000000000  000000000000000", so_wise_data)
 				if (so_wise_data):
@@ -740,13 +772,21 @@ class DeliveryPlanning(Document):
 											"stock_qty": s.ordered_qty,
 											"sales_order": s.sales_order
 											})
+						frappe.db.set_value('Delivery Planning Item', s.name,
+						{'pick_list' : pi.name,})					
 
+				print("----so wise date before save")
 				pi.save(ignore_permissions=True)
+				# for i in item:
+				# 		frappe.db.set_value('Delivery Planning Item', i.name,
+				# 		{'pick_list' : pi.name,
+				# 		})
+				
 			return 1
 
 	@frappe.whitelist()
 	def make_dnote(self):
-		salesno = 0
+		salesno = ""
 		discount = []
 		transporter = ""
 		print("********** In side Delivery Note ************")
@@ -773,20 +813,18 @@ class DeliveryPlanning(Document):
 												  "sales_order"]
 										)
 
-
-
-				for p in pli:
-					print("thisd is sales order --------", p.sales_order)
-					salesno = p.sales_order
+				for pi in pli:
+					print("thisd is sales order --------", pi.sales_order)
+					salesno = pi.sales_order
 					dnote.append('items',{
-									'item_code': p.item_code,
-									'warehouse': p.warehouse,
-									'qty': p.qty,
-									'stock_qty': p.stock_qty,
-									'uom': p.uom,
+									'item_code': pi.item_code,
+									'warehouse': pi.warehouse,
+									'qty': pi.qty,
+									'stock_qty': pi.stock_qty,
+									'uom': pi.uom,
 
-									'conversion_factor': p.conversion_factor,
-									'against_sales_order': p.sales_order
+									'conversion_factor': pi.conversion_factor,
+									'against_sales_order': pi.sales_order
 
 								})
 				discount = frappe.get_doc('Sales Order', salesno)
@@ -800,27 +838,30 @@ class DeliveryPlanning(Document):
 											  "rate"]
 									  )
 				print("--------- this  is taxes--------", tax)
-				for t in tax:
-					dnote.append('taxes',{
-						'charge_type': t.charge_type,
-						'description': t.description,
-						'account_head': t.account_head,
-						'rate': t.rate
-					})
+				if tax:
+					for t in tax:
+						dnote.append('taxes',{
+							'charge_type': t.charge_type,
+							'description': t.description,
+							'account_head': t.account_head,
+							'rate': t.rate
+						})
 
 
-				dnote.tc_name = discount.tc_name
-				dnote.additional_discount_percentage = discount.additional_discount_percentage
-				dnote.apply_dicount_on = discount.apply_discount_on
-				dnote.taxes_and_charges = discount.taxes_and_charges
-				dnote.transporter = discount.transporter
-				dnote.save(ignore_permissions=True)
+				# dnote.tc_name = discount.tc_name
+				# dnote.additional_discount_percentage = discount.additional_discount_percentage
+				# dnote.apply_dicount_on = discount.apply_discount_on
+				# dnote.taxes_and_charges = discount.taxes_and_charges
+				# dnote.transporter = discount.transporter
+				# dnote.save(ignore_permissions=True)
 
 				print('--------- Dnote ----  name ------------', dnote.name)
 
 			return 1
 
 		elif pl == []:
+			pick_list = ""
+			print("Else In side else of Create DN --------")
 			# dpi = frappe.db.get_all('Delivery Planning Item',
 			# 						filters={'related_delivey_planning': self.name,
 			# 								  'approved': "Yes"},
@@ -828,14 +869,15 @@ class DeliveryPlanning(Document):
 			# 						fields = ['customer','transporter'])
 			conditions = ""
 			conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
-			dpi = frappe.db.sql(""" Select customer, transporter
+			dpi = frappe.db.sql(""" Select name, customer, transporter
 							from `tabDelivery Planning Item`
-							where approved = 'Yes'
+							where approved = 'Yes' AND docstatus = 1 AND supplier_dc = 0
 							{conditions}
 							Group By customer, transporter
 							""".format(conditions=conditions), as_dict=1)
-			print("**********", dpi)
+			print("****  else ******", dpi)
 			if dpi:
+				print("----- type dpi", type(dpi))
 				for d in dpi:
 					dnote = frappe.new_doc('Delivery Note')
 					dnote.customer = d.customer
@@ -855,12 +897,16 @@ class DeliveryPlanning(Document):
 													  "conversion_factor",
 													  "sorce_warehouse",
 													  "sales_order",
-													  "name"]
+													  "name",
+													  "pick_list",
+													  "docstatus"]
 											 )
-					print(" */*/*/  */*/*/  /*/", item)
+					print(" */*/*/ else   */*/*/  /*/",type(item), item)
 
 					for i in item:
-						print("thisd is sales order --------", i.sales_order)
+						if(i.pick_list):
+							pick_list = i.pick_list
+						print("Else   thisd is sales order --------", i.sales_order)
 						salesno = i.sales_order
 						dnote.append('items', {
 							'item_code': i.item_code,
@@ -874,39 +920,70 @@ class DeliveryPlanning(Document):
 						})
 
 					discount = frappe.get_doc('Sales Order', salesno)
-					print("p........p.........p", discount.additional_discount_percentage)
+					if discount:
+						print("Else p........p.........p", discount.additional_discount_percentage)
 
-					tax = frappe.get_list('Sales Taxes and Charges',
-										  filters={'parent': salesno},
-										  fields=["charge_type",
-												  "account_head",
-												  "description",
-												  "rate"]
-										  )
-					print("--------- this  is taxes--------", tax)
-					for t in tax:
-						dnote.append('taxes', {
-							'charge_type': t.charge_type,
-							'description': t.description,
-							'account_head': t.account_head,
-							'rate': t.rate
-						})
+					# if discount:
+					# 	tax = frappe.get_list('Sales Taxes and Charges',
+					# 						filters={'parent': salesno},
+					# 						fields=["charge_type",
+					# 								"account_head",
+					# 								"description",
+					# 								"rate"]
+					# 					  )
+						# print("--Else  ------- this  is taxes--------", tax)
+					# if tax:
+					# 	for t in tax:
+					# 		print("Print in side for tax")
+					# 		dnote.append('taxes', {
+					# 			'charge_type': t.charge_type,
+					# 			'description': t.description,
+					# 			'account_head': t.account_head,
+					# 			'rate': t.rate
+					# 		})
+					if discount.additional_discount_percentage:
+						print("inside ------- discount.additional_discount_percentage ",discount.additional_discount_percentage)
+						print("------------",type(discount.additional_discount_percentage), type(dnote.additional_discount_percentage))
+						dnote.additional_discount_percentage = discount.additional_discount_percentage
+						
 
-					dnote.additional_discount_percentage = discount.additional_discount_percentage
-					dnote.apply_dicount_on = discount.apply_discount_on
-					dnote.taxes_and_charges = discount.taxes_and_charges
-					dnote.tc_name = discount.tc_name
-					# dnote.transporter = discount.transporter
+					print(" discount.apply_discount_on -----------",discount.apply_discount_on)
+					if discount.apply_discount_on:	
+						print("------------",type(discount.apply_discount_on),type(dnote.apply_discount_on))
+						dnote.apply_dicount_on = discount.apply_discount_on
 
+					print("discount.taxes_and_charges:",discount.taxes_and_charges)
+					if discount.taxes_and_charges:
+						print("------------",type(discount.taxes_and_charges), type(dnote.taxes_and_charges))
+						dnote.taxes_and_charges = discount.taxes_and_charges
 
+					
+					if discount.tc_name:	
+						print("discount.tc_name",discount.tc_name)
+						print("------------",type(discount.tc_name),type(discount.tc_name))
+						dnote.tc_name = discount.tc_name
+
+					
+					if discount.transporter:	
+						print("discount.transporter")
+						print("------------",type(discount.transporter),type(dnote.transporter))
+						dnote.transporter = discount.transporter
+
+					
+					if pick_list:
+						print("pick_list------------", pick_list)
+						print("pick_list------------", type(pick_list),type(dnote.pick_list))
+						dnote.pick_list = pick_list
+						print(" dnote ----- ",dnote.pick_list  )
+
+					print(" final print 00000000000")	
 					dnote.save(ignore_permissions=True)
 					for i in item:
-						newdoc = frappe.get_doc('Delivery Planning Item', i.name)
-						newdoc.delivery_note = dnote.name
-						newdoc.d_status = "Complete"
-						newdoc.save(ignore_permissions=True)
-
-
+						print(" value of i", i)
+						frappe.db.set_value('Delivery Planning Item', i.name,
+											{'delivery_note' : dnote.name,
+											'd_status' : "Complete"})
+						
 				return 2
 
 		else : return 0
@@ -924,24 +1001,29 @@ class DeliveryPlanning(Document):
 
 		if popi:
 			for p in popi:
-				popi = frappe.get_doc('Purchase Orders Planning Item', p.name)
-				popi.delete()
+				pop = frappe.get_doc('Purchase Orders Planning Item', p.name)
+				pop.delete()
 
 		if tdpi:
 			for t in tdpi:
 				trans = frappe.get_doc('Transporter Wise Planning Item', t.name)
 				trans.delete()
 
-		if dpi:
-			for d in dpi:
-				ddpi = frappe.get_doc('Delivery Planning Item', d.name)
-				ddpi.delete()
+		# if dpi:
+		# 	for d in dpi:
+		# 		# ddpi = frappe.get_doc('Delivery Planning Item', d.name)
+		# 		# ddpi.delete()
+		# 		# frappe.delete_doc('Delivery Planning Item',d.name, force = 1)
+		# 		# frappe.db.delete('Delivery Planning Item', {'name': d.name})
+		# 		d.cancel()
 
 	@frappe.whitelist()
 	def check_po_in_dpi(self):
 		dpi_po = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={"approved": "Yes",
-										  "transporter": "",
+								 		  "supplier_dc": 1,
+										  
+										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
 										  })
 
@@ -949,6 +1031,7 @@ class DeliveryPlanning(Document):
 		dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={"approved": "Yes",
 										  "supplier_dc": 0,
+										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
 										  })
 
@@ -1005,6 +1088,7 @@ class DeliveryPlanning(Document):
 			dpi_po = frappe.db.get_all(doctype='Delivery Planning Item',
 									   filters={"approved": "Yes",
 												"supplier_dc": 1,
+												"docstatus": 1,
 												"related_delivey_planning": self.name,
 												})
 			print("--------------- dpi_po", len(dpi_po))
@@ -1012,9 +1096,10 @@ class DeliveryPlanning(Document):
 			dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
 									   filters={"approved": "Yes",
 												"supplier_dc": 0,
+												"docstatus": 1,
 												"related_delivey_planning": self.name,
 												})
-			print("--------------- dpi_pn", len(dpi_dn))
+			print("--------------- dpi_dn", len(dpi_dn))
 
 			dpi = frappe.db.get_all(doctype='Delivery Planning Item',
 									filters={"related_delivey_planning": self.name})
@@ -1024,6 +1109,7 @@ class DeliveryPlanning(Document):
 												"supplier_dc": 1,
 												"related_delivey_planning": self.name,
 												"d_status" : "Complete",
+												"docstatus":1,
 												})
 			print("--------------- a_dpi_po", len(a_dpi_po))									
 			# {"autoname": ["is", "not set"]}
@@ -1032,7 +1118,8 @@ class DeliveryPlanning(Document):
 												"supplier_dc": 0,
 												"related_delivey_planning": self.name,
 												"d_status" : 'Complete',
-												})
+												"docstatus": 1,
+												})									
 
 			print("--------------- a_dpi_dn", len(a_dpi_dn))
 
@@ -1045,33 +1132,37 @@ class DeliveryPlanning(Document):
 			print("00000111111111122222222222222222", count)
 			if a_dpi_dn and a_dpi_po:
 				a_count = len(a_dpi_dn) + len(a_dpi_po)
+				print("adpi_po and adpi_dn-------------")
 			elif a_dpi_po:
 				a_count = len(a_dpi_po)
+				print("adpi_po-------------")
+
 			else:
 				a_count = len(a_dpi_dn)
+				print("adpi_dn-------------")
 			print("00000111111111122222222333333333333", a_count)
 
 			
 			if count == a_count and count > 0:
 				self.db_set('d_status', "Completed", update_modified=False)
-				print("------- in if 1 --------", count, a_count)
+				print("------- in if 1 complete--------", count, a_count)
 			elif count > 1 and count < len(dpi) :
 				self.db_set('d_status', "Partially Planned", update_modified=False)
-				print("------- in if 2  ---------", count, len(dpi))
+				print("------- in if 2 partial  ---------", count, len(dpi))
 			elif a_count == 0 and count > 0:
 				self.db_set('d_status', "Planned and To Deliver & Order", update_modified=False)
-				print("------- in if 3 ---------", count)
+				print("------- in if 3 to del to order---------", count)
 			elif len(a_dpi_po) > 0:
 				self.db_set('d_status', "To Deliver", update_modified=False)
-				print("------- in if 1 ---------", len(a_dpi_po))
-			elif len(a_dpi_dn) > 0:
+				print("------- in if 1 to deliver---------", len(a_dpi_po))
+			elif len(a_dpi_dn) > 0: 
 				self.db_set('d_status', "To Order", update_modified=False)
-				print("------- in if 1 ---------", len(a_dpi_dn))
+				print("------- in if 1 to order---------", len(a_dpi_dn))
 			else:
 				self.db_set('d_status', "Pending Planning", update_modified=False)
-				print("------- in if PP1 ---------", count)
+				print("------- in if PP1 pending---------", count)
 
-			# self.save(ignore_permissions=True)
+			# self.save("update")
 			return 1
 
 

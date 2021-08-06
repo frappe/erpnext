@@ -38,7 +38,17 @@
   "column_break_28",
   "delivery_note",
   "column_break_30",
-  "purchase_order"
+  "pick_list",
+  "column_break_34",
+  "purchase_order",
+  "section_break_34",
+  "is_split",
+  "split_from_item",
+  "sd_item",
+  "item_dname",
+  "rate",
+  "is_updated",
+  "amended_from"
  ],
  "fields": [
   {
@@ -63,13 +73,15 @@
   },
   {
    "fieldname": "item_code",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Item Code",
+   "options": "Item",
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -160,8 +172,9 @@
    "options": "\nYes\nNo"
   },
   {
+   "fetch_from": "item_code.weight_per_unit",
    "fieldname": "weight_per_unit",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "hidden": 1,
    "label": "Weight per unit"
   },
@@ -174,7 +187,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.transporter == \"\"",
    "fieldname": "supplier_dc",
    "fieldtype": "Check",
    "label": " Supplier delivers to Customer "
@@ -195,6 +207,7 @@
    "label": "Split"
   },
   {
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "hidden": 1,
@@ -236,7 +249,7 @@
    "fieldname": "d_status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Document Status",
+   "label": "Item Planning Status",
    "options": "Incomplete\nComplete",
    "read_only": 1
   },
@@ -275,11 +288,75 @@
    "in_list_view": 1,
    "label": "Transporter Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "item_dname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Item_dname"
+  },
+  {
+   "fetch_from": "item_code.standard_rate",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "rate"
+  },
+  {
+   "fieldname": "section_break_34",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_split",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Split"
+  },
+  {
+   "fieldname": "split_from_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Split from item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Delivery Planning Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "sd_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Split D Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_updated",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Updated"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pick_list",
+   "fieldtype": "Link",
+   "label": "Pick List",
+   "options": "Pick List",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2021-07-27 16:21:08.878989",
+ "modified": "2021-08-05 15:56:52.736957",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
@@ -295,6 +372,20 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
