@@ -35,7 +35,7 @@ class TestLead(unittest.TestCase):
 		customer.insert()
 
 	def test_create_lead_and_unlinking_dynamic_links(self):
-		lead_doc = make_lead(first_name = "Lorem", last_name="Ipsum")
+		lead_doc = make_lead(first_name = "Lorem", last_name="Ipsum", email_id="lorem_ipsum@example.com")
 		lead_doc_1 = make_lead()
 		frappe.get_doc({
 			"doctype": "Address",
@@ -79,7 +79,7 @@ def make_lead(**args):
 		"doctype": "Lead",
 		"first_name": args.first_name or "Test",
 		"last_name": args.last_name or "Lead",
-		"email_id": args.email_id or "new_lead{}@example.com".format(random_string(5)),
+		"email_id": args.email_id or "new_lead_{}@example.com".format(random_string(5)),
 	}).insert()
 
 	return lead_doc
