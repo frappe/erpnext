@@ -1,0 +1,23 @@
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+// License: GNU General Public License v3. See license.txt
+var date1 = new Date()
+frappe.views.calendar["Delivery Planning Item"] = {
+    
+	field_map: {
+		"start": "delivery_date",
+        "end": "delivery_date",
+		"id": "name",
+		"title": "name",
+	},
+
+	gantt: true,
+	filters: [
+		{
+			"fieldtype": "Select",
+			"fieldname": "docstatus",
+			"options": 1,
+			"label": __("Document Status")
+		}
+	],
+	get_events_method: "frappe.desk.calendar.get_events"
+}

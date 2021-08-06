@@ -6,6 +6,7 @@ def get_data():
 
 		'fieldname': 'related_delivery_planning',
 		'non_standard_fieldnames': {
+			'Delivery Planning Item' : 'related_delivey_planning',
 			'Batch': 'item'
 		},
 		'transactions': [
@@ -16,6 +17,10 @@ def get_data():
 			{
 				'label': _('Purchasing'),
 				'items': ['Purchase Order']
-			}
+			},
+			# {
+			# 	'label': _('Planning'),
+			# 	'items': ['Delivery Planning Item']
+			# }
 		]
 	}

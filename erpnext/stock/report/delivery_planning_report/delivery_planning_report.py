@@ -19,19 +19,19 @@ def execute(filters=None):
 	else: group_by =""
 
 	if filters.company:
-		conditions +="AND pl.company = %s" % frappe.db.escape(filters.company)
+		conditions +=" AND pl.company = %s" % frappe.db.escape(filters.company)
 
 	if filters.transporter:
-		conditions += "AND dpi.transporter = %s" % frappe.db.escape(filters.transporter)
+		conditions += " AND dpi.transporter = %s" % frappe.db.escape(filters.transporter)
 
 	if filters.from_date:
-		conditions += "AND dpi.delivery_date >= '%s'" % filters.from_date
+		conditions += " AND dpi.delivery_date >= '%s'" % filters.from_date
 
 	if filters.to_date:
-		conditions += "AND dpi.delivery_date <= '%s'" % filters.to_date
+		conditions += " AND dpi.delivery_date <= '%s'" % filters.to_date
 
 	if filters.customer:
-		conditions += "AND dpi.customer = %s" % frappe.db.escape(filters.customer)
+		conditions += " AND dpi.customer = %s" % frappe.db.escape(filters.customer)
 	columns = get_column()
 	data = get_data(conditions, group_by)
 	return columns, data
@@ -58,47 +58,44 @@ def get_data(conditions, group_by):
 	query = frappe.db.sql(""" select
 							dpi.sales_order,
 							dpi.customer,
-							c.customer_name,
+							dpi.customer_name,
 							dpi.transporter,
-							s.supplier_name as transporter_name,
+							dpi.transporter_name,
 							dpi.item_code,
 							dpi.item_name,
 							dpi.ordered_qty,
 							dpi.qty_to_deliver,
 							dpi.delivery_date as expected_date,
 							dpi.delivery_date as planned_delivery_date,
-							dn.name as delivery_note,
+							dpi.delivery_note,
 							dn.posting_date as delivery_note_date,
 							DATEDIFF(dpi.delivery_date, dn.posting_date) as delay_days,
 							pl.name as pick_list,
 							dpi.weight_to_deliver as weight_ordered,
-							dpi.weight_to_deliver as palnned_delivery_weight,
-							pl.total_weight as actual_delivery_weight,
-							# po.name as purchase_order,
-							pl.company
+							dpi.weight_to_deliver as planned_delivery_weight,
+							dn.total_net_weight as actual_delivery_weight,
+							dpi.purchase_order as purchase_order,
+							pl.company,
+							dpi.name as Planning_Item,
+							dpi.related_delivey_planning as Related_to_Planning
+							
 
 							from `tabDelivery Planning Item` dpi
 
 							Left join `tabDelivery Note` dn
-							ON dn.related_delivery_planning = dpi.related_delivey_planning
+							ON dn.name = dpi.delivery_note
 
 							Left join `tabPick List` pl
-							ON pl.customer = dn.customer
+							ON pl.related_delivery_planning = dpi.related_delivey_planning
 
-							Left join `tabPurchase Order` po
-							ON dpi.related_delivey_planning = pl.related_delivery_planning
-
-							Left join `tabCustomer` c ON dpi.customer = c.name
-							Left join `tabSupplier` s ON dpi.transporter = s.name
-
-
-							where pl.docstatus = 1 AND dn.docstatus = 1 AND dpi.approved = "Yes"
-							AND dn.related_delivery_planning = dpi.related_delivey_planning
-							AND pl.customer = dn.customer
-							AND dpi.related_delivey_planning = pl.related_delivery_planning
-							AND dpi.customer = c.name
-							AND dpi.transporter = s.name
+							where dpi.docstatus = 1  AND dpi.d_status = "Complete"
 							{conditions}
 							{group_by}""".format(conditions=conditions, group_by=group_by), as_dict=1)
 	return query
 
+# pl.docstatus = 1 AND dn.docstatus = 1 AND dpi.approved = "Yes"
+# 							AND dn.related_delivery_planning = dpi.related_delivey_planning
+# 							AND pl.customer = dn.customer
+# 							AND dpi.related_delivey_planning = pl.related_delivery_planning
+# 							AND dpi.customer = c.name
+# 							AND dpi.transporter = s.name
