@@ -330,7 +330,7 @@ class BOM(WebsiteGenerator):
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
 
 		if not from_child_bom:
-			frappe.msgprint(_("Cost Updated"))
+			frappe.msgprint(_("Cost Updated"), alert=True)
 
 	def update_parent_cost(self):
 		if self.total_cost:
@@ -713,7 +713,8 @@ def get_bom_item_rate(args, bom_doc):
 			"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 			"conversion_factor": args.get("conversion_factor") or 1,
 			"plc_conversion_rate": 1,
-			"ignore_party": True
+			"ignore_party": True,
+			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 		out = frappe._dict()
@@ -747,7 +748,7 @@ def get_valuation_rate(args):
 	if valuation_rate <= 0:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0
+			where item_code = %s and valuation_rate > 0 and is_cancelled = 0
 			order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
 
 		valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
@@ -773,7 +774,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				bom_item.rate,
-				bom_item.amount,
+				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
@@ -1068,13 +1069,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if barcodes:
 			or_cond_filters["name"] = ("in", barcodes)
 
-	for cond in get_match_cond(doctype, as_condition=False):
-		for key, value in cond.items():
-			if key == doctype:
-				key = "name"
-
-			query_filters[key] = ("in", value)
-
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")
 		if not has_variants:
@@ -1083,7 +1077,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters and filters.get("is_stock_item"):
 		query_filters["is_stock_item"] = 1
 
-	return frappe.get_all("Item",
+	return frappe.get_list("Item",
 		fields = fields, filters=query_filters,
 		or_filters = or_cond_filters, order_by=order_by,
 		limit_start=start, limit_page_length=page_len, as_list=1)

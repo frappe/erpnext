@@ -239,7 +239,7 @@ class WorkOrder(Document):
 		self.create_serial_no_batch_no()
 
 	def on_submit(self):
-		if not self.wip_warehouse:
+		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
@@ -487,21 +487,20 @@ class WorkOrder(Document):
 			return
 
 		operations = []
-		if not self.use_multi_level_bom:
-			bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
-			operations.extend(_get_operations(self.bom_no, qty=1.0/bom_qty))
-		else:
+
+		if self.use_multi_level_bom:
 			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
-			bom_traversal = list(reversed(bom_tree.level_order_traversal()))
-			bom_traversal.append(bom_tree) # add operation on top level item last
+			bom_traversal = reversed(bom_tree.level_order_traversal())
 
-			for d in bom_traversal:
-				if d.is_bom:
-					operations.extend(_get_operations(d.name, qty=d.exploded_qty))
+			for node in bom_traversal:
+				if node.is_bom:
+					operations.extend(_get_operations(node.name, qty=node.exploded_qty))
 
-			for correct_index, operation in enumerate(operations, start=1):
-				operation.idx = correct_index
+		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
+		operations.extend(_get_operations(self.bom_no, qty=1.0/bom_qty))
 
+		for correct_index, operation in enumerate(operations, start=1):
+			operation.idx = correct_index
 
 		self.set('operations', operations)
 		self.calculate_time()
@@ -656,7 +655,7 @@ class WorkOrder(Document):
 				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
 					self.append('required_items', {
 						'rate': item.rate,
-						'amount': item.amount,
+						'amount': item.rate * item.qty,
 						'operation': item.operation or operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
