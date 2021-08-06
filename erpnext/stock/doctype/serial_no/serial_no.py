@@ -5,13 +5,14 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.model.naming import make_autoname
-from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
+from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate, get_datetime
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
-
 from frappe import _, ValidationError
-
 from erpnext.controllers.stock_controller import StockController
 from six.moves import map
+from six import string_types
+
+
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass
 class SerialNoNotRequiredError(ValidationError): pass
@@ -22,6 +23,7 @@ class SerialNoWarehouseError(ValidationError): pass
 class SerialNoBatchError(ValidationError): pass
 class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
+
 
 class SerialNo(StockController):
 	def __init__(self, *args, **kwargs):
@@ -277,8 +279,8 @@ def process_serial_no(sle):
 	validate_serial_no_required(sle, item_details)
 	validate_serial_no(sle, item_details)
 
-	if not sle.skip_update_serial_no:
-		auto_make_serial_nos(sle, item_details)
+	if not sle.get('skip_update_serial_no'):
+		create_missing_serial_nos(sle, item_details)
 		update_serial_nos_for_cancel(sle)
 
 
@@ -303,8 +305,6 @@ def validate_serial_no(sle, item_details):
 
 	serial_nos = get_serial_nos(sle.serial_no) if sle.serial_no else []
 
-	validate_material_transfer_entry(sle)
-
 	if serial_nos and sle.is_cancelled == "No":
 		validate_serial_no_qty(sle, serial_nos, item_details)
 
@@ -325,10 +325,6 @@ def validate_serial_no(sle, item_details):
 				if sr.batch_no and sr.batch_no != sle.batch_no and cint(sle.actual_qty) < 0:
 					frappe.throw(_("{0} {1} does not belong to Batch {2}").format(label_serial_no, serial_no,
 						sle.batch_no), SerialNoBatchError)
-
-				# check if already received if qty > 0
-				# check if available in stock if qty < 0
-				# check if already returned if already delivered
 
 				validate_serial_no_reservation(sle, sr)
 
@@ -409,85 +405,99 @@ def validate_so_serial_no(sr, sales_order):
 		be delivered""").format(sales_order, sr.item_code, label_serial_no, sr.name))
 
 
-def validate_serial_no_ledger(sle):
-	serial_nos = get_serial_nos(sle.serial_no)
+def validate_serial_no_ledger(serial_nos, item_code, voucher_type, voucher_no, company):
+	def throw_already_received(d):
+		received_voucher_msg = ""
+		if last_receipt_sle:
+			if (last_receipt_sle.voucher_type, last_receipt_sle.voucher_no) == (voucher_type, voucher_no):
+				received_voucher_msg = " (received in {0} on {1})"\
+					.format(frappe.get_desk_link(d.voucher_type, d.voucher_no),
+						frappe.format(d.timestamp))
+			else:
+				received_voucher_msg = " (received in {0} on {1})"\
+					.format(frappe.get_desk_link(last_receipt_sle.voucher_type, last_receipt_sle.voucher_no),
+						frappe.format(last_receipt_sle.timestamp))
+
+		frappe.throw(_("{0} is already available in Warehouse {1}{2}")
+			.format(serial_no_link, current_warehouse, received_voucher_msg), title=_("Already In Stock"))
+
+	def throw_not_available(d):
+		issuing_voucher_msg = ""
+		if last_issue_sle:
+			if (last_issue_sle.voucher_type, last_issue_sle.voucher_no) == (voucher_type, voucher_no):
+				issuing_voucher_msg = _(" (already issued in {0} on {1})") \
+					.format(frappe.get_desk_link(d.voucher_type, d.voucher_no),
+						frappe.format(d.timestamp))
+			else:
+				issuing_voucher_msg = _(" (already issued in {0} on {1})") \
+					.format(frappe.get_desk_link(last_issue_sle.voucher_type, last_issue_sle.voucher_no),
+						frappe.format(last_issue_sle.timestamp))
+
+		last_available_sle = get_serial_no_last_available_sle(serial_no_sl_entries, exclude=d.name)
+		last_available_msg = ""
+
+		if last_available_sle:
+			last_available_msg = _(". However it is available on {0} (received in {1})").format(
+				frappe.format(last_available_sle.timestamp),
+				frappe.get_desk_link(last_available_sle.voucher_type, last_available_sle.voucher_no))
+
+		frappe.throw(_("{0} is not available in any Warehouse{1}{2}")
+			.format(serial_no_link, issuing_voucher_msg, last_available_msg), title=_("Not In Stock"))
+
+	if isinstance(serial_nos, string_types):
+		serial_nos = get_serial_nos(serial_nos)
+
 	if not serial_nos:
 		return
 
-	is_vehicle = frappe.get_cached_value("Item", sle.item_code, "is_vehicle")
+	is_vehicle = frappe.get_cached_value("Item", item_code, "is_vehicle")
 
 	sl_entries = frappe.db.sql("""
-		select name, posting_date, posting_time, creation, voucher_type, voucher_no, serial_no, warehouse, actual_qty
+		select name, posting_date, posting_time, creation, voucher_type, voucher_no, serial_no, warehouse, actual_qty,
+			timestamp(posting_date, posting_time) as timestamp
 		from `tabStock Ledger Entry`
 		where item_code=%s and company=%s and ifnull(is_cancelled, 'No')='No'
 			and exists(select sr.name from `tabStock Ledger Entry Serial No` sr
 				where sr.parent = `tabStock Ledger Entry`.name and sr.serial_no in %s)
 		order by posting_date, posting_time, creation
-	""", (sle.item_code, sle.company, serial_nos), as_dict=1)
+	""", (item_code, company, serial_nos), as_dict=1)
 
 	serial_no_sl_map = {}
-	for d in sl_entries:
-		current_sle_serial_nos = get_serial_nos(d.serial_no)
+	for sle in sl_entries:
+		current_sle_serial_nos = get_serial_nos(sle.serial_no)
 		for serial_no in current_sle_serial_nos:
 			if serial_no in serial_nos:
-				serial_no_sl_map.setdefault(serial_no, []).append(d)
+				serial_no_sl_map.setdefault(serial_no, []).append(sle)
 
 	for serial_no, serial_no_sl_entries in serial_no_sl_map.items():
 		serial_no_link = frappe.get_desk_link('Vehicle' if is_vehicle else 'Serial No', serial_no)
 
 		current_warehouse = None
-		receipt_voucher = None
-		issue_voucher = None
-		for d in serial_no_sl_entries:
+		last_receipt_sle = None
+		last_issue_sle = None
+
+		for sle in serial_no_sl_entries:
 			# incoming
-			if d.actual_qty > 0:
+			if sle.actual_qty > 0:
 				# already in stock
 				if current_warehouse:
-					received_voucher_msg = ""
-					if receipt_voucher:
-						if receipt_voucher == (sle.voucher_type, sle.voucher_no):
-							received_voucher_msg = " ({0})".format(frappe.get_desk_link(d.voucher_type, d.voucher_no))
-						else:
-							received_voucher_msg = " ({0})".format(frappe.get_desk_link(receipt_voucher[0], receipt_voucher[1]))
+					throw_already_received(sle)
 
-					frappe.throw(_("{0} is already received in Warehouse {1}{2}")
-						.format(serial_no_link, current_warehouse, received_voucher_msg))
-
-				current_warehouse = d.warehouse
-				receipt_voucher = (d.voucher_type, d.voucher_no)
+				current_warehouse = sle.warehouse
+				last_receipt_sle = sle
 			# outgoing
-			elif d.actual_qty < 0:
+			elif sle.actual_qty < 0:
 				# not in stock
 				if not current_warehouse:
-					issuing_voucher_msg = ""
-					if issue_voucher:
-						if issue_voucher == (sle.voucher_type, sle.voucher_no):
-							issuing_voucher_msg = _(" (already issued in {0})")\
-								.format(frappe.get_desk_link(d.voucher_type, d.voucher_no))
-						else:
-							issuing_voucher_msg = _(" (already issued in {0})")\
-								.format(frappe.get_desk_link(issue_voucher[0], issue_voucher[1]))
+					throw_not_available(sle)
 
-					last_available_sle = get_serial_no_last_available_sle(serial_no_sl_entries, exclude=d.name)
-					last_available_msg = ""
-					posting_date_msg = ""
-
-					if last_available_sle:
-						last_available_msg = _(". However it is available on {0} {1} (received in {2}").format(
-							frappe.format(last_available_sle.posting_date), frappe.format(last_available_sle.posting_time),
-							frappe.get_desk_link(last_available_sle.voucher_type, last_available_sle.voucher_no))
-
-						posting_date_msg = _(" on {0} {1}").format(frappe.format(d.posting_date), frappe.format(d.posting_time))
-
-					frappe.throw(_("{0} is not available in any Warehouse{1}{2}{3}")
-						.format(serial_no_link, posting_date_msg, issuing_voucher_msg, last_available_msg))
 				# in stock but incorrect warehouse
-				elif d.warehouse != current_warehouse:
+				elif sle.warehouse != current_warehouse:
 					frappe.throw(_("{0} is not available in Warehouse {1}. However it is available in Warehouse {2}")
-						.format(serial_no_link, frappe.bold(d.warehouse), frappe.bold(current_warehouse)))
+						.format(serial_no_link, frappe.bold(sle.warehouse), frappe.bold(current_warehouse)))
 
 				current_warehouse = None
-				issue_voucher = (d.voucher_type, d.voucher_no)
+				last_issue_sle = sle
 
 
 def get_serial_no_last_available_sle(sl_entries, exclude=None):
@@ -523,45 +533,6 @@ def get_auto_serial_nos(serial_no_series, qty, item_code):
 	return "\n".join(serial_nos)
 
 
-def validate_material_transfer_entry(sle_doc):
-	sle_doc.update({
-		"skip_update_serial_no": False,
-		"skip_serial_no_validaiton": False
-	})
-
-	if (sle_doc.voucher_type == "Stock Entry" and sle_doc.is_cancelled == "No" and
-		frappe.get_cached_value("Stock Entry", sle_doc.voucher_no, "purpose") == "Material Transfer"):
-		if sle_doc.actual_qty < 0:
-			sle_doc.skip_update_serial_no = True
-		else:
-			sle_doc.skip_serial_no_validaiton = True
-
-
-def has_duplicate_serial_no(sn, sle):
-	if frappe.flags.allow_repost_serial_no:
-		return False
-
-	if (sn.warehouse and not sle.skip_serial_no_validaiton
-		and sle.voucher_type != 'Stock Reconciliation'):
-		return True
-
-	if sn.company != sle.company:
-		return False
-
-	status = False
-	if sn.purchase_document_no:
-		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and \
-			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]:
-			status = True
-
-		if status and sle.voucher_type == 'Stock Entry':
-			purpose, customer_provided = frappe.db.get_value('Stock Entry', sle.voucher_no, ['purpose', 'customer_provided'])
-			if purpose != 'Material Receipt' or customer_provided:
-				status = False
-
-	return status
-
-
 def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	"""
 		Allows same serial nos for raw materials and finished goods
@@ -580,7 +551,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	return allow_serial_nos
 
 
-def auto_make_serial_nos(sle, item_details):
+def create_missing_serial_nos(sle, item_details):
 	if not cint(sle.get('actual_qty')) > 0 or sle.get('is_cancelled') == 'Yes':
 		return
 
@@ -644,9 +615,9 @@ def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
 	serial_no_doc.flags.ignore_validate = True
 	serial_no_doc.flags.ignore_version = True
 	if is_new:
-		serial_no_doc.insert()
+		serial_no_doc.insert(ignore_permissions=True)
 	else:
-		serial_no_doc.save()
+		serial_no_doc.save(ignore_permissions=True)
 
 	return serial_no_doc
 
@@ -696,7 +667,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 						if d.get('is_vehicle'):
 							to_update.vehicle = d.vehicle = sle.serial_no
 
-						frappe.db.set_value(d.doctype, d.name, to_update, None)
+						d.db_set(to_update)
 						accepted_serial_nos_updated = True
 						if not update_rejected_serial_nos:
 							break
@@ -707,7 +678,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 						if d.get('is_vehicle'):
 							to_update.vehicle = d.vehicle = sle.serial_no
 
-						frappe.db.set_value(d.doctype, d.name, to_update, None)
+						d.db_set(to_update)
 						update_rejected_serial_nos = False
 						if accepted_serial_nos_updated:
 							break

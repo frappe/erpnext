@@ -30,8 +30,10 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 			if sle.get('is_cancelled') == 'Yes':
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
+			sle_allow_negative_stock = cint(sle.get('allow_negative_stock'))
+
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
-				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+				sle_doc = make_entry(sle, sle_allow_negative_stock or allow_negative_stock, via_landed_cost_voucher)
 				sle_id = sle_doc.get('name')
 				creation = sle_doc.get('creation')
 
@@ -41,7 +43,7 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 				"creation": creation,
 				"is_amended": is_amended
 			})
-			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
+			update_bin(args, sle_allow_negative_stock or allow_negative_stock, via_landed_cost_voucher)
 
 		if cancel:
 			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))

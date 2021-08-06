@@ -46,9 +46,9 @@ class StockLedgerEntry(Document):
 		self.set_serial_no_table()
 
 	def on_submit(self):
-		if not self.get("via_landed_cost_voucher"):
+		if not self.get("via_landed_cost_voucher") and not self.get("skip_serial_no_ledger_validation"):
 			from erpnext.stock.doctype.serial_no.serial_no import validate_serial_no_ledger
-			validate_serial_no_ledger(self)
+			validate_serial_no_ledger(self.serial_no, self.item_code, self.voucher_type, self.voucher_no, self.company)
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']
