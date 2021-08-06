@@ -5,15 +5,15 @@ frappe.ui.form.on('Service Level Agreement', {
 	setup: function(frm) {
 		if (cint(frm.doc.apply_sla_for_resolution) === 1) {
 			frm.get_field('priorities').grid.editable_fields = [
-				{fieldname: 'priority', columns: 1},
 				{fieldname: 'default_priority', columns: 1},
+				{fieldname: 'priority', columns: 2},
 				{fieldname: 'response_time', columns: 2},
 				{fieldname: 'resolution_time', columns: 2}
 			];
 		} else {
 			frm.get_field('priorities').grid.editable_fields = [
-				{fieldname: 'priority', columns: 1},
 				{fieldname: 'default_priority', columns: 1},
+				{fieldname: 'priority', columns: 2},
 				{fieldname: 'response_time', columns: 3},
 			];
 		}
