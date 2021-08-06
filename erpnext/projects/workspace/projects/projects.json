@@ -201,7 +201,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-07-08 17:36:23.303994",
+ "modified": "2021-08-05 12:16:01.540145",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
@@ -212,6 +212,7 @@
  "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
+ "roles": [],
  "sequence_id": 20,
  "shortcuts": [
   {

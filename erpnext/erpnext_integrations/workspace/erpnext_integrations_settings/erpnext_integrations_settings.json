@@ -1,7 +1,7 @@
 {
  "category": "",
  "charts": [],
- "content": "[{\"type\": \"spacer\", \"data\": {\"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Integrations Settings\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}]",
+ "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Integrations Settings\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}]",
  "creation": "2020-07-31 10:38:54.021237",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -11,6 +11,7 @@
  "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
+ "icon": "setting",
  "idx": 0,
  "is_default": 0,
  "is_standard": 0,
@@ -80,7 +81,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-07-08 17:36:13.682983",
+ "modified": "2021-08-05 12:15:58.951704",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations Settings",
@@ -91,6 +92,7 @@
  "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
+ "roles": [],
  "sequence_id": 11,
  "shortcuts": [],
  "title": "ERPNext Integrations Settings"
