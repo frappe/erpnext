@@ -129,7 +129,7 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None,
 		"earnings": make_earning_salary_component(setup=True,  test_tax=test_tax, company_list=["_Test Company"]),
 		"deductions": make_deduction_salary_component(setup=True, test_tax=test_tax, company_list=["_Test Company"]),
 		"payroll_frequency": payroll_frequency,
-		"payment_account": get_random("Account", filters={"account_currency": currency}),
+		"payment_account": get_random("Account", filters={'account_currency': currency}),
 		"currency": currency
 	}
 	if other_details and isinstance(other_details, dict):
