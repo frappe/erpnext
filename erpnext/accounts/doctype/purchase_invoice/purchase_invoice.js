@@ -134,7 +134,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["not in", ["Closed", "Completed"]],
+						status: ["not in", ["Closed", "Completed", "Return Issued"]],
 						company: me.frm.doc.company,
 						is_return: 0
 					}
