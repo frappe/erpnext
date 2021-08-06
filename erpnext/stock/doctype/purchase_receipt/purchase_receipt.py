@@ -415,7 +415,7 @@ class PurchaseReceipt(BuyingController):
 			"cost_center": cost_center,
 			"debit": debit,
 			"credit": credit,
-			"against_account": against_account,
+			"against": against_account,
 			"remarks": remarks,
 		}
 

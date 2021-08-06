@@ -23,9 +23,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_reverse_purchase_receipt_sle(self):
 
-		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 0)
-
-		pr = make_purchase_receipt(qty=0.5)
+		pr = make_purchase_receipt(qty=0.5, item_code="_Test Item Home Desktop 200")
 
 		sl_entry = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": pr.name}, ['actual_qty'])
@@ -40,8 +38,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertEqual(len(sl_entry_cancelled), 2)
 		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
-
-		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 1)
 
 	def test_make_purchase_invoice(self):
 		if not frappe.db.exists('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice'):
