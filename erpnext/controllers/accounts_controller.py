@@ -1108,7 +1108,8 @@ class AccountsController(TransactionBase):
 				base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
 
 		if not self.get("payment_schedule"):
-			if self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
+			if self.doctype in ["Sales Invoice", "Purchase Invoice"] and automatically_fetch_payment_terms \
+				and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
 				self.fetch_payment_terms_from_order(po_or_so, doctype)
 				if self.get('payment_terms_template'):
 					self.ignore_default_payment_terms_template = 1
