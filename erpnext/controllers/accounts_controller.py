@@ -1091,6 +1091,8 @@ class AccountsController(TransactionBase):
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
 			grand_total = grand_total - flt(self.write_off_amount)
+			po_or_so, doctype, fieldname = self.get_order_details()
+			automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 
 		if self.get("total_advance"):
 			if party_account_currency == self.company_currency:
@@ -1101,28 +1103,25 @@ class AccountsController(TransactionBase):
 				base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
 
 		if not self.get("payment_schedule"):
-			if self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.get("payment_terms_template"):
-				po_or_so, doctype, fieldname = self.get_order_details()
-
-			if self.get("payment_terms_template"):
+			if self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
+				self.fetch_payment_terms_from_order(po_or_so, doctype)
+				if self.get('payment_terms_template'):
+					self.ignore_default_payment_terms_template = 1
+			elif self.get("payment_terms_template"):
 				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total, base_grand_total)
 				for item in data:
 					self.append("payment_schedule", item)
-
-			elif self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
-				self.fetch_payment_terms_from_order(po_or_so, doctype)
-
 			elif self.doctype not in ["Purchase Receipt"]:
 				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, base_payment_amount=base_grand_total)
 				self.append("payment_schedule", data)
-		else:
-			for d in self.get("payment_schedule"):
-				if d.invoice_portion:
-					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
-					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
-					d.outstanding = d.payment_amount
-				elif not d.invoice_portion:
-					d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
+
+		for d in self.get("payment_schedule"):
+			if d.invoice_portion:
+				d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+				d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
+				d.outstanding = d.payment_amount
+			elif not d.invoice_portion:
+				d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
 
 
 	def get_order_details(self):
