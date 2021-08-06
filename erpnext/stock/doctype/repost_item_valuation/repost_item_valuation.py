@@ -80,7 +80,7 @@ def repost(doc):
 
 def repost_sl_entries(doc):
 	if doc.based_on == 'Transaction':
-		repost_future_sle(voucher_type=doc.voucher_type, voucher_no=doc.voucher_no,
+		repost_future_sle(doc=doc, voucher_type=doc.voucher_type, voucher_no=doc.voucher_no,
 			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
 	else:
 		repost_future_sle(args=[frappe._dict({
@@ -133,6 +133,6 @@ def repost_entries():
 
 def get_repost_item_valuation_entries():
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
-		WHERE status != 'Completed' and creation <= %s and docstatus = 1
+		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
 	""", now(), as_dict=1)
