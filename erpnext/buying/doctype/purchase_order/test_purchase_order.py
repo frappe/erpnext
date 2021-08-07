@@ -633,13 +633,17 @@ class TestPurchaseOrder(unittest.TestCase):
 				raise Exception
 
 	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
-		po = create_purchase_order()
+		po = create_purchase_order(do_not_save=1)
+		po.payment_terms_template = '_Test Payment Term Template'
+		po.save()
+		po.submit()
 
-		self.assertTrue(po.get('payment_schedule'))
-
+		company = frappe.get_doc('Company', '_Test Company', 'payment_terms', '_Test Payment Term Template 1')
 		pi = make_pi_from_po(po.name)
+		pi.save()
 
-		self.assertFalse(pi.get('payment_schedule'))
+		self.assertEqual(pi.get('payment_terms_template'), '_Test Payment Term Template 1')
+		frappe.db.set_value('Company', '_Test Company', 'payment_terms', '')
 
 	def test_terms_copied(self):
 		po = create_purchase_order(do_not_save=1)
