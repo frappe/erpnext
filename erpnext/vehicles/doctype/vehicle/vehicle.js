@@ -38,6 +38,11 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 
 	refresh: function () {
 		erpnext.hide_company();
+
+		const cant_change_fields = (this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields) || {};
+		$.each(cant_change_fields, (fieldname, cant_change) => {
+			this.frm.set_df_property(fieldname, 'read_only', cint(cant_change));
+		});
 	},
 
 	unregistered: function () {

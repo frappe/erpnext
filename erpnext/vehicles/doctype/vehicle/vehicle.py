@@ -41,6 +41,8 @@ class Vehicle(Document):
 
 	def onload(self):
 		self.copy_image_from_item()
+		self.set_onload('stock_exists', self.stock_ledger_created())
+		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 
 	def on_update(self):
 		self.update_vehicle_serial_no()
@@ -58,6 +60,7 @@ class Vehicle(Document):
 
 		self.copy_image_from_item()
 		self.set_status()
+		self.cant_change()
 
 	def on_trash(self):
 		self.delete_serial_no_on_trash()
@@ -155,6 +158,35 @@ class Vehicle(Document):
 				serial_no_doc = frappe.get_doc("Serial No", serial_no_name)
 
 		return serial_no_doc
+
+	def cant_change(self):
+		if self.is_new():
+			return
+
+		fields = self.get_cant_change_fields()
+		cant_change_fields = [f for f, cant_change in fields.items() if cant_change]
+
+		if cant_change_fields:
+			previous_values = frappe.db.get_value(self.doctype, self.name, cant_change_fields, as_dict=1)
+			for f, old_value in previous_values.items():
+				if cstr(self.get(f)) != cstr(old_value):
+					label = self.meta.get_label(f)
+					frappe.throw(_("Cannot change {0} because stock already exists for this Vehicle")
+						.format(frappe.bold(label)))
+
+	def get_cant_change_fields(self):
+		return {'chassis_no': self.stock_ledger_created()}
+
+	def stock_ledger_created(self):
+		if not hasattr(self, '_stock_ledger_created'):
+			self._stock_ledger_created = len(frappe.db.sql("""
+				select name
+				from `tabStock Ledger Entry`
+				where exists(select sr.name from `tabStock Ledger Entry Serial No` sr
+					where sr.parent = `tabStock Ledger Entry`.name and sr.serial_no = %s)
+				limit 1
+			""", self.name))
+		return self._stock_ledger_created
 
 	def set_status(self):
 		if self.delivery_document_type:
