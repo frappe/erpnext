@@ -1,0 +1,33 @@
+{
+ "creation": "2021-08-01 00:49:00.393441",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "serial_no"
+ ],
+ "fields": [
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Serial No",
+   "options": "Serial No",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-08-01 00:49:00.393441",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Ledger Entry Serial No",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

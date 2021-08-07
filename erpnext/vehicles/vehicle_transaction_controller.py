@@ -92,6 +92,9 @@ class VehicleTransactionController(StockController):
 
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+		pass
+
 	def validate_party(self):
 		if not self.get('customer') and not self.get('supplier'):
 			frappe.throw(_("Party is mandatory"))

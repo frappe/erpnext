@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "serial_no",
   "batch_no",
   "warehouse",
   "posting_date",
@@ -35,7 +34,9 @@
   "company",
   "fiscal_year",
   "is_cancelled",
+  "serial_no",
   "to_rename",
+  "serial_numbers",
   "dependencies"
  ],
  "fields": [
@@ -341,13 +342,20 @@
    "label": "Dependencies",
    "options": "Stock Ledger Entry Dependency",
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_numbers",
+   "fieldtype": "Table MultiSelect",
+   "label": "Serial Numbers",
+   "options": "Stock Ledger Entry Serial No",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2021-07-27 14:06:25.211420",
+ "modified": "2021-08-01 01:29:55.806025",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

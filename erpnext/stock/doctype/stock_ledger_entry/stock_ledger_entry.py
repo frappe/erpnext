@@ -30,18 +30,25 @@ class StockLedgerEntry(Document):
 		self.validate_item()
 		self.validate_batch()
 		self.validate_date()
-		self.validate_dependency()
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 
-	def on_submit(self):
+	def before_submit(self):
+		self.validate_dependency()
 		self.check_stock_frozen_date()
 
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
+
+		self.set_serial_no_table()
+
+	def on_submit(self):
+		if not self.get("via_landed_cost_voucher") and not self.get("skip_serial_no_ledger_validation"):
+			from erpnext.stock.doctype.serial_no.serial_no import validate_serial_no_ledger
+			validate_serial_no_ledger(self.serial_no, self.item_code, self.voucher_type, self.voucher_no, self.company)
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']
@@ -130,15 +137,15 @@ class StockLedgerEntry(Document):
 			frappe.throw(_("Invalid reference in Stock Ledger Entry Dependency"))
 
 	def check_stock_frozen_date(self):
-		stock_frozen_upto = frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto') or ''
+		stock_frozen_upto = frappe.get_cached_value('Stock Settings', None, 'stock_frozen_upto') or ''
 		if stock_frozen_upto:
-			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
+			stock_auth_role = frappe.get_cached_value('Stock Settings', None,'stock_auth_role')
 			if getdate(self.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in frappe.get_roles():
 				frappe.throw(_("Stock transactions before {0} are frozen").format(formatdate(stock_frozen_upto)), StockFreezeError)
 
-		stock_frozen_upto_days = int(frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto_days') or 0)
+		stock_frozen_upto_days = int(frappe.get_cached_value('Stock Settings', None, 'stock_frozen_upto_days') or 0)
 		if stock_frozen_upto_days:
-			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
+			stock_auth_role = frappe.get_cached_value('Stock Settings', None,'stock_auth_role')
 			older_than_x_days_ago = (add_days(getdate(self.posting_date), stock_frozen_upto_days) <= date.today())
 			if older_than_x_days_ago and not stock_auth_role in frappe.get_roles():
 				frappe.throw(_("Not allowed to update stock transactions older than {0}").format(stock_frozen_upto_days), StockFreezeError)
@@ -165,6 +172,15 @@ class StockLedgerEntry(Document):
 	def block_transactions_against_group_warehouse(self):
 		from erpnext.stock.utils import is_group_warehouse
 		is_group_warehouse(self.warehouse)
+
+	def set_serial_no_table(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		serial_nos = get_serial_nos(self.serial_no)
+
+		self.serial_numbers = []
+		for serial_no in serial_nos:
+			self.append('serial_numbers', {'serial_no': serial_no})
+
 
 def on_doctype_update():
 	if not frappe.db.has_index('tabStock Ledger Entry', 'posting_sort_index'):

@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint, get_datetime, formatdate, getdate
+from frappe.utils import cstr, flt, cint, get_datetime
 from erpnext.stock.doctype.batch.batch import get_batches, get_batch_received_date
 from erpnext.controllers.stock_controller import StockController
 from erpnext.accounts.utils import get_company_default
 from erpnext.stock.utils import get_stock_balance, get_incoming_rate
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, validate_serial_no_ledger
 from erpnext.stock.doctype.batch.batch import get_batch_qty_on
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -221,6 +221,20 @@ class StockReconciliation(StockController):
 
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 
+		self.validate_serial_no_ledger()
+
+	def validate_serial_no_ledger(self):
+		item_serial_nos = {}
+		for d in self.items:
+			for serial_no in get_serial_nos(d.serial_no):
+				item_serial_nos.setdefault(d.item_code, []).append(serial_no)
+			for serial_no in get_serial_nos(d.current_serial_no):
+				item_serial_nos.setdefault(d.item_code, []).append(serial_no)
+
+		for item_code, serial_nos in item_serial_nos.items():
+			serial_nos = list(set(serial_nos))
+			validate_serial_no_ledger(serial_nos, item_code, self.doctype, self.name, self.company)
+
 	def get_sle_for_item(self, d, sl_entries):
 		sle = {
 			"reset_rate": cint(self.reset_rate)
@@ -245,6 +259,11 @@ class StockReconciliation(StockController):
 		if cint(self.reset_rate):
 			sle["actual_qty"] = -1 * len(current_serial_nos)
 			sle["serial_no"] = d.get('current_serial_no')
+
+			# serial no ledger validation will be run manually
+			if self.docstatus == 1:
+				sle["skip_serial_no_ledger_validation"] = True
+				sle["allow_negative_stock"] = True
 		else:
 			serial_nos_removed = current_serial_nos - serial_nos
 			sle["actual_qty"] = -1 * len(serial_nos_removed)
@@ -267,6 +286,10 @@ class StockReconciliation(StockController):
 		if cint(self.reset_rate):
 			sle["actual_qty"] = len(serial_nos)
 			sle["serial_no"] = d.get('serial_no')
+
+			# serial no ledger validation will be run manually
+			if self.docstatus == 2:
+				sle["skip_serial_no_ledger_validation"] = True
 		else:
 			serial_nos_added = serial_nos - current_serial_nos
 			sle["actual_qty"] = len(serial_nos_added)

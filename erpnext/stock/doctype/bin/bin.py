@@ -32,6 +32,8 @@ class Bin(Document):
 				"batch_no": args.get("batch_no"),
 				"posting_date": args.get("posting_date"),
 				"posting_time": args.get("posting_time"),
+				"creation": args.get("creation"),
+				"sle_id": args.get("sle_id"),
 				"voucher_no": args.get("voucher_no")
 			}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
