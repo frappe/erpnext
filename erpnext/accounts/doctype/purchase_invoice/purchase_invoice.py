@@ -535,10 +535,8 @@ class PurchaseInvoice(BuyingController):
 			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2), merge_entries=False, from_repost=from_repost)
 
 			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) and self.auto_accounting_for_stock:
-				from erpnext.controllers.stock_controller import update_gl_entries_after
-				items, warehouses = self.get_items_and_warehouses()
-				update_gl_entries_after(self.posting_date, self.posting_time,
-					warehouses, items, company = self.company)
+				from erpnext.controllers.stock_controller import update_gl_entries_for_reposted_stock_vouchers
+				update_gl_entries_for_reposted_stock_vouchers(self.doctype, self.name, company=self.company)
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)

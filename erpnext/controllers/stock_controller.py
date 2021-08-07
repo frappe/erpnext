@@ -41,9 +41,8 @@ class StockController(AccountsController):
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
 			if (repost_future_gle or self.flags.repost_future_gle):
-				items, warehouses = self.get_items_and_warehouses()
-				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
-					warehouse_account, company=self.company)
+				update_gl_entries_for_reposted_stock_vouchers(self.doctype, self.name,
+					warehouse_account=warehouse_account, company=self.company)
 		elif self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self.docstatus == 1:
 			gl_entries = []
 			gl_entries = self.get_asset_gl_entry(gl_entries)
@@ -455,7 +454,28 @@ class StockController(AccountsController):
 					d.serial_no = d.vehicle
 
 
-def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
+def update_gl_entries_for_reposted_stock_vouchers(exclude_voucher_type=None, exclude_voucher_no=None,
+		only_if_value_changed=False, warehouse_account=None, company=None):
+	if frappe.flags.stock_ledger_vouchers_reposted:
+		stock_ledger_vouchers_reposted_sorted = sorted(frappe.flags.stock_ledger_vouchers_reposted,
+			key=lambda d: (d.posting_date, d.posting_time))
+		vouchers = [(d.voucher_type, d.voucher_no) for d in stock_ledger_vouchers_reposted_sorted]
+
+		if only_if_value_changed:
+			vouchers = [d for d in vouchers if d in frappe.flags.stock_ledger_vouchers_value_changed]
+
+		update_gl_entries_for_stock_voucher(vouchers, exclude_voucher_type, exclude_voucher_no, warehouse_account, company)
+
+
+def update_gl_entries_after(posting_date, posting_time,
+		for_warehouses=None, for_items=None, item_warehouse_list=None,
+		warehouse_account=None, company=None):
+	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time,
+		for_warehouses, for_items, item_warehouse_list)
+	update_gl_entries_for_stock_voucher(future_stock_vouchers, warehouse_account=warehouse_account, company=company)
+
+
+def update_gl_entries_for_stock_voucher(stock_vouchers, exclude_voucher_type=None, exclude_voucher_no=None,
 		warehouse_account=None, company=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql("""delete from `tabGL Entry`
@@ -464,10 +484,12 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 
-	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
-	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
+	gle = get_voucherwise_gl_entries(stock_vouchers)
 
-	for voucher_type, voucher_no in future_stock_vouchers:
+	for voucher_type, voucher_no in stock_vouchers:
+		if exclude_voucher_type and exclude_voucher_no and voucher_type == exclude_voucher_type and voucher_no == exclude_voucher_no:
+			continue
+
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
 		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
@@ -477,6 +499,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
+
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	matched = True
@@ -495,38 +518,54 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle):
 			break
 	return matched
 
-def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
+
+def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, item_warehouse_list=None):
 	future_stock_vouchers = []
 
-	values = []
 	condition = ""
 	if for_items:
-		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
-		values += for_items
+		condition += " and item_code in %(item_codes)s"
 
 	if for_warehouses:
-		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
-		values += for_warehouses
+		condition += " and warehouse in %(warehouses)s"
 
-	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+	if item_warehouse_list:
+		condition += " and (item_code, warehouse) in %(item_warehouse_list)s"
+
+	sle_vouchers = frappe.db.sql("""
+		select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
-		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
-		tuple([posting_date, posting_time] + values), as_dict=True):
-			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+		{condition}
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc
+		for update
+	""".format(condition=condition), {
+		"posting_date": posting_date,
+		"posting_time": posting_time,
+		"item_codes": for_items,
+		"warehouses": for_items,
+		"item_warehouse_list": item_warehouse_list
+	}, as_dict=True)
+
+	for d in sle_vouchers:
+		future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 
 	return future_stock_vouchers
 
-def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
-	gl_entries = {}
-	if future_stock_vouchers:
-		for d in frappe.db.sql("""select * from `tabGL Entry`
-			where posting_date >= %s and voucher_no in (%s)""" %
-			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
-			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
-				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
-	return gl_entries
+def get_voucherwise_gl_entries(stock_vouchers):
+	voucherwise_gl = {}
+	if stock_vouchers:
+		gl_entries = frappe.db.sql("""
+			select * from `tabGL Entry`
+			where (voucher_type, voucher_no) in %s
+			for update
+		""", [stock_vouchers], as_dict=1)
+
+		for d in gl_entries:
+			voucherwise_gl.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+
+	return voucherwise_gl
 
 
 @frappe.whitelist()

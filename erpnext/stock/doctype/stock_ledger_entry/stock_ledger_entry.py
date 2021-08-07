@@ -30,6 +30,7 @@ class StockLedgerEntry(Document):
 		self.validate_item()
 		self.validate_batch()
 		self.validate_date()
+		self.validate_dependency()
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 		self.validate_and_set_fiscal_year()
@@ -85,6 +86,48 @@ class StockLedgerEntry(Document):
 				ItemTemplateCannotHaveStock)
 
 		self.stock_uom = item_det.stock_uom
+
+	def validate_dependency(self):
+		# this validation also prevents circular dependency when checking whether dependency reference exists
+		if not self.dependencies:
+			return
+
+		dependency_map = {}
+		for d in self.dependencies:
+			dependency_key = (d.dependent_voucher_type, d.dependent_voucher_no, d.dependent_voucher_detail_no)
+			if dependency_key in dependency_map:
+				frappe.throw(_("Duplicate Stock Ledger Entry Dependency found"))
+
+			dependency_map[dependency_key] = d
+
+			if d.dependency_percentage <= 0:
+				frappe.throw(_("Invalid Dependency Percentage {0} in Stock Ledger Entry")
+					.format(frappe.format(d.dependency_percentage)))
+
+		dependency_keys = list(dependency_map.keys())
+		dependent_sles = frappe.db.sql("""
+			select name, voucher_type, voucher_no, voucher_detail_no, actual_qty
+			from `tabStock Ledger Entry`
+			where (voucher_type, voucher_no, voucher_detail_no) in %s
+				and name != %s
+		""", [dependency_keys, self.name], as_dict=1)
+
+		# qty filter, some voucher_detail_no may have multiple SLEs like Delivery Note return against DN with Target Warehouse
+		filtered_dependent_sles = []
+		for dep_sle in dependent_sles:
+			dependency_key = (dep_sle.voucher_type, dep_sle.voucher_no, dep_sle.voucher_detail_no)
+			dependency_details = dependency_map[dependency_key]
+
+			if dependency_details.dependency_qty_filter == "Positive" and dep_sle.actual_qty <= 0:
+				continue
+			if dependency_details.dependency_qty_filter == "Negative" and dep_sle.actual_qty >= 0:
+				continue
+
+			filtered_dependent_sles.append(dep_sle)
+
+		# for each dependency there must be exactly one SLE
+		if len(filtered_dependent_sles) != len(dependency_keys):
+			frappe.throw(_("Invalid reference in Stock Ledger Entry Dependency"))
 
 	def check_stock_frozen_date(self):
 		stock_frozen_upto = frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto') or ''

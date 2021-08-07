@@ -46,6 +46,7 @@
   "column_break_36",
   "basic_amount",
   "amount",
+  "cost_percentage",
   "has_serial_no",
   "serial_no_batch",
   "serial_no",
@@ -594,11 +595,18 @@
    "hidden": 1,
    "label": "Has Serial No",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:['Manufacture', 'Repack'].includes(parent.purpose) && doc.t_warehouse && !doc.s_warehouse",
+   "fieldname": "cost_percentage",
+   "fieldtype": "Percent",
+   "label": "Cost Percentage",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-05-28 00:23:05.399189",
+ "modified": "2021-07-27 13:34:54.138060",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

@@ -603,6 +603,8 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'customer_provided'	: cint(frm.doc.customer_provided),
 				'allow_zero_valuation': 1,
 				'stock_entry_type': frm.doc.stock_entry_type,
+				'posting_date': frm.doc.posting_date,
+				'posting_time': frm.doc.posting_time,
 			};
 
 			return frappe.call({

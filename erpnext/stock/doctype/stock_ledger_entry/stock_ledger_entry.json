@@ -17,12 +17,13 @@
   "voucher_detail_no",
   "party_type",
   "party",
-  "actual_qty",
-  "incoming_rate",
-  "outgoing_rate",
   "stock_uom",
+  "actual_qty",
   "qty_after_transaction",
   "batch_qty_after_transaction",
+  "additional_cost",
+  "incoming_rate",
+  "outgoing_rate",
   "valuation_rate",
   "batch_valuation_rate",
   "stock_value",
@@ -34,7 +35,8 @@
   "company",
   "fiscal_year",
   "is_cancelled",
-  "to_rename"
+  "to_rename",
+  "dependencies"
  ],
  "fields": [
   {
@@ -96,7 +98,6 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "read_only": 1,
-   "search_index": 1,
    "width": "100px"
   },
   {
@@ -142,6 +143,7 @@
    "oldfieldtype": "Data",
    "print_width": "150px",
    "read_only": 1,
+   "search_index": 1,
    "width": "150px"
   },
   {
@@ -300,7 +302,6 @@
    "fieldtype": "Float",
    "in_filter": 1,
    "label": "Batch Qty After Transaction",
-   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -324,13 +325,29 @@
    "fieldtype": "Check",
    "label": "Reset Rate",
    "read_only": 1
+  },
+  {
+   "fieldname": "additional_cost",
+   "fieldtype": "Currency",
+   "label": "Additional Cost",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "dependencies",
+   "fieldtype": "Table",
+   "label": "Dependencies",
+   "options": "Stock Ledger Entry Dependency",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2021-03-29 15:04:23.335002",
+ "modified": "2021-07-27 14:06:25.211420",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
