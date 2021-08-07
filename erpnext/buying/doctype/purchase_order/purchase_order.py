@@ -471,6 +471,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				"party_account_currency": "party_account_currency",
 				"supplier_warehouse":"supplier_warehouse"
 			},
+			"field_no_map" : ["payment_terms_template"],
 			"validation": {
 				"docstatus": ["=", 1],
 			}
