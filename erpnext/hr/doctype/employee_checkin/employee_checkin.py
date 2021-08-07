@@ -13,7 +13,9 @@ from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_star
 class EmployeeCheckin(Document):
 	def validate(self):
 		self.validate_duplicate_log()
-		self.fetch_shift()
+
+		if not self.attendance:
+			self.fetch_shift()
 
 	def validate_duplicate_log(self):
 		doc = frappe.db.exists('Employee Checkin', {
