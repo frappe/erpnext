@@ -484,6 +484,9 @@ class TestPurchaseOrder(unittest.TestCase):
 
 
 	def test_make_purchase_invoice_with_terms(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
+		
+		automatically_fetch_payment_terms()
 		po = create_purchase_order(do_not_save=True)
 
 		self.assertRaises(frappe.ValidationError, make_pi_from_po, po.name)
@@ -509,6 +512,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(getdate(pi.payment_schedule[0].due_date), getdate(po.transaction_date))
 		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
 		self.assertEqual(getdate(pi.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30))
+		automatically_fetch_payment_terms(enable=0)
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
@@ -638,7 +642,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.save()
 		po.submit()
 
-		company = frappe.get_doc('Company', '_Test Company', 'payment_terms', '_Test Payment Term Template 1')
+		frappe.db.set_value('Company', '_Test Company', 'payment_terms', '_Test Payment Term Template 1')
 		pi = make_pi_from_po(po.name)
 		pi.save()
 
@@ -992,7 +996,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
-		automatically_fetch_payment_terms(enable=0)	
+		automatically_fetch_payment_terms(enable=0)
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
