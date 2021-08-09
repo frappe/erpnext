@@ -694,29 +694,29 @@ class BOM(WebsiteGenerator):
 
 	def validate_scrap_items(self):
 		for item in self.scrap_items:
+			msg = ""
 			if item.item_code == self.item and not item.is_process_loss:
-				frappe.throw(_('Scrap/Loss Item:') + f' {frappe.bold(item.item_code)} ' +
-					_('should have') + ' ' + frappe.bold(_('Is Process Loss')) + ' ' + ('checked'))
+				msg = _('Scrap/Loss Item: {0} should have Is Process Loss checked') \
+					.format(frappe.bold(item.item_code))
 			elif item.item_code != self.item and item.is_process_loss:
-				frappe.throw(_('Scrap/Loss Item:') + f' {frappe.bold(item.item_code)} ' +
-					_('should not have') + ' ' + frappe.bold(_('Is Process Loss')) + ' ' + ('checked'))
+				msg = _('Scrap/Loss Item: {0} should not have Is Process Loss checked') \
+					.format(frappe.bold(item.item_code))
 
 			must_be_whole_number = frappe.get_value("UOM", item.stock_uom, "must_be_whole_number")
 			if item.is_process_loss and must_be_whole_number:
-				frappe.throw(_('Item:') + f' {frappe.bold(item.item_code)} ' +
-					_('with Stock UOM:') + f' {frappe.bold(item.stock_uom)} ' +
-					_('cannot be a Scrap/Loss Item'))
+				msg = _("Item: {0} with Stock UOM: {1} cannot be a Scrap/Loss Item") \
+					.format(frappe.bold(item.item_code), frappe.bold(item.stock_uom))
 
 			if item.is_process_loss and (item.stock_qty >= self.quantity):
-				frappe.throw(_('Scrap/Loss Item:') + f' {item.item_code} ' +
-					_('should have') +' '+frappe.bold(_('Qty')) + ' ' +
-					_('less than finished goods') + ' ' + frappe.bold(_('Quantity')))
+				msg = _("Scrap/Loss Item: {0} should have Qty less than finished goods Quantity") \
+					.format(frappe.bold(item.item_code))
 
 			if item.is_process_loss and (item.rate > 0):
-				frappe.throw(_('Scrap/Loss Item:') + f' {item.item_code} ' +
-					_('should have') + ' ' + frappe.bold(_('Rate')) +
-					' ' + _('set to 0 because') + ' ' +
-					frappe.bold(_('Is Process Loss')) + ' ' + _('is checked'))
+				msg = _("Scrap/Loss Item: {0} should have Rate set to 0 because Is Process Loss is checked") \
+					.format(frappe.bold(item.item_code))
+
+			if msg:
+				frappe.throw(msg, title=_("Note"))
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
