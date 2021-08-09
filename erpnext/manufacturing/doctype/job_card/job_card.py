@@ -608,6 +608,11 @@ def make_stock_entry(source_name, target_doc=None):
 		target.set_missing_values()
 		target.set_stock_entry_type()
 
+		wo_allows_alternate_item = frappe.db.get_value("Work Order", target.work_order, "allow_alternative_item")
+		for item in target.items:
+			item.allow_alternative_item = int(wo_allows_alternate_item and
+					frappe.get_cached_value("Item", item.item_code, "allow_alternative_item"))
+
 	doclist = get_mapped_doc("Job Card", source_name, {
 		"Job Card": {
 			"doctype": "Stock Entry",
