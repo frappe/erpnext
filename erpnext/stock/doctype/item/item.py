@@ -29,6 +29,8 @@ class StockExistsForTemplate(frappe.ValidationError):
 class InvalidBarcode(frappe.ValidationError):
 	pass
 
+class DataValidationError(frappe.ValidationError):
+	pass
 
 class Item(Document):
 	def onload(self):
@@ -374,15 +376,8 @@ class Item(Document):
 			frappe.db.set_value("Item", old_name, "item_name", new_name)
 
 		if merge:
-			# Validate properties before merging
-			if not frappe.db.exists("Item", new_name):
-				frappe.throw(_("Item {0} does not exist").format(new_name))
-
-			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
-			if new_properties != [cstr(self.get(fld)) for fld in field_list]:
-				frappe.throw(_("To merge, following properties must be same for both items")
-									+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
+			self.validate_properties_before_merge(new_name)
+			self.validate_duplicate_website_item_before_merge(old_name, new_name)
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
@@ -429,7 +424,41 @@ class Item(Document):
 		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}").format(
 			frappe.bold(old_name))
 
-		frappe.throw(_(msg), title=_("Merge not allowed"))
+		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_properties_before_merge(self, new_name):
+		# Validate properties before merging
+			if not frappe.db.exists("Item", new_name):
+				frappe.throw(_("Item {0} does not exist").format(new_name))
+
+			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
+			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
+
+			if new_properties != [cstr(self.get(field)) for field in field_list]:
+				msg = _("To merge, following properties must be same for both items")
+				msg += ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list])
+				frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_duplicate_website_item_before_merge(self, old_name, new_name):
+		"""
+			Block merge if both old and new items have website items against them.
+			This is to avoid duplicate website items after merging.
+		"""
+		web_items = frappe.get_all(
+			"Website Item",
+			filters={
+				"item_code": ["in", [old_name, new_name]]
+			},
+			fields=["item_code", "name"])
+
+		if len(web_items) <= 1:
+			return
+
+		old_web_item = [d.get("name") for d in web_items if d.get("item_code") == old_name][0]
+		web_item_link = get_link_to_form("Website Item", old_web_item)
+
+		msg = f"Please delete linked Website Item {frappe.bold(web_item_link)} before merging {old_name} and {new_name}"
+		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)

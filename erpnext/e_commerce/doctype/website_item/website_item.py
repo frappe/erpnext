@@ -63,7 +63,6 @@ class WebsiteItem(WebsiteGenerator):
 
 	def on_trash(self):
 		super(WebsiteItem, self).on_trash()
-		# Delete Item from search index
 		delete_item_from_index(self)
 		self.publish_unpublish_desk_item(publish=False)
 
@@ -85,7 +84,7 @@ class WebsiteItem(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
 
 	def update_template_item(self):
-		"""Set Show in Website for Template Item if True for its Variant"""
+		"""Publish Template Item if Variant is published."""
 		if self.variant_of:
 			if self.published:
 				# show template
@@ -109,9 +108,15 @@ class WebsiteItem(WebsiteGenerator):
 			return
 
 		# find if website image url exists as public
-		file_doc = frappe.get_all("File", filters={
-			"file_url": self.website_image
-		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
+		file_doc = frappe.get_all(
+			"File",
+			filters={
+				"file_url": self.website_image
+			},
+			fields=["name", "is_private"],
+			order_by="is_private asc",
+			limit_page_length=1
+		)
 
 		if file_doc:
 			file_doc = file_doc[0]
@@ -184,7 +189,7 @@ class WebsiteItem(WebsiteGenerator):
 		context.show_search = True
 		context.search_link = '/search'
 
-		context.parents = get_parent_item_groups(self.item_group, from_item=True)
+		context.parents = get_parent_item_groups(self.item_group, from_item=True) # breadcumbs
 		self.attributes = frappe.get_all("Item Variant Attribute",
 			fields=["attribute", "attribute_value"],
 			filters={"parent": self.item_code})
@@ -204,7 +209,7 @@ class WebsiteItem(WebsiteGenerator):
 
 		context.recommended_items = None
 		settings = context.shopping_cart.cart_settings
-		if settings.enable_recommendations:
+		if settings and settings.enable_recommendations:
 			context.recommended_items = self.get_recommended_items(settings)
 
 		return context
@@ -215,8 +220,9 @@ class WebsiteItem(WebsiteGenerator):
 
 			# load variants
 			# also used in set_attribute_context
-			context.variants = frappe.get_all("Item",
-				filters={"variant_of": self.name, "published_in_website": 1},
+			context.variants = frappe.get_all(
+				"Item",
+				filters={"variant_of": self.item_code, "published_in_website": 1},
 				order_by="name asc")
 
 			variant = frappe.form_dict.variant
@@ -267,7 +273,8 @@ class WebsiteItem(WebsiteGenerator):
 						context.selected_attributes[attr.attribute] = attr.attribute_value
 
 			# filter attributes, order based on attribute table
-			for attr in self.attributes:
+			item = frappe.get_cached_doc("Item", self.item_code)
+			for attr in item.attributes:
 				values = context.attribute_values.setdefault(attr.attribute, [])
 
 				if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
@@ -345,7 +352,7 @@ class WebsiteItem(WebsiteGenerator):
 
 		context.metatags.description = safe_description[:300]
 
-		context.metatags.title = self.item_name or self.item_code
+		context.metatags.title = self.web_item_name or self.item_name or self.item_code
 
 		context.metatags['og:type'] = 'product'
 		context.metatags['og:site_name'] = 'ERPNext'

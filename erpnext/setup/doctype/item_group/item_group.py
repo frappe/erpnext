@@ -140,17 +140,17 @@ def get_item_for_list_in_html(context):
 
 
 def get_parent_item_groups(item_group_name, from_item=False):
-	base_nav_page = {"name": frappe._("Shop by Category"), "route":"/shop-by-category"}
+	base_nav_page = {"name": _("Shop by Category"), "route":"/shop-by-category"}
 
 	if from_item and frappe.request.environ.get("HTTP_REFERER"):
 		# base page after 'Home' will vary on Item page
 		last_page = frappe.request.environ["HTTP_REFERER"].split('/')[-1]
 		if last_page and last_page in ("shop-by-category", "all-products"):
 			base_nav_page_title = " ".join(last_page.split("-")).title()
-			base_nav_page = {"name": frappe._(base_nav_page_title), "route":"/"+last_page}
+			base_nav_page = {"name": _(base_nav_page_title), "route":"/"+last_page}
 
 	base_parents = [
-		{"name": frappe._("Home"), "route":"/"},
+		{"name": _("Home"), "route":"/"},
 		base_nav_page,
 	]
 
