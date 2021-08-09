@@ -14,7 +14,7 @@ frappe.ui.form.on('Loan Application', {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 		frm.trigger("add_toolbar_buttons");
-		frm.set_query("loan_type", () => {
+		frm.set_query('loan_type', () => {
 			return {
 				filters: {
 					company: frm.doc.company
