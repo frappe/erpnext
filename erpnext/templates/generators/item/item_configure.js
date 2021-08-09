@@ -201,7 +201,7 @@ class ItemConfigure {
 				<span class="mr-2">
 					${frappe.utils.icon('assets', 'md')}
 				</span>
-				${__("Add to Cart")}s
+				${__("Add to Cart")}
 			</button>
 		` : '';
 

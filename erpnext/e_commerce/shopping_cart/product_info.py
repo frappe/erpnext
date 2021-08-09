@@ -37,17 +37,21 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 				cart_settings.company
 			)
 
-	stock_status = get_web_item_qty_in_stock(item_code, "website_warehouse")
+	stock_status = None
+	if cart_settings.show_stock_availability:
+		stock_status = get_web_item_qty_in_stock(item_code, "website_warehouse")
 
 	product_info = {
 		"price": price,
-		"stock_qty": stock_status.stock_qty,
-		"in_stock": stock_status.in_stock if stock_status.is_stock_item else get_non_stock_item_status(item_code, "website_warehouse"),
 		"qty": 0,
 		"uom": frappe.db.get_value("Item", item_code, "stock_uom"),
-		"show_stock_qty": show_quantity_in_website(),
 		"sales_uom": frappe.db.get_value("Item", item_code, "sales_uom")
 	}
+
+	if stock_status:
+		product_info["stock_qty"] = stock_status.stock_qty
+		product_info["in_stock"] = stock_status.in_stock if stock_status.is_stock_item else get_non_stock_item_status(item_code, "website_warehouse")
+		product_info["show_stock_qty"] = show_quantity_in_website()
 
 	if product_info["price"]:
 		if frappe.session.user != "Guest":
