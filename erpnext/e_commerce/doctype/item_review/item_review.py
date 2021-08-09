@@ -11,6 +11,9 @@ from frappe.contacts.doctype.contact.contact import get_contact_name
 from frappe.utils import flt, cint
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import get_shopping_cart_settings
 
+class UnverifiedReviewer(frappe.ValidationError):
+	pass
+
 class ItemReview(Document):
 	pass
 
@@ -47,6 +50,10 @@ def get_item_reviews(web_item, start, end, data=None):
 @frappe.whitelist()
 def add_item_review(web_item, title, rating, comment=None):
 	""" Add an Item Review by a user if non-existent. """
+	if frappe.session.user == "Guest":
+		frappe.throw(_("You are not verified to write a review yet. Please contact us for verification."),
+			exc=UnverifiedReviewer)
+
 	if not frappe.db.exists("Item Review", {"user": frappe.session.user, "website_item": web_item}):
 		doc = frappe.get_doc({
 			"doctype": "Item Review",
@@ -62,6 +69,9 @@ def add_item_review(web_item, title, rating, comment=None):
 		doc.insert()
 
 def get_customer(silent=False):
+	"""
+		silent: Return customer if exists else return nothing. Dont throw error.
+	"""
 	user = frappe.session.user
 	contact_name = get_contact_name(user)
 	customer = None
@@ -78,4 +88,5 @@ def get_customer(silent=False):
 	elif silent:
 		return None
 	else:
-		frappe.throw(_("You are not verified to write a review yet. Please contact us for verification."))
+		frappe.throw(_("You are not verified to write a review yet. Please contact us for verification."),
+		exc=UnverifiedReviewer)

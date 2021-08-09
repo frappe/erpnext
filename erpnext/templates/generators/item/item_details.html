@@ -13,9 +13,7 @@
 		<!-- Wishlist -->
 		{% if cart_settings.enable_wishlist %}
 			<div class="like-action-item-fp like-action {{ 'like-action-wished' if wished else ''}} ml-2"
-				data-item-code="{{ doc.item_code }}"
-				data-price="{{ price_info.get('price_list_rate') if price_info else 0 }}"
-				data-formatted-price="{{ price_info.get('formatted_price') if price_info else 0 }}">
+				data-item-code="{{ doc.item_code }}">
 				<svg class="icon sm">
 					<use class="{{ 'wished' if wished else 'not-wished' }} wish-icon" href="#icon-heart"></use>
 				</svg>
