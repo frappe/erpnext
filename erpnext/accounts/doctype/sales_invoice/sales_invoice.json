@@ -1755,7 +1755,6 @@
    "label": "Taxed Sales18"
   },
   {
-   "default": "company.account_head",
    "depends_on": "exonerated",
    "fieldname": "account_head",
    "fieldtype": "Link",
@@ -1773,7 +1772,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-07-23 16:03:59.938195",
+ "modified": "2021-08-05 15:27:25.360136",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -663,6 +663,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('Change POS Profile'), function() {
 			me.change_pos_profile();
 		});
+
+		this.page.add_menu_item(__('Cash Entry'), function() {
+			frappe.set_route('List', 'Cash Entry');
+		});
+
+		this.page.add_menu_item(__('Cash Withdrawal'), function() {
+			frappe.set_route('List', 'Cash Withdrawal');
+		});
+
 		this.page.add_menu_item(__('Close the POS'), function() {
 			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
 			voucher.pos_profile = me.frm.doc.pos_profile;
