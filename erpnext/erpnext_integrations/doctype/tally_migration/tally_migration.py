@@ -215,6 +215,8 @@ class TallyMigration(Document):
 
 			def get_address_doc(account, links):
 				tally_state = account.LEDSTATENAME.string.strip().title().replace('&', 'and') if account.LEDSTATENAME else ""
+				if not tally_state:
+					tally_state = account.PRIORSTATENAME.string.strip().title().replace('&', 'and') if account.PRIORSTATENAME else ""
 				pincode = account.PINCODE.string.strip() if account.PINCODE else ""
 				city, pincode_state = "", ""
 				if pincode:
@@ -234,13 +236,17 @@ class TallyMigration(Document):
 					"pincode": pincode,
 					"city": city,
 					"links": links,
-					"flags": { "ignore_mandatory": True }
+					"flags": { "ignore_mandatory": True, "ignore_validate": True }
 				}
 
 			customers, suppliers, addresses = [], [], []
 			for account in collection.find_all("LEDGER"):
 				party, party_type, links = None, None, []
-				party = account.NAME.string.strip()
+				try:
+					party = account.NAME.string.strip()
+				except:
+					self.log(account)
+					continue
 
 				if party in customer_ledgers:
 					party_type = "Customer"
@@ -255,8 +261,13 @@ class TallyMigration(Document):
 					links.append({"link_doctype": party_type, "link_name": party})
 
 				if party_type:
-					address_doc = get_address_doc(account, links)
-					addresses.append(address_doc)
+					if len(account.find_all("LEDMULTIADDRESSLIST.LIST")) > 1:
+						for address in account.find_all("LEDMULTIADDRESSLIST.LIST"):
+							address_doc = get_address_doc(address, links)
+							addresses.append(address_doc)
+					else:
+						address_doc = get_address_doc(account, links)
+						addresses.append(address_doc)
 
 			return customers, suppliers, addresses
 
