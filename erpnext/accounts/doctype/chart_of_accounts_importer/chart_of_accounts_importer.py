@@ -391,5 +391,5 @@ def set_default_accounts(company):
 	})
 
 	company.save()
-	install_country_fixtures(company.name)
+	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()

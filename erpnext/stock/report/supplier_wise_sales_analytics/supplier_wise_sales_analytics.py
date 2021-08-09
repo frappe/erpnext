@@ -69,7 +69,7 @@ def get_consumed_details(filters):
 		i.stock_uom, sle.actual_qty, sle.stock_value_difference,
 		sle.voucher_no, sle.voucher_type
 		from `tabStock Ledger Entry` sle, `tabItem` i
-		where sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1):
+		where sle.is_cancelled = 0 and sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1):
 			consumed_details.setdefault(d.item_code, []).append(d)
 
 	return consumed_details
