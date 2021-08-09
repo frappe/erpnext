@@ -747,9 +747,8 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 		group by item_code, warehouse
 	""".format(conditions=conditions), { "item_code": row['item_code'] }, as_dict=1)
 
-def get_warehouse_list(warehouses, warehouse_list=None):
-	if not warehouse_list:
-		warehouse_list = []
+def get_warehouse_list(warehouses):
+	warehouse_list = []
 
 	if isinstance(warehouses, str):
 		warehouses = json.loads(warehouses)
@@ -761,22 +760,18 @@ def get_warehouse_list(warehouses, warehouse_list=None):
 		else:
 			warehouse_list.append(row.get("warehouse"))
 
+	return warehouse_list
+
 @frappe.whitelist()
 def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_data=None):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
-	warehouse_list = []
 	if warehouses:
-		get_warehouse_list(warehouses, warehouse_list)
-
-	if warehouse_list:
-		warehouses = list(set(warehouse_list))
+		warehouses = list(set(get_warehouse_list(warehouses)))
 
 		if doc.get("for_warehouse") and not get_parent_warehouse_data and doc.get("for_warehouse") in warehouses:
 			warehouses.remove(doc.get("for_warehouse"))
-
-		warehouse_list = None
 
 	doc['mr_items'] = []
 

@@ -431,9 +431,11 @@ def get_ewb_data(dt, dn):
 		company_address = frappe.get_doc('Address', doc.company_address)
 		billing_address = frappe.get_doc('Address', doc.customer_address)
 
+		#added dispatch address
+		dispatch_address = frappe.get_doc('Address', doc.dispatch_address_name) if doc.dispatch_address_name else company_address
 		shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
 
-		data = get_address_details(data, doc, company_address, billing_address)
+		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
 		data.itemList = []
 		data.totalValue = doc.total
@@ -519,10 +521,10 @@ def get_gstins_for_company(company):
 			`tabDynamic Link`.link_name = %(company)s""", {"company": company})
 	return company_gstins
 
-def get_address_details(data, doc, company_address, billing_address):
+def get_address_details(data, doc, company_address, billing_address, dispatch_address):
 	data.fromPincode = validate_pincode(company_address.pincode, 'Company Address')
-	data.fromStateCode = data.actualFromStateCode = validate_state_code(
-		company_address.gst_state_number, 'Company Address')
+	data.fromStateCode = validate_state_code(company_address.gst_state_number, 'Company Address')
+	data.actualFromStateCode = validate_state_code(dispatch_address.gst_state_number, 'Dispatch Address')
 
 	if not doc.billing_address_gstin or len(doc.billing_address_gstin) < 15:
 		data.toGstin = 'URP'
@@ -858,3 +860,14 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
 
 	return depreciation_amount
+
+def set_item_tax_from_hsn_code(item):
+	if not item.taxes and item.gst_hsn_code: 
+		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
+
+		for tax in hsn_doc.taxes:
+			item.append('taxes', {
+				'item_tax_template': tax.item_tax_template,
+				'tax_category': tax.tax_category,
+				'valid_from': tax.valid_from
+			})
