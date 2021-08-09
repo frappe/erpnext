@@ -399,6 +399,8 @@ class TestPurchaseOrder(unittest.TestCase):
 
 
 	def test_return_against_purchase_order(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		po = create_purchase_order()
 
 		pr = make_pr_against_po(po.name, 6)
@@ -434,6 +436,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 5)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_purchase_order_invoice_receipt_workflow(self):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt
@@ -654,6 +657,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertTrue(pi.get('payment_schedule'))
 
 	def test_reserved_qty_subcontract_po(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		# Make stock available for raw materials
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item Home Desktop 100",
@@ -769,6 +774,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
 
 		self.assertEquals(bin11.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_exploded_items_in_subcontracted(self):
 		item_code = "_Test Subcontracted FG Item 1"
@@ -793,6 +799,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(supplied_items1, bom_items)
 
 	def test_backflush_based_on_stock_entry(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		item_code = "_Test Subcontracted FG Item 1"
 		make_subcontracted_item(item_code=item_code)
 		make_item('Sub Contracted Raw Material 1', {
@@ -852,6 +860,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			self.assertEqual(item.get('required_qty'), (transferred_rm_map[item.get('rm_item_code')].get('qty') / order_qty) * received_qty)
 
 		update_backflush_based_on("BOM")
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_backflushed_based_on_for_multiple_batches(self):
 		item_code = "_Test Subcontracted FG Item 2"
@@ -924,6 +933,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		update_backflush_based_on("BOM")
 
 	def test_supplied_qty_against_subcontracted_po(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		item_code = "_Test Subcontracted FG Item 5"
 		make_item('Sub Contracted Raw Material 4', {
 			'is_stock_item': 1,
@@ -979,6 +990,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			self.assertEqual(row.supplied_qty, 250.0)
 
 		update_backflush_based_on("BOM")
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry

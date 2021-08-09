@@ -38,6 +38,8 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(si).insert)
 
 	def test_delivery_note_no_gl_entry(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
@@ -105,8 +107,11 @@ class TestDeliveryNote(unittest.TestCase):
 	# 	dn.cancel()
 	# 	self.assertTrue(get_gl_entries("Delivery Note", dn.name))
 	# 	set_perpetual_inventory(0, company)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_delivery_note_gl_entry_packing_item(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
 		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=10, basic_rate=100)
@@ -143,6 +148,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(flt(bal, 2), flt(prev_bal - stock_value_diff, 2))
 
 		dn.cancel()
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_serialized(self):
 		se = make_serialized_item()
@@ -429,6 +435,8 @@ class TestDeliveryNote(unittest.TestCase):
 		})
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
 		set_valuation_method("_Test Item", "FIFO")
@@ -485,8 +493,11 @@ class TestDeliveryNote(unittest.TestCase):
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_closed_delivery_note(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
 
 		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
@@ -498,6 +509,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		update_delivery_note_status(dn.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
@@ -631,11 +643,16 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.status, "Completed")
 
 	def test_delivery_trip(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		dn = create_delivery_note()
 		dt = make_delivery_trip(dn.name)
 		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_delivery_note_with_cost_center(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		cost_center = "_Test Cost Center for BS Account - TCP1"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory")
@@ -662,8 +679,11 @@ class TestDeliveryNote(unittest.TestCase):
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_delivery_note_cost_center_with_balance_sheet_account(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		cost_center = "Main - TCP1"
 
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
@@ -692,6 +712,8 @@ class TestDeliveryNote(unittest.TestCase):
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
+
 
 	def test_make_sales_invoice_from_dn_for_returned_qty(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note

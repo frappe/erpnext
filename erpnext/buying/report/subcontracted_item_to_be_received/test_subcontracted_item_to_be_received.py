@@ -13,6 +13,8 @@ from pprint import pprint
 class TestSubcontractedItemToBeReceived(unittest.TestCase):
 
 	def test_pending_and_received_qty(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		po = create_purchase_order(item_code='_Test FG Item', is_subcontracted='Yes')
 		transfer_param = []
 		make_stock_entry(item_code='_Test Item', target='_Test Warehouse 1 - _TC', qty=100, basic_rate=100)
@@ -26,6 +28,7 @@ class TestSubcontractedItemToBeReceived(unittest.TestCase):
 		self.assertEqual(data[0]['received_qty'], 5)
 		self.assertEqual(data[0]['purchase_order'], po.name)
 		self.assertEqual(data[0]['supplier'], po.supplier)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 
 def make_purchase_receipt_against_po(po, quantity=5):

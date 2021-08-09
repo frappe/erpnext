@@ -21,6 +21,8 @@ class TestPOSClosingEntry(unittest.TestCase):
 		frappe.db.sql("delete from `tabPOS Profile`")
 
 	def test_pos_closing_entry(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
@@ -49,8 +51,11 @@ class TestPOSClosingEntry(unittest.TestCase):
 
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_cancelling_of_pos_closing_entry(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
@@ -89,6 +94,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 		pos_inv1.load_from_db()
 		self.assertEqual(si_doc.docstatus, 2)
 		self.assertEqual(pos_inv1.status, 'Paid')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 
 def init_user_and_profile(**args):

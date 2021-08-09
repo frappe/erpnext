@@ -25,7 +25,10 @@ class TestStockReconciliation(unittest.TestCase):
 		self._test_reco_sle_gle("FIFO")
 
 	def test_reco_for_moving_average(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		self._test_reco_sle_gle("Moving Average")
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def _test_reco_sle_gle(self, valuation_method):
 		se1, se2, se3 = insert_existing_sle(warehouse='Stores - TCP1')
@@ -151,6 +154,8 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_doc.cancel()
 
 	def test_stock_reco_for_batch_item(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		to_delete_records = []
 		to_delete_serial_nos = []
 
@@ -192,6 +197,7 @@ class TestStockReconciliation(unittest.TestCase):
 		for d in to_delete_records:
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_customer_provided_items(self):
 		item_code = 'Stock-Reco-customer-Item-100'

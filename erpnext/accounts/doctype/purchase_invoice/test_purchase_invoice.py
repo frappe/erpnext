@@ -593,6 +593,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 			{'item': item_code, 'reference_name': pi.name}))
 
 	def test_update_stock_and_purchase_return(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		actual_qty_0 = get_qty_after_transaction()
 
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
@@ -618,8 +620,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.reload()
 		pi.cancel()
 		self.assertEqual(actual_qty_0, get_qty_after_transaction())
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_subcontracting_via_purchase_invoice(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
@@ -633,6 +638,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
 		self.assertEqual(flt(pi.get("items")[0].rm_supp_cost, 2), flt(rm_supp_cost, 2))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_rejected_serial_no(self):
 		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,

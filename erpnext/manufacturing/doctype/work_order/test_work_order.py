@@ -61,6 +61,8 @@ class TestWorkOrder(unittest.TestCase):
 		return wo_order
 
 	def test_over_production(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		wo_doc = self.check_planned_qty()
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
@@ -72,6 +74,7 @@ class TestWorkOrder(unittest.TestCase):
 		s.insert()
 
 		self.assertRaises(StockOverProductionError, s.submit)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_planned_operating_cost(self):
 		wo_order = make_wo_order_test_record(item="_Test FG Item 2",
@@ -160,6 +163,8 @@ class TestWorkOrder(unittest.TestCase):
 			cint(bin1_on_cancel.projected_qty))
 
 	def test_reserved_qty_for_production_on_stock_entry(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target= self.warehouse, qty=100, basic_rate=100)
 		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
@@ -191,8 +196,11 @@ class TestWorkOrder(unittest.TestCase):
 			cint(bin1_on_start_production.reserved_qty_for_production))
 		self.assertEqual(cint(bin1_on_end_production.projected_qty),
 			cint(bin1_on_end_production.projected_qty))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_backflush_qty_for_overpduction_manufacture(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		cancel_stock_entry = []
 		allow_overproduction("overproduction_percentage_for_work_order", 30)
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=100)
@@ -227,8 +235,11 @@ class TestWorkOrder(unittest.TestCase):
 			doc.cancel()
 
 		allow_overproduction("overproduction_percentage_for_work_order", 0)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_reserved_qty_for_stopped_production(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target= self.warehouse, qty=100, basic_rate=100)
 		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
@@ -267,8 +278,11 @@ class TestWorkOrder(unittest.TestCase):
 			cint(self.bin1_at_start.reserved_qty_for_production))
 		self.assertEqual(cint(bin1_on_stop_production.projected_qty) + 1,
 			cint(self.bin1_at_start.projected_qty))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_scrap_material_qty(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
 
 		# add raw materials to stores
@@ -298,8 +312,11 @@ class TestWorkOrder(unittest.TestCase):
 			if item.bom_no and item.item_code in scrap_item_details:
 				self.assertEqual(wo_order_details.scrap_warehouse, item.t_warehouse)
 				self.assertEqual(flt(wo_order_details.qty)*flt(scrap_item_details[item.item_code]), item.qty)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_allow_overproduction(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		allow_overproduction("overproduction_percentage_for_work_order", 0)
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
@@ -317,6 +334,7 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(s.docstatus, 1)
 
 		allow_overproduction("overproduction_percentage_for_work_order", 0)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_over_production_for_sales_order(self):
 		so = make_sales_order(item_code="_Test FG Item", qty=2)
@@ -337,6 +355,8 @@ class TestWorkOrder(unittest.TestCase):
 		allow_overproduction("overproduction_percentage_for_sales_order", 0)
 
 	def test_work_order_with_non_stock_item(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		items = {'Finished Good Test Item For non stock': 1, '_Test FG Item': 1, '_Test FG Non Stock Item': 0}
 		for item, is_stock_item in items.items():
 			make_item(item, {
@@ -368,8 +388,11 @@ class TestWorkOrder(unittest.TestCase):
 		ste.insert()
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_job_card(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		stock_entries = []
 		bom = frappe.get_doc('BOM', {
 			'docstatus': 1,
@@ -413,6 +436,7 @@ class TestWorkOrder(unittest.TestCase):
 		stock_entries.reverse()
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_capcity_planning(self):
 		frappe.db.set_value("Manufacturing Settings", None, {
@@ -447,6 +471,8 @@ class TestWorkOrder(unittest.TestCase):
 			work_order.cancel()
 
 	def test_work_order_with_non_transfer_item(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		items = {'Finished Good Transfer Item': 1, '_Test FG Item': 1, '_Test FG Item 1': 0}
 		for item, allow_transfer in items.items():
 			make_item(item, {
@@ -469,6 +495,7 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(len(ste.items), 1)
 		ste1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
 		self.assertEqual(len(ste1.items), 3)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_cost_center_for_manufacture(self):
 		wo_order = make_wo_order_test_record()
@@ -519,6 +546,8 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(work_order1.operations[0].time_in_mins, 40.0)
 
 	def test_partial_material_consumption(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 1)
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
 
@@ -549,8 +578,11 @@ class TestWorkOrder(unittest.TestCase):
 			ste_doc.cancel()
 
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_extra_material_transfer(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
 		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture")
@@ -591,6 +623,7 @@ class TestWorkOrder(unittest.TestCase):
 			ste_doc.cancel()
 
 		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_make_stock_entry_for_customer_provided_item(self):
 		finished_item = 'Test Item for Make Stock Entry 1'
