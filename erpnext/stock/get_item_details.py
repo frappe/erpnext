@@ -765,7 +765,6 @@ def get_item_price(args, item_code, ignore_party=False):
 	return price_data
 
 
-
 def get_price_list_rate_for(args, item_code):
 	"""
 		:param customer: link to Customer DocType
