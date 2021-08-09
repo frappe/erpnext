@@ -75,16 +75,14 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	update_party_blanket_order(args, out)
 
 	out.update(get_price_list_rate(args, item))
-	# we do not send customer args for price list rate in case of purchase order but we save it for latter use
-	if doc and doc.get('doctype') == 'Purchase Order':
-		customer = args['customer']
-		args['customer'] = ''
+
+	if doc and doc.get('doctype') in sales_doctypes:
+		args['is_selling'] = 1
+
+	if doc and doc.get('doctype') in purchase_doctypes:
+		args['is_buying'] = 1
 
 	get_price_list_rate(args, item, out)
-
-	# Can be use latter we set it again
-	if doc and doc.get('doctype') == 'Purchase Order':
-		args['customer'] = customer
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
@@ -731,11 +729,12 @@ def get_item_price(args, item_code, ignore_party=False):
 	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
 
 	if not ignore_party:
-		if args.get("customer"):
+		if args.get("is_selling"):
 			conditions += " and customer=%(customer)s"
-		elif args.get("supplier"):
+		if args.get("is_buying"):
 			conditions += " and supplier=%(supplier)s"
-		else:
+
+		if not args.get("is_selling") and not args.get("is_buying"):
 			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
@@ -767,7 +766,9 @@ def get_price_list_rate_for(args, item_code):
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
 			"posting_date": args.get('posting_date'),
-			"batch_no": args.get('batch_no')
+			"batch_no": args.get('batch_no'),
+			"is_selling": args.get('is_selling'),
+			"is_buying": args.get('is_buying')
 	}
 
 	item_price_data = 0
