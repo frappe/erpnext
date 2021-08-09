@@ -86,6 +86,8 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(wo_order.planned_operating_cost, cost*2)
 
 	def test_reserved_qty_for_partial_completion(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		item = "_Test Item"
 		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
 
@@ -115,6 +117,7 @@ class TestWorkOrder(unittest.TestCase):
 
 		self.assertEqual(cint(bin1_at_completion.reserved_qty_for_production),
 			reserved_qty_on_submission - 1)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_production_item(self):
 		wo_order = make_wo_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)

@@ -765,6 +765,8 @@ class TestDeliveryNote(unittest.TestCase):
 
 
 	def test_delivery_note_bundle_with_batched_item(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		batched_bundle = make_item("_Test Batched bundle", {"is_stock_item": 0})
 		batched_item = make_item("_Test Batched Item",
 				{"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TESTBATCH.#####"}
@@ -780,6 +782,7 @@ class TestDeliveryNote(unittest.TestCase):
 			raise e
 
 		self.assertTrue("TESTBATCH" in dn.packed_items[0].batch_no, "Batch number not added in packed item")
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 
 def create_delivery_note(**args):

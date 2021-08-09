@@ -24,7 +24,10 @@ class TestStockReconciliation(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 	def test_reco_for_fifo(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		self._test_reco_sle_gle("FIFO")
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_reco_for_moving_average(self):
 		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')

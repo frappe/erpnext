@@ -50,6 +50,8 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 		self.assertEqual(getdate(ipme.medication_orders[0].datetime), date)
 
 	def test_ipme_with_stock_update(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		ipmo = create_ipmo(self.patient)
 		ipmo.submit()
 		ipmo.reload()
@@ -82,8 +84,11 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 		stock_entry = frappe.get_doc('Stock Entry', stock_entry)
 		self.assertEqual(stock_entry.items[0].patient, self.patient)
 		self.assertEqual(stock_entry.items[0].inpatient_medication_entry_child, ipme.medication_orders[0].name)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_drug_shortage_stock_entry(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		ipmo = create_ipmo(self.patient)
 		ipmo.submit()
 		ipmo.reload()
@@ -115,6 +120,7 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 
 		ipme.reload()
 		ipme.submit()
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def tearDown(self):
 		# cleanup - Discharge

@@ -59,6 +59,8 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertTrue(asset_repair.warehouse)
 
 	def test_decrease_stock_quantity(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		asset_repair = create_asset_repair(stock_consumption = 1, submit = 1)
 		stock_entry = frappe.get_last_doc('Stock Entry')
 
@@ -66,8 +68,11 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(stock_entry.items[0].s_warehouse, asset_repair.warehouse)
 		self.assertEqual(stock_entry.items[0].item_code, asset_repair.stock_items[0].item)
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_increase_in_asset_value_due_to_stock_consumption(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		asset = create_asset(calculate_depreciation = 1)
 		initial_asset_value = get_asset_value(asset)
 		asset_repair = create_asset_repair(asset= asset, stock_consumption = 1, submit = 1)
@@ -75,6 +80,7 @@ class TestAssetRepair(unittest.TestCase):
 
 		increase_in_asset_value = get_asset_value(asset) - initial_asset_value
 		self.assertEqual(asset_repair.stock_items[0].total_value, increase_in_asset_value)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_increase_in_asset_value_due_to_repair_cost_capitalisation(self):
 		asset = create_asset(calculate_depreciation = 1)

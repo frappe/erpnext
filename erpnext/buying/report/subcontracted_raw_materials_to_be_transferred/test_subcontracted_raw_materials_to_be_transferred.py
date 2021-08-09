@@ -12,6 +12,8 @@ import json, frappe, unittest
 class TestSubcontractedItemToBeTransferred(unittest.TestCase):
 
 	def test_pending_and_transferred_qty(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		po = create_purchase_order(item_code='_Test FG Item', is_subcontracted='Yes', supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		# Material Receipt of RMs
@@ -46,6 +48,7 @@ class TestSubcontractedItemToBeTransferred(unittest.TestCase):
 
 		se.cancel()
 		po.cancel()
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 def transfer_subcontracted_raw_materials(po):
 	# Order of supplied items fetched in PO is flaky

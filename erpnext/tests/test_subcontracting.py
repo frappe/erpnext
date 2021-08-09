@@ -19,6 +19,8 @@ class TestSubcontracting(unittest.TestCase):
 		make_bom_for_subcontracted_items()
 
 	def test_po_with_bom(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on BOM
 			- Create subcontracted PO for the item Subcontracted Item SA1 and add same item two times.
@@ -62,8 +64,11 @@ class TestSubcontracting(unittest.TestCase):
 						transfer, consumed = (sorted(transfer), sorted(consumed))
 
 					self.assertEqual(transfer, consumed)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_po_with_material_transfer(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transfer
 			- Create subcontracted PO for the item Subcontracted Item SA1 and Subcontracted Item SA5.
@@ -113,8 +118,11 @@ class TestSubcontracting(unittest.TestCase):
 			for field in ['qty', 'serial_no', 'batch_no']:
 				if value.get(field):
 					self.assertEqual(value.get(field), transferred_detais.get(field))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_subcontract_with_same_components_different_fg(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transfer
 			- Create subcontracted PO for the item Subcontracted Item SA2 and Subcontracted Item SA3.
@@ -169,8 +177,11 @@ class TestSubcontracting(unittest.TestCase):
 
 			self.assertEqual(value.qty, 6)
 			self.assertEqual(sorted(value.serial_no), sorted(transferred_detais.get('serial_no')[6:12]))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_return_non_consumed_materials(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transfer
 			- Create subcontracted PO for the item Subcontracted Item SA2.
@@ -215,8 +226,11 @@ class TestSubcontracting(unittest.TestCase):
 		self.assertEqual(doc.items[0].t_warehouse, '_Test Warehouse - _TC')
 		self.assertEqual(get_serial_nos(doc.items[0].serial_no),
 			itemwise_details.get(doc.items[0].item_code)['serial_no'][5:6])
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_item_with_batch_based_on_bom(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on BOM
 			- Create subcontracted PO for the item Subcontracted Item SA4 (has batch no).
@@ -273,8 +287,11 @@ class TestSubcontracting(unittest.TestCase):
 
 		for key, value in get_supplied_items(pr1).items():
 			self.assertEqual(value.qty, 2)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_item_with_batch_based_on_material_transfer(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transferred for Subcontract
 			- Create subcontracted PO for the item Subcontracted Item SA4 (has batch no).
@@ -333,8 +350,11 @@ class TestSubcontracting(unittest.TestCase):
 
 		for key, value in get_supplied_items(pr1).items():
 			self.assertEqual(value.qty, 2)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_partial_transfer_serial_no_components_based_on_material_transfer(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transferred for Subcontract
 			- Create subcontracted PO for the item Subcontracted Item SA2.
@@ -394,8 +414,11 @@ class TestSubcontracting(unittest.TestCase):
 			details = itemwise_details.get(key)
 			self.assertEqual(value.qty, details.qty)
 			self.assertEqual(sorted(value.serial_no), sorted(details.serial_no))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_incorrect_serial_no_components_based_on_material_transfer(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transferred for Subcontract
 			- Create subcontracted PO for the item Subcontracted Item SA2.
@@ -425,8 +448,11 @@ class TestSubcontracting(unittest.TestCase):
 		pr1.supplied_items[0].serial_no = 'ABCD'
 		self.assertRaises(frappe.ValidationError, pr1.save)
 		pr1.delete()
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_partial_transfer_batch_based_on_material_transfer(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transferred for Subcontract
 			- Create subcontracted PO for the item Subcontracted Item SA6.
@@ -488,9 +514,12 @@ class TestSubcontracting(unittest.TestCase):
 			details = itemwise_details.get(key)
 			self.assertEqual(value.qty, details.qty)
 			self.assertEqual(value.batch_no, details.batch_no)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 
 	def test_item_with_batch_based_on_material_transfer_for_purchase_invoice(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transferred for Subcontract
 			- Create subcontracted PO for the item Subcontracted Item SA4 (has batch no).
@@ -555,8 +584,11 @@ class TestSubcontracting(unittest.TestCase):
 
 		for key, value in get_supplied_items(pr1).items():
 			self.assertEqual(value.qty, 2)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_partial_transfer_serial_no_components_based_on_material_transfer_for_purchase_invoice(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transferred for Subcontract
 			- Create subcontracted PO for the item Subcontracted Item SA2.
@@ -620,8 +652,11 @@ class TestSubcontracting(unittest.TestCase):
 			details = itemwise_details.get(key)
 			self.assertEqual(value.qty, details.qty)
 			self.assertEqual(sorted(value.serial_no), sorted(details.serial_no))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_partial_transfer_batch_based_on_material_transfer_for_purchase_invoice(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on Material Transferred for Subcontract
 			- Create subcontracted PO for the item Subcontracted Item SA6.
@@ -687,8 +722,11 @@ class TestSubcontracting(unittest.TestCase):
 			details = itemwise_details.get(key)
 			self.assertEqual(value.qty, details.qty)
 			self.assertEqual(value.batch_no, details.batch_no)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_item_with_batch_based_on_bom_for_purchase_invoice(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		'''
 			- Set backflush based on BOM
 			- Create subcontracted PO for the item Subcontracted Item SA4 (has batch no).
@@ -748,6 +786,7 @@ class TestSubcontracting(unittest.TestCase):
 		pr1.items[0].expense_account = 'Stock Adjustment - _TC'
 		pr1.save()
 		pr1.submit()
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 		for key, value in get_supplied_items(pr1).items():
 			self.assertEqual(value.qty, 2)

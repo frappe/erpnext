@@ -776,6 +776,8 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_pos_with_no_gl_entry_for_change_amount(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		frappe.db.set_value('Accounts Settings', None, 'post_change_gl_entries', 0)
 
 		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
@@ -809,6 +811,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
 
 		frappe.db.set_value('Accounts Settings', None, 'post_change_gl_entries', 1)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def validate_pos_gl_entry(self, si, pos, cash_amount, validate_without_change_gle=False):
 		if validate_without_change_gle:
@@ -959,6 +962,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.cancel()
 
 	def test_serialized(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -976,10 +981,13 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"), si.name)
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 		return si
 
 	def test_serialized_cancel(self):
+		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 1)
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		si = self.test_serialized()
 		si.cancel()
@@ -990,6 +998,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"))
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"))
+		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
 
 	def test_serialize_status(self):
 		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
