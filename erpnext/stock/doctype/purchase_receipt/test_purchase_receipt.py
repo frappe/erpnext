@@ -324,18 +324,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr1.submit()
 		self.assertRaises(frappe.ValidationError, pr2.submit)
-
-		pr1.cancel()
-		se.cancel()
-		se1.cancel()
-		se2.cancel()
-		se3.cancel()
-		po.reload()
-		pr2.load_from_db()
-		pr2.cancel()
-
-		po.load_from_db()
-		po.cancel()
+		frappe.db.rollback()
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -1040,7 +1029,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			'account': srbnb_account,
 			'voucher_detail_no': pr.items[1].name
 		}, pluck="name")
-		
+
 		# check if the entries are not merged into one
 		# seperate entries should be made since voucher_detail_no is different
 		self.assertEqual(len(item_one_gl_entry), 1)
