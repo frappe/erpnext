@@ -946,7 +946,6 @@ class SalesInvoice(SellingController):
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					self.set_asset_status(asset)
-
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
