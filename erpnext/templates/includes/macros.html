@@ -231,7 +231,7 @@
 			{{ average_rating or 0 }}
 		</h2>
 		<div class="mb-2" style="margin-top: -.5rem;">
-			{{ frappe.utils.cstr(total_reviews) + " " + _("ratings") }}
+			{{ frappe.utils.cstr(total_reviews or 0) + " " + _("ratings") }}
 		</div>
 
 		<!-- Ratings Summary -->

@@ -139,9 +139,7 @@ erpnext.ProductList = class {
 
 		return `
 			<div class="like-action-list ${ item.wished ? "like-action-wished" : ''}"
-			data-item-code="${ item.item_code }"
-			data-price="${ item.price || '' }"
-			data-formatted-price="${ item.formatted_price || '' }">
+				data-item-code="${ item.item_code }">
 				<svg class="icon sm">
 					<use class="${ icon_class } wish-icon" href="#icon-heart"></use>
 				</svg>

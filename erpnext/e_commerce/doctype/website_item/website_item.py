@@ -198,8 +198,13 @@ class WebsiteItem(WebsiteGenerator):
 		self.set_disabled_attributes(context)
 		self.set_metatags(context)
 		self.set_shopping_cart_data(context)
+
+		settings = context.shopping_cart.cart_settings
+
 		self.get_product_details_section(context)
-		get_item_reviews(self.name, 0, 4, context)
+
+		if settings.enable_reviews:
+			get_item_reviews(self.name, 0, 4, context)
 
 		context.wished = False
 		if frappe.db.exists("Wishlist Item", {"item_code": self.item_code, "parent": frappe.session.user}):
@@ -208,7 +213,6 @@ class WebsiteItem(WebsiteGenerator):
 		context.user_is_customer = check_if_user_is_customer()
 
 		context.recommended_items = None
-		settings = context.shopping_cart.cart_settings
 		if settings and settings.enable_recommendations:
 			context.recommended_items = self.get_recommended_items(settings)
 
