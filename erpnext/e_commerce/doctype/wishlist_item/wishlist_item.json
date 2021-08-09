@@ -18,8 +18,6 @@
   "image",
   "image_view",
   "section_break_8",
-  "price",
-  "formatted_price",
   "warehouse_section",
   "warehouse"
  ],
@@ -39,7 +37,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Website Item",
-   "options": "Website Item"
+   "options": "Website Item",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -50,20 +49,23 @@
    "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
    "collapsible": 1,
    "fieldname": "item_details_section",
    "fieldtype": "Section Break",
-   "label": "Item Details"
+   "label": "Item Details",
+   "read_only": 1
   },
   {
    "fetch_from": "item_code.description",
    "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "label": "Description"
+   "label": "Description",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_7",
@@ -97,16 +99,12 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "price",
-   "fieldtype": "Float",
-   "label": "Price"
   },
   {
    "fetch_from": "item_code.item_group",
@@ -114,33 +112,30 @@
    "fieldname": "item_group",
    "fieldtype": "Link",
    "label": "Item Group",
-   "options": "Item Group"
+   "options": "Item Group",
+   "read_only": 1
   },
   {
    "fetch_from": "website_item.route",
    "fetch_if_empty": 1,
    "fieldname": "route",
    "fieldtype": "Small Text",
-   "label": "Route"
-  },
-  {
-   "fieldname": "formatted_price",
-   "fieldtype": "Data",
-   "label": "Formatted Price"
+   "label": "Route",
+   "read_only": 1
   },
   {
    "fetch_from": "website_item.web_item_name",
    "fetch_if_empty": 1,
    "fieldname": "web_item_name",
    "fieldtype": "Data",
-   "label": "Webiste Item Name",
+   "label": "Website Item Name",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-08 13:14:14.919749",
+ "modified": "2021-08-09 10:30:41.964802",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Wishlist Item",

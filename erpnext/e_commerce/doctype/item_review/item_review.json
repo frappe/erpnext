@@ -22,14 +22,16 @@
    "fieldname": "website_item",
    "fieldtype": "Link",
    "label": "Website Item",
-   "options": "Website Item"
+   "options": "Website Item",
+   "read_only": 1
   },
   {
    "fieldname": "user",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "User",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -53,33 +55,38 @@
    "fieldname": "rating",
    "fieldtype": "Rating",
    "in_list_view": 1,
-   "label": "Rating"
+   "label": "Rating",
+   "read_only": 1
   },
   {
    "fieldname": "comment",
    "fieldtype": "Small Text",
-   "label": "Comment"
+   "label": "Comment",
+   "read_only": 1
   },
   {
    "fieldname": "review_title",
    "fieldtype": "Data",
-   "label": "Review Title"
+   "label": "Review Title",
+   "read_only": 1
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fieldname": "published_on",
    "fieldtype": "Data",
-   "label": "Published on"
+   "label": "Published on",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-04-02 15:56:00.447950",
+ "modified": "2021-08-09 08:06:02.476254",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Item Review",

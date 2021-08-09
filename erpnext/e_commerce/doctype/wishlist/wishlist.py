@@ -10,15 +10,17 @@ class Wishlist(Document):
 	pass
 
 @frappe.whitelist()
-def add_to_wishlist(item_code, price, formatted_price=None):
+def add_to_wishlist(item_code):
 	"""Insert Item into wishlist."""
 
 	if frappe.db.exists("Wishlist Item", {"item_code": item_code, "parent": frappe.session.user}):
 		return
 
-	web_item_data = frappe.db.get_value("Website Item", {"item_code": item_code},
-		["image", "website_warehouse", "name", "web_item_name", "item_name", "item_group", "route"]
-		, as_dict=1)
+	web_item_data = frappe.db.get_value(
+		"Website Item",
+		{"item_code": item_code},
+		["image", "website_warehouse", "name", "web_item_name", "item_name", "item_group", "route"],
+		as_dict=1)
 
 	wished_item_dict = {
 		"item_code": item_code,
@@ -26,8 +28,6 @@ def add_to_wishlist(item_code, price, formatted_price=None):
 		"item_group": web_item_data.get("item_group"),
 		"website_item": web_item_data.get("name"),
 		"web_item_name": web_item_data.get("web_item_name"),
-		"price": frappe.utils.flt(price),
-		"formatted_price": formatted_price,
 		"image": web_item_data.get("image"),
 		"warehouse": web_item_data.get("website_warehouse"),
 		"route": web_item_data.get("route")
@@ -51,10 +51,12 @@ def add_to_wishlist(item_code, price, formatted_price=None):
 def remove_from_wishlist(item_code):
 	if frappe.db.exists("Wishlist Item", {"item_code": item_code, "parent": frappe.session.user}):
 		frappe.db.sql("""
-			delete
-			from `tabWishlist Item`
-			where item_code=%(item_code)s
-		""" % {"item_code": frappe.db.escape(item_code)})
+			DELETE
+			FROM `tabWishlist Item`
+			WHERE
+				item_code=%(item_code)s
+				and parent='%(user)s'
+		""" % {"item_code": frappe.db.escape(item_code), "user": frappe.session.user})
 
 		frappe.db.commit()
 
