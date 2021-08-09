@@ -118,11 +118,7 @@ $.extend(wishlist, {
 			btn.addClass("like-action-wished");
 			this.toggle_button_class($wish_icon, 'not-wished', 'wished');
 
-			let args = {
-				item_code: btn.data('item-code'),
-				price: btn.data('price'),
-				formatted_price: btn.data('formatted-price')
-			};
+			let args = {item_code: btn.data('item-code')};
 			let failure_action = function() {
 				me.toggle_button_class($wish_icon, 'wished', 'not-wished');
 			};
