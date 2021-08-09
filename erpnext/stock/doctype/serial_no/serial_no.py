@@ -302,7 +302,7 @@ def validate_serial_no_required(sle, item_details):
 	serial_nos = get_serial_nos(sle.serial_no)
 
 	if cint(item_details.has_serial_no):
-		if not serial_nos and cint(sle.actual_qty) < 0:
+		if not serial_nos and sle.is_cancelled == "No":
 			frappe.throw(_("{0} required for {1} Item {2}").format(label_serial_nos, label_serialized, sle.item_code),
 				SerialNoRequiredError)
 	else:
