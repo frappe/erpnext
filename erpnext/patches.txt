@@ -294,6 +294,7 @@ erpnext.patches.v13_0.update_level_in_bom #1234sswef
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
 erpnext.patches.v13_0.update_amt_in_work_order_required_items
+erpnext.patches.v13_0.delete_orphaned_tables
 erpnext.patches.v13_0.update_export_type_for_gst
 erpnext.patches.v13_0.update_tds_check_field #3
 erpnext.patches.v13_0.add_custom_field_for_south_africa
