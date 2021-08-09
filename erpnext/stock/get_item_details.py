@@ -752,7 +752,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		from `tabItem Price` {conditions}
 		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
 
-	if len(price_data) == 0 and args.get('transaction_type'):
+	if len(price_data) == 0 and not ignore_party and args.get('transaction_type'):
 		if args.get("transaction_type") == "buying":
 			conditions += "and (supplier is null or supplier = '')"
 		if args.get("transaction_type") == "selling":
