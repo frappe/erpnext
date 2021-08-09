@@ -366,7 +366,6 @@ def make_purchase_receipt(source_name, target_doc=None):
 		"Purchase Order": {
 			"doctype": "Purchase Receipt",
 			"field_map": {
-				"per_billed": "per_billed",
 				"supplier_warehouse":"supplier_warehouse"
 			},
 			"validation": {

@@ -244,7 +244,6 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"opportunity_from": "quotation_to",
-				"opportunity_type": "order_type",
 				"name": "enq_no",
 			}
 		},

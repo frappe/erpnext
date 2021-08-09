@@ -676,6 +676,56 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		update_backflush_based_on("BOM")
 
+	def test_po_to_pi_and_po_to_pr_worflow_full(self):
+		"""Test following behaviour:
+			- Create PO
+			- Create PI from PO and submit
+			- Create PR from PO and submit
+		"""
+		from erpnext.buying.doctype.purchase_order import test_purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order
+
+		po = test_purchase_order.create_purchase_order()
+
+		pi = purchase_order.make_purchase_invoice(po.name)
+		pi.submit()
+
+		pr = purchase_order.make_purchase_receipt(po.name)
+		pr.submit()
+
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "Completed")
+		self.assertEqual(pr.per_billed, 100)
+
+	def test_po_to_pi_and_po_to_pr_worflow_partial(self):
+		"""Test following behaviour:
+			- Create PO
+			- Create partial PI from PO and submit
+			- Create PR from PO and submit
+		"""
+		from erpnext.buying.doctype.purchase_order import test_purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order
+
+		po = test_purchase_order.create_purchase_order()
+
+		pi = purchase_order.make_purchase_invoice(po.name)
+		pi.items[0].qty /= 2   # roughly 50%, ^ this function only creates PI with 1 item.
+		pi.submit()
+
+		pr = purchase_order.make_purchase_receipt(po.name)
+		pr.save()
+		# per_billed is only updated after submission.
+		self.assertEqual(flt(pr.per_billed), 0)
+
+		pr.submit()
+
+		pi.load_from_db()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "To Bill")
+		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
+
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit, cost_center
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s

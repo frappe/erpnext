@@ -18,7 +18,7 @@ class TestEmployeeSeparation(unittest.TestCase):
 			'activity_name': 'Deactivate Employee',
 			'role': 'HR User'
 		})
-		separation.status = 'Pending'
+		separation.boarding_status = 'Pending'
 		separation.insert()
 		separation.submit()
 		self.assertEqual(separation.docstatus, 1)

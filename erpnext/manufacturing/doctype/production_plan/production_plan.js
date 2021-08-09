@@ -24,6 +24,16 @@ frappe.ui.form.on('Production Plan', {
 			}
 		});
 
+		frm.set_query('material_request', 'material_requests', function() {
+			return {
+				filters: {
+					material_request_type: "Manufacture",
+					docstatus: 1,
+					status: ["!=", "Stopped"],
+				}
+			};
+		});
+
 		frm.fields_dict['po_items'].grid.get_field('item_code').get_query = function(doc) {
 			return {
 				query: "erpnext.controllers.queries.item_query",

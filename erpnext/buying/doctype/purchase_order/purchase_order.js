@@ -355,7 +355,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						material_request_type: "Purchase",
 						docstatus: 1,
 						status: ["!=", "Stopped"],
-						per_ordered: ["<", 99.99],
+						per_ordered: ["<", 100],
 					}
 				})
 			}, __("Get items from"));

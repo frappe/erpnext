@@ -147,7 +147,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
-	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
+	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) and gl_map[0].voucher_type=="Journal Entry":
 		account_list = [gl_entries.account for gl_entries in gl_map]
 
 		aii_accounts = [d.name for d in frappe.get_all("Account",
@@ -160,13 +160,12 @@ def validate_account_for_perpetual_inventory(gl_map):
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
 				gl_map[0].posting_date, gl_map[0].company)
 
-			if gl_map[0].voucher_type=="Journal Entry":
-				# In case of Journal Entry, there are no corresponding SL entries,
-				# hence deducting currency amount
-				account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
-				if account_bal == stock_bal:
-					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
-						.format(account), StockAccountInvalidTransaction)
+			# In case of Journal Entry, there are no corresponding SL entries,
+			# hence deducting currency amount
+			account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
+			if account_bal == stock_bal:
+				frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+					.format(account), StockAccountInvalidTransaction)
 
 			# This has been comment for a temporary, will add this code again on release of immutable ledger
 			# elif account_bal != stock_bal:
@@ -240,10 +239,10 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	for d in gl_map:
 		if d.account == round_off_account:
 			round_off_gle = d
-			if d.debit_in_account_currency:
-				debit_credit_diff -= flt(d.debit_in_account_currency)
+			if d.debit:
+				debit_credit_diff -= flt(d.debit)
 			else:
-				debit_credit_diff += flt(d.credit_in_account_currency)
+				debit_credit_diff += flt(d.credit)
 			round_off_account_exists = True
 
 	if round_off_account_exists and abs(debit_credit_diff) <= (1.0 / (10**precision)):

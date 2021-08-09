@@ -277,7 +277,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:",
    "fieldname": "territory",
    "fieldtype": "Link",
    "label": "Territory",
@@ -413,7 +412,7 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2020-08-12 23:34:39.665513",
+ "modified": "2021-06-04 10:11:22.831139",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

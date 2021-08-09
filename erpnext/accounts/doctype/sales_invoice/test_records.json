@@ -30,7 +30,7 @@
   "base_grand_total": 561.8,
   "grand_total": 561.8,
   "is_pos": 0,
-  "naming_series": "_T-Sales Invoice-",
+  "naming_series": "T-SINV-",
   "base_net_total": 500.0,
   "taxes": [
    {
@@ -103,7 +103,7 @@
   "base_grand_total": 630.0,
   "grand_total": 630.0,
   "is_pos": 0,
-  "naming_series": "_T-Sales Invoice-",
+  "naming_series": "T-SINV-",
   "base_net_total": 500.0,
   "taxes": [
    {
@@ -174,7 +174,7 @@
   ],
   "grand_total": 0,
   "is_pos": 0,
-  "naming_series": "_T-Sales Invoice-",
+  "naming_series": "T-SINV-",
   "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
@@ -300,7 +300,7 @@
   ],
   "grand_total": 0,
   "is_pos": 0,
-  "naming_series": "_T-Sales Invoice-",
+  "naming_series": "T-SINV-",
   "taxes": [
    {
     "account_head": "_Test Account Excise Duty - _TC",
