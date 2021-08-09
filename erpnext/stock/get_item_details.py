@@ -74,15 +74,13 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	out.update(get_price_list_rate(args, item))
-
 	if doc and doc.get('doctype') in sales_doctypes:
-		args['is_selling'] = 1
+		args['transaction_type'] = 'selling'
 
 	if doc and doc.get('doctype') in purchase_doctypes:
-		args['is_buying'] = 1
+		args['transaction_type'] = 'buying'
 
-	get_price_list_rate(args, item, out)
+	out.update(get_price_list_rate(args, item))
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
@@ -729,13 +727,10 @@ def get_item_price(args, item_code, ignore_party=False):
 	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
 
 	if not ignore_party:
-		if args.get("is_selling"):
+		if args.get("transaction_type") == "buying":
 			conditions += " and customer=%(customer)s"
-		if args.get("is_buying"):
+		if args.get("transaction_type") == "selling":
 			conditions += " and supplier=%(supplier)s"
-
-		if not args.get("is_selling") and not args.get("is_buying"):
-			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
@@ -745,9 +740,20 @@ def get_item_price(args, item_code, ignore_party=False):
 		conditions += """ and %(posting_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
-	return frappe.db.sql(""" select name, price_list_rate, uom
+	price_data = frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
 		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
+
+	if len(price_data) == 0:
+		conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
+
+		price_data = frappe.db.sql(""" select name, price_list_rate, uom
+			from `tabItem Price` {conditions}
+			order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
+
+	return price_data
+
+
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -757,6 +763,7 @@ def get_price_list_rate_for(args, item_code):
 		:param item_code: str, Item Doctype field item_code
 		:param qty: Desired Qty
 		:param transaction_date: Date of the price
+		:param transaction_type: selling or buying
 	"""
 	item_price_args = {
 			"item_code": item_code,
@@ -767,8 +774,7 @@ def get_price_list_rate_for(args, item_code):
 			"transaction_date": args.get('transaction_date'),
 			"posting_date": args.get('posting_date'),
 			"batch_no": args.get('batch_no'),
-			"is_selling": args.get('is_selling'),
-			"is_buying": args.get('is_buying')
+			"transaction_type": args.get('transaction_type'),
 	}
 
 	item_price_data = 0
