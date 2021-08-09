@@ -38,4 +38,13 @@ class TestECommerceSettings(unittest.TestCase):
 
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 1")
 
+def setup_e_commerce_settings(values_dict):
+	"Accepts a dict of values that updates E Commerce Settings."
+	if not values_dict:
+		return
+
+	doc = frappe.get_doc("E Commerce Settings", "E Commerce Settings")
+	doc.update(values_dict)
+	doc.save()
+
 test_dependencies = ["Tax Rule"]
