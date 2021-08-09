@@ -38,13 +38,13 @@ def add_permissions():
 			update_permission_property(doctype, role, 0, 'create', 1)
 	
 
-	# if not frappe.db.get_value('Custom Role', dict(report="VAT Audit Report")):
-	# 	frappe.get_doc(dict(
-	# 		doctype='Custom Role',
-	# 		report="VAT Audit Report",
-	# 		roles= [
-	# 			dict(role='Accounts User'),
-	# 			dict(role='Accounts Manager'),
-	# 			dict(role='Auditor')
-	# 		]
-	# 	)).insert()
+	if not frappe.db.get_value('Custom Role', dict(report="VAT Audit Report")):
+		frappe.get_doc(dict(
+			doctype='Custom Role',
+			report="VAT Audit Report",
+			roles= [
+				dict(role='Accounts User'),
+				dict(role='Accounts Manager'),
+				dict(role='Auditor')
+			]
+		)).insert()
