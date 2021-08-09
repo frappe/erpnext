@@ -148,6 +148,7 @@ def get_lower_deduction_certificate(fiscal_year, pan_no):
 def get_tax_amount(party_type, parties, inv, tax_details, fiscal_year_details, pan_no=None):
 	fiscal_year = fiscal_year_details[0]
 
+
 	vouchers = get_invoice_vouchers(parties, fiscal_year, inv.company, party_type=party_type)
 	advance_vouchers = get_advance_vouchers(parties, fiscal_year, inv.company, party_type=party_type)
 	taxable_vouchers = vouchers + advance_vouchers
@@ -267,7 +268,11 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 
 	if ((threshold and inv.net_total >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
 		if (cumulative_threshold and supp_credit_amt >= cumulative_threshold) and cint(tax_details.tax_on_excess_amount):
-			supp_credit_amt -= cumulative_threshold
+			# Get net total again as TDS is calculated on net total
+			# Grand is used to just check for threshold breach
+			net_total = frappe.db.get_value('Purchase Invoice', invoice_filters, 'sum(net_total)') or 0.0
+			net_total += inv.net_total
+			supp_credit_amt = net_total - cumulative_threshold
 
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
