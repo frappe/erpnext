@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.hr.utils import EmployeeBoardingController
+from erpnext.controllers.employee_boarding_controller import EmployeeBoardingController
 from frappe.model.mapper import get_mapped_doc
 
 class IncompleteTaskError(frappe.ValidationError): pass
@@ -16,9 +16,9 @@ class EmployeeOnboarding(EmployeeBoardingController):
 		self.validate_duplicate_employee_onboarding()
 
 	def validate_duplicate_employee_onboarding(self):
-		emp_onboarding = frappe.db.exists("Employee Onboarding",{"job_applicant": self.job_applicant})
+		emp_onboarding = frappe.db.exists("Employee Onboarding", {"job_applicant": self.job_applicant})
 		if emp_onboarding and emp_onboarding != self.name:
-			frappe.throw(_("Employee Onboarding: {0} is already for Job Applicant: {1}").format(frappe.bold(emp_onboarding), frappe.bold(self.job_applicant)))
+			frappe.throw(_("Employee Onboarding: {0} already exists for Job Applicant: {1}").format(frappe.bold(emp_onboarding), frappe.bold(self.job_applicant)))
 
 	def validate_employee_creation(self):
 		if self.docstatus != 1:
@@ -30,7 +30,7 @@ class EmployeeOnboarding(EmployeeBoardingController):
 				else:
 					task_status = frappe.db.get_value("Task", activity.task, "status")
 					if task_status not in ["Completed", "Cancelled"]:
-						frappe.throw(_("All the mandatory Task for employee creation hasn't been done yet."), IncompleteTaskError)
+						frappe.throw(_("All the mandatory tasks for employee creation are not completed yet."), IncompleteTaskError)
 
 	def on_submit(self):
 		super(EmployeeOnboarding, self).on_submit()
