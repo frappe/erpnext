@@ -713,8 +713,8 @@ def get_item_price(args, item_code, ignore_party=False):
 	"""
 		Get name, price_list_rate from Item Price based on conditions
 			Check if the desired qty is within the increment of the packing list.
-		:param args: dict (or frappe._dict) with mandatory fields price_list, uom
-			optional fields transaction_date, customer, supplier
+		:param args: dict (or frappe._dict) with mandatory fields price_list, uom,
+			optional fields transaction_date, customer, supplier, transaction_type
 		:param item_code: str, Item Doctype field item_code
 	"""
 
@@ -727,10 +727,16 @@ def get_item_price(args, item_code, ignore_party=False):
 	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
 
 	if not ignore_party:
-		if args.get("transaction_type") == "buying":
-			conditions += " and customer=%(customer)s"
-		if args.get("transaction_type") == "selling":
-			conditions += " and supplier=%(supplier)s"
+		if args.get('transaction_type'):
+			if args.get("transaction_type") == "buying":
+				conditions += " and customer=%(customer)s"
+			if args.get("transaction_type") == "selling":
+				conditions += " and supplier=%(supplier)s"
+		else:
+			if args.get("customer"):
+				conditions += " and customer=%(customer)s"
+			elif args.get("supplier"):
+				conditions += " and supplier=%(supplier)s"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
