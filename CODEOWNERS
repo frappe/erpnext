@@ -21,13 +21,13 @@ erpnext/quality_management/     @marination @rohitwaghchaure
 erpnext/shopping_cart/          @marination
 erpnext/stock/                  @marination @rohitwaghchaure @ankush
 
-erpnext/crm/                    @ruchamahabal
-erpnext/education/              @ruchamahabal
-erpnext/healthcare/             @ruchamahabal
-erpnext/hr/                     @ruchamahabal
+erpnext/crm/                    @ruchamahabal @pateljannat
+erpnext/education/              @ruchamahabal @pateljannat
+erpnext/healthcare/             @ruchamahabal @pateljannat @chillaranand
+erpnext/hr/                     @ruchamahabal @pateljannat
 erpnext/non_profit/             @ruchamahabal
-erpnext/payroll                 @ruchamahabal
-erpnext/projects/               @ruchamahabal
+erpnext/payroll                 @ruchamahabal @pateljannat
+erpnext/projects/               @ruchamahabal @pateljannat
 
 erpnext/controllers             @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure @marination
 
