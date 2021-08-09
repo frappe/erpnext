@@ -144,7 +144,7 @@ erpnext.ProductGrid = class {
 	}
 
 	get_stock_availability(item, settings) {
-		if (!item.has_variants && !item.in_stock && settings.show_stock_availability) {
+		if (settings.show_stock_availability && !item.has_variants && !item.in_stock) {
 			return `<span class="out-of-stock">${ __("Out of stock") }</span>`;
 		}
 		return ``;
