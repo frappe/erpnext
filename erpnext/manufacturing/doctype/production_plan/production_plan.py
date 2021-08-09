@@ -109,6 +109,15 @@ class ProductionPlan(Document):
 		so_mr_list = [d.get(field) for d in self.get(table) if d.get(field)]
 		return so_mr_list
 
+	def get_bom_item(self):
+		"""Check if Item or if its Template has a BOM."""
+		bom_item = None
+		has_bom = frappe.db.exists({'doctype': 'BOM', 'item': self.item_code, 'docstatus': 1})
+		if not has_bom:
+			template_item = frappe.db.get_value('Item', self.item_code, ['variant_of'])
+			bom_item = "bom.item = {0}".format(frappe.db.escape(template_item)) if template_item else bom_item
+		return bom_item
+
 	def get_so_items(self):
 		# Check for empty table or empty rows
 		if not self.get("sales_orders") or not self.get_so_mr_list("sales_order", "sales_orders"):
@@ -117,16 +126,26 @@ class ProductionPlan(Document):
 		so_list = self.get_so_mr_list("sales_order", "sales_orders")
 
 		item_condition = ""
-		if self.item_code:
+		bom_item = "bom.item = so_item.item_code"
+		if self.item_code and frappe.db.exists('Item', self.item_code):
+			bom_item = self.get_bom_item() or bom_item
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
-		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
-			from `tabSales Order Item` so_item
-			where parent in (%s) and docstatus = 1 and qty > work_order_qty
-			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
-					and bom.is_active = 1) %s""" % \
-			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
+		items = frappe.db.sql("""
+			select
+				distinct parent, item_code, warehouse,
+				(qty - work_order_qty) * conversion_factor as pending_qty,
+				description, name
+			from
+				`tabSales Order Item` so_item
+			where
+				parent in (%s) and docstatus = 1 and qty > work_order_qty
+				and exists (select name from `tabBOM` bom where %s
+				and bom.is_active = 1) %s""" %
+			(", ".join(["%s"] * len(so_list)),
+			bom_item,
+			item_condition),
+			tuple(so_list), as_dict=1)
 
 		if self.item_code:
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
@@ -683,6 +702,7 @@ def get_material_request_items(row, sales_order, company,
 
 def get_sales_orders(self):
 	so_filter = item_filter = ""
+	bom_item = "bom.item = so_item.item_code"
 	if self.from_date:
 		so_filter += " and so.transaction_date >= %(from_date)s"
 	if self.to_date:
@@ -694,7 +714,8 @@ def get_sales_orders(self):
 	if self.sales_order_status:
 		so_filter += "and so.status = %(sales_order_status)s"
 
-	if self.item_code:
+	if self.item_code and frappe.db.exists('Item', self.item_code):
+		bom_item = self.get_bom_item() or bom_item
 		item_filter += " and so_item.item_code = %(item)s"
 
 	open_so = frappe.db.sql("""
@@ -704,13 +725,13 @@ def get_sales_orders(self):
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
 			and so.company = %(company)s
 			and so_item.qty > so_item.work_order_qty {0} {1}
-			and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
+			and (exists (select name from `tabBOM` bom where {2}
 					and bom.is_active = 1)
 				or exists (select name from `tabPacked Item` pi
 					where pi.parent = so.name and pi.parent_item = so_item.item_code
 						and exists (select name from `tabBOM` bom where bom.item=pi.item_code
 							and bom.is_active = 1)))
-		""".format(so_filter, item_filter), {
+		""".format(so_filter, item_filter, bom_item), {
 			"from_date": self.from_date,
 			"to_date": self.to_date,
 			"customer": self.customer,
