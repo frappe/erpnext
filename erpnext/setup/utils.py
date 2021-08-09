@@ -96,7 +96,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		key = "currency_exchange_rate_{0}:{1}:{2}".format(transaction_date, from_currency, to_currency)
 		value = cache.get(key)
 
-		if not value and not frappe.flags.in_test:
+		if not value:
 			import requests
 			api_url = "https://api.exchangerate.host/convert"
 			response = requests.get(api_url, params={
@@ -107,6 +107,8 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			# expire in 6 hours
 			response.raise_for_status()
 			value = response.json()["result"]
+			if not value and frappe.flags.in_test:
+				return 1.00
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except:
