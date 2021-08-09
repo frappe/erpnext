@@ -737,6 +737,8 @@ def get_item_price(args, item_code, ignore_party=False):
 				conditions += " and customer=%(customer)s"
 			elif args.get("supplier"):
 				conditions += " and supplier=%(supplier)s"
+			else:
+				conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
@@ -750,8 +752,11 @@ def get_item_price(args, item_code, ignore_party=False):
 		from `tabItem Price` {conditions}
 		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
 
-	if len(price_data) == 0:
-		conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
+	if len(price_data) == 0 and args.get('transaction_type'):
+		if args.get("transaction_type") == "buying":
+			conditions += "and (supplier is null or supplier = '')"
+		if args.get("transaction_type") == "selling":
+			conditions += "and (customer is null or customer = '')"
 
 		price_data = frappe.db.sql(""" select name, price_list_rate, uom
 			from `tabItem Price` {conditions}
