@@ -58,11 +58,9 @@ def get_conditions(filters):
 def get_data(filters):
 
 	data = []
-
 	conditions = get_conditions(filters)
-
 	accounts = frappe.db.get_all("Account", fields=["name", "account_currency"],
-		filters=conditions)
+		filters=conditions, order_by='name')
 
 	for d in accounts:
 		balance = get_balance_on(d.name, date=filters.report_date)

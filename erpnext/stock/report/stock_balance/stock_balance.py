@@ -16,8 +16,6 @@ def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	if not filters: filters = {}
 
-	validate_filters(filters)
-
 	from_date = filters.get('from_date')
 	to_date = filters.get('to_date')
 
@@ -157,7 +155,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
+			.format(', '.join(frappe.db.escape(i, percent=False) for i in items))
 
 	conditions = get_conditions(filters)
 
@@ -253,7 +251,7 @@ def get_items(filters):
 def get_item_details(items, sle, filters):
 	item_details = {}
 	if not items:
-		items = list(set([d.item_code for d in sle]))
+		items = list(set(d.item_code for d in sle))
 
 	if not items:
 		return item_details
@@ -291,15 +289,9 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
+		""".format(', '.join(frappe.db.escape(i, percent=False) for i in items)), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
-
-def validate_filters(filters):
-	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
-		if sle_count > 500000:
-			frappe.throw(_("Please set filter based on Item or Warehouse due to a large amount of entries."))
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''

@@ -18,7 +18,7 @@ class TestLabTest(unittest.TestCase):
 
 		lab_template.disabled = 1
 		lab_template.save()
-		self.assertEquals(frappe.db.get_value('Item', lab_template.item, 'disabled'), 1)
+		self.assertEqual(frappe.db.get_value('Item', lab_template.item, 'disabled'), 1)
 
 		lab_template.reload()
 
@@ -57,7 +57,7 @@ class TestLabTest(unittest.TestCase):
 
 		# sample collection should not be created
 		lab_test.reload()
-		self.assertEquals(lab_test.sample, None)
+		self.assertEqual(lab_test.sample, None)
 
 	def test_create_lab_tests_from_sales_invoice(self):
 		sales_invoice = create_sales_invoice()

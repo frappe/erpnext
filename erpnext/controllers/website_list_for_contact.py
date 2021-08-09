@@ -113,7 +113,7 @@ def post_process(doctype, data):
 			doc.set_indicator()
 
 		doc.status_display = ", ".join(doc.status_display)
-		doc.items_preview = ", ".join([d.item_name for d in doc.items if d.item_name])
+		doc.items_preview = ", ".join(d.item_name for d in doc.items if d.item_name)
 		result.append(doc)
 
 	return result

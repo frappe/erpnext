@@ -457,7 +457,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":
-			if frappe.db.get_value("Employee", party_name, "status") == "Left":
+			if frappe.db.get_value("Employee", party_name, "status") != "Active":
 				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
 
 def get_timeline_data(doctype, name):
@@ -542,6 +542,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where party_type = %s and party=%s
+		and is_cancelled = 0
 		group by company""", (party_type, party)))
 
 	for d in companies:

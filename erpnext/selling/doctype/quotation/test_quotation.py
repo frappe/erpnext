@@ -48,7 +48,7 @@ class TestQuotation(unittest.TestCase):
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
 
-		self.assertEquals(sales_order.currency, "USD")
+		self.assertEqual(sales_order.currency, "USD")
 		self.assertNotEqual(sales_order.currency, quotation.currency)
 
 	def test_make_sales_order(self):

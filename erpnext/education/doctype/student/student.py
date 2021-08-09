@@ -74,7 +74,6 @@ class Student(Document):
 			student_user.flags.ignore_permissions = True
 			student_user.add_roles("Student")
 			student_user.save()
-			update_password_link = student_user.reset_password()
 
 	def update_applicant_status(self):
 		"""Updates Student Applicant status to Admitted"""

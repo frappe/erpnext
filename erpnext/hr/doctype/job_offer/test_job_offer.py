@@ -35,13 +35,13 @@ class TestJobOffer(unittest.TestCase):
 		job_offer = create_job_offer(job_applicant=job_applicant.name)
 		job_offer.submit()
 		job_applicant.reload()
-		self.assertEquals(job_applicant.status, "Accepted")
+		self.assertEqual(job_applicant.status, "Accepted")
 
 		# status update after rejection
 		job_offer.status = "Rejected"
 		job_offer.submit()
 		job_applicant.reload()
-		self.assertEquals(job_applicant.status, "Rejected")
+		self.assertEqual(job_applicant.status, "Rejected")
 
 def create_job_offer(**args):
 	args = frappe._dict(args)

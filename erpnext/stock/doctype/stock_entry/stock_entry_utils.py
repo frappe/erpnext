@@ -45,6 +45,8 @@ def make_stock_entry(**args):
 		s.posting_date = args.posting_date
 	if args.posting_time:
 		s.posting_time = args.posting_time
+	if args.inspection_required:
+		s.inspection_required = args.inspection_required
 
 	# map names
 	if args.from_warehouse:

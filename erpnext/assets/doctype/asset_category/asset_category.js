@@ -4,7 +4,7 @@
 frappe.ui.form.on('Asset Category', {
 	onload: function(frm) {
 		frm.add_fetch('company_name', 'accumulated_depreciation_account', 'accumulated_depreciation_account');
-		frm.add_fetch('company_name', 'depreciation_expense_account', 'accumulated_depreciation_account');
+		frm.add_fetch('company_name', 'depreciation_expense_account', 'depreciation_expense_account');
 
 		frm.set_query('fixed_asset_account', 'accounts', function(doc, cdt, cdn) {
 			var d  = locals[cdt][cdn];

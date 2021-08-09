@@ -14,6 +14,7 @@
   "column_break_5",
   "expense_approver",
   "approval_status",
+  "delivery_trip",
   "is_paid",
   "expense_details",
   "expenses",
@@ -365,13 +366,20 @@
    "label": "Total Taxes and Charges",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.delivery_trip",
+   "fieldname": "delivery_trip",
+   "fieldtype": "Link",
+   "label": "Delivery Trip",
+   "options": "Delivery Trip"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2021-05-04 05:35:12.040199",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

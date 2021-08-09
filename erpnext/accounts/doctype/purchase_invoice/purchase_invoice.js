@@ -27,10 +27,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		});
 	},
 
-	company: function() {
-		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
-	},
-
 	onload: function() {
 		this._super();
 
@@ -138,7 +134,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["not in", ["Closed", "Completed"]],
+						status: ["not in", ["Closed", "Completed", "Return Issued"]],
 						company: me.frm.doc.company,
 						is_return: 0
 					}
@@ -569,5 +565,9 @@ frappe.ui.form.on("Purchase Invoice", {
 			frm: frm,
 			freeze_message: __("Creating Purchase Receipt ...")
 		})
-	}
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+	},
 })

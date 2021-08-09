@@ -4,25 +4,61 @@ from frappe import _, flt
 from frappe.model.document import Document
 
 
+# ruleid: frappe-modifying-but-not-comitting
 def on_submit(self):
 	if self.value_of_goods == 0:
 		frappe.throw(_('Value of goods cannot be 0'))
-	# ruleid: frappe-modifying-after-submit
 	self.status = 'Submitted'
 
+
+# ok: frappe-modifying-but-not-comitting
 def on_submit(self):
-	if flt(self.per_billed) < 100:
-		self.update_billing_status()
-	else:
-		# todook: frappe-modifying-after-submit
-		self.status = "Completed"
-		self.db_set("status", "Completed")
+	if self.value_of_goods == 0:
+		frappe.throw(_('Value of goods cannot be 0'))
+	self.status = 'Submitted'
+	self.db_set('status', 'Submitted')
 
-class TestDoc(Document):
-	pass
+# ok: frappe-modifying-but-not-comitting
+def on_submit(self):
+	if self.value_of_goods == 0:
+		frappe.throw(_('Value of goods cannot be 0'))
+	x = "y"
+	self.status = x
+	self.db_set('status', x)
 
-	def validate(self):
-		#ruleid: frappe-modifying-child-tables-while-iterating
-		for item in self.child_table:
-			if item.value < 0:
-				self.remove(item)
+
+# ok: frappe-modifying-but-not-comitting
+def on_submit(self):
+	x = "y"
+	self.status = x
+	self.save()
+
+# ruleid: frappe-modifying-but-not-comitting-other-method
+class DoctypeClass(Document):
+	def on_submit(self):
+		self.good_method()
+		self.tainted_method()
+
+	def tainted_method(self):
+		self.status = "uptate"
+
+
+# ok: frappe-modifying-but-not-comitting-other-method
+class DoctypeClass(Document):
+	def on_submit(self):
+		self.good_method()
+		self.tainted_method()
+
+	def tainted_method(self):
+		self.status = "update"
+		self.db_set("status", "update")
+
+# ok: frappe-modifying-but-not-comitting-other-method
+class DoctypeClass(Document):
+	def on_submit(self):
+		self.good_method()
+		self.tainted_method()
+		self.save()
+
+	def tainted_method(self):
+		self.status = "uptate"

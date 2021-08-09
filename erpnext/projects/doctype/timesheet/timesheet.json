@@ -11,6 +11,9 @@
   "title",
   "naming_series",
   "company",
+  "customer",
+  "currency",
+  "exchange_rate",
   "sales_invoice",
   "column_break_3",
   "salary_slip",
@@ -30,11 +33,14 @@
   "total_hours",
   "billing_details",
   "total_billable_hours",
-  "total_billed_hours",
-  "total_costing_amount",
+  "base_total_billable_amount",
+  "base_total_billed_amount",
+  "base_total_costing_amount",
   "column_break_10",
+  "total_billed_hours",
   "total_billable_amount",
   "total_billed_amount",
+  "total_costing_amount",
   "per_billed",
   "section_break_18",
   "note",
@@ -176,7 +182,6 @@
    "default": "0",
    "fieldname": "total_hours",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Total Working Hours",
    "read_only": 1
   },
@@ -199,7 +204,6 @@
    "allow_on_submit": 1,
    "fieldname": "total_billed_hours",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Total Billed Hours",
    "print_hide": 1,
    "read_only": 1
@@ -209,6 +213,7 @@
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
    "label": "Total Costing Amount",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -222,6 +227,7 @@
    "fieldname": "total_billable_amount",
    "fieldtype": "Currency",
    "label": "Total Billable Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -229,6 +235,7 @@
    "fieldname": "total_billed_amount",
    "fieldtype": "Currency",
    "label": "Total Billed Amount",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -236,6 +243,7 @@
    "allow_on_submit": 1,
    "fieldname": "per_billed",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "% Amount Billed",
    "no_copy": 1,
    "print_hide": 1,
@@ -265,13 +273,53 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "customer.default_currency",
+   "fetch_if_empty": 1,
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "base_total_costing_amount",
+   "fieldtype": "Currency",
+   "label": "Total Costing Amount",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_billable_amount",
+   "fieldtype": "Currency",
+   "label": "Total Billable Amount",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_billed_amount",
+   "fieldtype": "Currency",
+   "label": "Total Billed Amount",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate"
   }
  ],
  "icon": "fa fa-clock-o",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-08 20:51:14.590080",
+ "modified": "2021-05-18 16:10:08.249619",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",

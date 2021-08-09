@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="item-group-content" itemscope itemtype="http://schema.org/Product">
+<div class="item-group-content" itemscope itemtype="http://schema.org/Product" data-item-group="{{ name }}">
 	<div class="item-group-slideshow">
 		{% if slideshow %}<!-- slideshow -->
 			{{ web_block(
@@ -127,15 +127,36 @@
 			</script>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-12">
+	<div class="row mt-6">
+		<div class="col-3">
+		</div>
+		<div class="col-9">
 			{% if frappe.form_dict.start|int > 0 %}
-			<button class="btn btn-outline-secondary btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</button>
+			<button class="btn btn-outline-secondary btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">
+				{{ _("Prev") }}
+			</button>
 			{% endif %}
 			{% if items|length >= page_length %}
-			<button class="btn btn-outline-secondary btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
+			<button class="btn btn-outline-secondary btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}"
+				style="float: right;">
+				{{ _("Next") }}
+			</button>
 			{% endif %}
 		</div>
 	</div>
 </div>
+
+<script>
+	frappe.ready(() => {
+		$('.btn-prev, .btn-next').click((e) => {
+			const $btn = $(e.target);
+			$btn.prop('disabled', true);
+			const start = $btn.data('start');
+			let query_params = frappe.utils.get_query_params();
+			query_params.start = start;
+			let path = window.location.pathname + '?' + frappe.utils.get_url_from_dict(query_params);
+			window.location.href = path;
+		});
+	});
+</script>
 {% endblock %}

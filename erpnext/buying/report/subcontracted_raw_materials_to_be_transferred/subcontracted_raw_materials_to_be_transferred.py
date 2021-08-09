@@ -9,10 +9,10 @@ def execute(filters=None):
 	if filters.from_date >= filters.to_date:
 		frappe.msgprint(_("To Date must be greater than From Date"))
 
-	data = []
 	columns = get_columns()
-	get_data(data , filters)
-	return columns, data
+	data = get_data(filters)
+
+	return columns, data or []
 
 def get_columns():
 	return [
@@ -21,13 +21,12 @@ def get_columns():
 			"fieldtype": "Link",
 			"fieldname": "purchase_order",
 			"options": "Purchase Order",
-			"width": 150
+			"width": 200
 		},
 		{
 			"label": _("Date"),
 			"fieldtype": "Date",
 			"fieldname": "date",
-			"hidden": 1,
 			"width": 150
 		},
 		{
@@ -41,97 +40,58 @@ def get_columns():
 			"label": _("Item Code"),
 			"fieldtype": "Data",
 			"fieldname": "rm_item_code",
-			"width": 100
+			"width": 150
 		},
 		{
 			"label": _("Required Quantity"),
 			"fieldtype": "Float",
-			"fieldname": "r_qty",
-			"width": 100
+			"fieldname": "reqd_qty",
+			"width": 150
 		},
 		{
 			"label": _("Transferred Quantity"),
 			"fieldtype": "Float",
-			"fieldname": "t_qty",
-			"width": 100
+			"fieldname": "transferred_qty",
+			"width": 200
 		},
 		{
 			"label": _("Pending Quantity"),
 			"fieldtype": "Float",
 			"fieldname": "p_qty",
-			"width": 100
+			"width": 150
 		}
 	]
 
-def get_data(data, filters):
-	po = get_po(filters)
-	po_transferred_qty_map = frappe._dict(get_transferred_quantity([v.name for v in po]))
+def get_data(filters):
+	po_rm_item_details = get_po_items_to_supply(filters)
 
-	sub_items = get_purchase_order_item_supplied([v.name for v in po])
+	data = []
+	for row in po_rm_item_details:
+		transferred_qty = row.get("transferred_qty") or 0
+		if transferred_qty < row.get("reqd_qty", 0):
+			pending_qty = frappe.utils.flt(row.get("reqd_qty", 0) - transferred_qty)
+			row.p_qty = pending_qty if pending_qty > 0 else 0
+			data.append(row)
 
-	for order in po:
-		for item in sub_items:
-			if order.name == item.parent and order.name in po_transferred_qty_map and \
-				item.required_qty != po_transferred_qty_map.get(order.name).get(item.rm_item_code):
-				transferred_qty = po_transferred_qty_map.get(order.name).get(item.rm_item_code) \
-				if po_transferred_qty_map.get(order.name).get(item.rm_item_code) else 0
-				row ={
-					'purchase_order': item.parent,
-					'date': order.transaction_date,
-					'supplier': order.supplier,
-					'rm_item_code': item.rm_item_code,
-					'r_qty': item.required_qty,
-					't_qty':transferred_qty,
-					'p_qty':item.required_qty - transferred_qty
-				}
+	return data
 
-				data.append(row)
-
-	return(data)
-
-def get_po(filters):
-	record_filters = [
-			["is_subcontracted", "=", "Yes"],
-			["supplier", "=", filters.supplier],
-			["transaction_date", "<=", filters.to_date],
-			["transaction_date", ">=", filters.from_date],
-			["docstatus", "=", 1]
-		]
-	return frappe.get_all("Purchase Order", filters=record_filters, fields=["name", "transaction_date", "supplier"])
-
-def get_transferred_quantity(po_name):
-	stock_entries = get_stock_entry(po_name)
-	stock_entries_detail = get_stock_entry_detail([v.name for v in stock_entries])
-	po_transferred_qty_map = {}
-
-
-	for entry in stock_entries:
-		for details in stock_entries_detail:
-			if details.parent == entry.name:
-				details["Purchase_order"] = entry.purchase_order
-				if entry.purchase_order not in po_transferred_qty_map:
-					po_transferred_qty_map[entry.purchase_order] = {}
-					po_transferred_qty_map[entry.purchase_order][details.item_code] = details.qty
-				else:
-					po_transferred_qty_map[entry.purchase_order][details.item_code] = po_transferred_qty_map[entry.purchase_order].get(details.item_code, 0) + details.qty
-
-	return po_transferred_qty_map
-
-
-def get_stock_entry(po):
-	return frappe.get_all("Stock Entry", filters=[
-			('purchase_order', 'IN', po),
-			('stock_entry_type', '=', 'Send to Subcontractor'),
-			('docstatus', '=', 1)
-	], fields=["name", "purchase_order"])
-
-def get_stock_entry_detail(se):
-	return frappe.get_all("Stock Entry Detail", filters=[
-			["parent", "in", se]
+def get_po_items_to_supply(filters):
+	return frappe.db.get_all(
+		"Purchase Order",
+		fields=[
+			"name as purchase_order",
+			"transaction_date as date",
+			"supplier as supplier",
+			"`tabPurchase Order Item Supplied`.rm_item_code as rm_item_code",
+			"`tabPurchase Order Item Supplied`.required_qty as reqd_qty",
+			"`tabPurchase Order Item Supplied`.supplied_qty as transferred_qty"
 		],
-		fields=["parent", "item_code", "qty"])
-
-def get_purchase_order_item_supplied(po):
-	return frappe.get_all("Purchase Order Item Supplied", filters=[
-			('parent', 'IN', po)
-	], fields=['parent', 'rm_item_code', 'required_qty'])
+		filters = [
+			["Purchase Order", "per_received", "<", "100"],
+			["Purchase Order", "is_subcontracted", "=", "Yes"],
+			["Purchase Order", "supplier", "=", filters.supplier],
+			["Purchase Order", "transaction_date", "<=", filters.to_date],
+			["Purchase Order", "transaction_date", ">=", filters.from_date],
+			["Purchase Order", "docstatus", "=", 1]
+		]
+	)
