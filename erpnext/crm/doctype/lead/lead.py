@@ -63,6 +63,22 @@ class Lead(SellingController):
 	def on_update(self):
 		self.add_calendar_event()
 
+	def before_insert(self):
+		self.contact_doc = self.create_contact()
+
+	def after_insert(self):
+		self.update_links()
+
+	def update_links(self):
+		# update contact links
+		if self.contact_doc:
+			self.contact_doc.append("links", {
+				"link_doctype": "Lead",
+				"link_name": self.name,
+				"link_title": self.lead_name
+			})
+			self.contact_doc.save()
+
 	def add_calendar_event(self, opts=None, force=False):
 		super(Lead, self).add_calendar_event({
 			"owner": self.lead_owner,
@@ -116,7 +132,6 @@ class Lead(SellingController):
 			"party_name": self.name,
 			"docstatus": 1,
 			"status": ["!=", "Lost"]
-
 		})
 
 	def has_lost_quotation(self):
@@ -137,10 +152,43 @@ class Lead(SellingController):
 				self.lead_name = self.email_id.split("@")[0]
 
 	def set_title(self):
-		if self.company_name:
-			self.title = self.company_name
-		else:
-			self.title = self.lead_name
+		self.title = self.company_name or self.lead_name
+
+	def create_contact(self):
+		if not self.lead_name:
+			self.set_full_name()
+			self.set_lead_name()
+
+		contact = frappe.new_doc("Contact")
+		contact.update({
+			"first_name": self.first_name or self.lead_name,
+			"last_name": self.last_name,
+			"salutation": self.salutation,
+			"gender": self.gender,
+			"designation": self.designation,
+		})
+
+		if self.email_id:
+			contact.append("email_ids", {
+				"email_id": self.email_id,
+				"is_primary": 1
+			})
+
+		if self.phone:
+			contact.append("phone_nos", {
+				"phone": self.phone,
+				"is_primary_phone": 1
+			})
+
+		if self.mobile_no:
+			contact.append("phone_nos", {
+				"phone": self.mobile_no,
+				"is_primary_mobile_no":1
+			})
+
+		contact.insert(ignore_permissions=True)
+
+		return contact
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
