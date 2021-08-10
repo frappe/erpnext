@@ -519,8 +519,6 @@ class PurchaseInvoice(BuyingController):
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
-		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
-		
 		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
 		for item in self.get("items"):
@@ -841,8 +839,8 @@ class PurchaseInvoice(BuyingController):
 						"account": tax.account_head,
 						"against": self.supplier,
 						dr_or_cr: base_amount,
-						dr_or_cr + "_in_account_currency": base_amount \
-							if account_currency==self.company_currency \
+						dr_or_cr + "_in_account_currency": base_amount
+							if account_currency==self.company_currency
 							else amount,
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)
