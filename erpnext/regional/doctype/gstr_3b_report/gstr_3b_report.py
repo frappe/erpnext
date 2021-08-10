@@ -214,9 +214,8 @@ class GSTR3BReport(Document):
 
 			for d in item_details:
 				if d.item_code not in self.invoice_items.get(d.parent, {}):
-					self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
-						sum((i.get('taxable_value', 0) or i.get('base_net_amount', 0)) for i in item_details
-							if i.item_code == d.item_code and i.parent == d.parent))
+					self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
+					self.invoice_items[d.parent][d.item_code] += d.get('taxable_value', 0) or d.get('base_net_amount', 0)
 
 				if d.is_nil_exempt and d.item_code not in self.is_nil_exempt:
 					self.is_nil_exempt.append(d.item_code)
@@ -281,9 +280,15 @@ class GSTR3BReport(Document):
 		if self.get('invoice_items'):
 			# Build itemised tax for export invoices, nil and exempted where tax table is blank
 			for invoice, items in iteritems(self.invoice_items):
-				if invoice not in self.items_based_on_tax_rate and (self.invoice_detail_map.get(invoice, {}).get('export_type')
-					== "Without Payment of Tax"):
+				if invoice not in self.items_based_on_tax_rate and self.invoice_detail_map.get(invoice, {}).get('export_type') \
+					== "Without Payment of Tax" and self.invoice_detail_map.get(invoice, {}).get('gst_category') == "Overseas":
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
+				else:
+					for item in items.keys():
+						if item in self.is_nil_exempt + self.is_non_gst and \
+							item not in self.items_based_on_tax_rate.get(invoice, {}).get(0, []):
+								self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, [])
+								self.items_based_on_tax_rate[invoice][0].append(item)
 
 	def set_outward_taxable_supplies(self):
 		inter_state_supply_details = {}
@@ -321,6 +326,9 @@ class GSTR3BReport(Document):
 									})
 									inter_state_supply_details[(gst_category, place_of_supply)]['txval'] += taxable_value
 									inter_state_supply_details[(gst_category, place_of_supply)]['iamt'] += (taxable_value * rate /100)
+
+			if self.invoice_cess.get(inv):
+				self.report_dict['sup_details']['osup_det']['csamt'] += flt(self.invoice_cess.get(inv), 2)
 
 		self.set_inter_state_supply(inter_state_supply_details)
 

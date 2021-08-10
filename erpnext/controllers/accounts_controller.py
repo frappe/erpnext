@@ -674,19 +674,24 @@ class AccountsController(TransactionBase):
 		if self.get('doctype') in ['Purchase Invoice', 'Sales Invoice']:
 			for d in self.get("advances"):
 				if d.exchange_gain_loss:
-					party = self.supplier if self.get('doctype') == 'Purchase Invoice' else self.customer
-					party_account = self.credit_to if self.get('doctype') == 'Purchase Invoice' else self.debit_to
-					party_type = "Supplier" if self.get('doctype') == 'Purchase Invoice' else "Customer"
+					is_purchase_invoice = self.get('doctype') == 'Purchase Invoice'
+					party = self.supplier if is_purchase_invoice else self.customer
+					party_account = self.credit_to if is_purchase_invoice else self.debit_to
+					party_type = "Supplier" if is_purchase_invoice else "Customer"
 
 					gain_loss_account = frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
+					if not gain_loss_account:
+						frappe.throw(_("Please set Default Exchange Gain/Loss Account in Company {}")
+							.format(self.get('company')))
 					account_currency = get_account_currency(gain_loss_account)
 					if account_currency != self.company_currency:
-						frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
+						frappe.throw(_("Currency for {0} must be {1}").format(gain_loss_account, self.company_currency))
 
 					# for purchase
 					dr_or_cr = 'debit' if d.exchange_gain_loss > 0 else 'credit'
-					# just reverse for sales?
-					dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
+					if not is_purchase_invoice:
+						# just reverse for sales?
+						dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
 
 					gl_entries.append(
 						self.get_gl_dict({
@@ -1174,6 +1179,8 @@ class AccountsController(TransactionBase):
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
 			grand_total = grand_total - flt(self.write_off_amount)
+			po_or_so, doctype, fieldname = self.get_order_details()
+			automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 
 		if self.get("total_advance"):
 			if party_account_currency == self.company_currency:
@@ -1184,19 +1191,86 @@ class AccountsController(TransactionBase):
 				base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
 
 		if not self.get("payment_schedule"):
-			if self.get("payment_terms_template"):
+			if self.doctype in ["Sales Invoice", "Purchase Invoice"] and automatically_fetch_payment_terms \
+				and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
+				self.fetch_payment_terms_from_order(po_or_so, doctype)
+				if self.get('payment_terms_template'):
+					self.ignore_default_payment_terms_template = 1
+			elif self.get("payment_terms_template"):
 				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total, base_grand_total)
 				for item in data:
 					self.append("payment_schedule", item)
-			else:
+			elif self.doctype not in ["Purchase Receipt"]:
 				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, base_payment_amount=base_grand_total)
 				self.append("payment_schedule", data)
+
+		for d in self.get("payment_schedule"):
+			if d.invoice_portion:
+				d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+				d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
+				d.outstanding = d.payment_amount
+			elif not d.invoice_portion:
+				d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
+
+
+	def get_order_details(self):
+		if self.doctype == "Sales Invoice":
+			po_or_so = self.get('items')[0].get('sales_order')
+			po_or_so_doctype = "Sales Order"
+			po_or_so_doctype_name = "sales_order"
+
 		else:
-			for d in self.get("payment_schedule"):
-				if d.invoice_portion:
-					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
-					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
-					d.outstanding = d.payment_amount
+			po_or_so = self.get('items')[0].get('purchase_order')
+			po_or_so_doctype = "Purchase Order"
+			po_or_so_doctype_name = "purchase_order"
+		
+		return po_or_so, po_or_so_doctype, po_or_so_doctype_name
+
+	def linked_order_has_payment_terms(self, po_or_so, fieldname, doctype):
+		if po_or_so and self.all_items_have_same_po_or_so(po_or_so, fieldname):
+			if self.linked_order_has_payment_terms_template(po_or_so, doctype):
+				return True
+			elif self.linked_order_has_payment_schedule(po_or_so):
+				return True
+		
+		return False
+
+	def all_items_have_same_po_or_so(self, po_or_so, fieldname):
+		for item in self.get('items'):
+			if item.get(fieldname) != po_or_so:
+				return False
+		
+		return True
+
+	def linked_order_has_payment_terms_template(self, po_or_so, doctype):
+		return frappe.get_value(doctype, po_or_so, 'payment_terms_template')
+
+	def linked_order_has_payment_schedule(self, po_or_so):
+		return frappe.get_all('Payment Schedule', filters={'parent': po_or_so})
+
+	def fetch_payment_terms_from_order(self, po_or_so, po_or_so_doctype):
+		"""
+			Fetch Payment Terms from Purchase/Sales Order on creating a new Purchase/Sales Invoice.
+		"""
+		po_or_so = frappe.get_cached_doc(po_or_so_doctype, po_or_so)
+
+		self.payment_schedule = []
+		self.payment_terms_template = po_or_so.payment_terms_template
+
+		for schedule in po_or_so.payment_schedule:
+			payment_schedule = {
+				'payment_term': schedule.payment_term,
+				'due_date': schedule.due_date,
+				'invoice_portion': schedule.invoice_portion,
+				'mode_of_payment': schedule.mode_of_payment,
+				'description': schedule.description
+			}
+
+			if schedule.discount_type == 'Percentage':
+				payment_schedule['discount_type'] = schedule.discount_type
+				payment_schedule['discount'] = schedule.discount
+
+			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
@@ -1582,7 +1656,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 	if child_item.get("item_tax_template"):
 		child_item.item_tax_rate = get_item_tax_map(parent_doc.get('company'), child_item.item_tax_template, as_json=True)
 
-def add_taxes_from_tax_template(child_item, parent_doc):
+def add_taxes_from_tax_template(child_item, parent_doc, db_insert=True):
 	add_taxes_from_item_tax_template = frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template")
 
 	if child_item.get("item_tax_rate") and add_taxes_from_item_tax_template:
@@ -1605,7 +1679,8 @@ def add_taxes_from_tax_template(child_item, parent_doc):
 						"category" : "Total",
 						"add_deduct_tax" : "Add"
 					})
-				tax_row.db_insert()
+				if db_insert:
+					tax_row.db_insert()
 
 def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, trans_item):
 	"""
