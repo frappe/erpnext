@@ -290,6 +290,8 @@ class SalesInvoice(SellingController):
 		self.update_time_sheet(None)
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(SalesInvoice, self).on_cancel()
 
 		self.check_sales_order_on_hold_or_close("sales_order")
@@ -925,8 +927,18 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
+<<<<<<< HEAD
 					asset = frappe.get_doc("Asset", item.asset)
 
+=======
+					if item.get('asset'):
+						asset = frappe.get_doc("Asset", item.asset)
+					else:
+						frappe.throw(_(
+							"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name),
+							title=_("Missing Asset")
+						)
+>>>>>>> 1cba77cfbd (fix: Sales Return cancellation if linked with Payment Entry (#26551))
 					if (len(asset.finance_books) > 1 and not item.finance_book
 						and asset.finance_books[0].finance_book):
 						frappe.throw(_("Select finance book for the item {0} at row {1}")
@@ -939,8 +951,13 @@ class SalesInvoice(SellingController):
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
+<<<<<<< HEAD
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
+=======
+					self.set_asset_status(asset)
+
+>>>>>>> 1cba77cfbd (fix: Sales Return cancellation if linked with Payment Entry (#26551))
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
@@ -971,7 +988,7 @@ class SalesInvoice(SellingController):
 	def set_asset_status(self, asset):
 		if self.is_return:
 			asset.set_status()
-		else: 	
+		else:
 			asset.set_status("Sold" if self.docstatus==1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
@@ -1939,3 +1956,41 @@ def create_dunning(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 	return doclist
+
+def check_if_return_invoice_linked_with_payment_entry(self):
+	# If a Return invoice is linked with payment entry along with other invoices,
+	# the cancellation of the Return causes allocated amount to be greater than paid
+
+	if not frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+		return
+
+	payment_entries = []
+	if self.is_return and self.return_against:
+		invoice = self.return_against
+	else:
+		invoice = self.name
+
+	payment_entries = frappe.db.sql_list("""
+		SELECT
+			t1.name
+		FROM
+			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
+		WHERE
+			t1.name = t2.parent
+			and t1.docstatus = 1
+			and t2.reference_name = %s
+			and t2.allocated_amount < 0
+		""", invoice)
+
+	links_to_pe = []
+	if payment_entries:
+		for payment in payment_entries:
+			payment_entry = frappe.get_doc("Payment Entry", payment)
+			if len(payment_entry.references) > 1:
+				links_to_pe.append(payment_entry.name)
+		if links_to_pe:
+			payment_entries_link = [get_link_to_form('Payment Entry', name, label=name) for name in links_to_pe]
+			message = _("Please cancel and amend the Payment Entry")
+			message += " " + ", ".join(payment_entries_link) + " "
+			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
+			frappe.throw(message)
