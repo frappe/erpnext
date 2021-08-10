@@ -11,8 +11,7 @@ from erpnext.e_commerce.doctype.website_item.website_item import make_website_it
 from erpnext.e_commerce.doctype.wishlist.wishlist import add_to_wishlist, remove_from_wishlist
 
 class TestWishlist(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+	def setUp(self):
 		item = make_item("Test Phone Series X")
 		if not frappe.db.exists("Website Item", {"item_code": "Test Phone Series X"}):
 			make_website_item(item, save=True)
@@ -21,8 +20,7 @@ class TestWishlist(unittest.TestCase):
 		if not frappe.db.exists("Website Item", {"item_code": "Test Phone Series Y"}):
 			make_website_item(item, save=True)
 
-	@classmethod
-	def tearDownClass(cls):
+	def tearDown(self):
 		frappe.get_cached_doc("Website Item", {"item_code": "Test Phone Series X"}).delete()
 		frappe.get_cached_doc("Website Item", {"item_code": "Test Phone Series Y"}).delete()
 		frappe.get_cached_doc("Item", "Test Phone Series X").delete()

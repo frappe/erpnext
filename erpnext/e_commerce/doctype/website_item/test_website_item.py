@@ -300,6 +300,7 @@ class TestWebsiteItem(unittest.TestCase):
 		item_code = "Test Mobile Phone"
 		self.create_regular_web_item()
 		setup_e_commerce_settings({"show_stock_availability": 1})
+		frappe.local.shopping_cart_settings = None
 
 		# set warehouse
 		frappe.db.set_value("Website Item", {"item_code": item_code}, "website_warehouse", "_Test Warehouse - _TC")
