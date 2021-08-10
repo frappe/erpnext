@@ -22,7 +22,7 @@ from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accoun
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
+	unlink_inter_company_doc, check_if_return_invoice_linked_with_payment_entry
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
@@ -446,6 +446,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries)
 
 		if self.check_asset_cwip_enabled():
 			self.get_asset_gl_entry(gl_entries)
@@ -517,6 +518,8 @@ class PurchaseInvoice(BuyingController):
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
+
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -608,7 +611,7 @@ class PurchaseInvoice(BuyingController):
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
 
 					if not item.is_fixed_asset:
-						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
+						dummy, amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
@@ -822,8 +825,11 @@ class PurchaseInvoice(BuyingController):
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		valuation_tax = {}
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
 		for tax in self.get("taxes"):
-			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
+			amount, base_amount = self.get_tax_amounts(tax, enable_discount_accounting)
+			if tax.category in ("Total", "Valuation and Total") and flt(base_amount):
 				account_currency = get_account_currency(tax.account_head)
 
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
@@ -832,21 +838,21 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.supplier,
-						dr_or_cr: tax.base_tax_amount_after_discount_amount,
-						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==self.company_currency \
-							else tax.tax_amount_after_discount_amount,
+						dr_or_cr: base_amount,
+						dr_or_cr + "_in_account_currency": base_amount
+							if account_currency==self.company_currency
+							else amount,
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)
 				)
 			# accumulate valuation tax
-			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount) \
+			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(base_amount) \
 				and not self.is_internal_transfer():
 				if self.auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.name, 0)
 				valuation_tax[tax.name] += \
-					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(base_amount)
 
 		if self.is_opening == "No" and self.negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
@@ -982,6 +988,8 @@ class PurchaseInvoice(BuyingController):
 				}, item=self))
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(PurchaseInvoice, self).on_cancel()
 
 		self.check_on_hold_or_closed_status()
