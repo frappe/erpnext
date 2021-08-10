@@ -222,6 +222,10 @@ class Issue(Document):
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name
+	
+	def reset_issue_metrics(self):
+		self.db_set("resolution_time", None)
+		self.db_set("user_resolution_time", None)
 
 	def before_insert(self):
 		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
