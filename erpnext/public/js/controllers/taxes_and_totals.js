@@ -223,7 +223,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 			tax.item_wise_tax_detail = {};
 			var tax_fields = ["total", "tax_amount_after_discount_amount",
-				"tax_amount_for_current_item", "grand_total_for_current_item",
+				"tax_amount_for_current_item", "grand_total_for_current_item", "net_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"];
 
 			if (cstr(tax.charge_type) != "Actual" && cstr(tax.charge_type) != "Weighted Distribution" &&
@@ -510,9 +510,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
 					tax.grand_total_for_current_item = flt(item.taxable_amount + current_tax_amount);
+					tax.net_total_for_current_item = flt(item.net_amount + current_tax_amount);
 				} else {
 					tax.grand_total_for_current_item =
 						flt(me.frm.doc["taxes"][i-1].grand_total_for_current_item + current_tax_amount);
+					tax.net_total_for_current_item =
+						flt(me.frm.doc["taxes"][i-1].net_total_for_current_item + current_tax_amount);
 				}
 
 				// set precision in the last item iteration
@@ -612,14 +615,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				.map(d => d.net_amount));
 			current_tax_amount *= total_net_amount ? item.net_amount / total_net_amount : 0;
 		} else if(tax.charge_type == "On Net Total") {
-			current_tax_amount = (tax_rate / 100.0) * item.taxable_amount;
+			let taxable_amount = cint(tax.apply_on_net_amount) ? item.net_amount : item.taxable_amount;
+			current_tax_amount = (tax_rate / 100.0) * taxable_amount;
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
 
 		} else if(tax.charge_type == "On Previous Row Total") {
-			current_tax_amount = (tax_rate / 100.0) *
-				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
+			let taxable_amount = cint(tax.apply_on_net_amount) ? this.frm.doc["taxes"][cint(tax.row_id) - 1].net_total_for_current_item
+				: this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
+			current_tax_amount = (tax_rate / 100.0) * taxable_amount;
 		} else if (tax.charge_type == "On Item Quantity") {
 			current_tax_amount = tax_rate * item.qty;
 		}

@@ -78,6 +78,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			cur_frm.cscript.calculate_taxes_and_totals();
 		});
 
+		frappe.ui.form.on(this.frm.cscript.tax_table, "apply_on_net_amount", function(frm, cdt, cdn) {
+			cur_frm.cscript.calculate_taxes_and_totals();
+		});
+
 		frappe.ui.form.on(this.frm.cscript.tax_table, {
 			taxes_remove: function(frm, cdt, cdn) {
 				cur_frm.cscript.set_dynamic_labels();

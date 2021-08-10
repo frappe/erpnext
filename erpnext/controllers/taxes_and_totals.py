@@ -212,7 +212,7 @@ class calculate_taxes_and_totals(object):
 
 			tax.item_wise_tax_detail = {}
 			tax_fields = ["total", "tax_amount_after_discount_amount",
-				"tax_amount_for_current_item", "grand_total_for_current_item",
+				"tax_amount_for_current_item", "grand_total_for_current_item", "net_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
 			if tax.charge_type not in ["Actual", "Weighted Distribution"] and \
@@ -452,9 +452,12 @@ class calculate_taxes_and_totals(object):
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
 					tax.grand_total_for_current_item = flt(item.taxable_amount + current_tax_amount)
+					tax.net_total_for_current_item = flt(item.net_amount + current_tax_amount)
 				else:
 					tax.grand_total_for_current_item = \
 						flt(self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount)
+					tax.net_total_for_current_item = \
+						flt(self.doc.get("taxes")[i-1].net_total_for_current_item + current_tax_amount)
 
 				# set precision in the last item iteration
 				if n == len(self.doc.get("items")) - 1:
@@ -537,13 +540,15 @@ class calculate_taxes_and_totals(object):
 			total_net_amount = sum([d.net_amount for d in self.doc.items if (d.item_code or d.item_name) == item_key])
 			current_tax_amount *= item.net_amount / total_net_amount if total_net_amount else 0
 		elif tax.charge_type == "On Net Total":
-			current_tax_amount = (tax_rate / 100.0) * item.taxable_amount
+			taxable_amount = item.net_amount if cint(tax.apply_on_net_amount) else item.taxable_amount
+			current_tax_amount = (tax_rate / 100.0) * taxable_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
 		elif tax.charge_type == "On Previous Row Total":
-			current_tax_amount = (tax_rate / 100.0) * \
-				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
+			taxable_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].net_total_for_current_item \
+				if cint(tax.apply_on_net_amount) else self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
+			current_tax_amount = (tax_rate / 100.0) * taxable_amount
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 

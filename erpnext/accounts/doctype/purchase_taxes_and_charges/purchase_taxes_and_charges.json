@@ -14,6 +14,7 @@
   "col_break1",
   "account_head",
   "description",
+  "apply_on_net_amount",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -21,14 +22,14 @@
   "rate",
   "section_break_9",
   "tax_amount",
-  "tax_amount_after_discount_amount",
   "displayed_total",
+  "tax_amount_after_discount_amount",
   "total",
   "column_break_14",
   "base_tax_amount",
-  "base_total",
-  "base_tax_amount_after_discount_amount",
   "base_displayed_total",
+  "base_tax_amount_after_discount_amount",
+  "base_total",
   "set_manual_distribution",
   "item_wise_tax_detail",
   "manual_distribution_detail"
@@ -144,18 +145,20 @@
    "options": "currency"
   },
   {
+   "depends_on": "eval:doc.tax_amount_after_discount_amount != doc.tax_amount",
    "fieldname": "tax_amount_after_discount_amount",
    "fieldtype": "Currency",
-   "label": "Tax Amount After Discount Amount",
+   "label": "Amount After Additional Discount",
    "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
   {
    "columns": 2,
+   "depends_on": "eval:doc.total != doc.displayed_total",
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total",
+   "label": "Total After Additional Discount",
    "oldfieldname": "total",
    "oldfieldtype": "Currency",
    "options": "currency",
@@ -175,19 +178,21 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.total != doc.displayed_total",
    "fieldname": "base_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
    "hidden": 1,
-   "label": "Total (Company Currency)",
+   "label": "Total After Additional Discount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.tax_amount_after_discount_amount != doc.tax_amount",
    "fieldname": "base_tax_amount_after_discount_amount",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
-   "label": "Tax Amount After Discount Amount",
+   "label": "Amount After Additional Discount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
@@ -203,6 +208,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -240,11 +246,17 @@
    "hidden": 1,
    "label": "Manual Distribution Detail",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_on_net_amount",
+   "fieldtype": "Check",
+   "label": "Always Apply on Net Amount"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-09 22:44:55.785895",
+ "modified": "2021-08-10 14:04:19.874046",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
