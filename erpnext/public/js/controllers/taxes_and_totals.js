@@ -747,8 +747,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
-			} else {
-				pay.amount = 0.0
 			}
 		});
 		this.frm.refresh_fields();
