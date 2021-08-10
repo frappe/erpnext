@@ -20,7 +20,7 @@ class OpportunitySummaryBySalesStage(object):
 		self.get_data()
 		self.get_chart_data()
 
-		return self.columns,self.data,None,self.chart
+		return self.columns, self.data, None, self.chart
 
 	def get_columns(self):
 		self.columns = []
@@ -49,25 +49,32 @@ class OpportunitySummaryBySalesStage(object):
 		
 		self.sales_stage_list = frappe.db.get_list("Sales Stage",pluck="name")
 		for sales_stage in self.sales_stage_list:
-			self.columns.append({
-				'label': _(sales_stage),
-				'fieldname': sales_stage,
-				'width':150
-			})
+			if self.filters.get('data_based_on') == 'Number':
+				self.columns.append({
+					'label': _(sales_stage),
+					'fieldname': sales_stage,
+					'width':150
+				})
+			if self.filters.get('data_based_on') == 'Amount':
+				self.columns.append({
+					'label': _(sales_stage),
+					'fieldname': sales_stage,
+					'fieldtype': 'Currency',
+					'width':150
+				})
 
 		return self.columns
 
 	def get_data(self):
 		self.data = []
-		if self.filters.get('based_on') == "Opportunity Owner":
-			sql = "_assign"
-			self.get_data_query(sql)
-		if self.filters.get('based_on') == "Source":
-			sql = "source"
-			self.get_data_query(sql)
-		if self.filters.get('based_on') == "Opportunity Type":
-			sql = "opportunity_type"
-			self.get_data_query(sql)
+
+		sql = {
+			'Opportunity Owner': "_assign",
+			'Source': "source",
+			'Opportunity Source': "opportunity_type"
+		}[self.filters.get('based_on')]
+
+		self.get_data_query(sql)
 
 		self.get_rows()
 	
@@ -91,7 +98,6 @@ class OpportunitySummaryBySalesStage(object):
 	def get_rows(self):
 		self.data = []
 		self.get_formatted_data()
-		currency_symbol = self.get_currency()
 		
 		for based_on,data in iteritems(self.formatted_data):
 			if self.filters.get("based_on") == "Opportunity Owner":
@@ -108,7 +114,7 @@ class OpportunitySummaryBySalesStage(object):
 						sales_stage = d.get('sales_stage')
 						amount = data.get(sales_stage)
 						if amount:
-							row[sales_stage] = str(amount) + currency_symbol
+							row[sales_stage] = amount
 
 			if self.filters.get("based_on") == "Source":
 				row = {'source': based_on}
@@ -124,7 +130,7 @@ class OpportunitySummaryBySalesStage(object):
 						sales_stage = d.get('sales_stage')
 						amount = data.get(sales_stage)
 						if amount:
-							row[sales_stage] = str(amount) + currency_symbol
+							row[sales_stage] = amount
 
 			if self.filters.get("based_on") == "Opportunity Type":
 				row = {'opportunity_type': based_on}
@@ -140,7 +146,7 @@ class OpportunitySummaryBySalesStage(object):
 						sales_stage = d.get('sales_stage')
 						amount = data.get(sales_stage)
 						if amount:
-							row[sales_stage] = str(amount) + currency_symbol
+							row[sales_stage] = amount
 
 			self.data.append(row)
 
@@ -268,7 +274,15 @@ class OpportunitySummaryBySalesStage(object):
 			"type":"line"
 		}
 
-	def get_currency(self):
-		company = self.filters.get('company')
-		default_currency = frappe.db.get_value('Company',company,['default_currency'])
-		return frappe.db.get_value('Currency',default_currency,['symbol'])
+	def append_chart_data(self,data,values,labels,datasets):
+		for data in self.query_result:
+			for count in range(0,8):
+				if data['sales_stage'] == labels[count]:
+					values[count] = values[count] + data['count']
+		datasets.append({"name":'Count','values':values})
+
+
+	# def get_currency(self):
+	# 	company = self.filters.get('company')
+	# 	default_currency = frappe.db.get_value('Company',company,['default_currency'])
+	# 	return frappe.db.get_value('Currency',default_currency,['symbol'])
