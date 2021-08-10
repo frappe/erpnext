@@ -202,7 +202,7 @@ class SalesInvoice(SellingController):
 
 		if self.docstatus == 0:
 			self.caculate_items_amount()
-			self.set_cost_center()
+			# self.set_cost_center()
 
 		if not self.is_pos:
 			self.so_dn_required()
@@ -1163,8 +1163,8 @@ class SalesInvoice(SellingController):
 
 		self.make_customer_gl_entry(gl_entries)
 
-		if self.exonerated and self.account_head == None:
-			frappe.throw(_("You need to fill the account head field"))
+		# if self.exonerated and self.account_head == None:
+		# 	frappe.throw(_("You need to fill the account head field"))
 
 		self.make_tax_gl_entries(gl_entries)
 
