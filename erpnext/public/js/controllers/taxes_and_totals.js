@@ -47,7 +47,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
 			this.frm.doc.is_return) {
-			if (this.frm.doc.doctype == "Sales Invoice"){
+			if (this.frm.doc.doctype == "Sales Invoice") {
 				this.set_total_amount_to_default_mop();
 			}
 			this.calculate_paid_amount();
@@ -728,7 +728,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-			this.frm.doc.outstanding_amount =  flt(total_amont_to_pay - flt(paid_amount) +
+			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 		}
 	},
@@ -746,13 +746,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				precision("base_grand_total")
 			);
 		}
-		
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
 			} else {
-				pay.amount = 0.0
-			}		
+				pay.amount = 0.0;
+			}
 		});
 		this.frm.refresh_fields();
 	},
