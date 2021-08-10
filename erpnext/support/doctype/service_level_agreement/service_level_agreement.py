@@ -281,15 +281,18 @@ def get_repeated(values):
 
 
 def get_documents_with_active_service_level_agreement():
-	if not frappe.cache().hget("service_level_agreement", "active"):
-		set_documents_with_active_service_level_agreement()
+	sla_doctypes = frappe.cache().hget("service_level_agreement", "active")
 
-	return frappe.cache().hget("service_level_agreement", "active")
+	if sla_doctypes is None:
+		return set_documents_with_active_service_level_agreement()
+
+	return sla_doctypes
 
 
 def set_documents_with_active_service_level_agreement():
 	active = [sla.document_type for sla in frappe.get_all("Service Level Agreement", fields=["document_type"])]
 	frappe.cache().hset("service_level_agreement", "active", active)
+	return active
 
 
 def apply(doc, method=None):
@@ -797,7 +800,7 @@ def set_response_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("response_by"):
 		doc.response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 
-	if meta.has_field("response_by_variance"):
+	if meta.has_field("response_by_variance") and not doc.get('first_responded_on'):
 		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
 		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_time), 2)
 
@@ -805,7 +808,7 @@ def set_resolution_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("resolution_by"):
 		doc.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 
-	if meta.has_field("resolution_by_variance"):
+	if meta.has_field("resolution_by_variance") and not doc.get("resolution_date"):
 		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
 		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_time), 2)
 

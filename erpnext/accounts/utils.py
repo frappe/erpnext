@@ -472,7 +472,8 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate
+		"exchange_rate": d.exchange_rate if not d.exchange_gain_loss else payment_entry.get_exchange_rate(),
+		"exchange_gain_loss": d.exchange_gain_loss # only populated from invoice in case of advance allocation
 	}
 
 	if d.voucher_detail_no:
@@ -498,12 +499,15 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	payment_entry.set_amounts()
 
 	if d.difference_amount and d.difference_account:
-		payment_entry.set_gain_or_loss(account_details={
+		account_details = {
 			'account': d.difference_account,
 			'cost_center': payment_entry.cost_center or frappe.get_cached_value('Company',
-				payment_entry.company, "cost_center"),
-			'amount': d.difference_amount
-		})
+				payment_entry.company, "cost_center")
+		}
+		if d.difference_amount:
+			account_details['amount'] = d.difference_amount
+
+		payment_entry.set_gain_or_loss(account_details=account_details)
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
@@ -562,10 +566,10 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
-def get_company_default(company, fieldname):
-	value = frappe.get_cached_value('Company',  company,  fieldname)
+def get_company_default(company, fieldname, ignore_validation=False):
+	value = frappe.get_cached_value('Company', company, fieldname)
 
-	if not value:
+	if not ignore_validation and not value:
 		throw(_("Please set default {0} in Company {1}")
 			.format(frappe.get_meta("Company").get_label(fieldname), company))
 
@@ -784,7 +788,7 @@ def get_children(doctype, parent, company, is_root=False):
 	return acc
 
 def create_payment_gateway_account(gateway, payment_channel="Email"):
-	from erpnext.setup.setup_wizard.operations.company_setup import create_bank_account
+	from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
 	if not company:
@@ -962,7 +966,7 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 		for e in existing_gle:
 			if entry.account == e.account:
 				account_existed = True
-			if (entry.account == e.account and entry.against_account == e.against_account
+			if (entry.account == e.account
 					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center)
 					and ( flt(entry.debit, precision) != flt(e.debit, precision) or
 						flt(entry.credit, precision) != flt(e.credit, precision))):

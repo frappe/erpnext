@@ -17,6 +17,14 @@ frappe.ui.form.on("Stock Reconciliation", {
 				}
 			}
 		});
+		frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
+			var item = locals[cdt][cdn];
+			return {
+				filters: {
+					'item': item.item_code
+				}
+			};
+		});
 
 		if (frm.doc.company) {
 			erpnext.queries.setup_queries(frm, "Warehouse", function() {
@@ -48,25 +56,40 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	get_items: function(frm) {
-		let fields = [{
-			label: 'Warehouse', fieldname: 'warehouse', fieldtype: 'Link', options: 'Warehouse', reqd: 1,
-			"get_query": function() {
-				return {
-					"filters": {
-						"company": frm.doc.company,
-					}
-				};
+		let fields = [
+			{
+				label: 'Warehouse',
+				fieldname: 'warehouse',
+				fieldtype: 'Link',
+				options: 'Warehouse',
+				reqd: 1,
+				"get_query": function() {
+					return {
+						"filters": {
+							"company": frm.doc.company,
+						}
+					};
+				}
+			},
+			{
+				label: "Item Code",
+				fieldname: "item_code",
+				fieldtype: "Link",
+				options: "Item",
+				"get_query": function() {
+					return {
+						"filters": {
+							"disabled": 0,
+						}
+					};
+				}
+			},
+			{
+				label: __("Ignore Empty Stock"),
+				fieldname: "ignore_empty_stock",
+				fieldtype: "Check"
 			}
-		}, {
-			label: "Item Code", fieldname: "item_code", fieldtype: "Link", options: "Item",
-			"get_query": function() {
-				return {
-					"filters": {
-						"disabled": 0,
-					}
-				};
-			}
-		}];
+		];
 
 		frappe.prompt(fields, function(data) {
 			frappe.call({
@@ -76,22 +99,21 @@ frappe.ui.form.on("Stock Reconciliation", {
 					posting_date: frm.doc.posting_date,
 					posting_time: frm.doc.posting_time,
 					company: frm.doc.company,
-					item_code: data.item_code
+					item_code: data.item_code,
+					ignore_empty_stock: data.ignore_empty_stock
 				},
 				callback: function(r) {
+					if (r.exc || !r.message || !r.message.length) return;
+
 					frm.clear_table("items");
-					for (var i=0; i<r.message.length; i++) {
-						var d = frm.add_child("items");
-						$.extend(d, r.message[i]);
 
-						if (!d.qty) {
-							d.qty = 0;
-						}
+					r.message.forEach((row) => {
+						let item = frm.add_child("items");
+						$.extend(item, row);
 
-						if (!d.valuation_rate) {
-							d.valuation_rate = 0;
-						}
-					}
+						item.qty = item.qty || 0;
+						item.valuation_rate = item.valuation_rate || 0;
+					});
 					frm.refresh_field("items");
 				}
 			});

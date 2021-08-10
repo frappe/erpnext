@@ -83,14 +83,17 @@ class TestItem(unittest.TestCase):
 
 		make_test_objects("Item Price")
 
+		company = "_Test Company"
+		currency = frappe.get_cached_value("Company",  company,  "default_currency")
+
 		details = get_item_details({
 			"item_code": "_Test Item",
-			"company": "_Test Company",
+			"company": company,
 			"price_list": "_Test Price List",
-			"currency": "_Test Currency",
+			"currency": currency,
 			"doctype": "Sales Order",
 			"conversion_rate": 1,
-			"price_list_currency": "_Test Currency",
+			"price_list_currency": currency,
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
 			"customer": "_Test Customer",
@@ -587,8 +590,8 @@ def make_item_variant():
 test_records = frappe.get_test_records('Item')
 
 def create_item(item_code, is_stock_item=1, valuation_rate=0, warehouse="_Test Warehouse - _TC",
-		is_customer_provided_item=None, customer=None, is_purchase_item=None, opening_stock=0,
-		company="_Test Company"):
+		is_customer_provided_item=None, customer=None, is_purchase_item=None, opening_stock=0, is_fixed_asset=0,
+		asset_category=None, company="_Test Company"):
 	if not frappe.db.exists("Item", item_code):
 		item = frappe.new_doc("Item")
 		item.item_code = item_code
@@ -596,6 +599,8 @@ def create_item(item_code, is_stock_item=1, valuation_rate=0, warehouse="_Test W
 		item.description = item_code
 		item.item_group = "All Item Groups"
 		item.is_stock_item = is_stock_item
+		item.is_fixed_asset = is_fixed_asset
+		item.asset_category = asset_category
 		item.opening_stock = opening_stock
 		item.valuation_rate = valuation_rate
 		item.is_purchase_item = is_purchase_item
