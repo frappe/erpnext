@@ -347,7 +347,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "cost_center"]);
+		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "discount_account", "cost_center"]);
 	},
 
 	set_dynamic_labels: function() {
@@ -510,7 +510,6 @@ cur_frm.set_query("income_account", "items", function(doc) {
 	}
 });
 
-
 // Cost Center in Details Table
 // -----------------------------
 cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
@@ -592,6 +591,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("additional_discount_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					report_type: "Profit and Loss",
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Return / Credit Note',
@@ -614,6 +623,17 @@ frappe.ui.form.on('Sales Invoice', {
 						'company': doc.company,
 						"is_group": 0
 					}
+				}
+			}
+		}
+
+		// discount account
+		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
+					'company': doc.company,
+					"is_group": 0
 				}
 			}
 		}
