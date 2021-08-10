@@ -13,7 +13,6 @@ frappe.ui.form.on('Salary Information File', {
 			});
 
 			error_log_wrapper.append(error_log_html);
-			console.log(missing_fields_data);
 		}
 	}
 });
