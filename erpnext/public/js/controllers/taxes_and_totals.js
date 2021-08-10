@@ -107,7 +107,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_item_values() {
-		debugger;
 		var me = this;
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
