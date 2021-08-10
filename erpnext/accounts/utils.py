@@ -19,6 +19,7 @@ from erpnext.stock import get_warehouse_account_map
 
 class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 class FiscalYearError(frappe.ValidationError): pass
+class PaymentEntryUnlinkError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False):
@@ -555,15 +556,14 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 		for pe in linked_pe:
 			try:
 				pe_doc = frappe.get_doc("Payment Entry", pe)
-				pe_doc.set_total_allocated_amount()
-				pe_doc.set_unallocated_amount()
+				pe_doc.set_amounts()
 				pe_doc.clear_unallocated_reference_document_rows()
 				pe_doc.validate_payment_type_with_outstanding()
 			except Exception as e:
 				msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
 				msg += '<br>'
 				msg += _("Please cancel payment entry manually first")
-				frappe.throw(msg, title=_("Payment Unlink Error"))
+				frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
 
 			frappe.db.sql("""update `tabPayment Entry` set total_allocated_amount=%s,
 				base_total_allocated_amount=%s, unallocated_amount=%s, modified=%s, modified_by=%s

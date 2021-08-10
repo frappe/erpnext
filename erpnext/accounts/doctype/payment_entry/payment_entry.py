@@ -58,6 +58,7 @@ class PaymentEntry(AccountsController):
 		self.set_amounts()
 		self.validate_amounts()
 		self.apply_taxes()
+		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
 		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
@@ -477,7 +478,6 @@ class PaymentEntry(AccountsController):
 	def set_amounts(self):
 		self.set_received_amount()
 		self.set_amounts_in_company_currency()
-		self.set_amounts_after_tax()
 		self.set_total_allocated_amount()
 		self.set_unallocated_amount()
 		self.set_difference_amount()
@@ -492,6 +492,8 @@ class PaymentEntry(AccountsController):
 
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
+		if self.paid_from_account_currency == self.paid_to_account_currency:
+			self.received_amount = self.paid_amount
 
 	def set_amounts_after_tax(self):
 		applicable_tax = 0
