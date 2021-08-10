@@ -124,7 +124,8 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 		account_data = tax_row.get('account_head')
 		tax_row_defaults = {
 			'category': 'Total',
-			'charge_type': 'On Net Total'
+			'charge_type': 'On Net Total',
+			'cost_center': frappe.db.get_value('Company', company_name, 'cost_center')
 		}
 
 		if doctype == 'Purchase Taxes and Charges Template':

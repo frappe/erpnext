@@ -1288,6 +1288,27 @@ def validate_taxes_and_charges(tax):
 		tax.rate = None
 
 
+def validate_account_head(tax, doc):
+	company = frappe.get_cached_value('Account',
+		tax.account_head, 'company')
+
+	if company != doc.company:
+		frappe.throw(_('Row {0}: Account {1} does not belong to Company {2}')
+			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)), title=_('Invalid Account'))
+
+
+def validate_cost_center(tax, doc):
+	if not tax.cost_center:
+		return
+
+	company = frappe.get_cached_value('Cost Center',
+		tax.cost_center, 'company')
+
+	if company != doc.company:
+		frappe.throw(_('Row {0}: Cost Center {1} does not belong to Company {2}')
+			.format(tax.idx, frappe.bold(tax.cost_center), frappe.bold(doc.company)), title=_('Invalid Cost Center'))
+
+
 def validate_inclusive_tax(tax, doc):
 	def _on_previous_row_error(row_range):
 		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx, row_range))
