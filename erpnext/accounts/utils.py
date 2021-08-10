@@ -559,7 +559,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 			except Exception as e:
 				msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
 				msg += '<br>'
-				msg += _("Please cancel payment entry manually first and then resubmit")
+				msg += _("Please cancel payment entry manually first")
 				frappe.throw(msg, title=_("Payment Unlink Error"))
 
 			frappe.db.sql("""update `tabPayment Entry` set total_allocated_amount=%s,
