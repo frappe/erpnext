@@ -36,13 +36,13 @@ def validate_event_and_status(order_id, event, status):
 		if status != "processing":
 			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
 				title="WooCommerce Event: {}".format(event))
-			frappe.throw("Getting unexpect status!")
+			frappe.throw(f"Getting unexpect status: {status} from {event}!")
 
 	elif event == "wholesale_order":
 		if status not in ["pending", "on-hold"]:
 			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
 				title="WooCommerce Event: {}".format(event))
-			frappe.throw("Getting unexpect status!")
+			frappe.throw(f"Getting unexpect status: {status} from {event}!")
 
 def pre_process_payload(meta_data, billing):
 	customer_code = ""
