@@ -555,7 +555,10 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 		for pe in linked_pe:
 			try:
 				pe_doc = frappe.get_doc("Payment Entry", pe)
-				pe_doc.validate(on_reference_unlink=True)
+				pe_doc.set_total_allocated_amount()
+				pe_doc.set_unallocated_amount()
+				pe_doc.clear_unallocated_reference_document_rows()
+				pe_doc.validate_payment_type_with_outstanding()
 			except Exception as e:
 				msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
 				msg += '<br>'

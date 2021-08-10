@@ -45,7 +45,7 @@ class PaymentEntry(AccountsController):
 			self.party_account = self.paid_to
 			self.party_account_currency = self.paid_to_account_currency
 
-	def validate(self, on_reference_unlink=False):
+	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.validate_payment_type()
@@ -65,9 +65,8 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		self.validate_duplicate_entry()
 		self.validate_payment_type_with_outstanding()
-		if not on_reference_unlink:
-			self.validate_allocated_amount()
-			self.validate_paid_invoices()
+		self.validate_allocated_amount()
+		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
 
