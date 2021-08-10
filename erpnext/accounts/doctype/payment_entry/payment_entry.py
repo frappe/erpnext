@@ -64,6 +64,7 @@ class PaymentEntry(AccountsController):
 		self.set_title()
 		self.set_remarks()
 		self.validate_duplicate_entry()
+		self.validate_payment_type_with_outstanding()
 		if not on_reference_unlink:
 			self.validate_allocated_amount()
 			self.validate_paid_invoices()
@@ -119,6 +120,11 @@ class PaymentEntry(AccountsController):
 
 			if not self.get(field):
 				self.set(field, bank_data.account)
+
+	def validate_payment_type_with_outstanding(self):
+		total_outstanding = sum(d.allocated_amount for d in self.get('references'))
+		if total_outstanding < 0 and self.party_type == 'Customer' and self.payment_type == 'Receive':
+			frappe.throw(_("Cannot receive from customer against negative outstanding"), title=_("Incorrect Payment Type"))
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
@@ -530,10 +536,8 @@ class PaymentEntry(AccountsController):
 				base_total_allocated_amount += flt(flt(d.allocated_amount) * flt(d.exchange_rate),
 					self.precision("base_paid_amount"))
 
-		# Do not use absolute values as only credit notes could be allocated
-		# and total allocated should be negative in that scenario
-		self.total_allocated_amount = total_allocated_amount
-		self.base_total_allocated_amount = base_total_allocated_amount
+		self.total_allocated_amount = abs(total_allocated_amount)
+		self.base_total_allocated_amount = abs(base_total_allocated_amount)
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
