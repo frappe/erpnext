@@ -47,7 +47,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
 			this.frm.doc.is_return) {
-			if (this.frm.doc.doctype == "Sales Invoice"){
+			if (this.frm.doc.doctype == "Sales Invoice") {
 				this.set_total_amount_to_default_mop();
 			}
 			this.calculate_paid_amount();
@@ -750,13 +750,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				precision("base_grand_total")
 			);
 		}
-		
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
 			} else {
-				pay.amount = 0.0
-			}		
+				pay.amount = 0.0;
+			}
 		});
 		this.frm.refresh_fields();
 	}
