@@ -25,12 +25,14 @@ product_discount_fields = ['free_item', 'free_qty', 'free_item_uom',
 
 class PromotionalScheme(Document):
 	def validate(self):
+		if not self.selling and not self.buying:
+			frappe.throw(_("Atleast one of the Selling or Buying must be selected"))
 		if not (self.price_discount_slabs
 			or self.product_discount_slabs):
 			frappe.throw(_("Price or product discount slabs are required"))
 
 	def on_update(self):
-		data = frappe.get_all(
+		pricing_rules = frappe.get_all(
 			'Pricing Rule',
 			fields = ["promotional_scheme_id", "name", "creation"],
 			filters = {
@@ -39,15 +41,15 @@ class PromotionalScheme(Document):
 			},
 			order_by = 'creation asc',
 		) or {}
-		self.update_pricing_rules(data)
+		self.update_pricing_rules(pricing_rules)
 
-	def update_pricing_rules(self, data):
+	def update_pricing_rules(self, pricing_rules):
 		rules = {}
 		count = 0
 		names = []
-		for d in data:
-			names.append(d.name)
-			rules[d.get('promotional_scheme_id')] = names
+		for rule in pricing_rules:
+			names.append(rule.name)
+			rules[rule.get('promotional_scheme_id')] = names
 
 		docs = get_pricing_rules(self, rules)
 
@@ -64,9 +66,9 @@ class PromotionalScheme(Document):
 			frappe.msgprint(_("New {0} pricing rules are created").format(count))
 
 	def on_trash(self):
-		for d in frappe.get_all('Pricing Rule',
+		for rule in frappe.get_all('Pricing Rule',
 			{'promotional_scheme': self.name}):
-			frappe.delete_doc('Pricing Rule', d.name)
+			frappe.delete_doc('Pricing Rule', rule.name)
 
 def get_pricing_rules(doc, rules = {}):
 	new_doc = []
@@ -107,16 +109,19 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 				new_doc.append(pr)
 
 		else:
-			for i in range(len(args.get(applicable_for))) :
-
+			applicable_for_values = args.get(applicable_for) or []
+			for applicable_for_value in applicable_for_values:
 				pr = frappe.new_doc("Pricing Rule")
 				pr.title = doc.name
 				temp_args = args.copy()
-				temp_args[applicable_for] = args[applicable_for][i]
+				temp_args[applicable_for] = applicable_for_value
 				pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
 				new_doc.append(pr)
 
 	return new_doc
+
+
+
 
 def set_args(args, pr, doc, child_doc, discount_fields, child_doc_fields):
 	pr.update(args)
