@@ -977,8 +977,7 @@ var set_timesheet_detail_rate = function(cdt, cdn, currency, timelog) {
 		},
 		callback: function(r) {
 			if (!r.exc && r.message) {
-				frappe.model.set_value(cdt, cdn, 'billing_amount', r.message)
-				console.log(r.message);
+				frappe.model.set_value(cdt, cdn, 'billing_amount', r.message);
 			}
 		}
 	});
