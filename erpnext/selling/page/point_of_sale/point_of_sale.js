@@ -663,6 +663,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('Change POS Profile'), function() {
 			me.change_pos_profile();
 		});
+
+		this.page.add_menu_item(__('Cash Entry'), function() {
+			frappe.set_route('List', 'Cash Entry');
+		});
+
+		this.page.add_menu_item(__('Cash Withdrawal'), function() {
+			frappe.set_route('List', 'Cash Withdrawal');
+		});
+
 		this.page.add_menu_item(__('Close the POS'), function() {
 			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
 			voucher.pos_profile = me.frm.doc.pos_profile;
@@ -1804,6 +1813,19 @@ class Payment {
 				}
 			},
 			{
+				fieldtype: 'Currency',
+				label: __("Discount"),
+				options: me.frm.doc.currency,
+				fieldname: "discount_amount",
+				default: me.frm.doc.discount_amount,
+				onchange: () => {
+					me.update_cur_frm_value('discount_amount', () => {
+						frappe.flags.discount_amount = false;
+						me.update_discount_amount()
+					});
+				}
+			},
+			{
 				fieldtype: 'Column Break',
 			},
 			{
@@ -1816,6 +1838,18 @@ class Payment {
 					me.update_cur_frm_value('change_amount', () => {
 						frappe.flags.write_off_amount = false;
 						me.update_write_off_amount();
+					});
+				}
+			},
+			{
+				fieldtype: 'Link',
+				label: __("Discount Reason"),
+				options: "Reason For Discount",
+				fieldname: "discount_reason",
+				default: me.frm.doc.discount_reason,
+				onchange: () => {
+					me.update_cur_frm_value('discount_reason', () => {
+						frappe.flags.discount_reason = false;
 					});
 				}
 			},
@@ -1852,6 +1886,8 @@ class Payment {
 		frappe.flags.loyalty_points = true;
 		frappe.flags.redeem_loyalty_points = true;
 		frappe.flags.payment_method = true;
+		frappe.flags.discount_amount = true;
+		frappe.flags.discount_reason = true;
 	}
 
 	update_cur_frm_value(fieldname, callback) {
@@ -1877,6 +1913,10 @@ class Payment {
 						});
 				}
 			});
+	}
+	update_discount_amount() {
+		this.dialog.set_value("discount_amount", this.frm.doc.discount_amount);
+		this.update_change_amount();
 	}
 
 	update_change_amount() {
