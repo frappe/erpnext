@@ -27,6 +27,7 @@ class StockController(AccountsController):
 		if not self.get('is_return'):
 			self.validate_inspection()
 		self.validate_serialized_batch()
+		self.clean_serial_nos()
 		self.validate_customer_provided_item()
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
@@ -71,6 +72,12 @@ class StockController(AccountsController):
 				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
 					frappe.throw(_("Row #{0}: The batch {1} has already expired.")
 						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
+
+	def clean_serial_nos(self):
+		for row in self.get("items"):
+			if hasattr(row, "serial_no") and row.serial_no:
+				# replace commas by linefeed and remove all spaces in string
+				row.serial_no = row.serial_no.replace(",", "\n").replace(" ", "")
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
