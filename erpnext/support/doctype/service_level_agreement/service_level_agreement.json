@@ -179,7 +179,7 @@
   {
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
-   "label": "Filters"
+   "label": "Assignment Condition"
   },
   {
    "fieldname": "column_break_15",
