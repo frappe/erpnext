@@ -78,7 +78,7 @@
    "label": "Cost"
   },
   {
-   "depends_on": "eval:doc.price_determination==\"Based on price list\"",
+   "depends_on": "eval:doc.price_determination==\"Based On Price List\"",
    "fieldname": "price_list",
    "fieldtype": "Link",
    "label": "Price List",
@@ -147,7 +147,7 @@
   }
  ],
  "links": [],
- "modified": "2020-06-25 10:53:44.205774",
+ "modified": "2021-08-09 10:53:44.205774",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",

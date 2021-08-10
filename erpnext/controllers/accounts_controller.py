@@ -1288,6 +1288,27 @@ def validate_taxes_and_charges(tax):
 		tax.rate = None
 
 
+def validate_account_head(tax, doc):
+	company = frappe.get_cached_value('Account',
+		tax.account_head, 'company')
+
+	if company != doc.company:
+		frappe.throw(_('Row {0}: Account {1} does not belong to Company {2}')
+			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)), title=_('Invalid Account'))
+
+
+def validate_cost_center(tax, doc):
+	if not tax.cost_center:
+		return
+
+	company = frappe.get_cached_value('Cost Center',
+		tax.cost_center, 'company')
+
+	if company != doc.company:
+		frappe.throw(_('Row {0}: Cost Center {1} does not belong to Company {2}')
+			.format(tax.idx, frappe.bold(tax.cost_center), frappe.bold(doc.company)), title=_('Invalid Cost Center'))
+
+
 def validate_inclusive_tax(tax, doc):
 	def _on_previous_row_error(row_range):
 		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx, row_range))
@@ -1507,7 +1528,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 	if child_item.get("item_tax_template"):
 		child_item.item_tax_rate = get_item_tax_map(parent_doc.get('company'), child_item.item_tax_template, as_json=True)
 
-def add_taxes_from_tax_template(child_item, parent_doc):
+def add_taxes_from_tax_template(child_item, parent_doc, db_insert=True):
 	add_taxes_from_item_tax_template = frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template")
 
 	if child_item.get("item_tax_rate") and add_taxes_from_item_tax_template:
@@ -1530,7 +1551,8 @@ def add_taxes_from_tax_template(child_item, parent_doc):
 						"category" : "Total",
 						"add_deduct_tax" : "Add"
 					})
-				tax_row.db_insert()
+				if db_insert:
+					tax_row.db_insert()
 
 def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, trans_item):
 	"""
