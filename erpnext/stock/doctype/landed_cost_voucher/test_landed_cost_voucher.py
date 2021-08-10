@@ -253,6 +253,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 	def test_asset_lcv(self):
 		"Check if LCV for an Asset updates the Assets Gross Purchase Amount correctly."
+		frappe.db.set_value("Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC")
+
 		if not frappe.db.exists("Asset Category", "Computers"):
 			create_asset_category()
 
@@ -265,7 +267,6 @@ class TestLandedCostVoucher(unittest.TestCase):
 		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
 		self.assertEqual(len(assets), 1)
 
-		frappe.db.set_value("Company", pr.company, "capital_work_in_progress_account", "CWIP Account - _TC")
 		lcv = make_landed_cost_voucher(
 			company = pr.company,
 			receipt_document_type = "Purchase Receipt",
