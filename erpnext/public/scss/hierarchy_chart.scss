@@ -188,6 +188,10 @@
 // horizontal hierarchy tree view
 #hierarchy-chart-wrapper {
 	padding-top: 30px;
+
+	#arrows {
+		margin-top: -80px;
+	}
 }
 
 .hierarchy {
@@ -211,7 +215,6 @@
 #arrows {
 	position: absolute;
 	overflow: visible;
-	margin-top: -80px;
 }
 
 .active-connector {
