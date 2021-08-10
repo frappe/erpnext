@@ -1096,6 +1096,8 @@ class AccountsController(TransactionBase):
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
 			grand_total = grand_total - flt(self.write_off_amount)
+			po_or_so, doctype, fieldname = self.get_order_details()
+			automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 
 		if self.get("total_advance"):
 			if party_account_currency == self.company_currency:
@@ -1106,22 +1108,86 @@ class AccountsController(TransactionBase):
 				base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
 
 		if not self.get("payment_schedule"):
-			if self.get("payment_terms_template"):
+			if self.doctype in ["Sales Invoice", "Purchase Invoice"] and automatically_fetch_payment_terms \
+				and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype):
+				self.fetch_payment_terms_from_order(po_or_so, doctype)
+				if self.get('payment_terms_template'):
+					self.ignore_default_payment_terms_template = 1
+			elif self.get("payment_terms_template"):
 				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total, base_grand_total)
 				for item in data:
 					self.append("payment_schedule", item)
-			else:
+			elif self.doctype not in ["Purchase Receipt"]:
 				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, base_payment_amount=base_grand_total)
 				self.append("payment_schedule", data)
-		else:
-			for d in self.get("payment_schedule"):
-				if d.invoice_portion:
-					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
-					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
-					d.outstanding = d.payment_amount
-				elif not d.invoice_portion:
-					d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
 
+		for d in self.get("payment_schedule"):
+			if d.invoice_portion:
+				d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+				d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
+				d.outstanding = d.payment_amount
+			elif not d.invoice_portion:
+				d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
+
+
+	def get_order_details(self):
+		if self.doctype == "Sales Invoice":
+			po_or_so = self.get('items')[0].get('sales_order')
+			po_or_so_doctype = "Sales Order"
+			po_or_so_doctype_name = "sales_order"
+
+		else:
+			po_or_so = self.get('items')[0].get('purchase_order')
+			po_or_so_doctype = "Purchase Order"
+			po_or_so_doctype_name = "purchase_order"
+		
+		return po_or_so, po_or_so_doctype, po_or_so_doctype_name
+
+	def linked_order_has_payment_terms(self, po_or_so, fieldname, doctype):
+		if po_or_so and self.all_items_have_same_po_or_so(po_or_so, fieldname):
+			if self.linked_order_has_payment_terms_template(po_or_so, doctype):
+				return True
+			elif self.linked_order_has_payment_schedule(po_or_so):
+				return True
+		
+		return False
+
+	def all_items_have_same_po_or_so(self, po_or_so, fieldname):
+		for item in self.get('items'):
+			if item.get(fieldname) != po_or_so:
+				return False
+		
+		return True
+
+	def linked_order_has_payment_terms_template(self, po_or_so, doctype):
+		return frappe.get_value(doctype, po_or_so, 'payment_terms_template')
+
+	def linked_order_has_payment_schedule(self, po_or_so):
+		return frappe.get_all('Payment Schedule', filters={'parent': po_or_so})
+
+	def fetch_payment_terms_from_order(self, po_or_so, po_or_so_doctype):
+		"""
+			Fetch Payment Terms from Purchase/Sales Order on creating a new Purchase/Sales Invoice.
+		"""
+		po_or_so = frappe.get_cached_doc(po_or_so_doctype, po_or_so)
+
+		self.payment_schedule = []
+		self.payment_terms_template = po_or_so.payment_terms_template
+
+		for schedule in po_or_so.payment_schedule:
+			payment_schedule = {
+				'payment_term': schedule.payment_term,
+				'due_date': schedule.due_date,
+				'invoice_portion': schedule.invoice_portion,
+				'mode_of_payment': schedule.mode_of_payment,
+				'description': schedule.description
+			}
+
+			if schedule.discount_type == 'Percentage':
+				payment_schedule['discount_type'] = schedule.discount_type
+				payment_schedule['discount'] = schedule.discount
+
+			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
