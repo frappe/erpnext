@@ -283,7 +283,7 @@ class TestBOM(unittest.TestCase):
 	def test_bom_with_process_loss_item(self):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
 
-		if frappe.db.exists("BOM", f"BOM-{fg_item_non_whole.item_code}-001") is None:
+		if not frappe.db.exists("BOM", f"BOM-{fg_item_non_whole.item_code}-001"):
 			bom_doc = create_bom_with_process_loss_item(
 				fg_item_non_whole, bom_item, 0.25, 0, 1
 			)
