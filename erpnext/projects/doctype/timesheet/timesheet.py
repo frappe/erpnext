@@ -240,9 +240,11 @@ def get_timesheet_detail_rate(timelog, currency):
 		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent 
 		WHERE tsd.name = '{0}'""".format(timelog), as_dict = 1)[0]
 
-	exchange_rate = get_exchange_rate(timelog_detail.currency, currency)
-	
-	return timelog_detail.billing_amount * exchange_rate
+	if timelog_detail.currency:
+		exchange_rate = get_exchange_rate(timelog_detail.currency, currency)
+
+		return timelog_detail.billing_amount * exchange_rate
+	return timelog_detail.billing_amount
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
