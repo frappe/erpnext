@@ -176,12 +176,12 @@ class Customer(TransactionBase):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
 					address.save(ignore_permissions=self.flags.ignore_permissions)
 
-			lead = frappe.db.get_value("Lead", self.lead_name, ["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
+			lead = frappe.db.get_value("Lead", self.lead_name, ["company_name", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
 
 			if not lead.lead_name:
 				frappe.throw(_("Please mention the Lead Name in Lead {0}").format(self.lead_name))
 
-			if lead.organization_lead:
+			if lead.company_name:
 				contact_names = frappe.get_all('Dynamic Link', filters={
 									"parenttype":"Contact",
 									"link_doctype":"Lead",
