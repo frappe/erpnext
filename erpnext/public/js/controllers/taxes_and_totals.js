@@ -20,6 +20,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if(item.discount_percentage) {
 			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
+		} else if (item.rate_with_margin) {
+			item.discount_percentage = item.discount_amount / flt(item.rate_with_margin) * 100;
 		}
 
 		if (item.discount_amount) {
@@ -113,7 +115,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 
-				var exclude_round_fieldnames = [];
+				var exclude_round_fieldnames = ['discount_percentage'];
 				if (has_margin_field && item.margin_type === "Percentage") {
 					exclude_round_fieldnames.push('margin_rate_or_amount');
 				}

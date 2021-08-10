@@ -101,7 +101,7 @@ class calculate_taxes_and_totals(object):
 			for item in self.doc.get("items"):
 				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 
-				exclude_round_fieldnames = []
+				exclude_round_fieldnames = ['discount_percentage']
 				if has_margin_field and item.margin_type == "Percentage":
 					exclude_round_fieldnames.append('margin_rate_or_amount')
 				self.doc.round_floats_in(item, excluding=exclude_round_fieldnames)
@@ -114,7 +114,7 @@ class calculate_taxes_and_totals(object):
 							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 					elif item.discount_amount and item.pricing_rules:
-						item.rate =  item.price_list_rate - item.discount_amount
+						item.rate = item.price_list_rate - item.discount_amount
 
 				if has_margin_field:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
@@ -123,9 +123,11 @@ class calculate_taxes_and_totals(object):
 					rate_before_discount = item.rate_with_margin
 					item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 					item.discount_amount = item.rate_with_margin - item.rate
+					item.discount_percentage = item.discount_amount / item.rate_with_margin * 100
 				elif flt(item.price_list_rate):
 					rate_before_discount = item.price_list_rate
 					item.discount_amount = item.price_list_rate - item.rate
+					item.discount_percentage = item.discount_amount / item.price_list_rate * 100
 				else:
 					rate_before_discount = item.rate
 					item.discount_amount = 0
@@ -289,9 +291,6 @@ class calculate_taxes_and_totals(object):
 
 				item.net_amount = flt(item.net_amount / (1 + item.cumulated_tax_fraction))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0.0
-
-				item.discount_percentage = flt(item.discount_percentage,
-					item.precision("discount_percentage"))
 
 				self._set_in_company_currency(item, ["taxable_rate", "taxable_amount", "net_rate", "net_amount",
 					"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",

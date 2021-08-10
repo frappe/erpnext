@@ -30,8 +30,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					item.rate_with_margin = item.rate;
 				} else {
 					item.discount_amount = flt(item.price_list_rate - item.rate);
-					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
-						precision("discount_percentage", item));
+					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0);
 					item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
 					item.margin_type = '';
 					item.margin_rate_or_amount = 0;

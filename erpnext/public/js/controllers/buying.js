@@ -211,7 +211,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	price_list_rate: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 
-		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
+		frappe.model.round_floats_in(item, ["price_list_rate"]);
 
 		let item_rate = item.price_list_rate;
 		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
@@ -220,6 +220,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		if (item.discount_percentage) {
 			item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
+		} else if (flt(item.price_list_rate)) {
+			item.discount_percentage = flt(item.discount_amount) / flt(item.price_list_rate) * 100;
 		}
 
 		if (item.discount_amount) {
