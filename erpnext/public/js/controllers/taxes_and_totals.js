@@ -751,7 +751,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				pay.amount = total_amount_to_pay;
 			} else {
 				pay.amount = 0.0;
->>>>>>> b614834efe (fix: unseting of payment if no pos profile found (#26884))
 			}
 		});
 		this.frm.refresh_fields();
