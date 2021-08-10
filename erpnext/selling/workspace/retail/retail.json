@@ -1,7 +1,7 @@
 {
  "category": "",
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Point Of Sale\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"spacer\", \"data\": {\"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings & Configurations\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loyalty Program\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Opening & Closing\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}]",
+ "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Point Of Sale\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings & Configurations\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loyalty Program\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Opening & Closing\", \"col\": 4}}]",
  "creation": "2020-03-02 17:18:32.505616",
  "developer_mode_only": 0,
  "disable_user_customization": 0,

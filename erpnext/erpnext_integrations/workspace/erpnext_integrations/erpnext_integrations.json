@@ -1,7 +1,7 @@
 {
  "category": "",
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Marketplace\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Payments\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}]",
+ "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Marketplace\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Payments\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
  "creation": "2020-08-20 19:30:48.138801",
  "developer_mode_only": 0,
  "disable_user_customization": 0,

@@ -1,7 +1,7 @@
 {
  "category": "",
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Integrations Settings\", \"col\": 4, \"pt\": 0, \"pr\": 0, \"pb\": 0, \"pl\": 0}}]",
+ "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Integrations Settings\", \"col\": 4}}]",
  "creation": "2020-07-31 10:38:54.021237",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
