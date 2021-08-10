@@ -58,7 +58,7 @@ class InpatientRecord(Document):
 		admit_patient(self, service_unit, check_in, expected_discharge)
 
 	@frappe.whitelist()
-	def discharge(self, check_out):
+	def discharge(self, check_out=now_datetime()):
 		if (getdate(check_out) < getdate(self.admitted_datetime)):
 			frappe.throw(_('Discharge date cannot be less than Admission date'))
 		discharge_patient(self, check_out)
@@ -122,6 +122,9 @@ def schedule_inpatient(args):
 @frappe.whitelist()
 def schedule_discharge(args):
 	discharge_order = json.loads(args)
+	if not discharge_order or not discharge_order['patient'] or not discharge_order['discharge_ordered_datetime']:
+		frappe.throw(_('Missing required details, did not create schedule discharge'))
+
 	inpatient_record_id = frappe.db.get_value('Patient', discharge_order['patient'], 'inpatient_record')
 	if inpatient_record_id:
 		inpatient_record = frappe.get_doc('Inpatient Record', inpatient_record_id)

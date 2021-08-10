@@ -118,12 +118,12 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 
 	def tearDown(self):
 		# cleanup - Discharge
-		schedule_discharge(frappe.as_json({'patient': self.patient}))
+		schedule_discharge(frappe.as_json({'patient': self.patient, 'discharge_ordered_datetime': now_datetime()}))
 		self.ip_record.reload()
 		mark_invoiced_inpatient_occupancy(self.ip_record)
 
 		self.ip_record.reload()
-		discharge_patient(self.ip_record)
+		discharge_patient(self.ip_record, now_datetime())
 
 		for entry in frappe.get_all('Inpatient Medication Entry'):
 			doc = frappe.get_doc('Inpatient Medication Entry', entry.name)

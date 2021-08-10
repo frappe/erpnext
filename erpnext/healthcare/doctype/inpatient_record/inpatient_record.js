@@ -46,16 +46,16 @@ let discharge_patient = function(frm) {
 		width: 100,
 		fields: [
 			{fieldtype: 'Datetime', label: 'Discharge Datetime', fieldname: 'check_out',
-			reqd: 1, default: frappe.datetime.now_datetime()
+				reqd: 1, default: frappe.datetime.now_datetime()
 			}
 		],
 		primary_action_label: __('Discharge'),
-		primary_action : function(){
+		primary_action: function() {
 			let check_out = dialog.get_value('check_out');
 			frappe.call({
 				doc: frm.doc,
 				method: 'discharge',
-				args:{
+				args: {
 					'check_out': check_out
 				},
 				callback: function(data) {
