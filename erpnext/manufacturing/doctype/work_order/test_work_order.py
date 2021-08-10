@@ -694,7 +694,7 @@ class TestWorkOrder(unittest.TestCase):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_process_loss_bom_items
 		from erpnext.manufacturing.doctype.bom.test_bom import create_bom_with_process_loss_item
 
-		qty = fg_qty = 4
+		qty = 4
 		scrap_qty = 0.25 # bom item qty = 1, consider as 25% of FG
 		source_warehouse = "Stores - _TC"
 		wip_warehouse = "_Test Warehouse - _TC"
@@ -707,7 +707,7 @@ class TestWorkOrder(unittest.TestCase):
 		if not frappe.db.exists("BOM", bom_no):
 			bom_doc = create_bom_with_process_loss_item(
 				fg_item_non_whole, bom_item, scrap_qty=scrap_qty,
-				scrap_rate=0, fg_qty=fg_qty, is_process_loss=1
+				scrap_rate=0, fg_qty=1, is_process_loss=1
 			)
 			bom_doc.submit()
 
@@ -721,32 +721,32 @@ class TestWorkOrder(unittest.TestCase):
 		)
 
 		se = frappe.get_doc(
-			make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)
+			make_stock_entry(wo.name, "Material Transfer for Manufacture", qty)
 		)
 		se.get("items")[0].s_warehouse = "Stores - _TC"
 		se.insert()
 		se.submit()
 
 		se = frappe.get_doc(
-			make_stock_entry(wo.name, "Manufacture", 4)
+			make_stock_entry(wo.name, "Manufacture", qty)
 		)
 		se.insert()
 		se.submit()
 
 		# Testing stock entry values
 		items = se.get("items")
-		self.assertEqual(len(items), 3, "There should be 3 items including process loss.")
+		self.assertEqual(len(items), 4, "There should be 3 items including process loss.")
 
 		source_item, fg_item, pl_item = items
 
-		total_pl_qty = scrap_qty * fg_qty
-		actual_fg_qty = fg_qty - total_pl_qty
+		total_pl_qty = qty * scrap_qty
+		actual_fg_qty = qty - total_pl_qty
 
 		self.assertEqual(pl_item.qty, total_pl_qty)
 		self.assertEqual(fg_item.qty, actual_fg_qty)
 
 		# Testing Work Order values
-		self.assertEqual( frappe.db.get_value("Work Order", wo.name, "produced_qty"), actual_fg_qty)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), actual_fg_qty)
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
