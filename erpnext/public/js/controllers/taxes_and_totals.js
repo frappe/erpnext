@@ -47,7 +47,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
 			this.frm.doc.is_return) {
-			this.update_paid_amount_for_return();
+			if (this.frm.doc.doctype == "Sales Invoice"){
+				this.set_total_amount_to_default_mop();
+			}
+			this.calculate_paid_amount();
 		}
 
 		// Sales person's commission
@@ -104,6 +107,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_item_values() {
+		debugger;
 		var me = this;
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
@@ -734,7 +738,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 	}
 
-	update_paid_amount_for_return() {
+	set_total_amount_to_default_mop(){
 		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 
 		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
@@ -747,17 +751,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				precision("base_grand_total")
 			);
 		}
-
+		
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
 			} else {
 				pay.amount = 0.0
-			}
+			}		
 		});
 		this.frm.refresh_fields();
-
-		this.calculate_paid_amount();
 	}
 
 	set_default_payment(total_amount_to_pay, update_paid_amount) {
