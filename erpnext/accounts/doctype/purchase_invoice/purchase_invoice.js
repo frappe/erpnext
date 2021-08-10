@@ -366,7 +366,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row,
-			["expense_account", "cost_center", "project"]);
+			["expense_account", "discount_account", "cost_center", "project"]);
 	},
 
 	on_submit: function() {
@@ -500,10 +500,30 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Payment Entry': 'Payment'
 		}
 
+		frm.set_query("additional_discount_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					report_type: "Profit and Loss",
+				}
+			};
+		});
+
 		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {
 			return {
 				filters: {
 					'root_type': 'Asset',
+					'company': doc.company,
+					"is_group": 0
+				}
+			}
+		}
+
+		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
 					'company': doc.company,
 					"is_group": 0
 				}

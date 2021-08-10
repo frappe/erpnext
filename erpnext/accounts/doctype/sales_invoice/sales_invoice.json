@@ -106,6 +106,7 @@
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
@@ -2333,6 +2334,12 @@
    "label": "Disable Rounded Total",
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
   },
   {
    "default": "0",
