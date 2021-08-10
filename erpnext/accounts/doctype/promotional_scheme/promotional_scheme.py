@@ -26,7 +26,7 @@ product_discount_fields = ['free_item', 'free_qty', 'free_item_uom',
 class PromotionalScheme(Document):
 	def validate(self):
 		if not self.selling and not self.buying:
-			frappe.throw(_("Atleast one of the Selling or Buying must be selected"))
+			frappe.throw(_("Either 'Selling' or 'Buying' must be selected"), title=_("Mandatory"))
 		if not (self.price_discount_slabs
 			or self.product_discount_slabs):
 			frappe.throw(_("Price or product discount slabs are required"))
