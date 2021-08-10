@@ -18,15 +18,5 @@
  "ref_doctype": "GL Entry",
  "report_name": "VAT Audit Report",
  "report_type": "Script Report",
- "roles": [
-  {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Auditor"
-  }
- ]
+ "roles": []
 }

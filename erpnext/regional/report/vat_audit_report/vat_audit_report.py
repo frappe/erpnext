@@ -189,6 +189,8 @@ class VATAuditReport(object):
 						row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
 						row["voucher_type"] = doctype
 						row["voucher_no"] = inv
+						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier" 
+						row["party"] = inv_data.get("party")
 						row["remarks"] = inv_data.get("remarks")
 						row["gross_amount"]= item_details[0].get("gross_amount")
 						row["tax_amount"]= item_details[0].get("tax_amount")
@@ -227,6 +229,20 @@ class VATAuditReport(object):
 				"width": 150
 			},
 			{
+				"fieldname": "party_type",
+				"label": "Party Type",
+				"fieldtype": "Data",
+				"width": 140,
+				"hidden": 1
+			},
+			{
+				"fieldname": "party",
+				"label": "Party",
+				"fieldtype": "Dynamic Link",
+				"options": "party_type",
+				"width": 150
+			},
+			{
 				"fieldname": "remarks",
 				"label": "Details",
 				"fieldtype": "Data",
@@ -236,18 +252,18 @@ class VATAuditReport(object):
 				"fieldname": "net_amount",
 				"label": "Net Amount",
 				"fieldtype": "Currency",
-				"width": 150
+				"width": 130
 			},
 			{
 				"fieldname": "tax_amount",
 				"label": "Tax Amount",
 				"fieldtype": "Currency",
-				"width": 150
+				"width": 130
 			},
 			{
 				"fieldname": "gross_amount",
 				"label": "Gross Amount",
 				"fieldtype": "Currency",
-				"width": 150
+				"width": 130
 			},
 		]
