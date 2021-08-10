@@ -14,15 +14,17 @@ from erpnext.e_commerce.shopping_cart.cart import get_party
 from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import setup_e_commerce_settings
 
 class TestItemReview(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+	def setUp(self):
 		item = make_item("Test Mobile Phone")
 		if not frappe.db.exists("Website Item", {"item_code": "Test Mobile Phone"}):
 			make_website_item(item, save=True)
 
-	@classmethod
-	def tearDownClass(cls):
+		setup_e_commerce_settings({"enable_reviews": 1})
+		frappe.local.shopping_cart_settings = None
+
+	def tearDown(self):
 		frappe.get_cached_doc("Website Item", {"item_code": "Test Mobile Phone"}).delete()
+		setup_e_commerce_settings({"enable_reviews": 0})
 
 	def test_add_and_get_item_reviews_from_customer(self):
 		"Add / Get Reviews from a User that is a valid customer (has added to cart or purchased in the past)"
