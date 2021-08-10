@@ -1572,7 +1572,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 	if child_item.get("item_tax_template"):
 		child_item.item_tax_rate = get_item_tax_map(parent_doc.get('company'), child_item.item_tax_template, as_json=True)
 
-def add_taxes_from_tax_template(child_item, parent_doc):
+def add_taxes_from_tax_template(child_item, parent_doc, db_insert=True):
 	add_taxes_from_item_tax_template = frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template")
 
 	if child_item.get("item_tax_rate") and add_taxes_from_item_tax_template:
@@ -1595,7 +1595,8 @@ def add_taxes_from_tax_template(child_item, parent_doc):
 						"category" : "Total",
 						"add_deduct_tax" : "Add"
 					})
-				tax_row.db_insert()
+				if db_insert:
+					tax_row.db_insert()
 
 def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, trans_item):
 	"""

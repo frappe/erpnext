@@ -83,14 +83,17 @@ class TestItem(unittest.TestCase):
 
 		make_test_objects("Item Price")
 
+		company = "_Test Company"
+		currency = frappe.get_cached_value("Company",  company,  "default_currency")
+
 		details = get_item_details({
 			"item_code": "_Test Item",
-			"company": "_Test Company",
+			"company": company,
 			"price_list": "_Test Price List",
-			"currency": "_Test Currency",
+			"currency": currency,
 			"doctype": "Sales Order",
 			"conversion_rate": 1,
-			"price_list_currency": "_Test Currency",
+			"price_list_currency": currency,
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
 			"customer": "_Test Customer",
