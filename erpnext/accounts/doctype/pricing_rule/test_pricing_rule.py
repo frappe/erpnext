@@ -244,7 +244,8 @@ class TestPricingRule(unittest.TestCase):
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
 			"customer": "_Test Customer",
-			"name": None
+			"name": None,
+			"transaction_type": "selling"
 		})
 
 		details = get_item_details(args)
