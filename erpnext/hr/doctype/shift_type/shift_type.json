@@ -190,8 +190,29 @@
    "label": "Grace Period Settings"
   }
  ],
- "links": [],
- "modified": "2021-06-15 15:22:55.756078",
+ "links": [
+  {
+   "group": "Attendance and Checkin",
+   "link_doctype": "Attendance",
+   "link_fieldname": "shift"
+  },
+  {
+   "group": "Attendance and Checkin",
+   "link_doctype": "Employee Checkin",
+   "link_fieldname": "shift"
+  },
+  {
+   "group": "Request and Assignment",
+   "link_doctype": "Shift Request",
+   "link_fieldname": "shift_type"
+  },
+  {
+   "group": "Request and Assignment",
+   "link_doctype": "Shift Assignment",
+   "link_fieldname": "shift_type"
+  }
+ ],
+ "modified": "2021-08-11 12:07:33.227032",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

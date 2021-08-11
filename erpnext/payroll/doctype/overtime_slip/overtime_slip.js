@@ -28,20 +28,16 @@ frappe.ui.form.on('Overtime Slip', {
 	},
 
 	set_frequency_and_dates: function (frm) {
-		return frappe.call({
-			method: "erpnext.payroll.doctype.overtime_slip.overtime_slip.get_frequency_and_dates",
-			args: {
-				employee: frm.doc.employee,
-				date: frm.doc.from_date || frm.doc.posting_date,
-			},
-			callback: function (r) {
-				frm.set_value("payroll_frequency", r.message[1]);
-				if (r.message[0].start_date != frm.doc.from_date) {
-					frm.set_value("from_date", r.message[0].start_date);
+
+		if (frm.doc.employee) {
+			return frappe.call({
+				method: 'get_frequency_and_dates',
+				doc: frm.doc,
+				callback: function () {
+					frm.refresh();
 				}
-				frm.set_value("to_date", r.message[0].end_date);
-			}
-		});
+			});
+		}
 	},
 
 	get_emp_details_and_overtime_duration: function (frm) {

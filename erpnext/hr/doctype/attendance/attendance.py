@@ -22,7 +22,7 @@ class Attendance(Document):
 		self.set_default_shift()
 
 		if not frappe.db.get_single_value("Payroll Settings", "fetch_standard_working_hours_from_shift_type"):
-			self.standard_working_time = None
+			self.shift_duration = None
 
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
@@ -107,19 +107,17 @@ class Attendance(Document):
 		#this method is only for Calculation of overtime based on Attendance through Employee Checkins
 		self.overtime_duration = None
 
-		if not self.standard_working_time and self.shift:
-			self.standard_working_time = frappe.db.get_value("Shift Type", self.shift, "standard_working_time")
+		if not self.shift_duration and self.shift:
+			self.shift_duration = frappe.db.get_value("Shift Type", self.shift, "shift_duration")
 
 		if not self.overtime_type:
 			self.overtime_type = get_overtime_type(self.employee)
 
-		if int(self.working_time) > int(self.standard_working_time):
-			self.overtime_duration = int(self.working_time) - int(self.standard_working_time)
+		if int(self.working_time) > int(self.shift_duration):
+			self.overtime_duration = int(self.working_time) - int(self.shift_duration)
 
 @frappe.whitelist()
 def get_shift_type(employee, attendance_date):
-	emp_shift = frappe.db.get_value("Employee", employee, "default_shift")
-
 	shift_assignment = frappe.db.sql('''SELECT name, shift_type
 		FROM
 			`tabShift Assignment`
@@ -136,21 +134,22 @@ def get_shift_type(employee, attendance_date):
 	if len(shift_assignment):
 		shift = shift_assignment[0].shift_type
 	else:
-		shift = emp_shift
-
+		shift = frappe.db.get_value("Employee", employee, "default_shift")
 	return shift
 
 @frappe.whitelist()
 def get_overtime_type(employee):
 	overtime_type = None
-	emp_department = frappe.db.get_value("Employee", employee, "department")
+	emp_details = frappe.db.get_value("Employee", employee, ["department", "grade"], as_dict=1)
+
+	emp_department = emp_details.department
 	if emp_department:
 		overtime_type_doc = frappe.get_list("Overtime Type", filters={
 			"applicable_for": "Department", "department": emp_department}, fields=["name"])
 		if len(overtime_type_doc):
 			overtime_type = overtime_type_doc[0].name
-	emp_grade = frappe.db.get_value("Employee", employee, "grade")
 
+	emp_grade = emp_details.grade
 	if emp_grade:
 		overtime_type_doc = frappe.get_list("Overtime Type", filters={
 			"applicable_for": "Employee Grade", "employee_grade": emp_grade},

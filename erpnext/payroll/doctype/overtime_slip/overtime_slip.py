@@ -10,12 +10,7 @@ from frappe.model.document import Document
 class OvertimeSlip(Document):
 	def validate(self):
 		if not (self.from_date or self.to_date or self.payroll_frequency):
-			date = self.from_date or self.posting_date
-			data = get_frequency_and_dates(self.employee, date)
-
-			self.from_date = data[0].start_date
-			self.to_date = data[0].end_date
-			self.payroll_frequency = data[1]
+			self.get_frequency_and_dates()
 
 		self.validate_overlap()
 		if self.from_date >= self.to_date:
@@ -60,7 +55,8 @@ class OvertimeSlip(Document):
 			if len(records):
 				self.create_overtime_details_row_for_timesheet(records)
 		else:
-			frappe.throw(_('Select "Calculate Overtime Hours Based On" in Payroll Settings'))
+			link_to_settings = get_link_to_form('Payroll Settings', 'Payroll Settings', 'Payroll Settings')
+			frappe.throw(_('Select "Calculate Overtime Based On" in {0}').format(link_to_settings))
 
 		if len(self.overtime_details):
 			self.total_overtime_duration = sum([int(detail.overtime_duration) for detail in self.overtime_details])
@@ -145,6 +141,22 @@ class OvertimeSlip(Document):
 			return records
 		return []
 
+	@frappe.whitelist()
+	def get_frequency_and_dates(self):
+
+		date = self.from_date or self.posting_date
+
+		salary_structure = get_salary_structure(self.employee)
+		if salary_structure:
+			payroll_frequency = frappe.db.get_value("Salary Structure", salary_structure, "payroll_frequency")
+			date_details = get_start_end_dates(payroll_frequency, date, frappe.db.get_value('Employee', self.employee, "company"))
+
+			self.from_date = date_details.start_date
+			self.to_date = date_details.end_date
+			self.payroll_frequency = payroll_frequency
+		else:
+			frappe.throw(_("No Salary Structure Assignment found for Employee: {0}").format(self.employee))
+
 @frappe.whitelist()
 def get_standard_working_hours(employee, date):
 	shift_assignment = frappe.db.sql('''SELECT shift_type FROM `tabShift Assignment`
@@ -169,18 +181,9 @@ def get_standard_working_hours(employee, date):
 	elif not fetch_from_shift:
 		standard_working_time = frappe.db.get_single_value("HR Settings", "standard_working_hours") * 3600
 		if not standard_working_time:
-			frappe.throw(_('Please Set "Standard Working Hours" in HR settings'))
+			link_to_settings = get_link_to_form('HR Settings', 'HR Settings', 'HR Settings')
+			frappe.throw(_('Please Set "Standard Working Hours" in {0}').format(link_to_settings))
 
 	return standard_working_time
-
-@frappe.whitelist()
-def get_frequency_and_dates(employee, date):
-	salary_structure = get_salary_structure(employee)
-	if salary_structure:
-		payroll_frequency = frappe.db.get_value("Salary Structure", salary_structure, "payroll_frequency")
-		date_details = get_start_end_dates(payroll_frequency, date, frappe.db.get_value('Employee', employee, "company"))
-		return [date_details, payroll_frequency]
-	else:
-		frappe.throw(_("No Salary Structure Assignment found for Employee: {0}").format(employee))
 
 

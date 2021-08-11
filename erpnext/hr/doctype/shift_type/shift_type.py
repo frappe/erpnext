@@ -34,11 +34,12 @@ class ShiftType(Document):
 		self.standard_working_time = convert_time_into_duration(time_difference)
 
 	def validate_overtime(self):
-		if not frappe.db.get_single_value('Payroll Settings', 'fetch_standard_working_hours_from_shift_type') and self.allow_overtime:
-			frappe.throw(_('Please enable "Fetch Standard Working Hours from Shift Type" in payroll Settings for Overtime.'))
+		if self.allow_overtime:
+			if not frappe.db.get_single_value('Payroll Settings', 'fetch_standard_working_hours_from_shift_type'):
+				frappe.throw(_('Please enable "Fetch Standard Working Hours from Shift Type" in payroll Settings for Overtime.'))
 
-		if frappe.db.get_single_value("Payroll Settings", "overtime_based_on") != "Attendance" and self.allow_overtime:
-			frappe.throw(_('Please set Overtime based on "Attendance" in payroll Settings for Overtime.'))
+			if frappe.db.get_single_value("Payroll Settings", "overtime_based_on") != "Attendance":
+				frappe.throw(_('Please set Overtime based on "Attendance" in payroll Settings for Overtime.'))
 
 	@frappe.whitelist()
 	def process_auto_attendance(self):

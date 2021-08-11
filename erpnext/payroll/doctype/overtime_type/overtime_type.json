@@ -111,8 +111,21 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-06-15 13:49:20.612464",
+ "links": [
+  {
+   "link_doctype": "Attendance",
+   "link_fieldname": "overtime_type"
+  },
+  {
+   "link_doctype": "Timesheet",
+   "link_fieldname": "overtime_type"
+  },
+  {
+   "link_doctype": "Overtime Details",
+   "link_fieldname": "overtime_type"
+  }
+ ],
+ "modified": "2021-08-11 11:29:52.944112",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Overtime Type",

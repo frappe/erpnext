@@ -12,10 +12,10 @@ frappe.ui.form.on('Attendance', {
 		});
 
 		if (frm.doc.__islocal) {
-			cur_frm.set_value("attendance_date", frappe.datetime.get_today());
+			frm.set_value("attendance_date", frappe.datetime.get_today());
 		}
 
-		frm.set_query("employee", ()=>{
+		frm.set_query("employee", () => {
 			return {
 				query: "erpnext.controllers.queries.employee_query"
 			};

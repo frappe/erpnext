@@ -125,7 +125,7 @@
    "default": "Attendance",
    "fieldname": "overtime_based_on",
    "fieldtype": "Select",
-   "label": "Calculate Overtime Hours  Based On",
+   "label": "Calculate Overtime Based On",
    "options": "Attendance\nTimesheet"
   },
   {
@@ -139,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-06-15 13:55:44.563796",
+ "modified": "2021-08-11 11:45:10.568381",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",

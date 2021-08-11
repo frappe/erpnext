@@ -1,11 +1,12 @@
 {
  "actions": [],
- "autoname": "HR-OVR-SLIP-.#####",
+ "autoname": "HR-OT-SLIP-.#####",
  "creation": "2021-05-27 12:47:32.372698",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "employee_details",
   "posting_date",
   "employee",
   "employee_name",
@@ -79,7 +80,6 @@
   {
    "fieldname": "overtime_details",
    "fieldtype": "Table",
-   "label": "Overtime Details",
    "options": "Overtime Details",
    "reqd": 1
   },
@@ -89,7 +89,8 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Payroll Details"
   },
   {
    "fieldname": "from_date",
@@ -123,7 +124,8 @@
   },
   {
    "fieldname": "section_break_12",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Overtime Details"
   },
   {
    "fieldname": "column_break_17",
@@ -143,12 +145,17 @@
    "label": "Salary Slip",
    "options": "Salary Slip",
    "read_only": 1
+  },
+  {
+   "fieldname": "employee_details",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-16 14:55:13.441709",
+ "modified": "2021-08-11 12:30:27.536389",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Overtime Slip",
@@ -192,5 +199,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "employee_name",
  "track_changes": 1
 }
