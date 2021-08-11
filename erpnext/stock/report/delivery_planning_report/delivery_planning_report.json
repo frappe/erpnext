@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "columns": [],
  "creation": "2021-06-22 15:50:25.683371",
  "disable_prepared_report": 0,
@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "json": "{}",
- "modified": "2021-06-23 12:21:59.775248",
+ "modified": "2021-08-10 16:50:46.270327",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Report",

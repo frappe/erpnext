@@ -5,6 +5,7 @@ from bs4.element import Doctype
 import frappe
 from frappe.model.document import Document
 from erpnext.controllers.accounts_controller import update_child_qty_rate
+from datetime import date
 
 class DeliveryPlanningItem(Document):
 
@@ -39,10 +40,7 @@ class DeliveryPlanningItem(Document):
 			# SOI used in split and updating the SOI
 			ref_soi = frappe.get_doc('Sales Order Item', self.split_from_item)
 			print("---------- ref SOI --------  ",ref_soi)
-			# ref_soi.qty = pdpi.qty_to_deliver,
-			# ref_soi.stock_qty = pdpi.qty_to_deliver,
-			# ref_soi.amount = pdpi.qty_to_deliver * pdpi.rate
-			# ref_soi.save(ignore_permissions=True)
+		
 			frappe.db.set_value('Sales Order Item', self.split_from_item,
 						{'qty' : pdpi.qty_to_deliver,
 						'stock_qty' : pdpi.qty_to_deliver,
@@ -88,50 +86,28 @@ class DeliveryPlanningItem(Document):
 					title='Approval message',
 				)
 
-
-			# Updating new SOI.name into new splitted DPI 
-			
-
-			# frappe.db.set_value('Sales Order Item', self.split_from_item,
-			# 					{ 'qty' : pdpi.qty_to_deliver,
-			# 					'stock_qty': pdpi.qty_to_deliver,
-			# 					'amount' : pdpi.qty_to_deliver * pdpi.rate
-			# 					})
-
-			# soi1 = frappe.db.sql(""" Select name, item_code, item_name, rate, description 
-			# 						from `tabSales Order Item` where name = '{0}'
-			# 						""".format(self.item_dname),as_dict=1)
-			# print("----------s01 ============",soi1)															
-			
-			# if soi1:
-			# 	for s in soi1:
-			# 		sidesc = s.description
-			# 		siname = s.item_name 	
-			# 		sirate = s.rate	
-			# 		sname = s.name	
-			# 		sitem_code = s.item_code
-							
-			# print("----------======= name, desc -----=========",sidesc , siname,sname, sirate)
-			# soi1.qty = new_qty	
-			# soi1.stock_qty = new_qty
-			# soi1.amount = sirate * new_qty
-			# soi1.save(ignore_permissions=True)
-			# if (n_transporter):
-			# 	frappe.db.set_value('Sales Order', self.sales_order, 'transporter', n_transporter
-
 		if self.is_updated == 1 and self.is_split == 0:
 			# IF doc is updated then pusing same updates on SOI 
 			print("updated -------------",self.is_updated)
-			ref_soi = frappe.get_doc('Sales Order Item', self.item_dname)
-			ref_soi.qty = self.qty_to_deliver,
-			ref_soi.stock_qty = self.qty_to_deliver,
-			ref_soi.amount = self.qty_to_deliver * self.rate
-			ref_soi.delivered_by_supplier = self.supplier_dc
-			ref_soi.supplier = self.supplier
-			ref_soi.save(ignore_permissions=True)
+
+			ref_soi = frappe.db.set_value('Sales Order Item', self.item_dname, {
+					"qty" : self.qty_to_deliver,
+					"stock_qty" : self.qty_to_deliver,
+					"amount" : self.qty_to_deliver * self.rate,
+					"delivered_by_supplier" : self.supplier_dc,
+					"supplier" : self.supplier
+				})
+		
+			# ref_soi = frappe.get_doc('Sales Order Item', self.item_dname)
+			# ref_soi.qty = self.qty_to_deliver,
+			# ref_soi.stock_qty = self.qty_to_deliver,
+			# ref_soi.amount = self.qty_to_deliver * self.rate
+			# ref_soi.delivered_by_supplier = self.supplier_dc
+			# ref_soi.supplier = self.supplier
+			# ref_soi.save(ignore_permissions=True)
 			
 			if(ref_soi):
-				print("DOC updated",ref_soi.name)
+				print("DOC updated",ref_soi)
 				frappe.msgprint(
 					msg='Sales Order Item {soi} added in Sales Order {so}'.format(soi = soi.name, so = self.sales_order),
 					title='Approval message',

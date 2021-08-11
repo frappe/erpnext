@@ -7,7 +7,19 @@ frappe.ui.form.on('Delivery Planning', {
 		if(frm.doc.delivery_date_from > frm.doc.delivery_date_to)
 		{ frappe.throw(__('Delivery Date To should be greater or equal to Date From '))}
 	},
-	 onload: function(frm){
+	onload: function(frm){
+
+
+		frm.call({
+			method:'refresh_status',
+			doc: frm.doc,
+			callback: function(r){
+				if(r.message){
+					frm.refresh_field('d_status')
+				}
+			}
+				
+		});
 
 		cur_frm.set_query("transporter", function() {
 			return {
@@ -19,17 +31,17 @@ frappe.ui.form.on('Delivery Planning', {
 
 		if( frm.doc.docstatus === 1){
 
-//		frm.call('refresh_status')
-		frm.call({
-			method:'refresh_status',
-			doc: frm.doc,
-			callback: function(r){
-				if(r.message){
-					frm.refresh_field('d_status')
-				}
-			}
+//  setting status doccument
+		// frm.call({
+		// 	method:'refresh_status',
+		// 	doc: frm.doc,
+		// 	callback: function(r){
+		// 		if(r.message){
+		// 			frm.refresh_field('d_status')
+		// 		}
+		// 	}
 				
-		});
+		// });
 
 		// code to show Delivery palnning button
 		frm.call({
@@ -332,6 +344,8 @@ frappe.ui.form.on('Delivery Planning', {
 
 	 refresh: function(frm) {
 
+		document.getElementByClass("icon icon-sm").style.display = "none";
+
 		if (frm.doc.docstatus === 1){
 			frm.add_custom_button(__("Gantt Chart"), function () {
 				frappe.route_options = {
@@ -340,7 +354,7 @@ frappe.ui.form.on('Delivery Planning', {
 				};
 				frappe.set_route("List", "Delivery Planning Item", "Gantt");
 			});
-		}
+		};
 
 	},
 
@@ -370,204 +384,3 @@ frappe.ui.form.on('Delivery Planning', {
 
 	
 });
-
-
-//frappe.ui.form.on("Delivery Planning", "onload", function(frm) {
-//        frm.call({
-//				method : 'check_po_in_dpi',
-//				doc: frm.doc,
-//				callback : function(r){
-//					if(r.message == 1){
-//						console.log("----- 1 --- --For Both PO and DN -  ---  ---  ",r.message);
-//
-//							//  custom button to populate Transporter wise Delivery Planning
-//							frm.add_custom_button(__("Transporter Summary"), function() {
-//
-//								frm.call({
-//									method : 'summary_call',
-//									doc: frm.doc,
-//									callback : function(r){
-//										if(r.message == 1){
-//											console.log("-----  --- --item--  ---  ---  ",r);
-//											frappe.msgprint("  Transporter wise Delivery Plan created  ");
-//										}
-//										else{
-//										frappe.msgprint(" Unable to create Transporter wise Delivery Plan   ");
-//										}
-//								   }
-//								});
-//							},__("Calculate"));
-//
-//							//custom button to generate Purchase Order Planning Items
-//							console.log("Inside custom if purchase order")
-//							frm.add_custom_button(__("Purchase Order Summary"), function() {
-//							frm.call({
-//								method : 'purchase_order_call',
-//								doc: frm.doc,
-//
-//								callback : function(r){
-//									if(r.message == 1){
-//											console.log("-----  --- --item--  ---  ---  ",r);
-//											frappe.msgprint(" Purchase Order Plan Items created  ");
-//										}
-//									else{
-//										frappe.msgprint(" Unable to create Purchase Delivery Plan Item   ");
-//										}
-//							   }
-//							});
-//							},__("Calculate"));
-//
-//						// custom button Create for Purchase Order Creation
-//							frm.add_custom_button(__('Purchase Order'), function () {
-//								frm.call({
-//									method : 'make_po',
-//									doc: frm.doc,
-//									callback : function(r){
-//										if(r.message == 1){
-//											console.log("-----  --- --PO Create-  ---  ---  ",r);
-//											frappe.msgprint("  Purchase Order created ");
-//										}
-//										else{
-//											frappe.msgprint(" Unable to create Purchase Order ");
-//										}
-//								   }
-//								});
-//							}, __('Create'));
-//
-//							//custom button 'Create' for Pick List
-//							console.log("Creating CREATE button")
-//							frm.add_custom_button(__('Pick List'), function () {
-//								frm.call({
-//									method : 'make_picklist',
-//									doc: frm.doc,
-//									callback : function(r){
-//										if(r.message == 1){
-//											console.log("-----  --- --PO Create-  ---  ---  ",r);
-//											frappe.msgprint("  Purchase Pick List created ");
-//										}
-//										else{
-//											frappe.msgprint(" Unable to create Pick List ");
-//										}
-//								   }
-//								});
-//							}, __('Create'));
-//
-//					//    	Delivery Note creation using custom button
-//							frm.add_custom_button(__('Delivery Note'), function () {
-//								frm.call({
-//									method : 'make_dnote',
-//									doc: frm.doc,
-//									callback : function(r){
-//										if(r.message == 1){
-//											console.log("-----  --- --Dnote Create-  ---  ---  ",r);
-//											frappe.msgprint({
-//											title: __('Delivery Note created'),
-//											message: __('Created Delivery note using Pick List'),
-//											indicator: 'green'
-//										});
-//										}
-//										else if(r.message == 2){
-//											console.log("-----  --- -- 2  Dnote Create-  ---  ---  ",r);
-//											frappe.msgprint({
-//											title: __('Delivery Note created'),
-//											message: __('Created Delivery Note using Sales Order'),
-//											indicator: 'green'
-//										});
-//										}
-//										else{
-//											frappe.msgprint({
-//											title: __('Delivery Note not created'),
-//											message: __('No Items with of this Delivery Planning is Approved or Pick not created'),
-//											indicator: 'orange'
-//										});
-//										}
-//								   }
-//								});
-//							}, __('Create'));
-//
-//
-//					}
-//					else if(r.message == 2){
-//						console.log("----- 2 --- --FOR Purchase Order -  ---  ---  ",r.message);
-//
-//							//custom button to generate Purchase Order Planning Items
-//							console.log("Inside custom if purchase order")
-//							frm.add_custom_button(__("Purchase Order Summary"), function() {
-//							frm.call({
-//								method : 'purchase_order_call',
-//								doc: frm.doc,
-//
-//								callback : function(r){
-//									if(r.message == 1){
-//											console.log("-----  --- --item--  ---  ---  ",r);
-//											frappe.msgprint(" Purchase Order Plan Items created  ");
-//										}
-//									else{
-//										frappe.msgprint(" Unable to create Purchase Delivery Plan Item   ");
-//										}
-//							   }
-//							});
-//							},__("Calculate"));
-//
-//							// custom button Create for Purchase Order Creation
-//							frm.add_custom_button(__('Purchase Order'), function () {
-//								frm.call({
-//									method : 'make_po',
-//									doc: frm.doc,
-//									callback : function(r){
-//										if(r.message == 1){
-//											console.log("-----  --- --PO Create-  ---  ---  ",r);
-//											frappe.msgprint("  Purchase Order created ");
-//										}
-//										else{
-//											frappe.msgprint(" Unable to create Purchase Order ");
-//										}
-//								   }
-//								});
-//							}, __('Create'));
-//
-//
-//
-//						}
-//
-//					else if(r.message == 3 ){
-//						console.log("----- 3 --- --Nothing 85068 89977 nothing  ---  ---  ",r.message);
-//
-////							Transporter Summary inside Calcluate button
-//							frm.add_custom_button(__("Transporter Summary"), function() {
-//
-//								frm.call({
-//									method : 'summary_call',
-//									doc: frm.doc,
-//									callback : function(r){
-//										if(r.message == 1){
-//											console.log("-----  --- --item--  ---  ---  ",r);
-//											frappe.msgprint("  Transporter wise Delivery Plan created  ");
-//										}
-//										else{
-//										frappe.msgprint(" Unable to create Transporter wise Delivery Plan   ");
-//										}
-//								   }
-//								});
-//							},__("Calculate"));
-//
-//							//custom button 'Create' for Pick List
-//							console.log("Creating CREATE button")
-//							frm.add_custom_button(__('Pick List'), function () {
-//								frm.call({
-//									method : 'make_picklist',
-//									doc: frm.doc,
-//									callback : function(r){
-//										if(r.message == 1){
-//											console.log("-----  --- --PO Create-  ---  ---  ",r);
-//											frappe.msgprint("  Purchase Pick List created ");
-//										}
-//										else{
-//											frappe.msgprint(" Unable to create Pick List ");
-//										}
-//								   }
-//								});
-//							}, __('Create'));
-
-
-
