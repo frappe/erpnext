@@ -84,7 +84,8 @@ def make_sales_invoice(reference_name, patient, company, therapy_plan_template):
 		'selling_price_list': price_list,
 		'price_list_currency': price_list_currency,
 		'plc_conversion_rate': 1.0,
-		'conversion_rate': 1.0
+		'conversion_rate': 1.0,
+		'transaction_type': "selling"
 	}
 
 	item_line = si.append('items', {})

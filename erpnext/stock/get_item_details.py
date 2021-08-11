@@ -37,6 +37,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 			"name": "",
 			"supplier": None,
 			"transaction_date": None,
+			"transaction_type": "buying" / "selling"
 			"conversion_rate": 1.0,
 			"buying_price_list": None,
 			"is_subcontracted": "Yes" / "No",
