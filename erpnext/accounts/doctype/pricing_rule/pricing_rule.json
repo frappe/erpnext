@@ -558,7 +558,8 @@
    "description": "Simple Python Expression, Example: territory != 'All Territories'",
    "fieldname": "condition",
    "fieldtype": "Code",
-   "label": "Condition"
+   "label": "Condition",
+   "options": "PythonExpression"
   },
   {
    "fieldname": "column_break_42",
@@ -575,7 +576,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2021-03-06 22:01:24.840422",
+ "modified": "2021-08-06 15:10:04.219321",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
