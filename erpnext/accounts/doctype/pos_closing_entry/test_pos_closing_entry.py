@@ -103,7 +103,6 @@ class TestPOSClosingEntry(unittest.TestCase):
 		pos_inv2.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
-		payment = pcv_doc.payment_reconciliation[0]
 
 		for d in pcv_doc.payment_reconciliation:
 			if d.mode_of_payment == 'Cash':
