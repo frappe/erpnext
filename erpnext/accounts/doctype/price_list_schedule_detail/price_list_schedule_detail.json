@@ -1,0 +1,55 @@
+{
+ "creation": "2021-08-11 10:17:28.590366",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "price_list",
+  "start_time",
+  "final_hour",
+  "day"
+ ],
+ "fields": [
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Price List",
+   "options": "Price List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Start Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "final_hour",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Final Hour",
+   "reqd": 1
+  },
+  {
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Day",
+   "options": "Lunes\nMartes\nMiercoles\nJueves\nViernes\nS\u00e1bado\nDomingo",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-08-11 12:04:25.911401",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Price List Schedule Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
