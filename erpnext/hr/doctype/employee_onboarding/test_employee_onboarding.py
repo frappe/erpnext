@@ -11,38 +11,25 @@ from erpnext.hr.doctype.employee_onboarding.employee_onboarding import Incomplet
 from erpnext.hr.doctype.job_offer.test_job_offer import create_job_offer
 
 class TestEmployeeOnboarding(unittest.TestCase):
-	def test_employee_onboarding_incomplete_task(self):
+	def setUp(self):
 		if frappe.db.exists('Employee Onboarding', {'employee_name': 'Test Researcher'}):
 			frappe.delete_doc('Employee Onboarding', {'employee_name': 'Test Researcher'})
-		_set_up()
-		applicant = get_job_applicant()
 
-		job_offer = create_job_offer(job_applicant=applicant.name)
-		job_offer.submit()
+		project = "Employee Onboarding : Test Researcher - test@researcher.com"
+		frappe.db.sql("delete from tabProject where name=%s", project)
+		frappe.db.sql("delete from tabTask where project=%s", project)
 
-		onboarding = frappe.new_doc('Employee Onboarding')
-		onboarding.job_applicant = applicant.name
-		onboarding.job_offer = job_offer.name
-		onboarding.company = '_Test Company'
-		onboarding.designation = 'Researcher'
-		onboarding.append('activities', {
-			'activity_name': 'Assign ID Card',
-			'role': 'HR User',
-			'required_for_employee_creation': 1
-		})
-		onboarding.append('activities', {
-			'activity_name': 'Assign a laptop',
-			'role': 'HR User'
-		})
-		onboarding.status = 'Pending'
-		onboarding.insert()
-		onboarding.submit()
+	def test_employee_onboarding_incomplete_task(self):
+		onboarding = create_employee_onboarding()
 
-		project_name = frappe.db.get_value("Project", onboarding.project, "project_name")
+		project_name = frappe.db.get_value('Project', onboarding.project, 'project_name')
 		self.assertEqual(project_name, 'Employee Onboarding : Test Researcher - test@researcher.com')
 
 		# don't allow making employee if onboarding is not complete
 		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
+
+		# boarding status
+		self.assertEqual(onboarding.boarding_status, 'Pending')
 
 		# complete the task
 		project = frappe.get_doc('Project', onboarding.project)
@@ -50,6 +37,10 @@ class TestEmployeeOnboarding(unittest.TestCase):
 			task = frappe.get_doc('Task', task.name)
 			task.status = 'Completed'
 			task.save()
+
+		# boarding status
+		onboarding.reload()
+		self.assertEqual(onboarding.boarding_status, 'Completed')
 
 		# make employee
 		onboarding.reload()
@@ -60,6 +51,13 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		employee.gender = 'Female'
 		employee.insert()
 		self.assertEqual(employee.employee_name, 'Test Researcher')
+
+	def tearDown(self):
+		for entry in frappe.get_all('Employee Onboarding'):
+			doc = frappe.get_doc('Employee Onboarding', entry.name)
+			doc.cancel()
+			doc.delete()
+
 
 def get_job_applicant():
 	if frappe.db.exists('Job Applicant', 'Test Researcher - test@researcher.com'):
@@ -72,10 +70,35 @@ def get_job_applicant():
 	applicant.insert()
 	return applicant
 
-def _set_up():
-	for doctype in ["Employee Onboarding"]:
-		frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
+def get_job_offer(applicant_name):
+	job_offer = frappe.db.exists('Job Offer', {'job_applicant': applicant_name})
+	if job_offer:
+		return frappe.get_doc('Job Offer', job_offer)
 
-	project = "Employee Onboarding : Test Researcher - test@researcher.com"
-	frappe.db.sql("delete from tabProject where name=%s", project)
-	frappe.db.sql("delete from tabTask where project=%s", project)
+	job_offer = create_job_offer(job_applicant=applicant_name)
+	job_offer.submit()
+	return job_offer
+
+def create_employee_onboarding():
+	applicant = get_job_applicant()
+	job_offer = get_job_offer(applicant.name)
+
+	onboarding = frappe.new_doc('Employee Onboarding')
+	onboarding.job_applicant = applicant.name
+	onboarding.job_offer = job_offer.name
+	onboarding.company = '_Test Company'
+	onboarding.designation = 'Researcher'
+	onboarding.append('activities', {
+		'activity_name': 'Assign ID Card',
+		'role': 'HR User',
+		'required_for_employee_creation': 1
+	})
+	onboarding.append('activities', {
+		'activity_name': 'Assign a laptop',
+		'role': 'HR User'
+	})
+	onboarding.status = 'Pending'
+	onboarding.insert()
+	onboarding.submit()
+
+	return onboarding

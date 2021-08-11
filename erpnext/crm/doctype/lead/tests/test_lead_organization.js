@@ -9,7 +9,6 @@ QUnit.test("test: lead", function (assert) {
 		() => frappe.set_route("List", "Lead"),
 		() => frappe.new_doc("Lead"),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value("organization_lead", "1"),
 		() => cur_frm.set_value("company_name", lead_name),
 		() => cur_frm.save(),
 		() => frappe.timeout(1),

@@ -9,10 +9,11 @@ from frappe.utils import date_diff, getdate, rounded, add_days, cstr, cint, flt
 from frappe.model.document import Document
 from erpnext.payroll.doctype.payroll_period.payroll_period import get_payroll_period_days, get_period_factor
 from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
-from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_employee, get_previous_claimed_amount
+from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_employee, get_previous_claimed_amount, validate_active_employee
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.validate_duplicate_on_payroll_period()
 		if not self.max_benefits:
 			self.max_benefits = get_max_benefits_remaining(self.employee, self.date, self.payroll_period)

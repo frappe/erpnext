@@ -316,10 +316,6 @@ def get_payment_details(invoice):
 	))
 
 def get_return_doc_reference(invoice):
-	if not invoice.return_against:
-		frappe.throw(_('For generating IRN, reference to the original invoice is mandatory for a credit note. Please set {} field to generate e-invoice.')
-			.format(frappe.bold('Return Against')), title=_('Missing Field'))
-
 	invoice_date = frappe.db.get_value('Sales Invoice', invoice.return_against, 'posting_date')
 	return frappe._dict(dict(
 		invoice_name=invoice.return_against, invoice_date=format_date(invoice_date, 'dd/mm/yyyy')
@@ -438,7 +434,7 @@ def make_einvoice(invoice):
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 
-	if invoice.is_return:
+	if invoice.is_return and invoice.return_against:
 		prev_doc_details = get_return_doc_reference(invoice)
 
 	if invoice.transporter and not invoice.is_return:
@@ -932,7 +928,7 @@ class GSPConnector():
 
 	def set_einvoice_data(self, res):
 		enc_signed_invoice = res.get('SignedInvoice')
-		dec_signed_invoice = jwt.decode(enc_signed_invoice, verify=False)['data']
+		dec_signed_invoice = jwt.decode(enc_signed_invoice, options={"verify_signature": False})['data']
 
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')
@@ -969,7 +965,7 @@ class GSPConnector():
 			"attached_to_doctype": doctype,
 			"attached_to_name": docname,
 			"attached_to_field": "qrcode_image",
-			"is_private": 1,
+			"is_private": 0,
 			"content": qr_image.getvalue()})
 		_file.save()
 		frappe.db.commit()
