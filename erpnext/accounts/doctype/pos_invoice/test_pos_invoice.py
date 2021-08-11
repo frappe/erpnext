@@ -522,7 +522,7 @@ def create_pos_invoice(**args):
 	pos_inv.debit_to = args.debit_to or "Debtors - _TC"
 	pos_inv.is_return = args.is_return
 	pos_inv.return_against = args.return_against
-	pos_inv.currency=args.currency or "INR"
+	pos_inv.currency = args.currency or "INR"
 	pos_inv.conversion_rate = args.conversion_rate or 1
 	pos_inv.account_for_change_amount = args.account_for_change_amount or "Cash - _TC"
 
@@ -536,7 +536,8 @@ def create_pos_invoice(**args):
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
-		"serial_no": args.serial_no
+		"serial_no": args.serial_no,
+		"transaction_type": args.transaction_type or "selling"
 	})
 
 	if not args.do_not_save:
