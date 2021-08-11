@@ -19,6 +19,7 @@ class TestAttendanceRequest(unittest.TestCase):
 		frappe.db.rollback()
 
 	def test_on_duty_attendance_request(self):
+		"Test creation/updation of Attendace from Attendance Request, on duty."
 		today = nowdate()
 		employee = get_employee()
 		attendance_request = frappe.new_doc("Attendance Request")
@@ -58,6 +59,7 @@ class TestAttendanceRequest(unittest.TestCase):
 		self.assertEqual(attendance_docstatus, 2)
 
 	def test_work_from_home_attendance_request(self):
+		"Test creation/updation of Attendace from Attendance Request, work from home."
 		today = nowdate()
 		employee = get_employee()
 		attendance_request = frappe.new_doc("Attendance Request")
