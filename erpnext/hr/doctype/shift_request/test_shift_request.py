@@ -15,24 +15,35 @@ class TestShiftRequest(unittest.TestCase):
 		for doctype in ["Shift Request", "Shift Assignment"]:
 			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_make_shift_request(self):
+		"Test creation/updation of Shift Assignment from Shift Request."
 		department = frappe.get_value("Employee", "_T-Employee-00001", 'department')
 		set_shift_approver(department)
 		approver = frappe.db.sql("""select approver from `tabDepartment Approver` where parent= %s and parentfield = 'shift_request_approver'""", (department))[0][0]
 
 		shift_request = make_shift_request(approver)
 
-		shift_assignments = frappe.db.sql('''
-				SELECT shift_request, employee
-				FROM `tabShift Assignment`
-				WHERE shift_request = '{0}'
-			'''.format(shift_request.name), as_dict=1)
-		for d in shift_assignments:
-			employee = d.get('employee')
-			self.assertEqual(shift_request.employee, employee)
-			shift_request.cancel()
-			shift_assignment_doc = frappe.get_doc("Shift Assignment", {"shift_request": d.get('shift_request')})
-			self.assertEqual(shift_assignment_doc.docstatus, 2)
+		# Only one shift assignment is created against a shift request
+		shift_assignment = frappe.db.get_value(
+			"Shift Assignment",
+			filters={"shift_request": shift_request.name},
+			fieldname=["employee", "docstatus"],
+			as_dict=True
+		)
+		self.assertEqual(shift_request.employee, shift_assignment.employee)
+		self.assertEqual(shift_assignment.docstatus, 1)
+
+		shift_request.cancel()
+
+		shift_assignment_docstatus = frappe.db.get_value(
+			"Shift Assignment",
+			filters={"shift_request": shift_request.name},
+			fieldname="docstatus"
+		)
+		self.assertEqual(shift_assignment_docstatus, 2)
 
 	def test_shift_request_approver_perms(self):
 		employee = frappe.get_doc("Employee", "_T-Employee-00001")
