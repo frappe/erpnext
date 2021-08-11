@@ -4,7 +4,7 @@
 frappe.ui.form.on('Delivery Planning Item', {
 	
 	before_load: function(frm){
-		if(frm.doc.docstatus == 1){
+		if(frm.doc.docstatus === 1){
 			frm.call({
 						doc:frm.doc,
 						method: 'update_stock',
@@ -85,7 +85,22 @@ frappe.ui.form.on('Delivery Planning Item', {
 				    default: frm.doc.transporter,
 				    depends_on: "eval: doc.supplier_dc == 0",
 					mandatory_depends_on : "eval: doc.supplier_dc == 0",
+					onchange: function() {
+						frappe.model.get_value('Supplier', {"name":d.fields_dict.transporter.value}, 'supplier_name',
+						function(dd){								
+						console.log(" a000000",dd.supplier_name)
+						d.fields_dict.transporter_name.value = dd.supplier_name
+						d.fields_dict.transporter_name.refresh();
+						})
+					},
 
+				},
+				{
+					label: 'Transporter Name',
+					fieldname: 'transporter_name',
+					fieldtype: 'Data',
+					read_only: 1,
+					depends_on: "eval: doc.supplier_dc == 0",
 				},
 				{
 					label: 'Deliver Date',
@@ -121,6 +136,20 @@ frappe.ui.form.on('Delivery Planning Item', {
 					options: "Supplier",
 					depends_on: "eval: doc.supplier_dc == 1 ",
 					mandatory_depends_on : "eval: doc.supplier_dc == 1",
+					onchange: function() {
+						frappe.model.get_value('Supplier', {"name":d.fields_dict.supplier.value}, 'supplier_name',
+						function(dd){								
+						d.fields_dict.supplier_name.value = dd.supplier_name
+						d.fields_dict.supplier_name.refresh();
+						})
+					},
+				},
+				{
+					label: 'Supplier Name',
+					fieldname: 'supplier_name',
+					fieldtype: 'Data',
+					depends_on: "eval: doc.supplier_dc == 1 ",
+					read_only: 1,
 				}
 			],
 

@@ -1,6 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-var date1 = new Date()
+
 frappe.views.calendar["Delivery Planning Item"] = {
     
 	field_map: {
@@ -17,6 +17,7 @@ frappe.views.calendar["Delivery Planning Item"] = {
 			"fieldname": "docstatus",
 			"options": 1,
 			"label": __("Document Status")
+			// "docstatus":
 		}
 	],
 	get_events_method: "frappe.desk.calendar.get_events"
