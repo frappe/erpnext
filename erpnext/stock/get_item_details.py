@@ -728,9 +728,9 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	if not ignore_party:
 		if args.get('transaction_type'):
-			if args.get("transaction_type") == "buying":
+			if args.get("transaction_type") == "buying" and args.get("supplier"):
 				conditions += " and customer=%(customer)s"
-			if args.get("transaction_type") == "selling":
+			if args.get("transaction_type") == "selling" and args.get("customer"):
 				conditions += " and supplier=%(supplier)s"
 		else:
 			if args.get("customer"):
