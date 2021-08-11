@@ -13,6 +13,7 @@ from frappe.utils import (flt, cint, nowdate, add_days, comma_and, now_datetime,
 from frappe.utils.csvutils import build_csv_response
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 class ProductionPlan(Document):
@@ -649,6 +650,10 @@ def get_material_request_items(row, sales_order, company,
 		row['purchase_uom'] = row['stock_uom']
 
 	if row['purchase_uom'] != row['stock_uom']:
+		if not row['conversion_factor']:
+			row['conversion_factor'] = get_conversion_factor(row.get('item_code'),
+				row.get('purchase_uom')).get("conversion_factor")
+
 		if not row['conversion_factor']:
 			frappe.throw(_("UOM Conversion factor ({0} -> {1}) not found for item: {2}")
 				.format(row['purchase_uom'], row['stock_uom'], row.item_code))
