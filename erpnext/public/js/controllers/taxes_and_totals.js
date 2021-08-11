@@ -16,7 +16,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 		item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 
-		item.rate = flt(item.rate_with_margin , precision("rate", item));
+		item.rate = flt(item.rate_with_margin);
 
 		if(item.discount_percentage) {
 			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
@@ -25,7 +25,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 
 		if (item.discount_amount) {
-			item.rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
+			item.rate = flt((item.rate_with_margin) - (item.discount_amount));
 		} else {
 			item.discount_amount = 0;
 		}
@@ -115,10 +115,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 
-				var exclude_round_fieldnames = ['discount_percentage'];
-				if (has_margin_field && item.margin_type === "Percentage") {
-					exclude_round_fieldnames.push('margin_rate_or_amount');
-				}
+				var exclude_round_fieldnames = ['rate', 'price_list_rate', 'discount_percentage', 'discount_amount',
+					'margin_rate_or_amount', 'rate_with_margin'];
 				frappe.model.round_floats_in(item, null, exclude_round_fieldnames);
 
 				var rate_before_discount;

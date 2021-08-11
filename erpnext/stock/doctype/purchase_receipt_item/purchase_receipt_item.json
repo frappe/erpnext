@@ -341,7 +341,7 @@
    "depends_on": "price_list_rate",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
-   "label": "Discount Amount",
+   "label": "Discount on Price List Rate",
    "options": "currency"
   },
   {
@@ -381,8 +381,7 @@
    "label": "Amount",
    "oldfieldname": "import_amount",
    "oldfieldtype": "Currency",
-   "options": "currency",
-   "read_only": 1
+   "options": "currency"
   },
   {
    "fieldname": "col_break4",
@@ -952,13 +951,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_discount",
    "fieldname": "amount_before_discount",
    "fieldtype": "Currency",
    "label": "Amount Before Discount",
    "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "depends_on": "total_discount",
@@ -975,13 +972,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_discount",
    "fieldname": "total_discount",
    "fieldtype": "Currency",
    "label": "Total Discount",
    "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "depends_on": "total_discount",
@@ -1344,7 +1339,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-13 18:12:08.416022",
+ "modified": "2021-08-11 15:36:51.093735",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

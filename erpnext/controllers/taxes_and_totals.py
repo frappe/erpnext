@@ -101,9 +101,8 @@ class calculate_taxes_and_totals(object):
 			for item in self.doc.get("items"):
 				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 
-				exclude_round_fieldnames = ['discount_percentage']
-				if has_margin_field and item.margin_type == "Percentage":
-					exclude_round_fieldnames.append('margin_rate_or_amount')
+				exclude_round_fieldnames = ['rate', 'price_list_rate', 'discount_percentage', 'discount_amount',
+					'margin_rate_or_amount', 'rate_with_margin']
 				self.doc.round_floats_in(item, excluding=exclude_round_fieldnames)
 
 				if item.discount_percentage == 100:
@@ -111,7 +110,7 @@ class calculate_taxes_and_totals(object):
 				elif item.price_list_rate:
 					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
 						item.rate = flt(item.price_list_rate *
-							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+							(1.0 - (item.discount_percentage / 100.0)))
 						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 					elif item.discount_amount and item.pricing_rules:
 						item.rate = item.price_list_rate - item.discount_amount
@@ -121,7 +120,7 @@ class calculate_taxes_and_totals(object):
 
 				if has_margin_field and flt(item.rate_with_margin):
 					rate_before_discount = item.rate_with_margin
-					item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+					item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)))
 					item.discount_amount = item.rate_with_margin - item.rate
 					item.discount_percentage = item.discount_amount / item.rate_with_margin * 100
 				elif flt(item.price_list_rate):
@@ -902,7 +901,8 @@ class calculate_taxes_and_totals(object):
 						item.margin_type = None
 						item.margin_rate_or_amount = 0.0
 
-			rate_before_discount = flt(item.rate) + flt(item.discount_amount)
+			rate_db_precision = 6 if item.precision('price_list_rate') <= 6 else 9
+			rate_before_discount = flt(flt(item.rate) + flt(item.discount_amount), rate_db_precision)
 			if item.margin_type and rate_before_discount > flt(item.price_list_rate):
 				margin_amount = rate_before_discount - flt(item.price_list_rate)
 				if item.margin_type == "Amount":

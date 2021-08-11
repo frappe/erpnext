@@ -346,7 +346,7 @@
    "depends_on": "price_list_rate",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
-   "label": "Discount Amount",
+   "label": "Discount on Price List Rate with Margin",
    "options": "currency"
   },
   {
@@ -383,7 +383,6 @@
    "oldfieldtype": "Currency",
    "options": "currency",
    "print_width": "100px",
-   "read_only": 1,
    "width": "100px"
   },
   {
@@ -830,13 +829,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_discount",
    "fieldname": "amount_before_discount",
    "fieldtype": "Currency",
    "label": "Amount Before Discount",
    "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "depends_on": "total_discount",
@@ -853,13 +850,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_discount",
    "fieldname": "total_discount",
    "fieldtype": "Currency",
    "label": "Total Discount",
    "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "depends_on": "total_discount",
@@ -1208,7 +1203,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-13 18:16:47.538917",
+ "modified": "2021-08-11 15:24:28.046278",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

@@ -9,8 +9,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			var item = frappe.get_doc(cdt, cdn);
 			var margin_df = frappe.meta.get_docfield(cdt, 'margin_type');
 
-			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
-
 			if(item.price_list_rate) {
 				if(item.rate > item.price_list_rate && margin_df) {
 					// if rate is greater than price_list_rate, set margin
@@ -50,7 +48,45 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		});
 
+		frappe.ui.form.on(this.frm.doctype + " Item", "amount", function(frm, cdt, cdn) {
+			var item = frappe.get_doc(cdt, cdn);
 
+			item.amount = flt(item.amount, precision('amount', item));
+			if (flt(item.qty)) {
+				frappe.model.set_value(cdt, cdn, 'rate', item.amount / flt(item.qty));
+			} else {
+				frappe.model.set_value(cdt, cdn, 'rate', item.amount);
+			}
+		});
+
+		frappe.ui.form.on(this.frm.doctype + " Item", "amount_before_discount", function(frm, cdt, cdn) {
+			var item = frappe.get_doc(cdt, cdn);
+			var margin_df = frappe.meta.get_docfield(cdt, 'margin_type');
+
+			if (margin_df) {
+				item.margin_rate_or_amount = 0;
+			}
+
+			item.amount_before_discount = flt(item.amount_before_discount, precision('amount_before_discount', item));
+			if (flt(item.qty)) {
+				item.price_list_rate = item.amount_before_discount / flt(item.qty);
+			} else {
+				item.price_list_rate = item.amount_before_discount;
+			}
+
+			frappe.model.trigger('price_list_rate', item.price_list_rate, item);
+		});
+
+		frappe.ui.form.on(this.frm.doctype + " Item", "total_discount", function(frm, cdt, cdn) {
+			var item = frappe.get_doc(cdt, cdn);
+
+			item.total_discount = flt(item.total_discount, precision('total_discount', item));
+			if (flt(item.qty)) {
+				frappe.model.set_value(cdt, cdn, 'discount_amount', item.total_discount / flt(item.qty));
+			} else {
+				frappe.model.set_value(cdt, cdn, 'discount_amount', item.total_discount);
+			}
+		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
