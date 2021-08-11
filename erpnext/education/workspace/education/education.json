@@ -709,7 +709,7 @@
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "public": 1,
- "restrict_to_domain": "",
+ "restrict_to_domain": "Education",
  "roles": [],
  "sequence_id": 9,
  "shortcuts": [
