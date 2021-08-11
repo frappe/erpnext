@@ -174,13 +174,11 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.save()
 		pe.submit()
 
-		unlink_payment_on_cancel_of_invoice()
 		si2.load_from_db()
 		si2.cancel()
 
 		si1.load_from_db()
 		self.assertRaises(PaymentEntryUnlinkError, si1.cancel)
-		unlink_payment_on_cancel_of_invoice(0)
 
 
 	def test_sales_invoice_calculation_export_currency(self):
