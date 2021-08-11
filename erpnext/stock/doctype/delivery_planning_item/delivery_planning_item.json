@@ -21,6 +21,7 @@
   "sales_order",
   "sorce_warehouse",
   "postal_code",
+  "planned_date",
   "delivery_date",
   "current_stock",
   "available_stock",
@@ -48,6 +49,7 @@
   "item_dname",
   "rate",
   "is_updated",
+  "company",
   "amended_from"
  ],
  "fields": [
@@ -351,12 +353,24 @@
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
+  },
+  {
+   "fieldname": "planned_date",
+   "fieldtype": "Date",
+   "label": "Planned Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company ",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-05 15:56:52.736957",
+ "modified": "2021-08-10 16:47:38.154209",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
