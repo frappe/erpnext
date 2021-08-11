@@ -281,15 +281,18 @@ def get_repeated(values):
 
 
 def get_documents_with_active_service_level_agreement():
-	if not frappe.cache().hget("service_level_agreement", "active"):
-		set_documents_with_active_service_level_agreement()
+	sla_doctypes = frappe.cache().hget("service_level_agreement", "active")
 
-	return frappe.cache().hget("service_level_agreement", "active")
+	if sla_doctypes is None:
+		return set_documents_with_active_service_level_agreement()
+
+	return sla_doctypes
 
 
 def set_documents_with_active_service_level_agreement():
 	active = [sla.document_type for sla in frappe.get_all("Service Level Agreement", fields=["document_type"])]
 	frappe.cache().hset("service_level_agreement", "active", active)
+	return active
 
 
 def apply(doc, method=None):
