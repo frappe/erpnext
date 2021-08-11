@@ -127,6 +127,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				on_customer_change: (customer) => {
 					this.frm.set_value('customer', customer);
 				},
+				on_patient_change: (patient) => {
+					this.frm.set_value('patient', patient);
+				},
 				on_field_change: (item_code, field, value, batch_no) => {
 					this.update_item_in_cart(item_code, field, value, batch_no);
 				},
@@ -723,6 +726,7 @@ class POSCart {
 	make() {
 		this.make_dom();
 		this.make_customer_field();
+		this.make_patient_field()
 		this.make_loyalty_points();
 		this.make_numpad();
 	}
@@ -731,6 +735,8 @@ class POSCart {
 		this.wrapper.append(`
 			<div class="pos-cart">
 				<div class="customer-field">
+				</div>
+				<div class="patient-field">
 				</div>
 				<div class="cart-wrapper">
 					<div class="list-item-table">
@@ -958,6 +964,24 @@ class POSCart {
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
 
+	make_patient_field() {
+		this.patient_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Link',
+				label: 'Patient',
+				fieldname: 'patient',
+				options: 'Patient',
+				onchange: () => {
+					this.events.on_patient_change(this.patient_field.get_value());
+					this.events.get_loyalty_details();
+				}
+			},
+			parent: this.wrapper.find('.patient-field'),
+			render_input: true
+		});
+
+		this.patient_field.set_value(this.frm.doc.patient);
+	}
 
 	make_loyalty_points() {
 		this.available_loyalty_points = frappe.ui.form.make_control({
@@ -1814,7 +1838,7 @@ class Payment {
 			},
 			{
 				fieldtype: 'Currency',
-				label: __("Discount"),
+				label: __("Additional Discount Amount"),
 				options: me.frm.doc.currency,
 				fieldname: "discount_amount",
 				default: me.frm.doc.discount_amount,
@@ -1822,6 +1846,19 @@ class Payment {
 					me.update_cur_frm_value('discount_amount', () => {
 						frappe.flags.discount_amount = false;
 						me.update_discount_amount()
+					});
+				}
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Additional Discount Percentage"),
+				options: me.frm.doc.currency,
+				fieldname: "additional_discount_percentage",
+				default: me.frm.doc.additional_discount_percentage,
+				onchange: () => {
+					me.update_cur_frm_value('additional_discount_percentage', () => {
+						frappe.flags.additional_discount_percentage = false;
+						me.update_additional_discount_percentage()
 					});
 				}
 			},
@@ -1864,6 +1901,22 @@ class Payment {
 				default: me.frm.doc.paid_amount,
 				read_only: 1
 			},
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("Taxed Sales15"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "taxed_sales15",
+			// 	default: me.frm.doc.taxed_sales15,
+			// 	read_only: 1
+			// },
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("ISV 15%"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "isv15",
+			// 	default: me.frm.doc.isv15,
+			// 	read_only: 1
+			// },
 			{
 				fieldtype: 'Column Break',
 			},
@@ -1875,6 +1928,22 @@ class Payment {
 				default: me.frm.doc.outstanding_amount,
 				read_only: 1
 			},
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("Taxed Sales18"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "taxed_sales18",
+			// 	default: me.frm.doc.taxed_sales18,
+			// 	read_only: 1
+			// },
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("ISV 18%"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "isv18",
+			// 	default: me.frm.doc.isv18,
+			// 	read_only: 1
+			// },
 		]);
 
 		return fields;
@@ -1888,6 +1957,7 @@ class Payment {
 		frappe.flags.payment_method = true;
 		frappe.flags.discount_amount = true;
 		frappe.flags.discount_reason = true;
+		frappe.flags.additional_discount_percentage = true;
 	}
 
 	update_cur_frm_value(fieldname, callback) {
@@ -1914,8 +1984,14 @@ class Payment {
 				}
 			});
 	}
+
 	update_discount_amount() {
 		this.dialog.set_value("discount_amount", this.frm.doc.discount_amount);
+		this.update_change_amount();
+	}
+
+	update_additional_discount_percentage() {
+		this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
 		this.update_change_amount();
 	}
 
