@@ -31,6 +31,7 @@ from six import iteritems
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 from frappe.utils.data import money_in_words
+from datetime import datetime
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -278,6 +279,57 @@ class SalesInvoice(SellingController):
 
 		# if self.docstatus == 0:
 		# 	self.assign_cai()
+	
+	def assing_price_list(self):
+		day_in = datetime.today().weekday()
+		day = ""
+
+		if day_in == 0:
+			day = "Lunes"
+		elif day_in == 1:
+			day = "Martes"
+		elif day_in == 2:
+			day = "Miercoles"
+		elif day_in == 3:
+			day = "Jueves"
+		elif day_in == 4:
+			day = "Viernes"
+		elif day_in == 5:
+			day = "Sábado"
+		elif day_in == 6:
+			day = "Domingo"
+
+		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time]})
+
+		if len(price_list_schedule_detail) > 0:
+			self.set('selling_price_list', price_list_schedule_detail[0].price_list)
+	
+	def assing_price_list_pos(self):
+		day_in = datetime.today().weekday()
+		day = ""
+		price_list = ""
+
+		if day_in == 0:
+			day = "Lunes"
+		elif day_in == 1:
+			day = "Martes"
+		elif day_in == 2:
+			day = "Miercoles"
+		elif day_in == 3:
+			day = "Jueves"
+		elif day_in == 4:
+			day = "Viernes"
+		elif day_in == 5:
+			day = "Sábado"
+		elif day_in == 6:
+			day = "Domingo"
+
+		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time]})
+
+		if len(price_list_schedule_detail) > 0:
+			price_list = price_list_schedule_detail[0].price_list
+
+		return price_list
 
 	def calculated_taxes(self):
 		taxed15 = 0
@@ -860,7 +912,15 @@ class SalesInvoice(SellingController):
 				self.company_address = pos.get("company_address")
 
 			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+				price_list = self.assing_price_list_pos()
+
+				if price_list != "":
+					doc = frappe.get_doc('POS Profile', pos.get('name'))
+					doc.selling_price_list = price_list
+					doc.save()
+					self.set('selling_price_list', price_list)
+				else:
+					self.set('selling_price_list', pos.get("selling_price_list"))
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))

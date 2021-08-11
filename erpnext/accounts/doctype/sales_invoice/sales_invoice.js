@@ -34,6 +34,26 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 	},
 
+	// patient: function(frm) {
+	// 	frappe.call({
+	// 		method: "assing_price_list",
+	// 		doc: frm.doc,
+	// 		callback: function(r) {
+	// 			frm.set_df_property("selling_price_list", "options", r.message.price_list);
+	// 		}
+	// 	});
+	// },
+
+	// customer: function(frm) {
+	// 	frappe.call({
+	// 		method: "assing_price_list",
+	// 		doc: frm.doc,
+	// 		callback: function(r) {
+	// 			frm.set_df_property("selling_price_list", "options", r.message.price_list);
+	// 		}
+	// 	});
+	// },
+
 	refresh: function(doc, dt, dn) {
 		const me = this;
 		this._super();
@@ -278,6 +298,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					if(r.message && r.message.length) {
 						select_loyalty_program(me.frm, r.message);
 					}
+					frappe.call({
+						method: "assing_price_list",
+						doc: frm.doc,
+						callback: function(r) {
+							// frm.set_df_property("selling_price_list", "options", r.message.price_list);
+							// me.frm.set_value("selling_price_list", r.message.price_list);
+						}
+					});
 				}
 			});
 		}
@@ -797,6 +825,14 @@ frappe.ui.form.on('Sales Invoice', {
 							frm.set_value("customer", patient_customer.message.customer);
 							frm.refresh_fields();
 						}
+						frappe.call({
+							method: "assing_price_list",
+							doc: frm.doc,
+							callback: function(r) {
+								// frm.set_df_property("selling_price_list", "options", r.message.price_list);
+								// me.frm.set_value("selling_price_list", r.message.price_list);
+							}
+						});
 					}
 				});
 			}
