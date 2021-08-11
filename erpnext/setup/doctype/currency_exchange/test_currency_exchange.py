@@ -38,7 +38,8 @@ def save_new_records(test_records):
             curr_exchange.insert()
 
 test_exchange_values = {
-    '2015-12-15': '66.999'
+    '2015-12-15': '66.999',
+    '2016-01-15': '65.1'
 }
 
 # Removing API call from get_exchange_rate
