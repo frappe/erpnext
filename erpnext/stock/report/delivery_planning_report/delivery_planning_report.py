@@ -2,10 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
+from frappe import _, throw
+from frappe.utils import flt, date_diff, getdate
 
 def execute(filters=None):
-	conditions = ""
 	group_by = ""
 
 	if filters.group_by == "Transporter":
@@ -18,43 +18,63 @@ def execute(filters=None):
 		group_by =" GROUP BY dpi.delivery_date "
 	else: group_by =""
 
-	if filters.company:
-		conditions +=" AND pl.company = %s" % frappe.db.escape(filters.company)
-
-	if filters.transporter:
-		conditions += " AND dpi.transporter = %s" % frappe.db.escape(filters.transporter)
-
-	if filters.from_date:
-		conditions += " AND dpi.delivery_date >= '%s'" % filters.from_date
-
-	if filters.to_date:
-		conditions += " AND dpi.delivery_date <= '%s'" % filters.to_date
-
-	if filters.customer:
-		conditions += " AND dpi.customer = %s" % frappe.db.escape(filters.customer)
-	columns = get_column()
-	data = get_data(conditions, group_by)
+	validate_filters(filters)
+	
+	columns = get_columns(filters)
+	conditions = get_conditions(filters)
+	data = get_data(conditions, group_by, filters)
 	return columns, data
 
+def validate_filters(filters):
+	from_date, to_date = filters.get("from_date"), filters.get("to_date")
+	group, based = filters.get("group_by"), filters.get("based_on")
+
+	if not from_date and to_date:
+		frappe.throw(_("From and To Dates are required."))
+	elif date_diff(to_date, from_date) < 0:
+		frappe.throw(_("To Date cannot be before From Date."))
+
+	# if group == based:
+	# 	frappe.throw(_("Group by and Based on cannot be same"))
+	
 
 
-def get_column():
-	return [
-		_("Sales Order") + ":Link/Sales Order:160",
-		_("Customer") +":Link/Customer:120", _("Customer Name") + "::120",
-		_("Transporter") + ":Link/Supplier:120", _("Transporter Name") + "::120",
-		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
-		_("Ordered Qty") + ":Float:50", _("Qty To Deliver") + ":Float:50",
-		_("Expected Date") + ":Date:100", _("Planned Delivery Date") + ":Date:100",
-		_("Delivery Note") + ":Link/Delivery Note:160", _("Delivery Note Date") + ":Date:100",
-		_("Delay Days") + ":Int:50", _("Pick List") + ":Link/Pick List:180",
-		_("Weight Ordered") + ":Float:100", _("Planned Delivery Weight") + ":Float:100",
-		_("Actual Delivery Weight") + ":Float:100", _("Purchase Order") + ":Link/Purchase Order:180",
-		_("Company") + ":Link/Company:120",
+def get_conditions(filters):
+	conditions = ""
+	if filters.get("from_date") and filters.get("to_date"):
+		conditions += " AND dpi.delivery_date between %(from_date)s and %(to_date)s"
+
+	if filters.get("company"):
+		conditions += " AND dpi.company = %(company)s"
+
+	if filters.get("transporter"):
+		conditions += " AND dpi.transporter = %(transporter)s"
+
+	if filters.get("customer"):
+		conditions += " AND dpi.customer = %(customer)s"
+		
+	return conditions
+
+def get_columns(filters):
+	if filters.get("based_on") == "Transporter":
+		return [
+			_("Sales Order") + ":Link/Sales Order:160",
+			_("Customer") +":Link/Customer:120", _("Customer Name") + "::120",
+			_("Transporter") + ":Link/Supplier:120", _("Transporter Name") + "::120",
+			_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
+			_("Ordered Qty") + ":Float:50", _("Qty To Deliver") + ":Float:50",
+			_("Expected Date") + ":Date:90", _("Planned Delivery Date") + ":Date:90",
+			_("Delivery Note") + ":Link/Delivery Note:160", _("Delivery Note Date") + ":Date:80",
+			_("Delay Days") + ":Int:50", _("Pick List") + ":Link/Pick List:150",
+			_("Weight Ordered") + ":Float:100", _("Planned Delivery Weight") + ":Float:100",
+			_("Actual Delivery Weight") + ":Float:100", _("Purchase Order") + ":Link/Purchase Order:150",
+			_("Supplier") + ":Link/Supplier:120", _("Supplier Name") + "::120",
+			_("Item Planning ID") +":Data:100",
+			_("Company") + ":Link/Company:120",
 
 	]
 
-def get_data(conditions, group_by):
+def get_data(conditions, group_by, filters):
 	query = frappe.db.sql(""" select
 							dpi.sales_order,
 							dpi.customer,
@@ -66,36 +86,34 @@ def get_data(conditions, group_by):
 							dpi.ordered_qty,
 							dpi.qty_to_deliver,
 							dpi.delivery_date as expected_date,
-							dpi.delivery_date as planned_delivery_date,
+							dpi.planned_date as planned_delivery_date,
 							dpi.delivery_note,
 							dn.posting_date as delivery_note_date,
-							DATEDIFF(dpi.delivery_date, dn.posting_date) as delay_days,
-							pl.name as pick_list,
+							DATEDIFF(dpi.planned_date, dpi.delivery_date) as delay_days,
+							dpi.pick_list,
 							dpi.weight_to_deliver as weight_ordered,
 							dpi.weight_to_deliver as planned_delivery_weight,
-							dn.total_net_weight as actual_delivery_weight,
+							(dni.qty * dpi.weight_per_unit) as actual_delivery_weight,
 							dpi.purchase_order as purchase_order,
-							pl.company,
-							dpi.name as Planning_Item,
+							dpi.supplier,
+							dpi.supplier_name,
+							dpi.name as item_planning_id,
+							dpi.company,
 							dpi.related_delivey_planning as Related_to_Planning
 							
 
 							from `tabDelivery Planning Item` dpi
-
-							Left join `tabDelivery Note` dn
-							ON dn.name = dpi.delivery_note
-
-							Left join `tabPick List` pl
-							ON pl.related_delivery_planning = dpi.related_delivey_planning
+						
+							Left join `tabDelivery Note` dn ON dn.name = dpi.delivery_note
+							inner join 	`tabDelivery Note Item` dni on dni.parent = dpi.delivery_note 
+							and dni.item_code = dpi.item_code
+						
 
 							where dpi.docstatus = 1  AND dpi.d_status = "Complete"
+						
+							
 							{conditions}
-							{group_by}""".format(conditions=conditions, group_by=group_by), as_dict=1)
+							{groupby}
+							""".format(conditions=conditions, groupby = group_by), filters, as_dict=1)
 	return query
 
-# pl.docstatus = 1 AND dn.docstatus = 1 AND dpi.approved = "Yes"
-# 							AND dn.related_delivery_planning = dpi.related_delivey_planning
-# 							AND pl.customer = dn.customer
-# 							AND dpi.related_delivey_planning = pl.related_delivery_planning
-# 							AND dpi.customer = c.name
-# 							AND dpi.transporter = s.name
