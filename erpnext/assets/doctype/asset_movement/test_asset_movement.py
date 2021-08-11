@@ -51,7 +51,7 @@ class TestAssetMovement(unittest.TestCase):
 			reference_doctype = 'Purchase Receipt', reference_name = pr.name)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
 
-		movement2 = create_asset_movement(purpose = 'Transfer', company = asset.company,
+		create_asset_movement(purpose = 'Transfer', company = asset.company,
 			assets = [{ 'asset': asset.name , 'source_location': 'Test Location 2', 'target_location': 'Test Location'}],
 			reference_doctype = 'Purchase Receipt', reference_name = pr.name)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
@@ -60,7 +60,7 @@ class TestAssetMovement(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
 		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
-		movement3 = create_asset_movement(purpose = 'Issue', company = asset.company,
+		create_asset_movement(purpose = 'Issue', company = asset.company,
 			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'to_employee': employee}],
 			reference_doctype = 'Purchase Receipt', reference_name = pr.name)
 
