@@ -529,7 +529,7 @@ class SalarySlip(TransactionBase):
 
 	def process_overtime_slips(self):
 		overtime_slips = self.get_overtime_slips()
-		amounts, processed_overtime_slips = self.get_overtime_amount(overtime_slips)
+		amounts, processed_overtime_slips = self.get_overtime_type_details_and_amount(overtime_slips)
 		self.add_overtime_component(amounts, processed_overtime_slips)
 
 	def get_overtime_slips(self):
@@ -540,50 +540,22 @@ class SalarySlip(TransactionBase):
 			'docstatus': 1
 		}, fields = ["name", "from_date", 'to_date'])
 
-	def get_overtime_amount(self, overtime_slips):
-		standard_duration_amount = 0
-		weekends_duration_amount= 0
-		public_holidays_duration_amount = 0
-		calculated_amount = 0
+	def get_overtime_type_details_and_amount(self, overtime_slips):
+		standard_duration_amount, weekends_duration_amount = 0, 0
+		public_holidays_duration_amount, calculated_amount = 0, 0
 		processed_overtime_slips = []
 		overtime_types_details = {}
 		for slip in overtime_slips:
-			holiday_date = self.get_holidays_for_employee(slip.from_date, slip.to_date, as_dict=1)
-
-			holiday_date_map = {}
-			for date in holiday_date:
-				holiday_date_map[cstr(date.holiday_date)] = date
-
+			holiday_date_map = self.get_holiday_map(slip.from_date, slip.to_date)
 			details = self.get_overtime_details(slip.name)
 
 			for detail in details:
 				overtime_hours = detail.overtime_duration / 3600
-
-				if detail.overtime_type not in overtime_types_details:
-					details, applicable_components = self.get_overtime_type_detail(detail.overtime_type)
-					overtime_types_details[detail.overtime_type] = details
-					if len(applicable_components):
-						overtime_types_details[detail.overtime_type]["components"] = applicable_components
-					else:
-						frappe.throw(_("Select applicable components in Overtime Type: {0}").format(
-							frappe.bold(detail.overtime_type)))
-
-					if "applicable_amount" not in overtime_types_details[detail.overtime_type].keys():
-						component_amount = sum([data.default_amount for data in self.earnings if data.salary_component in
-							overtime_types_details[detail.overtime_type]["components"] and not data.get('additional_salary', None)])
-
-						overtime_types_details[detail.overtime_type]["applicable_daily_amount"] = component_amount/self.total_working_days
+				overtime_types_details = self.set_overtime_types_details(overtime_types_details, detail)
 
 				standard_working_hours = detail.standard_working_time/3600
 				applicable_hourly_wages = overtime_types_details[detail.overtime_type]["applicable_daily_amount"]/standard_working_hours
-
-				weekend_multiplier = overtime_types_details[detail.overtime_type]['standard_multiplier']
-				public_holiday_multiplier = overtime_types_details[detail.overtime_type]['standard_multiplier']
-
-				if overtime_types_details[detail.overtime_type]['applicable_for_weekend']:
-					weekend_multiplier = overtime_types_details[detail.overtime_type]['weekend_multiplier']
-				if overtime_types_details[detail.overtime_type]['applicable_for_public_holiday']:
-					public_holiday_multiplier = overtime_types_details[detail.overtime_type]['public_holiday_multiplier']
+				weekend_multiplier, public_holiday_multiplier = self.get_multipliers(overtime_types_details, detail)
 				overtime_date = cstr(detail.date)
 				if overtime_date in holiday_date_map.keys():
 					if holiday_date_map[overtime_date].weekly_off == 1:
@@ -600,6 +572,46 @@ class SalarySlip(TransactionBase):
 			processed_overtime_slips.append(slip.name)
 
 		return [weekends_duration_amount, public_holidays_duration_amount, standard_duration_amount] , processed_overtime_slips
+
+
+	def get_multipliers(self, overtime_types_details, detail):
+		weekend_multiplier = overtime_types_details[detail.overtime_type]['standard_multiplier']
+		public_holiday_multiplier = overtime_types_details[detail.overtime_type]['standard_multiplier']
+
+		if overtime_types_details[detail.overtime_type]['applicable_for_weekend']:
+			weekend_multiplier = overtime_types_details[detail.overtime_type]['weekend_multiplier']
+		if overtime_types_details[detail.overtime_type]['applicable_for_public_holiday']:
+			public_holiday_multiplier = overtime_types_details[detail.overtime_type]['public_holiday_multiplier']
+
+		return weekend_multiplier, public_holiday_multiplier
+
+	def get_holiday_map(self, from_date, to_date):
+		holiday_date = self.get_holidays_for_employee(from_date, to_date, as_dict=1)
+
+		holiday_date_map = {}
+		for date in holiday_date:
+			holiday_date_map[cstr(date.holiday_date)] = date
+
+		return holiday_date_map
+
+	def set_overtime_types_details(self, overtime_types_details, detail):
+		if detail.overtime_type not in overtime_types_details:
+			details, applicable_components = self.get_overtime_type_detail(detail.overtime_type)
+			overtime_types_details[detail.overtime_type] = details
+
+			if len(applicable_components):
+				overtime_types_details[detail.overtime_type]["components"] = applicable_components
+			else:
+				frappe.throw(_("Select applicable components in Overtime Type: {0}").format(
+					frappe.bold(detail.overtime_type)))
+
+			if "applicable_amount" not in overtime_types_details[detail.overtime_type].keys():
+				component_amount = sum([data.default_amount for data in self.earnings if data.salary_component in
+					overtime_types_details[detail.overtime_type]["components"] and not data.get('additional_salary', None)])
+
+				overtime_types_details[detail.overtime_type]["applicable_daily_amount"] = component_amount/self.total_working_days
+
+		return overtime_types_details
 
 	def add_overtime_component(self, amounts, processed_overtime_slips):
 		if len(amounts):
