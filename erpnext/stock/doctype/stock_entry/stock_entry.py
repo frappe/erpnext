@@ -76,6 +76,7 @@ class StockEntry(StockController):
 		self.validate_difference_account()
 		self.set_job_card_data()
 		self.set_purpose_for_stock_entry()
+		self.clean_serial_nos()
 		self.validate_duplicate_serial_no()
 
 		if not self.from_bom:

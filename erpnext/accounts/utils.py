@@ -922,7 +922,6 @@ def repost_gle_for_stock_vouchers(stock_vouchers, posting_date, company=None, wa
 			_delete_gl_entries(voucher_type, voucher_no)
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
-	future_stock_vouchers = []
 
 	values = []
 	condition = ""
@@ -938,30 +937,46 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 		condition += " and company = %s"
 		values.append(company)
 
-	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+	future_stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where
 			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
 			and is_cancelled = 0
 			{condition}
 		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
-		tuple([posting_date, posting_time] + values), as_dict=True):
-			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+		tuple([posting_date, posting_time] + values), as_dict=True)
 
-	return future_stock_vouchers
+	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 
 def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
+	""" Get voucherwise list of GL entries.
+
+	Only fetches GLE fields required for comparing with new GLE.
+	Check compare_existing_and_expected_gle function below.
+	"""
 	gl_entries = {}
-	if future_stock_vouchers:
-		for d in frappe.db.sql("""select * from `tabGL Entry`
-			where posting_date >= %s and voucher_no in (%s)""" %
-			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
-			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
-				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+	if not future_stock_vouchers:
+		return gl_entries
+
+	voucher_nos = [d[1] for d in future_stock_vouchers]
+
+	gles = frappe.db.sql("""
+		select name, account, credit, debit, cost_center, project
+			from `tabGL Entry`
+		where
+			posting_date >= %s and voucher_no in (%s)""" %
+		('%s', ', '.join(['%s'] * len(voucher_nos))),
+		tuple([posting_date] + voucher_nos), as_dict=1)
+
+	for d in gles:
+		gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
 	return gl_entries
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
+	if len(existing_gle) != len(expected_gle):
+		return False
+
 	matched = True
 	for entry in expected_gle:
 		account_existed = False
