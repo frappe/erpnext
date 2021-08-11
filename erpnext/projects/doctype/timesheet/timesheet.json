@@ -310,6 +310,7 @@
    "read_only": 1
   },
   {
+   "default": "1",
    "fieldname": "exchange_rate",
    "fieldtype": "Float",
    "label": "Exchange Rate"
