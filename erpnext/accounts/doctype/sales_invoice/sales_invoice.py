@@ -924,12 +924,17 @@ class SalesInvoice(SellingController):
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(asset,
 							item.base_net_amount, item.finance_book)
 						asset.db_set("disposal_date", None)
-						self.reset_depreciation_schedule(asset)
+
+						if asset.calculate_depreciation:
+							self.reset_depreciation_schedule(asset)
+							
 					else:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
 							item.base_net_amount, item.finance_book)
 						asset.db_set("disposal_date", self.posting_date)
-						self.depreciate_asset(asset)
+
+						if asset.calculate_depreciation:
+							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
