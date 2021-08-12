@@ -41,7 +41,7 @@ class LandedCostVoucher(Document):
 
 	def validate(self):
 		self.check_mandatory()
-		self.validate_purchase_receipts()
+		self.validate_receipt_documents()
 		init_landed_taxes_and_totals(self)
 		self.set_total_taxes_and_charges()
 		if not self.get("items"):
@@ -56,14 +56,23 @@ class LandedCostVoucher(Document):
 			frappe.throw(_("Please enter Receipt Document"))
 
 
-	def validate_purchase_receipts(self):
+	def validate_receipt_documents(self):
 		receipt_documents = []
 
 		for d in self.get("purchase_receipts"):
-			if frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus") != 1:
-				frappe.throw(_("Receipt document must be submitted"))
-			else:
-				receipt_documents.append(d.receipt_document)
+			docstatus = frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus")
+			if docstatus != 1:
+				msg = f"Row {d.idx}: {d.receipt_document_type} {frappe.bold(d.receipt_document)} must be submitted"
+				frappe.throw(_(msg), title=_("Invalid Document"))
+
+			if d.receipt_document_type == "Purchase Invoice":
+				update_stock = frappe.db.get_value(d.receipt_document_type, d.receipt_document, "update_stock")
+				if not update_stock:
+					msg = _("Row {0}: Purchase Invoice {1} has no stock impact.").format(d.idx, frappe.bold(d.receipt_document))
+					msg += "<br>" + _("Please create Landed Cost Vouchers against Invoices that have 'Update Stock' enabled.")
+					frappe.throw(msg, title=_("Incorrect Invoice"))
+
+			receipt_documents.append(d.receipt_document)
 
 		for item in self.get("items"):
 			if not item.receipt_document:

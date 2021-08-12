@@ -27,6 +27,7 @@ class StockController(AccountsController):
 		if not self.get('is_return'):
 			self.validate_inspection()
 		self.validate_serialized_batch()
+		self.clean_serial_nos()
 		self.validate_customer_provided_item()
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
@@ -53,12 +54,17 @@ class StockController(AccountsController):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		for d in self.get("items"):
 			if hasattr(d, 'serial_no') and hasattr(d, 'batch_no') and d.serial_no and d.batch_no:
-				serial_nos = get_serial_nos(d.serial_no)
-				for serial_no_data in frappe.get_all("Serial No",
-					filters={"name": ("in", serial_nos)}, fields=["batch_no", "name"]):
-					if serial_no_data.batch_no != d.batch_no:
+				serial_nos = frappe.get_all("Serial No",
+					fields=["batch_no", "name", "warehouse"],
+					filters={
+						"name": ("in", get_serial_nos(d.serial_no))
+					}
+				)
+
+				for row in serial_nos:
+					if row.warehouse and row.batch_no != d.batch_no:
 						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
-							.format(d.idx, serial_no_data.name, d.batch_no))
+							.format(d.idx, row.name, d.batch_no))
 
 			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
@@ -66,6 +72,12 @@ class StockController(AccountsController):
 				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
 					frappe.throw(_("Row #{0}: The batch {1} has already expired.")
 						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
+
+	def clean_serial_nos(self):
+		for row in self.get("items"):
+			if hasattr(row, "serial_no") and row.serial_no:
+				# replace commas by linefeed and remove all spaces in string
+				row.serial_no = row.serial_no.replace(",", "\n").replace(" ", "")
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
@@ -356,42 +368,68 @@ class StockController(AccountsController):
 		}, update_modified)
 
 	def validate_inspection(self):
-		'''Checks if quality inspection is set for Items that require inspection.
-		On submit, throw an exception'''
-		inspection_required_fieldname = None
-		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
-			inspection_required_fieldname = "inspection_required_before_purchase"
-		elif self.doctype in ["Delivery Note", "Sales Invoice"]:
-			inspection_required_fieldname = "inspection_required_before_delivery"
+		"""Checks if quality inspection is set/ is valid for Items that require inspection."""
+		inspection_fieldname_map = {
+			"Purchase Receipt": "inspection_required_before_purchase",
+			"Purchase Invoice": "inspection_required_before_purchase",
+			"Sales Invoice": "inspection_required_before_delivery",
+			"Delivery Note": "inspection_required_before_delivery"
+		}
+		inspection_required_fieldname = inspection_fieldname_map.get(self.doctype)
 
+		# return if inspection is not required on document level
 		if ((not inspection_required_fieldname and self.doctype != "Stock Entry") or
 			(self.doctype == "Stock Entry" and not self.inspection_required) or
 			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock)):
 				return
 
-		for d in self.get('items'):
-			qa_required = False
-			if (inspection_required_fieldname and not d.quality_inspection and
-				frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)):
-				qa_required = True
-			elif self.doctype == "Stock Entry" and not d.quality_inspection and d.t_warehouse:
-				qa_required = True
-			if self.docstatus == 1 and d.quality_inspection:
-				qa_doc = frappe.get_doc("Quality Inspection", d.quality_inspection)
-				if qa_doc.docstatus == 0:
-					link = frappe.utils.get_link_to_form('Quality Inspection', d.quality_inspection)
-					frappe.throw(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx), QualityInspectionNotSubmittedError)
+		for row in self.get('items'):
+			qi_required = False
+			if (inspection_required_fieldname and frappe.db.get_value("Item", row.item_code, inspection_required_fieldname)):
+				qi_required = True
+			elif self.doctype == "Stock Entry" and row.t_warehouse:
+				qi_required = True # inward stock needs inspection
 
-				if qa_doc.status != 'Accepted':
-					frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
-						.format(d.idx, d.item_code), QualityInspectionRejectedError)
-			elif qa_required :
-				action = frappe.get_doc('Stock Settings').action_if_quality_inspection_is_not_submitted
-				if self.docstatus==1 and action == 'Stop':
-					frappe.throw(_("Quality Inspection required for Item {0} to submit").format(frappe.bold(d.item_code)),
-						exc=QualityInspectionRequiredError)
-				else:
-					frappe.msgprint(_("Create Quality Inspection for Item {0}").format(frappe.bold(d.item_code)))
+			if qi_required: # validate row only if inspection is required on item level
+				self.validate_qi_presence(row)
+				if self.docstatus == 1:
+					self.validate_qi_submission(row)
+					self.validate_qi_rejection(row)
+
+	def validate_qi_presence(self, row):
+		"""Check if QI is present on row level. Warn on save and stop on submit if missing."""
+		if not row.quality_inspection:
+			msg = f"Row #{row.idx}: Quality Inspection is required for Item {frappe.bold(row.item_code)}"
+			if self.docstatus == 1:
+				frappe.throw(_(msg), title=_("Inspection Required"), exc=QualityInspectionRequiredError)
+			else:
+				frappe.msgprint(_(msg), title=_("Inspection Required"), indicator="blue")
+
+	def validate_qi_submission(self, row):
+		"""Check if QI is submitted on row level, during submission"""
+		action = frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_not_submitted")
+		qa_docstatus = frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus")
+
+		if not qa_docstatus == 1:
+			link = frappe.utils.get_link_to_form('Quality Inspection', row.quality_inspection)
+			msg = f"Row #{row.idx}: Quality Inspection {link} is not submitted for the item: {row.item_code}"
+			if action == "Stop":
+				frappe.throw(_(msg), title=_("Inspection Submission"), exc=QualityInspectionNotSubmittedError)
+			else:
+				frappe.msgprint(_(msg), alert=True, indicator="orange")
+
+	def validate_qi_rejection(self, row):
+		"""Check if QI is rejected on row level, during submission"""
+		action = frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_rejected")
+		qa_status = frappe.db.get_value("Quality Inspection", row.quality_inspection, "status")
+
+		if qa_status == "Rejected":
+			link = frappe.utils.get_link_to_form('Quality Inspection', row.quality_inspection)
+			msg = f"Row #{row.idx}: Quality Inspection {link} was rejected for item {row.item_code}"
+			if action == "Stop":
+				frappe.throw(_(msg), title=_("Inspection Rejected"), exc=QualityInspectionRejectedError)
+			else:
+				frappe.msgprint(_(msg), alert=True, indicator="orange")
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
