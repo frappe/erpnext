@@ -44,6 +44,12 @@ from erpnext.controllers.print_settings import (
 	set_print_templates_for_taxes,
 )
 from erpnext.controllers.sales_and_purchase_return import validate_return
+<<<<<<< HEAD
+=======
+from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled, get_party_gle_currency
+from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
+	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
+>>>>>>> 80c85dd17c (fix: Account currency validation for first transaction)
 from erpnext.exceptions import InvalidCurrency
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
@@ -169,6 +175,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_party()
 		self.validate_currency()
+		self.validate_party_account_currency()
 
 		if self.doctype in ["Purchase Invoice", "Sales Invoice"]:
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
@@ -1444,6 +1451,19 @@ class AccountsController(TransactionBase):
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
+
+	def validate_party_account_currency(self):
+		if self.doctype not in ('Sales Invoice', 'Purchase Invoice'):
+			return
+
+		party_type, party = self.get_party()
+		party_gle_currency = get_party_gle_currency(party_type, party, self.company)
+		party_account = self.get('debit_to') if self.doctype == 'Sales Invoice' else self.get('credit_to')
+		party_account_currency = get_account_currency(party_account)
+
+		if not party_gle_currency and (party_account_currency != self.currency):
+			frappe.throw(_("Party Account {0} currency and document currency should be same").format(frappe.bold(party_account)))
+
 
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0
