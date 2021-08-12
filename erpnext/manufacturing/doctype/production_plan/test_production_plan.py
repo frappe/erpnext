@@ -10,7 +10,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
+from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests, get_warehouse_list
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):
@@ -169,7 +169,7 @@ class TestProductionPlan(unittest.TestCase):
 		pln.get_items()
 		pln.submit()
 
-		self.assertTrue(pln.po_items[0].planned_qty, 3)	
+		self.assertTrue(pln.po_items[0].planned_qty, 3)
 
 		pln.make_work_order()
 		work_order = frappe.db.get_value('Work Order', {
@@ -193,10 +193,10 @@ class TestProductionPlan(unittest.TestCase):
 		for so_item in so_items:
 			so_wo_qty = frappe.db.get_value('Sales Order Item', so_item, 'work_order_qty')
 			self.assertEqual(so_wo_qty, 0.0)
-		
+
 		latest_plan = frappe.get_doc('Production Plan', pln.name)
 		latest_plan.cancel()
-	
+
 	def test_pp_to_mr_customer_provided(self):
 		#Material Request from Production Plan for Customer Provided
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
@@ -236,10 +236,10 @@ class TestProductionPlan(unittest.TestCase):
 		pln.append("po_items", {
 			"item_code": item_code,
 			"bom_no": frappe.db.get_value('BOM', {'item': "Test BOM 1"}),
-			"planned_qty": 3,
-			"make_work_order_for_sub_assembly_items": 1
+			"planned_qty": 3
 		})
 
+		pln.get_sub_assembly_items('In House')
 		pln.submit()
 		pln.make_work_order()
 
@@ -250,6 +250,27 @@ class TestProductionPlan(unittest.TestCase):
 		self.assertEqual(to_produce_qty, 18.0)
 		pln.cancel()
 		frappe.delete_doc("Production Plan", pln.name)
+
+	def test_get_warehouse_list_group(self):
+		"""Check if required warehouses are returned"""
+		warehouse_json = '[{\"warehouse\":\"_Test Warehouse Group - _TC\"}]'
+
+		warehouses = set(get_warehouse_list(warehouse_json))
+		expected_warehouses = {"_Test Warehouse Group-C1 - _TC", "_Test Warehouse Group-C2 - _TC"}
+
+		missing_warehouse = expected_warehouses - warehouses
+
+		self.assertTrue(len(missing_warehouse) == 0,
+				msg=f"Following warehouses were expected {', '.join(missing_warehouse)}")
+
+	def test_get_warehouse_list_single(self):
+		warehouse_json = '[{\"warehouse\":\"_Test Scrap Warehouse - _TC\"}]'
+
+		warehouses = set(get_warehouse_list(warehouse_json))
+		expected_warehouses = {"_Test Scrap Warehouse - _TC", }
+
+		self.assertEqual(warehouses, expected_warehouses)
+
 
 def create_production_plan(**args):
 	args = frappe._dict(args)

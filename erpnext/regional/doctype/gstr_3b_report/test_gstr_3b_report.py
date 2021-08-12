@@ -46,14 +46,14 @@ class TestGSTR3BReport(unittest.TestCase):
 		make_sales_invoice()
 		create_purchase_invoices()
 
-		if frappe.db.exists("GSTR 3B Report", "GSTR3B-March-2019-_Test Address-Billing"):
-			report = frappe.get_doc("GSTR 3B Report", "GSTR3B-March-2019-_Test Address-Billing")
+		if frappe.db.exists("GSTR 3B Report", "GSTR3B-March-2019-_Test Address GST-Billing"):
+			report = frappe.get_doc("GSTR 3B Report", "GSTR3B-March-2019-_Test Address GST-Billing")
 			report.save()
 		else:
 			report = frappe.get_doc({
 				"doctype": "GSTR 3B Report",
 				"company": "_Test Company GST",
-				"company_address": "_Test Address-Billing",
+				"company_address": "_Test Address GST-Billing",
 				"year": getdate().year,
 				"month": month_number_mapping.get(getdate().month)
 			}).insert()
@@ -89,7 +89,7 @@ class TestGSTR3BReport(unittest.TestCase):
 
 		si.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "IGST - _GST",
+			"account_head": "Output Tax IGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "IGST @ 18.0",
 			"rate": 18
@@ -117,7 +117,7 @@ def make_sales_invoice():
 
 	si.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "IGST - _GST",
+			"account_head": "Output Tax IGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "IGST @ 18.0",
 			"rate": 18
@@ -138,7 +138,7 @@ def make_sales_invoice():
 
 	si1.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "IGST - _GST",
+			"account_head": "Output Tax IGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "IGST @ 18.0",
 			"rate": 18
@@ -159,7 +159,7 @@ def make_sales_invoice():
 
 	si2.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "IGST - _GST",
+			"account_head": "Output Tax IGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "IGST @ 18.0",
 			"rate": 18
@@ -195,7 +195,7 @@ def create_purchase_invoices():
 
 	pi.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "CGST - _GST",
+			"account_head": "Input Tax CGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "CGST @ 9.0",
 			"rate": 9
@@ -203,7 +203,7 @@ def create_purchase_invoices():
 
 	pi.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "SGST - _GST",
+			"account_head": "Input Tax SGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "SGST @ 9.0",
 			"rate": 9
@@ -410,10 +410,10 @@ def make_company():
 	company.country = "India"
 	company.insert()
 
-	if not frappe.db.exists('Address', '_Test Address-Billing'):
+	if not frappe.db.exists('Address', '_Test Address GST-Billing'):
 		address = frappe.get_doc({
+			"address_title": "_Test Address GST",
 			"address_line1": "_Test Address Line 1",
-			"address_title": "_Test Address",
 			"address_type": "Billing",
 			"city": "_Test City",
 			"state": "Test State",
@@ -444,9 +444,9 @@ def set_account_heads():
 	if not gst_account:
 		gst_settings.append("gst_accounts", {
 			"company": "_Test Company GST",
-			"cgst_account": "CGST - _GST",
-			"sgst_account": "SGST - _GST",
-			"igst_account": "IGST - _GST",
+			"cgst_account": "Output Tax CGST - _GST",
+			"sgst_account": "Output Tax SGST - _GST",
+			"igst_account": "Output Tax IGST - _GST"
 		})
 
 		gst_settings.save()

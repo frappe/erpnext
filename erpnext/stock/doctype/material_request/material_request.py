@@ -189,7 +189,7 @@ class MaterialRequest(BuyingController):
 		item_wh_list = []
 		for d in self.get("items"):
 			if (not mr_item_rows or d.name in mr_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
-					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and d.warehouse:
+					and d.warehouse and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 :
 				item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:

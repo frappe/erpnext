@@ -182,9 +182,8 @@ class DeliveryNote(SellingController):
 		super(DeliveryNote, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
-				if not d['warehouse']:
-					frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
+			if not d['warehouse'] and frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
+				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 
 	def update_current_stock(self):

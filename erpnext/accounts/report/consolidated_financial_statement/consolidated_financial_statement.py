@@ -380,7 +380,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
 			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
 			acc.account_name, acc.account_number
-			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s
+			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s and gl.is_cancelled = 0
 			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
 			order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
 			{
