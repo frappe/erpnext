@@ -1,11 +1,13 @@
 frappe.listview_settings['Delivery Planning Item'] = {
 	add_fields: ["transporter", "sales_order", "customer", "customer_name","postal_code", "item_code", "item_name",
 					"delivery_date", "ordered_qty", "approved", "weight_to_deliver"],
+	filters: [["docstatus", "=", "Submitted"]],				
 	hide_name_column: true,
+
 	onload: function(listview) {
 		// cur_list.sort_selector.sort_by = "name"
-		// cur_list.page_length = 1000
-
+		
+		// document.getElementByClassName("btn btn-action btn-default btn-xs").style.backgroundColor = "lightblue";
 		listview.page.add_action_item(__("Approve"), function() {
 			const selected_docs = listview.get_checked_items();
 			const docnames = listview.get_checked_items(true);
@@ -16,15 +18,8 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						console.log(doc.name)
 				};
 			}
-				// console.log(selected)
            
 			frappe.call({
-				// method:'erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function',
-                // args: { selected_docs : selected_docs,
-				// selected_docs: selected_docs },
-				// callback: function(r) {
-				// 	listview.refresh();
-				// }
 
 				type: "POST",
 						method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function",
@@ -52,16 +47,9 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						console.log(doc.name)
 				};
 			}
-				// console.log(selected)
            
 			frappe.call({
-				// method:'erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function',
-                // args: { selected_docs : selected_docs,
-				// selected_docs: selected_docs },
-				// callback: function(r) {
-				// 	listview.refresh();
-				// }
-
+		
 				type: "POST",
 						method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.reject_function",
 							args: {
@@ -78,236 +66,241 @@ frappe.listview_settings['Delivery Planning Item'] = {
 			});
 		});
 
-		listview.page.add_action_item(__("Split"), function() {
-			const selected_docs = listview.get_checked_items();
-			const docnames = listview.get_checked_items(true);
-			var supplier_dc_check = 0;
+		// listview.page.add_action_item(__("Split"), function() {
+		// 	const selected_docs = listview.get_checked_items();
+		// 	const docnames = listview.get_checked_items(true);
+		// 	var supplier_dc_check = 0;
 
 			
-			if (selected_docs.length > 0) {
-				for (let doc of selected_docs) {
-						console.log(doc.name)
-				};
-			}
-				console.log(docnames)
-				console.log(selected_docs)
-				console.log(selected_docs[0].transporter)
-				console.log(selected_docs[0].supplier_dc)
-				console.log(selected_docs[0].supplier)
+		// 	if (selected_docs.length > 0) {
+		// 		for (let doc of selected_docs) {
+		// 				console.log(doc.name)
+		// 		};
+		// 	}
+		// 		console.log(docnames)
+		// 		console.log(selected_docs)
+		// 		console.log(selected_docs[0].transporter)
+		// 		console.log(selected_docs[0].supplier_dc)
+		// 		console.log(selected_docs[0].supplier)
 			
-				if (docnames.length > 1){
-					frappe.msgprint({
-						title: __('Notification'),
-						indicator: 'Red',
-						message: __('Please select only one item to split ')
-					});
-				}
-				else if( selected_docs[0].qty_to_deliver <=1){
-					frappe.msgprint({
-						title: __('Notification'),
-						indicator: 'Red',
+		// 		if (docnames.length > 1){
+		// 			frappe.msgprint({
+		// 				title: __('Notification'),
+		// 				indicator: 'Red',
+		// 				message: __('Please select only one item to split ')
+		// 			});
+		// 		}
+		// 		else if(selected_docs[0].docstatus == 1){
+		// 			frappe.msgprint({
+		// 				title: __('Notification'),
+		// 				indicator: 'Red',
 						
-						message: __('Select item with delivery qty greater than 1')
-					});
-				}
+		// 				message: __('Cannot split submitted document')
+		// 			});
+		// 		}
+		// 		else if( selected_docs[0].qty_to_deliver <=1){
+		// 			frappe.msgprint({
+		// 				title: __('Notification'),
+		// 				indicator: 'Red',
+						
+		// 				message: __('Cannot split item with qty = 1')
+		// 			});
+		// 		}
 			
-				// if(docnames.length == 1 ){
-				else{
-				console.log("Inside splite if with item" , docnames)
-				var new_supplier;
-				var new_warehouse;
-				var new_transporter;
-				var new_date;
-
+		// 		// if(docnames.length == 1 ){
+		// 		else{
+		// 		console.log("Inside splite if with item" , docnames)
+		// 		var new_supplier;
+		// 		var new_warehouse;
+		// 		var new_transporter;
+		// 		var new_date;
 				
+		// 		if(selected_docs[0].transporter == "" || selected_docs[0].transporter == null ){
+		// 			supplier_dc_check = 1;
+		// 			console.log("inside IF supplier dc",selected_docs[0].supplier)
+		// 		}
+		// 		else{supplier_dc_check = 0;}
 
-				if(selected_docs[0].transporter == "" || selected_docs[0].transporter == null ){
-					supplier_dc_check = 1;
-					console.log("inside IF supplier dc",selected_docs[0].supplier)
-				}
-				else{supplier_dc_check = 0;}
-
-				let d = new frappe.ui.Dialog({
-					title: 'Split Planning Item',
-					fields: [
-						{
-							label: 'Transporter',
-							fieldname: 'transporter',
-							fieldtype: 'Link',
-							options: "Supplier",
-							default: selected_docs[0].transporter,
-							depends_on: "eval: doc.supplier_dc == 0",
-							mandatory_depends_on : "eval: doc.supplier_dc == 0",
+		// 		let d = new frappe.ui.Dialog({
+		// 			title: 'Split Planning Item',
+		// 			fields: [
+		// 				{
+		// 					label: 'Transporter',
+		// 					fieldname: 'transporter',
+		// 					fieldtype: 'Link',
+		// 					options: "Supplier",
+		// 					onchange: function() {
+		// 						frappe.model.get_value('Supplier', {"name":d.fields_dict.transporter.value}, 'supplier_name',
+		// 						function(dd){								
+		// 							if (d.fields_dict.transporter.value){
+		// 								d.fields_dict.transporter_name.value = dd.supplier_name;
+		// 								d.fields_dict.transporter_name.refresh();
+		// 							}
+		// 							else{
+		// 								d.fields_dict.transporter_name.value = "Please select Transporter";
+		// 								d.fields_dict.transporter_name.refresh();
+		// 							}
+		// 						})
+		// 					},
+		// 					depends_on: "eval: doc.supplier_dc == 0",
+		// 					mandatory_depends_on : "eval: doc.supplier_dc == 0",
+		// 				},
+		// 				{
+		// 					label: 'Transporter Name',
+		// 					fieldname: 'transporter_name',
+		// 					fieldtfieldtype: 'Data',
+		// 					read_only: 1,
+		// 					depends_on: "eval: doc.supplier_dc == 0",
+		// 					mandatory_depends_on : "eval: doc.supplier_dc == 0",
+		// 					default: "Please select Transporter",
+		// 				},
+		// 				{
+		// 					label: 'Deliver Date',
+		// 					fieldname: 'delivery_date',
+		// 					fieldtype: 'Date',
+		// 					reqd: 1
+		// 				},
+		// 				{
+		// 					label: 'Qty To Deliver',
+		// 					fieldname: 'qty',
+		// 					fieldtype: 'Float',
+		// 					default : 1,
+		// 					reqd: 1
+		// 				},
+		// 				{
+		// 					label: 'Source Warehouse',
+		// 					fieldname: 'src_warehouse',
+		// 					fieldtype: 'Link',
+		// 					options: "Warehouse",
+		// 					default: selected_docs[0].sorce_warehouse,
 		
-						},
-						{
-							label: 'Deliver Date',
-							fieldname: 'delivery_date',
-							fieldtype: 'Date',
-							reqd: 1
-						},
-						{
-							label: 'Qty To Deliver',
-							fieldname: 'qty',
-							fieldtype: 'Float',
-							default : 1,
-							reqd: 1
-						},
-						{
-							label: 'Source Warehouse',
-							fieldname: 'src_warehouse',
-							fieldtype: 'Link',
-							options: "Warehouse",
-							default: selected_docs[0].sorce_warehouse,
+		// 				},
+		// 				{
+		// 					label: 'Supplier delivers to Customer ',
+		// 					fieldname: 'supplier_dc',
+		// 					default: supplier_dc_check,
+		// 					fieldtype: 'Check'
+		// 				},
+		// 				{
+		// 					label: 'Supplier',
+		// 					fieldname: 'supplier',
+		// 					fieldtype: 'Link',
+		// 					options: "Supplier",
+		// 					depends_on: "eval: doc.supplier_dc == 1 ",
+		// 					mandatory_depends_on : "eval: doc.supplier_dc == 1",
+		// 					onchange: function() {
+		// 						frappe.model.get_value('Supplier', {"name":d.fields_dict.supplier.value}, 'supplier_name',
+		// 						function(dd){		
+		// 							if (d.fields_dict.supplier.value){						
+		// 							d.fields_dict.supplier_name.value = dd.supplier_name
+		// 							d.fields_dict.supplier_name.refresh();
+		// 							}
+		// 							else{
+		// 								d.fields_dict.supplier_name.value = "Please select Supplier";
+		// 								d.fields_dict.supplier_name.refresh();
+		// 							}
+		// 						})
+		// 					},
+		// 				},
+		// 				{
+		// 					label: 'Supplier Name',
+		// 					fieldname: 'supplier_name',
+		// 					fieldtype: 'Data',
+		// 					ddepends_on: "eval: doc.supplier_dc == 1 ",
+		// 					mandatory_depends_on : "eval: doc.supplier_dc == 1",
+		// 					read_only: 1,
+		// 					default: "Please select Supplier"
+		// 				}
+		// 			],
 		
-						},
-						{
-							label: 'Supplier delivers to Customer ',
-							fieldname: 'supplier_dc',
-							default: supplier_dc_check,
-							fieldtype: 'Check'
-						},
-						{
-							label: 'Supplier',
-							fieldname: 'supplier',
-							fieldtype: 'Link',
-							options: "Supplier",
-							default: selected_docs[0].supplier,
-							depends_on: "eval: doc.supplier_dc == 1 ",
-							mandatory_depends_on : "eval: doc.supplier_dc == 1",
-						}
-					],
-		
-					primary_action_label: 'Submit',
-					primary_action(values) {
-						console.log(values);
-						if(values.transporter)
-						{ new_transporter = values.transporter;
-							console.log("0000000110000000",new_transporter);
-						}
+		// 			primary_action_label: 'Submit',
+		// 			primary_action(values) {
+		// 				console.log(values);
+		// 				if(values.transporter)
+		// 				{ new_transporter = values.transporter;
+		// 					console.log("0000000110000000",new_transporter);
+		// 				}
 						
-						else{ new_transporter = "";
-							console.log("0000000011000000",new_transporter);
-						}
-						if(values.supplier)
-						{ new_supplier = values.supplier;
-							console.log("00000000000000",new_supplier);
-						}
+		// 				else{ new_transporter = "";
+		// 					console.log("0000000011000000",new_transporter);
+		// 				}
+		// 				if(values.supplier)
+		// 				{ new_supplier = values.supplier;
+		// 					console.log("00000000000000",new_supplier);
+		// 				}
 						
-						else{ new_supplier = "";
-							console.log("00000000000000",new_supplier);
-						}
+		// 				else{ new_supplier = "";
+		// 					console.log("00000000000000",new_supplier);
+		// 				}
 		
-						if(values.src_warehouse)
-						{ new_warehouse = values.src_warehouse;
-							console.log("0000000110000000",new_warehouse);
-						}
+		// 				if(values.src_warehouse)
+		// 				{ new_warehouse = values.src_warehouse;
+		// 					console.log("0000000110000000",new_warehouse);
+		// 				}
 						
-						else{ new_warehouse = "";
-							console.log("0000000011000000",new_warehouse);
-						}
+		// 				else{ new_warehouse = "";
+		// 					console.log("0000000011000000",new_warehouse);
+		// 				}
 		
-						if(values.qty == 0 || values.qty >= selected_docs[0].qty_to_deliver)
-						{
-							frappe.msgprint({
-								title: __('Warning'),
-								indicator: 'red',
-								message: __('Qty To Deliver should be greater than 0 or  less than Item selected to split')
-								});
-							
-							// frappe.throw(__('Qty to delivery should be geater than 0 and less than {0}').format(self.qty_to_deliver))
-							console.log("values.qty",values.qty,selected_docs[0].qty_to_deliver)
-						}
+		// 				if(values.qty == 0 || values.qty >= selected_docs[0].qty_to_deliver)
+		// 				{
+		// 					frappe.msgprint({
+		// 						title: __('Warning'),
+		// 						indicator: 'red',
+		// 						message: __('Qty To Deliver should be greater than 0 or  less than Item selected to split')
+		// 						});
+		// 						console.log("values.qty",values.qty,selected_docs[0].qty_to_deliver)
+		// 				}
 					
-						else {			
-							frappe.call({
-							// doc:selected_docs[0],
-							method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.split_function",
-							type: "POST",
-							// 			method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.split_function",
-							// 				args: {
-							// 					"source_names": docnames
-							// 				},
-							args: {
-									"source_names": docnames,
-									"n_transporter": new_transporter,
-									"n_qty" : values.qty,
-									"n_src_warehouse" : new_warehouse,
-									"n_supplier_dc" : values.supplier_dc,
-									"n_supplier" : new_supplier,
-									"n_date" : values.delivery_date
-								  },
+		// 				else {			
+		// 					frappe.call({
+		// 					method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.split_function",
+		// 					type: "POST",
+		// 					args: {
+		// 							"source_names": docnames,
+		// 							"n_transporter": new_transporter,
+		// 							"n_qty" : values.qty,
+		// 							"n_src_warehouse" : new_warehouse,
+		// 							"n_supplier_dc" : values.supplier_dc,
+		// 							"n_supplier" : new_supplier,
+		// 							"n_date" : values.delivery_date
+		// 						  },
 		
-							callback: function(r){
-								if(r.message){
-									console.log("item",r);
-									frappe.msgprint({
-										title: __('Notification'),
-										indicator: 'green',
-										message: __('Document updated successfully')
-										});
-										d.hide();
-										// location.reload();
-										cur_list.refresh();
+		// 					callback: function(r){
+		// 						if(r.message){
+		// 							console.log("item",r);
+		// 							frappe.msgprint({
+		// 								title: __('Notification'),
+		// 								indicator: 'green',
+		// 								message: __('Document updated successfully')
+		// 								});
+		// 								d.hide();
+		// 								// location.reload();
+		// 								cur_list.refresh();
 										
-										console.log("curent list", cur_list)
-										// frappe.set_route("Report", "Delivery Planning Item");
-										// frappe.route_options = {"related_delivery_planning": frm.doc.related_delivey_planning };
-										// frappe.set_route("List","Delivery Planning Item", {
-										// 	"related_delivey_planning": frm.doc.related_delivey_planning
-										// });
-								}
-								else{
-									frappe.msgprint({
-									title: __('Notification'),
-									indicator: 'red',
-									message: __('Document update failed')
+		// 								console.log("curent list", cur_list)	
+		// 							}
+		// 						else{
+		// 							frappe.msgprint({
+		// 							title: __('Notification'),
+		// 							indicator: 'red',
+		// 							message: __('Document update failed')
 									
-									});
-									d.hide();
-								}
-							}
-						});
-						}
-		
-						
-						
-					}
-					});
-		
-					d.show();
-
-
-				// frappe.call({
-				// 	// method:'erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function',
-				// 	// args: { selected_docs : selected_docs,
-				// 	// selected_docs: selected_docs },
-				// 	// callback: function(r) {
-				// 	// 	listview.refresh();
-				// 	// }
-
-				// 	type: "POST",
-				// 			method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.split_function",
-				// 				args: {
-				// 					"source_names": docnames
-				// 				},
-				// 				callback: function (r) {
-				// 					console.log(r.message)
-				// 					if (!r.exc) {
-				// 						frappe.model.sync(r.message);
-				// 						console.log(r.message)
-				// 						cur_frm.dirty();
-				// 						cur_frm.refresh();
-				// 					}
-				// 				}
-				// });
-			}
-			
-		});
-
+		// 							});
+		// 							d.hide();
+		// 							}
+		// 						}
+		// 					});
+		// 				}		
+		// 			}
+		// 		});
+		// 		d.show();
+		// 	}			
+		// });
 	},
+
 	gantt_custom_popup_html: function(ganttobj, delivery_planning_item) {
-		var html = `<h5><a style="text-decoration:underline"\
+		var html = `<div class="details-container"><h5><a style="text-decoration:underline"\
 			href="/app/delivery_planning_item/${ganttobj.id}""> ${ganttobj.name} </a></h5>`;
 		html += `<p style="color:white">Sales Order: ${delivery_planning_item.sales_order}</p>`
 		html += `<p style="color:white">Customer: ${delivery_planning_item.customer}</p>`
@@ -317,22 +310,215 @@ frappe.listview_settings['Delivery Planning Item'] = {
 		html += `<p style="color:white">Transporter: ${delivery_planning_item.transporter_name}</p>`;
 		else
 		html += `<p style="color:white">Supplier: ${delivery_planning_item.supplier_name}</p>`;
+		html +=`</div>`
 		return html;
-	}
+	},
+	
+	// btn btn-action btn-default btn-xs
+
+	button: {
+        show(doc) {
+			return doc.name;
+        },
+        get_label() {
+            return 'Split';
+        },
+        get_description(doc) {
+            return __('View {0}', [`${doc.reference_type} ${doc.reference_name}`])
+        },
+        action(doc) {
+			console.log("inside action", doc.name)
+			var new_supplier;
+				var new_warehouse;
+				var new_transporter;
+				var new_date;
+            // frappe.set_route('Delivery Planning Item', doc.reference_type, doc.reference_name);
+			if(doc.docstatus == 1){
+				
+					frappe.msgprint({
+					title: __('Notification'),
+					indicator: 'red',
+					message: __('Cannot Split Submitted Document')
+					});
+			}
+			else if( doc.ordered_qty <=1){
+				frappe.msgprint({
+					title: __('Notification'),
+					indicator: 'Red',
+					message: __('Cannot split item with qty = 1')
+				});
+			}
+			else{
+			let d = new frappe.ui.Dialog({
+				title: 'Split Planning Item',
+				fields: [
+					{
+						label: 'Transporter',
+						fieldname: 'transporter',
+						fieldtype: 'Link',
+						options: "Supplier",
+						onchange: function() {
+							frappe.model.get_value('Supplier', {"name":d.fields_dict.transporter.value}, 'supplier_name',
+							function(dd){								
+								if (d.fields_dict.transporter.value){
+									d.fields_dict.transporter_name.value = dd.supplier_name;
+									d.fields_dict.transporter_name.refresh();
+								}
+								else{
+									d.fields_dict.transporter_name.value = "Please select Transporter";
+									d.fields_dict.transporter_name.refresh();
+								}
+							})
+						},
+						depends_on: "eval: doc.supplier_dc == 0",
+						mandatory_depends_on : "eval: doc.supplier_dc == 0",
+					},
+					{
+						label: 'Transporter Name',
+						fieldname: 'transporter_name',
+						fieldtype: 'Data',
+						depends_on: "eval: doc.supplier_dc == 0 ",
+						mandatory_depends_on : "eval: doc.supplier_dc == 0",
+						read_only: 1,
+						default: "Please select Transporter"
+					},
+					{
+						label: 'Deliver Date',
+						fieldname: 'delivery_date',
+						fieldtype: 'Date',
+						reqd: 1
+					},
+					{
+						label: 'Qty To Deliver',
+						fieldname: 'qty',
+						fieldtype: 'Float',
+						default : 1,
+						reqd: 1
+					},
+					{
+						label: 'Source Warehouse',
+						fieldname: 'src_warehouse',
+						fieldtype: 'Link',
+						options: "Warehouse",
+						default: doc.sorce_warehouse,
+	
+					},
+					{
+						label: 'Supplier delivers to Customer ',
+						fieldname: 'supplier_dc',
+						default: 0,
+						fieldtype: 'Check'
+					},
+					{
+						label: 'Supplier',
+						fieldname: 'supplier',
+						fieldtype: 'Link',
+						options: "Supplier",
+						depends_on: "eval: doc.supplier_dc == 1 ",
+						mandatory_depends_on : "eval: doc.supplier_dc == 1",
+						onchange: function() {
+							frappe.model.get_value('Supplier', {"name":d.fields_dict.supplier.value}, 'supplier_name',
+							function(dd){								
+							d.fields_dict.supplier_name.value = dd.supplier_name
+							d.fields_dict.supplier_name.refresh();
+							})
+						},
+					},
+					{
+						label: 'Supplier Name',
+						fieldname: 'supplier_name',
+						fieldtype: 'Data',
+						depends_on: "eval: doc.supplier_dc == 1 ",
+						mandatory_depends_on : "eval: doc.supplier_dc == 1",
+						read_only: 1,
+						default: "Please select Supplier"
+					}
+				],
+	
+				primary_action_label: 'Submit',
+				primary_action(values) {
+					console.log(values);
+					if(values.transporter)
+					{ new_transporter = values.transporter;
+						console.log("0000000110000000",new_transporter);
+					}
+					
+					else{ new_transporter = "";
+						console.log("0000000011000000",new_transporter);
+					}
+					if(values.supplier)
+					{ new_supplier = values.supplier;
+						console.log("00000000000000",new_supplier);
+					}
+					
+					else{ new_supplier = "";
+						console.log("00000000000000",new_supplier);
+					}
+	
+					if(values.src_warehouse)
+					{ new_warehouse = values.src_warehouse;
+						console.log("0000000110000000",new_warehouse);
+					}
+					
+					else{ new_warehouse = "";
+						console.log("0000000011000000",new_warehouse);
+					}
+	
+					if(values.qty == 0 || values.qty >= doc.qty_to_deliver)
+					{
+						frappe.msgprint({
+							title: __('Warning'),
+							indicator: 'red',
+							message: __('Qty To Deliver should be greater than 0 or  less than Item selected to split')
+							});
+							console.log("values.qty",values.qty,doc.qty_to_deliver)
+					}
+				
+					else {			
+						frappe.call({
+						method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.split_function",
+						type: "POST",
+						args: {
+								"source_names": doc.name,
+								"n_transporter": new_transporter,
+								"n_qty" : values.qty,
+								"n_src_warehouse" : new_warehouse,
+								"n_supplier_dc" : values.supplier_dc,
+								"n_supplier" : new_supplier,
+								"n_date" : values.delivery_date
+							  },
+	
+						callback: function(r){
+							if(r.message){
+								console.log("item",r);
+								frappe.msgprint({
+									title: __('Notification'),
+									indicator: 'green',
+									message: __('Document updated successfully')
+									});
+									d.hide();
+									// location.reload();
+									cur_list.refresh();
+									
+									console.log("curent list", cur_list)	
+								}
+							else{
+								frappe.msgprint({
+								title: __('Notification'),
+								indicator: 'red',
+								message: __('Document update failed')
+								
+								});
+								d.hide();
+								}
+							}
+						});
+					}		
+				}
+			});
+			d.show();
+		}
+        }
+    },
 
 };
-
-// $(document).bind('DOMSubtreeModified', function () {
-//     if ('List/Sales Invoice/List' in frappe.pages && frappe.pages['List/Sales Invoice/List'].page && !added) {
-//         added = true;
-//         frappe.pages['List/Sales Invoice/List'].page.add_action_item('Export to Quickbooks', function(event) {
-//             // Convert list of UI checks to list of IDs
-//             let selected = [];
-//             for (let check of event.view.cur_list.$checks) {
-//                 selected.push(check.dataset.name);
-//             }
-//             // Do action
-//         });
-        
-//     }
-// });
