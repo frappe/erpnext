@@ -48,8 +48,8 @@ class SalarySlip(TransactionBase):
 		else:
 			self.get_leave_details(lwp=self.leave_without_pay, late_days=self.late_days)
 
-		self.remove_zero_components()
 		self.calculate_net_pay()
+		self.remove_zero_components()
 
 		company_currency = erpnext.get_company_currency(self.company)
 		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
