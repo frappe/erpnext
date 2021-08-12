@@ -115,16 +115,25 @@ def update_stock(bin_name, args, allow_negative_stock=False, via_landed_cost_vou
 
 		# Reposts only current voucher SL Entries
 		# Updates valuation rate, stock value, stock queue for current transaction
-		update_entries_after({
-			"item_code": args.get('item_code'),
-			"warehouse": args.get('warehouse'),
+		updation_args = {
+			"item_code": args.get("item_code"),
+			"warehouse": args.get("warehouse"),
 			"posting_date": args.get("posting_date"),
 			"posting_time": args.get("posting_time"),
 			"voucher_type": args.get("voucher_type"),
 			"voucher_no": args.get("voucher_no"),
-			"sle_id": args.get('name'),
-			"creation": args.get('creation')
-		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
+			"sle_id": args.name,
+			"creation": args.creation
+		}
+
+		if args.get("batch_no"):
+			updation_args.update({"batch_no":args.get("batch_no")})
+
+		update_entries_after(
+			updation_args,
+			allow_negative_stock=allow_negative_stock,
+			via_landed_cost_voucher=via_landed_cost_voucher
+		)
 
 		# update qty in future sle and Validate negative qty
 		update_qty_in_future_sle(args, allow_negative_stock)
