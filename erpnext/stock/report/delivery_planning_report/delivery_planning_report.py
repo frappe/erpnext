@@ -4,14 +4,15 @@
 import frappe
 from frappe import _, throw
 from frappe.utils import flt, date_diff, getdate
+from frappe.utils.data import quote_urls
 
 def execute(filters=None):
 	group_by = ""
 
 	if filters.group_by == "Transporter":
-		group_by =" GROUP BY dpi.Transporter "
+		group_by =" GROUP BY dpi.transporter "
 	elif filters.group_by == "Customer":
-		group_by =" GROUP BY dpi.Customer "
+		group_by =" GROUP BY dpi.customer "
 	elif filters.group_by == "Sales Order":
 		group_by =" GROUP BY dpi.sales_order "
 	elif filters.group_by == "Delivery Date":
@@ -23,7 +24,7 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	conditions = get_conditions(filters)
 	data = get_data(conditions, group_by, filters)
-	return columns, data
+	return columns,data
 
 def validate_filters(filters):
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
@@ -34,8 +35,8 @@ def validate_filters(filters):
 	elif date_diff(to_date, from_date) < 0:
 		frappe.throw(_("To Date cannot be before From Date."))
 
-	# if group == based:
-	# 	frappe.throw(_("Group by and Based on cannot be same"))
+	if group == based:
+		frappe.throw(_("Group by and Based on cannot be same"))
 	
 
 
@@ -56,64 +57,390 @@ def get_conditions(filters):
 	return conditions
 
 def get_columns(filters):
+	column =[]
 	if filters.get("based_on") == "Transporter":
-		return [
-			_("Sales Order") + ":Link/Sales Order:160",
-			_("Customer") +":Link/Customer:120", _("Customer Name") + "::120",
-			_("Transporter") + ":Link/Supplier:120", _("Transporter Name") + "::120",
-			_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
-			_("Ordered Qty") + ":Float:50", _("Qty To Deliver") + ":Float:50",
-			_("Expected Date") + ":Date:90", _("Planned Delivery Date") + ":Date:90",
-			_("Delivery Note") + ":Link/Delivery Note:160", _("Delivery Note Date") + ":Date:80",
-			_("Delay Days") + ":Int:50", _("Pick List") + ":Link/Pick List:150",
-			_("Weight Ordered") + ":Float:100", _("Planned Delivery Weight") + ":Float:100",
-			_("Actual Delivery Weight") + ":Float:100", _("Purchase Order") + ":Link/Purchase Order:150",
-			_("Supplier") + ":Link/Supplier:120", _("Supplier Name") + "::120",
-			_("Item Planning ID") +":Data:100",
-			_("Company") + ":Link/Company:120",
+		lst =[
+			{
+				"fieldname": "transporter",
+				"label": "Transporter",
+				"width": 200,
+				"fieldtype": "Link",
+				"options": "Supplier"
+			},
+			{
+				"fieldname": "transporter_name",
+				"label": "Transporter Name",
+				"width": 200,
+				"fieldtype": "Data"
+			}
+		]
+		column.extend(lst)
 
+	if filters.get("based_on") == "Sales Order":
+		lst =[
+			{
+				"fieldname": "sales_order",
+				"label": "Sales Order",
+				"width": 200,
+				"fieldtype": "Link",
+				"options": "Sales Order"
+			},
+		]
+		column.extend(lst)
+		
+	if filters.get("based_on") == "Customer":
+		lst =[
+			{
+				"fieldname": "customer",
+				"label": "Customer",
+				"width": 200,
+				"fieldtype": "Link",
+				"options": "Customer"
+			},
+			{
+				"fieldname": "customer_name",
+				"label": "Customer Name",
+				"width": 200,
+				"fieldtype": "Data"
+			}
+		]
+		column.extend(lst)
+
+	if filters.get("based_on") == "Delivery Date":
+		lst =[
+			{
+				"fieldname": "delivery_date",
+				"label": "Delivery Date",
+				"width": 80,
+				"fieldtype": "Date"
+			},
+		]
+		column.extend(lst)	
+	
+
+
+	if filters.get("group_by") == "Transporter":
+		lst =[
+			{
+				"fieldname": "transporter",
+				"label": "Transporter",
+				"width": 200,
+				"fieldtype": "Link",
+				"options": "Supplier"
+			},
+			{
+				"fieldname": "transporter_name",
+				"label": "Transporter Name",
+				"width": 200,
+				"fieldtype": "Data"
+			}
+		]
+		column.extend(lst)
+
+	if filters.get("group_by") == "Sales Order":
+		lst =[
+			{
+				"fieldname": "sales_order",
+				"label": "Sales Order",
+				"width": 200,
+				"fieldtype": "Link",
+				"options": "Sales Order"
+			},
+		]
+		column.extend(lst)
+		
+	if filters.get("group_by") == "Customer":
+		lst =[
+			{
+				"fieldname": "customer",
+				"label": "Customer",
+				"width": 200,
+				"fieldtype": "Link",
+				"options": "Customer"
+			},
+			{
+				"fieldname": "customer_name",
+				"label": "Customer Name",
+				"width": 200,
+				"fieldtype": "Data"
+			}
+		]
+		column.extend(lst)
+
+	if filters.get("group_by") == "Delivery Date":
+		lst =[
+			{
+				"fieldname": "delivery_date",
+				"label": "Delivery Date",
+				"width": 80,
+				"fieldtype": "Date"
+			},
+		]
+		column.extend(lst)	
+	
+
+	lst =[
+		{
+			"fieldname": "item_code",
+			"label": "Item Code",
+			"width": 200,
+			"fieldtype": "Link",
+			"options": "Item"
+		},
+		{
+			"fieldname": "item_name",
+			"label": "Item Name",
+			"width": 200,
+			"fieldtype": "Data"
+		},
+		{
+			"fieldname": "ordered_qty",
+			"label": "Ordered Qty",
+			"width": 80,
+			"fieldtype": "Float"
+		},
+		{
+			"fieldname": "qty_to_deliver",
+			"label": "Qty To Deliver",
+			"width": 80,
+			"fieldtype": "Float"
+		},
+		{
+			"fieldname": "planned_date",
+			"label": "Planned Delivery Date",
+			"width": 100,
+			"fieldtype": "Date"
+		},
+		{
+			"fieldname": "delivery_note",
+			"label": "Delivery Note",
+			"width": 200,
+			"fieldtype": "Link",
+			"options": "Delivery Note"
+		},
+		{
+			"fieldname": "delivery_note_date",
+			"label": "Delivery Note Date",
+			"width": 100,
+			"fieldtype": "Date"
+		},
+		{
+			"fieldname": "delay_days",
+			"label": "Delay Days",
+			"width": 80,
+			"fieldtype": "Int"
+		},
+		{
+			"fieldname": "pick_list",
+			"label": "Pick List",
+			"width": 200,
+			"fieldtype": "Link",
+			"options": "Pick List"
+		},
+		{
+			"fieldname": "weight_ordered",
+			"label": "Weight Ordered",
+			"width": 80,
+			"fieldtype": "Float"
+		},
+		{
+			"fieldname": "planned_delivery_weight",
+			"label": "Planned Delivery Weight",
+			"width": 80,
+			"fieldtype": "Float"
+		},
+		{
+			"fieldname": "actual_delivery_weight",
+			"label": "Actual Delivery Weight",
+			"width": 50,
+			"fieldtype": "Float"
+		},
+		{
+			"fieldname": "purchase_order",
+			"label": "Purchase Order",
+			"width": 200,
+			"fieldtype": "Link",
+			"options": "Purchase Order"
+		},
+		{
+			"fieldname": "supplier",
+			"label": "Supplier",
+			"width": 200,
+			"fieldtype": "Link",
+			"options": "Supplier"
+		},
+		{
+			"fieldname": "supplier_name",
+			"label": "Supplier Name",
+			"width": 200,
+			"fieldtype": "Data"
+		},
+		{
+			"fieldname": "item_planning_id",
+			"label": "Item Planning ID",
+			"width": 200,
+			"fieldtype": "Link",
+			"options": "Delivery Planning Item"
+		},
+		{
+			"fieldname": "company",
+			"label": "Company",
+			"width": 200,
+			"fieldtype": "Link",
+			"options":"Company"
+		}
 	]
+	column.extend(lst)
+	return column
 
 def get_data(conditions, group_by, filters):
-	query = frappe.db.sql(""" select
-							dpi.sales_order,
-							dpi.customer,
-							dpi.customer_name,
-							dpi.transporter,
-							dpi.transporter_name,
-							dpi.item_code,
-							dpi.item_name,
-							dpi.ordered_qty,
-							dpi.qty_to_deliver,
-							dpi.delivery_date as expected_date,
-							dpi.planned_date as planned_delivery_date,
-							dpi.delivery_note,
-							dn.posting_date as delivery_note_date,
-							DATEDIFF(dpi.planned_date, dpi.delivery_date) as delay_days,
-							dpi.pick_list,
-							dpi.weight_to_deliver as weight_ordered,
-							dpi.weight_to_deliver as planned_delivery_weight,
-							(dni.qty * dpi.weight_per_unit) as actual_delivery_weight,
-							dpi.purchase_order as purchase_order,
-							dpi.supplier,
-							dpi.supplier_name,
-							dpi.name as item_planning_id,
-							dpi.company,
-							dpi.related_delivey_planning as Related_to_Planning
-							
+	query = "select "
+	if filters.get('group_by') =='Transporter' or filters.get('based_on') =='Transporter':
+		query += "dpi.transporter,dpi.transporter_name,"
 
-							from `tabDelivery Planning Item` dpi
-						
-							Left join `tabDelivery Note` dn ON dn.name = dpi.delivery_note
-							inner join 	`tabDelivery Note Item` dni on dni.parent = dpi.delivery_note 
-							and dni.item_code = dpi.item_code
-						
+	if filters.get('group_by') =='Customer' or filters.get('based_on') =='Customer':
+		query += "dpi.customer,dpi.customer_name,"
 
-							where dpi.docstatus = 1  AND dpi.d_status = "Complete"
-						
-							
-							{conditions}
-							{groupby}
-							""".format(conditions=conditions, groupby = group_by), filters, as_dict=1)
-	return query
+	if filters.get('group_by') =='Sales Order' or filters.get('based_on') =='Sales Order':
+		query += "dpi.sales_order,"
+
+	if filters.get('group_by') =='Delivery Date' or filters.get('based_on') =='Delivery Date':
+		query += "dpi.delivery_date as expected_date,"
+
+	query += """dpi.item_code,
+				dpi.item_name,
+				dpi.ordered_qty,
+				dpi.qty_to_deliver,
+				dpi.planned_date as planned_date,
+				dpi.delivery_note,
+				dn.posting_date as delivery_note_date,
+				DATEDIFF(dpi.planned_date, dpi.delivery_date) as delay_days,
+				dpi.pick_list,
+				dpi.weight_to_deliver as weight_ordered,
+				dpi.weight_to_deliver as planned_delivery_weight,
+				(dni.qty * dpi.weight_per_unit) as actual_delivery_weight,
+				dpi.purchase_order as purchase_order,
+				dpi.supplier,
+				dpi.supplier_name,
+				dpi.name as item_planning_id,
+				dpi.company,
+				dpi.related_delivey_planning as Related_to_Planning
+				
+				from `tabDelivery Planning Item` dpi
+			
+				Left join `tabDelivery Note` dn ON dn.name = dpi.delivery_note
+				left join 	`tabDelivery Note Item` dni on dni.parent = dpi.delivery_note 
+				and dni.item_code = dpi.item_code
+			
+
+				where dpi.docstatus = 1  AND dpi.d_status = "Complete"
+			
+				
+				{conditions}
+				{groupby}
+				"""
+	if filters.get('group_by'):
+		query +=",dpi.item_code, dpi.item_name, dpi.planned_date, dpi.delivery_note, delay_days, dpi.pick_list, dpi.purchase_order,dpi.supplier,dpi.supplier_name,dpi.name, dpi.company"
+	print('------query',query)
+	result = frappe.db.sql( query.format(conditions=conditions, groupby = group_by),filters, as_dict=1)	
+	# print("------------------------",result)
+		
+	item_details ={}
+	for d in result:
+		if filters.get("based_on") == _("Transporter"):
+			key = (d.transporter, d.transporter_name)
+			item_details.setdefault(key, {"details": []})
+			fifo_queue = item_details[key]["details"]
+			fifo_queue.append(d)	
+
+		if filters.get("based_on") == _("Customer"):
+			key = (d.customer, d.customer_name)
+			item_details.setdefault(key, {"details": []})
+			fifo_queue = item_details[key]["details"]
+			fifo_queue.append(d)
+
+		if filters.get("based_on") == _("Sales Order"):
+			key = (d.sales_order)
+			item_details.setdefault(key, {"details": []})
+			fifo_queue = item_details[key]["details"]
+			fifo_queue.append(d)
+
+		if filters.get("based_on") == _("Delivery Date"):
+			key = (d.expected_date)
+			item_details.setdefault(key, {"details": []})
+			fifo_queue = item_details[key]["details"]
+			fifo_queue.append(d)
+
+	data =[]
+	for key in item_details.keys():
+		ordered_qty=0
+		qty_to_deliver = 0
+		weight_ordered = 0
+		planned_delivery_weight = 0
+		actual_delivery_weight = 0
+		for d in item_details[key]['details']:
+			dd = frappe._dict({
+				'transporter' : d.get('transporter'),
+				'transporter_name' : d.get('transporter_name'),
+				'sales_order' : d.get('sales_order'),
+				'customer' : d.get('customer'),
+				'customer_name' : d.get('customer_name'),
+				'delivery_date' : d.get('expected_date'),
+				 'item_code' : d.get('item_code'),
+				 'item_name' : d.get('item_name'),
+				 'ordered_qty' : d.get('ordered_qty'),
+				 'qty_to_deliver' : d.get('qty_to_deliver'),
+				 'planned_date' : d.get('planned_date'),
+				 'delivery_note' : d.get('delivery_note'),
+				 'delivery_note_date' : d.get('delivery_note_date'),
+				 'delay_days' : d.get('delay_days'),
+				 'pick_list' : d.get('pick_list'),
+				 'weight_ordered' : d.get('weight_ordered'),
+				 'planned_delivery_weight' : d.get('planned_delivery_weight'),
+				 'actual_delivery_weight' :  d.get('actual_delivery_weight'),
+				 'purchase_order' : d.get('purchase_order'),
+				 'supplier' : d.get('supplier'),
+				 'supplier_name' : d.get('supplier_name'),
+				 'item_planning_id' : d.get('item_planning_id'),
+				 'company' : d.get('company')
+
+			})
+			ordered_qty += float(d.get('ordered_qty'))
+			qty_to_deliver += float(d.get('qty_to_deliver'))
+			weight_ordered += float(d.get('weight_ordered'))
+			planned_delivery_weight += float(d.get('planned_delivery_weight'))
+			# actual_delivery_weight += float(d.get('actual_delivery_weight'))
+			data.append(dd)		
+		dd = frappe._dict({
+				'transporter' : None,
+				'transporter_name' : None,
+				'sales_order' : None,
+				'customer' : None,
+				'customer_name' : None,
+				'delivery_date' : None,
+				 'item_code' : None,
+				 'item_name' : '<b>Total</b>',
+				 'ordered_qty' : ordered_qty,
+				 'qty_to_deliver' : qty_to_deliver,
+				 'planned_date' : None,
+				 'delivery_note' : None,
+				 'delivery_note_date' : None,
+				 'delay_days' : None,
+				 'pick_list' : None,
+				 'weight_ordered' : weight_ordered,
+				 'planned_delivery_weight' : planned_delivery_weight,
+				 'actual_delivery_weight' : None,
+				 'purchase_order' : None,
+				 'supplier' : None,
+				 'supplier_name' : None,
+				 'item_planning_id' : None,
+				 'company' : None
+
+			})
+		data.append(dd)
+
+
+
+	# print("---------",data)
+	return data
 
