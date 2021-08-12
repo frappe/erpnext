@@ -14,7 +14,7 @@ from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_a
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
+from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled, get_party_gle_currency
 from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
 	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
 from erpnext.exceptions import InvalidCurrency
@@ -113,6 +113,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_party()
 		self.validate_currency()
+		self.validate_party_account_currency()
 
 		if self.doctype == 'Purchase Invoice':
 			self.calculate_paid_amount()
@@ -1029,6 +1030,19 @@ class AccountsController(TransactionBase):
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
+
+	def validate_party_account_currency(self):
+		if self.doctype not in ('Sales Invoice', 'Purchase Invoice'):
+			return
+
+		party_type, party = self.get_party()
+		party_gle_currency = get_party_gle_currency(party_type, party, self.company)
+		party_account = self.get('debit_to') if self.doctype == 'Sales Invoice' else self.get('credit_to')
+		party_account_currency = get_account_currency(party_account)
+
+		if not party_gle_currency and (party_account_currency != self.currency):
+			frappe.throw(_("Party Account {0} currency and document currency should be same").format(frappe.bold(party_account)))
+
 
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0
