@@ -249,8 +249,7 @@
    "fieldtype": "Float",
    "label": "Leave Without Pay",
    "oldfieldname": "leave_without_pay",
-   "oldfieldtype": "Currency",
-   "read_only": 1
+   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "payment_days",
@@ -567,8 +566,7 @@
   {
    "fieldname": "late_days",
    "fieldtype": "Int",
-   "label": "Late Days",
-   "read_only": 1
+   "label": "Late Days"
   },
   {
    "fieldname": "column_break_58",
@@ -616,7 +614,7 @@
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2021-06-30 16:36:04.207320",
+ "modified": "2021-08-12 17:07:02.644539",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
