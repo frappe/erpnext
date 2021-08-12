@@ -502,6 +502,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "enable_deferred_expense",
    "fieldname": "deferred_expense_section",
    "fieldtype": "Section Break",
    "label": "Deferred Expense"
@@ -861,7 +862,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-07-13 02:04:37.787882",
+=======
+ "modified": "2021-08-12 20:14:45.506639",
+>>>>>>> 1de4c01942 (fix: Deferred Revenue Section should be collapsible only if its not enabled (#26928))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
