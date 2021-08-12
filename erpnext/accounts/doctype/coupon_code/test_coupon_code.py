@@ -54,7 +54,7 @@ def test_create_test_data():
 		})
 		item_price.insert()
 	# create test item pricing rule
-	if not frappe.db.exists("Pricing Rule","_Test Pricing Rule for _Test Item"):
+	if not frappe.db.exists("Pricing Rule", {"title": "_Test Pricing Rule for _Test Item"}):
 		item_pricing_rule = frappe.get_doc({
 		"doctype": "Pricing Rule",
 		"title": "_Test Pricing Rule for _Test Item",
@@ -83,14 +83,15 @@ def test_create_test_data():
 		sales_partner.insert()
 	# create test item coupon code
 	if not frappe.db.exists("Coupon Code", "SAVE30"):
+		pricing_rule = frappe.db.get_value("Pricing Rule", {"title": "_Test Pricing Rule for _Test Item"}, ['name'])
 		coupon_code = frappe.get_doc({
-		"doctype": "Coupon Code",
-		"coupon_name":"SAVE30",
-		"coupon_code":"SAVE30",
-		"pricing_rule": "_Test Pricing Rule for _Test Item",
-		"valid_from": "2014-01-01",
-		"maximum_use":1,
-		"used":0
+			"doctype": "Coupon Code",
+			"coupon_name":"SAVE30",
+			"coupon_code":"SAVE30",
+			"pricing_rule": pricing_rule,
+			"valid_from": "2014-01-01",
+			"maximum_use":1,
+			"used":0
 		})
 		coupon_code.insert()
 
