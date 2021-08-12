@@ -22,7 +22,7 @@ from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accoun
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
+	unlink_inter_company_doc, check_if_return_invoice_linked_with_payment_entry
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
@@ -1014,6 +1014,8 @@ class PurchaseInvoice(BuyingController):
 				}, item=self))
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(PurchaseInvoice, self).on_cancel()
 
 		self.check_on_hold_or_closed_status()
