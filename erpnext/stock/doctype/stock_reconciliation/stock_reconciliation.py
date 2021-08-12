@@ -215,6 +215,7 @@ class StockReconciliation(StockController):
 				previous_sle = get_previous_sle({
 					"item_code": row.item_code,
 					"warehouse": row.warehouse,
+					"batch_no": row.batch_no,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time
 				})

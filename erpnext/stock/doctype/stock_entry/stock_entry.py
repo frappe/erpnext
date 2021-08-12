@@ -426,6 +426,7 @@ class StockEntry(StockController):
 			previous_sle = get_previous_sle({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
+				"batch_no": d.batch_no,
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time
 			})
@@ -496,7 +497,7 @@ class StockEntry(StockController):
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company,
-					raise_error_if_no_rate=raise_error_if_no_rate)
+					raise_error_if_no_rate=raise_error_if_no_rate, batch_no=d.get("batch_no"))
 
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
 			if d.is_process_loss:
@@ -527,6 +528,7 @@ class StockEntry(StockController):
 			"posting_time": self.posting_time,
 			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
 			"serial_no": item.serial_no,
+			"batch_no": item.batch_no,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"company": self.company,

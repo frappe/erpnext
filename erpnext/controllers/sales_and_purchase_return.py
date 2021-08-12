@@ -399,6 +399,20 @@ def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None
 	if not return_against:
 		return_against = frappe.get_cached_value(voucher_type, voucher_no, "return_against")
 
+	if not return_against and voucher_type == 'Sales Invoice' and sle:
+		return get_incoming_rate({
+			"item_code": sle.item_code,
+			"warehouse": sle.warehouse,
+			"posting_date": sle.get('posting_date'),
+			"posting_time": sle.get('posting_time'),
+			"qty": sle.actual_qty,
+			"serial_no": sle.get('serial_no'),
+			"batch_no": sle.get('batch_no'),
+			"company": sle.company,
+			"voucher_type": sle.voucher_type,
+			"voucher_no": sle.voucher_no
+		}, raise_error_if_no_rate=False)
+
 	return_against_item_field = get_return_against_item_fields(voucher_type)
 
 	filters = get_filters(voucher_type, voucher_no, voucher_detail_no,
