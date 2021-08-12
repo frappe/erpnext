@@ -167,7 +167,8 @@ class DeliveryPlanningItem(Document):
 			dp_item.sales_order = self.sales_order
 			dp_item.sorce_warehouse = n_src_warehouse
 			dp_item.postal_code = self.postal_code
-			dp_item.delivery_date = n_date
+			dp_item.delivery_date = self.delivery_date
+			dp_item.planned_date = n_date
 			dp_item.current_stock = self.current_stock
 			dp_item.available_stock = self.available_stock
 			dp_item.related_delivey_planning = self.related_delivey_planning
@@ -281,7 +282,7 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 	sname = ""
 	sirate = 0
 	newname = ""
-	if(n_transporter, n_supplier, n_src_warehouse, n_qty):
+	if(n_qty):
 		if n_qty != doc.ordered_qty:
 			new_qty = float(doc.ordered_qty) - float(n_qty)
 			print("------- per unit ---------- ",doc.weight_per_unit,"-------- new Qty ------- ", n_qty)
@@ -303,9 +304,11 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		print("----------- values -------------", doc.sales_order, doc.item_code)
 		dp_item = frappe.new_doc("Delivery Planning Item")
 		# dp_item.item_dname = newname
-		if(n_supplier_dc == 0):
-				dp_item.transporter = n_transporter
-		
+		# if(n_supplier_dc == 0):
+		dp_item.transporter = n_transporter
+		# elif n_supplier_dc == 1:
+		dp_item.suppier = n_supplier
+
 		dp_item.customer = doc.customer
 		dp_item.item_code = doc.item_code
 		dp_item.item_name = doc.item_name
@@ -316,7 +319,8 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		dp_item.sales_order = doc.sales_order
 		dp_item.sorce_warehouse = n_src_warehouse
 		dp_item.postal_code = doc.postal_code
-		dp_item.delivery_date = n_date
+		dp_item.delivery_date = doc.delivery_date
+		dp_item.planned_date = n_date
 		dp_item.current_stock = doc.current_stock
 		dp_item.available_stock = doc.available_stock
 		dp_item.related_delivey_planning = doc.related_delivey_planning
