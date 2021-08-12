@@ -48,6 +48,7 @@ class SalarySlip(TransactionBase):
 		else:
 			self.get_leave_details(lwp=self.leave_without_pay, late_days=self.late_days)
 
+		self.remove_zero_components()
 		self.calculate_net_pay()
 
 		company_currency = erpnext.get_company_currency(self.company)
@@ -354,6 +355,19 @@ class SalarySlip(TransactionBase):
 			}
 			doc.append('earnings', wages_row)
 
+	def remove_zero_components(self):
+		to_remove = []
+		for d in self.get("earnings"):
+			if not flt(d.amount):
+				to_remove.append(d)
+
+		for d in self.get("deductions"):
+			if not flt(d.amount):
+				to_remove.append(d)
+
+		for d in to_remove:
+			self.remove(d)
+
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts("earnings")
@@ -396,7 +410,7 @@ class SalarySlip(TransactionBase):
 		data = self.get_data_for_eval()
 		for struct_row in self._salary_structure_doc.get(component_type):
 			amount = self.eval_condition_and_formula(struct_row, data)
-			if amount and struct_row.statistical_component == 0:
+			if struct_row.statistical_component == 0:
 				self.update_component_row(struct_row, amount, component_type)
 
 	def get_data_for_eval(self):
@@ -454,8 +468,7 @@ class SalarySlip(TransactionBase):
 						self.update_component_row(struct_row, benefit_component_amount, "earnings")
 				else:
 					benefit_claim_amount = get_benefit_claim_amount(self.employee, self.start_date, self.end_date, struct_row.salary_component)
-					if benefit_claim_amount:
-						self.update_component_row(struct_row, benefit_claim_amount, "earnings")
+					self.update_component_row(struct_row, benefit_claim_amount, "earnings")
 
 		self.adjust_benefits_in_last_payroll_period(payroll_period)
 
