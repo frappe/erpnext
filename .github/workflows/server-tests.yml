@@ -2,9 +2,13 @@ name: Server
 
 on:
   pull_request:
+    paths-ignore:
+      - '**.js'
   workflow_dispatch:
   push:
     branches: [ develop ]
+    paths-ignore:
+      - '**.js'
 
 jobs:
   test:
