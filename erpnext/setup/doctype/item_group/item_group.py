@@ -14,11 +14,7 @@ from frappe.utils.nestedset import NestedSet
 from frappe.website.utils import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 from six.moves.urllib.parse import quote
-
-from erpnext.e_commerce.filters import ProductFiltersBuilder
-from erpnext.e_commerce.product_query import ProductQuery
-from erpnext.utilities.product import get_qty_in_stock
-
+from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
