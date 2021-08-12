@@ -7,7 +7,7 @@ from frappe.utils import cint, comma_and
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import unique
-from erpnext.e_commerce.website_item_indexing import create_website_items_index, ALLOWED_INDEXABLE_FIELDS_SET, is_search_module_loaded
+from erpnext.e_commerce.redisearch import create_website_items_index, ALLOWED_INDEXABLE_FIELDS_SET, is_search_module_loaded
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
