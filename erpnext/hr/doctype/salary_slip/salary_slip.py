@@ -363,6 +363,7 @@ class SalarySlip(TransactionBase):
 			self.calculate_component_amounts("deductions")
 		self.total_deduction = self.get_component_totals("deductions")
 
+		self.get_pending_advances()
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
@@ -1017,7 +1018,6 @@ class SalarySlip(TransactionBase):
 			self.get_date_details()
 		self.pull_emp_details()
 		self.get_leave_details(for_preview=for_preview)
-		self.get_pending_advances()
 		self.calculate_net_pay()
 
 	def pull_emp_details(self):
