@@ -21,8 +21,9 @@
 {% if doc.items %}
 <div class="cart-container">
 	<div class="row m-0">
-		<div class="col-md-8 frappe-card p-5 mb-4">
-			<div>
+		<!-- Left section -->
+		<div class="col-md-8">
+			<div class="frappe-card p-5 mb-4">
 				<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
 				<div class="cart-items-header">
 					{{ _('Items') }}
@@ -56,61 +57,44 @@
 						</tfoot>
 					{% endif %}
 				</table>
-			</div>
 
-			<div class="row mt-2">
-				<div class="col-3">
-					{% if cart_settings.enable_checkout %}
-						<a class="btn btn-primary-light font-md" href="/orders">
-							{{ _('Past Orders') }}
-						</a>
-					{% else %}
-						<a class="btn btn-primary-light font-md" href="/quotations">
-							{{ _('Past Quotes') }}
-						</a>
-					{% endif %}
-				</div>
-				<div class="col-9">
-					{% if doc.items %}
-					<div class="place-order-container">
-						<a class="btn btn-primary-light mr-2 font-md" href="/all-products">
-							{{ _('Continue Shopping') }}
-						</a>
+				<div class="row mt-2">
+					<div class="col-3">
+						{% if cart_settings.enable_checkout %}
+							<a class="btn btn-primary-light font-md" href="/orders">
+								{{ _('Past Orders') }}
+							</a>
+						{% else %}
+							<a class="btn btn-primary-light font-md" href="/quotations">
+								{{ _('Past Quotes') }}
+							</a>
+						{% endif %}
 					</div>
-					{% endif %}
+					<div class="col-9">
+						{% if doc.items %}
+						<div class="place-order-container">
+							<a class="btn btn-primary-light mr-2 font-md" href="/all-products">
+								{{ _('Continue Shopping') }}
+							</a>
+						</div>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 
-
+			<!-- Terms and Conditions -->
 			{% if doc.items %}
-			{% if doc.tc_name %}
-				<div class="terms-and-conditions-link">
-					<a href class="link-terms-and-conditions" data-terms-name="{{ doc.tc_name }}">
-						{{ _("Terms and Conditions") }}
-					</a>
-					<script>
-						frappe.ready(() => {
-							$('.link-terms-and-conditions').click((e) => {
-								e.preventDefault();
-								const $link = $(e.target);
-								const terms_name = $link.attr('data-terms-name');
-								show_terms_and_conditions(terms_name);
-							})
-						});
-						function show_terms_and_conditions(terms_name) {
-							frappe.call('erpnext.e_commerce.shopping_cart.cart.get_terms_and_conditions', { terms_name })
-							.then(r => {
-								frappe.msgprint({
-									title: terms_name,
-									message: r.message
-								});
-							});
-						}
-					</script>
-				</div>
-			{% endif %}
+				{% if doc.terms %}
+					<div class="t-and-c-container mt-4 frappe-card">
+						<h5>{{ _("Terms and Conditions") }}</h5>
+						<div class="t-and-c-terms mt-2">
+							{{ doc.terms }}
+						</div>
+					</div>
+				{% endif %}
 		</div>
 
+		<!-- Right section -->
 		<div class="col-md-4">
 			<div class="cart-payment-addresses">
 				<!-- Apply Coupon Code  -->

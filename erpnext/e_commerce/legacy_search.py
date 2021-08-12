@@ -6,6 +6,7 @@ from whoosh.qparser import MultifieldParser, FieldsPlugin, WildcardPlugin
 from whoosh.analysis import StemmingAnalyzer
 from whoosh.query import Prefix
 
+# TODO: Make obsolete
 INDEX_NAME = "products"
 
 class ProductSearch(FullTextSearch):

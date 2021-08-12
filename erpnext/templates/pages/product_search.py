@@ -7,7 +7,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_htm
 from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_website
 
 from redisearch import AutoCompleter, Client, Query
-from erpnext.e_commerce.website_item_indexing import (
+from erpnext.e_commerce.redisearch import (
 	is_search_module_loaded,
 	WEBSITE_ITEM_INDEX,
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
@@ -16,7 +16,6 @@ from erpnext.e_commerce.website_item_indexing import (
 )
 
 no_cache = 1
-
 
 def get_context(context):
 	context.show_search = True
@@ -34,13 +33,13 @@ def get_product_data(search=None, start=0, limit=12):
 	# limit = 12 because we show 12 items in the grid view
 	# base query
 	query = """
-		Select
+		SELECT
 			web_item_name, item_name, item_code, brand, route,
 			website_image, thumbnail, item_group,
 			description, web_long_description as website_description,
 			website_warehouse, ranking
-		from `tabWebsite Item`
-		where published = 1
+		FROM `tabWebsite Item`
+		WHERE published = 1
 		"""
 
 	# search term condition
@@ -52,7 +51,7 @@ def get_product_data(search=None, start=0, limit=12):
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """ order by ranking asc, modified desc limit %s, %s""" % (cint(start), cint(limit))
+	query += """ ORDER BY ranking asc, modified desc limit %s, %s""" % (cint(start), cint(limit))
 
 	return frappe.db.sql(query, {
 		"search": search
@@ -90,13 +89,8 @@ def search(query, limit=10, fuzzy_search=True):
 
 	q = Query(query_string)
 
-	print(f"Executing query: {q.query_string()}")
-
 	results = client.search(q)
 	search_results['results'] = list(map(convert_to_dict, results.docs))
-
-	# FOR DEBUGGING
-	print("SEARCH RESULTS ------------------\n ", search_results)
 
 	return search_results
 

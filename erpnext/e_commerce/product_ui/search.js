@@ -49,7 +49,7 @@ erpnext.ProductSearch = class {
 
 			// Fetch and populate product results
 			frappe.call({
-				method: "erpnext.templates.pages.product_search.search",
+				method: "erpnext.templates.pages.e_commerce.product_search.search",
 				args: {
 					query: query
 				},
@@ -61,7 +61,7 @@ erpnext.ProductSearch = class {
 			// Populate categories
 			if (me.category_container) {
 				frappe.call({
-					method: "erpnext.templates.pages.product_search.get_category_suggestions",
+					method: "erpnext.templates.pages.e_commerce.product_search.get_category_suggestions",
 					args: {
 						query: query
 					},
