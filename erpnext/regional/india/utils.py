@@ -850,3 +850,16 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
 
 	return depreciation_amount
+
+def delete_gst_settings_for_company(doc, method):
+	if doc.country != 'India':
+		return
+
+	gst_settings = frappe.get_doc("GST Settings")
+
+	for d in reversed(gst_settings.get('gst_accounts')):
+		if d.company == doc.name:
+			gst_settings.remove(d)
+
+	gst_settings.save()
+
