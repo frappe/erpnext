@@ -871,3 +871,16 @@ def set_item_tax_from_hsn_code(item):
 				'tax_category': tax.tax_category,
 				'valid_from': tax.valid_from
 			})
+
+def delete_gst_settings_for_company(doc, method):
+	if doc.country != 'India':
+		return
+
+	gst_settings = frappe.get_doc("GST Settings")
+
+	for d in reversed(gst_settings.get('gst_accounts')):
+		if d.company == doc.name:
+			gst_settings.remove(d)
+
+	gst_settings.save()
+

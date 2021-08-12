@@ -308,6 +308,9 @@ doc_events = {
 	},
 	('Quotation', 'Sales Order', 'Sales Invoice'): {
 		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
+	},
+	"Company": {
+		"on_trash": "erpnext.regional.india.utils.delete_gst_settings_for_company"
 	}
 }
 
