@@ -1932,6 +1932,7 @@
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Profit / Loss Account",
    "options": "Account"
   },
@@ -1995,7 +1996,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-07-08 14:03:55.502522",
+ "modified": "2021-08-12 11:28:47.285816",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
