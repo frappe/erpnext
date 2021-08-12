@@ -3,14 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
-import json
 from unittest import TestCase
-from frappe.utils import today, now_datetime, cstr
+from frappe.utils import today
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 from erpnext.regional.report.vat_audit_report.vat_audit_report import execute
 
@@ -19,9 +17,9 @@ class TestVATAuditReport(TestCase):
 		frappe.set_user("Administrator")
 		make_company("_Test Company SA VAT", "_TCSV")
 
-		create_account(account_name="VAT - 0%", account_type="Tax", \
+		create_account(account_name="VAT - 0%", account_type="Tax",
 			parent_account="Duties and Taxes - _TCSV", company="_Test Company SA VAT")
-		create_account(account_name="VAT - 15%", account_type="Tax", \
+		create_account(account_name="VAT - 15%", account_type="Tax",
 			parent_account="Duties and Taxes - _TCSV", company="_Test Company SA VAT")
 		set_sa_vat_accounts()
 
@@ -44,14 +42,14 @@ class TestVATAuditReport(TestCase):
 			"from_date": today(),
 			"to_date": today()
 		}
-		columns, data = execute()
+		columns, data = execute(filters)
 		tax = []
 		for d in data:
 			tax.append(d.setdefault("tax_amount"))
 
 		self.assertEqual(tax[1], 15.0)
-		self.assertEqual(tax[2], 15.0)
-		self.assertEqual(tax[-2], 0.0)
+		self.assertEqual(tax[5], 0.0)
+		self.assertEqual(tax[9], 15.0)
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
@@ -107,10 +105,7 @@ def make_customer():
 			"doctype": "Customer",
 			"customer_name": "_Test SA Customer",
 			"customer_type": "Company",
-		})
-		customer.insert()
-	else:
-		customer = frappe.get_doc("Customer", "_Test SA Customer")
+		}).insert()
 
 def make_supplier():
 	if not frappe.db.exists("Supplier", "_Test SA Supplier"):
@@ -120,8 +115,6 @@ def make_supplier():
 			"supplier_type": "Company",
 			"supplier_group":"All Supplier Groups"
 		}).insert()
-	else:
-		supplier = frappe.get_doc("Supplier", "_Test SA Supplier")
 
 def make_item(item_code, properties=None):
 	if frappe.db.exists("Item", item_code):
