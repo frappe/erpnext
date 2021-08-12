@@ -717,9 +717,8 @@ def get_bom_item_rate(args, bom_doc):
 			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
-		out = frappe._dict()
-		get_price_list_rate(bom_args, item_doc, out)
-		rate = out.price_list_rate
+		price_list_data = get_price_list_rate(bom_args, item_doc)
+		rate = price_list_data.price_list_rate
 
 	return rate
 
@@ -748,7 +747,7 @@ def get_valuation_rate(args):
 	if valuation_rate <= 0:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0
+			where item_code = %s and valuation_rate > 0 and is_cancelled = 0
 			order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
 
 		valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0

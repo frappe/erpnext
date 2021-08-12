@@ -407,6 +407,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 			where
 				batch.disabled = 0
+				and sle.is_cancelled = 0
 				and sle.item_code = %(item_code)s
 				and sle.warehouse = %(warehouse)s
 				and (sle.batch_no like %(txt)s
