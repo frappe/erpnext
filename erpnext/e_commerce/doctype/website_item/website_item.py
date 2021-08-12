@@ -17,7 +17,7 @@ from erpnext.e_commerce.shopping_cart.cart import _set_price_list
 from erpnext.utilities.product import get_price
 
 # SEARCH
-from erpnext.e_commerce.website_item_indexing import (
+from erpnext.e_commerce.redisearch import (
 	insert_item_to_index,
 	update_index_for_item,
 	delete_item_from_index
