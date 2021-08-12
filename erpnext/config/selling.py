@@ -57,6 +57,11 @@ def get_data():
 					"dependencies": ["Item", "Customer"],
 				},
 				{
+					"type": "doctype",
+					"name": "Price List Schedule",
+					"description": _("Assign Price List Schedule."),
+				},
+				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Territory Target Variance (Item Group-Wise)",
