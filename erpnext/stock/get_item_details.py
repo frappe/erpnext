@@ -755,9 +755,9 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	if len(price_data) == 0 and not ignore_party and args.get('transaction_type'):
 		if args.get("transaction_type") == "buying":
-			conditions += "and (supplier is null or supplier = '')"
+			conditions += " and (supplier is null or supplier = '')"
 		if args.get("transaction_type") == "selling":
-			conditions += "and (customer is null or customer = '')"
+			conditions += " and (customer is null or customer = '')"
 
 		price_data = frappe.db.sql(""" select name, price_list_rate, uom
 			from `tabItem Price` {conditions}
