@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/manufacturing",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-08-04 17:48:04.463686",
+ "modified": "2021-08-13 16:04:34.333812",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -42,6 +42,9 @@
   },
   {
    "step": "Create BOM"
+  },
+  {
+   "step": "Production Planning"
   },
   {
    "step": "Work Order"

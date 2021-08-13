@@ -9,13 +9,13 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2021-08-04 17:45:57.435805",
+ "modified": "2021-08-13 15:59:53.313532",
  "modified_by": "Administrator",
  "name": "Operation",
  "owner": "Administrator",
  "reference_document": "Operation",
  "show_form_tour": 1,
  "show_full_form": 1,
- "title": "Create Operations",
+ "title": "Operation",
  "validate_action": 1
 }

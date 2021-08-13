@@ -9,13 +9,13 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2021-08-04 12:21:59.942014",
+ "modified": "2021-08-13 16:00:22.407811",
  "modified_by": "Administrator",
  "name": "Create Product",
  "owner": "Administrator",
  "reference_document": "Item",
  "show_form_tour": 1,
  "show_full_form": 1,
- "title": "Create Items for Bill of Materials",
+ "title": "Finished Items",
  "validate_action": 1
 }

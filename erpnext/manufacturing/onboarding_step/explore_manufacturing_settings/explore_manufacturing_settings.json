@@ -9,14 +9,14 @@
  "is_complete": 0,
  "is_single": 1,
  "is_skipped": 0,
- "modified": "2021-08-03 11:29:59.196891",
+ "modified": "2021-08-13 15:59:32.145655",
  "modified_by": "Administrator",
  "name": "Explore Manufacturing Settings",
  "owner": "Administrator",
  "reference_document": "Manufacturing Settings",
  "show_form_tour": 0,
  "show_full_form": 0,
- "title": "Review Manufacturing Settings",
+ "title": "Manufacturing Settings",
  "validate_action": 0,
  "video_url": "https://www.youtube.com/watch?v=UVGfzwOOZC4"
 }

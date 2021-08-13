@@ -9,13 +9,13 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2021-08-04 17:25:17.168827",
+ "modified": "2021-08-13 16:00:51.092671",
  "modified_by": "Administrator",
  "name": "Create BOM",
  "owner": "Administrator",
  "reference_document": "BOM",
  "show_form_tour": 1,
  "show_full_form": 1,
- "title": "Create a Bill of Materials",
+ "title": "Bill of Materials",
  "validate_action": 1
 }

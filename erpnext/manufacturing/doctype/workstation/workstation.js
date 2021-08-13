@@ -16,7 +16,7 @@ frappe.ui.form.on("Workstation", {
 			})
 		}
 	}
-})
+});
 
 frappe.tour['Workstation'] = [
 	{
@@ -30,8 +30,15 @@ frappe.tour['Workstation'] = [
 		description: __("No. of parallel job cards which can be allowed on this workstation. Example: 2 would mean this workstation can process production for two Work Orders at a time.")
 	},
 	{
-		fieldname: "working_hours_section",
+		fieldname: "holiday_list",
+		title: "Holiday List",
+		description: __("A Holiday List can be added to exclude counting these days for the Workstation.")
+	},
+	{
+		fieldname: "working_hours",
 		title: "Working Hours",
-		description: "Enter working hours for operation"
-	}
+		description: __("Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified.")
+	},
+
+
 ];
