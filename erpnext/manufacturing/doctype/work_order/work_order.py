@@ -334,6 +334,7 @@ class WorkOrder(Document):
 		self.actual_yeild_on_wo()
 		self.yeild_calc()
 		self.wo_actual_volume_list()
+		self.update()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
