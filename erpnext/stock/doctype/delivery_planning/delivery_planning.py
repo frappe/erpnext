@@ -392,7 +392,7 @@ class DeliveryPlanning(Document):
 	def purchase_order_call(self):
 		print("<<<<<<<<<<Calculate Po plan >>>>>>>>>>>>>>>>>")
 		item = frappe.get_all(doctype='Delivery Planning Item',
-							  filters={"approved": "Yes",
+							  filters={
 									   "supplier_dc": 1,
 									   "docstatus" : 1,
 									   "related_delivey_planning" : self.name})
@@ -475,7 +475,7 @@ class DeliveryPlanning(Document):
 
 		print("----------0000000000 this is  Transporter wise delivery call ------------")
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
-								 filters={"approved": "Yes",
+								 filters={
 										  "supplier_dc": 0,
 										  "docstatus" :1,
 										  "related_delivey_planning": self.name})
@@ -505,8 +505,7 @@ class DeliveryPlanning(Document):
 
 											from `tabDelivery Planning Item`
 
-											where approved = "Yes"
-											AND supplier_dc = 0
+											where supplier_dc = 0
 											AND docstatus = 1
 											{conditions}
 											group by transporter, delivery_date
@@ -526,7 +525,7 @@ class DeliveryPlanning(Document):
 														 {"related_delivey_planning" :self.name,
 														  "transporter" : q.transporter,
 														  "delivery_date" : q.delivery_date,
-														  "approved": "Yes",
+														 
 														  "docstatus" : 1,
 														  "supplier_dc" : 0},
 														 ["sales_order","item_name","item_code","customer",
@@ -560,7 +559,7 @@ class DeliveryPlanning(Document):
 
 										from `tabDelivery Planning Item`
 
-										where approved = "Yes" AND docstatus = 1
+										where docstatus = 1
 										{conditions}
 										group by transporter, delivery_date
 										""".format(conditions=conditions), as_dict=1)
@@ -576,7 +575,7 @@ class DeliveryPlanning(Document):
 						so_wise_data = frappe.db.get_all("Delivery Planning Item",
 														 {"related_delivey_planning": self.name,
 														  "transporter": q.transporter,
-														  "approved": "Yes",
+														 "docstatus" : 1
 														  },
 														 ["sales_order", "item_name", "ordered_qty",
 														  "weight_to_deliver","item_code","customer"]
@@ -605,7 +604,7 @@ class DeliveryPlanning(Document):
 		discount = []
 		print("------------- inside PO make po ---------")
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
-								 filters={"approved": "Yes",
+								 filters={
 										  "supplier_dc": 1,
 										  "docstatus" : 1,
 										  "related_delivey_planning": self.name})
@@ -624,7 +623,7 @@ class DeliveryPlanning(Document):
 										from `tabDelivery Planning Item`dpi
 
 										where dpi.supplier_dc = 1
-										AND dpi.approved = "Yes"
+										
 										AND dpi.docstatus = 1
 
 										{conditions}
@@ -641,7 +640,7 @@ class DeliveryPlanning(Document):
 				so_wise_data = frappe.db.get_all("Delivery Planning Item",
 												 {"related_delivey_planning": self.name,
 												  "supplier": q.supplier,
-												  "approved": "Yes"},
+												 },
 												 ["item_code",
 												  "item_name",
 												  "ordered_qty",
@@ -712,7 +711,7 @@ class DeliveryPlanning(Document):
 		print("------------- inside PI make picklist ---------")
 
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
-								 filters={"approved": "Yes",
+								 filters={
 										  "supplier_dc": 0,
 										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
@@ -732,7 +731,7 @@ class DeliveryPlanning(Document):
 									from `tabDelivery Planning Item`dpi
 
 									where dpi.supplier_dc = 0
-									AND dpi.approved = "Yes"
+									
 									AND dpi.transporter IS NOT NULL
 									AND dpi.docstatus = 1
 									{conditions}
@@ -749,7 +748,7 @@ class DeliveryPlanning(Document):
 												 {"related_delivey_planning": self.name,
 												  "transporter": q.transporter,
 												  "customer": q.customer,
-												  "approved": "Yes",
+												  
 												  "docstatus":1},
 												 ["item_code",
 												  "item_name",
@@ -789,7 +788,7 @@ class DeliveryPlanning(Document):
 	@frappe.whitelist()
 	def make_dnote(self):
 		item = frappe.db.get_all(doctype='Delivery Planning Item',
-								 filters={"approved": "Yes",
+								 filters={
 										  "supplier_dc": 0,
 										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
@@ -909,7 +908,7 @@ class DeliveryPlanning(Document):
 			conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
 			dpi = frappe.db.sql(""" Select name, customer, transporter
 							from `tabDelivery Planning Item`
-							where approved = 'Yes' AND docstatus = 1 AND supplier_dc = 0
+							where docstatus = 1 AND supplier_dc = 0
 							{conditions}
 							Group By customer, transporter
 							""".format(conditions=conditions), as_dict=1)
@@ -924,7 +923,7 @@ class DeliveryPlanning(Document):
 
 					item = frappe.db.get_all('Delivery Planning Item',
 											filters={'related_delivey_planning': self.name,
-													 'approved': "Yes",
+													 
 													 'supplier_dc': 0,
 													 'customer': d.customer,
 													 'transporter': d.transporter},
@@ -1059,7 +1058,7 @@ class DeliveryPlanning(Document):
 	@frappe.whitelist()
 	def check_po_in_dpi(self):
 		dpi_po = frappe.db.get_all(doctype='Delivery Planning Item',
-								 filters={"approved": "Yes",
+								 filters={
 								 		  "supplier_dc": 1,
 										  
 										  "docstatus" : 1,
@@ -1068,7 +1067,7 @@ class DeliveryPlanning(Document):
 
 
 		dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
-								 filters={"approved": "Yes",
+								 filters={
 										  "supplier_dc": 0,
 										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
@@ -1125,7 +1124,7 @@ class DeliveryPlanning(Document):
 
 		if self.docstatus == 1:
 			dpi_po = frappe.db.get_all(doctype='Delivery Planning Item',
-									   filters={"approved": "Yes",
+									   filters={
 												"supplier_dc": 1,
 												"docstatus": 1,
 												"related_delivey_planning": self.name,
@@ -1133,7 +1132,7 @@ class DeliveryPlanning(Document):
 			print("--------------- dpi_po", len(dpi_po))
 
 			dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
-									   filters={"approved": "Yes",
+									   filters={
 												"supplier_dc": 0,
 												"docstatus": 1,
 												"related_delivey_planning": self.name,
@@ -1144,7 +1143,7 @@ class DeliveryPlanning(Document):
 									filters={"related_delivey_planning": self.name})
 
 			a_dpi_po = frappe.db.get_all(doctype='Delivery Planning Item',
-									   filters={"approved": "Yes",
+									   filters={
 												"supplier_dc": 1,
 												"related_delivey_planning": self.name,
 												"d_status" : "Complete",
@@ -1153,7 +1152,7 @@ class DeliveryPlanning(Document):
 			print("--------------- a_dpi_po", len(a_dpi_po))									
 			# {"autoname": ["is", "not set"]}
 			a_dpi_dn = frappe.db.get_all(doctype='Delivery Planning Item',
-									   filters={"approved": "Yes",
+									   filters={
 												"supplier_dc": 0,
 												"related_delivey_planning": self.name,
 												"d_status" : 'Complete',
