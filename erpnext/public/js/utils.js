@@ -481,7 +481,7 @@ erpnext.utils.update_child_items = function(opts) {
 				query: "erpnext.controllers.queries.item_query",
 				filters: filters
 			};
-		};
+		}
 	}, {
 		fieldtype:'Link',
 		fieldname:'uom',
