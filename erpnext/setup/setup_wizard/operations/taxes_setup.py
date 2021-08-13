@@ -124,7 +124,8 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 		account_data = tax_row.get('account_head')
 		tax_row_defaults = {
 			'category': 'Total',
-			'charge_type': 'On Net Total'
+			'charge_type': 'On Net Total',
+			'cost_center': frappe.db.get_value('Company', company_name, 'cost_center')
 		}
 
 		if doctype == 'Purchase Taxes and Charges Template':
@@ -182,16 +183,6 @@ def make_item_tax_template(company_name, template):
 	doc.flags.ignore_validate = True
 	doc.insert(ignore_permissions=True)
 	return doc
-
-def make_tax_category(tax_category):
-	""" Make tax category based on title if not already created """
-	doctype = 'Tax Category'
-	if not frappe.db.exists(doctype, tax_category['title']):
-		tax_category['doctype'] = doctype
-		doc = frappe.get_doc(tax_category)
-		doc.flags.ignore_links = True
-		doc.flags.ignore_validate = True
-		doc.insert(ignore_permissions=True)
 
 def get_or_create_account(company_name, account):
 	"""
@@ -284,7 +275,7 @@ def get_or_create_tax_group(company_name, root_type):
 	return tax_group_name
 
 
-def make_tax_catgory(tax_category):
+def make_tax_category(tax_category):
 	doctype = 'Tax Category'
 	if isinstance(tax_category, str):
 		tax_category = {'title': tax_category}

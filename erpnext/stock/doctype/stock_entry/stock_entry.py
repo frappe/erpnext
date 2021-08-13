@@ -76,6 +76,7 @@ class StockEntry(StockController):
 		self.validate_difference_account()
 		self.set_job_card_data()
 		self.set_purpose_for_stock_entry()
+		self.clean_serial_nos()
 		self.validate_duplicate_serial_no()
 
 		if not self.from_bom:
@@ -1184,7 +1185,7 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "required_qty", "consumed_qty", "transferred_qty"]
+			fields=["item_code", "source_warehouse", "required_qty", "consumed_qty", "transferred_qty"]
 			)
 
 		work_order_qty = wo.material_transferred_for_manufacturing or wo.qty
@@ -1204,7 +1205,7 @@ class StockEntry(StockController):
 			if qty > 0:
 				self.add_to_stock_entry_detail({
 					item.item_code: {
-						"from_warehouse": wo.wip_warehouse,
+						"from_warehouse": wo.wip_warehouse or item.source_warehouse,
 						"to_warehouse": "",
 						"qty": qty,
 						"item_name": item.item_name,
@@ -1789,7 +1790,7 @@ def get_expired_batch_items():
 	from `tabBatch` b, `tabStock Ledger Entry` sle
 	where b.expiry_date <= %s
 	and b.expiry_date is not NULL
-	and b.batch_id = sle.batch_no
+	and b.batch_id = sle.batch_no and sle.is_cancelled = 0
 	group by sle.warehouse, sle.item_code, sle.batch_no""",(nowdate()), as_dict=1)
 
 @frappe.whitelist()

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, getdate, add_days, cstr, nowdate, get_link_to_form, formatdate
+from frappe.utils import cint, flt, getdate, add_days, add_months, cstr, nowdate, get_link_to_form, formatdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
 from frappe.model.mapper import get_mapped_doc
@@ -13,7 +13,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.assets.doctype.asset.depreciation \
-	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal, get_gl_entries_on_asset_regain
+	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal, get_gl_entries_on_asset_regain, post_depreciation_entries
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -290,6 +290,8 @@ class SalesInvoice(SellingController):
 		self.update_time_sheet(None)
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(SalesInvoice, self).on_cancel()
 
 		self.check_sales_order_on_hold_or_close("sales_order")
@@ -480,7 +482,7 @@ class SalesInvoice(SellingController):
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
-				frappe.throw(_("No POS Profile found. Please create a New POS Profile first"))
+				return
 			self.pos_profile = pos_profile.get('name')
 
 		pos = {}
@@ -925,33 +927,30 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
-					if item.get('asset'):
-						asset = frappe.get_doc("Asset", item.asset)
-					else:
-						frappe.throw(_(
-							"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
-							title=_("Missing Asset")
-						)
-					if (len(asset.finance_books) > 1 and not item.finance_book
-						and asset.finance_books[0].finance_book):
-						frappe.throw(_("Select finance book for the item {0} at row {1}")
-							.format(item.item_code, item.idx))
+					asset = self.get_asset(item)
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(asset,
 							item.base_net_amount, item.finance_book)
 						asset.db_set("disposal_date", None)
+
+						if asset.calculate_depreciation:
+							self.reset_depreciation_schedule(asset)
+							
 					else:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
 							item.base_net_amount, item.finance_book)
 						asset.db_set("disposal_date", self.posting_date)
+
+						if asset.calculate_depreciation:
+							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					self.set_asset_status(asset)
-				
+
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
@@ -979,10 +978,93 @@ class SalesInvoice(SellingController):
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
+	def get_asset(self, item):
+		if item.get('asset'):
+			asset = frappe.get_doc("Asset", item.asset)
+		else:
+			frappe.throw(_(
+				"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
+				title=_("Missing Asset")
+			)
+
+		self.check_finance_books(item, asset)
+		return asset
+
+	def check_finance_books(self, item, asset):
+		if (len(asset.finance_books) > 1 and not item.finance_book
+			and asset.finance_books[0].finance_book):
+			frappe.throw(_("Select finance book for the item {0} at row {1}")
+				.format(item.item_code, item.idx))
+
+	def depreciate_asset(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.prepare_depreciation_data(self.posting_date)
+		asset.save()
+		
+		post_depreciation_entries(self.posting_date)
+
+	def reset_depreciation_schedule(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+
+		# recreate original depreciation schedule of the asset
+		asset.prepare_depreciation_data()
+
+		self.modify_depreciation_schedule_for_asset_repairs(asset)
+		asset.save()
+
+		self.delete_depreciation_entry_made_after_sale(asset)
+
+	def modify_depreciation_schedule_for_asset_repairs(self, asset):
+		asset_repairs = frappe.get_all(
+			'Asset Repair',
+			filters = {'asset': asset.name},
+			fields = ['name', 'increase_in_asset_life']
+		)
+
+		for repair in asset_repairs:
+			if repair.increase_in_asset_life:
+				asset_repair = frappe.get_doc('Asset Repair', repair.name)
+				asset_repair.modify_depreciation_schedule()
+				asset.prepare_depreciation_data()
+
+	def delete_depreciation_entry_made_after_sale(self, asset):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
+
+		row = -1
+		finance_book = asset.get('schedules')[0].get('finance_book')
+		for schedule in asset.get('schedules'):
+			if schedule.finance_book != finance_book:
+				row = 0
+				finance_book = schedule.finance_book
+			else:
+				row += 1
+			
+			if schedule.schedule_date == posting_date_of_original_invoice:
+				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice):
+					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry.posting_date = nowdate()
+					reverse_journal_entry.submit()
+
+	def get_posting_date_of_sales_invoice(self):
+		return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
+
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone 
+	def sale_was_made_on_original_schedule_date(self, asset, schedule, row, posting_date_of_original_invoice):
+		for finance_book in asset.get('finance_books'):
+			if schedule.finance_book == finance_book.finance_book:
+				orginal_schedule_date = add_months(finance_book.depreciation_start_date,
+					row * cint(finance_book.frequency_of_depreciation))
+			
+				if orginal_schedule_date == posting_date_of_original_invoice:
+					return True
+		return False
+
 	def set_asset_status(self, asset):
 		if self.is_return:
 			asset.set_status()
-		else: 	
+		else:
 			asset.set_status("Sold" if self.docstatus==1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
@@ -1950,3 +2032,41 @@ def create_dunning(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 	return doclist
+
+def check_if_return_invoice_linked_with_payment_entry(self):
+	# If a Return invoice is linked with payment entry along with other invoices,
+	# the cancellation of the Return causes allocated amount to be greater than paid
+
+	if not frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+		return
+
+	payment_entries = []
+	if self.is_return and self.return_against:
+		invoice = self.return_against
+	else:
+		invoice = self.name
+
+	payment_entries = frappe.db.sql_list("""
+		SELECT
+			t1.name
+		FROM
+			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
+		WHERE
+			t1.name = t2.parent
+			and t1.docstatus = 1
+			and t2.reference_name = %s
+			and t2.allocated_amount < 0
+		""", invoice)
+
+	links_to_pe = []
+	if payment_entries:
+		for payment in payment_entries:
+			payment_entry = frappe.get_doc("Payment Entry", payment)
+			if len(payment_entry.references) > 1:
+				links_to_pe.append(payment_entry.name)
+		if links_to_pe:
+			payment_entries_link = [get_link_to_form('Payment Entry', name, label=name) for name in links_to_pe]
+			message = _("Please cancel and amend the Payment Entry")
+			message += " " + ", ".join(payment_entries_link) + " "
+			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
+			frappe.throw(message)
