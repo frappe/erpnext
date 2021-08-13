@@ -1055,11 +1055,8 @@ frappe.ui.form.on('Payment Entry', {
 								frm.set_value("paid_from_account_balance", r.message.paid_from_account_balance);
 								frm.set_value("paid_to_account_balance", r.message.paid_to_account_balance);
 								frm.set_value("party_balance", r.message.party_balance);
-<<<<<<< HEAD
-=======
 							}
 						]);
->>>>>>> 9bf1083d9e (fix: payment references from disappearing on selecting cost center (#24831))
 
 					}
 				}
