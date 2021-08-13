@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 import frappe
+import json
 from frappe.utils import cint
 
 from erpnext.e_commerce.product_data_engine.query import ProductQuery
@@ -10,23 +11,25 @@ from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
 from erpnext.setup.doctype.item_group.item_group import get_child_groups
 
 @frappe.whitelist(allow_guest=True)
-def get_product_filter_data():
-	"""Get pre-rendered filtered products and discount filters on load."""
-	if frappe.form_dict:
-		search = frappe.form_dict.search
-		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
-		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
-		start = cint(frappe.parse_json(frappe.form_dict.start)) if frappe.form_dict.start else 0
-		item_group = frappe.form_dict.item_group
-		from_filters = frappe.parse_json(frappe.form_dict.from_filters)
+def get_product_filter_data(query_args=None):
+	"""Get filtered products and discount filters."""
+	if isinstance(query_args, str):
+		query_args = json.loads(query_args)
+
+	if query_args:
+		search = query_args.get("search")
+		field_filters = query_args.get("field_filters", {})
+		attribute_filters = query_args.get("attribute_filters", {})
+		start = cint(query_args.start) if query_args.get("start") else 0
+		item_group = query_args.get("item_group")
+		from_filters = query_args.get("from_filters")
 	else:
 		search, attribute_filters, item_group, from_filters = None, None, None, None
 		field_filters = {}
 		start = 0
 
+	# if new filter is checked, reset start to show filtered items from page 1
 	if from_filters:
-		# if filter is checked, go to start
-		# and show filtered items from page 1
 		start = 0
 
 	sub_categories = []
@@ -35,8 +38,18 @@ def get_product_filter_data():
 		sub_categories = get_child_groups(item_group)
 
 	engine = ProductQuery()
-	result = engine.query(attribute_filters, field_filters, search_term=search,
-		start=start, item_group=item_group)
+	try:
+		result = engine.query(
+			attribute_filters,
+			field_filters,
+			search_term=search,
+			start=start,
+			item_group=item_group
+		)
+	except Exception as e:
+		traceback = frappe.get_traceback()
+		frappe.log_error(traceback, frappe._("Product Engine Error"))
+		return {"exc": "Something went wrong!"}
 
 	# discount filter data
 	filters = {}

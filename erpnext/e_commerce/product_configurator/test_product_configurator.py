@@ -1,13 +1,9 @@
-import unittest
-
-import frappe
-from bs4 import BeautifulSoup
 import frappe, unittest
-from frappe.utils import get_html_for_route
 from erpnext.e_commerce.product_data_engine.query import ProductQuery
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 
 test_dependencies = ["Item"]
+#TODO: Rename to test item variant configurator
 
 class TestProductConfigurator(unittest.TestCase):
 	def setUp(self):
