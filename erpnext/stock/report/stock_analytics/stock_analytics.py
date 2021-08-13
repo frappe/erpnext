@@ -144,7 +144,8 @@ def get_periodic_data(entry, filters):
 		# if period against item does not exist yet, instantiate it
 		# insert existing balance dict against period, and add/subtract to it
 		if periodic_data.get(d.item_code) and not periodic_data.get(d.item_code).get(period):
-			periodic_data[d.item_code][period] = periodic_data[d.item_code]['balance']
+			previous_balance = periodic_data[d.item_code]['balance'].copy()
+			periodic_data[d.item_code][period] = previous_balance
 
 		if d.voucher_type == "Stock Reconciliation":
 			if periodic_data.get(d.item_code) and periodic_data.get(d.item_code).get('balance').get(d.warehouse):
