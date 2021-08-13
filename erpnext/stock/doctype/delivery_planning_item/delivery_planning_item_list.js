@@ -1,70 +1,72 @@
 frappe.listview_settings['Delivery Planning Item'] = {
 	add_fields: ["transporter", "sales_order", "customer", "customer_name","postal_code", "item_code", "item_name",
-					"delivery_date", "ordered_qty", "approved", "weight_to_deliver"],
+					"delivery_date", "ordered_qty", "weight_to_deliver"],
 	filters: [["docstatus", "=", "Submitted"]],				
 	hide_name_column: true,
 
 	onload: function(listview) {
+
+		
 		// cur_list.sort_selector.sort_by = "name"
 		
 		// document.getElementByClassName("btn btn-action btn-default btn-xs").style.backgroundColor = "lightblue";
-		listview.page.add_action_item(__("Approve"), function() {
-			const selected_docs = listview.get_checked_items();
-			const docnames = listview.get_checked_items(true);
+		// listview.page.add_action_item(__("Approve"), function() {
+		// 	const selected_docs = listview.get_checked_items();
+		// 	const docnames = listview.get_checked_items(true);
 
 			
-			if (selected_docs.length > 0) {
-				for (let doc of selected_docs) {
-						console.log(doc.name)
-				};
-			}
+		// 	if (selected_docs.length > 0) {
+		// 		for (let doc of selected_docs) {
+		// 				console.log(doc.name)
+		// 		};
+		// 	}
            
-			frappe.call({
+		// 	frappe.call({
 
-				type: "POST",
-						method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function",
-							args: {
-								"source_names": docnames
-							},
-							callback: function (r) {
-								console.log(r.message)
-								if (!r.exc) {
-									frappe.model.sync(r.message);
-									console.log(r.message)
-									cur_list.refresh();
-								}
-							}
-			});
-		});
+		// 		type: "POST",
+		// 				method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.approve_function",
+		// 					args: {
+		// 						"source_names": docnames
+		// 					},
+		// 					callback: function (r) {
+		// 						console.log(r.message)
+		// 						if (!r.exc) {
+		// 							frappe.model.sync(r.message);
+		// 							console.log(r.message)
+		// 							cur_list.refresh();
+		// 						}
+		// 					}
+		// 	});
+		// });
 
-        listview.page.add_action_item(__("Reject"), function() {
-			const selected_docs = listview.get_checked_items();
-			const docnames = listview.get_checked_items(true);
+        // listview.page.add_action_item(__("Reject"), function() {
+		// 	const selected_docs = listview.get_checked_items();
+		// 	const docnames = listview.get_checked_items(true);
 
 			
-			if (selected_docs.length > 0) {
-				for (let doc of selected_docs) {
-						console.log(doc.name)
-				};
-			}
+		// 	if (selected_docs.length > 0) {
+		// 		for (let doc of selected_docs) {
+		// 				console.log(doc.name)
+		// 		};
+		// 	}
            
-			frappe.call({
+		// 	frappe.call({
 		
-				type: "POST",
-						method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.reject_function",
-							args: {
-								"source_names": docnames
-							},
-							callback: function (r) {
-								console.log(r.message)
-								if (!r.exc) {
-									frappe.model.sync(r.message);
-									console.log(r.message)
-									cur_list.refresh();
-								}
-							}
-			});
-		});
+		// 		type: "POST",
+		// 				method: "erpnext.stock.doctype.delivery_planning_item.delivery_planning_item.reject_function",
+		// 					args: {
+		// 						"source_names": docnames
+		// 					},
+		// 					callback: function (r) {
+		// 						console.log(r.message)
+		// 						if (!r.exc) {
+		// 							frappe.model.sync(r.message);
+		// 							console.log(r.message)
+		// 							cur_list.refresh();
+		// 						}
+		// 					}
+		// 	});
+		// });
 
 		// listview.page.add_action_item(__("Split"), function() {
 		// 	const selected_docs = listview.get_checked_items();

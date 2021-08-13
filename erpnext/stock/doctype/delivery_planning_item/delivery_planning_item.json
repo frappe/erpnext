@@ -121,6 +121,7 @@
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Sales Order",
    "options": "Sales Order",
    "read_only": 1,
@@ -130,6 +131,7 @@
    "fieldname": "postal_code",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Postal Code",
    "read_only": 1
   },
@@ -137,7 +139,6 @@
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Delivery Date",
    "read_only": 1,
    "reqd": 1
@@ -145,18 +146,22 @@
   {
    "fieldname": "current_stock",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Projected Stock ",
    "read_only": 1
   },
   {
    "fieldname": "available_stock",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Actual Stock",
    "read_only": 1
   },
   {
    "fieldname": "related_delivey_planning",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Related Delivery Planning",
    "options": "Delivery Planning",
    "read_only": 1
@@ -168,8 +173,7 @@
   {
    "fieldname": "approved",
    "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
+   "hidden": 1,
    "label": "Approved",
    "options": "\nYes\nNo"
   },
@@ -191,6 +195,7 @@
    "default": "0",
    "fieldname": "supplier_dc",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": " Supplier delivers to Customer "
   },
   {
@@ -270,7 +275,6 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "in_preview": 1,
    "label": "Customer Name",
    "read_only": 1
   },
@@ -363,6 +367,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company ",
    "options": "Company"
   }
@@ -370,7 +375,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-10 16:47:38.154209",
+ "modified": "2021-08-13 12:28:59.673068",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
