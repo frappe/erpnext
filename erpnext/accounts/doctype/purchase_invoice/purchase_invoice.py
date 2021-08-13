@@ -868,8 +868,8 @@ class PurchaseInvoice(BuyingController):
 						"account": tax.account_head,
 						"against": self.supplier,
 						dr_or_cr: base_amount,
-						dr_or_cr + "_in_account_currency": base_amount \
-							if account_currency==self.company_currency \
+						dr_or_cr + "_in_account_currency": base_amount
+							if account_currency==self.company_currency
 							else amount,
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)

@@ -1057,6 +1057,7 @@ class SalesInvoice(SellingController):
 				if orginal_schedule_date == posting_date_of_original_invoice:
 					return True
 		return False
+		
 	@property
 	def enable_discount_accounting(self):
 		if not hasattr(self, "_enable_discount_accounting"):
