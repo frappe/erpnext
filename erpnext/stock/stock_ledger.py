@@ -929,15 +929,16 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 		['item_code', 'warehouse', 'posting_date', 'posting_time', 'timestamp(posting_date, posting_time) as timestamp'],
 		as_dict=1)
 
-def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
-	allow_zero_rate=False, currency=None, company=None,
+def get_valuation_rate(item_code, warehouse=None, voucher_type=None,
+	voucher_no=None, allow_zero_rate=False, currency=None, company=None,
 	raise_error_if_no_rate=True, batch_no=None):
 	# Get valuation rate from last sle for the same item and warehouse
 	if not company:
 		company = erpnext.get_default_company()
 
+	has_voucher_details = voucher_no and voucher_type
 	last_valuation_rate = None
-	if batch_no:
+	if batch_no and warehouse and has_voucher_details:
 		# Get valuation_rate from last SLE with matching batch_no, warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry` force index (item_warehouse)
@@ -951,7 +952,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			(item_code, batch_no, warehouse, voucher_no, voucher_type))
 
 
-	if not last_valuation_rate:
+	if not last_valuation_rate and warehouse and has_voucher_details:
 		# Get valuation_rate from last SLE with any batch_no, and matching warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry` force index (item_warehouse)
@@ -963,7 +964,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			order by posting_date desc, posting_time desc, name desc limit 1""",
 			(item_code, warehouse, voucher_no, voucher_type))
 
-	if not last_valuation_rate:
+	if not last_valuation_rate and has_voucher_details:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry` force index (item_code)
