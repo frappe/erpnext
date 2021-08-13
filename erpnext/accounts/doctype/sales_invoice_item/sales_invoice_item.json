@@ -835,7 +835,6 @@
  "istable": 1,
  "links": [],
  "modified": "2021-08-12 20:15:42.668399",
->>>>>>> 1de4c01942 (fix: Deferred Revenue Section should be collapsible only if its not enabled (#26928))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
