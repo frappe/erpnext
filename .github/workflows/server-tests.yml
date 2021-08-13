@@ -1,6 +1,20 @@
 name: Server
 
+<<<<<<< HEAD
 on: [pull_request, workflow_dispatch]
+=======
+on:
+  pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.md'
+  workflow_dispatch:
+  push:
+    branches: [ develop ]
+    paths-ignore:
+      - '**.js'
+      - '**.md'
+>>>>>>> 8a6b82b196 (ci: ignore js files in unittests (#26934))
 
 jobs:
   test:
