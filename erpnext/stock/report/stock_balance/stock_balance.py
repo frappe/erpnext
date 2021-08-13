@@ -15,8 +15,6 @@ from six import iteritems
 def execute(filters=None):
 	if not filters: filters = {}
 
-	validate_filters(filters)
-
 	from_date = filters.get('from_date')
 	to_date = filters.get('to_date')
 
@@ -292,12 +290,6 @@ def get_item_reorder_details(items):
 		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
-
-def validate_filters(filters):
-	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
-		if sle_count > 500000:
-			frappe.throw(_("Please set filter based on Item or Warehouse due to a large amount of entries."))
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''
