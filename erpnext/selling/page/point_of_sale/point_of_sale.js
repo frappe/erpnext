@@ -726,7 +726,9 @@ class POSCart {
 	make() {
 		this.make_dom();
 		this.make_customer_field();
-		this.make_patient_field()
+		if (frappe.boot.active_domains.includes("Healthcare")){
+			this.make_patient_field()
+		}
 		this.make_loyalty_points();
 		this.make_numpad();
 	}
