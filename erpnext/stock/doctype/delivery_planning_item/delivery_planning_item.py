@@ -9,8 +9,10 @@ from datetime import date
 
 class DeliveryPlanningItem(Document):
 
+
+
 	def before_save(self):
-		if not self.is_new():
+		if not self.is_new() :
 			old_doc = self.get_doc_before_save()
 			print("-===== b4save =====--------- old_doc______-", old_doc)
 			if old_doc.sorce_warehouse != self.sorce_warehouse or old_doc.qty_to_deliver != self.qty_to_deliver or old_doc.supplier != self.supplier:
@@ -18,6 +20,18 @@ class DeliveryPlanningItem(Document):
 				print("--------------- in side old value----------",old_doc)
 				print("old waarehosue and newware house",old_doc.sorce_warehouse, self.sorce_warehouse)
 				self.is_updated =1
+
+		if self.docstatus != 1 and self.supplier_dc == 1:
+			frappe.db.set_value('Delivery Planning Item', self.name, {
+				'supplier' : "",
+				'supplier_name' : ""
+			})
+		elif self.docstatus != 1  and self.supplier_dc == 0:
+			frappe.db.set_value('Delivery Planning Item', self.name, {
+				'transporter' : "",
+				'transporter_name' : ""
+			})	
+						
 	
 	def on_submit(self):
 		

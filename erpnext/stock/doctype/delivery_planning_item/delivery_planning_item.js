@@ -4,7 +4,9 @@
 frappe.ui.form.on('Delivery Planning Item', {
 	
 	before_load: function(frm){
+
 		if(frm.doc.docstatus != 1){
+
 			frm.call({
 						doc:frm.doc,
 						method: 'update_stock',
@@ -13,7 +15,29 @@ frappe.ui.form.on('Delivery Planning Item', {
 		}
 	},
 
+	qty_to_deliver: function(frm){
+		if(frm.doc.qty_to_deliver > frm.doc.ordered_qty)
+		{
+			frappe.throw(__('qty is greater than ordered qty'))
+		}
+		else{
+			console.log("qty_to_deliver",frm.doc.qty_to_deliver)
+			frm.set_value({
+				pending_qty: frm.doc.ordered_qty - frm.doc.qty_to_deliver ,
+				weight_to_deliver: frm.doc.qty_to_deliver * frm.doc.weight_per_unit 
+			})
+		}
+	},
+
+	// pending_qty: function(frm){
+	// 	frm.set_value({
+			
+	// 		weight_to_deliver: frm.doc.pending_qty * frm.doc.weight_per_unit 
+	// 	})
+	// },
+
 	onload: function(frm){
+
 		cur_frm.set_query("transporter", function() {
 			return {
 			   "filters": {
@@ -23,7 +47,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 		});
 
 		if( frm.docstatus != 1)	{
-			console.log("")
+			console.log("frm.docstatus")
 		}
 
 		
@@ -61,16 +85,6 @@ frappe.ui.form.on('Delivery Planning Item', {
 		// 		frm.refresh_field("supplier")
 	    //     };
 
-		if (frm.doc.approved)
-			{
-				frm.set_df_property('split','hidden',1)
-				frm.refresh_field("split")
-			}	
-		else if(frm.doc.ordered_qty > 1)
-			{
-				frm.set_df_property('split','hidden',0)
-				frm.refresh_field("split")
-			}
 		
 	},
 

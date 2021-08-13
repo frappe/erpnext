@@ -43,15 +43,15 @@ frappe.query_reports["Delivery Planning Report"] = {
 			label: __("Group By"),
 			fieldtype: "Select",
 			options: ["","Transporter","Customer","Sales Order","Delivery Date"],
-		},{
+		},
+		{
 			fieldname: "based_on",
 			label: __("Based On"),
 			fieldtype: "Select",
 			default: "Transporter",
 			options: ["Transporter","Customer","Sales Order","Delivery Date"],
 		},
-
-	]
-
+		
+	],
 
 };
