@@ -475,6 +475,10 @@ def apply_pricing_rule_on_transaction(doc):
 						frappe.msgprint(_("User has not applied rule on the invoice {0}")
 							.format(doc.name))
 					else:
+						if d.coupon_code_based:
+							if not doc.get('coupon_code') or doc.get('coupon_code') is None:
+								doc.set(field, 0)
+								continue
 						doc.set(field, d.get(pr_field))
 
 				doc.calculate_taxes_and_totals()
