@@ -47,10 +47,14 @@ erpnext.ProductView =  class {
 		this.disable_view_toggler(true);
 
 		frappe.call({
-			method: 'erpnext.e_commerce.api.get_product_filter_data',
-			args: args,
+			method: "erpnext.e_commerce.api.get_product_filter_data",
+			args: {
+				query_args: args
+			},
 			callback: function(result) {
-				if (!result.exc && result && result.message) {
+				if (!result || result.exc || !result.message || result.message.exc) {
+					me.render_no_products_section(true);
+				} else {
 					// Sub Category results are independent of Items
 					if (me.item_group && result.message["sub_categories"].length) {
 						me.render_item_sub_categories(result.message["sub_categories"]);
@@ -82,8 +86,6 @@ erpnext.ProductView =  class {
 
 					// Bottom paging
 					me.add_paging_section(result.message["settings"]);
-				} else {
-					me.render_no_products_section();
 				}
 
 				me.disable_view_toggler(false);
@@ -189,7 +191,7 @@ erpnext.ProductView =  class {
 
 	prepare_search() {
 		$(".toolbar").append(`
-			<div class="input-group col-6">
+			<div class="input-group col-6 p-0">
 				<div class="dropdown w-100" id="dropdownMenuSearch">
 					<input type="search" name="query" id="search-box" class="form-control font-md"
 						placeholder="Search for Products"
@@ -211,7 +213,7 @@ erpnext.ProductView =  class {
 	}
 
 	render_view_toggler() {
-		$(".toolbar").append(`<div class="toggle-container col-6"></div>`);
+		$(".toolbar").append(`<div class="toggle-container col-6 p-0"></div>`);
 
 		["btn-list-view", "btn-grid-view"].forEach(view => {
 			let icon = view === "btn-list-view" ? "list" : "image-view";
@@ -473,16 +475,22 @@ erpnext.ProductView =  class {
 		}
 	}
 
-	render_no_products_section() {
-		this.products_section.append(`
-			<br><br><br>
-			<div class="cart-empty frappe-card">
+	render_no_products_section(error=false) {
+		let error_section = `
+			<div class="mt-4 w-100 alert alert-error font-md">
+				Something went wrong. Please refresh or contact us.
+			</div>
+		`;
+		let no_results_section = `
+			<div class="cart-empty frappe-card mt-4">
 				<div class="cart-empty-state">
 					<img src="/assets/erpnext/images/ui-states/cart-empty-state.png" alt="Empty Cart">
 				</div>
 				<div class="cart-empty-message mt-4">${ __('No products found') }</p>
 			</div>
-		`);
+		`;
+
+		this.products_section.append(error ? error_section : no_results_section);
 	}
 
 	render_item_sub_categories(categories) {
