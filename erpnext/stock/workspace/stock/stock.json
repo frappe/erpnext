@@ -569,6 +569,16 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Delivery Planning Report",
+   "link_to": "Delivery Planning Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
    "dependencies": "Item Price",
    "hidden": 0,
    "is_query_report": 0,
@@ -790,7 +800,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-07-23 17:46:20.195972",
+ "modified": "2021-08-13 12:21:03.525637",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
