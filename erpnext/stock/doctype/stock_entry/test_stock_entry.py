@@ -670,8 +670,10 @@ class TestStockEntry(unittest.TestCase):
 		retention_entry.insert()
 		retention_entry.submit()
 
-		qty_in_usable_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "_Test Warehouse - _TC", "_Test Item")
-		qty_in_retention_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "Test Warehouse for Sample Retention - _TC", "_Test Item")
+		qty_in_usable_warehouse = get_batch_qty(batch_no=receipt_entry.get("items")[0].batch_no,
+			warehouse="_Test Warehouse - _TC", item_code="_Test Item")
+		qty_in_retention_warehouse = get_batch_qty(batch_no=receipt_entry.get("items")[0].batch_no,
+			warehouse="Test Warehouse for Sample Retention - _TC", item_code="_Test Item")
 
 		self.assertEqual(qty_in_usable_warehouse, 36)
 		self.assertEqual(qty_in_retention_warehouse, 4)

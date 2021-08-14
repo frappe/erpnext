@@ -45,8 +45,8 @@ class TestBatch(unittest.TestCase):
 		receipt.submit()
 
 		self.assertTrue(receipt.items[0].batch_no)
-		self.assertEqual(get_batch_qty(receipt.items[0].batch_no,
-			receipt.items[0].warehouse), batch_qty)
+		self.assertEqual(get_batch_qty(batch_no=receipt.items[0].batch_no,
+			warehouse=receipt.items[0].warehouse), batch_qty)
 
 		return receipt
 
@@ -75,7 +75,8 @@ class TestBatch(unittest.TestCase):
 		stock_entry.submit()
 
 		self.assertTrue(stock_entry.items[0].batch_no)
-		self.assertEqual(get_batch_qty(stock_entry.items[0].batch_no, stock_entry.items[0].t_warehouse), 90)
+		self.assertEqual(get_batch_qty(batch_no=stock_entry.items[0].batch_no,
+			warehouse=stock_entry.items[0].t_warehouse), 90)
 
 	def test_delivery_note(self):
 		'''Test automatic batch selection for outgoing items'''
@@ -159,8 +160,8 @@ class TestBatch(unittest.TestCase):
 
 		new_batch = split_batch(receipt.items[0].batch_no, 'ITEM-BATCH-1', receipt.items[0].warehouse, 22)
 
-		self.assertEqual(get_batch_qty(receipt.items[0].batch_no, receipt.items[0].warehouse), 78)
-		self.assertEqual(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
+		self.assertEqual(get_batch_qty(batch_no=receipt.items[0].batch_no, warehouse=receipt.items[0].warehouse), 78)
+		self.assertEqual(get_batch_qty(batch_no=new_batch, warehouse=receipt.items[0].warehouse), 22)
 
 	def test_get_batch_qty(self):
 		'''Test getting batch quantities by batch_numbers, item_code or warehouse'''
@@ -171,7 +172,7 @@ class TestBatch(unittest.TestCase):
 		self.assertEqual(get_batch_qty(item_code = 'ITEM-BATCH-2', warehouse = '_Test Warehouse - _TC'),
 			[{'batch_no': u'batch a', 'qty': 90.0}, {'batch_no': u'batch b', 'qty': 90.0}])
 
-		self.assertEqual(get_batch_qty('batch a', '_Test Warehouse - _TC'), 90)
+		self.assertEqual(get_batch_qty(batch_no='batch a', warehouse='_Test Warehouse - _TC'), 90)
 
 	def test_total_batch_qty(self):
 		self.make_batch_item('ITEM-BATCH-3')

@@ -1819,7 +1819,7 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 	retention_warehouse = frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse')
 	retainted_qty = 0
 	if batch_no:
-		retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code)
+		retainted_qty = get_batch_qty(batch_no=batch_no, warehouse=retention_warehouse, item_code=item_code)
 	max_retain_qty = frappe.get_value('Item', item_code, 'sample_quantity')
 	if retainted_qty >= max_retain_qty:
 		frappe.msgprint(_("Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.").

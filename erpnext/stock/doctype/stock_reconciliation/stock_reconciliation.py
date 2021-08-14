@@ -57,7 +57,7 @@ class StockReconciliation(StockController):
 		self.difference_amount = 0.0
 		def _changed(item):
 			item_dict = get_stock_balance_for(item.item_code, item.warehouse,
-				self.posting_date, self.posting_time, batch_no=item.batch_no)
+				self.posting_date, self.posting_time, batch_no=item.batch_no, voucher_no=self.name)
 
 			if ((item.qty is None or item.qty==item_dict.get("qty")) and
 				(item.valuation_rate is None or item.valuation_rate==item_dict.get("rate")) and
@@ -607,7 +607,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 
 @frappe.whitelist()
 def get_stock_balance_for(item_code, warehouse,
-	posting_date, posting_time, batch_no=None, with_valuation_rate= True):
+	posting_date, posting_time, batch_no=None, with_valuation_rate=True, voucher_no=None):
 	frappe.has_permission("Stock Reconciliation", "write", throw = True)
 
 	item_dict = frappe.db.get_value("Item", item_code,
@@ -624,7 +624,8 @@ def get_stock_balance_for(item_code, warehouse,
 		qty, rate = data
 
 	if item_dict.get("has_batch_no"):
-		qty = get_batch_qty(batch_no, warehouse, posting_date=posting_date, posting_time=posting_time) or 0
+		qty = get_batch_qty(batch_no=batch_no, warehouse=warehouse, voucher_no=voucher_no,
+			posting_date=posting_date, posting_time=posting_time) or 0
 
 	return {
 		'qty': qty,

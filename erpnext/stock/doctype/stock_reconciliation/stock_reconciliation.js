@@ -145,7 +145,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 					warehouse: d.warehouse,
 					posting_date: frm.doc.posting_date,
 					posting_time: frm.doc.posting_time,
-					batch_no: d.batch_no
+					batch_no: d.batch_no,
+					voucher_no: frm.doc.name
 				},
 				callback: function(r) {
 					frappe.model.set_value(cdt, cdn, "qty", r.message.qty);

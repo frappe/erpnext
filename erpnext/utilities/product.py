@@ -40,9 +40,9 @@ def adjust_qty_for_expired_items(item_code, stock_qty, warehouse):
 
 	for batch in expired_batches:
 		if warehouse:
-			stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
+			stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch_no=batch, warehouse=warehouse))
 		else:
-			stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch)))
+			stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch_no=batch)))
 
 		if not stock_qty[0][0]:
 			break

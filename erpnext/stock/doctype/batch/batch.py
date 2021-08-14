@@ -143,7 +143,7 @@ class Batch(Document):
 
 
 @frappe.whitelist()
-def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=None, posting_time=None):
+def get_batch_qty(**kargs):
 	"""Returns batch actual qty if warehouse is passed,
 		or returns dict of qty by warehouse if warehouse is None
 
@@ -154,28 +154,44 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 	:param item_code: Optional - give qty for this item"""
 
 	out = 0
-	if batch_no and warehouse:
+	kargs = frappe._dict(kargs)
+
+	if kargs.batch_no and kargs.warehouse:
 		cond = ""
-		if posting_date and posting_time:
-			cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(posting_date,
-				posting_time)
+		if kargs.posting_date and kargs.posting_time and kargs.voucher_no:
+			cond += """ and timestamp(posting_date, posting_time)
+				<= timestamp(%(posting_date)s, %(posting_time)s) and voucher_no != %(voucher_no)s """
 
-		out = float(frappe.db.sql("""select sum(actual_qty)
-			from `tabStock Ledger Entry`
-			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(cond),
-			(warehouse, batch_no))[0][0] or 0)
+		# Returns available qty of the batch from specific warehouse
+		out = float(frappe.db.sql("""
+			SELECT
+				SUM(actual_qty)
+			FROM `tabStock Ledger Entry`
+			WHERE
+				is_cancelled = 0 and warehouse=%(warehouse)s and batch_no=%(batch_no)s {0}
+		""".format(cond), kargs)[0][0] or 0)
 
-	if batch_no and not warehouse:
-		out = frappe.db.sql('''select warehouse, sum(actual_qty) as qty
-			from `tabStock Ledger Entry`
-			where is_cancelled = 0 and batch_no=%s
-			group by warehouse''', batch_no, as_dict=1)
+	if kargs.batch_no and not kargs.warehouse:
 
-	if not batch_no and item_code and warehouse:
-		out = frappe.db.sql('''select batch_no, sum(actual_qty) as qty
-			from `tabStock Ledger Entry`
-			where is_cancelled = 0 and item_code = %s and warehouse=%s
-			group by batch_no''', (item_code, warehouse), as_dict=1)
+		# Returns list of dictionay with warehouse-wise available qty of the specific batch
+		out = frappe.db.sql('''
+			SELECT
+				warehouse, SUM(actual_qty) as qty
+			FROM `tabStock Ledger Entry`
+			WHERE
+				is_cancelled = 0 and batch_no=%s
+			GROUP BY warehouse''', kargs.batch_no, as_dict=1)
+
+	if not kargs.batch_no and kargs.item_code and kargs.warehouse:
+
+		# Returns list of dictionay with all available batches of specific item and warehouse
+		out = frappe.db.sql('''
+			SELECT
+				batch_no, SUM(actual_qty) as qty
+			FROM `tabStock Ledger Entry`
+			WHERE
+				is_cancelled = 0 and item_code = %s and warehouse=%s
+			GROUP BY batch_no''', (kargs.item_code, kargs.warehouse), as_dict=1)
 
 	return out
 

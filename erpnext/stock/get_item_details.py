@@ -1019,7 +1019,8 @@ def get_batch_qty_and_serial_no(batch_no, stock_qty, warehouse, item_code, has_s
 def get_batch_qty(batch_no, warehouse, item_code):
 	from erpnext.stock.doctype.batch import batch
 	if batch_no:
-		return {'actual_batch_qty': batch.get_batch_qty(batch_no, warehouse)}
+		return {'actual_batch_qty': batch.get_batch_qty(batch_no=batch_no,
+			warehouse=warehouse, item_code=item_code)}
 
 @frappe.whitelist()
 def apply_price_list(args, as_doc=False):
