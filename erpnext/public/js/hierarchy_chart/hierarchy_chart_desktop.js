@@ -98,6 +98,7 @@ erpnext.HierarchyChart = class {
 
 		company.refresh();
 		$(`[data-fieldname="company"]`).trigger('change');
+		$(`[data-fieldname="company"] .link-field`).css('z-index', 2);
 	}
 
 	setup_actions() {
