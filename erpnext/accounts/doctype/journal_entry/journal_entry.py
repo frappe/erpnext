@@ -37,6 +37,7 @@ class JournalEntry(AccountsController):
 		self.validate_party()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
+		self.validate_party_account_currency()
 		self.set_amounts_in_company_currency()
 		self.validate_debit_credit_amount()
 
@@ -432,6 +433,18 @@ class JournalEntry(AccountsController):
 				frappe.throw(_("Please check Multi Currency option to allow accounts with other currency"))
 
 		self.set_exchange_rate()
+
+	def validate_party_account_currency(self):
+		for d in self.get("accounts"):
+			if self.party_type not in ('Customer', 'Supplier'):
+				continue
+
+			party_gle_currency = get_party_gle_currency(self.party_type, self.party, self.company)
+			party_account_currency = get_account_currency(d.account)
+
+		if not party_gle_currency and (party_account_currency != self.currency):
+			frappe.throw(_("Row {0}: Party Account {1} currency and document currency should be same").format(
+				frappe.bold(d.idx), frappe.bold(d.account)))
 
 	def set_amounts_in_company_currency(self):
 		for d in self.get("accounts"):
