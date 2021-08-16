@@ -26,6 +26,10 @@ class TestWebsiteItem(unittest.TestCase):
 			"price_list": "_Test Price List India"
 		})
 
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.rollback()
+
 	def setUp(self):
 		if self._testMethodName in WEBITEM_DESK_TESTS:
 			make_item("Test Web Item", {
@@ -38,21 +42,12 @@ class TestWebsiteItem(unittest.TestCase):
 				]
 			})
 		elif self._testMethodName in WEBITEM_PRICE_TESTS:
-			self.create_regular_web_item()
+			create_regular_web_item()
 			make_web_item_price(item_code="Test Mobile Phone")
 			make_web_pricing_rule(
 				title="Test Pricing Rule for Test Mobile Phone",
 				item_code="Test Mobile Phone",
 				selling=1)
-
-	def tearDown(self):
-		if self._testMethodName in WEBITEM_DESK_TESTS:
-			frappe.get_doc("Item", "Test Web Item").delete()
-		elif self._testMethodName in WEBITEM_PRICE_TESTS:
-			frappe.delete_doc("Pricing Rule", "Test Pricing Rule for Test Mobile Phone")
-			frappe.get_cached_doc("Item Price", {"item_code": "Test Mobile Phone"}).delete()
-			frappe.get_cached_doc("Website Item", {"item_code": "Test Mobile Phone"}).delete()
-
 
 	def test_index_creation(self):
 		"Check if index is getting created in db."
@@ -104,6 +99,8 @@ class TestWebsiteItem(unittest.TestCase):
 		web_item.delete()
 		item.reload()
 		self.assertEqual(item.published_in_website, 0)
+
+		item.delete()
 
 	def test_publish_variant_and_template(self):
 		"Check if template is published on publishing variant."
@@ -256,7 +253,7 @@ class TestWebsiteItem(unittest.TestCase):
 			2) Showing stock availability disabled
 		"""
 		item_code = "Test Mobile Phone"
-		self.create_regular_web_item()
+		create_regular_web_item()
 		setup_e_commerce_settings({"show_stock_availability": 1})
 
 		frappe.local.shopping_cart_settings = None
@@ -298,7 +295,7 @@ class TestWebsiteItem(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		item_code = "Test Mobile Phone"
-		self.create_regular_web_item()
+		create_regular_web_item()
 		setup_e_commerce_settings({"show_stock_availability": 1})
 		frappe.local.shopping_cart_settings = None
 
@@ -339,7 +336,7 @@ class TestWebsiteItem(unittest.TestCase):
 	def test_recommended_item(self):
 		"Check if added recommended items are fetched correctly."
 		item_code = "Test Mobile Phone"
-		web_item = self.create_regular_web_item(item_code)
+		web_item = create_regular_web_item(item_code)
 
 		setup_e_commerce_settings({
 			"enable_recommendations": 1,
@@ -347,7 +344,7 @@ class TestWebsiteItem(unittest.TestCase):
 		})
 
 		# create recommended web item and price for it
-		recommended_web_item = self.create_regular_web_item("Test Mobile Phone 1")
+		recommended_web_item = create_regular_web_item("Test Mobile Phone 1")
 		make_web_item_price(item_code="Test Mobile Phone 1")
 
 		# add recommended item to first web item
@@ -379,14 +376,14 @@ class TestWebsiteItem(unittest.TestCase):
 		self.assertFalse(bool(recommended_items[0].get("price_info"))) # price not fetched
 
 		# tear down
-		frappe.get_cached_doc("Item Price", {"item_code": "Test Mobile Phone 1"}).delete()
 		web_item.delete()
 		recommended_web_item.delete()
+		frappe.get_cached_doc("Item", "Test Mobile Phone 1").delete()
 
 	def test_recommended_item_for_guest_user(self):
 		"Check if added recommended items are fetched correctly for guest user."
 		item_code = "Test Mobile Phone"
-		web_item = self.create_regular_web_item(item_code)
+		web_item = create_regular_web_item(item_code)
 
 		# price visible to guests
 		setup_e_commerce_settings({
@@ -396,7 +393,7 @@ class TestWebsiteItem(unittest.TestCase):
 		})
 
 		# create recommended web item and price for it
-		recommended_web_item = self.create_regular_web_item("Test Mobile Phone 1")
+		recommended_web_item = create_regular_web_item("Test Mobile Phone 1")
 		make_web_item_price(item_code="Test Mobile Phone 1")
 
 		# add recommended item to first web item
@@ -428,22 +425,24 @@ class TestWebsiteItem(unittest.TestCase):
 
 		# tear down
 		frappe.set_user("Administrator")
-		frappe.get_cached_doc("Item Price", {"item_code": "Test Mobile Phone 1"}).delete()
 		web_item.delete()
 		recommended_web_item.delete()
+		frappe.get_cached_doc("Item", "Test Mobile Phone 1").delete()
 
-	def create_regular_web_item(self, item_code=None):
-		"Create Regular Item and Website Item."
-		item_code = item_code or "Test Mobile Phone"
-		item = make_item(item_code)
+def create_regular_web_item(item_code=None, item_args=None, web_args=None):
+	"Create Regular Item and Website Item."
+	item_code = item_code or "Test Mobile Phone"
+	item = make_item(item_code, properties=item_args)
 
-		if not frappe.db.exists("Website Item", {"item_code": item_code}):
-			web_item = make_website_item(item, save=False)
-			web_item.save()
-		else:
-			web_item = frappe.get_cached_doc("Website Item", {"item_code": item_code})
+	if not frappe.db.exists("Website Item", {"item_code": item_code}):
+		web_item = make_website_item(item, save=False)
+		if web_args:
+			web_item.update(web_args)
+		web_item.save()
+	else:
+		web_item = frappe.get_cached_doc("Website Item", {"item_code": item_code})
 
-		return web_item
+	return web_item
 
 def make_web_item_price(**kwargs):
 	item_code = kwargs.get("item_code")

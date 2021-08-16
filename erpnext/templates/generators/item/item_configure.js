@@ -29,7 +29,7 @@ class ItemConfigure {
 		});
 
 		this.dialog = new frappe.ui.Dialog({
-			title: __('Configure {0}', [this.item_name]),
+			title: __('Select Variant for {0}', [this.item_name]),
 			fields,
 			on_hide: () => {
 				set_continue_configuration();
@@ -280,14 +280,14 @@ class ItemConfigure {
 	}
 
 	get_next_attribute_and_values(selected_attributes) {
-		return this.call('erpnext.e_commerce.product_configurator.utils.get_next_attribute_and_values', {
+		return this.call('erpnext.e_commerce.variant_selector.utils.get_next_attribute_and_values', {
 			item_code: this.item_code,
 			selected_attributes
 		});
 	}
 
 	get_attributes_and_values() {
-		return this.call('erpnext.e_commerce.product_configurator.utils.get_attributes_and_values', {
+		return this.call('erpnext.e_commerce.variant_selector.utils.get_attributes_and_values', {
 			item_code: this.item_code
 		});
 	}
@@ -311,9 +311,9 @@ function set_continue_configuration() {
 	const { itemCode } = $btn_configure.data();
 
 	if (localStorage.getItem(`configure:${itemCode}`)) {
-		$btn_configure.text(__('Continue Configuration'));
+		$btn_configure.text(__('Continue Selection'));
 	} else {
-		$btn_configure.text(__('Configure'));
+		$btn_configure.text(__('Select Variant'));
 	}
 }
 
