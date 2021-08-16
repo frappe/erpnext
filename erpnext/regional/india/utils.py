@@ -851,7 +851,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		# if its the first depreciation
 		if depreciable_value == asset.gross_purchase_amount:
 			# as per IT act, if the asset is purchased in the 2nd half of fiscal year, then rate is divided by 2
-			diff = date_diff(asset.available_for_use_date, row.depreciation_start_date)
+			diff = date_diff(row.depreciation_start_date, asset.available_for_use_date)
 			if diff <= 180:
 				rate_of_depreciation = rate_of_depreciation / 2
 				frappe.msgprint(
@@ -860,3 +860,14 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
 
 	return depreciation_amount
+
+def set_item_tax_from_hsn_code(item):
+	if not item.taxes and item.gst_hsn_code: 
+		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
+
+		for tax in hsn_doc.taxes:
+			item.append('taxes', {
+				'item_tax_template': tax.item_tax_template,
+				'tax_category': tax.tax_category,
+				'valid_from': tax.valid_from
+			})

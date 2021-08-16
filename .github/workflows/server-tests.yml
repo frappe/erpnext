@@ -2,13 +2,20 @@ name: Server
 
 on:
   pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.md'
   workflow_dispatch:
   push:
     branches: [ develop ]
+    paths-ignore:
+      - '**.js'
+      - '**.md'
 
 jobs:
   test:
     runs-on: ubuntu-18.04
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false
