@@ -93,11 +93,16 @@ class VehicleBookingController(AccountsController):
 	def set_vehicle_details(self, update=False):
 		if self.get('vehicle'):
 			values = get_fetch_values(self.doctype, "vehicle", self.vehicle)
-			if update:
-				self.db_set(values)
-			else:
-				for k, v in values.items():
-					self.set(k, v)
+		else:
+			values = {}
+			for df in self.meta.get_fields_to_fetch('vehicle'):
+				values[df.fieldname] = None
+
+		if update:
+			self.db_set(values)
+		else:
+			for k, v in values.items():
+				self.set(k, v)
 
 	def validate_customer(self):
 		if not self.get('customer') and not self.get('customer_is_company') and not self.get('party_name'):

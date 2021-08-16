@@ -142,7 +142,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			}
 
 			// Change / Select labels
-			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
+			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle (Unit)" : "Select Vehicle (Unit)";
 			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Vehicle Allocation" : "Select Allocation";
 			var select_delivery_period_label = this.frm.doc.delivery_period ? "Change Delivery Period" : "Select Delivery Period";
 			var change_priority_label = cint(this.frm.doc.priority) ? "Mark as Normal Priority" : "Mark as High Priority";
@@ -551,6 +551,23 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 	change_vehicle: function () {
 		var me = this;
+
+		var call_change_vehicle = function (vehicle) {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_vehicle",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					vehicle: vehicle
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		}
+
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Vehicle"),
 			fields: [
@@ -574,23 +591,13 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				{label: __("Color"), fieldname: "color", fieldtype: "Link", options: "Vehicle Color", read_only: 1},
 				{label: __("Warranty Number"), fieldname: "warranty_no", fieldtype: "Data", read_only: 1},
 				{label: __("Dispatch Date"), fieldname: "dispatch_date", fieldtype: "Date", read_only: 1},
+				{label: __("Remove Vehicle"), fieldname: "remove_vehicle", fieldtype: "Button",
+					hidden: me.frm.doc.vehicle ? 0 : 1, click: () => call_change_vehicle('')}
 			]
 		});
 
 		dialog.set_primary_action(__("Change"), function () {
-			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_vehicle",
-				args: {
-					vehicle_booking_order: me.frm.doc.name,
-					vehicle: dialog.get_value('vehicle')
-				},
-				callback: function (r) {
-					if (!r.exc) {
-						me.frm.reload_doc();
-						dialog.hide();
-					}
-				}
-			});
+			call_change_vehicle(dialog.get_value('vehicle'));
 		});
 		dialog.show();
 	},
@@ -634,7 +641,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					default: me.frm.doc.delivery_period, bold: 1, get_query: () => me.delivery_period_query(true)},
 				{label: __("Allocation Code / Sr #"), fieldname: "title", fieldtype: "Data", read_only: 1},
 				{label: __("Allocation Period"), fieldname: "allocation_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
-				{label: __("Remove Allocation"), fieldname: "remove_alation", fieldtype: "Button",
+				{label: __("Remove Allocation"), fieldname: "remove_allocation", fieldtype: "Button",
 					hidden: me.frm.doc.vehicle_allocation ? 0 : 1, click: () => call_change_allocation('')}
 			]
 		});

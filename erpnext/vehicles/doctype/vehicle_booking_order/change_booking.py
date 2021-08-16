@@ -29,14 +29,14 @@ def set_can_change_onload(vbo_doc):
 
 @frappe.whitelist()
 def change_vehicle(vehicle_booking_order, vehicle):
-	if not vehicle:
-		frappe.throw(_("Vehicle not provided"))
-
 	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
 	can_change_vehicle(vbo_doc, throw=True)
 
-	if vehicle == vbo_doc.vehicle:
-		frappe.throw(_("Vehicle {0} is already selected in {1}").format(vehicle, vehicle_booking_order))
+	if cstr(vehicle) == cstr(vbo_doc.vehicle):
+		if vehicle:
+			frappe.throw(_("Vehicle {0} is already selected in {1}").format(vehicle, vehicle_booking_order))
+		else:
+			frappe.throw(_("Vehicle is already unassigned in {0}").format(vehicle_booking_order))
 
 	previous_vehicle = vbo_doc.vehicle
 
@@ -49,7 +49,8 @@ def change_vehicle(vehicle_booking_order, vehicle):
 
 	save_vehicle_booking_for_update(vbo_doc)
 
-	update_vehicle_booked(vehicle, 1)
+	if vehicle:
+		update_vehicle_booked(vehicle, 1)
 	if previous_vehicle:
 		update_vehicle_booked(previous_vehicle, 0)
 
@@ -80,7 +81,7 @@ def change_allocation(vehicle_booking_order, vehicle_allocation):
 	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
 	can_change_allocation(vbo_doc, throw=True)
 
-	if vehicle_allocation == vbo_doc.vehicle_allocation:
+	if cstr(vehicle_allocation) == cstr(vbo_doc.vehicle_allocation):
 		if vehicle_allocation:
 			frappe.throw(_("Vehicle Allocation {0} is already selected in {1}").format(vehicle_allocation, vehicle_booking_order))
 		else:
