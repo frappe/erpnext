@@ -73,6 +73,7 @@
   "manufacturer_part_no",
   "accounting",
   "expense_account",
+  "discount_account",
   "col_break5",
   "is_fixed_asset",
   "asset_location",
@@ -850,6 +851,12 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "discount_account",
+   "fieldtype": "Link",
+   "label": "Discount Account",
+   "options": "Account"
   }
  ],
  "idx": 1,
