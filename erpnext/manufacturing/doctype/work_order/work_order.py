@@ -337,7 +337,6 @@ rder=%s and docstatus=1
 		self.actual_yeild_on_wo()
 		self.yeild_calc()
 		self.wo_actual_volume_list()
-		self.update()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
@@ -411,11 +410,10 @@ rder=%s and docstatus=1
 		# else:
 		# 	self.actual_yeild = flt((flt(self.actual_fg_weight)/flt(self.actual_rm_weight))*100, self.precision('actual_yeild'))
 		# frappe.db.set_value("Work Order", self.name, "actual_yeild", self.actual_yeild)
-		if self.bom_yeild == 0:
+		if flt(self.bom_yeild) == 0:
 			self.yeild_deviation = 0
 		else:
-			if self.bom_yeild:
-				self.yeild_deviation = flt(((flt(self.actual_yeild) - flt(self.bom_yeild))/flt(self.bom_yeild))*100, self.precision('yeild_deviation'))
+			self.yeild_deviation = flt(((flt(self.actual_yeild) - flt(self.bom_yeild))/flt(self.bom_yeild))*100, self.precision('yeild_deviation'))
 		frappe.db.set_value("Work Order", self.name, "yeild_deviation", self.yeild_deviation)
 		# return True
 		
@@ -793,7 +791,7 @@ rder=%s and docstatus=1
 
 	def validate_operation_time(self):
 		for d in self.operations:
-			if not d.time_in_mins > 0:
+			if d.time_in_mins < 0:
 				print(self.bom_no, self.production_item)
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 
