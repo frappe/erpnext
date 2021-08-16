@@ -103,6 +103,7 @@ erpnext.HierarchyChart = class {
 
 	setup_actions() {
 		let me = this;
+		this.page.clear_inner_toolbar();
 		this.page.add_inner_button(__('Export'), function() {
 			me.export_chart();
 		});
@@ -124,6 +125,7 @@ erpnext.HierarchyChart = class {
 	}
 
 	export_chart() {
+		frappe.dom.freeze(__('Exporting...'));
 		this.page.main.css({
 			'min-height': '',
 			'max-height': '',
@@ -147,6 +149,8 @@ erpnext.HierarchyChart = class {
 			a.href = dataURL;
 			a.download = 'hierarchy_chart';
 			a.click();
+		}).finally(() => {
+			frappe.dom.unfreeze();
 		});
 
 		this.setup_page_style();
@@ -170,7 +174,9 @@ erpnext.HierarchyChart = class {
 		this.page.main
 			.find('#hierarchy-chart-wrapper')
 			.append(this.$hierarchy);
+
 		this.nodes = {};
+		this.all_nodes_expanded = false;
 	}
 
 	make_svg_markers() {
@@ -203,7 +209,7 @@ erpnext.HierarchyChart = class {
 	render_root_nodes(expanded_view=false) {
 		let me = this;
 
-		frappe.call({
+		return frappe.call({
 			method: me.method,
 			args: {
 				company: me.company
@@ -230,8 +236,8 @@ erpnext.HierarchyChart = class {
 						expand_node = node;
 				});
 
+				me.root_node = expand_node;
 				if (!expanded_view) {
-					me.root_node = expand_node;
 					me.expand_node(expand_node);
 				}
 			}
@@ -281,10 +287,12 @@ erpnext.HierarchyChart = class {
 			]);
 		} else {
 			frappe.run_serially([
+				() => frappe.dom.freeze(),
 				() => this.setup_hierarchy(),
 				() => this.render_root_nodes(true),
 				() => this.get_all_nodes(node.id, node.name),
-				(data_list) => this.render_children_of_all_nodes(data_list)
+				(data_list) => this.render_children_of_all_nodes(data_list),
+				() => frappe.dom.unfreeze()
 			]);
 		}
 	}
@@ -360,7 +368,7 @@ erpnext.HierarchyChart = class {
 			node = this.nodes[entry.parent];
 			if (node) {
 				this.render_child_nodes_for_expanded_view(node, entry.data);
-			} else {
+			} else if (data_list.length) {
 				data_list.push(entry);
 			}
 		}
