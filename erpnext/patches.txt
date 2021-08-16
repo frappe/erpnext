@@ -300,3 +300,4 @@ erpnext.patches.v13_0.update_export_type_for_gst
 erpnext.patches.v13_0.update_tds_check_field #3
 erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.shopify_deprecation_warning
+erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
