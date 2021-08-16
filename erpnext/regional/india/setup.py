@@ -457,7 +457,7 @@ def make_custom_fields(update=True):
 			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
 
 		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
-			depends_on='eval:(doc.irn_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
+			depends_on='eval: doc.irn', allow_on_submit=1, insert_after='customer'),
 
 		dict(fieldname='eway_bill_validity', label='E-Way Bill Validity', fieldtype='Data', no_copy=1, print_hide=1,
 			depends_on='ewaybill', read_only=1, allow_on_submit=1, insert_after='ewaybill'),
