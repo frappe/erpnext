@@ -75,7 +75,7 @@ class JobCard(Document):
 		if args.get("employee"):
 			# override capacity for employee
 			production_capacity = 1
-			validate_overlap_for = " and jc.employee = %(employee)s "
+			validate_overlap_for = " and jctl.employee = %(employee)s "
 
 		extra_cond = ''
 		if check_next_available_slot:
