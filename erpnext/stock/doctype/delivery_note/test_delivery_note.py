@@ -17,7 +17,8 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry \
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation, set_valuation_method
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
+from erpnext.selling.doctype.sales_order.test_sales_order \
+	import make_sales_order, create_dn_against_so, automatically_fetch_payment_terms, compare_payment_schedules
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.doctype.item.test_item import make_item
@@ -759,6 +760,32 @@ class TestDeliveryNote(unittest.TestCase):
 
 		self.assertTrue("TESTBATCH" in dn.packed_items[0].batch_no, "Batch number not added in packed item")
 
+	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		automatically_fetch_payment_terms()
+
+		so = make_sales_order(uom="Nos", do_not_save=1)
+		create_payment_terms_template()
+		so.payment_terms_template = 'Test Receivable Template'
+		so.submit()
+
+		dn = create_dn_against_so(so.name, delivered_qty=10)
+		
+		si = create_sales_invoice(qty=10, do_not_save=1)
+		si.items[0].delivery_note= dn.name
+		si.items[0].dn_detail = dn.items[0].name
+		si.items[0].sales_order = so.name
+		si.items[0].so_detail = so.items[0].name
+
+		si.insert()
+		si.submit()
+
+		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
+		compare_payment_schedules(self, so, si)
+
+		automatically_fetch_payment_terms(enable=0)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
