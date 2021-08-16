@@ -782,3 +782,37 @@ frappe.ui.form.on("UOM Conversion Detail", {
 		}
 	}
 })
+
+frappe.tour['Item'] = [
+	{
+		fieldname: 'item_code',
+		title: 'Asset Item Code',
+		description: 'Enter code for Asset Item'
+	},
+	{
+		fieldname: 'item_name',
+		title: 'Asset Item Name',
+		description: 'Enter name for Asset Item'
+	},
+	{
+		fieldname: 'is_fixed_asset',
+		title: 'Is Fixed Asset',
+		description: 'Check this field to make this an Asset Item'
+	},
+	{
+		fieldname: 'auto_create_assets_on_purchase',
+		title: 'Auto Create Asset on Purchase',
+		description: 'Check Auto Create Asset on Purchase'
+	},
+	{
+		fieldname: 'asset_category',
+		title: 'Asset Category',
+		description: 'Select an Asset Category for this Asset Item'
+	},
+	{
+		fieldname: 'asset_naming_series',
+		title: 'Asset Naming Series',
+		description: 'Select a naming series'
+	},
+	// TODO: save on completion
+]
