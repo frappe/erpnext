@@ -49,7 +49,11 @@ class TestLoan(unittest.TestCase):
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)
 
-		self.applicant2 = frappe.db.get_value("Customer", {'name': '_Test Loan Customer'}, 'name')
+		if not frappe.db.exists("Customer", "_Test Loan Customer 1"):
+			frappe.get_doc(get_customer_dict("_Test Loan Customer 1")).insert(ignore_permissions=True)
+
+		self.applicant2 = frappe.db.get_value("Customer", {"name": "_Test Loan Customer"}, "name")
+		self.applicant3 = frappe.db.get_value("Customer", {"name": "_Test Loan Customer 1"}, "name")
 
 		create_loan(self.applicant1, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
 
@@ -124,6 +128,38 @@ class TestLoan(unittest.TestCase):
 		self.assertEqual(loan.disbursed_amount, 1000000)
 		self.assertTrue(gl_entries1)
 		self.assertTrue(gl_entries2)
+
+	def test_sanctioned_amount_limit(self):
+		# Clear loan docs before checking
+		frappe.db.sql("DELETE FROM `tabLoan` where applicant = '_Test Loan Customer 1'")
+		frappe.db.sql("DELETE FROM `tabLoan Application` where applicant = '_Test Loan Customer 1'")
+		frappe.db.sql("DELETE FROM `tabLoan Security Pledge` where applicant = '_Test Loan Customer 1'")
+
+		if not frappe.db.get_value("Sanctioned Loan Amount", filters={"applicant_type": "Customer",
+			"applicant": "_Test Loan Customer 1", "company": "_Test Company"}):
+			frappe.get_doc({
+				"doctype": "Sanctioned Loan Amount",
+				"applicant_type": "Customer",
+				"applicant": "_Test Loan Customer 1",
+				"sanctioned_amount_limit": 1500000,
+				"company": "_Test Company"
+			}).insert(ignore_permissions=True)
+
+		# Make First Loan
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant3, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+		loan = create_demand_loan(self.applicant3, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		# Make second loan greater than the sanctioned amount
+		loan_application = create_loan_application('_Test Company', self.applicant3, 'Demand Loan', pledge,
+			do_not_save=True)
+		self.assertRaises(frappe.ValidationError, loan_application.save)
 
 	def test_regular_loan_repayment(self):
 		pledge = [{
@@ -367,7 +403,7 @@ class TestLoan(unittest.TestCase):
 		unpledge_request.load_from_db()
 		self.assertEqual(unpledge_request.docstatus, 1)
 
-	def test_santined_loan_security_unpledge(self):
+	def test_sanctioned_loan_security_unpledge(self):
 		pledge = [{
 			"loan_security": "Test Security 1",
 			"qty": 4000.00
@@ -858,7 +894,7 @@ def create_repayment_entry(loan, applicant, posting_date, paid_amount):
 	return lr
 
 def create_loan_application(company, applicant, loan_type, proposed_pledges, repayment_method=None,
-	repayment_periods=None, posting_date=None):
+	repayment_periods=None, posting_date=None, do_not_save=False):
 	loan_application = frappe.new_doc('Loan Application')
 	loan_application.applicant_type = 'Customer'
 	loan_application.company = company
@@ -873,6 +909,9 @@ def create_loan_application(company, applicant, loan_type, proposed_pledges, rep
 
 	for pledge in proposed_pledges:
 		loan_application.append('proposed_pledges', pledge)
+
+	if do_not_save:
+		return loan_application
 
 	loan_application.save()
 	loan_application.submit()

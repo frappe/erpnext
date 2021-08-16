@@ -67,7 +67,6 @@
   {
    "fieldname": "value_after_depreciation",
    "fieldtype": "Currency",
-   "hidden": 1,
    "label": "Value After Depreciation",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -85,7 +84,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-05 16:30:09.213479",
+ "modified": "2021-06-17 12:59:05.743683",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",

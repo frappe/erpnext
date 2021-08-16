@@ -21,6 +21,9 @@ frappe.listview_settings['Attendance'] = {
 						label: __('For Employee'),
 						fieldtype: 'Link',
 						options: 'Employee',
+						get_query: () => {
+							return {query: "erpnext.controllers.queries.employee_query"}
+						},
 						reqd: 1,
 						onchange: function() {
 							dialog.set_df_property("unmarked_days", "hidden", 1);

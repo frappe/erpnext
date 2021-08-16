@@ -125,6 +125,8 @@ class SalesInvoice(SellingController):
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		if not self.is_return:
 			self.validate_serial_numbers()
+		else:
+			self.timesheets = []
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -288,6 +290,8 @@ class SalesInvoice(SellingController):
 		self.update_time_sheet(None)
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(SalesInvoice, self).on_cancel()
 
 		self.check_sales_order_on_hold_or_close("sales_order")
@@ -337,7 +341,7 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
-
+		self.unlink_sales_invoice_from_timesheets()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def update_status_updater_args(self):
@@ -393,6 +397,18 @@ class SalesInvoice(SellingController):
 		if validate_against_credit_limit:
 			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
+	def unlink_sales_invoice_from_timesheets(self):
+		for row in self.timesheets:
+			timesheet = frappe.get_doc('Timesheet', row.time_sheet)
+			for time_log in timesheet.time_logs:
+				if time_log.sales_invoice == self.name:
+					time_log.sales_invoice = None
+			timesheet.calculate_total_amounts()
+			timesheet.calculate_percentage_billed()
+			timesheet.flags.ignore_validate_update_after_submit = True
+			timesheet.set_status()
+			timesheet.db_update_all()
+
 	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
@@ -427,7 +443,7 @@ class SalesInvoice(SellingController):
 				timesheet.calculate_percentage_billed()
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
-				timesheet.save()
+				timesheet.db_update_all()
 
 	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
 		for data in timesheet.time_logs:
@@ -466,7 +482,7 @@ class SalesInvoice(SellingController):
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
-				frappe.throw(_("No POS Profile found. Please create a New POS Profile first"))
+				return
 			self.pos_profile = pos_profile.get('name')
 
 		pos = {}
@@ -517,7 +533,7 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
+					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos, update_data=True)
 					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -741,8 +757,10 @@ class SalesInvoice(SellingController):
 				self.append('timesheets', {
 						'time_sheet': data.parent,
 						'billing_hours': data.billing_hours,
-						'billing_amount': data.billing_amt,
-						'timesheet_detail': data.name
+						'billing_amount': data.billing_amount,
+						'timesheet_detail': data.name,
+						'activity_type': data.activity_type,
+						'description': data.description
 					})
 
 			self.calculate_billing_amount_for_timesheet()
@@ -824,16 +842,19 @@ class SalesInvoice(SellingController):
 		self.make_customer_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
+		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
+		self.allocate_advance_taxes(gl_entries)
+
 		self.make_item_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries)
 
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
@@ -868,17 +889,19 @@ class SalesInvoice(SellingController):
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
+			amount, base_amount = self.get_tax_amounts(tax, self.enable_discount_accounting)
+
 			if flt(tax.base_tax_amount_after_discount_amount):
 				account_currency = get_account_currency(tax.account_head)
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.customer,
-						"credit": flt(tax.base_tax_amount_after_discount_amount,
+						"credit": flt(base_amount,
 							tax.precision("tax_amount_after_discount_amount")),
-						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
+						"credit_in_account_currency": (flt(base_amount,
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
-							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
+							flt(amount, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)
 				)
@@ -922,15 +945,17 @@ class SalesInvoice(SellingController):
 						income_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
+						amount, base_amount = self.get_amount_and_base_amount(item, self.enable_discount_accounting)
+
 						account_currency = get_account_currency(income_account)
 						gl_entries.append(
 							self.get_gl_dict({
 								"account": income_account,
 								"against": self.customer,
-								"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
-								"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+								"credit": flt(base_amount, item.precision("base_net_amount")),
+								"credit_in_account_currency": (flt(base_amount, item.precision("base_net_amount"))
 									if account_currency==self.company_currency
-									else flt(item.net_amount, item.precision("net_amount"))),
+									else flt(amount, item.precision("net_amount"))),
 								"cost_center": item.cost_center,
 								"project": item.project or self.project
 							}, account_currency, item=item)
@@ -940,6 +965,19 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	@property
+	def enable_discount_accounting(self):
+		if not hasattr(self, "_enable_discount_accounting"):
+			self._enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		return self._enable_discount_accounting
+
+	def set_asset_status(self, asset):
+		if self.is_return:
+			asset.set_status()
+		else:
+			asset.set_status("Sold" if self.docstatus==1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		if cint(self.redeem_loyalty_points):
@@ -967,7 +1005,13 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
+
+			skip_change_gl_entries = not cint(frappe.db.get_single_value('Accounts Settings', 'post_change_gl_entries'))
+
 			for payment_mode in self.payments:
+				if skip_change_gl_entries and payment_mode.account == self.account_for_change_amount:
+					payment_mode.base_amount -= flt(self.change_amount)
+
 				if payment_mode.amount:
 					# POS, make payment entries
 					gl_entries.append(
@@ -999,8 +1043,11 @@ class SalesInvoice(SellingController):
 						}, payment_mode_account_currency, item=self)
 					)
 
+			if not skip_change_gl_entries:
+				self.make_gle_for_change_amount(gl_entries)
+
 	def make_gle_for_change_amount(self, gl_entries):
-		if cint(self.is_pos) and self.change_amount:
+		if self.change_amount:
 			if self.account_for_change_amount:
 				gl_entries.append(
 					self.get_gl_dict({
@@ -1121,7 +1168,6 @@ class SalesInvoice(SellingController):
 		"""
 		self.set_serial_no_against_delivery_note()
 		self.validate_serial_against_delivery_note()
-		self.validate_serial_against_sales_invoice()
 
 	def set_serial_no_against_delivery_note(self):
 		for item in self.items:
@@ -1151,26 +1197,6 @@ class SalesInvoice(SellingController):
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
 				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
 					item.idx, item.qty, item.item_code, len(si_serial_nos)))
-
-	def validate_serial_against_sales_invoice(self):
-		""" check if serial number is already used in other sales invoice """
-		for item in self.items:
-			if not item.serial_no:
-				continue
-
-			for serial_no in item.serial_no.split("\n"):
-				serial_no_details = frappe.db.get_value("Serial No", serial_no,
-					["sales_invoice", "item_code"], as_dict=1)
-
-				if not serial_no_details:
-					continue
-
-				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
-					and self.name != serial_no_details.sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
-					if sales_invoice_company == self.company:
-						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}")
-							.format(serial_no, serial_no_details.sales_invoice))
 
 	def update_project(self):
 		if self.project:
@@ -1918,3 +1944,41 @@ def create_dunning(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 	return doclist
+
+def check_if_return_invoice_linked_with_payment_entry(self):
+	# If a Return invoice is linked with payment entry along with other invoices,
+	# the cancellation of the Return causes allocated amount to be greater than paid
+
+	if not frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+		return
+
+	payment_entries = []
+	if self.is_return and self.return_against:
+		invoice = self.return_against
+	else:
+		invoice = self.name
+
+	payment_entries = frappe.db.sql_list("""
+		SELECT
+			t1.name
+		FROM
+			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
+		WHERE
+			t1.name = t2.parent
+			and t1.docstatus = 1
+			and t2.reference_name = %s
+			and t2.allocated_amount < 0
+		""", invoice)
+
+	links_to_pe = []
+	if payment_entries:
+		for payment in payment_entries:
+			payment_entry = frappe.get_doc("Payment Entry", payment)
+			if len(payment_entry.references) > 1:
+				links_to_pe.append(payment_entry.name)
+		if links_to_pe:
+			payment_entries_link = [get_link_to_form('Payment Entry', name, label=name) for name in links_to_pe]
+			message = _("Please cancel and amend the Payment Entry")
+			message += " " + ", ".join(payment_entries_link) + " "
+			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
+			frappe.throw(message)

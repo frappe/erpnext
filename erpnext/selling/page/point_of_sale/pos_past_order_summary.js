@@ -241,7 +241,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	send_email() {
 		const frm = this.events.get_frm();
-		const recipients = this.email_dialog.get_values().recipients;
+		const recipients = this.email_dialog.get_values().email_id;
 		const doc = this.doc || frm.doc;
 		const print_format = frm.pos_print_format;
 

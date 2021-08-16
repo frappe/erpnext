@@ -24,17 +24,20 @@
                     {% set start = frappe.utils.get_datetime(doc.start_time) %}
                     {% set end = frappe.utils.get_datetime(doc.end_time) %}
                     {% if start.date() == end.date() %}
-                    <li>{{_("Date")}}: <b>{{ start.strftime("%A, %d %b %Y") }}</b></li>
-                    <li>
-                        {{_("Timing")}}: <b>{{ start.strftime("%I:%M %p") + ' to ' + end.strftime("%I:%M %p") }}</b>
-                    </li>
+                        <li>{{_("Date")}}: <b>{{ start.strftime("%A, %d %b %Y") }}</b></li>
+                        <li>
+                            {{_("Timing")}}: <b>{{ start.strftime("%I:%M %p") + ' to ' + end.strftime("%I:%M %p") }}</b>
+                        </li>
                     {% else %}
-                    <li>{{_("Start Time")}}: <b>{{ start.strftime("%A, %d %b %Y at %I:%M %p") }}</b>
-                    </li>
-                    <li>{{_("End Time")}}: <b>{{ end.strftime("%A, %d %b %Y at %I:%M %p") }}</b>
-                    </li>
+                        <li>
+                            {{_("Start Time")}}: <b>{{ start.strftime("%A, %d %b %Y at %I:%M %p") }}</b>
+                        </li>
+                        <li>{{_("End Time")}}: <b>{{ end.strftime("%A, %d %b %Y at %I:%M %p") }}</b></li>
                     {% endif %}
-                    <li>{{ _('Event Link') }}: {{ frappe.utils.get_link_to_form(doc.doctype, doc.name) }}</li>
+                    <li>{{ _("Event Link") }}: {{ frappe.utils.get_link_to_form(doc.doctype, doc.name) }}</li>
+                    {% if doc.is_mandatory %}
+                        <li>{{ _("Note: This Training Event is mandatory") }}</li>
+                    {% endif %}
                 </ul>
             </div>
         </td>

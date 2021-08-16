@@ -431,9 +431,11 @@ def get_ewb_data(dt, dn):
 		company_address = frappe.get_doc('Address', doc.company_address)
 		billing_address = frappe.get_doc('Address', doc.customer_address)
 
+		#added dispatch address
+		dispatch_address = frappe.get_doc('Address', doc.dispatch_address_name) if doc.dispatch_address_name else company_address
 		shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
 
-		data = get_address_details(data, doc, company_address, billing_address)
+		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
 		data.itemList = []
 		data.totalValue = doc.total
@@ -500,7 +502,7 @@ def download_ewb_json():
 
 		if not isinstance(docname, list):
 			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
-			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
+			filename_prefix = re.sub(r'[^\w_.)( -]', '', docname)
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
@@ -519,10 +521,10 @@ def get_gstins_for_company(company):
 			`tabDynamic Link`.link_name = %(company)s""", {"company": company})
 	return company_gstins
 
-def get_address_details(data, doc, company_address, billing_address):
+def get_address_details(data, doc, company_address, billing_address, dispatch_address):
 	data.fromPincode = validate_pincode(company_address.pincode, 'Company Address')
-	data.fromStateCode = data.actualFromStateCode = validate_state_code(
-		company_address.gst_state_number, 'Company Address')
+	data.fromStateCode = validate_state_code(company_address.gst_state_number, 'Company Address')
+	data.actualFromStateCode = validate_state_code(dispatch_address.gst_state_number, 'Dispatch Address')
 
 	if not doc.billing_address_gstin or len(doc.billing_address_gstin) < 15:
 		data.toGstin = 'URP'
@@ -695,7 +697,7 @@ def get_gst_accounts(company=None, account_wise=False, only_reverse_charge=0, on
 		filters=filters,
 		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
-	if not gst_settings_accounts and not frappe.flags.in_test:
+	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 		frappe.throw(_("Please set GST Accounts in GST Settings"))
 
 	for d in gst_settings_accounts:
@@ -817,12 +819,8 @@ def update_taxable_values(doc, method):
 				considered_rows.append(prev_row_id)
 
 	for item in doc.get('items'):
-		if doc.apply_discount_on == 'Grand Total' and doc.discount_amount:
-			proportionate_value = item.base_amount if doc.base_total else item.qty
-			total_value = doc.base_total if doc.base_total else doc.total_qty
-		else:
-			proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
-			total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
+		proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
+		total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
 
 		applicable_charges = flt(flt(proportionate_value * (flt(additional_taxes) / flt(total_value)),
 			item.precision('taxable_value')))
@@ -838,14 +836,22 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		depreciation_amount = (flt(row.value_after_depreciation) -
-			flt(row.expected_value_after_useful_life)) / depreciation_left
+		# if the Depreciation Schedule is being prepared for the first time
+		if not asset.flags.increase_in_asset_life:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / depreciation_left
+
+		# if the Depreciation Schedule is being modified after Asset Repair
+		else:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
+		
 	else:
 		rate_of_depreciation = row.rate_of_depreciation
 		# if its the first depreciation
 		if depreciable_value == asset.gross_purchase_amount:
 			# as per IT act, if the asset is purchased in the 2nd half of fiscal year, then rate is divided by 2
-			diff = date_diff(asset.available_for_use_date, row.depreciation_start_date)
+			diff = date_diff(row.depreciation_start_date, asset.available_for_use_date)
 			if diff <= 180:
 				rate_of_depreciation = rate_of_depreciation / 2
 				frappe.msgprint(
@@ -854,3 +860,14 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
 
 	return depreciation_amount
+
+def set_item_tax_from_hsn_code(item):
+	if not item.taxes and item.gst_hsn_code: 
+		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
+
+		for tax in hsn_doc.taxes:
+			item.append('taxes', {
+				'item_tax_template': tax.item_tax_template,
+				'tax_category': tax.tax_category,
+				'valid_from': tax.valid_from
+			})

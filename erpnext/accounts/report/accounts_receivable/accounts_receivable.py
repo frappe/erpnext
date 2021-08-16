@@ -99,7 +99,6 @@ class ReceivablePayableReport(object):
 					voucher_no = gle.voucher_no,
 					party = gle.party,
 					posting_date = gle.posting_date,
-					remarks = gle.remarks,
 					account_currency = gle.account_currency,
 					invoiced = 0.0,
 					paid = 0.0,
@@ -579,11 +578,12 @@ class ReceivablePayableReport(object):
 		self.gl_entries = frappe.db.sql("""
 			select
 				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
-				against_voucher_type, against_voucher, account_currency, remarks, {0}
+				against_voucher_type, against_voucher, account_currency, {0}
 			from
 				`tabGL Entry`
 			where
 				docstatus < 2
+				and is_cancelled = 0
 				and party_type=%s
 				and (party is not null and party != '')
 				{1} {2} {3}"""
@@ -790,8 +790,6 @@ class ReceivablePayableReport(object):
 		if self.filters.party_type == "Supplier":
 			self.add_column(label=_('Supplier Group'), fieldname='supplier_group', fieldtype='Link',
 				options='Supplier Group')
-
-		self.add_column(label=_('Remarks'), fieldname='remarks', fieldtype='Text', width=200)
 
 	def add_column(self, label, fieldname=None, fieldtype='Currency', options=None, width=120):
 		if not fieldname: fieldname = scrub(label)

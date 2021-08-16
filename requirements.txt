@@ -10,4 +10,3 @@ python-youtube~=0.8.0
 taxjar~=1.9.2
 tweepy~=3.10.0
 Unidecode~=1.2.0
-WooCommerce~=3.0.0

@@ -23,7 +23,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 
-	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
+	mode_of_payments = get_mode_of_payments(set(d.parent for d in item_list))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)
 
 	data = []

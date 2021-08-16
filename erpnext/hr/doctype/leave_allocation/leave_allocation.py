@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name, get_leave_period
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import expire_allocation, create_leave_ledger_entry
+from erpnext.hr.doctype.leave_application.leave_application import get_approved_leaves_for_period
 
 class OverlapError(frappe.ValidationError): pass
 class BackDatedAllocationError(frappe.ValidationError): pass
@@ -54,6 +55,43 @@ class LeaveAllocation(Document):
 			self.update_leave_policy_assignments_when_no_allocations_left()
 		if self.carry_forward:
 			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
+
+	def on_update_after_submit(self):
+		if self.has_value_changed("new_leaves_allocated"):
+			self.validate_against_leave_applications()
+			leaves_to_be_added = self.new_leaves_allocated - self.get_existing_leave_count()
+			args = {
+				"leaves": leaves_to_be_added,
+				"from_date": self.from_date,
+				"to_date": self.to_date,
+				"is_carry_forward": 0
+			}
+			create_leave_ledger_entry(self, args, True)
+
+	def get_existing_leave_count(self):
+		ledger_entries = frappe.get_all("Leave Ledger Entry",
+								filters={
+									"transaction_type": "Leave Allocation",
+									"transaction_name": self.name,
+									"employee": self.employee,
+									"company": self.company,
+									"leave_type": self.leave_type
+								},
+								pluck="leaves")
+		total_existing_leaves = 0
+		for entry in ledger_entries:
+			total_existing_leaves += entry
+
+		return total_existing_leaves
+
+	def validate_against_leave_applications(self):
+		leaves_taken = get_approved_leaves_for_period(self.employee, self.leave_type,
+			self.from_date, self.to_date)
+		if flt(leaves_taken) > flt(self.total_leaves_allocated):
+			if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
+				frappe.msgprint(_("Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken))
+			else:
+				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
 
 	def update_leave_policy_assignments_when_no_allocations_left(self):
 		allocations = frappe.db.get_list("Leave Allocation", filters = {

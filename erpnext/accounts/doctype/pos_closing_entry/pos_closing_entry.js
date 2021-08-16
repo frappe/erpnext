@@ -107,7 +107,7 @@ frappe.ui.form.on('POS Closing Entry', {
 		frm.set_value("taxes", []);
 
 		for (let row of frm.doc.payment_reconciliation) {
-			row.expected_amount = 0;
+			row.expected_amount = row.opening_amount;
 		}
 
 		for (let row of frm.doc.pos_transactions) {
@@ -154,6 +154,9 @@ function add_to_pos_transaction(d, frm) {
 function refresh_payments(d, frm) {
 	d.payments.forEach(p => {
 		const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
+		if (p.account == d.account_for_change_amount) {
+			p.amount -= flt(d.change_amount);
+		}
 		if (payment) {
 			payment.expected_amount += flt(p.amount);
 			payment.difference = payment.closing_amount - payment.expected_amount;

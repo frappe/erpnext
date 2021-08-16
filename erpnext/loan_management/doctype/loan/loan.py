@@ -60,8 +60,9 @@ class Loan(AccountsController):
 			self.monthly_repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
 
 	def check_sanctioned_amount_limit(self):
-		total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
 		sanctioned_amount_limit = get_sanctioned_amount_limit(self.applicant_type, self.applicant, self.company)
+		if sanctioned_amount_limit:
+			total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
 
 		if sanctioned_amount_limit and flt(self.loan_amount) + flt(total_loan_amount) > flt(sanctioned_amount_limit):
 			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
@@ -155,9 +156,29 @@ def update_total_amount_paid(doc):
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_amount_paid)
 
 def get_total_loan_amount(applicant_type, applicant, company):
-	return frappe.db.get_value('Loan',
-		{'applicant_type': applicant_type, 'company': company, 'applicant': applicant, 'docstatus': 1},
-		'sum(loan_amount)')
+	pending_amount = 0
+	loan_details = frappe.db.get_all("Loan",
+		filters={"applicant_type": applicant_type, "company": company, "applicant": applicant, "docstatus": 1,
+			"status": ("!=", "Closed")},
+		fields=["status", "total_payment", "disbursed_amount", "total_interest_payable", "total_principal_paid",
+			"written_off_amount"])
+
+	interest_amount = flt(frappe.db.get_value("Loan Interest Accrual", {"applicant_type": applicant_type,
+		"company": company, "applicant": applicant, "docstatus": 1}, "sum(interest_amount - paid_interest_amount)"))
+
+	for loan in loan_details:
+		if loan.status in ("Disbursed", "Loan Closure Requested"):
+			pending_amount += flt(loan.total_payment) - flt(loan.total_interest_payable) \
+				- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
+		elif loan.status == "Partially Disbursed":
+			pending_amount += flt(loan.disbursed_amount) - flt(loan.total_interest_payable) \
+				- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
+		elif loan.status == "Sanctioned":
+			pending_amount += flt(loan.total_payment)
+
+	pending_amount += interest_amount
+
+	return pending_amount
 
 def get_sanctioned_amount_limit(applicant_type, applicant, company):
 	return frappe.db.get_value('Sanctioned Loan Amount',
@@ -264,7 +285,7 @@ def make_loan_write_off(loan, company=None, posting_date=None, amount=0, as_dict
 	pending_amount = amounts['pending_principal_amount']
 
 	if amount and (amount > pending_amount):
-		frappe.throw('Write Off amount cannot be greater than pending loan amount')
+		frappe.throw(_('Write Off amount cannot be greater than pending loan amount'))
 
 	if not amount:
 		amount = pending_amount

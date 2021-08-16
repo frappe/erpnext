@@ -168,21 +168,24 @@ def get_columns(filters):
 			"label": _("Income"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 305
+
 		},
 		{
 			"fieldname": "expense",
 			"label": _("Expense"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 305
+
 		},
 		{
 			"fieldname": "gross_profit_loss",
 			"label": _("Gross Profit / Loss"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 307
+
 		}
 	]
 
