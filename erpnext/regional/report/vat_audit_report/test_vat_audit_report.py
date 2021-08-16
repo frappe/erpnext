@@ -101,7 +101,7 @@ def set_sa_vat_accounts():
 
 def make_customer():
 	if not frappe.db.exists("Customer", "_Test SA Customer"):
-		customer = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Customer",
 			"customer_name": "_Test SA Customer",
 			"customer_type": "Company",
@@ -109,7 +109,7 @@ def make_customer():
 
 def make_supplier():
 	if not frappe.db.exists("Supplier", "_Test SA Supplier"):
-		supplier = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Supplier",
 			"supplier_name": "_Test SA Supplier",
 			"supplier_type": "Company",
@@ -117,23 +117,19 @@ def make_supplier():
 		}).insert()
 
 def make_item(item_code, properties=None):
-	if frappe.db.exists("Item", item_code):
-		return frappe.get_doc("Item", item_code)
+	if not frappe.db.exists("Item", item_code):
+		item = frappe.get_doc({
+			"doctype": "Item",
+			"item_code": item_code,
+			"item_name": item_code,
+			"description": item_code,
+			"item_group": "Products"
+		})
 
-	item = frappe.get_doc({
-		"doctype": "Item",
-		"item_code": item_code,
-		"item_name": item_code,
-		"description": item_code,
-		"item_group": "Products"
-	})
+		if properties:
+			item.update(properties)
 
-	if properties:
-		item.update(properties)
-
-	item.insert()
-
-	return item
+		item.insert()
 
 def make_sales_invoices():
 	def make_sales_invoices_wrapper(item, rate, tax_account, tax_rate, tax=True):
