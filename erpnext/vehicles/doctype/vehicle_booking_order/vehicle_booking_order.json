@@ -422,6 +422,7 @@
    "fieldname": "vehicle_chassis_no",
    "fieldtype": "Data",
    "label": "Chassis No",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -429,6 +430,7 @@
    "fieldname": "vehicle_engine_no",
    "fieldtype": "Data",
    "label": "Engine No",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -1071,7 +1073,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-25 17:39:44.683035",
+ "modified": "2021-08-16 15:10:06.592832",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

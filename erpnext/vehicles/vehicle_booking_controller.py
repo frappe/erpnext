@@ -96,7 +96,8 @@ class VehicleBookingController(AccountsController):
 		else:
 			values = {}
 			for df in self.meta.get_fields_to_fetch('vehicle'):
-				values[df.fieldname] = None
+				if df.read_only:
+					values[df.fieldname] = None
 
 		if update:
 			self.db_set(values)

@@ -17,6 +17,7 @@ class VehicleQuotation(VehicleBookingController):
 	def validate(self):
 		super(VehicleQuotation, self).validate()
 
+		self.validate_vehicle_qty()
 		self.update_opportunity()
 		self.validate_quotation_valid_till()
 		self.get_terms_and_conditions()
@@ -44,6 +45,10 @@ class VehicleQuotation(VehicleBookingController):
 	def before_print(self):
 		super(VehicleQuotation, self).before_print()
 		self.total_discount = -self.total_discount
+
+	def validate_vehicle_qty(self):
+		if self.get('vehicle') and cint(self.qty) > 1:
+			frappe.throw(_("Qty must be 1 if Vehicle is selected"))
 
 	def set_title(self):
 		self.title = self.customer_name
@@ -117,7 +122,8 @@ def _make_vehicle_booking_order(source_name, target_doc=None, ignore_permissions
 				"remarks": "remarks",
 				"delivery_period": "delivery_period",
 				"color": "color_1",
-				"delivery_date": "delivery_date"
+				"delivery_date": "delivery_date",
+				"vehicle": "vehicle",
 			},
 			"field_no_map": ['tc_name', 'terms']
 		},

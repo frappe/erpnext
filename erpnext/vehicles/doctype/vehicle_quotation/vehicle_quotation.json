@@ -66,7 +66,10 @@
   "vehicle_allocation_required",
   "exempt_from_vehicle_withholding_tax",
   "column_break_33",
+  "vehicle",
   "color",
+  "vehicle_chassis_no",
+  "vehicle_engine_no",
   "vehicle_description_section",
   "description",
   "allocation_details_section",
@@ -625,6 +628,7 @@
    "label": "Valid Till"
   },
   {
+   "fetch_from": "vehicle.color",
    "fieldname": "color",
    "fieldtype": "Link",
    "label": "Color",
@@ -846,12 +850,36 @@
    "fieldname": "do_not_apply_withholding_tax",
    "fieldtype": "Check",
    "label": "Do Not Apply Withholding Tax"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle"
+  },
+  {
+   "fetch_from": "vehicle.chassis_no",
+   "fieldname": "vehicle_chassis_no",
+   "fieldtype": "Data",
+   "label": "Chassis No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.engine_no",
+   "fieldname": "vehicle_engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-07-29 15:39:10.513184",
+ "modified": "2021-08-16 15:13:00.782136",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",
