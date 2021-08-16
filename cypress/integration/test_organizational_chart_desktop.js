@@ -3,6 +3,8 @@ context('Organizational Chart', () => {
 		cy.login();
 		cy.visit('/app/website');
 		cy.awesomebar('Organizational Chart');
+		cy.wait(500);
+		cy.url().should('include', '/organizational-chart');
 
 		cy.window().its('frappe.csrf_token').then(csrf_token => {
 			return cy.request({
@@ -17,6 +19,7 @@ context('Organizational Chart', () => {
 			}).then(res => {
 				expect(res.status).eq(200);
 				cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
+
 				cy.get('@input')
 					.clear({ force: true })
 					.type('Test Org Chart{enter}', { force: true })
