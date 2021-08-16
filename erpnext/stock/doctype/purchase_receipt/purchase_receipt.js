@@ -347,3 +347,18 @@ var validate_sample_quantity = function(frm, cdt, cdn) {
 		});
 	}
 };
+
+frappe.tour['Purchase Receipt'] = [
+	{
+		fieldname: 'supplier',
+		title: 'Supplier',
+		description: 'Select Asset Supplier'
+	},
+	{
+		fieldname: 'items',
+		title: 'Item Table',
+		description: 'Select an Asset Item, Enter rate and quantity'
+	},
+	// TODO: save and submit
+	// TODO: dashboard > asset (click here to see asset created against the receipt)
+]
