@@ -222,6 +222,10 @@ class Issue(Document):
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name
+	
+	def reset_issue_metrics(self):
+		self.db_set("resolution_time", None)
+		self.db_set("user_resolution_time", None)
 
 	def before_insert(self):
 		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
@@ -231,8 +235,7 @@ class Issue(Document):
 				self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
-		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
-			customer=self.customer, service_level_agreement=service_level_agreement)
+		service_level_agreement = get_active_service_level_agreement_for(self)
 
 		if not service_level_agreement:
 			if frappe.db.get_value("Issue", self.name, "service_level_agreement"):
@@ -243,7 +246,8 @@ class Issue(Document):
 			frappe.throw(_("This Service Level Agreement is specific to Customer {0}").format(service_level_agreement.customer))
 
 		self.service_level_agreement = service_level_agreement.name
-		self.priority = service_level_agreement.default_priority if not priority else priority
+		if not self.priority:
+			self.priority = service_level_agreement.default_priority
 
 		priority = get_priority(self)
 
