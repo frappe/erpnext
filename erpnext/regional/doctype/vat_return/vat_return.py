@@ -58,23 +58,25 @@ class VATRETURN(Document):
 		last_month=["January" ,"February","March","April","May","June","July","August","September","October","November","December"]
 		index =last_month.index(self.month)
 		last=last_month[index-1]
+		high=0
 		for i in doc:
 			if i.month==self.month and i.company==self.company and i.year==int(self.year):
-				self.report_dict["particular"]["sales"][0]["tv"]=i.taxable_sales+i.exempted_sales+i.export
+				self.report_dict["particular"]["sales"][0]["tv"]=flt(i.taxable_sales)+flt(i.exempted_sales)+flt(i.export)
 				self.report_dict["particular"]["sales"][0]["tc"]=i.tax
 				self.report_dict["particular"]["export"][0]["tv"]=i.export
 				self.report_dict["particular"]["taxable_sales"][0]["tv"]=i.taxable_sales
 				self.report_dict["particular"]["taxable_sales"][0]["tc"]=i.tax
 				self.report_dict["particular"]["exempted_sales"][0]["tv"]=i.exempted_sales
-				self.report_dict["particular"]["total"][0]["tc"]=i.tax + self.adjusted_tax_paid_on_sales
+				self.report_dict["particular"]["total"][0]["tc"]=flt(i.tax) +flt(self.adjusted_tax_paid_on_sales)
 				self.report_dict["particular"]["other_adj"][0]["tc"]=self.adjusted_tax_paid_on_sales
 				self.report_dict["particular"]["no_of_sales_invoice"][0]["tc"]=i.no_of_invoice
 				self.report_dict["particular"]["no_of_credit_note"][0]["tc"]=i.no_credit_note
 				self.report_dict["particular"]["no_of_debit_note"][0]["tc"]=i.no_debit_note
 			if i.month==last and i.company==self.company and i.year==int(self.year) and i.month!="January":
-				high=i.tax + self.adjusted_tax_paid_on_sales
+				high=flt(i.tax) + flt(self.adjusted_tax_paid_on_sales)
+				print(high)
 			if i.month=="January" and i.company==self.company and i.year==int(self.year)-1:
-				high=i.tax + self.adjusted_tax_paid_on_sales
+				high=flt(i.tax) + flt(self.adjusted_tax_paid_on_sales)
 		c_tax=high
 		a=self.report_dict["particular"]["total"][0]["tc"]
 		total=self.report_dict["particular"]["sales"][0]["tv"]
@@ -84,19 +86,18 @@ class VATRETURN(Document):
 		monthname(posting_date) as month,
 		year(posting_date) as year,
 		count(si.name) as no_of_invoices,
-		(sum(total) + (select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.company=si.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+		(sum(total) + (select sum(grand_total) from `tabPurchase Invoice` as xsi where  month(xsi.posting_date)=month(si.posting_date)
+			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date)   group by month(xsi.posting_date) desc, year(xsi.posting_date)
 			)) as total,
 		(select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.company=si.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
+			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date)  group by month(xsi.posting_date) desc, year(xsi.posting_date)
 			)
 			as exempted_purchase,
 		(select count(name) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.company=si.company and xsi.is_return=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
+			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.is_return=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
 			) as is_debit_advice,
 		(select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.company=si.company group by month(xsi.posting_date) desc, year(xsi.posting_date) 
-			and xsi.currency != "NPR"
+			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date)  and xsi.currency != "NPR" group by month(xsi.posting_date) desc, year(xsi.posting_date) 
 			)
 			as exempted_import,
 		sum(total) as taxable_purchase,
@@ -110,21 +111,23 @@ class VATRETURN(Document):
 		(select sum(pii.amount) from `tabPurchase Invoice` as pd 
 		inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 		where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
-		and pii.is_fixed_asset=1 and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date)) as capital_purchase,
+		and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)) as capital_purchase,
 
 		(select sum(pii.amount)*13/100 from `tabPurchase Invoice Item` as pii  
 		inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 		where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
-		and pii.is_fixed_asset=1 and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date) ) as capital_tax
+		and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date) ) as capital_tax
 		from
 		`tabPurchase Invoice` as si
 		where si.docstatus=1 
 		group by year(si.posting_date) desc,
 		monthname(si.posting_date) asc,
 		company""",as_dict=1)
+		print(doc1)
+		top=0
 		for i in doc1:
 			if i.month==self.month and i.company==self.company and i.year==int(self.year):
-				self.report_dict["particular"]["purchase"][0]["tv"]=i.taxable_purchase + i.taxable_import + i.exempted_purchase+i.exempted_import
+				self.report_dict["particular"]["purchase"][0]["tv"]=flt(i.taxable_purchase)+ flt(i.taxable_import) + flt(i.exempted_purchase)+flt(i.exempted_import)
 				self.report_dict["particular"]["taxcable_purchase"][0]["tv"]=i.taxable_purchase
 				self.report_dict["particular"]["taxcable_purchase"][0]["tp"]=i.local_tax
 				self.report_dict["particular"]["taxcable_import"][0]["tv"]=i.taxable_import
@@ -133,13 +136,13 @@ class VATRETURN(Document):
 				self.report_dict["particular"]["exempted_import"][0]["tv"]=i.exempted_import
 				
 				self.report_dict["particular"]["other_adj"][0]["tp"]=self.adjusted_tax_paid_on_purchase
-				self.report_dict["particular"]["total"][0]["tp"]=i.local_tax + i.import_tax+self.adjusted_tax_paid_on_purchase
+				self.report_dict["particular"]["total"][0]["tp"]=flt(i.local_tax) + flt(i.import_tax)+flt(self.adjusted_tax_paid_on_purchase)
 				self.report_dict["particular"]["no_of_purchase_invoice"][0]["tc"]=i.no_of_invoices
 				self.report_dict["particular"]["no_of_debit_advice"][0]["tc"]=i.is_debit_advice
 			if i.month==last and i.company==self.company and i.year==int(self.year) and i.month != "January":
-				top=i.local_tax + i.import_tax+self.adjusted_tax_paid_on_purchase
+				top=flt(i.local_tax) + flt(i.import_tax)+flt(self.adjusted_tax_paid_on_purchase)
 			if i.month=="January" and i.company==self.company and i.year==int(self.year)-1:
-				top=i.local_tax + i.import_tax+self.adjusted_tax_paid_on_purchase
+				top=flt(i.local_tax) + flt(i.import_tax)+flt(self.adjusted_tax_paid_on_purchase)
 		t_tax=top
 		tot=self.report_dict["particular"]["purchase"][0]["tv"]
 		b=self.report_dict["particular"]["total"][0]["tp"]
@@ -149,10 +152,10 @@ class VATRETURN(Document):
 		print(t_tax)
 		if a-b < 0:
 			self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"]=c_tax-t_tax
-			self.report_dict["particular"]["net_tax"][0]["tc"]=self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"]+self.report_dict["particular"]["debit_credit"][0]["tc"]
+			self.report_dict["particular"]["net_tax"][0]["tc"]=flt(self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"])+flt(self.report_dict["particular"]["debit_credit"][0]["tc"])
 		if a-b > 0:
 			self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"]=0
-			self.report_dict["particular"]["net_tax"][0]["tc"]=self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"]+self.report_dict["particular"]["debit_credit"][0]["tc"]
+			self.report_dict["particular"]["net_tax"][0]["tc"]=flt(self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"])+flt(self.report_dict["particular"]["debit_credit"][0]["tc"])
 		self.report_dict["particular"]["total_payment"][0]["tv"]=self.report_dict["particular"]["net_tax"][0]["tc"]
 		self.report_dict["particular"]["total_payment"][0]["tp"]="Voucher No:"
 		self.report_dict["particular"]["total_payment"][0]["tc"]=self.voucher_no
