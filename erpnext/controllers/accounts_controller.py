@@ -1416,7 +1416,7 @@ class AccountsController(TransactionBase):
 				d.invoice_portion = flt(d.payment_amount / grand_total * 100) if grand_total else 0
 
 	def set_due_date(self):
-		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
+		due_dates = [getdate(d.due_date) for d in self.get("payment_schedule") if d.due_date]
 		if due_dates:
 			self.due_date = max(due_dates)
 
