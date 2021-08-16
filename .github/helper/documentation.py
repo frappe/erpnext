@@ -32,11 +32,15 @@ if __name__ == "__main__":
 
 	if response.ok:
 		payload = response.json()
-		title = payload.get("title", "").lower()
+		title = payload.get("title", "").lower().strip()
 		head_sha = payload.get("head", {}).get("sha")
 		body = payload.get("body", "").lower()
 
-		if title.startswith("feat") and head_sha and "no-docs" not in body:
+		if (title.startswith("feat")
+			and head_sha
+			and "no-docs" not in body
+			and "backport" not in body
+		):
 			if docs_link_exists(body):
 				print("Documentation Link Found. You're Awesome! 🎉")
 
