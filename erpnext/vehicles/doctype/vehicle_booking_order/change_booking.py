@@ -3,7 +3,8 @@ from frappe import _
 from frappe.utils import cstr, flt, cint
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import update_vehicle_booked,\
 	update_allocation_booked
-from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details
+from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details,\
+	get_party_tax_status, get_party_doc
 
 def set_can_change_onload(vbo_doc):
 	can_change = {
@@ -14,6 +15,7 @@ def set_can_change_onload(vbo_doc):
 		"customer_details": can_change_customer_details(vbo_doc),
 		"item": can_change_item(vbo_doc),
 		"payment_adjustment": can_change_payment_adjustment(vbo_doc),
+		"vehicle_price": can_change_vehicle_price(vbo_doc),
 		"priority": can_change_priority(vbo_doc),
 		"cancellation": can_change_cancellation(vbo_doc),
 		"vehicle_receipt": can_receive_vehicle(vbo_doc),
@@ -347,6 +349,53 @@ def can_change_payment_adjustment(vbo_doc, throw=False):
 	if not allowed:
 		if throw:
 			frappe.throw(_("You are not allowed to change Booking Payment Adjustment"))
+		return False
+
+	if not check_allowed_after_vehicle_delivery(vbo_doc, throw=throw):
+		return False
+
+	return True
+
+
+@frappe.whitelist()
+def change_vehicle_price(vehicle_booking_order, vehicle_amount=0, fni_amount=0):
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	can_change_vehicle_price(vbo_doc, throw=True)
+
+	vehicle_amount = flt(vehicle_amount, vbo_doc.precision('vehicle_amount'))
+	fni_amount = flt(fni_amount, vbo_doc.precision('fni_amount'))
+
+	tax_status = vbo_doc.get_party_tax_status()
+	withholding_tax_amount = vbo_doc.get_withholding_tax_amount(tax_status)
+
+	if vehicle_amount == flt(vbo_doc.vehicle_amount) and fni_amount == flt(vbo_doc.fni_amount)\
+			and withholding_tax_amount == flt(vbo_doc.withholding_tax_amount):
+		frappe.throw(_("Vehicle Price is the same"))
+
+	vbo_doc.vehicle_amount = vehicle_amount
+	vbo_doc.fni_amount = fni_amount
+	vbo_doc.withholding_tax_amount = withholding_tax_amount
+	vbo_doc.tax_status = tax_status
+
+	vbo_doc.calculate_taxes_and_totals()
+	vbo_doc.validate_payment_schedule()
+	vbo_doc.update_payment_status()
+	vbo_doc.validate_amounts()
+
+	save_vehicle_booking_for_update(vbo_doc)
+
+	frappe.msgprint(_("Vehicle Price Updated Successfully"), indicator='green', alert=True)
+
+
+def can_change_vehicle_price(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
+	role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_change_vehicle_price")
+	allowed = role_allowed and role_allowed in frappe.get_roles()
+	if not allowed:
+		if throw:
+			frappe.throw(_("You are not allowed to change Booking Vehicle Price"))
 		return False
 
 	if not check_allowed_after_vehicle_delivery(vbo_doc, throw=throw):

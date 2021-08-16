@@ -185,6 +185,11 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					__("Change"));
 			}
 
+			if (this.can_change('vehicle_price')) {
+				this.frm.add_custom_button(__("Change Vehicle Price"), () => this.change_vehicle_price(),
+					__("Change"));
+			}
+
 			if (this.can_change('priority')) {
 				this.frm.add_custom_button(__(change_priority_label), () => this.change_priority(),
 					__("Change"));
@@ -963,7 +968,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			title: __("Change Payment Adjustment"),
 			fields: [
 				{label: __("Payment Adjustment Amount"), fieldname: "payment_adjustment", fieldtype: "Currency",
-					options: "Comoany:company:default_currency", reqd: 1,
+					options: "Company:company:default_currency", reqd: 1,
 					description: __(frappe.meta.get_docfield("Vehicle Booking Order", "payment_adjustment").description)},
 			]
 		});
@@ -984,6 +989,75 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			});
 		});
 		dialog.show();
+	},
+
+	change_vehicle_price: function () {
+		var me = this;
+
+		var update_invoice_total_in_dialog = function () {
+			var invoice_total = flt(dialog.get_value('vehicle_amount')) + flt(dialog.get_value('fni_amount'))
+				+ flt(dialog.get_value('withholding_tax_amount'));
+			dialog.set_value('invoice_total', invoice_total);
+		};
+
+		var dialog = new frappe.ui.Dialog({
+			title: __("Change Vehicle Price"),
+			fields: [
+				{label: __("New Vehicle Retail Price"), fieldname: "vehicle_amount", fieldtype: "Currency",
+					options: "Company:company:default_currency", reqd: 1, onchange: () => update_invoice_total_in_dialog()},
+				{label: __("New Freight and Insurance"), fieldname: "fni_amount", fieldtype: "Currency",
+					options: "Company:company:default_currency", onchange: () => update_invoice_total_in_dialog()},
+				{label: __("New Withholding Tax Amount"), fieldname: "withholding_tax_amount", fieldtype: "Currency",
+					options: "Company:company:default_currency", read_only: 1, onchange: () => update_invoice_total_in_dialog()},
+				{label: __("New Invoice Total"), fieldname: "invoice_total", fieldtype: "Currency",
+					options: "Company:company:default_currency", read_only: 1},
+			]
+		});
+
+		dialog.set_primary_action(__("Change"), function () {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_vehicle_price",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					vehicle_amount: dialog.get_value('vehicle_amount'),
+					fni_amount: dialog.get_value('fni_amount'),
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		});
+
+		frappe.call({
+			method: "get_party_tax_status",
+			doc: me.frm.doc,
+			callback: function (r1) {
+				if (!r1.exc) {
+					var tax_status = cstr(r1.message);
+
+					frappe.call({
+						method: "erpnext.vehicles.vehicle_booking_controller.get_vehicle_price",
+						args: {
+							company: me.frm.doc.company,
+							item_code: me.frm.doc.item_code,
+							vehicle_price_list: me.frm.doc.vehicle_price_list,
+							fni_price_list: me.frm.doc.fni_price_list,
+							tax_status: tax_status,
+						},
+						callback: function (r2) {
+							if (!r2.exc) {
+								dialog.set_values(r2.message);
+								update_invoice_total_in_dialog();
+								dialog.show();
+							}
+						}
+					});
+				}
+			}
+		});
 	},
 
 	change_priority: function () {

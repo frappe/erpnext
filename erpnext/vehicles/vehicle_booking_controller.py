@@ -221,6 +221,10 @@ class VehicleBookingController(AccountsController):
 	def get_withholding_tax_amount(self, tax_status):
 		return get_withholding_tax_amount(self.transaction_date, self.item_code, tax_status, self.company)
 
+	def get_party_tax_status(self):
+		party_type, customer, financer = get_party_doc(self.as_dict())
+		return get_party_tax_status(self.as_dict(), customer, financer)
+
 	def validate_amounts(self):
 		for field in ['vehicle_amount', 'invoice_total']:
 			self.validate_value(field, '>', 0)
@@ -394,7 +398,6 @@ def get_party_tax_ids(args, party, financer):
 def get_party_tax_status(args, party, financer):
 	is_leased = financer and args.finance_type == "Leased"
 	return financer.get('tax_status') if is_leased else party.get('tax_status')
-
 
 
 @frappe.whitelist()

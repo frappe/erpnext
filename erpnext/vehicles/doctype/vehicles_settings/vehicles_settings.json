@@ -20,13 +20,14 @@
   "section_break_14",
   "role_change_booking_after_payment",
   "role_change_payment_adjustment",
-  "maximum_payment_adjustment",
+  "role_change_vehicle_price",
   "column_break_17",
   "role_change_booking_after_vehicle_receipt",
   "role_change_booking_after_vehicle_delivery",
   "role_cancel_booking",
   "column_break_14",
-  "minimum_lead_time_days"
+  "minimum_lead_time_days",
+  "maximum_payment_adjustment"
  ],
  "fields": [
   {
@@ -147,11 +148,17 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Cancel Bookings",
    "options": "Role"
+  },
+  {
+   "fieldname": "role_change_vehicle_price",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Change Booking Vehicle Price",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-06-25 13:31:07.086784",
+ "modified": "2021-08-16 13:55:52.919378",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
