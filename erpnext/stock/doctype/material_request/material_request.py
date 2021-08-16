@@ -273,7 +273,7 @@ class MaterialRequest(BuyingController):
 
 	def set_wo_details(self):
 		for item in self.items:
-			if item.get('qty') > 0:
+			if item.get('qty') > 0 and item.get('work_order'):
 				wo_doc = frappe.get_doc("Work Order",item.get('work_order'))
 				self.append("work_order_detail",{
 					"company": wo_doc.get('company'),
