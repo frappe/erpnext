@@ -1,7 +1,6 @@
 import frappe
 from frappe.utils import cint
-
-from erpnext.e_commerce.product_configurator.item_variants_cache import ItemVariantsCacheManager
+from erpnext.e_commerce.variant_selector.item_variants_cache import ItemVariantsCacheManager
 
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 	items = []
