@@ -732,7 +732,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				this.frm.trigger("item_code", cdt, cdn);
 			}
 			else {
-				// Replacing all occurences of comma with carriage return
+				// Replace all occurences of comma with line feed
 				item.serial_no = item.serial_no.replace(/,/g, '\n');
 				item.conversion_factor = item.conversion_factor || 1;
 				refresh_field("serial_no", item.name, item.parentfield);
