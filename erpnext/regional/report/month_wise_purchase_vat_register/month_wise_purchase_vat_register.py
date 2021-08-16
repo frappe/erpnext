@@ -112,10 +112,10 @@ def get_data(filters):
 	year(posting_date) as year,
     count(si.name) as no_of_invoices,
     (sum(total) + (select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.company=si.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date)  group by month(xsi.posting_date) desc, year(xsi.posting_date)
         )) as total,
     (select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.company=si.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
+        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date)  group by month(xsi.posting_date) desc, year(xsi.posting_date)
         )
         as exempted_purchase,
     sum(total) as taxable_purchase,
@@ -129,16 +129,17 @@ def get_data(filters):
 	(select sum(pii.amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
-	and pii.is_fixed_asset=1 and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date)) as capital_purchase,
+	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)) as capital_purchase,
 
 	(select sum(pii.amount)*13/100 from `tabPurchase Invoice Item` as pii  
 	inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 	where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
-	 and pii.is_fixed_asset=1 and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date) ) as capital_tax
+	 and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date) ) as capital_tax
 	from
 	`tabPurchase Invoice` as si
 	where si.docstatus=1 {conditions}
 	group by year(si.posting_date) desc,
     monthname(si.posting_date) asc,
     company""".format(conditions=conditions),filters, as_dict=1)
+	print(doc)
 	return doc
