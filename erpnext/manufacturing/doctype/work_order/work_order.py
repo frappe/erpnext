@@ -208,7 +208,10 @@ class WorkOrder(Document):
 		elif self.docstatus==1:
 			if status != 'Stopped':
 				stock_entries = frappe._dict(frappe.db.sql("""select purpose, sum(fg_completed_qty)
-					from `tabStock Entry` where work_order=%s and docstatus=1
+					from `tabStock Entry` where work_o
+￼
+￼Customize
+rder=%s and docstatus=1
 					group by purpose""", self.name))
 
 				status = "Not Started"
@@ -411,7 +414,8 @@ class WorkOrder(Document):
 		if self.bom_yeild == 0:
 			self.yeild_deviation = 0
 		else:
-			self.yeild_deviation = flt(((flt(self.actual_yeild) - flt(self.bom_yeild))/flt(self.bom_yeild))*100, self.precision('yeild_deviation'))
+			if self.bom_yeild:
+				self.yeild_deviation = flt(((flt(self.actual_yeild) - flt(self.bom_yeild))/flt(self.bom_yeild))*100, self.precision('yeild_deviation'))
 		frappe.db.set_value("Work Order", self.name, "yeild_deviation", self.yeild_deviation)
 		# return True
 		
