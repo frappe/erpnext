@@ -635,7 +635,7 @@
   },
   {
    "fieldname": "months_of_service_in_payment_period",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "Months of Service in payment period"
   }
  ],
@@ -643,7 +643,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-17 15:58:05.940665",
+ "modified": "2021-08-16 14:32:02.054855",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
