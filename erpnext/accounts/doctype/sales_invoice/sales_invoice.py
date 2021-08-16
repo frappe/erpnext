@@ -848,6 +848,7 @@ class SalesInvoice(SellingController):
 		self.allocate_advance_taxes(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries)
 
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
@@ -888,17 +889,19 @@ class SalesInvoice(SellingController):
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
+			amount, base_amount = self.get_tax_amounts(tax, self.enable_discount_accounting)
+
 			if flt(tax.base_tax_amount_after_discount_amount):
 				account_currency = get_account_currency(tax.account_head)
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.customer,
-						"credit": flt(tax.base_tax_amount_after_discount_amount,
+						"credit": flt(base_amount,
 							tax.precision("tax_amount_after_discount_amount")),
-						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
+						"credit_in_account_currency": (flt(base_amount,
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
-							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
+							flt(amount, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)
 				)
@@ -917,6 +920,7 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
@@ -950,15 +954,17 @@ class SalesInvoice(SellingController):
 						income_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
+						amount, base_amount = self.get_amount_and_base_amount(item, self.enable_discount_accounting)
+
 						account_currency = get_account_currency(income_account)
 						gl_entries.append(
 							self.get_gl_dict({
 								"account": income_account,
 								"against": self.customer,
-								"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
-								"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+								"credit": flt(base_amount, item.precision("base_net_amount")),
+								"credit_in_account_currency": (flt(base_amount, item.precision("base_net_amount"))
 									if account_currency==self.company_currency
-									else flt(item.net_amount, item.precision("net_amount"))),
+									else flt(amount, item.precision("net_amount"))),
 								"cost_center": item.cost_center,
 								"project": item.project or self.project
 							}, account_currency, item=item)
@@ -1051,6 +1057,13 @@ class SalesInvoice(SellingController):
 				if orginal_schedule_date == posting_date_of_original_invoice:
 					return True
 		return False
+		
+	@property
+	def enable_discount_accounting(self):
+		if not hasattr(self, "_enable_discount_accounting"):
+			self._enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		return self._enable_discount_accounting
 
 	def set_asset_status(self, asset):
 		if self.is_return:
