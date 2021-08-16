@@ -270,7 +270,7 @@
   },
   {
    "fieldname": "barcode",
-   "fieldtype": "Barcode",
+   "fieldtype": "Barcode", 
    "label": "Barcode",
    "read_only": 1
   },
