@@ -190,8 +190,10 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-
-		item.unit_rate = abs(item.taxable_value / item.qty)
+		if flt(item.qty) != 0.0:
+			item.unit_rate = abs(item.taxable_value / item.qty)
+		else:
+			item.unit_rate = abs(item.taxable_value)
 		item.gross_amount = abs(item.taxable_value)
 		item.taxable_value = abs(item.taxable_value)
 		item.discount_amount = 0
@@ -928,7 +930,7 @@ class GSPConnector():
 
 	def set_einvoice_data(self, res):
 		enc_signed_invoice = res.get('SignedInvoice')
-		dec_signed_invoice = jwt.decode(enc_signed_invoice, verify=False)['data']
+		dec_signed_invoice = jwt.decode(enc_signed_invoice, options={"verify_signature": False})['data']
 
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')
