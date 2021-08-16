@@ -8,11 +8,22 @@ from frappe.utils import cint
 
 from erpnext.e_commerce.product_data_engine.query import ProductQuery
 from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
-from erpnext.setup.doctype.item_group.item_group import get_child_groups
+from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
 
 @frappe.whitelist(allow_guest=True)
 def get_product_filter_data(query_args=None):
-	"""Get filtered products and discount filters."""
+	"""
+		Returns filtered products and discount filters.
+		:param query_args (dict): contains filters to get products list
+
+		Query Args filters:
+		search (str): Search Term.
+		field_filters (dict): Keys include item_group, brand, etc.
+		attribute_filters(dict): Keys include Color, Size, etc.
+		start (int): Offset items by
+		item_group (str): Valid Item Group
+		from_filters (bool): Set as True to jump to page 1
+	"""
 	if isinstance(query_args, str):
 		query_args = json.loads(query_args)
 
@@ -35,7 +46,7 @@ def get_product_filter_data(query_args=None):
 	sub_categories = []
 	if item_group:
 		field_filters['item_group'] = item_group
-		sub_categories = get_child_groups(item_group)
+		sub_categories = get_child_groups_for_website(item_group, immediate=True)
 
 	engine = ProductQuery()
 	try:
@@ -46,7 +57,7 @@ def get_product_filter_data(query_args=None):
 			start=start,
 			item_group=item_group
 		)
-	except Exception as e:
+	except Exception:
 		traceback = frappe.get_traceback()
 		frappe.log_error(traceback, frappe._("Product Engine Error"))
 		return {"exc": "Something went wrong!"}

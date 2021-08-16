@@ -108,16 +108,23 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def delete_child_item_groups_key(self):
 		frappe.cache().hdel("child_item_groups", self.name)
 
-	def validate_item_group_defaults(self):
-		from erpnext.stock.doctype.item.item import validate_item_default_company_links
-		validate_item_default_company_links(self.item_group_defaults)
-
-def get_child_groups(item_group_name):
+def get_child_groups_for_website(item_group_name, immediate=False):
 	"""Returns child item groups *excluding* passed group."""
-	item_group = frappe.get_doc("Item Group", item_group_name)
-	return frappe.db.sql("""select name, route
-		from `tabItem Group` where lft>%(lft)s and rgt<%(rgt)s
-			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt}, as_dict=1)
+	item_group = frappe.get_cached_value("Item Group", item_group_name, ["lft", "rgt"], as_dict=1)
+	filters = {
+		"lft": [">", item_group.lft],
+		"rgt": ["<", item_group.rgt],
+		"show_in_website": 1
+	}
+
+	if immediate:
+		filters["parent_item_group"] = item_group_name
+
+	return frappe.get_all(
+		"Item Group",
+		filters=filters,
+		fields=["name", "route"]
+	)
 
 def get_child_item_groups(item_group_name):
 	item_group = frappe.get_cached_value("Item Group",
