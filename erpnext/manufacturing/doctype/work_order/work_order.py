@@ -208,10 +208,7 @@ class WorkOrder(Document):
 		elif self.docstatus==1:
 			if status != 'Stopped':
 				stock_entries = frappe._dict(frappe.db.sql("""select purpose, sum(fg_completed_qty)
-					from `tabStock Entry` where work_o
-￼
-￼Customize
-rder=%s and docstatus=1
+					from `tabStock Entry` where work_order=%s and docstatus=1
 					group by purpose""", self.name))
 
 				status = "Not Started"
