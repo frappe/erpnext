@@ -51,7 +51,8 @@ class VehicleAllocation(Document):
 			"sr_no": self.sr_no,
 			"code": self.code,
 			"is_additional": self.is_additional,
-			"docstatus": 1
+			"is_cancelled": 0,
+			"docstatus": 1,
 		}
 		if not self.is_new():
 			filters['name'] = ['!=', self.name]

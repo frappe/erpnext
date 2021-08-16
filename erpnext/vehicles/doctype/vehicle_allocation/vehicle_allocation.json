@@ -102,7 +102,6 @@
    "fieldtype": "Int",
    "in_standard_filter": 1,
    "label": "Serial No",
-   "no_copy": 1,
    "reqd": 1
   },
   {
@@ -227,7 +226,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-06-25 15:11:53.715543",
+ "modified": "2021-08-16 14:57:53.388808",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation",
