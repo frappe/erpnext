@@ -127,30 +127,24 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.submit()
 	return sle
 
-def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negative_stock=None, via_landed_cost_voucher=False):
+def repost_future_sle(args=None, doc=None, voucher_type=None, voucher_no=None, allow_negative_stock=None, via_landed_cost_voucher=False):
 	if not args and voucher_type and voucher_no:
-		args = get_args_for_voucher(voucher_type, voucher_no)
+		args = get_items_to_be_repost(voucher_type, voucher_no, doc)
 
-	distinct_item_warehouses = {}
-	for i, d in enumerate(args):
-		distinct_item_warehouses.setdefault((d.item_code, d.warehouse), frappe._dict({
-			"reposting_status": False,
-			"sle": d,
-			"args_idx": i
-		}))
+	distinct_item_warehouses = get_distinct_item_warehouse(args, doc)
 
-	i = 0
+	i = get_current_index(doc) or 0
 	while i < len(args):
 		obj = update_entries_after({
-			"item_code": args[i].item_code,
-			"warehouse": args[i].warehouse,
-			"posting_date": args[i].posting_date,
-			"posting_time": args[i].posting_time,
+			"item_code": args[i].get('item_code'),
+			"warehouse": args[i].get('warehouse'),
+			"posting_date": args[i].get('posting_date'),
+			"posting_time": args[i].get('posting_time'),
 			"creation": args[i].get("creation"),
 			"distinct_item_warehouses": distinct_item_warehouses
 		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
-		distinct_item_warehouses[(args[i].item_code, args[i].warehouse)].reposting_status = True
+		distinct_item_warehouses[(args[i].get('item_code'), args[i].get('warehouse'))].reposting_status = True
 
 		if obj.new_items_found:
 			for item_wh, data in iteritems(distinct_item_warehouses):
@@ -159,17 +153,60 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 					args.append(data.sle)
 				elif data.sle_changed and not data.reposting_status:
 					args[data.args_idx] = data.sle
-				
+
 				data.sle_changed = False
 		i += 1
 
-def get_args_for_voucher(voucher_type, voucher_no):
+		if doc and i % 2 == 0:
+			update_args_in_repost_item_valuation(doc, i, args, distinct_item_warehouses)
+
+	if doc and args:
+		update_args_in_repost_item_valuation(doc, i, args, distinct_item_warehouses)
+
+def update_args_in_repost_item_valuation(doc, index, args, distinct_item_warehouses):
+	frappe.db.set_value(doc.doctype, doc.name, {
+		'items_to_be_repost': json.dumps(args, default=str),
+		'distinct_item_and_warehouse': json.dumps({str(k): v for k,v in distinct_item_warehouses.items()}, default=str),
+		'current_index': index
+	})
+
+	frappe.db.commit()
+
+	frappe.publish_realtime('item_reposting_progress', {
+		'name': doc.name,
+		'items_to_be_repost': json.dumps(args, default=str),
+		'current_index': index
+	})
+
+def get_items_to_be_repost(voucher_type, voucher_no, doc=None):
+	if doc and doc.items_to_be_repost:
+		return json.loads(doc.items_to_be_repost) or []
+
 	return frappe.db.get_all("Stock Ledger Entry",
 		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
 		fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
 		order_by="creation asc",
 		group_by="item_code, warehouse"
 	)
+
+def get_distinct_item_warehouse(args=None, doc=None):
+	distinct_item_warehouses = {}
+	if doc and doc.distinct_item_and_warehouse:
+		distinct_item_warehouses = json.loads(doc.distinct_item_and_warehouse)
+		distinct_item_warehouses = {frappe.safe_eval(k): frappe._dict(v) for k, v in distinct_item_warehouses.items()}
+	else:
+		for i, d in enumerate(args):
+			distinct_item_warehouses.setdefault((d.item_code, d.warehouse), frappe._dict({
+				"reposting_status": False,
+				"sle": d,
+				"args_idx": i
+			}))
+
+	return distinct_item_warehouses
+
+def get_current_index(doc=None):
+	if doc and doc.current_index:
+		return doc.current_index
 
 class update_entries_after(object):
 	"""

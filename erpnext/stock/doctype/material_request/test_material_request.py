@@ -329,6 +329,58 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
 		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
 
+	def test_over_transfer_qty_allowance(self):
+		mr = frappe.new_doc('Material Request')
+		mr.company = "_Test Company"
+		mr.scheduled_date = today()
+		mr.append('items',{
+			"item_code": "_Test FG Item",
+			"item_name": "_Test FG Item",
+			"qty": 10,
+			"schedule_date": today(),
+			"uom": "_Test UOM 1",
+			"warehouse": "_Test Warehouse - _TC"
+		})
+
+		mr.material_request_type = "Material Transfer"
+		mr.insert()
+		mr.submit()
+
+		frappe.db.set_value('Stock Settings', None, 'mr_qty_allowance', 20)
+
+		# map a stock entry
+
+		se_doc = make_stock_entry(mr.name)
+		se_doc.update({
+			"posting_date": today(),
+			"posting_time": "00:00",
+		})
+		se_doc.get("items")[0].update({
+			"qty": 13,
+			"transfer_qty": 12.0,
+			"s_warehouse": "_Test Warehouse - _TC",
+			"t_warehouse": "_Test Warehouse 1 - _TC",
+			"basic_rate": 1.0
+		})
+
+		# make available the qty in _Test Warehouse 1 before transfer
+		sr = frappe.new_doc("Stock Reconciliation")
+		sr.company = "_Test Company"
+		sr.purpose = "Opening Stock"
+		sr.append('items', {
+			"item_code": "_Test FG Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 20,
+			"valuation_rate": 0.01
+		})
+		sr.insert()
+		sr.submit()
+		se = frappe.copy_doc(se_doc)
+		se.insert()
+		self.assertRaises(frappe.ValidationError)
+		se.items[0].qty = 12
+		se.submit()
+
 	def test_completed_qty_for_over_transfer(self):
 		existing_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		existing_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
