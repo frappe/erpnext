@@ -880,7 +880,6 @@ class TestStockEntry(unittest.TestCase):
 			(item, warehouses[0], batches[1], 1,  50),
 			(item, warehouses[0], batches[0], 1, 150),
 		]
-		expected_sv = [100, 25, 50, 250]
 		prs = create_pr_entries_for_batchwise_item_valuation_test(pr_entry_list)
 		sv_list = frappe.db.sql("""
 			SELECT stock_value
@@ -892,6 +891,7 @@ class TestStockEntry(unittest.TestCase):
 			voucher_nos=[pr.name for pr in prs]
 		))
 		sv_list = [i[0] for i in sv_list]
+		expected_sv = [100, 25, 50, 250]
 		abs_sv_diff = [abs(x - y) for x, y in zip(expected_sv, sv_list)]
 
 		# Outgoing Entries for Stock Value Difference check
@@ -901,7 +901,6 @@ class TestStockEntry(unittest.TestCase):
 			(item, warehouses[1], batches[0], 1, 200),
 			(item, warehouses[0], batches[0], 1, 200)
 		]
-		expected_incoming_rates = expected_abs_svd = [50, 100, 25, 150]
 		dns = create_dn_entries_for_batchwise_item_valuation_test(dn_entry_list)
 		svd_list = frappe.db.sql("""
 			SELECT stock_value_difference
@@ -913,6 +912,60 @@ class TestStockEntry(unittest.TestCase):
 			voucher_nos=[dn.name for dn in dns]
 		))
 		svd_list = [i[0] for i in svd_list]
+		expected_incoming_rates = expected_abs_svd = [50, 100, 25, 150]
+		abs_svd_diff = [abs(x + y) for x, y in zip(expected_abs_svd, svd_list)]
+
+		self.assertTrue(sum(abs_sv_diff) == 0, "Incorrect 'Stock Value' values")
+		self.assertTrue(sum(abs_svd_diff) == 0, "Incorrect 'Stock Value Difference' values")
+		for dn, incoming_rate in zip(dns, expected_incoming_rates):
+			self.assertEqual(
+				dn.items[0].incoming_rate, incoming_rate,
+				"Incorrect 'Incoming Rate' values fetched for DN items"
+			)
+
+	def test_batchwise_item_valuation_moving_average(self):
+		item, warehouses, batches = setup_batchwise_item_valuation_test("Moving Average")
+
+		# Incoming Entries for Stock Value check
+		pr_entry_list = [
+			(item, warehouses[0], batches[0], 1, 100),
+			(item, warehouses[0], batches[1], 1,  50),
+			(item, warehouses[0], batches[0], 1, 150),
+			(item, warehouses[0], batches[1], 1, 100),
+		]
+		prs = create_pr_entries_for_batchwise_item_valuation_test(pr_entry_list)
+		sv_list = frappe.db.sql("""
+			SELECT stock_value
+			FROM `tabstock Ledger Entry`
+			WHERE
+				voucher_no IN %(voucher_nos)s
+			ORDER BY posting_time ASC
+		""", dict(
+			voucher_nos=[pr.name for pr in prs]
+		))
+		sv_list = [i[0] for i in sv_list]
+		expected_sv = [100, 50, 250, 150]
+		abs_sv_diff = [abs(x - y) for x, y in zip(expected_sv, sv_list)]
+
+		# Outgoing Entries for Stock Value Difference check
+		dn_entry_list = [
+			(item, warehouses[0], batches[1], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200),
+			(item, warehouses[0], batches[1], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200)
+		]
+		dns = create_dn_entries_for_batchwise_item_valuation_test(dn_entry_list)
+		svd_list = frappe.db.sql("""
+			SELECT stock_value_difference
+			FROM `tabstock Ledger Entry`
+			WHERE
+				voucher_no IN %(voucher_nos)s
+			ORDER BY posting_time ASC
+		""", dict(
+			voucher_nos=[dn.name for dn in dns]
+		))
+		svd_list = [i[0] for i in svd_list]
+		expected_incoming_rates = expected_abs_svd = [75, 125, 75, 125]
 		abs_svd_diff = [abs(x + y) for x, y in zip(expected_abs_svd, svd_list)]
 
 		self.assertTrue(sum(abs_sv_diff) == 0, "Incorrect 'Stock Value' values")
@@ -999,9 +1052,12 @@ def setup_batchwise_item_valuation_test(valuation_method):
 	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-	item = make_item("BWIV - Test Item A", dict(valuation_method=valuation_method, has_batch_no=1))
+	item = make_item(
+		f"BWIV - Test Item {valuation_method}",
+		dict(valuation_method=valuation_method, has_batch_no=1)
+	)
 	warehouses = [create_warehouse(f"BWIV - Test Warehouse {i}") for i in ['J', 'K']]
-	batches = [f"BWIV - Test Batch {i}" for i in ['X', 'Y']]
+	batches = [f"BWIV - Test Batch {i} {valuation_method}" for i in ['X', 'Y']]
 
 	for batch_id in batches:
 		if not frappe.db.exists("Batch", batch_id):
