@@ -19,7 +19,6 @@ context('Organizational Chart', () => {
 			}).then(res => {
 				expect(res.status).eq(200);
 				cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
-
 				cy.get('@input')
 					.clear({ force: true })
 					.type('Test Org Chart{enter}', { force: true })

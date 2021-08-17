@@ -2332,7 +2332,9 @@
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
-   "label": "Disable Rounded Total"
+   "label": "Disable Rounded Total",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "additional_discount_account",
