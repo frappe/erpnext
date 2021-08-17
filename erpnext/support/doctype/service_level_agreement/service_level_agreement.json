@@ -182,12 +182,6 @@
    "label": "Apply SLA for Resolution Time"
   },
   {
-   "fieldname": "pause_sla_on",
-   "fieldtype": "Table",
-   "label": "SLA Paused On",
-   "options": "Pause SLA On Status"
-  },
-  {
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
    "label": "Assignment Condition"
