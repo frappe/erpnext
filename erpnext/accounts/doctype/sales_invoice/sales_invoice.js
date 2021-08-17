@@ -447,7 +447,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		this.frm.refresh_field("outstanding_amount");
 		this.frm.refresh_field("paid_amount");
 		this.frm.refresh_field("base_paid_amount");
-	},
+	}
 
 	currency() {
 		this._super();
