@@ -293,5 +293,10 @@ erpnext.patches.v13_0.update_job_card_details
 erpnext.patches.v13_0.update_level_in_bom #1234sswef
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
-erpnext.patches.v13_0.update_export_type_for_gst
+erpnext.patches.v13_0.update_amt_in_work_order_required_items
+erpnext.patches.v12_0.show_einvoice_irn_cancelled_field
+erpnext.patches.v13_0.delete_orphaned_tables
+erpnext.patches.v13_0.update_export_type_for_gst #2021-08-16
 erpnext.patches.v13_0.update_tds_check_field #3
+erpnext.patches.v13_0.update_recipient_email_digest
+erpnext.patches.v13_0.shopify_deprecation_warning

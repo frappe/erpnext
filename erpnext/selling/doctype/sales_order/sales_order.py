@@ -670,6 +670,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"party_account_currency": "party_account_currency",
 				"payment_terms_template": "payment_terms_template"
 			},
+			"field_no_map": ["payment_terms_template"],
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -692,6 +693,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
+
+	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
 
 	return doclist
 
