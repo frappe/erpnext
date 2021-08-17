@@ -1185,7 +1185,7 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "required_qty", "consumed_qty", "transferred_qty"]
+			fields=["item_code", "source_warehouse", "required_qty", "consumed_qty", "transferred_qty"]
 			)
 
 		work_order_qty = wo.material_transferred_for_manufacturing or wo.qty
@@ -1205,7 +1205,7 @@ class StockEntry(StockController):
 			if qty > 0:
 				self.add_to_stock_entry_detail({
 					item.item_code: {
-						"from_warehouse": wo.wip_warehouse,
+						"from_warehouse": wo.wip_warehouse or item.source_warehouse,
 						"to_warehouse": "",
 						"qty": qty,
 						"item_name": item.item_name,
