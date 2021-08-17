@@ -735,7 +735,7 @@ class TestWorkOrder(unittest.TestCase):
 
 		# Testing stock entry values
 		items = se.get("items")
-		self.assertEqual(len(items), 4, "There should be 3 items including process loss.")
+		self.assertEqual(len(items), 3, "There should be 3 items including process loss.")
 
 		source_item, fg_item, pl_item = items
 
@@ -746,7 +746,7 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(fg_item.qty, actual_fg_qty)
 
 		# Testing Work Order values
-		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), actual_fg_qty)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), qty)
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
