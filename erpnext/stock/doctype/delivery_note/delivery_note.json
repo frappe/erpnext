@@ -34,6 +34,8 @@
   "customer_gstin",
   "place_of_supply1",
   "shipping_address",
+  "dispatch_address_name",
+  "dispatch_address",
   "contact_person",
   "contact_display",
   "contact_mobile",
@@ -1420,13 +1422,28 @@
   {
    "fieldname": "section_break_140",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "dispatch_address_name",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Name",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "dispatch_address_name",
+   "fieldname": "dispatch_address",
+   "fieldtype": "Small Text",
+   "label": "Dispatch Address",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-11 19:27:30.901112",
+ "modified": "2021-07-08 21:37:20.802652",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
