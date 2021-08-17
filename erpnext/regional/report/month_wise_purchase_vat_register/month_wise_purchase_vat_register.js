@@ -11,5 +11,12 @@ frappe.query_reports["Month wise Purchase VAT Register"] = {
 			default: "",
 			reqd: 0
 		},
+		{
+		fieldname: "company",
+		label: __("Company"),
+		fieldtype: "Link",
+		options:"Company",
+		reqd: 0
+		},
 	]
 };

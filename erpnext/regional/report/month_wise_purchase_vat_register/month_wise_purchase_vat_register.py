@@ -101,8 +101,9 @@ def get_condition(filters):
 	conditions=" "
 	if filters.get("year"):
 		conditions += " AND year(si.posting_date)='%s'" % filters.get('year')
+	if filters.get("company"):
+		conditions += " AND si.company='%s'" % filters.get('company')
 	return conditions
-
 
 def get_data(filters):
 	conditions = get_condition(filters)
@@ -111,15 +112,27 @@ def get_data(filters):
     monthname(posting_date) as month,
 	year(posting_date) as year,
     count(si.name) as no_of_invoices,
-    (sum(total) + (select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date)  group by month(xsi.posting_date) desc, year(xsi.posting_date)
-        )) as total,
+    (ifnull((select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+	and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+	), 0) + ifnull((select sum(total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+	and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
+	), 0) + ifnull( (select xsi.total from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)),0)
+	+ifnull((select sum(pii.amount) from `tabPurchase Invoice` as pd 
+	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
+	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
+	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)),0)) as total,
+
     (select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date)  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
         )
         as exempted_purchase,
-    sum(total) as taxable_purchase,
-	sum(total)*13/100 as local_tax,
+    (select sum(total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
+        ) as taxable_purchase,
+	((select sum(total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+        ) *13/100 )as local_tax,
     case 
 		when si.currency != "NPR" then sum(si.total)
 	end as taxcable_import,
@@ -129,12 +142,12 @@ def get_data(filters):
 	(select sum(pii.amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
-	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)) as capital_purchase,
+	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date))as capital_purchase,
 
 	(select sum(pii.amount)*13/100 from `tabPurchase Invoice Item` as pii  
 	inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 	where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
-	 and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date) ) as capital_tax
+	 and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)) as capital_tax
 	from
 	`tabPurchase Invoice` as si
 	where si.docstatus=1 {conditions}
