@@ -57,26 +57,12 @@ class PatientEncounter(Document):
 		for treatment_plan in treatment_plans:
 			self.fill_treatment_plan(treatment_plan)
 
-	def fill_treatment_plan(self, plan=None):
-		plan_items = frappe.db.sql("""
-		SELECT
-			*
-		FROM
-			`tabTreatment Plan Template Item`
-		WHERE
-			parent=%s
-		""", plan, as_dict=1)
+	def fill_treatment_plan(self, plan):
+		plan_items = frappe.get_list('Treatment Plan Template Item', filters={'parent': plan}, fields='*')
 		for plan_item in plan_items:
 			self.fill_treatment_plan_item(plan_item)
 
-		drugs = frappe.db.sql("""
-			SELECT
-				*
-			FROM
-				`tabDrug Prescription`
-			WHERE
-				parent=%s
-			""", plan, as_dict=1)
+		drugs = frappe.get_list('Drug Prescription', filters={'parent': plan}, fields='*')
 		for drug in drugs:
 			self.fill_treatment_plan_drug(drug)
 
@@ -92,7 +78,7 @@ class PatientEncounter(Document):
 		self.append('drug_prescription', doc)
 		self.save()
 
-	def fill_treatment_plan_item(self, plan_item=None):
+	def fill_treatment_plan_item(self, plan_item):
 		if plan_item['type'] == 'Clinical Procedure Template':
 			doc = frappe.new_doc('Procedure Prescription')
 			doc.procedure = plan_item['template']
