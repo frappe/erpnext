@@ -183,6 +183,7 @@
   },
   {
    "label": "Pause SLA On",
+   "fieldname": "pause_sla_on",
    "options": "Pause SLA On Status"
   },
   {
