@@ -176,16 +176,16 @@ class Asset(AccountsController):
 
 		for d in self.get('finance_books'):
 			self.validate_asset_finance_books(d)
-			
+
 			start = self.clear_depreciation_schedule()
 
 			# value_after_depreciation - current Asset value
 			if d.value_after_depreciation:
 				value_after_depreciation = (flt(d.value_after_depreciation) -
-					flt(self.opening_accumulated_depreciation)) 
+					flt(self.opening_accumulated_depreciation))
 			else:
 				value_after_depreciation = (flt(self.gross_purchase_amount) -
-					flt(self.opening_accumulated_depreciation)) 
+					flt(self.opening_accumulated_depreciation))
 
 			d.value_after_depreciation = value_after_depreciation
 
@@ -321,10 +321,10 @@ class Asset(AccountsController):
 	def get_from_date(self, finance_book):
 		if not self.get('schedules'):
 			return self.available_for_use_date
-		
+
 		if len(self.finance_books) == 1:
 			return self.schedules[-1].schedule_date
-		
+
 		from_date = ""
 		for schedule in self.get('schedules'):
 			if schedule.finance_book == finance_book:
