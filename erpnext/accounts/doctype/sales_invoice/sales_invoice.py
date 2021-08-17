@@ -478,6 +478,9 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) != 1:
 			return
 
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
+
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
@@ -491,9 +494,6 @@ class SalesInvoice(SellingController):
 
 		if not self.get('payments') and not for_validate:
 			update_multi_mode_option(self, pos)
-
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
 			if not for_validate:
