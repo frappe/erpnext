@@ -2264,14 +2264,50 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+	coupon_code_name() {
+		var me = this;
+		var coupon = this.coupon_code_name
+		console.log(me.frm.doc.coupon_code_name);
+		frappe.db.get_value('Coupon Code', { 'coupon_code' : me.frm.doc.coupon_code_name}, 'coupon_code' , (r) => {
+			if(r){
+				me.frm.set_value('coupon_code', r.coupon_code);
+			}
+		});
+
+		// res => {
+		// 	var coupon_list = res[0];
+		// 	console.log(coupon_list);
+
+		// 	code = coupon_list.forEach( c => {
+		// 		if(c.coupon_code == me.frm.doc.coupon_code_name){
+		// 			return code;
+		// 		}
+		// 	})
+		// 	// if (!coupon_list){ 
+		// 		// 	frappe.throw(_("Please enter a valid coupon code"));
+		// 		// }
+		// 	me.frm.set_value( 'coupon_code', code);
+		// };
+
+
+	}
+
 	coupon_code() {
 		var me = this;
-		frappe.run_serially([
-			() => this.frm.doc.ignore_pricing_rule=1,
-			() => me.ignore_pricing_rule(),
-			() => this.frm.doc.ignore_pricing_rule=0,
-			() => me.apply_pricing_rule()
-		]);
+		if(this.frm.doc.coupon_code){
+			frappe.run_serially([
+				() => this.frm.doc.ignore_pricing_rule=1,
+				() => me.ignore_pricing_rule(),
+				() => this.frm.doc.ignore_pricing_rule=0,
+				() => me.apply_pricing_rule()
+			]);
+		}
+		else{
+			frappe.run_serially([
+				() => this.frm.doc.ignore_pricing_rule=1,
+				() => me.ignore_pricing_rule()
+			]);
+		}
 	}
 };
 

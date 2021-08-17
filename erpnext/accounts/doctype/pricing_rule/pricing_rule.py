@@ -198,12 +198,19 @@ def apply_pricing_rule(args, doc=None):
 	set_serial_nos_based_on_fifo = frappe.db.get_single_value("Stock Settings",
 		"automatically_set_serial_nos_based_on_fifo")
 
+	item_code_list = tuple(item.get('item_code') for item in item_list)
+	query_items = frappe.get_all('Item', fields=['item_code','has_serial_no'], filters=[['item_code','in',item_code_list]],as_list=1)
+	serial_no_list = dict()
+	for i_c,val in query_items:
+		serial_no_list.setdefault(i_c,val) 
+	
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
 		data = get_pricing_rule_for_item(args_copy, item.get('price_list_rate'), doc=doc)
 		out.append(data)
-		if not item.get("serial_no") and set_serial_nos_based_on_fifo and not args.get('is_return'):
+		
+		if serial_no_list.get(item.get('item_code')) and not item.get("serial_no") and set_serial_nos_based_on_fifo and not args.get('is_return'):
 			out[0].update(get_serial_no_for_item(args_copy))
 
 	return out
