@@ -2331,7 +2331,9 @@
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
-   "label": "Disable Rounded Total"
+   "label": "Disable Rounded Total",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "additional_discount_account",
@@ -2375,7 +2377,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-06 23:02:20.445127",
+ "modified": "2021-08-07 23:02:20.445127",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

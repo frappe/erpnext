@@ -2110,7 +2110,7 @@ class TestSalesInvoice(unittest.TestCase):
 		discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		si = create_sales_invoice(discount_account=discount_account, discount_percentage=10, rate=90)
-		
+
 		expected_gle = [
 			["Debtors - _TC", 90.0, 0.0, nowdate()],
 			["Discount Account - _TC", 10.0, 0.0, nowdate()],
@@ -2126,7 +2126,7 @@ class TestSalesInvoice(unittest.TestCase):
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
-		
+
 		si = create_sales_invoice(parent_cost_center='Main - _TC', do_not_save=1)
 		si.apply_discount_on = "Grand Total"
 		si.additional_discount_account = additional_discount_account
