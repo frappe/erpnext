@@ -447,6 +447,15 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		this.frm.refresh_field("outstanding_amount");
 		this.frm.refresh_field("paid_amount");
 		this.frm.refresh_field("base_paid_amount");
+	},
+
+	currency() {
+		this._super();
+		$.each(cur_frm.doc.timesheets, function(i, d) {
+			let row = frappe.get_doc(d.doctype, d.name)
+			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
+		});
+		calculate_total_billing_amount(cur_frm)
 	}
 };
 
@@ -846,7 +855,8 @@ frappe.ui.form.on('Sales Invoice', {
 			'time_sheet': row.parent,
 			'billing_hours': row.billing_hours,
 			'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
-			'timesheet_detail': row.name
+			'timesheet_detail': row.name,
+			'project_name': row.project_name
 		});
 		frm.refresh_field('timesheets');
 		calculate_total_billing_amount(frm);
@@ -965,41 +975,32 @@ frappe.ui.form.on('Sales Invoice', {
 	}
 })
 
-frappe.ui.form.on('Sales Invoice Timesheet', {
-	time_sheet: function(frm, cdt, cdn){
-		var d = locals[cdt][cdn];
-		if(d.time_sheet) {
-			frappe.call({
-				method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
-				args: {
-					'name': d.time_sheet,
-					'project': frm.doc.project || null
-				},
-				callback: function(r, rt) {
-					if(r.message){
-						let data = r.message;
-						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
-						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
-						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
-						calculate_total_billing_amount(frm)
-					}
-				}
-			})
-		}
-	}
-})
-
 var calculate_total_billing_amount =  function(frm) {
 	var doc = frm.doc;
 
 	doc.total_billing_amount = 0.0
-	if(doc.timesheets) {
+	if (doc.timesheets) {
 		$.each(doc.timesheets, function(index, data){
-			doc.total_billing_amount += data.billing_amount
+			doc.total_billing_amount += flt(data.billing_amount)
 		})
 	}
 
 	refresh_field('total_billing_amount')
+}
+
+var set_timesheet_detail_rate = function(cdt, cdn, currency, timelog) {
+	frappe.call({
+		method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_detail_rate",
+		args: {
+			timelog: timelog,
+			currency: currency
+		},
+		callback: function(r) {
+			if (!r.exc && r.message) {
+				frappe.model.set_value(cdt, cdn, 'billing_amount', r.message);
+			}
+		}
+	});
 }
 
 var select_loyalty_program = function(frm, loyalty_programs) {

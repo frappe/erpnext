@@ -275,7 +275,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		// Do not update if inter company reference is there as the details will already be updated
 		if(this.frm.updating_party_details || this.frm.doc.inter_company_invoice_reference)
 			return;
-		
+
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,

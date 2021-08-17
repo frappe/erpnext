@@ -13,6 +13,7 @@ from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_dat
 from datetime import datetime
 from frappe.utils.safe_exec import get_safe_globals
 from erpnext.support.doctype.issue.issue import get_holidays
+from frappe.utils.safe_exec import get_safe_globals
 
 class ServiceLevelAgreement(Document):
 	def validate(self):
@@ -215,15 +216,15 @@ def check_agreement_status():
 		if doc.end_date and getdate(doc.end_date) < getdate(frappe.utils.getdate()):
 			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "enabled", 0)
 
-
 def get_active_service_level_agreement_for(doc):
-	if doc.get('doctype') == "Issue" and not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 		return
 
 	filters = [
 		["Service Level Agreement", "document_type", "=", doc.get('doctype')],
 		["Service Level Agreement", "enabled", "=", 1]
 	]
+
 	if doc.get('priority'):
 		filters.append(["Service Level Priority", "priority", "=", doc.get('priority')])
 
