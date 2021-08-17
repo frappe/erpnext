@@ -220,7 +220,7 @@ def get_active_service_level_agreement_for(doc):
 		return
 
 	filters = [
-		["Service Level Agreement", "document_type", "=", doctype],
+		["Service Level Agreement", "document_type", "=", doc.get('doctype')],
 		["Service Level Agreement", "enabled", "=", 1]
 	]
 

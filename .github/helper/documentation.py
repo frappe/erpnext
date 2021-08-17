@@ -32,9 +32,9 @@ if __name__ == "__main__":
 
 	if response.ok:
 		payload = response.json()
-		title = payload.get("title", "").lower().strip()
-		head_sha = payload.get("head", {}).get("sha")
-		body = payload.get("body", "").lower()
+		title = (payload.get("title") or "").lower().strip()
+		head_sha = (payload.get("head") or {}).get("sha")
+		body = (payload.get("body") or "").lower()
 
 		if (title.startswith("feat")
 			and head_sha
