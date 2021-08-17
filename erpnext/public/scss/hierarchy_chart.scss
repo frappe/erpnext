@@ -206,10 +206,12 @@
 	margin: 0px 0px 16px 0px;
 }
 
-.level {
-	margin-right: 8px;
-	align-items: flex-start;
-	flex-direction: column;
+.hierarchy, .hierarchy-mobile {
+	.level {
+		margin-right: 8px;
+		align-items: flex-start;
+		flex-direction: column;
+	}
 }
 
 #arrows {
