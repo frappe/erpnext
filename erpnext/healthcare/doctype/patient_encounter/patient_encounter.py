@@ -40,6 +40,7 @@ class PatientEncounter(Document):
 		patient = frappe.get_doc('Patient', encounter['patient'])
 
 		filters = {}
+
 		age = patient.age
 		if age:
 			filters['patient_age_from'] = ['>=', age.years]

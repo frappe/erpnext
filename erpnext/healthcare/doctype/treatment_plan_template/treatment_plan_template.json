@@ -78,7 +78,8 @@
   {
    "fieldname": "patient_age_from",
    "fieldtype": "Int",
-   "label": "Patient Age From"
+   "label": "Patient Age From",
+   "non_negative": 1
   },
   {
    "fieldname": "column_break_12",
@@ -87,7 +88,8 @@
   {
    "fieldname": "patient_age_to",
    "fieldtype": "Int",
-   "label": "Patient Age To"
+   "label": "Patient Age To",
+   "non_negative": 1
   },
   {
    "fieldname": "gender",
@@ -137,7 +139,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-28 07:53:59.361435",
+ "modified": "2021-08-17 11:20:45.347027",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Treatment Plan Template",
