@@ -114,14 +114,42 @@ def get_period(posting_date, filters):
 
 
 def get_periodic_data(entry, filters):
+	"""Structured as:
+		Item 1
+			- Balance (updated and carried forward):
+					- Warehouse A : bal_qty/value
+					- Warehouse B : bal_qty/value
+			- Jun 2021 (sum of warehouse quantities used in report)
+					- Warehouse A : bal_qty/value
+					- Warehouse B : bal_qty/value
+			- Jul 2021 (sum of warehouse quantities used in report)
+					- Warehouse A : bal_qty/value
+					- Warehouse B : bal_qty/value
+		Item 2
+			- Balance (updated and carried forward):
+					- Warehouse A : bal_qty/value
+					- Warehouse B : bal_qty/value
+			- Jun 2021 (sum of warehouse quantities used in report)
+					- Warehouse A : bal_qty/value
+					- Warehouse B : bal_qty/value
+			- Jul 2021 (sum of warehouse quantities used in report)
+					- Warehouse A : bal_qty/value
+					- Warehouse B : bal_qty/value
+	"""
 	periodic_data = {}
 	for d in entry:
 		period = get_period(d.posting_date, filters)
 		bal_qty = 0
 
+		# if period against item does not exist yet, instantiate it
+		# insert existing balance dict against period, and add/subtract to it
+		if periodic_data.get(d.item_code) and not periodic_data.get(d.item_code).get(period):
+			previous_balance = periodic_data[d.item_code]['balance'].copy()
+			periodic_data[d.item_code][period] = previous_balance
+
 		if d.voucher_type == "Stock Reconciliation":
-			if periodic_data.get(d.item_code):
-				bal_qty = periodic_data[d.item_code]["balance"]
+			if periodic_data.get(d.item_code) and periodic_data.get(d.item_code).get('balance').get(d.warehouse):
+				bal_qty = periodic_data[d.item_code]['balance'][d.warehouse]
 
 			qty_diff = d.qty_after_transaction - bal_qty
 		else:
@@ -132,12 +160,12 @@ def get_periodic_data(entry, filters):
 		else:
 			value = d.stock_value_difference
 
-		periodic_data.setdefault(d.item_code, {}).setdefault(period, 0.0)
-		periodic_data.setdefault(d.item_code, {}).setdefault("balance", 0.0)
+		# period-warehouse wise balance
+		periodic_data.setdefault(d.item_code, {}).setdefault('balance', {}).setdefault(d.warehouse, 0.0)
+		periodic_data.setdefault(d.item_code, {}).setdefault(period, {}).setdefault(d.warehouse, 0.0)
 
-		periodic_data[d.item_code]["balance"] += value
-		periodic_data[d.item_code][period] = periodic_data[d.item_code]["balance"]
-
+		periodic_data[d.item_code]['balance'][d.warehouse] += value
+		periodic_data[d.item_code][period][d.warehouse] = periodic_data[d.item_code]['balance'][d.warehouse]
 
 	return periodic_data
 
@@ -160,7 +188,8 @@ def get_data(filters):
 		total = 0
 		for dummy, end_date in ranges:
 			period = get_period(end_date, filters)
-			amount = flt(periodic_data.get(item_data.name, {}).get(period))
+			period_data = periodic_data.get(item_data.name, {}).get(period)
+			amount = sum(period_data.values()) if period_data else 0
 			row[scrub(period)] = amount
 			total += amount
 		row["total"] = total
