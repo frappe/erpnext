@@ -11,7 +11,7 @@ import datetime
 class SocialMediaPost(Document):
 	def validate(self):
 		if (not self.twitter and not self.linkedin):
-			frappe.throw(_("Select atleast one Social Media from Share on."))
+			frappe.throw(_("Select atleast one Social Media Platform to Share on."))
 
 		if self.scheduled_time:
 			current_time = frappe.utils.now_datetime()
@@ -19,8 +19,8 @@ class SocialMediaPost(Document):
 			if scheduled_time < current_time:
 				frappe.throw(_("Scheduled Time must be a future time."))
 
-		if self.text and len(self.text)>280:
-			frappe.throw(_("Tweet length Must be less than 280."))
+		if self.text and len(self.text) > 280:
+			frappe.throw(_("Tweet length must be less than 280."))
 
 	def submit(self):
 		if self.scheduled_time:
@@ -40,7 +40,7 @@ class SocialMediaPost(Document):
 			linkedin = frappe.get_doc("LinkedIn Settings")
 			linkedin.delete_post(self.linkedin_post_id)
 		
-		frappe.db.set_value('Social Media Post', self.name, 'post_status', 'Deleted')
+		self.db_set('post_status', 'Deleted')
 
 	@frappe.whitelist()
 	def get_post(self):
@@ -70,7 +70,7 @@ class SocialMediaPost(Document):
 		except:
 			self.db_set("post_status", "Error")
 			title = _("Error while POSTING {0}").format(self.name)
-			frappe.log_error(message=frappe.get_traceback() , title=title)
+			frappe.log_error(message=frappe.get_traceback(), title=title)
 
 def process_scheduled_social_media_posts():
 	posts = frappe.get_list("Social Media Post", filters={"post_status": "Scheduled", "docstatus":1}, fields= ["name", "scheduled_time"])

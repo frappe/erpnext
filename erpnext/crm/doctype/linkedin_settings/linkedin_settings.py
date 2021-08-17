@@ -192,10 +192,10 @@ class LinkedInSettings(Document):
 		if response.status_code == 401:
 			self.db_set("session_status", "Expired")
 			frappe.db.commit()
-			frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
+			frappe.throw(content["message"], title=_("LinkedIn Error - Unauthorized"))
 		elif response.status_code == 403:
-			frappe.msgprint(_("You Didn't have permission to access this API"))
-			frappe.throw(content["message"], title="LinkedIn Error - Access Denied")
+			frappe.msgprint(_("You didn't have permission to access this API"))
+			frappe.throw(content["message"], title=_("LinkedIn Error - Access Denied"))
 		else:
 			frappe.throw(response.reason, title=response.status_code)
 

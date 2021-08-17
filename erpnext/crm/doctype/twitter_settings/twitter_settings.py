@@ -110,7 +110,7 @@ class TwitterSettings(Document):
 		if e.response.status_code == 401:
 			self.db_set("session_status", "Expired")
 			frappe.db.commit()
-		frappe.throw(content["message"],title="Twitter Error {0} : {1}".format(e.response.status_code, e.response.reason))
+		frappe.throw(content["message"],title=_("Twitter Error {0} : {1}").format(e.response.status_code, e.response.reason))
 
 
 @frappe.whitelist(allow_guest=True)

@@ -3,7 +3,7 @@
 frappe.ui.form.on('Social Media Post', {
 	validate: function(frm) {
 		if (frm.doc.twitter === 0 && frm.doc.linkedin === 0) {
-			frappe.throw(__("Select atleast one Social Media from Share on."));
+			frappe.throw(__("Select atleast one Social Media Platform to Share on."));
 		}
 		if (frm.doc.scheduled_time) {
 			let scheduled_time = new Date(frm.doc.scheduled_time);
