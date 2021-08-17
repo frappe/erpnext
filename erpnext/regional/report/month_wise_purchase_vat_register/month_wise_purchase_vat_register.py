@@ -134,9 +134,9 @@ def get_data(filters):
         and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
         ) *13/100 )as local_tax,
    (select xsi.total from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
-	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date) as taxcable_import,
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)) as taxcable_import,
 	(select xsi.total from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
-	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date) as import_tax,
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date) )as import_tax,
 	(select sum(pii.amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
