@@ -503,6 +503,10 @@ def make_sales_invoice(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
+	if automatically_fetch_payment_terms:
+		doc.set_payment_schedule()
+
 	return doc
 
 @frappe.whitelist()

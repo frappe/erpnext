@@ -484,6 +484,9 @@ class TestPurchaseOrder(unittest.TestCase):
 
 
 	def test_make_purchase_invoice_with_terms(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
+		
+		automatically_fetch_payment_terms()
 		po = create_purchase_order(do_not_save=True)
 
 		self.assertRaises(frappe.ValidationError, make_pi_from_po, po.name)
@@ -509,6 +512,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(getdate(pi.payment_schedule[0].due_date), getdate(po.transaction_date))
 		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
 		self.assertEqual(getdate(pi.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30))
+		automatically_fetch_payment_terms(enable=0)
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
@@ -632,14 +636,18 @@ class TestPurchaseOrder(unittest.TestCase):
 			else:
 				raise Exception
 
-	def test_terms_does_not_copy(self):
-		po = create_purchase_order()
+	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
+		po = create_purchase_order(do_not_save=1)
+		po.payment_terms_template = '_Test Payment Term Template'
+		po.save()
+		po.submit()
 
-		self.assertTrue(po.get('payment_schedule'))
-
+		frappe.db.set_value('Company', '_Test Company', 'payment_terms', '_Test Payment Term Template 1')
 		pi = make_pi_from_po(po.name)
+		pi.save()
 
-		self.assertFalse(pi.get('payment_schedule'))
+		self.assertEqual(pi.get('payment_terms_template'), '_Test Payment Term Template 1')
+		frappe.db.set_value('Company', '_Test Company', 'payment_terms', '')
 
 	def test_terms_copied(self):
 		po = create_purchase_order(do_not_save=1)
@@ -968,8 +976,27 @@ class TestPurchaseOrder(unittest.TestCase):
 		# To test if the PO does NOT have a Blanket Order
 		self.assertEqual(po_doc.items[0].blanket_order, None)
 
+	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
 
+		automatically_fetch_payment_terms()
 
+		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		create_payment_terms_template()
+		po.payment_terms_template = 'Test Receivable Template'
+		po.submit()
+
+		pi = make_purchase_invoice(qty=10, rate=100, do_not_save=1)
+		pi.items[0].purchase_order = po.name
+		pi.items[0].po_detail = po.items[0].name
+		pi.insert()
+
+		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
+		compare_payment_schedules(self, po, pi)
+
+		automatically_fetch_payment_terms(enable=0)
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)

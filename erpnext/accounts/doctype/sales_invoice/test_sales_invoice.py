@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unli
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
@@ -2101,6 +2102,78 @@ class TestSalesInvoice(unittest.TestCase):
 		sales_invoice.save()
 		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
 
+	def test_sales_invoice_with_discount_accounting_enabled(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+
+		enable_discount_accounting()
+
+		discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		si = create_sales_invoice(discount_account=discount_account, discount_percentage=10, rate=90)
+		
+		expected_gle = [
+			["Debtors - _TC", 90.0, 0.0, nowdate()],
+			["Discount Account - _TC", 10.0, 0.0, nowdate()],
+			["Sales - _TC", 0.0, 100.0, nowdate()]
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+		enable_discount_accounting(enable=0)
+
+	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+
+		enable_discount_accounting()
+		additional_discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		
+		si = create_sales_invoice(parent_cost_center='Main - _TC', do_not_save=1)
+		si.apply_discount_on = "Grand Total"
+		si.additional_discount_account = additional_discount_account
+		si.additional_discount_percentage = 20
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "Main - _TC",
+			"description": "Test",
+			"rate": 10
+		})
+		si.submit()
+
+		expected_gle = [
+			["_Test Account VAT - _TC", 0.0, 10.0, nowdate()],
+			["Debtors - _TC", 88, 0.0, nowdate()],
+			["Discount Account - _TC", 22.0, 0.0, nowdate()],
+			["Sales - _TC", 0.0, 100.0, nowdate()]
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+		enable_discount_accounting(enable=0)
+
+	def test_asset_depreciation_on_sale(self):
+		"""
+			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on Sept 30.
+		"""
+
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
+		post_depreciation_entries(getdate("2021-09-30"))
+
+		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-09-30"))
+		asset.load_from_db()
+
+		expected_values = [
+			["2020-06-30", 1311.48, 1311.48],
+			["2021-06-30", 20000.0, 21311.48],
+			["2021-09-30", 3966.76, 25278.24]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+			self.assertTrue(schedule.journal_entry)
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
@@ -2293,6 +2366,7 @@ def create_sales_invoice(**args):
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
 	si.naming_series = args.naming_series or "T-SINV-"
+	si.cost_center = args.parent_cost_center
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -2304,8 +2378,11 @@ def create_sales_invoice(**args):
 		"uom": args.uom or "Nos",
 		"stock_uom": args.uom or "Nos",
 		"rate": args.rate if args.get("rate") is not None else 100,
+		"price_list_rate": args.price_list_rate if args.get("price_list_rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"discount_account": args.discount_account or None,
+		"discount_amount": args.discount_amount or 0,
 		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
