@@ -717,9 +717,8 @@ def get_bom_item_rate(args, bom_doc):
 			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
-		out = frappe._dict()
-		get_price_list_rate(bom_args, item_doc, out)
-		rate = out.price_list_rate
+		price_list_data = get_price_list_rate(bom_args, item_doc)
+		rate = price_list_data.price_list_rate
 
 	return rate
 
@@ -774,7 +773,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				bom_item.rate,
-				bom_item.amount,
+				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
