@@ -447,9 +447,10 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Purchase Invoice Advance
-
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
+
+		target.set_payment_schedule()
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
@@ -470,6 +471,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				"party_account_currency": "party_account_currency",
 				"supplier_warehouse":"supplier_warehouse"
 			},
+			"field_no_map" : ["payment_terms_template"],
 			"validation": {
 				"docstatus": ["=", 1],
 			}
@@ -488,12 +490,6 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"add_if_empty": True
 		},
 	}
-
-	if frappe.get_single("Accounts Settings").automatically_fetch_payment_terms == 1:
-		fields["Payment Schedule"] = {
-			"doctype": "Payment Schedule",
-			"add_if_empty": True
-		}
 
 	doc = get_mapped_doc("Purchase Order", source_name,	fields,
 		target_doc, postprocess, ignore_permissions=ignore_permissions)

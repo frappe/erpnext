@@ -47,7 +47,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
 			this.frm.doc.is_return) {
-			this.update_paid_amount_for_return();
+			if (this.frm.doc.doctype == "Sales Invoice") {
+				this.set_total_amount_to_default_mop();
+			}
+			this.calculate_paid_amount();
 		}
 
 		// Sales person's commission
@@ -67,8 +70,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_discount_amount: function() {
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount")) {
-			this.calculate_item_values();
-			this.calculate_net_total();
 			this.set_discount_amount();
 			this.apply_discount_amount();
 		}
@@ -732,7 +733,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 	},
 
-	update_paid_amount_for_return: function() {
+	set_total_amount_to_default_mop: function() {
 		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 
 		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
@@ -745,17 +746,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				precision("base_grand_total")
 			);
 		}
-
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
-			} else {
-				pay.amount = 0.0
 			}
 		});
 		this.frm.refresh_fields();
-
-		this.calculate_paid_amount();
 	},
 
 	set_default_payment: function(total_amount_to_pay, update_paid_amount) {
