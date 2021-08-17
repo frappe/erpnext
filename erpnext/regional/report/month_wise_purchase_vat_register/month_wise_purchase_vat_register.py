@@ -112,40 +112,108 @@ def get_data(filters):
     monthname(posting_date) as month,
 	year(posting_date) as year,
     count(si.name) as no_of_invoices,
+	case  when si.currency = "NPR" then
     (ifnull((select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-	and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+	and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
 	), 0) + ifnull((select sum(total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-	and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
-	), 0) + ifnull( (select xsi.total from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
-	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)),0)
+	and xsi.total_taxes_and_charges != 0 and xsi.docstatus=1 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
+	), 0) + ifnull( (select sum(xsi.total) from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)),0)
 	+ifnull((select sum(pii.amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
+	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) and pd.docstatus=1
+	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)),0)) 
+	
+	when si.currency != "NPR" then
+    (ifnull((select sum(base_grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+	and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
+	), 0) + ifnull((select sum(base_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+	and xsi.base_total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and xsi.docstatus=1 and si.company=xsi.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
+	), 0) + ifnull( (select sum(xsi.total) from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)),0)
+	+ifnull((select sum(pii.base_amount) from `tabPurchase Invoice` as pd 
+	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
-	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)),0)) as total,
+	and pii.is_fixed_asset=1 and si.company=pd.company and pd.docstatus=1 group by month(pd.posting_date) desc, year(pd.posting_date)),0)) 
+	end as total,
 
-    (select sum(grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+	case  when si.currency = "NPR" then
+    (select sum(xsi.grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
         )
-        as exempted_purchase,
-    (select sum(total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-        and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company group by month(xsi.posting_date) desc, year(xsi.posting_date)
-        ) as taxable_purchase,
-	((select sum(total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-        and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  group by month(xsi.posting_date) desc, year(xsi.posting_date)
-        ) *13/100 )as local_tax,
-   (select xsi.total from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
-	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)) as taxcable_import,
-	(select xsi.total from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
-	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date) )*13/100 as import_tax,
+	
+	when si.currency != "NPR" then
+	(select sum(xsi.base_grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.base_total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1  group by month(xsi.posting_date) desc, year(xsi.posting_date))
+	End as exempted_purchase,
+
+	case  when si.currency != "NPR" then
+    (select sum(xsi.base_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.base_total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)) 
+	
+
+	when si.currency = "NPR" then
+	(select sum(xsi.total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)) 
+	End as taxable_purchase,
+
+	case  when si.currency = "NPR" then
+	(select sum(xsi.total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1  group by month(xsi.posting_date) desc, year(xsi.posting_date)
+        ) *13/100 
+	
+
+	 when si.currency != "NPR" then
+	((select sum(xsi.base_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+        and xsi.base_total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
+        ) *13/100 )
+	End as local_tax,
+
+	case  when si.currency = "NPR" then
+   	(select sum(xsi.total) from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)) 
+	
+
+	 when si.currency != "NPR" then
+	(select sum(xsi.base_total) from`tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)) 
+	End as taxcable_import,
+
+	case  when si.currency = "NPR" then
+	(select sum(xsi.total) from `tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date) )*13/100 
+	
+
+	when si.currency != "NPR" then
+	(select sum(xsi.base_total) from `tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+	and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date) )*13/100 
+	End as import_tax,
+
+	case  when si.currency != "NPR" then
+	(select sum(pii.base_amount) from `tabPurchase Invoice` as pd 
+	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
+	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
+	and pii.is_fixed_asset=1 and pd.docstatus=1 group by month(pd.posting_date) desc, year(pd.posting_date))
+
+	when si.currency = "NPR" then
 	(select sum(pii.amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
-	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date))as capital_purchase,
+	and pii.is_fixed_asset=1 and pd.docstatus=1  group by month(pd.posting_date) desc, year(pd.posting_date))
+	End as capital_purchase,
 
+	case  when si.currency = "NPR" then
 	(select sum(pii.amount)*13/100 from `tabPurchase Invoice Item` as pii  
 	inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 	where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
-	 and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)) as capital_tax
+	 and pii.is_fixed_asset=1 and pd.docstatus=1 group by month(pd.posting_date) desc, year(pd.posting_date)) 
+
+	when si.currency != "NPR" then
+	(select sum(pii.base_amount)*13/100 from `tabPurchase Invoice Item` as pii  
+	inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
+	where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
+	 and pii.is_fixed_asset=1 and pd.docstatus=1 group by month(pd.posting_date) desc, year(pd.posting_date)) 
+	 End as capital_tax
 	from
 	`tabPurchase Invoice` as si
 	where si.docstatus=1 {conditions}
