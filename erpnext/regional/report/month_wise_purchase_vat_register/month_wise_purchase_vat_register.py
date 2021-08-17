@@ -122,7 +122,7 @@ def get_data(filters):
 	+ifnull((select sum(pii.amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) and pd.docstatus=1
-	and pii.is_fixed_asset=1  group by month(pd.posting_date) desc, year(pd.posting_date)),0)) 
+	and pii.is_fixed_asset=1 and si.company=pd.company  group by month(pd.posting_date) desc, year(pd.posting_date)),0)) 
 	
 	when si.currency != "NPR" then
     (ifnull((select sum(base_grand_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
@@ -193,26 +193,26 @@ def get_data(filters):
 	(select sum(pii.base_amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
-	and pii.is_fixed_asset=1 and pd.docstatus=1 group by month(pd.posting_date) desc, year(pd.posting_date))
+	and pii.is_fixed_asset=1 and pd.docstatus=1 and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date))
 
 	when si.currency = "NPR" then
 	(select sum(pii.amount) from `tabPurchase Invoice` as pd 
 	inner join `tabPurchase Invoice Item` as pii on pd.name=pii.parent 
 	where  month(pd.posting_date)= month(si.posting_date) and year(pd.posting_date)=year(si.posting_date) 
-	and pii.is_fixed_asset=1 and pd.docstatus=1  group by month(pd.posting_date) desc, year(pd.posting_date))
+	and pii.is_fixed_asset=1 and pd.docstatus=1 and si.company=pd.company  group by month(pd.posting_date) desc, year(pd.posting_date))
 	End as capital_purchase,
 
 	case  when si.currency = "NPR" then
 	(select sum(pii.amount)*13/100 from `tabPurchase Invoice Item` as pii  
 	inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 	where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
-	 and pii.is_fixed_asset=1 and pd.docstatus=1 group by month(pd.posting_date) desc, year(pd.posting_date)) 
+	 and pii.is_fixed_asset=1 and pd.docstatus=1 and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date)) 
 
 	when si.currency != "NPR" then
 	(select sum(pii.base_amount)*13/100 from `tabPurchase Invoice Item` as pii  
 	inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 	where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
-	 and pii.is_fixed_asset=1 and pd.docstatus=1 group by month(pd.posting_date) desc, year(pd.posting_date)) 
+	 and pii.is_fixed_asset=1 and pd.docstatus=1   and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date)) 
 	 End as capital_tax
 	from
 	`tabPurchase Invoice` as si
