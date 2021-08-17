@@ -34,9 +34,9 @@ class PatientEncounter(Document):
 		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
 			self.practitioner_name or self.practitioner)[:100]
 
-	@frappe.whitelist(allow_guest=True)
+	@frappe.whitelist()
 	@staticmethod
-	def get_applicable_treatment_plans(encounter=None):
+	def get_applicable_treatment_plans(encounter):
 		patient = frappe.get_doc('Patient', encounter['patient'])
 
 		filters = {}
@@ -49,10 +49,10 @@ class PatientEncounter(Document):
 		if gender:
 			filters['gender'] = gender
 
-		plans = frappe.db.get_list('Treatment Plan Template', fields='*', filters=filters)
+		plans = frappe.get_list('Treatment Plan Template', fields='*', filters=filters)
 		return plans
 
-	@frappe.whitelist(allow_guest=True)
+	@frappe.whitelist()
 	def fill_treatment_plans(self, treatment_plans=None):
 		for treatment_plan in treatment_plans:
 			self.fill_treatment_plan(treatment_plan)
@@ -80,7 +80,6 @@ class PatientEncounter(Document):
 		for drug in drugs:
 			self.fill_treatment_plan_drug(drug)
 
-	@frappe.whitelist(allow_guest=True)
 	def fill_treatment_plan_drug(self, drug=None):
 		doc = frappe.new_doc('Drug Prescription')
 		doc.drug_code = drug['drug_code']
@@ -93,7 +92,6 @@ class PatientEncounter(Document):
 		self.append('drug_prescription', doc)
 		self.save()
 
-	@frappe.whitelist(allow_guest=True)
 	def fill_treatment_plan_item(self, plan_item=None):
 		if plan_item['type'] == 'Clinical Procedure Template':
 			doc = frappe.new_doc('Procedure Prescription')
