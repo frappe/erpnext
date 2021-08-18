@@ -37,6 +37,7 @@
   "image",
   "section_break_11",
   "brand",
+  "active_component",
   "description",
   "sb_barcodes",
   "barcodes",
@@ -1058,6 +1059,11 @@
    "fieldtype": "Link",
    "label": "Tax Detail",
    "options": "Tax Detail"
+  },
+  {
+   "fieldname": "active_component",
+   "fieldtype": "Small Text",
+   "label": "Active Component"
   }
  ],
  "has_web_view": 1,
@@ -1065,7 +1071,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-04-15 10:58:35.329255",
+ "modified": "2021-08-16 14:51:14.139635",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
