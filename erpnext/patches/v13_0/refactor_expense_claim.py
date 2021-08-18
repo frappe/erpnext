@@ -43,8 +43,8 @@ def execute():
 		frappe.db.sql("""
 			UPDATE `tabExpense Claim Item`
 			SET parentfield='items'
-			WHERE parentfield='expenses'"""
-		)
+			WHERE parentfield='expenses'
+		""")
 
 		frappe.reload_doc('hr', 'doctype', 'expense_claim')
 

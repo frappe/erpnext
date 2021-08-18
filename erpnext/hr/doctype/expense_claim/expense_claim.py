@@ -40,9 +40,9 @@ class ExpenseClaim(BuyingController):
 
 	def set_status(self, update=False):
 		status = {
-			"0": "Draft",
-			"1": "Submitted",
-			"2": "Cancelled"
+			'0': 'Draft',
+			'1': 'Submitted',
+			'2': 'Cancelled'
 		}[cstr(self.docstatus or 0)]
 
 		precision = self.precision('outstanding_amount')
@@ -62,9 +62,9 @@ class ExpenseClaim(BuyingController):
 				status = 'Rejected'
 		else:
 			status = 'Draft'
-    
-    if update:
-			self.db_set("status", status)
+
+		if update:
+			self.db_set('status', status)
 		else:
 			self.status = status
 
@@ -131,7 +131,7 @@ class ExpenseClaim(BuyingController):
 				self.get_gl_dict({
 					'account': self.payable_account,
 					'credit': outstanding_amount_in_company_currency,
-					'credit_in_account_currency': outstanding_amount_in_company_currency \
+					'credit_in_account_currency': outstanding_amount_in_company_currency
 						if payable_account_currency==self.company_currency else self.outstanding_amount,
 					'against': ','.join([d.default_account for d in self.items]),
 					'party_type': 'Employee',
@@ -166,7 +166,7 @@ class ExpenseClaim(BuyingController):
 				self.get_gl_dict({
 					'account': data.advance_account,
 					'credit': allocated_amount,
-					'credit_in_account_currency': allocated_amount \
+					'credit_in_account_currency': allocated_amount
 						if account_currency == self.company_currency else data.allocated_amount,
 					'against': ','.join([d.default_account for d in self.items]),
 					'party_type': 'Employee',
@@ -189,7 +189,7 @@ class ExpenseClaim(BuyingController):
 				self.get_gl_dict({
 					'account': payment_account,
 					'credit': outstanding_amount_in_company_currency,
-					'credit_in_account_currency': outstanding_amount_in_company_currency \
+					'credit_in_account_currency': outstanding_amount_in_company_currency
 						if payable_account_currency==self.company_currency else self.outstanding_amount,
 					'against': self.employee
 				}, item=self)
@@ -202,7 +202,7 @@ class ExpenseClaim(BuyingController):
 					'party': self.employee,
 					'against': payment_account,
 					'debit': outstanding_amount_in_company_currency,
-					'debit_in_account_currency': outstanding_amount_in_company_currency \
+					'debit_in_account_currency': outstanding_amount_in_company_currency
 						if payable_account_currency==self.company_currency else self.outstanding_amount,
 					'against_voucher': self.name,
 					'against_voucher_type': self.doctype,
@@ -222,8 +222,8 @@ class ExpenseClaim(BuyingController):
 					'account': tax.account_head,
 					'against': self.employee,
 					dr_or_cr: tax.base_tax_amount,
-					dr_or_cr + '_in_account_currency': tax.base_tax_amount \
-						if account_currency == self.company_currency \
+					dr_or_cr + '_in_account_currency': tax.base_tax_amount
+						if account_currency == self.company_currency
 						else tax.tax_amount,
 					'cost_center': tax.cost_center,
 					'against_voucher_type': self.doctype,

@@ -185,7 +185,7 @@ class PaymentEntry(AccountsController):
 				for field, value in iteritems(ref_details):
 					if d.exchange_gain_loss:
 						# for cases where gain/loss is booked into invoice
-						# exchange_gain_loss is calculated from invoice & populated 
+						# exchange_gain_loss is calculated from invoice & populated
 						# and row.exchange_rate is already set to payment entry's exchange rate
 						# refer -> `update_reference_in_payment_entry()` in utils.py
 						continue
@@ -417,7 +417,7 @@ class PaymentEntry(AccountsController):
 			net_total_for_tds = 0
 			if reference.reference_doctype == 'Purchase Order':
 				net_total_for_tds += flt(frappe.db.get_value('Purchase Order', reference.reference_name, 'net_total'))
-		
+
 			if net_total_for_tds:
 				net_total = net_total_for_tds
 
@@ -841,7 +841,7 @@ class PaymentEntry(AccountsController):
 
 		if account_details:
 			row.update(account_details)
-		
+
 		if not row.get('amount'):
 			# if no difference amount
 			return
@@ -1392,7 +1392,7 @@ def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_acc
 def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_currency, company_currency):
 	total_amount, outstanding_amount, exchange_rate = None
 	if ref_doc.doctype == "Expense Claim":
-			total_amount = flt(ref_doc.grand_total)
+		total_amount = flt(ref_doc.grand_total)
 	elif ref_doc.doctype == "Employee Advance":
 		total_amount, exchange_rate = get_total_amount_exchange_rate_for_employee_advance(party_account_currency, ref_doc)
 

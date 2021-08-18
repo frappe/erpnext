@@ -4,7 +4,8 @@
 frappe.provide("erpnext.hr");
 frappe.provide("erpnext.accounts.dimensions");
 frappe.provide("erpnext.accounts");
-{% include "erpnext/public/js/controllers/buying.js" %}; // eslint-disable-line
+// eslint-disable-next-line
+{% include "erpnext/public/js/controllers/buying.js" %};
 
 erpnext.hr.ExpenseClaimController = erpnext.buying.BuyingController.extend({
 	item_code: function(doc, cdt, cdn) {

@@ -1662,7 +1662,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	apply_price_list(item, reset_plc_conversion) {
-    if (!frappe.meta.has_field(this.frm.doc.doctype, "price_list_currency")) {
+		if (!frappe.meta.has_field(this.frm.doc.doctype, "price_list_currency")) {
 			return;
 		}
 		// We need to reset plc_conversion_rate sometimes because the call to

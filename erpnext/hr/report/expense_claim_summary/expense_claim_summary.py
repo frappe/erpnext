@@ -9,7 +9,8 @@ from erpnext.accounts.utils import get_currency_precision
 from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
 
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 
 	expense_claims = get_expense_claims(filters)
 	columns = get_columns()
