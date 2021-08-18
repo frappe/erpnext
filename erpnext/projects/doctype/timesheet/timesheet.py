@@ -76,7 +76,7 @@ class Timesheet(Document):
 						frappe.throw(_("Define Overtime Type for Employee {0}").format(self.employee))
 
 					if data.overtime_on:
-						if data.overtime_on <= data.from_time or data.overtime_on >= data.to_time:
+						if getdate(data.overtime_on) < getdate(data.from_time) or getdate(data.overtime_on) > getdate(data.to_time):
 							frappe.throw(_("Row {0}: {3} should be within {1} and {2}").format(
 								str(data.idx),
 								data.from_time,
@@ -260,9 +260,9 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 
 @frappe.whitelist()
 def get_timesheet_detail_rate(timelog, currency):
-	timelog_detail = frappe.db.sql("""SELECT tsd.billing_amount as billing_amount, 
-		ts.currency as currency FROM `tabTimesheet Detail` tsd 
-		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent 
+	timelog_detail = frappe.db.sql("""SELECT tsd.billing_amount as billing_amount,
+		ts.currency as currency FROM `tabTimesheet Detail` tsd
+		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent
 		WHERE tsd.name = '{0}'""".format(timelog), as_dict = 1)[0]
 
 	if timelog_detail.currency:

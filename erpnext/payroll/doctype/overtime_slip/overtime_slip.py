@@ -20,10 +20,6 @@ class OvertimeSlip(Document):
 			self.get_emp_and_overtime_details()
 
 	def validate_overlap(self):
-		if not self.name:
-			# hack! if name is null, it could cause problems with !=
-			self.name = "new-overtime-slip-1"
-
 		overtime_slips = frappe.db.get_all("Overtime Slip", filters = {
 			"docstatus": ("<", 2),
 			"employee":  self.employee,
@@ -68,11 +64,11 @@ class OvertimeSlip(Document):
 	def create_overtime_details_row_for_attendance(self, records):
 		self.overtime_details = []
 		for record in records:
-			if record.standard_working_time:
-				standard_working_time = record.standard_working_time
+			if record.shift_duration:
+				shift_duration = record.shift_duration
 			else:
-				standard_working_time = frappe.db.get_single_value("HR Settings", "standard_working_hours") * 3600
-				if not standard_working_time:
+				shift_duration = frappe.db.get_single_value("HR Settings", "standard_working_hours") * 3600
+				if not shift_duration:
 					frappe.throw(_('Please Set "Standard Working Hours" in HR settings'))
 
 			if record.overtime_duration:
@@ -82,7 +78,7 @@ class OvertimeSlip(Document):
 					"date": record.attendance_date,
 					"overtime_type": record.overtime_type,
 					"overtime_duration": record.overtime_duration,
-					"standard_working_time": standard_working_time,
+					"standard_working_time": shift_duration,
 				})
 
 	def create_overtime_details_row_for_timesheet(self, records):
@@ -111,7 +107,7 @@ class OvertimeSlip(Document):
 
 	def get_attendance_record(self):
 		if self.from_date and self.to_date:
-			records = frappe.db.sql("""SELECT overtime_duration, name, attendance_date, overtime_type, standard_working_time
+			records = frappe.db.sql("""SELECT overtime_duration, name, attendance_date, overtime_type, shift_duration
 				FROM `tabAttendance`
 				WHERE
 					attendance_date >= %s AND attendance_date <= %s
