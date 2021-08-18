@@ -11,4 +11,8 @@ def execute():
 	if not company:
 		return
 
+
+	frappe.reload_doc('accounts', 'doctype', 'pos_invoice')
+	frappe.reload_doc('accounts', 'doctype', 'pos_invoice_item')
+
 	make_custom_fields()

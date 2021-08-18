@@ -113,6 +113,7 @@ class PatientAppointment(Document):
 		if fee_validity:
 			frappe.msgprint(_('{0} has fee validity till {1}').format(self.patient, fee_validity.valid_till))
 
+	@frappe.whitelist()
 	def get_therapy_types(self):
 		if not self.therapy_plan:
 			return

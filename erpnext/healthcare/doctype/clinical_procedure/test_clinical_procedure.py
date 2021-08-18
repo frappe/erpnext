@@ -17,7 +17,7 @@ class TestClinicalProcedure(unittest.TestCase):
 
 		procedure_template.disabled = 1
 		procedure_template.save()
-		self.assertEquals(frappe.db.get_value('Item', procedure_template.item, 'disabled'), 1)
+		self.assertEqual(frappe.db.get_value('Item', procedure_template.item, 'disabled'), 1)
 
 	def test_consumables(self):
 		patient, medical_department, practitioner = create_healthcare_docs()

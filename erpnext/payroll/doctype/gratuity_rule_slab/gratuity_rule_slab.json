@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "creation": "2020-08-05 19:12:49.423500",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_year",
+  "to_year",
+  "fraction_of_applicable_earnings"
+ ],
+ "fields": [
+  {
+   "fieldname": "fraction_of_applicable_earnings",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Fraction of Applicable Earnings ",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "from_year",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "From(Year)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "to_year",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "To(Year)",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-08-17 14:09:56.781712",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Gratuity Rule Slab",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

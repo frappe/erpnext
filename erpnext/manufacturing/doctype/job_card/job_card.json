@@ -9,38 +9,49 @@
   "naming_series",
   "work_order",
   "bom_no",
-  "workstation",
-  "operation",
-  "operation_row_number",
   "column_break_4",
   "posting_date",
   "company",
-  "remarks",
   "production_section",
   "production_item",
   "item_name",
   "for_quantity",
-  "quality_inspection",
-  "wip_warehouse",
+  "serial_no",
   "column_break_12",
-  "employee",
-  "employee_name",
-  "status",
+  "wip_warehouse",
+  "quality_inspection",
   "project",
+  "batch_no",
+  "operation_section_section",
+  "operation",
+  "operation_row_number",
+  "column_break_18",
+  "workstation",
+  "employee",
+  "section_break_21",
+  "sub_operations",
   "timing_detail",
   "time_logs",
   "section_break_13",
   "total_completed_qty",
-  "total_time_in_mins",
   "column_break_15",
+  "total_time_in_mins",
   "section_break_8",
   "items",
+  "corrective_operation_section",
+  "for_job_card",
+  "is_corrective_job_card",
+  "column_break_33",
+  "hour_rate",
+  "for_operation",
   "more_information",
   "operation_id",
   "sequence_id",
   "transferred_qty",
   "requested_qty",
+  "status",
   "column_break_20",
+  "remarks",
   "barcode",
   "job_started",
   "started_time",
@@ -118,13 +129,6 @@
    "label": "Timing Detail"
   },
   {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Employee",
-   "options": "Employee"
-  },
-  {
    "allow_bulk_edit": 1,
    "fieldname": "time_logs",
    "fieldtype": "Table",
@@ -133,9 +137,11 @@
   },
   {
    "fieldname": "section_break_13",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
+   "default": "0",
    "fieldname": "total_completed_qty",
    "fieldtype": "Float",
    "label": "Total Completed Qty",
@@ -160,8 +166,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Job Card Item",
-   "read_only": 1
+   "options": "Job Card Item"
   },
   {
    "collapsible": 1,
@@ -251,12 +256,7 @@
    "reqd": 1
   },
   {
-   "fetch_from": "employee.employee_name",
-   "fieldname": "employee_name",
-   "fieldtype": "Read Only",
-   "label": "Employee Name"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "production_section",
    "fieldtype": "Section Break",
    "label": "Production"
@@ -314,11 +314,89 @@
    "label": "Quality Inspection",
    "no_copy": 1,
    "options": "Quality Inspection"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "sub_operations",
+   "fieldtype": "Table",
+   "label": "Sub Operations",
+   "options": "Job Card Operation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "operation_section_section",
+   "fieldtype": "Section Break",
+   "label": "Operation Section"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "depends_on": "is_corrective_job_card",
+   "fieldname": "hour_rate",
+   "fieldtype": "Currency",
+   "label": "Hour Rate"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "is_corrective_job_card",
+   "fieldname": "corrective_operation_section",
+   "fieldtype": "Section Break",
+   "label": "Corrective Operation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_corrective_job_card",
+   "fieldtype": "Check",
+   "label": "Is Corrective Job Card",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "for_job_card",
+   "fieldtype": "Link",
+   "label": "For Job Card",
+   "options": "Job Card",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "for_job_card.operation",
+   "fetch_if_empty": 1,
+   "fieldname": "for_operation",
+   "fieldtype": "Link",
+   "label": "For Operation",
+   "options": "Operation"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Table MultiSelect",
+   "label": "Employee",
+   "options": "Job Card Time Log"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial No"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-19 18:26:50.531664",
+ "modified": "2021-03-16 15:59:32.766484",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

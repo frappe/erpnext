@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "MAT-BIN-.YYYY.-.#####",
  "creation": "2013-01-10 16:34:25",
  "doctype": "DocType",
@@ -112,7 +113,8 @@
   {
    "fieldname": "reserved_qty_for_sub_contract",
    "fieldtype": "Float",
-   "label": "Reserved Qty for sub contract"
+   "label": "Reserved Qty for sub contract",
+   "read_only": 1
   },
   {
    "fieldname": "ma_rate",
@@ -166,7 +168,8 @@
  "hide_toolbar": 1,
  "idx": 1,
  "in_create": 1,
- "modified": "2019-11-18 18:34:59.456882",
+ "links": [],
+ "modified": "2021-03-30 23:09:39.572776",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
@@ -196,5 +199,6 @@
  ],
  "quick_entry": 1,
  "search_fields": "item_code,warehouse",
+ "sort_field": "modified",
  "sort_order": "ASC"
 }

@@ -82,11 +82,6 @@ frappe.query_reports["Stock Ledger"] = {
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
 			"options": "UOM"
-		},
-		{
-			"fieldname": "show_cancelled_entries",
-			"label": __("Show Cancelled Entries"),
-			"fieldtype": "Check"
 		}
 	],
 	"formatter": function (value, row, column, data, default_formatter) {

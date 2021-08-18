@@ -101,7 +101,7 @@ class PaymentRequest(Document):
 
 		controller.validate_transaction_currency(self.currency)
 		controller.request_for_payment(**payment_record)
-	
+
 	def get_request_amount(self):
 		data_of_completed_requests = frappe.get_all("Integration Request", filters={
 			'reference_doctype': self.doctype,
@@ -112,7 +112,7 @@ class PaymentRequest(Document):
 		if not data_of_completed_requests:
 			return self.grand_total
 
-		request_amounts = sum([json.loads(d).get('request_amount') for d in data_of_completed_requests])
+		request_amounts = sum(json.loads(d).get('request_amount') for d in data_of_completed_requests)
 		return request_amounts
 
 	def on_cancel(self):
@@ -492,7 +492,6 @@ def update_payment_req_status(doc, method):
 					status = 'Requested'
 
 			pay_req_doc.db_set('status', status)
-			frappe.db.commit()
 
 def get_dummy_message(doc):
 	return frappe.render_template("""{% if doc.contact_person -%}

@@ -9,14 +9,14 @@ frappe.ui.form.on('Exercise Type', {
 	}
 });
 
-erpnext.ExerciseEditor = Class.extend({
-	init: function(frm, wrapper) {
+erpnext.ExerciseEditor = class ExerciseEditor {
+	constructor(frm, wrapper) {
 		this.wrapper = wrapper;
 		this.frm = frm;
 		this.make(frm, wrapper);
-	},
+	}
 
-	make: function(frm, wrapper) {
+	make(frm, wrapper) {
 		$(this.wrapper).empty();
 
 		this.exercise_toolbar = $('<p>\
@@ -38,9 +38,9 @@ erpnext.ExerciseEditor = Class.extend({
 			this.make_cards(frm);
 			this.make_buttons(frm);
 		}
-	},
+	}
 
-	make_cards: function(frm) {
+	make_cards(frm) {
 		var me = this;
 		$(me.exercise_cards).empty();
 
@@ -60,9 +60,9 @@ erpnext.ExerciseEditor = Class.extend({
 					</div>
 			</div>`, {image_src: step.image, title: step.title, description: step.description, col_id: "col-"+i, card_id: "card-"+i, id: i})).appendTo(me.row);
 		});
-	},
+	}
 
-	make_buttons: function(frm) {
+	make_buttons(frm) {
 		let me = this;
 		$('.btn-edit').on('click', function() {
 			let id = $(this).attr('data-id');
@@ -82,9 +82,9 @@ erpnext.ExerciseEditor = Class.extend({
 				frm.dirty();
 			}, 300);
 		});
-	},
+	}
 
-	show_add_card_dialog: function(frm) {
+	show_add_card_dialog(frm) {
 		let me = this;
 		let d = new frappe.ui.Dialog({
 			title: __('Add Exercise Step'),
@@ -137,9 +137,9 @@ erpnext.ExerciseEditor = Class.extend({
 			primary_action_label: __('Add')
 		});
 		d.show();
-	},
+	}
 
-	show_edit_card_dialog: function(frm, id) {
+	show_edit_card_dialog(frm, id) {
 		let new_dialog = new frappe.ui.Dialog({
 			title: __("Edit Exercise Step"),
 			fields: [
@@ -183,4 +183,4 @@ erpnext.ExerciseEditor = Class.extend({
 		});
 		new_dialog.show();
 	}
-});
+};

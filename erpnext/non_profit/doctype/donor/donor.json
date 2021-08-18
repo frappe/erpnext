@@ -76,8 +76,13 @@
   }
  ],
  "image_field": "image",
- "links": [],
- "modified": "2020-09-16 23:46:04.083274",
+ "links": [
+  {
+   "link_doctype": "Donation",
+   "link_fieldname": "donor"
+  }
+ ],
+ "modified": "2021-02-17 16:36:33.470731",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",

@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "creation": "2021-04-07 07:34:00.124124",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "doctype_name",
+  "no_of_docs"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctype_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "DocType",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_of_docs",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Number of Docs"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-05-08 23:10:46.166744",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Transaction Deletion Record Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

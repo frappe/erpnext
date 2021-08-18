@@ -44,9 +44,11 @@ def execute():
 		# make current item's tax map
 		item_tax_map = {}
 		for d in old_item_taxes[item_code]:
-			item_tax_map[d.tax_type] = d.tax_rate
+			if d.tax_type not in item_tax_map:
+				item_tax_map[d.tax_type] = d.tax_rate
 
-		item_tax_template_name = get_item_tax_template(item_tax_templates, item_tax_map, item_code)
+		tax_types = []
+		item_tax_template_name = get_item_tax_template(item_tax_templates, item_tax_map, item_code, tax_types=tax_types)
 
 		# update the item tax table
 		frappe.db.sql("delete from `tabItem Tax` where parent=%s and parenttype='Item'", item_code)
@@ -68,7 +70,7 @@ def execute():
 								and item_tax_template is NULL""".format(dt), as_dict=1):
 			item_tax_map = json.loads(d.item_tax_rate)
 			item_tax_template_name = get_item_tax_template(item_tax_templates,
-				item_tax_map, d.item_code, d.parenttype, d.parent)
+				item_tax_map, d.item_code, d.parenttype, d.parent, tax_types=tax_types)
 			frappe.db.set_value(dt + " Item", d.name, "item_tax_template", item_tax_template_name)
 
 	frappe.db.auto_commit_on_many_writes = False
@@ -78,7 +80,7 @@ def execute():
 	settings.determine_address_tax_category_from = "Billing Address"
 	settings.save()
 
-def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttype=None, parent=None):
+def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttype=None, parent=None, tax_types=None):
 	# search for previously created item tax template by comparing tax maps
 	for template, item_tax_template_map in iteritems(item_tax_templates):
 		if item_tax_map == item_tax_template_map:
@@ -126,7 +128,9 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 		account_type = frappe.get_cached_value("Account", tax_type, "account_type")
 
 		if tax_type and account_type in ('Tax', 'Chargeable', 'Income Account', 'Expense Account', 'Expenses Included In Valuation'):
-			item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
+			if tax_type not in tax_types:
+				item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
+				tax_types.append(tax_type)
 			item_tax_templates.setdefault(item_tax_template.title, {})
 			item_tax_templates[item_tax_template.title][tax_type] = tax_rate
 	if item_tax_template.get("taxes"):

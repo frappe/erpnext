@@ -6,14 +6,14 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import set_request
-from frappe.website.render import render
+from frappe.website.serve import get_response
 
 class TestHomepage(unittest.TestCase):
 	def test_homepage_load(self):
 		set_request(method='GET', path='home')
-		response = render()
+		response = get_response()
 
-		self.assertEquals(response.status_code, 200)
+		self.assertEqual(response.status_code, 200)
 
 		html = frappe.safe_decode(response.get_data())
 		self.assertTrue('<section class="hero-section' in html)

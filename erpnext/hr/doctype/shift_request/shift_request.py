@@ -7,15 +7,20 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import formatdate, getdate
+from erpnext.hr.utils import share_doc_with_approver, validate_active_employee
 
 class OverlapError(frappe.ValidationError): pass
 
 class ShiftRequest(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.validate_dates()
 		self.validate_shift_request_overlap_dates()
 		self.validate_approver()
 		self.validate_default_shift()
+
+	def on_update(self):
+		share_doc_with_approver(self, self.approver)
 
 	def on_submit(self):
 		if self.status not in ["Approved", "Rejected"]:
@@ -29,6 +34,7 @@ class ShiftRequest(Document):
 			if self.to_date:
 				assignment_doc.end_date = self.to_date
 			assignment_doc.shift_request = self.name
+			assignment_doc.flags.ignore_permissions = 1
 			assignment_doc.insert()
 			assignment_doc.submit()
 

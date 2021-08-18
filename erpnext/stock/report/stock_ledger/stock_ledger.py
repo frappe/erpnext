@@ -115,7 +115,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = 'and sle.item_code in ({})'\
-			.format(', '.join([frappe.db.escape(i) for i in items]))
+			.format(', '.join(frappe.db.escape(i) for i in items))
 
 	sl_entries = frappe.db.sql("""
 		SELECT
@@ -138,7 +138,7 @@ def get_stock_ledger_entries(filters, items):
 			`tabStock Ledger Entry` sle
 		WHERE
 			company = %(company)s
-				AND posting_date BETWEEN %(from_date)s AND %(to_date)s
+				AND is_cancelled = 0 AND posting_date BETWEEN %(from_date)s AND %(to_date)s
 				{sle_conditions}
 				{item_conditions_sql}
 		ORDER BY
@@ -169,7 +169,7 @@ def get_items(filters):
 def get_item_details(items, sl_entries, include_uom):
 	item_details = {}
 	if not items:
-		items = list(set([d.item_code for d in sl_entries]))
+		items = list(set(d.item_code for d in sl_entries))
 
 	if not items:
 		return item_details
@@ -208,9 +208,6 @@ def get_sle_conditions(filters):
 		conditions.append("batch_no=%(batch_no)s")
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
-
-	if not filters.get("show_cancelled_entries"):
-		conditions.append("is_cancelled = 0")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 

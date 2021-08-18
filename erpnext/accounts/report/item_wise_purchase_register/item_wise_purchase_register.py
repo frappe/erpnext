@@ -334,7 +334,7 @@ def get_aii_accounts():
 
 def get_purchase_receipts_against_purchase_order(item_list):
 	po_pr_map = frappe._dict()
-	po_item_rows = list(set([d.po_detail for d in item_list]))
+	po_item_rows = list(set(d.po_detail for d in item_list))
 
 	if po_item_rows:
 		purchase_receipts = frappe.db.sql("""

@@ -11,7 +11,8 @@ from frappe.utils.file_manager import get_file, get_file_path
 from six.moves.urllib.parse import urlencode
 
 class LinkedInSettings(Document):
-	def get_authorization_url(self):	
+	@frappe.whitelist()
+	def get_authorization_url(self):
 		params = urlencode({
 			"response_type":"code",
 			"client_id": self.consumer_key,
@@ -35,7 +36,7 @@ class LinkedInSettings(Document):
 		headers = {
 			"Content-Type": "application/x-www-form-urlencoded"
 		}
-		
+
 		response = self.http_post(url=url, data=body, headers=headers)
 		response = frappe.parse_json(response.content.decode())
 		self.db_set("access_token", response["access_token"])

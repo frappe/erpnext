@@ -61,7 +61,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 
 		from_date = add_years(self.filters.from_date, cint(self.filters.no_of_years) * -1)
 		self.period_list = get_period_list(from_date, self.filters.to_date,
-			from_date, self.filters.to_date, None, self.filters.periodicity, ignore_fiscal_year=True)
+			from_date, self.filters.to_date, "Date Range", self.filters.periodicity, ignore_fiscal_year=True)
 
 		order_data = self.get_data_for_forecast() or []
 

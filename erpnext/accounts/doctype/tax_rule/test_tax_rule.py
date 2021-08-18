@@ -14,10 +14,15 @@ test_records = frappe.get_test_records('Tax Rule')
 from six import iteritems
 
 class TestTaxRule(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
+		frappe.db.set_value("Shopping Cart Settings", None, "enabled", 0)
+
+	@classmethod
+	def tearDownClass(cls):
 		frappe.db.sql("delete from `tabTax Rule`")
 
-	def tearDown(self):
+	def setUp(self):
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_conflict(self):
@@ -45,7 +50,7 @@ class TestTaxRule(unittest.TestCase):
 		tax_rule1 = make_tax_rule(customer_group= "All Customer Groups",
 			sales_tax_template = "_Test Sales Taxes and Charges Template - _TC", priority = 1, from_date = "2015-01-01")
 		tax_rule1.save()
-		self.assertEqual(get_tax_template("2015-01-01", {"customer_group" : "Commercial", "use_for_shopping_cart":0}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer_group" : "Commercial", "use_for_shopping_cart":1}),
 			"_Test Sales Taxes and Charges Template - _TC")
 
 	def test_conflict_with_overlapping_dates(self):

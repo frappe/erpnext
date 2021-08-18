@@ -8,6 +8,7 @@ from frappe.utils import (flt, add_months)
 from frappe.model.document import Document
 
 class MonthlyDistribution(Document):
+	@frappe.whitelist()
 	def get_months(self):
 		month_list = ['January','February','March','April','May','June','July','August','September',
 		'October','November','December']
@@ -20,7 +21,7 @@ class MonthlyDistribution(Document):
 			idx += 1
 
 	def validate(self):
-		total = sum([flt(d.percentage_allocation) for d in self.get("percentages")])
+		total = sum(flt(d.percentage_allocation) for d in self.get("percentages"))
 
 		if flt(total, 2) != 100.0:
 			frappe.throw(_("Percentage Allocation should be equal to 100%") + \

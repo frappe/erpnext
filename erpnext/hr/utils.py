@@ -1,113 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+import erpnext
+import frappe
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, InactiveEmployeeStatusError
 from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr, add_days, today
-from frappe.model.document import Document
 from frappe.desk.form import assign_to
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from frappe.model.document import Document
+from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
+	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
-
-class EmployeeBoardingController(Document):
-	'''
-		Create the project and the task for the boarding process
-		Assign to the concerned person and roles as per the onboarding/separation template
-	'''
-	def validate(self):
-		# remove the task if linked before submitting the form
-		if self.amended_from:
-			for activity in self.activities:
-				activity.task = ''
-
-	def on_submit(self):
-		# create the project for the given employee onboarding
-		project_name = _(self.doctype) + " : "
-		if self.doctype == "Employee Onboarding":
-			project_name += self.job_applicant
-		else:
-			project_name += self.employee
-		project = frappe.get_doc({
-				"doctype": "Project",
-				"project_name": project_name,
-				"expected_start_date": self.date_of_joining if self.doctype == "Employee Onboarding" else self.resignation_letter_date,
-				"department": self.department,
-				"company": self.company
-			}).insert(ignore_permissions=True)
-		self.db_set("project", project.name)
-		self.db_set("boarding_status", "Pending")
-		self.reload()
-		self.create_task_and_notify_user()
-
-	def create_task_and_notify_user(self):
-		# create the task for the given project and assign to the concerned person
-		for activity in self.activities:
-			if activity.task:
-				continue
-
-			task = frappe.get_doc({
-					"doctype": "Task",
-					"project": self.project,
-					"subject": activity.activity_name + " : " + self.employee_name,
-					"description": activity.description,
-					"department": self.department,
-					"company": self.company,
-					"task_weight": activity.task_weight
-				}).insert(ignore_permissions=True)
-			activity.db_set("task", task.name)
-			users = [activity.user] if activity.user else []
-			if activity.role:
-				user_list = frappe.db.sql_list('''select distinct(parent) from `tabHas Role`
-					where parenttype='User' and role=%s''', activity.role)
-				users = users + user_list
-
-				if "Administrator" in users:
-					users.remove("Administrator")
-
-			# assign the task the users
-			if users:
-				self.assign_task_to_users(task, set(users))
-
-	def assign_task_to_users(self, task, users):
-		for user in users:
-			args = {
-				'assign_to': [user],
-				'doctype': task.doctype,
-				'name': task.name,
-				'description': task.description or task.subject,
-				'notify': self.notify_users_by_email
-			}
-			assign_to.add(args)
-
-	def on_cancel(self):
-		# delete task project
-		for task in frappe.get_all("Task", filters={"project": self.project}):
-			frappe.delete_doc("Task", task.name, force=1)
-		frappe.delete_doc("Project", self.project, force=1)
-		self.db_set('project', '')
-		for activity in self.activities:
-			activity.db_set("task", "")
-
-
-@frappe.whitelist()
-def get_onboarding_details(parent, parenttype):
-	return frappe.get_all("Employee Boarding Activity",
-		fields=["activity_name", "role", "user", "required_for_employee_creation", "description", "task_weight"],
-		filters={"parent": parent, "parenttype": parenttype},
-		order_by= "idx")
-
-@frappe.whitelist()
-def get_boarding_status(project):
-	status = 'Pending'
-	if project:
-		doc = frappe.get_doc('Project', project)
-		if flt(doc.percent_complete) > 0.0 and flt(doc.percent_complete) < 100.0:
-			status = 'In Process'
-		elif flt(doc.percent_complete) == 100.0:
-			status = 'Completed'
-		return status
 
 def set_employee_name(doc):
 	if doc.employee and not doc.employee_name:
@@ -253,6 +156,7 @@ def get_total_exemption_amount(declarations):
 	total_exemption_amount = sum([flt(d.total_exemption_amount) for d in exemptions.values()])
 	return total_exemption_amount
 
+@frappe.whitelist()
 def get_leave_period(from_date, to_date, company):
 	leave_period = frappe.db.sql("""
 		select name, from_date, to_date
@@ -316,13 +220,7 @@ def allocate_earned_leaves():
 				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
 
 def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
-	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
-	if annual_allocation:
-		earned_leaves = flt(annual_allocation) / divide_by_frequency[e_leave_type.earned_leave_frequency]
-		if e_leave_type.rounding == "0.5":
-			earned_leaves = round(earned_leaves * 2) / 2
-		else:
-			earned_leaves = round(earned_leaves)
+		earned_leaves = get_monthly_earned_leave(annual_allocation, e_leave_type.earned_leave_frequency, e_leave_type.rounding)
 
 		allocation = frappe.get_doc('Leave Allocation', allocation.name)
 		new_allocation = flt(allocation.total_leaves_allocated) + flt(earned_leaves)
@@ -334,6 +232,21 @@ def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type
 			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
 			today_date = today()
 			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+
+def get_monthly_earned_leave(annual_leaves, frequency, rounding):
+	earned_leaves = 0.0
+	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
+	if annual_leaves:
+		earned_leaves = flt(annual_leaves) / divide_by_frequency[frequency]
+		if rounding:
+			if rounding == "0.25":
+				earned_leaves = round(earned_leaves * 4) / 4
+			elif rounding == "0.5":
+				earned_leaves = round(earned_leaves * 2) / 2
+			else:
+				earned_leaves = round(earned_leaves)
+
+	return earned_leaves
 
 
 def get_leave_allocations(date, leave_type):
@@ -475,9 +388,29 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount
 
-def grant_leaves_automatically():
-	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_singles_value("HR Settings", "automatically_allocate_leaves_based_on_leave_policy")
-	if automatically_allocate_leaves_based_on_leave_policy:
-		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "leaves_allocated":0})
-		for assignment in lpa:
-			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
+def share_doc_with_approver(doc, user):
+	# if approver does not have permissions, share
+	if not frappe.has_permission(doc=doc, ptype="submit", user=user):
+		frappe.share.add(doc.doctype, doc.name, user, submit=1,
+			flags={"ignore_share_permission": True})
+
+		frappe.msgprint(_("Shared with the user {0} with {1} access").format(
+			user, frappe.bold("submit"), alert=True))
+
+	# remove shared doc if approver changes
+	doc_before_save = doc.get_doc_before_save()
+	if doc_before_save:
+		approvers = {
+			"Leave Application": "leave_approver",
+			"Expense Claim": "expense_approver",
+			"Shift Request": "approver"
+		}
+
+		approver = approvers.get(doc.doctype)
+		if doc_before_save.get(approver) != doc.get(approver):
+			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
+
+def validate_active_employee(employee):
+	if frappe.db.get_value("Employee", employee, "status") == "Inactive":
+		frappe.throw(_("Transactions cannot be created for an Inactive Employee {0}.").format(
+			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)

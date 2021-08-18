@@ -16,13 +16,14 @@ class HolidayList(Document):
 		self.validate_days()
 		self.total_holidays = len(self.holidays)
 
+	@frappe.whitelist()
 	def get_weekly_off_dates(self):
 		self.validate_values()
 		date_list = self.get_weekly_off_date_list(self.from_date, self.to_date)
 		last_idx = max([cint(d.idx) for d in self.get("holidays")] or [0,])
 		for i, d in enumerate(date_list):
 			ch = self.append('holidays', {})
-			ch.description = self.weekly_off
+			ch.description = _(self.weekly_off)
 			ch.holiday_date = d
 			ch.weekly_off = 1
 			ch.idx = last_idx + i + 1
@@ -61,6 +62,7 @@ class HolidayList(Document):
 
 		return date_list
 
+	@frappe.whitelist()
 	def clear_table(self):
 		self.set('holidays', [])
 

@@ -4,18 +4,19 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
+from frappe.utils import getdate, validate_email_address, today, add_years, cstr
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
-	set_user_permission_if_allowed, has_permission
+	set_user_permission_if_allowed, has_permission, get_doc_permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
-from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
-class EmployeeUserDisabledError(frappe.ValidationError): pass
-class EmployeeLeftValidationError(frappe.ValidationError): pass
+class EmployeeUserDisabledError(frappe.ValidationError):
+	pass
+class InactiveEmployeeStatusError(frappe.ValidationError):
+	pass
 
 class Employee(NestedSet):
 	nsm_parent_field = 'reports_to'
@@ -37,7 +38,7 @@ class Employee(NestedSet):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
+		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
 
 		self.employee = self.name
 		self.set_employee_name()
@@ -66,7 +67,7 @@ class Employee(NestedSet):
 	def validate_user_details(self):
 		data = frappe.db.get_value('User',
 			self.user_id, ['enabled', 'user_image'], as_dict=1)
-		if data.get("user_image"):
+		if data.get("user_image") and self.image == '':
 			self.image = data.get("user_image")
 		self.validate_for_enabled_user_id(data.get("enabled", 0))
 		self.validate_duplicate_user_id()
@@ -80,6 +81,7 @@ class Employee(NestedSet):
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
+		self.update_approver_role()
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
@@ -145,6 +147,17 @@ class Employee(NestedSet):
 
 		user.save()
 
+	def update_approver_role(self):
+		if self.leave_approver:
+			user = frappe.get_doc("User", self.leave_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Leave Approver")
+
+		if self.expense_approver:
+			user = frappe.get_doc("User", self.expense_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Expense Approver")
+
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
 			throw(_("Date of Birth cannot be greater than today."))
@@ -185,7 +198,7 @@ class Employee(NestedSet):
 				message += "<br><br><ul><li>" + "</li><li>".join(link_to_employees)
 				message += "</li></ul><br>"
 				message += _("Please make sure the employees above report to another Active employee.")
-				throw(message, EmployeeLeftValidationError, _("Cannot Relieve Employee"))
+				throw(message, InactiveEmployeeStatusError, _("Cannot Relieve Employee"))
 			if not self.relieving_date:
 				throw(_("Please enter relieving date."))
 
@@ -466,7 +479,7 @@ def get_employee_emails(employee_list):
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
 
-	filters = [['status', '!=', 'Left']]
+	filters = [['status', '=', 'Active']]
 	if company and company != 'All Companies':
 		filters.append(['company', '=', company])
 
@@ -501,3 +514,10 @@ def has_user_permission_for_employee(user_name, employee_name):
 		'allow': 'Employee',
 		'for_value': employee_name
 	})
+
+def has_upload_permission(doc, ptype='read', user=None):
+	if not user:
+		user = frappe.session.user
+	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
+		return True
+	return doc.user_id == user

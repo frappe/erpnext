@@ -23,14 +23,9 @@ class TestPlaidSettings(unittest.TestCase):
 			doc.cancel()
 			doc.delete()
 
-		for ba in frappe.get_all("Bank Account"):
-			frappe.get_doc("Bank Account", ba.name).delete()
-
-		for at in frappe.get_all("Bank Account Type"):
-			frappe.get_doc("Bank Account Type", at.name).delete()
-
-		for ast in frappe.get_all("Bank Account Subtype"):
-			frappe.get_doc("Bank Account Subtype", ast.name).delete()
+		for doctype in ("Bank Account", "Bank Account Type", "Bank Account Subtype"):
+			for d in frappe.get_all(doctype):
+				frappe.delete_doc(doctype, d.name, force=True)
 
 	def test_plaid_disabled(self):
 		frappe.db.set_value("Plaid Settings", None, "enabled", 0)

@@ -167,6 +167,7 @@ class OpeningInvoiceCreationTool(Document):
 
 		return invoice
 
+	@frappe.whitelist()
 	def make_invoices(self):
 		self.validate_company()
 		invoices = self.get_invoices()
@@ -198,6 +199,7 @@ def start_import(invoices):
 		try:
 			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
+			doc.flags.ignore_mandatory = True
 			doc.insert()
 			doc.submit()
 			frappe.db.commit()
@@ -214,7 +216,8 @@ def start_import(invoices):
 	return names
 
 def publish(index, total, doctype):
-	if total < 5: return
+	if total < 50:
+		return
 	frappe.publish_realtime(
 		"opening_invoice_creation_progress",
 		dict(
@@ -238,5 +241,4 @@ def get_temporary_opening_account(company=None):
 		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
 
 	return accounts[0].name
-
 

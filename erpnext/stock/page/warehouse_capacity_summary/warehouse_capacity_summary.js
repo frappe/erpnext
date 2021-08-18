@@ -79,7 +79,7 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 		}
 	});
 
-	frappe.require('assets/js/item-dashboard.min.js', function() {
+	frappe.require('item-dashboard.bundle.js', function() {
 		$(frappe.render_template('warehouse_capacity_summary_header')).appendTo(page.main);
 
 		page.capacity_dashboard = new erpnext.stock.ItemDashboard({

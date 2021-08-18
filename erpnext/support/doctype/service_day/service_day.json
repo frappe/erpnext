@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-03-04 12:55:36.403035",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,7 +17,8 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Workday",
-   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_2",
@@ -26,7 +28,8 @@
    "fieldname": "start_time",
    "fieldtype": "Time",
    "in_list_view": 1,
-   "label": "Start Time"
+   "label": "Start Time",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -36,11 +39,13 @@
    "fieldname": "end_time",
    "fieldtype": "Time",
    "in_list_view": 1,
-   "label": "End Time"
+   "label": "End Time",
+   "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2019-05-05 19:15:08.999579",
+ "links": [],
+ "modified": "2020-07-06 13:28:47.303873",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Day",

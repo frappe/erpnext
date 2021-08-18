@@ -594,18 +594,22 @@ class TallyMigration(Document):
 			frappe.db.set_value("Price List", "Tally Price List", "enabled", 0)
 		frappe.flags.in_migrate = False
 
+	@frappe.whitelist()
 	def process_master_data(self):
 		self.set_status("Processing Master Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_process_master_data", queue="long", timeout=3600)
 
+	@frappe.whitelist()
 	def import_master_data(self):
 		self.set_status("Importing Master Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_import_master_data", queue="long", timeout=3600)
 
+	@frappe.whitelist()
 	def process_day_book_data(self):
 		self.set_status("Processing Day Book Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_process_day_book_data", queue="long", timeout=3600)
 
+	@frappe.whitelist()
 	def import_day_book_data(self):
 		self.set_status("Importing Day Book Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_import_day_book_data", queue="long", timeout=3600)

@@ -56,7 +56,7 @@ erpnext.PointOfSale.Payment = class {
 				);
 				let df_events = {
 					onchange: function() {
-						frm.set_value(this.df.fieldname, this.value);
+						frm.set_value(this.df.fieldname, this.get_value());
 					}
 				};
 				if (df.fieldtype == "Button") {
@@ -171,7 +171,7 @@ erpnext.PointOfSale.Payment = class {
 
 		this.setup_listener_for_payments();
 
-		this.$payment_modes.on('click', '.shortcut', () => {
+		this.$payment_modes.on('click', '.shortcut', function() {
 			const value = $(this).attr('data-value');
 			me.selected_mode.set_value(value);
 		});
@@ -198,6 +198,7 @@ erpnext.PointOfSale.Payment = class {
 			const is_cash_shortcuts_invisible = !this.$payment_modes.find('.cash-shortcuts').is(':visible');
 			this.attach_cash_shortcuts(frm.doc);
 			!is_cash_shortcuts_invisible && this.$payment_modes.find('.cash-shortcuts').css('display', 'grid');
+			this.render_payment_mode_dom();
 		});
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
@@ -213,6 +214,43 @@ erpnext.PointOfSale.Payment = class {
 				this[`${mode}_control`].set_value(default_mop.amount);
 			}
 		});
+	}
+
+	setup_listener_for_payments() {
+		frappe.realtime.on("process_phone_payment", (data) => {
+			const doc = this.events.get_frm().doc;
+			const { response, amount, success, failure_message } = data;
+			let message, title;
+
+			if (success) {
+				title = __("Payment Received");
+				const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
+				if (amount >= grand_total) {
+					frappe.dom.unfreeze();
+					message = __("Payment of {0} received successfully.", [format_currency(amount, doc.currency, 0)]);
+					this.events.submit_invoice();
+					cur_frm.reload_doc();
+
+				} else {
+					message = __("Payment of {0} received successfully. Waiting for other requests to complete...", [format_currency(amount, doc.currency, 0)]);
+				}
+			} else if (failure_message) {
+				message = failure_message;
+				title = __("Payment Failed");
+			}
+
+			frappe.msgprint({ "message": message, "title": title });
+		});
+	}
+
+	auto_set_remaining_amount() {
+		const doc = this.events.get_frm().doc;
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
+		const remaining_amount = grand_total - doc.paid_amount;
+		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
+		if (!current_value && remaining_amount > 0 && this.selected_mode) {
+			this.selected_mode.set_value(remaining_amount);
+		}
 	}
 
 	setup_listener_for_payments() {
@@ -389,7 +427,7 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	attach_cash_shortcuts(doc) {
-		const grand_total = doc.grand_total;
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
 		const currency = doc.currency;
 
 		const shortcuts = this.get_cash_shortcuts(flt(grand_total));
@@ -444,7 +482,7 @@ erpnext.PointOfSale.Payment = class {
 		const amount = doc.loyalty_amount > 0 ? format_currency(doc.loyalty_amount, doc.currency) : '';
 		this.$payment_modes.append(
 			`<div class="payment-mode-wrapper">
-				<div class="mode-of-payment" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
+				<div class="mode-of-payment loyalty-card" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
 					Redeem Loyalty Points
 					<div class="loyalty-amount-amount pay-amount">${amount}</div>
 					<div class="loyalty-amount-name">${loyalty_program}</div>
@@ -499,7 +537,8 @@ erpnext.PointOfSale.Payment = class {
 	update_totals_section(doc) {
 		if (!doc) doc = this.events.get_frm().doc;
 		const paid_amount = doc.paid_amount;
-		const remaining = doc.grand_total - doc.paid_amount;
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
+		const remaining = grand_total - doc.paid_amount;
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
 		const currency = doc.currency;
 		const label = change ? __('Change') : __('To Be Paid');
@@ -507,7 +546,7 @@ erpnext.PointOfSale.Payment = class {
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">Grand Total</div>
-				<div class="value">${format_currency(doc.grand_total, currency)}</div>
+				<div class="value">${format_currency(grand_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">

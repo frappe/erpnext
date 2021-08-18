@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "LM-LSS-.#####",
  "creation": "2019-09-06 11:33:34.709540",
  "doctype": "DocType",
@@ -14,6 +15,7 @@
   "shortfall_amount",
   "column_break_8",
   "security_value",
+  "shortfall_percentage",
   "section_break_8",
   "process_loan_security_shortfall"
  ],
@@ -85,10 +87,18 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shortfall_percentage",
+   "fieldtype": "Percent",
+   "label": "Shortfall Percentage",
+   "read_only": 1
   }
  ],
  "in_create": 1,
- "modified": "2019-10-24 06:24:26.128997",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-04-01 08:13:43.263772",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Shortfall",

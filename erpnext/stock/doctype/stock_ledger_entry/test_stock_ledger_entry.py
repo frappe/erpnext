@@ -15,10 +15,12 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import create_landed_cost_voucher
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDatedStockTransaction
+from frappe.core.page.permission_manager.permission_manager import reset
 
 class TestStockLedgerEntry(unittest.TestCase):
 	def setUp(self):
 		items = create_items()
+		reset('Stock Entry')
 
 		# delete SLE and BINs for all items
 		frappe.db.sql("delete from `tabStock Ledger Entry` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
@@ -34,7 +36,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account = "Stock Adjustment - _TC",
+			expense_account = "Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC",
 			posting_date='2020-04-10',
 			posting_time='14:00'
 		)
@@ -46,51 +48,51 @@ class TestStockLedgerEntry(unittest.TestCase):
 			qty=10,
 			rate=200,
 			company=company,
-			expense_account = "Stock Adjustment - _TC",
+			expense_account="Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC",
 			posting_date='2020-04-20',
 			posting_time='14:00'
 		)
 
 		# _Test Item for Reposting transferred from Stores to FG warehouse on 30-04-2020
-		make_stock_entry(
+		se = make_stock_entry(
 			item_code="_Test Item for Reposting",
 			source="Stores - _TC",
 			target="Finished Goods - _TC",
 			company=company,
 			qty=10,
-			expense_account="Stock Adjustment - _TC",
+			expense_account="Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC",
 			posting_date='2020-04-30',
 			posting_time='14:00'
 		)
-		target_wh_sle = get_previous_sle({
+		target_wh_sle = frappe.db.get_value('Stock Ledger Entry', {
 			"item_code": "_Test Item for Reposting",
 			"warehouse": "Finished Goods - _TC",
-			"posting_date": '2020-04-30',
-			"posting_time": '14:00'
-		})
+			"voucher_type": "Stock Entry",
+			"voucher_no": se.name
+		}, ["valuation_rate"], as_dict=1)
 
 		self.assertEqual(target_wh_sle.get("valuation_rate"), 150)
 
 		# Repack entry on 5-5-2020
 		repack = create_repack_entry(company=company, posting_date='2020-05-05', posting_time='14:00')
 
-		finished_item_sle = get_previous_sle({
+		finished_item_sle = frappe.db.get_value('Stock Ledger Entry', {
 			"item_code": "_Test Finished Item for Reposting",
 			"warehouse": "Finished Goods - _TC",
-			"posting_date": '2020-05-05',
-			"posting_time": '14:00'
-		})
+			"voucher_type": "Stock Entry",
+			"voucher_no": repack.name
+		}, ["incoming_rate", "valuation_rate"], as_dict=1)
 		self.assertEqual(finished_item_sle.get("incoming_rate"), 540)
 		self.assertEqual(finished_item_sle.get("valuation_rate"), 540)
 
 		# Reconciliation for _Test Item for Reposting at Stores on 12-04-2020: Qty = 50, Rate = 150
-		create_stock_reconciliation(
+		sr = create_stock_reconciliation(
 			item_code="_Test Item for Reposting",
 			warehouse="Stores - _TC",
 			qty=50,
 			rate=150,
 			company=company,
-			expense_account = "Stock Adjustment - _TC",
+			expense_account ="Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC",
 			posting_date='2020-04-12',
 			posting_time='14:00'
 		)
@@ -107,12 +109,12 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(target_wh_sle.get("valuation_rate"), 175)
 
 		# Check valuation rate of repacked item after back-dated entry at Stores
-		finished_item_sle = get_previous_sle({
+		finished_item_sle = frappe.db.get_value('Stock Ledger Entry', {
 			"item_code": "_Test Finished Item for Reposting",
 			"warehouse": "Finished Goods - _TC",
-			"posting_date": '2020-05-05',
-			"posting_time": '14:00'
-		})
+			"voucher_type": "Stock Entry",
+			"voucher_no": repack.name
+		}, ["incoming_rate", "valuation_rate"], as_dict=1)
 		self.assertEqual(finished_item_sle.get("incoming_rate"), 790)
 		self.assertEqual(finished_item_sle.get("valuation_rate"), 790)
 
@@ -125,7 +127,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		pr = make_purchase_receipt(company="_Test Company", posting_date='2020-04-10',
 			warehouse="Stores - _TC", item_code="_Test Item for Reposting", qty=5, rate=100)
 
-		return_pr = make_purchase_receipt(company="_Test Company", posting_date='2020-04-15', 
+		return_pr = make_purchase_receipt(company="_Test Company", posting_date='2020-04-15',
 			warehouse="Stores - _TC", item_code="_Test Item for Reposting", is_return=1, return_against=pr.name, qty=-2)
 
 		# check sle
@@ -278,7 +280,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		frappe.db.set_value("Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM")
 		make_bom(item = subcontracted_item, raw_materials =[rm_item_code], currency="INR")
-		
+
 		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100
 		pr = make_purchase_receipt(company=company, posting_date='2020-04-10',
 			warehouse="Stores - _TC", item_code=rm_item_code, qty=10, rate=100)
@@ -292,7 +294,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		# Update raw material's valuation via LCV, Additional cost = 50
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-		
+
 		pr1.reload()
 		self.assertEqual(pr1.items[0].valuation_rate, 125)
 
@@ -310,31 +312,37 @@ class TestStockLedgerEntry(unittest.TestCase):
 		# Back dated stock transactions are only allowed to stock managers
 		frappe.db.set_value("Stock Settings", None,
 			"role_allowed_to_create_edit_back_dated_transactions", "Stock Manager")
-		
+
 		# Set User with Stock User role but not Stock Manager
-		frappe.set_user("test@example.com")
-		user = frappe.get_doc("User", "test@example.com")
-		user.add_roles("Stock User")
-		user.remove_roles("Stock Manager")
+		try:
+			user = frappe.get_doc("User", "test@example.com")
+			user.add_roles("Stock User")
+			user.remove_roles("Stock Manager")
 
-		stock_entry_on_today = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		back_dated_se_1 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
-			posting_date=add_days(today(), -1), do_not_submit=True)
+			frappe.set_user(user.name)
 
-		# Block back-dated entry
-		self.assertRaises(BackDatedStockTransaction, back_dated_se_1.submit)
+			stock_entry_on_today = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+			back_dated_se_1 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
+				posting_date=add_days(today(), -1), do_not_submit=True)
 
-		user.add_roles("Stock Manager")
+			# Block back-dated entry
+			self.assertRaises(BackDatedStockTransaction, back_dated_se_1.submit)
 
-		# Back dated entry allowed to Stock Manager
-		back_dated_se_2 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
-			posting_date=add_days(today(), -1))
+			frappe.set_user("Administrator")
+			user.add_roles("Stock Manager")
+			frappe.set_user(user.name)
 
-		back_dated_se_2.cancel()
-		stock_entry_on_today.cancel()
+			# Back dated entry allowed to Stock Manager
+			back_dated_se_2 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
+				posting_date=add_days(today(), -1))
 
-		frappe.db.set_value("Stock Settings", None, "role_allowed_to_create_edit_back_dated_transactions", None)
-		frappe.set_user("Administrator")
+			back_dated_se_2.cancel()
+			stock_entry_on_today.cancel()
+
+		finally:
+			frappe.db.set_value("Stock Settings", None, "role_allowed_to_create_edit_back_dated_transactions", None)
+			frappe.set_user("Administrator")
+			user.remove_roles("Stock Manager")
 
 
 def create_repack_entry(**args):

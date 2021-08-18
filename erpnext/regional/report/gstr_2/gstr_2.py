@@ -44,7 +44,7 @@ class Gstr2Report(Gstr1Report):
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
 			for rate, items in items_based_on_rate.items():
-				if rate:
+				if rate or invoice_details.get('gst_category') == 'Registered Composition':
 					if inv not in self.igst_invoices:
 						rate = rate / 2
 						row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
@@ -86,7 +86,7 @@ class Gstr2Report(Gstr1Report):
 					conditions += opts[1]
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += "and ifnull(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') and is_return != 1 "
+			conditions += "and ifnull(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ', 'Registered Composition') and is_return != 1 "
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """

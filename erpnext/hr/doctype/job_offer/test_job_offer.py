@@ -13,14 +13,15 @@ from erpnext.hr.doctype.staffing_plan.test_staffing_plan import make_company
 
 class TestJobOffer(unittest.TestCase):
 	def test_job_offer_creation_against_vacancies(self):
-		create_staffing_plan(staffing_details=[{
-			"designation": "Designer",
+		frappe.db.set_value("HR Settings", None, "check_vacancies", 1)
+		job_applicant = create_job_applicant(email_id="test_job_offer@example.com")
+		job_offer = create_job_offer(job_applicant=job_applicant.name, designation="UX Designer")
+
+		create_staffing_plan(name='Test No Vacancies', staffing_details=[{
+			"designation": "UX Designer",
 			"vacancies": 0,
 			"estimated_cost_per_position": 5000
 		}])
-		frappe.db.set_value("HR Settings", None, "check_vacancies", 1)
-		job_applicant = create_job_applicant(email_id="test_job_offer@example.com")
-		job_offer = create_job_offer(job_applicant=job_applicant.name, designation="Researcher")
 		self.assertRaises(frappe.ValidationError, job_offer.submit)
 
 		# test creation of job offer when vacancies are not present
@@ -34,13 +35,13 @@ class TestJobOffer(unittest.TestCase):
 		job_offer = create_job_offer(job_applicant=job_applicant.name)
 		job_offer.submit()
 		job_applicant.reload()
-		self.assertEquals(job_applicant.status, "Accepted")
+		self.assertEqual(job_applicant.status, "Accepted")
 
 		# status update after rejection
 		job_offer.status = "Rejected"
 		job_offer.submit()
 		job_applicant.reload()
-		self.assertEquals(job_applicant.status, "Rejected")
+		self.assertEqual(job_applicant.status, "Rejected")
 
 def create_job_offer(**args):
 	args = frappe._dict(args)

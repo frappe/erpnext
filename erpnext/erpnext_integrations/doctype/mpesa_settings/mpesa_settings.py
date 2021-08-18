@@ -59,9 +59,10 @@ class MpesaSettings(Document):
 				request_amounts.append(amount)
 		else:
 			request_amounts = [request_amount]
-		
+
 		return request_amounts
 
+	@frappe.whitelist()
 	def get_account_balance_info(self):
 		payload = dict(
 			reference_doctype="Mpesa Settings",
@@ -198,7 +199,7 @@ def get_completed_integration_requests_info(reference_doctype, reference_docname
 		completed_mpesa_receipt = fetch_param_value(item_response, "MpesaReceiptNumber", "Name")
 		completed_payments.append(completed_amount)
 		mpesa_receipts.append(completed_mpesa_receipt)
-	
+
 	return mpesa_receipts, completed_payments
 
 def get_account_balance(request_payload):

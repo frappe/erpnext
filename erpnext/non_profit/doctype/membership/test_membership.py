@@ -6,44 +6,24 @@ import unittest
 import frappe
 import erpnext
 from erpnext.non_profit.doctype.member.member import create_member
+from erpnext.non_profit.doctype.membership.membership import update_halted_razorpay_subscription
 from frappe.utils import nowdate, add_months
 
 class TestMembership(unittest.TestCase):
 	def setUp(self):
-		# Get default company
-		company = frappe.get_doc("Company", erpnext.get_default_company())
-
-		# update membership settings
-		settings = frappe.get_doc("Membership Settings")
-		# Enable razorpay
-		settings.enable_razorpay = 1
-		settings.billing_cycle = "Monthly"
-		settings.billing_frequency = 24
-		# Enable invoicing
-		settings.enable_invoicing = 1
-		settings.make_payment_entry = 1
-		settings.company = company.name
-		settings.payment_account = company.default_cash_account
-		settings.debit_account = company.default_receivable_account
-		settings.save()
-
-		# make test plan
-		if not frappe.db.exists("Membership Type", "_rzpy_test_milythm"):
-			plan = frappe.new_doc("Membership Type")
-			plan.membership_type = "_rzpy_test_milythm"
-			plan.amount = 100
-			plan.razorpay_plan_id = "_rzpy_test_milythm"
-			plan.linked_item = create_item("_Test Item for Non Profit Membership").name
-			plan.insert()
-		else:
-			plan = frappe.get_doc("Membership Type", "_rzpy_test_milythm")
+		plan = setup_membership()
 
 		# make test member
-		self.member_doc = create_member(frappe._dict({
-				'fullname': "_Test_Member",
-				'email': "_test_member_erpnext@example.com",
-				'plan_id': plan.name
-		}))
+		self.member_doc = create_member(
+			frappe._dict({
+				"fullname": "_Test_Member",
+				"email": "_test_member_erpnext@example.com",
+				"plan_id": plan.name,
+				"subscription_id": "sub_DEX6xcJ1HSW4CR",
+				"customer_id": "cust_C0WlbKhp3aLA7W",
+				"subscription_status": "Active"
+			})
+		)
 		self.member_doc.make_customer_and_link()
 		self.member = self.member_doc.name
 
@@ -77,8 +57,22 @@ class TestMembership(unittest.TestCase):
 			"to_date": add_months(nowdate(), 3),
 		})
 
+	def test_halted_memberships(self):
+		make_membership(self.member, {
+			"from_date": add_months(nowdate(), 2),
+			"to_date": add_months(nowdate(), 3)
+		})
+
+		self.assertEqual(frappe.db.get_value("Member", self.member, "subscription_status"), "Active")
+		payload = get_subscription_payload()
+		update_halted_razorpay_subscription(data=payload)
+		self.assertEqual(frappe.db.get_value("Member", self.member, "subscription_status"), "Halted")
+
+	def tearDown(self):
+		frappe.db.rollback()
+
 def set_config(key, value):
-	frappe.db.set_value("Membership Settings", None, key, value)
+	frappe.db.set_value("Non Profit Settings", None, key, value)
 
 def make_membership(member, payload={}):
 	data = {
@@ -109,3 +103,60 @@ def create_item(item_code):
 	else:
 		item = frappe.get_doc("Item", item_code)
 	return item
+
+def setup_membership():
+	# Get default company
+	company = frappe.get_doc("Company", erpnext.get_default_company())
+
+	# update non profit settings
+	settings = frappe.get_doc("Non Profit Settings")
+	# Enable razorpay
+	settings.enable_razorpay_for_memberships = 1
+	settings.billing_cycle = "Monthly"
+	settings.billing_frequency = 24
+	# Enable invoicing
+	settings.allow_invoicing = 1
+	settings.automate_membership_payment_entries = 1
+	settings.company = company.name
+	settings.donation_company = company.name
+	settings.membership_payment_account = company.default_cash_account
+	settings.membership_debit_account = company.default_receivable_account
+	settings.flags.ignore_mandatory = True
+	settings.save()
+
+	# make test plan
+	if not frappe.db.exists("Membership Type", "_rzpy_test_milythm"):
+		plan = frappe.new_doc("Membership Type")
+		plan.membership_type = "_rzpy_test_milythm"
+		plan.amount = 100
+		plan.razorpay_plan_id = "_rzpy_test_milythm"
+		plan.linked_item = create_item("_Test Item for Non Profit Membership").name
+		plan.insert()
+	else:
+		plan = frappe.get_doc("Membership Type", "_rzpy_test_milythm")
+
+	return plan
+
+def get_subscription_payload():
+	return {
+		"entity": "event",
+		"account_id": "acc_BFQ7uQEaa7j2z7",
+		"event": "subscription.halted",
+		"contains": [
+			"subscription"
+		],
+		"payload": {
+			"subscription": {
+				"entity": {
+					"id": "sub_DEX6xcJ1HSW4CR",
+					"entity": "subscription",
+					"plan_id": "_rzpy_test_milythm",
+					"customer_id": "cust_C0WlbKhp3aLA7W",
+					"status": "halted",
+					"notes": {
+						"Important": "Notes for Internal Reference"
+					},
+				}
+			}
+		}
+	}

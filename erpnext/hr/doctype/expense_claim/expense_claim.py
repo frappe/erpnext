@@ -6,7 +6,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, get_link_to_form, getdate
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name
+from erpnext.hr.utils import set_employee_name, share_doc_with_approver, validate_active_employee
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
@@ -23,6 +23,7 @@ class ExpenseClaim(BuyingController):
 			'make_payment_via_journal_entry')
 
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.validate_advances()
 		self.validate_sanctioned_amount()
 		self.calculate_total_amount()
@@ -37,29 +38,38 @@ class ExpenseClaim(BuyingController):
 		if self.task and not self.project:
 			self.project = frappe.db.get_value('Task', self.task, 'project')
 
-	def set_status(self):
-		if self.is_new():
-			if self.get('amended_from'):
-				self.status = 'Draft'
-			return
+	def set_status(self, update=False):
+		status = {
+			"0": "Draft",
+			"1": "Submitted",
+			"2": "Cancelled"
+		}[cstr(self.docstatus or 0)]
 
 		precision = self.precision('outstanding_amount')
 		outstanding_amount = flt(self.outstanding_amount, precision)
 
 		if self.docstatus == 2:
-			self.status = 'Cancelled'
+			status = 'Cancelled'
 		elif self.docstatus == 1:
 			if self.approval_status == 'Approved':
 				if self.is_paid or outstanding_amount <= 0:
-					self.status = 'Paid'
+					status = 'Paid'
 				elif outstanding_amount > 0:
-					self.status = 'Unpaid'
+					status = 'Unpaid'
 				else:
-					self.status = 'Submitted'
+					status = 'Submitted'
 			elif self.approval_status == 'Rejected':
-				self.status = 'Rejected'
+				status = 'Rejected'
 		else:
-			self.status = 'Draft'
+			status = 'Draft'
+    
+    if update:
+			self.db_set("status", status)
+		else:
+			self.status = status
+
+	def on_update(self):
+		share_doc_with_approver(self, self.expense_approver)
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
@@ -79,7 +89,7 @@ class ExpenseClaim(BuyingController):
 		if self.is_paid:
 			update_reimbursed_amount(self)
 
-		self.set_status()
+		self.set_status(update=True)
 		self.update_claimed_amount_in_employee_advance()
 
 	def on_cancel(self):
@@ -91,7 +101,6 @@ class ExpenseClaim(BuyingController):
 		if self.is_paid:
 			update_reimbursed_amount(self)
 
-		self.set_status()
 		self.update_claimed_amount_in_employee_advance()
 
 	def update_claimed_amount_in_employee_advance(self):

@@ -81,15 +81,8 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 			self.ip_record.reload()
 			discharge_patient(self.ip_record)
 
-		for entry in frappe.get_all('Inpatient Medication Entry'):
-			doc = frappe.get_doc('Inpatient Medication Entry', entry.name)
-			doc.cancel()
-			doc.delete()
-
-		for entry in frappe.get_all('Inpatient Medication Order'):
-			doc = frappe.get_doc('Inpatient Medication Order', entry.name)
-			doc.cancel()
-			doc.delete()
+		for doctype in ["Inpatient Medication Entry", "Inpatient Medication Order"]:
+			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
 
 def create_dosage_form():
 	if not frappe.db.exists('Dosage Form', 'Tablet'):

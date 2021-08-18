@@ -13,6 +13,7 @@ from erpnext.education.utils import OverlapError
 
 class CourseSchedulingTool(Document):
 
+	@frappe.whitelist()
 	def schedule_course(self):
 		"""Creates course schedules as per specified parameters"""
 
@@ -74,7 +75,7 @@ class CourseSchedulingTool(Document):
 		"""Validates if Course Start Date is greater than Course End Date"""
 		if self.course_start_date > self.course_end_date:
 			frappe.throw(
-				"Course Start Date cannot be greater than Course End Date.")
+				_("Course Start Date cannot be greater than Course End Date."))
 
 	def delete_course_schedule(self, rescheduled, reschedule_errors):
 		"""Delete all course schedule within the Date range and specified filters"""

@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Member', {
 	setup: function(frm) {
-		frappe.db.get_single_value("Membership Settings", "enable_razorpay").then(val => {
+		frappe.db.get_single_value('Non Profit Settings', 'enable_razorpay_for_memberships').then(val => {
 			if (val && (frm.doc.subscription_id || frm.doc.customer_id)) {
 				frm.set_df_property('razorpay_details_section', 'hidden', false);
 			}
