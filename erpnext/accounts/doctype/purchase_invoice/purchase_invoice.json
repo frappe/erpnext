@@ -96,6 +96,7 @@
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
@@ -1691,9 +1692,13 @@
    "label": "Per Received",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
+  },
+  {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
   },
   {
    "default": "0",

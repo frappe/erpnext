@@ -529,7 +529,7 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
-				self.unallocated_amount = (self.received_amount + total_deductions -
+				self.unallocated_amount = (self.base_received_amount + total_deductions -
 					self.base_total_allocated_amount) / self.source_exchange_rate
 				self.unallocated_amount -= included_taxes
 			elif self.payment_type == "Pay" \
