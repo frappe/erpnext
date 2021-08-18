@@ -2002,8 +2002,6 @@
    "fieldtype": "Small Text",
    "label": "Dispatch Address",
    "read_only": 1
-<<<<<<< HEAD
-=======
   },
   {
    "default": "0",
@@ -2012,7 +2010,6 @@
    "hidden": 1,
    "label": "Ignore Default Payment Terms Template",
    "read_only": 1
->>>>>>> ef792971f3 (fix:  Add ignore user perms to set_target_warehouse field in sales invoice (#26987))
   }
  ],
  "icon": "fa fa-file-text",
