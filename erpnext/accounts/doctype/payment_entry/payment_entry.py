@@ -45,7 +45,7 @@ class PaymentEntry(AccountsController):
 			self.party_account = self.paid_to
 			self.party_account_currency = self.paid_to_account_currency
 
-	def validate(self, on_reference_unlink=False):
+	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.validate_payment_type()
@@ -58,15 +58,16 @@ class PaymentEntry(AccountsController):
 		self.set_amounts()
 		self.validate_amounts()
 		self.apply_taxes()
+		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
 		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
 		self.validate_duplicate_entry()
-		if not on_reference_unlink:
-			self.validate_allocated_amount()
-			self.validate_paid_invoices()
+		self.validate_payment_type_with_outstanding()
+		self.validate_allocated_amount()
+		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
 
@@ -119,6 +120,11 @@ class PaymentEntry(AccountsController):
 
 			if not self.get(field):
 				self.set(field, bank_data.account)
+
+	def validate_payment_type_with_outstanding(self):
+		total_outstanding = sum(d.allocated_amount for d in self.get('references'))
+		if total_outstanding < 0 and self.party_type == 'Customer' and self.payment_type == 'Receive':
+			frappe.throw(_("Cannot receive from customer against negative outstanding"), title=_("Incorrect Payment Type"))
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
@@ -472,7 +478,6 @@ class PaymentEntry(AccountsController):
 	def set_amounts(self):
 		self.set_received_amount()
 		self.set_amounts_in_company_currency()
-		self.set_amounts_after_tax()
 		self.set_total_allocated_amount()
 		self.set_unallocated_amount()
 		self.set_difference_amount()
@@ -487,6 +492,8 @@ class PaymentEntry(AccountsController):
 
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
+		if self.paid_from_account_currency == self.paid_to_account_currency:
+			self.received_amount = self.paid_amount
 
 	def set_amounts_after_tax(self):
 		applicable_tax = 0
@@ -530,10 +537,8 @@ class PaymentEntry(AccountsController):
 				base_total_allocated_amount += flt(flt(d.allocated_amount) * flt(d.exchange_rate),
 					self.precision("base_paid_amount"))
 
-		# Do not use absolute values as only credit notes could be allocated
-		# and total allocated should be negative in that scenario
-		self.total_allocated_amount = total_allocated_amount
-		self.base_total_allocated_amount = base_total_allocated_amount
+		self.total_allocated_amount = abs(total_allocated_amount)
+		self.base_total_allocated_amount = abs(base_total_allocated_amount)
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
