@@ -44,6 +44,13 @@ def get_data(filters, period_list, partner_doctype):
 		if d.item_group not in item_groups:
 			item_groups.append(d.item_group)
 
+	if item_groups:
+		for item_group in item_groups:
+			if frappe.db.get_value("Item Group", {"name":item_group}, "is_group"):
+				for child_item_group in frappe.get_all("Item Group", {"parent_item_group":item_group}):
+					if child_item_group['name'] not in item_groups:
+						item_group.append(child_item_group['name'])
+
 	date_field = ("transaction_date"
 		if filters.get('doctype') == "Sales Order" else "posting_date")
 
