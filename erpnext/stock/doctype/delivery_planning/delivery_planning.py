@@ -272,7 +272,7 @@ class DeliveryPlanning(Document):
 									Left join `tabAddress` a  ON so.customer = a.address_title
 
 									where so.docstatus = 1
-									and (soi.qty - soi.delivered_qty ) = 0
+									and (soi.qty - soi.delivered_qty ) != 0
 									{conditions} """.format(conditions=conditions), as_dict=1)
 		print("00000000000.0000000000.000000",query)
 		for i in query:
