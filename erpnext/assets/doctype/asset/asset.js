@@ -103,11 +103,11 @@ frappe.ui.form.on('Asset', {
 					frm.trigger("create_asset_maintenance");
 				}, __("Manage"));
 			}
-		
+
 			frm.add_custom_button(__("Repair Asset"), function() {
 				frm.trigger("create_asset_repair");
 			}, __("Manage"));
-			
+
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Adjust Asset Value"), function() {
 					frm.trigger("create_asset_adjustment");
@@ -539,3 +539,54 @@ erpnext.asset.transfer_asset = function() {
 		}
 	});
 };
+
+frappe.tour['Asset'] = [
+	{
+		fieldname: 'naming_series',
+		title: 'Naming Series',
+		description: 'Select Naming Series based on which Asset ID will be generated'
+	},
+	{
+		fieldname: 'item_code',
+		title: 'Item',
+		description: 'Select an Asset Item'
+	},
+	{
+		fieldname: 'location',
+		title: 'Location',
+		description: 'Select a Location'
+	},
+	{
+		fieldname: 'is_existing_asset',
+		title: 'Is Existing Asset',
+		description: 'Check Is Existing Asset'
+	},
+	{
+		fieldname: 'available_for_use_date',
+		title: 'Available For Use Date',
+		description: 'Set Available for use date'
+	},
+	{
+		fieldname: 'gross_purchase_amount',
+		title: 'Gross Purchase Amount',
+		description: 'Set Gross purchase amount'
+	},
+	{
+		fieldname: 'purchase_date',
+		title: 'Purchase Date',
+		description: 'Set Purchase Date'
+	},
+	{
+		fieldname: 'calculate_depreciation',
+		title: 'Calculate Depreciation',
+		description: 'Check Calculate Depreciation'
+	},
+	{
+		fieldname: 'opening_accumulated_depreciation',
+		title: 'Accumulated Depreciation',
+		description: 'Enter depreciation which has already been booked for this asset'
+	}
+
+	// TODO: - Save and submit asset
+	// TODO: - Check depreciation schedule for remaining value
+]
