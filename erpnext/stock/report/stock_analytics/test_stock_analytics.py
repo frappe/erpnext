@@ -24,10 +24,10 @@ class TestStockAnalyticsReport(unittest.TestCase):
 
 	def test_get_period_date_ranges_yearly(self):
 
-		filters = _dict(range="Yearly", from_date="2020-12-28", to_date="2021-02-06")
+		filters = _dict(range="Yearly", from_date="2021-01-28", to_date="2021-02-06")
 
 		ranges = get_period_date_ranges(filters)
-		first_date = get_fiscal_year("2020-12-28")[1]
+		first_date = get_fiscal_year("2021-01-28")[1]
 		expected_ranges = [
 			[first_date, datetime.date(2021, 2, 6)],
 		]
