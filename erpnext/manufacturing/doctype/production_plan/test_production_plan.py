@@ -11,6 +11,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import get_sa
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests, get_warehouse_list
+from erpnext.controllers.item_variant import create_variant
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):
@@ -271,6 +272,60 @@ class TestProductionPlan(unittest.TestCase):
 
 		self.assertEqual(warehouses, expected_warehouses)
 
+	def test_get_sales_order_with_variant(self):
+		if not frappe.db.exists('Item', {"item_code": 'PIV'}):
+			item = create_item('PIV', valuation_rate = 100)
+			variant_settings = {
+				"attributes": [
+					{
+						"attribute": "Colour"
+					},
+				],
+				"has_variants": 1
+			}
+			item.update(variant_settings)
+			item.save()
+			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+		if not frappe.db.exists('BOM', {"item": 'PIV'}):
+			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+		else:
+			parent_bom = frappe.get_doc('BOM', {"item": 'PIV'})
+
+		if not frappe.db.exists('Item', {"item_code": 'PIV-RED'}):
+			variant = create_variant("PIV", {"Colour": "Red"})
+			variant.save()
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+		else:
+			variant = frappe.get_doc('Item', 'PIV-RED')
+		if not frappe.db.exists('BOM', {"item": 'PIV-RED'}):
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+
+		"""Testing when item variant has a BOM"""
+		so = make_sales_order(item_code="PIV-RED", qty=5)
+		pln = frappe.new_doc('Production Plan')
+		pln.company = so.company
+		pln.get_items_from = 'Sales Order'
+		pln.item_code = 'PIV-RED'
+		pln.get_open_sales_orders()
+		self.assertEqual(pln.sales_orders[0].sales_order, so.name)
+		pln.get_so_items()
+		self.assertEqual(pln.po_items[0].item_code, 'PIV-RED')
+		self.assertEqual(pln.po_items[0].bom_no, variant_bom.name)
+		so.cancel()
+		frappe.delete_doc('Sales Order', so.name)
+		variant_bom.cancel()
+		frappe.delete_doc('BOM', variant_bom.name)
+
+		"""Testing when item variant doesn't have a BOM"""
+		so = make_sales_order(item_code="PIV-RED", qty=5)
+		pln.get_open_sales_orders()
+		self.assertEqual(pln.sales_orders[0].sales_order, so.name)
+		pln.po_items = []
+		pln.get_so_items()
+		self.assertEqual(pln.po_items[0].item_code, 'PIV-RED')
+		self.assertEqual(pln.po_items[0].bom_no, parent_bom.name)
+
+		frappe.db.rollback()
 
 def create_production_plan(**args):
 	args = frappe._dict(args)
