@@ -8,7 +8,7 @@ from frappe import _, msgprint, scrub
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, date_diff,
-	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day)
+	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day, cint)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details
@@ -58,7 +58,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			customer_group=party_details.customer_group, supplier_group=party_details.supplier_group, tax_category=party_details.tax_category,
 			billing_address=party_address, shipping_address=shipping_address)
 
-	if fetch_payment_terms_template:
+	if cint(fetch_payment_terms_template):
 		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
 
 	if not party_details.get("currency"):

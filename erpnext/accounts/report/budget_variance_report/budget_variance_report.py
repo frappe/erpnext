@@ -38,8 +38,8 @@ def execute(filters=None):
 				GROUP BY parent''',{'dimension':[dimension]})
 			if DCC_allocation:
 				filters['budget_against_filter'] = [DCC_allocation[0][0]]
-				cam_map = get_dimension_account_month_map(filters)
-				dimension_items = cam_map.get(DCC_allocation[0][0])
+				ddc_cam_map = get_dimension_account_month_map(filters)
+				dimension_items = ddc_cam_map.get(DCC_allocation[0][0])
 				if dimension_items:
 					data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation[0][1])
 
@@ -48,7 +48,6 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
-
 	for account, monthwise_data in iteritems(dimension_items):
 		row = [dimension, account]
 		totals = [0, 0, 0]
