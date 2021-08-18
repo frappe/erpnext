@@ -38,6 +38,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 	onload: function(frm){
 
+
 		cur_frm.set_query("transporter", function() {
 			return {
 			   "filters": {
@@ -46,9 +47,11 @@ frappe.ui.form.on('Delivery Planning Item', {
 			}
 		});
 
-		if( frm.docstatus != 1)	{
-			console.log("frm.docstatus")
-		}
+		// if( frm.doc.docstatus == 0 )	{
+		// 	console.log("frm.docstatus")
+		// 	frm.set_df_property('split','hidden',0)
+		// 	frm.refresh_field("split")
+		// }
 
 		
 		// if(frm.transporter){
@@ -94,6 +97,25 @@ frappe.ui.form.on('Delivery Planning Item', {
 			var new_warehouse;
 			var new_transporter;
 			var new_date;
+
+			if(frm.doc.docstatus == 1){
+				
+				frappe.msgprint({
+				title: __('Notification'),
+				indicator: 'red',
+				message: __('Cannot Split Submitted Document')
+				});
+			}
+			else if(frm.doc.docstatus == 2){
+				
+				frappe.msgprint({
+				title: __('Notification'),
+				indicator: 'red',
+				message: __('Cannot Split Cancelled Document')
+				});
+		}
+
+		else{
 			let d = new frappe.ui.Dialog({
 			title: 'Split Planning Item',
 			fields: [
@@ -274,7 +296,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 				
 			}
 			});
-
+		}
 			d.show();
 
 		}
