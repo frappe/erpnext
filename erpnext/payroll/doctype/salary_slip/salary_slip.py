@@ -680,7 +680,6 @@ class SalarySlip(TransactionBase):
 				component_row.set(attr, component_data.get(attr))
 
 		if additional_salary:
-			component_row.is_recurring_additional_salary = is_recurring
 			if additional_salary.overwrite:
 				component_row.additional_amount = flt(flt(amount) - flt(component_row.get("default_amount", 0)),
 					component_row.precision("additional_amount"))
