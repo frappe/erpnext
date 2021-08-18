@@ -174,5 +174,23 @@ class TestSerialNo(unittest.TestCase):
 		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.purchase_document_no, se.name)
 
+	def test_serial_no_sanitation(self):
+		"Test if Serial No input is sanitised before entering the DB."
+		item_code = "_Test Serialized Item"
+		test_records = frappe.get_test_records('Stock Entry')
+
+		se = frappe.copy_doc(test_records[0])
+		se.get("items")[0].item_code = item_code
+		se.get("items")[0].qty = 3
+		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  "
+		se.get("items")[0].transfer_qty = 3
+		se.set_stock_entry_type()
+		se.insert()
+		se.submit()
+
+		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3")
+
+		frappe.db.rollback()
+
 	def tearDown(self):
 		frappe.db.rollback()

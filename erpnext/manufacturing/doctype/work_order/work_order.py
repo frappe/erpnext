@@ -655,7 +655,7 @@ class WorkOrder(Document):
 				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
 					self.append('required_items', {
 						'rate': item.rate,
-						'amount': item.amount,
+						'amount': item.rate * item.qty,
 						'operation': item.operation or operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
