@@ -696,7 +696,7 @@ class PaymentEntry(AccountsController):
 				"cost_center": self.cost_center
 			}, item=self)
 
-			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
+			dr_or_cr = "credit" if self.payment_type == 'Receive' else "debit"
 
 			for d in self.get("references"):
 				cost_center = self.cost_center
