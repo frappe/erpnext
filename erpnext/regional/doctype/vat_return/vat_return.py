@@ -187,7 +187,10 @@ class VATRETURN(Document):
 		inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 		where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
 		and pii.is_fixed_asset=1 and pd.docstatus=1   and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date)) 
-		End as capital_tax
+		End as capital_tax,
+		(select count(name) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
+			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.is_return=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
+			) as is_debit_advice
 		from
 		`tabPurchase Invoice` as si
 		where si.docstatus=1
