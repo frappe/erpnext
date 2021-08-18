@@ -859,7 +859,9 @@
 				padding-bottom: var(--margin-md);
 
 				.invoice-fields {
-					overflow-y: visible;
+					overflow-y: scroll;
+					height: 100%;
+					padding-right: var(--padding-sm);
 				}
 			}
 

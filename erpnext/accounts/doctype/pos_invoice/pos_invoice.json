@@ -100,7 +100,6 @@
   "loyalty_redemption_cost_center",
   "section_break_49",
   "coupon_code",
-  "coupon_code_name",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_51",
@@ -1559,17 +1558,12 @@
    "label": "Coupon Code",
    "options": "Coupon Code",
    "print_hide": 1
-  },
-  {
-   "fieldname": "coupon_code_name",
-   "fieldtype": "Data",
-   "label": "Coupon Code Name"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-16 20:38:01.731385",
+ "modified": "2021-08-18 15:48:49.686667",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
