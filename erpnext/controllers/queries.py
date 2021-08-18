@@ -526,6 +526,9 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	if meta.is_tree:
 		query_filters.append(['is_group', '=', 0])
 
+	if meta.has_field('disabled'):
+		query_filters.append(['disabled', '!=', 1])
+
 	if meta.has_field('company'):
 		query_filters.append(['company', '=', filters.get('company')])
 
