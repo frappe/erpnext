@@ -3,8 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
+import datetime
 from frappe import _, scrub
-from frappe.utils import getdate, flt
+from frappe.utils import flt, getdate, get_quarter_start, get_first_day_of_week
+from frappe.utils import get_first_day as get_first_day_of_month
 from erpnext.stock.report.stock_balance.stock_balance import (get_items, get_stock_ledger_entries, get_item_details)
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
@@ -71,7 +73,8 @@ def get_columns(filters):
 
 def get_period_date_ranges(filters):
 		from dateutil.relativedelta import relativedelta
-		from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
+		from_date = round_down_to_nearest_frequency(filters.from_date, filters.range)
+		to_date = getdate(filters.to_date)
 
 		increment = {
 			"Monthly": 1,
@@ -96,6 +99,31 @@ def get_period_date_ranges(filters):
 				break
 
 		return periodic_daterange
+
+
+def round_down_to_nearest_frequency(date, frequency: str) -> datetime.datetime:
+	"""Rounds down the date to nearest frequency unit.
+	example:
+
+	>>> round_down_to_nearest_unit("2021-02-21", "Monthly")
+	datetime.datetime(2021, 2, 1)
+
+	>>> round_down_to_nearest_unit("2021-08-21", "Yearly")
+	datetime.datetime(2021, 1, 1)
+	"""
+
+	def _get_first_day_of_fiscal_year(date):
+		fiscal_year = get_fiscal_year(date)
+		return fiscal_year and fiscal_year[1] or date
+
+	round_down_function = {
+		"Monthly": get_first_day_of_month,
+		"Quarterly": get_quarter_start,
+		"Weekly": get_first_day_of_week,
+		"Yearly": _get_first_day_of_fiscal_year,
+	}.get(frequency, getdate)
+	return round_down_function(date)
+
 
 def get_period(posting_date, filters):
 	months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -208,7 +236,3 @@ def get_chart_data(columns):
 	chart["type"] = "line"
 
 	return chart
-
-
-
-
