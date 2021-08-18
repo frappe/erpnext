@@ -642,7 +642,8 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
 				'depends_on':'eval:in_list(["SEZ", "Overseas"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas"], doc.gst_category)'
 			}
 		],
 		'Customer': [
@@ -660,7 +661,8 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)'
 			}
 		],
 		'Member': [
