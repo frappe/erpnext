@@ -326,7 +326,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, pr2.submit)
 		frappe.db.rollback()
 
-
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
 		self.assertEqual(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no, "supplier"),
