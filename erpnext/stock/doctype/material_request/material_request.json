@@ -4,6 +4,7 @@
  "creation": "2013-03-07 14:48:38",
  "doctype": "DocType",
  "document_type": "Document",
+ "engine": "InnoDB",
  "field_order": [
   "type_section",
   "naming_series",
@@ -31,7 +32,9 @@
   "tc_name",
   "terms",
   "reference",
-  "job_card"
+  "job_card",
+  "description_section",
+  "description"
  ],
  "fields": [
   {
@@ -270,12 +273,21 @@
    "options": "Job Card",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2019-04-29 11:45:07.570292",
+ "modified": "2021-08-17 16:30:38.391864",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
