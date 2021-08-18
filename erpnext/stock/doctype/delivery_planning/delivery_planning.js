@@ -3,6 +3,20 @@
 
 frappe.ui.form.on('Delivery Planning', {
 
+	// before_cancel: function(frm){
+	// 	console.log(" Cancelling all DPI")
+	// 	frm.call({
+	// 		method:'on_cancel_all',
+	// 		doc: frm.doc,
+	// 		callback: function(r){
+	// 			if(r.message){
+	// 				console.log("==== before save ==========")
+	// 			}
+	// 		}
+				
+	// 	});
+	// },
+
 	before_save: function(frm){
 		if(frm.doc.delivery_date_from > frm.doc.delivery_date_to)
 		{ frappe.throw(__('Delivery Date To should be greater or equal to Date From '))}

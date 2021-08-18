@@ -343,6 +343,16 @@ frappe.listview_settings['Delivery Planning Item'] = {
 					message: __('Cannot Split Submitted Document')
 					});
 			}
+
+			else if(doc.docstatus == 2){
+				
+				frappe.msgprint({
+				title: __('Notification'),
+				indicator: 'red',
+				message: __('Cannot Split Cancelled Document')
+				});
+		}
+
 			else if( doc.ordered_qty <=1){
 				frappe.msgprint({
 					title: __('Notification'),

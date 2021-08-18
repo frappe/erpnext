@@ -778,7 +778,7 @@ class DeliveryPlanning(Document):
 													["item_code",
 													"item_name",
 													"qty_to_deliver",
-													"ordered_qty"
+													"ordered_qty",
 													"weight_to_deliver",
 													"uom",
 													"conversion_factor",
@@ -1075,10 +1075,63 @@ class DeliveryPlanning(Document):
 
 		else : return 0
 
-	def before_cancel(self):
-		print('This is before_cancel')
+	@frappe.whitelist()
+	def on_cancel_all(self):
+		print("00000n this is after cancel -------------==========---------")	
 		dpi = frappe.get_all(doctype='Delivery Planning Item',
 							  filters={"related_delivey_planning" : self.name})
+		if(dpi):
+			for d in dpi:	
+				doc = frappe.get_doc('Delivery Planning Item', d.name)	
+				doc.cancel()	
+
+			return 1 	
+
+
+	# def after_cancel(self):
+	# 	print("888888888 this is after cancel")	
+
+	# 	dpi = frappe.get_all(doctype='Delivery Planning Item',
+	# 						  filters={"related_delivey_planning" : self.name})
+			
+	# 	if dpi: 
+	# 		for d in dpi:	 
+	# 			doc = frappe.get_doc('Delivery Planning Item', d.name)	
+	# 			doc.cancel()			  
+
+	def before_cancel(self):
+		print('******111****************This is before_cancel')
+		dpi = frappe.get_all(doctype='Delivery Planning Item',
+							  filters={"related_delivey_planning" : self.name},fields=['*'])
+
+		if dpi:
+			for i in dpi:
+
+				if i.qty_to_deliver:
+					print('*********22*************This is before_cancel', i.qty_to_deliver)
+					delivered_qty = frappe.db.get_value('Sales Order Item', i.item_dname,'delivered_qty')
+					delivered_qty -= i.qty_to_deliver
+					frappe.db.set_value('Sales Order Item', i.item_dname, {
+									'delivered_qty': delivered_qty
+									},  update_modified=False)	
+
+				# if i.pick_list:
+				# 	print('*********33*************This is before_cancel', i.qty_to_deliver)
+				# 	frappe.db.set_value('Delivery Planning', i.item_dname, {
+				# 					'docstatus': 2
+				# 					},  update_modified=False)	
+
+
+			# for d in dpi:
+			# 	ddpi = frappe.get_doc('Delivery Planning Item', d.name)
+			# 	if ddpi.docstatus == 1:
+			# 		print("-------44--- delete ", ddpi.name , d.name)
+			# 		# ddpi.delete()
+			# 		# frappe.delete_doc('Delivery Planning Item',d.name, force = 1)
+			# 		# frappe.db.delete('Delivery Planning Item', {'name': d.name})
+			# 		ddpi.cancel()	
+			# 		print("--------------------------------------ddpi.cancel---",ddpi.docstatus)
+			# 		# ddpi.delete()						
 
 		tdpi = frappe.get_all(doctype='Transporter Wise Planning Item',
 							  filters={"related_delivery_planning" : self.name})
@@ -1096,13 +1149,7 @@ class DeliveryPlanning(Document):
 				trans = frappe.get_doc('Transporter Wise Planning Item', t.name)
 				trans.delete()
 
-		# if dpi:
-		# 	for d in dpi:
-		# 		# ddpi = frappe.get_doc('Delivery Planning Item', d.name)
-		# 		# ddpi.delete()
-		# 		# frappe.delete_doc('Delivery Planning Item',d.name, force = 1)
-		# 		# frappe.db.delete('Delivery Planning Item', {'name': d.name})
-		# 		d.cancel()
+		
 
 	@frappe.whitelist()
 	def check_po_in_dpi(self):
