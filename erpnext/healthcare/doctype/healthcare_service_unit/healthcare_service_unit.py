@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 
 from frappe.utils.nestedset import NestedSet
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, cstr
 import frappe
 from frappe import _
 import json

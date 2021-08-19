@@ -366,7 +366,7 @@ def get_available_slots(practitioner_doc, date):
 				}
 
 				if schedule_entry.service_unit:
-					slot_name = f'{schedule_entry.schedule} - {schedule_entry.service_unit}'
+					slot_name = f'{schedule_entry.schedule}'
 					allow_overlap, service_unit_capacity = frappe.get_value('Healthcare Service Unit', schedule_entry.service_unit, ['overlap_appointments', 'service_unit_capacity'])
 					if not allow_overlap:
 						# fetch all appointments to service unit
@@ -382,8 +382,8 @@ def get_available_slots(practitioner_doc, date):
 					filters=filters,
 					fields=['name', 'appointment_time', 'duration', 'status'])
 
-				slot_details.append({'slot_name':slot_name, 'service_unit':schedule_entry.service_unit,
-					'avail_slot':available_slots, 'appointments': appointments,  'allow_overlap': allow_overlap, 'service_unit_capacity':service_unit_capacity})
+				slot_details.append({'slot_name': slot_name, 'service_unit': schedule_entry.service_unit, 'avail_slot': available_slots,
+					'appointments': appointments,  'allow_overlap': allow_overlap, 'service_unit_capacity': service_unit_capacity})
 
 	return slot_details
 
