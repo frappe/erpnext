@@ -16,4 +16,3 @@ class TestAssessmentResult(unittest.TestCase):
 
 		grade = get_grade("_Test Grading Scale", 70)
 		self.assertEqual("B", grade)
-		

@@ -66,6 +66,3 @@ def execute():
 
 		frappe.db.sql(""" UPDATE `tabPacked Item` set target_warehouse = null
 			WHERE creation > '2020-04-16' and docstatus < 2 and parenttype = 'Sales Order' """)
-
-
-

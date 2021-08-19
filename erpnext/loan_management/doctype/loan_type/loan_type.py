@@ -21,4 +21,3 @@ class LoanType(Document):
 
 		if self.get('loan_account') == self.get('payment_account'):
 			frappe.throw(_('Loan Account and Payment Account cannot be same'))
-

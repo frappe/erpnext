@@ -203,5 +203,3 @@ def get_disbursal_amount(loan, on_current_security_price=0):
 		disbursal_amount = loan_details.loan_amount - loan_details.disbursed_amount
 
 	return disbursal_amount
-
-
