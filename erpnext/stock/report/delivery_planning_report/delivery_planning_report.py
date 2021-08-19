@@ -111,7 +111,7 @@ def get_columns(filters):
 			{
 				"fieldname": "delivery_date",
 				"label": "Delivery Date",
-				"width": 80,
+				"width": 100,
 				"fieldtype": "Date"
 			},
 		]
@@ -172,7 +172,7 @@ def get_columns(filters):
 			{
 				"fieldname": "delivery_date",
 				"label": "Delivery Date",
-				"width": 80,
+				"width": 100,
 				"fieldtype": "Date"
 			},
 		]
@@ -206,6 +206,24 @@ def get_columns(filters):
 			"fieldtype": "Float"
 		},
 		{
+			"fieldname": "weight_ordered",
+			"label": "Weight Ordered",
+			"width": 80,
+			"fieldtype": "Float"
+		},
+		{
+			"fieldname": "planned_delivery_weight",
+			"label": "Planned Delivery Weight",
+			"width": 80,
+			"fieldtype": "Float"
+		},
+		{
+			"fieldname": "actual_delivery_weight",
+			"label": "Actual Delivery Weight",
+			"width": 80,
+			"fieldtype": "Float"
+		},
+		{
 			"fieldname": "planned_date",
 			"label": "Planned Delivery Date",
 			"width": 100,
@@ -214,7 +232,7 @@ def get_columns(filters):
 		{
 			"fieldname": "delivery_note",
 			"label": "Delivery Note",
-			"width": 200,
+			"width": 160,
 			"fieldtype": "Link",
 			"options": "Delivery Note"
 		},
@@ -233,32 +251,15 @@ def get_columns(filters):
 		{
 			"fieldname": "pick_list",
 			"label": "Pick List",
-			"width": 200,
+			"width": 170,
 			"fieldtype": "Link",
 			"options": "Pick List"
 		},
-		{
-			"fieldname": "weight_ordered",
-			"label": "Weight Ordered",
-			"width": 80,
-			"fieldtype": "Float"
-		},
-		{
-			"fieldname": "planned_delivery_weight",
-			"label": "Planned Delivery Weight",
-			"width": 80,
-			"fieldtype": "Float"
-		},
-		{
-			"fieldname": "actual_delivery_weight",
-			"label": "Actual Delivery Weight",
-			"width": 50,
-			"fieldtype": "Float"
-		},
+		
 		{
 			"fieldname": "purchase_order",
 			"label": "Purchase Order",
-			"width": 200,
+			"width": 170,
 			"fieldtype": "Link",
 			"options": "Purchase Order"
 		},
@@ -278,7 +279,7 @@ def get_columns(filters):
 		{
 			"fieldname": "item_planning_id",
 			"label": "Item Planning ID",
-			"width": 200,
+			"width": 160,
 			"fieldtype": "Link",
 			"options": "Delivery Planning Item"
 		},
@@ -314,11 +315,20 @@ def get_data(conditions, group_by, filters):
 				dpi.planned_date as planned_date,
 				dpi.delivery_note,
 				dn.posting_date as delivery_note_date,
-				DATEDIFF(dpi.planned_date, dpi.delivery_date) as delay_days,
+					CASE 
+					WHEN (DATEDIFF(dpi.planned_date, dpi.delivery_date)) > 0 
+					THEN DATEDIFF(dpi.planned_date, dpi.delivery_date)
+					Else 0 
+					END as delay_days,
 				dpi.pick_list,
-				dpi.weight_to_deliver as weight_ordered,
+				(dpi.ordered_qty *  dpi.weight_per_unit)as weight_ordered,
 				dpi.weight_to_deliver as planned_delivery_weight,
-				(dni.qty * dpi.weight_per_unit) as actual_delivery_weight,
+					CASE
+					WHEN dni.qty THEN (dni.qty * dpi.weight_per_unit)
+					WHEN poi.qty THEN (poi.qty * dpi.weight_per_unit)
+					ELSE 0
+					END AS actual_delivery_weight,
+				
 				dpi.purchase_order as purchase_order,
 				dpi.supplier,
 				dpi.supplier_name,
@@ -331,7 +341,10 @@ def get_data(conditions, group_by, filters):
 				Left join `tabDelivery Note` dn ON dn.name = dpi.delivery_note
 				left join 	`tabDelivery Note Item` dni on dni.parent = dpi.delivery_note 
 				and dni.item_code = dpi.item_code
-			
+	
+                left join `tabPurchase Order` po ON po.name = dpi.purchase_order
+                Left join `tabPurchase Order Item` poi ON poi.parent = dpi.purchase_order
+                and poi.item_code = dpi.item_code
 
 				where dpi.docstatus = 1  AND dpi.d_status = "Complete"
 			
@@ -409,7 +422,7 @@ def get_data(conditions, group_by, filters):
 			qty_to_deliver += float(d.get('qty_to_deliver'))
 			weight_ordered += float(d.get('weight_ordered'))
 			planned_delivery_weight += float(d.get('planned_delivery_weight'))
-			# actual_delivery_weight += float(d.get('actual_delivery_weight'))
+			actual_delivery_weight += float(d.get('actual_delivery_weight'))
 			data.append(dd)		
 		dd = frappe._dict({
 				'transporter' : None,
@@ -429,7 +442,7 @@ def get_data(conditions, group_by, filters):
 				 'pick_list' : None,
 				 'weight_ordered' : weight_ordered,
 				 'planned_delivery_weight' : planned_delivery_weight,
-				 'actual_delivery_weight' : None,
+				 'actual_delivery_weight' : actual_delivery_weight,
 				 'purchase_order' : None,
 				 'supplier' : None,
 				 'supplier_name' : None,
