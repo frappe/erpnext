@@ -46,17 +46,12 @@ def execute(filters=None):
 
 		for src in gross_profit_data.si_list:	
 			row = frappe._dict()
-			row['currency'] = filters.currency
+			row.indent = src.indent
+			row.parent_invoice = src.parent_invoice
+			row.currency = filters.currency
 
 			for col in group_wise_columns.get(scrub(filters.group_by)):
 				row[column_names[col]] = src.get(col)
-
-			if row.item_code:
-				row.indent = 1.0
-				row.parent_invoice = src.parent_invoice
-			else:
-				row.indent = 0.0
-				row.parent_invoice = ''
 
 			data.append(row)
 
@@ -412,7 +407,9 @@ class GrossProfitGenerator(object):
 					'item_row': None, 
 					'is_return': row.is_return, 
 					'cost_center': row.cost_center,
-					'base_net_amount': 0
+					'base_net_amount': 0,
+					'indent': 0.0,
+					'parent_invoice': ''
 				})
 
 				self.si_list.insert(index, invoice)
@@ -422,7 +419,8 @@ class GrossProfitGenerator(object):
 				row.indent = 1.0
 				row.parent_invoice = row.parent
 				row.parent = row.item_code
-				self.si_list[0].base_net_amount += row.base_net_amount
+				# ind = parents_index-1 if parents_index > 0 else parents_index
+				# self.si_list[ind].base_net_amount += row.base_net_amount
 
 	def load_stock_ledger_entries(self):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
