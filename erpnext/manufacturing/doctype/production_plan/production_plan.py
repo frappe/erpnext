@@ -297,7 +297,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.total_produced_qty == self.total_planned_qty:
+			if self.total_produced_qty >= self.total_planned_qty:
 				self.status = "Completed"
 
 		if self.status != 'Completed':
