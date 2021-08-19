@@ -39,18 +39,44 @@ class PatientEncounter(Document):
 	def get_applicable_treatment_plans(encounter):
 		patient = frappe.get_doc('Patient', encounter['patient'])
 
-		filters = {}
+		plans = None
+		plan_filters = {}
+		plan_filters['name'] = ['in', []]
 
 		age = patient.age
 		if age:
-			filters['patient_age_from'] = ['>=', age.years]
-			filters['patient_age_to'] = ['<=', age.years]
+			plan_filters['patient_age_from'] = ['>=', age.years]
+			plan_filters['patient_age_to'] = ['<=', age.years]
 
 		gender = patient.sex
 		if gender:
-			filters['gender'] = gender
+			plan_filters['gender'] = gender
 
-		plans = frappe.get_list('Treatment Plan Template', fields='*', filters=filters)
+		diagnosis = [_diagnosis['diagnosis'] for _diagnosis in encounter['diagnosis']]
+		if diagnosis:
+			filters = [
+				['diagnosis', 'in', diagnosis],
+				['parenttype', '=', 'Treatment Plan Template'],
+			]
+			diagnosis = frappe.get_list('Patient Encounter Diagnosis', filters=filters, fields='*')
+			plan_names = [_diagnosis['parent'] for _diagnosis in diagnosis]
+			plan_filters['name'][1].extend(plan_names)
+
+		symptoms = [symptom['complaint'] for symptom in encounter['symptoms']]
+		if symptoms:
+			filters = [
+				['complaint', 'in', symptoms],
+				['parenttype', '=', 'Treatment Plan Template'],
+			]
+			symptoms = frappe.get_list('Patient Encounter Symptom', filters=filters, fields='*')
+			plan_names = [symptom['parent'] for symptom in symptoms]
+			plan_filters['name'][1].extend(plan_names)
+
+		if not plan_filters['name'][1]:
+			plan_filters.pop('name')
+
+		plans = frappe.get_list('Treatment Plan Template', fields='*', filters=plan_filters)
+
 		return plans
 
 	@frappe.whitelist()
