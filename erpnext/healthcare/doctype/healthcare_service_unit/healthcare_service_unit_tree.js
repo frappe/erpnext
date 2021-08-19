@@ -168,7 +168,7 @@ frappe.treeview_settings['Healthcare Service Unit'] = {
 										indicator: 'green'
 									});
 								} else {
-									frappe.msgprint('Could not create Service Units');
+									frappe.msgprint(__('Could not create Service Units'));
 								}
 							},
 							freeze: true,

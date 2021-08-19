@@ -109,7 +109,7 @@ def add_multiple_service_units(parent, data):
 		service_unit_doc = frappe.get_doc(service_unit)
 		try:
 			service_unit_doc.insert()
-		except Exception as e:
+		except Exception:
 			failed_list.append(service_unit['healthcare_service_unit_name'])
 
 	return failed_list
