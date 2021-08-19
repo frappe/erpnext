@@ -261,6 +261,7 @@ class SalesInvoice(SellingController):
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
+		self.validate_tax_id_mandatory()
 
 		if not self.auto_repeat:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -328,9 +329,14 @@ class SalesInvoice(SellingController):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
+	def validate_tax_id_mandatory(self):
+		restricted = frappe.get_cached_value("Accounts Settings", None, 'restrict_sales_tax_invoice_without_tax_id')
+		if self.get('has_stin') and restricted:
+			if not self.get('tax_id') and not self.get('tax_cnic') and not self.get('tax_strn'):
+				frappe.throw(_("Customer Tax ID or Identification Number is mandatory for Sales Tax Invoice"))
+
 	def before_cancel(self):
 		self.update_time_sheet(None)
-
 
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()

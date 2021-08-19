@@ -25,6 +25,7 @@
   "allow_project_in_entry_of_bs_account",
   "add_taxes_from_item_tax_template",
   "allow_invoicing_without_updating_stock",
+  "restrict_sales_tax_invoice_without_tax_id",
   "automatically_fetch_payment_terms",
   "print_settings",
   "show_inclusive_tax_in_print",
@@ -216,12 +217,18 @@
    "fieldname": "validate_over_billing_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Validate Over Billing in Purchase Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_sales_tax_invoice_without_tax_id",
+   "fieldtype": "Check",
+   "label": "Restrict Sales Tax Invoice Without Customer Tax ID"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2021-01-23 11:46:26.200226",
+ "modified": "2021-08-19 23:35:11.170172",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
