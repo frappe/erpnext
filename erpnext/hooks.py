@@ -251,7 +251,7 @@ doc_events = {
 			"erpnext.support.doctype.issue.issue.set_first_response_time"
 		]
 	},
-	("Sales Taxes and Charges Template", 'Price List'): {
+	"Sales Taxes and Charges Template": {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
 	"Website Settings": {

@@ -21,12 +21,12 @@ class TestShoppingCartSettings(unittest.TestCase):
 
 		cart_settings = self.get_cart_settings()
 		cart_settings.price_list = "_Test Price List Rest of the World"
-		self.assertRaises(ShoppingCartSetupError, cart_settings.validate_exchange_rates_exist)
+		self.assertRaises(ShoppingCartSetupError, cart_settings.validate_price_list_exchange_rate)
 
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records as \
 			currency_exchange_records
 		frappe.get_doc(currency_exchange_records[0]).insert()
-		cart_settings.validate_exchange_rates_exist()
+		cart_settings.validate_price_list_exchange_rate()
 
 	def test_tax_rule_validation(self):
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 0")
