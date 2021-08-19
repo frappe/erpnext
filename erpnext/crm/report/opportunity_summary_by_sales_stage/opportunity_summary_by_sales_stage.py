@@ -1,10 +1,15 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from math import inf
+import re
 import frappe
+import pandas
 from frappe import _
 from six import iteritems
 import json
+from frappe.utils import flt
+from erpnext.setup.utils import get_exchange_rate
 
 
 def execute(filters=None):
@@ -18,8 +23,8 @@ class OpportunitySummaryBySalesStage(object):
 	def run(self):
 		self.get_columns()
 		self.get_data()
+		self.chart = {}
 		self.get_chart_data()
-
 		return self.columns, self.data, None, self.chart
 
 	def get_columns(self):
@@ -45,7 +50,6 @@ class OpportunitySummaryBySalesStage(object):
 				'fieldname': 'opportunity_type',
 				'width': 200
 			})
-
 		
 		self.sales_stage_list = frappe.db.get_list("Sales Stage",pluck="name")
 		for sales_stage in self.sales_stage_list:
@@ -53,6 +57,7 @@ class OpportunitySummaryBySalesStage(object):
 				self.columns.append({
 					'label': _(sales_stage),
 					'fieldname': sales_stage,
+					'fieldtype': 'Int',
 					'width':150
 				})
 			if self.filters.get('data_based_on') == 'Amount':
@@ -68,163 +73,105 @@ class OpportunitySummaryBySalesStage(object):
 	def get_data(self):
 		self.data = []
 
-		sql = {
+		based_on = {
 			'Opportunity Owner': "_assign",
 			'Source': "source",
-			'Opportunity Source': "opportunity_type"
+			'Opportunity Type': "opportunity_type"
 		}[self.filters.get('based_on')]
 
-		self.get_data_query(sql)
+		data_based_on = {
+			'Number': "count(name) as count",
+			'Amount': "opportunity_amount as amount",
+		}[self.filters.get('data_based_on')]
+
+		self.get_data_query(based_on,data_based_on)
 
 		self.get_rows()
 	
-	def get_data_query(self,sql):
+	def get_data_query(self,based_on,data_based_on):
 		filter_data = self.filters.get('status')
-		
-		if self.filters.get("data_based_on") == "Number":
-			if self.filters.get('status'):
-				self.filters.update({'status':tuple(filter_data)})
-			self.query_result = frappe.db.sql("""select sales_stage,count(name) as count,{sql} from tabOpportunity
-			where {conditions} 
-			group by sales_stage,{sql}""".format(conditions=self.get_conditions(),sql=sql),self.filters,as_dict=1)
 
-		if self.filters.get("data_based_on") == "Amount":
-			if self.filters.get('status'):
-				self.filters.update({'status':tuple(filter_data)})
-			self.query_result = frappe.db.sql("""select sales_stage,sum(opportunity_amount) as amount,{sql} from tabOpportunity
-			where {conditions} 
-			group by sales_stage,{sql}""".format(conditions=self.get_conditions(),sql=sql),self.filters,as_dict=1)
-		
+		if filter_data:
+			self.filters.update({'status':tuple(filter_data)})
+
+		if self.filters.get('data_based_on') == 'Number':
+			self.query_result = frappe.db.sql("""select sales_stage,{select},{sql},currency from tabOpportunity
+				where {conditions} 
+				group by sales_stage,{sql}""".format(conditions=self.get_conditions(),sql=based_on,select=data_based_on),self.filters,as_dict=1)
+
+		if self.filters.get('data_based_on') == 'Amount':
+			self.query_result = frappe.db.sql("""select sales_stage,{based_on},currency,{data_based_on} from tabOpportunity
+				where {conditions} """.format(conditions=self.get_conditions(),based_on=based_on,data_based_on=data_based_on),self.filters,as_dict=1)
+
+			self.convert_to_base_currency()
+			dataframe = pandas.DataFrame.from_records(self.query_result)
+			result = dataframe.groupby(['sales_stage',based_on],as_index=False)['amount'].sum()
+			self.grouped_data = []
+
+			for i in range(len(result['amount'])):
+				self.grouped_data.append({'sales_stage': result['sales_stage'][i], based_on : result[based_on][i], 'amount': result['amount'][i]})
+			
+			self.query_result = self.grouped_data
+
 	def get_rows(self):
 		self.data = []
 		self.get_formatted_data()
 		
 		for based_on,data in iteritems(self.formatted_data):
-			if self.filters.get("based_on") == "Opportunity Owner":
-				row = {'opportunity_owner': based_on}
 
-				if self.filters.get("data_based_on") == "Number":
-					for d in self.query_result:
-						sales_stage = d.get('sales_stage')
-						count = data.get(sales_stage)
-						row[sales_stage] = count
+			row_based_on={
+				'Opportunity Owner': 'opportunity_owner',
+				'Source': 'source',
+				'Opportunity Type': 'opportunity_type'
+			}[self.filters.get('based_on')]
 
-				if self.filters.get("data_based_on") == "Amount":
-					for d in self.query_result:
-						sales_stage = d.get('sales_stage')
-						amount = data.get(sales_stage)
-						if amount:
-							row[sales_stage] = amount
+			row = {row_based_on: based_on}
 
-			if self.filters.get("based_on") == "Source":
-				row = {'source': based_on}
-
-				if self.filters.get("data_based_on") == "Number":
-					for d in self.query_result:
-						sales_stage = d.get('sales_stage')
-						count = data.get(sales_stage)
-						row[sales_stage] = count
-
-				if self.filters.get("data_based_on") == "Amount":
-					for d in self.query_result:
-						sales_stage = d.get('sales_stage')
-						amount = data.get(sales_stage)
-						if amount:
-							row[sales_stage] = amount
-
-			if self.filters.get("based_on") == "Opportunity Type":
-				row = {'opportunity_type': based_on}
-		
-				if self.filters.get("data_based_on") == "Number":
-					for d in self.query_result:
-						sales_stage = d.get('sales_stage')
-						count = data.get(sales_stage)
-						row[sales_stage] = count
-
-				if self.filters.get("data_based_on") == "Amount":
-					for d in self.query_result:
-						sales_stage = d.get('sales_stage')
-						amount = data.get(sales_stage)
-						if amount:
-							row[sales_stage] = amount
-
+			for d in self.query_result:
+				sales_stage = d.get('sales_stage')
+				row[sales_stage] = data.get(sales_stage)
+				
 			self.data.append(row)
 
 	def get_formatted_data(self):
 		self.formatted_data = frappe._dict()
 
 		for d in self.query_result:
+			data_based_on ={
+				'Number': 'count',
+				'Amount': 'amount'
+			}[self.filters.get('data_based_on')]
+
+			based_on ={
+				'Opportunity Owner': '_assign',
+				'Source': 'source',
+				'Opportunity Type': 'opportunity_type'
+			}[self.filters.get('based_on')]
+
 			if self.filters.get("based_on") == "Opportunity Owner":
-				if self.filters.get("data_based_on") == "Number":
-					temp = json.loads(d.get("_assign"))
-					if temp:
-						if len(temp) > 1:
-							sales_stage = d.get('sales_stage')
-							count = d.get('count')
-							for owner in temp:
-								self.helper(owner,sales_stage,count)
+				temp = json.loads(d.get(based_on))
+				sales_stage = d.get('sales_stage')
+				count = d.get(data_based_on)
+				if temp:
+					if len(temp) > 1:
+						for value in temp:
+							self.insert_formatted_data(value,sales_stage,count)
 
-						else:
-							owner = temp[0]
-							sales_stage = d.get('sales_stage')
-							count = d.get('count')
-							self.helper(owner,sales_stage,count)
 					else:
-						owner = "Not Assigned"
-						sales_stage = d.get('sales_stage')
-						count = d.get('count')
-						self.helper(owner,sales_stage,count)
+						value = temp[0]
+						self.insert_formatted_data(value,sales_stage,count)
 
-
-				if self.filters.get("data_based_on") == "Amount":
-
-					temp = json.loads(d.get("_assign"))
-					if temp:
-						if len(temp) > 1:
-							sales_stage = d.get('sales_stage')
-							amount = d.get('amount')
-							for owner in temp:
-								self.helper(owner,sales_stage,amount)
-
-						else:
-							owner = temp[0]
-							sales_stage = d.get('sales_stage')
-							amount = d.get('amount')
-							self.helper(owner,sales_stage,amount)
-					else:
-						owner = "Not Assigned"
-						sales_stage = d.get('sales_stage')
-						amount = d.get('amount')
-						self.helper(owner,sales_stage,amount)
+				else:
+					value = "Not Assigned"
+					self.insert_formatted_data(value,sales_stage,count)
 						
+			else:
+				value = d.get(based_on)
+				sales_stage = d.get('sales_stage')
+				count = d.get(data_based_on)
+				self.insert_formatted_data(value,sales_stage,count)
 
-			if self.filters.get("based_on") == "Source":
-				if self.filters.get("data_based_on") == "Number":
-					source = d.get('source')
-					sales_stage = d.get('sales_stage')
-					count = d.get('count')
-					self.helper(source,sales_stage,count)
-
-				if self.filters.get("data_based_on") == "Amount":
-					source = d.get('source')
-					sales_stage = d.get('sales_stage')
-					amount = d.get('amount')
-					self.helper(source,sales_stage,amount)
-
-			if self.filters.get("based_on") == "Opportunity Type":
-				if self.filters.get("data_based_on") == "Number":
-					opportunity_type = d.get('opportunity_type')
-					sales_stage = d.get('sales_stage')
-					count = d.get('count')
-					self.helper(opportunity_type,sales_stage,count)
-					
-				if self.filters.get("data_based_on") == "Amount":
-					opportunity_type = d.get('opportunity_type')
-					sales_stage = d.get('sales_stage')
-					amount = d.get('amount')
-					self.helper(opportunity_type,sales_stage,amount)
-
-	def helper(self,based_on,sales_stage,data):
+	def insert_formatted_data(self,based_on,sales_stage,data):
 		self.formatted_data.setdefault(based_on,frappe._dict()).setdefault(sales_stage,0)
 		self.formatted_data[based_on][sales_stage] += data
 						
@@ -252,19 +199,16 @@ class OpportunitySummaryBySalesStage(object):
 		for sales_stage in self.sales_stage_list:
 			labels.append(sales_stage)
 
-		if self.filters.get("data_based_on") == "Number":
-			for data in self.query_result:
-				for count in range(0,8):
-					if data['sales_stage'] == labels[count]:
-						values[count] = values[count] + data['count']
-			datasets.append({"name":'Count','values':values})
+		options = {
+			'Number': 'count',
+			'Amount': 'amount'
+		}[self.filters.get('data_based_on')]
 
-		if self.filters.get("data_based_on") == "Amount":
-			for data in self.query_result:
-				for count in range(0,8):
-					if data['sales_stage'] == labels[count]:
-						values[count] = values[count] + data['amount']
-			datasets.append({"name":'Amount','values':values})
+		for data in self.query_result:
+			for count in range(len(values)):
+				if data['sales_stage'] == labels[count]:
+					values[count] = values[count] + data[options]
+		datasets.append({"name":options,'values':values})
 
 		self.chart = {
 			"data":{
@@ -274,15 +218,25 @@ class OpportunitySummaryBySalesStage(object):
 			"type":"line"
 		}
 
-	def append_chart_data(self,data,values,labels,datasets):
+	def currency_conversion(self,from_currency,to_currency):
+		cacheobj = frappe.cache()
+
+		if cacheobj.get(from_currency):
+			return flt(str(cacheobj.get(from_currency),'UTF-8'))
+
+		else:
+			value = get_exchange_rate(from_currency,to_currency)
+			cacheobj.set(from_currency,value)
+			return flt(str(cacheobj.get(from_currency),'UTF-8'))
+
+	def get_default_currency(self):
+		company = self.filters.get('company')
+		return frappe.db.get_value('Company',company,['default_currency'])
+
+	def convert_to_base_currency(self):
+		default_currency = self.get_default_currency()
 		for data in self.query_result:
-			for count in range(0,8):
-				if data['sales_stage'] == labels[count]:
-					values[count] = values[count] + data['count']
-		datasets.append({"name":'Count','values':values})
-
-
-	# def get_currency(self):
-	# 	company = self.filters.get('company')
-	# 	default_currency = frappe.db.get_value('Company',company,['default_currency'])
-	# 	return frappe.db.get_value('Currency',default_currency,['symbol'])
+			if data.get('currency') != default_currency:
+				opportunity_currency = data.get('currency')
+				value = self.currency_conversion(opportunity_currency,default_currency)
+				data['amount'] = data['amount'] * value

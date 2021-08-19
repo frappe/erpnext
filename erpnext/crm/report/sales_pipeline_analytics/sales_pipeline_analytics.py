@@ -3,9 +3,12 @@
 
 import json
 import frappe
-from datetime import datetime
+from datetime import date
+import pandas
 from dateutil.relativedelta import relativedelta
 from six import iteritems
+from frappe.utils import flt
+from erpnext.setup.utils import get_exchange_rate
 
 def execute(filters=None):
 	return SalesPipelineAnalytics(filters).run()
@@ -24,27 +27,31 @@ class SalesPipelineAnalytics(object):
 
 	def get_columns(self):
 		self.columns = []
-		if self.filters['range'] == "Monthly":
-			
-			current_date = datetime.date(datetime.now())
-			current_month_number = int(current_date.strftime("%m"))
-			
-			for i in range(current_month_number,13):		
+
+		based_on = {
+			'Number' : "Int",
+			'Amount' : "Currency"
+		}[self.filters.get('based_on')]
+
+		if self.filters.get('range') == "Monthly":
+			month_list = self.get_month_list()
+
+			for month in month_list:		
 				self.columns.append(
 					{
-						'fieldname': current_date.strftime("%B"),
-						'label': current_date.strftime("%B"),
+						'fieldname': month,
+						'fieldtype': based_on,
+						'label': month,
 						'width': 200
 					}
 				)
-				current_date = current_date + relativedelta(months=1)
 
-		elif self.filters['range'] == "Quaterly":
-
+		elif self.filters.get('range') == "Quaterly":
 			for quarter in range(1,5):
 				self.columns.append(
 					{
 						'fieldname': f"Q{quarter}",
+						'fieldtype': based_on,
 						'label': f"Q{quarter}",
 						'width': 200
 					}
@@ -66,234 +73,92 @@ class SalesPipelineAnalytics(object):
 		return self.columns
 
 	def get_data(self):
-		self.data = []
-		if self.filters.get("range") == "Monthly":
-			data = self.get_monthly_data()
 
-		if self.filters.get("range") == "Quaterly":
-			data = self.get_quaterly_data()
+		select_1 ={
+			'Owner': '_assign as opportunity_owner',
+			'Sales Stage': 'sales_stage'
+		}[self.filters.get('pipeline_by')]
 
-		return data
+		select_2 ={
+			'Number': 'count(name) as count',
+			'Amount': 'opportunity_amount as amount'  
+		}[self.filters.get('based_on')]
 
-	def get_monthly_data(self):
+		group_by_1 = {
+			'Owner': '_assign',
+			'Sales Stage': 'sales_stage'
+		}[self.filters.get('pipeline_by')]
 
-		if self.filters.get("pipeline_by") == "Owner":
-			select = '_assign as opportunity_owner'
-			group_by = '_assign'
-			
-		if self.filters.get("pipeline_by") == "Sales Stage":
-			select = 'sales_stage'
-			group_by = 'sales_stage'
+		group_by_2 = {
+			'Monthly': 'month(expected_closing)',
+			'Quaterly': 'QUARTER(expected_closing)'
+		}[self.filters.get('range')]
 
-		if self.filters.get("based_on") == "Number":
-			self.query_result = frappe.db.sql("""SELECT  COUNT(name) as count,{select},monthname(expected_closing) as month from tabOpportunity 
-				where {conditions}
-				GROUP BY {group_by},month(expected_closing) ORDER BY month(expected_closing)""".format(conditions=self.get_conditions(),select=select,group_by=group_by)
-				,self.filters,as_dict=1)
 
-			if self.filters.get("pipeline_by") == "Owner":
-				self.get_periodic_data()
-				for customer,period_data in iteritems(self.periodic_data):
-					row = {'opportunity_owner': customer}
-					for info in self.query_result:
-						period = info.get('month')
-						count = period_data.get(period,0.0)
-						row[period] = count
-					self.data.append(row)
-				
-			
-			if self.filters.get("pipeline_by") == "Sales Stage":
-				self.get_periodic_data()
-				for sales_stage,period_data in iteritems(self.periodic_data):
-					row = {'sales_stage': sales_stage}
-					for info in self.query_result:
-						period = info.get('month')
-						count = period_data.get(period,0.0)
-						row[period] = count
-					self.data.append(row)
+		pipeline_by = {
+			'Owner': 'opportunity_owner',
+			'Sales Stage': 'sales_stage'
+		}[self.filters.get('pipeline_by')]
 
-			return self.data
+		duration = {
+			'Monthly': 'monthname(expected_closing) as month',
+			'Quaterly': 'QUARTER(expected_closing) as quarter'
+		}[self.filters.get('range')]
 
-			
-		if self.filters.get("based_on") == "Amount":
-			self.query_result = frappe.db.sql("""SELECT  sum(opportunity_amount) as amount,{select},monthname(expected_closing) as month from tabOpportunity 
-				where {conditions}
-				GROUP BY {group_by},month(expected_closing) ORDER BY month(expected_closing)""".format(conditions=self.get_conditions(),select=select,group_by=group_by,)
-				,self.filters,as_dict=1)
+		period_by = {
+			'Monthly': 'month',
+			'Quaterly': 'quarter'
+		}[self.filters.get('range')]
 
-			if self.filters.get("pipeline_by") == "Owner":
-				self.get_periodic_data()
-				for user,period_data in iteritems(self.periodic_data):
-					row = {'opportunity_owner': user}
-					for info in self.query_result:
-						period = info.get('month')
-						count = period_data.get(period,0.0)
-						row[period] = count
+		if self.filters.get('based_on') == 'Number':
+			self.query_result = frappe.db.get_list('Opportunity',filters=self.get_conditions(),fields=[select_1,select_2,duration]
+				,group_by="{},{}".format(group_by_1,group_by_2),order_by=group_by_2)
 
-					self.data.append(row)
-			
-			if self.filters.get("pipeline_by") == "Sales Stage":
-				self.get_periodic_data()
-				for sales_stage,period_data in iteritems(self.periodic_data):
-					row = {'sales_stage': sales_stage}
-					for info in self.query_result:
-						period = info.get('month')
-						count = period_data.get(period,0.0)
-						row[period] = count
+		if self.filters.get('based_on') == 'Amount':
+			self.query_result = frappe.db.get_list('Opportunity',filters=self.get_conditions(),fields=[select_1,select_2,duration,'currency'])
+			self.convert_to_base_currency()
+			dataframe = pandas.DataFrame.from_records(self.query_result)
+			result = dataframe.groupby([pipeline_by,period_by],as_index=False)['amount'].sum()
+			self.grouped_data = []
 
-					self.data.append(row)
+			for i in range(len(result['amount'])):
+				self.grouped_data.append({pipeline_by : result[pipeline_by][i], period_by : result[period_by][i], 'amount': result['amount'][i]})
+			self.query_result = self.grouped_data
 
-			return self.data
+		self.get_periodic_data()
+		self.append_data(pipeline_by,period_by)
 
-	def get_quaterly_data(self):
-		if self.filters.get("pipeline_by") == "Owner":
-			select = '_assign as opportunity_owner'
-			group_by = '_assign' 
-		if self.filters.get("pipeline_by") == "Sales Stage":
-			select = 'sales_stage'
-			group_by = 'sales_stage'
-
-		if self.filters.get("based_on") == "Number":
-			self.query_result = frappe.db.sql("""select count(name) as count,{select},QUARTER(expected_closing) as quarter from tabOpportunity 
-			where {conditions}
-			group by {group_by},QUARTER(expected_closing) order by QUARTER(expected_closing)
-			""".format(conditions=self.get_conditions(),select=select,group_by=group_by),self.filters,as_dict=1)
-
-			if self.filters.get("pipeline_by") == "Owner":
-				self.get_periodic_data()
-				for customer,period_data in iteritems(self.periodic_data):
-					row = {'opportunity_owner': customer}
-					for info in self.query_result:
-						period = "Q" + str(info.get('quarter'))
-						count = period_data.get(period,0.0)
-						row[period] = count
-					self.data.append(row)
-
-				return self.data
-
-			if self.filters.get("pipeline_by") == "Sales Stage":
-				self.get_periodic_data()
-				for customer,period_data in iteritems(self.periodic_data):
-					row = {'sales_stage': customer}
-					for info in self.query_result:
-						period = "Q" + str(info.get('quarter'))
-						count = period_data.get(period,0.0)
-						row[period] = count
-					self.data.append(row)
-
-				return self.data
-
-		if self.filters.get("based_on") == "Amount":
-			self.query_result = frappe.db.sql("""select sum(opportunity_amount) as amount,{select},QUARTER(expected_closing) as quarter from tabOpportunity 
-			where {conditions}
-			group by {group_by},QUARTER(expected_closing) order by QUARTER(expected_closing)
-			""".format(conditions=self.get_conditions(),select=select,group_by=group_by),self.filters,as_dict=1)
-
-			if self.filters.get("pipeline_by") == "Owner":
-				self.get_periodic_data()
-				for customer,period_data in iteritems(self.periodic_data):
-					row = {'opportunity_owner': customer}
-					for info in self.query_result:
-						period = "Q" + str(info.get('quarter'))
-						count = period_data.get(period,0.0)
-						row[period] = count
-					self.data.append(row)
-
-			if self.filters.get("pipeline_by") == "Sales Stage":
-				self.get_periodic_data()
-				for sales_stage,period_data in iteritems(self.periodic_data):
-					row = {'sales_stage': sales_stage}
-					for info in self.query_result:
-						period = "Q" + str(info.get('quarter'))
-						count = period_data.get(period,0.0)
-						row[period] = count
-					self.data.append(row)
-
-			return self.data
-			
 	def get_conditions(self):
-		current_date = datetime.date(datetime.now())
+
 		conditions = []
 		if self.filters.get("opportunity_source"):
-			conditions.append('source=%(opportunity_source)s')
+			conditions.append({"source": self.filters.get('opportunity_source')})
 		if self.filters.get("opportunity_type"):
-			conditions.append('opportunity_type=%(opportunity_type)s')
+			conditions.append({'opportunity_type': self.filters.get('opportunity_type')})
 		if self.filters.get("status"):
-			conditions.append('status=%(status)s')
+			conditions.append({'status': self.filters.get('status')})
 		if self.filters.get("company"):
-			conditions.append('company=%(company)s')
-		if self.filters.get("from_date"):
-			conditions.append('expected_closing>=%(from_date)s')
-		if self.filters.get("to_date"):
-			conditions.append('expected_closing<=%(to_date)s')
+			conditions.append({'company': self.filters.get('company')})
+		if self.filters.get("from_date") and self.filters.get("to_date"):
+			conditions.append(['expected_closing','between',[self.filters.get("from_date"),self.filters.get("to_date")]])
 
-		if not self.filters.get("from_date") and not self.filters.get("to_date") and self.filters.get("Monthly"):
-			conditions.append('expected_closing between {cd} and {dd}'.format(cd = current_date
-		,dd= current_date + relativedelta(months=1) + relativedelta(months=1)))
-
-		return "{}".format(" and ".join(conditions))
+		return conditions
 
 	def get_chart_data(self):
-		labels = []
-		values = []
-		quarter_list = [1,2,3,4]
-		count = [0,0,0,0]
-		count_month = [0,0,0,0,0,0,0,0,0,0,0,0]
+		
+		labels = values = []
 		datasets = []
-		month_list = []
-		current_date = datetime.date(datetime.now())
-		current_month_number = int(current_date.strftime("%m"))
 
-		for month in range(current_month_number,13):
-			month_list.append(current_date.strftime("%B"))
-			current_date = current_date + relativedelta(months=1)
-	
-		if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Amount":
-			for info in self.query_result:
-				for q in range(0,len(quarter_list)):
-					if info['quarter'] == quarter_list[q]:
-						count[q] = count[q] + info['amount']
-			values = count
-			datasets.append({'name':'Amount','values':values})
-			
-
-		if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Number":
-			for info in self.query_result:
-				for q in range(0,len(quarter_list)):
-					if info['quarter'] == quarter_list[q]:
-						count[q] = count[q] + info['count']
-			values = count
-			datasets.append({'name':'Number','values':values})
-
-		if self.filters.get("range") == "Monthly" and self.filters.get("based_on") == "Amount":
-			for info in self.query_result:
-				for m in range(0,len(month_list)):
-					if info['month'] == month_list[m]:
-						count_month[m] = count_month[m] + info['amount']
-			values = count_month
-			datasets.append({'name':'Amount','values':values})
-
-
-		if self.filters.get("range") == "Monthly" and self.filters.get("based_on") == "Number":
-			for info in self.query_result:
-				for m in range(0,len(month_list)):
-					if info['month'] == month_list[m]:
-						count_month[m] = count_month[m] + info['count']
-			values = count_month
-			datasets.append({'name':'Count','values':values})
+		self.append_to_dataset(values,datasets)
 					
-
 		for c in self.columns:
-			if c['fieldname'] == "opportunity_owner" or c['fieldname'] == "sales_stage":
-				pass
-			else:
+			if c['fieldname'] != "opportunity_owner" and c['fieldname'] != "sales_stage":
 				labels.append(c['fieldname'])
 
 		self.chart = {
 			"data":{
 				'labels': labels,
 				'datasets': datasets
-
 			},
 			"type":"line"
 		}
@@ -303,92 +168,41 @@ class SalesPipelineAnalytics(object):
 	def get_periodic_data(self):
 		self.periodic_data = frappe._dict()
 
+		based_on = {
+			'Number': 'count',
+			'Amount': 'amount'
+		}[self.filters.get('based_on')]
+
+		pipeline_by = {
+			'Owner': 'opportunity_owner',
+			'Sales Stage': 'sales_stage'
+		}[self.filters.get('pipeline_by')]
+
+		range ={
+			'Monthly': 'month',
+			'Quaterly': 'quarter'
+		}[self.filters.get('range')]
+
 		for info in self.query_result:
-			if self.filters.get("range") == "Monthly" and self.filters.get("based_on") == "Number" and self.filters.get("pipeline_by") == "Owner":
-				period = info.get('month')
-				value = info.get('opportunity_owner')
-				count = info.get('count')
-				if value:
-					temp = json.loads(value)
-
-					if self.filters.get("assigned_to"):
-						for data in json.loads(info.get('opportunity_owner')):
-							if data == self.filters.get("assigned_to"):
-								self.helper(period,data,count,temp)
-					else:
-						self.helper(period,value,count,temp)							
-
-				
-			if self.filters.get("range") == "Monthly" and self.filters.get("based_on") == "Number" and self.filters.get("pipeline_by") == "Sales Stage":
-				period = info.get('month')
-				value = info.get('sales_stage')
-				count = info.get('count')
-				self.helper(period,value,count,None)
-
-
-			if self.filters.get("range") == "Monthly" and self.filters.get("based_on") == "Amount" and self.filters.get("pipeline_by") == "Sales Stage":
-				period = info.get('month')
-				value = info.get('sales_stage')
-				amount = info.get('amount')
-				self.helper(period,value,amount,None)
-
-
-			if self.filters.get("range") == "Monthly" and self.filters.get("based_on") == "Amount" and self.filters.get("pipeline_by") == "Owner":
-				period = info.get('month')
-				value = info.get('opportunity_owner')
-				amount = info.get('amount')
-				if value:
-					temp = json.loads(value)
-
-					if self.filters.get("assigned_to"):
-						for data in json.loads(info.get('opportunity_owner')):
-							if data == self.filters.get("assigned_to"):
-								self.helper(period,data,amount,temp)
-					else:
-						self.helper(period,value,amount,temp)	
-
-			if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Number" and self.filters.get("pipeline_by") == "Owner":
+			if self.filters.get('range') == 'Monthly':
+				period = info.get(range)
+			if self.filters.get('range') == 'Quaterly':
 				period = "Q" + str(info.get('quarter'))
-				value = info.get('opportunity_owner')
-				count = info.get('count')
-				if value:
+
+			value = info.get(pipeline_by)
+			count = info.get(based_on)
+
+			if self.filters.get('pipeline_by') == 'Owner':
+				if value == '[]':
+					temp = ["Not Assigned"]
+				else:
 					temp = json.loads(value)
+				self.check_for_assigned_to(period,value,count,temp,info)
 
-					if self.filters.get("assigned_to"):
-						for data in json.loads(info.get('opportunity_owner')):
-							if data == self.filters.get("assigned_to"):
-								self.helper(period,data,count,temp)
-					else:
-						self.helper(period,value,count,temp)							
+			else:
+				self.insert_formatted_data(period,value,count,None)	
 
-			if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Number" and self.filters.get("pipeline_by") == "Sales Stage":
-				period = "Q" + str(info.get('quarter'))
-				value = info.get('sales_stage')
-				count = info.get('count')
-				self.helper(period,value,count,None)
-
-
-			if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Amount" and self.filters.get("pipeline_by") == "Owner":
-				period = "Q" + str(info.get('quarter'))
-				value = info.get('opportunity_owner')
-				amount = info.get('amount')
-				if value:
-					temp = json.loads(value)
-
-					if self.filters.get("assigned_to"):
-						for data in json.loads(info.get('opportunity_owner')):
-							if data == self.filters.get("assigned_to"):
-								self.helper(period,data,amount,temp)
-					else:
-						self.helper(period,value,amount,temp)	
-			
-			if self.filters.get("range") == "Quaterly" and self.filters.get("based_on") == "Amount" and self.filters.get("pipeline_by") == "Sales Stage":
-				period = "Q" + str(info.get('quarter'))
-				value = info.get('sales_stage')
-				amount = info.get('amount')
-				self.helper(period,value,amount,None)
-
-	def helper(self,period,value,val,temp):
+	def insert_formatted_data(self,period,value,val,temp):
 
 		if temp:
 			if len(temp) > 1:
@@ -413,6 +227,86 @@ class SalesPipelineAnalytics(object):
 			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
 			self.periodic_data[value][period] += val
 
-		# else:
-		# 	self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
-		# 	self.periodic_data[value][period] += val
+	def check_for_assigned_to(self,period,value,count,temp,info):
+		if self.filters.get("assigned_to"):
+			for data in json.loads(info.get('opportunity_owner')):
+				if data == self.filters.get("assigned_to"):
+					self.insert_formatted_data(period,data,count,temp)
+		else:
+			self.insert_formatted_data(period,value,count,temp)
+
+	def get_month_list(self):
+		month_list= []
+		current_date = date.today()
+		month_number = date.today().month
+
+		for month in range(month_number,13):
+			month_list.append(current_date.strftime("%B"))
+			current_date = current_date + relativedelta(months=1)
+		
+		return month_list
+
+	def append_to_dataset(self,values,datasets):
+
+		range_by = {
+			'Monthly': 'month',
+			'Quaterly': 'quarter'
+		}[self.filters.get('range')]
+
+		based_on = {
+			'Amount': 'amount',
+			'Number': 'count'
+		}[self.filters.get('based_on')]
+
+		if self.filters.get("range") == "Quaterly":
+			list = [1,2,3,4]
+			count = [0,0,0,0]
+
+		if self.filters.get("range") == "Monthly":
+			list = self.get_month_list()
+			count = [0,0,0,0,0,0,0,0,0,0,0,0]
+
+		for info in self.query_result:
+			for i in range(len(list)):
+				if info[range_by] == list[i]:
+					count[i] = count[i] + info[based_on]
+		values = count
+		datasets.append({'name': based_on,'values':values})
+
+	def append_data(self,pipeline_by,period_by):
+		self.data = []
+		for pipeline,period_data in iteritems(self.periodic_data):
+			row = {pipeline_by : pipeline}
+			for info in self.query_result:
+				if self.filters.get('range') == 'Monthly':
+					period = info.get(period_by)
+				if self.filters.get('range') == 'Quaterly':
+					period = "Q" + str(info.get(period_by))
+				count = period_data.get(period,0.0)
+				row[period] = count
+			self.data.append(row)
+				
+		return self.data
+
+	def get_default_currency(self):
+		company = self.filters.get('company')
+		return frappe.db.get_value('Company',company,['default_currency'])
+
+	def get_currency_rate(self,from_currency,to_currency):
+		cacheobj = frappe.cache()
+
+		if cacheobj.get(from_currency):
+			return flt(str(cacheobj.get(from_currency),'UTF-8'))
+
+		else:
+			value = get_exchange_rate(from_currency,to_currency)
+			cacheobj.set(from_currency,value)
+			return flt(str(cacheobj.get(from_currency),'UTF-8'))
+
+	def convert_to_base_currency(self):
+		default_currency = self.get_default_currency()
+		for data in self.query_result:
+			if data.get('currency') != default_currency:
+				opportunity_currency = data.get('currency')
+				value = self.get_currency_rate(opportunity_currency,default_currency)
+				data['amount'] = data['amount'] * value

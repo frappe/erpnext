@@ -9,7 +9,7 @@ frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 			label: __("Based On"),
 			fieldtype: "Select",
 			options: "Opportunity Owner\nSource\nOpportunity Type",
-			default: "Source"
+			default: "Opportunity Owner"
 		},
 		{
 			fieldname: "data_based_on",

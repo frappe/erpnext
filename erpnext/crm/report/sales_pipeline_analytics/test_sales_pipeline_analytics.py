@@ -34,7 +34,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         expected_data = [
             {
-                'opportunity_owner':'[]',
+                'opportunity_owner':'Not Assigned',
                 'August':1
             }
         ]
@@ -76,7 +76,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         expected_data = [
             {
-                'opportunity_owner':'[]',
+                'opportunity_owner':'Not Assigned',
                 'August':150000
             }
         ]
@@ -118,7 +118,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         expected_data = [
             {
-                'opportunity_owner':'[]',
+                'opportunity_owner':'Not Assigned',
                 'Q3':1
             }
         ]
@@ -160,7 +160,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         expected_data = [
             {
-                'opportunity_owner':'[]',
+                'opportunity_owner':'Not Assigned',
                 'Q3':150000
             }
         ]
@@ -205,7 +205,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         expected_data = [
             {
-                'opportunity_owner':'[]',
+                'opportunity_owner':'Not Assigned',
                 'August': 1
             }
         ]
