@@ -84,5 +84,3 @@ class LoanWriteOff(AccountsController):
 		)
 
 		make_gl_entries(gl_entries, cancel=cancel, merge_entries=False)
-
-

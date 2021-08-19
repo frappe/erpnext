@@ -44,7 +44,7 @@ class ExchangeRateRevaluation(Document):
 
 		if total_amt != total_debit:
 			return True
-		
+
 		return False
 
 	@frappe.whitelist()

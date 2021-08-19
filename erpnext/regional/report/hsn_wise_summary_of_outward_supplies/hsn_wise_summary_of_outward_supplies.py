@@ -285,5 +285,3 @@ def get_hsn_wise_json_data(filters, report_data):
 		count +=1
 
 	return data
-
-

@@ -174,4 +174,3 @@ def get_students(doctype, txt, searchfield, start, page_len, filters):
 			tuple(students + ["%%%s%%" % txt, start, page_len]
 		)
 	)
-
