@@ -13,6 +13,7 @@ from erpnext.stock.get_item_details import get_bin_details
 from fxnmrnth.integration_req_log import log_integration_request, log_exceptions
 
 from erpnext.exceptions import PartyFrozen, PartyDisabled
+from frappe.exceptions import ValidationError
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
@@ -35,13 +36,13 @@ def validate_event_and_status(order_id, event, status):
 		if status != "processing":
 			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
 				title="WooCommerce Event: {}".format(event))
-			frappe.throw("Getting unexpect status!")
+			frappe.throw(f"Getting unexpect status: {status} from {event}!")
 
 	elif event == "wholesale_order":
 		if status not in ["pending", "on-hold"]:
 			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
 				title="WooCommerce Event: {}".format(event))
-			frappe.throw("Getting unexpect status!")
+			frappe.throw(f"Getting unexpect status: {status} from {event}!")
 
 def pre_process_payload(meta_data, billing):
 	customer_code = ""
@@ -52,11 +53,7 @@ def pre_process_payload(meta_data, billing):
 	patient_dob = ""
 	for meta in meta_data:
 		if meta["key"] == "user_practitioner":
-			if "-" in meta["value"]:
-				end_index = meta["value"].find('-')
-				customer_code = meta["value"][0:end_index]
-			else:
-				customer_code = meta["value"]
+			customer_code = meta["value"]
 		elif meta["key"] == "customer_code":
 			customer_code = meta["value"]
 		elif meta["key"] == "delivery_option":
@@ -73,6 +70,11 @@ def pre_process_payload(meta_data, billing):
 			pos_order_type = meta["value"]
 		else:
 			pass
+
+	# To reslove if customer code contains "-a" or "-b"
+	if "-" in customer_code:
+		end_index = customer_code.find('-')
+		customer_code = customer_code[0:end_index]
 
 	# create temp_address dict for later use
 	temp_address = {
@@ -116,6 +118,10 @@ def order(*args, **kwargs):
 		order = json.loads(frappe.request.data)
 		log_exceptions(order=order, status="Failed", internal_reason=str(exc))
 		return str(exc)
+	except ValidationError as exc:
+		order = json.loads(frappe.request.data)
+		log_exceptions(order=order, status="Failed", internal_reason=str(exc))
+		return str(exc)
 	else:
 		order = json.loads(frappe.request.data)
 		webhook_delivery_id = frappe.get_request_header("X-WC-Webhook-Delivery-ID")
@@ -149,6 +155,9 @@ def _order(woocommerce_settings, *args, **kwargs):
 
 	# pre-process to parse payload (parameter: meta_data, billing)
 	customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address, patient_dob = pre_process_payload(order.get('meta_data'), order.get('billing'))
+
+	if pos_order_type == "marketing_material":
+		return "Marketing Material detected, we will ignore in ERPNext"
 
 	# Validate customer code, output payment_category and accepts_backorders 
 	payment_category, accepts_backorders = validate_customer_code_erpnext(customer_code)
@@ -456,7 +465,7 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 
 		# check sku
 		if not sku:
-			frappe.throw("SKU is missing!")
+			frappe.throw(f"SKU is missing for {item.get('name', 'product')}")
 		
 		# if we detect the sku is "GPKITPD", we ignore it
 		if sku == "GPKITPD":

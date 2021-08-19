@@ -351,6 +351,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address",
    "fieldtype": "Link",
    "label": "Select Shipping Address",
@@ -358,6 +359,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address_display",
    "fieldtype": "Small Text",
    "label": "Shipping Address",
@@ -1055,8 +1057,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-09-14 14:36:12.418690",
+ "modified": "2021-08-04 15:55:41.806811",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
