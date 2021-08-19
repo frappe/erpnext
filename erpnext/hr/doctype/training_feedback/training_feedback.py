@@ -42,4 +42,3 @@ class TrainingFeedback(Document):
 
 		if employee:
 			frappe.db.set_value("Training Event Employee", employee, "status", "Completed")
-

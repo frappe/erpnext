@@ -27,7 +27,7 @@ class WoocommerceSettings(Document):
 			for doctype in ["Customer", "Address"]:
 				df = dict(fieldname='woocommerce_email', label='Woocommerce Email', fieldtype='Data', read_only=1, print_hide=1)
 				create_custom_field(doctype, df)
-			
+
 			if not frappe.get_value("Item Group", {"name": _("WooCommerce Products")}):
 				item_group = frappe.new_doc("Item Group")
 				item_group.item_group_name = _("WooCommerce Products")
