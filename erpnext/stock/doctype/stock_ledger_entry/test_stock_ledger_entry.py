@@ -3,7 +3,9 @@
 # See license.txt
 from __future__ import unicode_literals
 
+import json
 import frappe
+
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.utils import add_days, today
 
@@ -349,6 +351,150 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			frappe.set_user("Administrator")
 			user.remove_roles("Stock Manager")
 
+	def test_batchwise_item_valuation_fifo(self):
+		item, warehouses, batches = setup_batchwise_item_valuation_test(
+			valuation_method="FIFO", suffix="010"
+		)
+
+		# Incoming Entries for Stock Value check
+		pr_entry_list = [
+			(item, warehouses[0], batches[0], 1, 100),
+			(item, warehouses[1], batches[0], 1,  25),
+			(item, warehouses[0], batches[1], 1,  50),
+			(item, warehouses[0], batches[0], 1, 150),
+		]
+		prs = create_purchase_receipt_entries_for_batchwise_item_valuation_test(pr_entry_list)
+		sle_details = fetch_sle_details_for_doc_list(prs, ['stock_value'])
+		sv_list = [d['stock_value'] for d in sle_details]
+		expected_sv = [100, 25, 50, 250]
+		abs_sv_diff = [abs(x - y) for x, y in zip(expected_sv, sv_list)]
+
+		# Outgoing Entries for Stock Value Difference check
+		dn_entry_list = [
+			(item, warehouses[0], batches[1], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200),
+			(item, warehouses[1], batches[0], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200)
+		]
+		dns = create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list)
+		sle_details = fetch_sle_details_for_doc_list(dns, ['stock_value_difference'])
+		svd_list = [d['stock_value_difference'] for d in sle_details]
+		expected_incoming_rates = expected_abs_svd = [50, 100, 25, 150]
+		abs_svd_diff = [abs(x + y) for x, y in zip(expected_abs_svd, svd_list)]
+
+		self.assertTrue(sum(abs_sv_diff) == 0, "Incorrect 'Stock Value' values")
+		self.assertTrue(sum(abs_svd_diff) == 0, "Incorrect 'Stock Value Difference' values")
+		for dn, incoming_rate in zip(dns, expected_incoming_rates):
+			self.assertEqual(
+				dn.items[0].incoming_rate, incoming_rate,
+				"Incorrect 'Incoming Rate' values fetched for DN items"
+			)
+
+		delete_sle_entries_by_item_code(item)
+
+	def test_batchwise_item_valuation_moving_average(self):
+		item, warehouses, batches = setup_batchwise_item_valuation_test(
+			valuation_method="Moving Average", suffix="001"
+		)
+
+		# Incoming Entries for Stock Value check
+		pr_entry_list = [
+			(item, warehouses[0], batches[0], 1, 100),
+			(item, warehouses[0], batches[1], 1,  50),
+			(item, warehouses[0], batches[0], 1, 150),
+			(item, warehouses[0], batches[1], 1, 100),
+		]
+		prs = create_purchase_receipt_entries_for_batchwise_item_valuation_test(pr_entry_list)
+		sle_details = fetch_sle_details_for_doc_list(prs, ['stock_value'])
+		sv_list = [d['stock_value'] for d in sle_details]
+		expected_sv = [100, 50, 250, 150]
+		abs_sv_diff = [abs(x - y) for x, y in zip(expected_sv, sv_list)]
+
+		# Outgoing Entries for Stock Value Difference check
+		dn_entry_list = [
+			(item, warehouses[0], batches[1], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200),
+			(item, warehouses[0], batches[1], 1, 200),
+			(item, warehouses[0], batches[0], 1, 200)
+		]
+		dns = create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list)
+		sle_details = fetch_sle_details_for_doc_list(dns, ['stock_value_difference'])
+		svd_list = [d['stock_value_difference'] for d in sle_details]
+		expected_incoming_rates = expected_abs_svd = [75, 125, 75, 125]
+		abs_svd_diff = [abs(x + y) for x, y in zip(expected_abs_svd, svd_list)]
+
+		self.assertTrue(sum(abs_sv_diff) == 0, "Incorrect 'Stock Value' values")
+		self.assertTrue(sum(abs_svd_diff) == 0, "Incorrect 'Stock Value Difference' values")
+		for dn, incoming_rate in zip(dns, expected_incoming_rates):
+			self.assertEqual(
+				dn.items[0].incoming_rate, incoming_rate,
+				"Incorrect 'Incoming Rate' values fetched for DN items"
+			)
+
+		delete_sle_entries_by_item_code(item)
+
+	def test_batchwise_item_valuation_stock_reco(self):
+		get_q_value = lambda q: sum(r*q for r,q in json.loads(q))
+		item, warehouses, batches = setup_batchwise_item_valuation_test(
+			valuation_method="FIFO", suffix="000"
+		)
+
+		# Check Opening Stock Entries
+		sr_entry_list_os = [
+			(item, warehouses[0], batches[1], 10, 100),
+			(item, warehouses[0], batches[0], 13, 200),
+		]
+		srs = create_stock_reco_entries_for_batchwise_item_valuation_test(
+			sr_entry_list_os, purpose="Opening Stock"
+		)
+		sle_details = fetch_sle_details_for_doc_list(srs, [
+			'stock_value_difference',
+			'stock_value',
+			'stock_queue',
+			'actual_qty',
+			'qty_after_transaction'
+		], as_dict=0)
+		for (svd, sv, sq, aq, qat), (*_, qty, rate) in zip(sle_details, sr_entry_list_os):
+			expected_sv = rate * qty
+			sv_from_q = get_q_value(sq)
+			self.assertTrue((qty == aq) and (aq == qat))
+			self.assertTrue((expected_sv == svd) and (svd == sv))
+			self.assertEqual(expected_sv, sv_from_q)
+
+		# Check Stock Reconciliation entries
+		sr_entry_list_sr = [
+			(item, warehouses[0], batches[1], 5, 50),
+			(item, warehouses[0], batches[0], 20, 75),
+		]
+		srs = create_stock_reco_entries_for_batchwise_item_valuation_test(
+			sr_entry_list_sr, purpose="Stock Reconciliation"
+		)
+		sle_details = fetch_sle_details_for_doc_list(srs, [
+			'stock_value_difference',
+			'stock_value',
+			'stock_queue',
+			'actual_qty',
+			'qty_after_transaction'
+		], as_dict=0)
+
+		expected_details = [
+			(*([sr_entry_list_sr[0][-1] * sr_entry_list_sr[0][-2]]*3), *([sr_entry_list_sr[0][-2]]*2)),
+			(-sr_entry_list_os[0][-1] * sr_entry_list_os[0][-2], 0, 0, -sr_entry_list_os[0][-2], 0),
+			(*([sr_entry_list_sr[1][-1] * sr_entry_list_sr[1][-2]]*3), *([sr_entry_list_sr[1][-2]]*2)),
+			(-sr_entry_list_os[1][-1] * sr_entry_list_os[1][-2], 0, 0, -sr_entry_list_os[1][-2], 0)
+		]
+		key = lambda sd: -sd[0]
+		sle_details = [*sorted(sle_details[:2],key=key), *sorted(sle_details[2:],key=key)]
+		for sd, ed in zip(sle_details, expected_details):
+			svd, sv, sq, aq, qat = sd
+			ex_svd, ex_sv, ex_sqv, ex_aq, ex_qat = ed
+			self.assertEqual(svd, ex_svd)
+			self.assertEqual(sv, ex_sv)
+			self.assertEqual(get_q_value(sq), ex_sqv)
+			self.assertEqual(aq, ex_aq)
+			self.assertEqual(qat, ex_qat)
+
+		delete_sle_entries_by_item_code(item)
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
@@ -412,3 +558,96 @@ def create_items():
 		make_item(d, properties=properties)
 
 	return items
+
+def setup_batchwise_item_valuation_test(valuation_method, suffix):
+	from erpnext.stock.doctype.batch.batch import make_batch
+	from erpnext.stock.doctype.item.test_item import make_item
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	item = make_item(
+		f"BWIV - Test Item {valuation_method} {suffix}",
+		dict(valuation_method=valuation_method, has_batch_no=1)
+	)
+	warehouses = [create_warehouse(f"BWIV - Test Warehouse {i}") for i in ['J', 'K']]
+	batches = [f"BWIV - Test Batch {i} {valuation_method} {suffix}" for i in ['X', 'Y']]
+
+	for batch_id in batches:
+		if not frappe.db.exists("Batch", batch_id):
+			make_batch(frappe._dict(batch_id=batch_id, item=item.item_code))
+
+	return item.item_code, warehouses, batches
+
+def create_purchase_receipt_entries_for_batchwise_item_valuation_test(pr_entry_list):
+	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+	prs = []
+
+	for item, warehouse, batch_no, qty, rate in pr_entry_list:
+		pr = make_purchase_receipt(item=item, warehouse=warehouse, qty=qty, rate=rate, batch_no=batch_no)
+		prs.append(pr)
+
+	return prs
+
+def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list):
+	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+	dns = []
+	for item, warehouse, batch_no, qty, rate in dn_entry_list:
+		so = make_sales_order(
+			rate=rate,
+			qty=qty,
+			item=item,
+			warehouse=warehouse,
+			against_blanket_order=0
+		)
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].batch_no = batch_no
+		dn.insert()
+		dn.submit()
+		dns.append(dn)
+	return dns
+
+def delete_sle_entries_by_item_code(item_code):
+	to_delete = frappe.db.sql(f"""
+		SELECT name, voucher_no, voucher_type
+		FROM `tabStock Ledger Entry`
+		WHERE item_code = '{item_code}'
+		ORDER BY TIMESTAMP(posting_date, posting_time) DESC
+	""")
+	for sle_name, voucher_no, voucher_type in to_delete:
+		try:
+			doc = frappe.get_doc(voucher_type, voucher_no)
+			if doc.docstatus != 2:
+				doc.cancel()
+		except frappe.DoesNotExistError:
+			pass
+		finally:
+			doc = frappe.get_doc("Stock Ledger Entry", sle_name)
+			if doc.docstatus != 2:
+				doc.cancel()
+			doc.delete()
+
+def fetch_sle_details_for_doc_list(doc_list, columns, as_dict=1):
+	return frappe.db.sql(f"""
+		SELECT { ', '.join(columns)}
+		FROM `tabstock Ledger Entry`
+		WHERE
+			voucher_no IN %(voucher_nos)s
+		ORDER BY posting_time ASC
+	""", dict(
+		voucher_nos=[doc.name for doc in doc_list]
+	), as_dict=as_dict)
+
+def create_stock_reco_entries_for_batchwise_item_valuation_test(sr_entry_list, purpose):
+	srs = []
+	for item_code, warehouse, batch_no, qty, valuation_rate in sr_entry_list:
+		sr = create_stock_reconciliation(
+			purpose=purpose,
+			warehouse=warehouse,
+			item_code=item_code,
+			qty=qty,
+			rate=valuation_rate,
+			batch_no=batch_no
+		)
+		srs.append(sr)
+	return srs
