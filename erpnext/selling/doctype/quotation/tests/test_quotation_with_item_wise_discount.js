@@ -35,4 +35,3 @@ QUnit.test("test quotation with item wise discount", function(assert) {
 		() => done()
 	]);
 });
-

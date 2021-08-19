@@ -108,7 +108,7 @@ class Company(NestedSet):
 				frappe.flags.country_change = True
 				self.create_default_accounts()
 				self.create_default_warehouses()
-		
+
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
 

@@ -52,7 +52,7 @@ def create_mode_of_payment(gateway, payment_type="General"):
 			"payment_gateway": gateway
 		}, ['payment_account'])
 
-	mode_of_payment = frappe.db.exists("Mode of Payment", gateway) 
+	mode_of_payment = frappe.db.exists("Mode of Payment", gateway)
 	if not mode_of_payment and payment_gateway_account:
 		mode_of_payment = frappe.get_doc({
 			"doctype": "Mode of Payment",
