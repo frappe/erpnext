@@ -108,5 +108,3 @@ def get_columns(filters):
 		"fieldtype": "Int",
 		"width": 180
 	}]
-
-

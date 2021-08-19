@@ -190,8 +190,10 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-
-		item.unit_rate = abs(item.taxable_value / item.qty)
+		if flt(item.qty) != 0.0:
+			item.unit_rate = abs(item.taxable_value / item.qty)
+		else:
+			item.unit_rate = abs(item.taxable_value)
 		item.gross_amount = abs(item.taxable_value)
 		item.taxable_value = abs(item.taxable_value)
 		item.discount_amount = 0

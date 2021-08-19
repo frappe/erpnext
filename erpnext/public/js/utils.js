@@ -465,7 +465,23 @@ erpnext.utils.update_child_items = function(opts) {
 		in_list_view: 1,
 		read_only: 0,
 		disabled: 0,
-		label: __('Item Code')
+		label: __('Item Code'),
+		get_query: function() {
+			let filters;
+			if (frm.doc.doctype == 'Sales Order') {
+				filters = {"is_sales_item": 1};
+			} else if (frm.doc.doctype == 'Purchase Order') {
+				if (frm.doc.is_subcontracted == "Yes") {
+					filters = {"is_sub_contracted_item": 1};
+				} else {
+					filters = {"is_purchase_item": 1};
+				}
+			}
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: filters
+			};
+		}
 	}, {
 		fieldtype:'Link',
 		fieldname:'uom',
