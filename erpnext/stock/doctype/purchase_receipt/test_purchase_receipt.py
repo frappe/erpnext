@@ -23,9 +23,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_reverse_purchase_receipt_sle(self):
 
-		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 0)
-
-		pr = make_purchase_receipt(qty=0.5)
+		pr = make_purchase_receipt(qty=0.5, item_code="_Test Item Home Desktop 200")
 
 		sl_entry = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": pr.name}, ['actual_qty'])
@@ -40,8 +38,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertEqual(len(sl_entry_cancelled), 2)
 		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
-
-		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 1)
 
 	def test_make_purchase_invoice(self):
 		if not frappe.db.exists('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice'):
@@ -328,18 +324,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr1.submit()
 		self.assertRaises(frappe.ValidationError, pr2.submit)
-
-		pr1.cancel()
-		se.cancel()
-		se1.cancel()
-		se2.cancel()
-		se3.cancel()
-		po.reload()
-		pr2.load_from_db()
-		pr2.cancel()
-
-		po.load_from_db()
-		po.cancel()
+		frappe.db.rollback()
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -1044,13 +1029,40 @@ class TestPurchaseReceipt(unittest.TestCase):
 			'account': srbnb_account,
 			'voucher_detail_no': pr.items[1].name
 		}, pluck="name")
-		
+
 		# check if the entries are not merged into one
 		# seperate entries should be made since voucher_detail_no is different
 		self.assertEqual(len(item_one_gl_entry), 1)
 		self.assertEqual(len(item_two_gl_entry), 1)
 
 		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', before_test_value)
+
+	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, make_pr_against_po
+		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
+
+		automatically_fetch_payment_terms()
+
+		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		create_payment_terms_template()
+		po.payment_terms_template = 'Test Receivable Template'
+		po.submit()
+
+		pr = make_pr_against_po(po.name, received_qty=10)
+
+		pi = make_purchase_invoice(qty=10, rate=100, do_not_save=1)
+		pi.items[0].purchase_receipt = pr.name
+		pi.items[0].pr_detail = pr.items[0].name
+		pi.items[0].purchase_order = po.name
+		pi.items[0].po_detail = po.items[0].name
+		pi.insert()
+
+		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
+		compare_payment_schedules(self, po, pi)
+
+		automatically_fetch_payment_terms(enable=0)
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference
