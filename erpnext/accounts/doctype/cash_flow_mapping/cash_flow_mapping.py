@@ -18,5 +18,3 @@ class CashFlowMapping(Document):
 				frappe._('You can only select a maximum of one option from the list of check boxes.'),
 				title='Error'
 			)
-
-
