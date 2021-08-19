@@ -201,17 +201,18 @@
    "fieldname": "service_unit_capacity",
    "fieldtype": "Int",
    "label": "Service Unit Capacity",
-   "mandatory_depends_on": "eval:doc.overlap_appointments == 1"
+   "mandatory_depends_on": "eval:doc.overlap_appointments == 1",
+   "non_negative": 1
   }
  ],
- "links": [],
  "is_tree": 1,
- "modified": "2021-02-23 13:47:31.168541",
+ "links": [],
+ "modified": "2021-08-19 14:09:11.643464",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit",
- "owner": "Administrator",
  "nsm_parent_field": "parent_healthcare_service_unit",
+ "owner": "Administrator",
  "permissions": [
   {
    "email": 1,

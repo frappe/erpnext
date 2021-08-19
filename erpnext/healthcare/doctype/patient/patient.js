@@ -29,12 +29,12 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Patient Progress'), function() {
 				frappe.route_options = {'patient': frm.doc.name};
 				frappe.set_route('patient-progress');
-			});
+			}, __('View'));
 
 			frm.add_custom_button(__('Patient History'), function() {
 				frappe.route_options = {'patient': frm.doc.name};
 				frappe.set_route('patient_history');
-			});
+			}, __('View'));
 		}
 
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Patient'};

@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 
 from frappe.utils.nestedset import NestedSet
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, flt
 import frappe
 from frappe import _
 import json
@@ -19,8 +19,7 @@ class HealthcareServiceUnit(NestedSet):
 
 	def autoname(self):
 		if self.company:
-			suffix = " - " + \
-				frappe.get_cached_value('Company',  self.company,  "abbr")
+			suffix = " - " + frappe.get_cached_value('Company', self.company, 'abbr')
 			if not self.healthcare_service_unit_name.endswith(suffix):
 				self.name = self.healthcare_service_unit_name + suffix
 		else:
@@ -53,9 +52,9 @@ class HealthcareServiceUnit(NestedSet):
 				self.service_unit_capacity = 0
 
 		if self.overlap_appointments:
-			if not self.service_unit_capacity or float(self.service_unit_capacity) <= 0:
-				frappe.throw(_('Please set a valid Servie Unit Capacity to enable Overlap Appointments'),
-					title=_('Invalid Servie Unit Capacity'))
+			if not self.service_unit_capacity:
+				frappe.throw(_('Please set a valid Service Unit Capacity to enable Overlapping Appointments'),
+					title=_('Mandatory'))
 
 
 @frappe.whitelist()

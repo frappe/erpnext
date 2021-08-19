@@ -49,7 +49,7 @@ frappe.treeview_settings['Healthcare Service Unit'] = {
 		{
 			fieldtype: 'Int', fieldname: 'service_unit_capacity', label: __('Service Unit Capacity'),
 			description: __('Sets the number of concurrent appointments allowed'), reqd: false,
-			depends_on: "eval:eval:!doc.is_group && doc.service_unit_type != ''", hidden: true
+			depends_on: "eval:!doc.is_group && doc.service_unit_type != ''", hidden: true
 		},
 		{
 			fieldtype: 'Link', fieldname: 'warehouse', label: __('Warehouse'), options: 'Warehouse',
