@@ -728,8 +728,9 @@ class SalesInvoice(SellingController):
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
-			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list, calculate_net_weight_packed_items
 			make_packing_list(self)
+			packed_items = calculate_net_weight_packed_items(self.items, self.packed_items)
 		else:
 			self.set('packed_items', [])
 

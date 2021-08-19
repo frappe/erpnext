@@ -48,8 +48,16 @@ class SalesOrder(SellingController):
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 			validate_coupon_code(self.coupon_code)
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list, calculate_net_weight_packed_items
 		make_packing_list(self)
+		packed_items = calculate_net_weight_packed_items(self.items, self.packed_items)
+
+		for item in self.items:
+			if packed_items[item.item_code]['valid']:
+				item.weight_per_unit = packed_items[item.item_code]['weight']
+
+			elif not packed_items[item.item_code]['valid']:
+				frappe.msgprint(msg = _("Could not calculate weight for {0}").format(item.item_code), alert=True, indicator='red')
 
 		self.validate_with_previous_doc()
 		self.set_status()

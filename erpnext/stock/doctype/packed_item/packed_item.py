@@ -125,3 +125,33 @@ def get_old_packed_item_details(old_packed_items):
 	for items in old_packed_items:
 		old_packed_items_map.setdefault((items.item_code ,items.parent_item), []).append(items.as_dict())
 	return old_packed_items_map
+
+def calculate_net_weight_packed_items(item_details, packed_items):
+	qty_details = {}
+	for detail in item_details:
+		qty_details[detail.item_code] = flt(detail.qty)
+
+	items = {}
+	for item in packed_items:
+		if item.parent_item in items:
+			if not items[item.parent_item]['valid']:
+				continue
+
+			if item.uom == items[item.parent_item]['uom']:
+				qty = item.qty/qty_details[item.parent_item]
+				items[item.parent_item]['weight'] += flt(item.weight_per_unit * qty)
+
+			else:
+				items[item.parent_item]['weight'] = 0
+				items[item.parent_item]['valid'] = 0
+
+		else:
+			qty = item.qty/qty_details[item.parent_item]
+			items[item.parent_item] = {
+				'uom': item.uom,
+				'weight': flt((item.weight_per_unit or 0) * qty),
+				'valid': 1
+			}
+	return items
+
+
