@@ -27,4 +27,3 @@ QUnit.test("Test: Appraisal Template [HR]", function (assert) {
 		() => done()
 	]);
 });
-

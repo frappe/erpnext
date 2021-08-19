@@ -139,7 +139,7 @@ def create_company():
 		'company_name': "Test PCV Company",
 		'country': 'United States',
 		'default_currency': 'USD'
-	})		
+	})
 	company.insert(ignore_if_duplicate = True)
 	return company.name
 
