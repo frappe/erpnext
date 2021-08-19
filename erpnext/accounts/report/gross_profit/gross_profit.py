@@ -141,8 +141,8 @@ class GrossProfitGenerator(object):
 		self.filters = frappe._dict(filters)
 		self.load_invoice_items()
 
-		# if filters.group_by == 'Invoice':
-		# 	self.group_items_by_invoice()
+		if filters.group_by == 'Invoice':
+			self.group_items_by_invoice()
 
 		self.load_stock_ledger_entries()
 		self.load_product_bundle()
@@ -378,6 +378,51 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
 			.format(conditions=conditions, sales_person_cols=sales_person_cols,
 				sales_team_table=sales_team_table, match_cond = get_match_cond('Sales Invoice')), self.filters, as_dict=1)
+
+	def group_items_by_invoice(self):
+		parents = []
+
+		for row in self.si_list:
+			if row.parent not in parents:
+				parents.append(row.parent)
+
+		parents_index = 0
+		for index, row in enumerate(self.si_list):
+			if parents_index < len(parents) and row.parent == parents[parents_index]:
+				invoice = frappe._dict({
+					'parent_invoice': "",
+					'parent': row.parent,
+					'indent': 0.0,
+					'posting_date': row.posting_date,
+					'posting_time': row.posting_time,
+					'project': row.project,
+					'update_stock': row.update_stock,
+					'customer': row.customer,
+					'customer_group': row.customer_group,
+					'customer_group': row.customer_group,
+					'item_code': None,
+					'item_name': None,
+					'description': None,
+					'warehouse': None,
+					'item_group': None,
+					'brand': None, 
+					'dn_detail': None, 
+					'delivery_note': None, 
+					'qty': 0, 
+					'item_row': None, 
+					'is_return': row.is_return, 
+					'cost_center': row.cost_center,
+					'base_net_amount': 0
+				})
+
+				self.si_list.insert(index, invoice)
+				parents_index += 1
+
+			else:
+				row.indent = 1.0
+				row.parent_invoice = row.parent
+				row.parent = row.item_code
+				self.si_list[0].base_net_amount += row.base_net_amount
 
 	def load_stock_ledger_entries(self):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
