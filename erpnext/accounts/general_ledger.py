@@ -147,7 +147,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
-	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
+	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) and gl_map[0].voucher_type=="Journal Entry":
 		account_list = [gl_entries.account for gl_entries in gl_map]
 
 		aii_accounts = [d.name for d in frappe.get_all("Account",
@@ -160,13 +160,12 @@ def validate_account_for_perpetual_inventory(gl_map):
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
 				gl_map[0].posting_date, gl_map[0].company)
 
-			if gl_map[0].voucher_type=="Journal Entry":
-				# In case of Journal Entry, there are no corresponding SL entries,
-				# hence deducting currency amount
-				account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
-				if account_bal == stock_bal:
-					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
-						.format(account), StockAccountInvalidTransaction)
+			# In case of Journal Entry, there are no corresponding SL entries,
+			# hence deducting currency amount
+			account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
+			if account_bal == stock_bal:
+				frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+					.format(account), StockAccountInvalidTransaction)
 
 			# This has been comment for a temporary, will add this code again on release of immutable ledger
 			# elif account_bal != stock_bal:
@@ -294,7 +293,8 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 			select account, posting_date, party_type, party, cost_center, fiscal_year,voucher_type,
 			voucher_no, against_voucher_type, against_voucher, cost_center, company
 			from `tabGL Entry`
-			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
+			where voucher_type=%s and voucher_no=%s
+			for update""", (voucher_type, voucher_no), as_dict=True)
 
 	if gl_entries:
 		validate_accounting_period(gl_entries)
