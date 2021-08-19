@@ -206,11 +206,11 @@ def update_cart_address(address_type, address_name):
 	if address_type.lower() == "billing":
 		quotation.customer_address = address_name
 		quotation.address_display = address_display
-		quotation.shipping_address_name == quotation.shipping_address_name or address_name
+		quotation.shipping_address_name = quotation.shipping_address_name or address_name
 	elif address_type.lower() == "shipping":
 		quotation.shipping_address_name = address_name
 		quotation.shipping_address = address_display
-		quotation.customer_address == quotation.customer_address or address_name
+		quotation.customer_address = quotation.customer_address or address_name
 
 	apply_cart_settings(quotation=quotation)
 
@@ -279,7 +279,7 @@ def update_party(fullname, company_name=None, mobile_no=None, phone=None):
 	party = get_party()
 
 	party.customer_name = company_name or fullname
-	party.customer_type == "Company" if company_name else "Individual"
+	party.customer_type = "Company" if company_name else "Individual"
 
 	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
 	contact = frappe.get_doc("Contact", contact_name)
