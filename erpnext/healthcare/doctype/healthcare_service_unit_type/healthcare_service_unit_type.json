@@ -12,7 +12,6 @@
   "service_unit_type",
   "allow_appointments",
   "overlap_appointments",
-  "allow_procedures",
   "inpatient_occupancy",
   "is_billable",
   "item_details",
@@ -168,17 +167,10 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Change in Item"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.allow_appointments == 1 && doc.inpatient_occupany != 1",
-   "fieldname": "allow_procedures",
-   "fieldtype": "Check",
-   "label": "Allow Procedures"
   }
  ],
  "links": [],
- "modified": "2020-09-11 14:54:49.023896",
+ "modified": "2021-08-19 17:52:30.266667",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit Type",
