@@ -78,7 +78,7 @@ def get_final_data(dimension, dimension_items, filters, period_month_ranges, dat
 		if filters["period"] != "Yearly" :
 			row += totals
 		data.append(row)
-		
+
 	return data
 
 
@@ -388,7 +388,7 @@ def get_chart_data(filters, columns, data):
 			budget_values[i] += values[index]
 			actual_values[i] += values[index+1]
 			index += 3
-			
+
 	return {
 		'data': {
 			'labels': labels,
@@ -399,4 +399,3 @@ def get_chart_data(filters, columns, data):
 		},
 		'type' : 'bar'
 	}
-

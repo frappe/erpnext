@@ -12,4 +12,3 @@ def execute():
             SET reason_for_leaving = reason_for_resignation
             WHERE status = 'Left' and reason_for_leaving is null and reason_for_resignation is not null
         """)
-

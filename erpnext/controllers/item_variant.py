@@ -344,4 +344,3 @@ def create_variant_doc_for_quick_entry(template, args):
 			variant.name = variant.item_code
 			validate_item_variant_attributes(variant, args)
 	return variant.as_dict()
-
