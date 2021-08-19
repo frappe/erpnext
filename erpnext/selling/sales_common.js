@@ -26,7 +26,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 				}
 			};
 		});
-	}	
+	}
 
 	setup_queries() {
 		var me = this;
@@ -85,7 +85,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 
 	refresh() {
 		super.refresh();
-		
+
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		this.frm.toggle_display("customer_name",

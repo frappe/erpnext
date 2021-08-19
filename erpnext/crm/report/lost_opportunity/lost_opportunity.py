@@ -87,17 +87,17 @@ def get_data(filters):
 			`tabOpportunity`.sales_stage,
 			`tabOpportunity`.territory
 		FROM
-			`tabOpportunity` 
+			`tabOpportunity`
 			{join}
 		WHERE
 			`tabOpportunity`.status = 'Lost' and `tabOpportunity`.company = %(company)s
-			AND `tabOpportunity`.modified BETWEEN %(from_date)s AND %(to_date)s 
-			{conditions} 
-		GROUP BY 
-			`tabOpportunity`.name 
-		ORDER BY 
+			AND `tabOpportunity`.modified BETWEEN %(from_date)s AND %(to_date)s
+			{conditions}
+		GROUP BY
+			`tabOpportunity`.name
+		ORDER BY
 			`tabOpportunity`.creation asc  """.format(conditions=get_conditions(filters), join=get_join(filters)), filters, as_dict=1)
-		
+
 
 def get_conditions(filters):
 	conditions = []
@@ -117,15 +117,15 @@ def get_conditions(filters):
 	return " ".join(conditions) if conditions else ""
 
 def get_join(filters):
-	join = """LEFT JOIN `tabOpportunity Lost Reason Detail` 
-			ON `tabOpportunity Lost Reason Detail`.parenttype = 'Opportunity' and 
+	join = """LEFT JOIN `tabOpportunity Lost Reason Detail`
+			ON `tabOpportunity Lost Reason Detail`.parenttype = 'Opportunity' and
 			`tabOpportunity Lost Reason Detail`.parent = `tabOpportunity`.name"""
 
 	if filters.get("lost_reason"):
-		join = """JOIN `tabOpportunity Lost Reason Detail` 
-			ON `tabOpportunity Lost Reason Detail`.parenttype = 'Opportunity' and 
+		join = """JOIN `tabOpportunity Lost Reason Detail`
+			ON `tabOpportunity Lost Reason Detail`.parenttype = 'Opportunity' and
 			`tabOpportunity Lost Reason Detail`.parent = `tabOpportunity`.name and
 			`tabOpportunity Lost Reason Detail`.lost_reason = '{0}'
 			""".format(filters.get("lost_reason"))
-	
+
 	return join

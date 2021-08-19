@@ -41,7 +41,7 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(total_repair_cost, asset_repair.repair_cost)
 		for item in asset_repair.stock_items:
 			total_repair_cost += item.total_value
-			
+
 		self.assertEqual(total_repair_cost, asset_repair.total_repair_cost)
 
 	def test_repair_status_after_submit(self):
@@ -99,7 +99,7 @@ class TestAssetRepair(unittest.TestCase):
 		initial_num_of_depreciations = num_of_depreciations(asset)
 		create_asset_repair(asset= asset, capitalize_repair_cost = 1, submit = 1)
 		asset.reload()
-	
+
 		self.assertEqual((initial_num_of_depreciations + 1), num_of_depreciations(asset))
 		self.assertEqual(asset.schedules[-1].accumulated_depreciation_amount, asset.finance_books[0].value_after_depreciation)
 
@@ -139,7 +139,7 @@ def create_asset_repair(**args):
 		})
 
 	asset_repair.insert(ignore_if_duplicate=True)
-	
+
 	if args.submit:
 		asset_repair.repair_status = "Completed"
 		asset_repair.cost_center = "_Test Cost Center - _TC"

@@ -72,7 +72,7 @@ class TestExpenseClaim(unittest.TestCase):
 	def test_expense_claim_gl_entry(self):
 		payable_account = get_payable_account(company_name)
 		taxes = generate_taxes()
-		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", 
+		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4",
 			do_not_submit=True, taxes=taxes)
 		expense_claim.submit()
 
