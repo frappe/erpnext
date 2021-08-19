@@ -450,5 +450,3 @@ def get_deferred_booking_accounts(doctype, voucher_detail_no, dr_or_cr):
 		return debit_account
 	else:
 		return credit_account
-
-

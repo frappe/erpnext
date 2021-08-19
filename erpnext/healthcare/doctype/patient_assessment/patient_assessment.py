@@ -31,6 +31,3 @@ def create_patient_assessment(source_name, target_doc=None):
 		}, target_doc)
 
 	return doc
-
-
-

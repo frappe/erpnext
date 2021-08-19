@@ -206,4 +206,3 @@ def get_employees(salary_structure):
 			salary_structure, salary_structure))
 
 	return list(set([d.employee for d in employees]))
-

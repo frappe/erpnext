@@ -74,6 +74,3 @@ def create_assignment(employee, leave_policy, leave_period=None, allocation_exis
 
 def get_employee_with_grade(grade):
     return frappe.get_list("Employee", filters = {"grade": grade})
-
-
-
