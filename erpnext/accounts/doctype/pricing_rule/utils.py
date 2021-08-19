@@ -168,7 +168,7 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 			frappe.throw(_("Invalid {0}").format(args.get(field)))
 
 		parent_groups = frappe.db.sql_list("""select name from `tab%s`
-			where lft>=%s and rgt<=%s""" % (parenttype, '%s', '%s'), (lft, rgt))
+			where lft<=%s and rgt>=%s""" % (parenttype, '%s', '%s'), (lft, rgt))
 
 		if parenttype in ["Customer Group", "Item Group", "Territory"]:
 			parent_field = "parent_{0}".format(frappe.scrub(parenttype))
