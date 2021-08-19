@@ -53,11 +53,7 @@ def pre_process_payload(meta_data, billing):
 	patient_dob = ""
 	for meta in meta_data:
 		if meta["key"] == "user_practitioner":
-			if "-" in meta["value"]:
-				end_index = meta["value"].find('-')
-				customer_code = meta["value"][0:end_index]
-			else:
-				customer_code = meta["value"]
+			customer_code = meta["value"]
 		elif meta["key"] == "customer_code":
 			customer_code = meta["value"]
 		elif meta["key"] == "delivery_option":
@@ -74,6 +70,11 @@ def pre_process_payload(meta_data, billing):
 			pos_order_type = meta["value"]
 		else:
 			pass
+
+	# To reslove if customer code contains "-a" or "-b"
+	if "-" in customer_code:
+		end_index = customer_code.find('-')
+		customer_code = customer_code[0:end_index]
 
 	# create temp_address dict for later use
 	temp_address = {
