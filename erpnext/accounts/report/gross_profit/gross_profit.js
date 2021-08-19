@@ -40,5 +40,16 @@ frappe.query_reports["Gross Profit"] = {
 	"tree": true,
 	"name_field": "parent",
 	"parent_field": "parent_invoice",
-	"initial_depth": 2
+	"initial_depth": 2,
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (data && !data.parent_invoice) {
+			value = $(`<span>${value}</span>`);
+			var $value = $(value).css("font-weight", "bold");
+			value = $value.wrap("<p></p>").parent().html();
+		}
+
+		return value;
+	},
 }
