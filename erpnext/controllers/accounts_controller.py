@@ -1503,7 +1503,8 @@ class AccountsController(TransactionBase):
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
-	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
+	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name", "exclude_from_item_tax_amount"],
+		as_dict=True)
 
 
 @frappe.whitelist()

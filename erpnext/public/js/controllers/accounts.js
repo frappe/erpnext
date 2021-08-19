@@ -165,6 +165,7 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 			callback: function(r) {
 				frappe.model.set_value(cdt, cdn, "rate", r.message.tax_rate || 0);
 				frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
+				frappe.model.set_value(cdt, cdn, "exclude_from_item_tax_amount", r.message.exclude_from_item_tax_amount);
 			}
 		})
 	} else if (d.charge_type == 'Actual' && d.account_head) {

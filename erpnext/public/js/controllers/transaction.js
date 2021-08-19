@@ -88,6 +88,48 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		});
 
+		frappe.ui.form.on(this.frm.doctype + " Item", "tax_inclusive_amount", function(frm, cdt, cdn) {
+			var item = frappe.get_doc(cdt, cdn);
+
+			item.tax_inclusive_amount = flt(item.tax_inclusive_amount);
+			if (flt(item.qty)) {
+				frappe.model.set_value(cdt, cdn, 'tax_inclusive_rate', item.tax_inclusive_amount / flt(item.qty));
+			} else {
+				frappe.model.set_value(cdt, cdn, 'tax_inclusive_rate', item.tax_inclusive_amount);
+			}
+		});
+
+		frappe.ui.form.on(this.frm.doctype + " Item", "tax_inclusive_rate", function(frm, cdt, cdn) {
+			var tax_rows = (frm.doc.taxes || []).filter(tax => !tax.exclude_from_item_tax_amount);
+
+			var invalid_charge_types = tax_rows.filter(tax => tax.charge_type != 'On Net Total');
+			if (invalid_charge_types.length) {
+				frappe.msgprint(__('Cannot calculate Rate from Tax Inclusive Rate'));
+				frm.cscript.calculate_taxes_and_totals();
+				return
+			}
+
+			var item = frappe.get_doc(cdt, cdn);
+			var item_tax_map = frm.cscript._load_item_tax_rate(item.item_tax_rate);
+
+			var tax_fraction = 0;
+			$.each(tax_rows, function (i, tax) {
+				var tax_rate = frm.cscript._get_tax_rate(tax, item_tax_map);
+				tax_fraction += tax_rate / 100;
+			});
+
+			item.tax_inclusive_rate = flt(item.tax_inclusive_rate);
+
+			var rate;
+			if (cint(item.apply_discount_after_taxes)) {
+				rate = item.tax_inclusive_rate - flt(item.taxable_rate) * tax_fraction;
+			} else {
+				rate = item.tax_inclusive_rate / (1 + tax_fraction);
+			}
+
+			frappe.model.set_value(cdt, cdn, 'rate', rate);
+		});
+
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
 		});

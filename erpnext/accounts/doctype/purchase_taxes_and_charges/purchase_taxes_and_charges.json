@@ -15,6 +15,7 @@
   "account_head",
   "description",
   "apply_on_net_amount",
+  "exclude_from_item_tax_amount",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -252,11 +253,17 @@
    "fieldname": "apply_on_net_amount",
    "fieldtype": "Check",
    "label": "Always Apply on Net Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "exclude_from_item_tax_amount",
+   "fieldtype": "Check",
+   "label": "Exclude From Item Tax Amount"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-08-10 14:04:19.874046",
+ "modified": "2021-08-20 00:49:29.237711",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",

@@ -20,7 +20,7 @@ frappe.ui.form.on('Account', {
 		frm.toggle_display('account_name', frm.is_new());
 
 		// hide fields if group
-		frm.toggle_display(['account_type', 'tax_rate', 'party_type'], cint(frm.doc.is_group) == 0);
+		frm.toggle_display(['account_type', 'tax_rate', 'party_type', 'exclude_from_item_tax_amount'], cint(frm.doc.is_group) == 0);
 
 		// disable fields
 		frm.toggle_enable(['is_group', 'company'], false);
@@ -55,6 +55,8 @@ frappe.ui.form.on('Account', {
 	account_type: function (frm) {
 		if (frm.doc.is_group == 0) {
 			frm.toggle_display(['tax_rate'], frm.doc.account_type == 'Tax');
+			frm.toggle_display('exclude_from_item_tax_amount',
+				["Tax", "Chargeable", "Income Account", "Expense Account", "Expenses Included In Valuation"].includes(frm.doc.account_type));
 			frm.toggle_display('warehouse', frm.doc.account_type == 'Stock');
 			frm.toggle_display('party_type', frm.doc.account_type == "Receivable" || frm.doc.account_type == "Payable");
 		}

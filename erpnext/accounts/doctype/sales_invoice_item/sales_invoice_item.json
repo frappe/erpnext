@@ -1055,6 +1055,8 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "item_taxes_and_charges",
+   "depends_on": "item_taxes_and_charges",
    "fieldname": "tax_inclusive_amounts_section",
    "fieldtype": "Section Break",
    "label": "Tax Inclusive Amounts"
@@ -1062,7 +1064,7 @@
   {
    "fieldname": "item_taxes_and_charges",
    "fieldtype": "Currency",
-   "label": "Taxes and Charges",
+   "label": "Taxes",
    "options": "currency",
    "print_hide": 1,
    "read_only": 1
@@ -1085,8 +1087,7 @@
    "fieldtype": "Currency",
    "label": "Tax Inclusive Rate",
    "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "base_tax_inclusive_rate",
@@ -1106,8 +1107,7 @@
    "fieldtype": "Currency",
    "label": "Tax Inclusive Amount",
    "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "base_tax_inclusive_amount",
@@ -1347,7 +1347,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-08-11 15:34:23.721864",
+ "modified": "2021-08-20 00:38:18.172960",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

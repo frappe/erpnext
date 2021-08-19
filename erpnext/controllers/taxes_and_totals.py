@@ -556,9 +556,11 @@ class calculate_taxes_and_totals(object):
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
 		# store tax breakup for each item
-		item.item_taxes_and_charges += current_tax_amount
 		item.item_tax_detail.setdefault(tax.name, 0)
 		item.item_tax_detail[tax.name] += current_tax_amount
+
+		if not tax.get('exclude_from_item_tax_amount'):
+			item.item_taxes_and_charges += current_tax_amount
 
 		key = item.item_code or item.item_name
 		item_wise_tax_amount = current_tax_amount*self.doc.conversion_rate

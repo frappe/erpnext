@@ -636,12 +636,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	set_item_wise_tax: function(item, tax, tax_rate, current_tax_amount) {
 		// store tax breakup for each item
-		item.item_taxes_and_charges += current_tax_amount;
-
 		if (!item.item_tax_detail.hasOwnProperty(tax.name)) {
 			item.item_tax_detail[tax.name] = 0;
 		}
 		item.item_tax_detail[tax.name] += current_tax_amount;
+
+		if (!tax.exclude_from_item_tax_amount) {
+			item.item_taxes_and_charges += current_tax_amount;
+		}
 
 		let tax_detail = tax.item_wise_tax_detail;
 		let key = item.item_code || item.item_name;
