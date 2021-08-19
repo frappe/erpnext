@@ -3,14 +3,6 @@
 
 frappe.ui.form.on('Party Link', {
 	refresh: function(frm) {
-		frm.set_query('party_type', 'links', () => {
-			return {
-				filters: {
-					name: ['in', party_types]
-				}
-			};
-		});
-
 		frm.set_query('primary_role', () => {
 			return {
 				filters: {
