@@ -2002,14 +2002,6 @@
    "fieldtype": "Small Text",
    "label": "Dispatch Address",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "ignore_default_payment_terms_template",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Ignore Default Payment Terms Template",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
