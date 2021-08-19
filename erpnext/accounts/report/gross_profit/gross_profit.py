@@ -41,14 +41,35 @@ def execute(filters=None):
 
 	columns = get_columns(group_wise_columns, filters)
 
-	for src in gross_profit_data.grouped_data:
-		row = []
-		for col in group_wise_columns.get(scrub(filters.group_by)):
-			row.append(src.get(col))
+	if filters.group_by == 'Invoice':
+		column_names = get_column_names()
 
-		row.append(filters.currency)
-		data.append(row)
+		for src in gross_profit_data.si_list:	
+			row = frappe._dict()
+			row['currency'] = filters.currency
 
+			for col in group_wise_columns.get(scrub(filters.group_by)):
+				row[column_names[col]] = src.get(col)
+
+			if row.item_code:
+				row.indent = 1.0
+				row.parent_invoice = src.parent_invoice
+			else:
+				row.indent = 0.0
+				row.parent_invoice = ''
+
+			data.append(row)
+
+	else:
+		for src in gross_profit_data.grouped_data:		
+			row = []
+			row.append(filters.currency)
+
+			for col in group_wise_columns.get(scrub(filters.group_by)):
+				row.append(src.get(col))
+
+			data.append(row)
+	
 	return columns, data
 
 def get_columns(group_wise_columns, filters):
@@ -91,12 +112,38 @@ def get_columns(group_wise_columns, filters):
 
 	return columns
 
+def get_column_names():
+	return frappe._dict({
+		'parent': 'sales_invoice',     
+		'customer': 'customer', 
+		'customer_group': 'customer_group', 
+		'posting_date': 'posting_date', 
+		'item_code': 'item_code', 
+		'item_name': 'item_name', 
+		'item_group': 'item_group', 
+		'brand': 'brand', 
+		'description': 'description', 
+		'warehouse': 'warehouse', 
+		'qty': 'qty', 
+		'base_rate': 'avg._selling_rate', 
+		'buying_rate': 'valuation_rate', 
+		'base_amount': 'selling_amount', 
+		'buying_amount': 'buying_amount', 
+		'gross_profit': 'gross_profit', 
+		'gross_profit_percent': 'gross_profit_%', 
+		'project': 'project'
+	})
+
 class GrossProfitGenerator(object):
 	def __init__(self, filters=None):
 		self.data = []
 		self.average_buying_rate = {}
 		self.filters = frappe._dict(filters)
 		self.load_invoice_items()
+
+		# if filters.group_by == 'Invoice':
+		# 	self.group_items_by_invoice()
+
 		self.load_stock_ledger_entries()
 		self.load_product_bundle()
 		self.load_non_stock_items()
