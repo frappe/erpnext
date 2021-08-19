@@ -118,4 +118,3 @@ def change_item_code_from_template(item_code, doc):
 		rename_doc('Item', doc.item_code, item_code, ignore_permissions=True)
 		frappe.db.set_value('Clinical Procedure Template', doc.name, 'item_code', item_code)
 	return
-

@@ -49,7 +49,7 @@ class StudentApplicant(Document):
 			frappe.throw(_("Please select Student Admission which is mandatory for the paid student applicant"))
 
 	def validation_from_student_admission(self):
-		
+
 		student_admission = get_student_admission_data(self.student_admission, self.program)
 
 		if student_admission and student_admission.min_age and \
