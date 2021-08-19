@@ -32,7 +32,7 @@ def execute(filters=None):
 
 		if filters.brand and filters.brand != item.brand:
 			continue
-			
+
 		elif filters.item_group and filters.item_group != item.item_group:
 			continue
 

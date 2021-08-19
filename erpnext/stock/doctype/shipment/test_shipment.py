@@ -24,7 +24,7 @@ def create_test_delivery_note():
 	customer = get_shipment_customer()
 	item = get_shipment_item(company.name)
 	posting_date = date.today() + timedelta(days=1)
-	
+
 	create_material_receipt(item, company.name)
 	delivery_note = frappe.new_doc("Delivery Note")
 	delivery_note.company = company.name
@@ -73,7 +73,7 @@ def create_test_shipment(delivery_notes = None):
 	shipment.pickup_to = '17:00'
 	shipment.description_of_content = 'unit test entry'
 	for delivery_note in delivery_notes:
-		shipment.append('shipment_delivery_note', 
+		shipment.append('shipment_delivery_note',
 			{
 				"delivery_note": delivery_note.name
 			}
@@ -222,7 +222,7 @@ def create_material_receipt(item, company):
 	)
 	stock.insert()
 	stock.submit()
-	
+
 
 def create_shipment_item(item_name, company_name):
 	item = frappe.new_doc("Item")

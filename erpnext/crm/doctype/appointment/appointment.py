@@ -235,4 +235,3 @@ def _get_employee_from_user(user):
 		# frappe.db.exists returns a tuple of a tuple
 		return frappe.get_doc('Employee', employee_docname[0][0])
 	return None
-

@@ -97,7 +97,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pi.save()
 		pi.submit()
 		invoices.append(pi)
-		
+
 		# Second Invoice will apply TDS checked
 		pi1 = create_purchase_invoice(supplier = "Test TDS Supplier3", rate = 20000)
 		pi1.submit()
