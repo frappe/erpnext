@@ -5,7 +5,7 @@ import json
 import unittest
 import frappe
 import frappe.permissions
-from frappe.utils import flt, add_days, nowdate
+from frappe.utils import flt, add_days, nowdate, getdate
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
@@ -85,7 +85,7 @@ class TestSalesOrder(unittest.TestCase):
 		si1.update_billed_amount_in_sales_order = 1
 		si1.submit()
 		so.load_from_db()
-		self.assertEquals(so.per_billed, 0)
+		self.assertEqual(so.per_billed, 0)
 
 	def test_make_sales_invoice_with_terms(self):
 		so = make_sales_order(do_not_submit=True)
@@ -673,6 +673,8 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.cancel()
 
+		dn.load_from_db()
+
 		self.assertRaises(frappe.CancelledLinkError, dn.submit)
 
 	def test_service_type_product_bundle(self):
@@ -996,7 +998,7 @@ class TestSalesOrder(unittest.TestCase):
 		# Check if Work Orders were raised
 		for item in so_item_name:
 			wo_qty = frappe.db.sql("select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
-			self.assertEquals(wo_qty[0][0], so_item_name.get(item))
+			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
 
 	def test_serial_no_based_delivery(self):
 		frappe.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)
@@ -1217,6 +1219,50 @@ class TestSalesOrder(unittest.TestCase):
 		# To test if the SO does NOT have a Blanket Order
 		self.assertEqual(so_doc.items[0].blanket_order, None)
 
+	def test_so_cancellation_when_si_drafted(self):
+		"""
+			Test to check if Sales Order gets cancelled if Sales Invoice is in Draft state
+			Expected result: sales order should not get cancelled 
+		"""
+		so = make_sales_order()
+		so.submit()
+		si = make_sales_invoice(so.name)
+		si.save()
+
+		self.assertRaises(frappe.ValidationError, so.cancel)
+
+	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		automatically_fetch_payment_terms()
+
+		so = make_sales_order(uom="Nos", do_not_save=1)
+		create_payment_terms_template()
+		so.payment_terms_template = 'Test Receivable Template'
+		so.submit()
+
+		si = create_sales_invoice(qty=10, do_not_save=1)
+		si.items[0].sales_order = so.name
+		si.items[0].so_detail = so.items[0].name
+		si.insert()
+
+		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
+		compare_payment_schedules(self, so, si)
+
+		automatically_fetch_payment_terms(enable=0)		
+
+def automatically_fetch_payment_terms(enable=1):
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	accounts_settings.automatically_fetch_payment_terms = enable
+	accounts_settings.save()
+
+def compare_payment_schedules(doc, doc1, doc2):
+	for index, schedule in enumerate(doc1.get('payment_schedule')):
+		doc.assertEqual(schedule.payment_term, doc2.payment_schedule[index].payment_term)
+		doc.assertEqual(getdate(schedule.due_date), doc2.payment_schedule[index].due_date)
+		doc.assertEqual(schedule.invoice_portion, doc2.payment_schedule[index].invoice_portion)
+		doc.assertEqual(schedule.payment_amount, doc2.payment_schedule[index].payment_amount)
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

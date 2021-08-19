@@ -78,6 +78,9 @@ frappe.ui.form.on("Delivery Note", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+
+		frm.set_df_property('packed_items', 'cannot_add_rows', true);
+		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 
 	print_without_amount: function(frm) {
@@ -273,11 +276,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	packed_items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	close_delivery_note: function(doc){

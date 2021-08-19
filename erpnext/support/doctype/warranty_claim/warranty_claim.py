@@ -29,7 +29,7 @@ class WarrantyClaim(TransactionBase):
 			where t2.parent = t1.name and t2.prevdoc_docname = %s and	t1.docstatus!=2""",
 			(self.name))
 		if lst:
-			lst1 = ','.join([x[0] for x in lst])
+			lst1 = ','.join(x[0] for x in lst)
 			frappe.throw(_("Cancel Material Visit {0} before cancelling this Warranty Claim").format(lst1))
 		else:
 			frappe.db.set(self, 'status', 'Cancelled')

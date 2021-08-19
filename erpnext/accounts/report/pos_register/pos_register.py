@@ -77,14 +77,14 @@ def get_pos_entries(filters, group_by_field):
 		), filters, as_dict=1)
 
 def concat_mode_of_payments(pos_entries):
-	mode_of_payments = get_mode_of_payments(set([d.pos_invoice for d in pos_entries]))
+	mode_of_payments = get_mode_of_payments(set(d.pos_invoice for d in pos_entries))
 	for entry in pos_entries:
 		if mode_of_payments.get(entry.pos_invoice):
 			entry.mode_of_payment = ", ".join(mode_of_payments.get(entry.pos_invoice, []))
 
 def add_subtotal_row(data, group_invoices, group_by_field, group_by_value):
-	grand_total = sum([d.grand_total for d in group_invoices])
-	paid_amount = sum([d.paid_amount for d in group_invoices])
+	grand_total = sum(d.grand_total for d in group_invoices)
+	paid_amount = sum(d.paid_amount for d in group_invoices)
 	data.append({
 		group_by_field: group_by_value,
 		"grand_total": grand_total,
@@ -116,22 +116,19 @@ def validate_filters(filters):
 		frappe.throw(_("Can not filter based on Payment Method, if grouped by Payment Method"))
 
 def get_conditions(filters):
-	conditions = "company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s".format(
-		company=filters.get("company"),
-		from_date=filters.get("from_date"),
-		to_date=filters.get("to_date"))
+	conditions = "company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s"
 
 	if filters.get("pos_profile"):
-		conditions += " AND pos_profile = %(pos_profile)s".format(pos_profile=filters.get("pos_profile"))
+		conditions += " AND pos_profile = %(pos_profile)s"
 	
 	if filters.get("owner"):
-		conditions += " AND owner = %(owner)s".format(owner=filters.get("owner"))
+		conditions += " AND owner = %(owner)s"
 	
 	if filters.get("customer"):
-		conditions += " AND customer = %(customer)s".format(customer=filters.get("customer"))
+		conditions += " AND customer = %(customer)s"
 	
 	if filters.get("is_return"):
-		conditions += " AND is_return = %(is_return)s".format(is_return=filters.get("is_return"))
+		conditions += " AND is_return = %(is_return)s"
 	
 	if filters.get("mode_of_payment"):
 		conditions += """

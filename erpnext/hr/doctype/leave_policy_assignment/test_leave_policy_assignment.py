@@ -35,7 +35,6 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 		leave_policy_assignments = create_assignment_for_multiple_employees([employee.name], frappe._dict(data))
 
 		leave_policy_assignment_doc = frappe.get_doc("Leave Policy Assignment", leave_policy_assignments[0])
-		leave_policy_assignment_doc.grant_leave_alloc_for_employee()
 		leave_policy_assignment_doc.reload()
 
 		self.assertEqual(leave_policy_assignment_doc.leaves_allocated, 1)
@@ -73,7 +72,6 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 		leave_policy_assignments = create_assignment_for_multiple_employees([employee.name], frappe._dict(data))
 
 		leave_policy_assignment_doc = frappe.get_doc("Leave Policy Assignment", leave_policy_assignments[0])
-		leave_policy_assignment_doc.grant_leave_alloc_for_employee()
 		leave_policy_assignment_doc.reload()
 
 

@@ -46,7 +46,13 @@ frappe.query_reports["GSTR-1"] = {
 			"label": __("Type of Business"),
 			"fieldtype": "Select",
 			"reqd": 1,
-			"options": ["B2B", "B2C Large", "B2C Small", "CDNR", "EXPORT"],
+			"options": [
+				{ "value": "B2B", "label": __("B2B Invoices - 4A, 4B, 4C, 6B, 6C") },
+				{ "value": "B2C Large", "label": __("B2C(Large) Invoices - 5A, 5B") },
+				{ "value": "B2C Small", "label": __("B2C(Small) Invoices - 7") },
+				{ "value": "CDNR-REG", "label": __("Credit/Debit Notes (Registered) - 9B") },
+				{ "value": "EXPORT", "label": __("Export Invoice - 6A") }
+			],
 			"default": "B2B"
 		}
 	],

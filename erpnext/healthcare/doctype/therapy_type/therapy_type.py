@@ -50,6 +50,7 @@ class TherapyType(Document):
 
 		self.db_set('change_in_item', 0)
 
+	@frappe.whitelist()
 	def add_exercises(self):
 		exercises = self.get_exercises_for_body_parts()
 		last_idx = max([cint(d.idx) for d in self.get('exercises')] or [0,])

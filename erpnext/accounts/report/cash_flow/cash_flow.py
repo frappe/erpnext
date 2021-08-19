@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
+from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data, get_filtered_list_for_consolidated_report)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
 from erpnext.accounts.utils import get_fiscal_year
 from six import iteritems
@@ -67,9 +67,9 @@ def execute(filters=None):
 			section_data.append(account_data)
 
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'],
-			period_list, company_currency, summary_data)
+			period_list, company_currency, summary_data, filters)
 
-	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency, summary_data)
+	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	chart = get_chart_data(columns, data)
@@ -162,18 +162,26 @@ def get_start_date(period, accumulated_values, company):
 
 	return start_date
 
-def add_total_row_account(out, data, label, period_list, currency, summary_data, consolidated = False):
+def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
 	total_row = {
 		"account_name": "'" + _("{0}").format(label) + "'",
 		"account": "'" + _("{0}").format(label) + "'",
 		"currency": currency
 	}
+
+	summary_data[label] = 0
+
+	# from consolidated financial statement
+	if filters.get('accumulated_in_group_company'):
+		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
+
 	for row in data:
 		if row.get("parent_account"):
 			for period in period_list:
 				key = period if consolidated else period['key']
 				total_row.setdefault(key, 0.0)
 				total_row[key] += row.get(key, 0.0)
+				summary_data[label] += row.get(key)
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += row["total"]
@@ -181,7 +189,6 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 	out.append(total_row)
 	out.append({})
 
-	summary_data[label] = total_row["total"]
 
 def get_report_summary(summary_data, currency):
 	report_summary = []

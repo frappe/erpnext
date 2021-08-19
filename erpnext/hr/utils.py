@@ -3,13 +3,12 @@
 
 import erpnext
 import frappe
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, InactiveEmployeeStatusError
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
-	get_datetime, getdate, nowdate, today, unique)
-
+	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
 
@@ -20,6 +19,7 @@ class EmployeeBoardingController(Document):
 		Assign to the concerned person and roles as per the onboarding/separation template
 	'''
 	def validate(self):
+		validate_active_employee(self.employee)
 		# remove the task if linked before submitting the form
 		if self.amended_from:
 			for activity in self.activities:
@@ -32,13 +32,15 @@ class EmployeeBoardingController(Document):
 			project_name += self.job_applicant
 		else:
 			project_name += self.employee
+
 		project = frappe.get_doc({
 				"doctype": "Project",
 				"project_name": project_name,
 				"expected_start_date": self.date_of_joining if self.doctype == "Employee Onboarding" else self.resignation_letter_date,
 				"department": self.department,
 				"company": self.company
-			}).insert(ignore_permissions=True)
+			}).insert(ignore_permissions=True, ignore_mandatory=True)
+
 		self.db_set("project", project.name)
 		self.db_set("boarding_status", "Pending")
 		self.reload()
@@ -267,6 +269,7 @@ def get_total_exemption_amount(declarations):
 	total_exemption_amount = sum([flt(d.total_exemption_amount) for d in exemptions.values()])
 	return total_exemption_amount
 
+@frappe.whitelist()
 def get_leave_period(from_date, to_date, company):
 	leave_period = frappe.db.sql("""
 		select name, from_date, to_date
@@ -498,13 +501,6 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount
 
-def grant_leaves_automatically():
-	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_singles_value("HR Settings", "automatically_allocate_leaves_based_on_leave_policy")
-	if automatically_allocate_leaves_based_on_leave_policy:
-		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "leaves_allocated":0})
-		for assignment in lpa:
-			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
-
 def share_doc_with_approver(doc, user):
 	# if approver does not have permissions, share
 	if not frappe.has_permission(doc=doc, ptype="submit", user=user):
@@ -526,3 +522,8 @@ def share_doc_with_approver(doc, user):
 		approver = approvers.get(doc.doctype)
 		if doc_before_save.get(approver) != doc.get(approver):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
+
+def validate_active_employee(employee):
+	if frappe.db.get_value("Employee", employee, "status") == "Inactive":
+		frappe.throw(_("Transactions cannot be created for an Inactive Employee {0}.").format(
+			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)

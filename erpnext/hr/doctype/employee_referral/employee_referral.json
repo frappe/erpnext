@@ -1,0 +1,294 @@
+{
+ "actions": [],
+ "autoname": "format:HR-REF-{####}",
+ "creation": "2021-03-23 14:54:45.047051",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "first_name",
+  "last_name",
+  "full_name",
+  "email",
+  "contact_no",
+  "resume",
+  "resume_link",
+  "column_break_6",
+  "date",
+  "status",
+  "for_designation",
+  "current_employer",
+  "current_job_title",
+  "referrer_details_section",
+  "referrer",
+  "referrer_name",
+  "column_break_14",
+  "is_applicable_for_referral_bonus",
+  "referral_payment_status",
+  "department",
+  "additional_information_section",
+  "qualification_reason",
+  "work_references",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_no",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Contact No.",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "current_employer",
+   "fieldtype": "Data",
+   "label": "Current Employer "
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Pending\nIn Process\nAccepted\nRejected",
+   "permlevel": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_job_title",
+   "fieldtype": "Data",
+   "label": "Current Job Title"
+  },
+  {
+   "fieldname": "resume",
+   "fieldtype": "Attach",
+   "label": "Resume"
+  },
+  {
+   "fieldname": "referrer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Referrer Details"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "additional_information_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Information "
+  },
+  {
+   "fieldname": "work_references",
+   "fieldtype": "Text Editor",
+   "label": "Work References"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Employee Referral",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "for_designation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "For Designation ",
+   "options": "Designation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Email",
+   "options": "Email",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_applicable_for_referral_bonus",
+   "fieldtype": "Check",
+   "label": "Is Applicable for Referral Bonus"
+  },
+  {
+   "fieldname": "qualification_reason",
+   "fieldtype": "Text Editor",
+   "label": "Why is this Candidate Qualified for this Position?"
+  },
+  {
+   "fieldname": "referrer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Referrer",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "referrer.employee_name",
+   "fieldname": "referrer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Referrer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resume_link",
+   "fieldtype": "Data",
+   "label": "Resume Link"
+  },
+  {
+   "fieldname": "referral_payment_status",
+   "fieldtype": "Select",
+   "label": "Referral Bonus Payment Status",
+   "options": "\nUnpaid\nPaid",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-04-26 21:21:38.094086",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Employee Referral",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "full_name"
+}

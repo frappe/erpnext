@@ -1,6 +1,7 @@
 
 from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
+from frappe.utils import cstr
 from frappe import _
 
 def verify_request():
@@ -146,22 +147,19 @@ def rename_address(address, customer):
 
 def link_items(items_list, woocommerce_settings, sys_lang):
 	for item_data in items_list:
-		item_woo_com_id = item_data.get("product_id")
+		item_woo_com_id = cstr(item_data.get("product_id"))
 
-		if frappe.get_value("Item", {"woocommerce_id": item_woo_com_id}):
-			#Edit Item
-			item = frappe.get_doc("Item", {"woocommerce_id": item_woo_com_id})
-		else:
+		if not frappe.db.get_value("Item", {"woocommerce_id": item_woo_com_id}, 'name'):
 			#Create Item
 			item = frappe.new_doc("Item")
+			item.item_code = _("woocommerce - {0}", sys_lang).format(item_woo_com_id)
+			item.stock_uom = woocommerce_settings.uom or _("Nos", sys_lang)
+			item.item_group = _("WooCommerce Products", sys_lang)
 
-		item.item_name = item_data.get("name")
-		item.item_code = _("woocommerce - {0}", sys_lang).format(item_data.get("product_id"))
-		item.woocommerce_id = item_data.get("product_id")
-		item.item_group = _("WooCommerce Products", sys_lang)
-		item.stock_uom = woocommerce_settings.uom or _("Nos", sys_lang)
-		item.flags.ignore_mandatory = True
-		item.save()
+			item.item_name = item_data.get("name")
+			item.woocommerce_id = item_woo_com_id
+			item.flags.ignore_mandatory = True
+			item.save()
 
 def create_sales_order(order, woocommerce_settings, customer_name, sys_lang):
 	new_sales_order = frappe.new_doc("Sales Order")
@@ -194,12 +192,12 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order, sys_l
 
 	for item in order.get("line_items"):
 		woocomm_item_id = item.get("product_id")
-		found_item = frappe.get_doc("Item", {"woocommerce_id": woocomm_item_id})
+		found_item = frappe.get_doc("Item", {"woocommerce_id": cstr(woocomm_item_id)})
 
 		ordered_items_tax = item.get("total_tax")
 
-		new_sales_order.append("items",{
-			"item_code": found_item.item_code,
+		new_sales_order.append("items", {
+			"item_code": found_item.name,
 			"item_name": found_item.item_name,
 			"description": found_item.item_name,
 			"delivery_date": new_sales_order.delivery_date,
@@ -207,7 +205,7 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order, sys_l
 			"qty": item.get("quantity"),
 			"rate": item.get("price"),
 			"warehouse": woocommerce_settings.warehouse or default_warehouse
-			})
+		})
 
 		add_tax_details(new_sales_order, ordered_items_tax, "Ordered Item tax", woocommerce_settings.tax_account)
 

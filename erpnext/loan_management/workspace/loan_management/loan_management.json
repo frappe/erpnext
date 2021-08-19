@@ -12,7 +12,7 @@
  "idx": 0,
  "is_default": 0,
  "is_standard": 1,
- "label": "Loan Management",
+ "label": "Loans",
  "links": [
   {
    "hidden": 0,
@@ -220,10 +220,10 @@
    "type": "Link"
   }
  ],
- "modified": "2021-02-18 17:31:53.586508",
+ "modified": "2021-05-25 17:31:53.586508",
  "modified_by": "Administrator",
  "module": "Loan Management",
- "name": "Loan Management",
+ "name": "Loans",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,

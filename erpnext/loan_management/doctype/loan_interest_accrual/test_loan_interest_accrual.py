@@ -52,7 +52,7 @@ class TestLoanInterestAccrual(unittest.TestCase):
 		process_loan_interest_accrual_for_demand_loans(posting_date=last_date)
 		loan_interest_accural = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
 
-		self.assertEquals(flt(loan_interest_accural.interest_amount, 0), flt(accrued_interest_amount, 0))
+		self.assertEqual(flt(loan_interest_accural.interest_amount, 0), flt(accrued_interest_amount, 0))
 
 	def test_accumulated_amounts(self):
 		pledge = [{
@@ -76,7 +76,7 @@ class TestLoanInterestAccrual(unittest.TestCase):
 		process_loan_interest_accrual_for_demand_loans(posting_date=last_date)
 		loan_interest_accrual = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
 
-		self.assertEquals(flt(loan_interest_accrual.interest_amount, 0), flt(accrued_interest_amount, 0))
+		self.assertEqual(flt(loan_interest_accrual.interest_amount, 0), flt(accrued_interest_amount, 0))
 
 		next_start_date = '2019-10-31'
 		next_end_date = '2019-11-29'
@@ -90,4 +90,4 @@ class TestLoanInterestAccrual(unittest.TestCase):
 
 		loan_interest_accrual = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name,
 			'process_loan_interest_accrual': process})
-		self.assertEquals(flt(loan_interest_accrual.total_pending_interest_amount, 0), total_pending_interest_amount)
+		self.assertEqual(flt(loan_interest_accrual.total_pending_interest_amount, 0), total_pending_interest_amount)

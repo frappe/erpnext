@@ -18,7 +18,6 @@ def get_level():
 		"Delivery Note": 5,
 		"Employee": 3, 
 		"Instructor": 5, 
-		"Instructor": 5, 
 		"Issue": 5,
 		"Item": 5, 
 		"Journal Entry": 3, 

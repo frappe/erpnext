@@ -68,6 +68,18 @@ frappe.query_reports["Job Card Summary"] = {
 			get_data: function(txt) {
 				return frappe.db.get_link_options('Item', txt);
 			}
+		},
+		{
+			label: __("Workstation"),
+			fieldname: "workstation",
+			fieldtype: "Link",
+			options: "Workstation"
+		},
+		{
+			label: __("Operation"),
+			fieldname: "operation",
+			fieldtype: "Link",
+			options: "Operation"
 		}
 	]
 };

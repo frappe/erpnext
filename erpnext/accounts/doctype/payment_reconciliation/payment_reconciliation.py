@@ -114,7 +114,7 @@ class PaymentReconciliation(Document):
 				'party_type': self.party_type,
 				'voucher_type': voucher_type,
 				'account': self.receivable_payable_account
-			}, as_dict=1, debug=1)
+			}, as_dict=1)
 
 	def add_payment_entries(self, entries):
 		self.set('payments', [])
@@ -306,5 +306,5 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				}
 			]
 		})
-
+		jv.flags.ignore_mandatory = True
 		jv.submit()

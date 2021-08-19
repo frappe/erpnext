@@ -185,7 +185,7 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Admitted Datetime",
-   "read_only": 1
+   "permlevel": 2
   },
   {
    "depends_on": "eval:(doc.expected_length_of_stay > 0)",
@@ -312,7 +312,7 @@
    "fieldname": "inpatient_occupancies",
    "fieldtype": "Table",
    "options": "Inpatient Occupancy",
-   "read_only": 1
+   "permlevel": 2
   },
   {
    "fieldname": "btn_transfer",
@@ -407,12 +407,12 @@
    "fieldname": "discharge_datetime",
    "fieldtype": "Datetime",
    "label": "Discharge Date",
-   "read_only": 1
+   "permlevel": 2
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-18 14:44:11.689956",
+ "modified": "2021-03-18 15:59:17.318988",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",
@@ -465,6 +465,37 @@
    "read": 1,
    "report": 1,
    "role": "Nursing User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "permlevel": 2,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "permlevel": 2,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "permlevel": 2,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nursing User",
+   "share": 1
   }
  ],
  "restrict_to_domain": "Healthcare",

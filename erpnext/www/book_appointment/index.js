@@ -48,7 +48,7 @@ function setup_date_picker() {
 function hide_next_button() {
     let next_button = document.getElementById('next-button');
     next_button.disabled = true;
-    next_button.onclick = () => frappe.msgprint("Please select a date and time");
+    next_button.onclick = () => frappe.msgprint(__("Please select a date and time"));
 }
 
 function show_next_button() {
@@ -63,7 +63,7 @@ function on_date_or_timezone_select() {
     if (date_picker.value === '') {
         clear_time_slots();
         hide_next_button();
-        frappe.throw('Please select a date');
+        frappe.throw(__('Please select a date'));
     }
     window.selected_date = date_picker.value;
     window.selected_timezone = timezone.value;

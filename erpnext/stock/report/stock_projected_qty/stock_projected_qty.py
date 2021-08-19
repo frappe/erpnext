@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, today
 from erpnext.stock.utils import update_included_uom_in_report, is_reposting_item_valuation_in_progress
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -49,9 +50,13 @@ def execute(filters=None):
 		if (re_order_level or re_order_qty) and re_order_level > bin.projected_qty:
 			shortage_qty = re_order_level - flt(bin.projected_qty)
 
+		reserved_qty_for_pos = get_pos_reserved_qty(bin.item_code, bin.warehouse)
+		if reserved_qty_for_pos:
+			bin.projected_qty -= reserved_qty_for_pos
+
 		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
 			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty,
-			bin.reserved_qty, bin.reserved_qty_for_production, bin.reserved_qty_for_sub_contract,
+			bin.reserved_qty, bin.reserved_qty_for_production, bin.reserved_qty_for_sub_contract, reserved_qty_for_pos,
 			bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
 
 		if include_uom:
@@ -74,9 +79,11 @@ def get_columns():
 		{"label": _("Requested Qty"), "fieldname": "indented_qty", "fieldtype": "Float", "width": 110, "convertible": "qty"},
 		{"label": _("Ordered Qty"), "fieldname": "ordered_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Reserved Qty"), "fieldname": "reserved_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Reserved Qty for Production"), "fieldname": "reserved_qty_for_production", "fieldtype": "Float",
+		{"label": _("Reserved for Production"), "fieldname": "reserved_qty_for_production", "fieldtype": "Float",
 			"width": 100, "convertible": "qty"},
-		{"label": _("Reserved for sub contracting"), "fieldname": "reserved_qty_for_sub_contract", "fieldtype": "Float",
+		{"label": _("Reserved for Sub Contracting"), "fieldname": "reserved_qty_for_sub_contract", "fieldtype": "Float",
+			"width": 100, "convertible": "qty"},
+		{"label": _("Reserved for POS Transactions"), "fieldname": "reserved_qty_for_pos", "fieldtype": "Float",
 			"width": 100, "convertible": "qty"},
 		{"label": _("Projected Qty"), "fieldname": "projected_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Reorder Level"), "fieldname": "re_order_level", "fieldtype": "Float", "width": 100, "convertible": "qty"},
