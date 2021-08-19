@@ -372,8 +372,6 @@ def create_appointment_type(args=None):
 			'price_list': args.get('price_list') or frappe.db.get_value("Price List", {"selling": 1}),
 			'items': args.get('items') or items
 		}).insert()
-
-
 def create_service_unit_type(id=0, allow_appointments=1, overlap_appointments=0):
 	if frappe.db.exists('Healthcare Service Unit Type', f'_Test Service Unit Type {str(id)}'):
 		return f'_Test Service Unit Type {str(id)}'
