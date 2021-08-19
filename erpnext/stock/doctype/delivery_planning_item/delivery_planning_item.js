@@ -38,7 +38,6 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 	onload: function(frm){
 
-
 		cur_frm.set_query("transporter", function() {
 			return {
 			   "filters": {
@@ -47,48 +46,11 @@ frappe.ui.form.on('Delivery Planning Item', {
 			}
 		});
 
-		// if( frm.doc.docstatus == 0 )	{
-		// 	console.log("frm.docstatus")
-		// 	frm.set_df_property('split','hidden',0)
-		// 	frm.refresh_field("split")
-		// }
-
-		
-		// if(frm.transporter){
-		// 	frm.set_df_property('supplier_dc','hidden',1)
-		// 	frm.refresh_field("supplier_dc")
-		// }
-		// else{
-		// 	frm.set_df_property('supplier_dc','hidden',0)
-		// 	frm.refresh_field("supplier_dc")
-		// }
-
-
-		// if (!frm.doc.approved)
-		// frm.call({
-		// 			doc:frm.doc,
-		// 			method: 'update_stock',
-					
-		// 		});
-				
-
-		// if(frm.doc.approved)
-		// 	{
-		// 		frm.set_df_property('transporter','read_only',1)
-		// 		frm.set_df_property('sorce_warehouse','read_only',1)
-		// 		frm.set_df_property('qty_to_deliver','read_only',1)
-		// 		frm.set_df_property('approved','read_only',1)
-		// 		frm.set_df_property('supplier_dc','read_only',1)
-		// 		frm.set_df_property('supplier','read_only',1)
-		// 		frm.refresh_field("transporter")
-		// 		frm.refresh_field("sorce_warehouse")
-		// 		frm.refresh_field("qty_to_deliver")
-		// 		frm.refresh_field("supplier_dc")
-		// 		frm.refresh_field("approved")
-		// 		frm.refresh_field("supplier")
-	    //     };
-
-		
+		if( frm.doc.docstatus > 0 )	{
+			console.log("frm.docstatus")
+			frm.set_df_property('split','hidden',1)
+			frm.refresh_field("split")
+		}				
 	},
 
 
@@ -290,10 +252,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 						}
 					}
 				});
-				}
-
-				
-				
+				}				
 			}
 			});
 		}
