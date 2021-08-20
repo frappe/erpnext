@@ -375,6 +375,10 @@ class GrossProfitGenerator(object):
 				sales_team_table=sales_team_table, match_cond = get_match_cond('Sales Invoice')), self.filters, as_dict=1)
 
 	def group_items_by_invoice(self):
+		"""
+			Turns list of Sales Invoice Items to a tree of Sales Invoices with their Items as children.
+		"""
+
 		parents = []
 
 		for row in self.si_list:
@@ -386,14 +390,13 @@ class GrossProfitGenerator(object):
 			if parents_index < len(parents) and row.parent == parents[parents_index]:
 				invoice = frappe._dict({
 					'parent_invoice': "",
-					'parent': row.parent,
 					'indent': 0.0,
+					'parent': row.parent,
 					'posting_date': row.posting_date,
 					'posting_time': row.posting_time,
 					'project': row.project,
 					'update_stock': row.update_stock,
 					'customer': row.customer,
-					'customer_group': row.customer_group,
 					'customer_group': row.customer_group,
 					'item_code': None,
 					'item_name': None,
@@ -407,20 +410,59 @@ class GrossProfitGenerator(object):
 					'item_row': None, 
 					'is_return': row.is_return, 
 					'cost_center': row.cost_center,
-					'base_net_amount': 0,
-					'indent': 0.0,
-					'parent_invoice': ''
+					'base_net_amount': 0
 				})
 
 				self.si_list.insert(index, invoice)
 				parents_index += 1
 
 			else:
-				row.indent = 1.0
-				row.parent_invoice = row.parent
-				row.parent = row.item_code
+				# skipping the bundle items rows
+				if not row.indent:
+					row.indent = 1.0
+					row.parent_invoice = row.parent
+					row.parent = row.item_code
+
 				# ind = parents_index-1 if parents_index > 0 else parents_index
 				# self.si_list[ind].base_net_amount += row.base_net_amount
+
+				if frappe.db.exists('Product Bundle', row.item_code):
+					self.add_bundle_items(row, index)
+
+	def add_bundle_items(self, product_bundle, index):
+		bundle_items = frappe.get_all(
+			'Product Bundle Item',
+			filters = {
+				'parent': product_bundle.item_code
+			},
+			fields = ['item_code', 'qty']
+		)
+
+		for i, item in enumerate(bundle_items):
+			bundle_item = frappe._dict({
+				'parent_invoice': product_bundle.item_code,
+				'indent': product_bundle.indent + 1,
+				'parent': item.item_code,
+				'posting_date': product_bundle.posting_date,
+				'posting_time': product_bundle.posting_time,
+				'project': product_bundle.project,
+				'customer': product_bundle.customer,
+				'customer_group': product_bundle.customer_group,
+				'item_code': item.item_code,
+				'item_name': frappe.db.get_value('Item', item.item_code, 'item_name'),
+				'description': frappe.db.get_value('Item', item.item_code, 'description'),
+				'warehouse': product_bundle.warehouse,
+				'item_group': frappe.db.get_value('Item', item.item_code, 'item_group'),
+				'brand': frappe.db.get_value('Item', item.item_code, 'brand'), 
+				'dn_detail': product_bundle.dn_detail, 
+				'delivery_note': product_bundle.delivery_note, 
+				'qty': (product_bundle.qty * item.qty), 
+				'item_row': None, 
+				'is_return': product_bundle.is_return, 
+				'cost_center': product_bundle.cost_center
+			})
+
+			self.si_list.insert((index+i+1), bundle_item)
 
 	def load_stock_ledger_entries(self):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
