@@ -46,6 +46,8 @@ def execute(filters=None):
 
 		# to display item as Item Code: Item Name
 		columns[0] = 'Sales Invoice:Link/Item:300'
+		# removing Item Code and Item Name columns
+		del columns[4:6]
 
 		for src in gross_profit_data.si_list:	
 			row = frappe._dict()
