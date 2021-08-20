@@ -37,15 +37,15 @@ frappe.tour['Stock Settings'] = [
 		__("to know more about them.")
 	},
 	{
-		fieldname: "allow_negative_stock",
-		title: __("Allow Negative Stock"),
-		description: __("This will allow stock items to be displayed in negative values. Using this option depends on your use case. With this option unchecked, the system warns before obstructing a transaction that is causing negative stock.")
-
-	},
-	{
 		fieldname: "show_barcode_field",
 		title: __("Show Barcode Field"),
 		description: __("Show 'Scan Barcode' field above every child table to insert Items with ease.")
+	},
+	{
+		fieldname: "action_if_quality_inspection_is_not_submitted",
+		title: __("Action if Quality Inspection Is Not Submitted"),
+		description: __("Quality inspection is performed on the inward and outward movement of goods. Receipt and delivery transactions will be stopped or the user will be warned if the quality inspection is not performed.")
+
 	},
 	{
 		fieldname: "automatically_set_serial_nos_based_on_fifo",

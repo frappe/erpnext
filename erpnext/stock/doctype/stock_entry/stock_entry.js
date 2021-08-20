@@ -1106,18 +1106,16 @@ frappe.tour['Stock Entry'] = [
 	{
 		fieldname: "stock_entry_type",
 		title: __("Stock Entry Type"),
-		description: __("Select the type of Stock Entry to be made.") + " " +
-		__("For now, to move stock between warehouses select Material Transfer.")
+		description: __("Select the type of Stock Entry to be made. For now, to receive stock into a warehouses select") + ' <a href="https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/stock-entry-purpose#2purpose-material-receipt" target="_blank">' + __("Material Receipt.") + "</a>"
 	},
 	{
-		fieldname: "from_warehouse",
-		title: __("Default Source Warehouse"),
-		description: __("Select a source warehouse, where you have stock available.")
+		fieldname: "to_warehouse",
+		title: __("Default Target Warehouse"),
+		description: __("Select a target warehouse where the stock will be received.")
 	},
 	{
 		fieldname: "items",
 		title: __("Items"),
-		description: __("Select an item and entry quantity to be delivered.") + " " +
-		__("Different 'Source Warehouse' and 'Target Warehouse' can be set for each row.")
+		description: __("Select an item and entry quantity to be delivered.")
 	},
 ]
