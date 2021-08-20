@@ -470,16 +470,34 @@ class WorkOrder(Document):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 
 		def _get_operations(bom_no, qty=1):
-			return frappe.db.sql(
+			data = frappe.db.sql(
 					f"""select
 						operation, description, workstation, idx,
 						base_hour_rate as hour_rate, time_in_mins * {qty} as time_in_mins,
-						"Pending" as status, parent as bom, batch_size, sequence_id
+						"Pending" as status, parent as bom, batch_size, sequence_id, fixed_time
 					from
 						`tabBOM Operation`
 					where
-						parent = %s order by idx
+						parent = %s
+						and fixed_time = 0
+						order by idx
 					""", bom_no, as_dict=1)
+
+			for o in frappe.db.sql(
+				f"""select
+						operation, description, workstation, idx,
+						base_hour_rate as hour_rate, time_in_mins as time_in_mins,
+						"Pending" as status, parent as bom, batch_size, sequence_id, fixed_time
+					from
+						`tabBOM Operation`
+					where
+						parent = %s
+						and fixed_time = 1
+						order by idx
+					""", bom_no, as_dict=1):
+				data.append(o)
+
+			return data
 
 
 		self.set('operations', [])
@@ -507,7 +525,8 @@ class WorkOrder(Document):
 
 	def calculate_time(self):
 		for d in self.get("operations"):
-			d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
+			if not d.fixed_time:
+				d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
 
 		self.calculate_operating_cost()
 
