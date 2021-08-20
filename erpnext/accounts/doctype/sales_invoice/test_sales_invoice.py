@@ -2027,54 +2027,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['actualFromStateCode'],7)
 		self.assertEqual(data['billLists'][0]['fromStateCode'],27)
 
-	def test_einvoice_submission_without_irn(self):
-		# init
-		einvoice_settings = frappe.get_doc('E Invoice Settings')
-		einvoice_settings.enable = 1
-		einvoice_settings.applicable_from = nowdate()
-		einvoice_settings.append('credentials', {
-			'company': '_Test Company',
-			'gstin': '27AAECE4835E1ZR',
-			'username': 'test',
-			'password': 'test'
-		})
-		einvoice_settings.save()
-
-		country = frappe.flags.country
-		frappe.flags.country = 'India'
-
-		si = make_sales_invoice_for_ewaybill()
-		self.assertRaises(frappe.ValidationError, si.submit)
-
-		si.irn = 'test_irn'
-		si.submit()
-
-		# reset
-		einvoice_settings = frappe.get_doc('E Invoice Settings')
-		einvoice_settings.enable = 0
-		frappe.flags.country = country
-
-	def test_einvoice_json(self):
-		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
-
-		si = get_sales_invoice_for_e_invoice()
-		si.discount_amount = 100
-		si.save()
-
-		einvoice = make_einvoice(si)
-		self.assertTrue(einvoice['EwbDtls'])
-		validate_totals(einvoice)
-
-		si.apply_discount_on = 'Net Total'
-		si.save()
-		einvoice = make_einvoice(si)
-		validate_totals(einvoice)
-
-		[d.set('included_in_print_rate', 1) for d in si.taxes]
-		si.save()
-		einvoice = make_einvoice(si)
-		validate_totals(einvoice)
-
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
 
@@ -2110,7 +2062,7 @@ class TestSalesInvoice(unittest.TestCase):
 		discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		si = create_sales_invoice(discount_account=discount_account, discount_percentage=10, rate=90)
-		
+
 		expected_gle = [
 			["Debtors - _TC", 90.0, 0.0, nowdate()],
 			["Discount Account - _TC", 10.0, 0.0, nowdate()],
@@ -2126,7 +2078,7 @@ class TestSalesInvoice(unittest.TestCase):
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
-		
+
 		si = create_sales_invoice(parent_cost_center='Main - _TC', do_not_save=1)
 		si.apply_discount_on = "Grand Total"
 		si.additional_discount_account = additional_discount_account
