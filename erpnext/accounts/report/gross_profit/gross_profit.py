@@ -44,6 +44,9 @@ def execute(filters=None):
 	if filters.group_by == 'Invoice':
 		column_names = get_column_names()
 
+		# to display item as Item Code: Item Name
+		columns[0] = 'Sales Invoice:Link/Item:300'
+
 		for src in gross_profit_data.si_list:	
 			row = frappe._dict()
 			row.indent = src.indent
