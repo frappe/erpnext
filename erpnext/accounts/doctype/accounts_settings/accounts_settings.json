@@ -19,6 +19,7 @@
   "book_asset_depreciation_entry_automatically",
   "unlink_advance_payment_on_cancelation_of_order",
   "post_change_gl_entries",
+  "enable_discount_accounting",
   "tax_settings_section",
   "determine_address_tax_category_from",
   "column_break_19",
@@ -261,6 +262,13 @@
    "fieldname": "post_change_gl_entries",
    "fieldtype": "Check",
    "label": "Create Ledger Entries for Change Amount"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting"
   }
  ],
  "icon": "icon-cog",
@@ -268,7 +276,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-06-17 20:26:03.721202",
+ "modified": "2021-07-12 18:54:29.084958",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

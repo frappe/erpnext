@@ -1908,6 +1908,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
+		self.assertEqual(data['billLists'][0]['actualFromStateCode'],7)
+		self.assertEqual(data['billLists'][0]['fromStateCode'],27)
 
 	def test_einvoice_submission_without_irn(self):
 		# init
@@ -1983,6 +1985,54 @@ class TestSalesInvoice(unittest.TestCase):
 		sales_invoice.discount_amount = 300
 		sales_invoice.save()
 		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+
+	def test_sales_invoice_with_discount_accounting_enabled(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+
+		enable_discount_accounting()
+
+		discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		si = create_sales_invoice(discount_account=discount_account, discount_percentage=10, rate=90)
+		
+		expected_gle = [
+			["Debtors - _TC", 90.0, 0.0, nowdate()],
+			["Discount Account - _TC", 10.0, 0.0, nowdate()],
+			["Sales - _TC", 0.0, 100.0, nowdate()]
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+		enable_discount_accounting(enable=0)
+
+	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+
+		enable_discount_accounting()
+		additional_discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		
+		si = create_sales_invoice(parent_cost_center='Main - _TC', do_not_save=1)
+		si.apply_discount_on = "Grand Total"
+		si.additional_discount_account = additional_discount_account
+		si.additional_discount_percentage = 20
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "Main - _TC",
+			"description": "Test",
+			"rate": 10
+		})
+		si.submit()
+
+		expected_gle = [
+			["_Test Account VAT - _TC", 0.0, 10.0, nowdate()],
+			["Debtors - _TC", 88, 0.0, nowdate()],
+			["Discount Account - _TC", 22.0, 0.0, nowdate()],
+			["Sales - _TC", 0.0, 100.0, nowdate()]
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+		enable_discount_accounting(enable=0)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
@@ -2062,6 +2112,30 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
+	if not frappe.db.exists('Address', '_Test Dispatch-Address for Eway bill-Shipping'):
+		address = frappe.get_doc({
+			"address_line1": "_Test Dispatch Address Line 1",
+			"address_title": "_Test Dispatch-Address for Eway bill",
+			"address_type": "Shipping",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+			"doctype": "Address",
+			"is_primary_address": 0,
+			"phone": "+910000000000",
+			"gstin": "07AAACC1206D1ZI",
+			"gst_state": "Delhi",
+			"gst_state_number": "07",
+			"pincode": "1100101"
+		}).insert()
+
+		address.append("links", {
+			"link_doctype": "Company",
+			"link_name": "_Test Company"
+		})
+
+		address.save()
+
 def make_test_transporter_for_ewaybill():
 	if not frappe.db.exists('Supplier', '_Test Transporter'):
 		frappe.get_doc({
@@ -2100,6 +2174,7 @@ def make_sales_invoice_for_ewaybill():
 	si.distance = 2000
 	si.company_address = "_Test Address for Eway bill-Billing"
 	si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+	si.dispatch_address_name = "_Test Dispatch-Address for Eway bill-Shipping"
 	si.vehicle_no = "KA12KA1234"
 	si.gst_category = "Registered Regular"
 	si.mode_of_transport = 'Road'
@@ -2152,6 +2227,7 @@ def create_sales_invoice(**args):
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
 	si.naming_series = args.naming_series or "T-SINV-"
+	si.cost_center = args.parent_cost_center
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -2163,8 +2239,11 @@ def create_sales_invoice(**args):
 		"uom": args.uom or "Nos",
 		"stock_uom": args.uom or "Nos",
 		"rate": args.rate if args.get("rate") is not None else 100,
+		"price_list_rate": args.price_list_rate if args.get("price_list_rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"discount_account": args.discount_account or None,
+		"discount_amount": args.discount_amount or 0,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"conversion_factor": 1
