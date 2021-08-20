@@ -602,7 +602,7 @@ class WorkOrder(Document):
 
 		if self.docstatus==1:
 			# calculate transferred qty based on submitted stock entries
-			self.update_transaferred_qty_for_required_items()
+			self.update_transferred_qty_for_required_items()
 
 			# update in bin
 			self.update_reserved_qty_for_production()
@@ -671,7 +671,7 @@ class WorkOrder(Document):
 
 			self.set_available_qty()
 
-	def update_transaferred_qty_for_required_items(self):
+	def update_transferred_qty_for_required_items(self):
 		'''update transferred qty from submitted stock entries for that item against
 			the work order'''
 
