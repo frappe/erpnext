@@ -135,13 +135,8 @@ class AccountsController(TransactionBase):
 
 		validate_regional(self)
 
-		validate_einvoice_fields(self)
-
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
-
-	def before_cancel(self):
-		validate_einvoice_fields(self)
 
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
@@ -2034,8 +2029,4 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
-	pass
-
-@erpnext.allow_regional
-def validate_einvoice_fields(doc):
 	pass
