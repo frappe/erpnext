@@ -13,6 +13,8 @@
   "column_break_5",
   "adjusted_tax_paid_on_purchase",
   "adjusted_tax_paid_on_sales",
+  "no_debit_advice",
+  "no_credit_advice",
   "voucher_no",
   "section_break_9",
   "json_output",
@@ -75,10 +77,20 @@
   {
    "fieldname": "section_break_9",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "no_debit_advice",
+   "fieldtype": "Float",
+   "label": "No. Debit Advice"
+  },
+  {
+   "fieldname": "no_credit_advice",
+   "fieldtype": "Float",
+   "label": "No. Credit Advice"
   }
  ],
  "links": [],
- "modified": "2021-08-11 17:44:26.245549",
+ "modified": "2021-08-20 18:07:16.935762",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "VAT RETURN",
