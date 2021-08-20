@@ -22,7 +22,7 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		ms.cancel()
 		events_after_cancel = get_events(ms)
 		self.assertTrue(len(events_after_cancel) == 0)
-	
+
 	def test_make_schedule(self):
 		ms = make_maintenance_schedule()
 		ms.save()
@@ -72,7 +72,7 @@ class TestMaintenanceSchedule(unittest.TestCase):
 
 		#checks if visit status is back updated in schedule
 		self.assertTrue(ms.schedules[1].completion_status, "Partially Completed")
-	
+
 def get_events(ms):
 	return frappe.get_all("Event Participants", filters={
 			"reference_doctype": ms.doctype,

@@ -29,4 +29,3 @@ def upload(select_doctype=None, rows=None):
 	rows = read_csv_content_from_attached_file(frappe.get_doc("Rename Tool", "Rename Tool"))
 
 	return bulk_rename(select_doctype, rows=rows)
-
