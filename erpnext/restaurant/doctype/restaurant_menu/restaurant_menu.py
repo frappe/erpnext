@@ -57,5 +57,3 @@ class RestaurantMenu(Document):
 		price_list.save()
 
 		return price_list
-
-

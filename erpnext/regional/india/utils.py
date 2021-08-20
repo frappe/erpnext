@@ -845,7 +845,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		else:
 			depreciation_amount = (flt(row.value_after_depreciation) -
 				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
-		
+
 	else:
 		rate_of_depreciation = row.rate_of_depreciation
 		# if its the first depreciation
@@ -862,7 +862,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	return depreciation_amount
 
 def set_item_tax_from_hsn_code(item):
-	if not item.taxes and item.gst_hsn_code: 
+	if not item.taxes and item.gst_hsn_code:
 		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
 
 		for tax in hsn_doc.taxes:
