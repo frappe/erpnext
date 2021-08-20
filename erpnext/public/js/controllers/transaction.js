@@ -342,6 +342,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
+<<<<<<< HEAD
 		let scan_barcode_field = this.frm.get_field('scan_barcode');
 		if (scan_barcode_field && scan_barcode_field.get_value()) {
 			scan_barcode_field.set_value("");
@@ -367,6 +368,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		}
 	},
+=======
+	}
+>>>>>>> 153fe1cdb4 (refactor: scan barcode field scanning (#26990))
 
 	scan_barcode: function() {
 		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
