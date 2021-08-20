@@ -47,7 +47,7 @@ class VATRETURN(Document):
 			 group by month(xsi.posting_date) desc, year(xsi.posting_date)  ) as no_debit_note,
 
 		when si.currency != "NPR" then
-		(select sum(xsi.total) from `tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+		(select sum(xsi.total) from `tabSales Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
 		and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date) )
 		End as export,
 
