@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub, unscrub
 from frappe.utils import cint, cstr, flt
-from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import get_booking_payments,\
-	separate_customer_and_supplier_payments, separate_advance_and_balance_payments
+from erpnext.vehicles.utils import get_booking_payments_by_order, get_advance_balance_details
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from frappe.desk.query_report import group_report_data
 
@@ -149,27 +148,12 @@ class VehicleBookingSummaryReport(object):
 		return self.buckets[key]
 
 	def set_payment_details(self):
-		self.get_payment_data()
+		booking_numbers = list(set([d.vehicle_booking_order for d in self.booking_data if d.vehicle_booking_order]))
+		self.payments_by_order = get_booking_payments_by_order(booking_numbers)
+
 		for d in self.booking_data:
-			booking_payment_entries = self.payment_by_booking.get(d.vehicle_booking_order) or []
-
-			customer_payments, supplier_payments = separate_customer_and_supplier_payments(booking_payment_entries)
-			advance_payments, balance_payments = separate_advance_and_balance_payments(customer_payments, supplier_payments)
-
-			if advance_payments:
-				d.advance_payment_date = advance_payments[0].deposit_date
-				d.advance_payment_amount = sum([d.amount for d in advance_payments])
-			if balance_payments:
-				d.balance_payment_date = balance_payments[-1].deposit_date
-				d.balance_payment_amount = sum([d.amount for d in balance_payments])
-
-	def get_payment_data(self):
-		booking_numbers = list(set([d.vehicle_booking_order for d in self.booking_data]))
-		payment_entries = get_booking_payments(booking_numbers)
-
-		self.payment_by_booking = {}
-		for d in payment_entries:
-			self.payment_by_booking.setdefault(d.vehicle_booking_order, []).append(d)
+			booking_payment_entries = self.payments_by_order.get(d.vehicle_booking_order) or []
+			d.update(get_advance_balance_details(booking_payment_entries))
 
 	def get_grouped_data(self):
 		data = self.data

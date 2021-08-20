@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub, unscrub
 from frappe.utils import getdate, nowdate, cstr, flt
-from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import get_booking_payments
+from erpnext.vehicles.utils import get_booking_payments
 from frappe.desk.query_report import group_report_data
 
 

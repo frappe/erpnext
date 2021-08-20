@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, cstr, getdate, add_days
+from frappe.utils import cint, flt, getdate, add_days
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
@@ -17,6 +17,7 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
 from erpnext.vehicles.doctype.vehicle_allocation_period.vehicle_allocation_period import get_delivery_period
 from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
+from erpnext.vehicles.utils import validate_vehicle_item
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import get_terms_and_conditions
 from erpnext.controllers.accounts_controller import AccountsController
 from six import string_types
@@ -613,13 +614,3 @@ def get_default_price_list(item, args, item_defaults, item_group_defaults, brand
 			price_list = frappe.get_cached_value("Selling Settings", None, "selling_price_list")
 
 		return price_list
-
-
-def validate_vehicle_item(item, validate_in_vehicle_booking=True):
-	from erpnext.stock.doctype.item.item import validate_end_of_life
-	validate_end_of_life(item.name, item.end_of_life, item.disabled)
-
-	if not item.is_vehicle:
-		frappe.throw(_("{0} is not a Vehicle Item").format(item.item_name or item.name))
-	if validate_in_vehicle_booking and not item.include_in_vehicle_booking:
-		frappe.throw(_("Vehicle Item {0} is not allowed for Vehicle Booking").format(item.item_name or item.name))
