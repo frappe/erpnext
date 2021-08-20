@@ -478,6 +478,9 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) != 1:
 			return
 
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
+
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
@@ -491,9 +494,6 @@ class SalesInvoice(SellingController):
 
 		if not self.get('payments') and not for_validate:
 			update_multi_mode_option(self, pos)
-
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
 			if not for_validate:
@@ -888,8 +888,10 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
 		for tax in self.get("taxes"):
-			amount, base_amount = self.get_tax_amounts(tax, self.enable_discount_accounting)
+			amount, base_amount = self.get_tax_amounts(tax, enable_discount_accounting)
 
 			if flt(tax.base_tax_amount_after_discount_amount):
 				account_currency = get_account_currency(tax.account_head)
@@ -920,6 +922,7 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
@@ -933,7 +936,7 @@ class SalesInvoice(SellingController):
 
 						if asset.calculate_depreciation:
 							self.reset_depreciation_schedule(asset)
-							
+
 					else:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
 							item.base_net_amount, item.finance_book)
@@ -954,7 +957,7 @@ class SalesInvoice(SellingController):
 						income_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
-						amount, base_amount = self.get_amount_and_base_amount(item, self.enable_discount_accounting)
+						amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 
 						account_currency = get_account_currency(income_account)
 						gl_entries.append(
@@ -980,7 +983,7 @@ class SalesInvoice(SellingController):
 			asset = frappe.get_doc("Asset", item.asset)
 		else:
 			frappe.throw(_(
-				"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
+				"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name),
 				title=_("Missing Asset")
 			)
 
@@ -997,7 +1000,7 @@ class SalesInvoice(SellingController):
 		asset.flags.ignore_validate_update_after_submit = True
 		asset.prepare_depreciation_data(self.posting_date)
 		asset.save()
-		
+
 		post_depreciation_entries(self.posting_date)
 
 	def reset_depreciation_schedule(self, asset):
@@ -1037,7 +1040,7 @@ class SalesInvoice(SellingController):
 				finance_book = schedule.finance_book
 			else:
 				row += 1
-			
+
 			if schedule.schedule_date == posting_date_of_original_invoice:
 				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice):
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
@@ -1047,17 +1050,17 @@ class SalesInvoice(SellingController):
 	def get_posting_date_of_sales_invoice(self):
 		return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
 
-	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone 
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
 	def sale_was_made_on_original_schedule_date(self, asset, schedule, row, posting_date_of_original_invoice):
 		for finance_book in asset.get('finance_books'):
 			if schedule.finance_book == finance_book.finance_book:
 				orginal_schedule_date = add_months(finance_book.depreciation_start_date,
 					row * cint(finance_book.frequency_of_depreciation))
-			
+
 				if orginal_schedule_date == posting_date_of_original_invoice:
 					return True
 		return False
-		
+
 	@property
 	def enable_discount_accounting(self):
 		if not hasattr(self, "_enable_discount_accounting"):
@@ -1460,7 +1463,7 @@ class SalesInvoice(SellingController):
 
 		discounting_status = None
 		if self.is_discounted:
-			discountng_status = get_discounting_status(self.name)
+			discounting_status = get_discounting_status(self.name)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1468,11 +1471,11 @@ class SalesInvoice(SellingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
+				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discounting_status=='Disbursed':
 					self.status = "Overdue and Discounted"
 				elif outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discountng_status=='Disbursed':
+				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discounting_status=='Disbursed':
 					self.status = "Unpaid and Discounted"
 				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"

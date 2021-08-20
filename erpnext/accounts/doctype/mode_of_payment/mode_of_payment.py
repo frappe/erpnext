@@ -39,4 +39,3 @@ class ModeofPayment(Document):
 				message = "POS Profile " + frappe.bold(", ".join(pos_profiles)) + " contains \
 					Mode of Payment " + frappe.bold(str(self.name)) + ". Please remove them to disable this mode."
 				frappe.throw(_(message), title="Not Allowed")
-

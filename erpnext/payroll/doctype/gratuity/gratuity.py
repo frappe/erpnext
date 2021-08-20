@@ -246,4 +246,3 @@ def get_last_salary_slip(employee):
 			"employee": employee, 'docstatus': 1
 		},
 		order_by = "start_date desc")[0].name
-

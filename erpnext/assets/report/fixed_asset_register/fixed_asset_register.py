@@ -99,7 +99,7 @@ def prepare_chart_data(data, filters):
 	labels_values_map = {}
 	date_field = frappe.scrub(filters.date_based_on)
 
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
 		filters.from_date, filters.to_date, filters.filter_based_on, "Monthly", company=filters.company)
 
 	for d in period_list:
