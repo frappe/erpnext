@@ -240,7 +240,7 @@ def get_deducted_tax(taxable_vouchers, fiscal_year, tax_details):
 def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_deducted, vouchers):
 	tds_amount = 0
 	invoice_filters = {
-		'name': ('in', vouchers), 
+		'name': ('in', vouchers),
 		'docstatus': 1
 	}
 
@@ -282,7 +282,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
-	
+
 	if cint(tax_details.round_off_tax_amount):
 		tds_amount = round(tds_amount)
 

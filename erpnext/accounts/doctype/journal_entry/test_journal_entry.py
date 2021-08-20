@@ -100,7 +100,7 @@ class TestJournalEntry(unittest.TestCase):
 			"debit_in_account_currency": 0 if diff > 0 else abs(diff),
 			"credit_in_account_currency": diff if diff > 0 else 0
 		})
-		
+
 		jv.append("accounts", {
 			"account": "Stock Adjustment - TCP1",
 			"cost_center": "Main - TCP1",

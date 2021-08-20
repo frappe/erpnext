@@ -17,4 +17,3 @@ def get_context(context):
 	context.doc = course
 	context.sidebar_title = sidebar_title
 	context.intro = course.course_intro
-
