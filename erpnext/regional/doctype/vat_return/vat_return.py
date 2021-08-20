@@ -229,10 +229,10 @@ class VATRETURN(Document):
 		self.report_dict["particular"]["total"][0]["tv"]=total+tot
 		print(c_tax)
 		print(t_tax)
-		if a-b < 0:
+		if (a-b)< 0:
 			self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"]=c_tax-t_tax
 			self.report_dict["particular"]["net_tax"][0]["tc"]=flt(self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"])+flt(self.report_dict["particular"]["debit_credit"][0]["tc"])
-		if a-b > 0:
+		if (a-b) > 0:
 			self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"]=0
 			self.report_dict["particular"]["net_tax"][0]["tc"]=flt(self.report_dict["particular"]["vat_adj_last_mon"][0]["tc"])+flt(self.report_dict["particular"]["debit_credit"][0]["tc"])
 		self.report_dict["particular"]["total_payment"][0]["tv"]=self.report_dict["particular"]["net_tax"][0]["tc"]
