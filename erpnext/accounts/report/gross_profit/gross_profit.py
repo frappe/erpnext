@@ -46,6 +46,9 @@ def execute(filters=None):
 		for col in group_wise_columns.get(scrub(filters.group_by)):
 			row.append(src.get(col))
 
+		# to display item as Item Code: Item Name
+		columns[0] = 'Sales Invoice:Link/Item:300'
+
 		for src in gross_profit_data.si_list:
 			row = frappe._dict()
 			row.indent = src.indent
@@ -455,12 +458,12 @@ class GrossProfitGenerator(object):
 				'description': frappe.db.get_value('Item', item.item_code, 'description'),
 				'warehouse': product_bundle.warehouse,
 				'item_group': frappe.db.get_value('Item', item.item_code, 'item_group'),
-				'brand': frappe.db.get_value('Item', item.item_code, 'brand'), 
-				'dn_detail': product_bundle.dn_detail, 
-				'delivery_note': product_bundle.delivery_note, 
-				'qty': (product_bundle.qty * item.qty), 
-				'item_row': None, 
-				'is_return': product_bundle.is_return, 
+				'brand': frappe.db.get_value('Item', item.item_code, 'brand'),
+				'dn_detail': product_bundle.dn_detail,
+				'delivery_note': product_bundle.delivery_note,
+				'qty': (product_bundle.qty * item.qty),
+				'item_row': None,
+				'is_return': product_bundle.is_return,
 				'cost_center': product_bundle.cost_center
 			})
 
