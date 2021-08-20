@@ -31,21 +31,26 @@ class VATRETURN(Document):
 		year(si.posting_date) as year,
 		count(si.name) as no_of_invoice,
 		(sum(total) + (select sum(grand_total) from `tabSales Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)
+			and xsi.total_taxes_and_charges=0 and si.company=xsi.company and year(xsi.posting_date)=year(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)
 			)) as total,
 		(select sum(grand_total) from `tabSales Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)
+			and xsi.total_taxes_and_charges=0 and si.company=xsi.company and year(xsi.posting_date)=year(si.posting_date) group by month(xsi.posting_date) desc, year(xsi.posting_date)
 			)
 				as exempted_sales,
+
 		(select count(name) from `tabSales Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and year(xsi.posting_date)=year(si.posting_date) and xsi.is_return=1 and xsi.company=si.company  
+			and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.is_return=1 and xsi.company=si.company  
 			 group by month(xsi.posting_date) desc, year(xsi.posting_date)  ) as no_credit_note,
+
 		(select count(name) from `tabSales Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and year(xsi.posting_date)=year(si.posting_date) and xsi.is_debit_note=1 and xsi.company=si.company  
+			and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.is_debit_note=1 and xsi.company=si.company  
 			 group by month(xsi.posting_date) desc, year(xsi.posting_date)  ) as no_debit_note,
-		case 
-			when si.currency != "NPR" then sum(si.total)
-		end as export,
+
+		when si.currency != "NPR" then
+		(select sum(xsi.total) from `tabPurchase Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
+		and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date) )
+		End as export,
+
 		sum(total) as taxable_sales,
 		sum(total_taxes_and_charges) as tax
 		from `tabSales Invoice` as si
@@ -189,7 +194,7 @@ class VATRETURN(Document):
 		and pii.is_fixed_asset=1 and pd.docstatus=1   and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date)) 
 		End as capital_tax,
 		(select count(name) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and xsi.is_return=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
+			and xsi.total_taxes_and_charges=0  and and si.company=pd.company and year(xsi.posting_date)=year(si.posting_date) and xsi.is_return=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
 			) as is_debit_advice
 		from
 		`tabPurchase Invoice` as si
