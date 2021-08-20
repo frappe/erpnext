@@ -772,7 +772,7 @@ class TestDeliveryNote(unittest.TestCase):
 		so.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=10)
-		
+
 		si = create_sales_invoice(qty=10, do_not_save=1)
 		si.items[0].delivery_note= dn.name
 		si.items[0].dn_detail = dn.items[0].name
