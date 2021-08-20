@@ -1,6 +1,7 @@
 import frappe
+import erpnext
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import getdate, flt, fmt_money
 from six import string_types
 
 
@@ -120,3 +121,50 @@ def separate_advance_and_balance_payments(customer_payments, supplier_payments):
 			advance_payments = customer_payments
 
 	return advance_payments, balance_payments
+
+
+def get_outstanding_remarks(outstanding_amount, vehicle_amount, fni_amount, withholding_tax_amount, payment_adjustment,
+		is_cancelled=False, company=None):
+	outstanding_amount = flt(outstanding_amount)
+	payment_adjustment = flt(payment_adjustment)
+
+	vehicle_amount = flt(vehicle_amount)
+	fni_amount = flt(fni_amount)
+	withholding_tax_amount = flt(withholding_tax_amount)
+	invoice_total = vehicle_amount + fni_amount + withholding_tax_amount
+
+	if is_cancelled:
+		return _("Cancelled")
+
+	if flt(outstanding_amount, 0) == 0:
+		if flt(payment_adjustment):
+			return _("Paid with Adjustment")
+		else:
+			return _("Fully Paid")
+
+	if flt(outstanding_amount, 0) >= flt(invoice_total, 0):
+		return _("Unpaid")
+
+	if flt(outstanding_amount, 0) == flt(vehicle_amount, 0):
+		return _("Ex Factory Amount Due")
+	if flt(outstanding_amount, 0) == flt(fni_amount, 0):
+		return _("Freight Charges Due")
+	if flt(outstanding_amount, 0) == flt(withholding_tax_amount, 0):
+		return _("Withholding Tax Due")
+
+	if flt(outstanding_amount, 0) == flt(vehicle_amount + fni_amount, 0):
+		return _("Ex Factory + Freight Due")
+	if flt(outstanding_amount, 0) == flt(vehicle_amount + withholding_tax_amount, 0):
+		return _("Ex Factory + Withholding Tax Due")
+	if flt(outstanding_amount, 0) == flt(fni_amount + withholding_tax_amount, 0):
+		return _("Freight + Withholding Tax Due")
+
+	# currency = None
+	# if not company:
+	# 	company = erpnext.get_default_company()
+	# if company:
+	# 	currency = erpnext.get_company_currency(company)
+	#
+	# return _("{0} Due").format(fmt_money(outstanding_amount, currency=currency))
+
+	return _("Balance Due")

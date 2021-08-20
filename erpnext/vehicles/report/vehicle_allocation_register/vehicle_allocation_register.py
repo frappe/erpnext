@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub, unscrub
 from frappe.utils import cint, cstr, flt
-from erpnext.vehicles.utils import get_booking_payments_by_order, get_advance_balance_details
+from erpnext.vehicles.utils import get_booking_payments_by_order, get_advance_balance_details, get_outstanding_remarks
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from frappe.desk.query_report import group_report_data
 
@@ -55,7 +55,8 @@ class VehicleAllocationRegisterReport(object):
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
-				m.invoice_total, m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
+				m.invoice_total, m.vehicle_amount, m.fni_amount, m.withholding_tax_amount,
+				m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
 				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
 				item.variant_of, item.item_group, item.brand,
 				m.vehicle, m.vehicle_chassis_no, m.vehicle_engine_no,
@@ -133,6 +134,10 @@ class VehicleAllocationRegisterReport(object):
 		for d in self.data:
 			booking_payment_entries = self.payments_by_order.get(d.vehicle_booking_order) or []
 			d.update(get_advance_balance_details(booking_payment_entries))
+
+			d.outstanding_remarks = get_outstanding_remarks(d.customer_outstanding,
+				d.vehicle_amount, d.fni_amount, d.withholding_tax_amount, d.payment_adjustment,
+				is_cancelled=d.status == "Cancelled Booking", company=self.filters.get('company'))
 
 	def get_grouped_data(self):
 		data = self.data
@@ -319,6 +324,7 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Advance Payment Amount"), "fieldname": "advance_payment_amount", "fieldtype": "Currency", "width": 120},
 			{"label": _("Balance Payment Date"), "fieldname": "balance_payment_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Balance Payment Amount"), "fieldname": "balance_payment_amount", "fieldtype": "Currency", "width": 120},
+			{"label": _("Outstanding Remarks"), "fieldname": "outstanding_remarks", "fieldtype": "Data", "width": 150},
 			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Previous Color"), "fieldname": "previous_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("Booking Color"), "fieldname": "booking_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
