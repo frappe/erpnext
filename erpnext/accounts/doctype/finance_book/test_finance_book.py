@@ -19,7 +19,7 @@ class TestFinanceBook(unittest.TestCase):
 			finance_book = frappe.get_doc("Finance Book", "_Test Finance Book")
 
 		return finance_book
-	
+
 	def test_finance_book(self):
 		finance_book = self.create_finance_book()
 

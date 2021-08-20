@@ -565,6 +565,7 @@
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode",
+   "options": "Barcode",
    "show_days": 1,
    "show_seconds": 1
   },
@@ -1378,7 +1379,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-30 15:17:53.663648",
+ "modified": "2021-08-17 20:16:12.737743",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

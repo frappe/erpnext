@@ -22,7 +22,7 @@ class TestIssueAnalytics(unittest.TestCase):
 		if current_month_date.year != last_month_date.year:
 			self.current_month += '_' + str(current_month_date.year)
 			self.last_month += '_' + str(last_month_date.year)
-		
+
 	def test_issue_analytics(self):
 		create_service_level_agreements_for_issues()
 		create_issue_types()
