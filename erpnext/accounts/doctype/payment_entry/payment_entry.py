@@ -700,11 +700,11 @@ class PaymentEntry(AccountsController):
 					"against_voucher": d.reference_name
 				})
 
-				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
-					self.precision("paid_amount"))
+				allocated_amount_in_company_currency = abs(flt(flt(d.allocated_amount) * flt(d.exchange_rate),
+					self.precision("paid_amount")))
 
 				gle.update({
-					dr_or_cr + "_in_account_currency": d.allocated_amount,
+					dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
 					dr_or_cr: allocated_amount_in_company_currency
 				})
 
