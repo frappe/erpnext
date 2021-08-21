@@ -351,6 +351,7 @@ def reconcile_against_document(args):
 		# cancel advance entry
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 
+		frappe.flags.ignore_party_validation = True
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
 		# update ref in advance entry
@@ -362,6 +363,7 @@ def reconcile_against_document(args):
 		# re-submit advance entry
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
+		frappe.flags.ignore_party_validation = False
 
 		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
 			doc.update_expense_claim()

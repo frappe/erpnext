@@ -144,4 +144,4 @@ def create_dunning_type_with_zero_interest_rate():
 			'closing_text': 'We kindly request that you pay the outstanding amount immediately, and late fees.'
 		}
 	)
-	dunning_type.save() 
+	dunning_type.save()
