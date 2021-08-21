@@ -62,7 +62,7 @@ class TestCurrencyExchange(unittest.TestCase):
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_selling")
 		self.assertEqual(exchange_rate, 62.9)
-		
+
 		# Exchange rate as on 15th Dec, 2015, should be fetched from fixer.io
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15", "for_selling")
