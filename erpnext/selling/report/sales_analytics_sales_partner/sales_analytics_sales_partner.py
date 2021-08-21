@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2013, Sangita and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -112,7 +112,7 @@ class Analytics(object):
 			value_field = "total_qty"
 
 		if self.filters.sales_person:
-			self.entries = frappe.db.sql(""" select s.order_type as entity, st.allocated_amount as value_field, s.{date_field}
+			self.entries = frappe.db.sql(""" select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
 			from `tab{doctype}` s join `tabSales Team` st  on st.parent=s.name 
 			where s.docstatus = 1 and s.company = %s and st.sales_person = %s and s.{date_field} between %s and %s
 			and ifnull(s.order_type, '') != '' order by s.order_type
@@ -143,13 +143,14 @@ class Analytics(object):
 
 		if self.filters.sales_person:
 			self.entries = frappe.db.sql("""
-							select  s.customer as entity,s.customer_name as entity_name,st.allocated_amount as value_field, s.{date_field}
+							select  s.customer as entity,s.customer_name as entity_name,s.{value_field}, s.{date_field}
 							from `tab{doctype}` s join `tabSales Team` st on st.parent=s.name
 							where s.docstatus = 1 and s.company = %s and st.sales_person = %s
 							and s.{date_field} between %s and %s
 						"""
 						 .format(date_field=self.date_field, value_field=value_field,doctype=self.filters.doc_type),
 						(self.filters.company, self.filters.sales_person, self.filters.from_date,self.filters.to_date), as_dict=1)
+			print("*******************",self.entries)
 		else:
 			self.entries = frappe.get_all(self.filters.doc_type,
 				fields=[entity, entity_name, value_field, self.date_field],
@@ -173,7 +174,7 @@ class Analytics(object):
 
 		if self.filters.sales_person:
 			self.entries = frappe.db.sql("""
-				select i.item_code as entity, i.item_name as entity_name, i.stock_uom, st.allocated_amount as value_field, s.{date_field}
+				select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
 				from `tab{doctype} Item` i , `tab{doctype}` s join `tabSales Team` st on st.parent=s.name
 				where s.name = i.parent and i.docstatus = 1 and s.company = %s and st.sales_person = %s
 				and s.{date_field} between %s and %s
@@ -207,7 +208,7 @@ class Analytics(object):
 
 		if self.filters.sales_person:
 			self.entries =frappe.db.sql("""
-				select  s.{entity_field} as entity_field ,st.allocated_amount as value_field, s.{date_field}
+				select  s.{entity_field} as entity_field ,s.{value_field}, s.{date_field}
 				from `tab{doctype}` s join `tabSales Team` st on st.parent=s.name
 				where s.docstatus = 1 and s.company = %s and st.sales_person = %s
 				and s.{date_field} between %s and %s
@@ -234,7 +235,7 @@ class Analytics(object):
 
 		if self.filters.sales_person:
 			self.entries = frappe.db.sql("""
-				select i.item_group as entity, st.allocated_amount as value_field, s.{date_field}
+				select i.item_group as entity, s.{value_field} as value_field, s.{date_field}
 				from `tab{doctype} Item` i , `tab{doctype}` s join `tabSales Team` st on st.parent=s.name
 				where s.name = i.parent and i.docstatus = 1 and s.company = %s and st.sales_person = %s
 				and s.{date_field} between %s and %s
