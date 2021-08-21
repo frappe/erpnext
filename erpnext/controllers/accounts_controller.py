@@ -1113,6 +1113,9 @@ class AccountsController(TransactionBase):
 		if self.doctype not in ('Sales Invoice', 'Purchase Invoice'):
 			return
 
+		if self.is_opening == 'Yes':
+			return
+
 		party_type, party = self.get_party()
 		party_gle_currency = get_party_gle_currency(party_type, party, self.company)
 		party_account = self.get('debit_to') if self.doctype == 'Sales Invoice' else self.get('credit_to')

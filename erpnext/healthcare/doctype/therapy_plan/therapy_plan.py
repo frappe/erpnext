@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, today
+from erpnext import get_company_currency
 
 class TherapyPlan(Document):
 	def validate(self):
@@ -73,6 +74,8 @@ def make_sales_invoice(reference_name, patient, company, therapy_plan_template):
 	si.company = company
 	si.patient = patient
 	si.customer = frappe.db.get_value('Patient', patient, 'customer')
+	si.currency = frappe.get_value('Customer', si.customer, 'default_currency') \
+		or get_company_currency(si.company)
 
 	item = frappe.db.get_value('Therapy Plan Template', therapy_plan_template, 'linked_item')
 	price_list, price_list_currency = frappe.db.get_values('Price List', {'selling': 1}, ['name', 'currency'])[0]

@@ -81,7 +81,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
 			rate=400,
-			debit_to="Debtors - TPC"
+			debit_to="Debtors - TPC",
+			currency="USD"
 		)
 		create_sales_invoice(
 			company=company,
@@ -89,7 +90,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
 			rate=200,
-			debit_to="Debtors - TPC"
+			debit_to="Debtors - TPC",
+			currency="USD"
 		)
 
 		pcv = frappe.get_doc({
