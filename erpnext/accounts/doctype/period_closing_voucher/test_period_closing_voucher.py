@@ -78,6 +78,10 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			expense_account="Cost of Goods Sold - TPC",
 			rate=400,
 			debit_to="Debtors - TPC",
+<<<<<<< HEAD
+=======
+			currency="USD"
+>>>>>>> 60915e874d (test: Update test cases for currency change validation)
 		)
 		create_sales_invoice(
 			company=company,
@@ -86,6 +90,10 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			expense_account="Cost of Goods Sold - TPC",
 			rate=200,
 			debit_to="Debtors - TPC",
+<<<<<<< HEAD
+=======
+			currency="USD"
+>>>>>>> 60915e874d (test: Update test cases for currency change validation)
 		)
 
 		pcv = self.make_period_closing_voucher(submit=False)
