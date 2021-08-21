@@ -200,6 +200,16 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 
 	company_currency = get_company_currency(filters)
 
+<<<<<<< HEAD
+=======
+	if filters.filter_based_on == 'Fiscal Year':
+		start_date = fiscal_year.year_start_date if filters.report != 'Balance Sheet' else None
+		end_date = fiscal_year.year_end_date
+	else:
+		start_date = filters.period_start_date if filters.report != 'Balance Sheet' else None
+		end_date = filters.period_end_date
+
+>>>>>>> 57e326e7d0 (fix: Consolidated balance sheet showing incorrect values (#26975))
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
 			where root_type=%s and ifnull(parent_account, '') = ''""", root_type, as_dict=1):
