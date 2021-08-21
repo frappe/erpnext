@@ -12,6 +12,7 @@
   "issue",
   "type",
   "color",
+  "item",
   "is_group",
   "is_template",
   "column_break0",
@@ -390,6 +391,12 @@
    "fieldtype": "Date",
    "label": "Completed On",
    "mandatory_depends_on": "eval: doc.status == \"Completed\""
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
   }
  ],
  "icon": "fa fa-check",
@@ -397,7 +404,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-04-16 12:46:51.556741",
+ "modified": "2021-08-21 12:22:50.026892",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
