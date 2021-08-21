@@ -104,7 +104,7 @@ jobs:
       - name: UI Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-ui-tests erpnext --headless
         env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          CYPRESS_RECORD_KEY: 60a8e3bf-08f5-45b1-9269-2b207d7d30cd
 
       - name: Show bench console if tests failed
         if: ${{ failure() }}

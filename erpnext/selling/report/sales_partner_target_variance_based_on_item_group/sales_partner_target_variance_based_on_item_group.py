@@ -9,4 +9,3 @@ def execute(filters=None):
 	data = []
 
 	return get_data_column(filters, "Sales Partner")
-

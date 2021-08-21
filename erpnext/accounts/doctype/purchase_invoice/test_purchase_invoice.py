@@ -271,7 +271,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
-		
+
 		pi = make_purchase_invoice(do_not_save=1, parent_cost_center="Main - _TC")
 		pi.apply_discount_on = "Grand Total"
 		pi.additional_discount_account = additional_discount_account

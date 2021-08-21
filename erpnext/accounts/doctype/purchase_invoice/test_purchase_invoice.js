@@ -72,4 +72,3 @@ QUnit.test("test purchase invoice", function(assert) {
 		() => done()
 	]);
 });
-
