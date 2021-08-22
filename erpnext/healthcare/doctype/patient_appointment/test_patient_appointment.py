@@ -235,6 +235,7 @@ class TestPatientAppointment(unittest.TestCase):
 		)
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record1)
+<<<<<<< HEAD
 		discharge_patient(ip_record1, now_datetime())
 
 	def test_payment_should_be_mandatory_for_new_patient_appointment(self):
@@ -415,6 +416,44 @@ def create_practitioner(id=0, medical_department=None):
 
 	return practitioner.name
 
+=======
+		discharge_patient(ip_record1)
+
+
+def create_healthcare_docs():
+	patient = create_patient()
+	practitioner = frappe.db.exists('Healthcare Practitioner', '_Test Healthcare Practitioner')
+	medical_department = frappe.db.exists('Medical Department', '_Test Medical Department')
+
+	if not medical_department:
+		medical_department = frappe.new_doc('Medical Department')
+		medical_department.department = '_Test Medical Department'
+		medical_department.save(ignore_permissions=True)
+		medical_department = medical_department.name
+
+	if not practitioner:
+		practitioner = frappe.new_doc('Healthcare Practitioner')
+		practitioner.first_name = '_Test Healthcare Practitioner'
+		practitioner.gender = 'Female'
+		practitioner.department = medical_department
+		practitioner.op_consulting_charge = 500
+		practitioner.inpatient_visit_charge = 500
+		practitioner.save(ignore_permissions=True)
+		practitioner = practitioner.name
+
+	return patient, medical_department, practitioner
+
+def create_patient():
+	patient = frappe.db.exists('Patient', '_Test Patient')
+	if not patient:
+		patient = frappe.new_doc('Patient')
+		patient.first_name = '_Test Patient'
+		patient.sex = 'Female'
+		patient.default_currency = 'INR'
+		patient.save(ignore_permissions=True)
+		patient = patient.name
+	return patient
+>>>>>>> 30876a105c (test: Set default currency for patient)
 
 def create_encounter(appointment):
 	if appointment:
