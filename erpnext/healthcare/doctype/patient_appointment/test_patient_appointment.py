@@ -206,6 +206,7 @@ def create_patient():
 		patient = frappe.new_doc('Patient')
 		patient.first_name = '_Test Patient'
 		patient.sex = 'Female'
+		patient.default_currency = 'INR'
 		patient.save(ignore_permissions=True)
 		patient = patient.name
 	return patient
