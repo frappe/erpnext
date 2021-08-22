@@ -696,7 +696,7 @@ class PaymentEntry(AccountsController):
 				"cost_center": self.cost_center
 			}, item=self)
 
-			dr_or_cr = "credit" if self.payment_type == 'Receive' else "debit"
+			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
 			for d in self.get("references"):
 				cost_center = self.cost_center
@@ -709,11 +709,11 @@ class PaymentEntry(AccountsController):
 					"cost_center": cost_center
 				})
 
-				allocated_amount_in_company_currency = abs(flt(flt(d.allocated_amount) * flt(d.exchange_rate),
-					self.precision("paid_amount")))
+				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
+					self.precision("paid_amount"))
 
 				gle.update({
-					dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
+					dr_or_cr + "_in_account_currency": d.allocated_amount,
 					dr_or_cr: allocated_amount_in_company_currency
 				})
 
