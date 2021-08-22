@@ -262,8 +262,12 @@ def create_sales_invoice(appointment_doc):
 =======
 	sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
 	sales_invoice.currency = frappe.get_value('Customer', sales_invoice.customer, 'default_currency') \
+<<<<<<< HEAD
 		or get_company_currency(appointment_doc.currency)
 >>>>>>> 60915e874d (test: Update test cases for currency change validation)
+=======
+		or get_company_currency(appointment_doc.company)
+>>>>>>> c10a22529c (test: fix property name)
 	sales_invoice.appointment = appointment_doc.name
 	sales_invoice.due_date = getdate()
 	sales_invoice.company = appointment_doc.company
