@@ -81,6 +81,8 @@ class VehicleTransactionController(StockController):
 
 	def update_stock_ledger(self):
 		qty = 1 if self.doctype == "Vehicle Receipt" else -1
+		if self.get('is_return'):
+			qty = -1 * qty
 
 		# make sl entries for source warehouse first, then do for target warehouse
 		sl_entries = [self.get_sl_entries(self, {
@@ -128,12 +130,23 @@ class VehicleTransactionController(StockController):
 
 	def validate_vehicle_booking_order(self):
 		if self.vehicle_booking_order:
-			vbo = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order,
-				['docstatus', 'status', 'customer', 'financer', 'supplier', 'item_code', 'vehicle', 'vehicle_delivered_date'],
-				as_dict=1)
+			vbo = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order, [
+					'docstatus', 'status',
+					'customer', 'financer', 'supplier',
+					'item_code', 'vehicle',
+					'vehicle_delivered_date', 'vehicle_received_date'
+			], as_dict=1)
 
 			if not vbo:
 				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
+
+			if vbo.docstatus != 1:
+				frappe.throw(_("Cannot make {0} against {1} because it is not submitted")
+					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+
+			if vbo.status == "Cancelled Booking":
+				frappe.throw(_("Cannot make {0} against {1} because it is cancelled")
+					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.get('customer'):
 				# Customer must match with booking customer/financer or vehicle owner must be set (and match)
@@ -173,17 +186,17 @@ class VehicleTransactionController(StockController):
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.doctype == "Vehicle Transfer Letter":
-				if getdate(self.posting_date) < getdate(vbo.vehicle_delivered_date):
-					frappe.throw(_("Transfer Date cannot be before Delivery Date {0}")
-						.format(frappe.format(getdate(vbo.vehicle_delivered_date))))
+				if getdate(self.posting_date) < getdate(vbo.vehicle_received_date):
+					frappe.throw(_("Transfer Date cannot be before Receiving Date {0}")
+						.format(frappe.format(getdate(vbo.vehicle_received_date)) if vbo.vehicle_received_date else ""))
 
-			if vbo.docstatus != 1:
-				frappe.throw(_("Cannot make {0} against {1} because it is not submitted")
-					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+			if self.doctype == "Vehicle Receipt" and not cint(self.get('is_return')) and vbo.vehicle_received_date:
+				frappe.throw(_("Cannot create Vehicle Receipt against {0} because Vehicle has already been received")
+					.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
-			if vbo.status == "Cancelled Booking":
-				frappe.throw(_("Cannot make {0} against {1} because it is cancelled")
-					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+			if self.doctype == "Vehicle Delivery" and cint(self.get('is_return')) and not vbo.vehicle_received_date:
+				frappe.throw(_("Cannot create Vehicle Delivery Return against {0} because Vehicle has not yet been received")
+					.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 	def validate_project(self):
 		if self.get('project'):
@@ -312,8 +325,7 @@ def get_vehicle_booking_order_details(args):
 		out.bill_no = booking_details.bill_no
 		out.bill_date = booking_details.bill_date
 
-		if args.doctype != "Vehicle Delivery":
-			out.warehouse = booking_details.warehouse
+		out.warehouse = booking_details.warehouse
 
 	out.booking_customer_name = booking_details.customer_name
 	out.booking_tax_id = booking_details.tax_id
@@ -369,8 +381,16 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 		out.warehouse = vehicle_details.warehouse
 
 	if args.vehicle and get_vehicle_booking_order and not args.vehicle_booking_order:
-		vehicle_booking_order = get_vehicle_booking_order_from_vehicle(args.vehicle)
-		out.vehicle_booking_order = vehicle_booking_order
+		status_filters = None
+		if args.doctype in ('Vehicle Receipt', 'Vehicle Delivery'):
+			if cint(args.is_return):
+				status_filters = {'delivery_status': ['=', 'Delivered']}
+			else:
+				status_filters = {'delivery_status': ['!=', 'Delivered']}
+
+		vehicle_booking_order = get_vehicle_booking_order_from_vehicle(args.vehicle, status_filters)
+		if vehicle_booking_order:
+			out.vehicle_booking_order = vehicle_booking_order
 
 	if cint(get_vehicle_invoice_receipt):
 		from erpnext.vehicles.doctype.vehicle_invoice_delivery.vehicle_invoice_delivery import get_vehicle_invoice_receipt,\
@@ -384,8 +404,14 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	return out
 
 
-def get_vehicle_booking_order_from_vehicle(vehicle):
-	return frappe.db.get_value("Vehicle Booking Order", {"vehicle": vehicle, "docstatus": 1})
+def get_vehicle_booking_order_from_vehicle(vehicle, filters=None):
+	filters = filters or {}
+	filters.update({
+		"vehicle": vehicle,
+		"docstatus": 1,
+	})
+
+	return frappe.db.get_value("Vehicle Booking Order", filters)
 
 
 @frappe.whitelist()

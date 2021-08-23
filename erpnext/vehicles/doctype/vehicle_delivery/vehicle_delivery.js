@@ -14,8 +14,12 @@ erpnext.vehicles.VehicleDeliveryController = erpnext.vehicles.VehicleTransaction
 		var me = this;
 		this.frm.set_query("vehicle", function () {
 			var filters = {item_code: me.frm.doc.item_code};
+
 			if (me.frm.doc.warehouse) {
 				filters['warehouse'] = me.frm.doc.warehouse;
+			} else if (cint(me.frm.doc.is_return)) {
+				filters['warehouse'] = ['is', 'not set'];
+				filters['delivery_document_no'] = ['is', 'set'];
 			} else {
 				filters['warehouse'] = ['is', 'set'];
 			}
@@ -26,12 +30,19 @@ erpnext.vehicles.VehicleDeliveryController = erpnext.vehicles.VehicleTransaction
 		});
 
 		this.frm.set_query("vehicle_booking_order", function() {
+			var filters = {
+				docstatus: 1,
+				status: ['!=', 'Cancelled Booking'],
+			}
+
+			if (cint(me.frm.doc.is_return)) {
+				filters['delivery_status'] = 'Delivered';
+			} else {
+				filters['delivery_status'] = 'In Stock';
+			}
+
 			return {
-				filters: {
-					docstatus: 1,
-					status: ['!=', 'Cancelled Booking'],
-					delivery_status: 'In Stock'
-				}
+				filters: filters
 			};
 		});
 	}

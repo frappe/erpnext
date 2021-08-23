@@ -14,10 +14,16 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 		var me = this;
 		this.frm.set_query("vehicle", function () {
 			var filters = {
-				item_code: me.frm.doc.item_code,
-				warehouse: ['is', 'not set'],
-				purchase_document_no: ['is', 'not set']
+				item_code: me.frm.doc.item_code
 			};
+
+			if (cint(me.frm.doc.is_return)) {
+				filters['warehouse'] = ['is', 'set'];
+				filters['purchase_document_no'] = ['is', 'set'];
+			} else {
+				filters['warehouse'] = ['is', 'not set'];
+				filters['purchase_document_no'] = ['is', 'not set'];
+			}
 
 			if (me.frm.doc.supplier) {
 				filters['supplier'] = ['in', ['', me.frm.doc.supplier]];
@@ -29,12 +35,19 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 		});
 
 		this.frm.set_query("vehicle_booking_order", function() {
+			var filters = {
+				docstatus: 1,
+				status: ['!=', 'Cancelled Booking']
+			};
+
+			if (cint(me.frm.doc.is_return)) {
+				filters['delivery_status'] = 'In Stock';
+			} else {
+				filters['delivery_status'] = 'Not Received';
+			}
+
 			return {
-				filters: {
-					docstatus: 1,
-					status: ['!=', 'Cancelled Booking'],
-					delivery_status: 'Not Received'
-				}
+				filters: filters
 			};
 		});
 	}

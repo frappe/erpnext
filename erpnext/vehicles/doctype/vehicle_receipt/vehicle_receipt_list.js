@@ -1,4 +1,12 @@
 frappe.listview_settings['Vehicle Receipt'] = {
+	add_fields: ["is_return"],
+	get_indicator: function(doc) {
+		if(cint(doc.is_return)) {
+			return [__("Returned"), "darkgrey", "is_return,=,1"];
+		} else {
+			return [__("Received"), "green", "is_return,=,0"];
+		}
+	},
 	onload: function(listview) {
 		listview.page.fields_dict.variant_of.get_query = () => {
 			return erpnext.queries.item({"is_vehicle": 1, "has_variants": 1, "include_disabled": 1});

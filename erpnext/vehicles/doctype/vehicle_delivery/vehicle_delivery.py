@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
 
 class VehicleDelivery(VehicleTransactionController):
@@ -14,7 +15,7 @@ class VehicleDelivery(VehicleTransactionController):
 
 	def validate(self):
 		super(VehicleDelivery, self).validate()
-
+		self.validate_return()
 		self.set_title()
 
 	def on_submit(self):
@@ -24,6 +25,24 @@ class VehicleDelivery(VehicleTransactionController):
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.update_vehicle_booking_order()
+
+	def validate_return(self):
+		if cint(self.is_return) and self.vehicle:
+			sle_exists = frappe.db.sql("""
+				select name
+				from `tabStock Ledger Entry`
+				where serial_no = %(vehicle)s and actual_qty > 0
+					and timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
+				limit 1
+			""", {
+				'vehicle': self.vehicle,
+				'posting_date': self.posting_date,
+				'posting_time': self.posting_time,
+			})
+
+			if not sle_exists:
+				frappe.throw(_("Cannot create a Vehicle Delivery Return for Vehicle {0} becuase it hasn't been received yet")
+					.format(self.vehicle))
 
 	def set_title(self):
 		self.title = "{0}{1}".format(self.customer_name or self.customer, ' ({0})'.format(self.get('received_by')) if self.get('received_by') else '')

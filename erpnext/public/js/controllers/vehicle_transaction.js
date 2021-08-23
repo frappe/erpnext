@@ -212,7 +212,8 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				args: {
 					doctype: me.frm.doc.doctype,
 					vehicle: me.frm.doc.vehicle,
-					customer: me.frm.doc.customer
+					customer: me.frm.doc.customer,
+					is_return: me.frm.doc.is_return,
 				},
 				get_vehicle_invoice_receipt: cint(me.frm.doc.doctype == "Vehicle Invoice Delivery")
 			},

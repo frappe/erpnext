@@ -20,8 +20,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		this._super();
 		this.set_customer_is_company_label();
 		this.set_dynamic_link();
-		this.setup_notification();
-		this.add_create_buttons();
+		this.setup_buttons();
 		this.setup_dashboard();
 	},
 
@@ -97,7 +96,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		};
 	},
 
-	add_create_buttons: function () {
+	setup_buttons: function () {
 		// Customer Payment Button (allowed on draft too)
 		if (this.frm.doc.docstatus < 2) {
 			if (flt(this.frm.doc.customer_outstanding) > 0) {
@@ -116,6 +115,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 			// Receive/Deliver Vehicle and Invoice
 			if (this.frm.doc.vehicle) {
+				// Vehicle Delivery/Receipt buttons
 				if (this.frm.doc.delivery_status === "Not Received") {
 					if (this.can_change('vehicle_receipt')) {
 						this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
@@ -124,12 +124,9 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					if (this.can_change('vehicle_delivery')) {
 						this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
 					}
-				} else if (this.frm.doc.delivery_status === "Delivered" && !this.frm.doc.transfer_customer) {
-					if (this.can_change('vehicle_transfer')) {
-						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'));
-					}
 				}
 
+				// Invoice Delivery/Receipt buttons
 				if (this.frm.doc.invoice_status === "Not Received") {
 					if (this.can_change('invoice_receipt')) {
 						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
@@ -137,6 +134,26 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				} else if (this.frm.doc.invoice_status === "In Hand" && this.frm.doc.delivery_status === "Delivered") {
 					if (this.can_change('invoice_delivery')) {
 						this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
+					}
+				}
+
+				// Transfer Letter button
+				if (this.frm.doc.delivery_status === "Delivered" && !this.frm.doc.transfer_customer) {
+					if (this.can_change('vehicle_transfer')) {
+						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'));
+					}
+				}
+
+				// Return Vehicle buttons
+				if (this.frm.doc.delivery_status === "In Stock") {
+					if (this.can_change('vehicle_receipt')) {
+						this.frm.add_custom_button(__('Return Vehicle to Supplier'), () => this.make_next_document('Vehicle Receipt Return'),
+							__("Return"));
+					}
+				} else if (this.frm.doc.delivery_status === "Delivered") {
+					if (this.can_change('vehicle_delivery')) {
+						this.frm.add_custom_button(__('Return Vehicle from Customer'), () => this.make_next_document('Vehicle Delivery Return'),
+							__("Return"));
 					}
 				}
 			}
@@ -153,6 +170,9 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				this.frm.add_custom_button(__(change_cancellation_label), () => this.change_cancellation(),
 					__("Status"));
 			}
+
+			// Notification Buttons
+			this.setup_notification_buttons();
 
 			// Change Buttons
 			if (this.can_change('customer_details')) {
@@ -208,11 +228,11 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
 			} else if (this.frm.doc.status === "To Assign Vehicle") {
 				this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
-			} else if (this.frm.doc.status === "To Receive Vehicle") {
+			} else if (["To Receive Vehicle", "Delivery Overdue"].includes(this.frm.doc.status) && this.frm.doc.delivery_status === "Not Received") {
 				this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Receive Invoice") {
 				this.frm.custom_buttons[__('Receive Invoice')] && this.frm.custom_buttons[__('Receive Invoice')].addClass('btn-primary');
-			} else if (this.frm.doc.status === "To Deliver Vehicle") {
+			} else if (["To Deliver Vehicle", "Delivery Overdue"].includes(this.frm.doc.status) && this.frm.doc.delivery_status === "In Stock") {
 				this.frm.custom_buttons[__('Deliver Vehicle')] && this.frm.custom_buttons[__('Deliver Vehicle')].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Deliver Invoice") {
 				this.frm.custom_buttons[__('Deliver Invoice')] && this.frm.custom_buttons[__('Deliver Invoice')].addClass('btn-primary');
@@ -384,7 +404,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		return html
 	},
 
-	setup_notification: function() {
+	setup_notification_buttons: function() {
 		var me = this;
 		if(this.frm.doc.docstatus === 1) {
 			if (this.frm.doc.status == "Cancelled Booking") {

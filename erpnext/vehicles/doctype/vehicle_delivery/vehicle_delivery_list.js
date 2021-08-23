@@ -1,4 +1,12 @@
 frappe.listview_settings['Vehicle Delivery'] = {
+	add_fields: ["is_return"],
+	get_indicator: function(doc) {
+		if(cint(doc.is_return)) {
+			return [__("Returned"), "darkgrey", "is_return,=,1"];
+		} else {
+			return [__("Delivered"), "green", "is_return,=,0"];
+		}
+	},
 	onload: function(listview) {
 		listview.page.fields_dict.customer.get_query = () => {
 			return erpnext.queries.customer();

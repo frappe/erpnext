@@ -287,22 +287,22 @@ class VehicleBookingOrder(VehicleBookingController):
 			})
 
 	def update_delivery_status(self, update=False):
-		vehicle_receipt = None
-		vehicle_delivery = None
+		vehicle_receipts = None
+		vehicle_deliveries = None
 
 		if self.docstatus != 0:
-			vehicle_receipt = self.get_vehicle_receipts()
+			vehicle_receipts = self.get_vehicle_receipts()
+			vehicle_deliveries = frappe.db.get_all("Vehicle Delivery", {"vehicle_booking_order": self.name, "docstatus": 1},
+				['name', 'posting_date', 'is_return'], order_by="posting_date, posting_time, creation")
 
-			vehicle_delivery = frappe.db.get_all("Vehicle Delivery", {"vehicle_booking_order": self.name, "docstatus": 1},
-				['name', 'posting_date'])
+		vehicle_receipt = frappe._dict()
+		vehicle_delivery = frappe._dict()
 
-			if len(vehicle_receipt) > 1:
-				frappe.throw(_("Vehicle Receipt already exists against Vehicle Booking Order"))
-			if len(vehicle_delivery) > 1:
-				frappe.throw(_("Vehicle Delivery already exists against Vehicle Booking Order"))
+		if vehicle_receipts and not vehicle_receipts[-1].get('is_return'):
+			vehicle_receipt = vehicle_receipts[-1]
 
-		vehicle_receipt = vehicle_receipt[0] if vehicle_receipt else frappe._dict()
-		vehicle_delivery = vehicle_delivery[0] if vehicle_delivery else frappe._dict()
+		if vehicle_deliveries and not vehicle_deliveries[-1].get('is_return'):
+			vehicle_delivery = vehicle_deliveries[-1]
 
 		if vehicle_delivery:
 			self.check_outstanding_payment_for_delivery()
@@ -365,14 +365,15 @@ class VehicleBookingOrder(VehicleBookingController):
 			row.db_update()
 
 	def get_vehicle_receipts(self):
-		fields = ['name', 'posting_date', 'lr_no', 'supplier', 'vehicle_booking_order']
+		fields = ['name', 'posting_date', 'is_return', 'lr_no', 'supplier', 'vehicle_booking_order']
 
-		vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle_booking_order": self.name, "docstatus": 1}, fields)
+		vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle_booking_order": self.name, "docstatus": 1}, fields,
+			order_by='posting_date, posting_time, creation')
 
 		# open stock
 		if not vehicle_receipts and self.vehicle:
 			vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle": self.vehicle, "docstatus": 1}, fields,
-				order_by='timestamp(posting_date, posting_time) asc', limit=1)
+				order_by='posting_date, posting_time, creation')
 
 		return vehicle_receipts
 
@@ -523,8 +524,12 @@ def get_next_document(vehicle_booking_order, doctype):
 
 	if doctype == "Vehicle Receipt":
 		return get_vehicle_receipt(doc)
+	elif doctype == "Vehicle Receipt Return":
+		return get_vehicle_receipt_return(doc)
 	elif doctype == "Vehicle Delivery":
 		return get_vehicle_delivery(doc)
+	elif doctype == "Vehicle Delivery Return":
+		return get_vehicle_delivery_return(doc)
 	elif doctype == "Vehicle Invoice Receipt":
 		return get_vehicle_invoice_receipt(doc)
 	elif doctype == "Vehicle Invoice Delivery":
@@ -539,9 +544,22 @@ def get_vehicle_receipt(source):
 	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_receive_vehicle
 
 	can_receive_vehicle(source, throw=True)
-	check_if_doc_exists("Vehicle Receipt", source.name)
+	check_if_doc_exists("Vehicle Receipt", source.name, {'docstatus': 0, 'is_return': 0})
 
 	target = frappe.new_doc("Vehicle Receipt")
+	set_next_document_values(source, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+def get_vehicle_receipt_return(source):
+	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_receive_vehicle
+
+	can_receive_vehicle(source, throw=True)
+	check_if_doc_exists("Vehicle Receipt", source.name, {'docstatus': 0, 'is_return': 1})
+
+	target = frappe.new_doc("Vehicle Receipt")
+	target.is_return = 1
 	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
 	return target
@@ -552,9 +570,22 @@ def get_vehicle_delivery(source):
 
 	can_deliver_vehicle(source, throw=True)
 	source.check_outstanding_payment_for_delivery()
-	check_if_doc_exists("Vehicle Delivery", source.name)
+	check_if_doc_exists("Vehicle Delivery", source.name, {'docstatus': 0, 'is_return': 0})
 
 	target = frappe.new_doc("Vehicle Delivery")
+	set_next_document_values(source, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+def get_vehicle_delivery_return(source):
+	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_deliver_vehicle
+
+	can_deliver_vehicle(source, throw=True)
+	check_if_doc_exists("Vehicle Delivery", source.name, {'docstatus': 0, 'is_return': 1})
+
+	target = frappe.new_doc("Vehicle Delivery")
+	target.is_return = 1
 	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
 	return target
@@ -602,8 +633,12 @@ def get_vehicle_invoice_delivery(source):
 	return target
 
 
-def check_if_doc_exists(doctype, vehicle_booking_order):
-	existing = frappe.db.get_value(doctype, {"vehicle_booking_order": vehicle_booking_order, "docstatus": ["<", 2]})
+def check_if_doc_exists(doctype, vehicle_booking_order, filters=None):
+	filter_args = filters or {}
+	filters = {"vehicle_booking_order": vehicle_booking_order, "docstatus": ["<", 2]}
+	filters.update(filter_args)
+
+	existing = frappe.db.get_value(doctype, filters)
 	if existing:
 		frappe.throw(_("{0} already exists").format(frappe.get_desk_link(doctype, existing)))
 
