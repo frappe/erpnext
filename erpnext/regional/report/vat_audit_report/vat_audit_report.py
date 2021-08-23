@@ -189,7 +189,7 @@ class VATAuditReport(object):
 						row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
 						row["voucher_type"] = doctype
 						row["voucher_no"] = inv
-						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier" 
+						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
 						row["party"] = inv_data.get("party")
 						row["remarks"] = inv_data.get("remarks")
 						row["gross_amount"]= item_details[0].get("gross_amount")

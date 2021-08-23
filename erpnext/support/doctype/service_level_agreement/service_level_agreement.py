@@ -235,10 +235,9 @@ def get_active_service_level_agreement_for(doc):
 		]
 
 	customer = doc.get('customer')
-	if customer:
-		or_filters.append(
-			["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer)]]
-		)
+	or_filters.append(
+		["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer)]]
+	)
 
 	default_sla_filter = filters + [["Service Level Agreement", "default_service_level_agreement", "=", 1]]
 	default_sla = frappe.get_all("Service Level Agreement", filters=default_sla_filter,
@@ -247,7 +246,7 @@ def get_active_service_level_agreement_for(doc):
 	filters += [["Service Level Agreement", "default_service_level_agreement", "=", 0]]
 	agreements = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
 		fields=["name", "default_priority", "apply_sla_for_resolution", "condition"])
-	
+
 	# check if the current document on which SLA is to be applied fulfills all the conditions
 	filtered_agreements = []
 	for agreement in agreements:
