@@ -2014,7 +2014,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		data = get_ewb_data("Sales Invoice", [si.name])
 
-		self.assertEqual(data['version'], '1.0.1118')
+		self.assertEqual(data['version'], '1.0.0421')
 		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')
 		self.assertEqual(data['billLists'][0]['fromTrdName'], '_Test Company')
 		self.assertEqual(data['billLists'][0]['toTrdName'], '_Test Customer')
