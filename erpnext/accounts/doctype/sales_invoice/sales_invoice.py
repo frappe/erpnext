@@ -273,13 +273,39 @@ class SalesInvoice(SellingController):
 		self.exonerated_value()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.create_dispatch_control()
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
 
 		# if self.docstatus == 0:
 		# 	self.assign_cai()
-	
+	def create_dispatch_control(self):
+		products = frappe.get_all("Sales Invoice Item", ["item_code", "qty"], filters = {"parent": self.name})
+
+		areas = frappe.get_all("Delivery Area", ["name"])
+
+		for area in areas:
+			products_dispatch = []
+			area_details = frappe.get_all("Delivery Area Detail", ["item"], filters = {"parent": area.name})
+			for product in products:
+				for areadetail in area_details:
+					if product.item_code == areadetail.item:
+						pro = [product.item_code, product.qty]
+						products_dispatch.append(pro)
+			
+			if len(products_dispatch) > 0:
+				doc = frappe.new_doc('Dispatch Control')
+				doc.sale_invoice = self.name
+				doc.delivery_area = area.name
+				doc.creation_date = datetime.now()
+				for list_product in products_dispatch:
+					row = doc.append("items", {
+					'item': list_product[0],
+					'qty': list_product[1]
+					})
+				doc.insert()
+
 	def assing_price_list(self):
 		day_in = datetime.today().weekday()
 		day = ""
