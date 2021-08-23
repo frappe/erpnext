@@ -378,7 +378,9 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 
 		frappe.model.set_value('BOM Item', rm[i].name, 'base_rate',
 			flt(rm[i].rate) * flt(doc.conversion_rate));
-		frappe.model.set_value('BOM Item', rm[i].name, 'amount', amount);
+
+		rm[i].amount = amount;
+		refresh_field('amount', rm[i].name, 'items');
 		frappe.model.set_value('BOM Item', rm[i].name, 'base_amount', base_amount);
 		frappe.model.set_value('BOM Item', rm[i].name,
 			'qty_consumed_per_unit', flt(rm[i].stock_qty)/flt(doc.quantity));
