@@ -346,6 +346,7 @@ class ProductionPlan(Document):
 				"production_plan"       : self.name,
 				"production_plan_item"  : d.name,
 				"product_bundle_item"	: d.product_bundle_item,
+				"planned_start_date"    : d.planned_start_date,
 				"make_work_order_for_sub_assembly_items": d.get("make_work_order_for_sub_assembly_items", 0)
 			}
 

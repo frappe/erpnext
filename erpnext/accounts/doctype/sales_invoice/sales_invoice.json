@@ -692,6 +692,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
+   "options": "Barcode",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode"

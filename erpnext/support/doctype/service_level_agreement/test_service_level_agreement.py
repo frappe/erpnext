@@ -267,11 +267,15 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		)
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
 		lead = make_lead(creation=creation, index=4)
-		self.assertFalse(lead.service_level_agreement)
+		applied_sla = frappe.db.get_value('Lead', lead.name, 'service_level_agreement')
+		self.assertFalse(applied_sla)
 
+		source = frappe.get_doc(doctype='Lead Source', source_name='Test Source')
+		source.insert(ignore_if_duplicate=True)
 		lead.source = "Test Source"
 		lead.save()
-		self.assertEqual(lead.service_level_agreement, lead_sla.name)
+		applied_sla = frappe.db.get_value('Lead', lead.name, 'service_level_agreement')
+		self.assertEqual(applied_sla, lead_sla.name)
 
 	def tearDown(self):
 		for d in frappe.get_all("Service Level Agreement"):
