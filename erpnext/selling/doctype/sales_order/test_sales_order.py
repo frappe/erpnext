@@ -549,6 +549,44 @@ class TestSalesOrder(unittest.TestCase):
 		# reserved qty in packed item should increase after changing bundle item uom
 		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 8)
 
+	def test_calculate_net_weight_for_packed_items(self):
+		product_bundle = make_item("_Testing Product Bundle 1", {"is_stock_item": 0})
+		packed_item_1 = make_item("_Testing Packed Item 1",
+				{"is_stock_item": 1, "weight_per_unit": 5, "stock_uom": "Kg"})
+		packed_item_2 = make_item("_Testing Packed Item 2",
+				{"is_stock_item": 1, "weight_per_unit": 2, "stock_uom": "Kg"})
+		make_product_bundle(parent=product_bundle.name, items=[packed_item_1.name, packed_item_2.name])
+
+		so = frappe.new_doc('Sales Order')
+		so.company = '_Test Company 1'
+		so.customer = '_Test Customer 1'
+		items = {
+			'item_code': '_Testing Product Bundle 1',
+			'delivery_date': nowdate(),
+			'qty': 1,
+			'warehouse': 'Finished Goods - _TC1'
+		}
+		so.append('items', items)
+		so.save()
+		self.assertEqual(so.total_net_weight, 7)
+		product_bundle = make_item("_Testing Product Bundle 2", {"is_stock_item": 0})
+		packed_item_1 = make_item("_Testing Packed Item 3",
+				{"is_stock_item": 1, "weight_per_unit": 3, "stock_uom": "Nos"})
+		packed_item_2 = make_item("_Testing Packed Item 4",
+				{"is_stock_item": 1, "weight_per_unit": 1, "stock_uom": "Kg"})
+		make_product_bundle(parent=product_bundle.name, items=[packed_item_1.name, packed_item_2.name])
+		items = {}
+		items = {
+			'item_code': '_Testing Product Bundle 2',
+			'delivery_date': nowdate(),
+			'qty': 1,
+			'warehouse': 'Finished Goods - _TC1'
+		}
+		so.append('items', items)
+		so.save()
+		self.assertEqual(so.total_net_weight, 7)
+		frappe.db.rollback()
+
 	def test_update_child_with_tax_template(self):
 		"""
 			Test Action: Create a SO with one item having its tax account head already in the SO.
