@@ -1921,6 +1921,39 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.local.enable_perpetual_inventory['_Test Company 1'] = old_perpetual_inventory
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
 
+	def test_sle_if_target_warehouse_exists_accidentally(self):
+		"""
+			Check if inward entry exists if Target Warehouse accidentally exists
+			but Customer is not an internal customer.
+		"""
+		se = make_stock_entry(
+			item_code="138-CMS Shoe",
+			target="Finished Goods - _TC",
+			company = "_Test Company",
+			qty=1,
+			basic_rate=500
+		)
+
+		si = frappe.copy_doc(test_records[0])
+		si.update_stock = 1
+		si.set_warehouse = "Finished Goods - _TC"
+		si.set_target_warehouse = "Stores - _TC"
+		si.get("items")[0].warehouse = "Finished Goods - _TC"
+		si.get("items")[0].target_warehouse = "Stores - _TC"
+		si.insert()
+		si.submit()
+
+		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
+			fields=["name", "actual_qty"])
+
+		# check if only one SLE for outward entry is created
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].actual_qty, -1)
+
+		# tear down
+		si.cancel()
+		se.cancel()
+
 	def test_internal_transfer_gl_entry(self):
 		## Create internal transfer account
 		account = create_account(account_name="Unrealized Profit",
