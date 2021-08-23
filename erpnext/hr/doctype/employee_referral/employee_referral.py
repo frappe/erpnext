@@ -70,4 +70,3 @@ def create_additional_salary(doc):
 		additional_salary.ref_docname = doc.name
 
 	return additional_salary
-

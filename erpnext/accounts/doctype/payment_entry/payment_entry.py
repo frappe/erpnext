@@ -193,7 +193,7 @@ class PaymentEntry(AccountsController):
 				for field, value in iteritems(ref_details):
 					if d.exchange_gain_loss:
 						# for cases where gain/loss is booked into invoice
-						# exchange_gain_loss is calculated from invoice & populated 
+						# exchange_gain_loss is calculated from invoice & populated
 						# and row.exchange_rate is already set to payment entry's exchange rate
 						# refer -> `update_reference_in_payment_entry()` in utils.py
 						continue
@@ -427,7 +427,7 @@ class PaymentEntry(AccountsController):
 			net_total_for_tds = 0
 			if reference.reference_doctype == 'Purchase Order':
 				net_total_for_tds += flt(frappe.db.get_value('Purchase Order', reference.reference_name, 'net_total'))
-		
+
 			if net_total_for_tds:
 				net_total = net_total_for_tds
 
@@ -548,7 +548,7 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
-				self.unallocated_amount = (self.received_amount + total_deductions -
+				self.unallocated_amount = (self.base_received_amount + total_deductions -
 					self.base_total_allocated_amount) / self.source_exchange_rate
 				self.unallocated_amount -= included_taxes
 			elif self.payment_type == "Pay" \
@@ -860,7 +860,7 @@ class PaymentEntry(AccountsController):
 
 		if account_details:
 			row.update(account_details)
-		
+
 		if not row.get('amount'):
 			# if no difference amount
 			return

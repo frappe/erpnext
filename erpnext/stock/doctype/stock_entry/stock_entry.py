@@ -317,9 +317,6 @@ class StockEntry(StockController):
 				d.s_warehouse = self.from_warehouse
 				d.t_warehouse = self.to_warehouse
 
-			if not (d.s_warehouse or d.t_warehouse):
-				frappe.throw(_("Atleast one warehouse is mandatory"))
-
 			if self.purpose in source_mandatory and not d.s_warehouse:
 				if self.from_warehouse:
 					d.s_warehouse = self.from_warehouse
@@ -331,6 +328,7 @@ class StockEntry(StockController):
 					d.t_warehouse = self.to_warehouse
 				else:
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
+
 
 			if self.purpose == "Manufacture":
 				if validate_for_manufacture:
@@ -345,6 +343,9 @@ class StockEntry(StockController):
 
 			if cstr(d.s_warehouse) == cstr(d.t_warehouse) and not self.purpose == "Material Transfer for Manufacture":
 				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
+
+			if not (d.s_warehouse or d.t_warehouse):
+				frappe.throw(_("Atleast one warehouse is mandatory"))
 
 	def validate_work_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"):
@@ -1185,7 +1186,7 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "required_qty", "consumed_qty", "transferred_qty"]
+			fields=["item_code", "source_warehouse", "required_qty", "consumed_qty", "transferred_qty"]
 			)
 
 		work_order_qty = wo.material_transferred_for_manufacturing or wo.qty
@@ -1205,7 +1206,7 @@ class StockEntry(StockController):
 			if qty > 0:
 				self.add_to_stock_entry_detail({
 					item.item_code: {
-						"from_warehouse": wo.wip_warehouse,
+						"from_warehouse": wo.wip_warehouse or item.source_warehouse,
 						"to_warehouse": "",
 						"qty": qty,
 						"item_name": item.item_name,

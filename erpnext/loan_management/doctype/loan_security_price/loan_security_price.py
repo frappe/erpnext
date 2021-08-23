@@ -40,12 +40,3 @@ def get_loan_security_price(loan_security, valid_time=None):
 		frappe.throw(_("No valid Loan Security Price found for {0}").format(frappe.bold(loan_security)))
 	else:
 		return loan_security_price
-
-
-
-
-
-
-
-
-
