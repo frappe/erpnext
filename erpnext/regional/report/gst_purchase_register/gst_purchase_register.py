@@ -21,4 +21,3 @@ def execute(filters=None):
 		'export_type',
 		'ecommerce_gstin'
 	])
-
