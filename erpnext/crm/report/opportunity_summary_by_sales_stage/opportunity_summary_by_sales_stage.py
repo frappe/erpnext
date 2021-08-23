@@ -147,22 +147,20 @@ class OpportunitySummaryBySalesStage(object):
 			}[self.filters.get('based_on')]
 
 			if self.filters.get("based_on") == "Opportunity Owner":
-				temp = json.loads(d.get(based_on))
+				if d.get(based_on) == '[]':
+					temp = ["Not Assigned"]
+				else:
+					temp = json.loads(d.get(based_on))
+
 				sales_stage = d.get('sales_stage')
 				count = d.get(data_based_on)
 				if temp:
 					if len(temp) > 1:
 						for value in temp:
 							self.insert_formatted_data(value,sales_stage,count)
-
 					else:
 						value = temp[0]
-						self.insert_formatted_data(value,sales_stage,count)
-
-				else:
-					value = "Not Assigned"
-					self.insert_formatted_data(value,sales_stage,count)
-						
+						self.insert_formatted_data(value,sales_stage,count)	
 			else:
 				value = d.get(based_on)
 				sales_stage = d.get('sales_stage')
