@@ -129,9 +129,12 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list, calculate_net_weight_packed_items
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list, calculate_net_weight_packed_items,\
+			validate_uom_for_packed_items
 		make_packing_list(self)
 		packed_items = calculate_net_weight_packed_items(self.items, self.packed_items)
+		if packed_items:
+			validate_uom_for_packed_items(self, packed_items)
 
 		if self._action != 'submit' and not self.is_return:
 			set_batch_nos(self, 'warehouse', throw=True)

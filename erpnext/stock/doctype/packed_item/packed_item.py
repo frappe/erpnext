@@ -6,11 +6,22 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe.utils import cstr, flt
+from frappe import _
 from erpnext.stock.get_item_details import get_item_details
 from frappe.model.document import Document
 
 class PackedItem(Document):
 	pass
+
+def validate_uom_for_packed_items(self, packed_items):
+	for item in self.items:
+		if packed_items[item.item_code]['valid']:
+			item.weight_per_unit = flt(packed_items[item.item_code]['weight'])
+			item.total_weight = flt(item.weight_per_unit) * flt(item.qty)
+		elif not packed_items[item.item_code]['valid']:
+			frappe.msgprint(msg = _("Could not calculate weight for {0} as it's items have different UoMs").format(item.item_code), alert=True, indicator='red')
+	from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
+	calculate_taxes_and_totals(self)
 
 def get_product_bundle_items(item_code):
 	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom, t1.description
@@ -19,7 +30,7 @@ def get_product_bundle_items(item_code):
 
 def get_packing_item_details(item, company):
 	return frappe.db.sql("""
-		select i.item_name, i.is_stock_item, i.description, i.stock_uom, id.default_warehouse
+		select i.item_name, i.is_stock_item, i.description, i.stock_uom, i.weight_per_unit, id.default_warehouse
 		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
 		where i.name = %s""",
 		(company, item), as_dict = 1)[0]
@@ -53,6 +64,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.parent_detail_docname = main_item_row.name
 	pi.uom = item.stock_uom
 	pi.qty = flt(qty)
+	pi.weight_per_unit = item.weight_per_unit
 	pi.conversion_factor = main_item_row.conversion_factor
 	if description and not pi.description:
 		pi.description = description
@@ -85,6 +97,7 @@ def make_packing_list(doc):
 				parent_items.append([d.item_code, d.name])
 
 	cleanup_packing_list(doc, parent_items)
+
 
 def cleanup_packing_list(doc, parent_items):
 	"""Remove all those child items which are no longer present in main item table"""
@@ -139,7 +152,7 @@ def calculate_net_weight_packed_items(item_details, packed_items):
 
 			if item.uom == items[item.parent_item]['uom']:
 				qty = item.qty/qty_details[item.parent_item]
-				items[item.parent_item]['weight'] += flt(item.weight_per_unit * qty)
+				items[item.parent_item]['weight'] += flt((item.weight_per_unit or 0) * qty)
 
 			else:
 				items[item.parent_item]['weight'] = 0
