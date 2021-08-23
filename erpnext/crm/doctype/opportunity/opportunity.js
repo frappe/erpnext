@@ -53,6 +53,13 @@ frappe.ui.form.on("Opportunity", {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
+	status:function(frm){
+		if (frm.doc.status == "Lost"){
+			frm.trigger('set_as_lost_dialog');
+		}
+	
+	},
+
 	customer_address: function(frm, cdt, cdn) {
 		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display', false);
 	},
@@ -91,11 +98,6 @@ frappe.ui.form.on("Opportunity", {
 			frm.add_custom_button(__('Quotation'),
 				cur_frm.cscript.create_quotation, __('Create'));
 
-			if(doc.status!=="Quotation") {
-				frm.add_custom_button(__('Lost'), () => {
-					frm.trigger('set_as_lost_dialog');
-				});
-			}
 		}
 
 		if(!frm.doc.__islocal && frm.perm[0].write && frm.doc.docstatus==0) {

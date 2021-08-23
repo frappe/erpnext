@@ -48,6 +48,8 @@
   "shipping_address",
   "company_address",
   "company_address_display",
+  "dispatch_address_name",
+  "dispatch_address",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -104,6 +106,7 @@
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
@@ -125,6 +128,7 @@
   "get_advances",
   "advances",
   "payment_schedule_section",
+  "ignore_default_payment_terms_template",
   "payment_terms_template",
   "payment_schedule",
   "payments_section",
@@ -195,7 +199,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "options": "fa fa-user"
+   "options": "fa fa-user",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -207,7 +213,9 @@
    "hide_seconds": 1,
    "label": "Title",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "bold": 1,
@@ -222,7 +230,9 @@
    "options": "ACC-SINV-.YYYY.-\nACC-SINV-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
-   "set_only_once": 1
+   "set_only_once": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "bold": 1,
@@ -236,7 +246,9 @@
    "oldfieldtype": "Link",
    "options": "Customer",
    "print_hide": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "bold": 1,
@@ -250,7 +262,9 @@
    "label": "Customer Name",
    "oldfieldname": "customer_name",
    "oldfieldtype": "Data",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "tax_id",
@@ -259,7 +273,9 @@
    "hide_seconds": 1,
    "label": "Tax Id",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "project",
@@ -271,7 +287,9 @@
    "oldfieldname": "project_name",
    "oldfieldtype": "Link",
    "options": "Project",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -282,7 +300,9 @@
    "label": "Include Payment (POS)",
    "oldfieldname": "is_pos",
    "oldfieldtype": "Check",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "is_pos",
@@ -292,7 +312,9 @@
    "hide_seconds": 1,
    "label": "POS Profile",
    "options": "POS Profile",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -302,14 +324,18 @@
    "hide_seconds": 1,
    "label": "Is Return (Credit Note)",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break1",
    "fieldtype": "Column Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "oldfieldtype": "Column Break"
+   "oldfieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "company",
@@ -323,7 +349,9 @@
    "options": "Company",
    "print_hide": 1,
    "remember_last_selected_value": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "cost_center",
@@ -331,7 +359,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "bold": 1,
@@ -345,7 +375,9 @@
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "posting_time",
@@ -356,7 +388,9 @@
    "no_copy": 1,
    "oldfieldname": "posting_time",
    "oldfieldtype": "Time",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -366,7 +400,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Edit Posting Date and Time",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "due_date",
@@ -376,7 +412,9 @@
    "label": "Payment Due Date",
    "no_copy": 1,
    "oldfieldname": "due_date",
-   "oldfieldtype": "Date"
+   "oldfieldtype": "Date",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "amended_from",
@@ -390,7 +428,9 @@
    "oldfieldtype": "Link",
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.return_against || doc.is_debit_note",
@@ -403,7 +443,9 @@
    "options": "Sales Invoice",
    "print_hide": 1,
    "read_only_depends_on": "eval:doc.is_return",
-   "search_index": 1
+   "search_index": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -412,7 +454,9 @@
    "fieldtype": "Check",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Update Billed Amount in Sales Order"
+   "label": "Update Billed Amount in Sales Order",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -421,7 +465,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Customer PO Details"
+   "label": "Customer PO Details",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -431,13 +477,17 @@
    "hide_seconds": 1,
    "label": "Customer's Purchase Order",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_23",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -445,7 +495,9 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Customer's Purchase Order Date"
+   "label": "Customer's Purchase Order Date",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -453,7 +505,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Address and Contact"
+   "label": "Address and Contact",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "customer_address",
@@ -462,7 +516,9 @@
    "hide_seconds": 1,
    "label": "Customer Address",
    "options": "Address",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "address_display",
@@ -470,7 +526,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Address",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "contact_person",
@@ -480,7 +538,9 @@
    "in_global_search": 1,
    "label": "Contact Person",
    "options": "Contact",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "contact_display",
@@ -488,7 +548,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Contact",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "contact_mobile",
@@ -497,7 +559,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Mobile No",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "contact_email",
@@ -508,7 +572,9 @@
    "label": "Contact Email",
    "options": "Email",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "territory",
@@ -517,13 +583,17 @@
    "hide_seconds": 1,
    "label": "Territory",
    "options": "Territory",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "col_break4",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "shipping_address_name",
@@ -532,7 +602,9 @@
    "hide_seconds": 1,
    "label": "Shipping Address Name",
    "options": "Address",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "shipping_address",
@@ -541,7 +613,9 @@
    "hide_seconds": 1,
    "label": "Shipping Address",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "company_address",
@@ -550,7 +624,9 @@
    "hide_seconds": 1,
    "label": "Company Address Name",
    "options": "Address",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "company_address_display",
@@ -560,7 +636,9 @@
    "hide_seconds": 1,
    "label": "Company Address",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -569,7 +647,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Currency and Price List"
+   "label": "Currency and Price List",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "currency",
@@ -581,7 +661,9 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "description": "Rate at which Customer Currency is converted to customer's base currency",
@@ -594,13 +676,17 @@
    "oldfieldtype": "Currency",
    "precision": "9",
    "print_hide": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break2",
    "fieldtype": "Column Break",
    "hide_days": 1,
    "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -613,7 +699,9 @@
    "oldfieldtype": "Select",
    "options": "Price List",
    "print_hide": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "price_list_currency",
@@ -624,7 +712,9 @@
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "description": "Rate at which Price list currency is converted to customer's base currency",
@@ -635,7 +725,9 @@
    "label": "Price List Exchange Rate",
    "precision": "9",
    "print_hide": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -646,14 +738,18 @@
    "label": "Ignore Pricing Rule",
    "no_copy": 1,
    "permlevel": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "sec_warehouse",
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Warehouse"
+   "label": "Warehouse",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "update_stock",
@@ -663,7 +759,9 @@
    "hide_seconds": 1,
    "label": "Source Warehouse",
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "items_section",
@@ -672,7 +770,9 @@
    "hide_seconds": 1,
    "label": "Items",
    "oldfieldtype": "Section Break",
-   "options": "fa fa-shopping-cart"
+   "options": "fa fa-shopping-cart",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -683,14 +783,18 @@
    "label": "Update Stock",
    "oldfieldname": "update_stock",
    "oldfieldtype": "Check",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_bulk_edit": 1,
@@ -702,14 +806,18 @@
    "oldfieldname": "entries",
    "oldfieldtype": "Table",
    "options": "Sales Invoice Item",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Pricing Rules"
+   "label": "Pricing Rules",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "pricing_rules",
@@ -718,7 +826,9 @@
    "hide_seconds": 1,
    "label": "Pricing Rule Detail",
    "options": "Pricing Rule Detail",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "packing_list",
@@ -727,7 +837,9 @@
    "hide_seconds": 1,
    "label": "Packing List",
    "options": "fa fa-suitcase",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "packed_items",
@@ -736,7 +848,9 @@
    "hide_seconds": 1,
    "label": "Packed Items",
    "options": "Packed Item",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "product_bundle_help",
@@ -744,7 +858,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Product Bundle Help",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -754,7 +870,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Time Sheet List"
+   "label": "Time Sheet List",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "timesheets",
@@ -763,7 +881,9 @@
    "hide_seconds": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -774,13 +894,17 @@
    "label": "Total Billing Amount",
    "options": "currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_30",
    "fieldtype": "Section Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total_qty",
@@ -788,7 +912,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Quantity",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_total",
@@ -798,7 +924,9 @@
    "label": "Total (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_net_total",
@@ -811,13 +939,17 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_32",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total",
@@ -826,7 +958,9 @@
    "hide_seconds": 1,
    "label": "Total",
    "options": "currency",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "net_total",
@@ -836,7 +970,9 @@
    "label": "Net Total",
    "options": "currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total_net_weight",
@@ -845,7 +981,9 @@
    "hide_seconds": 1,
    "label": "Total Net Weight",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "taxes_section",
@@ -853,7 +991,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "oldfieldtype": "Section Break",
-   "options": "fa fa-money"
+   "options": "fa fa-money",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "taxes_and_charges",
@@ -864,13 +1004,17 @@
    "oldfieldname": "charge",
    "oldfieldtype": "Link",
    "options": "Sales Taxes and Charges Template",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_38",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "shipping_rule",
@@ -880,7 +1024,9 @@
    "label": "Shipping Rule",
    "oldfieldtype": "Button",
    "options": "Shipping Rule",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "tax_category",
@@ -889,13 +1035,17 @@
    "hide_seconds": 1,
    "label": "Tax Category",
    "options": "Tax Category",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_40",
    "fieldtype": "Section Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "taxes",
@@ -905,7 +1055,9 @@
    "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
-   "options": "Sales Taxes and Charges"
+   "options": "Sales Taxes and Charges",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -913,7 +1065,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Tax Breakup"
+   "label": "Tax Breakup",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "other_charges_calculation",
@@ -924,13 +1078,17 @@
    "no_copy": 1,
    "oldfieldtype": "HTML",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_43",
    "fieldtype": "Section Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_total_taxes_and_charges",
@@ -942,13 +1100,17 @@
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_47",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total_taxes_and_charges",
@@ -958,7 +1120,9 @@
    "label": "Total Taxes and Charges",
    "options": "currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -966,7 +1130,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Loyalty Points Redemption"
+   "label": "Loyalty Points Redemption",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "redeem_loyalty_points",
@@ -976,7 +1142,9 @@
    "hide_seconds": 1,
    "label": "Loyalty Points",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "redeem_loyalty_points",
@@ -988,7 +1156,9 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -998,13 +1168,17 @@
    "hide_seconds": 1,
    "label": "Redeem Loyalty Points",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_77",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fetch_from": "customer.loyalty_program",
@@ -1016,7 +1190,9 @@
    "no_copy": 1,
    "options": "Loyalty Program",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "redeem_loyalty_points",
@@ -1026,7 +1202,9 @@
    "hide_seconds": 1,
    "label": "Redemption Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "redeem_loyalty_points",
@@ -1036,7 +1214,9 @@
    "hide_seconds": 1,
    "label": "Redemption Cost Center",
    "no_copy": 1,
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1045,7 +1225,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Additional Discount"
+   "label": "Additional Discount",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "Grand Total",
@@ -1055,7 +1237,9 @@
    "hide_seconds": 1,
    "label": "Apply Additional Discount On",
    "options": "\nGrand Total\nNet Total",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_discount_amount",
@@ -1065,13 +1249,17 @@
    "label": "Additional Discount Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_51",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "additional_discount_percentage",
@@ -1079,7 +1267,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Additional Discount Percentage",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "discount_amount",
@@ -1088,7 +1278,9 @@
    "hide_seconds": 1,
    "label": "Additional Discount Amount",
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "totals",
@@ -1097,7 +1289,9 @@
    "hide_seconds": 1,
    "oldfieldtype": "Section Break",
    "options": "fa fa-money",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_grand_total",
@@ -1110,7 +1304,9 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:!doc.disable_rounded_total",
@@ -1122,7 +1318,9 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:!doc.disable_rounded_total",
@@ -1135,7 +1333,9 @@
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "description": "In Words will be visible once you save the Sales Invoice.",
@@ -1148,7 +1348,9 @@
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break5",
@@ -1157,6 +1359,8 @@
    "hide_seconds": 1,
    "oldfieldtype": "Column Break",
    "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -1171,7 +1375,9 @@
    "oldfieldtype": "Currency",
    "options": "currency",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:!doc.disable_rounded_total",
@@ -1183,7 +1389,9 @@
    "no_copy": 1,
    "options": "currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "bold": 1,
@@ -1196,7 +1404,9 @@
    "oldfieldname": "rounded_total_export",
    "oldfieldtype": "Currency",
    "options": "currency",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "in_words",
@@ -1208,7 +1418,9 @@
    "oldfieldname": "in_words_export",
    "oldfieldtype": "Data",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total_advance",
@@ -1220,7 +1432,9 @@
    "oldfieldtype": "Currency",
    "options": "party_account_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "outstanding_amount",
@@ -1233,7 +1447,9 @@
    "oldfieldtype": "Currency",
    "options": "party_account_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1245,7 +1461,9 @@
    "label": "Advance Payments",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -1253,7 +1471,9 @@
    "fieldtype": "Check",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Allocate Advances Automatically (FIFO)"
+   "label": "Allocate Advances Automatically (FIFO)",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:!doc.allocate_advances_automatically",
@@ -1262,7 +1482,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Get Advances Received",
-   "options": "set_advances"
+   "options": "set_advances",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "advances",
@@ -1273,7 +1495,9 @@
    "oldfieldname": "advance_adjustment_details",
    "oldfieldtype": "Table",
    "options": "Sales Invoice Advance",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1282,7 +1506,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Payment Terms"
+   "label": "Payment Terms",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:(!doc.is_pos && !doc.is_return)",
@@ -1293,7 +1519,9 @@
    "label": "Payment Terms Template",
    "no_copy": 1,
    "options": "Payment Terms Template",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:(!doc.is_pos && !doc.is_return)",
@@ -1304,7 +1532,9 @@
    "label": "Payment Schedule",
    "no_copy": 1,
    "options": "Payment Schedule",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)",
@@ -1313,7 +1543,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Payments",
-   "options": "fa fa-money"
+   "options": "fa fa-money",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "is_pos",
@@ -1326,7 +1558,9 @@
    "oldfieldname": "cash_bank_account",
    "oldfieldtype": "Link",
    "options": "Account",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.is_pos===1",
@@ -1336,13 +1570,17 @@
    "hide_seconds": 1,
    "label": "Sales Invoice Payment",
    "options": "Sales Invoice Payment",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_84",
    "fieldtype": "Section Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_paid_amount",
@@ -1353,13 +1591,17 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_86",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval: doc.is_pos || doc.redeem_loyalty_points",
@@ -1373,13 +1615,17 @@
    "oldfieldtype": "Currency",
    "options": "currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_88",
    "fieldtype": "Section Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "is_pos",
@@ -1391,13 +1637,17 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_90",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "is_pos",
@@ -1408,7 +1658,9 @@
    "label": "Change Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "is_pos",
@@ -1418,7 +1670,9 @@
    "hide_seconds": 1,
    "label": "Account for Change Amount",
    "options": "Account",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1429,6 +1683,8 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Write Off",
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -1439,7 +1695,9 @@
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_write_off_amount",
@@ -1450,7 +1708,9 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -1460,13 +1720,17 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Write Off Outstanding Amount",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_74",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "write_off_account",
@@ -1475,7 +1739,9 @@
    "hide_seconds": 1,
    "label": "Write Off Account",
    "options": "Account",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "write_off_cost_center",
@@ -1484,7 +1750,9 @@
    "hide_seconds": 1,
    "label": "Write Off Cost Center",
    "options": "Cost Center",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1494,7 +1762,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Terms and Conditions",
-   "oldfieldtype": "Section Break"
+   "oldfieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "tc_name",
@@ -1505,7 +1775,9 @@
    "oldfieldname": "tc_name",
    "oldfieldtype": "Link",
    "options": "Terms and Conditions",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "terms",
@@ -1514,7 +1786,9 @@
    "hide_seconds": 1,
    "label": "Terms and Conditions Details",
    "oldfieldname": "terms",
-   "oldfieldtype": "Text Editor"
+   "oldfieldtype": "Text Editor",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1522,7 +1796,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Printing Settings"
+   "label": "Printing Settings",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1534,7 +1810,9 @@
    "oldfieldname": "letter_head",
    "oldfieldtype": "Select",
    "options": "Letter Head",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1544,7 +1822,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Group same items",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "language",
@@ -1553,13 +1833,17 @@
    "hide_seconds": 1,
    "label": "Print Language",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_84",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1573,7 +1857,9 @@
    "oldfieldtype": "Link",
    "options": "Print Heading",
    "print_hide": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1582,7 +1868,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "More Information"
+   "label": "More Information",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "inter_company_invoice_reference",
@@ -1591,7 +1879,9 @@
    "hide_seconds": 1,
    "label": "Inter Company Invoice Reference",
    "options": "Purchase Invoice",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "customer_group",
@@ -1601,7 +1891,9 @@
    "hide_seconds": 1,
    "label": "Customer Group",
    "options": "Customer Group",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "campaign",
@@ -1612,7 +1904,9 @@
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
    "options": "Campaign",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -1622,13 +1916,17 @@
    "hide_seconds": 1,
    "label": "Is Discounted",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "col_break23",
    "fieldtype": "Column Break",
    "hide_days": 1,
    "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -1642,7 +1940,9 @@
    "no_copy": 1,
    "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "source",
@@ -1653,7 +1953,9 @@
    "oldfieldname": "source",
    "oldfieldtype": "Select",
    "options": "Lead Source",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1664,7 +1966,9 @@
    "label": "Accounting Details",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "debit_to",
@@ -1677,7 +1981,9 @@
    "options": "Account",
    "print_hide": 1,
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "party_account_currency",
@@ -1689,7 +1995,9 @@
    "no_copy": 1,
    "options": "Currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "No",
@@ -1701,7 +2009,9 @@
    "oldfieldname": "is_opening",
    "oldfieldtype": "Select",
    "options": "No\nYes",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "c_form_applicable",
@@ -1711,7 +2021,9 @@
    "label": "C-Form Applicable",
    "no_copy": 1,
    "options": "No\nYes",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "c_form_no",
@@ -1722,7 +2034,9 @@
    "no_copy": 1,
    "options": "C-Form",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break8",
@@ -1730,7 +2044,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "oldfieldtype": "Column Break",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "remarks",
@@ -1741,7 +2057,9 @@
    "no_copy": 1,
    "oldfieldname": "remarks",
    "oldfieldtype": "Text",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1753,7 +2071,9 @@
    "label": "Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "sales_partner",
@@ -1764,7 +2084,9 @@
    "oldfieldname": "sales_partner",
    "oldfieldtype": "Link",
    "options": "Sales Partner",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break10",
@@ -1773,6 +2095,8 @@
    "hide_seconds": 1,
    "oldfieldtype": "Column Break",
    "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -1783,7 +2107,9 @@
    "label": "Commission Rate (%)",
    "oldfieldname": "commission_rate",
    "oldfieldtype": "Currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total_commission",
@@ -1794,7 +2120,9 @@
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1804,7 +2132,9 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Sales Team",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1816,7 +2146,9 @@
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
    "options": "Sales Team",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1824,7 +2156,9 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Subscription Section"
+   "label": "Subscription Section",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1834,7 +2168,9 @@
    "hide_seconds": 1,
    "label": "From Date",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1844,13 +2180,17 @@
    "hide_seconds": 1,
    "label": "To Date",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_140",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1862,7 +2202,9 @@
    "no_copy": 1,
    "options": "Auto Repeat",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -1871,7 +2213,9 @@
    "fieldtype": "Button",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Update Auto Repeat Reference"
+   "label": "Update Auto Repeat Reference",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "against_income_account",
@@ -1884,7 +2228,9 @@
    "oldfieldname": "against_income_account",
    "oldfieldtype": "Small Text",
    "print_hide": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
@@ -1892,13 +2238,17 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Accounting Dimensions"
+   "label": "Accounting Dimensions",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -1906,7 +2256,9 @@
    "fieldname": "is_consolidated",
    "fieldtype": "Check",
    "label": "Is Consolidated",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -1916,14 +2268,18 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Is Internal Customer",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fetch_from": "company.tax_id",
    "fieldname": "company_tax_id",
    "fieldtype": "Data",
    "label": "Company Tax ID",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.is_internal_customer",
@@ -1931,7 +2287,9 @@
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Profit / Loss Account",
-   "options": "Account"
+   "options": "Account",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.is_internal_customer",
@@ -1941,31 +2299,72 @@
    "fieldtype": "Link",
    "label": "Represents Company",
    "options": "Company",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_55",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval: doc.is_internal_customer && doc.update_stock",
    "fieldname": "set_target_warehouse",
    "fieldtype": "Link",
    "label": "Set Target Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "is_debit_note",
    "fieldtype": "Check",
-   "label": "Is Debit Note"
+   "label": "Is Debit Note",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
-   "label": "Disable Rounded Total"
+   "label": "Disable Rounded Total",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_default_payment_terms_template",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ignore Default Payment Terms Template",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address_name",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Name",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address",
+   "fieldtype": "Small Text",
+   "label": "Dispatch Address",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -1978,7 +2377,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-05-20 22:48:33.988881",
+ "modified": "2021-08-07 23:02:20.445127",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
