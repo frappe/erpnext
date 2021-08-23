@@ -754,8 +754,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 		});
 		this.frm.refresh_fields();
-
-		this.calculate_paid_amount();
 	}
 
 	set_default_payment(total_amount_to_pay, update_paid_amount) {
