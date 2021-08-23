@@ -202,7 +202,7 @@ def apply_pricing_rule(args, doc=None):
 	query_items = frappe.get_all('Item', fields=['item_code','has_serial_no'], filters=[['item_code','in',item_code_list]],as_list=1)
 	serialized_items = dict()
 	for item_code, val in query_items:
-		serialized_items.setdefault(iitem_code, val)
+		serialized_items.setdefault(item_code, val)
 	
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
