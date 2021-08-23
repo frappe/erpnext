@@ -373,20 +373,21 @@ class SalarySlip(TransactionBase):
 			days = abs(start_date-end_date).days
 			num_months=flt(days/7,precision=0)
 			return num_months
-		a=self.end_date
-		if self.payroll_frequency=="Monthly":
-			if not doc.start_date < lst.date_of_joining <= doc.end_date:
-				end_date = getdate(a)
-				start_date = getdate(b)
-				num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
-				return num_months
-		if self.payroll_frequency=="Weekly":
-			if not doc.start_date < lst.date_of_joining <= doc.end_date:
-				end_date = getdate(a)
-				start_date = getdate(b)
-				days = abs(start_date-end_date).days
-				num_months=flt(days/7,precision=0)
-				return num_months
+		# a=self.end_date
+		# b = doc.start_date
+		# if self.payroll_frequency=="Monthly":
+		# 	if not doc.start_date < lst.date_of_joining <= doc.end_date:
+		# 		end_date = getdate(a)
+		# 		start_date = getdate(b)
+		# 		num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+		# 		return num_months
+		# if self.payroll_frequency=="Weekly":
+		# 	if not doc.start_date < lst.date_of_joining <= doc.end_date:
+		# 		end_date = getdate(a)
+		# 		start_date = getdate(b)
+		# 		days = abs(start_date-end_date).days
+		# 		num_months=flt(days/7,precision=0)
+		# 		return num_months
 			
 
 
