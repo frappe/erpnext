@@ -17,8 +17,11 @@ template = frappe._dict({
 	"opening_qty": 0.0, "opening_val": 0.0,
 	"in_qty": 0.0, "in_val": 0.0,
 	"purchase_qty": 0.0, "purchase_val": 0.0,
+	"purchase_return_qty": 0.0, "purchase_return_val": 0.0,
 	"out_qty": 0.0, "out_val": 0.0,
 	"sales_qty": 0.0, "sales_val": 0.0,
+	"sales_return_qty": 0.0, "sales_return_val": 0.0,
+	"reconcile_qty": 0.0, "reconcile_val": 0.0,
 	"bal_qty": 0.0, "bal_val": 0.0,
 	"ordered_qty": 0.0, "projected_qty": 0.0,
 	"val_rate": 0.0
@@ -85,9 +88,12 @@ def execute(filters=None):
 				"opening_qty": qty_dict.opening_qty * alt_uom_size,
 				"in_qty": qty_dict.in_qty * alt_uom_size,
 				"purchase_qty": qty_dict.purchase_qty * alt_uom_size,
+				"purchase_return_qty": qty_dict.purchase_return_qty * alt_uom_size,
 				"out_qty": qty_dict.out_qty * alt_uom_size,
 				"sales_qty": qty_dict.sales_qty * alt_uom_size,
+				"sales_return_qty": qty_dict.sales_return_qty * alt_uom_size,
 				"bal_qty": qty_dict.bal_qty * alt_uom_size,
+				"reconcile_qty": qty_dict.reconcile_qty * alt_uom_size,
 				"reorder_level": item_reorder_level * alt_uom_size,
 				"reorder_qty": item_reorder_qty * alt_uom_size,
 				"ordered_qty": qty_dict.ordered_qty * alt_uom_size,
@@ -103,9 +109,12 @@ def execute(filters=None):
 					"opening_val": qty_dict.opening_val,
 					"in_val": qty_dict.in_val,
 					"purchase_val": qty_dict.purchase_val,
+					"purchase_return_val": qty_dict.purchase_return_val,
 					"out_val": qty_dict.out_val,
 					"sales_val": qty_dict.sales_val,
+					"sales_return_val": qty_dict.sales_return_val,
 					"bal_val": qty_dict.bal_val,
+					"reconcile_val": qty_dict.reconcile_val,
 					"val_rate": qty_dict.val_rate / alt_uom_size,
 				})
 
@@ -150,10 +159,16 @@ def get_columns(filters, show_amounts=True, show_item_name=True):
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Currency", "width": 90, "is_value": True},
 		{"label": _("Avg Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 100, "convertible": "rate", "is_value": True},
-		{"label": _("Purchase Qty"), "fieldname": "purchase_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-		{"label": _("Purchase Value"), "fieldname": "purchase_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("Purchase Qty"), "fieldname": "purchase_qty", "fieldtype": "Float", "width": 105, "convertible": "qty"},
+		{"label": _("Purchase Value"), "fieldname": "purchase_val", "fieldtype": "Currency", "width": 105, "is_value": True},
 		{"label": _("Sales Qty"), "fieldname": "sales_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Sales Value"), "fieldname": "sales_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("Purchase Return Qty"), "fieldname": "purchase_return_qty", "fieldtype": "Float", "width": 140, "convertible": "qty"},
+		{"label": _("Purchase Return Value"), "fieldname": "purchase_return_val", "fieldtype": "Currency", "width": 140, "is_value": True},
+		{"label": _("Sales Return Qty"), "fieldname": "sales_return_qty", "fieldtype": "Float", "width": 120, "convertible": "qty"},
+		{"label": _("Sales Return Value"), "fieldname": "sales_return_val", "fieldtype": "Currency", "width": 130, "is_value": True},
+		{"label": _("Reconciled Qty"), "fieldname": "reconcile_qty", "fieldtype": "Float", "width": 110, "convertible": "qty"},
+		{"label": _("Reconciled Value"), "fieldname": "reconcile_val", "fieldtype": "Currency", "width": 120, "is_value": True},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
@@ -260,11 +275,22 @@ def get_item_warehouse_map(filters, sle, ordered_qty_map=None):
 				qty_dict.out_val += abs(value_diff)
 
 			if d.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
-				qty_dict.purchase_qty += qty_diff
-				qty_dict.purchase_val += value_diff
+				if qty_diff > 0:
+					qty_dict.purchase_qty += qty_diff
+					qty_dict.purchase_val += value_diff
+				else:
+					qty_dict.purchase_return_qty -= qty_diff
+					qty_dict.purchase_return_val -= value_diff
 			elif d.voucher_type in ["Delivery Note", "Sales Invoice"]:
-				qty_dict.sales_qty -= qty_diff
-				qty_dict.sales_val -= value_diff
+				if qty_diff < 0:
+					qty_dict.sales_qty -= qty_diff
+					qty_dict.sales_val -= value_diff
+				else:
+					qty_dict.sales_return_qty += qty_diff
+					qty_dict.sales_return_val += value_diff
+			elif d.voucher_type == "Stock Reconciliation":
+				qty_dict.reconcile_qty += qty_diff
+				qty_dict.reconcile_val += value_diff
 
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
