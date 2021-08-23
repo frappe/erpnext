@@ -1,8 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from math import inf
-import re
 import frappe
 import pandas
 from frappe import _
