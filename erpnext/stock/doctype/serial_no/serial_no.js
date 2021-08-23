@@ -22,5 +22,16 @@ cur_frm.cscript.onload = function() {
 };
 
 frappe.ui.form.on("Serial No", "refresh", function(frm) {
+	if(!frm.is_new()) {
+		frm.add_custom_button(__("View Ledger"), () => {
+			frappe.route_options = {
+				serial_no: frm.doc.name,
+				from_date: frappe.defaults.get_user_default("year_start_date"),
+				to_date: frappe.defaults.get_user_default("year_end_date")
+			};
+			frappe.set_route("query-report", "Stock Ledger");
+		});
+	}
+
 	frm.toggle_enable("item_code", frm.doc.__islocal);
 });

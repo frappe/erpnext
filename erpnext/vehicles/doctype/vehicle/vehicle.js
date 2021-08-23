@@ -39,6 +39,17 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 	refresh: function () {
 		erpnext.hide_company();
 
+		if(!this.frm.is_new()) {
+			this.frm.add_custom_button(__("View Ledger"), () => {
+				frappe.route_options = {
+					serial_no: this.frm.doc.name,
+					from_date: frappe.defaults.get_user_default("year_start_date"),
+					to_date: frappe.defaults.get_user_default("year_end_date")
+				};
+				frappe.set_route("query-report", "Stock Ledger");
+			});
+		}
+
 		const cant_change_fields = (this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields) || {};
 		$.each(cant_change_fields, (fieldname, cant_change) => {
 			this.frm.set_df_property(fieldname, 'read_only', cint(cant_change));
