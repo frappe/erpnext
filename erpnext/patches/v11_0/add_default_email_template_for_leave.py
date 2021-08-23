@@ -27,4 +27,3 @@ def execute():
 			'subject': _("Leave Status Notification"),
 			'owner': frappe.session.user,
 		}).insert(ignore_permissions=True)
-

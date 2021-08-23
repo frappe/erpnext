@@ -692,6 +692,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
+   "options": "Barcode",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode"
@@ -1934,6 +1935,7 @@
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Profit / Loss Account",
    "options": "Account"
   },
@@ -2012,7 +2014,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-17 19:00:32.230701",
+ "modified": "2021-08-17 20:16:12.737743",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
