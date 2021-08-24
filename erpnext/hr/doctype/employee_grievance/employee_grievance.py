@@ -12,4 +12,3 @@ class EmployeeGrievance(Document):
 				bold("Invalid"),
 				bold("Resolved"))
 			)
-

@@ -217,4 +217,3 @@ def notify_failure(log):
 		sendmail_to_system_managers(_('[Important] [ERPNext] Razorpay donation webhook failed, please check.'), content)
 	except Exception:
 		pass
-

@@ -19,7 +19,7 @@ frappe.ui.form.on('Social Media Post', {
 	refresh: function(frm){
         if (frm.doc.docstatus === 1){
             if (frm.doc.post_status != "Posted"){
-                add_post_btn(frm); 
+                add_post_btn(frm);
             }
             else if (frm.doc.post_status == "Posted"){
                 frm.set_df_property('sheduled_time', 'read_only', 1);
@@ -63,5 +63,5 @@ var post = function(frm){
             frappe.dom.unfreeze();
         }
     })
-    
+
 }
