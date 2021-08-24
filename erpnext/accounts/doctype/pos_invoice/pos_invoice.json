@@ -99,6 +99,7 @@
   "loyalty_redemption_account",
   "loyalty_redemption_cost_center",
   "section_break_49",
+  "coupon_code",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_51",
@@ -1550,6 +1551,14 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "depends_on": "coupon_code",
+   "fieldname": "coupon_code",
+   "fieldtype": "Link",
+   "label": "Coupon Code",
+   "options": "Coupon Code",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
