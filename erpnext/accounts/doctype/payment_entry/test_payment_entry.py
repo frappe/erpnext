@@ -107,7 +107,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-		pe.target_exchange_rate = 50
+		pe.source_exchange_rate = 50
 		pe.insert()
 		pe.submit()
 
@@ -154,7 +154,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-		pe.target_exchange_rate = 50
+		pe.source_exchange_rate = 50
 		pe.insert()
 		pe.submit()
 
@@ -491,7 +491,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-		pe.target_exchange_rate = 55
+		pe.source_exchange_rate = 55
 
 		pe.append("deductions", {
 			"account": "_Test Exchange Gain/Loss - _TC",

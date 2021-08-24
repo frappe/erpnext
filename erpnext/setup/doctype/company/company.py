@@ -393,6 +393,10 @@ class Company(NestedSet):
 		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
 		frappe.db.sql("delete from `tabItem Tax Template` where company=%s", self.name)
 
+		# delete Process Deferred Accounts if no GL Entry found
+		if not frappe.db.get_value('GL Entry', {'company': self.name}):
+			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
+
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
 	kwargs = dict(queue="long", company=company, old=old, new=new)
