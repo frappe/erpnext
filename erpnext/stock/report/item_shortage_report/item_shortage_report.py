@@ -158,5 +158,3 @@ def get_columns():
 	]
 
 	return columns
-
-

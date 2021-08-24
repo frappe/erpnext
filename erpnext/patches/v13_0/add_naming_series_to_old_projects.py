@@ -10,4 +10,3 @@ def execute():
 			naming_series = 'PROJ-.####'
 		WHERE
 			naming_series is NULL""")
-
