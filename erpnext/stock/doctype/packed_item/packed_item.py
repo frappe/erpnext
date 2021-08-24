@@ -137,6 +137,11 @@ def update_parent_item_price(doc, parent_items_doctype, parent_item_code, bundle
 	current_parent_item_price = frappe.db.get_value(parent_items_doctype, parent_item_doc_name, 'amount')
 	if current_parent_item_price != bundle_price:
 		frappe.db.set_value(parent_items_doctype, parent_item_doc_name, 'amount', bundle_price)
+		update_parent_item_rate(parent_items_doctype, parent_item_doc_name, bundle_price)
+
+def update_parent_item_rate(parent_items_doctype, parent_item_doc_name, bundle_price):
+	parent_item_qty = frappe.db.get_value(parent_items_doctype, parent_item_doc_name, 'qty')
+	frappe.db.set_value(parent_items_doctype, parent_item_doc_name, 'rate', (bundle_price/parent_item_qty))
 
 @frappe.whitelist()
 def get_items_from_product_bundle(args):
