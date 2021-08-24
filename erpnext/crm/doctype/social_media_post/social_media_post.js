@@ -16,11 +16,11 @@ frappe.ui.form.on('Social Media Post', {
 	},
 
 	text: function(frm) {
-        if (frm.doc.test) {
-            frm.set_df_property('text', 'description', `${frm.doc.text.length}/280`);
-            frm.refresh_field('text');
-            frm.trigger('validate_tweet_length');
-        }
+		if (frm.doc.text) {
+			frm.set_df_property('text', 'description', `${frm.doc.text.length}/280`);
+			frm.refresh_field('text');
+			frm.trigger('validate_tweet_length');
+		}
 	},
 
 	validate_tweet_length: function(frm) {
