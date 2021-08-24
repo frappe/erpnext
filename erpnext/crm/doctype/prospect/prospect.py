@@ -6,7 +6,26 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 class Prospect(Document):
-	pass
+	def validate(self):
+		self.link_with_lead_contact_and_address()
+	
+	def link_with_lead_contact_and_address(self):
+		for row in self.prospect_lead:
+			links = frappe.get_all('Dynamic Link', filters={'link_doctype': 'Lead', 'link_name': row.lead}, fields=['parent', 'parenttype'])
+			for link in links:
+				linked_doc = frappe.get_doc(link['parenttype'], link['parent'])
+				exists = False
+
+				for d in linked_doc.get('links'):
+					if d.link_doctype == self.doctype and d.link_name == self.name:
+						exists = True
+
+				if not exists:
+					linked_doc.append('links', {
+						'link_doctype': self.doctype,
+						'link_name': self.name
+					})
+					linked_doc.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):

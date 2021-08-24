@@ -191,16 +191,6 @@ class Lead(SellingController):
 		return contact
 
 @frappe.whitelist()
-def make_prospect(source_name, target_doc=None, leads=None):
-	print("``````````````````````````")
-	print(source_name)
-	print("``````````````````````````")
-	print(target_doc)
-	print("``````````````````````````")
-	print(leads)
-	print("``````````````````````````")
-
-@frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	return _make_customer(source_name, target_doc)
 
@@ -269,6 +259,15 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
+
+	return target_doc
+
+@frappe.whitelist()
+def make_prospect(source_name, target_doc=None):
+	target_doc = get_mapped_doc("Lead", source_name,
+		{"Lead": {
+			"doctype": "Prospect",
+		}}, target_doc)
 
 	return target_doc
 
