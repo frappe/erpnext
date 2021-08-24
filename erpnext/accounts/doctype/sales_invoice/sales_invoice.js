@@ -450,14 +450,14 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	currency() {
+		var me = this;
 		super.currency();
-		console.log(this.frm);
 		if (this.frm.doc.timesheets) {
 			this.frm.doc.timesheets.forEach((d) => {
 				let row = frappe.get_doc(d.doctype, d.name)
-				set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
+				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
 			});
-			calculate_total_billing_amount(cur_frm);
+			calculate_total_billing_amount(this.frm);
 		}
 	}
 };
