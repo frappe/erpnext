@@ -659,7 +659,6 @@ frappe.ui.form.on("BOM", "with_operations", function(frm) {
 	if(!cint(frm.doc.with_operations)) {
 		frm.set_value("operations", []);
 	}
-	toggle_operations(frm);
 });
 
 frappe.ui.form.on("BOM Scrap Item", {
