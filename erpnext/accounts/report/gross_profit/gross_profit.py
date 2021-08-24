@@ -192,11 +192,12 @@ class GrossProfitGenerator(object):
 					buying_amount = 0
 
 			# get buying rate
-			if row.qty:
-				row.buying_rate = flt(row.buying_amount / row.qty, self.float_precision)
-				row.base_rate = flt(row.base_amount / row.qty, self.float_precision)
+			if flt(row.qty):
+				row.buying_rate = flt(row.buying_amount / flt(row.qty), self.float_precision)
+				row.base_rate = flt(row.base_amount / flt(row.qty), self.float_precision)
 			else:
-				row.buying_rate, row.base_rate = 0.0, 0.0
+				if self.filters.get("group_by") != "Invoice":
+					row.buying_rate, row.base_rate = 0.0, 0.0
 
 			# calculate gross profit
 			row.gross_profit = flt(row.base_amount - row.buying_amount, self.currency_precision)
@@ -219,7 +220,7 @@ class GrossProfitGenerator(object):
 					if i==0:
 						new_row = row
 					else:
-						new_row.qty += row.qty
+						new_row.qty += flt(row.qty)
 						new_row.buying_amount += flt(row.buying_amount, self.currency_precision)
 						new_row.base_amount += flt(row.base_amount, self.currency_precision)
 				new_row = self.set_average_rate(new_row)
@@ -230,10 +231,10 @@ class GrossProfitGenerator(object):
 							and row.item_code in self.returned_invoices[row.parent]:
 						returned_item_rows = self.returned_invoices[row.parent][row.item_code]
 						for returned_item_row in returned_item_rows:
-							row.qty += returned_item_row.qty
+							row.qty += flt(returned_item_row.qty)
 							row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
-						row.buying_amount = flt(row.qty * row.buying_rate, self.currency_precision)
-					if row.qty or row.base_amount:
+						row.buying_amount = flt(flt(row.qty) * row.buying_rate, self.currency_precision)
+					if flt(row.qty) or row.base_amount:
 						row = self.set_average_rate(row)
 						self.grouped_data.append(row)
 
@@ -241,8 +242,8 @@ class GrossProfitGenerator(object):
 		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, self.currency_precision)
 		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), self.currency_precision) \
 			if new_row.base_amount else 0
-		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, self.float_precision) if new_row.qty else 0
-		new_row.base_rate = flt(new_row.base_amount / new_row.qty, self.float_precision) if new_row.qty else 0
+		new_row.buying_rate = flt(new_row.buying_amount / flt(new_row.qty), self.float_precision) if flt(new_row.qty) else 0
+		new_row.base_rate = flt(new_row.base_amount / flt(new_row.qty), self.float_precision) if flt(new_row.qty) else 0
 
 		return new_row
 
@@ -423,11 +424,12 @@ class GrossProfitGenerator(object):
 					'brand': None, 
 					'dn_detail': None, 
 					'delivery_note': None, 
-					'qty': 0, 
+					'qty': None, 
 					'item_row': None, 
 					'is_return': row.is_return, 
 					'cost_center': row.cost_center,
-					'base_net_amount': 0
+					'base_net_amount': 0,
+					'base_rate': None
 				})
 
 				self.si_list.insert(index, invoice)
@@ -445,30 +447,8 @@ class GrossProfitGenerator(object):
 					
 					# self.si_list[parents_index-1].base_net_amount += row.base_net_amount
 
-					# print("\n\n\n\n\nRow Details: ", index, ". ", row.parent, ": ", row.base_net_amount)
-					# print("Ind details: ", parents_index-1, ": ", self.si_list[parents_index-1].base_net_amount, "\n\n\n")
-
-				if frappe.db.exists('Product Bundle', row.item_code):
-					self.add_bundle_items(row, index)
-
-		base_net_amount = 0
-		for row in reversed(self.si_list):
-			if row.indent == 1.0:
-				base_net_amount += row.get('base_net_amount')
-
-			elif row.indent == 0.0:
-				row.base_net_amount = base_net_amount				
-				base_net_amount = 0
-
-		# print("\n"*10)
-		# for index, row in enumerate(self.si_list):
-		# 	if row.indent == 0.0:
-		# 		print(index, ". ", row.parent, ": ", row.base_net_amount)
-		# 	elif row.indent == 1.0:
-		# 		print("\t", index, ". ", row.parent, ": ", row.base_net_amount)
-		# 	elif row.indent == 2.0:
-		# 		print("\t\t", index, ". ", row.parent, ": ", row.base_net_amount)
-		# 		print("")
+					if frappe.db.exists('Product Bundle', row.item_code):
+						self.add_bundle_items(row, index)
 			
 	def add_bundle_items(self, product_bundle, index):
 		bundle_items = frappe.get_all(
@@ -497,7 +477,7 @@ class GrossProfitGenerator(object):
 				'brand': frappe.db.get_value('Item', item.item_code, 'brand'), 
 				'dn_detail': product_bundle.dn_detail, 
 				'delivery_note': product_bundle.delivery_note, 
-				'qty': (product_bundle.qty * item.qty), 
+				'qty': (flt(product_bundle.qty) * flt(item.qty)), 
 				'item_row': None, 
 				'is_return': product_bundle.is_return, 
 				'cost_center': product_bundle.cost_center
