@@ -58,6 +58,7 @@ class StockEntry(StockController):
 
 		self.validate_posting_time()
 		self.validate_purpose()
+		self.set_title()
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.validate_qty()
@@ -1607,6 +1608,14 @@ class StockEntry(StockController):
 				used_serial_nos.extend(get_serial_nos(row.serial_no))
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
+
+	def set_title(self):
+		if frappe.flags.in_import and self.title:
+			# Allow updating title during data import/update
+			return
+
+		self.title = self.purpose
+
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
