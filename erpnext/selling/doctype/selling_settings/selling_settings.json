@@ -23,7 +23,7 @@
   "maintain_same_rate_action",
   "editable_price_list_rate",
   "validate_selling_price",
-  "calculate_product_bundle_price_based_on_child_items_rates",
+  "editable_bundle_item_rates",
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
@@ -195,7 +195,7 @@
   },
   {
    "default": "0",
-   "fieldname": "calculate_product_bundle_price_based_on_child_items_rates",
+   "fieldname": "editable_bundle_item_rates",
    "fieldtype": "Check",
    "label": "Calculate Product Bundle Price based on Child Items' Rates"
   }
@@ -205,7 +205,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-08-24 22:02:23.949616",
+ "modified": "2021-08-24 22:08:34.470897",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
