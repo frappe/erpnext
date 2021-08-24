@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe.utils import getdate
 import unittest
 
 test_dependencies = ['Employee Onboarding']
@@ -37,6 +38,7 @@ def create_employee_separation():
 	employee = frappe.db.get_value('Employee', {'status': 'Active'})
 	separation = frappe.new_doc('Employee Separation')
 	separation.employee = employee
+	separation.boarding_begins_on = getdate()
 	separation.company = '_Test Company'
 	separation.append('activities', {
 		'activity_name': 'Deactivate Employee',
