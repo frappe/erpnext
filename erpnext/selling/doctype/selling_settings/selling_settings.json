@@ -14,6 +14,13 @@
   "close_opportunity_after_days",
   "default_valid_till",
   "column_break_5",
+  "column_break_15",
+  "maintain_same_sales_rate",
+  "maintain_same_rate_action",
+  "editable_price_list_rate",
+  "validate_selling_price",
+  "calculate_product_bundle_price_based_on_child_items_rates",
+  "sales_transactions_settings_section",
   "so_required",
   "dn_required",
   "sales_update_frequency",
@@ -152,6 +159,47 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
    "options": "Role"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "customer_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "crm_settings_section",
+   "fieldtype": "Section Break",
+   "label": "CRM Settings"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "calculate_product_bundle_price_based_on_child_items_rates",
+   "fieldtype": "Check",
+   "label": "Calculate Product Bundle Price based on Child Items' Rates"
+>>>>>>> 2293ba302a (fix: Add checkbox to enable calculation of Product Bundle price based on child Items' rates)
   }
  ],
  "icon": "fa fa-cog",
@@ -159,7 +207,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-04-04 20:18:12.814624",
+=======
+ "modified": "2021-08-24 22:02:23.949616",
+>>>>>>> 2293ba302a (fix: Add checkbox to enable calculation of Product Bundle price based on child Items' rates)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
