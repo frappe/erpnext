@@ -91,7 +91,9 @@ def make_packing_list(doc):
 				parent_items.append([d.item_code, d.name])
 
 	cleanup_packing_list(doc, parent_items)
-	update_product_bundle_price(doc, parent_items)
+
+	if frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates"):
+		update_product_bundle_price(doc, parent_items)
 
 	if frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates"):
 		update_product_bundle_price(doc, parent_items)
