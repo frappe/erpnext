@@ -26,6 +26,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.utils import get_incoming_rate
+from erpnext.accounts.utils import PaymentEntryUnlinkError
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -136,7 +137,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.paid_to_account_currency = si.currency
 		pe.source_exchange_rate = 1
 		pe.target_exchange_rate = 1
-		pe.paid_amount = si.grand_total
+		pe.paid_amount = si.outstanding_amount
 		pe.insert()
 		pe.submit()
 
@@ -144,6 +145,42 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.get_doc('Sales Invoice', si.name)
 		self.assertRaises(frappe.LinkExistsError, si.cancel)
 		unlink_payment_on_cancel_of_invoice()
+
+	def test_payment_entry_unlink_against_standalone_credit_note(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		si1 = create_sales_invoice(rate=1000)
+		si2 = create_sales_invoice(rate=300)
+		si3 = create_sales_invoice(qty=-1, rate=300, is_return=1)
+		
+
+		pe = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Bank - _TC")
+		pe.append('references', {
+			'reference_doctype': 'Sales Invoice',
+			'reference_name': si2.name,
+			'total_amount': si2.grand_total,
+			'outstanding_amount': si2.outstanding_amount,
+			'allocated_amount': si2.outstanding_amount
+		})
+
+		pe.append('references', {
+			'reference_doctype': 'Sales Invoice',
+			'reference_name': si3.name,
+			'total_amount': si3.grand_total,
+			'outstanding_amount': si3.outstanding_amount,
+			'allocated_amount': si3.outstanding_amount
+		})
+
+		pe.reference_no = 'Test001'
+		pe.reference_date = nowdate()
+		pe.save()
+		pe.submit()
+
+		si2.load_from_db()
+		si2.cancel()
+
+		si1.load_from_db()
+		self.assertRaises(PaymentEntryUnlinkError, si1.cancel)
+
 
 	def test_sales_invoice_calculation_export_currency(self):
 		si = frappe.copy_doc(test_records[2])
@@ -2014,7 +2051,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		data = get_ewb_data("Sales Invoice", [si.name])
 
-		self.assertEqual(data['version'], '1.0.1118')
+		self.assertEqual(data['version'], '1.0.0421')
 		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')
 		self.assertEqual(data['billLists'][0]['fromTrdName'], '_Test Company')
 		self.assertEqual(data['billLists'][0]['toTrdName'], '_Test Customer')
@@ -2026,54 +2063,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
 		self.assertEqual(data['billLists'][0]['actualFromStateCode'],7)
 		self.assertEqual(data['billLists'][0]['fromStateCode'],27)
-
-	def test_einvoice_submission_without_irn(self):
-		# init
-		einvoice_settings = frappe.get_doc('E Invoice Settings')
-		einvoice_settings.enable = 1
-		einvoice_settings.applicable_from = nowdate()
-		einvoice_settings.append('credentials', {
-			'company': '_Test Company',
-			'gstin': '27AAECE4835E1ZR',
-			'username': 'test',
-			'password': 'test'
-		})
-		einvoice_settings.save()
-
-		country = frappe.flags.country
-		frappe.flags.country = 'India'
-
-		si = make_sales_invoice_for_ewaybill()
-		self.assertRaises(frappe.ValidationError, si.submit)
-
-		si.irn = 'test_irn'
-		si.submit()
-
-		# reset
-		einvoice_settings = frappe.get_doc('E Invoice Settings')
-		einvoice_settings.enable = 0
-		frappe.flags.country = country
-
-	def test_einvoice_json(self):
-		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
-
-		si = get_sales_invoice_for_e_invoice()
-		si.discount_amount = 100
-		si.save()
-
-		einvoice = make_einvoice(si)
-		self.assertTrue(einvoice['EwbDtls'])
-		validate_totals(einvoice)
-
-		si.apply_discount_on = 'Net Total'
-		si.save()
-		einvoice = make_einvoice(si)
-		validate_totals(einvoice)
-
-		[d.set('included_in_print_rate', 1) for d in si.taxes]
-		si.save()
-		einvoice = make_einvoice(si)
-		validate_totals(einvoice)
 
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
