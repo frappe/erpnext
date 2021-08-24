@@ -233,6 +233,7 @@ class WorkOrder(Document):
 						SELECT name FROM `tabStock Entry`
 						WHERE
 							work_order=%s
+							AND purpose='Manufacture'
 							AND docstatus=1
 					)
 			""", (self.name, ))[0][0])
