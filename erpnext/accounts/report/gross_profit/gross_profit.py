@@ -196,7 +196,7 @@ class GrossProfitGenerator(object):
 				row.buying_rate = flt(row.buying_amount / flt(row.qty), self.float_precision)
 				row.base_rate = flt(row.base_amount / flt(row.qty), self.float_precision)
 			else:
-				if self.filters.get("group_by") != "Invoice":
+				if self.is_not_invoice_row(row):
 					row.buying_rate, row.base_rate = 0.0, 0.0
 
 			# calculate gross profit
@@ -233,10 +233,13 @@ class GrossProfitGenerator(object):
 						for returned_item_row in returned_item_rows:
 							row.qty += flt(returned_item_row.qty)
 							row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
-						row.buying_amount = flt(flt(row.qty) * row.buying_rate, self.currency_precision)
-					if flt(row.qty) or row.base_amount:
+						row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
+					if (flt(row.qty) or row.base_amount) and self.is_not_invoice_row(row):
 						row = self.set_average_rate(row)
 						self.grouped_data.append(row)
+
+	def is_not_invoice_row(self, row):
+		return (self.filters.get("group_by") == "Invoice" and row.indent != 0.0) or self.filters.get("group_by") != "Invoice"
 
 	def set_average_rate(self, new_row):
 		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, self.currency_precision)
@@ -428,8 +431,7 @@ class GrossProfitGenerator(object):
 					'item_row': None, 
 					'is_return': row.is_return, 
 					'cost_center': row.cost_center,
-					'base_net_amount': frappe.db.get_value('Sales Invoice', row.parent, 'base_net_total'),
-					'base_rate': None
+					'base_net_amount': frappe.db.get_value('Sales Invoice', row.parent, 'base_net_total')
 				})
 
 				self.si_list.insert(index, invoice)
