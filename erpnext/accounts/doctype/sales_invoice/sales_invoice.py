@@ -478,6 +478,9 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) != 1:
 			return
 
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
+
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
@@ -491,9 +494,6 @@ class SalesInvoice(SellingController):
 
 		if not self.get('payments') and not for_validate:
 			update_multi_mode_option(self, pos)
-
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
 			if not for_validate:
@@ -1368,7 +1368,7 @@ class SalesInvoice(SellingController):
 
 		discounting_status = None
 		if self.is_discounted:
-			discountng_status = get_discounting_status(self.name)
+			discounting_status = get_discounting_status(self.name)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1376,11 +1376,11 @@ class SalesInvoice(SellingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
+				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discounting_status=='Disbursed':
 					self.status = "Overdue and Discounted"
 				elif outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discountng_status=='Disbursed':
+				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discounting_status=='Disbursed':
 					self.status = "Unpaid and Discounted"
 				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"

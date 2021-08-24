@@ -122,4 +122,3 @@ def update_pending_shortfall(shortfall):
 			"shortfall_amount": 0,
 			"shortfall_percentage": 0
 		})
-

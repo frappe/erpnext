@@ -208,7 +208,3 @@ def get_chart_data(columns):
 	chart["type"] = "line"
 
 	return chart
-
-
-
-
