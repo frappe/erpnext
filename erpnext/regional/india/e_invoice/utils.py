@@ -190,8 +190,10 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-
-		item.unit_rate = abs(item.taxable_value / item.qty)
+		if flt(item.qty) != 0.0:
+			item.unit_rate = abs(item.taxable_value / item.qty)
+		else:
+			item.unit_rate = abs(item.taxable_value)
 		item.gross_amount = abs(item.taxable_value)
 		item.taxable_value = abs(item.taxable_value)
 		item.discount_amount = 0
@@ -386,7 +388,7 @@ def validate_totals(einvoice):
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
 
 	if abs(
-		flt(value_details['TotInvVal']) + flt(value_details['Discount']) - 
+		flt(value_details['TotInvVal']) + flt(value_details['Discount']) -
 		flt(value_details['OthChrg']) - flt(value_details['RndOffAmt']) -
 		total_item_value) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))

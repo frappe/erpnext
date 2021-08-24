@@ -362,4 +362,3 @@ class IssueSummary(object):
 				'datatype': 'Int',
 			}
 		]
-

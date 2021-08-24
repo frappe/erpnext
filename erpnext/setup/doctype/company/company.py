@@ -108,7 +108,7 @@ class Company(NestedSet):
 				frappe.flags.country_change = True
 				self.create_default_accounts()
 				self.create_default_warehouses()
-		
+
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
 
@@ -392,6 +392,10 @@ class Company(NestedSet):
 		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
 		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
 		frappe.db.sql("delete from `tabItem Tax Template` where company=%s", self.name)
+
+		# delete Process Deferred Accounts if no GL Entry found
+		if not frappe.db.get_value('GL Entry', {'company': self.name}):
+			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
