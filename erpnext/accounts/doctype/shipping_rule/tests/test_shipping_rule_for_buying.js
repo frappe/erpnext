@@ -34,4 +34,3 @@ QUnit.test("test Shipping Rule", function(assert) {
 		() => done()
 	]);
 });
-

@@ -247,4 +247,3 @@ def get_per_day_interest(principal_amount, rate_of_interest, posting_date=None):
 		posting_date = getdate()
 
 	return flt((principal_amount * rate_of_interest) / (days_in_year(get_datetime(posting_date).year) * 100))
-

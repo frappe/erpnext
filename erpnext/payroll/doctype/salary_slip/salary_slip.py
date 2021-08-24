@@ -19,6 +19,7 @@ from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_appli
 from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.hr.utils import validate_active_employee
 from six import iteritems
 
 class SalarySlip(TransactionBase):
@@ -39,6 +40,7 @@ class SalarySlip(TransactionBase):
 
 	def validate(self):
 		self.status = self.get_status()
+		validate_active_employee(self.employee)
 		self.validate_dates()
 		self.check_existing()
 		if not self.salary_slip_based_on_timesheet:
@@ -644,10 +646,13 @@ class SalarySlip(TransactionBase):
 				continue
 
 			if (
-				(not d.additional_salary
-				and (not additional_salary or additional_salary.overwrite))
-				or (additional_salary
-				and additional_salary.name == d.additional_salary)
+				(
+					not d.additional_salary
+					and (not additional_salary or additional_salary.overwrite)
+				) or (
+					additional_salary
+					and additional_salary.name == d.additional_salary
+				)
 			):
 				component_row = d
 				break
@@ -675,8 +680,12 @@ class SalarySlip(TransactionBase):
 				component_row.set(attr, component_data.get(attr))
 
 		if additional_salary:
-			component_row.default_amount = 0
-			component_row.additional_amount = amount
+			if additional_salary.overwrite:
+				component_row.additional_amount = flt(flt(amount) - flt(component_row.get("default_amount", 0)),
+					component_row.precision("additional_amount"))
+			else:
+				component_row.default_amount = 0
+				component_row.additional_amount = amount
 			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date

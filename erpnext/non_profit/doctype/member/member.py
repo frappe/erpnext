@@ -84,7 +84,9 @@ def create_member(user_details):
 		"email_id": user_details.email,
 		"pan_number": user_details.pan or None,
 		"membership_type": user_details.plan_id,
-		"subscription_id": user_details.subscription_id or None
+		"customer_id": user_details.customer_id or None,
+		"subscription_id": user_details.subscription_id or None,
+		"subscription_status": user_details.subscription_status or ""
 	})
 
 	member.insert(ignore_permissions=True)

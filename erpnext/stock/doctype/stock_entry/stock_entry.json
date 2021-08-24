@@ -355,6 +355,7 @@
   },
   {
    "fieldname": "scan_barcode",
+   "options": "Barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode"
   },
@@ -629,7 +630,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-26 17:07:58.015737",
+ "modified": "2021-08-17 20:16:12.737743",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

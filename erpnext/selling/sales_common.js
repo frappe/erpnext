@@ -114,6 +114,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
 	}
 
+	dispatch_address_name() {
+		erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
+	}
+
 	sales_partner() {
 		this.apply_pricing_rule();
 	}

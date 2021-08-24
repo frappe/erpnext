@@ -18,6 +18,7 @@
   "section_break_9",
   "over_delivery_receipt_allowance",
   "role_allowed_to_over_deliver_receive",
+  "mr_qty_allowance",
   "column_break_12",
   "auto_insert_price_list_rate_if_missing",
   "allow_negative_stock",
@@ -283,6 +284,12 @@
    "fieldtype": "Select",
    "label": "Action If Quality Inspection Is Rejected",
    "options": "Stop\nWarn"
+  },
+  {
+   "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
+   "fieldname": "mr_qty_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance"
   }
  ],
  "icon": "icon-cog",
@@ -290,7 +297,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-07-10 16:17:42.159829",
+ "modified": "2021-06-28 17:02:26.683002",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
