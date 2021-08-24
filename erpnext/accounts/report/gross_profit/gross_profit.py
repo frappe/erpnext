@@ -428,7 +428,7 @@ class GrossProfitGenerator(object):
 					'item_row': None, 
 					'is_return': row.is_return, 
 					'cost_center': row.cost_center,
-					'base_net_amount': 0,
+					'base_net_amount': frappe.db.get_value('Sales Invoice', row.parent, 'base_net_total'),
 					'base_rate': None
 				})
 
