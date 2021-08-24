@@ -4,18 +4,11 @@
 frappe.ui.form.on('Salary Component', {
 	setup: function(frm) {
 		frm.set_query("account", "accounts", function(doc, cdt, cdn) {
-			let d = frappe.get_doc(cdt, cdn);
-
-			let root_type = "Liability";
-			if (frm.doc.type == "Deduction") {
-				root_type = "Expense";
-			}
-
+			var d = locals[cdt][cdn];
 			return {
 				filters: {
 					"is_group": 0,
-					"company": d.company,
-					"root_type": root_type
+					"company": d.company
 				}
 			};
 		});
