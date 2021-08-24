@@ -746,7 +746,14 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(fg_item.qty, actual_fg_qty)
 
 		# Testing Work Order values
-		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), qty)
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, "produced_qty"),
+			qty
+		)
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, "process_loss_qty"),
+			actual_fg_qty
+		)
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
