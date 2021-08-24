@@ -192,11 +192,11 @@ class JobCard(Document):
 						"completed_qty": args.get("completed_qty") or 0.0
 					})
 		elif args.get("start_time"):
-			new_args = {
+			new_args = frappe._dict({
 				"from_time": get_datetime(args.get("start_time")),
 				"operation": args.get("sub_operation"),
 				"completed_qty": 0.0
-			}
+			})
 
 			if employees:
 				for name in employees:
@@ -607,6 +607,11 @@ def make_stock_entry(source_name, target_doc=None):
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
 		target.set_stock_entry_type()
+
+		wo_allows_alternate_item = frappe.db.get_value("Work Order", target.work_order, "allow_alternative_item")
+		for item in target.items:
+			item.allow_alternative_item = int(wo_allows_alternate_item and
+					frappe.get_cached_value("Item", item.item_code, "allow_alternative_item"))
 
 	doclist = get_mapped_doc("Job Card", source_name, {
 		"Job Card": {
