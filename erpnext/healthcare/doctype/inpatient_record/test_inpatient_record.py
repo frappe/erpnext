@@ -29,7 +29,7 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertEqual("Occupied", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		# Discharge
-		schedule_discharge(frappe.as_json({'patient': patient}))
+		schedule_discharge(frappe.as_json({'patient': patient, 'discharge_ordered_datetime': now_datetime()}))
 		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
@@ -37,7 +37,7 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, ip_record.discharge)
 		mark_invoiced_inpatient_occupancy(ip_record1)
 
-		discharge_patient(ip_record1)
+		discharge_patient(ip_record1, now_datetime())
 
 		self.assertEqual(None, frappe.db.get_value("Patient", patient, "inpatient_record"))
 		self.assertEqual(None, frappe.db.get_value("Patient", patient, "inpatient_status"))
@@ -56,7 +56,7 @@ class TestInpatientRecord(unittest.TestCase):
 		admit_patient(ip_record, service_unit, now_datetime())
 
 		# Discharge
-		schedule_discharge(frappe.as_json({"patient": patient}))
+		schedule_discharge(frappe.as_json({"patient": patient, 'discharge_ordered_datetime': now_datetime()}))
 		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record = frappe.get_doc("Inpatient Record", ip_record.name)
@@ -88,12 +88,12 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertFalse(patient_encounter.name in encounter_ids)
 
 		# Discharge
-		schedule_discharge(frappe.as_json({"patient": patient}))
+		schedule_discharge(frappe.as_json({"patient": patient, 'discharge_ordered_datetime': now_datetime()}))
 		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record)
-		discharge_patient(ip_record)
+		discharge_patient(ip_record, now_datetime())
 		setup_inpatient_settings(key="do_not_bill_inpatient_encounters", value=0)
 
 	def test_validate_overlap_admission(self):
