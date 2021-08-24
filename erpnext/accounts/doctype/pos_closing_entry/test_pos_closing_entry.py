@@ -90,7 +90,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 			'POS Invoice Merge Log', {'pos_closing_entry': pcv_doc.name},
 			'consolidated_invoice'
 		)
-		docstatus =  frappe.db.get_value("Sales Invoice", cancelled_invoice, 'docstatus')
+		docstatus = frappe.db.get_value("Sales Invoice", cancelled_invoice, 'docstatus')
 		self.assertEqual(docstatus, 2)
 
 		pos_inv1.load_from_db()
