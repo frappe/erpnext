@@ -62,6 +62,16 @@ def get_data():
 					"description": _("Assign Price List Schedule."),
 				},
 				{
+                    "type": "doctype",
+                    "name": "Delivery Area",
+                    "onboard": 1,
+                },
+				{
+                    "type": "doctype",
+                    "name": "Dispatch Control",
+                    "onboard": 1,
+                },
+				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Territory Target Variance (Item Group-Wise)",

@@ -1,0 +1,76 @@
+{
+ "autoname": "DIS-CONT-.YYYY.-.########",
+ "creation": "2021-08-20 11:03:46.148909",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sale_invoice",
+  "customer",
+  "delivery_area",
+  "creation_date",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "sale_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sale Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "sale_invoice.customer",
+   "fieldname": "customer",
+   "fieldtype": "Data",
+   "label": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_area",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Delivery Area",
+   "options": "Delivery Area",
+   "reqd": 1
+  },
+  {
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Creation Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Dispatch Control Detail",
+   "reqd": 1
+  }
+ ],
+ "modified": "2021-08-24 10:52:49.292074",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Dispatch Control",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
