@@ -233,7 +233,8 @@ class Item(Document):
 					else:
 						changed[field] = self.get(field)
 
-			if not changed: return
+			if not changed:
+				return
 
 			web_item_doc = frappe.get_doc("Website Item", web_item)
 			web_item_doc.update(changed)
@@ -429,16 +430,16 @@ class Item(Document):
 
 	def validate_properties_before_merge(self, new_name):
 		# Validate properties before merging
-			if not frappe.db.exists("Item", new_name):
-				frappe.throw(_("Item {0} does not exist").format(new_name))
+		if not frappe.db.exists("Item", new_name):
+			frappe.throw(_("Item {0} does not exist").format(new_name))
 
-			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
+		field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
+		new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
 
-			if new_properties != [cstr(self.get(field)) for field in field_list]:
-				msg = _("To merge, following properties must be same for both items")
-				msg += ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list])
-				frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+		if new_properties != [cstr(self.get(field)) for field in field_list]:
+			msg = _("To merge, following properties must be same for both items")
+			msg += ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list])
+			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_duplicate_website_item_before_merge(self, old_name, new_name):
 		"""
