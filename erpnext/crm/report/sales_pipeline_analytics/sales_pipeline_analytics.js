@@ -66,7 +66,6 @@ frappe.query_reports["Sales Pipeline Analytics"] = {
 			label: __("Opportunity Type"),
 			fieldtype: "Link",
 			options: "Opportunity Type",
-			default: "Sales"	
 		},
 		
 	]

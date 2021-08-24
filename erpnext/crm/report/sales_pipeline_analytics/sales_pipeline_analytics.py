@@ -193,10 +193,11 @@ class SalesPipelineAnalytics(object):
 			count = info.get(based_on)
 
 			if self.filters.get('pipeline_by') == 'Owner':
-				if value == '[]':
-					temp = ["Not Assigned"]
+
+				if value == None or value == '[]':
+					temp = ["Not Assgined"]
 				else:
-					temp = json.loads(value)
+				 	temp = json.loads(value)
 				self.check_for_assigned_to(period,value,count,temp,info)
 
 			else:
