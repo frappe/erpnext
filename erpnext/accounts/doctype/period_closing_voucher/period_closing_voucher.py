@@ -51,7 +51,7 @@ class PeriodClosingVoucher(AccountsController):
 
 	def make_gl_entries(self):
 		gl_entries = []
-		net_pl_balance = 0 
+		net_pl_balance = 0
 
 		pl_accounts = self.get_pl_balances()
 
@@ -79,7 +79,7 @@ class PeriodClosingVoucher(AccountsController):
 
 		from erpnext.accounts.general_ledger import make_gl_entries
 		make_gl_entries(gl_entries)
-	
+
 	def get_pnl_gl_entry(self, net_pl_balance):
 		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 		gl_entry = self.get_gl_dict({
