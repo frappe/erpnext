@@ -25,6 +25,6 @@ class BankGuarantee(Document):
 def get_vouchar_detials(column_list, doctype, docname):
 	column_list = json.loads(column_list)
 	for col in column_list:
-		sanitize_searchfield(col) 
+		sanitize_searchfield(col)
 	return frappe.db.sql(''' select {columns} from `tab{doctype}` where name=%s'''
 		.format(columns=", ".join(column_list), doctype=doctype), docname, as_dict=1)[0]
