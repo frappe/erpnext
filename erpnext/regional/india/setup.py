@@ -531,6 +531,7 @@ def make_custom_fields(update=True):
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
+			dict(fieldname='hra_column_break', fieldtype='Column Break', insert_after='hra_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
 			dict(fieldname='non_profit_section', label='Non Profit Settings',
@@ -539,6 +540,7 @@ def make_custom_fields(update=True):
 				fieldtype='Data', insert_after='non_profit_section'),
 			dict(fieldname='with_effect_from', label='80G With Effect From',
 				fieldtype='Date', insert_after='company_80g_number'),
+			dict(fieldname='non_profit_column_break', fieldtype='Column Break', insert_after='with_effect_from'),
 			dict(fieldname='pan_details', label='PAN Number',
 				fieldtype='Data', insert_after='with_effect_from')
 		],
