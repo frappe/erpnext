@@ -533,8 +533,8 @@ frappe.ui.form.on('Payment Entry', {
 	source_exchange_rate: function(frm) {
 		if (frm.doc.paid_amount) {
 			frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
-			if(!frm.set_paid_amount_based_on_received_amount &&
-					(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency)) {
+			// target exchange rate should always be same as source if both account currencies is same
+			if(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
 				frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
 				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 			}
