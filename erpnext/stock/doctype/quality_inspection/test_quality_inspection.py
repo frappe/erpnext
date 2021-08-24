@@ -14,7 +14,7 @@ from erpnext.controllers.stock_controller import (
 )
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 # test_records = frappe.get_test_records('Quality Inspection')
 
@@ -159,6 +159,47 @@ class TestQualityInspection(unittest.TestCase):
 			frappe.delete_doc("Quality Inspection", qi)
 		dn.delete()
 
+	def test_rejected_qi_validation(self):
+		"""Test if rejected QI blocks Stock Entry as per Stock Settings."""
+		se = make_stock_entry(
+			item_code="_Test Item with QA",
+			target="_Test Warehouse - _TC",
+			qty=1,
+			basic_rate=100,
+			inspection_required=True,
+			do_not_submit=True
+		)
+
+		readings = [
+			{
+				"specification": "Iron Content",
+				"min_value": 0.1,
+				"max_value": 0.9,
+				"reading_1": "0.4"
+			}
+		]
+
+		qa = create_quality_inspection(
+			reference_type="Stock Entry",
+			reference_name=se.name,
+			readings=readings,
+			status="Rejected"
+		)
+
+		frappe.db.set_value("Stock Settings", None, "action_if_quality_inspection_is_rejected", "Stop")
+		se.reload()
+		self.assertRaises(QualityInspectionRejectedError, se.submit) # when blocked in Stock settings, block rejected QI
+
+		frappe.db.set_value("Stock Settings", None, "action_if_quality_inspection_is_rejected", "Warn")
+		se.reload()
+		se.submit() # when allowed in Stock settings, allow rejected QI
+
+		# teardown
+		qa.reload()
+		qa.cancel()
+		se.reload()
+		se.cancel()
+		frappe.db.set_value("Stock Settings", None, "action_if_quality_inspection_is_rejected", "Stop")
 
 def create_quality_inspection(**args):
 	args = frappe._dict(args)
@@ -175,11 +216,10 @@ def create_quality_inspection(**args):
 	if not args.readings:
 		create_quality_inspection_parameter("Size")
 		readings = {"specification": "Size", "min_value": 0, "max_value": 10}
+		if args.status == "Rejected":
+			readings["reading_1"] = "12"  # status is auto set in child on save
 	else:
 		readings = args.readings
-
-	if args.status == "Rejected":
-		readings["reading_1"] = "12"  # status is auto set in child on save
 
 	if isinstance(readings, list):
 		for entry in readings:

@@ -239,6 +239,7 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			and sle.`item_code`=%(item_code)s
 			and sle.`company` = %(company)s
 			and batch.disabled = 0
+			and sle.is_cancelled=0
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY

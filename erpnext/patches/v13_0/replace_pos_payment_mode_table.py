@@ -23,5 +23,5 @@ def execute():
 				pos_payment_method.parentfield = payment_mode.parentfield
 				pos_payment_method.parenttype = payment_mode.parenttype
 				pos_payment_method.db_insert()
-		
+
 		frappe.db.sql("""delete from `tabSales Invoice Payment` where parent=%s""", pos_profile.name)

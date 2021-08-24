@@ -16,6 +16,7 @@ class TestDunning(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		create_dunning_type()
+		create_dunning_type_with_zero_interest_rate()
 		unlink_payment_on_cancel_of_invoice()
 
 	@classmethod
@@ -25,10 +26,19 @@ class TestDunning(unittest.TestCase):
 	def test_dunning(self):
 		dunning = create_dunning()
 		amounts = calculate_interest_and_amount(
-			dunning.posting_date, dunning.outstanding_amount, dunning.rate_of_interest, dunning.dunning_fee, dunning.overdue_days)
+			dunning.outstanding_amount, dunning.rate_of_interest, dunning.dunning_fee, dunning.overdue_days)
 		self.assertEqual(round(amounts.get('interest_amount'), 2), 0.44)
 		self.assertEqual(round(amounts.get('dunning_amount'), 2), 20.44)
 		self.assertEqual(round(amounts.get('grand_total'), 2), 120.44)
+
+	def test_dunning_with_zero_interest_rate(self):
+		dunning = create_dunning_with_zero_interest_rate()
+		amounts = calculate_interest_and_amount(
+			dunning.outstanding_amount, dunning.rate_of_interest, dunning.dunning_fee, dunning.overdue_days)
+		self.assertEqual(round(amounts.get('interest_amount'), 2), 0)
+		self.assertEqual(round(amounts.get('dunning_amount'), 2), 20)
+		self.assertEqual(round(amounts.get('grand_total'), 2), 120)
+
 
 	def test_gl_entries(self):
 		dunning = create_dunning()
@@ -83,6 +93,27 @@ def create_dunning():
 	dunning.save()
 	return dunning
 
+def create_dunning_with_zero_interest_rate():
+	posting_date = add_days(today(), -20)
+	due_date = add_days(today(), -15)
+	sales_invoice = create_sales_invoice_against_cost_center(
+		posting_date=posting_date, due_date=due_date, status='Overdue')
+	dunning_type = frappe.get_doc("Dunning Type", 'First Notice with 0% Rate of Interest')
+	dunning = frappe.new_doc("Dunning")
+	dunning.sales_invoice = sales_invoice.name
+	dunning.customer_name = sales_invoice.customer_name
+	dunning.outstanding_amount = sales_invoice.outstanding_amount
+	dunning.debit_to = sales_invoice.debit_to
+	dunning.currency = sales_invoice.currency
+	dunning.company = sales_invoice.company
+	dunning.posting_date = nowdate()
+	dunning.due_date = sales_invoice.due_date
+	dunning.dunning_type = 'First Notice with 0% Rate of Interest'
+	dunning.rate_of_interest = dunning_type.rate_of_interest
+	dunning.dunning_fee = dunning_type.dunning_fee
+	dunning.save()
+	return dunning
+
 def create_dunning_type():
 	dunning_type = frappe.new_doc("Dunning Type")
 	dunning_type.dunning_type = 'First Notice'
@@ -95,6 +126,22 @@ def create_dunning_type():
 			'language': 'en',
 			'body_text': 'We have still not received payment for our invoice ',
 			'closing_text': 'We kindly request that you pay the outstanding amount immediately, including interest and late fees.'
+		}
+	)
+	dunning_type.save()
+
+def create_dunning_type_with_zero_interest_rate():
+	dunning_type = frappe.new_doc("Dunning Type")
+	dunning_type.dunning_type = 'First Notice with 0% Rate of Interest'
+	dunning_type.start_day = 10
+	dunning_type.end_day = 20
+	dunning_type.dunning_fee = 20
+	dunning_type.rate_of_interest = 0
+	dunning_type.append(
+		"dunning_letter_text", {
+			'language': 'en',
+			'body_text': 'We have still not received payment for our invoice ',
+			'closing_text': 'We kindly request that you pay the outstanding amount immediately, and late fees.'
 		}
 	)
 	dunning_type.save()
