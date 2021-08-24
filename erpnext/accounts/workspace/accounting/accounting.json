@@ -588,7 +588,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bank Statement",
+   "label": "Banking and Payments",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -639,6 +639,24 @@
    "label": "Bank Reconciliation Statement",
    "link_to": "Bank Reconciliation Statement",
    "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Reconciliation",
+   "link_to": "Payment Reconciliation",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
@@ -1064,7 +1082,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-06-10 03:17:31.427945",
+ "modified": "2021-08-23 16:06:34.167267",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
