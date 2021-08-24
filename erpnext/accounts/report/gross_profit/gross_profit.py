@@ -186,7 +186,7 @@ class GrossProfitGenerator(object):
 
 			if grouped_by_invoice:
 				if row.indent == 1.0:
-					buying_amount = row.buying_amount
+					buying_amount += row.buying_amount
 				elif row.indent == 0.0:
 					row.buying_amount = buying_amount
 					buying_amount = 0
