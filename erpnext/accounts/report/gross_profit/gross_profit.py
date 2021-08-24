@@ -62,14 +62,14 @@ def execute(filters=None):
 
 	else:
 		for idx, src in enumerate(gross_profit_data.grouped_data):
-		row = []
-		for col in group_wise_columns.get(scrub(filters.group_by)):
-			row.append(src.get(col))
+			row = []
+			for col in group_wise_columns.get(scrub(filters.group_by)):
+				row.append(src.get(col))
 
-		row.append(filters.currency)
-		if idx == len(gross_profit_data.grouped_data)-1:
-			row[0] = frappe.bold("Total")
-		data.append(row)
+			row.append(filters.currency)
+			if idx == len(gross_profit_data.grouped_data)-1:
+				row[0] = frappe.bold("Total")
+			data.append(row)
 	
 	return columns, data
 
