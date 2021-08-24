@@ -1,6 +1,12 @@
 name: Patch
 
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.md'
+  workflow_dispatch:
+
 
 jobs:
   test:
