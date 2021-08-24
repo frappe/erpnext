@@ -110,17 +110,18 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		this.frm.refresh_field("base_paid_amount");
 	},
 
+<<<<<<< HEAD
 	write_off_outstanding_amount_automatically: function() {
 		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
+=======
+	write_off_outstanding_amount_automatically() {
+		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
+>>>>>>> 332ac105b5 (refactor: use `read_only_depends_on` instead of code (#27008))
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
 				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
 			);
-			this.frm.toggle_enable("write_off_amount", false);
-
-		} else {
-			this.frm.toggle_enable("write_off_amount", true);
 		}
 
 		this.calculate_outstanding_amount(false);
