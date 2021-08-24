@@ -106,6 +106,7 @@
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
@@ -127,6 +128,7 @@
   "get_advances",
   "advances",
   "payment_schedule_section",
+  "ignore_default_payment_terms_template",
   "payment_terms_template",
   "payment_schedule",
   "payments_section",
@@ -690,6 +692,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
+   "options": "Barcode",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode"
@@ -1441,7 +1444,8 @@
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.write_off_outstanding_amount_automatically"
   },
   {
    "fieldname": "base_write_off_amount",
@@ -1932,6 +1936,7 @@
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Profit / Loss Account",
    "options": "Account"
   },
@@ -1953,6 +1958,7 @@
    "depends_on": "eval: doc.is_internal_customer && doc.update_stock",
    "fieldname": "set_target_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
   },
@@ -1970,6 +1976,12 @@
    "label": "Disable Rounded Total"
   },
   {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
+  },
+  {
    "allow_on_submit": 1,
    "fieldname": "dispatch_address_name",
    "fieldtype": "Link",
@@ -1983,6 +1995,14 @@
    "fieldtype": "Small Text",
    "label": "Dispatch Address",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_default_payment_terms_template",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ignore Default Payment Terms Template",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -1995,7 +2015,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-07-08 14:03:55.502522",
+ "modified": "2021-08-18 16:07:45.122570",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

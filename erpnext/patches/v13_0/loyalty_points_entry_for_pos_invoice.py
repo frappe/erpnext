@@ -9,7 +9,7 @@ def execute():
 	'''`sales_invoice` field from loyalty point entry is splitted into `invoice_type` & `invoice` fields'''
 
 	frappe.reload_doc("Accounts", "doctype", "loyalty_point_entry")
-	
+
 	if not frappe.db.has_column('Loyalty Point Entry', 'sales_invoice'):
 		return
 
