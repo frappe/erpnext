@@ -96,6 +96,7 @@
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
@@ -667,8 +668,7 @@
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1691,9 +1691,13 @@
    "label": "Per Received",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
+  },
+  {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
   },
   {
    "default": "0",
@@ -1710,7 +1714,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-07 17:53:14.351439",
+ "modified": "2021-08-17 20:16:12.737743",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

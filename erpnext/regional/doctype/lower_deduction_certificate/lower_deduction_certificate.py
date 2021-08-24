@@ -13,7 +13,7 @@ class LowerDeductionCertificate(Document):
 	def validate(self):
 		self.validate_dates()
 		self.validate_supplier_against_section_code()
-		
+
 	def validate_dates(self):
 		if getdate(self.valid_upto) < getdate(self.valid_from):
 			frappe.throw(_("Valid Upto date cannot be before Valid From date"))

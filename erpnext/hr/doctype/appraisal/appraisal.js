@@ -15,7 +15,7 @@ frappe.ui.form.on('Appraisal', {
 			frm.set_value('status', 'Draft');
 		}
 	},
-	
+
 	kra_template: function(frm) {
 		frm.doc.goals = [];
 		erpnext.utils.map_current_doc({

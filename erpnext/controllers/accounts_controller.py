@@ -135,13 +135,8 @@ class AccountsController(TransactionBase):
 
 		validate_regional(self)
 
-		validate_einvoice_fields(self)
-
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
-
-	def before_cancel(self):
-		validate_einvoice_fields(self)
 
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
@@ -164,7 +159,8 @@ class AccountsController(TransactionBase):
 		self.set_due_date()
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
-		self.validate_due_date()
+		if not self.get('ignore_default_payment_terms_template'):
+			self.validate_due_date()
 		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
@@ -813,6 +809,89 @@ class AccountsController(TransactionBase):
 							tax_map[tax.account_head] -= allocated_amount
 							allocated_tax_map[tax.account_head] -= allocated_amount
 
+	def get_amount_and_base_amount(self, item, enable_discount_accounting):
+		amount = item.net_amount
+		base_amount = item.base_net_amount
+
+		if enable_discount_accounting and self.get('discount_amount') and self.get('additional_discount_account'):
+			amount = item.amount
+			base_amount = item.base_amount
+
+		return amount, base_amount
+
+	def get_tax_amounts(self, tax, enable_discount_accounting):
+		amount = tax.tax_amount_after_discount_amount
+		base_amount = tax.base_tax_amount_after_discount_amount
+
+		if enable_discount_accounting and self.get('discount_amount') and self.get('additional_discount_account') \
+			and self.get('apply_discount_on') == 'Grand Total':
+			amount = tax.tax_amount
+			base_amount = tax.base_tax_amount
+
+		return amount, base_amount
+
+	def make_discount_gl_entries(self, gl_entries):
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		if enable_discount_accounting:
+			if self.doctype == "Purchase Invoice":
+				dr_or_cr = "credit"
+				rev_dr_cr = "debit"
+				supplier_or_customer = self.supplier
+
+			else:
+				dr_or_cr = "debit"
+				rev_dr_cr = "credit"
+				supplier_or_customer = self.customer
+
+			for item in self.get("items"):
+				if item.get('discount_amount') and item.get('discount_account'):
+					discount_amount = item.discount_amount * item.qty
+					if self.doctype == "Purchase Invoice":
+						income_or_expense_account = (item.expense_account
+							if (not item.enable_deferred_expense or self.is_return)
+							else item.deferred_expense_account)
+					else:
+						income_or_expense_account = (item.income_account
+							if (not item.enable_deferred_revenue or self.is_return)
+							else item.deferred_revenue_account)
+
+					account_currency = get_account_currency(item.discount_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.discount_account,
+							"against": supplier_or_customer,
+							dr_or_cr: flt(discount_amount, item.precision('discount_amount')),
+							dr_or_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'),
+								item.precision('discount_amount')),
+							"cost_center": item.cost_center,
+							"project": item.project
+						}, account_currency, item=item)
+					)
+
+					account_currency = get_account_currency(income_or_expense_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": income_or_expense_account,
+							"against": supplier_or_customer,
+							rev_dr_cr: flt(discount_amount, item.precision('discount_amount')),
+							rev_dr_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'),
+								item.precision('discount_amount')),
+							"cost_center": item.cost_center,
+							"project": item.project or self.project
+						}, account_currency, item=item)
+					)
+
+			if self.get('discount_amount') and self.get('additional_discount_account'):
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.additional_discount_account,
+						"against": supplier_or_customer,
+						dr_or_cr: self.discount_amount,
+						"cost_center": self.cost_center
+					}, item=self)
+				)
+
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
 		for pe in self.get("advances"):
@@ -1140,7 +1219,7 @@ class AccountsController(TransactionBase):
 			po_or_so = self.get('items')[0].get('purchase_order')
 			po_or_so_doctype = "Purchase Order"
 			po_or_so_doctype_name = "purchase_order"
-		
+
 		return po_or_so, po_or_so_doctype, po_or_so_doctype_name
 
 	def linked_order_has_payment_terms(self, po_or_so, fieldname, doctype):
@@ -1149,14 +1228,14 @@ class AccountsController(TransactionBase):
 				return True
 			elif self.linked_order_has_payment_schedule(po_or_so):
 				return True
-		
+
 		return False
 
 	def all_items_have_same_po_or_so(self, po_or_so, fieldname):
 		for item in self.get('items'):
 			if item.get(fieldname) != po_or_so:
 				return False
-		
+
 		return True
 
 	def linked_order_has_payment_terms_template(self, po_or_so, doctype):
@@ -1758,6 +1837,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	for d in data:
 		new_child_flag = False
+
+		if not d.get("item_code"):
+			# ignore empty rows
+			continue
+
 		if not d.get("docname"):
 			new_child_flag = True
 			check_doc_permissions(parent, 'create')
@@ -1780,7 +1864,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			qty_unchanged = prev_qty == new_qty
 			uom_unchanged = prev_uom == new_uom
 			conversion_factor_unchanged = prev_con_fac == new_con_fac
-			date_unchanged = prev_date == new_date if prev_date and new_date else False # in case of delivery note etc
+			date_unchanged = prev_date == getdate(new_date) if prev_date and new_date else False # in case of delivery note etc
 			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and uom_unchanged and date_unchanged:
 				continue
 
@@ -1891,8 +1975,4 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
-	pass
-
-@erpnext.allow_regional
-def validate_einvoice_fields(doc):
 	pass

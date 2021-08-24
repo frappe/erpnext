@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import flt, today
 from erpnext.accounts.utils import get_fiscal_year, now
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 class TestPeriodClosingVoucher(unittest.TestCase):
@@ -118,6 +119,58 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertTrue(pcv_gle, expected_gle)
 
+	def test_period_closing_with_finance_book_entries(self):
+		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
+
+		company = create_company()
+		surplus_account = create_account()
+		cost_center = create_cost_center("Test Cost Center 1")
+
+		create_sales_invoice(
+			company=company,
+			income_account="Sales - TPC",
+			expense_account="Cost of Goods Sold - TPC",
+			cost_center=cost_center,
+			rate=400,
+			debit_to="Debtors - TPC"
+		)
+		jv = make_journal_entry(
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			amount=400,
+			cost_center=cost_center,
+			posting_date=now()
+		)
+		jv.company = company
+		jv.finance_book = create_finance_book().name
+		jv.save()
+		jv.submit()
+
+		pcv = frappe.get_doc({
+			"transaction_date": today(),
+			"posting_date": today(),
+			"fiscal_year": get_fiscal_year(today())[0],
+			"company": company,
+			"closing_account_head": surplus_account,
+			"remarks": "Test",
+			"doctype": "Period Closing Voucher"
+		})
+		pcv.insert()
+		pcv.submit()
+
+		expected_gle = (
+			(surplus_account, 0.0, 400.0, ''),
+			(surplus_account, 0.0, 400.0, jv.finance_book),
+			('Sales - TPC', 400.0, 0.0, ''),
+			('Sales - TPC', 400.0, 0.0, jv.finance_book)
+		)
+
+		pcv_gle = frappe.db.sql("""
+			select account, debit, credit, finance_book from `tabGL Entry` where voucher_no=%s
+		""", (pcv.name))
+
+		self.assertTrue(pcv_gle, expected_gle)
+
 	def make_period_closing_voucher(self):
 		pcv = frappe.get_doc({
 			"doctype": "Period Closing Voucher",
@@ -139,7 +192,7 @@ def create_company():
 		'company_name': "Test PCV Company",
 		'country': 'United States',
 		'default_currency': 'USD'
-	})		
+	})
 	company.insert(ignore_if_duplicate = True)
 	return company.name
 
