@@ -53,26 +53,3 @@ frappe.ui.form.on('Asset Category', {
 
 	}
 });
-
-frappe.tour['Asset Category'] = [
-	{
-		fieldname: 'asset_category_name',
-		title: 'Asset Category Name',
-		description: 'Name Asset category. You can create categories based on Asset Types. like Furniture, Property, Electronics etc.'
-	},
-	{
-		fieldname: 'enable_cwip_accounting',
-		title: 'Enable CWIP Accounting',
-		description: 'Check to enable Capital Work in Progress accounting'
-	},
-	{
-		fieldname: 'finance_books',
-		title: 'Finance Book Detail',
-		description: 'Add a row to define Depreciation Method and other details. Note that you can leave Finance Book blank to have it\'s accounting done in the primary books of accounts.'
-	},
-	{
-		fieldname: 'accounts',
-		title: 'Accounts',
-		description: "Select the Fixed Asset and Depreciation accounts applicable for this Asset Category type"
-	},
-]
