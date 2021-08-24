@@ -48,11 +48,11 @@ frappe.ui.form.on("Warehouse", {
 			frm.add_custom_button(__('Non-Group to Group'),
 				function() { convert_to_group_or_ledger(frm); }, 'fa fa-retweet', 'btn-default')
 		}
-		
+
 		frm.toggle_enable(['is_group', 'company'], false);
 
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Warehouse'};
-		
+
 		frm.fields_dict['parent_warehouse'].get_query = function(doc) {
 			return {
 				filters: {
@@ -83,6 +83,6 @@ function convert_to_group_or_ledger(frm){
 		callback: function(){
 			frm.refresh();
 		}
-		
+
 	})
 }

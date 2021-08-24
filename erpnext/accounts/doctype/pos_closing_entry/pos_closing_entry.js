@@ -20,9 +20,9 @@ frappe.ui.form.on('POS Closing Entry', {
 		frm.set_query("pos_opening_entry", function(doc) {
 			return { filters: { 'status': 'Open', 'docstatus': 1 } };
 		});
-		
+
 		if (frm.doc.docstatus === 0 && !frm.doc.amended_from) frm.set_value("period_end_date", frappe.datetime.now_datetime());
-		
+
 		frappe.realtime.on('closing_process_complete', async function(data) {
 			await frm.reload_doc();
 			if (frm.doc.status == 'Failed' && frm.doc.error_message && data.user == frappe.session.user) {
@@ -43,7 +43,7 @@ frappe.ui.form.on('POS Closing Entry', {
 			const issue = '<a id="jump_to_error" style="text-decoration: underline;">issue</a>';
 			frm.dashboard.set_headline(
 				__('POS Closing failed while running in a background process. You can resolve the {0} and retry the process again.', [issue]));
-			
+
 			$('#jump_to_error').on('click', (e) => {
 				e.preventDefault();
 				frappe.utils.scroll_to(

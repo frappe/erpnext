@@ -149,6 +149,7 @@ frappe.ui.form.on("Customer", {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 
 	},
+
 	get_customer_group_details: function(frm) {
 		frappe.call({
 			method: "get_customer_group_details",
@@ -160,4 +161,3 @@ frappe.ui.form.on("Customer", {
 
 	}
 });
-
