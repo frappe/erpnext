@@ -159,7 +159,8 @@ class AccountsController(TransactionBase):
 		self.set_due_date()
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
-		self.validate_due_date()
+		if not self.get('ignore_default_payment_terms_template'):
+			self.validate_due_date()
 		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
