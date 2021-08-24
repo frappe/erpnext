@@ -11,8 +11,14 @@
   "emp_created_by",
   "column_break_4",
   "standard_working_hours",
-  "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
+  "reminders_section",
+  "send_birthday_reminders",
+  "column_break_9",
+  "send_work_anniversary_reminders",
+  "column_break_11",
+  "send_holiday_reminders",
+  "frequency",
   "leave_settings",
   "send_leave_notification",
   "leave_approval_notification_template",
@@ -49,13 +55,6 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "Don't send employee birthday reminders",
-   "fieldname": "stop_birthday_reminders",
-   "fieldtype": "Check",
-   "label": "Stop Birthday Reminders"
   },
   {
    "default": "1",
@@ -142,13 +141,53 @@
    "fieldname": "standard_working_hours",
    "fieldtype": "Int",
    "label": "Standard Working Hours"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reminders_section",
+   "fieldtype": "Section Break",
+   "label": "Reminders"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_holiday_reminders",
+   "fieldtype": "Check",
+   "label": "Holidays"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_work_anniversary_reminders",
+   "fieldtype": "Check",
+   "label": "Work Anniversaries "
+  },
+  {
+   "default": "Weekly",
+   "depends_on": "eval:doc.send_holiday_reminders",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Set the frequency for holiday reminders",
+   "options": "Weekly\nMonthly"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_birthday_reminders",
+   "fieldtype": "Check",
+   "label": "Birthdays"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-11 10:52:56.192773",
+ "modified": "2021-08-24 14:54:12.834162",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
