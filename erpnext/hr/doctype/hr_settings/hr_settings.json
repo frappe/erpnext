@@ -14,8 +14,9 @@
   "expense_approver_mandatory_in_expense_claim",
   "reminders_section",
   "send_birthday_reminders",
+  "column_break_9",
   "send_work_anniversary_reminders",
-  "separator",
+  "column_break_11",
   "send_holiday_reminders",
   "frequency",
   "leave_settings",
@@ -143,7 +144,6 @@
   },
   {
    "collapsible": 1,
-   "description": "Configure reminder that you want to send to your employees",
    "fieldname": "reminders_section",
    "fieldtype": "Section Break",
    "label": "Reminders"
@@ -156,7 +156,6 @@
   },
   {
    "default": "1",
-   "description": "Reminders for birthdays and work anniversaries are sent on the day of the event",
    "fieldname": "send_work_anniversary_reminders",
    "fieldtype": "Check",
    "label": "Work Anniversaries "
@@ -176,17 +175,19 @@
    "label": "Birthdays"
   },
   {
-   "fieldname": "separator",
-   "fieldtype": "HTML",
-   "label": "Separator",
-   "options": "<hr>"
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-18 12:09:26.487040",
+ "modified": "2021-08-24 14:54:12.834162",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
