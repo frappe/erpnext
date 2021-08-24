@@ -105,13 +105,13 @@ class DeliveryPlanningItem(Document):
 			print("updated -------------",self.is_updated)
 
 			ref_soi = frappe.db.set_value('Sales Order Item', self.item_dname, {
-					"qty" : self.qty_to_deliver,
-					"stock_qty" : self.qty_to_deliver,
-					"amount" : self.qty_to_deliver * self.rate,
+					# "qty" : self.qty_to_deliver,
+					# "stock_qty" : self.qty_to_deliver,
+					# "amount" : self.qty_to_deliver * self.rate,
 					"delivered_by_supplier" : self.supplier_dc,
-					"supplier" : self.supplier
+					"supplier" : self.supplier,
+					"warehouse" : self.sorce_warehouse
 				})
-		
 			# ref_soi = frappe.get_doc('Sales Order Item', self.item_dname)
 			# ref_soi.qty = self.qty_to_deliver,
 			# ref_soi.stock_qty = self.qty_to_deliver,
