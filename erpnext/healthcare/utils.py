@@ -8,12 +8,7 @@ import frappe
 import json
 from frappe import _
 from frappe.utils.formatters import format_value
-<<<<<<< HEAD
-from frappe.utils import time_diff_in_hours, rounded
-from six import string_types
-=======
 from frappe.utils import time_diff_in_hours, rounded, cstr
->>>>>>> c493cc234e... fix: redesign patient history card
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
@@ -316,7 +311,7 @@ def get_therapy_sessions_to_invoice(patient, company):
 
 @frappe.whitelist()
 def get_service_item_and_practitioner_charge(doc):
-	if isinstance(doc, string_types):
+	if isinstance(doc, str):
 		doc = json.loads(doc)
 		doc = frappe.get_doc(doc)
 

@@ -18,7 +18,6 @@ class PatientProgress {
 		this.page = wrapper.page;
 		this.sidebar = this.wrapper.find('.layout-side-section');
 		this.main_section = this.wrapper.find('.layout-main-section');
-		this.main_section.addClass('frappe-card');
 	}
 
 	show() {
