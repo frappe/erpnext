@@ -388,7 +388,7 @@ def validate_totals(einvoice):
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
 
 	if abs(
-		flt(value_details['TotInvVal']) + flt(value_details['Discount']) - 
+		flt(value_details['TotInvVal']) + flt(value_details['Discount']) -
 		flt(value_details['OthChrg']) - flt(value_details['RndOffAmt']) -
 		total_item_value) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))

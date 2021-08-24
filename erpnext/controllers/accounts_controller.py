@@ -135,13 +135,8 @@ class AccountsController(TransactionBase):
 
 		validate_regional(self)
 
-		validate_einvoice_fields(self)
-
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
-
-	def before_cancel(self):
-		validate_einvoice_fields(self)
 
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
@@ -164,7 +159,8 @@ class AccountsController(TransactionBase):
 		self.set_due_date()
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
-		self.validate_due_date()
+		if not self.get('ignore_default_payment_terms_template'):
+			self.validate_due_date()
 		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
@@ -1841,6 +1837,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	for d in data:
 		new_child_flag = False
+
+		if not d.get("item_code"):
+			# ignore empty rows
+			continue
+
 		if not d.get("docname"):
 			new_child_flag = True
 			check_doc_permissions(parent, 'create')
@@ -1863,7 +1864,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			qty_unchanged = prev_qty == new_qty
 			uom_unchanged = prev_uom == new_uom
 			conversion_factor_unchanged = prev_con_fac == new_con_fac
-			date_unchanged = prev_date == new_date if prev_date and new_date else False # in case of delivery note etc
+			date_unchanged = prev_date == getdate(new_date) if prev_date and new_date else False # in case of delivery note etc
 			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and uom_unchanged and date_unchanged:
 				continue
 
@@ -1974,8 +1975,4 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
-	pass
-
-@erpnext.allow_regional
-def validate_einvoice_fields(doc):
 	pass

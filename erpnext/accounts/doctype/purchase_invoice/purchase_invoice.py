@@ -522,7 +522,9 @@ class PurchaseInvoice(BuyingController):
 			and flt(d.base_tax_amount_after_discount_amount)]
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
-		
+
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
@@ -613,7 +615,7 @@ class PurchaseInvoice(BuyingController):
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
 
 					if not item.is_fixed_asset:
-						dummy, amount = self.get_amount_and_base_amount(item, self.enable_discount_accounting)
+						dummy, amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
@@ -855,9 +857,10 @@ class PurchaseInvoice(BuyingController):
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		valuation_tax = {}
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
 		for tax in self.get("taxes"):
-			amount, base_amount = self.get_tax_amounts(tax, self.enable_discount_accounting)
+			amount, base_amount = self.get_tax_amounts(tax, enable_discount_accounting)
 			if tax.category in ("Total", "Valuation and Total") and flt(base_amount):
 				account_currency = get_account_currency(tax.account_head)
 
