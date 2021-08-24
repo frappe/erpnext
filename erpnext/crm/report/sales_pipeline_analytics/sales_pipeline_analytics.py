@@ -194,10 +194,10 @@ class SalesPipelineAnalytics(object):
 
 			if self.filters.get('pipeline_by') == 'Owner':
 
-				if value == None or value == '[]':
-					temp = ["Not Assgined"]
+				if value is None or value == '[]':
+					temp = ["Not Assigned"]
 				else:
-				 	temp = json.loads(value)
+					temp = json.loads(value)
 				self.check_for_assigned_to(period,value,count,temp,info)
 
 			else:
@@ -211,21 +211,21 @@ class SalesPipelineAnalytics(object):
 					for user in temp:
 						if self.filters.get("assigned_to") == user:
 							value = user
-							self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
+							self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 							self.periodic_data[value][period] += val
 				else:
 					for user in temp:
 						value = user
-						self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
+						self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 						self.periodic_data[value][period] += val
 			else:
 				value = temp[0]
-				self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
+				self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 				self.periodic_data[value][period] += val
 
 		else:
 			value = value
-			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0.0)
+			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 			self.periodic_data[value][period] += val
 
 	def check_for_assigned_to(self,period,value,count,temp,info):
@@ -283,6 +283,7 @@ class SalesPipelineAnalytics(object):
 					period = info.get(period_by)
 				if self.filters.get('range') == 'Quaterly':
 					period = "Q" + str(info.get(period_by))
+
 				count = period_data.get(period,0.0)
 				row[period] = count
 			self.data.append(row)

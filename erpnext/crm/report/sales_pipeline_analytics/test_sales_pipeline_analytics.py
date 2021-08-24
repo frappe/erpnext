@@ -8,18 +8,15 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
     def setUpClass(self):
         create_company()
         create_customer()
-        create_lead()
         create_opportunity()
         
-
     def test_sales_pipeline_analytics(self):
         self.check_for_monthly_and_number()
         self.check_for_monthly_and_amount()
         self.check_for_quarterly_and_number()
         self.check_for_quarterly_and_amount()
         self.check_for_all_filters()
-
-    
+ 
     def check_for_monthly_and_number(self):
         filters = {
             'pipeline_by':"Owner",
@@ -60,7 +57,6 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
         ]
 
         self.assertEqual(expected_data,report[1])
-
 
     def check_for_monthly_and_amount(self):
         filters = {
@@ -103,7 +99,6 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         self.assertEqual(expected_data,report[1])
 
-
     def check_for_quarterly_and_number(self):
         filters = {
             'pipeline_by':"Owner",
@@ -144,7 +139,6 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
         ]
 
         self.assertEqual(expected_data,report[1])
-
 
     def check_for_quarterly_and_amount(self):
         filters = {
@@ -187,7 +181,6 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         self.assertEqual(expected_data,report[1])
 
-
     def check_for_all_filters(self):
         filters = {
             'pipeline_by':"Owner",
@@ -212,7 +205,6 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
         self.assertEqual(expected_data,report[1])
 
-
 def create_company():
     doc = frappe.db.exists('Company','__Test Company')
     if not doc:
@@ -226,15 +218,6 @@ def create_customer():
     if not doc:
         doc = frappe.new_doc("Customer")
         doc.customer_name = '_Test Customer'
-        doc.insert()
-
-def create_lead():
-    doc = frappe.db.exists("Lead","_Test Lead")
-    if not doc:
-        doc = frappe.new_doc("Lead")
-        doc.lead_name = '_Test Lead'
-        doc.company_name = 'Client Company'
-        doc.company = "__Test Company"
         doc.insert()
 
 def create_opportunity():
