@@ -211,15 +211,17 @@ class DeliveryPlanningItem(Document):
 		if(docs):
 			for doc in docs:
 				print("----- doc.actual_qty -----------", doc.actual_qty)	
-				frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
-					SET current_stock = {0},
-					available_stock = {1}
-					WHERE name = {2} """.format(doc.projected_qty, doc.actual_qty, "'"+self.name+"'"))	
+				# frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
+				# 	SET current_stock = {0},
+				# 	available_stock = {1}
+				# 	WHERE name = {2} """.format(doc.projected_qty, doc.actual_qty, "'"+self.name+"'"))	
+
 				# frappe.db.set_value('Delivery Planning Item', self.name, {
 				# 		'available_stock' : doc.actual_qty,
 				# 		'current_stock' : doc.projected_qty
 				# 	})
-		# self.save()			
+		# self.save()
+			return doc			
 
 @frappe.whitelist()
 def approve_function(source_names):

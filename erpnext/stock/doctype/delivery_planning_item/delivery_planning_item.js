@@ -3,17 +3,45 @@
 
 frappe.ui.form.on('Delivery Planning Item', {
 	
-	before_load: function(frm){
+	// refresh : function(frm){
+	// 	if(frm.doc.docstatus != 1){
 
+	// 		frm.call({
+	// 					doc:frm.doc,
+	// 					method: 'update_stock',	
+	// 				});
+	// 	}
+	// },
+
+	sorce_warehouse: function(frm){
 		if(frm.doc.docstatus != 1){
-
+			console.log("Inside soure_warehouse")
 			frm.call({
 						doc:frm.doc,
-						method: 'update_stock',
-						
+						method: 'update_stock',	
+						callback: function(r){
+							if(r.message)
+							frm.doc.current_stock = r.message.projected_qty
+							frm.refresh_field("current_stock");
+							frm.doc.available_stock = r.message.actual_qty
+							frm.refresh_field("available_stock")
+							
+						}
 					});
 		}
 	},
+
+	// before_load: function(frm){
+
+	// 	if(frm.doc.docstatus != 1){
+
+	// 		frm.call({
+	// 					doc:frm.doc,
+	// 					method: 'update_stock',
+						
+	// 				});
+	// 	}
+	// },
 
 	qty_to_deliver: function(frm){
 		if(frm.doc.qty_to_deliver > frm.doc.ordered_qty)
@@ -50,7 +78,9 @@ frappe.ui.form.on('Delivery Planning Item', {
 			console.log("frm.docstatus")
 			frm.set_df_property('split','hidden',1)
 			frm.refresh_field("split")
-		}				
+		}
+		
+		
 	},
 
 
