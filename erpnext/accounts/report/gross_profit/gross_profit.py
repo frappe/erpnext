@@ -460,6 +460,8 @@ class GrossProfitGenerator(object):
 		)
 
 		for i, item in enumerate(bundle_items):
+			item_name, description, item_group, brand = self.get_bundle_item_details(item.item_code)
+
 			bundle_item = frappe._dict({
 				'parent_invoice': product_bundle.item_code,
 				'indent': product_bundle.indent + 1,
@@ -470,11 +472,11 @@ class GrossProfitGenerator(object):
 				'customer': product_bundle.customer,
 				'customer_group': product_bundle.customer_group,
 				'item_code': item.item_code,
-				'item_name': frappe.db.get_value('Item', item.item_code, 'item_name'),
-				'description': frappe.db.get_value('Item', item.item_code, 'description'),
+				'item_name': item_name,
+				'description': description,
 				'warehouse': product_bundle.warehouse,
-				'item_group': frappe.db.get_value('Item', item.item_code, 'item_group'),
-				'brand': frappe.db.get_value('Item', item.item_code, 'brand'), 
+				'item_group': item_group,
+				'brand': brand, 
 				'dn_detail': product_bundle.dn_detail, 
 				'delivery_note': product_bundle.delivery_note, 
 				'qty': (flt(product_bundle.qty) * flt(item.qty)), 
@@ -484,6 +486,13 @@ class GrossProfitGenerator(object):
 			})
 
 			self.si_list.insert((index+i+1), bundle_item)
+
+	def get_bundle_item_details(self, item_code):
+		return frappe.db.get_value(
+			'Item', 
+			item_code, 
+			['item_name', 'description', 'item_group', 'brand']
+		)
 
 	def load_stock_ledger_entries(self):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
