@@ -84,6 +84,8 @@
   "rounding_adjustment",
   "rounded_total",
   "in_words",
+  "bundle_items_section",
+  "packed_items",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -926,6 +928,17 @@
    "label": "Lost Reasons",
    "options": "Quotation Lost Reason Detail",
    "read_only": 1
+  },
+  {
+   "fieldname": "packed_items",
+   "fieldtype": "Table",
+   "label": "Bundle Items",
+   "options": "Packed Item"
+  },
+  {
+   "fieldname": "bundle_items_section",
+   "fieldtype": "Section Break",
+   "label": "Bundle Items"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -933,7 +946,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-10-30 13:58:59.212060",
+ "modified": "2021-08-24 17:56:39.199033",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
