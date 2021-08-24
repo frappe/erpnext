@@ -361,14 +361,14 @@ class SalarySlip(TransactionBase):
 		from datetime import date
 		doc=frappe.get_doc("Payroll Period",{"company":self.company})
 		lst=frappe.get_doc("Employee",{"employee":self.employee})
-		b = doc.start_date
+		a=self.end_date
 		if doc.start_date < lst.date_of_joining <= doc.end_date and self.payroll_frequency=="Monthly":
-			end_date = getdate(b)
+			end_date = getdate(a)
 			start_date = getdate(lst.date_of_joining)
-			num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+			num_months = (end_date.year - start_date.year) * 12 + (end_date.month+1 - start_date.month)
 			return num_months
 		elif doc.start_date < lst.date_of_joining <= doc.end_date and self.payroll_frequency=="Weekly":
-			end_date = getdate(b)
+			end_date = getdate(a)
 			start_date = getdate(lst.date_of_joining)
 			days = abs(start_date-end_date).days
 			num_months=flt(days/7,precision=0)
@@ -379,7 +379,7 @@ class SalarySlip(TransactionBase):
 			if not doc.start_date < lst.date_of_joining <= doc.end_date:
 				end_date = getdate(a)
 				start_date = getdate(b)
-				num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+				num_months = (end_date.year - start_date.year) * 12 + (end_date.month+1 - start_date.month)
 				return num_months
 		if self.payroll_frequency=="Weekly":
 			if not doc.start_date < lst.date_of_joining <= doc.end_date:

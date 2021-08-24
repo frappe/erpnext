@@ -163,7 +163,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
 		frm.trigger("set_dynamic_labels");
 
-		if(frm.doc.employee){
+		if(frm.doc.start_date){
 			frappe.call({
 				method: 'get_payroll',
 				doc:frm.doc,
