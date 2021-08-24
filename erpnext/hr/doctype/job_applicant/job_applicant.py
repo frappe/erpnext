@@ -50,4 +50,3 @@ class JobApplicant(Document):
 
 			if names:
 				frappe.throw(_("Email Address must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
-

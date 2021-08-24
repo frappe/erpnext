@@ -83,4 +83,3 @@ class SMSCenter(Document):
 			receiver_list = self.get_receiver_nos()
 		if receiver_list:
 			send_sms(receiver_list, cstr(self.message))
-
