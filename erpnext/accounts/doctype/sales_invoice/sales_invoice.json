@@ -692,6 +692,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
+   "options": "Barcode",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode"
@@ -1443,7 +1444,8 @@
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.write_off_outstanding_amount_automatically"
   },
   {
    "fieldname": "base_write_off_amount",
@@ -2013,7 +2015,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-17 19:00:32.230701",
+ "modified": "2021-08-18 16:07:45.122570",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
