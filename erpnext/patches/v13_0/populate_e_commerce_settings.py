@@ -8,7 +8,7 @@ def execute():
 	frappe.reload_doc("portal", "doctype", "website_attribute")
 
 	products_settings_fields = [
-		"hide_variants", "home_page_is_products", "products_per_page",
+		"hide_variants", "products_per_page",
 		"enable_attribute_filters", "enable_field_filters"
 	]
 
