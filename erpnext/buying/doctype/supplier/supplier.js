@@ -60,9 +60,22 @@ frappe.ui.form.on("Supplier", {
 				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
 			}, __('Create'));
 
+			frm.add_custom_button(__('Get Supplier Group Details'), function () {
+				frm.trigger("get_supplier_group_details");
+			}, __('Actions'));
+
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
+	},
+	get_supplier_group_details: function(frm) {
+		frappe.call({
+			method: "get_supplier_group_details",
+			doc: frm.doc,
+			callback: function() {
+				frm.refresh();
+			}
+		});
 	},
 
 	is_internal_supplier: function(frm) {
