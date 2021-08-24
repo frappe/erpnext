@@ -1,13 +1,13 @@
 {
- "creation": "2021-08-20 16:02:59.314742",
+ "creation": "2021-08-24 14:44:22.292652",
  "docstatus": 0,
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2021-08-20 16:05:40.593997",
+ "modified": "2021-08-24 14:50:48.017420",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Create a Stock Entry",
+ "name": "Stock Entry",
  "owner": "Administrator",
  "reference_doctype": "Stock Entry",
  "save_on_complete": 1,
@@ -52,5 +52,5 @@
    "title": "Items"
   }
  ],
- "title": "Create a Stock Entry"
+ "title": "Stock Entry"
 }

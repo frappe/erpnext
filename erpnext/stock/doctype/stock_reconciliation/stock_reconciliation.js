@@ -289,20 +289,3 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
 
-frappe.tour['Stock Reconciliation'] = [
-	{
-		fieldname: "purpose",
-		title: __("Purpose"),
-		description: __("Set Purpose to Opening Stock to set the stock opening balance.")
-	},
-	{
-		fieldname: "posting_date",
-		title: __("Posting Date"),
-		description: __("Edit the Posting Date by clicking on the Edit Posting Date and Time checkbox below.")
-	},
-	{
-		fieldname: "items",
-		title: __("Items"),
-		description: __("Select the items for which the opening stock has to be set.")
-	},
-];
