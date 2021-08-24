@@ -50,7 +50,7 @@ class Quotation(SellingController):
 			self.customer_name = company_name or lead_name
 
 	def update_opportunity(self, status):
-		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
+		for opportunity in set(d.prevdoc_docname for d in self.get("items")):
 			if opportunity:
 				self.update_opportunity_status(status, opportunity)
 

@@ -13,7 +13,7 @@ class BalanceMismatchError(frappe.ValidationError): pass
 class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
 	def on_update(self):
-		if frappe.local.flags.ignore_on_update:
+		if frappe.local.flags.ignore_update_nsm:
 			return
 		else:
 			super(Account, self).on_update()
@@ -230,7 +230,7 @@ class Account(NestedSet):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be converted to group."))
 		elif self.account_type and not self.flags.exclude_account_type_check:
-			throw(_("Cannot covert to Group because Account Type is selected."))
+			throw(_("Cannot convert to Group because Account Type is selected."))
 		else:
 			self.is_group = 1
 			self.save()

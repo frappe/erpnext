@@ -12,10 +12,11 @@
     "url": "https://github.com/frappe/erpnext/issues"
   },
   "devDependencies": {
-    "snyk": "^1.290.1"
+    "snyk": "^1.518.0"
   },
   "dependencies": {
-    "onscan.js": "^1.5.2"
+    "onscan.js": "^1.5.2",
+    "html2canvas": "^1.1.4"
   },
   "scripts": {
     "snyk-protect": "snyk protect",

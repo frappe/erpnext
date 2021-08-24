@@ -9,11 +9,14 @@
   "supp_master_name",
   "supplier_group",
   "buying_price_list",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
   "column_break_3",
   "po_required",
   "pr_required",
   "maintain_same_rate",
   "allow_multiple_items",
+  "bill_for_rejected_quantity_in_purchase_invoice",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -89,6 +92,30 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_rate",
+   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action If Same Rate is Not Maintained",
+   "mandatory_depends_on": "maintain_same_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval:doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "default": "1",
+   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
+   "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
+   "fieldtype": "Check",
+   "label": "Bill for Rejected Quantity in Purchase Invoice"
   }
  ],
  "icon": "fa fa-cog",
@@ -96,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-02 17:34:04.190677",
+ "modified": "2021-06-24 10:38:28.934525",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

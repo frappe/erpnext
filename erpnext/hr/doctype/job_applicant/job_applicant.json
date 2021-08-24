@@ -18,6 +18,7 @@
   "job_title",
   "source",
   "source_name",
+  "employee_referral",
   "applicant_rating",
   "section_break_6",
   "notes",
@@ -152,13 +153,20 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "employee_referral",
+   "fieldtype": "Link",
+   "label": "Employee Referral",
+   "options": "Employee Referral",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-18 12:39:02.557563",
+ "modified": "2021-03-24 15:51:11.117517",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Applicant",

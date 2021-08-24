@@ -39,11 +39,13 @@ frappe.ui.form.on('Patient Assessment', {
 	},
 
 	set_score_range: function(frm) {
-		let options = [];
+		let options = [''];
 		for(let i = frm.doc.scale_min; i <= frm.doc.scale_max; i++) {
 			options.push(i);
 		}
-		frappe.meta.get_docfield('Patient Assessment Sheet', 'score', frm.doc.name).options = [''].concat(options);
+		frm.fields_dict.assessment_sheet.grid.update_docfield_property(
+			'score', 'options', options
+		);
 	},
 
 	calculate_total_score: function(frm, cdt, cdn) {

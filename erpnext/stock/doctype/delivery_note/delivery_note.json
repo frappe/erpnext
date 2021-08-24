@@ -32,6 +32,8 @@
   "contact_info",
   "shipping_address_name",
   "shipping_address",
+  "dispatch_address_name",
+  "dispatch_address",
   "contact_person",
   "contact_display",
   "contact_mobile",
@@ -99,6 +101,7 @@
   "rounding_adjustment",
   "rounded_total",
   "in_words",
+  "disable_rounded_total",
   "terms_section_break",
   "tc_name",
   "terms",
@@ -512,7 +515,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -553,8 +557,7 @@
    "oldfieldname": "packing_details",
    "oldfieldtype": "Table",
    "options": "Packed Item",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "product_bundle_help",
@@ -768,6 +771,7 @@
    "width": "150px"
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -777,6 +781,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
    "label": "Rounded Total (Company Currency)",
@@ -819,6 +824,7 @@
    "width": "150px"
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -829,6 +835,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "label": "Rounded Total",
@@ -1271,13 +1278,35 @@
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "grand_total",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "dispatch_address_name",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Name",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "dispatch_address_name",
+   "fieldname": "dispatch_address",
+   "fieldtype": "Small Text",
+   "label": "Dispatch Address",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-26 17:07:59.194403",
+ "modified": "2021-08-17 20:15:50.574966",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

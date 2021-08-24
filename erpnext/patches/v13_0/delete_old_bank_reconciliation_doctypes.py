@@ -22,5 +22,7 @@ def execute():
 
 	frappe.delete_doc("Page", "bank-reconciliation", force=1)
 
+	frappe.reload_doc('accounts', 'doctype', 'bank_transaction')
+
 	rename_field("Bank Transaction", "debit", "deposit")
 	rename_field("Bank Transaction", "credit", "withdrawal")

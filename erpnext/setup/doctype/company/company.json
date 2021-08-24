@@ -74,7 +74,7 @@
   "stock_received_but_not_billed",
   "service_received_but_not_billed",
   "expenses_included_in_valuation",
-  "fixed_asset_depreciation_settings",
+  "fixed_asset_defaults",
   "accumulated_depreciation_account",
   "depreciation_expense_account",
   "series_for_depreciation_entry",
@@ -83,6 +83,7 @@
   "disposal_account",
   "depreciation_cost_center",
   "capital_work_in_progress_account",
+  "repair_and_maintenance_account",
   "asset_received_but_not_billed",
   "budget_detail",
   "exception_budget_approver_role",
@@ -99,7 +100,6 @@
   "company_description",
   "registration_info",
   "registration_details",
-  "delete_company_transactions",
   "lft",
   "rgt",
   "old_parent"
@@ -521,12 +521,6 @@
    "options": "Account"
   },
   {
-   "collapsible": 1,
-   "fieldname": "fixed_asset_depreciation_settings",
-   "fieldtype": "Section Break",
-   "label": "Fixed Asset Depreciation Settings"
-  },
-  {
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
    "label": "Accumulated Depreciation Account",
@@ -667,11 +661,6 @@
    "oldfieldtype": "Code"
   },
   {
-   "fieldname": "delete_company_transactions",
-   "fieldtype": "Button",
-   "label": "Delete Company Transactions"
-  },
-  {
    "fieldname": "lft",
    "fieldtype": "Int",
    "hidden": 1,
@@ -740,6 +729,18 @@
    "fieldtype": "Link",
    "label": "Default Payment Discount Account",
    "options": "Account"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "fixed_asset_defaults",
+   "fieldtype": "Section Break",
+   "label": "Fixed Asset Defaults"
+  },
+  {
+   "fieldname": "repair_and_maintenance_account",
+   "fieldtype": "Link",
+   "label": "Repair and Maintenance Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -747,7 +748,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-02-16 15:53:37.167589",
+ "modified": "2021-05-12 16:51:08.187233",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

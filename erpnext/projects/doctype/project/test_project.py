@@ -33,12 +33,16 @@ class TestProject(unittest.TestCase):
 
 	def test_project_template_having_parent_child_tasks(self):
 		project_name = "Test Project with Template - Tasks with Parent-Child Relation"
+
+		if frappe.db.get_value('Project', {'project_name': project_name}, 'name'):
+			project_name = frappe.db.get_value('Project', {'project_name': project_name}, 'name')
+
 		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
 		frappe.delete_doc('Project', project_name)
 
 		task1 = task_exists("Test Template Task Parent")
 		if not task1:
-			task1 = create_task(subject="Test Template Task Parent", is_group=1, is_template=1, begin=1, duration=4)
+			task1 = create_task(subject="Test Template Task Parent", is_group=1, is_template=1, begin=1, duration=10)
 
 		task2 = task_exists("Test Template Task Child 1")
 		if not task2:
@@ -53,7 +57,7 @@ class TestProject(unittest.TestCase):
 		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name', 'parent_task'], dict(project=project.name), order_by='creation asc')
 
 		self.assertEqual(tasks[0].subject, 'Test Template Task Parent')
-		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 4))
+		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 10))
 
 		self.assertEqual(tasks[1].subject, 'Test Template Task Child 1')
 		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, 1, 3))

@@ -62,14 +62,15 @@ class POSProfile(Document):
 
 		if len(default_mode) > 1:
 			frappe.throw(_("You can only select one mode of payment as default"))
-		
+
 		invalid_modes = []
 		for d in self.payments:
 			account = frappe.db.get_value(
-				"Mode of Payment Account", 
+				"Mode of Payment Account",
 				{"parent": d.mode_of_payment, "company": self.company},
 				"default_account"
 			)
+
 			if not account:
 				invalid_modes.append(get_link_to_form("Mode of Payment", d.mode_of_payment))
 

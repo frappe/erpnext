@@ -31,7 +31,8 @@ class Department(NestedSet):
 		return new
 
 	def on_update(self):
-		NestedSet.on_update(self)
+		if not frappe.local.flags.ignore_update_nsm:
+			super(Department, self).on_update()
 
 	def on_trash(self):
 		super(Department, self).on_trash()

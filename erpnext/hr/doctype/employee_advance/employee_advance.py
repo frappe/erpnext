@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.hr.utils import validate_active_employee
 
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
@@ -18,11 +19,11 @@ class EmployeeAdvance(Document):
 			'make_payment_via_journal_entry')
 
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.set_status()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry')
-		self.set_status()
 
 	def set_status(self):
 		if self.docstatus == 0:
@@ -183,9 +184,9 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 	bank_cash_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 	if not bank_cash_account:
 		frappe.throw(_("Please set a Default Cash Account in Company defaults"))
-	
+
 	advance_account_currency = frappe.db.get_value('Account', advance_account, 'account_currency')
-	
+
 	je = frappe.new_doc('Journal Entry')
 	je.posting_date = nowdate()
 	je.voucher_type = get_voucher_type(mode_of_payment)

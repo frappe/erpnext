@@ -96,47 +96,58 @@ class POSInvoice(SalesInvoice):
 				if paid_amt and pay.amount != paid_amt:
 					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
+	def validate_pos_reserved_serial_nos(self, item):
+		serial_nos = get_serial_nos(item.serial_no)
+		filters = {"item_code": item.item_code, "warehouse": item.warehouse}
+		if item.batch_no:
+			filters["batch_no"] = item.batch_no
+
+		reserved_serial_nos = get_pos_reserved_serial_nos(filters)
+		invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
+
+		bold_invalid_serial_nos = frappe.bold(', '.join(invalid_serial_nos))
+		if len(invalid_serial_nos) == 1:
+			frappe.throw(_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
+						.format(item.idx, bold_invalid_serial_nos), title=_("Item Unavailable"))
+		elif invalid_serial_nos:
+			frappe.throw(_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
+						.format(item.idx, bold_invalid_serial_nos), title=_("Item Unavailable"))
+
+	def validate_delivered_serial_nos(self, item):
+		serial_nos = get_serial_nos(item.serial_no)
+		delivered_serial_nos = frappe.db.get_list('Serial No', {
+			'item_code': item.item_code,
+			'name': ['in', serial_nos],
+			'sales_invoice': ['is', 'set']
+		}, pluck='name')
+
+		if delivered_serial_nos:
+			bold_delivered_serial_nos = frappe.bold(', '.join(delivered_serial_nos))
+			frappe.throw(_("Row #{}: Serial No. {} has already been transacted into another Sales Invoice. Please select valid serial no.")
+						.format(item.idx, bold_delivered_serial_nos), title=_("Item Unavailable"))
+
 	def validate_stock_availablility(self):
 		if self.is_return:
 			return
 
-		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
-		error_msg = []
+		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 		for d in self.get('items'):
-			msg = ""
 			if d.serial_no:
-				filters = { "item_code": d.item_code, "warehouse": d.warehouse }
-				if d.batch_no:
-					filters["batch_no"] = d.batch_no
-
-				reserved_serial_nos = get_pos_reserved_serial_nos(filters)
-				serial_nos = get_serial_nos(d.serial_no)
-				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
-
-				bold_invalid_serial_nos = frappe.bold(', '.join(invalid_serial_nos))
-				if len(invalid_serial_nos) == 1:
-					msg = (_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
-								.format(d.idx, bold_invalid_serial_nos))
-				elif invalid_serial_nos:
-					msg = (_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
-								.format(d.idx, bold_invalid_serial_nos))
-
+				self.validate_pos_reserved_serial_nos(d)
+				self.validate_delivered_serial_nos(d)
 			else:
 				if allow_negative_stock:
 					return
 
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
+
 				item_code, warehouse, qty = frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty)
 				if flt(available_stock) <= 0:
-					msg = (_('Row #{}: Item Code: {} is not available under warehouse {}.').format(d.idx, item_code, warehouse))
+					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.')
+								.format(d.idx, item_code, warehouse), title=_("Item Unavailable"))
 				elif flt(available_stock) < flt(d.qty):
-					msg = (_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.')
-								.format(d.idx, item_code, warehouse, qty))
-			if msg:
-				error_msg.append(msg)
-
-		if error_msg:
-			frappe.throw(error_msg, title=_("Item Unavailable"), as_list=True)
+					frappe.throw(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.')
+								.format(d.idx, item_code, warehouse, available_stock), title=_("Item Unavailable"))
 
 	def validate_serialised_or_batched_item(self):
 		error_msg = []
@@ -203,9 +214,9 @@ class POSInvoice(SalesInvoice):
 		for d in self.get("items"):
 			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
 			if not is_stock_item:
-				frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice. ").format(
-					d.idx, frappe.bold(d.item_code)
-				), title=_("Invalid Item"))
+				if not frappe.db.exists('Product Bundle', d.item_code):
+					frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice.")
+						.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
@@ -446,29 +457,48 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
-	latest_sle = frappe.db.sql("""select qty_after_transaction
-		from `tabStock Ledger Entry`
+	if frappe.db.get_value('Item', item_code, 'is_stock_item'):
+		bin_qty = get_bin_qty(item_code, warehouse)
+		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
+		return bin_qty - pos_sales_qty
+	else:
+		if frappe.db.exists('Product Bundle', item_code):
+			return get_bundle_availability(item_code, warehouse)
+
+def get_bundle_availability(bundle_item_code, warehouse):
+	product_bundle = frappe.get_doc('Product Bundle', bundle_item_code)
+
+	bundle_bin_qty = 1000000
+	for item in product_bundle.items:
+		item_bin_qty = get_bin_qty(item.item_code, warehouse)
+		item_pos_reserved_qty = get_pos_reserved_qty(item.item_code, warehouse)
+		available_qty = item_bin_qty - item_pos_reserved_qty
+
+		max_available_bundles = available_qty / item.qty
+		if bundle_bin_qty > max_available_bundles:
+			bundle_bin_qty = max_available_bundles
+
+	pos_sales_qty = get_pos_reserved_qty(bundle_item_code, warehouse)
+	return bundle_bin_qty - pos_sales_qty
+
+def get_bin_qty(item_code, warehouse):
+	bin_qty = frappe.db.sql("""select actual_qty from `tabBin`
 		where item_code = %s and warehouse = %s
-		order by posting_date desc, posting_time desc
 		limit 1""", (item_code, warehouse), as_dict=1)
 
-	pos_sales_qty = frappe.db.sql("""select sum(p_item.qty) as qty
+	return bin_qty[0].actual_qty or 0 if bin_qty else 0
+
+def get_pos_reserved_qty(item_code, warehouse):
+	reserved_qty = frappe.db.sql("""select sum(p_item.qty) as qty
 		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
 		where p.name = p_item.parent
-		and p.consolidated_invoice is NULL
-		and p.docstatus = 1
+		and ifnull(p.consolidated_invoice, '') = ''
 		and p_item.docstatus = 1
 		and p_item.item_code = %s
 		and p_item.warehouse = %s
 		""", (item_code, warehouse), as_dict=1)
 
-	sle_qty = latest_sle[0].qty_after_transaction or 0 if latest_sle else 0
-	pos_sales_qty = pos_sales_qty[0].qty or 0 if pos_sales_qty else 0
-
-	if sle_qty and pos_sales_qty:
-		return sle_qty - pos_sales_qty
-	else:
-		return sle_qty
+	return reserved_qty[0].qty or 0 if reserved_qty else 0
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):

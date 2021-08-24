@@ -39,7 +39,11 @@ class JournalEntry(AccountsController):
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
 		self.validate_debit_credit_amount()
-		self.validate_total_debit_and_credit()
+
+		# Do not validate while importing via data import
+		if not frappe.flags.in_import:
+			self.validate_total_debit_and_credit()
+
 		self.validate_against_jv()
 		self.validate_reference_doc()
 		self.set_against_account()
@@ -192,8 +196,8 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 
 	def check_credit_limit(self):
-		customers = list(set([d.party for d in self.get("accounts")
-			if d.party_type=="Customer" and d.party and flt(d.debit) > 0]))
+		customers = list(set(d.party for d in self.get("accounts")
+			if d.party_type=="Customer" and d.party and flt(d.debit) > 0))
 		if customers:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			for customer in customers:
@@ -592,6 +596,7 @@ class JournalEntry(AccountsController):
 
 			self.validate_total_debit_and_credit()
 
+	@frappe.whitelist()
 	def get_outstanding_invoices(self):
 		self.set('accounts', [])
 		total = 0

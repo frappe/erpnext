@@ -57,18 +57,18 @@ def get_columns(customer_naming_type):
 	return columns
 
 def get_details(filters):
-	conditions = ""
 
+	sql_query = """SELECT
+						c.name, c.customer_name,
+						ccl.bypass_credit_limit_check,
+						c.is_frozen, c.disabled
+					FROM `tabCustomer` c, `tabCustomer Credit Limit` ccl
+					WHERE
+						c.name = ccl.parent
+						AND ccl.company = %(company)s"""
+
+	# customer filter is optional.
 	if filters.get("customer"):
-		conditions += " AND c.name = '" + filters.get("customer") + "'"
+		sql_query += " AND c.name = %(customer)s"
 
-	return frappe.db.sql("""SELECT
-			c.name, c.customer_name,
-			ccl.bypass_credit_limit_check,
-			c.is_frozen, c.disabled
-		FROM `tabCustomer` c, `tabCustomer Credit Limit` ccl
-		WHERE
-			c.name = ccl.parent
-			AND ccl.company = '{0}'
-			{1}
-	""".format( filters.get("company"),conditions), as_dict=1) #nosec
+	return frappe.db.sql(sql_query, filters, as_dict=1)

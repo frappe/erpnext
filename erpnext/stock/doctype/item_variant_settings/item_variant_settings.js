@@ -15,8 +15,9 @@ frappe.ui.form.on('Item Variant Settings', {
 				}
 			});
 
-			const child = frappe.meta.get_docfield("Variant Field", "field_name", frm.doc.name);
-			child.options = allow_fields;
+			frm.fields_dict.fields.grid.update_docfield_property(
+				'field_name', 'options', allow_fields
+			);
 		});
 	}
 });

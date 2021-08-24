@@ -7,9 +7,7 @@ import unittest
 import frappe
 from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.job_card.job_card import OperationSequenceError
-from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 class TestRouting(unittest.TestCase):
@@ -48,7 +46,53 @@ class TestRouting(unittest.TestCase):
 		wo_doc.cancel()
 		wo_doc.delete()
 
+	def test_update_bom_operation_time(self):
+		operations = [
+			{
+				"operation": "Test Operation A",
+				"workstation": "_Test Workstation A",
+				"hour_rate_rent": 300,
+				"hour_rate_labour": 750 ,
+				"time_in_mins": 30
+			},
+			{
+				"operation": "Test Operation B",
+				"workstation": "_Test Workstation B",
+				"hour_rate_labour": 200,
+				"hour_rate_rent": 1000,
+				"time_in_mins": 20
+			}
+		]
+
+		test_routing_operations = [
+			{
+				"operation": "Test Operation A",
+				"workstation": "_Test Workstation A",
+				"time_in_mins": 30
+			},
+			{
+				"operation": "Test Operation B",
+				"workstation": "_Test Workstation A",
+				"time_in_mins": 20
+			}
+		]
+		setup_operations(operations)
+		routing_doc = create_routing(routing_name="Routing Test", operations=test_routing_operations)
+		bom_doc = setup_bom(item_code="_Testing Item", routing=routing_doc.name, currency = 'INR')
+		self.assertEqual(routing_doc.operations[0].time_in_mins, 30)
+		self.assertEqual(routing_doc.operations[1].time_in_mins, 20)
+		routing_doc.operations[0].time_in_mins = 90
+		routing_doc.operations[1].time_in_mins = 42.2
+		routing_doc.save()
+		bom_doc.update_cost()
+		bom_doc.reload()
+		self.assertEqual(bom_doc.operations[0].time_in_mins, 90)
+		self.assertEqual(bom_doc.operations[1].time_in_mins, 42.2)
+
+
 def setup_operations(rows):
+	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 	for row in rows:
 		make_workstation(row)
 		make_operation(row)
@@ -61,12 +105,14 @@ def create_routing(**args):
 
 	if not args.do_not_save:
 		try:
-			for operation in args.operations:
-				doc.append("operations", operation)
-
 			doc.insert()
 		except frappe.DuplicateEntryError:
 			doc = frappe.get_doc("Routing", args.routing_name)
+			doc.delete_key('operations')
+			for operation in args.operations:
+				doc.append("operations", operation)
+
+			doc.save()
 
 	return doc
 
@@ -91,7 +137,7 @@ def setup_bom(**args):
 	name = frappe.db.get_value('BOM', {'item': args.item_code}, 'name')
 	if not name:
 		bom_doc = make_bom(item = args.item_code, raw_materials = args.get("raw_materials"),
-			routing = args.routing, with_operations=1)
+			routing = args.routing, with_operations=1, currency = args.currency)
 	else:
 		bom_doc = frappe.get_doc("BOM", name)
 
