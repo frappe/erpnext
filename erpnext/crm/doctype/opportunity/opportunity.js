@@ -10,15 +10,7 @@ frappe.ui.form.on("Opportunity", {
 		frm.custom_make_buttons = {
 			'Quotation': 'Quotation',
 			'Supplier Quotation': 'Supplier Quotation'
-		},
-
-		frm.set_query("opportunity_from", function() {
-			return{
-				"filters": {
-					"name": ["in", ["Customer", "Lead"]],
-				}
-			}
-		});
+		};
 
 		if (frm.doc.opportunity_from && frm.doc.party_name){
 			frm.trigger('set_contact_link');

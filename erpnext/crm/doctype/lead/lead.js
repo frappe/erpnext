@@ -51,7 +51,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 
 	make_customer () {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.crm.doctype.lead.lead.make_customer",
+			method: "erpnext.crm.doctype.lead.lead.make_prospect",
 			frm: cur_frm
 		})
 	}

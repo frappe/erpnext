@@ -191,6 +191,16 @@ class Lead(SellingController):
 		return contact
 
 @frappe.whitelist()
+def make_prospect(source_name, target_doc=None, leads=None):
+	print("``````````````````````````")
+	print(source_name)
+	print("``````````````````````````")
+	print(target_doc)
+	print("``````````````````````````")
+	print(leads)
+	print("``````````````````````````")
+
+@frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	return _make_customer(source_name, target_doc)
 

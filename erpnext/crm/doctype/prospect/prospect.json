@@ -1,0 +1,165 @@
+{
+ "actions": [],
+ "autoname": "field:company_name",
+ "creation": "2021-08-19 00:21:06.995448",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company_name",
+  "industry",
+  "market_segment",
+  "customer_group",
+  "territory",
+  "column_break_6",
+  "no_of_employees",
+  "currency",
+  "annual_revenue",
+  "fax",
+  "website",
+  "prospect_owner",
+  "leads_section",
+  "prospect_lead",
+  "addresses_and_contacts_section",
+  "address_html",
+  "column_break_17",
+  "contact_html",
+  "notes_section",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Company Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "industry",
+   "fieldtype": "Link",
+   "label": "Industry",
+   "options": "Industry Type"
+  },
+  {
+   "fieldname": "market_segment",
+   "fieldtype": "Link",
+   "label": "Market Segment",
+   "options": "Market Segment"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_of_employees",
+   "fieldtype": "Int",
+   "label": "No. of Employees"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "annual_revenue",
+   "fieldtype": "Currency",
+   "label": "Annual Revenue",
+   "options": "currency"
+  },
+  {
+   "fieldname": "fax",
+   "fieldtype": "Data",
+   "label": "Fax",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website",
+   "options": "URL"
+  },
+  {
+   "fieldname": "prospect_owner",
+   "fieldtype": "Link",
+   "label": "Prospect Owner",
+   "options": "User"
+  },
+  {
+   "fieldname": "leads_section",
+   "fieldtype": "Section Break",
+   "label": "Leads"
+  },
+  {
+   "fieldname": "prospect_lead",
+   "fieldtype": "Table",
+   "options": "Prospect Lead"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "addresses_and_contacts_section",
+   "fieldtype": "Section Break",
+   "label": "Addresses and Contacts"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-08-19 00:29:00.767038",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Prospect",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
