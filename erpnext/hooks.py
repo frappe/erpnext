@@ -249,6 +249,9 @@ doc_events = {
 		"on_update": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.update_hold_time",
 			"erpnext.support.doctype.issue.issue.set_first_response_time"
+		],
+		"after_insert": [
+			"erpnext.crm.doctype.lead.lead.add_prospect_link_in_communication"
 		]
 	},
 	("Sales Taxes and Charges Template", 'Price List'): {

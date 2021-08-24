@@ -362,3 +362,13 @@ def daily_open_lead():
 	leads = frappe.get_all("Lead", filters = [["contact_date", "Between", [nowdate(), nowdate()]]])
 	for lead in leads:
 		frappe.db.set_value("Lead", lead.name, "status", "Open")
+
+def add_prospect_link_in_communication(communication, method):
+	if communication.get('reference_doctype') == "Lead":
+		links = frappe.get_all('Prospect Lead', filters={'lead': communication.get('reference_name')}, fields=['parent', 'parenttype'])
+
+		for link in links:
+			communication.append('timeline_links', {
+				'link_doctype': link['parenttype'],
+				'link_name': link['parent']
+			})
