@@ -210,10 +210,10 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	company_currency = get_company_currency(filters)
 
 	if filters.filter_based_on == 'Fiscal Year':
-		start_date = fiscal_year.year_start_date
+		start_date = fiscal_year.year_start_date if filters.report != 'Balance Sheet' else None
 		end_date = fiscal_year.year_end_date
 	else:
-		start_date = filters.period_start_date
+		start_date = filters.period_start_date if filters.report != 'Balance Sheet' else None
 		end_date = filters.period_end_date
 
 	gl_entries_by_account = {}
