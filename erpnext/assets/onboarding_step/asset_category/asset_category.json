@@ -1,5 +1,5 @@
 {
- "action": "Create Entry",
+ "action": "Show Form Tour",
  "action_label": "Let's review existing Asset Category",
  "creation": "2021-08-13 14:26:18.656303",
  "description": "# Asset Category\n\nAn Asset Category classifies different assets of a Company.\n\nYou can create an Asset Category based on the type of assets. For example, all your desktops and laptops can be part of an Asset Category named \"Electronic Equipments\". Create a separate category for furniture. Also, you can update default properties for each category, like:\n - Depreciation type and duration\n - Fixed asset account\n - Depreciation account\n",
@@ -9,7 +9,7 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2021-08-13 14:35:45.090781",
+ "modified": "2021-08-23 11:01:22.090407",
  "modified_by": "Administrator",
  "name": "Asset Category",
  "owner": "Administrator",
