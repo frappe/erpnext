@@ -1556,7 +1556,6 @@
    "depends_on": "coupon_code",
    "fieldname": "coupon_code",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Coupon Code",
    "options": "Coupon Code",
    "print_hide": 1
