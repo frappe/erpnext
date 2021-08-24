@@ -182,11 +182,6 @@
    "label": "Apply SLA for Resolution Time"
   },
   {
-   "label": "Pause SLA On",
-   "fieldname": "pause_sla_on",
-   "options": "Pause SLA On Status"
-  },
-  {
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
    "label": "Assignment Condition"
@@ -208,7 +203,7 @@
   }
  ],
  "links": [],
- "modified": "2021-07-09 12:28:46.283334",
+ "modified": "2021-07-27 11:16:45.596579",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

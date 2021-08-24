@@ -214,7 +214,6 @@ erpnext.patches.v13_0.delete_old_sales_reports
 execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll #22-06-2020
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-2020
-execute:frappe.reload_doc("regional", "doctype", "e_invoice_settings")
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v13_0.loyalty_points_entry_for_pos_invoice #22-07-2020
 erpnext.patches.v12_0.add_taxjar_integration_field
@@ -237,7 +236,6 @@ erpnext.patches.v13_0.set_app_name
 erpnext.patches.v13_0.print_uom_after_quantity_patch
 erpnext.patches.v13_0.set_payment_channel_in_payment_gateway_account
 erpnext.patches.v13_0.create_healthcare_custom_fields_in_stock_entry_detail
-erpnext.patches.v12_0.setup_einvoice_fields #2020-12-02
 erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
 execute:frappe.delete_doc("Report", "Quoted Item Comparison")
@@ -259,14 +257,11 @@ erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
 erpnext.patches.v12_0.update_vehicle_no_reqd_condition
-erpnext.patches.v12_0.add_einvoice_status_field #2021-03-17
-erpnext.patches.v12_0.add_einvoice_summary_report_permissions
 erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
 erpnext.patches.v13_0.setup_uae_vat_fields
 execute:frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
-erpnext.patches.v12_0.add_company_link_to_einvoice_settings
 erpnext.patches.v13_0.rename_discharge_date_in_ip_record
 erpnext.patches.v12_0.create_taxable_value_field
 erpnext.patches.v12_0.add_gst_category_in_delivery_note
@@ -277,10 +272,10 @@ erpnext.patches.v12_0.add_document_type_field_for_italy_einvoicing
 erpnext.patches.v13_0.make_non_standard_user_type #13-04-2021
 erpnext.patches.v13_0.update_shipment_status
 erpnext.patches.v13_0.remove_attribute_field_from_item_variant_setting
-erpnext.patches.v12_0.add_ewaybill_validity_field
 erpnext.patches.v13_0.germany_make_custom_fields
 erpnext.patches.v13_0.germany_fill_debtor_creditor_number
 erpnext.patches.v13_0.set_pos_closing_as_failed
+erpnext.patches.v13_0.rename_stop_to_send_birthday_reminders
 execute:frappe.rename_doc("Workspace", "Loan Management", "Loans", force=True)
 erpnext.patches.v13_0.update_timesheet_changes
 erpnext.patches.v13_0.add_doctype_to_sla #14-06-2021
@@ -294,10 +289,11 @@ erpnext.patches.v13_0.update_level_in_bom #1234sswef
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
 erpnext.patches.v13_0.update_amt_in_work_order_required_items
-erpnext.patches.v12_0.show_einvoice_irn_cancelled_field
 erpnext.patches.v13_0.delete_orphaned_tables
 erpnext.patches.v13_0.update_export_type_for_gst #2021-08-16
 erpnext.patches.v13_0.update_tds_check_field #3
 erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.update_recipient_email_digest
 erpnext.patches.v13_0.shopify_deprecation_warning
+erpnext.patches.v13_0.einvoicing_deprecation_warning
+erpnext.patches.v14_0.delete_einvoicing_doctypes

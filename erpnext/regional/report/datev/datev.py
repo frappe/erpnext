@@ -202,7 +202,7 @@ def get_transactions(filters, as_dict=1):
 		FROM `tabGL Entry` gl
 
 			/* Kontonummer */
-			left join `tabAccount` acc 
+			left join `tabAccount` acc
 			on gl.account = acc.name
 
 			left join `tabCustomer` cus
@@ -218,7 +218,7 @@ def get_transactions(filters, as_dict=1):
 			and par.parenttype = gl.party_type
 			and par.company = %(company)s
 
-		WHERE gl.company = %(company)s 
+		WHERE gl.company = %(company)s
 		AND DATE(gl.posting_date) >= %(from_date)s
 		AND DATE(gl.posting_date) <= %(to_date)s
 		{}
