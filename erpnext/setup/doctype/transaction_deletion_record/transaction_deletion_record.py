@@ -31,7 +31,7 @@ class TransactionDeletionRecord(Document):
 		clear_notifications()
 		self.delete_company_transactions()
 
-	def populate_doctypes_to_be_ignored_table(self):		
+	def populate_doctypes_to_be_ignored_table(self):
 		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
 		for doctype in doctypes_to_be_ignored_list:
 			self.append('doctypes_to_be_ignored', {
@@ -74,7 +74,7 @@ class TransactionDeletionRecord(Document):
 		doctypes_to_be_ignored_list = self.get_doctypes_to_be_ignored_list()
 		docfields = self.get_doctypes_with_company_field(doctypes_to_be_ignored_list)
 
-		tables = self.get_all_child_doctypes()	
+		tables = self.get_all_child_doctypes()
 		for docfield in docfields:
 			if docfield['parent'] != self.doctype:
 				no_of_docs = self.get_number_of_docs_linked_with_specified_company(docfield['parent'], docfield['fieldname'])
@@ -90,7 +90,7 @@ class TransactionDeletionRecord(Document):
 					naming_series = frappe.db.get_value('DocType', docfield['parent'], 'autoname')
 					if naming_series:
 						if '#' in naming_series:
-							self.update_naming_series(naming_series, docfield['parent'])	
+							self.update_naming_series(naming_series, docfield['parent'])
 
 	def get_doctypes_to_be_ignored_list(self):
 		singles = frappe.get_all('DocType', filters = {'issingle': 1}, pluck = 'name')
@@ -101,9 +101,9 @@ class TransactionDeletionRecord(Document):
 		return doctypes_to_be_ignored_list
 
 	def get_doctypes_with_company_field(self, doctypes_to_be_ignored_list):
-		docfields = frappe.get_all('DocField', 
+		docfields = frappe.get_all('DocField',
 			filters = {
-				'fieldtype': 'Link', 
+				'fieldtype': 'Link',
 				'options': 'Company',
 				'parent': ['not in', doctypes_to_be_ignored_list]},
 			fields=['parent', 'fieldname'])
@@ -121,7 +121,7 @@ class TransactionDeletionRecord(Document):
 			self.append('doctypes', {
 				'doctype_name' : doctype,
 				'no_of_docs' : no_of_docs
-			})		
+			})
 
 	def delete_child_tables(self, doctype, company_fieldname):
 		parent_docs_to_be_deleted = frappe.get_all(doctype, {
@@ -129,7 +129,7 @@ class TransactionDeletionRecord(Document):
 		}, pluck = 'name')
 
 		child_tables = frappe.get_all('DocField', filters = {
-			'fieldtype': 'Table', 
+			'fieldtype': 'Table',
 			'parent': doctype
 		}, pluck = 'options')
 

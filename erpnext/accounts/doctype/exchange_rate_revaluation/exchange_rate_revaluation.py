@@ -27,6 +27,9 @@ class ExchangeRateRevaluation(Document):
 		if not (self.company and self.posting_date):
 			frappe.throw(_("Please select Company and Posting Date to getting entries"))
 
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry')
+
 	@frappe.whitelist()
 	def check_journal_entry_condition(self):
 		total_debit = frappe.db.get_value("Journal Entry Account", {
@@ -41,7 +44,7 @@ class ExchangeRateRevaluation(Document):
 
 		if total_amt != total_debit:
 			return True
-		
+
 		return False
 
 	@frappe.whitelist()
@@ -99,10 +102,12 @@ class ExchangeRateRevaluation(Document):
 					sum(debit) - sum(credit) as balance
 				from `tabGL Entry`
 				where account in (%s)
-				group by account, party_type, party
+				and posting_date <= %s
+				and is_cancelled = 0
+				group by account, NULLIF(party_type,''), NULLIF(party,'')
 				having sum(debit) != sum(credit)
 				order by account
-			""" % ', '.join(['%s']*len(accounts)), tuple(accounts), as_dict=1)
+			""" % (', '.join(['%s']*len(accounts)), '%s'), tuple(accounts + [self.posting_date]), as_dict=1)
 
 		return account_details
 
@@ -143,9 +148,9 @@ class ExchangeRateRevaluation(Document):
 				"party_type": d.get("party_type"),
 				"party": d.get("party"),
 				"account_currency": d.get("account_currency"),
-				"balance": d.get("balance_in_account_currency"),
-				dr_or_cr: abs(d.get("balance_in_account_currency")),
-				"exchange_rate":d.get("new_exchange_rate"),
+				"balance": flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")),
+				dr_or_cr: flt(abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")),
+				"exchange_rate": flt(d.get("new_exchange_rate"), d.precision("new_exchange_rate")),
 				"reference_type": "Exchange Rate Revaluation",
 				"reference_name": self.name,
 				})
@@ -154,9 +159,9 @@ class ExchangeRateRevaluation(Document):
 				"party_type": d.get("party_type"),
 				"party": d.get("party"),
 				"account_currency": d.get("account_currency"),
-				"balance": d.get("balance_in_account_currency"),
-				reverse_dr_or_cr: abs(d.get("balance_in_account_currency")),
-				"exchange_rate": d.get("current_exchange_rate"),
+				"balance": flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")),
+				reverse_dr_or_cr: flt(abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")),
+				"exchange_rate": flt(d.get("current_exchange_rate"), d.precision("current_exchange_rate")),
 				"reference_type": "Exchange Rate Revaluation",
 				"reference_name": self.name
 				})
@@ -185,9 +190,9 @@ def get_account_details(account, company, posting_date, party_type=None, party=N
 
 	account_details = {}
 	company_currency = erpnext.get_company_currency(company)
-	balance = get_balance_on(account, party_type=party_type, party=party, in_account_currency=False)
+	balance = get_balance_on(account, date=posting_date, party_type=party_type, party=party, in_account_currency=False)
 	if balance:
-		balance_in_account_currency = get_balance_on(account, party_type=party_type, party=party)
+		balance_in_account_currency = get_balance_on(account, date=posting_date, party_type=party_type, party=party)
 		current_exchange_rate = balance / balance_in_account_currency if balance_in_account_currency else 0
 		new_exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 		new_balance_in_base_currency = balance_in_account_currency * new_exchange_rate

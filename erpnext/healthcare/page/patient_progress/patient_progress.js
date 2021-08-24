@@ -133,8 +133,11 @@ class PatientProgress {
 			type: 'heatmap',
 			countLabel: 'Interactions',
 			data: {},
-			discreteDomains: 0
+			discreteDomains: 1,
+			radius: 3,
+			height: 150
 		});
+
 		this.update_heatmap_data();
 		this.create_heatmap_chart_filters();
 	}
@@ -164,33 +167,35 @@ class PatientProgress {
 	}
 
 	render_percentage_chart(field, title) {
-		frappe.xcall(
-			'erpnext.healthcare.page.patient_progress.patient_progress.get_therapy_sessions_distribution_data', {
-				patient: this.patient_id,
-				field: field
-			}
-		).then(chart => {
-			if (chart.labels.length) {
-				this.percentage_chart = new frappe.Chart('.therapy-session-percentage-chart', {
-					title: title,
-					type: 'percentage',
-					data: {
-						labels: chart.labels,
-						datasets: chart.datasets
-					},
-					truncateLegends: 1,
-					barOptions: {
-						height: 11,
-						depth: 1
-					},
-					height: 160,
-					maxSlices: 8,
-					colors: ['#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#a9a7ac'],
-				});
-			} else {
-				this.wrapper.find('.percentage-chart-container').hide();
-			}
-		});
+		// REDESIGN-TODO: chart seems to be broken. Enable this once fixed.
+		this.wrapper.find('.percentage-chart-container').hide();
+		// frappe.xcall(
+		// 	'erpnext.healthcare.page.patient_progress.patient_progress.get_therapy_sessions_distribution_data', {
+		// 		patient: this.patient_id,
+		// 		field: field
+		// 	}
+		// ).then(chart => {
+		// 	if (chart.labels.length) {
+		// 		this.percentage_chart = new frappe.Chart('.therapy-session-percentage-chart', {
+		// 			title: title,
+		// 			type: 'percentage',
+		// 			data: {
+		// 				labels: chart.labels,
+		// 				datasets: chart.datasets
+		// 			},
+		// 			truncateLegends: 1,
+		// 			barOptions: {
+		// 				height: 11,
+		// 				depth: 1
+		// 			},
+		// 			height: 160,
+		// 			maxSlices: 8,
+		// 			colors: ['#5e64ff', '#743ee2', '#ff5858', '#ffa00a', '#feef72', '#28a745', '#98d85b', '#a9a7ac'],
+		// 		});
+		// 	} else {
+		// 		this.wrapper.find('.percentage-chart-container').hide();
+		// 	}
+		// });
 	}
 
 	create_percentage_chart_filters() {
@@ -311,7 +316,7 @@ class PatientProgress {
 						},
 						axisOptions: {
 							xIsSeries: 1
-						},
+						}
 					});
 				} else {
 					$(parent).find('.chart-container').show();
@@ -377,7 +382,7 @@ class PatientProgress {
 							xIsSeries: 1
 						},
 						tooltipOptions: {
-							formatTooltipY: d => d + __(' out of ') + chart.max_score
+							formatTooltipY: d => __('{0} out of {1}', [d, chart.max_score])
 						}
 					});
 				} else {

@@ -48,4 +48,3 @@ def create_grievance_type():
 	grievance_type.save()
 
 	return grievance_type.name
-

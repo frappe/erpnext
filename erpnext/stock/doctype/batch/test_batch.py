@@ -269,11 +269,14 @@ class TestBatch(unittest.TestCase):
 		batch2 = create_batch('_Test Batch Price Item', 300, 1)
 		batch3 = create_batch('_Test Batch Price Item', 400, 0)
 
+		company = "_Test Company with perpetual inventory"
+		currency = frappe.get_cached_value("Company",  company,  "default_currency")
+
 		args = frappe._dict({
 			"item_code": "_Test Batch Price Item",
-			"company": "_Test Company with perpetual inventory",
+			"company": company,
 			"price_list": "_Test Price List",
-			"currency": "_Test Currency",
+			"currency": currency,
 			"doctype": "Sales Invoice",
 			"conversion_rate": 1,
 			"price_list_currency": "_Test Currency",
