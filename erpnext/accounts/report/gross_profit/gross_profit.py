@@ -429,7 +429,8 @@ class GrossProfitGenerator(object):
 					'item_row': None,
 					'is_return': row.is_return,
 					'cost_center': row.cost_center,
-					'base_net_amount': 0
+					'base_net_amount': frappe.db.get_value('Sales Invoice', row.parent, 'base_net_total'),
+					'base_rate': None
 				})
 
 				self.si_list.insert(index, invoice)
@@ -444,7 +445,7 @@ class GrossProfitGenerator(object):
 
 					# if not self.si_list[parents_index-1].base_net_amount:
 					# 	self.si_list[parents_index-1].base_net_amount = 0
-					
+
 					# self.si_list[parents_index-1].base_net_amount += row.base_net_amount
 
 					# print("\n\n\n\n\nRow Details: ", index, ". ", row.parent, ": ", row.base_net_amount)
@@ -459,7 +460,7 @@ class GrossProfitGenerator(object):
 				base_net_amount += row.get('base_net_amount')
 
 			elif row.indent == 0.0:
-				row.base_net_amount = base_net_amount				
+				row.base_net_amount = base_net_amount
 				base_net_amount = 0
 
 		# print("\n"*10)
@@ -471,7 +472,7 @@ class GrossProfitGenerator(object):
 		# 	elif row.indent == 2.0:
 		# 		print("\t\t", index, ". ", row.parent, ": ", row.base_net_amount)
 		# 		print("")
-			
+
 	def add_bundle_items(self, product_bundle, index):
 		bundle_items = frappe.get_all(
 			'Product Bundle Item',
