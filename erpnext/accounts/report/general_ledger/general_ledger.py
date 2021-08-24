@@ -48,7 +48,7 @@ def validate_filters(filters, account_details):
 
 	if not filters.get("from_date") and not filters.get("to_date"):
 		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date"))))
-			
+
 	if filters.get('account'):
 		filters.account = frappe.parse_json(filters.get('account'))
 		for account in filters.account:
@@ -92,7 +92,7 @@ def set_account_currency(filters):
 		account_currency = None
 
 		if filters.get("account"):
-			if len(filters.get("account")) == 1:	
+			if len(filters.get("account")) == 1:
 				account_currency = get_account_currency(filters.account[0])
 			else:
 				currency = get_account_currency(filters.account[0])
