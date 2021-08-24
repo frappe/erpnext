@@ -5,8 +5,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "home_page_is_products",
-  "column_break_4",
   "products_per_page",
   "display_settings_section",
   "hide_variants",
@@ -60,13 +58,6 @@
  ],
  "fields": [
   {
-   "default": "0",
-   "description": "If checked, the Home page will be the default Item Group for the website",
-   "fieldname": "home_page_is_products",
-   "fieldtype": "Check",
-   "label": "Home Page is Products"
-  },
-  {
    "default": "6",
    "fieldname": "products_per_page",
    "fieldtype": "Int",
@@ -83,10 +74,6 @@
    "fieldname": "hide_variants",
    "fieldtype": "Check",
    "label": "Hide Variants"
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -392,7 +379,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-07-15 16:50:50.087281",
+ "modified": "2021-08-24 13:40:15.294696",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",

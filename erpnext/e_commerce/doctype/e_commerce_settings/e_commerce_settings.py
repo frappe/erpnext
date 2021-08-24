@@ -17,11 +17,6 @@ class ECommerceSettings(Document):
 		self.is_redisearch_loaded = is_search_module_loaded()
 
 	def validate(self):
-		if self.home_page_is_products:
-			frappe.db.set_value("Website Settings", None, "home_page", "products")
-		elif frappe.db.get_single_value("Website Settings", "home_page") == 'products':
-			frappe.db.set_value("Website Settings", None, "home_page", "home")
-
 		self.validate_field_filters()
 		self.validate_attribute_filters()
 		self.validate_checkout()
@@ -163,9 +158,3 @@ def check_shopping_cart_enabled():
 
 def show_attachments():
 	return get_shopping_cart_settings().show_attachments
-
-def home_page_is_products(doc, method):
-	"""Called on saving Website Settings."""
-	home_page_is_products = cint(frappe.db.get_single_value("E Commerce Settings", "home_page_is_products"))
-	if home_page_is_products:
-		doc.home_page = "products"
