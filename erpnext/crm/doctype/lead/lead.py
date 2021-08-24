@@ -38,8 +38,14 @@ class Lead(SellingController):
 			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if (not cint(self.is_new())) else None,
 		})
 
+<<<<<<< HEAD
 		self.set_status()
 		self.check_email_id_is_unique()
+=======
+	def set_full_name(self):
+		if self.first_name:
+			self.lead_name = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
+>>>>>>> 1c279af0b3 (fix: lead name issue (#26999))
 
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
