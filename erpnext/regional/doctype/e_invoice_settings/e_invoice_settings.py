@@ -11,4 +11,3 @@ class EInvoiceSettings(Document):
 	def validate(self):
 		if self.enable and not self.credentials:
 			frappe.throw(_('You must add atleast one credentials to be able to use E Invoicing.'))
-

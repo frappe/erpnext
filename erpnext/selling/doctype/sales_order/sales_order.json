@@ -38,6 +38,8 @@
   "col_break46",
   "shipping_address_name",
   "shipping_address",
+  "dispatch_address_name",
+  "dispatch_address",
   "customer_group",
   "territory",
   "currency_and_price_list",
@@ -569,7 +571,8 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1486,13 +1489,29 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address_name",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Name",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "dispatch_address_name",
+   "fieldname": "dispatch_address",
+   "fieldtype": "Small Text",
+   "label": "Dispatch Address",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 23:55:13.439068",
+ "modified": "2021-08-17 20:15:26.531553",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

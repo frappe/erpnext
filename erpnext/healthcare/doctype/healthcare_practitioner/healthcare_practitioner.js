@@ -142,4 +142,3 @@ frappe.tour['Healthcare Practitioner'] = [
 		description: __('If this Healthcare Practitioner also works for the In-Patient Department, set the inpatient visit charge for this Practitioner.')
 	}
 ];
-
