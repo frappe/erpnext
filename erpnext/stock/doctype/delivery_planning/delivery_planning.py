@@ -939,9 +939,9 @@ class DeliveryPlanning(Document):
 
 					frappe.db.set_value('Sales Order Item', i.item_dname, {
 							'delivered_qty': i.qty_to_deliver,
-							'ordered_qty' : i.ordered_qty,
-							'actual_qty' : i.available_stock, 
-							'projected_qty' : i.current_stock,
+							# 'ordered_qty' : i.ordered_qty,
+							# 'actual_qty' : i.available_stock, 
+							# 'projected_qty' : i.current_stock,
 							},  update_modified=False)						
 						
 				return 2

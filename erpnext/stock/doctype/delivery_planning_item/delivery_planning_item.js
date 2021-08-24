@@ -66,6 +66,18 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 	onload: function(frm){
 
+		if(frm.doc.docstatus != 1){
+					frm.call({
+								doc:frm.doc,
+								method: 'update_stock',
+								callback: function(r){
+									if(r.message){
+										console.log("Item Updated")
+									}
+								}
+							});
+				}
+
 		cur_frm.set_query("transporter", function() {
 			return {
 			   "filters": {
