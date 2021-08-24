@@ -147,10 +147,10 @@ class TestPatientAppointment(unittest.TestCase):
 		self.assertEqual(appointment.service_unit, service_unit)
 
 		# Discharge
-		schedule_discharge(frappe.as_json({'patient': patient}))
+		schedule_discharge(frappe.as_json({'patient': patient, 'discharge_ordered_datetime': now_datetime()}))
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record1)
-		discharge_patient(ip_record1)
+		discharge_patient(ip_record1, now_datetime())
 
 	def test_invalid_healthcare_service_unit_validation(self):
 		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
@@ -174,10 +174,10 @@ class TestPatientAppointment(unittest.TestCase):
 		self.assertRaises(frappe.exceptions.ValidationError, appointment.save)
 
 		# Discharge
-		schedule_discharge(frappe.as_json({'patient': patient}))
+		schedule_discharge(frappe.as_json({'patient': patient, 'discharge_ordered_datetime': now_datetime()}))
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record1)
-		discharge_patient(ip_record1)
+		discharge_patient(ip_record1, now_datetime())
 
 	def test_overlap_appointment(self):
 		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import OverlapError
