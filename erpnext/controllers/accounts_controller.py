@@ -842,7 +842,7 @@ class AccountsController(TransactionBase):
 				dr_or_cr = "credit"
 				rev_dr_cr = "debit"
 				supplier_or_customer = self.supplier
-	
+
 			else:
 				dr_or_cr = "debit"
 				rev_dr_cr = "credit"
@@ -853,11 +853,11 @@ class AccountsController(TransactionBase):
 					discount_amount = item.discount_amount * item.qty
 					if self.doctype == "Purchase Invoice":
 						income_or_expense_account = (item.expense_account
-							if (not item.enable_deferred_expense or self.is_return) 
+							if (not item.enable_deferred_expense or self.is_return)
 							else item.deferred_expense_account)
 					else:
 						income_or_expense_account = (item.income_account
-							if (not item.enable_deferred_revenue or self.is_return) 
+							if (not item.enable_deferred_revenue or self.is_return)
 							else item.deferred_revenue_account)
 
 					account_currency = get_account_currency(item.discount_account)
@@ -866,7 +866,7 @@ class AccountsController(TransactionBase):
 							"account": item.discount_account,
 							"against": supplier_or_customer,
 							dr_or_cr: flt(discount_amount, item.precision('discount_amount')),
-							dr_or_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'), 
+							dr_or_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'),
 								item.precision('discount_amount')),
 							"cost_center": item.cost_center,
 							"project": item.project
@@ -879,7 +879,7 @@ class AccountsController(TransactionBase):
 							"account": income_or_expense_account,
 							"against": supplier_or_customer,
 							rev_dr_cr: flt(discount_amount, item.precision('discount_amount')),
-							rev_dr_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'), 
+							rev_dr_cr + "_in_account_currency": flt(discount_amount * self.get('conversion_rate'),
 								item.precision('discount_amount')),
 							"cost_center": item.cost_center,
 							"project": item.project or self.project
@@ -894,8 +894,8 @@ class AccountsController(TransactionBase):
 						dr_or_cr: self.discount_amount,
 						"cost_center": self.cost_center
 					}, item=self)
-				)		
-										
+				)
+
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
 		for pe in self.get("advances"):
@@ -1223,7 +1223,7 @@ class AccountsController(TransactionBase):
 			po_or_so = self.get('items')[0].get('purchase_order')
 			po_or_so_doctype = "Purchase Order"
 			po_or_so_doctype_name = "purchase_order"
-		
+
 		return po_or_so, po_or_so_doctype, po_or_so_doctype_name
 
 	def linked_order_has_payment_terms(self, po_or_so, fieldname, doctype):
@@ -1232,14 +1232,14 @@ class AccountsController(TransactionBase):
 				return True
 			elif self.linked_order_has_payment_schedule(po_or_so):
 				return True
-		
+
 		return False
 
 	def all_items_have_same_po_or_so(self, po_or_so, fieldname):
 		for item in self.get('items'):
 			if item.get(fieldname) != po_or_so:
 				return False
-		
+
 		return True
 
 	def linked_order_has_payment_terms_template(self, po_or_so, doctype):
@@ -1530,7 +1530,7 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 
 
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=None, condition=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	currency_field = "paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
@@ -1565,14 +1565,14 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
-				select "Payment Entry" as reference_type, name as reference_name,
+				select "Payment Entry" as reference_type, name as reference_name, posting_date,
 				remarks, unallocated_amount as amount, {2} as exchange_rate
 				from `tabPayment Entry`
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
-					and docstatus = 1 and unallocated_amount > 0
+					and docstatus = 1 and unallocated_amount > 0 {condition}
 				order by posting_date {1}
-			""".format(party_account_field, limit_cond, exchange_rate_field),
+			""".format(party_account_field, limit_cond, exchange_rate_field, condition=condition),
 			(party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)

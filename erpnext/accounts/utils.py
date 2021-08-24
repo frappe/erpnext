@@ -342,27 +342,51 @@ def reconcile_against_document(args):
 	"""
 		Cancel JV, Update aginst document, split if required and resubmit jv
 	"""
+	reconciled_entries = []
 	for d in args:
+		for entry in reconciled_entries:
+			if d.reference_name in entry.values():
+				(entry['against_voucher_type']).append(d.against_voucher_type)
+				(entry['against_voucher']).append(d.against_voucher)
+				(entry['allocated_amount']).append(d.allocated_amount)
+				break
+		else:
+			d['against_voucher_type'] = [d.against_voucher_type]
+			d['against_voucher'] = [d.against_voucher]
+			d['allocated_amount'] = [d.allocated_amount]
+			new_dict = d.copy()
+			reconciled_entries.append(new_dict)
 
-		check_if_advance_entry_modified(d)
-		validate_allocated_amount(d)
-
+	for entry in reconciled_entries:
 		# cancel advance entry
-		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
-
+		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
-		# update ref in advance entry
-		if d.voucher_type == "Journal Entry":
-			update_reference_in_journal_entry(d, doc)
-		else:
-			update_reference_in_payment_entry(d, doc)
+		for idx, _ in enumerate(entry.against_voucher):
+			against_voucher = entry.against_voucher[idx]
+			against_dict = {
+				'against_voucher': entry.against_voucher[idx],
+				'against_voucher_type': entry.against_voucher_type[idx],
+				'allocated_amount': entry.allocated_amount[idx],
+			}
+			reference = entry.copy()
+			reference.update(against_dict)
+			check_if_advance_entry_modified(reference)
 
+			validate_allocated_amount(reference)
+
+			# update ref in advance entry
+			if entry.voucher_type == "Journal Entry":
+				update_reference_in_journal_entry(reference, doc, do_not_save=True)
+			else:
+				update_reference_in_payment_entry(reference, doc, do_not_save=True)
+
+		doc.save(ignore_permissions=True)
 		# re-submit advance entry
-		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
+		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
 
-		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
+		if entry.voucher_type in ('Payment Entry', 'Journal Entry'):
 			doc.update_expense_claim()
 
 def check_if_advance_entry_modified(args):
@@ -412,7 +436,7 @@ def validate_allocated_amount(args):
 	elif flt(args.get("allocated_amount"), precision) > flt(args.get("unadjusted_amount"), precision):
 		throw(_("Allocated amount cannot be greater than unadjusted amount"))
 
-def update_reference_in_journal_entry(d, jv_obj):
+def update_reference_in_journal_entry(d, jv_obj, do_not_save=False):
 	"""
 		Updates against document, if partial amount splits into rows
 	"""
@@ -461,9 +485,10 @@ def update_reference_in_journal_entry(d, jv_obj):
 		ch.is_advance = cstr(jvd[0]["is_advance"])
 		ch.docstatus = 1
 
-	# will work as update after submit
-	jv_obj.flags.ignore_validate_update_after_submit = True
-	jv_obj.save(ignore_permissions=True)
+	if not do_not_save:
+		# will work as update after submit
+		jv_obj.flags.ignore_validate_update_after_submit = True
+		jv_obj.save(ignore_permissions=True)
 
 def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	reference_details = {
@@ -566,10 +591,10 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
-def get_company_default(company, fieldname, ignore_validation=False):
-	value = frappe.get_cached_value('Company', company, fieldname)
+def get_company_default(company, fieldname):
+	value = frappe.get_cached_value('Company',  company,  fieldname)
 
-	if not ignore_validation and not value:
+	if not value:
 		throw(_("Please set default {0} in Company {1}")
 			.format(frappe.get_meta("Company").get_label(fieldname), company))
 

@@ -120,11 +120,36 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
-				me.set_invoice_options();
-				me.toggle_primary_action();
+				me.toggle_primary_action()
 			}
 		});
 
+	}
+
+	allocate() {
+		var me = this;
+		let payments = me.frm.fields_dict.payments.grid.get_selected_children();
+		if (!(payments.length)) {
+			payments = me.frm.doc.payments
+		}
+		let invoices = me.frm.fields_dict.invoices.grid.get_selected_children();
+		if (!(invoices.length)) {
+			invoices = me.frm.doc.invoices
+		}
+		return me.frm.call({
+			doc: me.frm.doc,
+			method: 'allocate_entries',
+			args: {
+				payments: payments,
+				invoices: invoices
+			},
+			callback: function(r, rt) {
+				if (!r.exc && r.message) {
+					me.frm.set_value("allocation", r.message);
+					me.toggle_primary_action();
+				}
+			}
+		});
 	}
 
 	reconcile() {
@@ -218,41 +243,30 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			doc: me.frm.doc,
 			method: 'reconcile',
 			callback: function(r, rt) {
-				me.set_invoice_options();
+				me.frm.clear_table("allocation");
 				me.toggle_primary_action();
 			}
 		});
 	}
 
-	set_invoice_options() {
-		var me = this;
-		var invoices = [];
-
-		$.each(me.frm.doc.invoices || [], function(i, row) {
-			if (row.invoice_number && !in_list(invoices, row.invoice_number))
-				invoices.push(row.invoice_type + " | " + row.invoice_number);
-		});
-
-		if (invoices) {
-			this.frm.fields_dict.payments.grid.update_docfield_property(
-				'invoice_number', 'options', "\n" + invoices.join("\n")
-			);
-
-			$.each(me.frm.doc.payments || [], function(i, p) {
-				if(!in_list(invoices, cstr(p.invoice_number))) p.invoice_number = null;
-			});
-		}
-
-		refresh_field("payments");
-	}
-
 	toggle_primary_action() {
-		if ((this.frm.doc.payments || []).length) {
+		if ((this.frm.doc.payments || []).length && ((this.frm.doc.allocation || [])).length) {
 			this.frm.fields_dict.reconcile.$input
 				&& this.frm.fields_dict.reconcile.$input.addClass("btn-primary");
+			this.frm.fields_dict.allocate.$input
+				&& this.frm.fields_dict.allocate.$input.removeClass("btn-primary");
+			this.frm.fields_dict.get_unreconciled_entries.$input
+				&& this.frm.fields_dict.get_unreconciled_entries.$input.removeClass("btn-primary");
+		} else if ((this.frm.doc.payments || []).length) {
+			this.frm.fields_dict.allocate.$input
+				&& this.frm.fields_dict.allocate.$input.addClass("btn-primary");
+			this.frm.fields_dict.reconcile.$input
+				&& this.frm.fields_dict.reconcile.$input.removeClass("btn-primary");
 			this.frm.fields_dict.get_unreconciled_entries.$input
 				&& this.frm.fields_dict.get_unreconciled_entries.$input.removeClass("btn-primary");
 		} else {
+			this.frm.fields_dict.allocate.$input
+				&& this.frm.fields_dict.allocate.$input.removeClass("btn-primary");
 			this.frm.fields_dict.reconcile.$input
 				&& this.frm.fields_dict.reconcile.$input.removeClass("btn-primary");
 			this.frm.fields_dict.get_unreconciled_entries.$input

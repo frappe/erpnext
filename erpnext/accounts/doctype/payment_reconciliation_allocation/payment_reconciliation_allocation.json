@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "creation": "2021-08-16 17:04:40.185167",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_name",
+  "invoice_number",
+  "column_break_3",
+  "allocated_amount",
+  "is_advance",
+  "section_break_5",
+  "difference_account",
+  "column_break_7",
+  "difference_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Invoice Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated Amount",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "difference_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Difference Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Difference Amount",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reference Name"
+  },
+  {
+   "fieldname": "is_advance",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Is Advance",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2021-08-24 22:50:01.391410",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Reconciliation Allocation",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
