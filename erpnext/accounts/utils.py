@@ -342,20 +342,23 @@ def reconcile_against_document(args):
 	"""
 		Cancel JV, Update aginst document, split if required and resubmit jv
 	"""
+
+	# To optimize making GL Entry for Payment Entry with multiple references
 	reconciled_entries = []
-	for d in args:
+	for row in args:
 		for entry in reconciled_entries:
-			if d.reference_name in entry.values():
-				(entry['against_voucher_type']).append(d.against_voucher_type)
-				(entry['against_voucher']).append(d.against_voucher)
-				(entry['allocated_amount']).append(d.allocated_amount)
+			if row.reference_name in entry.values():
+				(entry['against_voucher_type']).append(row.against_voucher_type)
+				(entry['against_voucher']).append(row.against_voucher)
+				(entry['allocated_amount']).append(row.allocated_amount)
 				break
 		else:
-			d['against_voucher_type'] = [d.against_voucher_type]
-			d['against_voucher'] = [d.against_voucher]
-			d['allocated_amount'] = [d.allocated_amount]
-			new_dict = d.copy()
-			reconciled_entries.append(new_dict)
+			# convert these values into list to be able to append them in existing payment transaction
+			row['against_voucher_type'] = [row.against_voucher_type]
+			row['against_voucher'] = [row.against_voucher]
+			row['allocated_amount'] = [row.allocated_amount]
+			new_row = row.copy()
+			reconciled_entries.append(new_row)
 
 	for entry in reconciled_entries:
 		# cancel advance entry
@@ -366,14 +369,13 @@ def reconcile_against_document(args):
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
 		for idx, _ in enumerate(entry.against_voucher):
-			against_voucher = entry.against_voucher[idx]
-			against_dict = {
+			reference_fields = {
 				'against_voucher': entry.against_voucher[idx],
 				'against_voucher_type': entry.against_voucher_type[idx],
 				'allocated_amount': entry.allocated_amount[idx],
 			}
 			reference = entry.copy()
-			reference.update(against_dict)
+			reference.update(reference_fields)
 			check_if_advance_entry_modified(reference)
 
 			validate_allocated_amount(reference)

@@ -130,11 +130,11 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		var me = this;
 		let payments = me.frm.fields_dict.payments.grid.get_selected_children();
 		if (!(payments.length)) {
-			payments = me.frm.doc.payments
+			payments = me.frm.doc.payments;
 		}
 		let invoices = me.frm.fields_dict.invoices.grid.get_selected_children();
 		if (!(invoices.length)) {
-			invoices = me.frm.doc.invoices
+			invoices = me.frm.doc.invoices;
 		}
 		return me.frm.call({
 			doc: me.frm.doc,
@@ -143,7 +143,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				payments: payments,
 				invoices: invoices
 			},
-			callback: function(r, rt) {
+			callback: function(r) {
 				if (!r.exc && r.message) {
 					me.frm.set_value("allocation", r.message);
 					me.toggle_primary_action();
