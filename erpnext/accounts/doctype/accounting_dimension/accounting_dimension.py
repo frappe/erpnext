@@ -19,7 +19,7 @@ class AccountingDimension(Document):
 
 	def validate(self):
 		if self.document_type in core_doctypes_list + ('Accounting Dimension', 'Project',
-				'Cost Center', 'Accounting Dimension Detail', 'Company') :
+				'Cost Center', 'Accounting Dimension Detail', 'Company', 'Account') :
 
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
@@ -27,7 +27,7 @@ class AccountingDimension(Document):
 		exists = frappe.db.get_value("Accounting Dimension", {'document_type': self.document_type}, ['name'])
 
 		if exists and self.is_new():
-			frappe.throw("Document Type already used as a dimension")
+			frappe.throw(_("Document Type already used as a dimension"))
 
 		if not self.is_new():
 			self.validate_document_type_change()

@@ -210,10 +210,10 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	company_currency = get_company_currency(filters)
 
 	if filters.filter_based_on == 'Fiscal Year':
-		start_date = fiscal_year.year_start_date
+		start_date = fiscal_year.year_start_date if filters.report != 'Balance Sheet' else None
 		end_date = fiscal_year.year_end_date
 	else:
-		start_date = filters.period_start_date
+		start_date = filters.period_start_date if filters.report != 'Balance Sheet' else None
 		end_date = filters.period_end_date
 
 	gl_entries_by_account = {}
@@ -380,7 +380,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
 			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
 			acc.account_name, acc.account_number
-			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s
+			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s and gl.is_cancelled = 0
 			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
 			order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
 			{

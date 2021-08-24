@@ -7,25 +7,30 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "employee_details_section",
   "naming_series",
   "employee",
   "employee_name",
-  "salary_component",
-  "type",
-  "amount",
-  "ref_doctype",
-  "ref_docname",
-  "amended_from",
   "column_break_5",
   "company",
   "department",
+  "salary_details_section",
+  "salary_component",
+  "type",
   "currency",
+  "amount",
+  "column_break_13",
+  "is_recurring",
+  "payroll_date",
   "from_date",
   "to_date",
-  "payroll_date",
-  "is_recurring",
+  "properties_and_references_section",
+  "deduct_full_tax_on_selected_payroll_date",
+  "ref_doctype",
+  "ref_docname",
+  "column_break_22",
   "overwrite_salary_structure_amount",
-  "deduct_full_tax_on_selected_payroll_date"
+  "amended_from"
  ],
  "fields": [
   {
@@ -81,7 +86,7 @@
   },
   {
    "depends_on": "eval:(doc.is_recurring==0)",
-   "description": "Date on which this component is applied",
+   "description": "The date on which Salary Component with Amount will contribute for Earnings/Deduction in Salary Slip. ",
    "fieldname": "payroll_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -159,6 +164,7 @@
    "fieldname": "ref_docname",
    "fieldtype": "Dynamic Link",
    "label": "Reference Document",
+   "no_copy": 1,
    "options": "ref_doctype",
    "read_only": 1
   },
@@ -171,11 +177,34 @@
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "employee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_details_section",
+   "fieldtype": "Section Break",
+   "label": "Salary Details"
+  },
+  {
+   "fieldname": "properties_and_references_section",
+   "fieldtype": "Section Break",
+   "label": "Properties and References"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:33:59.098532",
+ "modified": "2021-05-26 11:10:00.812698",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Additional Salary",

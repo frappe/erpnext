@@ -2,39 +2,62 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.maintenance");
-
+var serial_nos = [];
 frappe.ui.form.on('Maintenance Visit', {
-	refresh: function(frm) {
+	refresh: function (frm) {
 		//filters for serial_no based on item_code
-		frm.set_query('serial_no', 'purposes', function(frm, cdt, cdn) {
+		frm.set_query('serial_no', 'purposes', function (frm, cdt, cdn) {
 			let item = locals[cdt][cdn];
-			return {
-				filters: {
-					'item_code': item.item_code
-				}
-			};
+			if (serial_nos) {
+				return {
+					filters: {
+						'item_code': item.item_code,
+						'name': ["in", serial_nos]
+					}
+				};
+			} else {
+				return {
+					filters: {
+						'item_code': item.item_code
+					}
+				};
+			}
 		});
 	},
-	setup: function(frm) {
+	setup: function (frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
 	},
-	onload: function(frm) {
+	onload: function (frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+		if (frm.maintenance_type == 'Scheduled') {
+			let schedule_id = item.purposes[0].prevdoc_detail_docname;
+			frappe.call({
+				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.update_serial_nos",
+				args: {
+					s_id: schedule_id
+				},
+				callback: function (r) {
+					serial_nos = r.message;
+				}
+			});
+		}
+
 		if (!frm.doc.status) {
-			frm.set_value({status:'Draft'});
+			frm.set_value({ status: 'Draft' });
 		}
 		if (frm.doc.__islocal) {
-			frm.set_value({mntc_date: frappe.datetime.get_today()});
+			frm.set_value({ mntc_date: frappe.datetime.get_today() });
 		}
 	},
-	customer: function(frm) {
+	customer: function (frm) {
 		erpnext.utils.get_party_details(frm);
 	},
-	customer_address: function(frm) {
+	customer_address: function (frm) {
 		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display');
 	},
-	contact_person: function(frm) {
+	contact_person: function (frm) {
 		erpnext.utils.get_contact_details(frm);
 	}
 
@@ -42,14 +65,14 @@ frappe.ui.form.on('Maintenance Visit', {
 
 // TODO commonify this code
 erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
-	refresh: function() {
-		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+	refresh: function () {
+		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer' };
 
 		var me = this;
 
-		if (this.frm.doc.docstatus===0) {
+		if (this.frm.doc.docstatus === 0) {
 			this.frm.add_custom_button(__('Maintenance Schedule'),
-				function() {
+				function () {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 						source_doctype: "Maintenance Schedule",
@@ -64,7 +87,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 					})
 				}, __("Get Items From"));
 			this.frm.add_custom_button(__('Warranty Claim'),
-				function() {
+				function () {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 						source_doctype: "Warranty Claim",
@@ -80,7 +103,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 					})
 				}, __("Get Items From"));
 			this.frm.add_custom_button(__('Sales Order'),
-				function() {
+				function () {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 						source_doctype: "Sales Order",
@@ -99,4 +122,4 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 	},
 });
 
-$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({ frm: cur_frm }));

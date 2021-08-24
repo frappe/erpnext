@@ -523,8 +523,9 @@ def update_project_sales_billing():
 def create_kanban_board_if_not_exists(project):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
-	if not frappe.db.exists('Kanban Board', project):
-		quick_kanban_board('Task', project, 'status', project)
+	project = frappe.get_doc('Project', project)
+	if not frappe.db.exists('Kanban Board', project.project_name):
+		quick_kanban_board('Task', project.project_name, 'status', project.name)
 
 	return True
 

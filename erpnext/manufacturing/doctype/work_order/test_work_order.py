@@ -389,17 +389,12 @@ class TestWorkOrder(unittest.TestCase):
 		ste.submit()
 		stock_entries.append(ste)
 
-		job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name})
+		job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name}, order_by='creation asc')
 		self.assertEqual(len(job_cards), len(bom.operations))
 
 		for i, job_card in enumerate(job_cards):
 			doc = frappe.get_doc("Job Card", job_card)
-			doc.append("time_logs", {
-				"from_time": add_to_date(None, i),
-				"hours": 1,
-				"to_time": add_to_date(None, i + 1),
-				"completed_qty": doc.for_quantity
-			})
+			doc.time_logs[0].completed_qty = 1
 			doc.submit()
 
 		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
@@ -517,6 +512,60 @@ class TestWorkOrder(unittest.TestCase):
 		work_order1.set_work_order_operations()
 		work_order1.save()
 		self.assertEqual(work_order1.operations[0].time_in_mins, 40.0)
+
+	def test_batch_size_for_fg_item(self):
+		fg_item = "Test Batch Size Item For BOM 3"
+		rm1 = "Test Batch Size Item RM 1 For BOM 3"
+
+		frappe.db.set_value('Manufacturing Settings', None, 'make_serial_no_batch_from_work_order', 0)
+		for item in ["Test Batch Size Item For BOM 3", "Test Batch Size Item RM 1 For BOM 3"]:
+			item_args = {
+				"include_item_in_manufacturing": 1,
+				"is_stock_item": 1
+			}
+
+			if item == fg_item:
+				item_args['has_batch_no'] = 1
+				item_args['create_new_batch'] = 1
+				item_args['batch_number_series'] = 'TBSI3.#####'
+
+			make_item(item, item_args)
+
+		bom_name = frappe.db.get_value("BOM",
+			{"item": fg_item, "is_active": 1, "with_operations": 1}, "name")
+
+		if not bom_name:
+			bom = make_bom(item=fg_item, rate=1000, raw_materials = [rm1], do_not_save=True)
+			bom.save()
+			bom.submit()
+			bom_name = bom.name
+
+		work_order = make_wo_order_test_record(item=fg_item, skip_transfer=True, planned_start_date=now(), qty=1)
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		for row in ste1.get('items'):
+			if row.is_finished_item:
+				self.assertEqual(row.item_code, fg_item)
+
+		work_order = make_wo_order_test_record(item=fg_item, skip_transfer=True, planned_start_date=now(), qty=1)
+		frappe.db.set_value('Manufacturing Settings', None, 'make_serial_no_batch_from_work_order', 1)
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		for row in ste1.get('items'):
+			if row.is_finished_item:
+				self.assertEqual(row.item_code, fg_item)
+
+		work_order = make_wo_order_test_record(item=fg_item, skip_transfer=True, planned_start_date=now(),
+			qty=30, do_not_save = True)
+		work_order.batch_size = 10
+		work_order.insert()
+		work_order.submit()
+		self.assertEqual(work_order.has_batch_no, 1)
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 30))
+		for row in ste1.get('items'):
+			if row.is_finished_item:
+				self.assertEqual(row.item_code, fg_item)
+				self.assertEqual(row.qty, 10)
+
+		frappe.db.set_value('Manufacturing Settings', None, 'make_serial_no_batch_from_work_order', 0)
 
 	def test_partial_material_consumption(self):
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 1)

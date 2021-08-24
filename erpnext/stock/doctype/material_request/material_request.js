@@ -101,7 +101,8 @@ frappe.ui.form.on('Material Request', {
 		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.status != 'Stopped') {
-			if (flt(frm.doc.per_ordered, 2) < 100) {
+			let precision = frappe.defaults.get_default("float_precision");
+			if (flt(frm.doc.per_ordered, precision) < 100) {
 				let add_create_pick_list_button = () => {
 					frm.add_custom_button(__('Pick List'),
 						() => frm.events.create_pick_list(frm), __('Create'));
@@ -433,7 +434,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			if (doc.material_request_type == "Customer Provided") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 
+					filters:{
 						'customer': me.frm.doc.customer,
 						'is_stock_item':1
 					}

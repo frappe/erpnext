@@ -68,7 +68,7 @@ class DeliveryTrip(Document):
 			delete (bool, optional): Defaults to `False`. `True` if driver details need to be emptied, else `False`.
 		"""
 
-		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
+		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
 
 		update_fields = {
 			"driver": self.driver,
@@ -136,8 +136,8 @@ class DeliveryTrip(Document):
 
 				# Include last leg in the final distance calculation
 				self.uom = self.default_distance_uom
-				total_distance = sum([leg.get("distance", {}).get("value", 0.0)
-					for leg in directions.get("legs")])  # in meters
+				total_distance = sum(leg.get("distance", {}).get("value", 0.0)
+					for leg in directions.get("legs"))  # in meters
 				self.total_distance = total_distance * self.uom_conversion_factor
 			else:
 				idx += len(route) - 1

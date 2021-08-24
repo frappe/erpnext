@@ -31,12 +31,12 @@ class HRSettings(Document):
 
 		try:
 			weekly_job = frappe.get_doc(
-				'Scheduled Job Type', 
+				'Scheduled Job Type',
 				f'employee_reminders.send_reminders_in_advance_weekly'
 			)
 
 			monthly_job = frappe.get_doc(
-				'Scheduled Job Type', 
+				'Scheduled Job Type',
 				f'employee_reminders.send_reminders_in_advance_monthly'
 			)
 		except frappe.DoesNotExistError:
@@ -62,7 +62,7 @@ class HRSettings(Document):
 	def did_frequency_change(self):
 		old_freq = frappe.db.get_value("HR Settings", self.name, "frequency")
 		return self.send_holiday_reminders and (old_freq != self.frequency)
-	
+
 	def show_freq_change_warning(self, from_date, to_date):
 		from_date = frappe.bold(format_date(from_date))
 		to_date = frappe.bold(format_date(to_date))

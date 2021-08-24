@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, comma_or, nowdate, getdate
+from frappe.utils import flt, comma_or, nowdate, getdate, now
 from frappe import _
 from frappe.model.document import Document
 
@@ -76,12 +76,12 @@ status_map = {
 		["Stopped", "eval:self.status == 'Stopped'"],
 		["Cancelled", "eval:self.docstatus == 2"],
 		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
-		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
 		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
 		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
 		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"],
 		["Received", "eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
 		["Partially Received", "eval:self.status != 'Stopped' and self.per_received > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
 		["Manufactured", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Manufacture'"]
 	],
 	"Bank Transaction": [
@@ -299,8 +299,8 @@ class StatusUpdater(Document):
 			args['name'] = self.get(args['percent_join_field_parent'])
 			self._update_percent_field(args, update_modified)
 		else:
-			distinct_transactions = set([d.get(args['percent_join_field'])
-				for d in self.get_all_children(args['source_dt'])])
+			distinct_transactions = set(d.get(args['percent_join_field'])
+				for d in self.get_all_children(args['source_dt']))
 
 			for name in distinct_transactions:
 				if name:
@@ -336,10 +336,14 @@ class StatusUpdater(Document):
 				target.notify_update()
 
 	def _update_modified(self, args, update_modified):
-		args['update_modified'] = ''
-		if update_modified:
-			args['update_modified'] = ', modified = now(), modified_by = {0}'\
-				.format(frappe.db.escape(frappe.session.user))
+		if not update_modified:
+			args['update_modified'] = ''
+			return
+
+		args['update_modified'] = ', modified = {0}, modified_by = {1}'.format(
+			frappe.db.escape(now()),
+			frappe.db.escape(frappe.session.user)
+		)
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
 		ref_fieldname = frappe.scrub(ref_dt)

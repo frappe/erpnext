@@ -47,19 +47,13 @@ class EmailDigest(Document):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
-		recipients = list(filter(lambda r: r in valid_users,
-			self.recipient_list.split("\n")))
 
-		original_user = frappe.session.user
-
-		if recipients:
-			for user_id in recipients:
-				frappe.set_user(user_id)
-				frappe.set_user_lang(user_id)
+		if self.recipients:
+			for row in self.recipients:
 				msg_for_this_recipient = self.get_msg_html()
-				if msg_for_this_recipient:
+				if msg_for_this_recipient and row.recipient in valid_users:
 					frappe.sendmail(
-						recipients=user_id,
+						recipients=row.recipient,
 						subject=_("{0} Digest").format(self.frequency),
 						message=msg_for_this_recipient,
 						reference_doctype = self.doctype,
@@ -249,7 +243,7 @@ class EmailDigest(Document):
 				card = cache.get(cache_key)
 
 				if card:
-					card = eval(card)
+					card = frappe.safe_eval(card)
 
 				else:
 					card = frappe._dict(getattr(self, "get_" + key)())
@@ -808,7 +802,6 @@ def get_incomes_expenses_for_period(account, from_date, to_date):
 			val = balance_on_to_date - balance_before_from_date
 		else:
 			last_year_closing_balance = get_balance_on(account, date=fy_start_date - timedelta(days=1))
-			print(fy_start_date - timedelta(days=1), last_year_closing_balance)
 			val = balance_on_to_date + (last_year_closing_balance - balance_before_from_date)
 
 		return val

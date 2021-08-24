@@ -140,7 +140,7 @@ class EmployeeHoursReport:
 					additional_filters += f"AND tt.{field} = '{self.filters.get(field)}'"
 
 		self.filtered_time_logs = frappe.db.sql('''
-			SELECT tt.employee AS employee, ttd.hours AS hours, ttd.billable AS billable, ttd.project AS project
+			SELECT tt.employee AS employee, ttd.hours AS hours, ttd.is_billable AS is_billable, ttd.project AS project
 			FROM `tabTimesheet Detail` AS ttd
 			JOIN `tabTimesheet` AS tt
 				ON ttd.parent = tt.name
@@ -153,14 +153,14 @@ class EmployeeHoursReport:
 	def generate_stats_by_employee(self):
 		self.stats_by_employee = frappe._dict()
 
-		for emp, hours, billable, project in self.filtered_time_logs:
+		for emp, hours, is_billable, project in self.filtered_time_logs:
 			self.stats_by_employee.setdefault(
 				emp, frappe._dict()
 			).setdefault('billed_hours', 0.0)
 
 			self.stats_by_employee[emp].setdefault('non_billed_hours', 0.0)
 
-			if billable:
+			if is_billable:
 				self.stats_by_employee[emp]['billed_hours'] += flt(hours, 2)
 			else:
 				self.stats_by_employee[emp]['non_billed_hours'] += flt(hours, 2)

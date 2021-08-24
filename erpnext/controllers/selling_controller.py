@@ -330,9 +330,15 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
-					rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
-					if d.rate != rate:
-						d.rate = rate
+					if d.doctype == "Packed Item":
+						incoming_rate = flt(d.incoming_rate * d.conversion_factor, d.precision('incoming_rate'))
+						if d.incoming_rate != incoming_rate:
+							d.incoming_rate = incoming_rate
+					else:
+						rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
+						if d.rate != rate:
+							d.rate = rate
+
 						d.discount_percentage = 0
 						d.discount_amount = 0
 						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
@@ -428,7 +434,7 @@ class SellingController(StockController):
 		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
 
 	def get_po_nos(self, ref_doctype, ref_fieldname, po_nos):
-		doc_list = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
+		doc_list = list(set(d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)))
 		if doc_list:
 			po_nos += [d.po_no for d in frappe.get_all(ref_doctype, 'po_no', filters = {'name': ('in', doc_list)}) if d.get('po_no')]
 

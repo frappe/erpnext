@@ -19,6 +19,7 @@ from erpnext.stock import get_warehouse_account_map
 
 class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 class FiscalYearError(frappe.ValidationError): pass
+class PaymentEntryUnlinkError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False):
@@ -350,6 +351,7 @@ def reconcile_against_document(args):
 		# cancel advance entry
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 
+		frappe.flags.ignore_party_validation = True
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
 		# update ref in advance entry
@@ -361,6 +363,7 @@ def reconcile_against_document(args):
 		# re-submit advance entry
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
+		frappe.flags.ignore_party_validation = False
 
 		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
 			doc.update_expense_claim()
@@ -472,7 +475,8 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate
+		"exchange_rate": d.exchange_rate if not d.exchange_gain_loss else payment_entry.get_exchange_rate(),
+		"exchange_gain_loss": d.exchange_gain_loss # only populated from invoice in case of advance allocation
 	}
 
 	if d.voucher_detail_no:
@@ -498,12 +502,15 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	payment_entry.set_amounts()
 
 	if d.difference_amount and d.difference_account:
-		payment_entry.set_gain_or_loss(account_details={
+		account_details = {
 			'account': d.difference_account,
 			'cost_center': payment_entry.cost_center or frappe.get_cached_value('Company',
-				payment_entry.company, "cost_center"),
-			'amount': d.difference_amount
-		})
+				payment_entry.company, "cost_center")
+		}
+		if d.difference_amount:
+			account_details['amount'] = d.difference_amount
+
+		payment_entry.set_gain_or_loss(account_details=account_details)
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
@@ -549,10 +556,16 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
 		for pe in linked_pe:
-			pe_doc = frappe.get_doc("Payment Entry", pe)
-			pe_doc.set_total_allocated_amount()
-			pe_doc.set_unallocated_amount()
-			pe_doc.clear_unallocated_reference_document_rows()
+			try:
+				pe_doc = frappe.get_doc("Payment Entry", pe)
+				pe_doc.set_amounts()
+				pe_doc.clear_unallocated_reference_document_rows()
+				pe_doc.validate_payment_type_with_outstanding()
+			except Exception as e:
+				msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
+				msg += '<br>'
+				msg += _("Please cancel payment entry manually first")
+				frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
 
 			frappe.db.sql("""update `tabPayment Entry` set total_allocated_amount=%s,
 				base_total_allocated_amount=%s, unallocated_amount=%s, modified=%s, modified_by=%s
@@ -635,7 +648,7 @@ def get_held_invoices(party_type, party):
 			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
 			as_dict=1
 		)
-		held_invoices = set([d['name'] for d in held_invoices])
+		held_invoices = set(d['name'] for d in held_invoices)
 
 	return held_invoices
 
@@ -784,7 +797,7 @@ def get_children(doctype, parent, company, is_root=False):
 	return acc
 
 def create_payment_gateway_account(gateway, payment_channel="Email"):
-	from erpnext.setup.setup_wizard.operations.company_setup import create_bank_account
+	from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
 	if not company:
@@ -916,7 +929,6 @@ def repost_gle_for_stock_vouchers(stock_vouchers, posting_date, company=None, wa
 			_delete_gl_entries(voucher_type, voucher_no)
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
-	future_stock_vouchers = []
 
 	values = []
 	condition = ""
@@ -932,37 +944,53 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 		condition += " and company = %s"
 		values.append(company)
 
-	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+	future_stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where
 			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
 			and is_cancelled = 0
 			{condition}
 		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
-		tuple([posting_date, posting_time] + values), as_dict=True):
-			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+		tuple([posting_date, posting_time] + values), as_dict=True)
 
-	return future_stock_vouchers
+	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 
 def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
+	""" Get voucherwise list of GL entries.
+
+	Only fetches GLE fields required for comparing with new GLE.
+	Check compare_existing_and_expected_gle function below.
+	"""
 	gl_entries = {}
-	if future_stock_vouchers:
-		for d in frappe.db.sql("""select * from `tabGL Entry`
-			where posting_date >= %s and voucher_no in (%s)""" %
-			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
-			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
-				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+	if not future_stock_vouchers:
+		return gl_entries
+
+	voucher_nos = [d[1] for d in future_stock_vouchers]
+
+	gles = frappe.db.sql("""
+		select name, account, credit, debit, cost_center, project
+			from `tabGL Entry`
+		where
+			posting_date >= %s and voucher_no in (%s)""" %
+		('%s', ', '.join(['%s'] * len(voucher_nos))),
+		tuple([posting_date] + voucher_nos), as_dict=1)
+
+	for d in gles:
+		gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
 	return gl_entries
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
+	if len(existing_gle) != len(expected_gle):
+		return False
+
 	matched = True
 	for entry in expected_gle:
 		account_existed = False
 		for e in existing_gle:
 			if entry.account == e.account:
 				account_existed = True
-			if (entry.account == e.account and entry.against_account == e.against_account
+			if (entry.account == e.account
 					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center)
 					and ( flt(entry.debit, precision) != flt(e.debit, precision) or
 						flt(entry.credit, precision) != flt(e.credit, precision))):
