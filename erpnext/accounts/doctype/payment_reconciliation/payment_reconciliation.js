@@ -120,7 +120,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
-				me.toggle_primary_action()
+				me.toggle_primary_action();
 			}
 		});
 

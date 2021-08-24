@@ -262,10 +262,10 @@ class PaymentReconciliation(Document):
 
 	def validate_entries(self):
 		if not self.get("invoices"):
-			frappe.throw(_("No records found in the Invoice table"))
+			frappe.throw(_("No records found in the Invoices table"))
 
 		if not self.get("payments"):
-			frappe.throw(_("No records found in the Payment table"))
+			frappe.throw(_("No records found in the Payments table"))
 
 	def validate_allocation(self):
 		unreconciled_invoices = frappe._dict()
@@ -278,7 +278,7 @@ class PaymentReconciliation(Document):
 				invoices_to_reconcile.append(row.invoice_number)
 
 				if row.invoice_number not in unreconciled_invoices.get(row.invoice_type, {}):
-					frappe.throw(_("{0}: {1} not found in Invoice Details table")
+					frappe.throw(_("{0}: {1} not found in Invoices table")
 						.format(row.invoice_type, row.invoice_number))
 
 				if flt(row.allocated_amount) > flt(row.amount):
@@ -291,7 +291,7 @@ class PaymentReconciliation(Document):
 						.format(row.idx, row.allocated_amount, invoice_outstanding))
 
 		if not invoices_to_reconcile:
-			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))
+			frappe.throw(_("No records found in Allocation table"))
 
 	def get_conditions(self, get_invoices=False, get_payments=False):
 		if get_invoices:
