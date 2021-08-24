@@ -1102,20 +1102,3 @@ function check_should_not_attach_bom_items(bom_no) {
 
 $.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
 
-frappe.tour['Stock Entry'] = [
-	{
-		fieldname: "stock_entry_type",
-		title: __("Stock Entry Type"),
-		description: __("Select the type of Stock Entry to be made. For now, to receive stock into a warehouses select") + ' <a href="https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/stock-entry-purpose#2purpose-material-receipt" target="_blank">' + __("Material Receipt.") + "</a>"
-	},
-	{
-		fieldname: "to_warehouse",
-		title: __("Default Target Warehouse"),
-		description: __("Select a target warehouse where the stock will be received.")
-	},
-	{
-		fieldname: "items",
-		title: __("Items"),
-		description: __("Select an item and entry quantity to be delivered.")
-	},
-]

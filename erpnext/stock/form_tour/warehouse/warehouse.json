@@ -1,13 +1,13 @@
 {
- "creation": "2021-08-20 15:56:10.157109",
+ "creation": "2021-08-24 14:43:44.465237",
  "docstatus": 0,
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2021-08-20 15:56:10.157109",
+ "modified": "2021-08-24 14:50:31.988256",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Create a Warehouse",
+ "name": "Warehouse",
  "owner": "Administrator",
  "reference_doctype": "Warehouse",
  "save_on_complete": 1,
@@ -50,5 +50,5 @@
    "title": "Account"
   }
  ],
- "title": "Create a Warehouse"
+ "title": "Warehouse"
 }

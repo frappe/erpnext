@@ -87,21 +87,3 @@ function convert_to_group_or_ledger(frm){
 	})
 }
 
-frappe.tour['Warehouse'] = [
-	{
-		fieldname: "warehouse_name",
-		title: __("Warehouse Name"),
-		description: __("Select name for the warehouse. This should reflect its location or purpose.")
-	},
-	{
-		fieldname: "warehouse_type",
-		title: __("Warehouse Type"),
-		description: __("Select a warehouse type to categorize the warehouse into a sub-group.")
-	},
-	{
-		fieldname: "account",
-		title: __("Account"),
-		description: __("Select an account to set a default account for all transactions with this warehouse.")
-	},
-];
-
