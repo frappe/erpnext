@@ -10,6 +10,7 @@ def execute():
 	if not frappe.db.has_column('Work Order', 'has_batch_no'):
 		return
 
+	frappe.reload_doc('manufacturing', 'doctype', 'manufacturing_settings')
 	if cint(frappe.db.get_single_value('Manufacturing Settings', 'make_serial_no_batch_from_work_order')):
 		return
 
@@ -29,19 +30,20 @@ def execute():
 		return
 
 	repost_stock_entries = []
+
 	stock_entries = frappe.db.sql_list('''
 		SELECT
 			se.name
 		FROM
 			`tabStock Entry` se
 		WHERE
-			se.purpose = 'Manufacture' and se.docstatus < 2 and se.work_order in {work_orders}
+			se.purpose = 'Manufacture' and se.docstatus < 2 and se.work_order in %s
 			and not exists(
 				select name from `tabStock Entry Detail` sed where sed.parent = se.name and sed.is_finished_item = 1
 			)
-		Order BY
+		ORDER BY
 			se.posting_date, se.posting_time
-	'''.format(work_orders=tuple(work_orders)))
+	''',  (work_orders,))
 
 	if stock_entries:
 		print('Length of stock entries', len(stock_entries))

@@ -131,7 +131,7 @@
    "fieldtype": "Link",
    "label": "Service Unit",
    "options": "Healthcare Service Unit",
-   "set_only_once": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_break_12",
@@ -349,7 +349,7 @@
   }
  ],
  "links": [],
- "modified": "2021-02-08 13:13:15.116833",
+ "modified": "2021-08-19 17:28:41.329387",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

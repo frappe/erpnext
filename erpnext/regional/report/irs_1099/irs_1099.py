@@ -52,7 +52,7 @@ def execute(filters=None):
 				AND gl.party_type = "Supplier"
 				AND gl.company = %(company)s
 				{conditions}
-			
+
 		GROUP BY
 			gl.party
 

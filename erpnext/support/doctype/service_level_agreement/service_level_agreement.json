@@ -18,6 +18,10 @@
   "entity_type",
   "column_break_10",
   "entity",
+  "filters_section",
+  "condition",
+  "column_break_15",
+  "condition_description",
   "agreement_details_section",
   "start_date",
   "active",
@@ -171,10 +175,30 @@
    "fieldtype": "Table",
    "label": "Pause SLA On",
    "options": "Pause SLA On Status"
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Assignment Condition"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition",
+   "options": "Python"
+  },
+  {
+   "fieldname": "condition_description",
+   "fieldtype": "HTML",
+   "options": "<p><strong>Condition Examples:</strong></p>\n<pre>doc.status==\"Open\"<br>doc.due_date==nowdate()<br>doc.total &gt; 40000\n</pre>"
   }
  ],
  "links": [],
- "modified": "2020-06-10 12:30:15.050785",
+ "modified": "2021-07-27 11:16:45.596579",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
