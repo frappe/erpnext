@@ -123,6 +123,7 @@ class Item(WebsiteGenerator):
 		self.cant_change()
 		self.update_show_in_website()
 		self.validate_item_tax_net_rate_range()
+		set_item_tax_from_hsn_code(self)
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -1305,3 +1306,7 @@ def update_variants(variants, template, publish_progress=True):
 def on_doctype_update():
 	# since route is a Text column, it needs a length for indexing
 	frappe.db.add_index("Item", ["route(500)"])
+
+@erpnext.allow_regional
+def set_item_tax_from_hsn_code(item):
+	pass

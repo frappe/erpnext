@@ -310,6 +310,7 @@
    "read_only": 1
   },
   {
+   "default": "1",
    "fieldname": "exchange_rate",
    "fieldtype": "Float",
    "label": "Exchange Rate"
@@ -319,7 +320,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-18 16:10:08.249619",
+ "modified": "2021-06-09 12:08:53.930200",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
