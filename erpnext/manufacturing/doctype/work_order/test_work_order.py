@@ -752,7 +752,7 @@ class TestWorkOrder(unittest.TestCase):
 		)
 		self.assertEqual(
 			frappe.db.get_value("Work Order", wo.name, "process_loss_qty"),
-			actual_fg_qty
+			total_pl_qty
 		)
 
 def get_scrap_item_details(bom_no):
