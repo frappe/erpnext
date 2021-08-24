@@ -360,6 +360,9 @@ def reconcile_against_document(args):
 	for entry in reconciled_entries:
 		# cancel advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
+
+		frappe.flags.ignore_party_validation = True
+
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
 		for idx, _ in enumerate(entry.against_voucher):
