@@ -42,36 +42,42 @@ def execute(filters=None):
 	columns = get_columns(group_wise_columns, filters)
 
 	if filters.group_by == 'Invoice':
-		column_names = get_column_names()
-
-		# to display item as Item Code: Item Name
-		columns[0] = 'Sales Invoice:Link/Item:300'
-		# removing Item Code and Item Name columns
-		del columns[4:6]
-
-		for src in gross_profit_data.si_list:	
-			row = frappe._dict()
-			row.indent = src.indent
-			row.parent_invoice = src.parent_invoice
-			row.currency = filters.currency
-
-			for col in group_wise_columns.get(scrub(filters.group_by)):
-				row[column_names[col]] = src.get(col)
-
-			data.append(row)
+		get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_wise_columns, data)
 
 	else:
-		for idx, src in enumerate(gross_profit_data.grouped_data):
-			row = []
-			for col in group_wise_columns.get(scrub(filters.group_by)):
-				row.append(src.get(col))
-
-			row.append(filters.currency)
-			if idx == len(gross_profit_data.grouped_data)-1:
-				row[0] = frappe.bold("Total")
-			data.append(row)
+		get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_columns, data)
 	
 	return columns, data
+
+def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_wise_columns, data):
+	column_names = get_column_names()
+
+	# to display item as Item Code: Item Name
+	columns[0] = 'Sales Invoice:Link/Item:300'
+	# removing Item Code and Item Name columns
+	del columns[4:6]
+
+	for src in gross_profit_data.si_list:	
+		row = frappe._dict()
+		row.indent = src.indent
+		row.parent_invoice = src.parent_invoice
+		row.currency = filters.currency
+
+		for col in group_wise_columns.get(scrub(filters.group_by)):
+			row[column_names[col]] = src.get(col)
+
+		data.append(row)
+
+def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_columns, data):
+	for idx, src in enumerate(gross_profit_data.grouped_data):
+		row = []
+		for col in group_wise_columns.get(scrub(filters.group_by)):
+			row.append(src.get(col))
+
+		row.append(filters.currency)
+		if idx == len(gross_profit_data.grouped_data)-1:
+			row[0] = frappe.bold("Total")
+		data.append(row)
 
 def get_columns(group_wise_columns, filters):
 	columns = []
