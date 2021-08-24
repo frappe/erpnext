@@ -7,4 +7,3 @@ def execute():
 	frappe.reload_doc("manufacturing", "doctype", "work_order_item")
 
 	frappe.db.sql("""UPDATE `tabWork Order Item` SET amount = rate * required_qty""")
-

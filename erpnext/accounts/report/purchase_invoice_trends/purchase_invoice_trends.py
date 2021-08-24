@@ -11,4 +11,4 @@ def execute(filters=None):
 	conditions = get_columns(filters, "Purchase Invoice")
 	data = get_data(filters, conditions)
 
-	return conditions["columns"], data 
+	return conditions["columns"], data
