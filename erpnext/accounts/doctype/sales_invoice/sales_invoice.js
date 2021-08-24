@@ -323,13 +323,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.frm.refresh_fields();
 	},
 
-<<<<<<< HEAD
-	write_off_outstanding_amount_automatically: function() {
-		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
-=======
 	write_off_outstanding_amount_automatically() {
 		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
->>>>>>> 332ac105b5 (refactor: use `read_only_depends_on` instead of code (#27008))
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
