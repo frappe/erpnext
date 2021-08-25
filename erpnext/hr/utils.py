@@ -448,21 +448,44 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
 	return total_given_benefit_amount
 
-def get_holidays_for_employee(employee, start_date, end_date):
-	holiday_list = get_holiday_list_for_employee(employee)
+def get_holiday_dates_for_employee(employee, start_date, end_date):
+	"""return a list of holiday dates for the given employee between start_date and end_date"""
+	# return only date	
+	holidays = get_holidays_for_employee(employee, start_date, end_date) 
+	
+	return [cstr(h.holiday_date) for h in holidays]
 
-	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
-		where
-			parent=%(holiday_list)s
-			and holiday_date >= %(start_date)s
-			and holiday_date <= %(end_date)s''', {
-				"holiday_list": holiday_list,
-				"start_date": start_date,
-				"end_date": end_date
-			})
 
-	holidays = [cstr(i) for i in holidays]
+def get_holidays_for_employee(employee, start_date, end_date, raise_exception=True, only_non_weekly=False):
+	"""Get Holidays for a given employee
 
+		`employee` (str)
+		`start_date` (str or datetime)
+		`end_date` (str or datetime)
+		`raise_exception` (bool)
+		`only_non_weekly` (bool)
+
+		return: list of dicts with `holiday_date` and `description` 
+	"""
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception=raise_exception)
+
+	if not holiday_list:
+		return []
+
+	filters = {
+		'parent': holiday_list,
+		'holiday_date': ('between', [start_date, end_date])
+	}
+
+	if only_non_weekly:
+		filters['weekly_off'] = False
+
+	holidays = frappe.get_all(
+		'Holiday', 
+		fields=['description', 'holiday_date'],
+		filters=filters
+	)
+	
 	return holidays
 
 @erpnext.allow_regional

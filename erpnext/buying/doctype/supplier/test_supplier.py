@@ -13,6 +13,30 @@ test_records = frappe.get_test_records('Supplier')
 
 
 class TestSupplier(unittest.TestCase):
+    def test_get_supplier_group_details(self):
+        doc = frappe.new_doc("Supplier Group")
+        doc.supplier_group_name = "_Testing Supplier Group"
+        doc.payment_terms = "_Test Payment Term Template 3"
+        doc.accounts = []
+        test_account_details = {
+            "company": "_Test Company",
+            "account": "Creditors - _TC",
+        }
+        doc.append("accounts", test_account_details)
+        doc.save()
+        s_doc = frappe.new_doc("Supplier")
+        s_doc.supplier_name = "Testing Supplier"
+        s_doc.supplier_group = "_Testing Supplier Group"
+        s_doc.payment_terms = ""
+        s_doc.accounts = []
+        s_doc.insert()
+        s_doc.get_supplier_group_details()
+        self.assertEqual(s_doc.payment_terms, "_Test Payment Term Template 3")
+        self.assertEqual(s_doc.accounts[0].company, "_Test Company")
+        self.assertEqual(s_doc.accounts[0].account, "Creditors - _TC")
+        s_doc.delete()
+        doc.delete()
+
     def test_supplier_default_payment_terms(self):
         # Payment Term based on Days after invoice date
         frappe.db.set_value(
