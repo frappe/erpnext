@@ -24,7 +24,7 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 
 	selling_price_list = cart_quotation.get("selling_price_list") if cart_quotation else _set_price_list(cart_settings, None)
 
-	price = []
+	price = {}
 	if cart_settings.show_price:
 		is_guest = frappe.session.user == "Guest"
 		# Show Price if logged in.

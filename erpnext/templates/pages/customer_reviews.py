@@ -10,10 +10,10 @@ def get_context(context):
 	context.full_page = True
 	context.reviews = None
 
-	if frappe.form_dict and frappe.form_dict.get("item_code"):
-		context.item_code = frappe.form_dict.get("item_code")
-		context.web_item = frappe.db.get_value("Website Item", {"item_code": context.item_code}, "name")
+	if frappe.form_dict and frappe.form_dict.get("web_item"):
+		context.web_item = frappe.form_dict.get("web_item")
 		context.user_is_customer = check_if_user_is_customer()
 		context.enable_reviews = get_shopping_cart_settings().enable_reviews
 		if context.enable_reviews:
-			get_item_reviews(context.web_item, 0, 10, context)
+			reviews_data = get_item_reviews(context.web_item)
+			context.update(reviews_data)
