@@ -52,8 +52,9 @@ class PatientEncounter(Document):
 		if gender:
 			plan_filters['gender'] = gender
 
-		diagnosis = [_diagnosis['diagnosis'] for _diagnosis in encounter['diagnosis']]
+		diagnosis = encounter.get('diagnosis')
 		if diagnosis:
+			diagnosis = [_diagnosis['diagnosis'] for _diagnosis in encounter['diagnosis']]
 			filters = [
 				['diagnosis', 'in', diagnosis],
 				['parenttype', '=', 'Treatment Plan Template'],
@@ -62,8 +63,9 @@ class PatientEncounter(Document):
 			plan_names = [_diagnosis['parent'] for _diagnosis in diagnosis]
 			plan_filters['name'][1].extend(plan_names)
 
-		symptoms = [symptom['complaint'] for symptom in encounter['symptoms']]
+		symptoms = encounter.get('symptoms')
 		if symptoms:
+			symptoms = [symptom['complaint'] for symptom in encounter['symptoms']]
 			filters = [
 				['complaint', 'in', symptoms],
 				['parenttype', '=', 'Treatment Plan Template'],
