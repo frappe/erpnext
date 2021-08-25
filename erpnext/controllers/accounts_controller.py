@@ -1391,26 +1391,24 @@ class AccountsController(TransactionBase):
 
 		jv = frappe.new_doc('Journal Entry')
 		jv.voucher_type = 'Journal Entry'
-		jv.naming_series = 'ACC-JV-.YYYY.-'
 		jv.posting_date = self.posting_date
 		jv.company = self.company
 		jv.remark = 'Adjustment for {} {}'.format(self.doctype, self.name)
 
 		reconcilation_entry = frappe._dict()
 		advance_entry = frappe._dict()
-		cost_center = erpnext.get_default_cost_center(self.company)
 
 		reconcilation_entry.account = secondary_account
 		reconcilation_entry.party_type = secondary_party_type
 		reconcilation_entry.party = secondary_party
 		reconcilation_entry.reference_type = self.doctype
 		reconcilation_entry.reference_name = self.name
-		reconcilation_entry.cost_center = cost_center
+		reconcilation_entry.cost_center = self.cost_center
 
 		advance_entry.account = primary_account
 		advance_entry.party_type = primary_party_type
 		advance_entry.party = primary_party
-		advance_entry.cost_center = cost_center
+		advance_entry.cost_center = self.cost_center
 		advance_entry.is_advance = 'Yes'
 
 		if self.doctype == 'Sales Invoice':
