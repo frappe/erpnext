@@ -154,9 +154,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			return
 		}
 
-		$.each(doc["items"], function(i, row) {
+		doc.items.forEach((row) => {
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
-		})
+		});
 	}
 
 	set_default_print_format() {
@@ -446,12 +446,24 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	currency() {
-		super.currency();
+		this._super();
 		$.each(cur_frm.doc.timesheets, function(i, d) {
 			let row = frappe.get_doc(d.doctype, d.name)
 			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
 		});
 		calculate_total_billing_amount(cur_frm)
+	}
+
+	currency() {
+		var me = this;
+		super.currency();
+		if (this.frm.doc.timesheets) {
+			this.frm.doc.timesheets.forEach((d) => {
+				let row = frappe.get_doc(d.doctype, d.name)
+				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
+			});
+			calculate_total_billing_amount(this.frm);
+		}
 	}
 };
 
@@ -974,9 +986,9 @@ var calculate_total_billing_amount =  function(frm) {
 
 	doc.total_billing_amount = 0.0
 	if (doc.timesheets) {
-		$.each(doc.timesheets, function(index, data){
-			doc.total_billing_amount += flt(data.billing_amount)
-		})
+		doc.timesheets.forEach((d) => {
+			doc.total_billing_amount += flt(d.billing_amount)
+		});
 	}
 
 	refresh_field('total_billing_amount')
