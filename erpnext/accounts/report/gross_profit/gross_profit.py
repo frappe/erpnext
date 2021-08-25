@@ -471,11 +471,6 @@ class GrossProfitGenerator(object):
 					row.parent_invoice = row.parent
 					row.parent = row.item_code
 
-					# if not self.si_list[parents_index-1].base_net_amount:
-					# 	self.si_list[parents_index-1].base_net_amount = 0
-					
-					# self.si_list[parents_index-1].base_net_amount += row.base_net_amount
-
 					if frappe.db.exists('Product Bundle', row.item_code):
 						self.add_bundle_items(row, index)
 			
