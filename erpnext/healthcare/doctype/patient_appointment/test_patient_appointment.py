@@ -4,10 +4,11 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter
+from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter, check_payment_fields_reqd, check_is_new_patient
 from frappe.utils import nowdate, add_days, now_datetime
 from frappe.utils.make_random import get_random
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+
 
 class TestPatientAppointment(unittest.TestCase):
 	def setUp(self):
@@ -175,6 +176,28 @@ class TestPatientAppointment(unittest.TestCase):
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record1)
 		discharge_patient(ip_record1)
+
+	def test_payment_should_be_mandatory_for_new_patient_appointment(self):
+		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 1)
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		frappe.db.set_value('Healthcare Settings', None, 'max_visits', 3)
+		frappe.db.set_value('Healthcare Settings', None, 'valid_days', 30)
+
+		patient = create_patient()
+		assert check_is_new_patient(patient)
+		payment_required = check_payment_fields_reqd(patient)
+		assert payment_required is True
+
+	def test_sales_invoice_should_be_generated_for_new_patient_appointment(self):
+		patient, medical_department, practitioner = create_healthcare_docs()
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		invoice_count = frappe.db.count('Sales Invoice')
+
+		assert check_is_new_patient(patient)
+		create_appointment(patient, practitioner, nowdate())
+		new_invoice_count = frappe.db.count('Sales Invoice')
+
+		assert new_invoice_count == invoice_count + 1
 
 
 def create_healthcare_docs():
