@@ -95,9 +95,17 @@ frappe.ui.form.on("Opportunity", {
 					}, __('Create'));
 			}
 
-			frm.add_custom_button(__('Quotation'),
-				cur_frm.cscript.create_quotation, __('Create'));
+			if (frm.doc.opportunity_from != "Customer") {
+				frm.add_custom_button(__('Customer'),
+					function() {
+						frm.trigger("make_customer")
+					}, __('Create'));
+			}
 
+			frm.add_custom_button(__('Quotation'),
+				function() {
+					frm.trigger("create_quotation")
+				}, __('Create'));
 		}
 
 		if(!frm.doc.__islocal && frm.perm[0].write && frm.doc.docstatus==0) {
@@ -195,7 +203,18 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			frm: cur_frm
 		})
 	}
+<<<<<<< HEAD
 });
+=======
+
+	make_customer() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_customer",
+			frm: cur_frm
+		})
+	}
+};
+>>>>>>> 4d98be2126 (feat: provision to create customer from opportunity (#27141))
 
 $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
 
