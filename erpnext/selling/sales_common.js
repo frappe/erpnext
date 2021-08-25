@@ -394,6 +394,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	_set_batch_number(doc) {
+		if (doc.batch_no) {
+			return
+		}
+
 		let args = {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)};
 		if (doc.has_serial_no && doc.serial_no) {
 			args['serial_no'] = doc.serial_no

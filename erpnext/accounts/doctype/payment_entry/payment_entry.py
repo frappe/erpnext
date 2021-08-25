@@ -55,14 +55,17 @@ class PaymentEntry(AccountsController):
 		self.validate_mandatory()
 		self.validate_reference_documents()
 		self.set_tax_withholding()
-		self.apply_taxes()
 		self.set_amounts()
+		self.validate_amounts()
+		self.apply_taxes()
+		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
 		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
 		self.validate_duplicate_entry()
+		self.validate_payment_type_with_outstanding()
 		self.validate_allocated_amount()
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
@@ -117,6 +120,11 @@ class PaymentEntry(AccountsController):
 
 			if not self.get(field):
 				self.set(field, bank_data.account)
+
+	def validate_payment_type_with_outstanding(self):
+		total_outstanding = sum(d.allocated_amount for d in self.get('references'))
+		if total_outstanding < 0 and self.party_type == 'Customer' and self.payment_type == 'Receive':
+			frappe.throw(_("Cannot receive from customer against negative outstanding"), title=_("Incorrect Payment Type"))
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
@@ -236,7 +244,9 @@ class PaymentEntry(AccountsController):
 						self.company_currency, self.posting_date)
 
 	def set_target_exchange_rate(self, ref_doc=None):
-		if self.paid_to and not self.target_exchange_rate:
+		if self.paid_from_account_currency == self.paid_to_account_currency:
+			self.target_exchange_rate = self.source_exchange_rate
+		elif self.paid_to and not self.target_exchange_rate:
 			if ref_doc:
 				if self.paid_to_account_currency == ref_doc.currency:
 					self.target_exchange_rate = ref_doc.get("exchange_rate")
@@ -468,13 +478,22 @@ class PaymentEntry(AccountsController):
 	def set_amounts(self):
 		self.set_received_amount()
 		self.set_amounts_in_company_currency()
-		self.set_amounts_after_tax()
 		self.set_total_allocated_amount()
 		self.set_unallocated_amount()
 		self.set_difference_amount()
 
+	def validate_amounts(self):
+		self.validate_received_amount()
+	
+	def validate_received_amount(self):
+		if self.paid_from_account_currency == self.paid_to_account_currency:
+			if self.paid_amount != self.received_amount:
+				frappe.throw(_("Received Amount cannot be greater than Paid Amount"))
+
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
+		if self.paid_from_account_currency == self.paid_to_account_currency:
+			self.received_amount = self.paid_amount
 
 	def set_amounts_after_tax(self):
 		applicable_tax = 0

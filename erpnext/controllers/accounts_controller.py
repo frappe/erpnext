@@ -160,7 +160,8 @@ class AccountsController(TransactionBase):
 		self.set_due_date()
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
-		self.validate_due_date()
+		if not self.get('ignore_default_payment_terms_template'):
+			self.validate_due_date()
 		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
@@ -1853,6 +1854,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	for d in data:
 		new_child_flag = False
+
+		if not d.get("item_code"):
+			# ignore empty rows
+			continue
+
 		if not d.get("docname"):
 			new_child_flag = True
 			check_doc_permissions(parent, 'create')
