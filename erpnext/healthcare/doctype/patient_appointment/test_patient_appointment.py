@@ -192,7 +192,7 @@ class TestPatientAppointment(unittest.TestCase):
 		assert payment_required is True
 
 	def test_sales_invoice_should_be_generated_for_new_patient_appointment(self):
-		patient, medical_department, practitioner = create_healthcare_docs()
+		patient, practitioner = create_healthcare_docs()
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
 		invoice_count = frappe.db.count('Sales Invoice')
 
