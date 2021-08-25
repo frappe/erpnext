@@ -134,6 +134,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.practitioner;",
    "fieldname": "section_break_12",
    "fieldtype": "Section Break",
    "label": "Appointment Details"
