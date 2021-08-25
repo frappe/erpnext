@@ -24,7 +24,7 @@ def make_custom_fields(update=True):
 		'Sales Invoice Item': is_zero_rated,
 		'Purchase Invoice Item': is_zero_rated
 	}
-	
+
 	create_custom_fields(custom_fields, update=update)
 
 def add_permissions():
@@ -36,7 +36,7 @@ def add_permissions():
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, 'write', 1)
 			update_permission_property(doctype, role, 0, 'create', 1)
-	
+
 
 	if not frappe.db.get_value('Custom Role', dict(report="VAT Audit Report")):
 		frappe.get_doc(dict(

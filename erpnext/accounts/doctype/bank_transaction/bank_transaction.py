@@ -121,4 +121,3 @@ def unclear_reference_payment(doctype, docname):
 			frappe.db.set_value(doc.payment_document, doc.payment_entry, "clearance_date", None)
 
 		return doc.payment_entry
-
