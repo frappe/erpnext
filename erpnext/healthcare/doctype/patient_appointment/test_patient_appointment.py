@@ -178,8 +178,29 @@ class TestPatientAppointment(unittest.TestCase):
 		schedule_discharge(frappe.as_json({'patient': patient, 'discharge_ordered_datetime': now_datetime()}))
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record1)
-<<<<<<< HEAD
 		discharge_patient(ip_record1, now_datetime())
+
+	def test_payment_should_be_mandatory_for_new_patient_appointment(self):
+		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 1)
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		frappe.db.set_value('Healthcare Settings', None, 'max_visits', 3)
+		frappe.db.set_value('Healthcare Settings', None, 'valid_days', 30)
+
+		patient = create_patient()
+		assert check_is_new_patient(patient)
+		payment_required = check_payment_fields_reqd(patient)
+		assert payment_required is True
+
+	def test_sales_invoice_should_be_generated_for_new_patient_appointment(self):
+		patient, medical_department, practitioner = create_healthcare_docs()
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		invoice_count = frappe.db.count('Sales Invoice')
+
+		assert check_is_new_patient(patient)
+		create_appointment(patient, practitioner, nowdate())
+		new_invoice_count = frappe.db.count('Sales Invoice')
+
+		assert new_invoice_count == invoice_count + 1
 
 	def test_overlap_appointment(self):
 		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import OverlapError
@@ -277,65 +298,6 @@ def create_practitioner(id=0, medical_department=None):
 
 	return practitioner.name
 
-=======
-		discharge_patient(ip_record1)
-
-	def test_payment_should_be_mandatory_for_new_patient_appointment(self):
-		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 1)
-		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
-		frappe.db.set_value('Healthcare Settings', None, 'max_visits', 3)
-		frappe.db.set_value('Healthcare Settings', None, 'valid_days', 30)
-
-		patient = create_patient()
-		assert check_is_new_patient(patient)
-		payment_required = check_payment_fields_reqd(patient)
-		assert payment_required is True
-
-	def test_sales_invoice_should_be_generated_for_new_patient_appointment(self):
-		patient, medical_department, practitioner = create_healthcare_docs()
-		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
-		invoice_count = frappe.db.count('Sales Invoice')
-
-		assert check_is_new_patient(patient)
-		create_appointment(patient, practitioner, nowdate())
-		new_invoice_count = frappe.db.count('Sales Invoice')
-
-		assert new_invoice_count == invoice_count + 1
-
-
-def create_healthcare_docs():
-	patient = create_patient()
-	practitioner = frappe.db.exists('Healthcare Practitioner', '_Test Healthcare Practitioner')
-	medical_department = frappe.db.exists('Medical Department', '_Test Medical Department')
-
-	if not medical_department:
-		medical_department = frappe.new_doc('Medical Department')
-		medical_department.department = '_Test Medical Department'
-		medical_department.save(ignore_permissions=True)
-		medical_department = medical_department.name
-
-	if not practitioner:
-		practitioner = frappe.new_doc('Healthcare Practitioner')
-		practitioner.first_name = '_Test Healthcare Practitioner'
-		practitioner.gender = 'Female'
-		practitioner.department = medical_department
-		practitioner.op_consulting_charge = 500
-		practitioner.inpatient_visit_charge = 500
-		practitioner.save(ignore_permissions=True)
-		practitioner = practitioner.name
-
-	return patient, medical_department, practitioner
-
-def create_patient():
-	patient = frappe.db.exists('Patient', '_Test Patient')
-	if not patient:
-		patient = frappe.new_doc('Patient')
-		patient.first_name = '_Test Patient'
-		patient.sex = 'Female'
-		patient.save(ignore_permissions=True)
-		patient = patient.name
-	return patient
->>>>>>> a65498dc61 (fix(healthcare): Made payment fields mandatory for new appointments (#26608))
 
 def create_encounter(appointment):
 	if appointment:

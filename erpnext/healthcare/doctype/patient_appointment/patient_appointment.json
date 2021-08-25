@@ -350,11 +350,7 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
  "modified": "2021-08-19 17:28:41.329387",
-=======
- "modified": "2021-06-16 00:40:26.841794",
->>>>>>> a65498dc61 (fix(healthcare): Made payment fields mandatory for new appointments (#26608))
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
