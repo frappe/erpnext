@@ -95,13 +95,6 @@ frappe.ui.form.on("Opportunity", {
 					}, __('Create'));
 			}
 
-			if (frm.doc.opportunity_from != "Customer") {
-				frm.add_custom_button(__('Customer'),
-					function() {
-						frm.trigger("make_customer")
-					}, __('Create'));
-			}
-
 			frm.add_custom_button(__('Quotation'),
 				function() {
 					frm.trigger("create_quotation")
@@ -200,13 +193,6 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 	create_quotation() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
-			frm: cur_frm
-		})
-	}
-
-	make_customer() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.crm.doctype.opportunity.opportunity.make_customer",
 			frm: cur_frm
 		})
 	}
