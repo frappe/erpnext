@@ -134,6 +134,7 @@
    "set_only_once": 1
   },
   {
+   "depends_on": "eval:doc.practitioner;",
    "fieldname": "section_break_12",
    "fieldtype": "Section Break",
    "label": "Appointment Details"
@@ -349,7 +350,7 @@
   }
  ],
  "links": [],
- "modified": "2021-02-08 13:13:15.116833",
+ "modified": "2021-06-16 00:40:26.841794",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
