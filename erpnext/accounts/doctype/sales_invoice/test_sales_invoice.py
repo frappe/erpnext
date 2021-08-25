@@ -2185,7 +2185,7 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 1)
 
 		# create a sales invoice
-		si = create_sales_invoice(customer=customer)
+		si = create_sales_invoice(customer=customer, parent_cost_center="_Test Cost Center - _TC")
 
 		# check outstanding of sales invoice
 		si.reload()
