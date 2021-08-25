@@ -199,10 +199,33 @@ class TestPatientAppointment(unittest.TestCase):
 
 		assert new_invoice_count == invoice_count + 1
 
+	def test_patient_appointment_should_consider_permissions_while_fetching_appointments(self):
+		patient, medical_department, practitioner = create_healthcare_docs()
+		create_appointment(patient, practitioner, nowdate())
 
-def create_healthcare_docs():
+		patient, medical_department, new_practitioner = create_healthcare_docs(practitioner_name='Dr. John')
+		create_appointment(patient, new_practitioner, nowdate())
+
+		roles = [{"doctype": "Has Role", "role": "Physician"}]
+		user = create_user(roles=roles)
+		new_practitioner = frappe.get_doc('Healthcare Practitioner', new_practitioner)
+		new_practitioner.user_id = user.email
+		new_practitioner.save()
+
+		frappe.set_user(user.name)
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 1
+
+		frappe.set_user("Administrator")
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 2
+
+def create_healthcare_docs(practitioner_name=None):
+	if not practitioner_name:
+		practitioner_name = '_Test Healthcare Practitioner'
+
 	patient = create_patient()
-	practitioner = frappe.db.exists('Healthcare Practitioner', '_Test Healthcare Practitioner')
+	practitioner = frappe.db.exists('Healthcare Practitioner', practitioner_name)
 	medical_department = frappe.db.exists('Medical Department', '_Test Medical Department')
 
 	if not medical_department:
@@ -213,7 +236,7 @@ def create_healthcare_docs():
 
 	if not practitioner:
 		practitioner = frappe.new_doc('Healthcare Practitioner')
-		practitioner.first_name = '_Test Healthcare Practitioner'
+		practitioner.first_name = practitioner_name
 		practitioner.gender = 'Female'
 		practitioner.department = medical_department
 		practitioner.op_consulting_charge = 500
@@ -319,3 +342,17 @@ def create_appointment_type(args=None):
 			'price_list': args.get('price_list') or frappe.db.get_value("Price List", {"selling": 1}),
 			'items': args.get('items') or items
 		}).insert()
+
+def create_user(email=None, roles=None):
+	if not email:
+		email = '{}@frappe.com'.format(frappe.utils.random_string(10))
+	user = frappe.db.exists('User', email)
+	if not user:
+		user = frappe.get_doc({
+			"doctype": "User",
+			"email": email,
+			"first_name": "test_user",
+			"password": "password",
+			"roles": roles,
+		}).insert()
+	return user
