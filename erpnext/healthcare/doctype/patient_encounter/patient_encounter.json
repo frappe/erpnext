@@ -327,6 +327,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.patient",
    "fieldname": "get_applicable_treatment_plans",
    "fieldtype": "Button",
    "label": "Get Applicable Treatment Plans"
