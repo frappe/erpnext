@@ -72,7 +72,8 @@ class TestExpenseClaim(unittest.TestCase):
 	def test_expense_claim_gl_entry(self):
 		payable_account = get_payable_account(company_name)
 		taxes = generate_taxes()
-		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", do_not_submit=True, taxes=taxes)
+		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4",
+			do_not_submit=True, taxes=taxes)
 		expense_claim.submit()
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -82,7 +83,7 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			['CGST - _TC4',18.0, 0.0],
+			['Output Tax CGST - _TC4',18.0, 0.0],
 			[payable_account, 0.0, 218.0],
 			["Travel Expenses - _TC4", 200.0, 0.0]
 		])
@@ -145,7 +146,7 @@ def generate_taxes():
 	parent_account = frappe.db.get_value('Account',
 		{'company': company_name, 'is_group':1, 'account_type': 'Tax'},
 		'name')
-	account = create_account(company=company_name, account_name="CGST", account_type="Tax", parent_account=parent_account)
+	account = create_account(company=company_name, account_name="Output Tax CGST", account_type="Tax", parent_account=parent_account)
 	return {'taxes':[{
 		"account_head": account,
 		"rate": 0,

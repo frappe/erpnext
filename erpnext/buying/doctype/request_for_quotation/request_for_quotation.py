@@ -317,18 +317,20 @@ def add_items(sq_doc, supplier, items):
 			create_rfq_items(sq_doc, supplier, data)
 
 def create_rfq_items(sq_doc, supplier, data):
-	sq_doc.append('items', {
-		"item_code": data.item_code,
-		"item_name": data.item_name,
-		"description": data.description,
-		"qty": data.qty,
-		"rate": data.rate,
-		"conversion_factor": data.conversion_factor if data.conversion_factor else None,
-		"supplier_part_no": frappe.db.get_value("Item Supplier", {'parent': data.item_code, 'supplier': supplier}, "supplier_part_no"),
-		"warehouse": data.warehouse or '',
+	args = {}
+
+	for field in ['item_code', 'item_name', 'description', 'qty', 'rate', 'conversion_factor',
+		'warehouse', 'material_request', 'material_request_item', 'stock_qty']:
+		args[field] = data.get(field)
+
+	args.update({
 		"request_for_quotation_item": data.name,
-		"request_for_quotation": data.parent
+		"request_for_quotation": data.parent,
+		"supplier_part_no": frappe.db.get_value("Item Supplier",
+			{'parent': data.item_code, 'supplier': supplier}, "supplier_part_no")
 	})
+
+	sq_doc.append('items', args)
 
 @frappe.whitelist()
 def get_pdf(doctype, name, supplier):

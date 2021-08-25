@@ -11,6 +11,7 @@ from frappe.test_runner import make_test_records
 import erpnext
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+from erpnext.stock.doctype.item.test_item import create_item
 
 test_records = frappe.get_test_records('Warehouse')
 
@@ -91,6 +92,39 @@ class TestWarehouse(unittest.TestCase):
 
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Merging 2 - TCP1"}))
+
+	def test_unlinking_warehouse_from_item_defaults(self):
+		company = "_Test Company"
+
+		warehouse_names = [f'_Test Warehouse {i} for Unlinking' for i in range(2)]
+		warehouse_ids = []
+		for warehouse in warehouse_names:
+			warehouse_id = create_warehouse(warehouse, company=company)
+			warehouse_ids.append(warehouse_id)
+
+		item_names = [f'_Test Item {i} for Unlinking' for i in range(2)]
+		for item, warehouse in zip(item_names, warehouse_ids):
+			create_item(item, warehouse=warehouse, company=company)
+
+		# Delete warehouses
+		for warehouse in warehouse_ids:
+			frappe.delete_doc("Warehouse", warehouse)
+
+		# Check Item existance
+		for item in item_names:
+			self.assertTrue(
+				bool(frappe.db.exists("Item", item)),
+				f"{item} doesn't exist"
+			)
+
+			item_doc = frappe.get_doc("Item", item)
+			for item_default in item_doc.item_defaults:
+				self.assertNotIn(
+					item_default.default_warehouse,
+					warehouse_ids,
+					f"{item} linked to {item_default.default_warehouse} in {warehouse_ids}."
+				)
+
 
 def create_warehouse(warehouse_name, properties=None, company=None):
 	if not company:

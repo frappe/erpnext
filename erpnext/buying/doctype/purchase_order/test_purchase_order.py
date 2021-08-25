@@ -20,7 +20,6 @@ from erpnext.controllers.status_updater import OverAllowanceError
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 
 from erpnext.stock.doctype.batch.test_batch import make_new_batch
-from erpnext.controllers.buying_controller import get_backflushed_subcontracted_raw_materials
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -485,6 +484,9 @@ class TestPurchaseOrder(unittest.TestCase):
 
 
 	def test_make_purchase_invoice_with_terms(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
+
+		automatically_fetch_payment_terms()
 		po = create_purchase_order(do_not_save=True)
 
 		self.assertRaises(frappe.ValidationError, make_pi_from_po, po.name)
@@ -510,6 +512,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(getdate(pi.payment_schedule[0].due_date), getdate(po.transaction_date))
 		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
 		self.assertEqual(getdate(pi.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30))
+		automatically_fetch_payment_terms(enable=0)
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
@@ -633,14 +636,18 @@ class TestPurchaseOrder(unittest.TestCase):
 			else:
 				raise Exception
 
-	def test_terms_does_not_copy(self):
-		po = create_purchase_order()
+	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
+		po = create_purchase_order(do_not_save=1)
+		po.payment_terms_template = '_Test Payment Term Template'
+		po.save()
+		po.submit()
 
-		self.assertTrue(po.get('payment_schedule'))
-
+		frappe.db.set_value('Company', '_Test Company', 'payment_terms', '_Test Payment Term Template 1')
 		pi = make_pi_from_po(po.name)
+		pi.save()
 
-		self.assertFalse(pi.get('payment_schedule'))
+		self.assertEqual(pi.get('payment_terms_template'), '_Test Payment Term Template 1')
+		frappe.db.set_value('Company', '_Test Company', 'payment_terms', '')
 
 	def test_terms_copied(self):
 		po = create_purchase_order(do_not_save=1)
@@ -771,7 +778,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(bin11.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
 
 	def test_exploded_items_in_subcontracted(self):
-		item_code = "_Test Subcontracted FG Item 1"
+		item_code = "_Test Subcontracted FG Item 11"
 		make_subcontracted_item(item_code=item_code)
 
 		po = create_purchase_order(item_code=item_code, qty=1,
@@ -847,79 +854,6 @@ class TestPurchaseOrder(unittest.TestCase):
 		transferred_rm_map = frappe._dict()
 		for item in rm_items:
 			transferred_rm_map[item.get('rm_item_code')] = item
-
-		for item in pr.get('supplied_items'):
-			self.assertEqual(item.get('required_qty'), (transferred_rm_map[item.get('rm_item_code')].get('qty') / order_qty) * received_qty)
-
-		update_backflush_based_on("BOM")
-
-	def test_backflushed_based_on_for_multiple_batches(self):
-		item_code = "_Test Subcontracted FG Item 2"
-		make_item('Sub Contracted Raw Material 2', {
-			'is_stock_item': 1,
-			'is_sub_contracted_item': 1
-		})
-
-		make_subcontracted_item(item_code=item_code, has_batch_no=1, create_new_batch=1,
-			raw_materials=["Sub Contracted Raw Material 2"])
-
-		update_backflush_based_on("Material Transferred for Subcontract")
-
-		order_qty = 500
-		po = create_purchase_order(item_code=item_code, qty=order_qty,
-			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
-
-		make_stock_entry(target="_Test Warehouse - _TC",
-			item_code = "Sub Contracted Raw Material 2", qty=552, basic_rate=100)
-
-		rm_items = [
-			{"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 2","item_name":"_Test Item",
-				"qty":552,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"}]
-
-		rm_item_string = json.dumps(rm_items)
-		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
-		se.submit()
-
-		for batch in ["ABCD1", "ABCD2", "ABCD3", "ABCD4"]:
-			make_new_batch(batch_id=batch, item_code=item_code)
-
-		pr = make_purchase_receipt(po.name)
-
-		# partial receipt
-		pr.get('items')[0].qty = 30
-		pr.get('items')[0].batch_no = "ABCD1"
-
-		purchase_order = po.name
-		purchase_order_item = po.items[0].name
-
-		for batch_no, qty in {"ABCD2": 60, "ABCD3": 70, "ABCD4":40}.items():
-			pr.append("items", {
-				"item_code": pr.get('items')[0].item_code,
-				"item_name": pr.get('items')[0].item_name,
-				"uom": pr.get('items')[0].uom,
-				"stock_uom": pr.get('items')[0].stock_uom,
-				"warehouse": pr.get('items')[0].warehouse,
-				"conversion_factor": pr.get('items')[0].conversion_factor,
-				"cost_center": pr.get('items')[0].cost_center,
-				"rate": pr.get('items')[0].rate,
-				"qty": qty,
-				"batch_no": batch_no,
-				"purchase_order": purchase_order,
-				"purchase_order_item": purchase_order_item
-			})
-
-		pr.submit()
-
-		pr1 = make_purchase_receipt(po.name)
-		pr1.get('items')[0].qty = 300
-		pr1.get('items')[0].batch_no = "ABCD1"
-		pr1.save()
-
-		pr_key = ("Sub Contracted Raw Material 2", po.name)
-		consumed_qty = get_backflushed_subcontracted_raw_materials([po.name]).get(pr_key)
-
-		self.assertTrue(pr1.supplied_items[0].consumed_qty > 0)
-		self.assertTrue(pr1.supplied_items[0].consumed_qty,  flt(552.0) - flt(consumed_qty))
 
 		update_backflush_based_on("BOM")
 
@@ -1042,8 +976,27 @@ class TestPurchaseOrder(unittest.TestCase):
 		# To test if the PO does NOT have a Blanket Order
 		self.assertEqual(po_doc.items[0].blanket_order, None)
 
+	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
 
+		automatically_fetch_payment_terms()
 
+		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		create_payment_terms_template()
+		po.payment_terms_template = 'Test Receivable Template'
+		po.submit()
+
+		pi = make_purchase_invoice(qty=10, rate=100, do_not_save=1)
+		pi.items[0].purchase_order = po.name
+		pi.items[0].po_detail = po.items[0].name
+		pi.insert()
+
+		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
+		compare_payment_schedules(self, po, pi)
+
+		automatically_fetch_payment_terms(enable=0)
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
@@ -1111,28 +1064,35 @@ def create_purchase_order(**args):
 
 	po.schedule_date = add_days(nowdate(), 1)
 	po.company = args.company or "_Test Company"
-	po.supplier = args.customer or "_Test Supplier"
+	po.supplier = args.supplier or "_Test Supplier"
 	po.is_subcontracted = args.is_subcontracted or "No"
 	po.currency = args.currency or frappe.get_cached_value('Company',  po.company,  "default_currency")
 	po.conversion_factor = args.conversion_factor or 1
 	po.supplier_warehouse = args.supplier_warehouse or None
 
-	po.append("items", {
-		"item_code": args.item or args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
-		"qty": args.qty or 10,
-		"rate": args.rate or 500,
-		"schedule_date": add_days(nowdate(), 1),
-		"include_exploded_items": args.get('include_exploded_items', 1),
-		"against_blanket_order": args.against_blanket_order
-	})
+	if args.rm_items:
+		for row in args.rm_items:
+			po.append("items", row)
+	else:
+		po.append("items", {
+			"item_code": args.item or args.item_code or "_Test Item",
+			"warehouse": args.warehouse or "_Test Warehouse - _TC",
+			"qty": args.qty or 10,
+			"rate": args.rate or 500,
+			"schedule_date": add_days(nowdate(), 1),
+			"include_exploded_items": args.get('include_exploded_items', 1),
+			"against_blanket_order": args.against_blanket_order
+		})
+
+	po.set_missing_values()
 	if not args.do_not_save:
 		po.insert()
 		if not args.do_not_submit:
 			if po.is_subcontracted == "Yes":
 				supp_items = po.get("supplied_items")
 				for d in supp_items:
-					d.reserve_warehouse = args.warehouse or "_Test Warehouse - _TC"
+					if not d.reserve_warehouse:
+						d.reserve_warehouse = args.warehouse or "_Test Warehouse - _TC"
 			po.submit()
 
 	return po

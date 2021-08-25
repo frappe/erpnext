@@ -102,4 +102,3 @@ def get_linked_material_requests(items):
 			mr_list.append(material_request)
 
 	return mr_list
-

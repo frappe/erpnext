@@ -71,7 +71,6 @@ frappe.ui.form.on("BOM", {
 
 	refresh: function(frm) {
 		frm.toggle_enable("item", frm.doc.__islocal);
-		toggle_operations(frm);
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
@@ -84,7 +83,7 @@ frappe.ui.form.on("BOM", {
 
 		if (!frm.doc.__islocal && frm.doc.docstatus<2) {
 			frm.add_custom_button(__("Update Cost"), function() {
-				frm.events.update_cost(frm);
+				frm.events.update_cost(frm, true);
 			});
 			frm.add_custom_button(__("Browse BOM"), function() {
 				frappe.route_options = {
@@ -236,7 +235,7 @@ frappe.ui.form.on("BOM", {
 						reqd: 1,
 					},
 					{
-						fieldname: "varint_item_code",
+						fieldname: "variant_item_code",
 						options: "Item",
 						label: __("Variant Item"),
 						fieldtype: "Link",
@@ -288,7 +287,7 @@ frappe.ui.form.on("BOM", {
 			let variant_items = data.items || [];
 
 			variant_items.forEach(d => {
-				if (!d.varint_item_code) {
+				if (!d.variant_item_code) {
 					frappe.throw(__("Select variant item code for the template item {0}", [d.item_code]));
 				}
 			})
@@ -300,7 +299,7 @@ frappe.ui.form.on("BOM", {
 		has_template_rm.forEach(d => {
 			dialog.fields_dict.items.df.data.push({
 				"item_code": d.item_code,
-				"varint_item_code": "",
+				"variant_item_code": "",
 				"qty": d.qty,
 				"source_warehouse": d.source_warehouse,
 				"operation": d.operation
@@ -319,15 +318,15 @@ frappe.ui.form.on("BOM", {
 		})
 	},
 
-	update_cost: function(frm) {
+	update_cost: function(frm, save_doc=false) {
 		return frappe.call({
 			doc: frm.doc,
 			method: "update_cost",
 			freeze: true,
 			args: {
 				update_parent: true,
-				from_child_bom:false,
-				save: frm.doc.docstatus === 1 ? true : false
+				save: save_doc,
+				from_child_bom: false
 			},
 			callback: function(r) {
 				refresh_field("items");
@@ -651,15 +650,8 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 	erpnext.bom.calculate_total(frm.doc);
 });
 
-var toggle_operations = function(frm) {
-	frm.toggle_display("operations_section", cint(frm.doc.with_operations) == 1);
-	frm.toggle_display("transfer_material_against", cint(frm.doc.with_operations) == 1);
-	frm.toggle_reqd("transfer_material_against", cint(frm.doc.with_operations) == 1);
-};
-
 frappe.ui.form.on("BOM", "with_operations", function(frm) {
 	if(!cint(frm.doc.with_operations)) {
 		frm.set_value("operations", []);
 	}
-	toggle_operations(frm);
 });

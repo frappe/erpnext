@@ -24,4 +24,3 @@ import "./telephony";
 import "./templates/call_link.html";
 
 // import { sum } from 'frappe/public/utils/util.js'
-

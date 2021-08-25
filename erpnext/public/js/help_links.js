@@ -54,7 +54,7 @@ frappe.help.help_links["permission-manager"] = [
 
 frappe.help.help_links["Form/System Settings"] = [
 	{
-		label: "Naming Series",
+		label: "System Settings",
 		url: docsUrl + "user/manual/en/setting-up/settings/system-settings",
 	},
 ];
@@ -206,7 +206,7 @@ frappe.help.help_links["Form/PayPal Settings"] = [
 		label: "PayPal Settings",
 		url:
 			docsUrl +
-			"user/manual/en/setting-up/integrations/paypal-integration",
+			"user/manual/en/erpnext_integration/paypal-integration",
 	},
 ];
 
@@ -215,14 +215,14 @@ frappe.help.help_links["Form/Razorpay Settings"] = [
 		label: "Razorpay Settings",
 		url:
 			docsUrl +
-			"user/manual/en/setting-up/integrations/razorpay-integration",
+			"user/manual/en/erpnext_integration/razorpay-integration",
 	},
 ];
 
 frappe.help.help_links["Form/Dropbox Settings"] = [
 	{
 		label: "Dropbox Settings",
-		url: docsUrl + "user/manual/en/setting-up/integrations/dropbox-backup",
+		url: docsUrl + "user/manual/en/erpnext_integration/dropbox-backup",
 	},
 ];
 
@@ -230,7 +230,7 @@ frappe.help.help_links["Form/LDAP Settings"] = [
 	{
 		label: "LDAP Settings",
 		url:
-			docsUrl + "user/manual/en/setting-up/integrations/ldap-integration",
+			docsUrl + "user/manual/en/erpnext_integration/ldap-integration",
 	},
 ];
 
@@ -239,7 +239,7 @@ frappe.help.help_links["Form/Stripe Settings"] = [
 		label: "Stripe Settings",
 		url:
 			docsUrl +
-			"user/manual/en/setting-up/integrations/stripe-integration",
+			"user/manual/en/erpnext_integration/stripe-integration",
 	},
 ];
 
@@ -644,14 +644,14 @@ frappe.help.help_links["List/Payment Request"] = [
 frappe.help.help_links["List/Asset"] = [
 	{
 		label: "Managing Fixed Assets",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/accounts/opening-balance/fixed_assets",
 	},
 ];
 
 frappe.help.help_links["List/Asset Category"] = [
 	{
 		label: "Asset Category",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/asset/asset-category",
 	},
 ];
 
@@ -663,7 +663,7 @@ frappe.help.help_links["List/Item"] = [
 	{ label: "Item", url: docsUrl + "user/manual/en/stock/item" },
 	{
 		label: "Item Price",
-		url: docsUrl + "user/manual/en/stock/item/item-price",
+		url: docsUrl + "user/manual/en/stock/item-price",
 	},
 	{
 		label: "Barcode",
@@ -672,25 +672,25 @@ frappe.help.help_links["List/Item"] = [
 	},
 	{
 		label: "Item Wise Taxation",
-		url: docsUrl + "user/manual/en/accounts/item-wise-taxation",
+		url: docsUrl + "user/manual/en/accounts/item-tax-template",
 	},
 	{
 		label: "Managing Fixed Assets",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/accounts/opening-balance/fixed_assets",
 	},
 	{
 		label: "Item Codification",
-		url: docsUrl + "user/manual/en/stock/item/item-codification",
+		url: docsUrl + "user/manual/en/stock/articles/item-codification",
 	},
 	{
 		label: "Item Variants",
-		url: docsUrl + "user/manual/en/stock/item/item-variants",
+		url: docsUrl + "user/manual/en/stock/item-variants",
 	},
 	{
 		label: "Item Valuation",
 		url:
 			docsUrl +
-			"user/manual/en/stock/item/item-valuation-fifo-and-moving-average",
+			"user/manual/en/stock/articles/item-valuation-fifo-and-moving-average",
 	},
 ];
 
@@ -698,7 +698,7 @@ frappe.help.help_links["Form/Item"] = [
 	{ label: "Item", url: docsUrl + "user/manual/en/stock/item" },
 	{
 		label: "Item Price",
-		url: docsUrl + "user/manual/en/stock/item/item-price",
+		url: docsUrl + "user/manual/en/stock/item-price",
 	},
 	{
 		label: "Barcode",
@@ -707,19 +707,19 @@ frappe.help.help_links["Form/Item"] = [
 	},
 	{
 		label: "Item Wise Taxation",
-		url: docsUrl + "user/manual/en/accounts/item-wise-taxation",
+		url: docsUrl + "user/manual/en/accounts/item-tax-template",
 	},
 	{
 		label: "Managing Fixed Assets",
-		url: docsUrl + "user/manual/en/accounts/managing-fixed-assets",
+		url: docsUrl + "user/manual/en/accounts/opening-balance/fixed_assets",
 	},
 	{
 		label: "Item Codification",
-		url: docsUrl + "user/manual/en/stock/item/item-codification",
+		url: docsUrl + "user/manual/en/stock/articles/item-codification",
 	},
 	{
 		label: "Item Variants",
-		url: docsUrl + "user/manual/en/stock/item/item-variants",
+		url: docsUrl + "user/manual/en/stock/item-variants",
 	},
 	{
 		label: "Item Valuation",
@@ -991,7 +991,7 @@ frappe.help.help_links["Form/BOM"] = [
 		label: "Nested BOM Structure",
 		url:
 			docsUrl +
-			"user/manual/en/manufacturing/articles/nested-bom-structure",
+			"user/manual/en/manufacturing/articles/managing-multi-level-bom",
 	},
 ];
 

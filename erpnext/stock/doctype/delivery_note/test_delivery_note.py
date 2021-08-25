@@ -7,7 +7,7 @@ import unittest
 import frappe
 import json
 import frappe.defaults
-from frappe.utils import cint, nowdate, nowtime, cstr, add_days, flt, today
+from frappe.utils import nowdate, nowtime, cstr, flt
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.accounts.utils import get_balance_on
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
@@ -17,10 +17,13 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry \
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation, set_valuation_method
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
-from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+from erpnext.selling.doctype.sales_order.test_sales_order \
+	import make_sales_order, create_dn_against_so, automatically_fetch_payment_terms, compare_payment_schedules
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
-from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
 
 class TestDeliveryNote(unittest.TestCase):
 	def test_over_billing_against_dn(self):
@@ -277,8 +280,6 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 
 	def test_sales_return_for_non_bundled_items_full(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
 		make_item("Box", {'is_stock_item': 1})
@@ -740,6 +741,51 @@ class TestDeliveryNote(unittest.TestCase):
 		si2 = make_sales_invoice(dn.name)
 		self.assertEqual(si2.items[0].qty, 2)
 		self.assertEqual(si2.items[1].qty, 1)
+
+
+	def test_delivery_note_bundle_with_batched_item(self):
+		batched_bundle = make_item("_Test Batched bundle", {"is_stock_item": 0})
+		batched_item = make_item("_Test Batched Item",
+				{"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TESTBATCH.#####"}
+				)
+		make_product_bundle(parent=batched_bundle.name, items=[batched_item.name])
+		make_stock_entry(item_code=batched_item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=42)
+
+		try:
+			dn = create_delivery_note(item_code=batched_bundle.name, qty=1)
+		except frappe.ValidationError as e:
+			if "batch" in str(e).lower():
+				self.fail("Batch numbers not getting added to bundled items in DN.")
+			raise e
+
+		self.assertTrue("TESTBATCH" in dn.packed_items[0].batch_no, "Batch number not added in packed item")
+
+	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		automatically_fetch_payment_terms()
+
+		so = make_sales_order(uom="Nos", do_not_save=1)
+		create_payment_terms_template()
+		so.payment_terms_template = 'Test Receivable Template'
+		so.submit()
+
+		dn = create_dn_against_so(so.name, delivered_qty=10)
+
+		si = create_sales_invoice(qty=10, do_not_save=1)
+		si.items[0].delivery_note= dn.name
+		si.items[0].dn_detail = dn.items[0].name
+		si.items[0].sales_order = so.name
+		si.items[0].so_detail = so.items[0].name
+
+		si.insert()
+		si.submit()
+
+		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
+		compare_payment_schedules(self, so, si)
+
+		automatically_fetch_payment_terms(enable=0)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

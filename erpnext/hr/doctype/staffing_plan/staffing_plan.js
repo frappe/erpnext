@@ -103,4 +103,4 @@ var set_total_estimated_budget = function(frm) {
 		})
 		frm.set_value('total_estimated_budget', estimated_budget);
 	}
-}
+};
