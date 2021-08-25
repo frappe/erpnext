@@ -251,6 +251,27 @@ class TestPatientAppointment(unittest.TestCase):
 		appointment = create_appointment(patient, practitioner, nowdate(), service_unit=overlap_service_unit, save=0)
 		self.assertRaises(MaximumCapacityError, appointment.save)
 
+	def test_patient_appointment_should_consider_permissions_while_fetching_appointments(self):
+		patient, practitioner = create_healthcare_docs()
+		create_appointment(patient, practitioner, nowdate())
+
+		patient, new_practitioner = create_healthcare_docs(id=2)
+		create_appointment(patient, new_practitioner, nowdate())
+
+		roles = [{"doctype": "Has Role", "role": "Physician"}]
+		user = create_user(roles=roles)
+		new_practitioner = frappe.get_doc('Healthcare Practitioner', new_practitioner)
+		new_practitioner.user_id = user.email
+		new_practitioner.save()
+
+		frappe.set_user(user.name)
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 1
+
+		frappe.set_user("Administrator")
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 2
+
 
 def create_healthcare_docs(id=0):
 	patient = create_patient(id)
@@ -298,7 +319,6 @@ def create_practitioner(id=0, medical_department=None):
 
 	return practitioner.name
 
-
 def create_encounter(appointment):
 	if appointment:
 		encounter = frappe.new_doc('Patient Encounter')
@@ -312,7 +332,6 @@ def create_encounter(appointment):
 		encounter.submit()
 
 		return encounter
-
 
 def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0,
 	service_unit=None, appointment_type=None, save=1, department=None):
@@ -423,3 +442,17 @@ def create_service_unit(id=0, service_unit_type=None, service_unit_capacity=0):
 	service_unit.save(ignore_permissions=True)
 
 	return service_unit.name
+
+def create_user(email=None, roles=None):
+	if not email:
+		email = '{}@frappe.com'.format(frappe.utils.random_string(10))
+	user = frappe.db.exists('User', email)
+	if not user:
+		user = frappe.get_doc({
+			"doctype": "User",
+			"email": email,
+			"first_name": "test_user",
+			"password": "password",
+			"roles": roles,
+		}).insert()
+	return user
