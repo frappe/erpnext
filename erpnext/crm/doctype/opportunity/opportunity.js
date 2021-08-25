@@ -203,9 +203,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			frm: cur_frm
 		})
 	}
-<<<<<<< HEAD
-});
-=======
 
 	make_customer() {
 		frappe.model.open_mapped_doc({
@@ -214,7 +211,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		})
 	}
 };
->>>>>>> 4d98be2126 (feat: provision to create customer from opportunity (#27141))
 
 $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
 
