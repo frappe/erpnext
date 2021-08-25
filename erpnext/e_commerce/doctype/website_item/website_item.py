@@ -204,7 +204,9 @@ class WebsiteItem(WebsiteGenerator):
 		self.get_product_details_section(context)
 
 		if settings.enable_reviews:
-			get_item_reviews(self.name, 0, 4, context)
+			reviews_data = get_item_reviews(self.name)
+			context.update(reviews_data)
+			context.reviews = context.reviews[:4]
 
 		context.wished = False
 		if frappe.db.exists("Wishlist Item", {"item_code": self.item_code, "parent": frappe.session.user}):
@@ -219,32 +221,38 @@ class WebsiteItem(WebsiteGenerator):
 		return context
 
 	def set_variant_context(self, context):
-		if self.has_variants:
-			context.no_cache = True
+		if not self.has_variants:
+			return
 
-			# load variants
-			# also used in set_attribute_context
-			context.variants = frappe.get_all(
-				"Item",
-				filters={"variant_of": self.item_code, "published_in_website": 1},
-				order_by="name asc")
+		context.no_cache = True
+		variant = frappe.form_dict.variant
 
-			variant = frappe.form_dict.variant
-			if not variant and context.variants:
-				# the case when the item is opened for the first time from its list
-				variant = context.variants[0]
+		# load variants
+		# also used in set_attribute_context
+		context.variants = frappe.get_all(
+			"Item",
+			filters={
+				"variant_of": self.item_code,
+				"published_in_website": 1
+			},
+			order_by="name asc")
 
-			if variant:
-				context.variant = frappe.get_doc("Item", variant)
+		# the case when the item is opened for the first time from its list
+		if not variant and context.variants:
+			variant = context.variants[0]
 
-				for fieldname in ("website_image", "website_image_alt", "web_long_description", "description",
-										"website_specifications"):
-					if context.variant.get(fieldname):
-						value = context.variant.get(fieldname)
-						if isinstance(value, list):
-							value = [d.as_dict() for d in value]
+		if variant:
+			context.variant = frappe.get_doc("Item", variant)
+			fields = ("website_image", "website_image_alt", "web_long_description", "description",
+				"website_specifications")
 
-						context[fieldname] = value
+			for fieldname in fields:
+				if context.variant.get(fieldname):
+					value = context.variant.get(fieldname)
+					if isinstance(value, list):
+						value = [d.as_dict() for d in value]
+
+					context[fieldname] = value
 
 		if self.slideshow:
 			if context.variant and context.variant.slideshow:
@@ -253,48 +261,57 @@ class WebsiteItem(WebsiteGenerator):
 				context.update(get_slideshow(self))
 
 	def set_attribute_context(self, context):
-		if self.has_variants:
-			attribute_values_available = {}
-			context.attribute_values = {}
-			context.selected_attributes = {}
+		if not self.has_variants:
+			return
 
-			# load attributes
-			for v in context.variants:
-				v.attributes = frappe.get_all("Item Variant Attribute",
-					fields=["attribute", "attribute_value"],
-					filters={"parent": v.name})
-				# make a map for easier access in templates
-				v.attribute_map = frappe._dict({})
-				for attr in v.attributes:
-					v.attribute_map[attr.attribute] = attr.attribute_value
+		attribute_values_available = {}
+		context.attribute_values = {}
+		context.selected_attributes = {}
 
-				for attr in v.attributes:
-					values = attribute_values_available.setdefault(attr.attribute, [])
-					if attr.attribute_value not in values:
-						values.append(attr.attribute_value)
+		# load attributes
+		self.set_selected_attributes(context.variants, context, attribute_values_available)
 
-					if v.name == context.variant.name:
-						context.selected_attributes[attr.attribute] = attr.attribute_value
+		# filter attributes, order based on attribute table
+		item = frappe.get_cached_doc("Item", self.item_code)
+		self.set_attribute_values(item.attributes, context, attribute_values_available)
 
-			# filter attributes, order based on attribute table
-			item = frappe.get_cached_doc("Item", self.item_code)
-			for attr in item.attributes:
-				values = context.attribute_values.setdefault(attr.attribute, [])
+		context.variant_info = json.dumps(context.variants)
 
-				if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
-					for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
-						values.append(val)
+	def set_selected_attributes(self, variants, context, attribute_values_available):
+		for variant in variants:
+			variant.attributes = frappe.get_all(
+				"Item Variant Attribute",
+				filters={"parent": variant.name},
+				fields=["attribute", "attribute_value as value"])
 
-				else:
-					# get list of values defined (for sequence)
-					for attr_value in frappe.db.get_all("Item Attribute Value",
-						fields=["attribute_value"],
-						filters={"parent": attr.attribute}, order_by="idx asc"):
+			# make an attribute-value map for easier access in templates
+			variant.attribute_map = frappe._dict(
+				{ attr.attribute : attr.value for attr in variant.attributes}
+			)
 
-						if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
-							values.append(attr_value.attribute_value)
+			for attr in variant.attributes:
+				values = attribute_values_available.setdefault(attr.attribute, [])
+				if attr.value not in values:
+					values.append(attr.value)
 
-			context.variant_info = json.dumps(context.variants)
+				if variant.name == context.variant.name:
+					context.selected_attributes[attr.attribute] = attr.value
+
+	def set_attribute_values(self, attributes, context, attribute_values_available):
+		for attr in attributes:
+			values = context.attribute_values.setdefault(attr.attribute, [])
+
+			if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
+				for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
+					values.append(val)
+			else:
+				# get list of values defined (for sequence)
+				for attr_value in frappe.db.get_all("Item Attribute Value",
+					fields=["attribute_value"],
+					filters={"parent": attr.attribute}, order_by="idx asc"):
+
+					if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
+						values.append(attr_value.attribute_value)
 
 	def set_disabled_attributes(self, context):
 		"""Disable selection options of attribute combinations that do not result in a variant"""

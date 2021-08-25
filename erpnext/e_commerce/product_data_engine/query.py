@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.utils import flt
 from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
 from erpnext.e_commerce.doctype.item_review.item_review import get_customer
-from frappe.utils import flt
+from erpnext.utilities.product import get_non_stock_item_status
 
 from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
 
@@ -235,12 +236,22 @@ class ProductQuery:
 	def get_stock_availability(self, item):
 		"""Modify item object and add stock details."""
 		item.in_stock = False
+		warehouse = item.get("website_warehouse")
+		is_stock_item = frappe.get_cached_value("Item", item.item_code, "is_stock_item")
 
-		if item.get("website_warehouse"):
-			stock_qty = frappe.utils.flt(
-				frappe.db.get_value("Bin", {"item_code": item.item_code, "warehouse": item.get("website_warehouse")},
-					"actual_qty"))
-			item.in_stock = bool(stock_qty)
+		if not is_stock_item:
+			if warehouse:
+				# product bundle case
+				item.in_stock = get_non_stock_item_status(item.item_code, "website_warehouse")
+			else:
+				item.in_stock = True
+		elif warehouse:
+			# stock item and has warehouse
+			actual_qty = frappe.db.get_value(
+				"Bin",
+				{"item_code": item.item_code,"warehouse": item.get("website_warehouse")},
+				"actual_qty")
+			item.in_stock = bool(flt(actual_qty))
 
 	def get_cart_items(self):
 		customer = get_customer(silent=True)

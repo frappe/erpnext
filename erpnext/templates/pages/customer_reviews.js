@@ -96,22 +96,24 @@ $(() => {
 			reviews.forEach((review) => {
 				$content.append(`
 					<div class="mb-3 review">
-						<div style="display: flex;">
+						<div class="d-flex">
+							<p class="mr-4 user-review-title">
+								<span>${__(review.review_title)}</span>
+							</p>
 							<div class="rating">
 								${me.get_review_stars(review.rating)}
 							</div>
-							<p class="ml-4 user-review-title">
-								<span>${__(review.review_title)}</span>
-							</p>
 						</div>
-						<div class="review-signature">
-							<span class="reviewer">${__(review.customer)}</span>
-							<span>${__(review.published_on)}</span>
-						</div>
-						<div class="product-description mb-4 mt-4">
+
+						<div class="product-description mb-4">
 							<p>
 								${__(review.comment)}
 							</p>
+						</div>
+						<div class="review-signature mb-2">
+							<span class="reviewer">${__(review.customer)}</span>
+							<span class="indicator grey" style="--text-on-gray: var(--gray-300);"></span>
+							<span class="reviewer">${__(review.published_on)}</span>
 						</div>
 					</div>
 				`);
@@ -122,9 +124,11 @@ $(() => {
 			let stars = ``;
 			for (let i = 1; i < 6; i++) {
 				let fill_class = i <= rating ? 'star-click' : '';
-				stars += `<svg class="icon icon-md ${fill_class}">
+				stars += `
+					<svg class="icon icon-sm ${fill_class}">
 						<use href="#icon-star"></use>
-					</svg>`;
+					</svg>
+				`;
 			}
 			return stars;
 		}

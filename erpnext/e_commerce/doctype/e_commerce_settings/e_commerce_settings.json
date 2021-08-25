@@ -329,7 +329,7 @@
    "fieldname": "redisearch_warning",
    "fieldtype": "HTML",
    "label": "Redisearch Warning",
-   "options": "<p class=\"alert alert-warning\">Redisearch module not loaded. If you want to use advanced product search features, refer documentation <a class=\"alert-link\" href=\"https://frappeframework.com/docs/user/en/installation\" target=\"_blank\">here</a>.</p>"
+   "options": "<p class=\"alert alert-warning\">Redisearch is not loaded. If you want to use the advanced product search feature, refer <a class=\"alert-link\" href=\"https://docs.erpnext.com/docs/v13/user/manual/en/setting-up/articles/installing-redisearch\" target=\"_blank\">here</a>.</p>"
   },
   {
    "default": "0",
@@ -379,7 +379,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-08-24 13:40:15.294696",
+ "modified": "2021-08-24 21:10:45.669526",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
