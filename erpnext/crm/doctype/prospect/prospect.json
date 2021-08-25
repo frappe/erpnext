@@ -15,12 +15,14 @@
   "no_of_employees",
   "currency",
   "annual_revenue",
+  "more_details_section",
   "fax",
   "website",
+  "column_break_13",
   "prospect_owner",
   "leads_section",
   "prospect_lead",
-  "addresses_and_contacts_section",
+  "address_and_contact_section",
   "address_html",
   "column_break_17",
   "contact_html",
@@ -108,12 +110,6 @@
    "options": "Prospect Lead"
   },
   {
-   "depends_on": "eval: !doc.__islocal",
-   "fieldname": "addresses_and_contacts_section",
-   "fieldtype": "Section Break",
-   "label": "Addresses and Contacts"
-  },
-  {
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address HTML"
@@ -136,11 +132,26 @@
   {
    "fieldname": "notes",
    "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "more_details_section",
+   "fieldtype": "Section Break",
+   "label": "More Details"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-19 00:29:00.767038",
+ "modified": "2021-08-25 12:35:00.759909",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",

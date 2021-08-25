@@ -8,7 +8,7 @@ frappe.ui.form.on('Prospect', {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.crm.doctype.prospect.prospect.make_customer",
 					frm: cur_frm
-				})
+				});
 			}, __("Create"));
 		}
 		if (!cur_frm.is_new() && frappe.boot.user.can_create.includes("Opportunity")) {
@@ -16,7 +16,7 @@ frappe.ui.form.on('Prospect', {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.crm.doctype.prospect.prospect.make_opportunity",
 					frm: cur_frm
-				})
+				});
 			}, __("Create"));
 		}
 
