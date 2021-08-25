@@ -50,16 +50,19 @@ def add_to_wishlist(item_code):
 @frappe.whitelist()
 def remove_from_wishlist(item_code):
 	if frappe.db.exists("Wishlist Item", {"item_code": item_code, "parent": frappe.session.user}):
-		frappe.db.sql("""
-			DELETE
-			FROM `tabWishlist Item`
-			WHERE
-				item_code=%(item_code)s
-				and parent='%(user)s'
-		""" % {"item_code": frappe.db.escape(item_code), "user": frappe.session.user})
-
+		frappe.db.delete(
+			"Wishlist Item",
+			{
+				"item_code": item_code,
+				"parent": frappe.session.user
+			}
+		)
 		frappe.db.commit()
 
-		wishlist = frappe.get_doc("Wishlist", frappe.session.user)
+		wishlist_items = frappe.db.get_values(
+			"Wishlist Item",
+			filters={"parent": frappe.session.user}
+		)
+
 		if hasattr(frappe.local, "cookie_manager"):
-			frappe.local.cookie_manager.set_cookie("wish_count", str(len(wishlist.items)))
+			frappe.local.cookie_manager.set_cookie("wish_count", str(len(wishlist_items)))

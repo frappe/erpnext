@@ -35,8 +35,8 @@
 		{% if cart_settings.show_stock_availability %}
 		<div class="mt-2">
 			{% if product_info.in_stock == 0 %}
-			<span class="text-danger no-stock">
-				{{ _('Not in stock') }}
+			<span class="no-stock out-of-stock">
+				{{ _('Out of stock') }}
 			</span>
 			{% elif product_info.in_stock == 1 %}
 			<span class="in-green has-stock">
