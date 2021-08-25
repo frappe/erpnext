@@ -109,4 +109,3 @@ def make_supplier_scorecard(source_name, target_doc=None):
 	}, target_doc, post_process, ignore_permissions=True)
 
 	return doc
-

@@ -1098,7 +1098,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "fieldname": "billing_address",
@@ -1148,7 +1149,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-25 00:15:12.239017",
+ "modified": "2021-08-17 20:16:40.849885",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

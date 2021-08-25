@@ -113,5 +113,3 @@ def disable_dimension():
 	dimension2 = frappe.get_doc("Accounting Dimension", "Location")
 	dimension2.disabled = 1
 	dimension2.save()
-
-
