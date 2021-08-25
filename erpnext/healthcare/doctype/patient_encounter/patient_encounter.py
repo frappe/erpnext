@@ -50,7 +50,7 @@ class PatientEncounter(Document):
 
 		gender = patient.sex
 		if gender:
-			plan_filters['gender'] = gender
+			plan_filters['gender'] = ['in', [gender, None]]
 
 		diagnosis = encounter.get('diagnosis')
 		if diagnosis:
@@ -77,9 +77,7 @@ class PatientEncounter(Document):
 		if not plan_filters['name'][1]:
 			plan_filters.pop('name')
 
-		plans = frappe.get_list('Treatment Plan Template', fields='*', filters=plan_filters)
-
-		return plans
+		return {'filters': plan_filters}
 
 	@frappe.whitelist()
 	def fill_treatment_plans(self, treatment_plans=None):
