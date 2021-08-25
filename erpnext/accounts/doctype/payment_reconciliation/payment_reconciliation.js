@@ -91,15 +91,15 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 		this.frm.add_custom_button(__('Get Unreconciled Entries'), () =>
 			this.frm.trigger("get_unreconciled_entries")
-        );
+		);
 
-        this.frm.add_custom_button(__('Allocate'), () =>
+		this.frm.add_custom_button(__('Allocate'), () =>
 			this.frm.trigger("allocate")
 		);
 
-        this.frm.add_custom_button(__('Reconcile'), () =>
+		this.frm.add_custom_button(__('Reconcile'), () =>
 			this.frm.trigger("reconcile")
-        );
+		);
 
 	}
 
@@ -128,7 +128,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
-
+				if (!(me.frm.doc.payments.length || me.frm.doc.invoices.length)) {
+					frappe.throw({message: __("No invoice and payment records found for this party")});
+				}
 			}
 		});
 
@@ -251,6 +253,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			method: 'reconcile',
 			callback: function(r, rt) {
 				me.frm.clear_table("allocation");
+				me.frm.refresh_fields();
 			}
 		});
 	}

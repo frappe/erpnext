@@ -10,7 +10,6 @@
   "party",
   "column_break_4",
   "receivable_payable_account",
-  "bank_cash_account",
   "col_break1",
   "from_invoice_date",
   "to_invoice_date",
@@ -23,6 +22,7 @@
   "minimum_payment_amount",
   "maximum_payment_amount",
   "payment_limit",
+  "bank_cash_account",
   "sec_break1",
   "invoices",
   "column_break_15",
@@ -62,6 +62,7 @@
    "reqd": 1
   },
   {
+   "description": "This filter will be applied to Journal Entry.",
    "fieldname": "bank_cash_account",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -75,6 +76,7 @@
    "label": "Filters"
   },
   {
+   "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
    "fieldname": "sec_break1",
    "fieldtype": "Section Break",
    "label": "Unreconciled Entries"
@@ -86,7 +88,7 @@
    "options": "Payment Reconciliation Payment"
   },
   {
-   "depends_on": "eval:doc.invoices && doc.payments",
+   "depends_on": "allocation",
    "fieldname": "sec_break2",
    "fieldtype": "Section Break",
    "label": "Allocated Entries"
@@ -173,7 +175,7 @@
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
- "modified": "2021-08-25 11:45:53.208915",
+ "modified": "2021-08-25 20:56:38.806392",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",

@@ -341,52 +341,34 @@ def add_cc(args=None):
 
 def reconcile_against_document(args):
 	"""
-		Cancel JV, Update aginst document, split if required and resubmit jv
+		Cancel PE or JV, Update against document, split if required and resubmit
 	"""
-
-	# To optimize making GL Entry for Payment Entry with multiple references
-	reconciled_entries = []
+	# To optimize making GL Entry for PE or JV with multiple references
+	reconciled_entries = {}
 	for row in args:
-		for entry in reconciled_entries:
-			if row.reference_name in entry.values():
-				(entry['against_voucher_type']).append(row.against_voucher_type)
-				(entry['against_voucher']).append(row.against_voucher)
-				(entry['allocated_amount']).append(row.allocated_amount)
-				break
-		else:
-			# convert these values into list to be able to append them in existing payment transaction
-			row['against_voucher_type'] = [row.against_voucher_type]
-			row['against_voucher'] = [row.against_voucher]
-			row['allocated_amount'] = [row.allocated_amount]
-			new_row = row.copy()
-			reconciled_entries.append(new_row)
+		if not reconciled_entries.get((row.voucher_type, row.voucher_no)):
+			reconciled_entries[(row.voucher_type, row.voucher_no)] = []
 
-	for entry in reconciled_entries:
+		reconciled_entries[(row.voucher_type, row.voucher_no)].append(row)
+
+	for key, entries in reconciled_entries.items():
+		voucher_type = key[0]
+		voucher_no = key[1]
+
 		# cancel advance entry
-		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
-
-		frappe.flags.ignore_party_validation = True
-
+		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
-		for idx, _ in enumerate(entry.against_voucher):
-			reference_fields = {
-				'against_voucher': entry.against_voucher[idx],
-				'against_voucher_type': entry.against_voucher_type[idx],
-				'allocated_amount': entry.allocated_amount[idx],
-			}
-			reference = entry.copy()
-			reference.update(reference_fields)
-			check_if_advance_entry_modified(reference)
-
-			validate_allocated_amount(reference)
+		for entry in entries:
+			check_if_advance_entry_modified(entry)
+			validate_allocated_amount(entry)
 
 			# update ref in advance entry
-			if entry.voucher_type == "Journal Entry":
-				update_reference_in_journal_entry(reference, doc, do_not_save=True)
+			if voucher_type == "Journal Entry":
+				update_reference_in_journal_entry(entry, doc, do_not_save=True)
 			else:
-				update_reference_in_payment_entry(reference, doc, do_not_save=True)
+				update_reference_in_payment_entry(entry, doc, do_not_save=True)
 
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
@@ -444,59 +426,44 @@ def validate_allocated_amount(args):
 	elif flt(args.get("allocated_amount"), precision) > flt(args.get("unadjusted_amount"), precision):
 		throw(_("Allocated amount cannot be greater than unadjusted amount"))
 
-def update_reference_in_journal_entry(d, jv_obj, do_not_save=False):
+def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	"""
 		Updates against document, if partial amount splits into rows
 	"""
-	jv_detail = jv_obj.get("accounts", {"name": d["voucher_detail_no"]})[0]
-	jv_detail.set(d["dr_or_cr"], d["allocated_amount"])
-	jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit',
-		d["allocated_amount"]*flt(jv_detail.exchange_rate))
+	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
 
-	original_reference_type = jv_detail.reference_type
-	original_reference_name = jv_detail.reference_name
-
-	jv_detail.set("reference_type", d["against_voucher_type"])
-	jv_detail.set("reference_name", d["against_voucher"])
-
-	if d['allocated_amount'] < d['unadjusted_amount']:
-		jvd = frappe.db.sql("""
-			select cost_center, balance, against_account, is_advance,
-				account_type, exchange_rate, account_currency
-			from `tabJournal Entry Account` where name = %s
-		""", d['voucher_detail_no'], as_dict=True)
-
+	if flt(d['unadjusted_amount']) - flt(d['allocated_amount']) != 0:
+		# adjust the unreconciled balance
 		amount_in_account_currency = flt(d['unadjusted_amount']) - flt(d['allocated_amount'])
-		amount_in_company_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
+		amount_in_company_currency = amount_in_account_currency * flt(jv_detail.exchange_rate)
+		jv_detail.set(d['dr_or_cr'], amount_in_account_currency)
+		jv_detail.set('debit' if d['dr_or_cr'] == 'debit_in_account_currency' else 'credit', amount_in_company_currency)
+	else:
+		journal_entry.remove(jv_detail)
 
-		# new entry with balance amount
-		ch = jv_obj.append("accounts")
-		ch.account = d['account']
-		ch.account_type = jvd[0]['account_type']
-		ch.account_currency = jvd[0]['account_currency']
-		ch.exchange_rate = jvd[0]['exchange_rate']
-		ch.party_type = d["party_type"]
-		ch.party = d["party"]
-		ch.cost_center = cstr(jvd[0]["cost_center"])
-		ch.balance = flt(jvd[0]["balance"])
+	# new row with references
+	new_row = journal_entry.append("accounts")
+	new_row.update(jv_detail.as_dict().copy())
 
-		ch.set(d['dr_or_cr'], amount_in_account_currency)
-		ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
+	new_row.set(d["dr_or_cr"], d["allocated_amount"])
+	new_row.set('debit' if d['dr_or_cr'] == 'debit_in_account_currency' else 'credit',
+		d["allocated_amount"] * flt(jv_detail.exchange_rate))
 
-		ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency'
-			else 'debit_in_account_currency', 0)
-		ch.set('credit' if d['dr_or_cr']== 'debit_in_account_currency' else 'debit', 0)
+	new_row.set('credit_in_account_currency' if d['dr_or_cr'] == 'debit_in_account_currency'
+		else 'debit_in_account_currency', 0)
+	new_row.set('credit' if d['dr_or_cr'] == 'debit_in_account_currency' else 'debit', 0)
 
-		ch.against_account = cstr(jvd[0]["against_account"])
-		ch.reference_type = original_reference_type
-		ch.reference_name = original_reference_name
-		ch.is_advance = cstr(jvd[0]["is_advance"])
-		ch.docstatus = 1
+	new_row.set("reference_type", d["against_voucher_type"])
+	new_row.set("reference_name", d["against_voucher"])
 
+	new_row.against_account = cstr(jv_detail.against_account)
+	new_row.is_advance = cstr(jv_detail.is_advance)
+	new_row.docstatus = 1
+
+	# will work as update after submit
+	journal_entry.flags.ignore_validate_update_after_submit = True
 	if not do_not_save:
-		# will work as update after submit
-		jv_obj.flags.ignore_validate_update_after_submit = True
-		jv_obj.save(ignore_permissions=True)
+		journal_entry.save(ignore_permissions=True)
 
 def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	reference_details = {

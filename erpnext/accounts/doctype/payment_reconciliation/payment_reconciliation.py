@@ -162,34 +162,34 @@ class PaymentReconciliation(Document):
 		entry = []
 		for pay in args.get('payments'):
 			for inv in args.get('invoices'):
-				def get_allocated_entry(pay, inv):
-					res = frappe._dict({
-						'reference_type': pay.get('reference_type'),
-						'reference_name': pay.get('reference_name'),
-						'reference_row': pay.get('reference_row'),
-						'invoice_type': inv.get('invoice_type'),
-						'invoice_number': inv.get('invoice_number'),
-						'amount': pay.get('amount'),
-						'allocated_amount': inv.get('outstanding_amount') if pay.get('amount') > inv.get('outstanding_amount') else pay.get('amount'),
-						'difference_account': inv.get('difference_account'),
-						'difference_amount': inv.get('difference_amount')
-					})
-					pay['amount'] = flt(pay.get('amount')) - flt(res.allocated_amount)
-					inv['outstanding_amount'] = flt(inv.get('outstanding_amount')) - flt(res.allocated_amount)
-					entry.append(res)
-					return entry
 				if pay.get('amount') == 0:
 					break
 				elif inv.get('outstanding_amount') == 0:
 					continue
 				else:
-					get_allocated_entry(pay, inv)
+					res = self.get_allocated_entry(pay, inv)
+					entry.append(res)
+					pay['amount'] = flt(pay.get('amount')) - flt(res.allocated_amount)
+					inv['outstanding_amount'] = flt(inv.get('outstanding_amount')) - flt(res.allocated_amount)
 			else:
 				break
 
 		allocated_entries.extend(entry)
 
 		return allocated_entries
+
+	def get_allocated_entry(self, pay, inv):
+		return frappe._dict({
+			'reference_type': pay.get('reference_type'),
+			'reference_name': pay.get('reference_name'),
+			'reference_row': pay.get('reference_row'),
+			'invoice_type': inv.get('invoice_type'),
+			'invoice_number': inv.get('invoice_number'),
+			'amount': pay.get('amount'),
+			'allocated_amount': inv.get('outstanding_amount') if pay.get('amount') > inv.get('outstanding_amount') else pay.get('amount'),
+			'difference_account': inv.get('difference_account'),
+			'difference_amount': inv.get('difference_amount')
+		})
 
 	@frappe.whitelist()
 	def reconcile(self):
