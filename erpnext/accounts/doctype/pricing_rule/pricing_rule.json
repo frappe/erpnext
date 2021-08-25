@@ -2,12 +2,13 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:title",
+ "autoname": "naming_series:",
  "creation": "2014-02-21 15:02:51",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "applicability_section",
+  "naming_series",
   "title",
   "disable",
   "apply_on",
@@ -95,8 +96,7 @@
    "fieldtype": "Data",
    "label": "Title",
    "no_copy": 1,
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "default": "0",
@@ -558,7 +558,8 @@
    "description": "Simple Python Expression, Example: territory != 'All Territories'",
    "fieldname": "condition",
    "fieldtype": "Code",
-   "label": "Condition"
+   "label": "Condition",
+   "options": "PythonExpression"
   },
   {
    "fieldname": "column_break_42",
@@ -570,12 +571,19 @@
    "fieldname": "is_recursive",
    "fieldtype": "Check",
    "label": "Is Recursive"
+  },
+  {
+   "default": "PRLE-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "PRLE-.####"
   }
  ],
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2021-03-06 22:01:24.840422",
+ "modified": "2021-08-06 15:10:04.219321",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
@@ -633,5 +641,6 @@
  ],
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "title_field": "title"
 }

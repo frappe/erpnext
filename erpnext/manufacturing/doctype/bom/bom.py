@@ -148,6 +148,7 @@ class BOM(WebsiteGenerator):
 		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
+		self.set_bom_scrap_items_detail()
 		self.validate_materials()
 		self.set_routing_operations()
 		self.validate_operations()
@@ -200,7 +201,7 @@ class BOM(WebsiteGenerator):
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
-			self.validate_bom_currecny(item)
+			self.validate_bom_currency(item)
 
 			ret = self.get_bom_material_detail({
 				"company": self.company,
@@ -218,6 +219,19 @@ class BOM(WebsiteGenerator):
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
+
+	def set_bom_scrap_items_detail(self):
+		for item in self.get("scrap_items"):
+			args = {
+				"item_code": item.item_code,
+				"company": self.company,
+				"scrap_items": True,
+				"bom_no": '',
+			}
+			ret = self.get_bom_material_detail(args)
+			for key, value in ret.items():
+				if not item.get(key):
+					item.set(key, value)
 
 	@frappe.whitelist()
 	def get_bom_material_detail(self, args=None):
@@ -255,7 +269,7 @@ class BOM(WebsiteGenerator):
 
 		return ret_item
 
-	def validate_bom_currecny(self, item):
+	def validate_bom_currency(self, item):
 		if item.get('bom_no') and frappe.db.get_value('BOM', item.get('bom_no'), 'currency') != self.currency:
 			frappe.throw(_("Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}")
 				.format(item.idx, item.bom_no, self.currency))
@@ -717,9 +731,8 @@ def get_bom_item_rate(args, bom_doc):
 			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
-		out = frappe._dict()
-		get_price_list_rate(bom_args, item_doc, out)
-		rate = out.price_list_rate
+		price_list_data = get_price_list_rate(bom_args, item_doc)
+		rate = price_list_data.price_list_rate
 
 	return rate
 
@@ -748,7 +761,7 @@ def get_valuation_rate(args):
 	if valuation_rate <= 0:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0
+			where item_code = %s and valuation_rate > 0 and is_cancelled = 0
 			order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
 
 		valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
@@ -774,7 +787,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				bom_item.rate,
-				bom_item.amount,
+				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
@@ -1069,13 +1082,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if barcodes:
 			or_cond_filters["name"] = ("in", barcodes)
 
-	for cond in get_match_cond(doctype, as_condition=False):
-		for key, value in cond.items():
-			if key == doctype:
-				key = "name"
-
-			query_filters[key] = ("in", value)
-
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")
 		if not has_variants:
@@ -1084,7 +1090,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters and filters.get("is_stock_item"):
 		query_filters["is_stock_item"] = 1
 
-	return frappe.get_all("Item",
+	return frappe.get_list("Item",
 		fields = fields, filters=query_filters,
 		or_filters = or_cond_filters, order_by=order_by,
 		limit_start=start, limit_page_length=page_len, as_list=1)

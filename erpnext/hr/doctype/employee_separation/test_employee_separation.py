@@ -6,21 +6,43 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-test_dependencies = ["Employee Onboarding"]
+test_dependencies = ['Employee Onboarding']
 
 class TestEmployeeSeparation(unittest.TestCase):
 	def test_employee_separation(self):
-		employee = frappe.db.get_value("Employee", {"status": "Active"})
-		separation = frappe.new_doc('Employee Separation')
-		separation.employee = employee
-		separation.company = '_Test Company'
-		separation.append('activities', {
-			'activity_name': 'Deactivate Employee',
-			'role': 'HR User'
-		})
-		separation.boarding_status = 'Pending'
-		separation.insert()
-		separation.submit()
+		separation = create_employee_separation()
+
 		self.assertEqual(separation.docstatus, 1)
+		self.assertEqual(separation.boarding_status, 'Pending')
+
+		project = frappe.get_doc('Project', separation.project)
+		project.percent_complete_method = 'Manual'
+		project.status = 'Completed'
+		project.save()
+
+		separation.reload()
+		self.assertEqual(separation.boarding_status, 'Completed')
+
 		separation.cancel()
-		self.assertEqual(separation.project, "")
+		self.assertEqual(separation.project, '')
+
+	def tearDown(self):
+		for entry in frappe.get_all('Employee Separation'):
+			doc = frappe.get_doc('Employee Separation', entry.name)
+			if doc.docstatus == 1:
+				doc.cancel()
+			doc.delete()
+
+def create_employee_separation():
+	employee = frappe.db.get_value('Employee', {'status': 'Active'})
+	separation = frappe.new_doc('Employee Separation')
+	separation.employee = employee
+	separation.company = '_Test Company'
+	separation.append('activities', {
+		'activity_name': 'Deactivate Employee',
+		'role': 'HR User'
+	})
+	separation.boarding_status = 'Pending'
+	separation.insert()
+	separation.submit()
+	return separation

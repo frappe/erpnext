@@ -109,6 +109,9 @@ class Company(NestedSet):
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
+		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
+			self.create_default_cost_center()
+
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name, self.country)
 			self.create_default_tax_template()
@@ -116,9 +119,6 @@ class Company(NestedSet):
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
 			install_post_company_fixtures(frappe._dict({'company_name': self.name}))
-
-		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
-			self.create_default_cost_center()
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
@@ -392,6 +392,10 @@ class Company(NestedSet):
 		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
 		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
 		frappe.db.sql("delete from `tabItem Tax Template` where company=%s", self.name)
+
+		# delete Process Deferred Accounts if no GL Entry found
+		if not frappe.db.get_value('GL Entry', {'company': self.name}):
+			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
