@@ -132,7 +132,6 @@ class Customer(TransactionBase):
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
-			self.create_opportunity_address_contact()
 
 		self.update_customer_groups()
 
@@ -159,18 +158,6 @@ class Customer(TransactionBase):
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
 			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
-
-	def create_opportunity_address_contact(self):
-		if self.opportunity_name:
-			dynamic_links = frappe.get_all('Dynamic Link', filters={
-									"link_doctype":"Opportunity",
-									"link_name":self.opportunity_name
-								}, fields=["parent", "parenttype"])
-			for dynamic_link in dynamic_links:
-				dynamic_link = frappe.get_doc(dynamic_link["parenttype"], dynamic_link["parent"])
-				if not dynamic_link.has_link('Customer', self.name):
-					dynamic_link.append('links', dict(link_doctype='Customer', link_name=self.name))
-					dynamic_link.save(ignore_permissions=self.flags.ignore_permissions)
 
 	def create_lead_address_contact(self):
 		if self.lead_name:
