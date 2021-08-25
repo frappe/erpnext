@@ -176,6 +176,9 @@ def update_parent_item_rate(parent_item_doc, bundle_price):
 def update_product_bundle_price(doc, parent_items):
 	"""Updates the prices of Product Bundles based on the rates of the Items in the bundle."""
 
+	if not doc.get('items'):
+		return
+
 	parent_items_index = 0
 	bundle_price = 0
 	parent_items_doctype = doc.items[0].doctype
