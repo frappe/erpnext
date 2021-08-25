@@ -436,31 +436,7 @@ class GrossProfitGenerator(object):
 		parents_index = 0
 		for index, row in enumerate(self.si_list):
 			if parents_index < len(parents) and row.parent == parents[parents_index]:
-				invoice = frappe._dict({
-					'parent_invoice': "",
-					'indent': 0.0,
-					'parent': row.parent,
-					'posting_date': row.posting_date,
-					'posting_time': row.posting_time,
-					'project': row.project,
-					'update_stock': row.update_stock,
-					'customer': row.customer,
-					'customer_group': row.customer_group,
-					'item_code': None,
-					'item_name': None,
-					'description': None,
-					'warehouse': None,
-					'item_group': None,
-					'brand': None, 
-					'dn_detail': None, 
-					'delivery_note': None, 
-					'qty': None, 
-					'item_row': None, 
-					'is_return': row.is_return, 
-					'cost_center': row.cost_center,
-					'base_net_amount': frappe.db.get_value('Sales Invoice', row.parent, 'base_net_total')
-				})
-
+				invoice = self.get_invoice_row(row)
 				self.si_list.insert(index, invoice)
 				parents_index += 1
 
@@ -473,9 +449,42 @@ class GrossProfitGenerator(object):
 
 					if frappe.db.exists('Product Bundle', row.item_code):
 						self.add_bundle_items(row, index)
+
+	def get_invoice_row(self, row):
+		return frappe._dict({
+			'parent_invoice': "",
+			'indent': 0.0,
+			'parent': row.parent,
+			'posting_date': row.posting_date,
+			'posting_time': row.posting_time,
+			'project': row.project,
+			'update_stock': row.update_stock,
+			'customer': row.customer,
+			'customer_group': row.customer_group,
+			'item_code': None,
+			'item_name': None,
+			'description': None,
+			'warehouse': None,
+			'item_group': None,
+			'brand': None, 
+			'dn_detail': None, 
+			'delivery_note': None, 
+			'qty': None, 
+			'item_row': None, 
+			'is_return': row.is_return, 
+			'cost_center': row.cost_center,
+			'base_net_amount': frappe.db.get_value('Sales Invoice', row.parent, 'base_net_total')
+		})
 			
 	def add_bundle_items(self, product_bundle, index):
-		bundle_items = frappe.get_all(
+		bundle_items = self.get_bundle_items(product_bundle)
+
+		for i, item in enumerate(bundle_items):
+			bundle_item = self.get_bundle_item_row(product_bundle, item)
+			self.si_list.insert((index+i+1), bundle_item)
+
+	def get_bundle_items(self, product_bundle):
+		return frappe.get_all(
 			'Product Bundle Item',
 			filters = {
 				'parent': product_bundle.item_code
@@ -483,33 +492,31 @@ class GrossProfitGenerator(object):
 			fields = ['item_code', 'qty']
 		)
 
-		for i, item in enumerate(bundle_items):
-			item_name, description, item_group, brand = self.get_bundle_item_details(item.item_code)
+	def get_bundle_item_row(self, product_bundle, item):
+		item_name, description, item_group, brand = self.get_bundle_item_details(item.item_code)
 
-			bundle_item = frappe._dict({
-				'parent_invoice': product_bundle.item_code,
-				'indent': product_bundle.indent + 1,
-				'parent': item.item_code,
-				'posting_date': product_bundle.posting_date,
-				'posting_time': product_bundle.posting_time,
-				'project': product_bundle.project,
-				'customer': product_bundle.customer,
-				'customer_group': product_bundle.customer_group,
-				'item_code': item.item_code,
-				'item_name': item_name,
-				'description': description,
-				'warehouse': product_bundle.warehouse,
-				'item_group': item_group,
-				'brand': brand, 
-				'dn_detail': product_bundle.dn_detail, 
-				'delivery_note': product_bundle.delivery_note, 
-				'qty': (flt(product_bundle.qty) * flt(item.qty)), 
-				'item_row': None, 
-				'is_return': product_bundle.is_return, 
-				'cost_center': product_bundle.cost_center
-			})
-
-			self.si_list.insert((index+i+1), bundle_item)
+		return frappe._dict({
+			'parent_invoice': product_bundle.item_code,
+			'indent': product_bundle.indent + 1,
+			'parent': item.item_code,
+			'posting_date': product_bundle.posting_date,
+			'posting_time': product_bundle.posting_time,
+			'project': product_bundle.project,
+			'customer': product_bundle.customer,
+			'customer_group': product_bundle.customer_group,
+			'item_code': item.item_code,
+			'item_name': item_name,
+			'description': description,
+			'warehouse': product_bundle.warehouse,
+			'item_group': item_group,
+			'brand': brand, 
+			'dn_detail': product_bundle.dn_detail, 
+			'delivery_note': product_bundle.delivery_note, 
+			'qty': (flt(product_bundle.qty) * flt(item.qty)), 
+			'item_row': None, 
+			'is_return': product_bundle.is_return, 
+			'cost_center': product_bundle.cost_center
+		})
 
 	def get_bundle_item_details(self, item_code):
 		return frappe.db.get_value(
