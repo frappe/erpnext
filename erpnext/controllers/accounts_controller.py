@@ -1375,9 +1375,12 @@ class AccountsController(TransactionBase):
 
 	def get_common_party_link(self):
 		party_type, party = self.get_party()
-		party_link = frappe.db.exists('Party Link', {'secondary_role': party_type, 'secondary_party': party})
-		if party_link:
-			return frappe.db.get_value('Party Link', party_link, ['primary_role', 'primary_party'], as_dict=True)
+		return frappe.db.get_value(
+			doctype='Party Link',
+			filters={'secondary_role': party_type, 'secondary_party': party},
+			fieldname=['primary_role', 'primary_party'],
+			as_dict=True
+		)
 
 	def create_advance_and_reconcile(self, party_link):
 		secondary_party_type, secondary_party = self.get_party()
