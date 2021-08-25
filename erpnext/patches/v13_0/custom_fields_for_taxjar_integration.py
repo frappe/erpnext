@@ -12,7 +12,7 @@ def execute():
 
 	custom_fields = {
 		'Sales Invoice Item': [
-			dict(fieldname='product_tax_category', fieldtype='Data', insert_after='description', 
+			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='description', options='Product Tax Category',
 				label='Product Tax Category', fetch_from='item_code.product_tax_category'),
 			dict(fieldname='tax_collectable', fieldtype='Currency', insert_after='net_amount', 
 				label='Tax Collectable', read_only=1),
