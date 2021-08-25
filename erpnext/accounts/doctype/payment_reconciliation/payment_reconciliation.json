@@ -17,7 +17,6 @@
   "minimum_invoice_amount",
   "maximum_invoice_amount",
   "invoice_limit",
-  "get_unreconciled_entries",
   "column_break_13",
   "from_payment_date",
   "to_payment_date",
@@ -26,12 +25,10 @@
   "payment_limit",
   "sec_break1",
   "invoices",
-  "allocate",
   "column_break_15",
   "payments",
   "sec_break2",
-  "allocation",
-  "reconcile"
+  "allocation"
  ],
  "fields": [
   {
@@ -57,7 +54,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.company && doc.party_type",
+   "depends_on": "eval:doc.company && doc.party",
    "fieldname": "receivable_payable_account",
    "fieldtype": "Link",
    "label": "Receivable / Payable Account",
@@ -87,11 +84,6 @@
    "fieldtype": "Table",
    "label": "Payments",
    "options": "Payment Reconciliation Payment"
-  },
-  {
-   "fieldname": "reconcile",
-   "fieldtype": "Button",
-   "label": "Reconcile"
   },
   {
    "depends_on": "eval:doc.invoices && doc.payments",
@@ -172,16 +164,6 @@
    "label": "Payment Limit"
   },
   {
-   "fieldname": "get_unreconciled_entries",
-   "fieldtype": "Button",
-   "label": "Get Unreconciled Entries"
-  },
-  {
-   "fieldname": "allocate",
-   "fieldtype": "Button",
-   "label": "Allocate"
-  },
-  {
    "fieldname": "maximum_invoice_amount",
    "fieldtype": "Currency",
    "label": "Maximum Invoice Amount"
@@ -191,7 +173,7 @@
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
- "modified": "2021-08-24 18:27:02.216097",
+ "modified": "2021-08-25 11:45:53.208915",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
