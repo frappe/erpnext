@@ -21,6 +21,7 @@
   "default_bank_account",
   "lead_name",
   "prospect",
+  "opportunity_name",
   "image",
   "column_break0",
   "account_manager",
@@ -498,7 +499,17 @@
    "fieldname": "prospect",
    "fieldtype": "Link",
    "label": "Prospect",
-   "options": "Prospect"
+   "no_copy": 1,
+   "options": "Prospect",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "opportunity_name",
+   "fieldtype": "Link",
+   "label": "From Opportunity",
+   "no_copy": 1,
+   "options": "Opportunity",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-user",
@@ -506,7 +517,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-23 14:40:15.214350",
+ "modified": "2021-08-25 18:56:09.929905",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

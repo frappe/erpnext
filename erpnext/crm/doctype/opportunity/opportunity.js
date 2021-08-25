@@ -57,7 +57,7 @@ frappe.ui.form.on("Opportunity", {
 		if (frm.doc.status == "Lost"){
 			frm.trigger('set_as_lost_dialog');
 		}
-	
+
 	},
 
 	customer_address: function(frm, cdt, cdn) {
@@ -95,11 +95,18 @@ frappe.ui.form.on("Opportunity", {
 					}, __('Create'));
 			}
 
+			if (frm.doc.opportunity_from != "Customer") {
+				frm.add_custom_button(__('Customer'),
+					function() {
+						frm.trigger("make_customer")
+					}, __('Create'));
+			}
+
 			frm.add_custom_button(__('Quotation'),
 				function() {
 					frm.trigger("create_quotation")
 				}, __('Create'));
-			}
+		}
 
 		if(!frm.doc.__islocal && frm.perm[0].write && frm.doc.docstatus==0) {
 			if(frm.doc.status==="Open") {
@@ -193,6 +200,13 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 	create_quotation() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
+			frm: cur_frm
+		})
+	}
+
+	make_customer() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_customer",
 			frm: cur_frm
 		})
 	}

@@ -124,6 +124,3 @@ class TestCouponCode(unittest.TestCase):
 
 		so.submit()
 		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
-
-
-

@@ -34,9 +34,10 @@ class Lead(SellingController):
 			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if (not cint(self.is_new())) else None,
 			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if (not cint(self.is_new())) else None,
 		})
-		
+
 	def set_full_name(self):
-		self.lead_name = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
+		if self.first_name:
+			self.lead_name = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
 
 	def validate_email_id(self):
 		if self.email_id:
