@@ -54,12 +54,13 @@ class BankTransaction(StatusUpdater):
 			elif payment_entry.payment_document == "Sales Invoice":
 				self.clear_sales_invoice(payment_entry, for_cancel=for_cancel)
 
-	def clear_simple_entry(self, payment_entry):
+	def clear_simple_entry(self, payment_entry, for_cancel=False):
 		if payment_entry.payment_document == "Payment Entry":
 			if frappe.db.get_value("Payment Entry", payment_entry.payment_entry, "payment_type") == "Internal Transfer":
 				if len(get_reconciled_bank_transactions(payment_entry)) < 2:
 					return
-    clearance_date = self.date if not for_cancel else None
+
+		clearance_date = self.date if not for_cancel else None
 		frappe.db.set_value(
 			payment_entry.payment_document, payment_entry.payment_entry,
 			"clearance_date", clearance_date)
