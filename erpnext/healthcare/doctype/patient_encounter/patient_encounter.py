@@ -39,14 +39,13 @@ class PatientEncounter(Document):
 	def get_applicable_treatment_plans(encounter):
 		patient = frappe.get_doc('Patient', encounter['patient'])
 
-		plans = None
 		plan_filters = {}
 		plan_filters['name'] = ['in', []]
 
 		age = patient.age
 		if age:
-			plan_filters['patient_age_from'] = ['>=', age.years]
-			plan_filters['patient_age_to'] = ['<=', age.years]
+			plan_filters['patient_age_from'] = ['<=', age.years]
+			plan_filters['patient_age_to'] = ['>=', age.years]
 
 		gender = patient.sex
 		if gender:

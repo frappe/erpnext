@@ -204,8 +204,8 @@ frappe.ui.form.on('Patient Encounter', {
 					get_query() {
 						return {
 							filters: data.message.filters
-	        			}
-	        		},
+						};
+					},
 					action(selections) {
 						frappe.call({
 							method: 'fill_treatment_plans',

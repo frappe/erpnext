@@ -73,7 +73,8 @@ class TestPatientEncounter(unittest.TestCase):
 			'patient': self.patient_male.name,
 			'practitioner': self.practitioner.name,
 		}).insert()
-		plans = PatientEncounter.get_applicable_treatment_plans(encounter.as_dict())
+		data = PatientEncounter.get_applicable_treatment_plans(encounter.as_dict())
+		plans = frappe.get_list('Treatment Plan Template', fields='*', filters=data['filters'])
 		assert plans[0]['name'] == self.care_plan_male.template_name
 
 		encounter = frappe.get_doc({
@@ -81,5 +82,6 @@ class TestPatientEncounter(unittest.TestCase):
 			'patient': self.patient_female.name,
 			'practitioner': self.practitioner.name,
 		}).insert()
-		plans = PatientEncounter.get_applicable_treatment_plans(encounter.as_dict())
+		data = PatientEncounter.get_applicable_treatment_plans(encounter.as_dict())
+		plans = frappe.get_list('Treatment Plan Template', fields='*', filters=data['filters'])
 		assert plans[0]['name'] == self.care_plan_female.template_name
