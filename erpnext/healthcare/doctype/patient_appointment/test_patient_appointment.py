@@ -202,7 +202,6 @@ class TestPatientAppointment(unittest.TestCase):
 
 		assert new_invoice_count == invoice_count + 1
 
-<<<<<<< HEAD
 	def test_overlap_appointment(self):
 		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import OverlapError
 		patient, practitioner = create_healthcare_docs(id=1)
@@ -252,6 +251,27 @@ class TestPatientAppointment(unittest.TestCase):
 		appointment = create_appointment(patient, practitioner, nowdate(), service_unit=overlap_service_unit, save=0)
 		self.assertRaises(MaximumCapacityError, appointment.save)
 
+	def test_patient_appointment_should_consider_permissions_while_fetching_appointments(self):
+		patient, practitioner = create_healthcare_docs()
+		create_appointment(patient, practitioner, nowdate())
+
+		patient, new_practitioner = create_healthcare_docs(id=2)
+		create_appointment(patient, new_practitioner, nowdate())
+
+		roles = [{"doctype": "Has Role", "role": "Physician"}]
+		user = create_user(roles=roles)
+		new_practitioner = frappe.get_doc('Healthcare Practitioner', new_practitioner)
+		new_practitioner.user_id = user.email
+		new_practitioner.save()
+
+		frappe.set_user(user.name)
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 1
+
+		frappe.set_user("Administrator")
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 2
+
 
 def create_healthcare_docs(id=0):
 	patient = create_patient(id)
@@ -299,65 +319,6 @@ def create_practitioner(id=0, medical_department=None):
 
 	return practitioner.name
 
-=======
-	def test_patient_appointment_should_consider_permissions_while_fetching_appointments(self):
-		patient, medical_department, practitioner = create_healthcare_docs()
-		create_appointment(patient, practitioner, nowdate())
-
-		patient, medical_department, new_practitioner = create_healthcare_docs(practitioner_name='Dr. John')
-		create_appointment(patient, new_practitioner, nowdate())
-
-		roles = [{"doctype": "Has Role", "role": "Physician"}]
-		user = create_user(roles=roles)
-		new_practitioner = frappe.get_doc('Healthcare Practitioner', new_practitioner)
-		new_practitioner.user_id = user.email
-		new_practitioner.save()
-
-		frappe.set_user(user.name)
-		appointments = frappe.get_list('Patient Appointment')
-		assert len(appointments) == 1
-
-		frappe.set_user("Administrator")
-		appointments = frappe.get_list('Patient Appointment')
-		assert len(appointments) == 2
-
-def create_healthcare_docs(practitioner_name=None):
-	if not practitioner_name:
-		practitioner_name = '_Test Healthcare Practitioner'
-
-	patient = create_patient()
-	practitioner = frappe.db.exists('Healthcare Practitioner', practitioner_name)
-	medical_department = frappe.db.exists('Medical Department', '_Test Medical Department')
-
-	if not medical_department:
-		medical_department = frappe.new_doc('Medical Department')
-		medical_department.department = '_Test Medical Department'
-		medical_department.save(ignore_permissions=True)
-		medical_department = medical_department.name
-
-	if not practitioner:
-		practitioner = frappe.new_doc('Healthcare Practitioner')
-		practitioner.first_name = practitioner_name
-		practitioner.gender = 'Female'
-		practitioner.department = medical_department
-		practitioner.op_consulting_charge = 500
-		practitioner.inpatient_visit_charge = 500
-		practitioner.save(ignore_permissions=True)
-		practitioner = practitioner.name
-
-	return patient, medical_department, practitioner
-
-def create_patient():
-	patient = frappe.db.exists('Patient', '_Test Patient')
-	if not patient:
-		patient = frappe.new_doc('Patient')
-		patient.first_name = '_Test Patient'
-		patient.sex = 'Female'
-		patient.save(ignore_permissions=True)
-		patient = patient.name
-	return patient
->>>>>>> 81b28b8998 (fix(healthcare): Removed ignore user permissions flag in appointment (#27129))
-
 def create_encounter(appointment):
 	if appointment:
 		encounter = frappe.new_doc('Patient Encounter')
@@ -371,7 +332,6 @@ def create_encounter(appointment):
 		encounter.submit()
 
 		return encounter
-
 
 def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0,
 	service_unit=None, appointment_type=None, save=1, department=None):
@@ -456,7 +416,6 @@ def create_appointment_type(args=None):
 			'items': args.get('items') or items
 		}).insert()
 
-<<<<<<< HEAD
 
 def create_service_unit_type(id=0, allow_appointments=1, overlap_appointments=0):
 	if frappe.db.exists('Healthcare Service Unit Type', f'_Test Service Unit Type {str(id)}'):
@@ -483,7 +442,7 @@ def create_service_unit(id=0, service_unit_type=None, service_unit_capacity=0):
 	service_unit.save(ignore_permissions=True)
 
 	return service_unit.name
-=======
+
 def create_user(email=None, roles=None):
 	if not email:
 		email = '{}@frappe.com'.format(frappe.utils.random_string(10))
@@ -497,4 +456,3 @@ def create_user(email=None, roles=None):
 			"roles": roles,
 		}).insert()
 	return user
->>>>>>> 81b28b8998 (fix(healthcare): Removed ignore user permissions flag in appointment (#27129))
