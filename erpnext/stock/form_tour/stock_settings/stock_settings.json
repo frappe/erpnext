@@ -4,7 +4,7 @@
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2021-08-20 15:37:36.151783",
+ "modified": "2021-08-25 16:19:37.699528",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -37,30 +37,6 @@
    "title": "Default Warehouse"
   },
   {
-   "description": "Choose between FIFO and Moving Average Valuation Methods. Click <a href=\"https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average\" target=\"_blank\">here</a> to know more about them.",
-   "field": "",
-   "fieldname": "valuation_method",
-   "fieldtype": "Select",
-   "has_next_condition": 0,
-   "is_table_field": 0,
-   "label": "Default Valuation Method",
-   "parent_field": "",
-   "position": "Bottom",
-   "title": "Default Valuation Method"
-  },
-  {
-   "description": "Show 'Scan Barcode' field above every child table to insert Items with ease.",
-   "field": "",
-   "fieldname": "show_barcode_field",
-   "fieldtype": "Check",
-   "has_next_condition": 0,
-   "is_table_field": 0,
-   "label": "Show Barcode Field in Stock Transactions",
-   "parent_field": "",
-   "position": "Bottom",
-   "title": "Show Barcode Field"
-  },
-  {
    "description": "Quality inspection is performed on the inward and outward movement of goods. Receipt and delivery transactions will be stopped or the user will be warned if the quality inspection is not performed.",
    "field": "",
    "fieldname": "action_if_quality_inspection_is_not_submitted",
@@ -83,6 +59,30 @@
    "parent_field": "",
    "position": "Bottom",
    "title": "Automatically Set Serial Nos based on FIFO"
+  },
+  {
+   "description": "Show 'Scan Barcode' field above every child table to insert Items with ease.",
+   "field": "",
+   "fieldname": "show_barcode_field",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Show Barcode Field in Stock Transactions",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Show Barcode Field"
+  },
+  {
+   "description": "Choose between FIFO and Moving Average Valuation Methods. Click <a href=\"https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average\" target=\"_blank\">here</a> to know more about them.",
+   "field": "",
+   "fieldname": "valuation_method",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Default Valuation Method",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Default Valuation Method"
   }
  ],
  "title": "Stock Settings"

@@ -4,7 +4,7 @@
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2021-08-24 14:50:48.017420",
+ "modified": "2021-08-25 16:31:31.441194",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -48,7 +48,7 @@
    "label": "Items",
    "next_step_condition": "eval: doc.items[0]?.item_code",
    "parent_field": "",
-   "position": "Bottom",
+   "position": "Top",
    "title": "Items"
   }
  ],
