@@ -29,10 +29,10 @@ class TestFeeValidity(unittest.TestCase):
 		healthcare_settings.save(ignore_permissions=True)
 		patient, medical_department, practitioner = create_healthcare_docs()
 
-		# appointment should not be invoiced. Check Fee Validity created for new patient
+		# For first appointment, invoice is generated
 		appointment = create_appointment(patient, practitioner, nowdate())
 		invoiced = frappe.db.get_value("Patient Appointment", appointment.name, "invoiced")
-		self.assertEqual(invoiced, 0)
+		self.assertEqual(invoiced, 1)
 
 		# appointment should not be invoiced as it is within fee validity
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 4))
