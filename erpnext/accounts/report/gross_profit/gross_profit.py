@@ -472,35 +472,6 @@ class GrossProfitGenerator(object):
 			fields = ['item_code', 'qty']
 		)
 
-<<<<<<< HEAD
-		for i, item in enumerate(bundle_items):
-			item_name, description, item_group, brand = self.get_bundle_item_details(item.item_code)
-
-			bundle_item = frappe._dict({
-				'parent_invoice': product_bundle.item_code,
-				'indent': product_bundle.indent + 1,
-				'parent': item.item_code,
-				'posting_date': product_bundle.posting_date,
-				'posting_time': product_bundle.posting_time,
-				'project': product_bundle.project,
-				'customer': product_bundle.customer,
-				'customer_group': product_bundle.customer_group,
-				'item_code': item.item_code,
-				'item_name': item_name,
-				'description': description,
-				'warehouse': product_bundle.warehouse,
-				'item_group': item_group,
-				'brand': brand,
-				'dn_detail': product_bundle.dn_detail,
-				'delivery_note': product_bundle.delivery_note,
-				'qty': (flt(product_bundle.qty) * flt(item.qty)),
-				'item_row': None,
-				'is_return': product_bundle.is_return,
-				'cost_center': product_bundle.cost_center
-			})
-
-			self.si_list.insert((index+i+1), bundle_item)
-=======
 	def get_bundle_item_row(self, product_bundle, item):
 		item_name, description, item_group, brand = self.get_bundle_item_details(item.item_code)
 
@@ -526,7 +497,6 @@ class GrossProfitGenerator(object):
 			'is_return': product_bundle.is_return,
 			'cost_center': product_bundle.cost_center
 		})
->>>>>>> 3135d6dc6a (fix: Get Bundle Items)
 
 	def get_bundle_item_details(self, item_code):
 		return frappe.db.get_value(
