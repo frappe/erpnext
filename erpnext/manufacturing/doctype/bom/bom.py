@@ -148,6 +148,7 @@ class BOM(WebsiteGenerator):
 		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
+		self.set_bom_scrap_items_detail()
 		self.validate_materials()
 		self.set_routing_operations()
 		self.validate_operations()
@@ -200,7 +201,7 @@ class BOM(WebsiteGenerator):
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
-			self.validate_bom_currecny(item)
+			self.validate_bom_currency(item)
 
 			ret = self.get_bom_material_detail({
 				"company": self.company,
@@ -218,6 +219,19 @@ class BOM(WebsiteGenerator):
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
+
+	def set_bom_scrap_items_detail(self):
+		for item in self.get("scrap_items"):
+			args = {
+				"item_code": item.item_code,
+				"company": self.company,
+				"scrap_items": True,
+				"bom_no": '',
+			}
+			ret = self.get_bom_material_detail(args)
+			for key, value in ret.items():
+				if not item.get(key):
+					item.set(key, value)
 
 	@frappe.whitelist()
 	def get_bom_material_detail(self, args=None):
@@ -255,7 +269,7 @@ class BOM(WebsiteGenerator):
 
 		return ret_item
 
-	def validate_bom_currecny(self, item):
+	def validate_bom_currency(self, item):
 		if item.get('bom_no') and frappe.db.get_value('BOM', item.get('bom_no'), 'currency') != self.currency:
 			frappe.throw(_("Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}")
 				.format(item.idx, item.bom_no, self.currency))

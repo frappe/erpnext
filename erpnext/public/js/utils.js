@@ -82,6 +82,17 @@ $.extend(erpnext, {
 			});
 			frappe.set_route('Form','Journal Entry', journal_entry.name);
 		});
+	},
+
+	proceed_save_with_reminders_frequency_change: () => {
+		frappe.ui.hide_open_dialog();
+		
+		frappe.call({
+			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change', 
+			callback: () => {
+				cur_frm.save();
+			}
+		});
 	}
 });
 
@@ -563,7 +574,7 @@ erpnext.utils.update_child_items = function(opts) {
 			},
 		],
 		primary_action: function() {
-			const trans_items = this.get_values()["trans_items"];
+			const trans_items = this.get_values()["trans_items"].filter((item) => !!item.item_code);
 			frappe.call({
 				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
 				freeze: true,
