@@ -451,35 +451,8 @@ class GrossProfitGenerator(object):
 					row.parent_invoice = row.parent
 					row.parent = row.item_code
 
-					# if not self.si_list[parents_index-1].base_net_amount:
-					# 	self.si_list[parents_index-1].base_net_amount = 0
-
-					# self.si_list[parents_index-1].base_net_amount += row.base_net_amount
-
-					# print("\n\n\n\n\nRow Details: ", index, ". ", row.parent, ": ", row.base_net_amount)
-					# print("Ind details: ", parents_index-1, ": ", self.si_list[parents_index-1].base_net_amount, "\n\n\n")
-
-				if frappe.db.exists('Product Bundle', row.item_code):
-					self.add_bundle_items(row, index)
-
-		base_net_amount = 0
-		for row in reversed(self.si_list):
-			if row.indent == 1.0:
-				base_net_amount += row.get('base_net_amount')
-
-			elif row.indent == 0.0:
-				row.base_net_amount = base_net_amount
-				base_net_amount = 0
-
-		# print("\n"*10)
-		# for index, row in enumerate(self.si_list):
-		# 	if row.indent == 0.0:
-		# 		print(index, ". ", row.parent, ": ", row.base_net_amount)
-		# 	elif row.indent == 1.0:
-		# 		print("\t", index, ". ", row.parent, ": ", row.base_net_amount)
-		# 	elif row.indent == 2.0:
-		# 		print("\t\t", index, ". ", row.parent, ": ", row.base_net_amount)
-		# 		print("")
+					if frappe.db.exists('Product Bundle', row.item_code):
+						self.add_bundle_items(row, index)
 
 	def add_bundle_items(self, product_bundle, index):
 		bundle_items = frappe.get_all(
