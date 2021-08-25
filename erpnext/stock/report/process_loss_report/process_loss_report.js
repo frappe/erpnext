@@ -19,6 +19,13 @@ frappe.query_reports["Process Loss Report"] = {
       options: "Item",
       mandatory: false,
 		},
+		{
+      label: __("Work Order"),
+      fieldname: "work_order",
+      fieldtype: "Link",
+      options: "Work Order",
+      mandatory: false,
+		},
     {
       label: __("From Date"),
       fieldname: "from_date",
