@@ -194,7 +194,7 @@ class TestPatientAppointment(unittest.TestCase):
 		invoice_count = frappe.db.count('Sales Invoice')
 
 		assert check_is_new_patient(patient)
-		appointment = create_appointment(patient, practitioner, nowdate())
+		create_appointment(patient, practitioner, nowdate())
 		new_invoice_count = frappe.db.count('Sales Invoice')
 
 		assert new_invoice_count == invoice_count + 1
