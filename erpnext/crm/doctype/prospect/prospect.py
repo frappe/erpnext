@@ -6,11 +6,22 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 class Prospect(Document):
-	def after_save(self):
+	def validate(self):
+		self.update_lead_details()
+
+	def on_update(self):
 		self.link_with_lead_contact_and_address()
 	
 	def on_trash(self):
 		self.unlink_dynamic_links()
+
+	def update_lead_details(self):
+		for row in self.get('prospect_lead'):
+			lead = frappe.get_value('Lead', row.lead, ['lead_name', 'status', 'email_id', 'mobile_no'], as_dict=True)
+			row.lead_name = lead.lead_name
+			row.status = lead.status
+			row.email = lead.email_id
+			row.mobile_no = lead.mobile_no
 
 	def link_with_lead_contact_and_address(self):
 		for row in self.prospect_lead:

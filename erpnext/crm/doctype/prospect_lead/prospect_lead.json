@@ -21,45 +21,41 @@
    "reqd": 1
   },
   {
-   "fetch_from": "lead.lead_name",
-   "fetch_if_empty": 1,
    "fieldname": "lead_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Lead Name"
+   "label": "Lead Name",
+   "read_only": 1
   },
   {
-   "fetch_from": "lead.status",
-   "fetch_if_empty": 1,
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Lead\nOpen\nReplied\nOpportunity\nQuotation\nLost Quotation\nInterested\nConverted\nDo Not Contact"
+   "options": "Lead\nOpen\nReplied\nOpportunity\nQuotation\nLost Quotation\nInterested\nConverted\nDo Not Contact",
+   "read_only": 1
   },
   {
-   "fetch_from": "lead.email_id",
-   "fetch_if_empty": 1,
    "fieldname": "email",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Email",
-   "options": "Email"
+   "options": "Email",
+   "read_only": 1
   },
   {
-   "fetch_from": "lead.mobile_no",
-   "fetch_if_empty": 1,
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Mobile No",
-   "options": "Phone"
+   "options": "Phone",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-20 01:58:39.387874",
+ "modified": "2021-08-25 12:58:24.638054",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect Lead",

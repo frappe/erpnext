@@ -19,21 +19,12 @@ frappe.ui.form.on('Prospect', {
 				})
 			}, __("Create"));
 		}
-	},
 
-	make_customer () {
-		console.log("Make Customer");
-		frappe.model.open_mapped_doc({
-			method: "erpnext.crm.doctype.prospect.prospect.make_customer",
-			frm: cur_frm
-		})
-	},
-
-	make_opportunity () {
-		console.log("Make Opportunity");
-		// frappe.model.open_mapped_doc({
-		// 	method: "erpnext.crm.doctype.lead.lead.make_opportunity",
-		// 	frm: cur_frm
-		// })
+		if (!cur_frm.is_new()) {
+			frappe.contacts.render_address_and_contact(cur_frm);
+			cur_frm.trigger('render_contact_day_html');
+		} else {
+			frappe.contacts.clear_address_and_contact(cur_frm);
+		}
 	}
 });
