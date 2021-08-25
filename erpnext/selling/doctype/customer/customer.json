@@ -20,6 +20,7 @@
   "tax_withholding_category",
   "default_bank_account",
   "lead_name",
+  "opportunity_name",
   "image",
   "column_break0",
   "account_manager",
@@ -493,6 +494,12 @@
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "opportunity_name",
+   "fieldtype": "Link",
+   "label": "From Opportunity",
+   "options": "Opportunity"
   }
  ],
  "icon": "fa fa-user",
@@ -500,7 +507,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-28 12:54:57.258959",
+ "modified": "2021-08-25 18:11:44.940104",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
