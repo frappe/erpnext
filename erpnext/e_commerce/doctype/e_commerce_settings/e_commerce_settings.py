@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, comma_and
+from frappe.utils import comma_and
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import unique
