@@ -2351,6 +2351,7 @@ def create_sales_invoice(**args):
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"discount_account": args.discount_account or None,
 		"discount_amount": args.discount_amount or 0,
+		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"conversion_factor": 1
