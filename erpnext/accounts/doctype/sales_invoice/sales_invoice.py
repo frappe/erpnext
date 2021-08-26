@@ -273,7 +273,7 @@ class SalesInvoice(SellingController):
 		self.exonerated_value()
 		if self.docstatus == 1:
 			self.update_accounts_status()
-			self.create_dispatch_control()
+			# self.create_dispatch_control()
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
@@ -876,6 +876,8 @@ class SalesInvoice(SellingController):
 		self.set_paid_amount()
 		self.exonerated_value()
 		self.calculated_taxes()
+		if self.docstatus == 1:
+			self.create_dispatch_control()
 		self.reload()
 
 	def set_paid_amount(self):
