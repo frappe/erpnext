@@ -219,6 +219,7 @@
   },
   {
    "fetch_from": "item_code.valuation_rate",
+   "fetch_if_empty": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -229,7 +230,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-20 23:31:05.393712",
+ "modified": "2021-08-27 01:04:30.242238",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
