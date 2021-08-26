@@ -285,39 +285,36 @@ class TestBOM(unittest.TestCase):
 
 		if not frappe.db.exists("BOM", f"BOM-{fg_item_non_whole.item_code}-001"):
 			bom_doc = create_bom_with_process_loss_item(
-				fg_item_non_whole, bom_item, 0.25, 0, 1
+				fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, fg_qty=1
 			)
 			bom_doc.submit()
 
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, 2, 0
+			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0
 		)
 		#  PL Item qty can't be >= FG Item qty
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, 1, 100
+			fg_item_non_whole, bom_item, scrap_qty=1, scrap_rate=100
 		)
 		# PL Item rate has to be 0
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_whole, bom_item, 0.25, 0
+			fg_item_whole, bom_item, scrap_qty=0.25, scrap_rate=0
 		)
 		#  Items with whole UOMs can't be PL Items
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, 0.25, 0, is_process_loss=0
+			fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, is_process_loss=0
 		)
 		# FG Items in Scrap/Loss Table should have Is Process Loss set
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
-
-
-
 
 def level_order_traversal(node):
 	traversal = []
@@ -364,6 +361,7 @@ def create_nested_bom(tree, prefix="_Test bom "):
 			bom = frappe.get_doc(doctype="BOM", item=bom_item_code)
 			for child_item in child_items.keys():
 				bom.append("items", {"item_code": prefix + child_item})
+			bom.currency = "INR"
 			bom.insert()
 			bom.submit()
 
@@ -407,6 +405,7 @@ def create_bom_with_process_loss_item(
 		"rate": scrap_rate,
 		"is_process_loss": is_process_loss
 	})
+	bom_doc.currency = "INR"
 	return bom_doc
 
 def create_process_loss_bom_items():
