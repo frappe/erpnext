@@ -35,7 +35,7 @@ class TestEmployeeSeparation(unittest.TestCase):
 			doc.delete()
 
 def create_employee_separation():
-	employee = frappe.db.get_value('Employee', {'status': 'Active'})
+	employee = frappe.db.get_value('Employee', {'status': 'Active', 'company': '_Test Company'})
 	separation = frappe.new_doc('Employee Separation')
 	separation.employee = employee
 	separation.boarding_begins_on = getdate()
