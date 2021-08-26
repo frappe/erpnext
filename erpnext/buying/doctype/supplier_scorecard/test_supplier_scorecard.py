@@ -128,4 +128,3 @@ valid_scorecard = [
 		"weighting_function":"{total_score} * max( 0, min ( 1 , (12 - {period_number}) / 12) )"
 	}
 ]
-

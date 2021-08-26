@@ -329,7 +329,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
 			target_doc.purchase_invoice_item = source_doc.name
-			target_doc.price_list_rate = 0
 
 		elif doctype == "Delivery Note":
 			returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
@@ -360,7 +359,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			else:
 				target_doc.pos_invoice_item = source_doc.name
 
-			target_doc.price_list_rate = 0
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 

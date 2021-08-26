@@ -23,6 +23,7 @@ def execute(filters=None):
 	conversion_factors = []
 	if opening_row:
 		data.append(opening_row)
+		conversion_factors.append(0)
 
 	actual_qty = stock_value = 0
 

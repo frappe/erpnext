@@ -302,3 +302,4 @@ erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.st
 };
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
+

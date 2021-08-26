@@ -12,7 +12,7 @@
 @media (max-width: 768px) {
     #submit-button-area {
         display: grid;
-        grid-template-areas: 
+        grid-template-areas:
         "submit"
         "back";
     }
