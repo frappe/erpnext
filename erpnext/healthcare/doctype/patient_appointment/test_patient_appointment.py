@@ -115,7 +115,7 @@ class TestPatientAppointment(unittest.TestCase):
 		self.assertTrue(fee_validity)
 
 		# first follow up appointment
-		appointment = create_appointment(patient, practitioner, nowdate())
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 1))
 		self.assertEqual(frappe.db.get_value('Fee Validity', fee_validity, 'visited'), 1)
 
 		update_status(appointment.name, 'Cancelled')
@@ -124,7 +124,7 @@ class TestPatientAppointment(unittest.TestCase):
 
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
-		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1)
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 1), invoice=1)
 		update_status(appointment.name, 'Cancelled')
 		# check invoice cancelled
 		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
