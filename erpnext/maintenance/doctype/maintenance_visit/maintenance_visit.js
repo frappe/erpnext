@@ -54,7 +54,6 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 						frappe.msgprint(__('Please select Customer first'));
 						return;
 					}
->>>>>>> db69d1dc00 (fix: fetch from more than one sales order in Maintenance Visit (#26924))
 					erpnext.utils.map_current_doc({
 						method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 						source_doctype: "Maintenance Schedule",
@@ -90,7 +89,6 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 						frappe.msgprint(__('Please select Customer first'));
 						return;
 					}
->>>>>>> db69d1dc00 (fix: fetch from more than one sales order in Maintenance Visit (#26924))
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 						source_doctype: "Sales Order",
