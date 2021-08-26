@@ -138,7 +138,7 @@ class POSInvoice(SalesInvoice):
 						.format(item.idx, bold_delivered_serial_nos), title=_("Item Unavailable"))
 
 	def validate_stock_availablility(self):
-		if self.is_return:
+		if self.is_return or self.docstatus != 1:
 			return
 
 		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
