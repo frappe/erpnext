@@ -49,9 +49,6 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Maintenance Schedule'),
-<<<<<<< HEAD
-				function() {
-=======
 				function () {
 					if (!me.frm.doc.customer) {
 						frappe.msgprint(__('Please select Customer first'));
@@ -88,9 +85,6 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 					})
 				}, __("Get items from"));
 			this.frm.add_custom_button(__('Sales Order'),
-<<<<<<< HEAD
-				function() {
-=======
 				function () {
 					if (!me.frm.doc.customer) {
 						frappe.msgprint(__('Please select Customer first'));
