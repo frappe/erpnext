@@ -2175,6 +2175,50 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
 			self.assertTrue(schedule.journal_entry)
 
+	def test_sales_invoice_against_supplier(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import make_customer
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		# create a customer
+		customer = make_customer(customer="_Test Common Supplier")
+		# create a supplier
+		supplier = create_supplier(supplier_name="_Test Common Supplier").name
+
+		# create a party link between customer & supplier
+		# set primary role as supplier
+		party_link = frappe.new_doc("Party Link")
+		party_link.primary_role = "Supplier"
+		party_link.primary_party = supplier
+		party_link.secondary_role = "Customer"
+		party_link.secondary_party = customer
+		party_link.save()
+
+		# enable common party accounting
+		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 1)
+
+		# create a sales invoice
+		si = create_sales_invoice(customer=customer, parent_cost_center="_Test Cost Center - _TC")
+
+		# check outstanding of sales invoice
+		si.reload()
+		self.assertEqual(si.status, 'Paid')
+		self.assertEqual(flt(si.outstanding_amount), 0.0)
+
+		# check creation of journal entry
+		jv = frappe.get_all('Journal Entry Account', {
+			'account': si.debit_to,
+			'party_type': 'Customer',
+			'party': si.customer,
+			'reference_type': si.doctype,
+			'reference_name': si.name
+		}, pluck='credit_in_account_currency')
+
+		self.assertTrue(jv)
+		self.assertEqual(jv[0], si.grand_total)
+
+		party_link.delete()
+		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 0)
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
