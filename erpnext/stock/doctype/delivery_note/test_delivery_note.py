@@ -433,9 +433,10 @@ class TestDeliveryNote(unittest.TestCase):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
-		customer = create_internal_customer(
+		customer_name = create_internal_customer(
 			customer_name="_Test Internal Customer 2",
-			allowed_company="_Test Company with perpetual inventory"
+			represents_company="_Test Company with perpetual inventory",
+			allowed_to_interact_with="_Test Company with perpetual inventory"
 		)
 
 		set_valuation_method("_Test Item", "FIFO")
@@ -453,7 +454,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = create_delivery_note(
 			item_code="_Test Product Bundle Item",
 			company="_Test Company with perpetual inventory",
-			customer=customer.name,
+			customer=customer_name,
 			cost_center = 'Main - TCP1',
 			expense_account = "Cost of Goods Sold - TCP1",
 			do_not_submit=True,
