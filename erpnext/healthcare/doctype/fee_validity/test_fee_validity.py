@@ -22,14 +22,14 @@ class TestFeeValidity(unittest.TestCase):
 		item = create_healthcare_service_items()
 		healthcare_settings = frappe.get_single("Healthcare Settings")
 		healthcare_settings.enable_free_follow_ups = 1
-		healthcare_settings.max_visits = 2
+		healthcare_settings.max_visits = 1
 		healthcare_settings.valid_days = 7
 		healthcare_settings.automate_appointment_invoicing = 1
 		healthcare_settings.op_consulting_charge_item = item
 		healthcare_settings.save(ignore_permissions=True)
 		patient, medical_department, practitioner = create_healthcare_docs()
 
-		# For first appointment, invoice is generated
+		# For first appointment, invoice is generated. First appointment not considered in fee validity
 		appointment = create_appointment(patient, practitioner, nowdate())
 		invoiced = frappe.db.get_value("Patient Appointment", appointment.name, "invoiced")
 		self.assertEqual(invoiced, 1)
