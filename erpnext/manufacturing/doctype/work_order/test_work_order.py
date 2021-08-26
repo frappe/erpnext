@@ -690,6 +690,71 @@ class TestWorkOrder(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry, wo.name, 'Material Transfer for Manufacture')
 
+	def test_wo_completion_with_pl_bom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_process_loss_bom_items
+		from erpnext.manufacturing.doctype.bom.test_bom import create_bom_with_process_loss_item
+
+		qty = 4
+		scrap_qty = 0.25 # bom item qty = 1, consider as 25% of FG
+		source_warehouse = "Stores - _TC"
+		wip_warehouse = "_Test Warehouse - _TC"
+		fg_item_non_whole, _, bom_item = create_process_loss_bom_items()
+
+		test_stock_entry.make_stock_entry(item_code=bom_item.item_code,
+			target=source_warehouse, qty=4, basic_rate=100)
+
+		bom_no = f"BOM-{fg_item_non_whole.item_code}-001"
+		if not frappe.db.exists("BOM", bom_no):
+			bom_doc = create_bom_with_process_loss_item(
+				fg_item_non_whole, bom_item, scrap_qty=scrap_qty,
+				scrap_rate=0, fg_qty=1, is_process_loss=1
+			)
+			bom_doc.submit()
+
+		wo = make_wo_order_test_record(
+			production_item=fg_item_non_whole.item_code,
+			bom_no=bom_no,
+			wip_warehouse=wip_warehouse,
+			qty=qty,
+			skip_transfer=1,
+			stock_uom=fg_item_non_whole.stock_uom,
+		)
+
+		se = frappe.get_doc(
+			make_stock_entry(wo.name, "Material Transfer for Manufacture", qty)
+		)
+		se.get("items")[0].s_warehouse = "Stores - _TC"
+		se.insert()
+		se.submit()
+
+		se = frappe.get_doc(
+			make_stock_entry(wo.name, "Manufacture", qty)
+		)
+		se.insert()
+		se.submit()
+
+		# Testing stock entry values
+		items = se.get("items")
+		self.assertEqual(len(items), 3, "There should be 3 items including process loss.")
+
+		source_item, fg_item, pl_item = items
+
+		total_pl_qty = qty * scrap_qty
+		actual_fg_qty = qty - total_pl_qty
+
+		self.assertEqual(pl_item.qty, total_pl_qty)
+		self.assertEqual(fg_item.qty, actual_fg_qty)
+
+		# Testing Work Order values
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, "produced_qty"),
+			qty
+		)
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, "process_loss_qty"),
+			total_pl_qty
+		)
+
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
 	for item in frappe.db.sql("""select item_code, stock_qty from `tabBOM Scrap Item`
