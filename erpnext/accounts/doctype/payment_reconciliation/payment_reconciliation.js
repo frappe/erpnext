@@ -91,18 +91,18 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		if (this.frm.doc.receivable_payable_account) {
 			this.frm.add_custom_button(__('Get Unreconciled Entries'), () =>
 				this.frm.trigger("get_unreconciled_entries")
-			)
+			);
 		}
 		if (this.frm.doc.invoices.length || this.frm.doc.payments.length &&
 			!(this.frm.doc.allocation.length)) {
 			this.frm.add_custom_button(__('Allocate'), () =>
 				this.frm.trigger("allocate")
-			)
+			);
 		}
 		if (this.frm.doc.allocation.length) {
 			this.frm.add_custom_button(__('Reconcile'), () =>
 				this.frm.trigger("reconcile")
-			)
+			);
 		}
 	}
 
