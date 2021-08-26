@@ -43,13 +43,17 @@ class TestVATAuditReport(TestCase):
 			"to_date": today()
 		}
 		columns, data = execute(filters)
-		tax = []
-		for d in data:
-			tax.append(d.setdefault("tax_amount"))
+		total_tax_amount = 0
+		total_row_tax = 0
+		for row in data:
+			keys = row.keys()
+			# skips total row tax_amount in if.. and skips section header in elif..
+			if 'voucher_no' in keys:
+				total_tax_amount = total_tax_amount + row['tax_amount']
+			elif 'tax_amount' in keys:
+				total_row_tax = total_row_tax + row['tax_amount']
 
-		self.assertEqual(tax[1], 15.0)
-		self.assertEqual(tax[5], 0.0)
-		self.assertEqual(tax[9], 15.0)
+		self.assertEqual(total_tax_amount, total_row_tax)
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
