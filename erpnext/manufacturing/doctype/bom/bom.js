@@ -446,6 +446,11 @@ var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
+				if (d.is_process_loss) {
+					r.message.rate = 0;
+					r.message.base_rate = 0;
+				}
+
 				$.extend(d, r.message);
 				refresh_field("items");
 				refresh_field("scrap_items");
@@ -655,3 +660,35 @@ frappe.ui.form.on("BOM", "with_operations", function(frm) {
 		frm.set_value("operations", []);
 	}
 });
+
+frappe.ui.form.on("BOM Scrap Item", {
+	item_code(frm, cdt, cdn) {
+		const { item_code } = locals[cdt][cdn];
+		if (item_code === frm.doc.item) {
+			locals[cdt][cdn].is_process_loss = 1;
+			trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code);
+		}
+	},
+});
+
+function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
+	frappe.prompt(
+		{
+			fieldname: "percent",
+			fieldtype: "Percent",
+			label: __("% Finished Item Quantity"),
+			description:
+				__("Set quantity of process loss item:") +
+				` ${item_code} ` +
+				__("as a percentage of finished item quantity"),
+		},
+		(data) => {
+			const row = locals[cdt][cdn];
+			row.stock_qty = (frm.doc.quantity * data.percent) / 100;
+			row.qty = row.stock_qty / (row.conversion_factor || 1);
+			refresh_field("scrap_items");
+		},
+		__("Set Process Loss Item Quantity"),
+		__("Set Quantity")
+	);
+}

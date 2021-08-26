@@ -4,10 +4,11 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter
+from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter, check_payment_fields_reqd, check_is_new_patient
 from frappe.utils import nowdate, add_days, now_datetime
 from frappe.utils.make_random import get_random
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+
 
 class TestPatientAppointment(unittest.TestCase):
 	def setUp(self):
@@ -109,18 +110,21 @@ class TestPatientAppointment(unittest.TestCase):
 		patient, practitioner = create_healthcare_docs()
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 1)
 		appointment = create_appointment(patient, practitioner, nowdate())
-		fee_validity = frappe.db.get_value('Fee Validity Reference', {'appointment': appointment.name}, 'parent')
+		fee_validity = frappe.db.get_value('Fee Validity', {'patient': patient, 'practitioner': practitioner})
 		# fee validity created
 		self.assertTrue(fee_validity)
 
-		visited = frappe.db.get_value('Fee Validity', fee_validity, 'visited')
+		# first follow up appointment
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 1))
+		self.assertEqual(frappe.db.get_value('Fee Validity', fee_validity, 'visited'), 1)
+
 		update_status(appointment.name, 'Cancelled')
 		# check fee validity updated
-		self.assertEqual(frappe.db.get_value('Fee Validity', fee_validity, 'visited'), visited - 1)
+		self.assertEqual(frappe.db.get_value('Fee Validity', fee_validity, 'visited'), 0)
 
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
-		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1)
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 1), invoice=1)
 		update_status(appointment.name, 'Cancelled')
 		# check invoice cancelled
 		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
@@ -179,6 +183,28 @@ class TestPatientAppointment(unittest.TestCase):
 		mark_invoiced_inpatient_occupancy(ip_record1)
 		discharge_patient(ip_record1, now_datetime())
 
+	def test_payment_should_be_mandatory_for_new_patient_appointment(self):
+		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 1)
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		frappe.db.set_value('Healthcare Settings', None, 'max_visits', 3)
+		frappe.db.set_value('Healthcare Settings', None, 'valid_days', 30)
+
+		patient = create_patient()
+		assert check_is_new_patient(patient)
+		payment_required = check_payment_fields_reqd(patient)
+		assert payment_required is True
+
+	def test_sales_invoice_should_be_generated_for_new_patient_appointment(self):
+		patient, practitioner = create_healthcare_docs()
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		invoice_count = frappe.db.count('Sales Invoice')
+
+		assert check_is_new_patient(patient)
+		create_appointment(patient, practitioner, nowdate())
+		new_invoice_count = frappe.db.count('Sales Invoice')
+
+		assert new_invoice_count == invoice_count + 1
+
 	def test_overlap_appointment(self):
 		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import OverlapError
 		patient, practitioner = create_healthcare_docs(id=1)
@@ -228,6 +254,27 @@ class TestPatientAppointment(unittest.TestCase):
 		appointment = create_appointment(patient, practitioner, nowdate(), service_unit=overlap_service_unit, save=0)
 		self.assertRaises(MaximumCapacityError, appointment.save)
 
+	def test_patient_appointment_should_consider_permissions_while_fetching_appointments(self):
+		patient, practitioner = create_healthcare_docs()
+		create_appointment(patient, practitioner, nowdate())
+
+		patient, new_practitioner = create_healthcare_docs(id=2)
+		create_appointment(patient, new_practitioner, nowdate())
+
+		roles = [{"doctype": "Has Role", "role": "Physician"}]
+		user = create_user(roles=roles)
+		new_practitioner = frappe.get_doc('Healthcare Practitioner', new_practitioner)
+		new_practitioner.user_id = user.email
+		new_practitioner.save()
+
+		frappe.set_user(user.name)
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 1
+
+		frappe.set_user("Administrator")
+		appointments = frappe.get_list('Patient Appointment')
+		assert len(appointments) == 2
+
 
 def create_healthcare_docs(id=0):
 	patient = create_patient(id)
@@ -275,7 +322,6 @@ def create_practitioner(id=0, medical_department=None):
 
 	return practitioner.name
 
-
 def create_encounter(appointment):
 	if appointment:
 		encounter = frappe.new_doc('Patient Encounter')
@@ -289,7 +335,6 @@ def create_encounter(appointment):
 		encounter.submit()
 
 		return encounter
-
 
 def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0,
 	service_unit=None, appointment_type=None, save=1, department=None):
@@ -400,3 +445,17 @@ def create_service_unit(id=0, service_unit_type=None, service_unit_capacity=0):
 	service_unit.save(ignore_permissions=True)
 
 	return service_unit.name
+
+def create_user(email=None, roles=None):
+	if not email:
+		email = '{}@frappe.com'.format(frappe.utils.random_string(10))
+	user = frappe.db.exists('User', email)
+	if not user:
+		user = frappe.get_doc({
+			"doctype": "User",
+			"email": email,
+			"first_name": "test_user",
+			"password": "password",
+			"roles": roles,
+		}).insert()
+	return user

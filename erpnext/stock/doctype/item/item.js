@@ -798,4 +798,4 @@ frappe.ui.form.on("UOM Conversion Detail", {
 			});
 		}
 	}
-})
+});
