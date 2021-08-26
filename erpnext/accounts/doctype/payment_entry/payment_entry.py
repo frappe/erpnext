@@ -10,7 +10,7 @@ from erpnext.accounts.utils import get_outstanding_invoices, get_account_currenc
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account, get_bank_account_details
 from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
@@ -755,9 +755,11 @@ class PaymentEntry(AccountsController):
 
 			if self.payment_type in ('Pay', 'Internal Transfer'):
 				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
+				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_from
 			elif self.payment_type == 'Receive':
 				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
+				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_to
 
 			payment_or_advance_account = self.get_party_account_for_taxes()
@@ -779,14 +781,13 @@ class PaymentEntry(AccountsController):
 					"cost_center": d.cost_center
 				}, account_currency, item=d))
 
-			#Intentionally use -1 to get net values in party account
 			if not d.included_in_paid_amount or self.advance_tax_account:
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": payment_or_advance_account,
 						"against": against,
-						dr_or_cr: -1 * tax_amount,
-						dr_or_cr + "_in_account_currency": -1 * base_tax_amount
+						rev_dr_or_cr: tax_amount,
+						rev_dr_or_cr + "_in_account_currency": -1 * base_tax_amount
 						if account_currency==self.company_currency
 						else d.tax_amount,
 						"cost_center": self.cost_center,
