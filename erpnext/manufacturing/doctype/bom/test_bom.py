@@ -280,6 +280,46 @@ class TestBOM(unittest.TestCase):
 			self.assertEqual(reqd_item.qty, created_item.qty)
 			self.assertEqual(reqd_item.exploded_qty, created_item.exploded_qty)
 
+	def test_bom_recursion_1st_level(self):
+		"""BOM should not allow BOM item again in child"""
+		item_code = "_Test BOM Recursion"
+		make_item(item_code, {'is_stock_item': 1})
+
+		bom = frappe.new_doc("BOM")
+		bom.item = item_code
+		bom.append("items", frappe._dict(item_code=item_code))
+		with self.assertRaises(frappe.ValidationError) as err:
+			bom.save()
+
+		self.assertTrue("recursion" in str(err.exception).lower())
+		frappe.delete_doc("BOM", bom.name, ignore_missing=True)
+
+	def test_bom_recursion_transitive(self):
+		item1 = "_Test BOM Recursion"
+		item2 = "_Test BOM Recursion 2"
+		make_item(item1, {'is_stock_item': 1})
+		make_item(item2, {'is_stock_item': 1})
+
+		bom1 = frappe.new_doc("BOM")
+		bom1.item = item1
+		bom1.append("items", frappe._dict(item_code=item2))
+		bom1.save()
+		bom1.submit()
+
+		bom2 = frappe.new_doc("BOM")
+		bom2.item = item2
+		bom2.append("items", frappe._dict(item_code=item1))
+
+		with self.assertRaises(frappe.ValidationError) as err:
+			bom2.save()
+			bom2.submit()
+
+		self.assertTrue("recursion" in str(err.exception).lower())
+
+		bom1.cancel()
+		frappe.delete_doc("BOM", bom1.name, ignore_missing=True, force=True)
+		frappe.delete_doc("BOM", bom2.name, ignore_missing=True, force=True)
+
 	def test_bom_with_process_loss_item(self):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
 

@@ -675,13 +675,18 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_valuation_rate_missing_on_make_stock_entry(self):
 		item_name = 'Test Valuation Rate Missing'
+		rm_item = '_Test raw material item'
 		make_item(item_name, {
+			"is_stock_item": 1,
+			"include_item_in_manufacturing": 1,
+		})
+		make_item('_Test raw material item', {
 			"is_stock_item": 1,
 			"include_item_in_manufacturing": 1,
 		})
 
 		if not frappe.db.get_value('BOM', {'item': item_name}):
-			make_bom(item=item_name, raw_materials=[item_name], rm_qty=1)
+			make_bom(item=item_name, raw_materials=[rm_item], rm_qty=1)
 
 		company = "_Test Company with perpetual inventory"
 		source_warehouse = create_warehouse("Test Valuation Rate Missing Warehouse", company=company)
