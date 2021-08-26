@@ -198,6 +198,85 @@ class TestProductionPlan(unittest.TestCase):
 		pln.cancel()
 		frappe.delete_doc("Production Plan", pln.name)
 
+<<<<<<< HEAD
+=======
+	def test_get_warehouse_list_group(self):
+		"""Check if required warehouses are returned"""
+		warehouse_json = '[{\"warehouse\":\"_Test Warehouse Group - _TC\"}]'
+
+		warehouses = set(get_warehouse_list(warehouse_json))
+		expected_warehouses = {"_Test Warehouse Group-C1 - _TC", "_Test Warehouse Group-C2 - _TC"}
+
+		missing_warehouse = expected_warehouses - warehouses
+
+		self.assertTrue(len(missing_warehouse) == 0,
+				msg=f"Following warehouses were expected {', '.join(missing_warehouse)}")
+
+	def test_get_warehouse_list_single(self):
+		warehouse_json = '[{\"warehouse\":\"_Test Scrap Warehouse - _TC\"}]'
+
+		warehouses = set(get_warehouse_list(warehouse_json))
+		expected_warehouses = {"_Test Scrap Warehouse - _TC", }
+
+		self.assertEqual(warehouses, expected_warehouses)
+
+	def test_get_sales_order_with_variant(self):
+		rm_item = create_item('PIV_RM', valuation_rate = 100)
+		if not frappe.db.exists('Item', {"item_code": 'PIV'}):
+			item = create_item('PIV', valuation_rate = 100)
+			variant_settings = {
+				"attributes": [
+					{
+						"attribute": "Colour"
+					},
+				],
+				"has_variants": 1
+			}
+			item.update(variant_settings)
+			item.save()
+			parent_bom = make_bom(item = 'PIV', raw_materials = [rm_item.item_code])
+		if not frappe.db.exists('BOM', {"item": 'PIV'}):
+			parent_bom = make_bom(item = 'PIV', raw_materials = [rm_item.item_code])
+		else:
+			parent_bom = frappe.get_doc('BOM', {"item": 'PIV'})
+
+		if not frappe.db.exists('Item', {"item_code": 'PIV-RED'}):
+			variant = create_variant("PIV", {"Colour": "Red"})
+			variant.save()
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [rm_item.item_code])
+		else:
+			variant = frappe.get_doc('Item', 'PIV-RED')
+		if not frappe.db.exists('BOM', {"item": 'PIV-RED'}):
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [rm_item.item_code])
+
+		"""Testing when item variant has a BOM"""
+		so = make_sales_order(item_code="PIV-RED", qty=5)
+		pln = frappe.new_doc('Production Plan')
+		pln.company = so.company
+		pln.get_items_from = 'Sales Order'
+		pln.item_code = 'PIV-RED'
+		pln.get_open_sales_orders()
+		self.assertEqual(pln.sales_orders[0].sales_order, so.name)
+		pln.get_so_items()
+		self.assertEqual(pln.po_items[0].item_code, 'PIV-RED')
+		self.assertEqual(pln.po_items[0].bom_no, variant_bom.name)
+		so.cancel()
+		frappe.delete_doc('Sales Order', so.name)
+		variant_bom.cancel()
+		frappe.delete_doc('BOM', variant_bom.name)
+
+		"""Testing when item variant doesn't have a BOM"""
+		so = make_sales_order(item_code="PIV-RED", qty=5)
+		pln.get_open_sales_orders()
+		self.assertEqual(pln.sales_orders[0].sales_order, so.name)
+		pln.po_items = []
+		pln.get_so_items()
+		self.assertEqual(pln.po_items[0].item_code, 'PIV-RED')
+		self.assertEqual(pln.po_items[0].bom_no, parent_bom.name)
+
+		frappe.db.rollback()
+
+>>>>>>> c07dce940e (fix: don't allow BOM's item code at any level of child items (#27157))
 def create_production_plan(**args):
 	args = frappe._dict(args)
 
