@@ -173,4 +173,3 @@ def get_linked_call_logs(doctype, docname):
 		})
 
 	return timeline_contents
-

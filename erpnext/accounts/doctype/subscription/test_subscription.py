@@ -630,5 +630,3 @@ class TestSubscription(unittest.TestCase):
 
 		subscription.process()
 		self.assertEqual(len(subscription.invoices), 1)
-
-

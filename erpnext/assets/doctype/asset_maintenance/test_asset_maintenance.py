@@ -73,7 +73,7 @@ def create_asset_data():
 			'doctype': 'Location',
 			'location_name': 'Test Location'
 		}).insert()
-	
+
 	if not frappe.db.exists("Item", "Photocopier"):
 		meta = frappe.get_meta('Asset')
 		naming_series = meta.get_field("naming_series").options
@@ -157,6 +157,6 @@ def set_depreciation_settings_in_company():
 	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"
 	company.depreciation_cost_center = "_Test Cost Center - _TC"
 	company.save()
-	
+
 	# Enable booking asset depreciation entry automatically
-	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)	
+	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)

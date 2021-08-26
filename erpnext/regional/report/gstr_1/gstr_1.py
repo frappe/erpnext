@@ -286,7 +286,8 @@ class Gstr1Report(object):
 		# Build itemised tax for export invoices where tax table is blank
 		for invoice, items in iteritems(self.invoice_items):
 			if invoice not in self.items_based_on_tax_rate and invoice not in unidentified_gst_accounts_invoice \
-				and frappe.db.get_value(self.doctype, invoice, "export_type") == "Without Payment of Tax":
+				and self.invoices.get(invoice, {}).get('export_type') == "Without Payment of Tax" \
+				and self.invoices.get(invoice, {}).get('gst_category') == "Overseas":
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
 	def get_columns(self):
@@ -587,7 +588,7 @@ def get_json(filters, report_name, data):
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-	gst_json = {"version": "GST2.2.9",
+	gst_json = {"version": "GST3.0.4",
 		"hash": "hash", "gstin": gstin, "fp": fp}
 
 	res = {}
@@ -764,7 +765,7 @@ def get_cdnr_reg_json(res, gstin):
 				"ntty": invoice[0]["document_type"],
 				"pos": "%02d" % int(invoice[0]["place_of_supply"].split('-')[0]),
 				"rchrg": invoice[0]["reverse_charge"],
-				"inv_type": get_invoice_type_for_cdnr(invoice[0])
+				"inv_typ": get_invoice_type_for_cdnr(invoice[0])
 			}
 
 			inv_item["itms"] = []
