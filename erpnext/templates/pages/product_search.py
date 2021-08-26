@@ -47,4 +47,3 @@ def get_product_list(search=None, start=0, limit=12):
 		set_product_info_for_website(item)
 
 	return [get_item_for_list_in_html(r) for r in data]
-

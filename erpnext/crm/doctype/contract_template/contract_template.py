@@ -24,8 +24,8 @@ def get_contract_template(template_name, doc):
 
 	if contract_template.contract_terms:
 		contract_terms = frappe.render_template(contract_template.contract_terms, doc)
-	
+
 	return {
-		'contract_template': contract_template, 
+		'contract_template': contract_template,
 		'contract_terms': contract_terms
 	}
