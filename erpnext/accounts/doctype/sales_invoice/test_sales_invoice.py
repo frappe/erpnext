@@ -1787,7 +1787,8 @@ class TestSalesInvoice(unittest.TestCase):
 
 		create_internal_customer(
 			customer_name="_Test Internal Customer",
-			represents_company="_Test Company 1"
+			represents_company="_Test Company 1",
+			allowed_to_interact_with="Wind Power LLC"
 		)
 
 		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
@@ -1831,91 +1832,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
-<<<<<<< HEAD
-=======
-	def test_inter_company_transaction_without_default_warehouse(self):
-		"Check mapping (expense account) of inter company SI to PI in absence of default warehouse."
-		# setup
-		old_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
-
-		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled('_Test Company 1')
-		frappe.local.enable_perpetual_inventory['_Test Company 1'] = 1
-
-		frappe.db.set_value("Company", '_Test Company 1', "stock_received_but_not_billed", "Stock Received But Not Billed - _TC1")
-		frappe.db.set_value("Company", '_Test Company 1', "expenses_included_in_valuation", "Expenses Included In Valuation - _TC1")
-
-
-		if not frappe.db.exists("Customer", "_Test Internal Customer"):
-			customer = frappe.get_doc({
-				"customer_group": "_Test Customer Group",
-				"customer_name": "_Test Internal Customer",
-				"customer_type": "Individual",
-				"doctype": "Customer",
-				"territory": "_Test Territory",
-				"is_internal_customer": 1,
-				"represents_company": "_Test Company 1"
-			})
-
-			customer.append("companies", {
-				"company": "Wind Power LLC"
-			})
-
-			customer.insert()
-
-		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
-			supplier = frappe.get_doc({
-				"supplier_group": "_Test Supplier Group",
-				"supplier_name": "_Test Internal Supplier",
-				"doctype": "Supplier",
-				"is_internal_supplier": 1,
-				"represents_company": "Wind Power LLC"
-			})
-
-			supplier.append("companies", {
-				"company": "_Test Company 1"
-			})
-
-			supplier.insert()
-
-		# begin test
-		si = create_sales_invoice(
-			company = "Wind Power LLC",
-			customer = "_Test Internal Customer",
-			debit_to = "Debtors - WP",
-			warehouse = "Stores - WP",
-			income_account = "Sales - WP",
-			expense_account = "Cost of Goods Sold - WP",
-			cost_center = "Main - WP",
-			currency = "USD",
-			update_stock = 1,
-			do_not_save = 1
-		)
-		si.selling_price_list = "_Test Price List Rest of the World"
-		si.submit()
-
-		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
-
-		# in absence of warehouse Stock Received But Not Billed is set as expense account while mapping
-		# mapping is not obstructed
-		self.assertIsNone(target_doc.items[0].warehouse)
-		self.assertEqual(target_doc.items[0].expense_account, "Stock Received But Not Billed - _TC1")
-
-		target_doc.items[0].update({"cost_center": "Main - _TC1"})
-
-		# missing warehouse is validated on save, after mapping
-		self.assertRaises(WarehouseMissingError, target_doc.save)
-
-		target_doc.items[0].update({"warehouse": "Stores - _TC1"})
-		target_doc.save()
-
-		# after warehouse is set, linked account or default inventory account is set
-		self.assertEqual(target_doc.items[0].expense_account, 'Stock In Hand - _TC1')
-
-		# tear down
-		frappe.local.enable_perpetual_inventory['_Test Company 1'] = old_perpetual_inventory
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
-
 	def test_sle_if_target_warehouse_exists_accidentally(self):
 		"""
 			Check if inward entry exists if Target Warehouse accidentally exists
@@ -1949,9 +1865,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si.cancel()
 		se.cancel()
 
->>>>>>> f4dc9ee2aa (fix: Don't create inward SLE against SI unless is internal customer enabled (#27086))
 	def test_internal_transfer_gl_entry(self):
 		## Create internal transfer account
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
 		account = create_account(account_name="Unrealized Profit",
 			parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
 
@@ -2487,29 +2404,6 @@ def get_taxes_and_charges():
 	"rate": 2,
 	"row_id": 1
 	}]
-
-def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
-	if not frappe.db.exists("Customer", customer_name):
-		customer = frappe.get_doc({
-			"customer_group": "_Test Customer Group",
-			"customer_name": customer_name,
-			"customer_type": "Individual",
-			"doctype": "Customer",
-			"territory": "_Test Territory",
-			"is_internal_customer": 1,
-			"represents_company": represents_company
-		})
-
-		customer.append("companies", {
-			"company": allowed_to_interact_with
-		})
-
-		customer.insert()
-		customer_name = customer.name
-	else:
-		customer_name = frappe.db.get_value("Customer", customer_name)
-
-	return customer_name
 
 def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):
 	if not frappe.db.exists("Supplier", supplier_name):
