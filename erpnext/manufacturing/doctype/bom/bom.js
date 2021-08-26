@@ -660,7 +660,7 @@ frappe.tour['BOM'] = [
 	{
 		fieldname: "item",
 		title: "Item",
-		description: __("Select the Item to be manufactured. The Item name, UoM, company, and currency will be fetched automatically.")
+		description: __("Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically.")
 	},
 	{
 		fieldname: "quantity",
