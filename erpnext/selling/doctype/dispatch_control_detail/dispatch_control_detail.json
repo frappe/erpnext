@@ -1,4 +1,5 @@
 {
+ "autoname": "hash",
  "creation": "2021-08-20 10:59:40.421089",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -8,7 +9,7 @@
   "item_code",
   "item_name",
   "qty",
-  "status"
+  "ready"
  ],
  "fields": [
   {
@@ -41,14 +42,15 @@
    "label": "Quantity"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Open\nClosed"
+   "default": "0",
+   "fieldname": "ready",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Ready"
   }
  ],
  "istable": 1,
- "modified": "2021-08-24 10:52:33.371555",
+ "modified": "2021-08-25 16:50:24.083151",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Dispatch Control Detail",
