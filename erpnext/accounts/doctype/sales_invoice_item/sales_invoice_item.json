@@ -834,11 +834,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-08-12 20:15:42.668399",
-=======
  "modified": "2021-08-19 13:41:53.435827",
->>>>>>> fe4540d74d (fix: allow to change rate manually in case of stand-alone credit note (#27036))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
