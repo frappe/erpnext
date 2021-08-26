@@ -362,7 +362,7 @@ class SellingController(StockController):
 				sales_order.update_reserved_qty(so_item_rows)
 
 	def set_incoming_rate(self):
-		if self.doctype not in ("Delivery Note", "Sales Invoice", "Sales Order"):
+		if self.doctype not in ("Delivery Note", "Sales Invoice"):
 			return
 
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -371,18 +371,19 @@ class SellingController(StockController):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get('stock_qty') or d.get('actual_qty'))
 
-				d.incoming_rate = get_incoming_rate({
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"posting_date": self.get('posting_date') or self.get('transaction_date'),
-					"posting_time": self.get('posting_time') or nowtime(),
-					"qty": qty if cint(self.get("is_return")) else (-1 * qty),
-					"serial_no": d.get('serial_no'),
-					"company": self.company,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"allow_zero_valuation": d.get("allow_zero_valuation")
-				}, raise_error_if_no_rate=False)
+				if not d.incoming_rate:
+					d.incoming_rate = get_incoming_rate({
+						"item_code": d.item_code,
+						"warehouse": d.warehouse,
+						"posting_date": self.get('posting_date') or self.get('transaction_date'),
+						"posting_time": self.get('posting_time') or nowtime(),
+						"qty": qty if cint(self.get("is_return")) else (-1 * qty),
+						"serial_no": d.get('serial_no'),
+						"company": self.company,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"allow_zero_valuation": d.get("allow_zero_valuation")
+					}, raise_error_if_no_rate=False)
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
