@@ -109,9 +109,13 @@ class PatientAppointment(Document):
 					frappe.db.set_value('Patient Appointment', self.name, 'notes', comments)
 
 	def update_fee_validity(self):
+		if not frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups'):
+			return
+
 		fee_validity = manage_fee_validity(self)
 		if fee_validity:
-			frappe.msgprint(_('{0} has fee validity till {1}').format(self.patient, fee_validity.valid_till))
+			frappe.msgprint(_('{0}: {1} has fee validity till {2}').format(self.patient,
+				frappe.bold(self.patient_name), fee_validity.valid_till))
 
 	@frappe.whitelist()
 	def get_therapy_types(self):
