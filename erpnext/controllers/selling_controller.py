@@ -423,7 +423,7 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sle_for_source_warehouse(d))
 
-				if d.target_warehouse:
+				if d.target_warehouse and self.get("is_internal_customer"):
 					sl_entries.append(self.get_sle_for_target_warehouse(d))
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
