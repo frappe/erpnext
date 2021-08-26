@@ -18,4 +18,3 @@ def execute():
 			'is_group': 1,
 			'company': company
 		}).insert(ignore_permissions=True)
-

@@ -250,7 +250,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
-		
+
 		pi = make_purchase_invoice(do_not_save=1, parent_cost_center="Main - _TC")
 		pi.apply_discount_on = "Grand Total"
 		pi.additional_discount_account = additional_discount_account
@@ -1001,7 +1001,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		unlink_enabled = frappe.db.get_value(
 			"Accounts Settings", "Accounts Settings",
 			"unlink_payment_on_cancel_of_invoice")
-		
+
 		frappe.db.set_value(
 			"Accounts Settings", "Accounts Settings",
 			"unlink_payment_on_cancel_of_invoice", 1)
@@ -1050,7 +1050,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			where voucher_no=%s
 			group by account
 			order by account asc""", (pi.name), as_dict=1)
-		
+
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.balance)

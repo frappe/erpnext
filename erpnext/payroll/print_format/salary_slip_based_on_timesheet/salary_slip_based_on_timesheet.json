@@ -13,6 +13,6 @@
  "name": "Salary Slip based on Timesheet",
  "owner": "Administrator",
  "print_format_builder": 1,
- "print_format_type": "Server",
+ "print_format_type": "Jinja",
  "standard": "Yes"
 }
