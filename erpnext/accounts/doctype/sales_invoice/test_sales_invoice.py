@@ -2428,7 +2428,6 @@ def create_sales_invoice(**args):
 		"asset": args.asset or None,
 		"discount_account": args.discount_account or None,
 		"discount_amount": args.discount_amount or 0,
-		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"conversion_factor": 1,
