@@ -21,6 +21,10 @@ class BankTransaction(StatusUpdater):
 		self.update_allocations()
 		self.clear_linked_payment_entries()
 		self.set_status(update=True)
+	
+	def on_cancel(self):
+		self.clear_linked_payment_entries(for_cancel=True)
+		self.set_status(update=True)
 
 	def update_allocations(self):
 		if self.payment_entries:
@@ -41,21 +45,30 @@ class BankTransaction(StatusUpdater):
 			frappe.db.set_value(self.doctype, self.name, "status", "Reconciled")
 
 		self.reload()
-
-	def clear_linked_payment_entries(self):
+	
+	def clear_linked_payment_entries(self, for_cancel=False):
 		for payment_entry in self.payment_entries:
 			if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
-				self.clear_simple_entry(payment_entry)
+				self.clear_simple_entry(payment_entry, for_cancel=for_cancel)
 
 			elif payment_entry.payment_document == "Sales Invoice":
-				self.clear_sales_invoice(payment_entry)
+				self.clear_sales_invoice(payment_entry, for_cancel=for_cancel)
 
-	def clear_simple_entry(self, payment_entry):
-		frappe.db.set_value(payment_entry.payment_document, payment_entry.payment_entry, "clearance_date", self.date)
+	def clear_simple_entry(self, payment_entry, for_cancel=False):
+		clearance_date = self.date if not for_cancel else None
+		frappe.db.set_value(
+			payment_entry.payment_document, payment_entry.payment_entry,
+			"clearance_date", clearance_date)
 
-	def clear_sales_invoice(self, payment_entry):
-		frappe.db.set_value("Sales Invoice Payment", dict(parenttype=payment_entry.payment_document,
-			parent=payment_entry.payment_entry), "clearance_date", self.date)
+	def clear_sales_invoice(self, payment_entry, for_cancel=False):
+		clearance_date = self.date if not for_cancel else None
+		frappe.db.set_value(
+			"Sales Invoice Payment",
+			dict(
+				parenttype=payment_entry.payment_document,
+				parent=payment_entry.payment_entry
+			),
+			"clearance_date", clearance_date)
 
 def get_total_allocated_amount(payment_entry):
 	return frappe.db.sql("""
@@ -105,4 +118,3 @@ def unclear_reference_payment(doctype, docname):
 			frappe.db.set_value(doc.payment_document, doc.payment_entry, "clearance_date", None)
 
 		return doc.payment_entry
-

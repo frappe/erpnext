@@ -13,7 +13,7 @@ class ActivityCost(Document):
 	def validate(self):
 		self.set_title()
 		self.check_unique()
-		
+
 	def set_title(self):
 		if self.employee:
 			if not self.employee_name:

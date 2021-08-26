@@ -10,7 +10,7 @@ class TestDelayedTasksSummary(unittest.TestCase):
 	def setUp(self):
 		task1 = create_task("_Test Task 98", add_days(nowdate(), -10), nowdate())
 		create_task("_Test Task 99", add_days(nowdate(), -10), add_days(nowdate(), -1))
-		
+
 		task1.status = "Completed"
 		task1.completed_on = add_days(nowdate(), -1)
 		task1.save()
@@ -38,7 +38,7 @@ class TestDelayedTasksSummary(unittest.TestCase):
 		]
 		report = execute(filters)
 		data = list(filter(lambda x: x.subject == "_Test Task 99", report[1]))[0]
-		
+
 		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[0].get(key), data.get(key))
 
