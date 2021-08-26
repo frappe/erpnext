@@ -1,8 +1,8 @@
-frappe.provide("e_commerce.wishlist");
-var wishlist = e_commerce.wishlist;
+frappe.provide("erpnext.e_commerce.wishlist");
+var wishlist = erpnext.e_commerce.wishlist;
 
-frappe.provide("e_commerce.shopping_cart");
-var shopping_cart = e_commerce.shopping_cart;
+frappe.provide("erpnext.e_commerce.shopping_cart");
+var shopping_cart = erpnext.e_commerce.shopping_cart;
 
 $.extend(wishlist, {
 	set_wishlist_count: function() {
@@ -98,7 +98,7 @@ $.extend(wishlist, {
 		}
 
 		let success_action = function() {
-			e_commerce.wishlist.set_wishlist_count();
+			erpnext.e_commerce.wishlist.set_wishlist_count();
 		};
 
 		if ($wish_icon.hasClass('wished')) {

@@ -20,8 +20,8 @@ $(() => {
 		}
 
 		bind_card_actions() {
-			e_commerce.shopping_cart.bind_add_to_cart_action();
-			e_commerce.wishlist.bind_wishlist_action();
+			erpnext.e_commerce.shopping_cart.bind_add_to_cart_action();
+			erpnext.e_commerce.wishlist.bind_wishlist_action();
 		}
 	}
 
