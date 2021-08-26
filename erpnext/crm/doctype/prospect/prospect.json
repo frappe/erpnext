@@ -151,7 +151,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-25 12:35:00.759909",
+ "modified": "2021-08-26 12:10:49.191839",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",
@@ -159,7 +159,6 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -168,9 +167,31 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "company_name",
  "track_changes": 1
 }
