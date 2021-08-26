@@ -3,6 +3,7 @@
 
 import json
 import frappe
+import numpy as np
 from datetime import date
 import pandas
 from dateutil.relativedelta import relativedelta
@@ -118,6 +119,7 @@ class SalesPipelineAnalytics(object):
 			self.query_result = frappe.db.get_list('Opportunity',filters=self.get_conditions(),fields=[select_1,select_2,duration,'currency'])
 			self.convert_to_base_currency()
 			dataframe = pandas.DataFrame.from_records(self.query_result)
+			dataframe.replace(to_replace= [None],value="Not Assigned",inplace=True)
 			result = dataframe.groupby([pipeline_by,period_by],as_index=False)['amount'].sum()
 			self.grouped_data = []
 
@@ -127,6 +129,8 @@ class SalesPipelineAnalytics(object):
 
 		self.get_periodic_data()
 		self.append_data(pipeline_by,period_by)
+
+		return self.data
 
 	def get_conditions(self):
 
@@ -194,7 +198,7 @@ class SalesPipelineAnalytics(object):
 
 			if self.filters.get('pipeline_by') == 'Owner':
 
-				if value is None or value == '[]':
+				if value == "Not Assigned" or value == '[]' or value is None:
 					temp = ["Not Assigned"]
 				else:
 					temp = json.loads(value)

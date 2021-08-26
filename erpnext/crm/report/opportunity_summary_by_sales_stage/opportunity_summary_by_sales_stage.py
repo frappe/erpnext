@@ -96,6 +96,7 @@ class OpportunitySummaryBySalesStage(object):
 
 			self.convert_to_base_currency()
 			dataframe = pandas.DataFrame.from_records(self.query_result)
+			dataframe.replace(to_replace=[None], value="Not Assigned", inplace=True)
 			result = dataframe.groupby(['sales_stage',based_on],as_index=False)['amount'].sum()
 			self.grouped_data = []
 
@@ -141,7 +142,7 @@ class OpportunitySummaryBySalesStage(object):
 
 			if self.filters.get("based_on") == "Opportunity Owner":
 
-				if d.get(based_on) == '[]' or d.get(based_on) is None:
+				if d.get(based_on) == '[]' or d.get(based_on) is None or d.get(based_on) == "Not Assigned":
 					temp = ["Not Assigned"]
 				else:
 					temp = json.loads(d.get(based_on))

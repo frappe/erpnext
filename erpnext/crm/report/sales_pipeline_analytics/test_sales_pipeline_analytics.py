@@ -221,12 +221,12 @@ def create_customer():
         doc.insert()
 
 def create_opportunity():
-    doc = frappe.db.exists({"doctype":"Opportunity","title":"Client Company"})
+    doc = frappe.db.exists({"doctype":"Opportunity","party_name":"_Test Customer"})
     if not doc:
         doc = frappe.new_doc("Opportunity")
-        doc.opportunity_from = "Lead"
-        lead_name = frappe.db.get_value("Lead",{"company":'__Test Company'},['name'])
-        doc.party_name = lead_name
+        doc.opportunity_from = "Customer"
+        customer_name = frappe.db.get_value("Customer",{"customer_name":'_Test Customer'},['customer_name'])
+        doc.party_name = customer_name
         doc.opportunity_amount = 150000
         doc.source = "Cold Calling"
         doc.expected_closing = "2021-08-31"
