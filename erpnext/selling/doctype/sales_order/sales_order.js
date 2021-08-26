@@ -102,38 +102,6 @@ frappe.ui.form.on("Sales Order Item", {
 	}
 });
 
-frappe.tour['Sales Order'] = [
-//	TODO: create the sales order form tour
-/*
-1. Sales Order List
-
-2. New Sales Order
-
-3. Get Items from Quotation
-
-4. Update Delivery Date in Sales Order
-
-5. Review Delivery warehouse
-
-6. Save and Submit Sales Order
-*/
-	{
-		fieldname: "items",
-		title: "Get Items from Quotation",
-		description: "Get Items from Quotation"
-	},
-	{
-		fieldname: "delivery_date",
-		title: "Update Delivery date",
-		description: "Update delivery date"
-	},
-	{
-		fieldname: "set_warehouse",
-		title: "Set Delivery Warehouse",
-		description: "Set delivery warehouse"
-	}
-];
-
 erpnext.selling.SalesOrderController = class SalesOrderController extends erpnext.selling.SellingController {
 	onload(doc, dt, dn) {
 		super.onload(doc, dt, dn);
