@@ -149,7 +149,7 @@ class SalesInvoice(SellingController):
 					if self.update_stock:
 						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-					elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+					elif asset.status in ("Scrapped", "Cancelled") or (asset.status == "Sold" and not self.is_return):
 						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
 
 	def validate_item_cost_centers(self):
@@ -947,8 +947,8 @@ class SalesInvoice(SellingController):
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
-					asset.db_set("disposal_date", self.posting_date)
-					asset.set_status("Sold" if self.docstatus==1 else None)
+					self.set_asset_status(asset)
+				
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():

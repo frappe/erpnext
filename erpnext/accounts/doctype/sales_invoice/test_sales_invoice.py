@@ -150,7 +150,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si1 = create_sales_invoice(rate=1000)
 		si2 = create_sales_invoice(rate=300)
 		si3 = create_sales_invoice(qty=-1, rate=300, is_return=1)
-		
+
 
 		pe = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Bank - _TC")
 		pe.append('references', {
@@ -1108,6 +1108,57 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(si1.outstanding_amount)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
 
+	def test_gle_made_when_asset_is_returned(self):
+		create_asset_data()
+
+		pi = frappe.new_doc('Purchase Invoice')
+		pi.supplier = '_Test Supplier'
+		pi.append('items', {
+			'item_code': 'Macbook Pro',
+			'qty': 1
+		})
+		pi.set_missing_values()
+		
+		asset = create_asset(item_code="Macbook Pro")
+	
+		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
+		return_si = create_sales_invoice(is_return=1, return_against=si.name, item_code="Macbook Pro", asset=asset.name, qty=-1, rate=90000)
+
+		disposal_account = frappe.get_cached_value("Company", "_Test Company", "disposal_account")
+
+		# Asset value is 100,000 but it was sold for 90,000, so there should be a loss of 10,000
+		loss_for_si = frappe.get_all(
+			"GL Entry", 
+			filters = {
+				"voucher_no": si.name,
+				"account": disposal_account
+			},
+			fields = ["credit", "debit"]
+		)[0]
+
+		loss_for_return_si = frappe.get_all(
+			"GL Entry", 
+			filters = {
+				"voucher_no": return_si.name,
+				"account": disposal_account
+			},
+			fields = ["credit", "debit"]
+		)[0]
+
+		self.assertEqual(loss_for_si['credit'], loss_for_return_si['debit'])
+		self.assertEqual(loss_for_si['debit'], loss_for_return_si['credit'])
+
+	def test_incoming_rate_for_stand_alone_credit_note(self):
+		return_si = create_sales_invoice(is_return=1, update_stock=1, qty=-1, rate=90000, incoming_rate=10,
+			company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', debit_to='Debtors - TCP1',
+			income_account='Sales - TCP1', expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1')
+
+		incoming_rate = frappe.db.get_value('Stock Ledger Entry', {'voucher_no': return_si.name}, 'incoming_rate')
+		debit_amount = frappe.db.get_value('GL Entry',
+			{'voucher_no': return_si.name, 'account': 'Stock In Hand - TCP1'}, 'debit')
+
+		self.assertEqual(debit_amount, 10.0)
+		self.assertEqual(incoming_rate, 10.0)
 
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
@@ -1785,23 +1836,13 @@ class TestSalesInvoice(unittest.TestCase):
 		acc_settings.save()
 
 	def test_inter_company_transaction(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
-		if not frappe.db.exists("Customer", "_Test Internal Customer"):
-			customer = frappe.get_doc({
-				"customer_group": "_Test Customer Group",
-				"customer_name": "_Test Internal Customer",
-				"customer_type": "Individual",
-				"doctype": "Customer",
-				"territory": "_Test Territory",
-				"is_internal_customer": 1,
-				"represents_company": "_Test Company 1"
-			})
-
-			customer.append("companies", {
-				"company": "Wind Power LLC"
-			})
-
-			customer.insert()
+		create_internal_customer(
+			customer_name="_Test Internal Customer",
+			represents_company="_Test Company 1",
+			allowed_to_interact_with="Wind Power LLC"
+		)
 
 		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
 			supplier = frappe.get_doc({
@@ -1844,8 +1885,43 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
+	def test_sle_if_target_warehouse_exists_accidentally(self):
+		"""
+			Check if inward entry exists if Target Warehouse accidentally exists
+			but Customer is not an internal customer.
+		"""
+		se = make_stock_entry(
+			item_code="138-CMS Shoe",
+			target="Finished Goods - _TC",
+			company = "_Test Company",
+			qty=1,
+			basic_rate=500
+		)
+
+		si = frappe.copy_doc(test_records[0])
+		si.update_stock = 1
+		si.set_warehouse = "Finished Goods - _TC"
+		si.set_target_warehouse = "Stores - _TC"
+		si.get("items")[0].warehouse = "Finished Goods - _TC"
+		si.get("items")[0].target_warehouse = "Stores - _TC"
+		si.insert()
+		si.submit()
+
+		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
+			fields=["name", "actual_qty"])
+
+		# check if only one SLE for outward entry is created
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].actual_qty, -1)
+
+		# tear down
+		si.cancel()
+		se.cancel()
+
 	def test_internal_transfer_gl_entry(self):
 		## Create internal transfer account
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
 		account = create_account(account_name="Unrealized Profit",
 			parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
 
@@ -2349,12 +2425,14 @@ def create_sales_invoice(**args):
 		"price_list_rate": args.price_list_rate if args.get("price_list_rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"asset": args.asset or None,
 		"discount_account": args.discount_account or None,
 		"discount_amount": args.discount_amount or 0,
 		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
-		"conversion_factor": 1
+		"conversion_factor": 1,
+		"incoming_rate": args.incoming_rate or 0
 	})
 
 	if not args.do_not_save:
@@ -2450,29 +2528,6 @@ def get_taxes_and_charges():
 	"rate": 2,
 	"row_id": 1
 	}]
-
-def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
-	if not frappe.db.exists("Customer", customer_name):
-		customer = frappe.get_doc({
-			"customer_group": "_Test Customer Group",
-			"customer_name": customer_name,
-			"customer_type": "Individual",
-			"doctype": "Customer",
-			"territory": "_Test Territory",
-			"is_internal_customer": 1,
-			"represents_company": represents_company
-		})
-
-		customer.append("companies", {
-			"company": allowed_to_interact_with
-		})
-
-		customer.insert()
-		customer_name = customer.name
-	else:
-		customer_name = frappe.db.get_value("Customer", customer_name)
-
-	return customer_name
 
 def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):
 	if not frappe.db.exists("Supplier", supplier_name):
