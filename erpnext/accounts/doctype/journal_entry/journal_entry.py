@@ -13,6 +13,7 @@ from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amo
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting \
 	import get_party_account_based_on_invoice_discounting
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
+from erpnext.accounts.party import get_party_gle_currency
 
 from six import string_types, iteritems
 
@@ -35,6 +36,7 @@ class JournalEntry(AccountsController):
 		self.clearance_date = None
 
 		self.validate_party()
+		self.validate_party_account_currency()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
@@ -194,6 +196,16 @@ class JournalEntry(AccountsController):
 			if account_type in ["Receivable", "Payable"]:
 				if not (d.party_type and d.party):
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
+	
+	def validate_party_account_currency(self):
+		for d in self.get("accounts"):
+			if d.party_type in ('Customer', 'Supplier'):
+				party_gle_currency = get_party_gle_currency(d.party_type, d.party, self.company)
+				party_account_currency = get_account_currency(d.account)
+				party_currency = frappe.db.get_value(d.party_type, d.party, 'default_currency')
+				
+				if not party_gle_currency and (party_account_currency != party_currency):
+					frappe.throw(_("Party Account {0} currency and default party currency should be same").format(frappe.bold(d.account)))
 
 	def check_credit_limit(self):
 		customers = list(set(d.party for d in self.get("accounts")
