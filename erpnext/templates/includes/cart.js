@@ -4,8 +4,8 @@
 // js inside blog page
 
 // shopping cart
-frappe.provide("e_commerce.shopping_cart");
-var shopping_cart = e_commerce.shopping_cart;
+frappe.provide("erpnext.e_commerce.shopping_cart");
+var shopping_cart = erpnext.e_commerce.shopping_cart;
 
 $.extend(shopping_cart, {
 	show_error: function(title, text) {

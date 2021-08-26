@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 // shopping cart
-frappe.provide("e_commerce.shopping_cart");
-var shopping_cart = e_commerce.shopping_cart;
+frappe.provide("erpnext.e_commerce.shopping_cart");
+var shopping_cart = erpnext.e_commerce.shopping_cart;
 
 var getParams = function (url) {
 	var params = [];
@@ -192,7 +192,7 @@ $.extend(shopping_cart, {
 			$btn.parent().find('.cart-indicator').removeClass('hidden');
 
 			const item_code = $btn.data('item-code');
-			e_commerce.shopping_cart.update_cart({
+			erpnext.e_commerce.shopping_cart.update_cart({
 				item_code,
 				qty: 1
 			});
