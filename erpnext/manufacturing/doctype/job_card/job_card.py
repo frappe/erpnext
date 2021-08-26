@@ -26,17 +26,17 @@ class JobCard(Document):
 		self.set_status()
 		self.validate_operation_id()
 		self.validate_sequence_id()
-		self.get_sub_operations()
+		self.set_sub_operations()
 		self.update_sub_operation_status()
 
-	def get_sub_operations(self):
+	def set_sub_operations(self):
 		if self.operation:
 			self.sub_operations = []
-			for row in frappe.get_all("Sub Operation",
-				filters = {"parent": self.operation}, fields=["operation", "idx"]):
-				row.status = "Pending"
+			for row in frappe.get_all('Sub Operation',
+				filters = {'parent': self.operation}, fields=['operation', 'idx'], order_by='idx'):
+				row.status = 'Pending'
 				row.sub_operation = row.operation
-				self.append("sub_operations", row)
+				self.append('sub_operations', row)
 
 	def validate_time_logs(self):
 		self.total_time_in_mins = 0.0
@@ -690,7 +690,7 @@ def make_corrective_job_card(source_name, operation=None, for_operation=None, ta
 		target.set('time_logs', [])
 		target.set('employee', [])
 		target.set('items', [])
-		target.get_sub_operations()
+		target.set_sub_operations()
 		target.get_required_items()
 		target.validate_time_logs()
 

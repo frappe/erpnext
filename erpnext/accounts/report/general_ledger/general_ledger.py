@@ -78,13 +78,10 @@ def validate_filters(filters, account_details):
 def validate_party(filters):
 	party_type, party = filters.get("party_type"), filters.get("party")
 
-	if party:
-		if not party_type:
-			frappe.throw(_("To filter based on Party, select Party Type first"))
-		else:
-			for d in party:
-				if not frappe.db.exists(party_type, d):
-					frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
+	if party and party_type:
+		for d in party:
+			if not frappe.db.exists(party_type, d):
+				frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
 
 def set_account_currency(filters):
 	if filters.get("account") or (filters.get('party') and len(filters.party) == 1):
