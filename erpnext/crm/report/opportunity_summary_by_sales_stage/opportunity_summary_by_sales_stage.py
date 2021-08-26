@@ -21,7 +21,6 @@ class OpportunitySummaryBySalesStage(object):
 	def run(self):
 		self.get_columns()
 		self.get_data()
-		self.chart = {}
 		self.get_chart_data()
 		return self.columns, self.data, None, self.chart
 
@@ -87,19 +86,13 @@ class OpportunitySummaryBySalesStage(object):
 		self.get_rows()
 	
 	def get_data_query(self,based_on,data_based_on):
-		filter_data = self.filters.get('status')
-
-		if filter_data:
-			self.filters.update({'status':tuple(filter_data)})
 
 		if self.filters.get('data_based_on') == 'Number':
-			self.query_result = frappe.db.sql("""select sales_stage,{select},{sql},currency from tabOpportunity
-				where {conditions} 
-				group by sales_stage,{sql}""".format(conditions=self.get_conditions(),sql=based_on,select=data_based_on),self.filters,as_dict=1)
+			group_by = "{},{}".format('sales_stage',based_on)
+			self.query_result = frappe.db.get_list("Opportunity",filters=self.get_conditions(),fields=['sales_stage',data_based_on,based_on],group_by=group_by)
 
 		if self.filters.get('data_based_on') == 'Amount':
-			self.query_result = frappe.db.sql("""select sales_stage,{based_on},currency,{data_based_on} from tabOpportunity
-				where {conditions} """.format(conditions=self.get_conditions(),based_on=based_on,data_based_on=data_based_on),self.filters,as_dict=1)
+			self.query_result = frappe.db.get_list("Opportunity",filters=self.get_conditions(),fields=['sales_stage',based_on,data_based_on,'currency'])
 
 			self.convert_to_base_currency()
 			dataframe = pandas.DataFrame.from_records(self.query_result)
@@ -173,21 +166,19 @@ class OpportunitySummaryBySalesStage(object):
 		self.formatted_data[based_on][sales_stage] += data
 						
 	def get_conditions(self):
-		conditions = []
-		if self.filters.get("opportunity_source"):
-			conditions.append('source=%(opportunity_source)s')
-		if self.filters.get("opportunity_type"):
-			conditions.append('opportunity_type=%(opportunity_type)s')
-		if self.filters.get("status"):
-			conditions.append('status in %(status)s')
-		if self.filters.get("company"):
-			conditions.append('company=%(company)s')
-		if self.filters.get("from_date"):
-			conditions.append('transaction_date>=%(from_date)s')
-		if self.filters.get("to_date"):
-			conditions.append('transaction_date<=%(to_date)s')
+		filters = []
+		if self.filters.get('company'):
+			filters.append({'company': self.filters.get('company')})
+		if self.filters.get('opportunity_type'):
+			filters.append({'opportunity_type': self.filters.get('opportunity_type')})
+		if self.filters.get('opportunity_source'):
+			filters.append({'source': self.filters.get('opportunity_source')})
+		if self.filters.get('status'):
+			filters.append({'status':("in",self.filters.get('status'))})
+		if self.filters.get('from_date') and self.filters.get('to_date'):
+			filters.append(['transaction_date', 'between' , [self.filters.get('from_date'),self.filters.get('to_date')]])
 
-		return "{}".format(" and ".join(conditions))
+		return filters
 
 	def get_chart_data(self):
 		labels = []
