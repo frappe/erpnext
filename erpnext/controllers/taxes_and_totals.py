@@ -595,7 +595,8 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("outstanding_amount"))
 
 			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
-			 	self.update_paid_amount_for_return(total_amount_to_pay)
+				self.set_total_amount_to_default_mop(total_amount_to_pay)
+				self.calculate_paid_amount()
 
 	def calculate_paid_amount(self):
 
@@ -675,7 +676,7 @@ class calculate_taxes_and_totals(object):
 	def set_item_wise_tax_breakup(self):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 
-	def update_paid_amount_for_return(self, total_amount_to_pay):
+	def set_total_amount_to_default_mop(self, total_amount_to_pay):
 		default_mode_of_payment = frappe.db.get_value('POS Payment Method',
 			{'parent': self.doc.pos_profile, 'default': 1}, ['mode_of_payment'], as_dict=1)
 
@@ -685,9 +686,7 @@ class calculate_taxes_and_totals(object):
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
 				'amount': total_amount_to_pay,
 				'default': 1
-			})
-
-		self.calculate_paid_amount()
+			})	
 
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:
