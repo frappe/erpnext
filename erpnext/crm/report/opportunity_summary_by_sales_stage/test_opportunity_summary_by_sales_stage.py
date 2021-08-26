@@ -20,7 +20,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
         filters = {
             'based_on': "Opportunity Owner",
             'data_based_on': "Number",
-            'company': "__Test Company"
+            'company': "Best Test"
         }
 
         report = execute(filters)
@@ -36,7 +36,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
         filters = {
             'based_on': "Source",
             'data_based_on': "Number",
-            'company': "__Test Company"
+            'company': "Best Test"
         }
 
         report = execute(filters)
@@ -52,7 +52,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
         filters = {
             'based_on': "Opportunity Type",
             'data_based_on': "Number",
-            'company': "__Test Company"
+            'company': "Best Test"
         }
 
         report = execute(filters)
@@ -68,7 +68,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
         filters = {
             'based_on': "Opportunity Type",
             'data_based_on': "Number",
-            'company': "__Test Company",
+            'company': "Best Test",
             'opportunity_source': "Cold Calling",
             'opportunity_type': "Sales",
             'status': ["Open"]

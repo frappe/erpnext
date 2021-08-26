@@ -24,7 +24,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Number",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -44,7 +44,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Number",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -65,7 +65,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Amount",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -85,7 +85,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Amount",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -106,7 +106,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Number",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -126,7 +126,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Number",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -147,7 +147,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Amount",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -167,7 +167,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Amount",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company"
+            'company':"Best Test"
         }
 
         report = execute(filters)
@@ -188,7 +188,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
             'based_on':"Number",
             'status':"Open",
             'opportunity_type':"Sales",
-            'company':"__Test Company",
+            'company':"Best Test",
             'opportunity_source':'Cold Calling',
             'from_date': '2021-08-01',
             'to_date':'2021-08-31'
@@ -206,29 +206,29 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
         self.assertEqual(expected_data,report[1])
 
 def create_company():
-    doc = frappe.db.exists('Company','__Test Company')
+    doc = frappe.db.exists('Company','Best Test')
     if not doc:
         doc = frappe.new_doc('Company')
-        doc.company_name = '__Test Company'
+        doc.company_name = 'Best Test'
         doc.default_currency = "INR"
         doc.insert()
 
 def create_customer():
-    doc = frappe.db.exists("Customer","_Test Customer")
+    doc = frappe.db.exists("Customer","_Test NC")
     if not doc:
         doc = frappe.new_doc("Customer")
-        doc.customer_name = '_Test Customer'
+        doc.customer_name = '_Test NC'
         doc.insert()
 
 def create_opportunity():
-    doc = frappe.db.exists({"doctype":"Opportunity","party_name":"_Test Customer"})
+    doc = frappe.db.exists({"doctype":"Opportunity","party_name":"_Test NC"})
     if not doc:
         doc = frappe.new_doc("Opportunity")
         doc.opportunity_from = "Customer"
-        customer_name = frappe.db.get_value("Customer",{"customer_name":'_Test Customer'},['customer_name'])
+        customer_name = frappe.db.get_value("Customer",{"customer_name":'_Test NC'},['customer_name'])
         doc.party_name = customer_name
         doc.opportunity_amount = 150000
         doc.source = "Cold Calling"
         doc.expected_closing = "2021-08-31"
-        doc.company = "__Test Company"
+        doc.company = 'Best Test'
         doc.insert()

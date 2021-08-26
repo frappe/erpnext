@@ -3,7 +3,6 @@
 
 import json
 import frappe
-import numpy as np
 from datetime import date
 import pandas
 from dateutil.relativedelta import relativedelta
@@ -208,7 +207,7 @@ class SalesPipelineAnalytics(object):
 				self.insert_formatted_data(period,value,count,None)	
 
 	def insert_formatted_data(self,period,value,val,temp):
-
+		
 		if temp:
 			if len(temp) > 1:
 				if self.filters.get("assigned_to"):
@@ -233,6 +232,7 @@ class SalesPipelineAnalytics(object):
 			self.periodic_data[value][period] += val
 
 	def check_for_assigned_to(self,period,value,count,temp,info):
+
 		if self.filters.get("assigned_to"):
 			for data in json.loads(info.get('opportunity_owner')):
 				if data == self.filters.get("assigned_to"):
