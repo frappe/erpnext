@@ -47,9 +47,9 @@ frappe.query_reports["Sales Person Target Variance Based On Item Group"] = {
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
-		
+
 		if (column.fieldname.includes('variance')) {
-			
+
 			if (data[column.fieldname] < 0) {
 				value = "<span style='color:red'>" + value + "</span>";
 			}

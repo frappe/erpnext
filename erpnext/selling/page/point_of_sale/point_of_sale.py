@@ -146,7 +146,7 @@ def filter_service_items(items):
 		if not item['is_stock_item']:
 			if not frappe.db.exists('Product Bundle', item['item_code']):
 				items.remove(item)
-	
+
 	return items
 
 def get_conditions(search_term):

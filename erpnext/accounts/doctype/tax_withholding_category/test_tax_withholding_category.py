@@ -97,7 +97,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pi.save()
 		pi.submit()
 		invoices.append(pi)
-		
+
 		# Second Invoice will apply TDS checked
 		pi1 = create_purchase_invoice(supplier = "Test TDS Supplier3", rate = 20000)
 		pi1.submit()
@@ -140,6 +140,36 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		tcs_charged = sum(d.base_tax_amount for d in si.taxes if d.account_head == 'TCS - _TC')
 		self.assertEqual(tcs_charged, 500)
 		invoices.append(si)
+
+		#delete invoices to avoid clashing
+		for d in invoices:
+			d.cancel()
+
+	def test_tds_calculation_on_net_total(self):
+		frappe.db.set_value("Supplier", "Test TDS Supplier4", "tax_withholding_category", "Cumulative Threshold TDS")
+		invoices = []
+
+		pi = create_purchase_invoice(supplier = "Test TDS Supplier4", rate = 20000, do_not_save=True)
+		pi.append('taxes', {
+			"category": "Total",
+			"charge_type": "Actual",
+			"account_head": '_Test Account VAT - _TC',
+			"cost_center": 'Main - _TC',
+			"tax_amount": 1000,
+			"description": "Test",
+			"add_deduct_tax": "Add"
+
+		})
+		pi.save()
+		pi.submit()
+		invoices.append(pi)
+
+		# Second Invoice will apply TDS checked
+		pi1 = create_purchase_invoice(supplier = "Test TDS Supplier4", rate = 20000)
+		pi1.submit()
+		invoices.append(pi1)
+
+		self.assertEqual(pi1.taxes[0].tax_amount, 4000)
 
 		#delete invoices to avoid clashing
 		for d in invoices:
@@ -220,7 +250,7 @@ def create_sales_invoice(**args):
 
 def create_records():
 	# create a new suppliers
-	for name in ['Test TDS Supplier', 'Test TDS Supplier1', 'Test TDS Supplier2', 'Test TDS Supplier3']:
+	for name in ['Test TDS Supplier', 'Test TDS Supplier1', 'Test TDS Supplier2', 'Test TDS Supplier3', 'Test TDS Supplier4']:
 		if frappe.db.exists('Supplier', name):
 			continue
 

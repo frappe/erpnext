@@ -128,4 +128,3 @@ def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 			order by idx desc, name
 			limit %s, %s""".format(searchfield),
 			tuple(["%%%s%%" % txt, "%%%s%%" % txt, start, page_len]))
-
