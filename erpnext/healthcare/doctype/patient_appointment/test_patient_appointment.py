@@ -107,14 +107,17 @@ class TestPatientAppointment(unittest.TestCase):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 1)
 		appointment = create_appointment(patient, practitioner, nowdate())
-		fee_validity = frappe.db.get_value('Fee Validity Reference', {'appointment': appointment.name}, 'parent')
+		fee_validity = frappe.db.get_value('Fee Validity', {'patient': patient, 'practitioner': practitioner})
 		# fee validity created
 		self.assertTrue(fee_validity)
 
-		visited = frappe.db.get_value('Fee Validity', fee_validity, 'visited')
+		# first follow up appointment
+		appointment = create_appointment(patient, practitioner, nowdate())
+		self.assertEqual(frappe.db.get_value('Fee Validity', fee_validity, 'visited'), 1)
+
 		update_status(appointment.name, 'Cancelled')
 		# check fee validity updated
-		self.assertEqual(frappe.db.get_value('Fee Validity', fee_validity, 'visited'), visited - 1)
+		self.assertEqual(frappe.db.get_value('Fee Validity', fee_validity, 'visited'), 0)
 
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
