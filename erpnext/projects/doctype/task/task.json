@@ -396,6 +396,7 @@
    "fieldname": "item",
    "fieldtype": "Link",
    "label": "Item",
+   "mandatory_depends_on": "eval:doc.is_template",
    "options": "Item"
   }
  ],
@@ -404,7 +405,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-08-21 12:22:50.026892",
+ "modified": "2021-08-26 15:05:08.657655",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
