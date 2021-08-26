@@ -168,11 +168,13 @@ class TestProductDataEngine(unittest.TestCase):
 
 		filter_engine = ProductFiltersBuilder()
 		attribute_filter = filter_engine.get_attribute_filters()[0]
-		attribute = attribute_filter.item_attribute_values[0]
+		attributes = attribute_filter.item_attribute_values
+
+		attribute_values = [d.attribute_value for d in attributes]
 
 		self.assertEqual(attribute_filter.name, "Test Size")
-		self.assertEqual(len(attribute_filter.item_attribute_values), 1)
-		self.assertEqual(attribute.attribute_value, "Large")
+		self.assertGreater(len(attribute_values), 0)
+		self.assertIn("Large", attribute_values)
 
 	def test_product_list_with_attribute_filter(self):
 		"Test if attribute filters are applied correctly."

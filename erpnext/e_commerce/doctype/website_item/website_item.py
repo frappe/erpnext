@@ -286,7 +286,7 @@ class WebsiteItem(WebsiteGenerator):
 
 			# make an attribute-value map for easier access in templates
 			variant.attribute_map = frappe._dict(
-				{ attr.attribute : attr.value for attr in variant.attributes}
+				{attr.attribute : attr.value for attr in variant.attributes}
 			)
 
 			for attr in variant.attributes:
