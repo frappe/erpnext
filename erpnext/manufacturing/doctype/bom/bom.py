@@ -452,14 +452,20 @@ class BOM(WebsiteGenerator):
 			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {0}").format(bom_name))
 
 		bom_list = self.traverse_tree()
-		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
-			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'})
+		child_items = frappe.get_all('BOM Item', fields=["bom_no", "item_code"],
+			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'}) or []
 
-		if bom_nos and self.name in {d.bom_no for d in bom_nos}:
+		child_bom = {d.bom_no for d in child_items}
+		child_items_codes = {d.item_code for d in child_items}
+
+		if self.name in child_bom:
 			_throw_error(self.name)
 
+		if self.item in child_items_codes:
+			_throw_error(self.item)
+
 		bom_nos = frappe.get_all('BOM Item', fields=["parent"],
-			filters={'bom_no': self.name, 'parenttype': 'BOM'})
+			filters={'bom_no': self.name, 'parenttype': 'BOM'}) or []
 
 		if self.name in {d.parent for d in bom_nos}:
 			_throw_error(self.name)
