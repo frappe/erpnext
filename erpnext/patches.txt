@@ -301,10 +301,7 @@ erpnext.patches.v13_0.update_export_type_for_gst #2021-08-16
 erpnext.patches.v13_0.update_tds_check_field #3
 erpnext.patches.v13_0.update_recipient_email_digest
 erpnext.patches.v13_0.shopify_deprecation_warning
-<<<<<<< HEAD
 erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.rename_discharge_ordered_date_in_ip_record
-=======
 erpnext.patches.v13_0.migrate_stripe_api
->>>>>>> 16eed07a0f (fix: use Stripe's Price API for plan-price information (#26107))
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
