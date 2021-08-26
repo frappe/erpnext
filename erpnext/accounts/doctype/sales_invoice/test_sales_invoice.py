@@ -1140,6 +1140,18 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(loss_for_si['credit'], loss_for_return_si['debit'])
 		self.assertEqual(loss_for_si['debit'], loss_for_return_si['credit'])
 
+	def test_incoming_rate_for_stand_alone_credit_note(self):
+		return_si = create_sales_invoice(is_return=1, update_stock=1, qty=-1, rate=90000, incoming_rate=10,
+			company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', debit_to='Debtors - TCP1',
+			income_account='Sales - TCP1', expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1')
+
+		incoming_rate = frappe.db.get_value('Stock Ledger Entry', {'voucher_no': return_si.name}, 'incoming_rate')
+		debit_amount = frappe.db.get_value('GL Entry',
+			{'voucher_no': return_si.name, 'account': 'Stock In Hand - TCP1'}, 'debit')
+
+		self.assertEqual(debit_amount, 10.0)
+		self.assertEqual(incoming_rate, 10.0)
+
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
 		si.apply_discount_on = "Net Total"
@@ -2163,6 +2175,50 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
 			self.assertTrue(schedule.journal_entry)
 
+	def test_sales_invoice_against_supplier(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import make_customer
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		# create a customer
+		customer = make_customer(customer="_Test Common Supplier")
+		# create a supplier
+		supplier = create_supplier(supplier_name="_Test Common Supplier").name
+
+		# create a party link between customer & supplier
+		# set primary role as supplier
+		party_link = frappe.new_doc("Party Link")
+		party_link.primary_role = "Supplier"
+		party_link.primary_party = supplier
+		party_link.secondary_role = "Customer"
+		party_link.secondary_party = customer
+		party_link.save()
+
+		# enable common party accounting
+		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 1)
+
+		# create a sales invoice
+		si = create_sales_invoice(customer=customer, parent_cost_center="_Test Cost Center - _TC")
+
+		# check outstanding of sales invoice
+		si.reload()
+		self.assertEqual(si.status, 'Paid')
+		self.assertEqual(flt(si.outstanding_amount), 0.0)
+
+		# check creation of journal entry
+		jv = frappe.get_all('Journal Entry Account', {
+			'account': si.debit_to,
+			'party_type': 'Customer',
+			'party': si.customer,
+			'reference_type': si.doctype,
+			'reference_name': si.name
+		}, pluck='credit_in_account_currency')
+
+		self.assertTrue(jv)
+		self.assertEqual(jv[0], si.grand_total)
+
+		party_link.delete()
+		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 0)
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
@@ -2375,7 +2431,8 @@ def create_sales_invoice(**args):
 		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
-		"conversion_factor": 1
+		"conversion_factor": 1,
+		"incoming_rate": args.incoming_rate or 0
 	})
 
 	if not args.do_not_save:
