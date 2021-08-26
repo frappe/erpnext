@@ -28,6 +28,9 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		});
 
+		frm.set_df_property('packed_items', 'cannot_add_rows', true);
+		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
+
 	},
 
 	company: function(frm) {
