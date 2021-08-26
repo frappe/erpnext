@@ -3,13 +3,12 @@
 
 frappe.provide("erpnext.accounts");
 
-frappe.ui.form.on("Payment Reconciliation Payment", {
+frappe.ui.form.on("Payment Reconciliation Allocation", {
 	invoice_number: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.invoice_number) {
-			var parts = row.invoice_number.split(' | ');
-			var invoice_type = parts[0];
-			var invoice_number = parts[1];
+			var invoice_type = row.invoice_type;
+			var invoice_number = row.invoice_number;
 
 			var invoice_amount = frm.doc.invoices.filter(function(d) {
 				return d.invoice_type === invoice_type && d.invoice_number === invoice_number;
@@ -233,9 +232,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				primary_action_label: __('Reconcile Entries')
 			});
 
-			this.frm.doc.payments.forEach(d => {
+			this.frm.doc.allocation.forEach(d => {
 				if (d.difference_amount && !d.difference_account) {
-					dialog.fields_dict.payments.df.data.push({
+					dialog.fields_dict.allocation.df.data.push({
 						'docname': d.name,
 						'reference_name': d.reference_name,
 						'difference_amount': d.difference_amount,
@@ -244,8 +243,8 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				}
 			});
 
-			this.data = dialog.fields_dict.payments.df.data;
-			dialog.fields_dict.payments.grid.refresh();
+			this.data = dialog.fields_dict.allocation.df.data;
+			dialog.fields_dict.allocation.grid.refresh();
 			dialog.show();
 		} else {
 			this.reconcile_payment_entries();

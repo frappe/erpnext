@@ -282,12 +282,12 @@ class PaymentReconciliation(Document):
 						.format(row.invoice_type, row.invoice_number))
 
 				if flt(row.allocated_amount) > flt(row.amount):
-					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2}")
+					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equal to Payment Entry amount {2}")
 						.format(row.idx, row.allocated_amount, row.amount))
 
 				invoice_outstanding = unreconciled_invoices.get(row.invoice_type, {}).get(row.invoice_number)
 				if flt(row.allocated_amount) - invoice_outstanding > 0.009:
-					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to invoice outstanding amount {2}")
+					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2}")
 						.format(row.idx, row.allocated_amount, invoice_outstanding))
 
 		if not invoices_to_reconcile:
