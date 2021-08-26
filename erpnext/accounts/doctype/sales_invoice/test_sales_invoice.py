@@ -1140,6 +1140,18 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(loss_for_si['credit'], loss_for_return_si['debit'])
 		self.assertEqual(loss_for_si['debit'], loss_for_return_si['credit'])
 
+	def test_incoming_rate_for_stand_alone_credit_note(self):
+		return_si = create_sales_invoice(is_return=1, update_stock=1, qty=-1, rate=90000, incoming_rate=10,
+			company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', debit_to='Debtors - TCP1',
+			income_account='Sales - TCP1', expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1')
+
+		incoming_rate = frappe.db.get_value('Stock Ledger Entry', {'voucher_no': return_si.name}, 'incoming_rate')
+		debit_amount = frappe.db.get_value('GL Entry',
+			{'voucher_no': return_si.name, 'account': 'Stock In Hand - TCP1'}, 'debit')
+
+		self.assertEqual(debit_amount, 10.0)
+		self.assertEqual(incoming_rate, 10.0)
+
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
 		si.apply_discount_on = "Net Total"
@@ -2375,7 +2387,8 @@ def create_sales_invoice(**args):
 		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
-		"conversion_factor": 1
+		"conversion_factor": 1,
+		"incoming_rate": args.incoming_rate or 0
 	})
 
 	if not args.do_not_save:
