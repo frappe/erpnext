@@ -390,7 +390,7 @@ class StockReconciliation(StockController):
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 			sl_entries.reverse()
-			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+			allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
 
