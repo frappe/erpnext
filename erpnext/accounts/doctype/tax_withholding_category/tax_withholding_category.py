@@ -241,13 +241,14 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 	tds_amount = 0
 	invoice_filters = {
 		'name': ('in', vouchers), 
-		'docstatus': 1
+		'docstatus': 1,
+		'apply_tds': 1
 	}
 
 	field = 'sum(net_total)'
 
-	if not cint(tax_details.consider_party_ledger_amount):
-		invoice_filters.update({'apply_tds': 1})
+	if cint(tax_details.consider_party_ledger_amount):
+		invoice_filters.pop('apply_tds', None)
 		field = 'sum(grand_total)'
 
 	supp_credit_amt = frappe.db.get_value('Purchase Invoice', invoice_filters, field) or 0.0
@@ -282,7 +283,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
-	
+
 	if cint(tax_details.round_off_tax_amount):
 		tds_amount = round(tds_amount)
 

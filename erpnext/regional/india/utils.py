@@ -475,7 +475,7 @@ def get_ewb_data(dt, dn):
 		ewaybills.append(data)
 
 	data = {
-		'version': '1.0.1118',
+		'version': '1.0.0421',
 		'billLists': ewaybills
 	}
 
@@ -845,7 +845,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		else:
 			depreciation_amount = (flt(row.value_after_depreciation) -
 				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
-		
+
 	else:
 		rate_of_depreciation = row.rate_of_depreciation
 		# if its the first depreciation
@@ -862,7 +862,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	return depreciation_amount
 
 def set_item_tax_from_hsn_code(item):
-	if not item.taxes and item.gst_hsn_code: 
+	if not item.taxes and item.gst_hsn_code:
 		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
 
 		for tax in hsn_doc.taxes:
@@ -871,3 +871,20 @@ def set_item_tax_from_hsn_code(item):
 				'tax_category': tax.tax_category,
 				'valid_from': tax.valid_from
 			})
+
+def delete_gst_settings_for_company(doc, method):
+	if doc.country != 'India':
+		return
+
+	gst_settings = frappe.get_doc("GST Settings")
+	records_to_delete = []
+
+	for d in reversed(gst_settings.get('gst_accounts')):
+		if d.company == doc.name:
+			records_to_delete.append(d)
+
+	for d in records_to_delete:
+		gst_settings.remove(d)
+
+	gst_settings.save()
+

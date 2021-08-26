@@ -13,6 +13,10 @@ from datetime import timedelta
 class TestSetUp(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabService Level Agreement`")
+		frappe.db.sql("delete from `tabService Level Priority`")
+		frappe.db.sql("delete from `tabSLA Fulfilled On Status`")
+		frappe.db.sql("delete from `tabPause SLA On Status`")
+		frappe.db.sql("delete from `tabService Day`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
@@ -178,7 +182,7 @@ class TestFirstResponseTime(TestSetUp):
 	# issue creation and first response are on consecutive days
 	def test_first_response_time_case6(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is also sent before working hours, but on the next day. 
+			Test frt when the issue was created before working hours and the first response is also sent before working hours, but on the next day.
 		"""
 		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("06-29-2021 6:00"))
 		self.assertEqual(issue.first_response_time, 28800.0)
@@ -200,7 +204,7 @@ class TestFirstResponseTime(TestSetUp):
 	def test_first_response_time_case9(self):
 		"""
 			Test frt when the issue was created before working hours and the first response is sent on the next day, which is not a work day.
-		""" 
+		"""
 		issue = create_issue_and_communication(get_datetime("06-25-2021 6:00"), get_datetime("06-26-2021 11:00"))
 		self.assertEqual(issue.first_response_time, 28800.0)
 
@@ -228,7 +232,7 @@ class TestFirstResponseTime(TestSetUp):
 	def test_first_response_time_case13(self):
 		"""
 			Test frt when the issue was created during working hours and the first response is sent on the next day, which is not a work day.
-		""" 
+		"""
 		issue = create_issue_and_communication(get_datetime("06-25-2021 12:00"), get_datetime("06-26-2021 11:00"))
 		self.assertEqual(issue.first_response_time, 21600.0)
 
@@ -344,7 +348,7 @@ class TestFirstResponseTime(TestSetUp):
 		"""
 		issue = create_issue_and_communication(get_datetime("06-25-2021 20:00"), get_datetime("06-27-2021 11:00"))
 		self.assertEqual(issue.first_response_time, 1.0)
-	
+
 def create_issue_and_communication(issue_creation, first_responded_on):
 	issue = make_issue(issue_creation, index=1)
 	sender = create_user("test@admin.com")
