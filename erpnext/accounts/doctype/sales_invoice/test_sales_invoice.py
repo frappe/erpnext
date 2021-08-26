@@ -148,7 +148,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si1 = create_sales_invoice(rate=1000)
 		si2 = create_sales_invoice(rate=300)
 		si3 = create_sales_invoice(qty=-1, rate=300, is_return=1)
-		
+
 
 		pe = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Bank - _TC")
 		pe.append('references', {
@@ -1795,23 +1795,13 @@ class TestSalesInvoice(unittest.TestCase):
 		acc_settings.save()
 
 	def test_inter_company_transaction(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
-		if not frappe.db.exists("Customer", "_Test Internal Customer"):
-			customer = frappe.get_doc({
-				"customer_group": "_Test Customer Group",
-				"customer_name": "_Test Internal Customer",
-				"customer_type": "Individual",
-				"doctype": "Customer",
-				"territory": "_Test Territory",
-				"is_internal_customer": 1,
-				"represents_company": "_Test Company 1"
-			})
-
-			customer.append("companies", {
-				"company": "Wind Power LLC"
-			})
-
-			customer.insert()
+		create_internal_customer(
+			customer_name="_Test Internal Customer",
+			represents_company="_Test Company 1",
+			allowed_to_interact_with="Wind Power LLC"
+		)
 
 		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
 			supplier = frappe.get_doc({
@@ -1854,8 +1844,43 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
+	def test_sle_if_target_warehouse_exists_accidentally(self):
+		"""
+			Check if inward entry exists if Target Warehouse accidentally exists
+			but Customer is not an internal customer.
+		"""
+		se = make_stock_entry(
+			item_code="138-CMS Shoe",
+			target="Finished Goods - _TC",
+			company = "_Test Company",
+			qty=1,
+			basic_rate=500
+		)
+
+		si = frappe.copy_doc(test_records[0])
+		si.update_stock = 1
+		si.set_warehouse = "Finished Goods - _TC"
+		si.set_target_warehouse = "Stores - _TC"
+		si.get("items")[0].warehouse = "Finished Goods - _TC"
+		si.get("items")[0].target_warehouse = "Stores - _TC"
+		si.insert()
+		si.submit()
+
+		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
+			fields=["name", "actual_qty"])
+
+		# check if only one SLE for outward entry is created
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].actual_qty, -1)
+
+		# tear down
+		si.cancel()
+		se.cancel()
+
 	def test_internal_transfer_gl_entry(self):
 		## Create internal transfer account
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
 		account = create_account(account_name="Unrealized Profit",
 			parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
 
@@ -2436,29 +2461,6 @@ def get_taxes_and_charges():
 	"rate": 2,
 	"row_id": 1
 	}]
-
-def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
-	if not frappe.db.exists("Customer", customer_name):
-		customer = frappe.get_doc({
-			"customer_group": "_Test Customer Group",
-			"customer_name": customer_name,
-			"customer_type": "Individual",
-			"doctype": "Customer",
-			"territory": "_Test Territory",
-			"is_internal_customer": 1,
-			"represents_company": represents_company
-		})
-
-		customer.append("companies", {
-			"company": allowed_to_interact_with
-		})
-
-		customer.insert()
-		customer_name = customer.name
-	else:
-		customer_name = frappe.db.get_value("Customer", customer_name)
-
-	return customer_name
 
 def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):
 	if not frappe.db.exists("Supplier", supplier_name):
