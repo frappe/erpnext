@@ -46,7 +46,7 @@ class VATRETURN(Document):
 			and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.is_debit_note=1 and xsi.company=si.company  
 			 group by month(xsi.posting_date) desc, year(xsi.posting_date)  ) as no_debit_note,
 
-		when si.currency != "NPR" then
+		case when si.currency != "NPR" then
 		(select sum(xsi.total) from `tabSales Invoice` as xsi where xsi.currency != "NPR" and year(xsi.posting_date)=year(si.posting_date) 
 		and si.company=xsi.company and month(xsi.posting_date)=month(si.posting_date) and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date) )
 		End as export,
@@ -192,10 +192,7 @@ class VATRETURN(Document):
 		inner join `tabPurchase Invoice` as pd on pd.name=pii.parent 
 		where month(pd.posting_date)=month(si.posting_date) and year(pd.posting_date)=year(si.posting_date)
 		and pii.is_fixed_asset=1 and pd.docstatus=1   and si.company=pd.company group by month(pd.posting_date) desc, year(pd.posting_date)) 
-		End as capital_tax,
-		(select count(name) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
-			and xsi.total_taxes_and_charges=0  and and si.company=pd.company and year(xsi.posting_date)=year(si.posting_date) and xsi.is_return=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)
-			) as is_debit_advice
+		End as capital_tax
 		from
 		`tabPurchase Invoice` as si
 		where si.docstatus=1
@@ -217,7 +214,8 @@ class VATRETURN(Document):
 				self.report_dict["particular"]["other_adj"][0]["tp"]=self.adjusted_tax_paid_on_purchase
 				self.report_dict["particular"]["total"][0]["tp"]=flt(i.local_tax) + flt(i.import_tax)+flt(self.adjusted_tax_paid_on_purchase)
 				self.report_dict["particular"]["no_of_purchase_invoice"][0]["tc"]=i.no_of_invoices
-				self.report_dict["particular"]["no_of_debit_advice"][0]["tc"]=i.is_debit_advice
+				self.report_dict["particular"]["no_of_debit_advice"][0]["tc"]=flt(self.no_debit_advice)
+				self.report_dict["particular"]["no_of_credit_advice"][0]["tc"]=flt(self.no_credit_advice)
 			if i.month==last and i.company==self.company and i.year==int(self.year) and i.month != "January":
 				top=flt(i.local_tax) + flt(i.import_tax)+flt(self.adjusted_tax_paid_on_purchase)
 			if i.month=="January" and i.company==self.company and i.year==int(self.year)-1:
