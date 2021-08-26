@@ -76,55 +76,41 @@ class PatientEncounter(Document):
 		if not plan_filters['name'][1]:
 			plan_filters.pop('name')
 
-		return {'filters': plan_filters}
+		plans = frappe.get_list('Treatment Plan Template', fields='*', filters=plan_filters)
+
+		return plans
 
 	@frappe.whitelist()
-	def fill_treatment_plans(self, treatment_plans=None):
+	def set_treatment_plans(self, treatment_plans=None):
 		for treatment_plan in treatment_plans:
-			self.fill_treatment_plan(treatment_plan)
+			self.set_treatment_plan(treatment_plan)
 
-	def fill_treatment_plan(self, plan):
+	def set_treatment_plan(self, plan):
 		plan_items = frappe.get_list('Treatment Plan Template Item', filters={'parent': plan}, fields='*')
 		for plan_item in plan_items:
-			self.fill_treatment_plan_item(plan_item)
+			self.set_treatment_plan_item(plan_item)
 
 		drugs = frappe.get_list('Drug Prescription', filters={'parent': plan}, fields='*')
 		for drug in drugs:
-			self.fill_treatment_plan_drug(drug)
+			self.append('drug_prescription', drug)
 
-	def fill_treatment_plan_drug(self, drug=None):
-		doc = frappe.new_doc('Drug Prescription')
-		doc.drug_code = drug['drug_code']
-		doc.dosage = drug['dosage']
-		doc.dosage_form = drug['dosage_form']
-		doc.period = drug['period']
-		doc.parenttype = drug['parenttype']
-		doc.parent = drug['parent']
-		doc.insert()
-		self.append('drug_prescription', doc)
 		self.save()
 
-	def fill_treatment_plan_item(self, plan_item):
-		if plan_item['type'] == 'Clinical Procedure Template':
-			doc = frappe.new_doc('Procedure Prescription')
-			doc.procedure = plan_item['template']
-			child_field = 'procedure_prescription'
+	def set_treatment_plan_item(self, plan_item):
+		if plan_item.type == 'Clinical Procedure Template':
+			self.append('procedure_prescription', {
+				'procedure': plan_item.template
+			})
 
-		if plan_item['type'] == 'Lab Test Template':
-			doc = frappe.new_doc('Lab Prescription')
-			doc.lab_test_code = plan_item['template']
-			child_field = 'lab_test_prescription'
+		if plan_item.type == 'Lab Test Template':
+			self.append('lab_test_prescription', {
+				'lab_test_code': plan_item.template
+			})
 
-		if plan_item['type'] == 'Therapy Type':
-			doc = frappe.new_doc('Therapy Plan Detail')
-			doc.therapy_type = plan_item['template']
-			child_field = 'therapies'
-
-		doc.parent = plan_item['parent']
-		doc.parenttype = plan_item['parenttype']
-		doc.insert()
-		self.append(child_field, doc)
-		self.save()
+		if plan_item.type == 'Therapy Type':
+			self.append('therapies', {
+				'therapy_type': plan_item.template
+			})
 
 
 @frappe.whitelist()

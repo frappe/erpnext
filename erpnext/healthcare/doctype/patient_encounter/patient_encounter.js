@@ -201,21 +201,17 @@ frappe.ui.form.on('Patient Encounter', {
 					setters: {
 						medical_department: "",
 					},
-					get_query() {
-						return {
-							filters: data.message.filters
-						};
-					},
 					action(selections) {
 						frappe.call({
-							method: 'fill_treatment_plans',
+							method: 'set_treatment_plans',
 							doc: frm.doc,
 							args: selections,
+						}).then(() => {
+							frm.refresh_field('drug_prescription');
+							frm.refresh_field('procedure_prescription');
+							frm.refresh_field('lab_test_prescription');
+							frm.refresh_field('therapies');
 						});
-						refresh_field('drug_prescription');
-						refresh_field('procedure_prescription');
-						refresh_field('lab_test_prescription');
-						refresh_field('therapies');
 						cur_dialog.hide();
 					}
 				});
