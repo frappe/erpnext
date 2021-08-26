@@ -14,7 +14,7 @@ from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_a
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
+from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled, get_party_account
 from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
 	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
 from erpnext.exceptions import InvalidCurrency
@@ -1362,6 +1362,67 @@ class AccountsController(TransactionBase):
 			return True
 
 		return False
+
+	def process_common_party_accounting(self):
+		is_invoice = self.doctype in ['Sales Invoice', 'Purchase Invoice']
+		if not is_invoice:
+			return
+
+		if frappe.db.get_single_value('Accounts Settings', 'enable_common_party_accounting'):
+			party_link = self.get_common_party_link()
+			if party_link and self.outstanding_amount:
+				self.create_advance_and_reconcile(party_link)
+
+	def get_common_party_link(self):
+		party_type, party = self.get_party()
+		return frappe.db.get_value(
+			doctype='Party Link',
+			filters={'secondary_role': party_type, 'secondary_party': party},
+			fieldname=['primary_role', 'primary_party'],
+			as_dict=True
+		)
+
+	def create_advance_and_reconcile(self, party_link):
+		secondary_party_type, secondary_party = self.get_party()
+		primary_party_type, primary_party = party_link.primary_role, party_link.primary_party
+
+		primary_account = get_party_account(primary_party_type, primary_party, self.company)
+		secondary_account = get_party_account(secondary_party_type, secondary_party, self.company)
+
+		jv = frappe.new_doc('Journal Entry')
+		jv.voucher_type = 'Journal Entry'
+		jv.posting_date = self.posting_date
+		jv.company = self.company
+		jv.remark = 'Adjustment for {} {}'.format(self.doctype, self.name)
+
+		reconcilation_entry = frappe._dict()
+		advance_entry = frappe._dict()
+
+		reconcilation_entry.account = secondary_account
+		reconcilation_entry.party_type = secondary_party_type
+		reconcilation_entry.party = secondary_party
+		reconcilation_entry.reference_type = self.doctype
+		reconcilation_entry.reference_name = self.name
+		reconcilation_entry.cost_center = self.cost_center
+
+		advance_entry.account = primary_account
+		advance_entry.party_type = primary_party_type
+		advance_entry.party = primary_party
+		advance_entry.cost_center = self.cost_center
+		advance_entry.is_advance = 'Yes'
+
+		if self.doctype == 'Sales Invoice':
+			reconcilation_entry.credit_in_account_currency = self.outstanding_amount
+			advance_entry.debit_in_account_currency = self.outstanding_amount
+		else:
+			advance_entry.credit_in_account_currency = self.outstanding_amount
+			reconcilation_entry.debit_in_account_currency = self.outstanding_amount
+
+		jv.append('accounts', reconcilation_entry)
+		jv.append('accounts', advance_entry)
+
+		jv.save()
+		jv.submit()
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
