@@ -213,7 +213,6 @@ class ProductionPlan(Document):
 					})
 
 			pi = self.append('po_items', {
-				'include_exploded_items': 1,
 				'warehouse': data.warehouse,
 				'item_code': data.item_code,
 				'description': data.description or item_details.description,
@@ -224,6 +223,7 @@ class ProductionPlan(Document):
 				'planned_start_date': now_datetime(),
 				'product_bundle_item': data.parent_item
 			})
+			pi._set_defaults()
 
 			if self.get_items_from == "Sales Order":
 				pi.sales_order = data.parent
