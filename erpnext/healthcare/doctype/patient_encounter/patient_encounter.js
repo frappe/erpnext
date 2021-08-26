@@ -194,7 +194,7 @@ frappe.ui.form.on('Patient Encounter', {
 			args: {'encounter': frm.doc},
 			freeze: true,
 			freeze_message: __('Fetching Treatment Plans'),
-			callback: function(data) {
+			callback: function() {
 				new frappe.ui.form.MultiSelectDialog({
 					doctype: "Treatment Plan Template",
 					target: this.cur_frm,
