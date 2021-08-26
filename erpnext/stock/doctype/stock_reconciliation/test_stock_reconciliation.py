@@ -311,6 +311,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr2.cancel()
 		pr1.cancel()
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_stock_reco_future_negative_stock(self):
 		"""
 			Test if a backdated stock reco causes future negative stock and is blocked.
@@ -328,8 +329,6 @@ class TestStockReconciliation(unittest.TestCase):
 		warehouse = "_Test Warehouse - _TC"
 		create_item(item_code)
 
-		negative_stock_setting = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 0)
 
 		pr1 = make_purchase_receipt(item_code=item_code, warehouse=warehouse, qty=10, rate=100,
 			posting_date=add_days(nowdate(), -2))
@@ -349,7 +348,6 @@ class TestStockReconciliation(unittest.TestCase):
 		self.assertRaises(NegativeStockError, sr3.submit)
 
 		# teardown
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", negative_stock_setting)
 		sr3.cancel()
 		dn2.cancel()
 		pr1.cancel()
@@ -358,7 +356,7 @@ class TestStockReconciliation(unittest.TestCase):
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_stock_reco_cancellation_future_negative_stock(self):
 		"""
-			Test if a backdated stock reco cancellation that cuases future negative stock is blocked.
+			Test if a backdated stock reco cancellation that causes future negative stock is blocked.
 			-------------------------------------------
 			Var | Doc  | Qty | Balance
 			-------------------------------------------
