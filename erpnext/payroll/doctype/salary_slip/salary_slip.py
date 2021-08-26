@@ -11,6 +11,7 @@ from frappe.model.naming import make_autoname
 from frappe import msgprint, _
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.utils import get_holiday_dates_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
@@ -337,20 +338,7 @@ class SalarySlip(TransactionBase):
 		return payment_days
 
 	def get_holidays_for_employee(self, start_date, end_date):
-		holiday_list = get_holiday_list_for_employee(self.employee)
-		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
-			where
-				parent=%(holiday_list)s
-				and holiday_date >= %(start_date)s
-				and holiday_date <= %(end_date)s''', {
-					"holiday_list": holiday_list,
-					"start_date": start_date,
-					"end_date": end_date
-				})
-
-		holidays = [cstr(i) for i in holidays]
-
-		return holidays
+		return get_holiday_dates_for_employee(self.employee, start_date, end_date)
 
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
