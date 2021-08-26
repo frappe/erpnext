@@ -55,4 +55,3 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 		() => done()
 	]);
 });
-

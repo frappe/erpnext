@@ -147,8 +147,3 @@ def get_pledged_security_qty(loan):
 		current_pledges[security] -= unpledges.get(security, 0.0)
 
 	return current_pledges
-
-
-
-
-

@@ -27,7 +27,7 @@ class InpatientRecord(Document):
 
 	def validate_dates(self):
 		if (getdate(self.expected_discharge) < getdate(self.scheduled_date)) or \
-			(getdate(self.discharge_ordered_date) < getdate(self.scheduled_date)):
+			(getdate(self.discharge_ordered_datetime) < getdate(self.scheduled_date)):
 			frappe.throw(_('Expected and Discharge dates cannot be less than Admission Schedule date'))
 
 		for entry in self.inpatient_occupancies:
@@ -58,8 +58,10 @@ class InpatientRecord(Document):
 		admit_patient(self, service_unit, check_in, expected_discharge)
 
 	@frappe.whitelist()
-	def discharge(self):
-		discharge_patient(self)
+	def discharge(self, check_out=now_datetime()):
+		if (getdate(check_out) < getdate(self.admitted_datetime)):
+			frappe.throw(_('Discharge date cannot be less than Admission date'))
+		discharge_patient(self, check_out)
 
 	@frappe.whitelist()
 	def transfer(self, service_unit, check_in, leave_from):
@@ -120,10 +122,13 @@ def schedule_inpatient(args):
 @frappe.whitelist()
 def schedule_discharge(args):
 	discharge_order = json.loads(args)
+	if not discharge_order or not discharge_order['patient'] or not discharge_order['discharge_ordered_datetime']:
+		frappe.throw(_('Missing required details, did not create schedule discharge'))
+
 	inpatient_record_id = frappe.db.get_value('Patient', discharge_order['patient'], 'inpatient_record')
 	if inpatient_record_id:
 		inpatient_record = frappe.get_doc('Inpatient Record', inpatient_record_id)
-		check_out_inpatient(inpatient_record)
+		check_out_inpatient(inpatient_record, discharge_order['discharge_ordered_datetime'])
 		set_details_from_ip_order(inpatient_record, discharge_order)
 		inpatient_record.status = 'Discharge Scheduled'
 		inpatient_record.save(ignore_permissions = True)
@@ -143,18 +148,18 @@ def set_ip_child_records(inpatient_record, inpatient_record_child, encounter_chi
 			table.set(df.fieldname, item.get(df.fieldname))
 
 
-def check_out_inpatient(inpatient_record):
+def check_out_inpatient(inpatient_record, discharge_ordered_datetime):
 	if inpatient_record.inpatient_occupancies:
 		for inpatient_occupancy in inpatient_record.inpatient_occupancies:
 			if inpatient_occupancy.left != 1:
 				inpatient_occupancy.left = True
-				inpatient_occupancy.check_out = now_datetime()
+				inpatient_occupancy.check_out = discharge_ordered_datetime
 				frappe.db.set_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "occupancy_status", "Vacant")
 
 
-def discharge_patient(inpatient_record):
+def discharge_patient(inpatient_record, check_out):
 	validate_inpatient_invoicing(inpatient_record)
-	inpatient_record.discharge_datetime = now_datetime()
+	inpatient_record.discharge_datetime = check_out
 	inpatient_record.status = "Discharged"
 
 	inpatient_record.save(ignore_permissions = True)
