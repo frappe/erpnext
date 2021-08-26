@@ -69,6 +69,7 @@
   "time_sheet_list",
   "timesheets",
   "total_billing_amount",
+  "total_billing_hours",
   "section_break_30",
   "total_qty",
   "base_total",
@@ -1564,12 +1565,20 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_billing_hours",
+   "fieldtype": "Float",
+   "label": "Total Billing Hours",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-07-01 12:41:29.484813",
+ "modified": "2021-07-26 14:01:34.605644",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
