@@ -61,6 +61,7 @@
   "set_warehouse",
   "items_section",
   "items",
+  "bundle_items_section",
   "packed_items",
   "sb_last_purchase",
   "total_qty",
@@ -1144,13 +1145,21 @@
    "fieldtype": "Table",
    "label": "Bundle Items",
    "options": "Packed Item"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "packed_items",
+   "fieldname": "bundle_items_section",
+   "fieldtype": "Section Break",
+   "label": "Bundle Items",
+   "options": "fa fa-suitcase"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 01:46:33.944417",
+ "modified": "2021-08-27 02:18:07.342249",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
