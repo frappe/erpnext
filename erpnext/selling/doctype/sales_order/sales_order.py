@@ -48,10 +48,10 @@ class SalesOrder(SellingController):
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 			validate_coupon_code(self.coupon_code)
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list, calculate_net_weight_packed_items,\
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list, calculate_item_net_weight_from_packed_items,\
 			validate_uom_for_packed_items
 		make_packing_list(self)
-		packed_items = calculate_net_weight_packed_items(self.items, self.packed_items)
+		packed_items = calculate_item_net_weight_from_packed_items(self.items, self.packed_items)
 		if packed_items:
 			validate_uom_for_packed_items(self, packed_items)
 

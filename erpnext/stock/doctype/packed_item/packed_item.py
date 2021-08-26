@@ -29,11 +29,16 @@ def get_product_bundle_items(item_code):
 		where t2.new_item_code=%s and t1.parent = t2.name order by t1.idx""", item_code, as_dict=1)
 
 def get_packing_item_details(item, company):
-	return frappe.db.sql("""
-		select i.item_name, i.is_stock_item, i.description, i.stock_uom, i.weight_per_unit, id.default_warehouse
-		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
-		where i.name = %s""",
-		(company, item), as_dict = 1)[0]
+	return frappe.db.get_all("Item",
+		fields = [
+			'item_name',
+			'is_stock_item',
+			'description',
+			'stock_uom',
+			'weight_per_unit',
+			"`tabItem Default`.default_warehouse"
+		],
+		filters = {"name": item, "company": company})[0] or {}
 
 def get_bin_qty(item, warehouse):
 	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin`
@@ -139,7 +144,7 @@ def get_old_packed_item_details(old_packed_items):
 		old_packed_items_map.setdefault((items.item_code ,items.parent_item), []).append(items.as_dict())
 	return old_packed_items_map
 
-def calculate_net_weight_packed_items(item_details, packed_items):
+def calculate_item_net_weight_from_packed_items(item_details, packed_items):
 	qty_details = {}
 	for detail in item_details:
 		qty_details[detail.item_code] = flt(detail.qty)
