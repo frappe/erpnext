@@ -37,11 +37,25 @@ frappe.query_reports["Stock Analytics"] = {
 			default: "",
 		},
 		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1,
+		},
+		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
 			fieldtype: "Link",
-			options:"Warehouse",
+			options: "Warehouse",
 			default: "",
+			get_query: function() {
+				const company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: { 'company': company }
+				}
+			}
 		},
 		{
 			fieldname: "from_date",
