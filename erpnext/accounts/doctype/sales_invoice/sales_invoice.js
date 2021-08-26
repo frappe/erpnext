@@ -154,9 +154,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			return
 		}
 
-		$.each(doc["items"], function(i, row) {
+		doc.items.forEach((row) => {
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
-		})
+		});
 	}
 
 	set_default_print_format() {
@@ -324,16 +324,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	write_off_outstanding_amount_automatically() {
-		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
+		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
 				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
 			);
-			this.frm.toggle_enable("write_off_amount", false);
-
-		} else {
-			this.frm.toggle_enable("write_off_amount", true);
 		}
 
 		this.calculate_outstanding_amount(false);
@@ -450,12 +446,24 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	currency() {
-		super.currency();
+		this._super();
 		$.each(cur_frm.doc.timesheets, function(i, d) {
 			let row = frappe.get_doc(d.doctype, d.name)
 			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
 		});
 		calculate_total_billing_amount(cur_frm)
+	}
+
+	currency() {
+		var me = this;
+		super.currency();
+		if (this.frm.doc.timesheets) {
+			this.frm.doc.timesheets.forEach((d) => {
+				let row = frappe.get_doc(d.doctype, d.name)
+				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
+			});
+			calculate_total_billing_amount(this.frm);
+		}
 	}
 };
 
@@ -787,8 +795,6 @@ frappe.ui.form.on('Sales Invoice', {
 		if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 		else hide_field(['c_form_applicable', 'c_form_no']);
 
-		frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
-
 		frm.refresh_fields();
 	},
 
@@ -980,9 +986,9 @@ var calculate_total_billing_amount =  function(frm) {
 
 	doc.total_billing_amount = 0.0
 	if (doc.timesheets) {
-		$.each(doc.timesheets, function(index, data){
-			doc.total_billing_amount += flt(data.billing_amount)
-		})
+		doc.timesheets.forEach((d) => {
+			doc.total_billing_amount += flt(d.billing_amount)
+		});
 	}
 
 	refresh_field('total_billing_amount')
