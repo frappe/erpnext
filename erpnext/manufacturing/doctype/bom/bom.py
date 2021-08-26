@@ -232,7 +232,7 @@ class BOM(WebsiteGenerator):
 			}
 			ret = self.get_bom_material_detail(args)
 			for key, value in ret.items():
-				if not item.get(key):
+				if item.get(key) is None:
 					item.set(key, value)
 
 	@frappe.whitelist()
