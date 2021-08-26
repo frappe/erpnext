@@ -13,7 +13,7 @@
  "save_on_complete": 0,
  "steps": [
   {
-   "description": "Name Asset category. You can create categories based on Asset Types. like Furniture, Property, Electronics etc.",
+   "description": "Name Asset category. You can create categories based on Asset Types like Furniture, Property, Electronics etc.",
    "field": "",
    "fieldname": "asset_category_name",
    "fieldtype": "Data",

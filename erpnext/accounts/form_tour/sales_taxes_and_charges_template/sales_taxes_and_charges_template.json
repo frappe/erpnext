@@ -46,7 +46,7 @@
    "label": "Default",
    "parent_field": "",
    "position": "Bottom",
-   "title": "Is this Default?"
+   "title": "Is this Default Tax Template?"
   },
   {
    "description": "You can add a row for a tax rule here. These rules can be applied on the net total, or can be a flat amount.",

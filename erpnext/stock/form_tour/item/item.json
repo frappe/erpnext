@@ -49,7 +49,7 @@
    "title": "Is this a Fixed Asset?"
   },
   {
-   "description": "Check Auto Create Asset on Purchase",
+   "description": "On checking it, the system will create an Asset automatically on purchase",
    "field": "",
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
@@ -73,7 +73,7 @@
    "title": "Asset Category"
   },
   {
-   "description": "Select a naming series",
+   "description": "Select a naming series which will be used to create an Asset automatically",
    "field": "",
    "fieldname": "asset_naming_series",
    "fieldtype": "Select",

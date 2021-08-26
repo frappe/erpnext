@@ -26,7 +26,7 @@
    "title": "Select Supplier"
   },
   {
-   "description": "Add Items in the table",
+   "description": "Add items in the table",
    "field": "",
    "fieldname": "items",
    "fieldtype": "Table",
@@ -35,7 +35,7 @@
    "label": "Items",
    "parent_field": "",
    "position": "Bottom",
-   "title": "List Of Items"
+   "title": "List of Items"
   },
   {
    "child_doctype": "Purchase Invoice Item",
