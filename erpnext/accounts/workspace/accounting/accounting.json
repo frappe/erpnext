@@ -534,6 +534,17 @@
    "type": "Link"
   },
   {
+    "dependencies": "GL Entry",
+    "hidden": 0,
+    "is_query_report": 1,
+    "label": "KSA VAT Report",
+    "link_to": "KSA VAT",
+    "link_type": "Report",
+    "onboard": 0,
+    "only_for": "Saudi Arabia",
+    "type": "Link"
+   },
+  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Financial Statements",
@@ -1153,6 +1164,16 @@
    "onboard": 0,
    "type": "Link"
   },
+  {
+    "hidden": 0,
+    "is_query_report": 0,
+    "label": "KSA VAT Setting",
+    "link_to": "KSA VAT Setting",
+    "link_type": "DocType",
+    "onboard": 0,
+    "only_for": "Saudi Arabia",
+    "type": "Link"
+   },
   {
    "hidden": 0,
    "is_query_report": 0,

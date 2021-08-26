@@ -1,0 +1,47 @@
+[
+    {
+        "type": "Sales Account",
+        "accounts": [
+            {
+                "title": "Standard rated Sales",
+                "item_tax_template": "KSA VAT 5%",
+                "account": "VAT 5%"
+            },
+            {
+                "title": "Zero rated domestic sales",
+                "item_tax_template": "KSA VAT Zero",
+                "account": "VAT Zero"
+            },
+            {
+                "title": "Exempted sales",
+                "item_tax_template": "KSA VAT Exempted",
+                "account": "VAT Zero"
+            }
+        ]
+    },
+    {
+        "type": "Purchase Account",
+        "accounts": [
+            {
+                "title": "Standard rated domestic purchases",
+                "item_tax_template": "KSA VAT 5%",
+                "account": "VAT 5%"
+            },
+            {
+                "title": "Imports subject to VAT paid at customs",
+                "item_tax_template": "KSA Excise 50%",
+                "account": "Excise 50%"
+            },
+            {
+                "title": "Zero rated purchases",
+                "item_tax_template": "KSA VAT Zero",
+                "account": "VAT Zero"
+            },
+            {
+                "title": "Exempted purchases",
+                "item_tax_template": "KSA VAT Exempted",
+                "account": "VAT Zero"
+            }
+        ]
+    }
+]
