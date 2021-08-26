@@ -126,7 +126,7 @@ class VATRETURN(Document):
 			and xsi.base_total_taxes_and_charges=0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company and xsi.docstatus=1  group by month(xsi.posting_date) desc, year(xsi.posting_date))
 		End as exempted_purchase,
 
-		case  when si.country != "Nepal" then
+		case  when si.country = "Nepal" then
 		(select sum(xsi.base_total) from `tabPurchase Invoice` as xsi where month(xsi.posting_date)=month(si.posting_date)
 			and xsi.base_total_taxes_and_charges != 0 and year(xsi.posting_date)=year(si.posting_date) and si.company=xsi.company  and xsi.docstatus=1 group by month(xsi.posting_date) desc, year(xsi.posting_date)) 
 		
