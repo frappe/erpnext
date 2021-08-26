@@ -198,6 +198,7 @@ class TestProductionPlan(unittest.TestCase):
 		pln.cancel()
 		frappe.delete_doc("Production Plan", pln.name)
 
+
 def create_production_plan(**args):
 	args = frappe._dict(args)
 
