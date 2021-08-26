@@ -224,14 +224,14 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
-   "read_only": 1
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-27 01:13:40.138203",
+ "modified": "2021-08-27 01:20:55.308822",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
