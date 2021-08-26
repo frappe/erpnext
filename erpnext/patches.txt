@@ -304,5 +304,3 @@ erpnext.patches.v13_0.shopify_deprecation_warning
 erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.rename_discharge_ordered_date_in_ip_record
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
-erpnext.patches.v13_0.einvoicing_deprecation_warning
-erpnext.patches.v14_0.delete_einvoicing_doctypes
