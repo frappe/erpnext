@@ -458,4 +458,3 @@ def set_valuation_method(item_code, valuation_method):
 			}, allow_negative_stock=1)
 
 test_dependencies = ["Item", "Warehouse"]
-

@@ -238,9 +238,9 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 
 @frappe.whitelist()
 def get_timesheet_detail_rate(timelog, currency):
-	timelog_detail = frappe.db.sql("""SELECT tsd.billing_amount as billing_amount, 
-		ts.currency as currency FROM `tabTimesheet Detail` tsd 
-		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent 
+	timelog_detail = frappe.db.sql("""SELECT tsd.billing_amount as billing_amount,
+		ts.currency as currency FROM `tabTimesheet Detail` tsd
+		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent
 		WHERE tsd.name = '{0}'""".format(timelog), as_dict = 1)[0]
 
 	if timelog_detail.currency:
