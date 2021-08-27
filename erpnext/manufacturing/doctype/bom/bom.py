@@ -517,16 +517,20 @@ class BOM(WebsiteGenerator):
 	def update_rate_and_time(self, row, update_hour_rate = False):
 		if not row.hour_rate or update_hour_rate:
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
-			row.hour_rate = (hour_rate / flt(self.conversion_rate)
-				if self.conversion_rate and hour_rate else hour_rate)
+
+			if hour_rate:
+				row.hour_rate = (hour_rate / flt(self.conversion_rate)
+					if self.conversion_rate and hour_rate else hour_rate)
 
 			if self.routing:
-				row.time_in_mins = flt(frappe.db.get_value("BOM Operation", {
+				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
 						"workstation": row.workstation,
 						"operation": row.operation,
-						"sequence_id": row.sequence_id,
 						"parent": self.routing
 				}, ["time_in_mins"]))
+
+				if time_in_mins:
+					row.time_in_mins = time_in_mins
 
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
