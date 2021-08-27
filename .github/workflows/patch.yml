@@ -1,10 +1,17 @@
 name: Patch
 
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.md'
+  workflow_dispatch:
+
 
 jobs:
   test:
     runs-on: ubuntu-18.04
+    timeout-minutes: 60
 
     name: Patch Test
 

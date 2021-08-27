@@ -72,7 +72,8 @@ class BuyingController(StockController, Subcontracting):
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions,
-			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address')))
+			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address'),
+			fetch_payment_terms_template= not self.get('ignore_default_payment_terms_template')))
 
 		self.set_missing_item_details(for_validate)
 

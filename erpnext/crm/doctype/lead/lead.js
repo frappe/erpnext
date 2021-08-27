@@ -12,7 +12,8 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			'Opportunity': this.make_opportunity
 		};
 
-		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
+		// For avoiding integration issues.
+		this.frm.set_df_property('first_name', 'reqd', true);
 	}
 
 	onload () {
@@ -38,43 +39,88 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			this.frm.add_custom_button(__("Customer"), this.make_customer, __("Create"));
 			this.frm.add_custom_button(__("Opportunity"), this.make_opportunity, __("Create"));
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Create"));
+			this.frm.add_custom_button(__("Prospect"), this.make_prospect, __("Create"));
+			this.frm.add_custom_button(__('Add to Prospect'), this.add_lead_to_prospect, __('Action'));
 		}
 
 		if (!this.frm.is_new()) {
 			frappe.contacts.render_address_and_contact(this.frm);
+			cur_frm.trigger('render_contact_day_html');
 		} else {
 			frappe.contacts.clear_address_and_contact(this.frm);
 		}
 	}
 
-	make_customer () {
+	add_lead_to_prospect (frm) {
+		frappe.prompt([
+			{
+				fieldname: 'prospect',
+				label: __('Prospect'),
+				fieldtype: 'Link',
+				options: 'Prospect',
+				reqd: 1
+			}
+		],
+		function(data) {
+			frappe.call({
+				method: 'erpnext.crm.doctype.lead.lead.add_lead_to_prospect',
+				args: {
+					'lead': frm.doc.name,
+					'prospect': data.prospect
+				},
+				callback: function(r) {
+					if (!r.exc) {
+						frm.reload_doc();
+					}
+				},
+				freeze: true,
+				freeze_message: __('...Adding Lead to Prospect')
+			});
+		}, __('Add Lead to Prospect'), __('Add'));
+	}
+
+	make_customer (frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_customer",
-			frm: cur_frm
+			frm: frm
 		})
 	}
 
-	make_opportunity () {
+	make_opportunity (frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_opportunity",
-			frm: cur_frm
+			frm: frm
 		})
 	}
 
-	make_quotation () {
+	make_quotation (frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",
-			frm: cur_frm
+			frm: frm
 		})
 	}
 
-	organization_lead () {
-		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
-		this.frm.toggle_reqd("company_name", this.frm.doc.organization_lead);
+	make_prospect (frm) {
+		frappe.model.with_doctype("Prospect", function() {
+			let prospect = frappe.model.get_new_doc("Prospect");
+			prospect.company_name = frm.doc.company_name;
+			prospect.no_of_employees = frm.doc.no_of_employees;
+			prospect.industry = frm.doc.industry;
+			prospect.market_segment = frm.doc.market_segment;
+			prospect.territory = frm.doc.territory;
+			prospect.fax = frm.doc.fax;
+			prospect.website = frm.doc.website;
+			prospect.prospect_owner = frm.doc.lead_owner;
+
+			let lead_prospect_row = frappe.model.add_child(prospect, 'prospect_lead');
+			lead_prospect_row.lead = frm.doc.name;
+
+			frappe.set_route("Form", "Prospect", prospect.name);
+		});
 	}
 
 	company_name () {
-		if (this.frm.doc.organization_lead && !this.frm.doc.lead_name) {
+		if (!this.frm.doc.lead_name) {
 			this.frm.set_value("lead_name", this.frm.doc.company_name);
 		}
 	}
@@ -84,6 +130,19 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			let d = moment(this.frm.doc.contact_date);
 			d.add(1, "day");
 			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
+		}
+	}
+
+	render_contact_day_html() {
+		if (cur_frm.doc.contact_date) {
+			let contact_date = frappe.datetime.obj_to_str(cur_frm.doc.contact_date);
+			let diff_days = frappe.datetime.get_day_diff(contact_date, frappe.datetime.get_today());
+			let color = diff_days > 0 ? "orange" : "green";
+			let message = diff_days > 0 ? __("Next Contact Date") : __("Last Contact Date");
+			let html = `<div class="col-xs-12">
+						<span class="indicator whitespace-nowrap ${color}"><span> ${message} : ${frappe.datetime.global_date_format(contact_date)}</span></span>
+					</div>` ;
+			cur_frm.dashboard.set_headline_alert(html);
 		}
 	}
 };

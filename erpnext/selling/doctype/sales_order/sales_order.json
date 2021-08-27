@@ -571,7 +571,8 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1510,7 +1511,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-08 21:37:44.177493",
+ "modified": "2021-08-17 20:15:26.531553",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
