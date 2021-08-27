@@ -230,6 +230,7 @@ def create_opportunity():
         doc.party_name = customer_name
         doc.opportunity_amount = 150000
         doc.source = "Cold Calling"
+        doc.currency = "INR"
         doc.expected_closing = "2021-08-31"
         doc.company = 'Best Test'
         doc.insert()
