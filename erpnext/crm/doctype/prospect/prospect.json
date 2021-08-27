@@ -39,6 +39,8 @@
   {
    "fieldname": "industry",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Industry",
    "options": "Industry Type"
   },
@@ -57,6 +59,8 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Territory",
    "options": "Territory"
   },
@@ -72,12 +76,14 @@
   {
    "fieldname": "currency",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Currency",
    "options": "Currency"
   },
   {
    "fieldname": "annual_revenue",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Annual Revenue",
    "options": "currency"
   },
@@ -151,7 +157,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-26 12:10:49.191839",
+ "modified": "2021-08-27 16:24:42.961967",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",
