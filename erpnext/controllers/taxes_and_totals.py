@@ -24,11 +24,13 @@ class calculate_taxes_and_totals(object):
 			return
 
 		self.discount_amount_applied = False
-		self._calculate()
 
-		if self.doc.meta.get_field("discount_amount"):
-			self.set_discount_amount()
-			self.apply_discount_amount()
+		if self.docstatus == 0 or self.flags.ignore_validate_update_after_submit
+			self._calculate()
+
+			if self.doc.meta.get_field("discount_amount"):
+				self.set_discount_amount()
+				self.apply_discount_amount()
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			self.calculate_total_advance()
