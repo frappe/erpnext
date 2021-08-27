@@ -16,9 +16,12 @@
   "begin_check_in_before_shift_start_time",
   "allow_check_out_after_shift_end_time",
   "column_break_10",
+  "half_day_if_late_minutes",
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
+  "sync_settings_section",
   "process_attendance_after",
+  "column_break_16",
   "last_sync_of_checkin",
   "grace_period_settings_auto_attendance_section",
   "enable_entry_grace_period",
@@ -154,9 +157,24 @@
    "fieldname": "last_sync_of_checkin",
    "fieldtype": "Datetime",
    "label": "Last Sync of Checkin"
+  },
+  {
+   "fieldname": "sync_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Sync Settings"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Late entry in minutes after which Half Day is marked. (Zero to disable)",
+   "fieldname": "half_day_if_late_minutes",
+   "fieldtype": "Int",
+   "label": "Mark Half Day If Entry Later Than"
   }
  ],
- "modified": "2021-06-27 01:57:15.929129",
+ "modified": "2021-08-27 15:52:28.339910",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

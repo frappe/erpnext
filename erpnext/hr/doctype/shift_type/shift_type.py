@@ -45,22 +45,27 @@ class ShiftType(Document):
 			1. These logs belongs to an single shift, single employee and is not in a holiday date.
 			2. Logs are in chronological order
 		"""
+		status = 'Present'
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
+
 		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
-		
 		if cint(self.enable_exit_grace_period) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
 			early_exit = True
-			
-		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
-			return 'Absent', total_working_hours, late_entry, early_exit
+
+		if cint(self.half_day_if_late_minutes) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.half_day_if_late_minutes)):
+			status = 'Half Day'
+
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
-			return 'Half Day', total_working_hours, late_entry, early_exit
-		return 'Present', total_working_hours, late_entry, early_exit
+			status = 'Half Day'
+		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
+			status = 'Absent'
+
+		return status, total_working_hours, late_entry, early_exit
 
 	def mark_absent_for_dates_with_no_attendance(self, employee):
-		"""Marks Absents for the given employee on working days in this shift which have no attendance marked.
+		"""Marks Absents for the given employee on working days in this shift which have no andance marked.
 		The Absent is marked starting from 'process_attendance_after' or employee creation date.
 		"""
 		date_of_joining, relieving_date, employee_creation = frappe.db.get_value("Employee", employee, ["date_of_joining", "relieving_date", "creation"])
