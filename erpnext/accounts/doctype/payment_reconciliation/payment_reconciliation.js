@@ -93,8 +93,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				this.frm.trigger("get_unreconciled_entries")
 			);
 		}
-		if (this.frm.doc.invoices.length || this.frm.doc.payments.length &&
-			!(this.frm.doc.allocation.length)) {
+		if (this.frm.doc.invoices.length && this.frm.doc.payments.length) {
 			this.frm.add_custom_button(__('Allocate'), () =>
 				this.frm.trigger("allocate")
 			);
