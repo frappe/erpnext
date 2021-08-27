@@ -13,12 +13,15 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/accounts",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-10-30 15:41:15.547225",
+ "modified": "2021-08-13 11:59:35.690443",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",
  "owner": "Administrator",
  "steps": [
+  {
+   "step": "Company"
+  },
   {
    "step": "Chart of Accounts"
   },
@@ -26,22 +29,19 @@
    "step": "Setup Taxes"
   },
   {
-   "step": "Create a Product"
+   "step": "Accounts Settings"
   },
   {
-   "step": "Create a Supplier"
+   "step": "Cost Centers for Report and Budgeting"
   },
   {
    "step": "Create Your First Purchase Invoice"
   },
   {
-   "step": "Create a Customer"
+   "step": "Updating Opening Balances"
   },
   {
-   "step": "Create Your First Sales Invoice"
-  },
-  {
-   "step": "Configure Account Settings"
+   "step": "Financial Statements"
   }
  ],
  "subtitle": "Accounts, Invoices, Taxation, and more.",

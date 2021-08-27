@@ -214,6 +214,7 @@ class WorkOrder(Document):
 					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
+			self.set_process_loss_qty()
 
 			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
@@ -222,6 +223,22 @@ class WorkOrder(Document):
 
 		if self.production_plan:
 			self.update_production_plan_status()
+
+	def set_process_loss_qty(self):
+		process_loss_qty = flt(frappe.db.sql("""
+				SELECT sum(qty) FROM `tabStock Entry Detail`
+				WHERE
+					is_process_loss=1
+					AND parent IN (
+						SELECT name FROM `tabStock Entry`
+						WHERE
+							work_order=%s
+							AND purpose='Manufacture'
+							AND docstatus=1
+					)
+			""", (self.name, ))[0][0])
+		if process_loss_qty is not None:
+			self.db_set('process_loss_qty', process_loss_qty)
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc('Production Plan', self.production_plan)

@@ -320,7 +320,8 @@ class TestPOSInvoice(unittest.TestCase):
 		pos2.get("items")[0].serial_no = serial_nos[0]
 		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
 
-		self.assertRaises(frappe.ValidationError, pos2.insert)
+		pos2.insert()
+		self.assertRaises(frappe.ValidationError, pos2.submit)
 
 	def test_delivered_serialized_item_transaction(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -348,7 +349,8 @@ class TestPOSInvoice(unittest.TestCase):
 		pos2.get("items")[0].serial_no = serial_nos[0]
 		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
 
-		self.assertRaises(frappe.ValidationError, pos2.insert)
+		pos2.insert()
+		self.assertRaises(frappe.ValidationError, pos2.submit)
 
 	def test_loyalty_points(self):
 		from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import create_records
