@@ -146,19 +146,19 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim.submit()
 		
 		# Payment entry 1: paying 500
-		pe = make_payment_entry(expense_claim, payable_account,500)
+		make_payment_entry(expense_claim, payable_account,500)
 		outstanding_amount, total_amount_reimbursed = get_outstanding_and_total_reimbursed_amounts(expense_claim)
 		self.assertEqual(outstanding_amount, 5000)
 		self.assertEqual(total_amount_reimbursed, 500)
 		
 		# Payment entry 1: paying 2000
-		pe = make_payment_entry(expense_claim, payable_account,2000)
+		make_payment_entry(expense_claim, payable_account,2000)
 		outstanding_amount, total_amount_reimbursed = get_outstanding_and_total_reimbursed_amounts(expense_claim)
 		self.assertEqual(outstanding_amount, 3000)
 		self.assertEqual(total_amount_reimbursed, 2500)
 		
 		# Payment entry 1: paying 3000		
-		pe = make_payment_entry(expense_claim, payable_account,3000)
+		make_payment_entry(expense_claim, payable_account,3000)
 		outstanding_amount, total_amount_reimbursed = get_outstanding_and_total_reimbursed_amounts(expense_claim)
 		self.assertEqual(outstanding_amount, 0)
 		self.assertEqual(total_amount_reimbursed, 5500)
@@ -235,4 +235,4 @@ def make_payment_entry(expense_claim, payable_account, amt):
 	pe.references[0].allocated_amount = amt
 	pe.insert()
 	pe.submit() 
-	return pe
+	
