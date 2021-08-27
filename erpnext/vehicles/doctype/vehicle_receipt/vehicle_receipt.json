@@ -383,13 +383,14 @@
    "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Is Return"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-08-21 14:12:43.734118",
+ "modified": "2021-08-25 00:04:04.985792",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",

@@ -22,7 +22,6 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 				filters['purchase_document_no'] = ['is', 'set'];
 			} else {
 				filters['warehouse'] = ['is', 'not set'];
-				filters['purchase_document_no'] = ['is', 'not set'];
 			}
 
 			if (me.frm.doc.supplier) {
