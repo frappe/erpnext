@@ -6,6 +6,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
+        frappe.db.delete("Opportunity")
         create_company()
         create_customer()
         create_opportunity()

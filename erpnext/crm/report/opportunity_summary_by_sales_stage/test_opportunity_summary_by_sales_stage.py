@@ -1,4 +1,5 @@
 import unittest
+import frappe
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import execute
 from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics import create_company,create_customer,create_opportunity
 
@@ -6,6 +7,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
+        frappe.db.delete("Opportunity")
         create_company()
         create_customer()
         create_opportunity()
