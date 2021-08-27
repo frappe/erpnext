@@ -757,7 +757,7 @@ class SalesInvoice(SellingController):
 		if self.project:
 			for data in get_projectwise_timesheet_data(self.project):
 				self.append('timesheets', {
-						'time_sheet': data.parent,
+						'time_sheet': data.time_sheet,
 						'billing_hours': data.billing_hours,
 						'billing_amount': data.billing_amount,
 						'timesheet_detail': data.name,
@@ -768,12 +768,11 @@ class SalesInvoice(SellingController):
 			self.calculate_billing_amount_for_timesheet()
 
 	def calculate_billing_amount_for_timesheet(self):
-		total_billing_amount = 0.0
-		for data in self.timesheets:
-			if data.billing_amount:
-				total_billing_amount += data.billing_amount
+		def timesheet_sum(field):
+			return sum((ts.get(field) or 0.0) for ts in self.timesheets)
 
-		self.total_billing_amount = total_billing_amount
+		self.total_billing_amount = timesheet_sum("billing_amount")
+		self.total_billing_hours = timesheet_sum("billing_hours")
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
