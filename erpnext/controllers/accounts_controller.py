@@ -1629,7 +1629,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
 					and docstatus = 1 and unallocated_amount > 0 {condition}
 				order by posting_date {1}
-			""".format(party_account_field, limit_cond, exchange_rate_field, condition=condition),
+			""".format(party_account_field, limit_cond, exchange_rate_field, condition=condition or ""),
 			(party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
