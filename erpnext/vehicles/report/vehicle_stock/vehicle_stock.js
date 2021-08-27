@@ -129,6 +129,12 @@ frappe.query_reports["Vehicle Stock"] = {
 			options: "Vehicle"
 		},
 		{
+			fieldname: "vehicle_color",
+			label: __("Vehicle Color"),
+			fieldtype: "Link",
+			options: "Vehicle Color"
+		},
+		{
 			fieldname: "vehicle_booking_order",
 			label: __("Vehicle Booking Order"),
 			fieldtype: "Link",
@@ -222,6 +228,10 @@ frappe.query_reports["Vehicle Stock"] = {
 					style['color'] = 'red';
 				}
 			}
+		}
+
+		if (cint(data.has_return)) {
+			style['background-color'] = '#ffe2a7';
 		}
 
 		return default_formatter(value, row, column, data, {css: style});

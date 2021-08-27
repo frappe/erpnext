@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub, unscrub
-from frappe.utils import flt, cstr, getdate
+from frappe.utils import flt, cstr, getdate, cint
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from frappe.desk.query_report import group_report_data
 
@@ -148,52 +148,75 @@ class VehicleStockReport(object):
 			d.color = vehicle_data.color
 			d.customer = vehicle_data.customer
 			d.customer_name = vehicle_data.customer_name
+			d.has_return = 0
+			d.has_delivery_return = 0
+			d.has_receipt_return = 0
+			d.open_stock = 0
 
 			# Data from receipt
 			if d.received_dt and d.received_dn:
+				vehicle_receipt_data = None
 				if d.received_dt == "Vehicle Receipt":
 					vehicle_receipt_data = self.vehicle_receipt_data.get(d.received_dn, frappe._dict())
-					if vehicle_receipt_data:
-						d.chassis_no = vehicle_receipt_data.vehicle_chassis_no
-						d.engine_no = vehicle_receipt_data.vehicle_engine_no
-						d.license_plate = vehicle_receipt_data.vehicle_license_plate
-						d.unregistered = vehicle_receipt_data.vehicle_unregistered
-						d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
-						d.customer = vehicle_receipt_data.customer
-						d.customer_name = vehicle_receipt_data.customer_name
-						d.supplier = vehicle_receipt_data.supplier
-						d.supplier_name = vehicle_receipt_data.supplier_name
-						d.transporter = vehicle_receipt_data.transporter
-						d.transporter_name = vehicle_receipt_data.transporter_name or vehicle_receipt_data.transporter
-						d.lr_no = vehicle_receipt_data.lr_no
+				elif d.received_dt == "Vehicle Delivery":
+					vehicle_receipt_data = self.vehicle_delivery_data.get(d.received_dn, frappe._dict())
+
+				if vehicle_receipt_data:
+					d.chassis_no = vehicle_receipt_data.vehicle_chassis_no
+					d.engine_no = vehicle_receipt_data.vehicle_engine_no
+					d.license_plate = vehicle_receipt_data.vehicle_license_plate
+					d.unregistered = vehicle_receipt_data.vehicle_unregistered
+					d.color = vehicle_receipt_data.vehicle_color or d.color
+					d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
+					d.customer = vehicle_receipt_data.customer
+					d.customer_name = vehicle_receipt_data.customer_name
+					d.supplier = vehicle_receipt_data.supplier
+					d.supplier_name = vehicle_receipt_data.supplier_name
+					d.transporter = vehicle_receipt_data.transporter
+					d.transporter_name = vehicle_receipt_data.transporter_name or vehicle_receipt_data.transporter
+					d.lr_no = vehicle_receipt_data.lr_no
+					d.has_return = cint(vehicle_receipt_data.is_return) or d.has_return
+					d.has_delivery_return = cint(vehicle_receipt_data.is_return)
 
 			# Data from delivery
 			if d.delivery_dt and d.delivery_dn:
+				vehicle_delivery_data = None
 				if d.delivery_dt == "Vehicle Delivery":
 					vehicle_delivery_data = self.vehicle_delivery_data.get(d.delivery_dn, frappe._dict())
-					if vehicle_delivery_data:
-						d.chassis_no = vehicle_delivery_data.vehicle_chassis_no or d.chassis_no
-						d.engine_no = vehicle_delivery_data.vehicle_engine_no or d.engine_no
-						d.license_plate = vehicle_delivery_data.vehicle_license_plate or d.license_plate
-						d.unregistered = vehicle_delivery_data.vehicle_unregistered or d.unregistered
-						d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
-						d.customer = vehicle_delivery_data.customer
-						d.customer_name = vehicle_delivery_data.booking_customer_name or vehicle_delivery_data.customer_name
-						d.broker = vehicle_delivery_data.broker
-						d.broker_name = vehicle_delivery_data.broker_name
-						d.receiver_contact = vehicle_delivery_data.receiver_contact
-						d.delivered_to = vehicle_delivery_data.receiver_contact_display or vehicle_delivery_data.customer_name
-						d.delivered_to_contact = vehicle_delivery_data.receiver_contact_mobile or vehicle_delivery_data.receiver_contact_phone
+				elif d.delivery_dt == "Vehicle Receipt":
+					vehicle_delivery_data = self.vehicle_receipt_data.get(d.delivery_dn, frappe._dict())
 
-						if vehicle_delivery_data.vehicle_owner and vehicle_delivery_data.vehicle_owner != vehicle_delivery_data.customer:
-							d.delivery_customer = vehicle_delivery_data.customer
-							d.delivery_customer_name = vehicle_delivery_data.customer_name
+				if vehicle_delivery_data:
+					d.chassis_no = vehicle_delivery_data.vehicle_chassis_no or d.chassis_no
+					d.engine_no = vehicle_delivery_data.vehicle_engine_no or d.engine_no
+					d.license_plate = vehicle_delivery_data.vehicle_license_plate or d.license_plate
+					d.unregistered = vehicle_delivery_data.vehicle_unregistered or d.unregistered
+					d.color = vehicle_delivery_data.vehicle_color or d.color
+					d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
+					d.customer = vehicle_delivery_data.customer
+					d.customer_name = vehicle_delivery_data.booking_customer_name or vehicle_delivery_data.customer_name
+					d.broker = vehicle_delivery_data.broker
+					d.broker_name = vehicle_delivery_data.broker_name
+					d.receiver_contact = vehicle_delivery_data.receiver_contact
+					d.delivered_to = vehicle_delivery_data.receiver_contact_display or vehicle_delivery_data.customer_name
+					d.delivered_to_contact = vehicle_delivery_data.receiver_contact_mobile or vehicle_delivery_data.receiver_contact_phone
+					d.has_return = cint(vehicle_delivery_data.is_return) or d.has_return
+					d.has_receipt_return = cint(vehicle_delivery_data.is_return)
+
+					if vehicle_delivery_data.vehicle_owner and vehicle_delivery_data.vehicle_owner != vehicle_delivery_data.customer:
+						d.delivery_customer = vehicle_delivery_data.customer
+						d.delivery_customer_name = vehicle_delivery_data.customer_name
 
 			# Booked Open Stock
 			if not d.vehicle_booking_order and d.vehicle in self.booking_by_vehicle_data:
 				booking_data = self.booking_by_vehicle_data[d.vehicle]
-				d.vehicle_booking_order = booking_data.name
-				d.open_stock = 1 if booking_data.vehicle_receipt else 0
+				if d.received_dt == "Vehicle Receipt" and d.received_dn == booking_data.vehicle_receipt:
+					d.vehicle_booking_order = booking_data.name
+					d.open_stock = 1
+
+			# Unbooked Open Stock
+			if not d.vehicle_booking_order and not d.project:
+				d.open_stock = 1
 
 			if d.vehicle_booking_order and not d.dispatch_date:
 				d.dispatch_date = vehicle_data.get('dispatch_date')
@@ -231,21 +254,21 @@ class VehicleStockReport(object):
 
 			# Stock Status
 			if d.qty > 0:
-				if d.vehicle_booking_order and d.open_stock:
-					d.status = "Open Stock (Booked)"
-					d.status_color = "purple"
-				elif d.vehicle_booking_order:
-					d.status = "In Stock (Booked)"
+				if d.vehicle_booking_order and not d.open_stock:
+					d.status = "In Stock"
 					d.status_color = "#743ee2"
 				elif d.project:
 					d.status = "For Repair"
 				else:
 					d.status = "Open Stock"
-					d.status_color = "blue"
+					d.status_color = "purple" if d.vehicle_booking_order else "blue"
+
+				if d.has_delivery_return:
+					d.status += " (Returned)"
 			elif d.qty <= 0:
 				if d.delivery_dn:
-					d.status = "Delivered"
-					d.status_color = "green"
+					d.status = "Returned" if d.has_receipt_return else "Delivered"
+					d.status_color = "red" if d.has_receipt_return else "green"
 				elif d.dispatch_date and not d.received_date:
 					if d.vehicle_booking_order:
 						d.status = "Dispatched (Booked)"
@@ -283,6 +306,9 @@ class VehicleStockReport(object):
 
 		if self.filters.vehicle_booking_order:
 			data = [d for d in self.data if d.vehicle_booking_order == self.filters.vehicle_booking_order]
+
+		if self.filters.vehicle_color:
+			data = [d for d in self.data if d.color == self.filters.vehicle_color]
 
 		if self.filters.invoice_status == "Invoice In Hand and Delivered":
 			data = [d for d in self.data if d.invoice_received_date or d.invoice_delivery_date]
@@ -445,12 +471,14 @@ class VehicleStockReport(object):
 		self.vehicle_receipt_data = {}
 		self.vehicle_delivery_data = {}
 
-		receipt_names = list(set([d.received_dn for d in self.data if d.received_dn and d.received_dt == "Vehicle Receipt"]))
+		receipt_names = [d.received_dn for d in self.data if d.received_dn and d.received_dt == "Vehicle Receipt"]
+		receipt_names += [d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Receipt"]
+		receipt_names = list(set(receipt_names))
 		if receipt_names:
 			data = frappe.db.sql("""
 				select name, vehicle_booking_order, supplier, supplier_name, customer, customer_name,
-					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered,
-					transporter, transporter_name, lr_no
+					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered, vehicle_color,
+					transporter, transporter_name, lr_no, is_return
 				from `tabVehicle Receipt`
 				where docstatus = 1 and name in %s
 			""", [receipt_names], as_dict=1)
@@ -458,13 +486,16 @@ class VehicleStockReport(object):
 			for d in data:
 				self.vehicle_receipt_data[d.name] = d
 
-		delivery_names = list(set([d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Delivery"]))
+		delivery_names = [d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Delivery"]
+		delivery_names += [d.received_dn for d in self.data if d.received_dn and d.received_dt == "Vehicle Delivery"]
+		delivery_names = list(set(delivery_names))
 		if delivery_names:
 			data = frappe.db.sql("""
 				select name, vehicle_booking_order,
 					customer, customer_name, booking_customer_name, broker, broker_name, vehicle_owner, vehicle_owner_name,
-					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered,
-					receiver_contact, receiver_contact_display, receiver_contact_mobile, receiver_contact_phone
+					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered, vehicle_color,
+					receiver_contact, receiver_contact_display, receiver_contact_mobile, receiver_contact_phone,
+					transporter, transporter_name, lr_no, is_return
 				from `tabVehicle Delivery`
 				where docstatus = 1 and name in %s
 			""", [delivery_names], as_dict=1)

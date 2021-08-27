@@ -96,10 +96,24 @@
 
 				<td class="text-nowrap">
 					{% if(data[i].received_date) { %}
-						<div>Received: {%= frappe.datetime.str_to_user(data[i].received_date) %}</div>
+						<div>
+							{% if (data[i].has_delivery_return) { %}
+								Returned:
+							{% } else { %}
+								Received:
+							{% } %}
+							{%= frappe.datetime.str_to_user(data[i].received_date) %}
+						</div>
 					{% } %}
 					{% if(data[i].delivery_date) { %}
-						<div>Delivered: {%= frappe.datetime.str_to_user(data[i].delivery_date) %}</div>
+						<div>
+							{% if (data[i].has_receipt_return) { %}
+								Returned:
+							{% } else { %}
+								Delivered:
+							{% } %}
+							{%= frappe.datetime.str_to_user(data[i].delivery_date) %}
+						</div>
 					{% } %}
 					{% if(data[i].dispatch_date && !data[i].received_date) { %}
 						<div>Dispatched: {%= frappe.datetime.str_to_user(data[i].dispatch_date) %}</div>
