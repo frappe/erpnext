@@ -1144,7 +1144,8 @@
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Bundle Items",
-   "options": "Packed Item"
+   "options": "Packed Item",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -1152,14 +1153,15 @@
    "fieldname": "bundle_items_section",
    "fieldtype": "Section Break",
    "label": "Bundle Items",
-   "options": "fa fa-suitcase"
+   "options": "fa fa-suitcase",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 02:18:07.342249",
+ "modified": "2021-08-27 20:05:54.869308",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
