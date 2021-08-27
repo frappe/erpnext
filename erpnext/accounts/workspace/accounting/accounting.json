@@ -211,6 +211,15 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Reconciliation",
+   "link_to": "Payment Reconciliation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
@@ -303,6 +312,15 @@
    "is_query_report": 0,
    "label": "Payment Entry",
    "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Reconciliation",
+   "link_to": "Payment Reconciliation",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -1082,7 +1100,11 @@
    "type": "Link"
   }
  ],
+<<<<<<< HEAD
  "modified": "2021-08-23 16:06:34.167267",
+=======
+ "modified": "2021-08-27 12:15:52.872470",
+>>>>>>> 072151e16d (feat: Payment reconciliation on accounts module workspace (#25925))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -1136,5 +1158,11 @@
    "link_to": "Accounts",
    "type": "Dashboard"
   }
+<<<<<<< HEAD
  ]
 }
+=======
+ ],
+ "title": "Accounting"
+}
+>>>>>>> 072151e16d (feat: Payment reconciliation on accounts module workspace (#25925))
