@@ -4,8 +4,12 @@
 import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.contacts.address_and_contact import load_address_and_contact
 
 class Prospect(Document):
+	def onload(self):
+		load_address_and_contact(self)
+
 	def validate(self):
 		self.update_lead_details()
 
