@@ -399,7 +399,6 @@
    "options": "Contact"
   },
   {
-   "depends_on": "mobile_no",
    "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
@@ -439,7 +438,7 @@
    "link_fieldname": "supplier"
   }
  ],
- "modified": "2021-08-27 13:46:18.212802",
+ "modified": "2021-08-27 18:02:44.314077",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
