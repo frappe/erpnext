@@ -8,7 +8,7 @@ from frappe import _, msgprint, scrub
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, date_diff,
-	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day)
+	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day, cint)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details
@@ -58,7 +58,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			customer_group=party_details.customer_group, supplier_group=party_details.supplier_group, tax_category=party_details.tax_category,
 			billing_address=party_address, shipping_address=shipping_address)
 
-	if fetch_payment_terms_template:
+	if cint(fetch_payment_terms_template):
 		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
 
 	if not party_details.get("currency"):
@@ -286,6 +286,7 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)), InvalidAccountCurrency)
 
 def validate_party_accounts(doc):
+
 	companies = []
 
 	for account in doc.get("accounts"):
@@ -446,6 +447,10 @@ def get_payment_terms_template(party_name, party_type, company=None):
 	return template
 
 def validate_party_frozen_disabled(party_type, party_name):
+
+	if frappe.flags.ignore_party_validation:
+		return
+
 	if party_type and party_name:
 		if party_type in ("Customer", "Supplier"):
 			party = frappe.get_cached_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
@@ -542,6 +547,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where party_type = %s and party=%s
+		and is_cancelled = 0
 		group by company""", (party_type, party)))
 
 	for d in companies:

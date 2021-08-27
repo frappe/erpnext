@@ -121,4 +121,3 @@ def get_chart_data(data):
 		},
 		'type': 'bar'
 	}
-

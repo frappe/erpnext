@@ -39,6 +39,3 @@ class TestCourseEnrollment(unittest.TestCase):
 			doc = frappe.get_doc("Program Enrollment", entry.name)
 			doc.cancel()
 			doc.delete()
-
-
-

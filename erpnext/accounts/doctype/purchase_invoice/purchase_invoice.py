@@ -22,10 +22,12 @@ from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accoun
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
+	unlink_inter_company_doc, check_if_return_invoice_linked_with_payment_entry
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
+
+class WarehouseMissingError(frappe.ValidationError): pass
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -207,8 +209,8 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock and for_validate:
 			for d in self.get('items'):
 				if not d.warehouse:
-					frappe.throw(_("Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}").
-						format(d.idx, d.item_code, self.company))
+					frappe.throw(_("Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}").
+						format(d.idx, d.item_code, self.company), exc=WarehouseMissingError)
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
@@ -246,7 +248,7 @@ class PurchaseInvoice(BuyingController):
 				and (not item.po_detail or
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
-				if self.update_stock and (not item.from_warehouse):
+				if self.update_stock and item.warehouse and (not item.from_warehouse):
 					if for_validate and item.expense_account and item.expense_account != warehouse_account[item.warehouse]["account"]:
 						msg = _("Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account").format(
 							item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]), frappe.bold(item.expense_account), frappe.bold(item.warehouse))
@@ -413,6 +415,8 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
+		self.process_common_party_accounting()
+
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
@@ -446,11 +450,13 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries)
 
 		if self.check_asset_cwip_enabled():
 			self.get_asset_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
+		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.allocate_advance_taxes(gl_entries)
@@ -518,6 +524,8 @@ class PurchaseInvoice(BuyingController):
 			and flt(d.base_tax_amount_after_discount_amount)]
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
+
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -609,7 +617,7 @@ class PurchaseInvoice(BuyingController):
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
 
 					if not item.is_fixed_asset:
-						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
+						dummy, amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
@@ -656,7 +664,7 @@ class PurchaseInvoice(BuyingController):
 								)
 								gl_entries.append(
 									self.get_gl_dict({
-										"account": self.get_company_default("exchange_gain_loss_account"),		
+										"account": self.get_company_default("exchange_gain_loss_account"),
 										"against": self.supplier,
 										"credit": discrepancy_caused_by_exchange_rate_difference,
 										"cost_center": item.cost_center,
@@ -851,8 +859,11 @@ class PurchaseInvoice(BuyingController):
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		valuation_tax = {}
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
 		for tax in self.get("taxes"):
-			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
+			amount, base_amount = self.get_tax_amounts(tax, enable_discount_accounting)
+			if tax.category in ("Total", "Valuation and Total") and flt(base_amount):
 				account_currency = get_account_currency(tax.account_head)
 
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
@@ -861,21 +872,21 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.supplier,
-						dr_or_cr: tax.base_tax_amount_after_discount_amount,
-						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==self.company_currency \
-							else tax.tax_amount_after_discount_amount,
+						dr_or_cr: base_amount,
+						dr_or_cr + "_in_account_currency": base_amount
+							if account_currency==self.company_currency
+							else amount,
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)
 				)
 			# accumulate valuation tax
-			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount) \
+			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(base_amount) \
 				and not self.is_internal_transfer():
 				if self.auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.name, 0)
 				valuation_tax[tax.name] += \
-					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(base_amount)
 
 		if self.is_opening == "No" and self.negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
@@ -915,6 +926,13 @@ class PurchaseInvoice(BuyingController):
 							"credit": valuation_tax[tax.name],
 							"remarks": self.remarks or "Accounting Entry for Stock"
 						}, item=tax))
+
+	@property
+	def enable_discount_accounting(self):
+		if not hasattr(self, "_enable_discount_accounting"):
+			self._enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		return self._enable_discount_accounting
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
@@ -1011,6 +1029,8 @@ class PurchaseInvoice(BuyingController):
 				}, item=self))
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(PurchaseInvoice, self).on_cancel()
 
 		self.check_on_hold_or_closed_status()
@@ -1192,7 +1212,7 @@ def get_purchase_document_details(doc):
 			purchase_receipts_or_invoices.append(item.get(doc_reference))
 		if item.get(items_reference):
 			items.append(item.get(items_reference))
-	
+
 	exchange_rate_map = frappe._dict(frappe.get_all(parent_doctype, filters={'name': ('in',
 		purchase_receipts_or_invoices)}, fields=['name', 'conversion_rate'], as_list=1))
 

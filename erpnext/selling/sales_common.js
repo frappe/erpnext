@@ -114,6 +114,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
 	}
 
+	dispatch_address_name() {
+		erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
+	}
+
 	sales_partner() {
 		this.apply_pricing_rule();
 	}
@@ -390,6 +394,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	_set_batch_number(doc) {
+		if (doc.batch_no) {
+			return
+		}
+
 		let args = {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)};
 		if (doc.has_serial_no && doc.serial_no) {
 			args['serial_no'] = doc.serial_no

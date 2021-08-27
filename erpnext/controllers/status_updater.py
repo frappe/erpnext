@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, comma_or, nowdate, getdate
+from frappe.utils import flt, comma_or, nowdate, getdate, now
 from frappe import _
 from frappe.model.document import Document
 
@@ -86,7 +86,8 @@ status_map = {
 	],
 	"Bank Transaction": [
 		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
-		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
+		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"],
+		["Cancelled", "eval:self.docstatus == 2"]
 	],
 	"POS Opening Entry": [
 		["Draft", None],
@@ -336,10 +337,14 @@ class StatusUpdater(Document):
 				target.notify_update()
 
 	def _update_modified(self, args, update_modified):
-		args['update_modified'] = ''
-		if update_modified:
-			args['update_modified'] = ', modified = now(), modified_by = {0}'\
-				.format(frappe.db.escape(frappe.session.user))
+		if not update_modified:
+			args['update_modified'] = ''
+			return
+
+		args['update_modified'] = ', modified = {0}, modified_by = {1}'.format(
+			frappe.db.escape(now()),
+			frappe.db.escape(frappe.session.user)
+		)
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
 		ref_fieldname = frappe.scrub(ref_dt)

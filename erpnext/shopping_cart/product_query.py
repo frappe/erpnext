@@ -87,7 +87,8 @@ class ProductQuery:
 				filters=self.filters,
 				or_filters=self.or_filters,
 				start=start,
-				limit=self.page_length
+				limit=self.page_length,
+				order_by="weightage desc"
 			)
 
 		# Combine results having context of website item groups into item results

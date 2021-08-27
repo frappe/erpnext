@@ -77,9 +77,6 @@ class Task(NestedSet):
 		if flt(self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
-		if flt(self.progress) == 100:
-			self.status = 'Completed'
-
 		if self.status == 'Completed':
 			self.progress = 100
 
