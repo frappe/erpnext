@@ -731,6 +731,15 @@
    "options": "Account"
   },
   {
+   "fieldname": "hr_settings_section",
+   "fieldtype": "Section Break",
+   "label": "HR & Payroll Settings"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
    "collapsible": 1,
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
@@ -741,6 +750,14 @@
    "fieldtype": "Link",
    "label": "Repair and Maintenance Account",
    "options": "Account"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "section_break_28",
+   "fieldtype": "Section Break",
+   "label": "Chart of Accounts"
+>>>>>>> a285b5b78b (feat: Accounts, Selling & Assets Onboarding cleanup (#27112))
   }
  ],
  "icon": "fa fa-building",
