@@ -740,15 +740,6 @@
    "fieldname": "section_break_28",
    "fieldtype": "Section Break",
    "label": "Chart of Accounts"
-  },
-  {
-   "fieldname": "hr_settings_section",
-   "fieldtype": "Section Break",
-   "label": "HR & Payroll Settings"
-  },
-  {
-   "fieldname": "column_break_26",
-   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-building",
