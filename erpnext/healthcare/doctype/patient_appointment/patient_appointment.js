@@ -241,6 +241,13 @@ frappe.ui.form.on('Patient Appointment', {
 					frm.toggle_reqd('mode_of_payment', 0);
 					frm.toggle_reqd('paid_amount', 0);
 					frm.toggle_reqd('billing_item', 0);
+				} else if (data.message) {
+					frm.toggle_display('mode_of_payment', 1);
+					frm.toggle_display('paid_amount', 1);
+					frm.toggle_display('billing_item', 1);
+					frm.toggle_reqd('mode_of_payment', 1);
+					frm.toggle_reqd('paid_amount', 1);
+					frm.toggle_reqd('billing_item', 1);
 				} else {
 					// if automated appointment invoicing is disabled, hide fields
 					frm.toggle_display('mode_of_payment', data.message ? 1 : 0);

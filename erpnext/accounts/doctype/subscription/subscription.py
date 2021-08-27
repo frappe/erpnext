@@ -367,21 +367,25 @@ class Subscription(Document):
 			)
 
 		# Discounts
-		if self.additional_discount_percentage:
-			invoice.additional_discount_percentage = self.additional_discount_percentage
+		if self.is_trialling():
+			invoice.additional_discount_percentage = 100
+		else:
+			if self.additional_discount_percentage:
+				invoice.additional_discount_percentage = self.additional_discount_percentage
 
-		if self.additional_discount_amount:
-			invoice.discount_amount = self.additional_discount_amount
+			if self.additional_discount_amount:
+				invoice.discount_amount = self.additional_discount_amount
 
-		if self.additional_discount_percentage or self.additional_discount_amount:
-			discount_on = self.apply_additional_discount
-			invoice.apply_discount_on = discount_on if discount_on else 'Grand Total'
+			if self.additional_discount_percentage or self.additional_discount_amount:
+				discount_on = self.apply_additional_discount
+				invoice.apply_discount_on = discount_on if discount_on else 'Grand Total'
 
 		# Subscription period
 		invoice.from_date = self.current_invoice_start
 		invoice.to_date = self.current_invoice_end
 
 		invoice.flags.ignore_mandatory = True
+
 		invoice.save()
 
 		if self.submit_invoice:
