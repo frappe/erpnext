@@ -22,7 +22,7 @@ applies_to_fields = [
 	{"label": "", "fieldname": "col_break_vehicle_2", "fieldtype": "Column Break",
 		"insert_after": "vehicle_engine_no"},
 	{"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
-		"insert_after": "col_break_vehicle_2", "fetch_from": "applies_to_vehicle.last_odometer"},
+		"insert_after": "col_break_vehicle_2", "fetch_from": "applies_to_vehicle.last_odometer", "no_copy": 1},
 	{"label": "Vehicle Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color",
 		"insert_after": "vehicle_last_odometer", "fetch_from": "applies_to_vehicle.color"},
 ]
