@@ -12,7 +12,8 @@ frappe.ui.form.SupplierQuickEntryForm = class SupplierQuickEntryForm extends fra
 	}
 
 	get_variant_fields() {
-		var variant_fields = [{
+		var variant_fields = [
+		{
 			fieldtype: "Section Break",
 			label: __("Primary Contact Details"),
 			collapsible: 1

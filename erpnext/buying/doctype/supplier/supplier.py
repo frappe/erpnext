@@ -43,8 +43,11 @@ class Supplier(TransactionBase):
 			self.naming_series = ''
 
 		self.create_primary_contact()
+		self.create_primary_address()
 
 	def validate(self):
+		self.flags.is_new_doc = self.is_new()
+
 		# validation for Naming Series mandatory field...
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.naming_series:
@@ -90,9 +93,14 @@ class Supplier(TransactionBase):
 
 	def create_primary_address(self):
 		from erpnext.selling.doctype.customer.customer import make_address
+		from frappe.contacts.doctype.address.address import get_address_display
 
 		if self.flags.is_new_doc and self.get('address_line1'):
-			make_address(self)
+			address = make_address(self)
+			address_display = get_address_display(address.name)
+
+			self.db_set("supplier_primary_address", address.name)
+			self.db_set("primary_address", address_display)
 
 	def on_trash(self):
 		if self.supplier_primary_contact:
@@ -100,8 +108,10 @@ class Supplier(TransactionBase):
 				UPDATE `tabSupplier`
 				SET
 					supplier_primary_contact=null,
+					supplier_primary_address=null,
 					mobile_no=null,
-					email_id=null
+					email_id=null,
+					primary_address=null
 				WHERE name='{self.name}'""")
 
 		delete_contact_and_address('Supplier', self.name)
