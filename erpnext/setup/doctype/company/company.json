@@ -43,6 +43,8 @@
   "default_buying_terms",
   "hr_settings_section",
   "default_holiday_list",
+  "column_break_36",
+  "default_leave_policy",
   "column_break_24",
   "standard_working_hours",
   "default_settings",
@@ -882,13 +884,23 @@
    "fieldtype": "Select",
    "label": "Income Tax Status",
    "options": "\nFiler\nNon Filer"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_leave_policy",
+   "fieldtype": "Link",
+   "label": "Default Leave Policy",
+   "options": "Leave Policy"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2021-06-02 15:28:27.342606",
+ "modified": "2021-08-27 15:33:37.225045",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

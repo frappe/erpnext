@@ -216,13 +216,17 @@ def throw_overlap_error(doc, exists_for, overlap_doc, from_date, to_date):
 	frappe.throw(msg)
 
 def get_employee_leave_policy(employee):
-	leave_policy = frappe.db.get_value("Employee", employee, "leave_policy")
+	leave_policy = frappe.get_cached_value("Employee", employee, "leave_policy")
 	if not leave_policy:
-		employee_grade = frappe.db.get_value("Employee", employee, "grade")
+		employee_grade = frappe.get_cached_value("Employee", employee, "grade")
 		if employee_grade:
-			leave_policy = frappe.db.get_value("Employee Grade", employee_grade, "default_leave_policy")
-			if not leave_policy:
-				frappe.throw(_("Employee {0} of grade {1} have no default leave policy").format(employee, employee_grade))
+			leave_policy = frappe.get_cached_value("Employee Grade", employee_grade, "default_leave_policy")
+
+	if not leave_policy:
+		employee_company = frappe.get_cached_value("Employee", employee, "company")
+		if employee_company:
+			leave_policy = frappe.get_cached_value("Company", employee_company, "default_leave_policy")
+
 	if leave_policy:
 		return frappe.get_doc("Leave Policy", leave_policy)
 	else:
