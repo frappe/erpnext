@@ -216,11 +216,8 @@ erpnext.patches.v13_0.delete_old_sales_reports
 execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll #22-06-2020
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-2020
-<<<<<<< HEAD
 execute:frappe.reload_doc("regional", "doctype", "e_invoice_settings")
-=======
 erpnext.patches.v12_0.create_itc_reversal_custom_fields
->>>>>>> 17e0fa7a8b (fix: patches were breaking while migrating (#27195))
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v13_0.loyalty_points_entry_for_pos_invoice #22-07-2020
 erpnext.patches.v12_0.add_taxjar_integration_field
