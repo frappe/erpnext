@@ -1019,6 +1019,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1029,6 +1030,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -1511,7 +1513,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 02:45:54.968867",
+ "modified": "2021-08-27 20:11:57.748736",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

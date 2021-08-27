@@ -1141,6 +1141,7 @@
    "options": "Tax Withholding Category"
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Bundle Items",
@@ -1150,6 +1151,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
    "fieldname": "bundle_items_section",
    "fieldtype": "Section Break",
    "label": "Bundle Items",
@@ -1161,7 +1163,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 20:05:54.869308",
+ "modified": "2021-08-27 20:11:23.509147",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
