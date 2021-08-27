@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2018-05-09 05:37:18.439763",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -7,6 +8,8 @@
   "activity_name",
   "user",
   "role",
+  "begin_on",
+  "duration",
   "column_break_3",
   "task",
   "task_weight",
@@ -16,12 +19,16 @@
  ],
  "fields": [
   {
+   "columns": 3,
    "fieldname": "activity_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Activity Name"
+   "label": "Activity Name",
+   "reqd": 1
   },
   {
+   "columns": 2,
+   "depends_on": "eval:!doc.role",
    "fieldname": "user",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -29,9 +36,10 @@
    "options": "User"
   },
   {
+   "columns": 1,
+   "depends_on": "eval:!doc.user",
    "fieldname": "role",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Role",
    "options": "Role"
   },
@@ -67,10 +75,25 @@
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Description"
+  },
+  {
+   "columns": 2,
+   "fieldname": "duration",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Duration (Days)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "begin_on",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Begin On (Days)"
   }
  ],
  "istable": 1,
- "modified": "2019-06-03 19:22:42.965762",
+ "links": [],
+ "modified": "2021-07-30 15:55:22.470102",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Boarding Activity",

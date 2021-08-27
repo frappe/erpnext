@@ -95,7 +95,7 @@ jobs:
         run: cd ~/frappe-bench/ && bench --site test_site execute erpnext.setup.utils.before_tests
 
       - name: cypress pre-requisites
-        run: cd ~/frappe-bench/apps/frappe && yarn add cypress-file-upload@^5 --no-lockfile
+        run: cd ~/frappe-bench/apps/frappe && yarn add cypress-file-upload@^5 @testing-library/cypress@^8 --no-lockfile
 
 
       - name: Build Assets
