@@ -305,8 +305,10 @@ def _get_lead_contact_details(lead):
 
 	if cint(lead.organization_lead):
 		out["contact_display"] = ""
+		out["contact_designation"] = ""
 	else:
 		out["contact_display"] = " ".join(filter(None, [lead.salutation, lead.lead_name]))
+		out["contact_designation"] = lead.get('designation')
 
 	return out
 

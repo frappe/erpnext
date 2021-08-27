@@ -13,6 +13,7 @@
   "naming_series",
   "lead_name",
   "company_name",
+  "designation",
   "col_break123",
   "source",
   "territory",
@@ -435,12 +436,18 @@
    "fieldname": "tax_strn",
    "fieldtype": "Data",
    "label": "STRN"
+  },
+  {
+   "depends_on": "eval:!doc.organization_lead",
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2021-06-24 13:04:22.172359",
+ "modified": "2021-08-27 16:33:31.946649",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

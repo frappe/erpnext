@@ -30,7 +30,8 @@ force_fields = [
 	'customer_name', 'financer_name', 'lessee_name', 'customer_category', 'territory',
 	'item_name', 'item_group', 'brand', 'variant_of', 'variant_of_name', 'vehicle_allocation_required',
 	'customer_address',
-	'address_display', 'contact_display', 'financer_contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'address_display', 'contact_display', 'financer_contact_display',
+	'contact_email', 'contact_mobile', 'contact_phone', 'contact_designation',
 	'father_name', 'husband_name',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no',
 	'withholding_tax_amount', 'exempt_from_vehicle_withholding_tax'
@@ -426,6 +427,7 @@ def get_customer_contact_details(args, customer_contact=None, financer_contact=N
 	out.contact_email = customer_contact.get('contact_email')
 	out.contact_mobile = customer_contact.get('contact_mobile') or financer_contact.get('contact_mobile')
 	out.contact_phone = financer_contact.get('contact_phone') if is_leased else customer_contact.get('contact_phone')
+	out.contact_designation = customer_contact.get('contact_designation')
 
 	return out
 

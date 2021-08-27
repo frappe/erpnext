@@ -30,6 +30,7 @@
   "contact_details_section",
   "contact_person",
   "contact_display",
+  "contact_designation",
   "column_break_24",
   "on_account_of",
   "financer_contact_person",
@@ -874,12 +875,18 @@
    "label": "Engine No",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "contact_designation",
+   "fieldtype": "Data",
+   "label": "Contact Designation",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-08-16 15:13:00.782136",
+ "modified": "2021-08-27 16:43:27.984940",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",
