@@ -716,11 +716,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "section_break_28",
-   "fieldtype": "Section Break",
-   "label": "Chart of Accounts"
-  },
-  {
    "fieldname": "hr_settings_section",
    "fieldtype": "Section Break",
    "label": "HR & Payroll Settings"
