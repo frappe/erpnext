@@ -268,6 +268,7 @@
    "options": "fa fa-map-marker"
   },
   {
+   "depends_on": "eval: !doc.__islocal",
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address HTML",
@@ -284,6 +285,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "eval: !doc.__islocal",
    "fieldname": "contact_html",
    "fieldtype": "HTML",
    "label": "Contact HTML",
