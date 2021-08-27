@@ -25,7 +25,7 @@ class calculate_taxes_and_totals(object):
 
 		self.discount_amount_applied = False
 
-		if self.docstatus == 0 or self.flags.ignore_validate_update_after_submit
+		if self.doc.docstatus == 0 or self.doc.flags.ignore_validate_update_after_submit
 			self._calculate()
 
 			if self.doc.meta.get_field("discount_amount"):
