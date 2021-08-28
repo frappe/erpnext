@@ -318,6 +318,14 @@ def add_node():
 
 	if args.parent_task == 'All Tasks' or args.parent_task == args.project:
 		args.parent_task = None
+		if args.parent_task == args.project:
+			args.company == frappe.get_value('Project', args.project, 'company')
+		else:
+			from frappe.defaults import get_user_default
+			args.company == get_user_default('company')
+
+	else:
+		args.company = frappe.get_value('Task', args.parent_task, 'company')
 
 	frappe.get_doc(args).insert()
 
@@ -326,6 +334,8 @@ def add_multiple_tasks(data, parent):
 	data = json.loads(data)
 	new_doc = {'doctype': 'Task', 'parent_task': parent if parent!="All Tasks" else ""}
 	new_doc['project'] = frappe.db.get_value('Task', {"name": parent}, 'project') or ""
+	from frappe.defaults import get_user_default
+	new_doc['company'] = frappe.db.get_value('Task', {"name": parent}, 'company') or get_user_default('company')
 
 	for d in data:
 		if not d.get("subject"): continue
