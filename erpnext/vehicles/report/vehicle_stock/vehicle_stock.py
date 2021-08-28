@@ -207,10 +207,12 @@ class VehicleStockReport(object):
 						d.delivery_customer = vehicle_delivery_data.customer
 						d.delivery_customer_name = vehicle_delivery_data.customer_name
 
-			# Booked Open Stock
+			# Booked Open Stock / Dispatched Vehicle Booking
 			if not d.vehicle_booking_order and d.vehicle in self.booking_by_vehicle_data:
 				booking_data = self.booking_by_vehicle_data[d.vehicle]
-				if d.received_dt == "Vehicle Receipt" and d.received_dn == booking_data.vehicle_receipt:
+				if not d.received_dn:
+					d.vehicle_booking_order = booking_data.name
+				elif d.received_dt == "Vehicle Receipt" and d.received_dn == booking_data.vehicle_receipt:
 					d.vehicle_booking_order = booking_data.name
 					d.open_stock = 1
 
@@ -270,12 +272,8 @@ class VehicleStockReport(object):
 					d.status = "Returned" if d.has_receipt_return else "Delivered"
 					d.status_color = "red" if d.has_receipt_return else "green"
 				elif d.dispatch_date and not d.received_date:
-					if d.vehicle_booking_order:
-						d.status = "Dispatched (Booked)"
-						d.status_color = "orange"
-					else:
-						d.status = "Dispatched"
-						d.status_color = "orange"
+					d.status = "Dispatched"
+					d.status_color = "orange"
 
 			# Invoice Status
 			if d.invoice_delivery_date:
