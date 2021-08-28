@@ -640,18 +640,22 @@ def get_sle_entries_against_voucher(args):
 		order_by="creation asc")
 
 def get_conditions_to_validate_future_sle(sl_entries):
-	warehouse_items_map = {}
+	conditions_map = {}
 	for entry in sl_entries:
-		if entry.warehouse not in warehouse_items_map:
-			warehouse_items_map[entry.warehouse] = set()
+		key = (entry.warehouse, 'item_code')
+		if entry.get('batch_no'):
+			key = (entry.warehouse, 'batch_no')
 
-		warehouse_items_map[entry.warehouse].add(entry.item_code)
+		if key not in conditions_map:
+			conditions_map[key] = set()
+
+		conditions_map[key].add(entry.get(key[1]))
 
 	or_conditions = []
-	for warehouse, items in warehouse_items_map.items():
+	for key, items in conditions_map.items():
 		or_conditions.append(
-			f"""warehouse = {frappe.db.escape(warehouse)}
-				and item_code in ({', '.join(frappe.db.escape(item) for item in items)})""")
+			f"""warehouse = {frappe.db.escape(key[0])}
+				and {key[1]} in ({', '.join(frappe.db.escape(item) for item in items)})""")
 
 	return or_conditions
 

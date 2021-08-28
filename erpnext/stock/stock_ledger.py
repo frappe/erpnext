@@ -1030,6 +1030,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
+			{batch_condition}
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
@@ -1039,7 +1040,11 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 				)
 			)
 		{datetime_limit_condition}
-		""".format(qty_shift=qty_shift, datetime_limit_condition=datetime_limit_condition), args)
+		""".format(
+			qty_shift=qty_shift,
+			datetime_limit_condition=datetime_limit_condition,
+			batch_condition=get_batch_condition(args, filter_batch_wise=True)
+		), args)
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
 
@@ -1075,6 +1080,7 @@ def get_next_stock_reco(args):
 		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
+			{batch_condition}
 			and voucher_type = 'Stock Reconciliation'
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
@@ -1085,7 +1091,7 @@ def get_next_stock_reco(args):
 				)
 			)
 		limit 1
-	""", args, as_dict=1)
+	""".format(batch_condition=get_batch_condition(args, filter_batch_wise=True)), args, as_dict=1)
 
 def get_datetime_limit_condition(detail):
 	return f"""
@@ -1122,13 +1128,14 @@ def get_future_sle_with_negative_qty(args):
 		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
+			{batch_condition}
 			and voucher_no != %(voucher_no)s
 			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 			and is_cancelled = 0
 			and qty_after_transaction < 0
 		order by timestamp(posting_date, posting_time) asc
 		limit 1
-	""", args, as_dict=1)
+	""".format(batch_condition=get_batch_condition(args, filter_batch_wise=True)), args, as_dict=1)
 
 def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 	""" Rounds off the number to zero only if number is close to zero for decimal
