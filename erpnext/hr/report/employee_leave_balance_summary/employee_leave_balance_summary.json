@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2019-09-06 11:18:06.209397",
+ "modified": "2021-08-28 16:21:36.147448",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Leave Balance Summary",
@@ -18,16 +18,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Employee"
-  },
-  {
-   "role": "HR Manager"
-  },
-  {
    "role": "HR User"
   },
   {
-   "role": "Leave Approver"
+   "role": "HR Manager"
   }
  ]
 }
