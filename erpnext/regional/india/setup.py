@@ -535,14 +535,21 @@ def make_custom_fields(update=True):
 				depends_on = 'eval:doc.type == "Deduction"'
 			)
 		],
-		'Employee': [
-			dict(fieldname='ifsc_code',
+		'Bank Account': [
+			dict(
+				fieldname='ifsc_code',
 				label='IFSC Code',
 				fieldtype='Data',
-				insert_after='bank_ac_no',
-				print_hide=1,
-				depends_on='eval:doc.salary_mode == "Bank"'
-				),
+				insert_after='branch_code'
+			),
+			dict(
+				fieldname =  'micr_code',
+				label = 'MICR Code',
+				fieldtype = 'Data',
+				insert_after = 'ifsc_code'
+			)
+		],
+		'Employee': [
 			dict(
 				fieldname =  'pan_number',
 				label = 'PAN Number',
@@ -551,20 +558,11 @@ def make_custom_fields(update=True):
 				print_hide = 1
 			),
 			dict(
-				fieldname =  'micr_code',
-				label = 'MICR Code',
-				fieldtype = 'Data',
-				insert_after = 'ifsc_code',
-				print_hide = 1,
-				depends_on='eval:doc.salary_mode == "Bank"'
-			),
-			dict(
 				fieldname = 'provident_fund_account',
 				label = 'Provident Fund Account',
 				fieldtype = 'Data',
 				insert_after = 'pan_number'
 			)
-
 		],
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',
