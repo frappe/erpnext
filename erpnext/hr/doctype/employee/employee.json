@@ -65,8 +65,7 @@
   "salary_mode",
   "payroll_cost_center",
   "column_break_52",
-  "bank_name",
-  "bank_ac_no",
+  "bank_account",
   "health_insurance_section",
   "health_insurance_provider",
   "health_insurance_no",
@@ -437,22 +436,6 @@
    "options": "\nBank\nCash\nCheque"
   },
   {
-   "depends_on": "eval:doc.salary_mode == 'Bank'",
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
-   "oldfieldname": "bank_name",
-   "oldfieldtype": "Link"
-  },
-  {
-   "depends_on": "eval:doc.salary_mode == 'Bank'",
-   "fieldname": "bank_ac_no",
-   "fieldtype": "Data",
-   "label": "Bank A/C No.",
-   "oldfieldname": "bank_ac_no",
-   "oldfieldtype": "Data"
-  },
-  {
    "collapsible": 1,
    "fieldname": "health_insurance_section",
    "fieldtype": "Section Break",
@@ -807,13 +790,20 @@
    "fieldtype": "Link",
    "label": "Shift Request Approver",
    "options": "User"
+  },
+  {
+   "depends_on": "eval:doc.salary_mode == 'Bank'",
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2021-06-17 11:31:37.730760",
+ "modified": "2021-08-29 18:24:53.875953",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
