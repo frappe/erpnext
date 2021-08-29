@@ -42,8 +42,7 @@
   "hour_rate",
   "base_hour_rate",
   "section_break_26",
-  "bank_name",
-  "bank_account_no",
+  "bank_account",
   "mode_of_payment",
   "section_break_32",
   "deduct_tax_for_unclaimed_employee_benefits",
@@ -291,22 +290,6 @@
   {
    "fieldname": "section_break_26",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
-   "oldfieldname": "bank_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
-  },
-  {
-   "fieldname": "bank_account_no",
-   "fieldtype": "Data",
-   "label": "Bank Account No.",
-   "oldfieldname": "bank_account_no",
-   "oldfieldtype": "Data",
-   "read_only": 1
   },
   {
    "fieldname": "section_break_32",
@@ -625,13 +608,20 @@
    "label": "Leave Details",
    "options": "Salary Slip Leave",
    "read_only": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:44:09.772331",
+ "modified": "2021-08-29 18:18:12.647762",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
