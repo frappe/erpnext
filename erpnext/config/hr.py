@@ -40,123 +40,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Employee Grouping"),
-			"items": [
-
-			]
-		},
-		{
-			"label": _("Attendance"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Attendance",
-					"onboard": 1,
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Attendance Request",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Monthly Attendance Sheet",
-					"doctype": "Attendance"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employee Checkin Sheet",
-					"doctype": "Employee Checkin"
-				},
-				{
-					"type": "doctype",
-					"name": "Upload Attendance",
-					"hide_count": True,
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Checkin",
-					"hide_count": True,
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Attendance Tool",
-					"hide_count": True,
-					"onboard": 1,
-					"dependencies": ["Employee"]
-				},
-			]
-		},
-		{
-			"label": _("Leaves"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Leave Application",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Allocation",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Compensatory Leave Request",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Encashment",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employee Leave Balance",
-					"doctype": "Leave Application"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Leave Ledger Entry",
-					"doctype": "Leave Ledger Entry"
-				},
-			]
-		},
-		{
-			"label": _("Leave Configuration"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Leave Policy",
-					"dependencies": ["Leave Type"]
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Period",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Holiday List",
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Block List",
-				},
-			]
-		},
-		{
 			"label": _("Payroll"),
 			"items": [
 				{
@@ -192,6 +75,184 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Attendance"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Monthly Attendance Sheet",
+					"doctype": "Attendance",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Checkin Sheet",
+					"doctype": "Employee Checkin"
+				},
+				{
+					"type": "doctype",
+					"name": "Attendance",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Attendance Request",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Checkin",
+					"hide_count": True,
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Upload Attendance",
+					"hide_count": True,
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Attendance Tool",
+					"hide_count": True,
+					"dependencies": ["Employee"]
+				},
+			]
+		},
+		{
+			"label": _("Leaves"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Leave Application",
+					"onboard": 1,
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Allocation",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Compensatory Leave Request",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Encashment",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Leave Balance",
+					"doctype": "Leave Application"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Leave Balance Summary",
+					"doctype": "Leave Application"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Leave Ledger Entry",
+					"doctype": "Leave Ledger Entry"
+				},
+			]
+		},
+		{
+			"label": _("Advances and Loans"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Advance",
+					"dependencies": ["Employee"],
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
+					"name": "Loan",
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
+					"name": "Expense Claim",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Loan Application",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Loan Type",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employees Receivable",
+					"doctype": "Expense Claim"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Ledger Summary",
+					"doctype": "Expense Claim"
+				},
+			]
+		},
+		{
+			"label": _("Shift Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Shift Type",
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Request",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Assignment",
+				},
+			]
+		},
+		{
+			"label": _("Leave Configuration"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Leave Policy",
+					"onboard": 1,
+					"dependencies": ["Leave Type"]
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Period",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Holiday List",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Block List",
+				},
+			]
+		},
+		{
 			"label": _("Payroll Configuration"),
 			"items": [
 				{
@@ -220,35 +281,13 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Expenses and Advances"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Expense Claim",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Advance",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employees Receivable",
-					"doctype": "Expense Claim"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employee Ledger Summary",
-					"doctype": "Expense Claim"
-				},
-			]
-		},
-		{
 			"label": _("Employee Tax"),
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Opening Income Tax",
+					"dependencies": ["Employee"]
+				},
 				{
 					"type": "doctype",
 					"name": "Employee Tax Exemption Declaration",
@@ -408,41 +447,6 @@ def get_data():
 					"doctype": "Energy Point Log",
 					"label": _("Energy Point Leaderboard"),
 					"route": "#social/users"
-				},
-			]
-		},
-		{
-			"label": _("Loans"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Loan Application",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Loan"
-				},
-				{
-					"type": "doctype",
-					"name": "Loan Type",
-				},
-			]
-		},
-		{
-			"label": _("Shift Management"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Shift Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Shift Request",
-				},
-				{
-					"type": "doctype",
-					"name": "Shift Assignment",
 				},
 			]
 		},
