@@ -303,18 +303,19 @@ class SalarySlip(TransactionBase):
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
 			leave = frappe.db.sql("""
-				SELECT t1.name,
-					CASE WHEN t1.half_day_date = %(dt)s or t1.to_date = t1.from_date
-					THEN t1.half_day else 0 END
-				FROM `tabLeave Application` t1, `tabLeave Type` t2
-				WHERE t2.name = t1.leave_type
-				AND t2.is_lwp = 1
-				AND t1.docstatus = 1
-				AND t1.employee = %(employee)s
-				AND CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
-				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+				SELECT app.name,
+					CASE WHEN app.half_day_date = %(dt)s or app.to_date = app.from_date
+					THEN app.half_day else 0 END
+				FROM `tabLeave Application` app, `tabLeave Type` type
+				WHERE type.name = app.leave_type
+				AND type.is_lwp = 1
+				AND app.docstatus = 1
+				AND app.employee = %(employee)s
+				AND CASE
+					WHEN type.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(app.salary_slip, '') = ''
+					WHEN type.include_holiday THEN %(dt)s between from_date and to_date and ifnull(app.salary_slip, '') = ''
 				END
-				""".format(holidays), {"employee": self.employee, "dt": dt})
+			""".format(holidays), {"employee": self.employee, "dt": dt})
 
 			if leave:
 				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
@@ -322,11 +323,11 @@ class SalarySlip(TransactionBase):
 		if not cint(frappe.get_cached_value("HR Settings", None, "do_not_consider_absent_as_lwp")):
 			absent = frappe.db.sql("""
 				SELECT sum(CASE
-					WHEN t1.status = 'Half Day' THEN 0.5
-					WHEN t1.status = 'Absent' THEN 1
+					WHEN att.status = 'Half Day' THEN 0.5
+					WHEN att.status = 'Absent' THEN 1
 					ELSE 0 END)
-				FROM `tabAttendance` as t1
-				WHERE t1.docstatus = 1
+				FROM `tabAttendance` as att
+				WHERE att.docstatus = 1
 				AND ifnull(leave_application, '') = ''
 				AND employee = %(employee)s
 				AND attendance_date between %(st_dt)s AND %(end_dt)s
