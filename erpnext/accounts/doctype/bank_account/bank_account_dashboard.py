@@ -13,11 +13,15 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Payments'),
-				'items': ['Payment Entry', 'Payment Request', 'Payment Order', 'Payroll Entry']
+				'items': ['Payment Entry', 'Payment Request', 'Payment Order']
 			},
 			{
 				'label': _('Party'),
-				'items': ['Customer', 'Supplier']
+				'items': ['Customer', 'Supplier', 'Employee']
+			},
+			{
+				'label': _('Payroll'),
+				'items': ['Payroll Entry', 'Salary Slip']
 			},
 			{
 				'items': ['Bank Guarantee']
