@@ -93,28 +93,29 @@ def get_conditions(filters):
 	return " and ".join(conditions)
 
 def get_data(filters):
-
 	data = []
 
-	fields = ["employee", "branch", "bank_name", "bank_ac_no", "salary_mode"]
-	if erpnext.get_region() == "India":
-		fields += ["ifsc_code", "micr_code"]
-
-
-	employee_details = frappe.get_list("Employee", fields = fields)
+	employee_details = frappe.get_list("Employee", fields=["employee", "bank_account", "salary_mode"])
 	employee_data_dict = {}
 
 	for d in employee_details:
-		employee_data_dict.setdefault(
-			d.employee,{
-				"bank_ac_no" : d.bank_ac_no,
-				"ifsc_code" : d.ifsc_code or None,
-				"micr_code" : d.micr_code or  None,
-				"branch" : d.branch,
-				"salary_mode" : d.salary_mode,
-				"bank_name": d.bank_name
-			}
-		)
+		employee_data_dict[d.employee] = {
+			"salary_mode" : d.salary_mode
+		}
+
+		if d.bank_account:
+			bank_account = frappe.get_doc("Bank Account", d.bank_account)
+			employee_data_dict[d.employee].update({
+				"bank_ac_no" : bank_account.iban or bank_account.bank_account_no,
+				"branch" : bank_account.branch,
+				"bank_name": bank_account.bank
+			})
+
+			if erpnext.get_region() == "India":
+				employee_data_dict[d.employee].update({
+					"ifsc_code" : bank_account.ifsc_code,
+					"micr_code" : bank_account.micr_code,
+				})
 
 	conditions = get_conditions(filters)
 
