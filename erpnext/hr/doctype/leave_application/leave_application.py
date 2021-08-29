@@ -43,7 +43,7 @@ class LeaveApplication(Document):
 			self.notify_leave_approver()
 
 	def on_submit(self):
-		if self.status == "Open":
+		if self.status not in ("Approved", "Rejected"):
 			frappe.throw(_("Only Leave Applications with status 'Approved' and 'Rejected' can be submitted"))
 
 		self.validate_back_dated_application()
