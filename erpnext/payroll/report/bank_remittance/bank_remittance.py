@@ -2,10 +2,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import formatdate
-import itertools
-from frappe import _, get_all
+from frappe import _
 
 def execute(filters=None):
 	columns = [
@@ -50,7 +49,7 @@ def execute(filters=None):
 		}
 	]
 
-	if frappe.db.has_column('Employee', 'ifsc_code'):
+	if frappe.db.has_column('Bank Account', 'ifsc_code'):
 		columns.append({
 			"label": _("IFSC Code"),
 			"fieldtype": "Data",
@@ -78,8 +77,8 @@ def execute(filters=None):
 	payroll_entries = get_payroll_entries(accounts, filters)
 	salary_slips = get_salary_slips(payroll_entries)
 
-	if frappe.db.has_column('Employee', 'ifsc_code'):
-		get_emp_bank_ifsc_code(salary_slips)
+	if frappe.db.has_column('Bank Account', 'ifsc_code'):
+		add_ifsc_code(salary_slips)
 
 	for salary in salary_slips:
 		if salary.bank_name and salary.bank_account_no and salary.debit_acc_no and salary.status in ["Submitted", "Paid"]:
@@ -99,7 +98,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_bank_accounts():
-	accounts = [d.name for d in get_all("Account", filters={"account_type": "Bank"})]
+	accounts = [d.name for d in frappe.get_all("Account", filters={"account_type": "Bank"})]
 	return accounts
 
 def get_payroll_entries(accounts, filters):
@@ -114,7 +113,7 @@ def get_payroll_entries(accounts, filters):
 	if filters.from_date:
 		payroll_filter.append(('posting_date', '>', filters.from_date))
 
-	entries = get_all("Payroll Entry", payroll_filter, ["name", "payment_account"])
+	entries = frappe.get_all("Payroll Entry", payroll_filter, ["name", "payment_account"])
 
 	payment_accounts = [d.payment_account for d in entries]
 	entries = set_company_account(payment_accounts, entries)
@@ -122,8 +121,8 @@ def get_payroll_entries(accounts, filters):
 
 def get_salary_slips(payroll_entries):
 	payroll  = [d.name for d in payroll_entries]
-	salary_slips = get_all("Salary Slip", filters = [("payroll_entry", "IN", payroll)],
-		fields = ["modified", "net_pay", "bank_name", "bank_account_no", "payroll_entry", "employee", "employee_name", "status"]
+	salary_slips = frappe.get_all("Salary Slip", filters = [("payroll_entry", "IN", payroll)],
+		fields = ["modified", "net_pay", "bank", "bank_account", "payroll_entry", "employee", "employee_name", "status"]
 	)
 
 	payroll_entry_map = {}
@@ -139,21 +138,12 @@ def get_salary_slips(payroll_entries):
 
 	return salary_slips
 
-def get_emp_bank_ifsc_code(salary_slips):
-	emp_names = [d.employee for d in salary_slips]
-	ifsc_codes = get_all("Employee", [("name", "IN", emp_names)], ["ifsc_code", "name"])
-
-	ifsc_codes_map = {}
-	for code in ifsc_codes:
-		ifsc_codes_map[code.name] = code
-
+def add_ifsc_code(salary_slips):
 	for slip in salary_slips:
-		slip["ifsc_code"] = ifsc_codes_map[code.name]['ifsc_code']
-
-	return salary_slips
+		slip["ifsc_code"] = frappe.get_value("Bank Account", slip.bank_account, "ifsc_code")
 
 def set_company_account(payment_accounts, payroll_entries):
-	company_accounts = get_all("Bank Account", [("account", "in", payment_accounts)], ["account", "bank_account_no"])
+	company_accounts = frappe.get_all("Bank Account", [("account", "in", payment_accounts)], ["account", "bank_account_no"])
 	company_accounts_map = {}
 	for acc in company_accounts:
 		company_accounts_map[acc.account] = acc
