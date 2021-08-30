@@ -55,7 +55,7 @@ def validate_period_closing(gl_map):
 
 	if period_closing:
 		msg = _("You cannot create or cancel any accounting entries within a closed fiscal year.") + '<br><br>'
-		msg += _("You must cancel Period Closing Voucher {} to proceed with entries submission.").format(
+		msg += _("You must cancel Period Closing Voucher {} to proceed with submission/cancellation.").format(
 			frappe.bold(period_closing[0].name))
 
 		frappe.throw(msg, title=_("Fiscal Year Closed"), exc=ClosedAccountingPeriod)
