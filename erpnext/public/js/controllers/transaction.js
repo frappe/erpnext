@@ -342,30 +342,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
-		let scan_barcode_field = this.frm.get_field('scan_barcode');
-		if (scan_barcode_field && scan_barcode_field.get_value()) {
-			scan_barcode_field.set_value("");
-			scan_barcode_field.set_new_description("");
-
-			if (frappe.is_mobile()) {
-				if (scan_barcode_field.$input_wrapper.find('.input-group').length) return;
-
-				let $input_group = $('<div class="input-group">');
-				scan_barcode_field.$input_wrapper.find('.control-input').append($input_group);
-				$input_group.append(scan_barcode_field.$input);
-				$(`<span class="input-group-btn" style="vertical-align: top">
-						<button class="btn btn-default border" type="button">
-							<i class="fa fa-camera text-muted"></i>
-						</button>
-					</span>`)
-					.on('click', '.btn', () => {
-						frappe.barcode.scan_barcode().then(barcode => {
-							scan_barcode_field.set_value(barcode);
-						});
-					})
-					.appendTo($input_group);
-			}
-		}
 	}
 
 	scan_barcode() {
@@ -2266,12 +2242,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	coupon_code() {
 		var me = this;
-		frappe.run_serially([
-			() => this.frm.doc.ignore_pricing_rule=1,
-			() => me.ignore_pricing_rule(),
-			() => this.frm.doc.ignore_pricing_rule=0,
-			() => me.apply_pricing_rule()
-		]);
+		if (this.frm.doc.coupon_code) {
+			frappe.run_serially([
+				() => this.frm.doc.ignore_pricing_rule=1,
+				() => me.ignore_pricing_rule(),
+				() => this.frm.doc.ignore_pricing_rule=0,
+				() => me.apply_pricing_rule()
+			]);
+		} else {
+			frappe.run_serially([
+				() => this.frm.doc.ignore_pricing_rule=1,
+				() => me.ignore_pricing_rule()
+			]);
+		}
 	}
 };
 

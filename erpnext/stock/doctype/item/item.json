@@ -204,6 +204,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_item_from_hub",
    "fieldtype": "Check",
    "label": "Is Item from Hub",
@@ -238,6 +239,7 @@
   {
    "bold": 1,
    "default": "1",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
    "label": "Maintain Stock",
@@ -246,6 +248,7 @@
   },
   {
    "default": "1",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
    "label": "Include Item In Manufacturing"
@@ -282,6 +285,7 @@
    "fieldname": "asset_category",
    "fieldtype": "Link",
    "label": "Asset Category",
+   "mandatory_depends_on": "is_fixed_asset",
    "options": "Asset Category"
   },
   {
@@ -434,8 +438,8 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.has_batch_no || doc.has_serial_no || doc.is_fixed_asset",
-   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
+   "collapsible_depends_on": "eval:doc.has_batch_no || doc.has_serial_no",
+   "depends_on": "eval:doc.is_stock_item",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
    "label": "Serial Nos and Batches"
@@ -492,7 +496,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
+   "depends_on": "eval:doc.is_stock_item",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
    "label": "Has Serial No",
@@ -510,6 +514,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "attributes",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "variants_section",
    "fieldtype": "Section Break",
    "label": "Variants"
@@ -540,6 +545,7 @@
    "options": "Item Variant Attribute"
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "defaults",
    "fieldtype": "Section Break",
    "label": "Sales, Purchase, Accounting Defaults"
@@ -621,6 +627,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "supplier_details",
    "fieldtype": "Section Break",
    "label": "Supplier Details"
@@ -668,6 +675,7 @@
   },
   {
    "collapsible": 1,
+   "default": "eval:!doc.is_fixed_asset",
    "fieldname": "sales_details",
    "fieldtype": "Section Break",
    "label": "Sales Details",
@@ -761,6 +769,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "customer_details",
    "fieldtype": "Section Break",
    "label": "Customer Details"
@@ -791,6 +800,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "inspection_criteria",
    "fieldtype": "Section Break",
    "label": "Inspection Criteria",
@@ -861,6 +871,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "website_section",
    "fieldtype": "Section Break",
    "label": "Website",
@@ -987,7 +998,7 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:(!doc.is_item_from_hub)",
+   "depends_on": "eval:(!doc.is_item_from_hub && !doc.is_fixed_asset)",
    "fieldname": "hub_publishing_sb",
    "fieldtype": "Section Break",
    "label": "Hub Publishing Details"
@@ -1021,7 +1032,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)",
@@ -1029,7 +1040,7 @@
    "oldfieldtype": "Currency"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Float",
    "label": "Over Billing Allowance (%)"
@@ -1067,7 +1078,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-07-13 01:29:06.071827",
+ "modified": "2021-08-26 12:23:07.277077",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

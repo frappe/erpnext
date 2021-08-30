@@ -62,6 +62,3 @@ def create_cost_center(**args):
 			cc.is_group = args.is_group or 0
 			cc.parent_cost_center = args.parent_cost_center or "_Test Company - _TC"
 			cc.insert()
-
-
-

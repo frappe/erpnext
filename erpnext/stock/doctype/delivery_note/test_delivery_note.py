@@ -430,12 +430,19 @@ class TestDeliveryNote(unittest.TestCase):
 		})
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
+		customer_name = create_internal_customer(
+			customer_name="_Test Internal Customer 2",
+			represents_company="_Test Company with perpetual inventory",
+			allowed_to_interact_with="_Test Company with perpetual inventory"
+		)
 
 		set_valuation_method("_Test Item", "FIFO")
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")
 
-		target_warehouse=get_warehouse(company=company, abbr="TCP1",
+		target_warehouse = get_warehouse(company=company, abbr="TCP1",
 			warehouse_name="_Test Customer Warehouse").name
 
 		for warehouse in ("Stores - TCP1", target_warehouse):
@@ -444,10 +451,16 @@ class TestDeliveryNote(unittest.TestCase):
 			create_stock_reconciliation(item_code="_Test Item Home Desktop 100", company = company,
 				expense_account = "Stock Adjustment - TCP1", warehouse=warehouse, qty=500, rate=100)
 
-		dn = create_delivery_note(item_code="_Test Product Bundle Item",
-			company='_Test Company with perpetual inventory', cost_center = 'Main - TCP1',
-			expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True, qty=5, rate=500,
-			warehouse="Stores - TCP1", target_warehouse=target_warehouse)
+		dn = create_delivery_note(
+			item_code="_Test Product Bundle Item",
+			company="_Test Company with perpetual inventory",
+			customer=customer_name,
+			cost_center = 'Main - TCP1',
+			expense_account = "Cost of Goods Sold - TCP1",
+			do_not_submit=True,
+			qty=5, rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse=target_warehouse)
 
 		dn.submit()
 
@@ -486,6 +499,9 @@ class TestDeliveryNote(unittest.TestCase):
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
+
+		# tear down
+		frappe.db.rollback()
 
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
@@ -772,7 +788,7 @@ class TestDeliveryNote(unittest.TestCase):
 		so.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=10)
-		
+
 		si = create_sales_invoice(qty=10, do_not_save=1)
 		si.items[0].delivery_note= dn.name
 		si.items[0].dn_detail = dn.items[0].name

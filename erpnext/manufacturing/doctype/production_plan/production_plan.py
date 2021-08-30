@@ -213,7 +213,6 @@ class ProductionPlan(Document):
 					})
 
 			pi = self.append('po_items', {
-				'include_exploded_items': 1,
 				'warehouse': data.warehouse,
 				'item_code': data.item_code,
 				'description': data.description or item_details.description,
@@ -224,6 +223,7 @@ class ProductionPlan(Document):
 				'planned_start_date': now_datetime(),
 				'product_bundle_item': data.parent_item
 			})
+			pi._set_defaults()
 
 			if self.get_items_from == "Sales Order":
 				pi.sales_order = data.parent
@@ -297,7 +297,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.total_produced_qty == self.total_planned_qty:
+			if self.total_produced_qty >= self.total_planned_qty:
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -346,6 +346,7 @@ class ProductionPlan(Document):
 				"production_plan"       : self.name,
 				"production_plan_item"  : d.name,
 				"product_bundle_item"	: d.product_bundle_item,
+				"planned_start_date"    : d.planned_start_date,
 				"make_work_order_for_sub_assembly_items": d.get("make_work_order_for_sub_assembly_items", 0)
 			}
 
