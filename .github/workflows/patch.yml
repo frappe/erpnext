@@ -7,6 +7,9 @@ on:
       - '**.md'
   workflow_dispatch:
 
+concurrency:
+  group: patch-develop-${{ github.event.number }}
+  cancel-in-progress: true
 
 jobs:
   test:
