@@ -64,7 +64,7 @@ def create_transaction(doc, method):
 	tax_dict['amount'] = doc.total + tax_dict['shipping']
 
 	try:
-		if tax_dict['amount']<0:
+		if doc.is_return:
 			client.create_refund(tax_dict)
 		else:	
 			client.create_order(tax_dict)
