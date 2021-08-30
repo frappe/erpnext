@@ -2,9 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Full and Final Statement', {
-	onload: function(frm) {
+	refresh: function(frm) {
 		frm.events.set_queries(frm, "payables");
 		frm.events.set_queries(frm, "receivables");
+
+		if (frm.doc.docstatus == 1 && frm.doc.status == "Unpaid") {
+			frm.add_custom_button(__("Create Journal Entry"), function () {
+				frm.events.create_journal_entry(frm);
+			});
+		}
 	},
 
 	set_queries: function(frm, type) {
@@ -19,22 +25,29 @@ frappe.ui.form.on('Full and Final Statement', {
 			};
 		});
 
-		frm.set_query("reference_document", type, function () {
-			return {
-				filters: {
-					employee: frm.doc.employee,
-					company: frm.doc.company,
+		let filters = {};
+
+		frm.set_query('reference_document', type, function(doc, cdt, cdn) {
+			let fnf_doc = frappe.get_doc(cdt, cdn);
+
+			frappe.model.with_doctype(fnf_doc.reference_document_type, function() {
+				if (frappe.model.is_tree(fnf_doc.reference_document_type)) {
+					filters['is_group'] = 0;
 				}
+
+				if (frappe.meta.has_field(fnf_doc.reference_document_type, 'company')) {
+					filters['company'] = frm.doc.company;
+				}
+
+				if (frappe.meta.has_field(fnf_doc.reference_document_type, 'employee')) {
+					filters['employee'] = frm.doc.employee;
+				}
+			});
+
+			return {
+				filters: filters
 			};
 		});
-	},
-
-	refresh: function(frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.status == "Unpaid") {
-			frm.add_custom_button(__("Create Journal Entry"), function () {
-				frm.events.create_journal_entry(frm);
-			});
-		}
 	},
 
 	employee: function(frm) {
