@@ -385,6 +385,9 @@ def check_if_advance_entry_modified(args):
 		check if amount is same
 		check if jv is submitted
 	"""
+	if not args.get('unreconciled_amount'):
+		args.update({'unreconciled_amount': args.get('unadjusted_amount')})
+
 	ret = None
 	if args.voucher_type == "Journal Entry":
 		ret = frappe.db.sql("""
@@ -406,14 +409,14 @@ def check_if_advance_entry_modified(args):
 					and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 					and t1.party_type = %(party_type)s and t1.party = %(party)s and t1.{0} = %(account)s
 					and t2.reference_doctype in ("", "Sales Order", "Purchase Order")
-					and t2.allocated_amount = %(unadjusted_amount)s
+					and t2.allocated_amount = %(unreconciled_amount)s
 			""".format(party_account_field), args)
 		else:
 			ret = frappe.db.sql("""select name from `tabPayment Entry`
 				where
 					name = %(voucher_no)s and docstatus = 1
 					and party_type = %(party_type)s and party = %(party)s and {0} = %(account)s
-					and unallocated_amount = %(unadjusted_amount)s
+					and unallocated_amount = %(unreconciled_amount)s
 			""".format(party_account_field), args)
 
 	if not ret:

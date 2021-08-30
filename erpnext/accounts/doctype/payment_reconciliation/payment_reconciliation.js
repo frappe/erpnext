@@ -2,44 +2,9 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.accounts");
-
-frappe.ui.form.on("Payment Reconciliation Allocation", {
-	invoice_number: function(frm, cdt, cdn) {
-		var row = locals[cdt][cdn];
-		if(row.invoice_number) {
-			var invoice_type = row.invoice_type;
-			var invoice_number = row.invoice_number;
-
-			var invoice_amount = frm.doc.invoices.filter(function(d) {
-				return d.invoice_type === invoice_type && d.invoice_number === invoice_number;
-			})[0].outstanding_amount;
-
-			frappe.model.set_value(cdt, cdn, "allocated_amount", Math.min(invoice_amount, row.amount));
-
-			frm.call({
-				doc: frm.doc,
-				method: 'get_difference_amount',
-				args: {
-					child_row: row
-				},
-				callback: function(r, rt) {
-					if(r.message) {
-						frappe.model.set_value(cdt, cdn,
-							"difference_amount", r.message);
-					}
-				}
-			});
-		}
-	}
-});
-
 erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationController extends frappe.ui.form.Controller {
 	onload() {
 		var me = this;
-
-		this.frm.set_query("party", function() {
-			check_mandatory(me.frm);
-		});
 
 		this.frm.set_query("party_type", function() {
 			return {
@@ -158,9 +123,6 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				invoices: invoices
 			},
 			callback: function(r) {
-				if (!r.exc && r.message) {
-					me.frm.set_value("allocation", r.message);
-				}
 				me.frm.refresh();
 			}
 		});

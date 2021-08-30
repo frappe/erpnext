@@ -12,12 +12,14 @@
   "invoice_number",
   "section_break_6",
   "allocated_amount",
+  "unreconciled_amount",
+  "amount",
   "column_break_8",
   "is_advance",
   "section_break_5",
-  "difference_account",
+  "difference_amount",
   "column_break_7",
-  "difference_amount"
+  "difference_account"
  ],
  "fields": [
   {
@@ -48,9 +50,9 @@
   {
    "fieldname": "difference_account",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Difference Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_7",
@@ -61,7 +63,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Difference Amount",
-   "options": "Currency"
+   "options": "Currency",
+   "read_only": 1
   },
   {
    "fieldname": "reference_name",
@@ -102,11 +105,27 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unreconciled_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Unreconciled Amount",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Amount",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-08-26 16:24:40.647797",
+ "modified": "2021-08-30 10:58:42.665107",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",
