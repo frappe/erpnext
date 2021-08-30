@@ -543,10 +543,10 @@ def make_custom_fields(update=True):
 				insert_after='branch_code'
 			),
 			dict(
-				fieldname =  'micr_code',
-				label = 'MICR Code',
-				fieldtype = 'Data',
-				insert_after = 'ifsc_code'
+				fieldname='micr_code',
+				label='MICR Code',
+				fieldtype='Data',
+				insert_after='ifsc_code'
 			)
 		],
 		'Employee': [
