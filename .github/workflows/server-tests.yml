@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
 
     strategy:
@@ -113,7 +113,7 @@ jobs:
     name: Coverage Wrap Up
     needs: test
     container: python:3-slim
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Clone
         uses: actions/checkout@v2
