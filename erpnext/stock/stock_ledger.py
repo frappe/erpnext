@@ -677,7 +677,7 @@ class update_entries_after(object):
 					self.wh_data.stock_queue.append([actual_qty, incoming_rate])
 				else:
 					qty = self.wh_data.stock_queue[-1][0] + actual_qty
-					self.wh_data.stock_queue[-1] = [qty, incoming_rate]
+					self.wh_data.stock_queue[-1][0] = qty
 		else:
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:
