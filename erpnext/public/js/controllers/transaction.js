@@ -871,20 +871,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 
 			// Get default company billing address in Purchase Invoice, Order and Receipt
-			if (frm.doc.company && frappe.meta.get_docfield(this.frm.doctype, "billing_address")) {
+			if (this.frm.doc.company && frappe.meta.get_docfield(this.frm.doctype, "billing_address")) {
 				frappe.call({
 					method: "erpnext.setup.doctype.company.company.get_default_company_address",
-					args: {name:this.frm.doc.company, existing_address: this.frm.doc.billing_address || ""},
+					args: {name: this.frm.doc.company, existing_address: this.frm.doc.billing_address || ""},
 					debounce: 2000,
 					callback: function(r) {
 						if (r.message) {
-							me.frm.set_value("billing_address",r.message)
-						}
-						else {
-							ke.frm.set_value("company_address","")
+							me.frm.set_value("billing_address", r.message);
+						} else {
+							me.frm.set_value("company_address", "");
 						}
 					}
-				})
+				});
 			}
 
 		} else {
