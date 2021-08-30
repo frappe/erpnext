@@ -745,7 +745,7 @@ def add_leaves(events, start, end, filter_conditions=None):
 			"docstatus": d.docstatus,
 			"color": d.color,
 			"all_day": int(not d.half_day),
-			"title": cstr(d.employee_name)  + f' ({d.leave_type})'  + (' ' + _('(Half Day)') if d.half_day else ''),
+			"title": cstr(d.employee_name) + f' ({cstr(d.leave_type)})' + (' ' + _('(Half Day)') if d.half_day else ''),
 		}
 		if e not in events:
 			events.append(e)
