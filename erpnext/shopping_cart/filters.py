@@ -57,6 +57,10 @@ class ProductFiltersBuilder:
 
 	def get_attribute_filters(self):
 		attributes = [row.attribute for row in self.doc.filter_attributes]
+
+		if not attributes:
+			return []
+
 		result = frappe.db.sql(
 			"""
 			select
