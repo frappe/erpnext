@@ -288,6 +288,7 @@ class TestProductionPlan(unittest.TestCase):
 		self.assertEqual(warehouses, expected_warehouses)
 
 	def test_get_sales_order_with_variant(self):
+		rm_item = create_item('PIV_RM', valuation_rate = 100)
 		if not frappe.db.exists('Item', {"item_code": 'PIV'}):
 			item = create_item('PIV', valuation_rate = 100)
 			variant_settings = {
@@ -300,20 +301,20 @@ class TestProductionPlan(unittest.TestCase):
 			}
 			item.update(variant_settings)
 			item.save()
-			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+			parent_bom = make_bom(item = 'PIV', raw_materials = [rm_item.item_code])
 		if not frappe.db.exists('BOM', {"item": 'PIV'}):
-			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+			parent_bom = make_bom(item = 'PIV', raw_materials = [rm_item.item_code])
 		else:
 			parent_bom = frappe.get_doc('BOM', {"item": 'PIV'})
 
 		if not frappe.db.exists('Item', {"item_code": 'PIV-RED'}):
 			variant = create_variant("PIV", {"Colour": "Red"})
 			variant.save()
-			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [rm_item.item_code])
 		else:
 			variant = frappe.get_doc('Item', 'PIV-RED')
 		if not frappe.db.exists('BOM', {"item": 'PIV-RED'}):
-			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [rm_item.item_code])
 
 		"""Testing when item variant has a BOM"""
 		so = make_sales_order(item_code="PIV-RED", qty=5)

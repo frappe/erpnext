@@ -3,10 +3,14 @@ import frappe
 
 def execute():
 	company = frappe.get_all('Company', filters = {'country': 'India'})
-	if not company or not frappe.db.count('E Invoice User'):
+
+	if not company:
 		return
 
 	frappe.reload_doc("regional", "doctype", "e_invoice_user")
+	if not frappe.db.count('E Invoice User'):
+		return
+
 	for creds in frappe.db.get_all('E Invoice User', fields=['name', 'gstin']):
 		company_name = frappe.db.sql("""
 			select dl.link_name from `tabAddress` a, `tabDynamic Link` dl
