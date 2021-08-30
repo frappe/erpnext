@@ -10,6 +10,8 @@ from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
@@ -1106,6 +1108,45 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(si1.outstanding_amount)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
 
+	def test_gle_made_when_asset_is_returned(self):
+		create_asset_data()
+
+		pi = frappe.new_doc('Purchase Invoice')
+		pi.supplier = '_Test Supplier'
+		pi.append('items', {
+			'item_code': 'Macbook Pro',
+			'qty': 1
+		})
+		pi.set_missing_values()
+		
+		asset = create_asset(item_code="Macbook Pro")
+	
+		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
+		return_si = create_sales_invoice(is_return=1, return_against=si.name, item_code="Macbook Pro", asset=asset.name, qty=-1, rate=90000)
+
+		disposal_account = frappe.get_cached_value("Company", "_Test Company", "disposal_account")
+
+		# Asset value is 100,000 but it was sold for 90,000, so there should be a loss of 10,000
+		loss_for_si = frappe.get_all(
+			"GL Entry", 
+			filters = {
+				"voucher_no": si.name,
+				"account": disposal_account
+			},
+			fields = ["credit", "debit"]
+		)[0]
+
+		loss_for_return_si = frappe.get_all(
+			"GL Entry", 
+			filters = {
+				"voucher_no": return_si.name,
+				"account": disposal_account
+			},
+			fields = ["credit", "debit"]
+		)[0]
+
+		self.assertEqual(loss_for_si['credit'], loss_for_return_si['debit'])
+		self.assertEqual(loss_for_si['debit'], loss_for_return_si['credit'])
 
 	def test_incoming_rate_for_stand_alone_credit_note(self):
 		return_si = create_sales_invoice(is_return=1, update_stock=1, qty=-1, rate=90000, incoming_rate=10,
@@ -2108,6 +2149,30 @@ class TestSalesInvoice(unittest.TestCase):
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 		enable_discount_accounting(enable=0)
 
+	def test_asset_depreciation_on_sale(self):
+		"""
+			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on Sept 30.
+		"""
+
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
+		post_depreciation_entries(getdate("2021-09-30"))
+
+		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-09-30"))
+		asset.load_from_db()
+
+		expected_values = [
+			["2020-06-30", 1311.48, 1311.48],
+			["2021-06-30", 20000.0, 21311.48],
+			["2021-09-30", 3966.76, 25278.24]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+			self.assertTrue(schedule.journal_entry)
+
 	def test_sales_invoice_against_supplier(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import make_customer
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
@@ -2360,6 +2425,7 @@ def create_sales_invoice(**args):
 		"price_list_rate": args.price_list_rate if args.get("price_list_rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"asset": args.asset or None,
 		"discount_account": args.discount_account or None,
 		"discount_amount": args.discount_amount or 0,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",

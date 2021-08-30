@@ -55,6 +55,11 @@ class BankTransaction(StatusUpdater):
 				self.clear_sales_invoice(payment_entry, for_cancel=for_cancel)
 
 	def clear_simple_entry(self, payment_entry, for_cancel=False):
+		if payment_entry.payment_document == "Payment Entry":
+			if frappe.db.get_value("Payment Entry", payment_entry.payment_entry, "payment_type") == "Internal Transfer":
+				if len(get_reconciled_bank_transactions(payment_entry)) < 2:
+					return
+
 		clearance_date = self.date if not for_cancel else None
 		frappe.db.set_value(
 			payment_entry.payment_document, payment_entry.payment_entry,
@@ -69,6 +74,17 @@ class BankTransaction(StatusUpdater):
 				parent=payment_entry.payment_entry
 			),
 			"clearance_date", clearance_date)
+
+def get_reconciled_bank_transactions(payment_entry):
+	reconciled_bank_transactions = frappe.get_all(
+		'Bank Transaction Payments', 
+		filters = {
+			'payment_entry': payment_entry.payment_entry
+		},
+		fields = ['parent']
+	)
+
+	return reconciled_bank_transactions
 
 def get_total_allocated_amount(payment_entry):
 	return frappe.db.sql("""
