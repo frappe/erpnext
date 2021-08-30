@@ -104,7 +104,7 @@ class Supplier(TransactionBase):
 
 	def on_trash(self):
 		if self.supplier_primary_contact:
-			frappe.db.sql(f"""
+			frappe.db.sql("""
 				UPDATE `tabSupplier`
 				SET
 					supplier_primary_contact=null,
@@ -112,7 +112,7 @@ class Supplier(TransactionBase):
 					mobile_no=null,
 					email_id=null,
 					primary_address=null
-				WHERE name='{self.name}'""")
+				WHERE name=%(name)s""", {"name": self.name})
 
 		delete_contact_and_address('Supplier', self.name)
 
