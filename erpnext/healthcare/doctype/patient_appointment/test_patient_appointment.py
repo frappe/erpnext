@@ -66,7 +66,7 @@ class TestPatientAppointment(unittest.TestCase):
 		medical_department = create_medical_department()
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
-		appointment_type = create_appointment_type()
+		appointment_type = create_appointment_type({'medical_department': medical_department})
 
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2),
 			invoice=1, appointment_type=appointment_type.name, department=medical_department)
@@ -91,9 +91,9 @@ class TestPatientAppointment(unittest.TestCase):
 				'op_consulting_charge': 300
 		}]
 		appointment_type = create_appointment_type(args={
-				'name': 'Generic Appointment Type charge',
-				'items': items
-			})
+			'name': 'Generic Appointment Type charge',
+			'items': items
+		})
 
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2),
 			invoice=1, appointment_type=appointment_type.name)
@@ -408,9 +408,9 @@ def create_appointment_type(args=None):
 	else:
 		item = create_healthcare_service_items()
 		items = [{
-				'medical_department': '_Test Medical Department',
-				'op_consulting_charge_item': item,
-				'op_consulting_charge': 200
+			'medical_department': args.get('medical_department') or '_Test Medical Department',
+			'op_consulting_charge_item': item,
+			'op_consulting_charge': 200
 		}]
 		return frappe.get_doc({
 			'doctype': 'Appointment Type',
