@@ -70,7 +70,7 @@ class Project(Document):
 				subject = task_details.subject,
 				project = self.name,
 				status = 'Open',
-				item=task_details.item,
+				item_code=task_details.item_code,
 				is_milestone=task_details.is_milestone,
 				exp_start_date = self.calculate_start_date(task_details),
 				exp_end_date = self.calculate_end_date(task_details),
