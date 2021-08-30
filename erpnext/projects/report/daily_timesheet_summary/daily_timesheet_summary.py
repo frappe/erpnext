@@ -20,8 +20,8 @@ def execute(filters=None):
 	return columns, data
 
 def get_column():
-	return [_("Timesheet") + ":Link/Timesheet:120", _("Employee") + "::150", _("Employee Name") + "::150", 
-		_("From Datetime") + "::140", _("To Datetime") + "::140", _("Hours") + "::70", 
+	return [_("Timesheet") + ":Link/Timesheet:120", _("Employee") + "::150", _("Employee Name") + "::150",
+		_("From Datetime") + "::140", _("To Datetime") + "::140", _("Hours") + "::70",
 		_("Activity Type") + "::120", _("Task") + ":Link/Task:150",
 		_("Project") + ":Link/Project:120", _("Status") + "::70"]
 

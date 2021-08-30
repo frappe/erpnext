@@ -80,5 +80,4 @@ def get_interview_details(job_applicant):
 	for detail in interview_detail:
 		interview_detail_map[detail.name] = detail
 
-	return interview_detail_map
-
+	return interview_detail_map		

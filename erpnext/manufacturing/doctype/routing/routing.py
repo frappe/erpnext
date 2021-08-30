@@ -4,13 +4,23 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint
+from frappe.utils import cint, flt
 from frappe import _
 from frappe.model.document import Document
 
 class Routing(Document):
 	def validate(self):
+		self.calculate_operating_cost()
 		self.set_routing_id()
+
+	def on_update(self):
+		self.calculate_operating_cost()
+
+	def calculate_operating_cost(self):
+		for operation in self.operations:
+			if not operation.hour_rate:
+				operation.hour_rate = frappe.db.get_value("Workstation", operation.workstation, 'hour_rate')
+			operation.operating_cost = flt(flt(operation.hour_rate) * flt(operation.time_in_mins) / 60, 2)
 
 	def set_routing_id(self):
 		sequence_id = 0

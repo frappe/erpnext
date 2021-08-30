@@ -21,4 +21,3 @@ class QualityFeedback(Document):
 			self.document_type ='User'
 			self.document_name = frappe.session.user
 		self.set_parameters()
-

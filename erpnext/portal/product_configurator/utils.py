@@ -2,6 +2,7 @@ import frappe
 from frappe.utils import cint
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
 from erpnext.shopping_cart.product_info import get_product_info_for_website
+from erpnext.setup.doctype.item_group.item_group import get_child_groups
 
 def get_field_filter_data():
 	product_settings = get_product_settings()
@@ -89,6 +90,7 @@ def get_products_for_website(field_filters=None, attribute_filters=None, search=
 def get_products_html_for_website(field_filters=None, attribute_filters=None):
 	field_filters = frappe.parse_json(field_filters)
 	attribute_filters = frappe.parse_json(attribute_filters)
+	set_item_group_filters(field_filters)
 
 	items = get_products_for_website(field_filters, attribute_filters)
 	html = ''.join(get_html_for_items(items))
@@ -97,6 +99,10 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 		html = frappe.render_template('erpnext/www/all-products/not_found.html', {})
 
 	return html
+
+def set_item_group_filters(field_filters):
+	if field_filters is not None and 'item_group' in field_filters:
+		field_filters['item_group'] = [ig[0] for ig in get_child_groups(field_filters['item_group'])]
 
 
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):

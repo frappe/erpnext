@@ -37,6 +37,7 @@ class TestPickList(unittest.TestCase):
 			'company': '_Test Company',
 			'customer': '_Test Customer',
 			'items_based_on': 'Sales Order',
+			'purpose': 'Delivery',
 			'locations': [{
 				'item_code': '_Test Item',
 				'qty': 5,
@@ -90,6 +91,7 @@ class TestPickList(unittest.TestCase):
 			'company': '_Test Company',
 			'customer': '_Test Customer',
 			'items_based_on': 'Sales Order',
+			'purpose': 'Delivery',
 			'locations': [{
 				'item_code': '_Test Item Warehouse Group Wise Reorder',
 				'qty': 1000,
@@ -135,6 +137,7 @@ class TestPickList(unittest.TestCase):
 			'company': '_Test Company',
 			'customer': '_Test Customer',
 			'items_based_on': 'Sales Order',
+			'purpose': 'Delivery',
 			'locations': [{
 				'item_code': '_Test Serialized Item',
 				'qty': 1000,
@@ -264,6 +267,7 @@ class TestPickList(unittest.TestCase):
 			'company': '_Test Company',
 			'customer': '_Test Customer',
 			'items_based_on': 'Sales Order',
+			'purpose': 'Delivery',
 			'locations': [{
 				'item_code': '_Test Item',
 				'qty': 5,
@@ -319,6 +323,7 @@ class TestPickList(unittest.TestCase):
 			'company': '_Test Company',
 			'customer': '_Test Customer',
 			'items_based_on': 'Sales Order',
+			'purpose': 'Delivery',
 			'locations': [{
 				'item_code': '_Test Item',
 				'qty': 1,

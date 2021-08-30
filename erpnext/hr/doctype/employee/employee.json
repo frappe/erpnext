@@ -207,7 +207,7 @@
    "label": "Status",
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Active\nInactive\nLeft",
+   "options": "Active\nInactive\nSuspended\nLeft",
    "reqd": 1,
    "search_index": 1
   },
@@ -813,7 +813,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2021-06-12 11:31:37.730760",
+ "modified": "2021-06-17 11:31:37.730760",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
