@@ -252,7 +252,7 @@ class Customer(TransactionBase):
 
 	def on_trash(self):
 		if self.customer_primary_contact:
-			frappe.db.sql(f"""
+			frappe.db.sql("""
 				UPDATE `tabCustomer`
 				SET
 					customer_primary_contact=null,
@@ -260,7 +260,7 @@ class Customer(TransactionBase):
 					mobile_no=null,
 					email_id=null,
 					primary_address=null
-				WHERE name='{self.name}'""")
+				WHERE name=%(name)s""", {"name": self.name})
 
 		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
