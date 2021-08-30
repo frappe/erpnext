@@ -102,11 +102,11 @@ class JournalEntry(AccountsController):
 
 	def update_status_for_full_and_final_statement(self):
 		for entry in self.accounts:
-			if entry.reference_type == "Full And Final Statement":
+			if entry.reference_type == "Full and Final Statement":
 				if self.docstatus == 1:
-					frappe.db.set_value("Full And Final Statement", entry.reference_name, "status", "Paid")
+					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Paid")
 				elif self.docstatus == 2:
-					frappe.db.set_value("Full And Final Statement", entry.reference_name, "status", "Unpaid")
+					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Unpaid")
 
 
 	def validate_inter_company_accounts(self):
