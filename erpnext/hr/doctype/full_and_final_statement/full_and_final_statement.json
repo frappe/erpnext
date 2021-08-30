@@ -122,6 +122,8 @@
    "fetch_from": "employee.company",
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "read_only": 1
@@ -148,6 +150,7 @@
   {
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "in_standard_filter": 1,
    "label": "Transaction Date",
    "reqd": 1
   },
@@ -159,6 +162,7 @@
   {
    "fieldname": "total_payable_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total Payable Amount",
    "read_only": 1
   },
@@ -169,14 +173,15 @@
   {
    "fieldname": "total_receivable_amount",
    "fieldtype": "Currency",
-   "label": "Total Receivable Amount,",
+   "in_list_view": 1,
+   "label": "Total Receivable Amount",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-20 16:52:12.384571",
+ "modified": "2021-08-30 21:11:09.892560",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Full and Final Statement",
@@ -221,5 +226,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "employee_name",
  "track_changes": 1
 }
