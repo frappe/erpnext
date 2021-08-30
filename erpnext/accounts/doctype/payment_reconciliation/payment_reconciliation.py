@@ -285,8 +285,10 @@ class PaymentReconciliation(Document):
 			frappe.throw(_("No records found in Allocation table"))
 
 	def get_conditions(self, get_invoices=False, get_payments=False, get_return_invoices=False):
+		condition = " and company = '{0}' ".format(self.company)
+
 		if get_invoices:
-			condition = " and posting_date >= {0}".format(frappe.db.escape(self.from_invoice_date)) if self.from_invoice_date else ""
+			condition += " and posting_date >= {0}".format(frappe.db.escape(self.from_invoice_date)) if self.from_invoice_date else ""
 			condition += " and posting_date <= {0}".format(frappe.db.escape(self.to_invoice_date)) if self.to_invoice_date else ""
 			dr_or_cr = ("debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
 				else "credit_in_account_currency")
@@ -296,9 +298,9 @@ class PaymentReconciliation(Document):
 			if self.maximum_invoice_amount:
 				condition += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_invoice_amount))
 
-			return condition
 		elif get_return_invoices:
-			condition = " and gl.posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
+			condition = " and gl.company = '{0}' ".format(self.company)
+			condition += " and gl.posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
 			condition += " and gl.posting_date <= {0}".format(frappe.db.escape(self.to_payment_date)) if self.to_payment_date else ""
 			dr_or_cr = ("gl.debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
 				else "gl.credit_in_account_currency")
@@ -308,9 +310,8 @@ class PaymentReconciliation(Document):
 			if self.maximum_invoice_amount:
 				condition += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_payment_amount))
 
-			return condition
 		else:
-			condition = " and posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
+			condition += " and posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
 			condition += " and posting_date <= {0}".format(frappe.db.escape(self.to_payment_date)) if self.to_payment_date else ""
 
 			if self.minimum_payment_amount:
@@ -320,7 +321,7 @@ class PaymentReconciliation(Document):
 				condition += " and unallocated_amount <= {0}".format(flt(self.maximum_payment_amount)) if get_payments \
 					else " and total_debit <= {0}".format(flt(self.maximum_payment_amount))
 
-			return condition
+		return condition
 
 def reconcile_dr_cr_note(dr_cr_notes, company):
 	for inv in dr_cr_notes:

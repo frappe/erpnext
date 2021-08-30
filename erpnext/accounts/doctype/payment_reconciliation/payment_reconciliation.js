@@ -70,8 +70,18 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		}
 	}
 
+	company() {
+		var me = this;
+		this.frm.set_value('receivable_payable_account', '');
+		me.frm.clear_table("allocation");
+		me.frm.clear_table("invoices");
+		me.frm.clear_table("payments");
+		me.frm.refresh_fields();
+		me.frm.trigger('party');
+	}
+
 	party() {
-		var me = this
+		var me = this;
 		if (!me.frm.doc.receivable_payable_account && me.frm.doc.party_type && me.frm.doc.party) {
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
