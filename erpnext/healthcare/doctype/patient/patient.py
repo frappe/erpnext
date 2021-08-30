@@ -8,24 +8,27 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, getdate
 import dateutil
+from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.naming import set_name_by_naming_series
 from frappe.utils.nestedset import get_root_of
 from erpnext import get_default_currency
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account, send_registration_sms
+from erpnext.accounts.party import get_dashboard_info
 
 class Patient(Document):
+	def onload(self):
+		'''Load address and contacts in `__onload`'''
+		load_address_and_contact(self)
+		self.load_dashboard_info()
+
 	def validate(self):
 		self.set_full_name()
-		self.add_as_website_user()
 
 	def before_insert(self):
 		self.set_missing_customer_details()
 
 	def after_insert(self):
-		self.add_as_website_user()
-		self.reload()
-		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient') and not self.customer:
-			create_customer(self)
 		if frappe.db.get_single_value('Healthcare Settings', 'collect_registration_fee'):
 			frappe.db.set_value('Patient', self.name, 'status', 'Disabled')
 		else:
@@ -49,6 +52,16 @@ class Patient(Document):
 			else:
 				create_customer(self)
 
+		self.set_contact() # add or update contact
+
+		if not self.user_id and self.email and self.invite_user:
+			self.create_website_user()
+
+	def load_dashboard_info(self):
+		if self.customer:
+			info = get_dashboard_info('Customer', self.customer, None)
+			self.set_onload('dashboard_info', info)
+
 	def set_full_name(self):
 		if self.last_name:
 			self.patient_name = ' '.join(filter(None, [self.first_name, self.last_name]))
@@ -71,18 +84,24 @@ class Patient(Document):
 		if not self.language:
 			self.language = frappe.db.get_single_value('System Settings', 'language')
 
-	def add_as_website_user(self):
-		if self.email:
-			if not frappe.db.exists ('User', self.email):
-				user = frappe.get_doc({
-					'doctype': 'User',
-					'first_name': self.first_name,
-					'last_name': self.last_name,
-					'email': self.email,
-					'user_type': 'Website User'
-				})
-				user.flags.ignore_permissions = True
-				user.add_roles('Patient')
+	def create_website_user(self):
+		if self.email and not frappe.db.exists('User', self.email):
+			user = frappe.get_doc({
+				'doctype': 'User',
+				'first_name': self.first_name,
+				'last_name': self.last_name,
+				'email': self.email,
+				'user_type': 'Website User',
+				'gender': self.sex,
+				'phone': self.phone,
+				'mobile_no': self.mobile,
+				'birth_date': self.dob
+			})
+			user.flags.ignore_permissions = True
+			user.enabled = True
+			user.send_welcome_email = True
+			user.add_roles('Patient')
+			frappe.db.set_value(self.doctype, self.name, 'user_id', user.name)
 
 	def autoname(self):
 		patient_name_by = frappe.db.get_single_value('Healthcare Settings', 'patient_name_by')
@@ -114,7 +133,7 @@ class Patient(Document):
 		age = self.age
 		if not age:
 			return
-		age_str = str(age.years) + ' ' + _("Years(s)") + ' ' + str(age.months) + ' ' + _("Month(s)") + ' ' + str(age.days) + ' ' + _("Day(s)")
+		age_str = f'{str(age.years)} {_("Years(s)")} {str(age.months)} {_("Month(s)")} {str(age.days)} {_("Day(s)")}'
 		return age_str
 
 	@frappe.whitelist()
@@ -130,6 +149,58 @@ class Patient(Document):
 			send_registration_sms(self)
 
 			return {'invoice': sales_invoice.name}
+
+	def set_contact(self):
+		if frappe.db.exists('Dynamic Link', {'parenttype':'Contact', 'link_doctype':'Patient', 'link_name':self.name}):
+			old_doc = self.get_doc_before_save()
+			if old_doc.email != self.email or old_doc.mobile != self.mobile or old_doc.phone != self.phone:
+				self.update_contact()
+		else:
+			self.reload()
+			if self.email or self.mobile or self.phone:
+				contact = frappe.get_doc({
+					'doctype': 'Contact',
+					'first_name': self.first_name,
+					'middle_name': self.middle_name,
+					'last_name': self.last_name,
+					'gender': self.sex,
+					'is_primary_contact': 1
+				})
+				contact.append('links', dict(link_doctype='Patient', link_name=self.name))
+				if self.customer:
+					contact.append('links', dict(link_doctype='Customer', link_name=self.customer))
+
+				contact.insert(ignore_permissions=True)
+				self.update_contact(contact) # update email, mobile and phone
+
+	def update_contact(self, contact=None):
+		if not contact:
+			contact_name = get_default_contact(self.doctype, self.name)
+			if contact_name:
+				contact = frappe.get_doc('Contact', contact_name)
+
+		if contact:
+			if self.email and self.email != contact.email_id:
+				for email in contact.email_ids:
+					email.is_primary = True if email.email_id == self.email else False
+				contact.add_email(self.email, is_primary=True)
+				contact.set_primary_email()
+
+			if self.mobile and self.mobile != contact.mobile_no:
+				for mobile in contact.phone_nos:
+					mobile.is_primary_mobile_no = True if mobile.phone == self.mobile else False
+				contact.add_phone(self.mobile, is_primary_mobile_no=True)
+				contact.set_primary('mobile_no')
+
+			if self.phone and self.phone != contact.phone:
+				for phone in contact.phone_nos:
+					phone.is_primary_phone = True if phone.phone == self.phone else False
+				contact.add_phone(self.phone, is_primary_phone=True)
+				contact.set_primary('phone')
+
+		contact.flags.ignore_validate = True # disable hook TODO: safe?
+		contact.save(ignore_permissions=True)
+
 
 def create_customer(doc):
 	customer = frappe.get_doc({
@@ -156,8 +227,8 @@ def make_invoice(patient, company):
 	sales_invoice.debit_to = get_receivable_account(company)
 
 	item_line = sales_invoice.append('items')
-	item_line.item_name = 'Registeration Fee'
-	item_line.description = 'Registeration Fee'
+	item_line.item_name = 'Registration Fee'
+	item_line.description = 'Registration Fee'
 	item_line.qty = 1
 	item_line.uom = uom
 	item_line.conversion_factor = 1
@@ -181,8 +252,11 @@ def get_patient_detail(patient):
 	return details
 
 def get_timeline_data(doctype, name):
-	"""Return timeline data from medical records"""
-	return dict(frappe.db.sql('''
+	'''
+	Return Patient's timeline data from medical records
+	Also include the associated Customer timeline data
+	'''
+	patient_timeline_data = dict(frappe.db.sql('''
 		SELECT
 			unix_timestamp(communication_date), count(*)
 		FROM
@@ -191,3 +265,11 @@ def get_timeline_data(doctype, name):
 			patient=%s
 			and `communication_date` > date_sub(curdate(), interval 1 year)
 		GROUP BY communication_date''', name))
+
+	customer = frappe.db.get_value(doctype, name, 'customer')
+	if customer:
+		from erpnext.accounts.party import get_timeline_data
+		customer_timeline_data = get_timeline_data('Customer', customer)
+		patient_timeline_data.update(customer_timeline_data)
+
+	return patient_timeline_data
