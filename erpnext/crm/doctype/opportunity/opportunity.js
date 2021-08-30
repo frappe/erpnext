@@ -144,14 +144,19 @@ frappe.ui.form.on("Opportunity", {
 				callback: function(r) {
 					if (r.message) {
 						frm.set_value('conversion_rate', flt(r.message));
-						frm.set_df_property("conversion_rate", "description", "1 " + frm.doc.currency
-						+ " = [?] " + company_currency);	
+						frm.set_df_property('conversion_rate', 'description', '1 ' + frm.doc.currency
+						+ ' = [?] ' + company_currency);
 					}
 				}
 			});
+		} else {
+			frm.set_value('conversion_rate', 1.0);
+			frm.set_df_property('conversion_rate', 'hidden', 1);
+			frm.set_df_property('conversion_rate', 'description', '');
 		}
+
 		frm.trigger('opportunity_amount');
-		frm.trigger("set_dynamic_field_label");
+		frm.trigger('set_dynamic_field_label');
 	},
 
 	opportunity_amount: function(frm) {
@@ -184,6 +189,10 @@ frappe.ui.form.on("Opportunity", {
 		let company_currency = erpnext.get_currency(frm.doc.company);
 		frm.set_currency_labels(["base_opportunity_amount", "base_total"], company_currency);
 		frm.set_currency_labels(["opportunity_amount", "total"], frm.doc.currency);
+
+		// toggle fields
+		frm.toggle_display(["conversion_rate", "base_opportunity_amount", "base_total"],
+			frm.doc.currency != company_currency);
 	},
 
 	change_grid_labels: function(frm) {
