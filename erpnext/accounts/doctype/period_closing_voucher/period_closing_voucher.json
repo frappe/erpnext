@@ -7,6 +7,7 @@
  "field_order": [
   "transaction_date",
   "posting_date",
+  "year_start_date",
   "fiscal_year",
   "amended_from",
   "company",
@@ -90,13 +91,20 @@
    "fieldname": "cost_center_wise_pnl",
    "fieldtype": "Check",
    "label": "Book Cost Center Wise Profit/Loss"
+  },
+  {
+   "fieldname": "year_start_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Year Start Date",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-20 15:27:37.210458",
+ "modified": "2021-08-30 20:15:25.639122",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Period Closing Voucher",

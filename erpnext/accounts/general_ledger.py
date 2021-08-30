@@ -15,6 +15,7 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
+			validate_period_closing(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
@@ -44,6 +45,20 @@ def validate_accounting_period(gl_map):
 	if accounting_periods:
 		frappe.throw(_("You cannot create or cancel any accounting entries with in the closed Accounting Period {0}")
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
+
+def validate_period_closing(gl_map):
+	period_closing = frappe.db.get_all('Period Closing Voucher', filters={
+		'posting_date': ['>', gl_map[0].posting_date],
+		'year_start_date': ['<=', gl_map[0].posting_date],
+		'docstatus': 1
+	})
+
+	if period_closing:
+		msg = _("You cannot create or cancel any accounting entries within a closed fiscal year.") + '<br><br>'
+		msg += _("You must cancel Period Closing Voucher {} to proceed with entries submission.").format(
+			frappe.bold(period_closing[0].name))
+
+		frappe.throw(msg, title=_("Fiscal Year Closed"), exc=ClosedAccountingPeriod)
 
 def process_gl_map(gl_map, merge_entries=True, precision=None):
 	if merge_entries:
@@ -251,6 +266,7 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 	if gl_entries:
 		validate_accounting_period(gl_entries)
+		validate_period_closing(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 		set_as_cancel(gl_entries[0]['voucher_type'], gl_entries[0]['voucher_no'])
 
