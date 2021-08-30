@@ -5,11 +5,12 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import flt, today, add_days
 from erpnext.accounts.utils import get_fiscal_year, now
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.general_ledger import ClosedAccountingPeriod
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
@@ -56,6 +57,20 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		""", (pcv.name))
 
 		self.assertEqual(pcv_gle, expected_gle)
+
+		# test gl entry creation after fiscal year is closed
+		jv1 = make_journal_entry(
+			amount=400,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=cost_center,
+			posting_date=add_days(today(), -1),
+			save=False
+		)
+		jv1.company = company
+		jv1.save()
+		
+		self.assertRaises(ClosedAccountingPeriod, jv1.submit)
 
 	def test_cost_center_wise_posting(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
