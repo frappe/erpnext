@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
+from erpnext.accounts.utils import check_and_delete_linked_reports
 
 def execute():
 	reports_to_delete = ["Requested Items To Be Ordered",
@@ -13,7 +14,7 @@ def execute():
 	for report in reports_to_delete:
 		if frappe.db.exists("Report", report):
 			delete_auto_email_reports(report)
-			check_linked_reports(report)
+			check_and_delete_linked_reports(report)
 
 			frappe.delete_doc("Report", report)
 
@@ -22,13 +23,3 @@ def delete_auto_email_reports(report):
 	auto_email_reports = frappe.db.get_values("Auto Email Report", {"report": report}, ["name"])
 	for auto_email_report in auto_email_reports:
 		frappe.delete_doc("Auto Email Report", auto_email_report[0])
-
-def check_linked_reports(report):
-	""" Check if reports are referenced in Desktop Icon """
-	icons = frappe.get_all("Desktop Icon",
-						fields = ['name'],
-						filters = {
-							"_report": report
-						})
-	if icons:
-		frappe.delete_doc("Desktop Icon", icons)

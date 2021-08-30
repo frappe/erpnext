@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.patches.v13_0.delete_old_purchase_reports import check_linked_reports
+from erpnext.accounts.utils import check_and_delete_linked_reports
 
 def execute():
 	reports_to_delete = ["Ordered Items To Be Delivered", "Ordered Items To Be Billed"]
@@ -12,7 +12,7 @@ def execute():
 	for report in reports_to_delete:
 		if frappe.db.exists("Report", report):
 			delete_auto_email_reports(report)
-			check_linked_reports(report)
+			check_and_delete_linked_reports(report)
 
 			frappe.delete_doc("Report", report)
 
