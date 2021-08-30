@@ -24,10 +24,16 @@ def execute(filters=None):
 		if not fifo_queue: continue
 
 		average_age = get_average_age(fifo_queue, to_date)
+<<<<<<< HEAD
 
 		if fifo_queue:
 			earliest_age = date_diff(to_date, fifo_queue[0][1])
 			latest_age = date_diff(to_date, fifo_queue[-1][1])
+=======
+		earliest_age = date_diff(to_date, fifo_queue[0][1])
+		latest_age = date_diff(to_date, fifo_queue[-1][1])
+		range1, range2, range3, above_range3 = get_range_age(filters, fifo_queue, to_date, item_dict)
+>>>>>>> 5fd04101d4 (fix: Stock Ageing report issues for serialized items (#27228))
 
 		row = [details.name, details.item_name,
 			details.description, details.item_group, details.brand]
@@ -54,7 +60,29 @@ def get_average_age(fifo_queue, to_date):
 			age_qty += batch_age * 1
 			total_qty += 1
 
+<<<<<<< HEAD
 	return (age_qty / total_qty) if total_qty else 0.0
+=======
+	return flt(age_qty / total_qty, 2) if total_qty else 0.0
+
+def get_range_age(filters, fifo_queue, to_date, item_dict):
+	range1 = range2 = range3 = above_range3 = 0.0
+
+	for item in fifo_queue:
+		age = date_diff(to_date, item[1])
+		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
+
+		if age <= filters.range1:
+			range1 += qty
+		elif age <= filters.range2:
+			range2 += qty
+		elif age <= filters.range3:
+			range3 += qty
+		else:
+			above_range3 += qty
+
+	return range1, range2, range3, above_range3
+>>>>>>> 5fd04101d4 (fix: Stock Ageing report issues for serialized items (#27228))
 
 def get_columns(filters):
 	columns = [
@@ -175,9 +203,7 @@ def get_fifo_queue(filters, sle=None):
 					fifo_queue.append([d.actual_qty, d.posting_date])
 		else:
 			if serial_no_list:
-				for serial_no in fifo_queue:
-					if serial_no[0] in serial_no_list:
-						fifo_queue.remove(serial_no)
+				fifo_queue[:] = [serial_no for serial_no in fifo_queue if serial_no[0] not in serial_no_list]
 			else:
 				qty_to_pop = abs(d.actual_qty)
 				while qty_to_pop:
@@ -200,14 +226,16 @@ def get_fifo_queue(filters, sle=None):
 		else:
 			item_details[key]["total_qty"] += d.actual_qty
 
+		item_details[key]["has_serial_no"] = d.has_serial_no
+
 	return item_details
 
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select
-			item.name, item.item_name, item_group, brand, description, item.stock_uom,
+			item.name, item.item_name, item_group, brand, description, item.stock_uom, item.has_serial_no,
 			actual_qty, posting_date, voucher_type, voucher_no, serial_no, batch_no, qty_after_transaction, warehouse
 		from `tabStock Ledger Entry` sle,
-			(select name, item_name, description, stock_uom, brand, item_group
+			(select name, item_name, description, stock_uom, brand, item_group, has_serial_no
 				from `tabItem` {item_conditions}) item
 		where item_code = item.name and
 			company = %(company)s and
