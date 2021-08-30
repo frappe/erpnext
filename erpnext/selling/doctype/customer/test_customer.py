@@ -352,3 +352,26 @@ def set_credit_limit(customer, company, credit_limit):
 			'credit_limit': credit_limit
 		})
 		customer.credit_limits[-1].db_insert()
+
+def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
+	if not frappe.db.exists("Customer", customer_name):
+		customer = frappe.get_doc({
+			"doctype": "Customer",
+			"customer_group": "_Test Customer Group",
+			"customer_name": customer_name,
+			"customer_type": "Individual",
+			"territory": "_Test Territory",
+			"is_internal_customer": 1,
+			"represents_company": represents_company
+		})
+
+		customer.append("companies", {
+			"company": allowed_to_interact_with
+		})
+
+		customer.insert()
+		customer_name = customer.name
+	else:
+		customer_name = frappe.db.get_value("Customer", customer_name)
+
+	return customer_name

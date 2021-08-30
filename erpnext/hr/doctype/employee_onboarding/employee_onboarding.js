@@ -50,28 +50,13 @@ frappe.ui.form.on('Employee Onboarding', {
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-		if (frm.doc.docstatus === 1 && frm.doc.project) {
-			frappe.call({
-				method: "erpnext.hr.utils.get_boarding_status",
-				args: {
-					"project": frm.doc.project
-				},
-				callback: function(r) {
-					if (r.message) {
-						frm.set_value('boarding_status', r.message);
-					}
-					refresh_field("boarding_status");
-				}
-			});
-		}
-
 	},
 
 	employee_onboarding_template: function(frm) {
 		frm.set_value("activities" ,"");
 		if (frm.doc.employee_onboarding_template) {
 			frappe.call({
-				method: "erpnext.hr.utils.get_onboarding_details",
+				method: "erpnext.controllers.employee_boarding_controller.get_onboarding_details",
 				args: {
 					"parent": frm.doc.employee_onboarding_template,
 					"parenttype": "Employee Onboarding Template"

@@ -1,0 +1,21 @@
+{
+ "action": "Go to Page",
+ "action_label": "Let's walk-through Chart of Accounts to review setup",
+ "creation": "2021-08-13 14:23:09.297765",
+ "description": "# Fixed Asset Accounts\n\nWith the company, a host of fixed asset accounts are pre-configured. To ensure your asset transactions are leading to correct accounting entries, you can review and set up following asset accounts as per your business  requirements.\n - Fixed asset accounts (Asset account)\n - Accumulated depreciation\n - Capital Work in progress (CWIP) account\n - Asset Depreciation account (Expense account)",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-24 17:46:37.646174",
+ "modified_by": "Administrator",
+ "name": "Fixed Asset Accounts",
+ "owner": "Administrator",
+ "path": "app/account/view/tree",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Review Fixed Asset Accounts",
+ "validate_action": 1
+}

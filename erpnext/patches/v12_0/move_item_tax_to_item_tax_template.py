@@ -91,8 +91,9 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 	item_tax_template.title = make_autoname("Item Tax Template-.####")
 
 	for tax_type, tax_rate in iteritems(item_tax_map):
-		account_details = frappe.db.get_value("Account", tax_type, ['name', 'account_type'], as_dict=1)
+		account_details = frappe.db.get_value("Account", tax_type, ['name', 'account_type', 'company'], as_dict=1)
 		if account_details:
+			item_tax_template.company = account_details.company
 			if account_details.account_type not in ('Tax', 'Chargeable', 'Income Account', 'Expense Account', 'Expenses Included In Valuation'):
 				frappe.db.set_value('Account', account_details.name, 'account_type', 'Chargeable')
 		else:

@@ -16,8 +16,6 @@ def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	if not filters: filters = {}
 
-	validate_filters(filters)
-
 	from_date = filters.get('from_date')
 	to_date = filters.get('to_date')
 
@@ -237,12 +235,15 @@ def filter_items_with_no_transactions(iwb_map, float_precision):
 	return iwb_map
 
 def get_items(filters):
+	"Get items based on item code, item group or brand."
 	conditions = []
 	if filters.get("item_code"):
 		conditions.append("item.name=%(item_code)s")
 	else:
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
+		if filters.get("brand"): # used in stock analytics report
+			conditions.append("item.brand=%(brand)s")
 
 	items = []
 	if conditions:
@@ -294,12 +295,6 @@ def get_item_reorder_details(items):
 		""".format(', '.join(frappe.db.escape(i, percent=False) for i in items)), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
-
-def validate_filters(filters):
-	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
-		if sle_count > 500000:
-			frappe.throw(_("Please set filter based on Item or Warehouse due to a large amount of entries."))
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''
