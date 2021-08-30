@@ -2,9 +2,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-
 import json
 import frappe
+from operator import itemgetter
 
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.utils import add_days, today
@@ -14,9 +14,13 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 	create_landed_cost_voucher,
 )
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+	make_purchase_receipt,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDatedStockTransaction
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import (
+	BackDatedStockTransaction,
+)
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
@@ -352,6 +356,9 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			user.remove_roles("Stock Manager")
 
 	def test_batchwise_item_valuation_fifo(self):
+		frappe.db.commit()
+		frappe.db.begin()
+
 		item, warehouses, batches = setup_batchwise_item_valuation_test(
 			valuation_method="FIFO", suffix="010"
 		)
@@ -390,9 +397,12 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				"Incorrect 'Incoming Rate' values fetched for DN items"
 			)
 
-		delete_sle_entries_by_item_code(item)
+		frappe.db.rollback()
 
 	def test_batchwise_item_valuation_moving_average(self):
+		frappe.db.commit()
+		frappe.db.begin()
+
 		item, warehouses, batches = setup_batchwise_item_valuation_test(
 			valuation_method="Moving Average", suffix="001"
 		)
@@ -431,10 +441,13 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				"Incorrect 'Incoming Rate' values fetched for DN items"
 			)
 
-		delete_sle_entries_by_item_code(item)
+		frappe.db.rollback()
+
 
 	def test_batchwise_item_valuation_stock_reco(self):
-		get_q_value = lambda q: sum(r*q for r,q in json.loads(q))
+		frappe.db.commit()
+		frappe.db.begin()
+
 		item, warehouses, batches = setup_batchwise_item_valuation_test(
 			valuation_method="FIFO", suffix="000"
 		)
@@ -456,7 +469,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		], as_dict=0)
 		for (svd, sv, sq, aq, qat), (*_, qty, rate) in zip(sle_details, sr_entry_list_os):
 			expected_sv = rate * qty
-			sv_from_q = get_q_value(sq)
+			sv_from_q = get_stock_value_from_q(sq)
 			self.assertTrue((qty == aq) and (aq == qat))
 			self.assertTrue((expected_sv == svd) and (svd == sv))
 			self.assertEqual(expected_sv, sv_from_q)
@@ -464,7 +477,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		# Check Stock Reconciliation entries
 		sr_entry_list_sr = [
 			(item, warehouses[0], batches[1], 5, 50),
-			(item, warehouses[0], batches[0], 20, 75),
+			(item, warehouses[0], batches[0], 20, 75)
 		]
 		srs = create_stock_reco_entries_for_batchwise_item_valuation_test(
 			sr_entry_list_sr, purpose="Stock Reconciliation"
@@ -483,18 +496,162 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			(*([sr_entry_list_sr[1][-1] * sr_entry_list_sr[1][-2]]*3), *([sr_entry_list_sr[1][-2]]*2)),
 			(-sr_entry_list_os[1][-1] * sr_entry_list_os[1][-2], 0, 0, -sr_entry_list_os[1][-2], 0)
 		]
-		key = lambda sd: -sd[0]
-		sle_details = [*sorted(sle_details[:2],key=key), *sorted(sle_details[2:],key=key)]
+
+		sle_details = [
+			*sorted(sle_details[:2], key=lambda sd: -sd[0]),
+			*sorted(sle_details[2:], key=lambda sd: -sd[0])
+		]
 		for sd, ed in zip(sle_details, expected_details):
 			svd, sv, sq, aq, qat = sd
 			ex_svd, ex_sv, ex_sqv, ex_aq, ex_qat = ed
 			self.assertEqual(svd, ex_svd)
 			self.assertEqual(sv, ex_sv)
-			self.assertEqual(get_q_value(sq), ex_sqv)
+			self.assertEqual(get_stock_value_from_q(sq), ex_sqv)
 			self.assertEqual(aq, ex_aq)
 			self.assertEqual(qat, ex_qat)
 
-		delete_sle_entries_by_item_code(item)
+		frappe.db.rollback()
+
+	def test_batchwise_item_valuation_stock_entry(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
+		frappe.db.commit()
+		frappe.db.begin()
+
+		columns = [
+				'stock_value_difference',
+				'stock_value',
+				'actual_qty',
+				'qty_after_transaction',
+				'stock_queue',
+		]
+		item, warehouses, batches = setup_batchwise_item_valuation_test(
+			valuation_method="FIFO", suffix="001"
+		)
+		def check_sle_details_against_expected(sle_details, expected_sle_details, detail, columns):
+			for i, (sle_vals, ex_sle_vals) in enumerate(zip(sle_details, expected_sle_details)):
+				for col, sle_val, ex_sle_val in zip(columns, sle_vals, ex_sle_vals):
+					if col == 'stock_queue':
+						sle_val = get_stock_value_from_q(sle_val)
+						ex_sle_val = get_stock_value_from_q(ex_sle_val)
+					self.assertEqual(
+						sle_val, ex_sle_val,
+						f"Incorrect {col} value on transaction #: {i} in {detail}"
+					)
+
+		# List used to defer assertions to prevent commits cause of error skipped rollback
+		details_list = []
+
+
+		# Test Material Receipt Entries
+		se_entry_list_mr = [
+			(item, None, warehouses[0], batches[0], 1,  75, "2021-01-21"),
+			(item, None, warehouses[0], batches[1], 1, 100, "2021-01-23"),
+			(item, None, warehouses[0], batches[1], 1, 150, "2021-01-25"),
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_mr, "Material Receipt"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			( 75.0,  75.0, 1.0, 1.0, '[[1.0, 75.0]]'),
+			(100.0, 100.0, 1.0, 1.0, '[[1.0, 100.0]]'),
+			(150.0, 250.0, 1.0, 2.0, '[[1.0, 100.0], [1.0, 150.0]]')
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Receipt Entries", columns
+		))
+
+
+		# Test Material Transfer Entries
+		se_entry_list_mt = [
+			(item, warehouses[0], warehouses[1], batches[1], 1, None, "2021-01-27"),
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_mt, "Material Transfer"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		sle_details = sorted(sle_details, key=itemgetter(2))
+		expected_sle_details = [
+			(-100.0, 150.0, -1.0, 1.0, '[[1.0, 150.0]]'),
+			( 100.0, 100.0,  1.0, 1.0, '[[1.0, 100.0]]')
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Transfer Entries", columns
+		))
+
+
+		# Test Material Issue Entries
+		se_entry_list_mi = [
+			(item, warehouses[0], None, batches[1], 1, None, "2021-01-29"),
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_mi, "Material Issue"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			(-150.0, 0.0, -1.0, 0.0, '[[0, 150.0]]')
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Issue Entries", columns
+		))
+
+
+		# Test Backdated Material Receipt Entries
+		se_entry_list_bd_mr = [
+			(item, None, warehouses[1], batches[1], 1, 150, "2021-01-19"),
+			(item, None, warehouses[1], batches[0], 1, 200, "2021-01-17")
+		]
+		# Prevent Repost from commiting (check RepostItemValuation.on_submit)
+		frappe.flags.in_test = False
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_bd_mr, "Material Receipt"
+		)
+		frappe.flags.in_test = True
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			(200.0, 200.0, 1.0, 1.0, '[[1.0, 200.0]]'),
+			(150.0, 150.0, 1.0, 1.0, '[[1.0, 150.0]]')
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Backdated Material Receipt Entries", columns
+		))
+
+
+		# Run post-backdated-SE Repost SLE
+		repost_entry_name = frappe.db.sql(f"""
+			SELECT name FROM `tabRepost Item Valuation`
+			WHERE voucher_no='{ses[0].name}'""")[0][0]
+		repost_entry_doc = frappe.get_doc("Repost Item Valuation", repost_entry_name)
+		repost_sl_entries(repost_entry_doc)
+
+
+		# Material Issue to Test Backdated Material Receipt Entries
+		se_entry_list_tbd_mi = [
+			(item, warehouses[1], None, batches[1], 2, None, "2021-01-31")
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_tbd_mi, "Material Issue"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			(-250.0, 0.0, -2.0, 0.0, '[[0, 125.0]]'),
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Issue to Test Backdated Entries", columns
+		))
+
+
+		frappe.db.rollback()
+
+		# Run assertions
+		for details in details_list:
+			check_sle_details_against_expected(*details)
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
@@ -607,33 +764,14 @@ def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list
 		dns.append(dn)
 	return dns
 
-def delete_sle_entries_by_item_code(item_code):
-	to_delete = frappe.db.sql(f"""
-		SELECT name, voucher_no, voucher_type
-		FROM `tabStock Ledger Entry`
-		WHERE item_code = '{item_code}'
-		ORDER BY TIMESTAMP(posting_date, posting_time) DESC
-	""")
-	for sle_name, voucher_no, voucher_type in to_delete:
-		try:
-			doc = frappe.get_doc(voucher_type, voucher_no)
-			if doc.docstatus != 2:
-				doc.cancel()
-		except frappe.DoesNotExistError:
-			pass
-		finally:
-			doc = frappe.get_doc("Stock Ledger Entry", sle_name)
-			if doc.docstatus != 2:
-				doc.cancel()
-			doc.delete()
-
 def fetch_sle_details_for_doc_list(doc_list, columns, as_dict=1):
 	return frappe.db.sql(f"""
 		SELECT { ', '.join(columns)}
 		FROM `tabstock Ledger Entry`
 		WHERE
 			voucher_no IN %(voucher_nos)s
-		ORDER BY posting_time ASC
+			and docstatus = 1
+		ORDER BY timestamp(posting_date, posting_time) ASC
 	""", dict(
 		voucher_nos=[doc.name for doc in doc_list]
 	), as_dict=as_dict)
@@ -651,3 +789,39 @@ def create_stock_reco_entries_for_batchwise_item_valuation_test(sr_entry_list, p
 		)
 		srs.append(sr)
 	return srs
+
+def get_stock_value_from_q(q):
+	return sum(r*q for r,q in json.loads(q))
+
+def create_stock_entry_entries_for_batchwise_item_valuation_test(se_entry_list, purpose):
+	ses = []
+	for item, source, target, batch, qty, rate, posting_date in se_entry_list:
+		args = dict(
+			item_code=item,
+			qty=qty,
+			company="_Test Company",
+			batch_no=batch,
+			posting_date=posting_date,
+			purpose=purpose
+		)
+
+		if purpose == "Material Receipt":
+			args.update(
+				dict(to_warehouse=target, rate=rate)
+			)
+
+		elif purpose == "Material Issue":
+			args.update(
+				dict(from_warehouse=source)
+			)
+
+		elif purpose == "Material Transfer":
+			args.update(
+				dict(from_warehouse=source, to_warehouse=target)
+			)
+
+		else:
+			raise ValueError(f"Invalid purpose: {purpose}")
+		ses.append(make_stock_entry(**args))
+
+	return ses

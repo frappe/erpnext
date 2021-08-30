@@ -142,14 +142,20 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 	while i < len(args):
 		validate_item_warehouse(args[i])
 
-		obj = update_entries_after({
-			'item_code': args[i].get('item_code'),
-			'warehouse': args[i].get('warehouse'),
-			'posting_date': args[i].get('posting_date'),
-			'posting_time': args[i].get('posting_time'),
-			'creation': args[i].get('creation'),
-			'distinct_item_warehouses': distinct_item_warehouses
-		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
+		args_for_update_after_entries = {
+			"item_code": args[i].get('item_code'),
+			"warehouse": args[i].get('warehouse'),
+			"posting_date": args[i].get('posting_date'),
+			"posting_time": args[i].get('posting_time'),
+			"creation": args[i].get("creation"),
+			"distinct_item_warehouses": distinct_item_warehouses
+		}
+		if args[i].get('batch_no'):
+			args_for_update_after_entries.update({'batch_no': args[i].get('batch_no')})
+		obj = update_entries_after(
+			args_for_update_after_entries, allow_negative_stock=allow_negative_stock,
+			via_landed_cost_voucher=via_landed_cost_voucher
+		)
 
 		distinct_item_warehouses[(args[i].get('item_code'), args[i].get('warehouse'))].reposting_status = True
 
@@ -197,7 +203,7 @@ def get_items_to_be_repost(voucher_type, voucher_no, doc=None):
 
 	return frappe.db.get_all("Stock Ledger Entry",
 		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-		fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
+		fields=["item_code", "warehouse", "posting_date", "posting_time", "creation", "batch_no"],
 		order_by="creation asc",
 		group_by="item_code, warehouse"
 	)
