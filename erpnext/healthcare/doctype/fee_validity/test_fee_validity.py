@@ -27,7 +27,7 @@ class TestFeeValidity(unittest.TestCase):
 		healthcare_settings.automate_appointment_invoicing = 1
 		healthcare_settings.op_consulting_charge_item = item
 		healthcare_settings.save(ignore_permissions=True)
-		patient, medical_department, practitioner = create_healthcare_docs()
+		patient, practitioner = create_healthcare_docs()
 
 		# For first appointment, invoice is generated. First appointment not considered in fee validity
 		appointment = create_appointment(patient, practitioner, nowdate())
