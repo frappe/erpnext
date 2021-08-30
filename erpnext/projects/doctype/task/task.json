@@ -12,7 +12,7 @@
   "issue",
   "type",
   "color",
-  "item",
+  "item_code",
   "is_group",
   "is_template",
   "column_break0",
@@ -393,9 +393,9 @@
    "mandatory_depends_on": "eval: doc.status == \"Completed\""
   },
   {
-   "fieldname": "item",
+   "fieldname": "item_code",
    "fieldtype": "Link",
-   "label": "Item",
+   "label": "Item Code",
    "mandatory_depends_on": "eval:doc.is_template",
    "options": "Item"
   }
@@ -405,7 +405,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-08-26 15:05:08.657655",
+ "modified": "2021-08-30 18:56:27.402701",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
