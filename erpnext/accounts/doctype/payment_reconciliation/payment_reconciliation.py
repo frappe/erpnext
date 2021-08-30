@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import flt, today
+from frappe.utils import flt, today, getdate, nowdate
 from frappe import msgprint, _
 from frappe.model.document import Document
 from erpnext.accounts.utils import (get_outstanding_invoices,
@@ -125,7 +125,7 @@ class PaymentReconciliation(Document):
 				'party_type': self.party_type,
 				'voucher_type': voucher_type,
 				'account': self.receivable_payable_account
-			}, as_dict=1, debug=1)
+			}, as_dict=1)
 
 	def add_payment_entries(self, non_reconciled_payments):
 		self.set('payments', [])
@@ -184,8 +184,6 @@ class PaymentReconciliation(Document):
 			else:
 				break
 
-		allocated_entries = []
-
 		self.set('allocation', [])
 		for entry in entries:
 			if entry['allocated_amount'] != 0:
@@ -194,15 +192,15 @@ class PaymentReconciliation(Document):
 
 	def get_allocated_entry(self, pay, inv, allocated_amount):
 		return frappe._dict({
-		'reference_type': pay.get('reference_type'),
-		'reference_name': pay.get('reference_name'),
-		'reference_row': pay.get('reference_row'),
-		'invoice_type': inv.get('invoice_type'),
-		'invoice_number': inv.get('invoice_number'),
-		'unreconciled_amount': pay.get('unreconciled_amount'),
-		'amount': pay.get('amount'),
-		'allocated_amount': allocated_amount,
-		'difference_amount': pay.get('difference_amount')
+			'reference_type': pay.get('reference_type'),
+			'reference_name': pay.get('reference_name'),
+			'reference_row': pay.get('reference_row'),
+			'invoice_type': inv.get('invoice_type'),
+			'invoice_number': inv.get('invoice_number'),
+			'unreconciled_amount': pay.get('unreconciled_amount'),
+			'amount': pay.get('amount'),
+			'allocated_amount': allocated_amount,
+			'difference_amount': pay.get('difference_amount')
 		})
 
 	@frappe.whitelist()
@@ -265,21 +263,17 @@ class PaymentReconciliation(Document):
 
 	def validate_allocation(self):
 		unreconciled_invoices = frappe._dict()
-		unreconciled_payments = frappe._dict()
 
 		for inv in self.get("invoices"):
 			unreconciled_invoices.setdefault(inv.invoice_type, {}).setdefault(inv.invoice_number, inv.outstanding_amount)
-		for pay in self.get("payments"):
-			unreconciled_payments.setdefault(pay.reference_type, {}).setdefault(pay.reference_name, pay.amount)
 
 		invoices_to_reconcile = []
 		for row in self.get("allocation"):
 			if row.invoice_type and row.invoice_number and row.allocated_amount:
 				invoices_to_reconcile.append(row.invoice_number)
 
-				payment_amount = unreconciled_payments.get(row.reference_type, {}).get(row.reference_name)
 				if flt(row.amount) - flt(row.allocated_amount) < 0:
-					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equal to unadjusted payment amount {2}")
+					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equal to remaining payment amount {2}")
 						.format(row.idx, row.allocated_amount, row.amount))
 
 				invoice_outstanding = unreconciled_invoices.get(row.invoice_type, {}).get(row.invoice_number)

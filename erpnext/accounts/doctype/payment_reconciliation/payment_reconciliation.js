@@ -122,7 +122,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				payments: payments,
 				invoices: invoices
 			},
-			callback: function(r) {
+			callback: function() {
 				me.frm.refresh();
 			}
 		});
