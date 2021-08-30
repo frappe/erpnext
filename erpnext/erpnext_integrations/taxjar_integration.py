@@ -1,4 +1,5 @@
 import traceback
+import frappe
 import taxjar
 from erpnext import get_default_company
 from frappe import _
