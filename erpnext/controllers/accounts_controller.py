@@ -2099,9 +2099,19 @@ class AccountsController(TransactionBase):
 				)
 				self.append("payment_schedule", data)
 
+<<<<<<< HEAD
 		allocate_payment_based_on_payment_terms = frappe.db.get_value(
 			"Payment Terms Template", self.payment_terms_template, "allocate_payment_based_on_payment_terms"
 		)
+=======
+		for d in self.get("payment_schedule"):
+			if d.invoice_portion:
+				d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+				d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
+				d.outstanding = d.payment_amount
+			elif not d.invoice_portion:
+				d.base_payment_amount = flt(d.payment_amount * self.get("conversion_rate"), d.precision('base_payment_amount'))
+>>>>>>> a1e5a64a66 (fix: payment terms on Sales Order when Invoice Portion field is empty)
 
 		if not (
 			automatically_fetch_payment_terms
