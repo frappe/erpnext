@@ -527,6 +527,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		item, warehouses, batches = setup_batchwise_item_valuation_test(
 			valuation_method="FIFO", suffix="001"
 		)
+
 		def check_sle_details_against_expected(sle_details, expected_sle_details, detail, columns):
 			for i, (sle_vals, ex_sle_vals) in enumerate(zip(sle_details, expected_sle_details)):
 				for col, sle_val, ex_sle_val in zip(columns, sle_vals, ex_sle_vals):
@@ -553,7 +554,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		)
 		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
 		expected_sle_details = [
-			( 75.0,  75.0, 1.0, 1.0, '[[1.0, 75.0]]'),
+			(75.0, 75.0, 1.0, 1.0, '[[1.0, 75.0]]'),
 			(100.0, 100.0, 1.0, 1.0, '[[1.0, 100.0]]'),
 			(150.0, 250.0, 1.0, 2.0, '[[1.0, 100.0], [1.0, 150.0]]')
 		]
@@ -574,7 +575,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		sle_details = sorted(sle_details, key=itemgetter(2))
 		expected_sle_details = [
 			(-100.0, 150.0, -1.0, 1.0, '[[1.0, 150.0]]'),
-			( 100.0, 100.0,  1.0, 1.0, '[[1.0, 100.0]]')
+			(100.0, 100.0, 1.0, 1.0, '[[1.0, 100.0]]')
 		]
 		details_list.append((
 			sle_details, expected_sle_details,

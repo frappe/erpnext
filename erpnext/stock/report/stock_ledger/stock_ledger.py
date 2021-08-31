@@ -223,12 +223,15 @@ def get_opening_balance(filters, columns):
 		return
 
 	from erpnext.stock.stock_ledger import get_previous_sle
-	last_entry = get_previous_sle({
+	last_entry_args = {
 		"item_code": filters.item_code,
 		"warehouse_condition": get_warehouse_condition(filters.warehouse),
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
-	})
+	}
+	if filters.get('batch_no'):
+		last_entry_args.update({'batch_no' : filters.get('batch_no')})
+	last_entry = get_previous_sle(last_entry_args)
 
 	row = {
 		"item_code": _("'Opening'"),
