@@ -7,10 +7,7 @@ context('Organizational Chart', () => {
 	it('navigates to org chart', () => {
 		cy.visit('/app');
 		cy.awesomebar('Organizational Chart');
-<<<<<<< HEAD
-=======
 		cy.url().should('include', '/organizational-chart');
->>>>>>> 52dd326f22 (fix(test): first check for org chart always fails (#27249))
 
 		cy.window().its('frappe.csrf_token').then(csrf_token => {
 			return cy.request({
