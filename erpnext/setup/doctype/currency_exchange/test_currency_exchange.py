@@ -59,9 +59,9 @@ def patched_requests_get(*args, **kwargs):
 	if args[0] == "https://api.exchangerate.host/convert" and kwargs.get('params'):
 		if kwargs['params'].get('date') and kwargs['params'].get('from') and kwargs['params'].get('to'):
 			if test_exchange_values.get(kwargs['params']['date']):
-				return PatchResponse({ 'result': test_exchange_values[kwargs['params']['date']] }, 200)
+				return PatchResponse({'result': test_exchange_values[kwargs['params']['date']]}, 200)
 
-	return PatchResponse({ 'result': None }, 404)
+	return PatchResponse({'result': None}, 404)
 
 @mock.patch('requests.get', side_effect=patched_requests_get)
 class TestCurrencyExchange(unittest.TestCase):
