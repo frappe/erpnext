@@ -24,6 +24,11 @@ class TestGratuity(unittest.TestCase):
 		frappe.db.sql("DELETE FROM `tabGratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
+	def test_get_last_salary_slip_should_return_none_for_new_employee(self):
+		new_employee = make_employee("new_employee@salary.com", company='_Test Company')
+		salary_slip = get_last_salary_slip(new_employee)
+		assert salary_slip is None
+
 	def test_check_gratuity_amount_based_on_current_slab_and_additional_salary_creation(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
 
