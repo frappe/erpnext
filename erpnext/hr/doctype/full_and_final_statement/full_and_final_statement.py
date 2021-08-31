@@ -7,7 +7,6 @@ from frappe.utils import get_link_to_form, today, flt
 from frappe.model.document import Document
 
 class FullandFinalStatement(Document):
-
 	def validate(self):
 		self.get_outstanding_statements()
 		if self.docstatus == 1:
@@ -15,10 +14,10 @@ class FullandFinalStatement(Document):
 			self.validate_settlement("receivables")
 			self.validate_asset()
 
-	def validate_settlement(self, type):
-		for data in self.get(type,[]):
+	def validate_settlement(self, component_type):
+		for data in self.get(component_type, []):
 			if data.status == "Unsettled":
-				frappe.throw(_("Settled all Payables and Receivable before submission"))
+				frappe.throw(_("Settle all Payables and Receivables before submission"))
 
 	def validate_asset(self):
 		for data in self.assets_allocated:
