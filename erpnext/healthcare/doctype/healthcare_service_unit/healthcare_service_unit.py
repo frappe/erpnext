@@ -30,7 +30,7 @@ class HealthcareServiceUnit(NestedSet):
 		self.validate_one_root()
 
 	def set_service_unit_properties(self):
-		if self.is_group:
+		if cint(self.is_group):
 			self.allow_appointments = False
 			self.overlap_appointments = False
 			self.inpatient_occupancy = False
