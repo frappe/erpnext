@@ -279,15 +279,6 @@ erpnext.PointOfSale.Payment = class {
 		});
 	}
 
-	auto_set_remaining_amount() {
-		const doc = this.events.get_frm().doc;
-		const remaining_amount = doc.grand_total - doc.paid_amount;
-		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
-		if (!current_value && remaining_amount > 0 && this.selected_mode) {
-			this.selected_mode.set_value(remaining_amount);
-		}
-	}
-
 	attach_shortcuts() {
 		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
 		this.$component.find('.submit-order-btn').attr("title", `${ctrl_label}+Enter`);
