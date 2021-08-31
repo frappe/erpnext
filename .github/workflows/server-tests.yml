@@ -12,6 +12,10 @@ on:
       - '**.js'
       - '**.md'
 
+concurrency:
+  group: server-develop-${{ github.event.number }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-18.04
