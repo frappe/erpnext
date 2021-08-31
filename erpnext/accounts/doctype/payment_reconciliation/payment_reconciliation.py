@@ -299,9 +299,9 @@ class PaymentReconciliation(Document):
 				condition += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_invoice_amount))
 
 		elif get_return_invoices:
-			condition = " and gl.company = '{0}' ".format(self.company)
-			condition += " and gl.posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
-			condition += " and gl.posting_date <= {0}".format(frappe.db.escape(self.to_payment_date)) if self.to_payment_date else ""
+			condition = " and doc.company = '{0}' ".format(self.company)
+			condition += " and doc.posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
+			condition += " and doc.posting_date <= {0}".format(frappe.db.escape(self.to_payment_date)) if self.to_payment_date else ""
 			dr_or_cr = ("gl.debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
 				else "gl.credit_in_account_currency")
 
