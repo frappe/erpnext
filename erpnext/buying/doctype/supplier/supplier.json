@@ -385,12 +385,11 @@
  "image_field": "image",
  "links": [
   {
-   "group": "Item Group",
-   "link_doctype": "Supplier Item Group",
-   "link_fieldname": "supplier"
+   "link_doctype": "Party Specific Items",
+   "link_fieldname": "party"
   }
  ],
- "modified": "2021-05-18 15:10:11.087191",
+ "modified": "2021-08-31 14:39:15.658327",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
