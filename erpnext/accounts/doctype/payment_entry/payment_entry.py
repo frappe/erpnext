@@ -75,9 +75,9 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
+		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_donation()
 		self.update_payment_schedule()
 		self.set_status()
@@ -85,9 +85,9 @@ class PaymentEntry(AccountsController):
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.make_gl_entries(cancel=1)
+		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_donation(cancel=1)
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
@@ -831,7 +831,10 @@ class PaymentEntry(AccountsController):
 			for d in self.get("references"):
 				if d.reference_doctype=="Expense Claim" and d.reference_name:
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
-					update_reimbursed_amount(doc, self.name)
+					if self.docstatus == 2:
+						update_reimbursed_amount(doc, -1 * d.allocated_amount)
+					else:
+						update_reimbursed_amount(doc, d.allocated_amount)
 
 	def update_donation(self, cancel=0):
 		if self.payment_type == "Receive" and self.party_type == "Donor" and self.party:
