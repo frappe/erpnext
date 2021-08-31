@@ -66,6 +66,7 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		self.update_status_for_full_and_final_statement()
 		check_if_stock_and_account_balance_synced(self.posting_date,
 			self.company, self.doctype, self.name)
 
@@ -83,6 +84,7 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.update_status_for_full_and_final_statement()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -97,6 +99,15 @@ class JournalEntry(AccountsController):
 		for voucher_type, order_list in iteritems(advance_paid):
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
+
+	def update_status_for_full_and_final_statement(self):
+		for entry in self.accounts:
+			if entry.reference_type == "Full and Final Statement":
+				if self.docstatus == 1:
+					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Paid")
+				elif self.docstatus == 2:
+					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Unpaid")
+
 
 	def validate_inter_company_accounts(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
@@ -643,7 +654,10 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				update_reimbursed_amount(doc, jv=self.name)
+				if self.docstatus == 2:
+					update_reimbursed_amount(doc, -1 * d.debit)
+				else:
+					update_reimbursed_amount(doc, d.debit)
 
 
 	def validate_expense_claim(self):

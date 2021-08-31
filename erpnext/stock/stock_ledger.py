@@ -279,13 +279,15 @@ class update_entries_after(object):
 			}
 
 		"""
+		self.data.setdefault(args.warehouse, frappe._dict())
+		warehouse_dict = self.data[args.warehouse]
 		previous_sle = get_previous_sle_of_current_voucher(args)
+		warehouse_dict.previous_sle = previous_sle
 
-		self.data[args.warehouse] = frappe._dict({
-			"previous_sle": previous_sle,
-			"qty_after_transaction": flt(previous_sle.qty_after_transaction),
-			"valuation_rate": flt(previous_sle.valuation_rate),
-			"stock_value": flt(previous_sle.stock_value),
+		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
+			setattr(warehouse_dict, key, flt(previous_sle.get(key)))
+
+		warehouse_dict.update({
 			"prev_stock_value": previous_sle.stock_value or 0.0,
 			"stock_queue": json.loads(previous_sle.stock_queue or "[]"),
 			"stock_value_difference": 0.0
