@@ -77,7 +77,6 @@ def make_custom_fields(update=True):
 
 def add_permissions():
 	doctype = "Product Tax Category"
-	add_permission(doctype, 'All', 0)
 	for role in ('Accounts Manager', 'Accounts User', 'System Manager','Item Manager', 'Stock Manager'):
 		add_permission(doctype, role, 0)
 		update_permission_property(doctype, role, 0, 'write', 1)
