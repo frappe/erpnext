@@ -306,5 +306,6 @@ erpnext.patches.v13_0.rename_discharge_ordered_date_in_ip_record
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
+erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.employee_bank_account
 erpnext.patches.v13_0.salary_slip_bank_account
