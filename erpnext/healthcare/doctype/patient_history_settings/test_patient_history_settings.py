@@ -38,13 +38,12 @@ class TestPatientHistorySettings(unittest.TestCase):
 		# tests for medical record creation of standard doctypes in test_patient_medical_record.py
 		patient = create_patient()
 		doc = create_doc(patient)
-
 		# check for medical record
 		medical_rec = frappe.db.exists("Patient Medical Record", {"status": "Open", "reference_name": doc.name})
 		self.assertTrue(medical_rec)
 
 		medical_rec = frappe.get_doc("Patient Medical Record", medical_rec)
-		expected_subject = "Date: {0}Rating: 3Feedback: Test Patient History Settings".format(
+		expected_subject = "Date:{0}Rating:3Feedback:Test Patient History Settings".format(
 			frappe.utils.format_date(getdate()))
 		self.assertEqual(strip_html(medical_rec.subject), expected_subject)
 		self.assertEqual(medical_rec.patient, patient)

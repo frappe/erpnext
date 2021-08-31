@@ -29,6 +29,7 @@
 
 .patient-name {
   font-size: 20px;
+  margin-top: 25px;
 }
 
 /* heatmap */
@@ -55,6 +56,7 @@
 }
 
 .heatmap-container .chart-filter {
+  z-index: 1;
   position: relative;
   top: 5px;
   margin-right: 10px;
@@ -111,8 +113,11 @@ text.title {
 }
 
 .chart-column-container {
-  border-bottom: 1px solid #d1d8dd;
   margin: 5px 0;
+}
+
+.progress-graphs .progress-container {
+  margin-bottom: var(--margin-xl);
 }
 
 .line-chart-container .frappe-chart {
@@ -146,6 +151,7 @@ text.title {
   }
 
   .percentage-chart-container .chart-filter {
+    z-index: 1;
     position: relative;
     top: 12px;
     margin-right: 10px;
