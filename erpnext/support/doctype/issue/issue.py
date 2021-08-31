@@ -24,8 +24,11 @@ class Issue(Document):
 
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
-
+		self.change_service_level_agreement_and_priority()
+		self.update_status()
 		self.set_lead_contact(self.raised_by)
+		if not self.service_level_agreement:
+			self.reset_sla_fields()
 
 	def on_update(self):
 		# Add a communication in the issue timeline
