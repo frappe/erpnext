@@ -71,7 +71,7 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 				- flt(loan.total_principal_paid)
 
 		pledged_securities = get_pledged_security_qty(loan.name)
-		ltv_ratio = ''
+		ltv_ratio = 0.0
 		security_value = 0.0
 
 		for security, qty in pledged_securities.items():
