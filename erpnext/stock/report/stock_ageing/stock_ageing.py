@@ -175,9 +175,7 @@ def get_fifo_queue(filters, sle=None):
 					fifo_queue.append([d.actual_qty, d.posting_date])
 		else:
 			if serial_no_list:
-				for serial_no in fifo_queue:
-					if serial_no[0] in serial_no_list:
-						fifo_queue.remove(serial_no)
+				fifo_queue[:] = [serial_no for serial_no in fifo_queue if serial_no[0] not in serial_no_list]
 			else:
 				qty_to_pop = abs(d.actual_qty)
 				while qty_to_pop:
