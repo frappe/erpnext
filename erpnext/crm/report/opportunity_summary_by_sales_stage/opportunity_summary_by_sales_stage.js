@@ -27,18 +27,19 @@ frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
-			fieldtype: "Date",	
+			fieldtype: "Date",
 		},
 		{
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
-			get_data: function(){
-				return [{value:"Open",description:"Status"},
-						{value:"Converted",description:"Status"},
-						{value:"Quotation",description:"Status"},
-						{value:"Replied",description:"Status"}
-					]
+			get_data: function() {
+				return [
+					{value: "Open", description: "Status"},
+					{value: "Converted", description: "Status"},
+					{value: "Quotation", description: "Status"},
+					{value: "Replied", description: "Status"}
+				]
 			}
 		},
 		{
