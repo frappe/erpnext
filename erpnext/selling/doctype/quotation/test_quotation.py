@@ -226,6 +226,36 @@ class TestQuotation(unittest.TestCase):
 		expired_quotation.reload()
 		self.assertEqual(expired_quotation.status, "Expired")
 
+	def test_product_bundle_mapping_on_creating_so(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		quotation = make_quotation(item_code="_Test Product Bundle", qty=1, rate=100)
+		sales_order = make_sales_order(quotation.name)
+
+		quotation_item = [quotation.items[0].item_code, quotation.items[0].rate, quotation.items[0].qty, quotation.items[0].amount]
+		so_item = [sales_order.items[0].item_code, sales_order.items[0].rate, sales_order.items[0].qty, sales_order.items[0].amount]
+
+		self.assertEqual(quotation_item, so_item)
+
+		quotation_packed_items = [
+			[quotation.packed_items[0].parent_item, quotation.packed_items[0].item_code, quotation.packed_items[0].qty],
+			[quotation.packed_items[1].parent_item, quotation.packed_items[1].item_code, quotation.packed_items[1].qty]
+		]
+		so_packed_items = [
+			[sales_order.packed_items[0].parent_item, sales_order.packed_items[0].item_code, sales_order.packed_items[0].qty],
+			[sales_order.packed_items[1].parent_item, sales_order.packed_items[1].item_code, sales_order.packed_items[1].qty]
+		]
+
+		self.assertEqual(quotation_packed_items, so_packed_items)
 
 test_records = frappe.get_test_records('Quotation')
 
