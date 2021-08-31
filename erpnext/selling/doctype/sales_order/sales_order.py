@@ -947,58 +947,47 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				"pricing_rules"
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map
+			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map and not is_product_bundle(doc.item_code)
+		},
+		"Packed Item": {
+			"doctype": "Purchase Order Item",
+			"field_map":  [
+				["parent", "sales_order"],
+				["uom", "uom"],
+				["conversion_factor", "conversion_factor"],
+				["parent_item", "product_bundle"],
+				["rate", "rate"]
+			],
+			"field_no_map": [
+				"rate",
+				"price_list_rate",
+				"item_tax_template",
+				"discount_percentage",
+				"discount_amount",
+				"supplier",
+				"pricing_rules"
+			],
 		}
 	}, target_doc, set_missing_values)
 
-	doc.items = replace_product_bundles_with_bundle_items(doc.items, source_name)
-
+	set_delivery_date(doc.items, source_name)
+	
 	return doc
 
-def replace_product_bundles_with_bundle_items(items, sales_order_name):
-	updated_items = []
-
+def set_delivery_date(items, sales_order):
 	for item in items:
-		if is_product_bundle(item.item_code):
-			bundle_items = get_bundle_items(item.item_code, sales_order_name)
-			insert_bundle_items(updated_items, bundle_items, item, sales_order_name)
-		else:
-			updated_items.append(item)
-
-	items = updated_items
-
-	return items
+		if item.product_bundle:
+			item.schedule_date = frappe.get_value(
+				'Sales Order Item', 
+				{
+					'parent': sales_order, 
+					'item_code': item.product_bundle
+				}, 
+				'delivery_date'
+			)
 
 def is_product_bundle(item_code):
 	return frappe.db.exists('Product Bundle', item_code)
-
-def get_bundle_items(item_code, so_name):
-	return frappe.get_all(
-		'Packed Item', 
-		filters = {
-			'parent': so_name,
-			'parent_item': item_code
-		},
-		fields = ['item_code', 'item_name', 'qty', 'rate', 'uom']
-	)
-
-def insert_bundle_items(updated_items, bundle_items, item, sales_order):
-	for bundle_item in bundle_items:
-		new_item = frappe.get_doc({
-			'doctype': 'Purchase Order Item',
-			'item_code': bundle_item.item_code,
-			'item_name': bundle_item.item_name,
-			'product_bundle': item.item_code,
-			'qty': bundle_item.qty,
-			'rate': bundle_item.rate,
-			'uom': bundle_item.uom,
-			'schedule_date': item.schedule_date,
-			'sales_order': sales_order,
-			'expense_account': item.expense_account,
-			'cost_center': item.cost_center
-		})
-
-		updated_items.append(new_item)
 
 @frappe.whitelist()
 def make_work_orders(items, sales_order, company, project=None):
