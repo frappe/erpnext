@@ -11,11 +11,7 @@
   "is_advance",
   "reference_row",
   "col_break1",
-  "invoice_number",
   "amount",
-  "allocated_amount",
-  "section_break_10",
-  "difference_account",
   "difference_amount",
   "sec_break1",
   "remark",
@@ -41,6 +37,7 @@
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Posting Date",
    "read_only": 1
   },
@@ -64,14 +61,6 @@
   },
   {
    "columns": 2,
-   "fieldname": "invoice_number",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Invoice Number",
-   "reqd": 1
-  },
-  {
-   "columns": 2,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -80,44 +69,14 @@
    "read_only": 1
   },
   {
-   "columns": 2,
-   "fieldname": "allocated_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Allocated amount",
-   "options": "currency",
-   "reqd": 1
-  },
-  {
    "fieldname": "sec_break1",
    "fieldtype": "Section Break"
   },
   {
    "fieldname": "remark",
    "fieldtype": "Small Text",
-   "in_list_view": 1,
    "label": "Remark",
    "read_only": 1
-  },
-  {
-   "columns": 2,
-   "fieldname": "difference_account",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Difference Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "difference_amount",
-   "fieldtype": "Currency",
-   "label": "Difference Amount",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "currency",
@@ -125,11 +84,18 @@
    "hidden": 1,
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "label": "Difference Amount",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-07-19 18:12:41.682347",
+ "modified": "2021-08-30 10:51:48.140062",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Payment",
