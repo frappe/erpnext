@@ -19,14 +19,14 @@ def get_list_context(context=None):
 		"get_list": get_transaction_list
 	}
 
-def get_list_context_for_custom_webform(module):
+def get_webform_list_context(module):
 	if get_module_app(module) != 'erpnext':
 		return
 	return {
-		"get_list": get_transaction_list_for_custom_webform
+		"get_list": get_webform_transaction_list
 	}
 
-def get_transaction_list_for_custom_webform(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
+def get_webform_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
 	""" Get List of transactions for custom doctypes """
 	from frappe.www.list import get_list
 	if not filters: 
