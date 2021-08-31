@@ -234,6 +234,15 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Reconciliation",
+   "link_to": "Payment Reconciliation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
@@ -336,6 +345,15 @@
    "label": "Payment Entry",
    "link_count": 0,
    "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Reconciliation",
+   "link_to": "Payment Reconciliation",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -1188,7 +1206,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:52.872470",
+ "modified": "2021-08-27 12:15:52.872470",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

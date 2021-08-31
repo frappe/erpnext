@@ -29,6 +29,8 @@
   {
    "fieldname": "service_unit_type",
    "fieldtype": "Data",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_list_view": 1,
    "label": "Service Unit Type",
    "no_copy": 1,
@@ -41,6 +43,8 @@
    "depends_on": "eval:doc.inpatient_occupancy != 1",
    "fieldname": "allow_appointments",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Allow Appointments"
   },
   {
@@ -49,6 +53,8 @@
    "depends_on": "eval:doc.allow_appointments == 1 && doc.inpatient_occupany != 1",
    "fieldname": "overlap_appointments",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Allow Overlap"
   },
   {
@@ -57,6 +63,8 @@
    "depends_on": "eval:doc.allow_appointments != 1",
    "fieldname": "inpatient_occupancy",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Inpatient Occupancy"
   },
   {
@@ -65,17 +73,23 @@
    "depends_on": "eval:doc.inpatient_occupancy == 1 && doc.allow_appointments != 1",
    "fieldname": "is_billable",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Is Billable"
   },
   {
    "depends_on": "is_billable",
    "fieldname": "item_details",
    "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Item Details"
   },
   {
    "fieldname": "item",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Item",
    "no_copy": 1,
    "options": "Item",
@@ -84,6 +98,8 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Data",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Item Code",
    "mandatory_depends_on": "eval: doc.is_billable == 1",
    "no_copy": 1
@@ -91,6 +107,8 @@
   {
    "fieldname": "item_group",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Item Group",
    "mandatory_depends_on": "eval: doc.is_billable == 1",
    "options": "Item Group"
@@ -98,6 +116,8 @@
   {
    "fieldname": "uom",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "UOM",
    "mandatory_depends_on": "eval: doc.is_billable == 1",
    "options": "UOM"
@@ -105,28 +125,38 @@
   {
    "fieldname": "no_of_hours",
    "fieldtype": "Int",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "UOM Conversion in Hours",
    "mandatory_depends_on": "eval: doc.is_billable == 1"
   },
   {
    "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Rate / UOM"
   },
   {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Disabled",
    "no_copy": 1
   },
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Description"
   },
   {
@@ -134,11 +164,13 @@
    "fieldname": "change_in_item",
    "fieldtype": "Check",
    "hidden": 1,
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Change in Item"
   }
  ],
  "links": [],
- "modified": "2020-05-20 15:31:09.627516",
+ "modified": "2021-08-19 17:52:30.266667",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit Type",
