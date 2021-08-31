@@ -25,7 +25,8 @@ doctype_js = {
 	"Address": "public/js/address.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
-	"Newsletter": "public/js/newsletter.js"
+	"Newsletter": "public/js/newsletter.js",
+	"Contact": "public/js/contact.js"
 }
 
 override_doctype_class = {
@@ -159,6 +160,7 @@ website_route_rules = [
 			"parents": [{"label": _("Material Request"), "route": "material-requests"}]
 		}
 	},
+	{"from_route": "/project", "to_route": "Project"}
 ]
 
 standard_portal_menu_items = [
@@ -229,6 +231,7 @@ standard_queries = {
 
 doc_events = {
 	"*": {
+		"validate": "erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 		"on_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.create_medical_record",
 		"on_update_after_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.update_medical_record",
 		"on_cancel": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.delete_medical_record"
@@ -243,7 +246,13 @@ doc_events = {
 		"on_update": ["erpnext.hr.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role"]
 	},
-	("Sales Taxes and Charges Template", 'Price List'): {
+	"Communication": {
+		"on_update": [
+			"erpnext.support.doctype.service_level_agreement.service_level_agreement.update_hold_time",
+			"erpnext.support.doctype.issue.issue.set_first_response_time"
+		]
+	},
+	"Sales Taxes and Charges Template": {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
 	"Website Settings": {
@@ -270,17 +279,24 @@ doc_events = {
 	},
 	"Purchase Invoice": {
 		"validate": [
-			"erpnext.regional.india.utils.update_grand_total_for_rcm",
+			"erpnext.regional.india.utils.validate_reverse_charge_transaction",
+			"erpnext.regional.india.utils.update_itc_availed_fields",
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
-			"erpnext.regional.united_arab_emirates.utils.validate_returns"
-			]
+			"erpnext.regional.united_arab_emirates.utils.validate_returns",
+			"erpnext.regional.india.utils.update_taxable_values"
+		]
 	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
-		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code', 'erpnext.regional.india.utils.update_gst_category']
+		'validate': [
+			'erpnext.regional.india.utils.validate_gstin_for_india',
+			'erpnext.regional.italy.utils.set_state_code',
+			'erpnext.regional.india.utils.update_gst_category',
+			'erpnext.healthcare.utils.update_address_links'
+		],
 	},
 	'Supplier': {
 		'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
@@ -291,13 +307,16 @@ doc_events = {
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
 		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
-		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
+		"validate": ["erpnext.crm.utils.update_lead_phone_numbers", "erpnext.healthcare.utils.update_patient_email_and_phone_numbers"]
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
 	},
 	('Quotation', 'Sales Order', 'Sales Invoice'): {
 		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
+	},
+	"Company": {
+		"on_trash": "erpnext.regional.india.utils.delete_gst_settings_for_company"
 	}
 }
 
@@ -331,8 +350,9 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
-		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
-		"erpnext.erpnext_integrations.connectors.shopify_connection.sync_old_orders",
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.set_service_level_agreement_variance"
+	],
+	"hourly_long": [
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries"
 	],
 	"daily": [
@@ -341,7 +361,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
-		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
+		"erpnext.hr.doctype.employee.employee_reminders.send_work_anniversary_reminders",
+		"erpnext.hr.doctype.employee.employee_reminders.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.send_summary",
@@ -367,13 +388,17 @@ scheduler_events = {
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
-		"erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment.automatically_allocate_leaves_based_on_leave_policy",
 		"erpnext.hr.utils.generate_leave_encashment",
 		"erpnext.hr.utils.allocate_earned_leaves",
-		"erpnext.hr.utils.grant_leaves_automatically",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead"
+	],
+	"weekly": [
+		"erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"
+	],
+	"monthly": [
+		"erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_monthly"
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
@@ -427,9 +452,8 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_regional_round_off_accounts': 'erpnext.regional.india.utils.get_regional_round_off_accounts',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
-		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries',
-		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields',
-		'erpnext.assets.doctype.asset.asset.get_depreciation_amount': 'erpnext.regional.india.utils.get_depreciation_amount'
+		'erpnext.assets.doctype.asset.asset.get_depreciation_amount': 'erpnext.regional.india.utils.get_depreciation_amount',
+		'erpnext.stock.doctype.item.item.set_item_tax_from_hsn_code': 'erpnext.regional.india.utils.set_item_tax_from_hsn_code'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data',

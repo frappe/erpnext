@@ -21,7 +21,7 @@ class MonthlyDistribution(Document):
 			idx += 1
 
 	def validate(self):
-		total = sum([flt(d.percentage_allocation) for d in self.get("percentages")])
+		total = sum(flt(d.percentage_allocation) for d in self.get("percentages"))
 
 		if flt(total, 2) != 100.0:
 			frappe.throw(_("Percentage Allocation should be equal to 100%") + \

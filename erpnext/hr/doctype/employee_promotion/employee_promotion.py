@@ -7,16 +7,15 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
-from erpnext.hr.utils import update_employee
+from erpnext.hr.utils import update_employee, validate_active_employee
 
 class EmployeePromotion(Document):
 	def validate(self):
-		if frappe.get_value("Employee", self.employee, "status") == "Left":
-			frappe.throw(_("Cannot promote Employee with status Left"))
+		validate_active_employee(self.employee)
 
 	def before_submit(self):
 		if getdate(self.promotion_date) > getdate():
-			frappe.throw(_("Employee Promotion cannot be submitted before Promotion Date "),
+			frappe.throw(_("Employee Promotion cannot be submitted before Promotion Date"),
 				frappe.DocstatusTransitionError)
 
 	def on_submit(self):

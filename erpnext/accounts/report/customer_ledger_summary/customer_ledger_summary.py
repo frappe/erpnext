@@ -145,7 +145,7 @@ class PartyLedgerSummaryReport(object):
 		out = []
 		for party, row in iteritems(self.party_data):
 			if row.opening_balance or row.invoiced_amount or row.paid_amount or row.return_amount or row.closing_amount:
-				total_party_adjustment = sum([amount for amount in itervalues(self.party_adjustment_details.get(party, {}))])
+				total_party_adjustment = sum(amount for amount in itervalues(self.party_adjustment_details.get(party, {})))
 				row.paid_amount -= total_party_adjustment
 
 				adjustments = self.party_adjustment_details.get(party, {})

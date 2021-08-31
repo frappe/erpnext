@@ -151,7 +151,7 @@ class SalesOrder(SellingController):
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	def update_prevdoc_status(self, flag=None):
-		for quotation in list(set([d.prevdoc_docname for d in self.get("items")])):
+		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
 				if doc.docstatus==2:
@@ -233,7 +233,7 @@ class SalesOrder(SellingController):
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql_list("""select t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""",
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus < 2""",
 			self.name)
 
 		if submit_rv:
@@ -670,6 +670,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"party_account_currency": "party_account_currency",
 				"payment_terms_template": "payment_terms_template"
 			},
+			"field_no_map": ["payment_terms_template"],
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -693,6 +694,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 
+	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
+
 	return doclist
 
 @frappe.whitelist()
@@ -713,8 +718,7 @@ def make_maintenance_schedule(source_name, target_doc=None):
 				"doctype": "Maintenance Schedule Item",
 				"field_map": {
 					"parent": "sales_order"
-				},
-				"add_if_empty": True
+				}
 			}
 		}, target_doc)
 
@@ -740,8 +744,7 @@ def make_maintenance_visit(source_name, target_doc=None):
 				"field_map": {
 					"parent": "prevdoc_docname",
 					"parenttype": "prevdoc_doctype"
-				},
-				"add_if_empty": True
+				}
 			}
 		}, target_doc)
 

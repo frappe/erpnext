@@ -3,127 +3,14 @@
 
 import erpnext
 import frappe
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, InactiveEmployeeStatusError
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
-	get_datetime, getdate, nowdate, today, unique)
-
+	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
-
-
-class EmployeeBoardingController(Document):
-	'''
-		Create the project and the task for the boarding process
-		Assign to the concerned person and roles as per the onboarding/separation template
-	'''
-	def validate(self):
-		# remove the task if linked before submitting the form
-		if self.amended_from:
-			for activity in self.activities:
-				activity.task = ''
-
-	def on_submit(self):
-		# create the project for the given employee onboarding
-		project_name = _(self.doctype) + " : "
-		if self.doctype == "Employee Onboarding":
-			project_name += self.job_applicant
-		else:
-			project_name += self.employee
-
-		project = frappe.get_doc({
-				"doctype": "Project",
-				"project_name": project_name,
-				"expected_start_date": self.date_of_joining if self.doctype == "Employee Onboarding" else self.resignation_letter_date,
-				"department": self.department,
-				"company": self.company
-			}).insert(ignore_permissions=True, ignore_mandatory=True)
-
-		self.db_set("project", project.name)
-		self.db_set("boarding_status", "Pending")
-		self.reload()
-		self.create_task_and_notify_user()
-
-	def create_task_and_notify_user(self):
-		# create the task for the given project and assign to the concerned person
-		for activity in self.activities:
-			if activity.task:
-				continue
-
-			task = frappe.get_doc({
-				"doctype": "Task",
-				"project": self.project,
-				"subject": activity.activity_name + " : " + self.employee_name,
-				"description": activity.description,
-				"department": self.department,
-				"company": self.company,
-				"task_weight": activity.task_weight
-			}).insert(ignore_permissions=True)
-			activity.db_set("task", task.name)
-
-			users = [activity.user] if activity.user else []
-			if activity.role:
-				user_list = frappe.db.sql_list('''
-					SELECT
-						DISTINCT(has_role.parent)
-					FROM
-						`tabHas Role` has_role
-							LEFT JOIN `tabUser` user
-								ON has_role.parent = user.name
-					WHERE
-						has_role.parenttype = 'User'
-							AND user.enabled = 1
-							AND has_role.role = %s
-				''', activity.role)
-				users = unique(users + user_list)
-
-				if "Administrator" in users:
-					users.remove("Administrator")
-
-			# assign the task the users
-			if users:
-				self.assign_task_to_users(task, users)
-
-	def assign_task_to_users(self, task, users):
-		for user in users:
-			args = {
-				'assign_to': [user],
-				'doctype': task.doctype,
-				'name': task.name,
-				'description': task.description or task.subject,
-				'notify': self.notify_users_by_email
-			}
-			assign_to.add(args)
-
-	def on_cancel(self):
-		# delete task project
-		for task in frappe.get_all("Task", filters={"project": self.project}):
-			frappe.delete_doc("Task", task.name, force=1)
-		frappe.delete_doc("Project", self.project, force=1)
-		self.db_set('project', '')
-		for activity in self.activities:
-			activity.db_set("task", "")
-
-
-@frappe.whitelist()
-def get_onboarding_details(parent, parenttype):
-	return frappe.get_all("Employee Boarding Activity",
-		fields=["activity_name", "role", "user", "required_for_employee_creation", "description", "task_weight"],
-		filters={"parent": parent, "parenttype": parenttype},
-		order_by= "idx")
-
-@frappe.whitelist()
-def get_boarding_status(project):
-	status = 'Pending'
-	if project:
-		doc = frappe.get_doc('Project', project)
-		if flt(doc.percent_complete) > 0.0 and flt(doc.percent_complete) < 100.0:
-			status = 'In Process'
-		elif flt(doc.percent_complete) == 100.0:
-			status = 'Completed'
-		return status
 
 def set_employee_name(doc):
 	if doc.employee and not doc.employee_name:
@@ -269,6 +156,7 @@ def get_total_exemption_amount(declarations):
 	total_exemption_amount = sum([flt(d.total_exemption_amount) for d in exemptions.values()])
 	return total_exemption_amount
 
+@frappe.whitelist()
 def get_leave_period(from_date, to_date, company):
 	leave_period = frappe.db.sql("""
 		select name, from_date, to_date
@@ -447,21 +335,44 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
 	return total_given_benefit_amount
 
-def get_holidays_for_employee(employee, start_date, end_date):
-	holiday_list = get_holiday_list_for_employee(employee)
+def get_holiday_dates_for_employee(employee, start_date, end_date):
+	"""return a list of holiday dates for the given employee between start_date and end_date"""
+	# return only date	
+	holidays = get_holidays_for_employee(employee, start_date, end_date) 
+	
+	return [cstr(h.holiday_date) for h in holidays]
 
-	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
-		where
-			parent=%(holiday_list)s
-			and holiday_date >= %(start_date)s
-			and holiday_date <= %(end_date)s''', {
-				"holiday_list": holiday_list,
-				"start_date": start_date,
-				"end_date": end_date
-			})
 
-	holidays = [cstr(i) for i in holidays]
+def get_holidays_for_employee(employee, start_date, end_date, raise_exception=True, only_non_weekly=False):
+	"""Get Holidays for a given employee
 
+		`employee` (str)
+		`start_date` (str or datetime)
+		`end_date` (str or datetime)
+		`raise_exception` (bool)
+		`only_non_weekly` (bool)
+
+		return: list of dicts with `holiday_date` and `description` 
+	"""
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception=raise_exception)
+
+	if not holiday_list:
+		return []
+
+	filters = {
+		'parent': holiday_list,
+		'holiday_date': ('between', [start_date, end_date])
+	}
+
+	if only_non_weekly:
+		filters['weekly_off'] = False
+
+	holidays = frappe.get_all(
+		'Holiday', 
+		fields=['description', 'holiday_date'],
+		filters=filters
+	)
+	
 	return holidays
 
 @erpnext.allow_regional
@@ -500,13 +411,6 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount
 
-def grant_leaves_automatically():
-	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_singles_value("HR Settings", "automatically_allocate_leaves_based_on_leave_policy")
-	if automatically_allocate_leaves_based_on_leave_policy:
-		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "leaves_allocated":0})
-		for assignment in lpa:
-			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
-
 def share_doc_with_approver(doc, user):
 	# if approver does not have permissions, share
 	if not frappe.has_permission(doc=doc, ptype="submit", user=user):
@@ -528,3 +432,8 @@ def share_doc_with_approver(doc, user):
 		approver = approvers.get(doc.doctype)
 		if doc_before_save.get(approver) != doc.get(approver):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
+
+def validate_active_employee(employee):
+	if frappe.db.get_value("Employee", employee, "status") == "Inactive":
+		frappe.throw(_("Transactions cannot be created for an Inactive Employee {0}.").format(
+			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)

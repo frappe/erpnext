@@ -92,7 +92,7 @@ class AssetValueAdjustment(Document):
 			d.value_after_depreciation = asset_value
 
 			if d.depreciation_method in ("Straight Line", "Manual"):
-				end_date = max([s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx])
+				end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
 				total_days = date_diff(end_date, self.date)
 				rate_per_day = flt(d.value_after_depreciation) / flt(total_days)
 				from_date = self.date

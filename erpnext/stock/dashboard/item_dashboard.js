@@ -268,7 +268,9 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 		frappe.call({
 			method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
 			args: values,
+			btn: dialog.get_primary_btn(),
 			freeze: true,
+			freeze_message: __('Creating Stock Entry'),
 			callback: function (r) {
 				frappe.show_alert(__('Stock Entry {0} created',
 					['<a href="/app/stock-entry/' + r.message.name + '">' + r.message.name + '</a>']));

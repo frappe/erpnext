@@ -42,9 +42,10 @@ rules:
 
 - id: frappe-translation-python-splitting
   pattern-either:
-  - pattern: _(...) + ... + _(...)
+  - pattern: _(...) + _(...)
   - pattern: _("..." + "...")
-  - pattern-regex: '_\([^\)]*\\\s*'
+  - pattern-regex: '[\s\.]_\([^\)]*\\\s*'    # lines broken by `\`
+  - pattern-regex: '[\s\.]_\(\s*\n'          # line breaks allowed by python for using ( )
   message: |
     Do not split strings inside translate function. Do not concatenate using translate functions.
     Please refer: https://frappeframework.com/docs/user/en/translations
@@ -53,8 +54,8 @@ rules:
 
 - id: frappe-translation-js-splitting
   pattern-either:
-  - pattern-regex: '__\([^\)]*[\+\\]\s*'
-  - pattern: __('...' + '...')
+  - pattern-regex: '__\([^\)]*[\\]\s+'
+  - pattern: __('...' + '...', ...)
   - pattern: __('...') + __('...')
   message: |
     Do not split strings inside translate function. Do not concatenate using translate functions.

@@ -76,9 +76,9 @@ frappe.ui.form.on("Work Order", {
 		frm.set_query("production_item", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query",
-				filters:[
-					['is_stock_item', '=',1]
-				]
+				filters: {
+					"is_stock_item": 1,
+				}
 			};
 		});
 
@@ -141,8 +141,7 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		if (frm.doc.docstatus === 1
-			&& frm.doc.operations && frm.doc.operations.length
-			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
+			&& frm.doc.operations && frm.doc.operations.length) {
 
 			const not_completed = frm.doc.operations.filter(d => {
 				if(d.status != 'Completed') {
@@ -190,35 +189,41 @@ frappe.ui.form.on("Work Order", {
 		const dialog = frappe.prompt({fieldname: 'operations', fieldtype: 'Table', label: __('Operations'),
 			fields: [
 				{
-					fieldtype:'Link',
-					fieldname:'operation',
+					fieldtype: 'Link',
+					fieldname: 'operation',
 					label: __('Operation'),
-					read_only:1,
-					in_list_view:1
+					read_only: 1,
+					in_list_view: 1
 				},
 				{
-					fieldtype:'Link',
-					fieldname:'workstation',
+					fieldtype: 'Link',
+					fieldname: 'workstation',
 					label: __('Workstation'),
-					read_only:1,
-					in_list_view:1
+					read_only: 1,
+					in_list_view: 1
 				},
 				{
-					fieldtype:'Data',
-					fieldname:'name',
+					fieldtype: 'Data',
+					fieldname: 'name',
 					label: __('Operation Id')
 				},
 				{
-					fieldtype:'Float',
-					fieldname:'pending_qty',
+					fieldtype: 'Float',
+					fieldname: 'pending_qty',
 					label: __('Pending Qty'),
 				},
 				{
-					fieldtype:'Float',
-					fieldname:'qty',
+					fieldtype: 'Float',
+					fieldname: 'qty',
 					label: __('Quantity to Manufacture'),
-					read_only:0,
-					in_list_view:1,
+					read_only: 0,
+					in_list_view: 1,
+				},
+				{
+					fieldtype: 'Float',
+					fieldname: 'batch_size',
+					label: __('Batch Size'),
+					read_only: 1
 				},
 			],
 			data: operations_data,
@@ -229,9 +234,13 @@ frappe.ui.form.on("Work Order", {
 		}, function(data) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.make_job_card",
+				freeze: true,
 				args: {
 					work_order: frm.doc.name,
 					operations: data.operations,
+				},
+				callback: function() {
+					frm.reload_doc();
 				}
 			});
 		}, __("Job Card"), __("Create"));
@@ -243,13 +252,16 @@ frappe.ui.form.on("Work Order", {
 			if(data.completed_qty != frm.doc.qty) {
 				pending_qty = frm.doc.qty - flt(data.completed_qty);
 
-				dialog.fields_dict.operations.df.data.push({
-					'name': data.name,
-					'operation': data.operation,
-					'workstation': data.workstation,
-					'qty': pending_qty,
-					'pending_qty': pending_qty,
-				});
+				if (pending_qty) {
+					dialog.fields_dict.operations.df.data.push({
+						'name': data.name,
+						'operation': data.operation,
+						'workstation': data.workstation,
+						'batch_size': data.batch_size,
+						'qty': pending_qty,
+						'pending_qty': pending_qty
+					});
+				}
 			}
 		});
 		dialog.fields_dict.operations.grid.refresh();
@@ -704,6 +716,8 @@ erpnext.work_order = {
 	stop_work_order: function(frm, status) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
+			freeze: true,
+			freeze_message: __("Updating Work Order status"),
 			args: {
 				work_order: frm.doc.name,
 				status: status
@@ -717,3 +731,63 @@ erpnext.work_order = {
 		});
 	}
 };
+
+frappe.tour['Work Order'] = [
+	{
+		fieldname: "production_item",
+		title: "Item to Manufacture",
+		description: __("Select the Item to be manufactured.")
+	},
+	{
+		fieldname: "bom_no",
+		title: "BOM No",
+		description: __("The default BOM for that item will be fetched by the system. You can also change the BOM.")
+	},
+	{
+		fieldname: "qty",
+		title: "Qty to Manufacture",
+		description: __("Enter the quantity to manufacture. Raw material Items will be fetched only when this is set.")
+	},
+	{
+		fieldname: "use_multi_level_bom",
+		title: "Use Multi-Level BOM",
+		description: __("This is enabled by default. If you want to plan materials for sub-assemblies of the Item you're manufacturing leave this enabled. If you plan and manufacture the sub-assemblies separately, you can disable this checkbox.")
+	},
+	{
+		fieldname: "source_warehouse",
+		title: "Source Warehouse",
+		description: __("The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage.")
+	},
+	{
+		fieldname: "fg_warehouse",
+		title: "Target Warehouse",
+		description: __("The warehouse where you store finished Items before they are shipped.")
+	},
+	{
+		fieldname: "wip_warehouse",
+		title: "Work-in-Progress Warehouse",
+		description: __("The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse.")
+	},
+	{
+		fieldname: "scrap_warehouse",
+		title: "Scrap Warehouse",
+		description: __("If the BOM results in Scrap material, the Scrap Warehouse needs to be selected.")
+	},
+	{
+		fieldname: "required_items",
+		title: "Required Items",
+		description: __("All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table.")
+	},
+	{
+		fieldname: "planned_start_date",
+		title: "Planned Start Date",
+		description: __("Set the Planned Start Date (an Estimated Date at which you want the Production to begin)")
+	},
+	{
+		fieldname: "operations",
+		title: "Operations",
+		description: __("If the selected BOM has Operations mentioned in it, the system will fetch all Operations from BOM, these values can be changed.")
+	},
+
+
+];

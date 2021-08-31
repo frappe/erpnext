@@ -4,7 +4,7 @@
 frappe.ui.form.on('Production Plan', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Work Order': 'Work Order',
+			'Work Order': 'Work Order / Subcontract PO',
 			'Material Request': 'Material Request',
 		};
 
@@ -68,17 +68,13 @@ frappe.ui.form.on('Production Plan', {
 			frm.trigger("show_progress");
 
 			if (frm.doc.status !== "Completed") {
-				if (frm.doc.po_items && frm.doc.status !== "Closed") {
-					frm.add_custom_button(__("Work Order"), ()=> {
-						frm.trigger("make_work_order");
-					}, __('Create'));
-				}
+				frm.add_custom_button(__("Work Order Tree"), ()=> {
+					frappe.set_route('Tree', 'Work Order', {production_plan: frm.doc.name});
+				}, __('View'));
 
-				if (frm.doc.mr_items && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
-					frm.add_custom_button(__("Material Request"), ()=> {
-						frm.trigger("make_material_request");
-					}, __('Create'));
-				}
+				frm.add_custom_button(__("Production Plan Summary"), ()=> {
+					frappe.set_route('query-report', 'Production Plan Summary', {production_plan: frm.doc.name});
+				}, __('View'));
 
 				if  (frm.doc.status === "Closed") {
 					frm.add_custom_button(__("Re-open"), function() {
@@ -88,6 +84,18 @@ frappe.ui.form.on('Production Plan', {
 					frm.add_custom_button(__("Close"), function() {
 						frm.events.close_open_production_plan(frm, true);
 					}, __("Status"));
+				}
+
+				if (frm.doc.po_items && frm.doc.status !== "Closed") {
+					frm.add_custom_button(__("Work Order / Subcontract PO"), ()=> {
+						frm.trigger("make_work_order");
+					}, __('Create'));
+				}
+
+				if (frm.doc.mr_items && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
+					frm.add_custom_button(__("Material Request"), ()=> {
+						frm.trigger("make_material_request");
+					}, __('Create'));
 				}
 			}
 		}
@@ -211,13 +219,35 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	get_items: function(frm) {
+	get_items: function (frm) {
+		frm.clear_table('prod_plan_references');
+
 		frappe.call({
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
-			callback: function() {
+			callback: function () {
 				refresh_field('po_items');
+			}
+		});
+	},
+	combine_items: function (frm) {
+		frm.clear_table('prod_plan_references');
+
+		frappe.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
+		});
+	},
+
+	get_sub_assembly_items: function(frm) {
+		frappe.call({
+			method: "get_sub_assembly_items",
+			freeze: true,
+			doc: frm.doc,
+			callback: function() {
+				refresh_field("sub_assembly_items");
 			}
 		});
 	},
@@ -295,8 +325,25 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	download_materials_required: function(frm) {
-		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
-		open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc });
+		const fields = [{
+			fieldname: 'warehouses',
+			fieldtype: 'Table MultiSelect',
+			label: __('Warehouses'),
+			default: frm.doc.from_warehouse,
+			options: "Production Plan Material Request Warehouse",
+			get_query: function () {
+				return {
+					filters: {
+						company: frm.doc.company
+					}
+				};
+			},
+		}];
+
+		frappe.prompt(fields, (row) => {
+			let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
+			open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc, warehouses: row.warehouses });
+		}, __('Select Warehouses to get Stock for Materials Planning'), __('Get Stock'));
 	},
 
 	show_progress: function(frm) {
@@ -381,3 +428,36 @@ cur_frm.fields_dict['sales_orders'].grid.get_field("sales_order").get_query = fu
 		]
 	}
 };
+
+frappe.tour['Production Plan'] = [
+	{
+		fieldname: "get_items_from",
+		title: "Get Items From",
+		description: __("Select whether to get items from a Sales Order or a Material Request. For now select <b>Sales Order</b>.\n A Production Plan can also be created manually where you can select the Items to manufacture.")
+	},
+	{
+		fieldname: "get_sales_orders",
+		title: "Get Sales Orders",
+		description: __("Click on Get Sales Orders to fetch sales orders based on the above filters.")
+	},
+	{
+		fieldname: "get_items",
+		title: "Get Finished Goods for Manufacture",
+		description: __("Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched.")
+	},
+	{
+		fieldname: "po_items",
+		title: "Finished Goods",
+		description: __("On expanding a row in the Items to Manufacture table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process.")
+	},
+	{
+		fieldname: "include_non_stock_items",
+		title: "Include Non Stock Items",
+		description: __("To include non-stock items in the material request planning. i.e. Items for which 'Maintain Stock' checkbox is unticked.")
+	},
+	{
+		fieldname: "include_subcontracted_items",
+		title: "Include Subcontracted Items",
+		description: __("To add subcontracted Item's raw materials if include exploded items is disabled.")
+	}
+];

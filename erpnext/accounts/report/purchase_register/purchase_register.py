@@ -26,7 +26,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(invoice_list,
 		invoice_expense_map, expense_accounts)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
-	suppliers = list(set([d.supplier for d in invoice_list]))
+	suppliers = list(set(d.supplier for d in invoice_list))
 	supplier_details = get_supplier_details(suppliers)
 
 	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
@@ -120,13 +120,13 @@ def get_columns(invoice_list, additional_table_columns):
 			and docstatus = 1 and (account_head is not null and account_head != '')
 			and category in ('Total', 'Valuation and Total')
 			and parent in (%s) order by account_head""" %
-			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+			', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list))
 
 		unrealized_profit_loss_accounts = frappe.db.sql_list("""SELECT distinct unrealized_profit_loss_account
 			from `tabPurchase Invoice` where docstatus = 1 and name in (%s)
 			and ifnull(unrealized_profit_loss_account, '') != ''
 			order by unrealized_profit_loss_account""" %
-			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+			', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list))
 
 	expense_columns = [(account + ":Currency/currency:120") for account in expense_accounts]
 	unrealized_profit_loss_account_columns = [(account + ":Currency/currency:120") for account in unrealized_profit_loss_accounts]
@@ -208,7 +208,7 @@ def get_invoice_expense_map(invoice_list):
 		from `tabPurchase Invoice Item`
 		where parent in (%s)
 		group by parent, expense_account
-	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+	""" % ', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list), as_dict=1)
 
 	invoice_expense_map = {}
 	for d in expense_details:
@@ -221,7 +221,7 @@ def get_internal_invoice_map(invoice_list):
 	unrealized_amount_details = frappe.db.sql("""SELECT name, unrealized_profit_loss_account,
 		base_net_total as amount from `tabPurchase Invoice` where name in (%s)
 		and is_internal_supplier = 1 and company = represents_company""" %
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+		', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list), as_dict=1)
 
 	internal_invoice_map = {}
 	for d in unrealized_amount_details:
@@ -238,7 +238,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 		where parent in (%s) and category in ('Total', 'Valuation and Total')
 			and base_tax_amount_after_discount_amount != 0
 		group by parent, account_head, add_deduct_tax
-	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+	""" % ', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list), as_dict=1)
 
 	invoice_tax_map = {}
 	for d in tax_details:
@@ -258,7 +258,7 @@ def get_invoice_po_pr_map(invoice_list):
 		select parent, purchase_order, purchase_receipt, po_detail, project
 		from `tabPurchase Invoice Item`
 		where parent in (%s)
-	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+	""" % ', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list), as_dict=1)
 
 	invoice_po_pr_map = {}
 	for d in pi_items:

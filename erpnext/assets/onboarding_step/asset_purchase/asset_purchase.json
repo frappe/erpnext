@@ -1,0 +1,21 @@
+{
+ "action": "Show Form Tour",
+ "action_label": "Let's create a Purchase Receipt",
+ "creation": "2021-08-13 14:27:53.678621",
+ "description": "# Purchase an Asset\n\nAssets purchases process if done following the standard Purchase cycle. If capital work in progress is enabled in Asset Category, Asset will be created as soon as Purchase Receipt is created for it. You can quickly create a Purchase Receipt for Asset and see its impact on books of accounts.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-24 17:26:57.180637",
+ "modified_by": "Administrator",
+ "name": "Asset Purchase",
+ "owner": "Administrator",
+ "reference_document": "Purchase Receipt",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Purchase an Asset",
+ "validate_action": 1
+}

@@ -14,6 +14,7 @@ from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_e
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from frappe.model.document import Document
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
+from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 
 class Project(Document):
 	def get_feed(self):
@@ -37,6 +38,7 @@ class Project(Document):
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
+		update_employee_boarding_status(self)
 
 	def copy_from_template(self):
 		'''
@@ -132,6 +134,7 @@ class Project(Document):
 	def update_project(self):
 		'''Called externally by Task'''
 		self.update_percent_complete()
+		update_employee_boarding_status(self)
 		self.update_costing()
 		self.db_update()
 
@@ -523,8 +526,9 @@ def update_project_sales_billing():
 def create_kanban_board_if_not_exists(project):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
-	if not frappe.db.exists('Kanban Board', project):
-		quick_kanban_board('Task', project, 'status', project)
+	project = frappe.get_doc('Project', project)
+	if not frappe.db.exists('Kanban Board', project.project_name):
+		quick_kanban_board('Task', project.project_name, 'status', project.name)
 
 	return True
 

@@ -32,29 +32,17 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	filters = {"project": project}
 	if search:
 		filters["subject"] = ("like", "%{0}%".format(search))
-	# if item_status:
-# 		filters["status"] = item_status
 	tasks = frappe.get_all("Task", filters=filters,
-		fields=["name", "subject", "status", "_seen", "_comments", "modified", "description"],
+		fields=["name", "subject", "status", "modified", "_assign", "exp_end_date", "is_group", "parent_task"],
 		limit_start=start, limit_page_length=10)
-
+	task_nest = []
 	for task in tasks:
-		task.todo = frappe.get_all('ToDo',filters={'reference_name':task.name, 'reference_type':'Task'},
-		fields=["assigned_by", "owner", "modified", "modified_by"])
-
-		if task.todo:
-			task.todo=task.todo[0]
-			task.todo.user_image = frappe.db.get_value('User', task.todo.owner, 'user_image')
-
-
-		task.comment_count = len(json.loads(task._comments or "[]"))
-
-		task.css_seen = ''
-		if task._seen:
-			if frappe.session.user in json.loads(task._seen):
-				task.css_seen = 'seen'
-
-	return tasks
+		if task.is_group:
+			child_tasks = list(filter(lambda x: x.parent_task == task.name, tasks))
+			if len(child_tasks):
+				task.children = child_tasks
+		task_nest.append(task)
+	return list(filter(lambda x: not x.parent_task, tasks))
 
 @frappe.whitelist()
 def get_task_html(project, start=0, item_status=None):
@@ -74,19 +62,11 @@ def get_timesheets(project, start=0, search=None):
 	fields=['project','activity_type','from_time','to_time','parent'],
 	limit_start=start, limit_page_length=10)
 	for timesheet in timesheets:
-		timesheet.infos = frappe.get_all('Timesheet', filters={"name": timesheet.parent},
-			fields=['name','_comments','_seen','status','modified','modified_by'],
+		info = frappe.get_all('Timesheet', filters={"name": timesheet.parent},
+			fields=['name','status','modified','modified_by'],
 			limit_start=start, limit_page_length=10)
-
-		for timesheet.info in timesheet.infos:
-			timesheet.info.user_image = frappe.db.get_value('User', timesheet.info.modified_by, 'user_image')
-
-			timesheet.info.comment_count = len(json.loads(timesheet.info._comments or "[]"))
-
-			timesheet.info.css_seen = ''
-			if timesheet.info._seen:
-				if frappe.session.user in json.loads(timesheet.info._seen):
-					timesheet.info.css_seen = 'seen'
+		if len(info):
+			timesheet.update(info[0])
 	return timesheets
 
 @frappe.whitelist()
