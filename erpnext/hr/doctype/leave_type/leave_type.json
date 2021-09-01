@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "leave_type_name",
+  "abbr",
   "max_leaves_allowed",
   "applicable_after",
   "max_continuous_days_allowed",
@@ -172,11 +173,19 @@
    "fieldname": "maximum_carry_forwarded_leaves",
    "fieldtype": "Float",
    "label": "Maximum Carry Forwarded Leaves"
+  },
+  {
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Abbreviation",
+   "no_copy": 1,
+   "unique": 1
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-03-03 15:36:44.873821",
+ "modified": "2021-09-01 23:07:42.757231",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",

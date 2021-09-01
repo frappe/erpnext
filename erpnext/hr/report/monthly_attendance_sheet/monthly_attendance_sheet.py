@@ -252,10 +252,23 @@ def get_attendance_years():
 	return "\n".join(str(year) for year in year_list)
 
 
-def get_attendance_status_abbr(attendance_status, late_entry=0, early_exit=0):
+def get_attendance_status_abbr(attendance_status, late_entry=0, early_exit=0, leave_type=None):
 	status_map = {"Present": "P", "Absent": "A", "Half Day": "HD", "On Leave": "L", "Holiday": "H"}
 
 	abbr = status_map.get(attendance_status, '')
+
+	leave_type_abbr = ""
+	if leave_type:
+		leave_type_abbr = frappe.get_cached_value("Leave Type", leave_type, "abbr")
+	if not leave_type_abbr:
+		leave_type_abbr = status_map['On Leave']
+
+	if attendance_status == "On Leave":
+		abbr = leave_type_abbr
+
+	# if attendance_status == "Half Day" and leave_type:
+	# 	abbr = "{0}({1})".format(abbr, leave_type_abbr)
+
 	if cint(late_entry):
 		abbr = ">{0}".format(abbr)
 	if cint(early_exit):
