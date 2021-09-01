@@ -291,10 +291,6 @@ class Issue(Document):
 		self.agreement_status = "Ongoing"
 		self.save()
 
-	def reset_issue_metrics(self):
-		self.db_set("resolution_time", None)
-		self.db_set("user_resolution_time", None)
-
 
 def get_priority(issue):
 	service_level_agreement = frappe.get_doc("Service Level Agreement", issue.service_level_agreement)
