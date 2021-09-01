@@ -631,14 +631,14 @@
   {
    "fieldname": "gross_year_to_date",
    "fieldtype": "Currency",
-   "label": "Year To Date",
+   "label": "Gross Year To Date",
    "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "base_gross_year_to_date",
    "fieldtype": "Currency",
-   "label": "Year To Date(Company Currency)",
+   "label": "Gross Year To Date(Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
   }
@@ -647,7 +647,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-28 11:42:52.374549",
+ "modified": "2021-09-01 10:22:52.374549",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
