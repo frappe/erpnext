@@ -337,9 +337,9 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 
 def get_holiday_dates_for_employee(employee, start_date, end_date):
 	"""return a list of holiday dates for the given employee between start_date and end_date"""
-	# return only date	
-	holidays = get_holidays_for_employee(employee, start_date, end_date) 
-	
+	# return only date
+	holidays = get_holidays_for_employee(employee, start_date, end_date)
+
 	return [cstr(h.holiday_date) for h in holidays]
 
 
@@ -352,7 +352,7 @@ def get_holidays_for_employee(employee, start_date, end_date, raise_exception=Tr
 		`raise_exception` (bool)
 		`only_non_weekly` (bool)
 
-		return: list of dicts with `holiday_date` and `description` 
+		return: list of dicts with `holiday_date` and `description`
 	"""
 	holiday_list = get_holiday_list_for_employee(employee, raise_exception=raise_exception)
 
@@ -368,11 +368,11 @@ def get_holidays_for_employee(employee, start_date, end_date, raise_exception=Tr
 		filters['weekly_off'] = False
 
 	holidays = frappe.get_all(
-		'Holiday', 
+		'Holiday',
 		fields=['description', 'holiday_date'],
 		filters=filters
 	)
-	
+
 	return holidays
 
 @erpnext.allow_regional

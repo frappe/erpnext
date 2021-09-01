@@ -300,7 +300,7 @@
   {
    "fieldname": "for_warehouse",
    "fieldtype": "Link",
-   "label": "Material Request Warehouse",
+   "label": "Make Material Request for Warehouse",
    "options": "Warehouse"
   },
   {
@@ -364,7 +364,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-28 20:00:33.905114",
+ "modified": "2021-08-23 17:26:03.799876",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

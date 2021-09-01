@@ -48,7 +48,7 @@ class LabTest(Document):
 			if item.result_value and item.secondary_uom and item.conversion_factor:
 				try:
 					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
-				except:
+				except Exception:
 					item.secondary_uom_result = ''
 					frappe.msgprint(_('Row #{0}: Result for Secondary UOM not calculated').format(item.idx), title = _('Warning'))
 
