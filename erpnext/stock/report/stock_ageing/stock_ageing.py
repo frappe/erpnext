@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from operator import itemgetter
 from frappe.utils import date_diff, flt, cint
 from six import iteritems
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -12,7 +13,7 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	item_details = get_fifo_queue(filters)
 	to_date = filters["to_date"]
-	_func = lambda x: x[1]
+	_func = itemgetter(1)
 
 	data = []
 	for item, item_dict in iteritems(item_details):
