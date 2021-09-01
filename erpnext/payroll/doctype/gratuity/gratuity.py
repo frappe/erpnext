@@ -242,8 +242,11 @@ def get_salary_structure(employee):
 		order_by = "from_date desc")[0].salary_structure
 
 def get_last_salary_slip(employee):
-	return frappe.get_list("Salary Slip", filters = {
+	salary_slips = frappe.get_list("Salary Slip", filters = {
 			"employee": employee, 'docstatus': 1
 		},
-		order_by = "start_date desc")[0].name
-
+		order_by = "start_date desc"
+	)
+	if not salary_slips:
+		return
+	return salary_slips[0].name

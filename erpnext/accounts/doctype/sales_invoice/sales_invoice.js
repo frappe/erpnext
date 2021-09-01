@@ -323,17 +323,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.frm.refresh_fields();
 	},
 
-	write_off_outstanding_amount_automatically: function() {
-		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
+	write_off_outstanding_amount_automatically() {
+		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
 				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
 			);
-			this.frm.toggle_enable("write_off_amount", false);
-
-		} else {
-			this.frm.toggle_enable("write_off_amount", true);
 		}
 
 		this.calculate_outstanding_amount(false);
@@ -347,7 +343,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "cost_center"]);
+		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "discount_account", "cost_center"]);
 	},
 
 	set_dynamic_labels: function() {
@@ -447,6 +443,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.frm.refresh_field("outstanding_amount");
 		this.frm.refresh_field("paid_amount");
 		this.frm.refresh_field("base_paid_amount");
+	},
+
+	currency() {
+		this._super();
+		$.each(cur_frm.doc.timesheets, function(i, d) {
+			let row = frappe.get_doc(d.doctype, d.name)
+			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
+		});
+		calculate_total_billing_amount(cur_frm)
 	}
 });
 
@@ -509,7 +514,6 @@ cur_frm.set_query("income_account", "items", function(doc) {
 		filters: {'company': doc.company}
 	}
 });
-
 
 // Cost Center in Details Table
 // -----------------------------
@@ -592,6 +596,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("additional_discount_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					report_type: "Profit and Loss",
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Return / Credit Note',
@@ -614,6 +628,17 @@ frappe.ui.form.on('Sales Invoice', {
 						'company': doc.company,
 						"is_group": 0
 					}
+				}
+			}
+		}
+
+		// discount account
+		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
+					'company': doc.company,
+					"is_group": 0
 				}
 			}
 		}
@@ -694,19 +719,6 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 
-	project: function(frm){
-		if (!frm.doc.is_return) {
-			frm.call({
-				method: "add_timesheet_data",
-				doc: frm.doc,
-				callback: function(r, rt) {
-					refresh_field(['timesheets'])
-				}
-			})
-			frm.refresh();
-		}
-	},
-
 	onload: function(frm) {
 		frm.redemption_conversion_factor = null;
 	},
@@ -757,8 +769,6 @@ frappe.ui.form.on('Sales Invoice', {
 		// India related fields
 		if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 		else hide_field(['c_form_applicable', 'c_form_no']);
-
-		frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
 
 		frm.refresh_fields();
 	},
@@ -819,24 +829,92 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 
-	add_timesheet_row: function(frm, row, exchange_rate) {
-		frm.add_child('timesheets', {
-			'activity_type': row.activity_type,
-			'description': row.description,
-			'time_sheet': row.parent,
-			'billing_hours': row.billing_hours,
-			'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
-			'timesheet_detail': row.name
+	project: function(frm) {
+		if (frm.doc.project) {
+			frm.events.add_timesheet_data(frm, {
+				project: frm.doc.project
+			});
+		}
+	},
+
+	async add_timesheet_data(frm, kwargs) {
+		if (kwargs === "Sales Invoice") {
+			// called via frm.trigger()
+			kwargs = Object();
+		}
+
+		if (!kwargs.hasOwnProperty("project") && frm.doc.project) {
+			kwargs.project = frm.doc.project;
+		}
+
+		const timesheets = await frm.events.get_timesheet_data(frm, kwargs);
+		return frm.events.set_timesheet_data(frm, timesheets);
+	},
+
+	async get_timesheet_data(frm, kwargs) {
+		return frappe.call({
+			method: "erpnext.projects.doctype.timesheet.timesheet.get_projectwise_timesheet_data",
+			args: kwargs
+		}).then(r => {
+			if (!r.exc && r.message.length > 0) {
+				return r.message
+			} else {
+				return []
+			}
 		});
-		frm.refresh_field('timesheets');
-		calculate_total_billing_amount(frm);
+	},
+
+	set_timesheet_data: function(frm, timesheets) {
+		frm.clear_table("timesheets")
+		timesheets.forEach(timesheet => {
+			if (frm.doc.currency != timesheet.currency) {
+				frappe.call({
+					method: "erpnext.setup.utils.get_exchange_rate",
+					args: {
+						from_currency: timesheet.currency,
+						to_currency: frm.doc.currency
+					},
+					callback: function(r) {
+						if (r.message) {
+							exchange_rate = r.message;
+							frm.events.append_time_log(frm, timesheet, exchange_rate);
+						}
+					}
+				});
+			} else {
+				frm.events.append_time_log(frm, timesheet, 1.0);
+			}
+		});
+	},
+
+	append_time_log: function(frm, time_log, exchange_rate) {
+		const row = frm.add_child("timesheets");
+		row.activity_type = time_log.activity_type;
+		row.description = time_log.description;
+		row.time_sheet = time_log.time_sheet;
+		row.from_time = time_log.from_time;
+		row.to_time = time_log.to_time;
+		row.billing_hours = time_log.billing_hours;
+		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
+		row.timesheet_detail = time_log.name;
+    row.project_name = time_log.project_name;
+
+		frm.refresh_field("timesheets");
+		frm.trigger("calculate_timesheet_totals");
+	},
+
+	calculate_timesheet_totals: function(frm) {
+		frm.set_value("total_billing_amount",
+			frm.doc.timesheets.reduce((a, b) => a + (b["billing_amount"] || 0.0), 0.0));
+		frm.set_value("total_billing_hours",
+			frm.doc.timesheets.reduce((a, b) => a + (b["billing_hours"] || 0.0), 0.0));
 	},
 
 	refresh: function(frm) {
 		if (frm.doc.docstatus===0 && !frm.doc.is_return) {
-			frm.add_custom_button(__('Fetch Timesheet'), function() {
+			frm.add_custom_button(__("Fetch Timesheet"), function() {
 				let d = new frappe.ui.Dialog({
-					title: __('Fetch Timesheet'),
+					title: __("Fetch Timesheet"),
 					fields: [
 						{
 							"label" : __("From"),
@@ -845,8 +923,8 @@ frappe.ui.form.on('Sales Invoice', {
 							"reqd": 1,
 						},
 						{
-							fieldtype: 'Column Break',
-							fieldname: 'col_break_1',
+							fieldtype: "Column Break",
+							fieldname: "col_break_1",
 						},
 						{
 							"label" : __("To"),
@@ -863,48 +941,18 @@ frappe.ui.form.on('Sales Invoice', {
 						},
 					],
 					primary_action: function() {
-						let data = d.get_values();
-						frappe.call({
-							method: "erpnext.projects.doctype.timesheet.timesheet.get_projectwise_timesheet_data",
-							args: {
-								from_time: data.from_time,
-								to_time: data.to_time,
-								project: data.project
-							},
-							callback: function(r) {
-								if (!r.exc && r.message.length > 0) {
-									frm.clear_table('timesheets')
-									r.message.forEach((d) => {
-										let exchange_rate = 1.0;
-										if (frm.doc.currency != d.currency) {
-											frappe.call({
-												method: 'erpnext.setup.utils.get_exchange_rate',
-												args: {
-													from_currency: d.currency,
-													to_currency: frm.doc.currency
-												},
-												callback: function(r) {
-													if (r.message) {
-														exchange_rate = r.message;
-														frm.events.add_timesheet_row(frm, d, exchange_rate);
-													}
-												}
-											});
-										} else {
-											frm.events.add_timesheet_row(frm, d, exchange_rate);
-										}
-									});
-								} else {
-									frappe.msgprint(__('No Timesheets found with the selected filters.'))
-								}
-								d.hide();
-							}
+						const data = d.get_values();
+						frm.events.add_timesheet_data(frm, {
+							from_time: data.from_time,
+							to_time: data.to_time,
+							project: data.project
 						});
+						d.hide();
 					},
-					primary_action_label: __('Get Timesheets')
+					primary_action_label: __("Get Timesheets")
 				});
 				d.show();
-			})
+			});
 		}
 
 		if (frm.doc.is_debit_note) {
@@ -937,49 +985,36 @@ frappe.ui.form.on('Sales Invoice', {
 			frm: frm
 		});
 	},
+
 	create_dunning: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 			frm: frm
 		});
 	}
-})
+});
 
-frappe.ui.form.on('Sales Invoice Timesheet', {
-	time_sheet: function(frm, cdt, cdn){
-		var d = locals[cdt][cdn];
-		if(d.time_sheet) {
-			frappe.call({
-				method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
-				args: {
-					'name': d.time_sheet,
-					'project': frm.doc.project || null
-				},
-				callback: function(r, rt) {
-					if(r.message){
-						let data = r.message;
-						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
-						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
-						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
-						calculate_total_billing_amount(frm)
-					}
-				}
-			})
+
+frappe.ui.form.on("Sales Invoice Timesheet", {
+	timesheets_remove(frm, cdt, cdn) {
+		frm.trigger("calculate_timesheet_totals");
+	}
+});
+
+
+var set_timesheet_detail_rate = function(cdt, cdn, currency, timelog) {
+	frappe.call({
+		method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_detail_rate",
+		args: {
+			timelog: timelog,
+			currency: currency
+		},
+		callback: function(r) {
+			if (!r.exc && r.message) {
+				frappe.model.set_value(cdt, cdn, 'billing_amount', r.message);
+			}
 		}
-	}
-})
-
-var calculate_total_billing_amount =  function(frm) {
-	var doc = frm.doc;
-
-	doc.total_billing_amount = 0.0
-	if(doc.timesheets) {
-		$.each(doc.timesheets, function(index, data){
-			doc.total_billing_amount += data.billing_amount
-		})
-	}
-
-	refresh_field('total_billing_amount')
+	});
 }
 
 var select_loyalty_program = function(frm, loyalty_programs) {

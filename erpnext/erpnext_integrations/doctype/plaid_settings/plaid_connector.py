@@ -50,7 +50,7 @@ class PlaidConnector():
 				"secret": self.settings.plaid_secret,
 				"products": self.products,
 			})
-		
+
 		return args
 
 	def get_link_token(self, update_mode=False):

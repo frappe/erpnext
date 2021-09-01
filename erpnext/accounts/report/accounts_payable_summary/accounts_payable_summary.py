@@ -12,4 +12,3 @@ def execute(filters=None):
 		"naming_by": ["Buying Settings", "supp_master_name"],
 	}
 	return AccountsReceivableSummary(filters).run(args)
-

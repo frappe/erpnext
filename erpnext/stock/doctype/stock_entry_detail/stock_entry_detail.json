@@ -18,6 +18,7 @@
   "col_break2",
   "is_finished_item",
   "is_scrap_item",
+  "is_process_loss",
   "quality_inspection",
   "subcontracted_item",
   "section_break_8",
@@ -307,6 +308,7 @@
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",
+   "no_copy": 1,
    "options": "Quality Inspection"
   },
   {
@@ -542,13 +544,19 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_process_loss",
+   "fieldtype": "Check",
+   "label": "Is Process Loss"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-22 20:08:23.799715",
+ "modified": "2021-06-22 16:47:11.268975",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

@@ -49,4 +49,3 @@ frappe.query_reports["Vehicle Expenses"] = {
 		}
 	]
 };
-

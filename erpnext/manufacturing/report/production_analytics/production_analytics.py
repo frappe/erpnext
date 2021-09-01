@@ -139,7 +139,3 @@ def get_chart_data(periodic_data, columns):
 	chart["type"] = "line"
 
 	return chart
-
-
-
-

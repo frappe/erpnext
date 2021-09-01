@@ -8,10 +8,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import date_diff, add_days, getdate
 from erpnext.hr.doctype.employee.employee import is_holiday
-from erpnext.hr.utils import validate_dates
+from erpnext.hr.utils import validate_dates, validate_active_employee
 
 class AttendanceRequest(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		validate_dates(self, self.from_date, self.to_date)
 		if self.half_day:
 			if not getdate(self.from_date)<=getdate(self.half_day_date)<=getdate(self.to_date):

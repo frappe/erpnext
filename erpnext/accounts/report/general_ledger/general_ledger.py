@@ -49,16 +49,17 @@ def validate_filters(filters, account_details):
 	if not filters.get("from_date") and not filters.get("to_date"):
 		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date"))))
 
-	for account in filters.account:
-		if not account_details.get(account):
-			frappe.throw(_("Account {0} does not exists").format(account))
-			
 	if filters.get('account'):
 		filters.account = frappe.parse_json(filters.get('account'))
+		for account in filters.account:
+			if not account_details.get(account):
+				frappe.throw(_("Account {0} does not exists").format(account))
 
-	if (filters.get("account") and filters.get("group_by") == _('Group by Account')
-		and account_details[filters.account].is_group == 0):
-		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
+	if (filters.get("account") and filters.get("group_by") == _('Group by Account')):
+		filters.account = frappe.parse_json(filters.get('account'))
+		for account in filters.account:
+			if account_details[account].is_group == 0:
+				frappe.throw(_("Can not filter based on Child Account, if grouped by Account"))
 
 	if (filters.get("voucher_no")
 		and filters.get("group_by") in [_('Group by Voucher')]):
@@ -77,13 +78,10 @@ def validate_filters(filters, account_details):
 def validate_party(filters):
 	party_type, party = filters.get("party_type"), filters.get("party")
 
-	if party:
-		if not party_type:
-			frappe.throw(_("To filter based on Party, select Party Type first"))
-		else:
-			for d in party:
-				if not frappe.db.exists(party_type, d):
-					frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
+	if party and party_type:
+		for d in party:
+			if not frappe.db.exists(party_type, d):
+				frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
 
 def set_account_currency(filters):
 	if filters.get("account") or (filters.get('party') and len(filters.party) == 1):
@@ -91,7 +89,7 @@ def set_account_currency(filters):
 		account_currency = None
 
 		if filters.get("account"):
-			if len(filters.get("account")) == 1:	
+			if len(filters.get("account")) == 1:
 				account_currency = get_account_currency(filters.account[0])
 			else:
 				currency = get_account_currency(filters.account[0])
