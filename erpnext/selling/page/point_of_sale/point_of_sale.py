@@ -17,7 +17,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	display_items_in_stock = 0
 
 	if pos_profile:
-		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
+		warehouse, display_items_in_stock, company = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock', 'company'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -54,6 +54,18 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			lft=lft, rgt=rgt,
 			condition=condition
 		), as_dict=1)
+
+	cont = 0
+
+	for i in range(len(items_data)):
+		if cont > 0:
+			i -= cont
+
+		company_result = frappe.get_all("Item Default", ["name"], filters = {"parent": items_data[i].item_code, "company": company})
+
+		if len(company_result) == 0:
+			items_data.pop(i)
+			cont += 1
 
 	if items_data:
 		items = [d.item_code for d in items_data]
@@ -133,9 +145,9 @@ def search_serial_or_batch_or_barcode_number(search_value):
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
 		return "name = {0}".format(frappe.db.escape(item_code))
+			
+	return """(name like {item_code} or item_name like {item_code} or active_component like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
 
-	return """(name like {item_code}
-		or item_name like {item_code} or active_component like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
 
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"

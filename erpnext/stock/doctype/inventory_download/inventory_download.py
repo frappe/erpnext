@@ -16,10 +16,10 @@ class InventoryDownload(Document):
 		self.apply_inventory_download_cancel()
 	
 	def apply_inventory_download(self):
-		items = frappe.get_all("Inventory Download Detail", ["s_warehouse", "item_code", "qty"], filters = {"parent": self.name})
+		items = frappe.get_all("Inventory Download Detail", ["item_code", "qty"], filters = {"parent": self.name})
 
 		for item in items:
-			bin = frappe.get_all("Bin", ["name", "actual_qty"], filters = {"warehouse": item.s_warehouse, "item_code": item.item_code})
+			bin = frappe.get_all("Bin", ["name", "actual_qty"], filters = {"warehouse": self.warehouse, "item_code": item.item_code})
 
 			if len(bin) > 0:
 				if bin[0].actual_qty >= item.qty:
@@ -32,10 +32,10 @@ class InventoryDownload(Document):
 				frappe.throw(_("This product does not exist in inventory with the selected warehouse."))
 	
 	def apply_inventory_download_cancel(self):
-		items = frappe.get_all("Inventory Download Detail", ["s_warehouse", "item_code", "qty"], filters = {"parent": self.name})
+		items = frappe.get_all("Inventory Download Detail", ["item_code", "qty"], filters = {"parent": self.name})
 
 		for item in items:
-			bin = frappe.get_all("Bin", ["name", "actual_qty"], filters = {"warehouse": item.s_warehouse, "item_code": item.item_code})
+			bin = frappe.get_all("Bin", ["name", "actual_qty"], filters = {"warehouse": self.warehouse, "item_code": item.item_code})
 
 			if len(bin) > 0:
 				doc = frappe.get_doc("Bin", bin[0].name)
