@@ -65,7 +65,7 @@ def get_data(filters, leave_types):
 			for leave_type in leave_types:
 				remaining = 0
 				if leave_type in available_leave["leave_allocation"]:
-				# opening balance
+					# opening balance
 					remaining = available_leave["leave_allocation"][leave_type]['remaining_leaves']
 
 				row += [remaining]
