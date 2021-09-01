@@ -14,12 +14,6 @@ frappe.msgprint("Useful message")
 # ruleid: frappe-missing-translate-function-python
 msgprint("Useful message")
 
-# ruleid: frappe-missing-translate-function-python
-{ "label": "Field Label" }
-
-# ruleid: frappe-missing-translate-function-python
-dict(label="Field Label")
-
 
 # ok: frappe-missing-translate-function-python
 translatedmessage = _("Hello")
@@ -35,9 +29,3 @@ msgprint(_("Helpful message"))
 
 # ok: frappe-missing-translate-function-python
 frappe.throw(_("Error occured"))
-
-# ok: frappe-missing-translate-function-python
-{ "label": _("Field Label") }
-
-# ok: frappe-missing-translate-function-python
-dict(label=_("Field Label"))
