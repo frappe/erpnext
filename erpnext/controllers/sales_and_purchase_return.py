@@ -63,7 +63,7 @@ def validate_returned_items(doc):
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.db.sql("""select item_code, qty, serial_no, batch_no from `tabPacked Item`
-			where parent = %s""".format(doc.doctype), doc.return_against, as_dict=1):
+			where parent = %s""", doc.return_against, as_dict=1):
 				valid_items = get_ref_item_dict(valid_items, d)
 
 	already_returned_items = get_already_returned_items(doc)
