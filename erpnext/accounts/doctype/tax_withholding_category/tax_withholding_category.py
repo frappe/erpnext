@@ -21,7 +21,7 @@ class TaxWithholdingCategory(Document):
 				frappe.throw(_("Row #{0}: From Date cannot be before To Date").format(d.idx))
 
 			# validate overlapping of dates
-			if last_date and getdate(r.to_date) < getdate(last_date):
+			if last_date and getdate(d.to_date) < getdate(last_date):
 				frappe.throw(_("Row #{0}: Dates overlapping with other row").format(d.idx))
 
 	def validate_thresholds(self):
