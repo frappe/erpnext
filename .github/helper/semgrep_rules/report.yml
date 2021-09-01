@@ -3,6 +3,8 @@ rules:
   paths:
     include:
     - "**/report"
+    exclude:
+    - "**/regional"
   pattern-either:
   - patterns:
       - pattern: |
