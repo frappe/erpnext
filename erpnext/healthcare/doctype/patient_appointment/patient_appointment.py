@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, get_time, flt
+from frappe.utils import getdate, get_time, flt, get_link_to_form
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
 import datetime
@@ -333,17 +333,13 @@ def check_employee_wise_availability(date, practitioner_doc):
 
 
 def get_available_slots(practitioner_doc, date):
-	available_slots = []
-	slot_details = []
+	available_slots = slot_details = []
 	weekday = date.strftime('%A')
 	practitioner = practitioner_doc.name
 
 	for schedule_entry in practitioner_doc.practitioner_schedules:
-		if schedule_entry.schedule:
-			practitioner_schedule = frappe.get_doc('Practitioner Schedule', schedule_entry.schedule)
-		else:
-			frappe.throw(_('{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner').format(
-				frappe.bold(practitioner)), title=_('Practitioner Schedule Not Found'))
+		validate_practitioner_schedules(schedule_entry, practitioner)
+		practitioner_schedule = frappe.get_doc('Practitioner Schedule', schedule_entry.schedule)
 
 		if practitioner_schedule:
 			available_slots = []
@@ -384,6 +380,19 @@ def get_available_slots(practitioner_doc, date):
 					'appointments': appointments,  'allow_overlap': allow_overlap, 'service_unit_capacity': service_unit_capacity})
 
 	return slot_details
+
+
+def validate_practitioner_schedules(schedule_entry, practitioner):
+	if schedule_entry.schedule:
+		if not schedule_entry.service_unit:
+			frappe.throw(_('Practitioner {0} does not have a Service Unit set against the Practitioner Schedule {1}.').format(
+				get_link_to_form('Healthcare Practitioner', practitioner), frappe.bold(schedule_entry.schedule)),
+				title=_('Service Unit Not Found'))
+
+	else:
+		frappe.throw(_('Practitioner {0} does not have a Practitioner Schedule assigned.').format(
+			get_link_to_form('Healthcare Practitioner', practitioner)),
+			title=_('Practitioner Schedule Not Found'))
 
 
 @frappe.whitelist()
