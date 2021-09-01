@@ -2,7 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import json
+import frappe
 from frappe.utils.nestedset import get_root_of
 from frappe.utils import cint
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
@@ -209,7 +210,6 @@ def check_opening_entry(user):
 
 @frappe.whitelist()
 def create_opening_voucher(pos_profile, company, balance_details):
-	import json
 	balance_details = json.loads(balance_details)
 
 	new_pos_opening = frappe.get_doc({
