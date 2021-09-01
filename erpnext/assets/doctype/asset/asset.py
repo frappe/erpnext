@@ -321,10 +321,10 @@ class Asset(AccountsController):
 	def get_from_date(self, finance_book):
 		if not self.get('schedules'):
 			return self.available_for_use_date
-		
+
 		if len(self.finance_books) == 1:
 			return self.schedules[-1].schedule_date
-		
+
 		from_date = ""
 		for schedule in self.get('schedules'):
 			if schedule.finance_book == finance_book:

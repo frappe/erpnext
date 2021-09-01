@@ -1118,9 +1118,9 @@ class TestSalesInvoice(unittest.TestCase):
 			'qty': 1
 		})
 		pi.set_missing_values()
-		
+
 		asset = create_asset(item_code="Macbook Pro")
-	
+
 		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
 		return_si = create_sales_invoice(is_return=1, return_against=si.name, item_code="Macbook Pro", asset=asset.name, qty=-1, rate=90000)
 
@@ -1128,7 +1128,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# Asset value is 100,000 but it was sold for 90,000, so there should be a loss of 10,000
 		loss_for_si = frappe.get_all(
-			"GL Entry", 
+			"GL Entry",
 			filters = {
 				"voucher_no": si.name,
 				"account": disposal_account
@@ -1137,7 +1137,7 @@ class TestSalesInvoice(unittest.TestCase):
 		)[0]
 
 		loss_for_return_si = frappe.get_all(
-			"GL Entry", 
+			"GL Entry",
 			filters = {
 				"voucher_no": return_si.name,
 				"account": disposal_account
