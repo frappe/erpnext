@@ -147,7 +147,6 @@
   {
    "default": "Stop",
    "depends_on": "maintain_same_sales_rate",
-   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
    "label": "Action if Same Rate is Not Maintained",
@@ -205,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-01 22:47:24.298970",
+ "modified": "2021-09-01 22:48:30.860203",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
