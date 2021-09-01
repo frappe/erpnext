@@ -143,7 +143,6 @@
   {
    "default": "Stop",
    "depends_on": "maintain_same_sales_rate",
-   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
    "label": "Action If Same Rate is Not Maintained",
