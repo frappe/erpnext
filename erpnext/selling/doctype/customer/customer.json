@@ -20,6 +20,7 @@
   "tax_withholding_category",
   "default_bank_account",
   "lead_name",
+  "prospect",
   "opportunity_name",
   "image",
   "column_break0",
@@ -213,8 +214,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company",
-   "unique": 1
+   "options": "Company"
   },
   {
    "depends_on": "represents_company",
@@ -496,6 +496,14 @@
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "prospect",
+   "fieldtype": "Link",
+   "label": "Prospect",
+   "no_copy": 1,
+   "options": "Prospect",
+   "print_hide": 1
   },
   {
    "fieldname": "opportunity_name",

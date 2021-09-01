@@ -60,9 +60,6 @@ class EmailDigest(Document):
 						reference_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
 
-		frappe.set_user(original_user)
-		frappe.set_user_lang(original_user)
-
 	def get_msg_html(self):
 		"""Build email digest content"""
 		frappe.flags.ignore_account_permission = True
