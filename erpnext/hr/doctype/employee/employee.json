@@ -15,24 +15,78 @@
   "first_name",
   "middle_name",
   "last_name",
-  "employee_name",
   "column_break1",
+  "employee_name",
   "salutation",
   "gender",
-  "date_of_birth",
   "image",
   "column_break_12",
   "company",
   "status",
   "employee_number",
-  "employment_type",
   "date_of_joining",
-  "emergency_contact_details",
+  "date_of_birth",
+  "job_profile",
+  "department",
+  "designation",
+  "column_break_41",
+  "grade",
+  "reports_to",
+  "column_break_31",
+  "branch",
+  "employment_type",
+  "salary_information",
+  "salary_mode",
+  "column_break_56",
+  "bank_name",
+  "col_break31",
+  "bank_ac_no",
+  "attendance_and_leave_details",
+  "default_shift",
+  "attendance_device_id",
+  "column_break_49",
+  "leave_policy",
+  "leave_approver",
+  "column_break_44",
+  "holiday_list",
+  "contact_details",
+  "cell_number",
+  "unsubscribed",
+  "column_break_71",
   "emergency_phone_number",
-  "column_break_21",
   "person_to_be_contacted",
-  "column_break_24",
   "relation",
+  "column_break_21",
+  "prefered_contact_email",
+  "prefered_email",
+  "personal_email",
+  "company_email",
+  "identification_section",
+  "tax_cnic",
+  "cnic_date_of_issue",
+  "cnic_valid_upto",
+  "column_break_57",
+  "tax_id",
+  "passport_number",
+  "place_of_issue",
+  "column_break_81",
+  "date_of_issue",
+  "valid_upto",
+  "address_section",
+  "current_address",
+  "current_accommodation_type",
+  "column_break4",
+  "permanent_address",
+  "permanent_accommodation_type",
+  "personal_details",
+  "health_insurance_provider",
+  "health_insurance_no",
+  "column_break6",
+  "blood_group",
+  "health_details",
+  "column_break_87",
+  "marital_status",
+  "family_background",
   "erpnext_user",
   "user_id",
   "create_user",
@@ -46,61 +100,8 @@
   "col_break_22",
   "notice_number_of_days",
   "date_of_retirement",
-  "job_profile",
-  "department",
-  "grade",
-  "column_break_41",
-  "designation",
-  "reports_to",
-  "column_break_31",
-  "branch",
-  "attendance_and_leave_details",
-  "leave_policy",
-  "holiday_list",
-  "column_break_49",
-  "leave_approver",
-  "attendance_device_id",
-  "column_break_44",
-  "default_shift",
-  "salary_information",
-  "salary_mode",
-  "column_break_56",
-  "bank_name",
-  "bank_ac_no",
-  "health_insurance_section",
-  "health_insurance_provider",
-  "health_insurance_no",
-  "contact_details",
-  "cell_number",
-  "prefered_contact_email",
-  "prefered_email",
-  "personal_email",
-  "company_email",
-  "column_break4",
-  "permanent_accommodation_type",
-  "permanent_address",
-  "unsubscribed",
-  "column_break_71",
-  "current_accommodation_type",
-  "current_address",
   "sb53",
   "bio",
-  "personal_details",
-  "tax_cnic",
-  "cnic_date_of_issue",
-  "cnic_valid_upto",
-  "tax_id",
-  "column_break_81",
-  "passport_number",
-  "date_of_issue",
-  "place_of_issue",
-  "valid_upto",
-  "column_break6",
-  "blood_group",
-  "marital_status",
-  "health_details",
-  "column_break_87",
-  "family_background",
   "educational_qualification",
   "education",
   "previous_work_experience",
@@ -261,13 +262,6 @@
    "oldfieldtype": "Date"
   },
   {
-   "allow_in_quick_entry": 1,
-   "collapsible": 1,
-   "fieldname": "emergency_contact_details",
-   "fieldtype": "Section Break",
-   "label": "Emergency Contact"
-  },
-  {
    "bold": 1,
    "fieldname": "emergency_phone_number",
    "fieldtype": "Data",
@@ -282,7 +276,7 @@
   {
    "fieldname": "relation",
    "fieldtype": "Data",
-   "label": "Relation"
+   "label": "Emergency Contact Relation"
   },
   {
    "collapsible": 1,
@@ -365,12 +359,12 @@
    "oldfieldtype": "Date"
   },
   {
-   "collapsible": 1,
    "fieldname": "job_profile",
    "fieldtype": "Section Break",
-   "label": "Department and Grade"
+   "label": "Job Profile"
   },
   {
+   "bold": 1,
    "fieldname": "department",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -381,6 +375,7 @@
    "options": "Department"
   },
   {
+   "bold": 1,
    "fieldname": "designation",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -436,7 +431,6 @@
    "options": "Holiday List"
   },
   {
-   "collapsible": 1,
    "fieldname": "salary_information",
    "fieldtype": "Section Break",
    "label": "Salary Details",
@@ -469,12 +463,6 @@
    "oldfieldtype": "Data"
   },
   {
-   "collapsible": 1,
-   "fieldname": "health_insurance_section",
-   "fieldtype": "Section Break",
-   "label": "Health Insurance"
-  },
-  {
    "fieldname": "health_insurance_provider",
    "fieldtype": "Link",
    "label": "Health Insurance Provider",
@@ -487,7 +475,6 @@
    "label": "Health Insurance No"
   },
   {
-   "collapsible": 1,
    "fieldname": "contact_details",
    "fieldtype": "Section Break",
    "label": "Contact Details"
@@ -576,7 +563,7 @@
    "collapsible": 1,
    "fieldname": "personal_details",
    "fieldtype": "Section Break",
-   "label": "Personal Details"
+   "label": "Health and Family"
   },
   {
    "fieldname": "passport_number",
@@ -586,17 +573,17 @@
   {
    "fieldname": "date_of_issue",
    "fieldtype": "Date",
-   "label": "Date of Issue"
+   "label": "Passport Date of Issue"
   },
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto"
+   "label": "Passport Valid Upto"
   },
   {
    "fieldname": "place_of_issue",
    "fieldtype": "Data",
-   "label": "Place of Issue"
+   "label": "Passport Place of Issue"
   },
   {
    "fieldname": "column_break6",
@@ -766,6 +753,7 @@
    "label": "Old Parent"
   },
   {
+   "bold": 1,
    "fieldname": "attendance_device_id",
    "fieldtype": "Data",
    "in_standard_filter": 1,
@@ -774,7 +762,6 @@
    "unique": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "attendance_and_leave_details",
    "fieldtype": "Section Break",
    "label": "Attendance and Leave Details"
@@ -784,6 +771,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "bold": 1,
    "fieldname": "default_shift",
    "fieldtype": "Link",
    "label": "Default Shift",
@@ -825,10 +813,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_24",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_33",
    "fieldtype": "Column Break"
   },
@@ -859,13 +843,31 @@
   {
    "fieldname": "column_break_56",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_section",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "identification_section",
+   "fieldtype": "Section Break",
+   "label": "Identification"
+  },
+  {
+   "fieldname": "column_break_57",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2021-02-03 16:38:23.059061",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2021-09-02 00:57:49.084304",
+ "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",
