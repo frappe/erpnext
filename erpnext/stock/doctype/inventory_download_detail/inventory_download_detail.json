@@ -8,9 +8,7 @@
  "field_order": [
   "barcode",
   "section_break_2",
-  "s_warehouse",
   "col_break1",
-  "t_warehouse",
   "sec_break1",
   "item_code",
   "item_group",
@@ -74,26 +72,8 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "s_warehouse",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Source Warehouse",
-   "oldfieldname": "s_warehouse",
-   "oldfieldtype": "Link",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "col_break1",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "t_warehouse",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Target Warehouse",
-   "oldfieldname": "t_warehouse",
-   "oldfieldtype": "Link",
-   "options": "Warehouse"
   },
   {
    "fieldname": "sec_break1",
@@ -472,7 +452,7 @@
   }
  ],
  "istable": 1,
- "modified": "2021-08-02 23:15:27.936510",
+ "modified": "2021-08-31 14:31:37.922364",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download Detail",

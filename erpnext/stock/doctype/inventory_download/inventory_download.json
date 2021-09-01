@@ -10,6 +10,8 @@
   "reason_for_download",
   "responsable",
   "authorized",
+  "company",
+  "warehouse",
   "items",
   "amended_from"
  ],
@@ -63,10 +65,24 @@
    "options": "Inventory Download",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-08-02 23:30:02.649724",
+ "modified": "2021-08-31 14:34:23.742596",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download",
