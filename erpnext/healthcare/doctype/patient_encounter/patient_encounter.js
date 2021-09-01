@@ -257,7 +257,7 @@ var schedule_discharge = function(frm) {
 	var dialog = new frappe.ui.Dialog ({
 		title: 'Inpatient Discharge',
 		fields: [
-			{fieldtype: 'Date', label: 'Discharge Ordered Date', fieldname: 'discharge_ordered_date', default: 'Today', read_only: 1},
+			{fieldtype: 'Datetime', label: 'Discharge Ordered DateTime', fieldname: 'discharge_ordered_datetime', default: frappe.datetime.now_datetime()},
 			{fieldtype: 'Date', label: 'Followup Date', fieldname: 'followup_date'},
 			{fieldtype: 'Column Break'},
 			{fieldtype: 'Small Text', label: 'Discharge Instructions', fieldname: 'discharge_instructions'},
@@ -270,7 +270,7 @@ var schedule_discharge = function(frm) {
 				patient: frm.doc.patient,
 				discharge_encounter: frm.doc.name,
 				discharge_practitioner: frm.doc.practitioner,
-				discharge_ordered_date: dialog.get_value('discharge_ordered_date'),
+				discharge_ordered_datetime: dialog.get_value('discharge_ordered_datetime'),
 				followup_date: dialog.get_value('followup_date'),
 				discharge_instructions: dialog.get_value('discharge_instructions'),
 				discharge_note: dialog.get_value('discharge_note')

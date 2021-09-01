@@ -502,6 +502,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "enable_deferred_expense",
    "fieldname": "deferred_expense_section",
    "fieldtype": "Section Break",
    "label": "Deferred Expense"
@@ -861,7 +862,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-13 02:04:37.787882",
+ "modified": "2021-08-12 20:14:45.506639",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

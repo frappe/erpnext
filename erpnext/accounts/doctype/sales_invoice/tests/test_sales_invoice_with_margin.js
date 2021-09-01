@@ -33,4 +33,3 @@ QUnit.test("test sales invoice with margin", function(assert) {
 		() => done()
 	]);
 });
-

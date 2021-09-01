@@ -99,5 +99,3 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 	def tearDown(self):
 		for doctype in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
 			frappe.db.sql("delete from `tab{0}`".format(doctype)) #nosec
-
-

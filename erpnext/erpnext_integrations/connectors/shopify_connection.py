@@ -350,4 +350,3 @@ def is_sync_complete(shopify_settings, order):
 		return getdate(shopify_settings.to_date) < getdate(order.get('created_at'))
 	else:
 		return cstr(order.get('id')) == cstr(shopify_settings.to_order_id)
-

@@ -153,7 +153,7 @@ def get_active_service_level_agreement_for(doc):
 	filters += [["Service Level Agreement", "default_service_level_agreement", "=", 0]]
 	agreements = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
 		fields=["name", "default_priority", "condition"])
-	
+
 	# check if the current document on which SLA is to be applied fulfills all the conditions
 	filtered_agreements = []
 	for agreement in agreements:

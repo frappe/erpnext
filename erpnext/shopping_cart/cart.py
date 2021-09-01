@@ -308,7 +308,7 @@ def update_party(fullname, company_name=None, mobile_no=None, phone=None):
 	party = get_party()
 
 	party.customer_name = company_name or fullname
-	party.customer_type == "Company" if company_name else "Individual"
+	party.customer_type = "Company" if company_name else "Individual"
 
 	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
 	contact = frappe.get_doc("Contact", contact_name)

@@ -253,6 +253,8 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
 
+		self.process_common_party_accounting()
+
 	def validate_pos_return(self):
 
 		if self.is_pos and self.is_return:
@@ -478,6 +480,9 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) != 1:
 			return
 
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
+
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
@@ -491,9 +496,6 @@ class SalesInvoice(SellingController):
 
 		if not self.get('payments') and not for_validate:
 			update_multi_mode_option(self, pos)
-
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
 			if not for_validate:
@@ -888,10 +890,8 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
-		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
-
 		for tax in self.get("taxes"):
-			amount, base_amount = self.get_tax_amounts(tax, enable_discount_accounting)
+			amount, base_amount = self.get_tax_amounts(tax, self.enable_discount_accounting)
 
 			if flt(tax.base_tax_amount_after_discount_amount):
 				account_currency = get_account_currency(tax.account_head)
@@ -922,8 +922,6 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
-		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
-
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
@@ -949,7 +947,7 @@ class SalesInvoice(SellingController):
 						income_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
-						amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
+						amount, base_amount = self.get_amount_and_base_amount(item, self.enable_discount_accounting)
 
 						account_currency = get_account_currency(income_account)
 						gl_entries.append(
@@ -969,6 +967,13 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	@property
+	def enable_discount_accounting(self):
+		if not hasattr(self, "_enable_discount_accounting"):
+			self._enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		return self._enable_discount_accounting
 
 	def set_asset_status(self, asset):
 		if self.is_return:
@@ -1365,7 +1370,7 @@ class SalesInvoice(SellingController):
 
 		discounting_status = None
 		if self.is_discounted:
-			discountng_status = get_discounting_status(self.name)
+			discounting_status = get_discounting_status(self.name)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1373,11 +1378,11 @@ class SalesInvoice(SellingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
+				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discounting_status=='Disbursed':
 					self.status = "Overdue and Discounted"
 				elif outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discountng_status=='Disbursed':
+				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discounting_status=='Disbursed':
 					self.status = "Unpaid and Discounted"
 				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"

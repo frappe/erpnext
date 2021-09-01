@@ -148,13 +148,16 @@ class BOM(WebsiteGenerator):
 		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
+		self.set_bom_scrap_items_detail()
 		self.validate_materials()
 		self.set_routing_operations()
 		self.validate_operations()
 		self.calculate_cost()
 		self.update_stock_qty()
+		self.validate_scrap_items()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
 		self.set_bom_level()
+
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -200,7 +203,7 @@ class BOM(WebsiteGenerator):
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
-			self.validate_bom_currecny(item)
+			self.validate_bom_currency(item)
 
 			ret = self.get_bom_material_detail({
 				"company": self.company,
@@ -218,6 +221,19 @@ class BOM(WebsiteGenerator):
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
+
+	def set_bom_scrap_items_detail(self):
+		for item in self.get("scrap_items"):
+			args = {
+				"item_code": item.item_code,
+				"company": self.company,
+				"scrap_items": True,
+				"bom_no": '',
+			}
+			ret = self.get_bom_material_detail(args)
+			for key, value in ret.items():
+				if item.get(key) is None:
+					item.set(key, value)
 
 	@frappe.whitelist()
 	def get_bom_material_detail(self, args=None):
@@ -255,7 +271,7 @@ class BOM(WebsiteGenerator):
 
 		return ret_item
 
-	def validate_bom_currecny(self, item):
+	def validate_bom_currency(self, item):
 		if item.get('bom_no') and frappe.db.get_value('BOM', item.get('bom_no'), 'currency') != self.currency:
 			frappe.throw(_("Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}")
 				.format(item.idx, item.bom_no, self.currency))
@@ -498,16 +514,20 @@ class BOM(WebsiteGenerator):
 	def update_rate_and_time(self, row, update_hour_rate = False):
 		if not row.hour_rate or update_hour_rate:
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
-			row.hour_rate = (hour_rate / flt(self.conversion_rate)
-				if self.conversion_rate and hour_rate else hour_rate)
+
+			if hour_rate:
+				row.hour_rate = (hour_rate / flt(self.conversion_rate)
+					if self.conversion_rate and hour_rate else hour_rate)
 
 			if self.routing:
-				row.time_in_mins = flt(frappe.db.get_value("BOM Operation", {
+				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
 						"workstation": row.workstation,
 						"operation": row.operation,
-						"sequence_id": row.sequence_id,
 						"parent": self.routing
 				}, ["time_in_mins"]))
+
+				if time_in_mins:
+					row.time_in_mins = time_in_mins
 
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
@@ -673,6 +693,33 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
+
+	def validate_scrap_items(self):
+		for item in self.scrap_items:
+			msg = ""
+			if item.item_code == self.item and not item.is_process_loss:
+				msg = _('Scrap/Loss Item: {0} should have Is Process Loss checked as it is the same as the item to be manufactured or repacked.') \
+					.format(frappe.bold(item.item_code))
+			elif item.item_code != self.item and item.is_process_loss:
+				msg = _('Scrap/Loss Item: {0} should not have Is Process Loss checked as it is different from  the item to be manufactured or repacked') \
+					.format(frappe.bold(item.item_code))
+
+			must_be_whole_number = frappe.get_value("UOM", item.stock_uom, "must_be_whole_number")
+			if item.is_process_loss and must_be_whole_number:
+				msg = _("Item: {0} with Stock UOM: {1} cannot be a Scrap/Loss Item as {1} is a whole UOM.") \
+					.format(frappe.bold(item.item_code), frappe.bold(item.stock_uom))
+
+			if item.is_process_loss and (item.stock_qty >= self.quantity):
+				msg = _("Scrap/Loss Item: {0} should have Qty less than finished goods Quantity.") \
+					.format(frappe.bold(item.item_code))
+
+			if item.is_process_loss and (item.rate > 0):
+				msg = _("Scrap/Loss Item: {0} should have Rate set to 0 because Is Process Loss is checked.") \
+					.format(frappe.bold(item.item_code))
+
+			if msg:
+				frappe.throw(msg, title=_("Note"))
+
 	def get_tree_representation(self) -> BOMTree:
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)
@@ -808,8 +855,11 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", where_conditions="",
-			select_columns=", bom_item.idx, item.description", is_stock_item=is_stock_item, qty_field="stock_qty")
+		query = query.format(
+			table="BOM Scrap Item", where_conditions="",
+			select_columns=", bom_item.idx, item.description, is_process_loss",
+			is_stock_item=is_stock_item, qty_field="stock_qty"
+		)
 
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:

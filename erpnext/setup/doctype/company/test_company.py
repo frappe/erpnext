@@ -130,4 +130,3 @@ def create_test_lead_in_company(company):
 		lead.company = company
 		lead.save()
 	return lead.name
-

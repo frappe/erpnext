@@ -58,6 +58,7 @@ class StockEntry(StockController):
 
 		self.validate_posting_time()
 		self.validate_purpose()
+		self.set_title()
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.validate_qty()
@@ -271,7 +272,7 @@ class StockEntry(StockController):
 		item_wise_qty = {}
 		if self.purpose == "Manufacture" and self.work_order:
 			for d in self.items:
-				if d.is_finished_item:
+				if d.is_finished_item or d.is_process_loss:
 					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
 
 		for item_code, qty_list in iteritems(item_wise_qty):
@@ -317,9 +318,6 @@ class StockEntry(StockController):
 				d.s_warehouse = self.from_warehouse
 				d.t_warehouse = self.to_warehouse
 
-			if not (d.s_warehouse or d.t_warehouse):
-				frappe.throw(_("Atleast one warehouse is mandatory"))
-
 			if self.purpose in source_mandatory and not d.s_warehouse:
 				if self.from_warehouse:
 					d.s_warehouse = self.from_warehouse
@@ -332,9 +330,10 @@ class StockEntry(StockController):
 				else:
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
+
 			if self.purpose == "Manufacture":
 				if validate_for_manufacture:
-					if d.is_finished_item or d.is_scrap_item:
+					if d.is_finished_item or d.is_scrap_item or d.is_process_loss:
 						d.s_warehouse = None
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
@@ -345,6 +344,9 @@ class StockEntry(StockController):
 
 			if cstr(d.s_warehouse) == cstr(d.t_warehouse) and not self.purpose == "Material Transfer for Manufacture":
 				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
+
+			if not (d.s_warehouse or d.t_warehouse):
+				frappe.throw(_("Atleast one warehouse is mandatory"))
 
 	def validate_work_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"):
@@ -463,7 +465,7 @@ class StockEntry(StockController):
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
-		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item)
+		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item or d.is_process_loss)
 
 		# Set basic rate for incoming items
 		for d in self.get('items'):
@@ -484,6 +486,8 @@ class StockEntry(StockController):
 					raise_error_if_no_rate=raise_error_if_no_rate)
 
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
+			if d.is_process_loss:
+				d.basic_rate = flt(0.)
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 
 	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
@@ -1041,6 +1045,7 @@ class StockEntry(StockController):
 
 		self.set_scrap_items()
 		self.set_actual_qty()
+		self.update_items_for_process_loss()
 		self.validate_customer_provided_item()
 		self.calculate_rate_and_amount()
 
@@ -1185,7 +1190,7 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "required_qty", "consumed_qty", "transferred_qty"]
+			fields=["item_code", "source_warehouse", "required_qty", "consumed_qty", "transferred_qty"]
 			)
 
 		work_order_qty = wo.material_transferred_for_manufacturing or wo.qty
@@ -1205,7 +1210,7 @@ class StockEntry(StockController):
 			if qty > 0:
 				self.add_to_stock_entry_detail({
 					item.item_code: {
-						"from_warehouse": wo.wip_warehouse,
+						"from_warehouse": wo.wip_warehouse or item.source_warehouse,
 						"to_warehouse": "",
 						"qty": qty,
 						"item_name": item.item_name,
@@ -1398,6 +1403,7 @@ class StockEntry(StockController):
 				get_default_cost_center(item_dict[d], company = self.company))
 			se_child.is_finished_item = item_dict[d].get("is_finished_item", 0)
 			se_child.is_scrap_item = item_dict[d].get("is_scrap_item", 0)
+			se_child.is_process_loss = item_dict[d].get("is_process_loss", 0)
 
 			for field in ["idx", "po_detail", "original_item",
 				"expense_account", "description", "item_name", "serial_no", "batch_no"]:
@@ -1576,6 +1582,30 @@ class StockEntry(StockController):
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
 				frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
+				
+	def update_items_for_process_loss(self):
+		process_loss_dict = {}
+		for d in self.get("items"):
+			if not d.is_process_loss:
+				continue
+
+			scrap_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_scrap_warehouse")
+			if scrap_warehouse is not None:
+				d.t_warehouse = scrap_warehouse
+			d.is_scrap_item = 0
+
+			if d.item_code not in process_loss_dict:
+				process_loss_dict[d.item_code] = [flt(0), flt(0)]
+			process_loss_dict[d.item_code][0] += flt(d.transfer_qty)
+			process_loss_dict[d.item_code][1] += flt(d.qty)
+
+		for d in self.get("items"):
+			if not d.is_finished_item or d.item_code not in process_loss_dict:
+				continue
+			# Assumption: 1 finished item has 1 row.
+			d.transfer_qty -= process_loss_dict[d.item_code][0]
+			d.qty -= process_loss_dict[d.item_code][1]
+
 
 	def set_serial_no_batch_for_finished_good(self):
 		args = {}
@@ -1606,6 +1636,14 @@ class StockEntry(StockController):
 				used_serial_nos.extend(get_serial_nos(row.serial_no))
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
+
+	def set_title(self):
+		if frappe.flags.in_import and self.title:
+			# Allow updating title during data import/update
+			return
+
+		self.title = self.purpose
+
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

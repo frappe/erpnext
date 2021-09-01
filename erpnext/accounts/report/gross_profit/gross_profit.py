@@ -41,12 +41,14 @@ def execute(filters=None):
 
 	columns = get_columns(group_wise_columns, filters)
 
-	for src in gross_profit_data.grouped_data:
+	for idx, src in enumerate(gross_profit_data.grouped_data):
 		row = []
 		for col in group_wise_columns.get(scrub(filters.group_by)):
 			row.append(src.get(col))
 
 		row.append(filters.currency)
+		if idx == len(gross_profit_data.grouped_data)-1:
+			row[0] = frappe.bold("Total")
 		data.append(row)
 
 	return columns, data
@@ -154,6 +156,15 @@ class GrossProfitGenerator(object):
 
 	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
+		self.totals = frappe._dict(
+			qty=0,
+			base_amount=0,
+			buying_amount=0,
+			gross_profit=0,
+			gross_profit_percent=0,
+			base_rate=0,
+			buying_rate=0
+		)
 		for key in list(self.grouped):
 			if self.filters.get("group_by") != "Invoice":
 				for i, row in enumerate(self.grouped[key]):
@@ -165,6 +176,7 @@ class GrossProfitGenerator(object):
 						new_row.base_amount += flt(row.base_amount, self.currency_precision)
 				new_row = self.set_average_rate(new_row)
 				self.grouped_data.append(new_row)
+				self.add_to_totals(new_row)
 			else:
 				for i, row in enumerate(self.grouped[key]):
 					if row.parent in self.returned_invoices \
@@ -177,15 +189,25 @@ class GrossProfitGenerator(object):
 					if row.qty or row.base_amount:
 						row = self.set_average_rate(row)
 						self.grouped_data.append(row)
+					self.add_to_totals(row)
+		self.set_average_gross_profit(self.totals)
+		self.grouped_data.append(self.totals)
 
 	def set_average_rate(self, new_row):
+		self.set_average_gross_profit(new_row)
+		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, self.float_precision) if new_row.qty else 0
+		new_row.base_rate = flt(new_row.base_amount / new_row.qty, self.float_precision) if new_row.qty else 0
+		return new_row
+
+	def set_average_gross_profit(self, new_row):
 		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, self.currency_precision)
 		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), self.currency_precision) \
 			if new_row.base_amount else 0
-		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, self.float_precision) if new_row.qty else 0
-		new_row.base_rate = flt(new_row.base_amount / new_row.qty, self.float_precision) if new_row.qty else 0
 
-		return new_row
+	def add_to_totals(self, new_row):
+		for key in self.totals:
+			if new_row.get(key):
+				self.totals[key] += new_row[key]
 
 	def get_returned_invoice_items(self):
 		returned_invoices = frappe.db.sql("""
