@@ -371,4 +371,3 @@ def add_lead_to_prospect(lead, prospect):
 	prospect.save(ignore_permissions=True)
 	frappe.msgprint(_('Lead {0} has been added to prospect {1}.').format(frappe.bold(lead), frappe.bold(prospect.name)),
 		title=_('Lead Added'), indicator='green')
-	

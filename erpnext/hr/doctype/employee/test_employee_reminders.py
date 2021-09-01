@@ -18,7 +18,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		# Create a test holiday list
 		test_holiday_dates = cls.get_test_holiday_dates()
 		test_holiday_list = make_holiday_list(
-			'TestHolidayRemindersList', 
+			'TestHolidayRemindersList',
 			holiday_dates=[
 				{'holiday_date': test_holiday_dates[0], 'description': 'test holiday1'},
 				{'holiday_date': test_holiday_dates[1], 'description': 'test holiday2'},
@@ -49,8 +49,8 @@ class TestEmployeeReminders(unittest.TestCase):
 	def get_test_holiday_dates(cls):
 		today_date = getdate()
 		return [
-			today_date, 
-			today_date-timedelta(days=4), 
+			today_date,
+			today_date-timedelta(days=4),
 			today_date-timedelta(days=3),
 			today_date+timedelta(days=1),
 			today_date+timedelta(days=3),
@@ -63,7 +63,7 @@ class TestEmployeeReminders(unittest.TestCase):
 
 	def test_is_holiday(self):
 		from erpnext.hr.doctype.employee.employee import is_holiday
-		
+
 		self.assertTrue(is_holiday(self.test_employee.name))
 		self.assertTrue(is_holiday(self.test_employee.name, date=self.test_holiday_dates[1]))
 		self.assertFalse(is_holiday(self.test_employee.name, date=getdate()-timedelta(days=1)))
@@ -118,7 +118,7 @@ class TestEmployeeReminders(unittest.TestCase):
 
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue("Subject: Work Anniversary Reminder" in email_queue[0].message)
-	
+
 	def test_send_holidays_reminder_in_advance(self):
 		from erpnext.hr.utils import get_holidays_for_employee
 		from erpnext.hr.doctype.employee.employee_reminders import send_holidays_reminder_in_advance
@@ -133,10 +133,10 @@ class TestEmployeeReminders(unittest.TestCase):
 		holidays = get_holidays_for_employee(
 					self.test_employee.get('name'),
 					getdate(), getdate() + timedelta(days=3),
-					only_non_weekly=True, 
+					only_non_weekly=True,
 					raise_exception=False
 				)
-		
+
 		send_holidays_reminder_in_advance(
 			self.test_employee.get('name'),
 			holidays
@@ -158,7 +158,7 @@ class TestEmployeeReminders(unittest.TestCase):
 
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue(len(email_queue) > 0)
-	
+
 	def test_advance_holiday_reminders_weekly(self):
 		from erpnext.hr.doctype.employee.employee_reminders import send_reminders_in_advance_weekly
 		# Get HR settings and enable advance holiday reminders

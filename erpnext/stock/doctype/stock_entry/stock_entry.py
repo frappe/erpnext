@@ -1582,7 +1582,7 @@ class StockEntry(StockController):
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
 				frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
-				
+
 	def update_items_for_process_loss(self):
 		process_loss_dict = {}
 		for d in self.get("items"):

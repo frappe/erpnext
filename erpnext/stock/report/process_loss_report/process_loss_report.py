@@ -92,7 +92,7 @@ def get_query_args(filters: Filters) -> QueryArgs:
 
 def run_query(query_args: QueryArgs) -> Data:
 	return frappe.db.sql("""
-		SELECT 
+		SELECT
 			wo.name, wo.status, wo.production_item, wo.qty,
 			wo.produced_qty, wo.process_loss_qty,
 			(wo.produced_qty - wo.process_loss_qty) as actual_produced_qty,
@@ -130,4 +130,3 @@ def get_filter_conditions(filters: Filters) -> QueryArgs:
 			{"work_order_filter": f"AND wo.name='{work_order_name}'"}
 		)
 	return filter_conditions
-
