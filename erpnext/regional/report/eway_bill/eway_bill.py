@@ -41,7 +41,7 @@ def get_data(filters):
 	}
 
 	# Regular expression set to remove all the special characters
-	special_characters = "[$%^*()+\\[\]{};':\"\\|<>.?]"
+	special_characters = r"[$%^*()+\\[\]{};':\"\\|<>.?]"
 
 	for row in data:
 		set_defaults(row)

@@ -88,7 +88,7 @@ def simulate(domain='Manufacturing', days=100):
 			elif domain=='Education':
 				edu.work()
 
-		except:
+		except Exception:
 			frappe.db.set_global('demo_last_date', current_date)
 			raise
 		finally:

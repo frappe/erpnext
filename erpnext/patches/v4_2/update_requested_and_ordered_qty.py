@@ -20,5 +20,5 @@ def execute():
 				})
 				if count % 200 == 0:
 					frappe.db.commit()
-			except:
+			except Exception:
 				frappe.db.rollback()

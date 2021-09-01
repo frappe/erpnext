@@ -86,7 +86,7 @@ def execute():
 			try:
 				employee_other_income.submit()
 				migrated.append([proof.employee, proof.payroll_period])
-			except:
+			except Exception:
 				pass
 
 	if not frappe.db.table_exists("Employee Tax Exemption Declaration"):
@@ -108,5 +108,5 @@ def execute():
 
 			try:
 				employee_other_income.submit()
-			except:
+			except Exception:
 				pass
