@@ -8,4 +8,5 @@ import frappe
 from erpnext.e_commerce.shopping_cart.cart import get_cart_quotation
 
 def get_context(context):
+	context.body_class = "product-page"
 	context.update(get_cart_quotation())

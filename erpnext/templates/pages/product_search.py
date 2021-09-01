@@ -58,7 +58,17 @@ def get_product_data(search=None, start=0, limit=12):
 	}, as_dict=1)
 
 @frappe.whitelist(allow_guest=True)
-def search(query, limit=10, fuzzy_search=True):
+def search(query):
+	product_results = product_search(query)
+	category_results = get_category_suggestions(query)
+
+	return {
+		"product_results": product_results.get("results") or [],
+		"category_results": category_results.get("results") or []
+	}
+
+@frappe.whitelist(allow_guest=True)
+def product_search(query, limit=10, fuzzy_search=True):
 	search_results = {"from_redisearch": True, "results": []}
 
 	if not is_search_module_loaded():

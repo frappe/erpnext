@@ -14,6 +14,7 @@ def get_context(context):
 
 	items = set_stock_price_details(items, settings, selling_price_list)
 
+	context.body_class = "product-page"
 	context.items = items
 	context.settings = settings
 	context.no_cache = 1

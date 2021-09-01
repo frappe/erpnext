@@ -5,7 +5,7 @@ frappe.provide("erpnext.e_commerce.shopping_cart");
 var shopping_cart = erpnext.e_commerce.shopping_cart;
 
 $.extend(wishlist, {
-	set_wishlist_count: function() {
+	set_wishlist_count: function(animate=false) {
 		// set badge count for wishlist icon
 		var wish_count = frappe.get_cookie("wish_count");
 		if (frappe.session.user==="Guest") {
@@ -26,10 +26,12 @@ $.extend(wishlist, {
 		}
 		if (wish_count) {
 			$badge.html(wish_count);
-			$wishlist.addClass('cart-animate');
-			setTimeout(() => {
-				$wishlist.removeClass('cart-animate');
-			}, 500);
+			if (animate) {
+				$wishlist.addClass('cart-animate');
+				setTimeout(() => {
+					$wishlist.removeClass('cart-animate');
+				}, 500);
+			}
 		} else {
 			$badge.remove();
 		}
@@ -98,7 +100,7 @@ $.extend(wishlist, {
 		}
 
 		let success_action = function() {
-			erpnext.e_commerce.wishlist.set_wishlist_count();
+			erpnext.e_commerce.wishlist.set_wishlist_count(true);
 		};
 
 		if ($wish_icon.hasClass('wished')) {
