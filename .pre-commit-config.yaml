@@ -9,9 +9,7 @@ repos:
     hooks:
       - id: trailing-whitespace
         files: "erpnext.*"
-      - id: end-of-file-fixer
-        files: "erpnext.*"
-        exclude: ".*json$|.*txt$"
+        exclude: ".*json$|.*txt$|.*csv|.*md"
       - id: check-yaml
       - id: no-commit-to-branch
         args: ['--branch', 'develop']
@@ -22,7 +20,7 @@ repos:
     rev: 3.9.2
     hooks:
       - id: flake8
-        additional_dependencies: [flake8-isort]
+        args: ['--config', '.github/helper/.flake8_strict']
         exclude: ".*setup.py$"
 
 ci:
