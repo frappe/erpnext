@@ -150,7 +150,7 @@
    "options": "Stop\nWarn"
   },
   {
-   "depends_on": "eval: doc.maintain_same_rate_action == 'Stop'",
+   "depends_on": "eval: doc.maintain_same_sales_rate && doc.maintain_same_rate_action == 'Stop'",
    "fieldname": "role_to_override_stop_action",
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
