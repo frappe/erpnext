@@ -291,10 +291,6 @@ class Issue(Document):
 		self.agreement_status = "Ongoing"
 		self.save()
 
-	def reset_issue_metrics(self):
-		self.db_set("resolution_time", None)
-		self.db_set("user_resolution_time", None)
-
 
 def get_priority(issue):
 	service_level_agreement = frappe.get_doc("Service Level Agreement", issue.service_level_agreement)
@@ -533,7 +529,7 @@ def set_first_response_time(communication, method):
 
 def is_first_response(issue):
 	responses = frappe.get_all('Communication', filters = {'reference_name': issue.name, 'sent_or_received': 'Sent'})
-	if len(responses) == 1: 
+	if len(responses) == 1:
 		return True
 	return False
 
@@ -562,7 +558,7 @@ def calculate_first_response_time(issue, first_responded_on):
 			# both issue creation and first response were after working hours
 			else:
 				return 1.0		# this should ideally be zero, but it gets reset when the next response is sent if the value is zero
-			
+
 		else:
 			return 1.0
 

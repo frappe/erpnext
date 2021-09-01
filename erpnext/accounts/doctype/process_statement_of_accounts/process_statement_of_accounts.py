@@ -158,7 +158,7 @@ def get_recipients_and_cc(customer, doc):
 	if doc.cc_to != '':
 		try:
 			cc=[frappe.get_value('User', doc.cc_to, 'email')]
-		except:
+		except Exception:
 			pass
 
 	return recipients, cc

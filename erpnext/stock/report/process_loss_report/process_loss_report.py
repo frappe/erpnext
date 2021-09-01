@@ -92,7 +92,7 @@ def get_query_args(filters: Filters) -> QueryArgs:
 
 def run_query(query_args: QueryArgs) -> Data:
 	return frappe.db.sql("""
-		SELECT 
+		SELECT
 			wo.name, wo.status, wo.production_item, wo.qty,
 			wo.produced_qty, wo.process_loss_qty,
 			(wo.produced_qty - wo.process_loss_qty) as actual_produced_qty,
