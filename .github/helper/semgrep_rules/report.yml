@@ -1,0 +1,21 @@
+rules:
+- id: frappe-missing-translate-function-in-report-python
+  paths:
+    include:
+    - "**/report"
+    exclude:
+    - "**/regional"
+  pattern-either:
+  - patterns:
+      - pattern: |
+          {..., "label": "...", ...}
+      - pattern-not: |
+          {..., "label": _("..."), ...}
+  - patterns:
+      - pattern: dict(..., label="...", ...)
+      - pattern-not: dict(..., label=_("..."), ...)
+  message: |
+      All user facing text must be wrapped in translate function. Please refer to translation documentation. https://frappeframework.com/docs/user/en/guides/basics/translations
+  languages: [python]
+  severity: ERROR
+
