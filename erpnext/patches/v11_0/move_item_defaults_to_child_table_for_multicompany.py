@@ -30,7 +30,7 @@ def execute():
 						buying_cost_center, selling_cost_center, expense_account, income_account, default_supplier
 					FROM `tabItem`;
 			''', companies[0].name)
-		except:
+		except Exception:
 			pass
 	else:
 		item_details = frappe.db.sql(""" SELECT name, default_warehouse,

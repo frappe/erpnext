@@ -15,7 +15,7 @@ SUPPORTED_COUNTRY_CODES = ["AT", "AU", "BE", "BG", "CA", "CY", "CZ", "DE", "DK",
 	"SE", "SI", "SK", "US"]
 SUPPORTED_STATE_CODES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL',
 	'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE',
-	'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 
+	'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD',
 	'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
 
 
@@ -66,7 +66,7 @@ def create_transaction(doc, method):
 	try:
 		if doc.is_return:
 			client.create_refund(tax_dict)
-		else:	
+		else:
 			client.create_order(tax_dict)
 	except taxjar.exceptions.TaxJarResponseError as err:
 		frappe.throw(_(sanitize_error_response(err)))
@@ -108,7 +108,7 @@ def get_tax_data(doc):
 
 	if to_shipping_state not in SUPPORTED_STATE_CODES:
 		to_shipping_state = get_state_code(to_address, 'Shipping')
-	
+
 	tax_dict = {
 		'from_country': from_country_code,
 		'from_zip': from_address.pincode,
@@ -125,7 +125,7 @@ def get_tax_data(doc):
 		'plugin': 'erpnext',
 		'line_items': line_items
 	}
-	return tax_dict	
+	return tax_dict
 
 def get_state_code(address, location):
 	if address is not None:
@@ -134,16 +134,16 @@ def get_state_code(address, location):
 			frappe.throw(_("Please enter a valid State in the {0} Address").format(location))
 	else:
 		frappe.throw(_("Please enter a valid State in the {0} Address").format(location))
-	
+
 	return state_code
 
 def get_line_item_dict(item):
-	return dict( 
+	return dict(
 		id = item.get('idx'),
 		quantity = item.get('qty'),
 		unit_price = item.get('rate'),
 		product_tax_code = item.get('product_tax_category')
-	)  	
+	)
 
 def set_sales_tax(doc, method):
 	if not TAXJAR_CALCULATE_TAX:
@@ -202,7 +202,7 @@ def check_sales_tax_exemption(doc):
 				break
 		doc.run_method("calculate_taxes_and_totals")
 		return True
-	else: 
+	else:
 		return False
 
 def validate_tax_request(tax_dict):

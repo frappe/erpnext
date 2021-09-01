@@ -207,7 +207,7 @@ def get_member_based_on_subscription(subscription_id, email=None, customer_id=No
 
 	try:
 		return frappe.get_doc("Member", members[0]["name"])
-	except:
+	except Exception:
 		return None
 
 
@@ -393,7 +393,7 @@ def notify_failure(log):
 		""".format(get_link_to_form("Error Log", log.name))
 
 		sendmail_to_system_managers("[Important] [ERPNext] Razorpay membership webhook failed , please check.", content)
-	except:
+	except Exception:
 		pass
 
 
@@ -402,7 +402,7 @@ def get_plan_from_razorpay_id(plan_id):
 
 	try:
 		return plan[0]["name"]
-	except:
+	except Exception:
 		return None
 
 

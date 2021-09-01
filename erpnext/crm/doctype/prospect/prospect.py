@@ -15,7 +15,7 @@ class Prospect(Document):
 
 	def on_update(self):
 		self.link_with_lead_contact_and_address()
-	
+
 	def on_trash(self):
 		self.unlink_dynamic_links()
 

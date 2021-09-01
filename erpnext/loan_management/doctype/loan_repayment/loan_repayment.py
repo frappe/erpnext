@@ -6,10 +6,9 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _
-from frappe.utils import flt, getdate, cint
 from six import iteritems
 from frappe.model.document import Document
-from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day, get_datetime
+from frappe.utils import flt, cint, date_diff, add_days, getdate, add_months, get_first_day, get_datetime
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
