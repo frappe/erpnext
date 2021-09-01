@@ -12,7 +12,10 @@ from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 from frappe.utils import today
 
 def setup(company=None, patch=True):
-	setup_company_independent_fixtures(patch=patch)
+	# Company independent fixtures should be called only once at the first company setup
+	if frappe.db.count('Company', {'country': 'India'}) <=1:
+		setup_company_independent_fixtures(patch=patch)
+
 	if not patch:
 		make_fixtures(company)
 
@@ -454,7 +457,7 @@ def make_custom_fields(update=True):
 			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
 
 		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
-			depends_on='eval:(doc.irn_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
+			depends_on='eval: doc.irn', allow_on_submit=1, insert_after='customer'),
 
 		dict(fieldname='eway_bill_validity', label='E-Way Bill Validity', fieldtype='Data', no_copy=1, print_hide=1,
 			depends_on='ewaybill', read_only=1, allow_on_submit=1, insert_after='ewaybill'),
@@ -659,9 +662,9 @@ def make_custom_fields(update=True):
 				'label': 'Export Type',
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
-				'default': 'Without Payment of Tax',
 				'depends_on':'eval:in_list(["SEZ", "Overseas"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas"], doc.gst_category)'
 			}
 		],
 		'Customer': [
@@ -678,9 +681,9 @@ def make_custom_fields(update=True):
 				'label': 'Export Type',
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
-				'default': 'Without Payment of Tax',
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)'
 			}
 		],
 		'Member': [
@@ -809,7 +812,7 @@ def set_tax_withholding_category(company):
 			doc.flags.ignore_mandatory = True
 			doc.insert()
 		else:
-			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
+			doc = frappe.get_doc("Tax Withholding Category", d.get("name"), for_update=True)
 
 			if accounts:
 				doc.append("accounts", accounts[0])

@@ -81,4 +81,3 @@ def get_chart_data(parameters,employees, filters):
 	}
 	chart["type"] = "donut"
 	return chart
-

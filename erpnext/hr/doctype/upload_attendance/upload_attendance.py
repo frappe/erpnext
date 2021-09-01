@@ -10,7 +10,7 @@ from frappe import _
 from frappe.utils.csvutils import UnicodeWriter
 from frappe.model.document import Document
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.hr.utils import get_holidays_for_employee
+from erpnext.hr.utils import get_holiday_dates_for_employee
 
 class UploadAttendance(Document):
 	pass
@@ -94,7 +94,7 @@ def get_holidays_for_employees(employees, from_date, to_date):
 	holidays = {}
 	for employee in employees:
 		holiday_list = get_holiday_list_for_employee(employee)
-		holiday = get_holidays_for_employee(employee, getdate(from_date), getdate(to_date))
+		holiday = get_holiday_dates_for_employee(employee, getdate(from_date), getdate(to_date))
 		if holiday_list not in holidays:
 			holidays[holiday_list] = holiday
 

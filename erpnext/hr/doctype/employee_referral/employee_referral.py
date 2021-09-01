@@ -7,9 +7,11 @@ import frappe
 from frappe import _
 from frappe.utils import get_link_to_form
 from frappe.model.document import Document
+from erpnext.hr.utils import validate_active_employee
 
 class EmployeeReferral(Document):
 	def validate(self):
+		validate_active_employee(self.referrer)
 		self.set_full_name()
 		self.set_referral_bonus_payment_status()
 
@@ -68,4 +70,3 @@ def create_additional_salary(doc):
 		additional_salary.ref_docname = doc.name
 
 	return additional_salary
-

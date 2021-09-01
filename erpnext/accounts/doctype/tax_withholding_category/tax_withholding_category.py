@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate
+from frappe.utils import flt, getdate, cint
 from erpnext.accounts.utils import get_fiscal_year
 
 class TaxWithholdingCategory(Document):
@@ -86,7 +86,10 @@ def get_tax_withholding_details(tax_withholding_category, fiscal_year, company):
 				"rate": tax_rate_detail.tax_withholding_rate,
 				"threshold": tax_rate_detail.single_threshold,
 				"cumulative_threshold": tax_rate_detail.cumulative_threshold,
-				"description": tax_withholding.category_name if tax_withholding.category_name else tax_withholding_category
+				"description": tax_withholding.category_name if tax_withholding.category_name else tax_withholding_category,
+				"consider_party_ledger_amount": tax_withholding.consider_party_ledger_amount,
+				"tax_on_excess_amount": tax_withholding.tax_on_excess_amount,
+				"round_off_tax_amount": tax_withholding.round_off_tax_amount
 			})
 
 def get_tax_withholding_rates(tax_withholding, fiscal_year):
@@ -144,6 +147,7 @@ def get_lower_deduction_certificate(fiscal_year, pan_no):
 
 def get_tax_amount(party_type, parties, inv, tax_details, fiscal_year_details, pan_no=None):
 	fiscal_year = fiscal_year_details[0]
+
 
 	vouchers = get_invoice_vouchers(parties, fiscal_year, inv.company, party_type=party_type)
 	advance_vouchers = get_advance_vouchers(parties, fiscal_year, inv.company, party_type=party_type)
@@ -235,10 +239,19 @@ def get_deducted_tax(taxable_vouchers, fiscal_year, tax_details):
 
 def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_deducted, vouchers):
 	tds_amount = 0
+	invoice_filters = {
+		'name': ('in', vouchers), 
+		'docstatus': 1,
+		'apply_tds': 1
+	}
 
-	supp_credit_amt = frappe.db.get_value('Purchase Invoice', {
-		'name': ('in', vouchers), 'docstatus': 1, 'apply_tds': 1
-	}, 'sum(net_total)') or 0.0
+	field = 'sum(net_total)'
+
+	if cint(tax_details.consider_party_ledger_amount):
+		invoice_filters.pop('apply_tds', None)
+		field = 'sum(grand_total)'
+
+	supp_credit_amt = frappe.db.get_value('Purchase Invoice', invoice_filters, field) or 0.0
 
 	supp_jv_credit_amt = frappe.db.get_value('Journal Entry Account', {
 		'parent': ('in', vouchers), 'docstatus': 1,
@@ -255,6 +268,13 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
 
 	if ((threshold and inv.net_total >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
+		if (cumulative_threshold and supp_credit_amt >= cumulative_threshold) and cint(tax_details.tax_on_excess_amount):
+			# Get net total again as TDS is calculated on net total
+			# Grand is used to just check for threshold breach
+			net_total = frappe.db.get_value('Purchase Invoice', invoice_filters, 'sum(net_total)') or 0.0
+			net_total += inv.net_total
+			supp_credit_amt = net_total - cumulative_threshold
+
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
 			inv.get('posting_date') or inv.get('transaction_date'), tax_deducted,
@@ -263,6 +283,9 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
+
+	if cint(tax_details.round_off_tax_amount):
+		tds_amount = round(tds_amount)
 
 	return tds_amount
 

@@ -56,7 +56,7 @@ erpnext.PointOfSale.Payment = class {
 				);
 				let df_events = {
 					onchange: function() {
-						frm.set_value(this.df.fieldname, this.value);
+						frm.set_value(this.df.fieldname, this.get_value());
 					}
 				};
 				if (df.fieldtype == "Button") {
@@ -198,6 +198,7 @@ erpnext.PointOfSale.Payment = class {
 			const is_cash_shortcuts_invisible = !this.$payment_modes.find('.cash-shortcuts').is(':visible');
 			this.attach_cash_shortcuts(frm.doc);
 			!is_cash_shortcuts_invisible && this.$payment_modes.find('.cash-shortcuts').css('display', 'grid');
+			this.render_payment_mode_dom();
 		});
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
@@ -246,41 +247,6 @@ erpnext.PointOfSale.Payment = class {
 		const doc = this.events.get_frm().doc;
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
 		const remaining_amount = grand_total - doc.paid_amount;
-		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
-		if (!current_value && remaining_amount > 0 && this.selected_mode) {
-			this.selected_mode.set_value(remaining_amount);
-		}
-	}
-
-	setup_listener_for_payments() {
-		frappe.realtime.on("process_phone_payment", (data) => {
-			const doc = this.events.get_frm().doc;
-			const { response, amount, success, failure_message } = data;
-			let message, title;
-
-			if (success) {
-				title = __("Payment Received");
-				if (amount >= doc.grand_total) {
-					frappe.dom.unfreeze();
-					message = __("Payment of {0} received successfully.", [format_currency(amount, doc.currency, 0)]);
-					this.events.submit_invoice();
-					cur_frm.reload_doc();
-
-				} else {
-					message = __("Payment of {0} received successfully. Waiting for other requests to complete...", [format_currency(amount, doc.currency, 0)]);
-				}
-			} else if (failure_message) {
-				message = failure_message;
-				title = __("Payment Failed");
-			}
-
-			frappe.msgprint({ "message": message, "title": title });
-		});
-	}
-
-	auto_set_remaining_amount() {
-		const doc = this.events.get_frm().doc;
-		const remaining_amount = doc.grand_total - doc.paid_amount;
 		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
 		if (!current_value && remaining_amount > 0 && this.selected_mode) {
 			this.selected_mode.set_value(remaining_amount);

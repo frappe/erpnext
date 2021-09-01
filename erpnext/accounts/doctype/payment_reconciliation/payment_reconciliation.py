@@ -306,5 +306,5 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				}
 			]
 		})
-
+		jv.flags.ignore_mandatory = True
 		jv.submit()
