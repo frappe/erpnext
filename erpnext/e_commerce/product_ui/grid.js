@@ -143,7 +143,7 @@ erpnext.ProductGrid = class {
 
 	get_stock_availability(item, settings) {
 		if (settings.show_stock_availability && !item.has_variants && !item.in_stock) {
-			return `<span class="out-of-stock">${ __("Out of stock") }</span>`;
+			return `<span class="out-of-stock mb-2 mt-1">${ __("Out of stock") }</span>`;
 		}
 		return ``;
 	}
@@ -161,7 +161,7 @@ erpnext.ProductGrid = class {
 			return `
 				<div id="${ item.name }" class="btn
 					btn-sm btn-primary btn-add-to-cart-list
-					w-100 mt-4 ${ item.in_cart ? 'hidden' : '' }"
+					w-100 mt-2 ${ item.in_cart ? 'hidden' : '' }"
 					data-item-code="${ item.item_code }">
 					<span class="mr-2">
 						<svg class="icon icon-md">

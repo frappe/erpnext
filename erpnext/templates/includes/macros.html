@@ -363,9 +363,9 @@
 <div class="recommended-item mb-6 d-flex">
 	<div class="r-item-image">
 		{% if item.website_item_thumbnail %}
-			{{ product_image(item.website_item_thumbnail, alt="item.website_item_name", no_border=True) }}
+			{{ product_image(item.website_item_thumbnail, css_class="r-product-image", alt="item.website_item_name", no_border=True) }}
 		{% else %}
-			<div class = "no-image-r-item">
+			<div class="no-image-r-item">
 				{{ frappe.utils.get_abbr(item.website_item_name) or "NA" }}
 			</div>
 		{% endif %}
