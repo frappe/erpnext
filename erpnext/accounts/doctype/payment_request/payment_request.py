@@ -542,3 +542,15 @@ def make_payment_order(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+
+def validate_payment(doc, method):
+	status = frappe.db.get_value(doc.reference_doctype, doc.reference_docname, 'status')
+	if status == 'Paid':
+		frappe.log_error("The Payment Request {0} is already paid, cannot process payment twice".format(doc.reference_docname))
+		return{
+			"redirect_to": frappe.redirect_to_message(_('Server Error'), _("The Payment Request {0} is already paid, cannot process payment twice".format(doc.reference_docname))),
+			"status": 401
+		}
+	else:
+		return
