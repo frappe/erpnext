@@ -975,16 +975,21 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 	return doc
 
 def set_delivery_date(items, sales_order):
+	delivery_dates = frappe.get_all(
+		'Sales Order Item', 
+		filters = {
+			'parent': sales_order
+		}, 
+		fields = ['delivery_date', 'item_code']
+	)
+
+	delivery_by_item = frappe._dict()
+	for date in delivery_dates:
+		delivery_by_item[date.item_code] = date.delivery_date
+
 	for item in items:
 		if item.product_bundle:
-			item.schedule_date = frappe.get_value(
-				'Sales Order Item', 
-				{
-					'parent': sales_order, 
-					'item_code': item.product_bundle
-				}, 
-				'delivery_date'
-			)
+			item.schedule_date = delivery_by_item[item.product_bundle]
 
 def is_product_bundle(item_code):
 	return frappe.db.exists('Product Bundle', item_code)
