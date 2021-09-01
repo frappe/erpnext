@@ -1037,8 +1037,7 @@
    "hide_seconds": 1,
    "label": "Packed Items",
    "options": "Packed Item",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "payment_schedule_section",
@@ -1513,7 +1512,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 20:11:57.748736",
+ "modified": "2021-09-01 15:12:24.115483",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
