@@ -25,7 +25,7 @@
   "editable_price_list_rate",
   "validate_selling_price",
   "editable_bundle_item_rates",
-  "transaction_settings_section",
+  "sales_transactions_settings_section",
   "so_required",
   "dn_required",
   "sales_update_frequency",
@@ -145,11 +145,7 @@
    "depends_on": "maintain_same_sales_rate",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
-<<<<<<< HEAD
-   "label": "Action If Same Rate is Not Maintained",
-=======
    "label": "Action if Same Rate is Not Maintained Throughout Sales Cycle",
->>>>>>> ebdc568e85 (fix: Rename 'Action if Same Rate is Not Maintained' to 'Action if Same Rate is Not Maintained Throughout Sales Cycle')
    "mandatory_depends_on": "maintain_same_sales_rate",
    "options": "Stop\nWarn"
   },
@@ -199,8 +195,10 @@
    "label": "Transaction Settings"
   },
   {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
+   "default": "0",
+   "fieldname": "editable_bundle_item_rates",
+   "fieldtype": "Check",
+   "label": "Calculate Product Bundle Price based on Child Items' Rates"
   }
  ],
  "icon": "fa fa-cog",
