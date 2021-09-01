@@ -214,6 +214,10 @@ frappe.ui.form.on("Opportunity", {
 			total += item.amount;
 			base_total += item.base_amount;
 		})
+
+		total += frm.doc.opportunity_amount;
+		base_total += frm.doc.base_opportunity_amount;
+
 		frm.set_value({'total': total, 'base_total': base_total});
 	}
 

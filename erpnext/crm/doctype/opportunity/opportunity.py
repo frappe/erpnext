@@ -47,8 +47,8 @@ class Opportunity(TransactionBase):
 			item.base_amount = flt(self.conversion_rate * item.amount)
 			total += item.amount
 			base_total += item.base_amount
-		self.total = total
-		self.base_total = base_total
+		self.total = total + self.opportunity_amount
+		self.base_total = base_total + self.base_opportunity_amount
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
