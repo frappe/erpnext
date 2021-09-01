@@ -18,6 +18,7 @@
   "delete_linked_ledger_entries",
   "book_asset_depreciation_entry_automatically",
   "unlink_advance_payment_on_cancelation_of_order",
+  "enable_common_party_accounting",
   "post_change_gl_entries",
   "enable_discount_accounting",
   "tax_settings_section",
@@ -269,6 +270,12 @@
    "fieldname": "enable_discount_accounting",
    "fieldtype": "Check",
    "label": "Enable Discount Accounting"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_common_party_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Common Party Accounting"
   }
  ],
  "icon": "icon-cog",
@@ -276,7 +283,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-07-12 18:54:29.084958",
+ "modified": "2021-08-19 11:17:38.788054",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

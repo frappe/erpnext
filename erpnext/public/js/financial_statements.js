@@ -176,5 +176,3 @@ function get_filters() {
 
 	return filters;
 }
-
-

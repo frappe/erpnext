@@ -79,6 +79,3 @@ def get_company_wise_loan_security_details(filters, loan_security_details):
 		total_portfolio_value += flt(qty * loan_security_details.get(key[1], {}).get('latest_price', 0))
 
 	return security_wise_map, total_portfolio_value
-
-
-

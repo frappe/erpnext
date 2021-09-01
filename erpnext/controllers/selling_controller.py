@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, cstr, get_link_to_form, nowtime
-from frappe import _, throw
+from frappe import _, bold, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -16,7 +16,6 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 
 class SellingController(StockController):
-
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
 			self.grand_total)
@@ -169,39 +168,96 @@ class SellingController(StockController):
 
 	def validate_selling_price(self):
 		def throw_message(idx, item_name, rate, ref_rate_field):
-			bold_net_rate = frappe.bold("net rate")
-			msg = (_("""Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {}""")
-						.format(idx, frappe.bold(item_name), frappe.bold(ref_rate_field), bold_net_rate, frappe.bold(rate)))
-			msg += "<br><br>"
-			msg += (_("""You can alternatively disable selling price validation in {} to bypass this validation.""")
-						.format(get_link_to_form("Selling Settings", "Selling Settings")))
-			frappe.throw(msg, title=_("Invalid Selling Price"))
+			throw(_("""Row #{0}: Selling rate for item {1} is lower than its {2}.
+					Selling {3} should be atleast {4}.<br><br>Alternatively,
+					you can disable selling price validation in {5} to bypass
+					this validation.""").format(
+				idx,
+				bold(item_name),
+				bold(ref_rate_field),
+				bold("net rate"),
+				bold(rate),
+				get_link_to_form("Selling Settings", "Selling Settings"),
+			), title=_("Invalid Selling Price"))
 
-		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
-			return
-		if hasattr(self, "is_return") and self.is_return:
+		if (
+			self.get("is_return")
+			or not frappe.db.get_single_value("Selling Settings", "validate_selling_price")
+		):
 			return
 
-		for it in self.get("items"):
-			if not it.item_code:
+		is_internal_customer = self.get('is_internal_customer')
+		valuation_rate_map = {}
+
+		for item in self.items:
+			if not item.item_code:
 				continue
 
-			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
-			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
-			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
-				throw_message(it.idx, frappe.bold(it.item_name), last_purchase_rate_in_sales_uom, "last purchase rate")
+			last_purchase_rate, is_stock_item = frappe.get_cached_value(
+				"Item", item.item_code, ("last_purchase_rate", "is_stock_item")
+			)
 
-			last_valuation_rate = frappe.db.sql("""
-				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
-				AND warehouse = %s AND valuation_rate > 0
-				ORDER BY posting_date DESC, posting_time DESC, creation DESC LIMIT 1
-				""", (it.item_code, it.warehouse))
-			if last_valuation_rate:
-				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] * (it.conversion_factor or 1)
-				if is_stock_item and flt(it.base_net_rate) < flt(last_valuation_rate_in_sales_uom) \
-					and not self.get('is_internal_customer'):
-					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
+			last_purchase_rate_in_sales_uom = (
+				last_purchase_rate * (item.conversion_factor or 1)
+			)
 
+			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
+				throw_message(
+					item.idx,
+					item.item_name,
+					last_purchase_rate_in_sales_uom,
+					"last purchase rate"
+				)
+
+			if is_internal_customer or not is_stock_item:
+				continue
+
+			valuation_rate_map[(item.item_code, item.warehouse)] = None
+
+		if not valuation_rate_map:
+			return
+
+		or_conditions = (
+			f"""(item_code = {frappe.db.escape(valuation_rate[0])}
+			and warehouse = {frappe.db.escape(valuation_rate[1])})"""
+			for valuation_rate in valuation_rate_map
+		)
+
+		valuation_rates = frappe.db.sql(f"""
+			select
+				item_code, warehouse, valuation_rate
+			from
+				`tabBin`
+			where
+				({" or ".join(or_conditions)})
+				and valuation_rate > 0
+		""", as_dict=True)
+
+		for rate in valuation_rates:
+			valuation_rate_map[(rate.item_code, rate.warehouse)] = rate.valuation_rate
+
+		for item in self.items:
+			if not item.item_code:
+				continue
+
+			last_valuation_rate = valuation_rate_map.get(
+				(item.item_code, item.warehouse)
+			)
+
+			if not last_valuation_rate:
+				continue
+
+			last_valuation_rate_in_sales_uom = (
+				last_valuation_rate * (item.conversion_factor or 1)
+			)
+
+			if flt(item.base_net_rate) < flt(last_valuation_rate_in_sales_uom):
+				throw_message(
+					item.idx,
+					item.item_name,
+					last_valuation_rate_in_sales_uom,
+					"valuation rate"
+				)
 
 	def get_item_list(self):
 		il = []
@@ -306,7 +362,7 @@ class SellingController(StockController):
 				sales_order.update_reserved_qty(so_item_rows)
 
 	def set_incoming_rate(self):
-		if self.doctype not in ("Delivery Note", "Sales Invoice", "Sales Order"):
+		if self.doctype not in ("Delivery Note", "Sales Invoice"):
 			return
 
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -315,18 +371,19 @@ class SellingController(StockController):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get('stock_qty') or d.get('actual_qty'))
 
-				d.incoming_rate = get_incoming_rate({
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"posting_date": self.get('posting_date') or self.get('transaction_date'),
-					"posting_time": self.get('posting_time') or nowtime(),
-					"qty": qty if cint(self.get("is_return")) else (-1 * qty),
-					"serial_no": d.get('serial_no'),
-					"company": self.company,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"allow_zero_valuation": d.get("allow_zero_valuation")
-				}, raise_error_if_no_rate=False)
+				if not d.incoming_rate:
+					d.incoming_rate = get_incoming_rate({
+						"item_code": d.item_code,
+						"warehouse": d.warehouse,
+						"posting_date": self.get('posting_date') or self.get('transaction_date'),
+						"posting_time": self.get('posting_time') or nowtime(),
+						"qty": qty if cint(self.get("is_return")) else (-1 * qty),
+						"serial_no": d.get('serial_no'),
+						"company": self.company,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"allow_zero_valuation": d.get("allow_zero_valuation")
+					}, raise_error_if_no_rate=False)
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
@@ -366,7 +423,7 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sle_for_source_warehouse(d))
 
-				if d.target_warehouse:
+				if d.target_warehouse and self.get("is_internal_customer"):
 					sl_entries.append(self.get_sle_for_target_warehouse(d))
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)

@@ -226,6 +226,40 @@ class TestBOM(unittest.TestCase):
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
 		self.assertEqual(bom_items, supplied_items)
 
+
+	def test_bom_with_process_loss_item(self):
+		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
+
+		if not frappe.db.exists("BOM", f"BOM-{fg_item_non_whole.item_code}-001"):
+			bom_doc = create_bom_with_process_loss_item(
+				fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, fg_qty=1
+			)
+			bom_doc.submit()
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0
+		)
+		#  PL Item qty can't be >= FG Item qty
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_non_whole, bom_item, scrap_qty=1, scrap_rate=100
+		)
+		# PL Item rate has to be 0
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_whole, bom_item, scrap_qty=0.25, scrap_rate=0
+		)
+		#  Items with whole UOMs can't be PL Items
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, is_process_loss=0
+		)
+		# FG Items in Scrap/Loss Table should have Is Process Loss set
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
 	def test_bom_tree_representation(self):
 		bom_tree = {
 			"Assembly": {
@@ -248,12 +282,8 @@ class TestBOM(unittest.TestCase):
 		for reqd_item, created_item in zip(reqd_order, created_order):
 			self.assertEqual(reqd_item, created_item.item_code)
 
-
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
-
-
-
 
 def level_order_traversal(node):
 	traversal = []
@@ -300,6 +330,7 @@ def create_nested_bom(tree, prefix="_Test bom "):
 			bom = frappe.get_doc(doctype="BOM", item=bom_item_code)
 			for child_item in child_items.keys():
 				bom.append("items", {"item_code": prefix + child_item})
+			bom.currency = "INR"
 			bom.insert()
 			bom.submit()
 
@@ -321,3 +352,45 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 
 	for warehouse in warehouse_list:
 		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=qty, rate=rate)
+
+def create_bom_with_process_loss_item(
+		fg_item, bom_item, scrap_qty, scrap_rate, fg_qty=2, is_process_loss=1):
+	bom_doc = frappe.new_doc("BOM")
+	bom_doc.item = fg_item.item_code
+	bom_doc.quantity = fg_qty
+	bom_doc.append("items", {
+		"item_code": bom_item.item_code,
+		"qty": 1,
+		"uom": bom_item.stock_uom,
+		"stock_uom": bom_item.stock_uom,
+		"rate": 100.0
+	})
+	bom_doc.append("scrap_items", {
+		"item_code": fg_item.item_code,
+		"qty": scrap_qty,
+		"stock_qty": scrap_qty,
+		"uom": fg_item.stock_uom,
+		"stock_uom": fg_item.stock_uom,
+		"rate": scrap_rate,
+		"is_process_loss": is_process_loss
+	})
+	bom_doc.currency = "INR"
+	return bom_doc
+
+def create_process_loss_bom_items():
+	item_list = [
+		("_Test Item - Non Whole UOM", "Kg"),
+		("_Test Item - Whole UOM", "Unit"),
+		("_Test PL BOM Item", "Unit")
+	]
+	return [create_process_loss_bom_item(it) for it in item_list]
+
+def create_process_loss_bom_item(item_tuple):
+	item_code, stock_uom = item_tuple
+	if frappe.db.exists("Item", item_code) is None:
+		return make_item(
+			item_code,
+			{'stock_uom':stock_uom, 'valuation_rate':100}
+		)
+	else:
+		return frappe.get_doc("Item", item_code)
