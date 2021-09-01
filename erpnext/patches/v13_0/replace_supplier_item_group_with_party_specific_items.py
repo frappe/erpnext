@@ -19,7 +19,6 @@ def execute():
 	for link in supplier_dt.links:
 		if link.link_doctype == "Supplier Item Group":
 			supplier_dt.links.remove(link)
-			frappe.delete_doc("Supplier Item Group", link.name, force=1)
 			supplier_dt.append('links', {'link_doctype': 'Party Specific Items', 'link_fieldname':'party'})
 			supplier_dt.save()
 	frappe.delete_doc("DocType", "Supplier Item Group", force=1)

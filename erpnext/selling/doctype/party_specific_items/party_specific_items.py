@@ -15,4 +15,4 @@ class PartySpecificItems(Document):
 			'based_on': self.based_on,
 		})
 		if exists:
-			frappe.throw(_(f"This item filter has already been applied for the {self.party_type}"))
+			frappe.throw(_("This item filter has already been applied for the {0}").format(self.party_type))
