@@ -1223,7 +1223,8 @@ def update_tax_witholding_category(company, account, date):
 	fiscal_year = get_fiscal_year(date=date, company=company)
 
 	if not frappe.db.get_value('Tax Withholding Rate',
-		{'parent': 'TDS - 194 - Dividends - Individual', 'fiscal_year': fiscal_year[0]}):
+		{'parent': 'TDS - 194 - Dividends - Individual', 'from_date': ('>=', fiscal_year[1]),
+			'to_date': ('<=', fiscal_year[2])}):
 		tds_category = frappe.get_doc('Tax Withholding Category', 'TDS - 194 - Dividends - Individual')
 		tds_category.append('rates', {
 			'from_date': fiscal_year[1],
