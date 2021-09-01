@@ -16,58 +16,58 @@ class TestSetUp(unittest.TestCase):
 
 class TestIssue(TestSetUp):
 	def test_response_time_and_resolution_time_based_on_different_sla(self):
-		creation = get_datetime("2020-03-04 12:00")
+		creation = get_datetime("2019-03-04 12:00")
 
 		# make issue with customer specific SLA
 		customer = create_customer("_Test Customer", "__Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "_Test Customer", 1)
 
-		self.assertEqual(issue.response_by, get_datetime("2020-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-04 15:00"))
+		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
 
 		# make issue with customer_group specific SLA
 		customer = create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "__Test Customer", 2)
 
-		self.assertEqual(issue.response_by, get_datetime("2020-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-04 15:00"))
+		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
 
 
 		# make issue with territory specific SLA
 		customer = create_customer("___Test Customer", "__Test SLA Customer Group", "_Test SLA Territory")
 		issue = make_issue(creation, "___Test Customer", 3)
 
-		self.assertEqual(issue.response_by, get_datetime("2020-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-04 15:00"))
+		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
 
 		# make issue with default SLA
 		issue = make_issue(creation=creation, index=4)
 
-		self.assertEqual(issue.response_by, get_datetime("2020-03-04 16:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-04 18:00"))
+		self.assertEqual(issue.response_by, get_datetime("2019-03-04 16:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 18:00"))
 
 		# make issue with default SLA before working hours
-		creation = get_datetime("2020-03-04 7:00")
+		creation = get_datetime("2019-03-04 7:00")
 		issue = make_issue(creation=creation, index=5)
 
-		self.assertEqual(issue.response_by, get_datetime("2020-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-04 16:00"))
+		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 16:00"))
 
 		# make issue with default SLA after working hours
-		creation = get_datetime("2020-03-04 20:00")
+		creation = get_datetime("2019-03-04 20:00")
 		issue = make_issue(creation, index=6)
 
-		self.assertEqual(issue.response_by, get_datetime("2020-03-06 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-06 16:00"))
+		self.assertEqual(issue.response_by, get_datetime("2019-03-06 14:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2019-03-06 16:00"))
 
 		# make issue with default SLA next day
-		creation = get_datetime("2020-03-04 14:00")
+		creation = get_datetime("2019-03-04 14:00")
 		issue = make_issue(creation=creation, index=7)
 
-		self.assertEqual(issue.response_by, get_datetime("2020-03-04 18:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-06 12:00"))
+		self.assertEqual(issue.response_by, get_datetime("2019-03-04 18:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2019-03-06 12:00"))
 
-		frappe.flags.current_time = get_datetime("2020-03-04 15:00")
+		frappe.flags.current_time = get_datetime("2019-03-04 15:00")
 
 		issue.status = 'Closed'
 		issue.save()
