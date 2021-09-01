@@ -129,11 +129,15 @@ class ProductFiltersBuilder:
 		min_discount, max_discount = discounts[0], discounts[1]
 		# [25, 60] rounded min max
 		min_range_absolute, max_range_absolute = floor(min_discount), floor(max_discount)
+
 		min_range = int(min_discount - (min_range_absolute % 10)) # 20
 		max_range = int(max_discount - (max_range_absolute % 10)) # 60
 
+		min_range = (min_range + 10) if min_range != min_range_absolute else min_range # 30 (upper limit of 25.89 in range of 10)
+		max_range = (max_range + 10) if max_range != max_range_absolute else max_range # 60
+
 		for discount in range(min_range, (max_range + 1), 10):
-			label = f"{discount}% and above"
+			label = f"{discount}% and below"
 			discount_filters.append([discount, label])
 
 		return discount_filters

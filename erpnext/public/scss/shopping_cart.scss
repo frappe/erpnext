@@ -3,10 +3,11 @@
 :root {
 	--green-info: #38A160;
 	--product-bg-color: white;
+	--body-bg-color:  var(--gray-50);
 }
 
 body.product-page {
-	background: var(--gray-50);
+	background: var(--body-bg-color);
 }
 
 .item-breadcrumbs {
@@ -175,6 +176,7 @@ body.product-page {
 		font-weight: 600;
 		color: var(--text-color);
 		margin: var(--margin-sm) 0;
+		margin-bottom: auto !important;
 
 		.striked-price {
 			font-weight: 500;
@@ -203,7 +205,12 @@ body.product-page {
 	}
 }
 
+#products-list-area, #products-grid-area {
+	padding: 0 5px;
+}
+
 .list-row {
+	background-color: white;
 	padding-bottom: 1rem;
 	padding-top: 1.5rem !important;
 	border-radius: 8px;
@@ -222,6 +229,17 @@ body.product-page {
 		.btn-explore-variants {
 			visibility: visible;
 		}
+	}
+
+	.product-code {
+		padding-top: 0 !important;
+	}
+
+	.btn-explore-variants {
+		min-width: 135px;
+		max-height: 30px;
+		float: right;
+		padding: 0.25rem 1rem;
 	}
 }
 
@@ -288,7 +306,7 @@ body.product-page {
 .product-container {
 	@include card($padding: var(--padding-md));
 	background-color: var(--product-bg-color) !important;
-	min-height: 70vh;
+	min-height: fit-content;
 
 	.product-details {
 		max-width: 50%;
@@ -372,7 +390,7 @@ body.product-page {
 			max-height: 430px;
 		}
 
-		overflow: scroll;
+		overflow: auto;
 	}
 
 	.item-slideshow-image {
@@ -443,7 +461,7 @@ body.product-page {
 		.r-item-image {
 			width: 40%;
 
-			.product-image {
+			.r-product-image {
 				padding: 2px 15px;
 			}
 
@@ -920,6 +938,11 @@ body.product-page {
 	background: white;
 	color: var(--primary-color);
 	font-size: 14px;
+
+	&.list-indicator {
+		position: unset;
+		margin-left: auto;
+	}
 }
 
 
@@ -1021,6 +1044,10 @@ body.product-page {
 	}
 }
 
+#pay-for-order {
+	padding: .5rem 1rem; // Pay button in SO
+}
+
 .btn-explore-variants {
 	visibility: hidden;
 	box-shadow: none;
@@ -1044,7 +1071,7 @@ body.product-page {
 	visibility: hidden;
 	box-shadow: none;
 	margin: var(--margin-sm) 0;
-	margin-top: auto !important;
+	// margin-top: auto !important;
 	max-height: 50px; // to avoid resizing on window resize
 	flex: none;
 	transition: 0.3s ease;
@@ -1231,6 +1258,7 @@ body.product-page {
 }
 
 #search-results-container {
+	border: 1px solid var(--gray-200);
 	padding: .25rem 1rem;
 
 	.category-chip {
@@ -1250,7 +1278,10 @@ body.product-page {
 }
 
 #search-box {
+	background-color: white;
+	height: 100%;
 	padding-left: 2.5rem;
+	border: 1px solid var(--gray-200);
 }
 
 .search-icon {
@@ -1267,6 +1298,11 @@ body.product-page {
 
 #toggle-view {
 	float: right;
+
+	.btn-primary {
+		background-color: var(--gray-600);
+		box-shadow: 0 0 0 0.2rem var(--gray-400);
+	}
 }
 
 .placeholder-div {
@@ -1327,4 +1363,8 @@ body.product-page {
 
 .mt-minus-2 {
 	margin-top: -2rem;
+}
+
+.mt-minus-1 {
+	margin-top: -1rem;
 }

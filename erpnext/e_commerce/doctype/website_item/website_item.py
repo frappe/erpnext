@@ -187,12 +187,17 @@ class WebsiteItem(WebsiteGenerator):
 
 	def get_context(self, context):
 		context.show_search = True
-		context.search_link = '/search'
+		context.search_link = "/search"
+		context.body_class = "product-page"
 
 		context.parents = get_parent_item_groups(self.item_group, from_item=True) # breadcumbs
 		self.attributes = frappe.get_all("Item Variant Attribute",
 			fields=["attribute", "attribute_value"],
 			filters={"parent": self.item_code})
+
+		if self.slideshow:
+			context.update(get_slideshow(self))
+
 		self.set_variant_context(context)
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
@@ -254,11 +259,9 @@ class WebsiteItem(WebsiteGenerator):
 
 					context[fieldname] = value
 
-		if self.slideshow:
-			if context.variant and context.variant.slideshow:
-				context.update(get_slideshow(context.variant))
-			else:
-				context.update(get_slideshow(self))
+		if self.slideshow and context.variant and context.variant.slideshow:
+			context.update(get_slideshow(context.variant))
+
 
 	def set_attribute_context(self, context):
 		if not self.has_variants:

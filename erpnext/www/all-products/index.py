@@ -6,6 +6,7 @@ sitemap = 1
 
 def get_context(context):
 	# Add homepage as parent
+	context.body_class = "product-page"
 	context.parents = [{"name": frappe._("Home"), "route":"/"}]
 
 	filter_engine = ProductFiltersBuilder()

@@ -24,7 +24,7 @@ erpnext.ProductList = class {
 			let title = item.web_item_name || item.item_name || item.item_code || "";
 			title =  title.length > 200 ? title.substr(0, 200) + "..." : title;
 
-			html += `<div class='row list-row w-100'>`;
+			html += `<div class='row list-row w-100 mb-4'>`;
 			html += me.get_image_html(item, title, me.settings);
 			html += me.get_row_body_html(item, title, me.settings);
 			html += `</div>`;
@@ -86,7 +86,7 @@ erpnext.ProductList = class {
 		`;
 
 		if (settings.enabled) {
-			title_html += `<div class="col-4" style="display:flex">`;
+			title_html += `<div class="col-4 cart-action-container ${item.in_cart ? 'd-flex' : ''}">`;
 			title_html += this.get_primary_button(item, settings);
 			title_html += `</div>`;
 		}
@@ -151,9 +151,7 @@ erpnext.ProductList = class {
 		if (item.has_variants) {
 			return `
 				<a href="/${ item.route || '#' }">
-					<div class="btn btn-sm btn-explore-variants btn"
-					style="margin-bottom: 0; max-height: 30px; float: right;
-						padding: 0.25rem 1rem; min-width: 135px;">
+					<div class="btn btn-sm btn-explore-variants btn mb-0 mt-0">
 						${ __('Explore') }
 					</div>
 				</a>
@@ -161,10 +159,10 @@ erpnext.ProductList = class {
 		} else if (settings.enabled && (settings.allow_items_not_in_stock || item.in_stock)) {
 			return `
 				<div id="${ item.name }" class="btn
-					btn-sm btn-primary btn-add-to-cart-list
+					btn-sm btn-primary btn-add-to-cart-list mb-0
 					${ item.in_cart ? 'hidden' : '' }"
 					data-item-code="${ item.item_code }"
-					style="margin-bottom: 0; margin-top: 0px !important; max-height: 30px; float: right;
+					style="margin-top: 0px !important; max-height: 30px; float: right;
 						padding: 0.25rem 1rem; min-width: 135px;">
 					<span class="mr-2">
 						<svg class="icon icon-md">
@@ -174,14 +172,14 @@ erpnext.ProductList = class {
 					${ __('Add to Cart') }
 				</div>
 
-				<div class="cart-indicator ${item.in_cart ? '' : 'hidden'}" style="position: unset;">
+				<div class="cart-indicator list-indicator ${item.in_cart ? '' : 'hidden'}">
 					1
 				</div>
 
 				<a href="/cart">
 					<div id="${ item.name }" class="btn
 						btn-sm btn-primary btn-add-to-cart-list
-						ml-4 go-to-cart
+						ml-4 go-to-cart mb-0 mt-0
 						${ item.in_cart ? '' : 'hidden' }"
 						data-item-code="${ item.item_code }"
 						style="padding: 0.25rem 1rem; min-width: 135px;">

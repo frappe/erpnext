@@ -129,7 +129,7 @@ erpnext.ProductView =  class {
 
 	prepare_product_area_wrapper(view) {
 		let left_margin = view == "list" ? "ml-2" : "";
-		let top_margin = view == "list" ? "mt-8" : "mt-4";
+		let top_margin = view == "list" ? "mt-6" : "mt-minus-1";
 		return this.products_section.append(`
 			<br>
 			<div id="products-${view}-area" class="row products-list ${ top_margin } ${ left_margin }"></div>
@@ -191,7 +191,7 @@ erpnext.ProductView =  class {
 
 	prepare_search() {
 		$(".toolbar").append(`
-			<div class="input-group col-6 p-0">
+			<div class="input-group col-8 p-0">
 				<div class="dropdown w-100" id="dropdownMenuSearch">
 					<input type="search" name="query" id="search-box" class="form-control font-md"
 						placeholder="Search for Products"
@@ -213,7 +213,7 @@ erpnext.ProductView =  class {
 	}
 
 	render_view_toggler() {
-		$(".toolbar").append(`<div class="toggle-container col-6 p-0"></div>`);
+		$(".toolbar").append(`<div class="toggle-container col-4 p-0"></div>`);
 
 		["btn-list-view", "btn-grid-view"].forEach(view => {
 			let icon = view === "btn-list-view" ? "list" : "image-view";

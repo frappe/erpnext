@@ -38,38 +38,36 @@ erpnext.ProductSearch = class {
 			let query = e.target.value;
 
 			if (query.length == 0) {
-				me.populateResults([]);
-				me.populateCategoriesList([]);
+				me.populateResults(null);
+				me.populateCategoriesList(null);
 			}
 
 			if (query.length < 3 || !query.length) return;
 
-			// Populate recent search chips
-			me.setRecentSearches(query);
-
-			// Fetch and populate product results
 			frappe.call({
 				method: "erpnext.templates.pages.product_search.search",
 				args: {
 					query: query
 				},
 				callback: (data) => {
-					me.populateResults(data);
+					let product_results = null, category_results = null;
+
+					// Populate product results
+					product_results = data.message ? data.message.product_results : null;
+					me.populateResults(product_results);
+
+					// Populate categories
+					if (me.category_container) {
+						category_results = data.message ? data.message.category_results : null;
+						me.populateCategoriesList(category_results);
+					}
+
+					// Populate recent search chips only on successful queries
+					if (!$.isEmptyObject(product_results) || !$.isEmptyObject(category_results)) {
+						me.setRecentSearches(query);
+					}
 				}
 			});
-
-			// Populate categories
-			if (me.category_container) {
-				frappe.call({
-					method: "erpnext.templates.pages.product_search.get_category_suggestions",
-					args: {
-						query: query
-					},
-					callback: (data) => {
-						me.populateCategoriesList(data);
-					}
-				});
-			}
 
 			this.search_dropdown.removeClass("hidden");
 		});
@@ -186,17 +184,16 @@ erpnext.ProductSearch = class {
 		this.attachEventListenersToChips();
 	}
 
-	populateResults(data) {
-		if (data.length === 0 || data.message.results.length === 0) {
+	populateResults(product_results) {
+		if (!product_results || product_results.length === 0) {
 			let empty_html = ``;
 			this.products_container.html(empty_html);
 			return;
 		}
 
 		let html = "";
-		let search_results = data.message.results;
 
-		search_results.forEach((res) => {
+		product_results.forEach((res) => {
 			let thumbnail = res.thumbnail || '/assets/erpnext/images/ui-states/cart-empty-state.png';
 			html += `
 				<div class="dropdown-item" style="display: flex;">
@@ -212,8 +209,8 @@ erpnext.ProductSearch = class {
 		this.products_container.html(html);
 	}
 
-	populateCategoriesList(data) {
-		if (data.length === 0 || data.message.results.length === 0) {
+	populateCategoriesList(category_results) {
+		if (!category_results || category_results.length === 0) {
 			let empty_html = `
 				<div class="category-container mt-2">
 					<div class="category-chips">
@@ -229,8 +226,8 @@ erpnext.ProductSearch = class {
 				<b>${ __("Categories") }</b>
 			</div>
 		`;
-		let search_results = data.message.results;
-		search_results.forEach((category) => {
+
+		category_results.forEach((category) => {
 			html += `
 				<a href="/${category.route}" class="btn btn-sm category-chip mr-2 mb-2"
 					style="font-size: 13px" role="button">
