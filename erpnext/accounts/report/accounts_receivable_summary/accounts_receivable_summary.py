@@ -95,6 +95,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if row.sales_person:
 			self.party_total[row.party].sales_person.append(row.sales_person)
 
+		row.update({"address_display": self.get_billing_address(row.party)})
+
 	def get_columns(self):
 		self.columns = []
 		self.add_column(label=_(self.party_type), fieldname='party',

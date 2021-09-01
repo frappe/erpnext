@@ -38,6 +38,7 @@ class ReceivablePayableReport(object):
 		self.age_as_on = getdate(nowdate()) \
 			if self.filters.report_date > getdate(nowdate()) \
 			else self.filters.report_date
+		self.billing_addresses = {}
 
 	def run(self, args):
 		self.filters.update(args)
@@ -343,6 +344,7 @@ class ReceivablePayableReport(object):
 			row.currency = row.account_currency
 		else:
 			row.currency = self.company_currency
+		row.update({"address_display": self.get_billing_address(row.party)})
 
 	def allocate_outstanding_based_on_payment_terms(self, row):
 		self.get_payment_terms(row)
@@ -555,6 +557,18 @@ class ReceivablePayableReport(object):
 
 		if index is None: index = 4
 		row['range' + str(index+1)] = row.outstanding
+
+	def get_billing_address(self, party):
+		from frappe.contacts.doctype.address.address import get_address_display
+		address_display = self.billing_addresses.get(party)
+		if address_display is None:
+			address = frappe.db.get_list("Address", filters=[
+				["is_primary_address", "=", 1],
+				["Dynamic Link", "link_name", "=", party]
+			], fields=["name"], pluck="name")
+			address_display = get_address_display(address.pop()) if address else ""
+			self.billing_addresses.update({party: address_display})
+		return address_display
 
 	def get_gl_entries(self):
 		# get all the GL entries filtered by the given filters
