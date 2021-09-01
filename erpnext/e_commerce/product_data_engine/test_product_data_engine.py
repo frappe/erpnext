@@ -226,7 +226,7 @@ class TestProductDataEngine(unittest.TestCase):
 
 		self.assertEqual(len(discount_filters[0]), 2)
 		self.assertEqual(discount_filters[0][0], 10)
-		self.assertEqual(discount_filters[0][1], "10% and above")
+		self.assertEqual(discount_filters[0][1], "10% and below")
 
 	def test_product_list_with_discount_filters(self):
 		"Test if discount filters are applied correctly."
@@ -261,7 +261,7 @@ class TestProductDataEngine(unittest.TestCase):
 		)
 		items = result.get("items")
 
-		# check if only product with 10% and above discount are fetched in the right order
+		# check if only product with 10% and below discount are fetched in the right order
 		self.assertEqual(len(items), 2)
 		self.assertEqual(items[0].get("item_code"), "Test 13I Laptop")
 		self.assertEqual(items[1].get("item_code"), "Test 12I Laptop")

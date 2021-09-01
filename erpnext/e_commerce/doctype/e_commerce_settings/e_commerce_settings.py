@@ -21,7 +21,6 @@ class ECommerceSettings(Document):
 		self.validate_field_filters()
 		self.validate_attribute_filters()
 		self.validate_checkout()
-		self.validate_brand_check()
 		self.validate_search_index_fields()
 
 		if self.enabled:
@@ -70,10 +69,6 @@ class ECommerceSettings(Document):
 				frappe.throw(_("{0} is not a valid option for Search Index Field.").format(frappe.bold(invalid_fields)))
 
 		self.search_index_fields = ','.join(fields)
-
-	def validate_brand_check(self):
-		if self.show_brand_line and not ("brand" in self.search_index_fields):
-			self.search_index_fields += ",brand"
 
 	def validate_price_list_exchange_rate(self):
 		"Check if exchange rate exists for Price List currency (to Company's currency)."

@@ -71,7 +71,7 @@
 					</div>
 					<p class="mr-1 mb-1">
 						{{ _(offer.offer_title) }}:
-						{{ _(offer.offer_subtitle) }}
+						{{ _(offer.offer_subtitle) if offer.offer_subtitle else '' }}
 						<a class="offer-details" href="#"
 							data-offer-title="{{ offer.offer_title }}" data-offer-id="{{ offer.name }}"
 							role="button">
@@ -117,7 +117,7 @@
 			const $btn = $(e.currentTarget);
 			$btn.prop('disabled', true);
 			const item_code = $btn.data('item-code');
-			e_commerce.shopping_cart.update_cart({
+			erpnext.e_commerce.shopping_cart.update_cart({
 				item_code,
 				qty: 1,
 				callback(r) {

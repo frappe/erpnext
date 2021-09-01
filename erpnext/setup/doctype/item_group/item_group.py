@@ -67,6 +67,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def get_context(self, context):
 		context.show_search = True
+		context.body_class = "product-page"
 		context.page_length = cint(frappe.db.get_single_value('E Commerce Settings', 'products_per_page')) or 6
 		context.search_link = '/product_search'
 
