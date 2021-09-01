@@ -79,7 +79,8 @@ class NamingSeries(Document):
 		options = self.scrub_options_list(ol)
 
 		# validate names
-		for i in options: self.validate_series_name(i)
+		for i in options:
+			self.validate_series_name(i)
 
 		if options and self.user_must_always_select:
 			options = [''] + options
@@ -138,7 +139,7 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
-		if not re.match("^[\w\- /.#{}]*$", n, re.UNICODE):
+		if not re.match(r"^[\w\- \/.#{}]+$", n, re.UNICODE):
 			throw(_('Special Characters except "-", "#", ".", "/", "{" and "}" not allowed in naming series'))
 
 	@frappe.whitelist()

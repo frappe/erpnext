@@ -47,27 +47,18 @@ class EmailDigest(Document):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
-		recipients = list(filter(lambda r: r in valid_users,
-			self.recipient_list.split("\n")))
 
-		original_user = frappe.session.user
-
-		if recipients:
-			for user_id in recipients:
-				frappe.set_user(user_id)
-				frappe.set_user_lang(user_id)
+		if self.recipients:
+			for row in self.recipients:
 				msg_for_this_recipient = self.get_msg_html()
-				if msg_for_this_recipient:
+				if msg_for_this_recipient and row.recipient in valid_users:
 					frappe.sendmail(
-						recipients=user_id,
+						recipients=row.recipient,
 						subject=_("{0} Digest").format(self.frequency),
 						message=msg_for_this_recipient,
 						reference_doctype = self.doctype,
 						reference_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
-
-		frappe.set_user(original_user)
-		frappe.set_user_lang(original_user)
 
 	def get_msg_html(self):
 		"""Build email digest content"""

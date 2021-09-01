@@ -29,7 +29,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		try:
 			repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin, allow_negative_stock)
 			frappe.db.commit()
-		except:
+		except Exception:
 			frappe.db.rollback()
 
 	if allow_negative_stock:
@@ -247,5 +247,5 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 
 				sr.via_stock_ledger = True
 				sr.save()
-			except:
+			except Exception:
 				pass

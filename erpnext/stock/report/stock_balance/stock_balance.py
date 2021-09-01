@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from operator import itemgetter
 import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, cint, getdate, now, date_diff
@@ -44,7 +45,7 @@ def execute(filters=None):
 	data = []
 	conversion_factors = {}
 
-	_func = lambda x: x[1]
+	_func = itemgetter(1)
 
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
@@ -235,12 +236,15 @@ def filter_items_with_no_transactions(iwb_map, float_precision):
 	return iwb_map
 
 def get_items(filters):
+	"Get items based on item code, item group or brand."
 	conditions = []
 	if filters.get("item_code"):
 		conditions.append("item.name=%(item_code)s")
 	else:
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
+		if filters.get("brand"): # used in stock analytics report
+			conditions.append("item.brand=%(brand)s")
 
 	items = []
 	if conditions:

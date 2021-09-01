@@ -28,11 +28,11 @@ class MaintenanceVisit(TransactionBase):
 	def validate(self):
 		self.validate_serial_no()
 		self.validate_maintenance_date()
-	
+
 	def update_completion_status(self):
 		if self.maintenance_schedule_detail:
 			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'completion_status', self.completion_status)
-	
+
 	def update_actual_date(self):
 		if self.maintenance_schedule_detail:
 			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'actual_date', self.mntc_date)

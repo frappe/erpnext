@@ -176,4 +176,3 @@ def time_diff_in_hours(start, end):
 
 def find_index_in_dict(dict_list, key, value):
 	return next((index for (index, d) in enumerate(dict_list) if d[key] == value), None)
-

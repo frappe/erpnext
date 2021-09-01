@@ -96,8 +96,6 @@ def get_columns():
 		}
 	]
 
-	return columns
-
 
 def get_vehicle_log_data(filters):
 	start_date, end_date = get_period_dates(filters)

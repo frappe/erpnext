@@ -11,5 +11,5 @@ def execute():
 
 		frappe.reload_doc("stock", "doctype", "stock_ledger_entry")
 		frappe.reload_doc("stock", "doctype", "serial_no")
-	except:
+	except Exception:
 		pass

@@ -165,8 +165,14 @@ class SerialNo(StockController):
 				)
 			ORDER BY
 				posting_date desc, posting_time desc, creation desc""",
-			(self.item_code, self.company,
-				serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'), as_dict=1):
+			(
+				self.item_code, self.company,
+				serial_no,
+				serial_no+'\n%',
+				'%\n'+serial_no,
+				'%\n'+serial_no+'\n%'
+			),
+			as_dict=1):
 				if serial_no.upper() in get_serial_nos(sle.serial_no):
 					if cint(sle.actual_qty) > 0:
 						sle_dict.setdefault("incoming", []).append(sle)
@@ -567,7 +573,7 @@ def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch
 	if batch_nos:
 		try:
 			filters["batch_no"] = json.loads(batch_nos) if (type(json.loads(batch_nos)) == list) else [json.loads(batch_nos)]
-		except:
+		except Exception:
 			filters["batch_no"] = [batch_nos]
 
 	if posting_date:

@@ -26,31 +26,39 @@ frappe.ui.form.on('Patient', {
 		}
 
 		if (frm.doc.patient_name && frappe.user.has_role('Physician')) {
+			frm.add_custom_button(__('Patient Progress'), function() {
+				frappe.route_options = {'patient': frm.doc.name};
+				frappe.set_route('patient-progress');
+			}, __('View'));
+
 			frm.add_custom_button(__('Patient History'), function() {
 				frappe.route_options = {'patient': frm.doc.name};
 				frappe.set_route('patient_history');
-			},'View');
+			}, __('View'));
 		}
 
-		if (!frm.doc.__islocal && (frappe.user.has_role('Nursing User') || frappe.user.has_role('Physician'))) {
-			frm.add_custom_button(__('Vital Signs'), function () {
-				create_vital_signs(frm);
-			}, 'Create');
-			frm.add_custom_button(__('Medical Record'), function () {
-				create_medical_record(frm);
-			}, 'Create');
-			frm.add_custom_button(__('Patient Encounter'), function () {
-				create_encounter(frm);
-			}, 'Create');
-			frm.toggle_enable(['customer'], 0); // ToDo, allow change only if no transactions booked or better, add merge option
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Patient'};
+		frm.toggle_display(['address_html', 'contact_html'], !frm.is_new());
+
+		if (!frm.is_new()) {
+			if ((frappe.user.has_role('Nursing User') || frappe.user.has_role('Physician'))) {
+				frm.add_custom_button(__('Medical Record'), function () {
+					create_medical_record(frm);
+				}, 'Create');
+				frm.toggle_enable(['customer'], 0);
+			}
+			frappe.contacts.render_address_and_contact(frm);
+			erpnext.utils.set_party_dashboard_indicators(frm);
+		} else {
+			frappe.contacts.clear_address_and_contact(frm);
 		}
 	},
+
 	onload: function (frm) {
-		if (!frm.doc.dob) {
-			$(frm.fields_dict['age_html'].wrapper).html('');
-		}
 		if (frm.doc.dob) {
 			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${get_age(frm.doc.dob)}`);
+		} else {
+			$(frm.fields_dict['age_html'].wrapper).html('');
 		}
 	}
 });
@@ -59,16 +67,14 @@ frappe.ui.form.on('Patient', 'dob', function(frm) {
 	if (frm.doc.dob) {
 		let today = new Date();
 		let birthDate = new Date(frm.doc.dob);
-		if (today < birthDate){
+		if (today < birthDate) {
 			frappe.msgprint(__('Please select a valid Date'));
 			frappe.model.set_value(frm.doctype,frm.docname, 'dob', '');
-		}
-		else {
+		} else {
 			let age_str = get_age(frm.doc.dob);
 			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${age_str}`);
 		}
-	}
-	else {
+	} else {
 		$(frm.fields_dict['age_html'].wrapper).html('');
 	}
 });

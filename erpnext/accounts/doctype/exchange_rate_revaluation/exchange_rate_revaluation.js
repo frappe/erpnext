@@ -31,7 +31,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 						}, __('Create'));
 					}
 				}
-			});			
+			});
 		}
 	},
 

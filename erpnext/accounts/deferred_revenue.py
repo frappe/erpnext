@@ -359,7 +359,7 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 		try:
 			make_gl_entries(gl_entries, cancel=(doc.docstatus == 2), merge_entries=True)
 			frappe.db.commit()
-		except:
+		except Exception:
 			frappe.db.rollback()
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback)
@@ -430,7 +430,7 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 
 		if submit:
 			journal_entry.submit()
-	except:
+	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		frappe.log_error(message=traceback)
@@ -450,5 +450,3 @@ def get_deferred_booking_accounts(doctype, voucher_detail_no, dr_or_cr):
 		return debit_account
 	else:
 		return credit_account
-
-

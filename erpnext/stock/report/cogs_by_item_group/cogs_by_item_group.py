@@ -43,13 +43,13 @@ def validate_filters(filters: Filters) -> None:
 def get_columns() -> Columns:
 	return [
 		{
-			'label': 'Item Group',
+			'label': _('Item Group'),
 			'fieldname': 'item_group',
 			'fieldtype': 'Data',
 			'width': '200'
 		},
 		{
-			'label': 'COGS Debit',
+			'label': _('COGS Debit'),
 			'fieldname': 'cogs_debit',
 			'fieldtype': 'Currency',
 			'width': '200'
@@ -64,7 +64,7 @@ def get_data(filters: Filters) -> Data:
 
 	assign_self_values(leveled_dict, svd_list)
 	assign_agg_values(leveled_dict)
-	
+
 	data = []
 	for item in leveled_dict.items():
 		i = item[1]
@@ -160,7 +160,7 @@ def get_row(name:str, value:float, is_bold:int, indent:int) -> Row:
 	if is_bold:
 		item_group = frappe.bold(item_group)
 	return frappe._dict(item_group=item_group, cogs_debit=value, indent=indent)
-			
+
 
 def assign_item_groups_to_svd_list(svd_list: SVDList) -> None:
 	ig_map = get_item_groups_map(svd_list)

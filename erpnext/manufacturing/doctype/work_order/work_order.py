@@ -214,6 +214,7 @@ class WorkOrder(Document):
 					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
+			self.set_process_loss_qty()
 
 			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
@@ -222,6 +223,22 @@ class WorkOrder(Document):
 
 		if self.production_plan:
 			self.update_production_plan_status()
+
+	def set_process_loss_qty(self):
+		process_loss_qty = flt(frappe.db.sql("""
+				SELECT sum(qty) FROM `tabStock Entry Detail`
+				WHERE
+					is_process_loss=1
+					AND parent IN (
+						SELECT name FROM `tabStock Entry`
+						WHERE
+							work_order=%s
+							AND purpose='Manufacture'
+							AND docstatus=1
+					)
+			""", (self.name, ))[0][0])
+		if process_loss_qty is not None:
+			self.db_set('process_loss_qty', process_loss_qty)
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc('Production Plan', self.production_plan)
@@ -602,7 +619,7 @@ class WorkOrder(Document):
 
 		if self.docstatus==1:
 			# calculate transferred qty based on submitted stock entries
-			self.update_transaferred_qty_for_required_items()
+			self.update_transferred_qty_for_required_items()
 
 			# update in bin
 			self.update_reserved_qty_for_production()
@@ -671,7 +688,7 @@ class WorkOrder(Document):
 
 			self.set_available_qty()
 
-	def update_transaferred_qty_for_required_items(self):
+	def update_transferred_qty_for_required_items(self):
 		'''update transferred qty from submitted stock entries for that item against
 			the work order'''
 
@@ -838,7 +855,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 
 	for item in variant_items:
 		args = frappe._dict({
-			"item_code": item.get("varint_item_code"),
+			"item_code": item.get("variant_item_code"),
 			"required_qty": item.get("qty"),
 			"qty": item.get("qty"), # for bom
 			"source_warehouse": item.get("source_warehouse"),
@@ -859,7 +876,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		}, bom_doc)
 
 		if not args.source_warehouse:
-			args["source_warehouse"] = get_item_defaults(item.get("varint_item_code"),
+			args["source_warehouse"] = get_item_defaults(item.get("variant_item_code"),
 				wo_doc.company).default_warehouse
 
 		args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))
