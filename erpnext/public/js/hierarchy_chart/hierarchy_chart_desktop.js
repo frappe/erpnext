@@ -81,6 +81,7 @@ erpnext.HierarchyChart = class {
 			reqd: 1,
 			change: () => {
 				me.company = undefined;
+				$('#hierarchy-chart-wrapper').remove();
 
 				if (company.get_value()) {
 					me.company = company.get_value();
@@ -91,11 +92,6 @@ erpnext.HierarchyChart = class {
 					me.render_root_nodes();
 					me.all_nodes_expanded = false;
 				} else {
-					if (me.$hierarchy)
-						me.$hierarchy.remove();
-
-					$(`#connectors`).empty();
-
 					frappe.throw(__('Please select a company first.'));
 				}
 			}
@@ -177,7 +173,8 @@ erpnext.HierarchyChart = class {
 			</ul>`);
 
 		this.page.main
-			.find('#hierarchy-chart-wrapper')
+			.find('#hierarchy-chart')
+			.empty()
 			.append(this.$hierarchy);
 
 		this.nodes = {};
@@ -207,6 +204,8 @@ erpnext.HierarchyChart = class {
 					<g id="connectors" fill="none">
 					</g>
 				</svg>
+				<div id="hierarchy-chart">
+				</div>
 			</div>`);
 	}
 
@@ -223,7 +222,10 @@ erpnext.HierarchyChart = class {
 				let expand_node = undefined;
 				let node = undefined;
 
-				$.each(r.message, (i, data) => {
+				$.each(r.message, (_i, data) => {
+					if ($(`#${data.id}`).length)
+						return;
+
 					node = new me.Node({
 						id: data.id,
 						parent: $('<li class="child-node"></li>').appendTo(me.$hierarchy.find('.node-children')),
