@@ -67,8 +67,6 @@ erpnext.HierarchyChart = class {
 	}
 
 	show() {
-		frappe.breadcrumbs.add('HR');
-
 		this.setup_actions();
 		if ($(`[data-fieldname="company"]`).length) return;
 		let me = this;
@@ -84,7 +82,7 @@ erpnext.HierarchyChart = class {
 			change: () => {
 				me.company = undefined;
 
-				if (company.get_value() && me.company != company.get_value()) {
+				if (company.get_value()) {
 					me.company = company.get_value();
 
 					// svg for connectors
@@ -92,6 +90,13 @@ erpnext.HierarchyChart = class {
 					me.setup_hierarchy();
 					me.render_root_nodes();
 					me.all_nodes_expanded = false;
+				} else {
+					if (me.$hierarchy)
+						me.$hierarchy.remove();
+
+					$(`#connectors`).empty();
+
+					frappe.throw(__('Please select a company first.'));
 				}
 			}
 		});
@@ -176,7 +181,6 @@ erpnext.HierarchyChart = class {
 			.append(this.$hierarchy);
 
 		this.nodes = {};
-		this.all_nodes_expanded = false;
 	}
 
 	make_svg_markers() {
@@ -290,7 +294,7 @@ erpnext.HierarchyChart = class {
 				() => frappe.dom.freeze(),
 				() => this.setup_hierarchy(),
 				() => this.render_root_nodes(true),
-				() => this.get_all_nodes(node.id, node.name),
+				() => this.get_all_nodes(),
 				(data_list) => this.render_children_of_all_nodes(data_list),
 				() => frappe.dom.unfreeze()
 			]);
@@ -341,15 +345,13 @@ erpnext.HierarchyChart = class {
 		node.expanded = true;
 	}
 
-	get_all_nodes(node_id, node_name) {
+	get_all_nodes() {
 		return new Promise(resolve => {
 			frappe.call({
 				method: 'erpnext.utilities.hierarchy_chart.get_all_nodes',
 				args: {
 					method: this.method,
-					company: this.company,
-					parent: node_id,
-					parent_name: node_name
+					company: this.company
 				},
 				callback: (r) => {
 					resolve(r.message);
