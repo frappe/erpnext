@@ -7,8 +7,7 @@ import unittest
 
 import frappe
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
-from frappe.utils.data import (nowdate, add_days, add_to_date, add_months, date_diff, flt, get_date_str,
-	get_first_day, get_last_day)
+from frappe.utils.data import nowdate, add_days, add_to_date, add_months, date_diff, flt, get_date_str
 
 def create_plan():
 	if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):

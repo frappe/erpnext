@@ -5,8 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
 from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request

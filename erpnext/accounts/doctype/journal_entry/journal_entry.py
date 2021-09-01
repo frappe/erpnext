@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form
+from frappe.utils import cstr, flt, fmt_money, formatdate, nowdate, cint, get_link_to_form
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_stock_accounts, get_stock_and_account_balance, \

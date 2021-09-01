@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-import erpnext
 from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.general_ledger import make_reverse_gl_entries

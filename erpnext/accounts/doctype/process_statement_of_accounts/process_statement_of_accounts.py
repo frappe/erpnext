@@ -11,13 +11,11 @@ from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_sum
 from erpnext import get_company_currency
 from erpnext.accounts.party import get_party_account_currency
 
-from frappe.utils.print_format import report_to_pdf
 from frappe.utils.pdf import get_pdf
 from frappe.utils import today, add_days, add_months, getdate, format_date
 from frappe.utils.jinja import validate_template
 
 import copy
-from datetime import timedelta
 from frappe.www.printview import get_print_style
 
 class ProcessStatementOfAccounts(Document):

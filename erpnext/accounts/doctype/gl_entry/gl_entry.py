@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, fmt_money, getdate, formatdate, cint
+from frappe.utils import flt, fmt_money
 from frappe.model.document import Document
 from frappe.model.naming import set_name_from_naming_options
 from frappe.model.meta import get_field_precision

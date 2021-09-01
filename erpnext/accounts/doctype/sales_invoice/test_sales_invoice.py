@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import frappe, erpnext
 
-import unittest, copy, time
-from frappe.utils import nowdate, flt, getdate, cint, add_days, add_months
+import unittest, copy
+from frappe.utils import nowdate, flt, getdate, add_days
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice

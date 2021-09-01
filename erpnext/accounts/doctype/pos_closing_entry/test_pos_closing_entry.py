@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 import unittest
-from frappe.utils import nowdate
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import make_closing_entry_from_opening

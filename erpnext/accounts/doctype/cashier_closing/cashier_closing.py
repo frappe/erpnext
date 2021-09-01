@@ -5,8 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import cint, flt, cstr
-from frappe import _, msgprint, throw
+from frappe.utils import flt
+from frappe import _
 
 class CashierClosing(Document):
 	def validate(self):

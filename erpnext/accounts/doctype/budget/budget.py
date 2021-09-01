@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, add_months, get_last_day, fmt_money, nowdate
+from frappe.utils import flt, getdate, add_months, get_last_day, fmt_money
 from frappe.model.naming import make_autoname
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.model.document import Document

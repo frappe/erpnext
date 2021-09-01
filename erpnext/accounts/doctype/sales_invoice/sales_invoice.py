@@ -19,7 +19,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delive
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
+	get_loyalty_program_details_with_points, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from frappe.model.utils import get_fetch_values
