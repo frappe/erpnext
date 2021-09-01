@@ -156,6 +156,7 @@ class BOM(WebsiteGenerator):
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
 		self.set_bom_level()
+		self.validate_scrap_items()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -230,7 +231,7 @@ class BOM(WebsiteGenerator):
 			}
 			ret = self.get_bom_material_detail(args)
 			for key, value in ret.items():
-				if not item.get(key):
+				if item.get(key) is None:
 					item.set(key, value)
 
 	@frappe.whitelist()
@@ -446,25 +447,29 @@ class BOM(WebsiteGenerator):
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
 
-	def check_recursion(self, bom_list=[]):
+	def check_recursion(self, bom_list=None):
 		""" Check whether recursion occurs in any bom"""
+		def _throw_error(bom_name):
+			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {0}").format(bom_name))
+
 		bom_list = self.traverse_tree()
-		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
-			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'})
+		child_items = frappe.get_all('BOM Item', fields=["bom_no", "item_code"],
+			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'}) or []
 
-		raise_exception = False
-		if bom_nos and self.name in [d.bom_no for d in bom_nos]:
-			raise_exception = True
+		child_bom = {d.bom_no for d in child_items}
+		child_items_codes = {d.item_code for d in child_items}
 
-		if not raise_exception:
-			bom_nos = frappe.get_all('BOM Item', fields=["parent"],
-				filters={'bom_no': self.name, 'parenttype': 'BOM'})
+		if self.name in child_bom:
+			_throw_error(self.name)
 
-			if self.name in [d.parent for d in bom_nos]:
-				raise_exception = True
+		if self.item in child_items_codes:
+			_throw_error(self.item)
 
-		if raise_exception:
-			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {1}").format(self.name, self.name))
+		bom_nos = frappe.get_all('BOM Item', fields=["parent"],
+			filters={'bom_no': self.name, 'parenttype': 'BOM'}) or []
+
+		if self.name in {d.parent for d in bom_nos}:
+			_throw_error(self.name)
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
@@ -512,16 +517,20 @@ class BOM(WebsiteGenerator):
 	def update_rate_and_time(self, row, update_hour_rate = False):
 		if not row.hour_rate or update_hour_rate:
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
-			row.hour_rate = (hour_rate / flt(self.conversion_rate)
-				if self.conversion_rate and hour_rate else hour_rate)
+
+			if hour_rate:
+				row.hour_rate = (hour_rate / flt(self.conversion_rate)
+					if self.conversion_rate and hour_rate else hour_rate)
 
 			if self.routing:
-				row.time_in_mins = flt(frappe.db.get_value("BOM Operation", {
+				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
 						"workstation": row.workstation,
 						"operation": row.operation,
-						"sequence_id": row.sequence_id,
 						"parent": self.routing
 				}, ["time_in_mins"]))
+
+				if time_in_mins:
+					row.time_in_mins = time_in_mins
 
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
@@ -705,6 +714,32 @@ class BOM(WebsiteGenerator):
 		if update:
 			self.db_set("bom_level", self.bom_level)
 
+	def validate_scrap_items(self):
+		for item in self.scrap_items:
+			msg = ""
+			if item.item_code == self.item and not item.is_process_loss:
+				msg = _('Scrap/Loss Item: {0} should have Is Process Loss checked as it is the same as the item to be manufactured or repacked.') \
+					.format(frappe.bold(item.item_code))
+			elif item.item_code != self.item and item.is_process_loss:
+				msg = _('Scrap/Loss Item: {0} should not have Is Process Loss checked as it is different from  the item to be manufactured or repacked') \
+					.format(frappe.bold(item.item_code))
+
+			must_be_whole_number = frappe.get_value("UOM", item.stock_uom, "must_be_whole_number")
+			if item.is_process_loss and must_be_whole_number:
+				msg = _("Item: {0} with Stock UOM: {1} cannot be a Scrap/Loss Item as {1} is a whole UOM.") \
+					.format(frappe.bold(item.item_code), frappe.bold(item.stock_uom))
+
+			if item.is_process_loss and (item.stock_qty >= self.quantity):
+				msg = _("Scrap/Loss Item: {0} should have Qty less than finished goods Quantity.") \
+					.format(frappe.bold(item.item_code))
+
+			if item.is_process_loss and (item.rate > 0):
+				msg = _("Scrap/Loss Item: {0} should have Rate set to 0 because Is Process Loss is checked.") \
+					.format(frappe.bold(item.item_code))
+
+			if msg:
+				frappe.throw(msg, title=_("Note"))
+
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
 		rate = get_valuation_rate(args) * (args.get("conversion_factor") or 1)
@@ -822,8 +857,11 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", where_conditions="",
-			select_columns=", bom_item.idx, item.description", is_stock_item=is_stock_item, qty_field="stock_qty")
+		query = query.format(
+			table="BOM Scrap Item", where_conditions="",
+			select_columns=", bom_item.idx, item.description, is_process_loss",
+			is_stock_item=is_stock_item, qty_field="stock_qty"
+		)
 
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:

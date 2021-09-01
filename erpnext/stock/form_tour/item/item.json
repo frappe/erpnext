@@ -1,0 +1,89 @@
+{
+ "creation": "2021-08-24 17:56:40.754909",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-08-24 18:04:50.928431",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item",
+ "owner": "Administrator",
+ "reference_doctype": "Item",
+ "save_on_complete": 0,
+ "steps": [
+  {
+   "description": "Enter code for Asset Item",
+   "field": "",
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Item Code",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Asset Item Code"
+  },
+  {
+   "description": "Enter name for Asset Item",
+   "field": "",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Item Name",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Asset Item Name"
+  },
+  {
+   "description": "Check this field to make this an Asset Item",
+   "field": "",
+   "fieldname": "is_fixed_asset",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Is Fixed Asset",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Is this a Fixed Asset?"
+  },
+  {
+   "description": "On checking it, the system will create an Asset automatically on purchase",
+   "field": "",
+   "fieldname": "auto_create_assets",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Auto Create Assets on Purchase",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Auto Create Asset on Purchase"
+  },
+  {
+   "description": "Select an Asset Category for this Asset Item",
+   "field": "",
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Asset Category",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Asset Category"
+  },
+  {
+   "description": "Select a naming series which will be used to create an Asset automatically",
+   "field": "",
+   "fieldname": "asset_naming_series",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Asset Naming Series",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Asset Naming Series"
+  }
+ ],
+ "title": "Item"
+}

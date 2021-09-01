@@ -63,6 +63,7 @@ class Lead(SellingController):
 
 	def on_update(self):
 		self.add_calendar_event()
+		self.update_prospects()
 
 	def before_insert(self):
 		self.contact_doc = self.create_contact()
@@ -88,6 +89,12 @@ class Lead(SellingController):
 			"subject": ('Contact ' + cstr(self.lead_name)),
 			"description": ('Contact ' + cstr(self.lead_name)) + (self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
 		}, force)
+
+	def update_prospects(self):
+		prospects = frappe.get_all('Prospect Lead', filters={'lead': self.name}, fields=['parent'])
+		for row in prospects:
+			prospect = frappe.get_doc('Prospect', row.parent)
+			prospect.save(ignore_permissions=True)
 
 	def check_email_id_is_unique(self):
 		if self.email_id:
@@ -355,3 +362,14 @@ def daily_open_lead():
 	leads = frappe.get_all("Lead", filters = [["contact_date", "Between", [nowdate(), nowdate()]]])
 	for lead in leads:
 		frappe.db.set_value("Lead", lead.name, "status", "Open")
+
+@frappe.whitelist()
+def add_lead_to_prospect(lead, prospect):
+	prospect = frappe.get_doc('Prospect', prospect)
+	prospect.append('prospect_lead', {
+		'lead': lead
+	})
+	prospect.save(ignore_permissions=True)
+	frappe.msgprint(_('Lead {0} has been added to prospect {1}.').format(frappe.bold(lead), frappe.bold(prospect.name)),
+		title=_('Lead Added'), indicator='green')
+	

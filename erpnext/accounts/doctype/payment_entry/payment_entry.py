@@ -75,9 +75,9 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
+		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_donation()
 		self.update_payment_schedule()
 		self.set_status()
@@ -85,9 +85,9 @@ class PaymentEntry(AccountsController):
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.make_gl_entries(cancel=1)
+		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_donation(cancel=1)
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
@@ -755,9 +755,11 @@ class PaymentEntry(AccountsController):
 
 			if self.payment_type in ('Pay', 'Internal Transfer'):
 				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
+				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_from
 			elif self.payment_type == 'Receive':
 				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
+				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_to
 
 			payment_or_advance_account = self.get_party_account_for_taxes()
@@ -779,14 +781,13 @@ class PaymentEntry(AccountsController):
 					"cost_center": d.cost_center
 				}, account_currency, item=d))
 
-			#Intentionally use -1 to get net values in party account
 			if not d.included_in_paid_amount or self.advance_tax_account:
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": payment_or_advance_account,
 						"against": against,
-						dr_or_cr: -1 * tax_amount,
-						dr_or_cr + "_in_account_currency": -1 * base_tax_amount
+						rev_dr_or_cr: tax_amount,
+						rev_dr_or_cr + "_in_account_currency": base_tax_amount
 						if account_currency==self.company_currency
 						else d.tax_amount,
 						"cost_center": self.cost_center,
@@ -830,7 +831,10 @@ class PaymentEntry(AccountsController):
 			for d in self.get("references"):
 				if d.reference_doctype=="Expense Claim" and d.reference_name:
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
-					update_reimbursed_amount(doc, self.name)
+					if self.docstatus == 2:
+						update_reimbursed_amount(doc, -1 * d.allocated_amount)
+					else:
+						update_reimbursed_amount(doc, d.allocated_amount)
 
 	def update_donation(self, cancel=0):
 		if self.payment_type == "Receive" and self.party_type == "Donor" and self.party:

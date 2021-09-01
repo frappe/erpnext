@@ -253,6 +253,8 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
 
+		self.process_common_party_accounting()
+
 	def validate_pos_return(self):
 
 		if self.is_pos and self.is_return:
