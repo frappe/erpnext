@@ -7,7 +7,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import (nowdate, getdate, now_datetime, get_datetime, flt, date_diff, get_last_day, cint,
-	get_first_day, get_datetime, add_days)
+	get_first_day, add_days)
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 
