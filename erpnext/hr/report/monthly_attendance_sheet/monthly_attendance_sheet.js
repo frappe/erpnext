@@ -59,14 +59,18 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 		if (column.fieldname == 'total_present' && flt(value)) {
 			style['color'] = 'green';
 		}
-		if (column.fieldname == 'total_absent' && flt(value)) {
+		if (['total_absent', 'total_late_deduction', 'total_deduction'].includes(column.fieldname) && flt(value)) {
 			style['color'] = 'red';
 		}
 		if (column.fieldname == 'total_half_day' && flt(value)) {
 			style['color'] = 'orange';
 		}
-		if (column.fieldname == 'total_leave' && flt(value)) {
-			style['color'] = 'blue';
+		if ((column.fieldname == 'total_leave' || column.leave_type) && flt(value)) {
+			if (column.is_lwp) {
+				style['color'] = 'red';
+			} else {
+				style['color'] = 'blue';
+			}
 		}
 		if (column.fieldname == 'total_late_entry' && flt(value)) {
 			style['color'] = 'orange';

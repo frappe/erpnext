@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, formatdate
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import get_employee_details,\
-	get_attendance_status_abbr, get_holiday_map, is_holiday
+	get_attendance_status_abbr, get_holiday_map, is_date_holiday
 
 def execute(filters=None):
 	filters = frappe._dict(filters)
@@ -41,7 +41,7 @@ def execute(filters=None):
 					'designation': employee_details.designation,
 				})
 
-				if is_holiday(current_date, holiday_map, employee_details, filters.default_holiday_list):
+				if is_date_holiday(current_date, holiday_map, employee_details, filters.default_holiday_list):
 					row_template['attendance_status'] = "Holiday"
 					row_template['attendance_abbr'] = get_attendance_status_abbr(row_template['attendance_status'])
 
@@ -75,6 +75,7 @@ def execute(filters=None):
 								attendance_details.early_exit)
 							row['late_entry'] = attendance_details.late_entry
 							row['early_exit'] = attendance_details.early_exit
+							row['leave_type'] = attendance_details.leave_type
 
 							if attendance_details.working_hours:
 								row['working_hours'] = attendance_details.working_hours
@@ -148,7 +149,7 @@ def get_attendance_map(filters):
 		employee_condition = " and employee = %(employee)s"
 
 	attendance = frappe.db.sql("""
-		select name, employee, attendance_date, shift, status, late_entry, early_exit, working_hours
+		select name, employee, attendance_date, shift, status, late_entry, early_exit, working_hours, leave_type
 		from `tabAttendance`
 		where docstatus = 1 and attendance_date between %(from_date)s and %(to_date)s {0}
 		order by attendance_date
@@ -188,6 +189,7 @@ def get_columns(filters, checkin_column_count):
 	columns += [
 		{"fieldname": "attendance_marked", "label": _("Marked"), "fieldtype": "Check", "width": 65},
 		{"fieldname": "attendance_status", "label": _("Status"), "fieldtype": "Data", "width": 75},
+		{"fieldname": "leave_type", "label": _("Leave Type"), "fieldtype": "Link", "options": "Leave Type", "width": 90},
 		{"fieldname": "working_hours", "label": _("Hours"), "fieldtype": "Float", "width": 60, "precision": 1},
 		{"fieldname": "late_entry", "label": _("Late Entry"), "fieldtype": "Check", "width": 80},
 		{"fieldname": "early_exit", "label": _("Early Exit"), "fieldtype": "Check", "width": 80},
