@@ -266,9 +266,9 @@
 						{% if(!data[i]["is_total_row"]) { %}
 							<td>
 								{% if(!(filters.customer || filters.supplier)) { %}
-									{%= data[i]["party"] %}
+									<b>{%= data[i]["party"] %}</b>
 									{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
-										<br> {%= data[i]["customer_name"] %}
+										<br> <b>{%= data[i]["customer_name"] %}</b>
 									{% } else if(data[i]["supplier_name"] != data[i]["party"]) { %}
 										<br> {%= data[i]["supplier_name"] %}
 									{% } %}
