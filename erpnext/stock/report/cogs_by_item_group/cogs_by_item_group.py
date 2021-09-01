@@ -43,13 +43,13 @@ def validate_filters(filters: Filters) -> None:
 def get_columns() -> Columns:
 	return [
 		{
-			'label': 'Item Group',
+			'label': _('Item Group'),
 			'fieldname': 'item_group',
 			'fieldtype': 'Data',
 			'width': '200'
 		},
 		{
-			'label': 'COGS Debit',
+			'label': _('COGS Debit'),
 			'fieldname': 'cogs_debit',
 			'fieldtype': 'Currency',
 			'width': '200'
