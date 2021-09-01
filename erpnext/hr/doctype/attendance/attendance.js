@@ -9,3 +9,8 @@ cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
 		query: "erpnext.controllers.queries.employee_query"
 	}	
 }
+frappe.ui.form.on('Attendance', {
+	refresh: function () {
+		erpnext.hide_company();
+	}
+});

@@ -18,18 +18,22 @@ class Attendance(Document):
 			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
 
 	def check_leave_record(self):
-		leave_record = frappe.db.sql("""select leave_type, half_day, half_day_date from `tabLeave Application`
+		leave_record = frappe.db.sql("""select name, leave_type, half_day, half_day_date from `tabLeave Application`
 			where employee = %s and %s between from_date and to_date and status = 'Approved'
 			and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
 		if leave_record:
 			for d in leave_record:
+				self.leave_type = d.leave_type
+				self.leave_application = d.name
 				if d.half_day_date == getdate(self.attendance_date):
 					self.status = 'Half Day'
 					frappe.msgprint(_("Employee {0} on Half day on {1}").format(self.employee, self.attendance_date))
 				else:
 					self.status = 'On Leave'
-					self.leave_type = d.leave_type
 					frappe.msgprint(_("Employee {0} is on Leave on {1}").format(self.employee, self.attendance_date))
+		else:
+			self.leave_type = None
+			self.leave_application = None
 
 		if self.status == "On Leave" and not leave_record:
 			frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
