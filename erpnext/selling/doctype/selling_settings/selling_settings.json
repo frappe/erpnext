@@ -154,7 +154,7 @@
    "options": "Stop\nWarn"
   },
   {
-   "depends_on": "eval: doc.maintain_same_rate_action == 'Stop'",
+   "depends_on": "eval: doc.maintain_same_sales_rate && doc.maintain_same_rate_action == 'Stop'",
    "fieldname": "role_to_override_stop_action",
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
@@ -204,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-01 22:48:30.860203",
+ "modified": "2021-09-01 22:53:53.394444",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
