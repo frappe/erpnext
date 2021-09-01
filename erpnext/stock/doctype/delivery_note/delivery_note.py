@@ -331,7 +331,7 @@ class DeliveryNote(SellingController):
 			credit_note_link = frappe.utils.get_link_to_form('Sales Invoice', return_invoice.name)
 
 			frappe.msgprint(_("Credit Note {0} has been created automatically").format(credit_note_link))
-		except:
+		except Exception:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
