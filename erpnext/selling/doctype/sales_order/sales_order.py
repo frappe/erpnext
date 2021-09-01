@@ -959,7 +959,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				["rate", "rate"]
 			],
 			"field_no_map": [
-				"rate",
 				"price_list_rate",
 				"item_tax_template",
 				"discount_percentage",
