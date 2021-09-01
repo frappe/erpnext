@@ -31,6 +31,7 @@ class SalesPipelineAnalytics(object):
 		self.set_pipeline_based_on_column()
 
 	def set_range_columns(self):
+
 		based_on = {
 			'Number': 'Int',
 			'Amount': 'Currency'
@@ -57,6 +58,7 @@ class SalesPipelineAnalytics(object):
 				})
 
 	def set_pipeline_based_on_column(self):
+
 		if self.filters.get('pipeline_by') == 'Owner':
 			self.columns.insert(0, {
 				'fieldname': 'opportunity_owner',
@@ -71,71 +73,80 @@ class SalesPipelineAnalytics(object):
 				'width': 200
 			})
 
-	def get_data(self):
-		select_1 ={
+	def get_fields(self):
+
+		self.based_on ={
 			'Owner': '_assign as opportunity_owner',
 			'Sales Stage': 'sales_stage'
 		}[self.filters.get('pipeline_by')]
 
-		select_2 ={
+		self.data_based_on ={
 			'Number': 'count(name) as count',
 			'Amount': 'opportunity_amount as amount'
 		}[self.filters.get('based_on')]
 
-		group_by_1 = {
+		self.group_by_based_on = {
 			'Owner': '_assign',
 			'Sales Stage': 'sales_stage'
 		}[self.filters.get('pipeline_by')]
 
-		group_by_2 = {
+		self.group_by_period = {
 			'Monthly': 'month(expected_closing)',
 			'Quaterly': 'QUARTER(expected_closing)'
 		}[self.filters.get('range')]
 
-
-		pipeline_by = {
+		self.pipeline_by = {
 			'Owner': 'opportunity_owner',
 			'Sales Stage': 'sales_stage'
 		}[self.filters.get('pipeline_by')]
 
-		duration = {
+		self.duration = {
 			'Monthly': 'monthname(expected_closing) as month',
 			'Quaterly': 'QUARTER(expected_closing) as quarter'
 		}[self.filters.get('range')]
 
-		period_by = {
+		self.period_by = {
 			'Monthly': 'month',
 			'Quaterly': 'quarter'
 		}[self.filters.get('range')]
 
+	def get_data(self):
+
+		self.get_fields()
+
 		if self.filters.get('based_on') == 'Number':
 			self.query_result = frappe.db.get_list('Opportunity',
 				filters=self.get_conditions(),
-				fields=[select_1, select_2, duration],
-				group_by='{},{}'.format(group_by_1, group_by_2),
-				order_by=group_by_2
+				fields=[self.based_on, self.data_based_on, self.duration],
+				group_by='{},{}'.format(self.group_by_based_on, self.group_by_period),
+				order_by=self.group_by_period
 			)
 
 		if self.filters.get('based_on') == 'Amount':
 			self.query_result = frappe.db.get_list('Opportunity',
 				filters=self.get_conditions(),
-				fields=[select_1, select_2, duration, 'currency']
+				fields=[self.based_on, self.data_based_on, self.duration, 'currency']
 			)
 
 			self.convert_to_base_currency()
 
 			dataframe = pandas.DataFrame.from_records(self.query_result)
 			dataframe.replace(to_replace=[None], value='Not Assigned', inplace=True)
-			result = dataframe.groupby([pipeline_by, period_by], as_index=False)['amount'].sum()
+			result = dataframe.groupby([self.pipeline_by, self.period_by], as_index=False)['amount'].sum()
 
 			self.grouped_data = []
 
 			for i in range(len(result['amount'])):
-				self.grouped_data.append({pipeline_by : result[pipeline_by][i], period_by : result[period_by][i], 'amount': result['amount'][i]})
+				self.grouped_data.append({
+					self.pipeline_by : result[self.pipeline_by][i], 
+					self.period_by : result[self.period_by][i], 
+					'amount': result['amount'][i]
+				})
+
 			self.query_result = self.grouped_data
 
 		self.get_periodic_data()
-		self.append_data(pipeline_by, period_by)
+		self.append_data(self.pipeline_by, self.period_by)
 
 	def get_conditions(self):
 		conditions = []
@@ -240,7 +251,7 @@ class SalesPipelineAnalytics(object):
 			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 			self.periodic_data[value][period] += val
 
-	def check_for_assigned_to(self,period,value,count,temp,info):
+	def check_for_assigned_to(self, period, value, count, temp, info):
 		if self.filters.get('assigned_to'):
 			for data in json.loads(info.get('opportunity_owner')):
 				if data == self.filters.get('assigned_to'):
@@ -305,15 +316,15 @@ class SalesPipelineAnalytics(object):
 		company = self.filters.get('company')
 		return frappe.db.get_value('Company',company,['default_currency'])
 
-	def get_currency_rate(self,from_currency,to_currency):
+	def get_currency_rate(self, from_currency, to_currency):
 		cacheobj = frappe.cache()
 
 		if cacheobj.get(from_currency):
 			return flt(str(cacheobj.get(from_currency),'UTF-8'))
 
 		else:
-			value = get_exchange_rate(from_currency,to_currency)
-			cacheobj.set(from_currency,value)
+			value = get_exchange_rate(from_currency, to_currency)
+			cacheobj.set(from_currency, value)
 			return flt(str(cacheobj.get(from_currency),'UTF-8'))
 
 	def convert_to_base_currency(self):
