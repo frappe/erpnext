@@ -106,7 +106,7 @@ def fin(args):
 def make_sample_data(domains):
 	try:
 		sample_data.make_sample_data(domains)
-	except:
+	except Exception:
 		# clear message
 		if frappe.message_log:
 			frappe.message_log.pop()

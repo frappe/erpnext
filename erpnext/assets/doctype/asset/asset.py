@@ -546,7 +546,7 @@ class Asset(AccountsController):
 		cwip_account = None
 		try:
 			cwip_account = get_asset_account("capital_work_in_progress_account", self.name, self.asset_category, self.company)
-		except:
+		except Exception:
 			# if no cwip account found in category or company and "cwip is enabled" then raise else silently pass
 			if cwip_enabled:
 				raise
