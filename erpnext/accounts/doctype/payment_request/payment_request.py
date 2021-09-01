@@ -549,7 +549,7 @@ def validate_payment(doc, method):
 	if status == 'Paid':
 		frappe.log_error("The Payment Request {0} is already paid, cannot process payment twice".format(doc.reference_docname))
 		return{
-			"redirect_to": frappe.redirect_to_message(_('Server Error'), _("The Payment Request {0} is already paid, cannot process payment twice".format(doc.reference_docname))),
+			"redirect_to": frappe.redirect_to_message(_('Server Error'), _("The Payment Request {0} is already paid, cannot process payment twice").format(doc.reference_docname)),
 			"status": 401
 		}
 	else:
