@@ -13,7 +13,6 @@ from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_dat
 from datetime import datetime
 from frappe.utils.safe_exec import get_safe_globals
 from erpnext.support.doctype.issue.issue import get_holidays
-from frappe.utils.safe_exec import get_safe_globals
 
 class ServiceLevelAgreement(Document):
 	def validate(self):
