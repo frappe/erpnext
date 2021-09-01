@@ -82,7 +82,7 @@ class DailyWorkSummary(Document):
 							crop=True
 						)
 						d.image = thumbnail_image
-			except:
+			except Exception:
 				d.image = original_image
 
 			if d.sender in did_not_reply:
