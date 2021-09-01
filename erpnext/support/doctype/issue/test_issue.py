@@ -7,8 +7,6 @@ import unittest
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import get_datetime, flt
-import datetime
-from datetime import timedelta
 
 class TestSetUp(unittest.TestCase):
 	def setUp(self):
