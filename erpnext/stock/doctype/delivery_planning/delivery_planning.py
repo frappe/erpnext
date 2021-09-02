@@ -62,6 +62,7 @@ class DeliveryPlanning(Document):
 									soi.weight_per_unit,
 									soi.delivery_date,
 									soi.projected_qty,
+									soi.actual_qty,
 									so.transporter,
 									soi.delivered_by_supplier,
 									soi.supplier,
@@ -76,6 +77,7 @@ class DeliveryPlanning(Document):
 									Left join `tabAddress` a  ON so.customer = a.address_title
 
 									where so.docstatus = 1
+									and (soi.qty - soi.delivered_qty ) != 0
 									{conditions} """.format(conditions=conditions), as_dict=1)
 		for i in query:
 			dp_item = frappe.new_doc("Delivery Planning Item")
@@ -95,8 +97,8 @@ class DeliveryPlanning(Document):
 			dp_item.sorce_warehouse = i.warehouse
 			dp_item.postal_code = i.pincode
 			dp_item.delivery_date = i.delivery_date
-			dp_item.current_stock = i.projected_qty - i.stock_qty
-			dp_item.available_stock = i.projected_qty
+			dp_item.current_stock = i.projected_qty
+			dp_item.available_stock = i.actual_qty
 			dp_item.related_delivey_planning = self.name
 			dp_item.weight_per_unit = i.weight_per_unit
 			dp_item.supplier_dc = i.delivered_by_supplier
@@ -109,86 +111,6 @@ class DeliveryPlanning(Document):
 			frappe.msgprint(
 			msg='Delivery Planning Item Created',
 			title='Success')
-
-	def on_transporter_planning(self):
-		conditions = ""
-		if self.company:
-			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
-
-		if self.transporter:
-			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
-
-		if self.delivery_date_from:
-			conditions += "AND so.delivery_date >= '%s'" % self.delivery_date_from
-
-		if self.delivery_date_to:
-			conditions += "AND so.delivery_date <= '%s'" % self.delivery_date_to
-
-		query = frappe.db.sql(""" select
-							so.transporter,
-							so.delivery_date,
-							SUM(so.total_net_weight) AS total_net_weight ,
-							SUM(so.total_qty) AS total_qty
-
-							from `tabSales Order` so
-							# from `tabSales Order Item` soi
-							# join `tabSales Order` so ON soi.parent = so.name
-
-							where so.docstatus = 1
-							{conditions}
-							group by so.transporter, so.delivery_date
-
-							""".format(conditions=conditions), as_dict=1)
-
-		for i in query:
-			dp_item = frappe.new_doc("Transporter Wise Planning Item")
-			dp_item.transporter = i.transporter
-			dp_item.delivery_date = i.delivery_date
-			dp_item.weight_to_deliver = i.total_net_weight
-			dp_item.quantity_to_deliver = i.total_qty
-			dp_item.source_warehouse = ""
-			dp_item.related_delivery_planning = self.name
-			dp_item.save(ignore_permissions=True)
-
-
-	def on_purchase_planning(self):
-		conditions = ""
-		if self.company:
-			conditions += "AND so.company = %s" % frappe.db.escape(self.company)
-
-		if self.transporter:
-			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
-
-		if self.delivery_date_from:
-			conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
-
-		if self.delivery_date_to:
-			conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
-
-		query = frappe.db.sql(""" select
-					soi.item_code,
-					soi.item_name,
-					soi.warehouse,
-					soi.qty,
-					so.transporter,
-					so.name
-
-					from `tabSales Order Item` soi
-					join `tabSales Order` so ON soi.parent = so.name
-
-					where so.docstatus = 1
-					{conditions} """.format(conditions=conditions), as_dict=1)
-
-		for i in query:
-			dp_item = frappe.new_doc("Purchase Orders Planning Item")
-			dp_item.sales_order = i.sales_order
-			dp_item.item_code = i.item_code
-			dp_item.item_name = i.item_name
-			dp_item.supplier = i.transporter
-			dp_item.related_delivery_planning = self.name
-			dp_item.save(ignore_permissions=True)
-
-	# left outer join `tabAddress` as add on add.address_title = so.customer
 
 	# on click of custom button Calculate Purchase Order Plan Summary create new PODPI
 	@frappe.whitelist()
@@ -409,56 +331,68 @@ class DeliveryPlanning(Document):
 										where dpi.supplier_dc = 1
 										
 										AND dpi.docstatus = 1
+										AND dpi.purchase_order IS NULL
 
 										{conditions}
 										group by dpi.supplier
 										""".format(conditions=conditions), as_dict=1)
 
-			for q in query:
-				po = frappe.new_doc("Purchase Order")
-				po.supplier = q.supplier
-				po.total_qty = q.t_qty
-				po.total_net_weight = q.t_weight
-				po.related_delivery_planning = self.name
+			if query:
+				for q in query:
+					po = frappe.new_doc("Purchase Order")
+					po.supplier = q.supplier
+					po.total_qty = q.t_qty
+					po.total_net_weight = q.t_weight
+					po.related_delivery_planning = self.name
 
-				so_wise_data = frappe.db.get_all("Delivery Planning Item",
-												 {"related_delivey_planning": self.name,
-												  "supplier": q.supplier,
-												 },
-												 ["item_code",
-												  "item_name",
-												  "ordered_qty",
-												  "delivery_date",
-												  "sorce_warehouse",
-												  "sales_order",
-												  "item_dname",
-												  "name",
-												  "docstatus"
-												 ]
-												 )
-				if (so_wise_data):
-					for s in so_wise_data:
-						salesno = s.sales_order
-						po.append("items", {"item_code": s.item_code,
-											 "item_name": s.item_name,
-											 "schedule_date":s.delivery_date,
-											 "qty": s.ordered_qty,
-											 "warehouse": s.sorce_warehouse,
-											 "sales_order": s.sales_order,
-											 "delivered_by_supplier" : 1,
-											 "sales_order_item" : s.item_dname
-											 })
+					so_wise_data = frappe.db.get_all("Delivery Planning Item",
+													{"related_delivey_planning": self.name,
+													"supplier": q.supplier,
+													},
+													["item_code",
+													"item_name",
+													"ordered_qty",
+													"delivery_date",
+													"sorce_warehouse",
+													"sales_order",
+													"item_dname",
+													"name",
+													"docstatus",
+													"qty_to_deliver"
+													]
+													)
+					if (so_wise_data):
+						for s in so_wise_data:
+							salesno = s.sales_order
+							po.append("items", {"item_code": s.item_code,
+												"item_name": s.item_name,
+												"schedule_date":s.delivery_date,
+												"qty": s.ordered_qty,
+												"warehouse": s.sorce_warehouse,
+												"sales_order": s.sales_order,
+												"delivered_by_supplier" : 1,
+												"sales_order_item" : s.item_dname
+												})
 
-				discount = frappe.get_doc('Sales Order', salesno)
-				po.save(ignore_permissions=True)
-				po.submit()
-				for i in so_wise_data:
-						frappe.db.set_value('Delivery Planning Item', i.name,
-						{'purchase_order' : po.name,
-						'd_status' : "Complete",
-						})
+					discount = frappe.get_doc('Sales Order', salesno)
+					po.save(ignore_permissions=True)
+					po.submit()
+					# po.save()
+					# frappe.db.commit()
+					for i in so_wise_data:
+							frappe.db.set_value('Delivery Planning Item', i.name,
+							{'purchase_order' : po.name,
+							'd_status' : "Complete",
+							})
 
-			return 1
+							frappe.db.set_value('Sales Order Item', i.item_dname, {
+							'delivered_qty': i.qty_to_deliver,
+							'ordered_qty' : i.ordered_qty,
+							# 'actual_qty' : i.available_stock, 
+							#'projected_qty' : i.current_stock,
+							},  update_modified=False)	
+
+				return 1
 
 	@frappe.whitelist()
 	def make_picklist(self):
@@ -467,7 +401,8 @@ class DeliveryPlanning(Document):
 										  "supplier_dc": 0,
 										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
-										  })
+										  },
+								fields = ["name","pick_list"])
 		if (item):
 			conditions = ""
 			conditions += "AND dpi.related_delivey_planning = %s" % frappe.db.escape(self.name)
@@ -482,6 +417,7 @@ class DeliveryPlanning(Document):
 									
 									AND dpi.transporter IS NOT NULL
 									AND dpi.docstatus = 1
+									AND dpi.pick_list IS NULL
 									{conditions}
 									group by dpi.transporter, dpi.customer
 									""".format(conditions=conditions), as_dict=1)
@@ -549,42 +485,49 @@ class DeliveryPlanning(Document):
 		if pl:
 			for p in pl:
 				dnote = frappe.new_doc('Delivery Note')
-				dnote.customer = p.customer
+				dnote.customer = d.customer
 				dnote.related_delivery_planning = self.name
+				dnote.transporter = d.transporter
 
-				pli = frappe.db.get_all('Pick List Item',
-										filters={ 'parent': p.name },
-										fields =[ "item_code",
-												  "qty",
-												  'stock_uom',
-												  "uom",
-												  "conversion_factor",
-												  "warehouse",
-												  "sales_order"]
+				item = frappe.db.get_all('Delivery Planning Item',
+										filters={'related_delivey_planning': self.name,
+												
+												'supplier_dc': 0,
+												'customer': d.customer,
+												'transporter': d.transporter},
+										fields= ["item_code",
+												"ordered_qty",
+												'stock_uom',
+												"uom",
+												"current_stock",
+												"available_stock",
+												"conversion_factor",
+												"sorce_warehouse",
+												"sales_order",
+												"name",
+												"pick_list",
+												"docstatus",
+												"item_dname",
+												"qty_to_deliver"]
 										)
 
-				for pi in pli:
-					salesno = pi.sales_order
-					item_doc = frappe.get_doc("Item",{"item_code":pi.item_code})
-					price_list_cur = frappe.get_value("Price List",{"selling":1},'currency')
-					# dnote.price_list_currency = price_list_cur
-					# dnote.conversion_rate = 1
-					# dnote.plc_conversion_rate = 1
-					dnote.grand_total = 100
-					dnote.rounded_total = 100
-					dnote.append('items',{
-									'item_code': pi.item_code,
-									'warehouse': pi.warehouse,
-									'qty': pi.qty,
-									'stock_qty': pi.stock_qty,
-									'uom': pi.uom,
-									"item_name" : item_doc.get("item_name"),
-									"description":item_doc.get("description"),
+				for i in item:
+					if(i.pick_list):
+						pick_list = i.pick_list
+					salesno = i.sales_order
+					dnote.append('items', {
+						'item_code': i.item_code,
+						'warehouse': i.sorce_warehouse,
+						'qty': i.qty_to_deliver,
+						'stock_qty': i.qty_to_deliver,
+						'uom': i.uom,
+						'stock_uom': i.stock_uom,
+						'conversion_factor': i.conversion_factor,
+						'against_sales_order': i.sales_order
+					})
 
-									'conversion_factor': pi.conversion_factor,
-									'against_sales_order': pi.sales_order
+					
 
-								})
 				discount = frappe.get_doc('Sales Order', salesno)
 				tax = frappe.get_list('Sales Taxes and Charges',
 									  filters={'parent': salesno},
@@ -708,6 +651,26 @@ class DeliveryPlanning(Document):
 	def before_cancel(self):
 		dpi = frappe.get_all(doctype='Delivery Planning Item',
 							  filters={"related_delivey_planning" : self.name})
+		if(dpi):
+			for d in dpi:	
+				doc = frappe.get_doc('Delivery Planning Item', d.name)	
+				doc.cancel()	
+
+			return 1 	
+  
+	def before_cancel(self):
+		dpi = frappe.get_all(doctype='Delivery Planning Item',
+							  filters={"related_delivey_planning" : self.name},fields=['*'])
+
+		if dpi:
+			for i in dpi:
+
+				if i.qty_to_deliver:
+					delivered_qty = frappe.db.get_value('Sales Order Item', i.item_dname,'delivered_qty')
+					delivered_qty -= i.qty_to_deliver
+					frappe.db.set_value('Sales Order Item', i.item_dname, {
+									'delivered_qty': delivered_qty
+									},  update_modified=False)	
 
 		tdpi = frappe.get_all(doctype='Transporter Wise Planning Item',
 							  filters={"related_delivery_planning" : self.name})
@@ -725,20 +688,11 @@ class DeliveryPlanning(Document):
 				trans = frappe.get_doc('Transporter Wise Planning Item', t.name)
 				trans.delete()
 
-		# if dpi:
-		# 	for d in dpi:
-		# 		# ddpi = frappe.get_doc('Delivery Planning Item', d.name)
-		# 		# ddpi.delete()
-		# 		# frappe.delete_doc('Delivery Planning Item',d.name, force = 1)
-		# 		# frappe.db.delete('Delivery Planning Item', {'name': d.name})
-		# 		d.cancel()
-
 	@frappe.whitelist()
 	def check_po_in_dpi(self):
 		dpi_po = frappe.db.get_all(doctype='Delivery Planning Item',
 								 filters={
-								 		  "supplier_dc": 1,
-										  
+								 		  "supplier_dc": 1, 
 										  "docstatus" : 1,
 										  "related_delivey_planning": self.name,
 										  })

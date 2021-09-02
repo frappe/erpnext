@@ -23,7 +23,7 @@ frappe.listview_settings['Delivery Planning'] = {
 		else if (doc.d_status === "Completed") {
 			return [__("Completed"), "blue", "status,=,Completed"];
 		}
-	
+			
 	},
 };
 
