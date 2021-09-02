@@ -647,7 +647,11 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-09-01 10:35:52.374549",
+=======
+ "modified": "2021-09-01 10:22:52.374549",
+>>>>>>> e10fede1ae (fix: track salary slip ytd gross salary. (#27215))
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
