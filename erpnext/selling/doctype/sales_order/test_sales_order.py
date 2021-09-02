@@ -922,7 +922,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_product_bundles_in_so_are_replaced_with_bundle_items_in_po(self):
 		"""
-			Tests if the the Product Bundles in the Items table of Sales Orders are replaced with 
+			Tests if the the Product Bundles in the Items table of Sales Orders are replaced with
 			their child items(from the Packed Items table) on creating a Purchase Order from it.
 		"""
 		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order

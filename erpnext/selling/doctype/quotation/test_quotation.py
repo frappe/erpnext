@@ -230,9 +230,9 @@ class TestQuotation(unittest.TestCase):
 		self.assertEqual(expired_quotation.status, "Expired")
 
 	def test_product_bundle_mapping_on_creating_so(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
 
 		make_item("_Test Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
@@ -261,8 +261,8 @@ class TestQuotation(unittest.TestCase):
 		self.assertEqual(quotation_packed_items, so_packed_items)
 
 	def test_product_bundle_price_calculation_when_calculate_bundle_price_is_unchecked(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
 
 		make_item("_Test Product Bundle", {"is_stock_item": 0})
 		bundle_item1 = make_item("_Test Bundle Item 1", {"is_stock_item": 1})
@@ -281,8 +281,8 @@ class TestQuotation(unittest.TestCase):
 		self.assertEqual(quotation.items[0].amount, 200)
 
 	def test_product_bundle_price_calculation_when_calculate_bundle_price_is_checked(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
 
 		make_item("_Test Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
