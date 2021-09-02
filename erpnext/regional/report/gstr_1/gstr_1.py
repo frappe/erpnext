@@ -62,7 +62,7 @@ class Gstr1Report(object):
 	def get_data(self):
 		if self.filters.get("type_of_business") in  ("B2C Small", "B2C Large"):
 			self.get_b2c_data()
-		elif self.filters.get("type_of_business") in  ("Advances"):
+		elif self.filters.get("type_of_business") == "Advances":
 			self.get_advance_data()
 		elif self.invoices:
 			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
@@ -78,7 +78,7 @@ class Gstr1Report(object):
 						self.data.append(row)
 
 	def get_advance_data(self):
-		advances_data = {}
+		Advances_data = {}
 		advances = self.get_advance_entries()
 		for entry in advances:
 			# only consider IGST and SGST so as to avoid duplication of taxable amount
@@ -695,7 +695,7 @@ class Gstr1Report(object):
 					"width": 120
 				}
 			]
-		elif self.filters.get("type_of_business") ==  "Advances":
+		elif self.filters.get("type_of_business") == "Advances":
 			self.invoice_columns = [
 				{
 					"fieldname": "place_of_supply",
