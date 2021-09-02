@@ -78,7 +78,7 @@ class Gstr1Report(object):
 						self.data.append(row)
 
 	def get_advance_data(self):
-		Advances_data = {}
+		advances_data = {}
 		advances = self.get_advance_entries()
 		for entry in advances:
 			# only consider IGST and SGST so as to avoid duplication of taxable amount
