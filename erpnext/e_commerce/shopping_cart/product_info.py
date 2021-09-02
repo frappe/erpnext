@@ -38,8 +38,13 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 			)
 
 	stock_status = None
+
 	if cart_settings.show_stock_availability:
-		stock_status = get_web_item_qty_in_stock(item_code, "website_warehouse")
+		on_backorder = frappe.get_cached_value("Website Item", {"item_code": item_code}, "on_backorder")
+		if on_backorder:
+			stock_status = frappe._dict({"on_backorder": True})
+		else:
+			stock_status = get_web_item_qty_in_stock(item_code, "website_warehouse")
 
 	product_info = {
 		"price": price,
@@ -49,9 +54,12 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 	}
 
 	if stock_status:
-		product_info["stock_qty"] = stock_status.stock_qty
-		product_info["in_stock"] = stock_status.in_stock if stock_status.is_stock_item else get_non_stock_item_status(item_code, "website_warehouse")
-		product_info["show_stock_qty"] = show_quantity_in_website()
+		if stock_status.on_backorder:
+			product_info["on_backorder"] = True
+		else:
+			product_info["stock_qty"] = stock_status.stock_qty
+			product_info["in_stock"] = stock_status.in_stock if stock_status.is_stock_item else get_non_stock_item_status(item_code, "website_warehouse")
+			product_info["show_stock_qty"] = show_quantity_in_website()
 
 	if product_info["price"]:
 		if frappe.session.user != "Guest":

@@ -25,9 +25,9 @@ frappe.ui.form.on("E Commerce Settings", {
 		}
 
 		frappe.model.with_doctype("Item", () => {
-			const item_meta = frappe.get_meta('Item');
+			const web_item_meta = frappe.get_meta('Website Item');
 
-			const valid_fields = item_meta.fields.filter(
+			const valid_fields = web_item_meta.fields.filter(
 				df => ["Link", "Table MultiSelect"].includes(df.fieldtype) && !df.hidden
 			).map(df => ({ label: df.label, value: df.fieldname }));
 

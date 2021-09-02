@@ -125,11 +125,20 @@ erpnext.ProductList = class {
 	}
 
 	get_stock_availability(item, settings) {
-		if (settings.show_stock_availability && !item.has_variants && !item.in_stock) {
-			return `
-				<br>
-				<span class="out-of-stock mt-2">${ __("Out of stock") }</span>
-			`;
+		if (settings.show_stock_availability && !item.has_variants) {
+			if (item.on_backorder) {
+				return `
+					<br>
+					<span class="out-of-stock mt-2" style="color: var(--primary-color)">
+						${ __("Available on backorder") }
+					</span>
+				`;
+			} else if (!item.in_stock) {
+				return `
+					<br>
+					<span class="out-of-stock mt-2">${ __("Out of stock") }</span>
+				`;
+			}
 		}
 		return ``;
 	}
@@ -169,7 +178,7 @@ erpnext.ProductList = class {
 							<use href="#icon-assets"></use>
 						</svg>
 					</span>
-					${ __('Add to Cart') }
+					${ settings.enable_checkout ? __('Add to Cart') :  __('Add to Quote') }
 				</div>
 
 				<div class="cart-indicator list-indicator ${item.in_cart ? '' : 'hidden'}">
@@ -183,7 +192,7 @@ erpnext.ProductList = class {
 						${ item.in_cart ? '' : 'hidden' }"
 						data-item-code="${ item.item_code }"
 						style="padding: 0.25rem 1rem; min-width: 135px;">
-						${ __('Go to Cart') }
+						${ settings.enable_checkout ? __('Go to Cart') :  __('Go to Quote') }
 					</div>
 				</a>
 			`;

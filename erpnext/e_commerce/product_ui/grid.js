@@ -142,9 +142,22 @@ erpnext.ProductGrid = class {
 	}
 
 	get_stock_availability(item, settings) {
-		if (settings.show_stock_availability && !item.has_variants && !item.in_stock) {
-			return `<span class="out-of-stock mb-2 mt-1">${ __("Out of stock") }</span>`;
+		if (settings.show_stock_availability && !item.has_variants) {
+			if (item.on_backorder) {
+				return `
+					<span class="out-of-stock mb-2 mt-1" style="color: var(--primary-color)">
+						${ __("Available on backorder") }
+					</span>
+				`;
+			} else if (!item.in_stock) {
+				return `
+					<span class="out-of-stock mb-2 mt-1">
+						${ __("Out of stock") }
+					</span>
+				`;
+			}
 		}
+
 		return ``;
 	}
 
@@ -168,7 +181,7 @@ erpnext.ProductGrid = class {
 							<use href="#icon-assets"></use>
 						</svg>
 					</span>
-					${ __('Add to Cart') }
+					${ settings.enable_checkout ? __('Add to Cart') :  __('Add to Quote') }
 				</div>
 
 				<a href="/cart">
@@ -177,7 +190,7 @@ erpnext.ProductGrid = class {
 						w-100 mt-4 go-to-cart-grid
 						${ item.in_cart ? '' : 'hidden' }"
 						data-item-code="${ item.item_code }">
-						${ __('Go to Cart') }
+						${ settings.enable_checkout ? __('Go to Cart') :  __('Go to Quote') }
 					</div>
 				</a>
 			`;

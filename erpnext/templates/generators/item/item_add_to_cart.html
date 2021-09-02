@@ -34,17 +34,21 @@
 
 		{% if cart_settings.show_stock_availability %}
 		<div class="mt-2">
-			{% if product_info.in_stock == 0 %}
-			<span class="no-stock out-of-stock">
-				{{ _('Out of stock') }}
-			</span>
+			{% if product_info.get("on_backorder") %}
+				<span class="no-stock out-of-stock" style="color: var(--primary-color);">
+					{{ _('Available on backorder') }}
+				</span>
+			{% elif product_info.in_stock == 0 %}
+				<span class="no-stock out-of-stock">
+					{{ _('Out of stock') }}
+				</span>
 			{% elif product_info.in_stock == 1 %}
-			<span class="in-green has-stock">
-				{{ _('In stock') }}
-				{% if product_info.show_stock_qty and product_info.stock_qty %}
-					({{ product_info.stock_qty[0][0] }})
-				{% endif %}
-			</span>
+				<span class="in-green has-stock">
+					{{ _('In stock') }}
+					{% if product_info.show_stock_qty and product_info.stock_qty %}
+						({{ product_info.stock_qty[0][0] }})
+					{% endif %}
+				</span>
 			{% endif %}
 		</div>
 		{% endif %}
@@ -88,17 +92,21 @@
 			<div class="mb-4 d-flex">
 				<!-- Add to Cart -->
 				{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
-				<a href="/cart" class="btn btn-light btn-view-in-cart hidden mr-2 font-md" role="button">
-					{{ _("View in Cart") }}
-				</a>
-				<button data-item-code="{{item_code}}" class="btn btn-primary btn-add-to-cart mr-2 w-30-40">
-					<span class="mr-2">
-						<svg class="icon icon-md">
-							<use href="#icon-assets"></use>
-						</svg>
-					</span>
-					{{ _("Add to Cart") }}
-				</button>
+					<a href="/cart" class="btn btn-light btn-view-in-cart hidden mr-2 font-md"
+						role="button">
+						{{  _("View in Cart") if cart_settings.enable_checkout else _("View in Quote") }}
+					</a>
+					<button
+						data-item-code="{{item_code}}"
+						class="btn btn-primary btn-add-to-cart mr-2 w-30-40"
+					>
+						<span class="mr-2">
+							<svg class="icon icon-md">
+								<use href="#icon-assets"></use>
+							</svg>
+						</span>
+						{{ _("Add to Cart") if cart_settings.enable_checkout else  _("Add to Quote") }}
+					</button>
 				{% endif %}
 
 				<!-- Contact Us -->

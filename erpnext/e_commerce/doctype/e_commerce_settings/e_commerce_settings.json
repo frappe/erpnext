@@ -91,7 +91,7 @@
    "depends_on": "enable_field_filters",
    "fieldname": "filter_fields",
    "fieldtype": "Table",
-   "label": "Item Fields",
+   "label": "Website Item Fields",
    "options": "Website Filter Field"
   },
   {
@@ -370,7 +370,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-08-31 12:23:06.187619",
+ "modified": "2021-09-02 14:02:44.785824",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",

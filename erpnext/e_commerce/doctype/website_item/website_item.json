@@ -29,11 +29,14 @@
   "column_break_13",
   "slideshow",
   "thumbnail",
+  "stock_information_section",
+  "website_warehouse",
+  "column_break_24",
+  "on_backorder",
   "section_break_17",
   "short_description",
   "web_long_description",
   "column_break_27",
-  "website_warehouse",
   "website_specifications",
   "copy_from_item_group",
   "display_additional_information_section",
@@ -326,13 +329,29 @@
    "fieldtype": "Table",
    "label": "Recommended/Similar Items",
    "options": "Recommended Items"
+  },
+  {
+   "fieldname": "stock_information_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Information"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Indicate that Item is available on backorder and not usually pre-stocked",
+   "fieldname": "on_backorder",
+   "fieldtype": "Check",
+   "label": "On Backorder"
   }
  ],
  "has_web_view": 1,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-12 21:00:04.065803",
+ "modified": "2021-09-02 13:08:41.942726",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",
