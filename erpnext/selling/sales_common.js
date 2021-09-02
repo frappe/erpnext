@@ -90,7 +90,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		this.frm.toggle_display("customer_name",
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
-		
+
 		this.toggle_editable_price_list_rate();
 	},
 

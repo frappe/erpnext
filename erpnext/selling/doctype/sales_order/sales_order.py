@@ -970,15 +970,15 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	set_delivery_date(doc.items, source_name)
-	
+
 	return doc
 
 def set_delivery_date(items, sales_order):
 	delivery_dates = frappe.get_all(
-		'Sales Order Item', 
+		'Sales Order Item',
 		filters = {
 			'parent': sales_order
-		}, 
+		},
 		fields = ['delivery_date', 'item_code']
 	)
 
