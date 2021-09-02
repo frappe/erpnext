@@ -145,7 +145,11 @@
    "depends_on": "maintain_same_sales_rate",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
+<<<<<<< HEAD
    "label": "Action If Same Rate is Not Maintained",
+=======
+   "label": "Action if Same Rate is Not Maintained Throughout Sales Cycle",
+>>>>>>> ebdc568e85 (fix: Rename 'Action if Same Rate is Not Maintained' to 'Action if Same Rate is Not Maintained Throughout Sales Cycle')
    "mandatory_depends_on": "maintain_same_sales_rate",
    "options": "Stop\nWarn"
   },
