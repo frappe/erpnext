@@ -19,9 +19,6 @@ def get_indexable_web_fields():
 
 	return [df.fieldname for df in valid_fields]
 
-ALLOWED_INDEXABLE_FIELDS_SET = get_indexable_web_fields()
-
-
 def is_search_module_loaded():
 	cache = frappe.cache()
 	out = cache.execute_command('MODULE LIST')

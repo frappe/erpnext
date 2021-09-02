@@ -7,7 +7,7 @@ from frappe.utils import comma_and, flt
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import unique
-from erpnext.e_commerce.redisearch import create_website_items_index, ALLOWED_INDEXABLE_FIELDS_SET, is_search_module_loaded
+from erpnext.e_commerce.redisearch import create_website_items_index, get_indexable_web_fields, is_search_module_loaded
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
@@ -57,8 +57,10 @@ class ECommerceSettings(Document):
 		fields = unique(fields.strip(',').split(',')) # Remove extra ',' and remove duplicates
 
 		# All fields should be indexable
-		if not (set(fields).issubset(ALLOWED_INDEXABLE_FIELDS_SET)):
-			invalid_fields = list(set(fields).difference(ALLOWED_INDEXABLE_FIELDS_SET))
+		allowed_indexable_fields = get_indexable_web_fields()
+
+		if not (set(fields).issubset(allowed_indexable_fields)):
+			invalid_fields = list(set(fields).difference(allowed_indexable_fields))
 			num_invalid_fields = len(invalid_fields)
 			invalid_fields = comma_and(invalid_fields)
 
