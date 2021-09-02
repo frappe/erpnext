@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "creation": "2021-09-02 14:53:50.923529",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "api_details_section",
+  "api_endpoint",
+  "column_break_3",
+  "result_key",
+  "section_break_2",
+  "req_params",
+  "column_break_4",
+  "extra_params"
+ ],
+ "fields": [
+  {
+   "fieldname": "api_endpoint",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API Endpoint",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Request Parameters"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "req_params",
+   "fieldtype": "Table",
+   "label": "Mandatory Parameters",
+   "options": "Currency Exchange Settings Details",
+   "reqd": 1
+  },
+  {
+   "fieldname": "extra_params",
+   "fieldtype": "Table",
+   "label": "Additional Parameters",
+   "options": "Currency Exchange Settings Extra Details"
+  },
+  {
+   "fieldname": "api_details_section",
+   "fieldtype": "Section Break",
+   "label": "API Details"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "result_key",
+   "fieldtype": "Data",
+   "label": "Result Key",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-09-02 15:18:29.198210",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Currency Exchange Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
