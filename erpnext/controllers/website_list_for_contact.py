@@ -46,7 +46,8 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	user = frappe.session.user
 	ignore_permissions = False
 
-	if not filters: filters = []
+	if not filters:
+		filters = []
 
 	if doctype in ['Supplier Quotation', 'Purchase Invoice']:
 		filters.append((doctype, 'docstatus', '<', 2))
