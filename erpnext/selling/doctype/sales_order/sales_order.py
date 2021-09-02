@@ -947,10 +947,51 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				"pricing_rules"
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map
+			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map and not is_product_bundle(doc.item_code)
+		},
+		"Packed Item": {
+			"doctype": "Purchase Order Item",
+			"field_map":  [
+				["parent", "sales_order"],
+				["uom", "uom"],
+				["conversion_factor", "conversion_factor"],
+				["parent_item", "product_bundle"],
+				["rate", "rate"]
+			],
+			"field_no_map": [
+				"price_list_rate",
+				"item_tax_template",
+				"discount_percentage",
+				"discount_amount",
+				"supplier",
+				"pricing_rules"
+			],
 		}
 	}, target_doc, set_missing_values)
+
+	set_delivery_date(doc.items, source_name)
+	
 	return doc
+
+def set_delivery_date(items, sales_order):
+	delivery_dates = frappe.get_all(
+		'Sales Order Item', 
+		filters = {
+			'parent': sales_order
+		}, 
+		fields = ['delivery_date', 'item_code']
+	)
+
+	delivery_by_item = frappe._dict()
+	for date in delivery_dates:
+		delivery_by_item[date.item_code] = date.delivery_date
+
+	for item in items:
+		if item.product_bundle:
+			item.schedule_date = delivery_by_item[item.product_bundle]
+
+def is_product_bundle(item_code):
+	return frappe.db.exists('Product Bundle', item_code)
 
 @frappe.whitelist()
 def make_work_orders(items, sales_order, company, project=None):

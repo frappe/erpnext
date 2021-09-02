@@ -1214,7 +1214,7 @@ class SalarySlip(TransactionBase):
 		period_start_date, period_end_date = self.get_year_to_date_period()
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
-			fields = ['sum(net_pay) as sum'],
+			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
 			filters = {'employee_name' : self.employee_name,
 				'start_date' : ['>=', period_start_date],
 				'end_date' : ['<', period_end_date],
@@ -1222,10 +1222,13 @@ class SalarySlip(TransactionBase):
 				'docstatus': 1
 			})
 
-		year_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
+		year_to_date = flt(salary_slip_sum[0].net_sum) if salary_slip_sum else 0.0
+		gross_year_to_date = flt(salary_slip_sum[0].gross_sum) if salary_slip_sum else 0.0
 
 		year_to_date += self.net_pay
+		gross_year_to_date += self.gross_pay
 		self.year_to_date = year_to_date
+		self.gross_year_to_date = gross_year_to_date
 
 	def compute_month_to_date(self):
 		month_to_date = 0
