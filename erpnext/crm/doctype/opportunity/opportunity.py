@@ -288,6 +288,24 @@ def make_request_for_quotation(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
+def make_customer(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		if source.opportunity_from == "Lead":
+			target.lead_name = source.party_name
+
+	doclist = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Customer",
+			"field_map": {
+				"currency": "default_currency",
+				"customer_name": "customer_name"
+			}
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist
+
+@frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {

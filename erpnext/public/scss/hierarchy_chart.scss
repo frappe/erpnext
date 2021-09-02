@@ -1,0 +1,313 @@
+.node-card {
+	background: white;
+	stroke: 1px solid var(--gray-200);
+	box-shadow: var(--shadow-base);
+	border-radius: 0.5rem;
+	padding: 0.75rem;
+	margin-left: 3rem;
+	width: 18rem;
+	overflow: hidden;
+
+	.btn-edit-node {
+		display: none;
+	}
+
+	.edit-chart-node {
+		display: none;
+	}
+
+	.node-edit-icon {
+		display: none;
+	}
+}
+
+.node-card.exported {
+	box-shadow: none
+}
+
+.node-image {
+	width: 3.0rem;
+	height: 3.0rem;
+}
+
+.node-name {
+	font-size: 1rem;
+	line-height: 1.72;
+}
+
+.node-title {
+	font-size: 0.75rem;
+	line-height: 1.35;
+}
+
+.node-info {
+	width: 12.7rem;
+}
+
+.node-connections {
+	font-size: 0.75rem;
+	line-height: 1.35;
+}
+
+.node-card.active {
+	background: var(--blue-50);
+	border: 1px solid var(--blue-500);
+	box-shadow: var(--shadow-md);
+	border-radius: 0.5rem;
+	padding: 0.75rem;
+	width: 18rem;
+
+	.btn-edit-node {
+		display: flex;
+		background: var(--blue-100);
+		color: var(--blue-500);
+		padding: .25rem .5rem;
+		font-size: .75rem;
+		justify-content: center;
+		box-shadow: var(--shadow-sm);
+		margin-left: auto;
+	}
+
+	.edit-chart-node {
+		display: block;
+		margin-right: 0.25rem;
+	}
+
+	.node-edit-icon {
+		display: block;
+	}
+
+	.node-edit-icon > .icon{
+		stroke: var(--blue-500);
+	}
+
+	.node-name {
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 2px;
+		width: 12.2rem;
+	}
+}
+
+.node-card.active-path {
+	background: var(--blue-100);
+	border: 1px solid var(--blue-300);
+	box-shadow: var(--shadow-sm);
+	border-radius: 0.5rem;
+	padding: 0.75rem;
+	width: 15rem;
+	height: 3.0rem;
+
+	.btn-edit-node {
+		display: none !important;
+	}
+
+	.edit-chart-node {
+		display: none;
+	}
+
+	.node-edit-icon {
+		display: none;
+	}
+
+	.node-info {
+		display: none;
+	}
+
+	.node-title {
+		display: none;
+	}
+
+	.node-connections {
+		display: none;
+	}
+
+	.node-name {
+		font-size: 0.85rem;
+		line-height: 1.35;
+	}
+
+	.node-image {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+
+	.node-meta {
+		align-items: baseline;
+	}
+}
+
+.node-card.collapsed {
+	background: white;
+	stroke: 1px solid var(--gray-200);
+	box-shadow: var(--shadow-sm);
+	border-radius: 0.5rem;
+	padding: 0.75rem;
+	width: 15rem;
+	height: 3.0rem;
+
+	.btn-edit-node {
+		display: none !important;
+	}
+
+	.edit-chart-node {
+		display: none;
+	}
+
+	.node-edit-icon {
+		display: none;
+	}
+
+	.node-info {
+		display: none;
+	}
+
+	.node-title {
+		display: none;
+	}
+
+	.node-connections {
+		display: none;
+	}
+
+	.node-name {
+		font-size: 0.85rem;
+		line-height: 1.35;
+	}
+
+	.node-image {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+
+	.node-meta {
+		align-items: baseline;
+	}
+}
+
+// horizontal hierarchy tree view
+#hierarchy-chart-wrapper {
+	padding-top: 30px;
+
+	#arrows {
+		margin-top: -80px;
+	}
+}
+
+.hierarchy {
+	display: flex;
+}
+
+.hierarchy li {
+	list-style-type: none;
+}
+
+.child-node {
+	margin: 0px 0px 16px 0px;
+}
+
+.hierarchy, .hierarchy-mobile {
+	.level {
+		margin-right: 8px;
+		align-items: flex-start;
+		flex-direction: column;
+	}
+}
+
+#arrows {
+	position: absolute;
+	overflow: visible;
+}
+
+.active-connector {
+	stroke: var(--blue-500);
+}
+
+.collapsed-connector {
+	stroke: var(--blue-300);
+}
+
+// mobile
+
+.hierarchy-mobile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 10px;
+	padding-left: 0px;
+}
+
+.hierarchy-mobile li {
+	list-style-type: none;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.mobile-node {
+	margin-left: 0;
+}
+
+.mobile-node.active-path {
+	width: 12.25rem;
+}
+
+.active-child {
+	width: 15.5rem;
+}
+
+.mobile-node .node-connections {
+	max-width: 80px;
+}
+
+.hierarchy-mobile .node-children {
+	margin-top: 16px;
+}
+
+.root-level .node-card {
+	margin: 0 0 16px;
+}
+
+// node group
+
+.collapsed-level {
+	margin-bottom: 16px;
+	width: 18rem;
+}
+
+.node-group {
+	background: white;
+	border: 1px solid var(--gray-300);
+	box-shadow: var(--shadow-sm);
+	border-radius: 0.5rem;
+	padding: 0.75rem;
+	width: 18rem;
+	height: 3rem;
+	overflow: hidden;
+	align-items: center;
+}
+
+.node-group .avatar-group {
+	margin-left: 0px;
+}
+
+.node-group .avatar-extra-count {
+	background-color: var(--blue-100);
+	color: var(--blue-500);
+}
+
+.node-group .avatar-frame {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
+.node-group.collapsed {
+	width: 5rem;
+	margin-left: 12px;
+}
+
+.sibling-group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}

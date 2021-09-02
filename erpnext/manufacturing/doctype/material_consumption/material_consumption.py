@@ -98,7 +98,8 @@ class MaterialConsumption(Document):
             total_value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
 
         wo.consumed_total_weight = flt(total_value, wo.precision('consumed_total_weight'))
-
+        wo.reload()
+        
     def make_stock_entry(self):
         precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("picked_qty"))
         precision2 = get_field_precision(frappe.get_meta("Work Order").get_field("bom_yeild"))

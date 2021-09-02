@@ -1,0 +1,171 @@
+{
+	"company_name": "",
+	"address": "",
+    "pan_number":"",
+	"ret_period":"",
+	"particular": {
+		"sales": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "taxable_sales":[
+            {
+                "tv": 0,
+				"tp": 0,
+				"tc": 0
+            }
+        ],
+        "export":[
+            {
+                "tv": 0,
+				"tp": 0,
+				"tc": 0
+            }
+        ],
+        "exempted_sales":[
+            {
+                "tv": 0,
+				"tp": 0,
+				"tc": 0
+            }
+        ],
+        "purchase": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "taxcable_purchase": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "taxcable_import": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "exempted_purchase": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "exempted_import": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "other": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "other_adj": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "total": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "debit_credit": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "vat_adj_last_mon": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+        "net_tax": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"tax_refund": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"total_payment": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"no_of_purchase_invoice": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"no_of_credit_note": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"no_of_debit_note": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"no_of_credit_advice": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"no_of_debit_advice": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		],
+		"no_of_sales_invoice": [
+			{
+				"tv": 0,
+				"tp": 0,
+				"tc": 0
+			}
+		]
+		
+	}
+}
+	

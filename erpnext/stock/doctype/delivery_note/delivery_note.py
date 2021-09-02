@@ -525,6 +525,10 @@ def make_sales_invoice(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
+	if automatically_fetch_payment_terms:
+		doc.set_payment_schedule()
+
 	return doc
 
 @frappe.whitelist()
@@ -717,7 +721,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				target.append('taxes', tax)
 
 	def update_details(source_doc, target_doc, source_parent):
-		target_doc.inter_company_invoice_reference = source_doc.nametaxes
+		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype == 'Purchase Receipt':
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")

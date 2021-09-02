@@ -17,6 +17,9 @@
   "variant_of",
   "item_name",
   "item_group",
+  "gst_hsn_code",
+  "is_nil_exempt",
+  "is_non_gst",
   "intercompany_item",
   "intercompany_item_name",
   "is_item_from_hub",
@@ -1102,6 +1105,24 @@
    "fieldname": "specific_gravity",
    "fieldtype": "Float",
    "label": "Specific Gravity"
+  },
+  {
+   "fieldname": "gst_hsn_code",
+   "fieldtype": "Link",
+   "label": "HSN/HAC",
+   "options": "GST HSN Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_nil_exempt",
+   "fieldtype": "Check",
+   "label": "Is Nil Rated or Exempted"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_non_gst",
+   "fieldtype": "Check",
+   "label": "Is Non GST "
   }
  ],
  "has_web_view": 1,
@@ -1111,7 +1132,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-07-22 13:51:41.043549",
+ "modified": "2021-07-29 15:23:29.788181",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

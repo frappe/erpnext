@@ -11,6 +11,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
@@ -250,6 +251,39 @@ class TestLandedCostVoucher(unittest.TestCase):
 			self.assertEqual(entry.credit, amounts[0])
 			self.assertEqual(entry.credit_in_account_currency, amounts[1])
 
+	def test_asset_lcv(self):
+		"Check if LCV for an Asset updates the Assets Gross Purchase Amount correctly."
+		frappe.db.set_value("Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC")
+
+		if not frappe.db.exists("Asset Category", "Computers"):
+			create_asset_category()
+
+		if not frappe.db.exists("Item", "Macbook Pro"):
+			create_fixed_asset_item()
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=50000)
+
+		# check if draft asset was created
+		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
+		self.assertEqual(len(assets), 1)
+
+		lcv = make_landed_cost_voucher(
+			company = pr.company,
+			receipt_document_type = "Purchase Receipt",
+			receipt_document=pr.name,
+			charges=80,
+			expense_account="Expenses Included In Valuation - _TC")
+
+		lcv.save()
+		lcv.submit()
+
+		# lcv updates amount in draft asset
+		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "gross_purchase_amount"), 50080)
+
+		# tear down
+		lcv.cancel()
+		pr.cancel()
+
 def make_landed_cost_voucher(** args):
 	args = frappe._dict(args)
 	ref_doc = frappe.get_doc(args.receipt_document_type, args.receipt_document)
@@ -268,7 +302,7 @@ def make_landed_cost_voucher(** args):
 
 	lcv.set("taxes", [{
 		"description": "Shipping Charges",
-		"expense_account": "Expenses Included In Valuation - TCP1",
+		"expense_account": args.expense_account or "Expenses Included In Valuation - TCP1",
 		"amount": args.charges
 	}])
 

@@ -67,7 +67,7 @@ class BankClearance(Document):
 			pos_sales_invoices = frappe.db.sql("""
 				select
 					"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
-					si.posting_date, si.customer as against_account,si.customer_name as party sip.clearance_date,
+					si.posting_date, si.customer as against_account,si.customer_name as party ,sip.clearance_date,
 					account.account_currency, 0 as credit
 				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
 				where

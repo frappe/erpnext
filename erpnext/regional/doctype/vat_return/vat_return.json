@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "autoname": "format:VAT-{month}-{year}-{company_address}",
+ "creation": "2021-08-09 16:36:35.277739",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "company_address",
+  "year",
+  "month",
+  "column_break_5",
+  "adjusted_tax_paid_on_purchase",
+  "adjusted_tax_paid_on_sales",
+  "no_debit_advice",
+  "no_credit_advice",
+  "voucher_no",
+  "section_break_9",
+  "json_output",
+  "missing_field_invoices"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Select",
+   "label": "Year"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "json_output",
+   "fieldtype": "Code",
+   "label": "JSON Output"
+  },
+  {
+   "fieldname": "missing_field_invoices",
+   "fieldtype": "Small Text",
+   "label": "Invoices with no Place Of Supply",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "adjusted_tax_paid_on_purchase",
+   "fieldtype": "Float",
+   "label": "Adjusted Tax paid on Purchase"
+  },
+  {
+   "fieldname": "adjusted_tax_paid_on_sales",
+   "fieldtype": "Float",
+   "label": "Adjusted Tax paid on Sales"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Data",
+   "label": "Voucher NO"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "no_debit_advice",
+   "fieldtype": "Float",
+   "label": "No. Debit Advice"
+  },
+  {
+   "fieldname": "no_credit_advice",
+   "fieldtype": "Float",
+   "label": "No. Credit Advice"
+  }
+ ],
+ "links": [],
+ "modified": "2021-08-20 18:07:16.935762",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "VAT RETURN",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

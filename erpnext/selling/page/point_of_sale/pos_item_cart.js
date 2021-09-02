@@ -367,15 +367,16 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount-field"></div>`
 		);
 		const me = this;
+		const frm = me.events.get_frm();
+		let discount = frm.doc.additional_discount_percentage;
 
 		this.discount_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Discount'),
 				fieldtype: 'Data',
-				placeholder: __('Enter discount percentage.'),
+				placeholder: ( discount ? discount + '%' :  __('Enter discount percentage.') ),
 				input_class: 'input-xs',
 				onchange: function() {
-					const frm = me.events.get_frm();
 					if (flt(this.value) != 0) {
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
 						me.hide_discount_control(this.value);
@@ -563,7 +564,6 @@ erpnext.PointOfSale.ItemCart = class {
 		)
 
 		set_dynamic_rate_header_width();
-		this.scroll_to_item($item_to_update);
 
 		function set_dynamic_rate_header_width() {
 			const rate_cols = Array.from(me.$cart_items_wrapper.find(".item-rate-amount"));
@@ -636,12 +636,6 @@ erpnext.PointOfSale.ItemCart = class {
 	handle_broken_image($img) {
 		const item_abbr = $($img).attr('alt');
 		$($img).parent().replaceWith(`<div class="item-image item-abbr">${item_abbr}</div>`);
-	}
-
-	scroll_to_item($item) {
-		if ($item.length === 0) return;
-		const scrollTop = $item.offset().top - this.$cart_items_wrapper.offset().top + this.$cart_items_wrapper.scrollTop();
-		this.$cart_items_wrapper.animate({ scrollTop });
 	}
 
 	update_selector_value_in_cart_item(selector, value, item) {
@@ -979,7 +973,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 	load_invoice() {
 		const frm = this.events.get_frm();
-		
+
 		this.attach_refresh_field_event(frm);
 
 		this.fetch_customer_details(frm.doc.customer).then(() => {

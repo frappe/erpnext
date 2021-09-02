@@ -4,11 +4,7 @@ set -e
 
 cd ~ || exit
 
-sudo apt-get install redis-server
-
-sudo apt install nodejs
-
-sudo apt install npm
+sudo apt-get install redis-server libcups2-dev
 
 pip install frappe-bench
 
@@ -32,7 +28,6 @@ wget -O /tmp/wkhtmltox.tar.xz https://github.com/frappe/wkhtmltopdf/raw/master/w
 tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
 sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
 sudo chmod o+x /usr/local/bin/wkhtmltopdf
-sudo apt-get install libcups2-dev
 
 cd ~/frappe-bench || exit
 
@@ -42,5 +37,5 @@ sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
 bench get-app erpnext "${GITHUB_WORKSPACE}"
-bench start &
+bench start &> bench_run_logs.txt &
 bench --site test_site reinstall --yes
