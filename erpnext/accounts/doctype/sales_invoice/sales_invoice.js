@@ -1071,7 +1071,7 @@ var get_healthcare_services_to_invoice = function(frm) {
 		var patient = dialog.fields_dict.patient.input.value;
 		if(patient && patient!=selected_patient){
 			selected_patient = patient;
-			var method = "erpnext.healthcare.utils.get_healthcare_services_to_invoice";
+			var method = "healthcare.healthcare.utils.get_healthcare_services_to_invoice";
 			var args = {patient: patient, company: frm.doc.company};
 			var columns = (["service", "reference_name", "reference_type"]);
 			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
@@ -1239,7 +1239,7 @@ var get_drugs_to_invoice = function(frm) {
 		var encounter = dialog.fields_dict.encounter.input.value;
 		if(encounter && encounter!=selected_encounter){
 			selected_encounter = encounter;
-			var method = "erpnext.healthcare.utils.get_drugs_to_invoice";
+			var method = "healthcare.healthcare.utils.get_drugs_to_invoice";
 			var args = {encounter: encounter};
 			var columns = (["drug_code", "quantity", "description"]);
 			get_healthcare_items(frm, false, $results, $placeholder, method, args, columns);

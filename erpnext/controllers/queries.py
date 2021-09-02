@@ -697,7 +697,7 @@ def get_healthcare_service_units(doctype, txt, searchfield, start, page_len, fil
 				company = frappe.db.escape(filters.get('company')), txt = frappe.db.escape('%{0}%'.format(txt)))
 
 	if filters and filters.get('inpatient_record'):
-		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
+		from healthcare.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
 			get_current_healthcare_service_unit,
 		)
 		service_unit = get_current_healthcare_service_unit(filters.get('inpatient_record'))
