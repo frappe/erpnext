@@ -12,7 +12,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import (
-    add_days,
+	add_days,
 	add_to_date,
 	cint,
 	flt,
@@ -22,7 +22,7 @@ from frappe.utils import (
 	getdate,
 	time_diff,
 	time_diff_in_hours,
-	time_diff_in_seconds
+	time_diff_in_seconds,
 )
 
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (

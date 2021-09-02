@@ -9,7 +9,6 @@ from frappe.utils import getdate, nowdate
 from six import iteritems, itervalues
 
 
-
 class PartyLedgerSummaryReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})

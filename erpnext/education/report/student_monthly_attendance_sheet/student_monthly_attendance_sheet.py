@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-
 import frappe
 from frappe import _
 from frappe.utils import add_days, cstr, date_diff, get_first_day, get_last_day, getdate

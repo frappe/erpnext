@@ -12,7 +12,6 @@ from frappe.utils import global_date_format
 from six import string_types
 
 
-
 class DailyWorkSummary(Document):
 	def send_mails(self, dws_group, emails):
 		'''Send emails to get daily work summary to all users \

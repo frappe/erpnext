@@ -1,8 +1,6 @@
 import frappe
 
-from erpnext.portal.product_configurator.utils import (
-    get_product_settings
-)
+from erpnext.portal.product_configurator.utils import get_product_settings
 from erpnext.shopping_cart.filters import ProductFiltersBuilder
 from erpnext.shopping_cart.product_query import ProductQuery
 

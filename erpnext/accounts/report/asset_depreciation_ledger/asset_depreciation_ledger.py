@@ -8,7 +8,6 @@ from frappe import _
 from frappe.utils import flt
 
 
-
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
 	return columns, data

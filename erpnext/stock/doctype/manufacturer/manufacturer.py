@@ -4,9 +4,7 @@
 
 from __future__ import unicode_literals
 
-from frappe.contacts.address_and_contact import (
-    load_address_and_contact
-)
+from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 
 

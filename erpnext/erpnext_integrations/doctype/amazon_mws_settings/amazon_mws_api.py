@@ -12,7 +12,6 @@ import hmac
 import re
 from urllib.parse import quote
 
-
 from erpnext.erpnext_integrations.doctype.amazon_mws_settings import xml_utils
 
 try:

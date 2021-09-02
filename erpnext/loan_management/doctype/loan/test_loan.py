@@ -6,15 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import (
-    add_days,
-	add_months,
-	add_to_date,
-	date_diff,
-	flt,
-	get_datetime,
-	nowdate
-)
+from frappe.utils import add_days, add_months, add_to_date, date_diff, flt, get_datetime, nowdate
 
 from erpnext.loan_management.doctype.loan.loan import (
 	make_loan_write_off,

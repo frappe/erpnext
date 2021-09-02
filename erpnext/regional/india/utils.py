@@ -6,14 +6,7 @@ import re
 import frappe
 from frappe import _
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (
-    cint,
-	cstr,
-	date_diff,
-	flt,
-	getdate,
-	nowdate
-)
+from frappe.utils import cint, cstr, date_diff, flt, getdate, nowdate
 from six import string_types
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges

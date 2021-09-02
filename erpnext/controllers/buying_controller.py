@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-
 import frappe
 from frappe import _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display

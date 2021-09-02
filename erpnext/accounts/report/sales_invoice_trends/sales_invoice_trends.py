@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-
 from erpnext.controllers.trends import get_columns, get_data
 
 

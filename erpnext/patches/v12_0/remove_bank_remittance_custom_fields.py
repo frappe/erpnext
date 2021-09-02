@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import frappe
 
 
-
 def execute():
 	frappe.reload_doc("accounts", "doctype", "tax_category")
 	frappe.reload_doc("stock", "doctype", "item_manufacturer")

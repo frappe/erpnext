@@ -4,17 +4,9 @@
 
 from __future__ import unicode_literals
 
-
 import frappe
 from frappe import _
-from frappe.utils import (
-    add_days,
-	cint,
-	date_diff,
-	flt,
-	get_datetime,
-	getdate
-)
+from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate
 from six import iteritems
 
 import erpnext

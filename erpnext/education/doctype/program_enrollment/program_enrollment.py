@@ -11,7 +11,6 @@ from frappe.model.document import Document
 from frappe.utils import comma_and, get_link_to_form, getdate
 
 
-
 class ProgramEnrollment(Document):
 	def validate(self):
 		self.validate_duplication()

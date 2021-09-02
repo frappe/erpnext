@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.utils import (
-    add_days,
+	add_days,
 	cstr,
 	flt,
 	format_datetime,
@@ -13,7 +13,7 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	nowdate,
-	today
+	today,
 )
 
 import erpnext

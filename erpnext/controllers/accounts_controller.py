@@ -7,10 +7,7 @@ import json
 
 import frappe
 from frappe import _, throw
-from frappe.model.workflow import (
-    get_workflow_name,
-	is_transition_condition_satisfied
-)
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 from frappe.utils import (
 	add_days,
 	add_months,

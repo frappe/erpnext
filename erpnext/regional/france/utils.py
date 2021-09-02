@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 
-
 # don't remove this function it is used in tests
 def test_method():
 	'''test function'''

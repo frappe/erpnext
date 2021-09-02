@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
 	AccountsReceivableSummary,
 )
