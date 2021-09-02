@@ -4,6 +4,8 @@
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def execute():
+	frappe.reload_doc('accounts', 'doctype', 'payment_entry')
+
 	custom_fields = {
 		'Payment Entry': [
 			dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break', insert_after='deductions',
