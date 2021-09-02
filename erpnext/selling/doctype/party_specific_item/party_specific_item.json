@@ -7,8 +7,9 @@
  "field_order": [
   "party_type",
   "party",
+  "column_break_3",
   "restrict_based_on",
-  "based_on"
+  "based_on_value"
  ],
  "fields": [
   {
@@ -31,25 +32,29 @@
    "fieldname": "restrict_based_on",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Restrict Based On",
+   "label": "Restrict Items Based On",
    "options": "Item\nItem Group\nBrand",
    "reqd": 1
   },
   {
-   "fieldname": "based_on",
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "based_on_value",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Based On",
+   "label": "Based On Value",
    "options": "restrict_based_on",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-31 13:29:32.273991",
+ "modified": "2021-09-02 17:36:37.337094",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "Party Specific Items",
+ "name": "Party Specific Item",
  "owner": "Administrator",
  "permissions": [
   {
