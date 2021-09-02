@@ -1405,7 +1405,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 	})
 
 def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_account_currency, company_currency, reference_name):
-	total_amount, outstanding_amount, exchange_rate = None
+	total_amount = outstanding_amount = exchange_rate = None
 	if reference_doctype == "Fees":
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
@@ -1425,7 +1425,7 @@ def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_acc
 	return total_amount, outstanding_amount, exchange_rate
 
 def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_currency, company_currency):
-	total_amount, outstanding_amount, exchange_rate = None
+	total_amount = outstanding_amount = exchange_rate = None
 	if ref_doc.doctype == "Expense Claim":
 			total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 	elif ref_doc.doctype == "Employee Advance":
@@ -1465,7 +1465,7 @@ def get_total_amount_exchange_rate_base_on_currency(party_account_currency, comp
 	return total_amount, exchange_rate
 
 def get_bill_no_and_update_amounts(reference_doctype, ref_doc, total_amount, exchange_rate, party_account_currency, company_currency):
-	outstanding_amount, bill_no = None
+	outstanding_amount = bill_no = None
 	if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 		outstanding_amount = ref_doc.get("outstanding_amount")
 		bill_no = ref_doc.get("bill_no")
