@@ -8,8 +8,8 @@ Borrowed from https://github.com/timotheus/ebaysdk-python
 """
 from __future__ import unicode_literals
 
-import xml.etree.ElementTree as ET
 import re
+import xml.etree.ElementTree as ET
 
 
 class object_dict(dict):

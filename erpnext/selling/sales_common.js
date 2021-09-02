@@ -90,7 +90,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 
 		this.frm.toggle_display("customer_name",
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
-		
+
 		this.toggle_editable_price_list_rate();
 	}
 

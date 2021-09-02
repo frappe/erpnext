@@ -3,16 +3,32 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import datetime
 import json
-from frappe import _, bold
-from frappe.model.mapper import get_mapped_doc
-from frappe.model.document import Document
-from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate,
-	get_time, add_to_date, time_diff, add_days, get_datetime_str, get_link_to_form, time_diff_in_seconds)
 
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
+import frappe
+from frappe import _, bold
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import (
+	add_days,
+	add_to_date,
+	cint,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	get_time,
+	getdate,
+	time_diff,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
+
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_mins_between_operations,
+)
+
 
 class OverlapError(frappe.ValidationError): pass
 

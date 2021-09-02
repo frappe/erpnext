@@ -2,13 +2,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
-from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
-from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import get_datetime, flt
 import datetime
-from datetime import timedelta
+import unittest
+
+import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.utils import flt, get_datetime
+
+from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import (
+	create_service_level_agreements_for_issues,
+)
+
 
 class TestSetUp(unittest.TestCase):
 	def setUp(self):

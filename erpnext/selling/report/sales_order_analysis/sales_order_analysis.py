@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import copy
+
+import frappe
 from frappe import _
-from frappe.utils import flt, date_diff, getdate
+from frappe.utils import date_diff, flt, getdate
+
 
 def execute(filters=None):
 	if not filters:

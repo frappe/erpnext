@@ -3,10 +3,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
+from erpnext.hr.doctype.training_event.test_training_event import (
+	create_training_event,
+	create_training_program,
+)
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
-from erpnext.hr.doctype.training_event.test_training_event import create_training_program, create_training_event
+
+
 class TestTrainingFeedback(unittest.TestCase):
 	def setUp(self):
 		create_training_program("Basic Training")

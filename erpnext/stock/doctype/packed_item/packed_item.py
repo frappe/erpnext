@@ -4,10 +4,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, flt
-from erpnext.stock.get_item_details import get_item_details
+
+import json
+
+import frappe
 from frappe.model.document import Document
+from frappe.utils import cstr, flt
+
+from erpnext.stock.get_item_details import get_item_details
+
 
 class PackedItem(Document):
 	pass
@@ -130,7 +135,7 @@ def update_product_bundle_price(doc, parent_items):
 	# for the last product bundle
 	if doc.get("packed_items"):
 		update_parent_item_price(doc, parent_items[parent_items_index][0], bundle_price)
-		
+
 def update_parent_item_price(doc, parent_item_code, bundle_price):
 	parent_item_doc = doc.get('items', {'item_code': parent_item_code})[0]
 
