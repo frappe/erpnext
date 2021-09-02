@@ -36,7 +36,7 @@ class SellingSettings(Document):
 
 	def toggle_editable_rate_for_bundle_items(self):
 		editable_bundle_item_rates = cint(self.editable_bundle_item_rates)
-		
+
 		make_property_setter("Packed Item", "rate", "read_only", not(editable_bundle_item_rates), "Check", validate_fields_for_doctype=False)
 
 	def set_default_customer_group_and_territory(self):
