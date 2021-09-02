@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import calendar
+
+import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
+
 from erpnext.education.utils import OverlapError
 
 

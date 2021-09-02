@@ -2,14 +2,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json, time
 
-from frappe.model.document import Document
-from frappe.utils import add_years, now, get_datetime, get_datetime_str, cint
+import json
+import time
+
+import frappe
+import requests
 from frappe import _
 from frappe.frappeclient import FrappeClient
-from erpnext.utilities.product import get_price, get_qty_in_stock
+from frappe.model.document import Document
+from frappe.utils import add_years, cint, get_datetime, get_datetime_str, now
 from six import string_types
+
+from erpnext.utilities.product import get_price, get_qty_in_stock
+
 
 class MarketplaceSettings(Document):
 

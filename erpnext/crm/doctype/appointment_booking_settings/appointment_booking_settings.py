@@ -3,9 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import datetime
+
 import frappe
 from frappe import _
-import datetime
 from frappe.model.document import Document
 
 

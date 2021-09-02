@@ -3,10 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-from  frappe import _
-from  frappe import ValidationError
 import unittest
+
+import frappe
+from frappe import ValidationError, _
 
 # test_records = frappe.get_test_records('Bank Account')
 

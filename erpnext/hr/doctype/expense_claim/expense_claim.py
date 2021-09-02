@@ -2,17 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import get_fullname, flt, cstr, get_link_to_form
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name, share_doc_with_approver, validate_active_employee
-from erpnext.accounts.party import get_party_account
-from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import cstr, flt, get_fullname, get_link_to_form
 from frappe.utils.csvutils import getlink
+
+import erpnext
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.hr.utils import set_employee_name, share_doc_with_approver, validate_active_employee
+
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 class ExpenseApproverIdentityError(frappe.ValidationError): pass

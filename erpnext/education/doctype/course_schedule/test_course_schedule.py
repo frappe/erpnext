@@ -3,13 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
+import datetime
 import unittest
 
-import datetime
-from frappe.utils import today, to_timedelta
-from erpnext.education.utils import OverlapError
+import frappe
+from frappe.utils import to_timedelta, today
 from frappe.utils.make_random import get_random
+
+from erpnext.education.utils import OverlapError
 
 # test_records = frappe.get_test_records('Course Schedule')
 

@@ -1,6 +1,15 @@
 from __future__ import unicode_literals
-import unittest, frappe, requests, os, time, erpnext
+
+import os
+import time
+import unittest
+
+import frappe
+import requests
+
+import erpnext
 from erpnext.erpnext_integrations.connectors.woocommerce_connection import order
+
 
 class TestWoocommerce(unittest.TestCase):
 	def setUp(self):

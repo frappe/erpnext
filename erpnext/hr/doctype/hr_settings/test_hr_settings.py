@@ -3,11 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.hr.doctype.employee.test_employee import make_employee
-from frappe.utils import now_datetime
 from datetime import timedelta
+
+import frappe
+from frappe.utils import now_datetime
+
+from erpnext.hr.doctype.employee.test_employee import make_employee
+
 
 class TestHRSettings(unittest.TestCase):
 	pass

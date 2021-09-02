@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe
-from frappe.utils import flt, add_days, nowdate, add_months, getdate
 import unittest
+
+import frappe
+from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 test_dependencies = ["Product Bundle"]
 
@@ -133,8 +134,10 @@ class TestQuotation(unittest.TestCase):
 
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
-		from erpnext.selling.doctype.sales_order.sales_order \
-			import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_delivery_note,
+			make_sales_invoice,
+		)
 
 		rate_with_margin = flt((1500*18.75)/100 + 1500)
 

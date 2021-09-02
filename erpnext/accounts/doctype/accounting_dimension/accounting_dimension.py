@@ -3,15 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe import _
+
 import json
-from frappe.model.document import Document
+
+import frappe
+from frappe import _, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
-from frappe import scrub
+from frappe.model import core_doctypes_list
+from frappe.model.document import Document
 from frappe.utils import cstr
 from frappe.utils.background_jobs import enqueue
-from frappe.model import core_doctypes_list
+
 
 class AccountingDimension(Document):
 	def before_insert(self):

@@ -3,9 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.quality_management.doctype.quality_procedure.test_quality_procedure import create_procedure
+
+import frappe
+
+from erpnext.quality_management.doctype.quality_procedure.test_quality_procedure import (
+	create_procedure,
+)
+
 
 class TestQualityGoal(unittest.TestCase):
 	def test_quality_goal(self):

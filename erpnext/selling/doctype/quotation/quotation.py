@@ -2,10 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, nowdate, getdate
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
 

@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 
+import unittest
+
+import frappe
 from bs4 import BeautifulSoup
-import frappe, unittest
-from frappe.utils import set_request, get_html_for_route
+from frappe.utils import get_html_for_route, set_request
 from frappe.website.render import render
+
 from erpnext.portal.product_configurator.utils import get_products_for_website
 from erpnext.stock.doctype.item.test_item import make_item_variant
 

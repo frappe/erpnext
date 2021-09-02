@@ -3,16 +3,20 @@
 
 from __future__ import unicode_literals
 
-import frappe, os, json
+import json
+import os
 
+import frappe
 from frappe import _
+from frappe.desk.doctype.global_search_settings.global_search_settings import (
+	update_global_search_doctypes,
+)
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
-from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
+from frappe.utils.nestedset import rebuild_tree
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
-from frappe.utils.nestedset import rebuild_tree
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",

@@ -2,15 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 import frappe.defaults
-from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint
-from erpnext.controllers.stock_controller import StockController
+from frappe import _, msgprint
+from frappe.utils import cint, cstr, flt
+
+import erpnext
 from erpnext.accounts.utils import get_company_default
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_available_serial_nos
+from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_available_serial_nos, get_incoming_rate, get_stock_balance
+
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
 class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
@@ -159,8 +163,11 @@ class StockReconciliation(StockController):
 			raise frappe.ValidationError(self.validation_messages)
 
 	def validate_item(self, item_code, row):
-		from erpnext.stock.doctype.item.item import validate_end_of_life, \
-			validate_is_stock_item, validate_cancelled_item
+		from erpnext.stock.doctype.item.item import (
+			validate_cancelled_item,
+			validate_end_of_life,
+			validate_is_stock_item,
+		)
 
 		# using try except to catch all validation msgs and display together
 

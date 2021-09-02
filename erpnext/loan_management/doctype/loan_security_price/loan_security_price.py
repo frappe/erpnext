@@ -3,11 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, now_datetime, add_to_date, get_datetime, get_timestamp, get_datetime_str
+from frappe.utils import (
+	add_to_date,
+	get_datetime,
+	get_datetime_str,
+	get_timestamp,
+	getdate,
+	now_datetime,
+)
 from six import iteritems
+
 
 class LoanSecurityPrice(Document):
 	def validate(self):

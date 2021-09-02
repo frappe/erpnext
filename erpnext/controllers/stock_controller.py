@@ -10,7 +10,11 @@ from frappe import _
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
-from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
+from erpnext.accounts.general_ledger import (
+	make_gl_entries,
+	make_reverse_gl_entries,
+	process_gl_map,
+)
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map

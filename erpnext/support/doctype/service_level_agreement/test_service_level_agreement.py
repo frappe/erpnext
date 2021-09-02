@@ -3,10 +3,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_group
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
+
 
 class TestServiceLevelAgreement(unittest.TestCase):
 	def setUp(self):

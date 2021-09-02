@@ -3,13 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _
 from frappe.model.document import Document
+
+import erpnext
+from erpnext.accounts.deferred_revenue import (
+	build_conditions,
+	convert_deferred_expense_to_expense,
+	convert_deferred_revenue_to_income,
+)
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
-from erpnext.accounts.deferred_revenue import convert_deferred_expense_to_expense, \
-	convert_deferred_revenue_to_income, build_conditions
+
 
 class ProcessDeferredAccounting(Document):
 	def validate(self):

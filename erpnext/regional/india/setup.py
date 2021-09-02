@@ -3,13 +3,18 @@
 
 from __future__ import unicode_literals
 
-import frappe, os, json
+import json
+import os
+
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_permission, update_permission_property
-from erpnext.regional.india import states
-from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 from frappe.utils import today
+
+from erpnext.accounts.utils import FiscalYearError, get_fiscal_year
+from erpnext.regional.india import states
+
 
 def setup(company=None, patch=True):
 	# Company independent fixtures should be called only once at the first company setup

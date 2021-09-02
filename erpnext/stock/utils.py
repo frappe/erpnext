@@ -2,12 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-import json
-from frappe.utils import flt, cstr, nowdate, nowtime, get_link_to_form
 
+import json
+
+import frappe
+from frappe import _
+from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 from six import string_types
+
+import erpnext
+
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 

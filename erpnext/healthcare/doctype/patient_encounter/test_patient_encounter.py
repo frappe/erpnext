@@ -2,9 +2,11 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
+
 import unittest
 
 import frappe
+
 from erpnext.healthcare.doctype.patient_encounter.patient_encounter import PatientEncounter
 
 

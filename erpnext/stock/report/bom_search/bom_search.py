@@ -2,9 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
 
+import json
+
+import frappe
 from six import iteritems
+
 
 def execute(filters=None):
 	data = []

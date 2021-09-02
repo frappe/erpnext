@@ -1,7 +1,7 @@
 import sys
-import requests
 from urllib.parse import urlparse
 
+import requests
 
 docs_repos = [
 	"frappe_docs",
