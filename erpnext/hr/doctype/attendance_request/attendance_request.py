@@ -6,33 +6,47 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import date_diff, add_days, getdate
+from frappe.utils import date_diff, add_days, getdate, formatdate
 from erpnext.hr.doctype.employee.employee import is_holiday
-from erpnext.hr.utils import validate_dates
+from erpnext.hr.utils import validate_dates, validate_overlap
+
 
 class AttendanceRequest(Document):
 	def validate(self):
-		validate_dates(self, self.from_date, self.to_date)
+		validate_dates(self, self.from_date, self.to_date, allow_future_date=True)
+		validate_overlap(self, self.from_date, self.to_date, self.company)
 		if self.half_day:
 			if not getdate(self.from_date)<=getdate(self.half_day_date)<=getdate(self.to_date):
-				frappe.throw(_("Half day date should be in between from date and to date"))
+				frappe.throw(_("Half Day date should be in between from date and to date"))
 
 	def on_submit(self):
 		self.create_attendance()
 
 	def on_cancel(self):
-		attendance_list = frappe.get_list("Attendance", {'employee': self.employee, 'attendance_request': self.name})
+		attendance_list = frappe.get_all("Attendance",
+			{'employee': self.employee, 'attendance_request': self.name, 'docstatus': 1})
 		if attendance_list:
 			for attendance in attendance_list:
 				attendance_obj = frappe.get_doc("Attendance", attendance['name'])
+				attendance_obj.flags.ignore_permissions = True
 				attendance_obj.cancel()
 
 	def create_attendance(self):
+		attendance_created = 0
+
 		request_days = date_diff(self.to_date, self.from_date) + 1
 		for number in range(request_days):
 			attendance_date = add_days(self.from_date, number)
 			skip_attendance = self.validate_if_attendance_not_applicable(attendance_date)
 			if not skip_attendance:
+				attendance_name = frappe.db.exists('Attendance', dict(employee=self.employee,
+					attendance_date=attendance_date, docstatus=1))
+				if attendance_name:
+					# cancel existing attendance
+					existing_doc = frappe.get_doc('Attendance', attendance_name)
+					existing_doc.flags.ignore_permissions = True
+					existing_doc.cancel()
+
 				attendance = frappe.new_doc("Attendance")
 				attendance.employee = self.employee
 				attendance.employee_name = self.employee_name
@@ -46,10 +60,16 @@ class AttendanceRequest(Document):
 				attendance.save(ignore_permissions=True)
 				attendance.submit()
 
+				attendance_created += 1
+
+		if not attendance_created:
+			frappe.throw(_("Cannot submit because no Attendance can be created in the date range"))
+
 	def validate_if_attendance_not_applicable(self, attendance_date):
 		# Check if attendance_date is a Holiday
 		if is_holiday(self.employee, attendance_date):
-			frappe.msgprint(_("Attendance not submitted for {0} as it is a Holiday.").format(attendance_date), alert=1)
+			frappe.msgprint(_("Attendance not created for {0} as it is a Holiday.")
+				.format(formatdate(attendance_date)))
 			return True
 
 		# Check if employee on Leave
@@ -57,7 +77,20 @@ class AttendanceRequest(Document):
 			where employee = %s and %s between from_date and to_date
 			and docstatus = 1""", (self.employee, attendance_date), as_dict=True)
 		if leave_record:
-			frappe.msgprint(_("Attendance not submitted for {0} as {1} on leave.").format(attendance_date, self.employee), alert=1)
+			frappe.msgprint(_("Attendance not created for {0} as {1} on leave.")
+				.format(formatdate(attendance_date), self.employee))
+			return True
+
+		existing_attendance_status = frappe.db.get_value("Attendance",
+			{'employee': self.employee, 'attendance_date': attendance_date, 'docstatus': 1}, 'status')
+		if existing_attendance_status == "Present":
+			frappe.msgprint(_("Attendance not created for {0} as it is already marked Present.")
+				.format(formatdate(attendance_date)))
+			return True
+
+		if existing_attendance_status == "Half Day" and self.half_day and date_diff(getdate(self.half_day_date), getdate(attendance_date)) == 0:
+			frappe.msgprint(_("Attendance not created for {0} as it is already marked Half Day.")
+				.format(formatdate(attendance_date)))
 			return True
 
 		return False

@@ -496,6 +496,7 @@ class PayrollEntry(Document):
 				'employee': d.employee,
 				'employee_name': d.employee_name,
 				'rounded_total': d.rounded_total,
+				'net_pay': d.net_pay,
 				'bank_account_no': d.bank_account_no
 			})
 			bank_employee_map[bank_name].total += d.rounded_total

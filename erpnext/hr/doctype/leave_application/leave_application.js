@@ -74,6 +74,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company();
 		if (frm.is_new()) {
 			frm.trigger("calculate_total_days");
 		}
@@ -88,6 +89,7 @@ frappe.ui.form.on("Leave Application", {
 				frm.set_value('employee', perm['Employee'].map(perm_doc => perm_doc.doc)[0]);
 			}
 		}
+		frm.trigger("make_dashboard");
 	},
 
 	employee: function(frm) {

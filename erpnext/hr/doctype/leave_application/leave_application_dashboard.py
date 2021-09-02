@@ -8,12 +8,13 @@ def get_data():
 		'fieldname': 'leave_application',
 		'transactions': [
 			{
+				'label': _('Attendance'),
 				'items': ['Attendance']
 			}
 		],
-        'reports': [
+		'reports': [
 			{
-                'label': _('Reports'),
+				'label': _('Reports'),
 				'items': ['Employee Leave Balance']
 			}
 		]

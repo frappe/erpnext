@@ -83,7 +83,9 @@ def execute(filters=None):
 				if not attendance_details.leave_type:
 					row['total_deduction'] += 0.5
 			elif attendance_status == "On Leave":
-				row['total_leave'] += 1
+				leave_details = leave_type_map.get(attendance_details.leave_type, frappe._dict())
+				if not is_holiday or leave_details.include_holidays:
+					row['total_leave'] += 1
 
 			if attendance_status in ("On Leave", "Half Day") and attendance_details.leave_type:
 				leave_details = leave_type_map.get(attendance_details.leave_type, frappe._dict())

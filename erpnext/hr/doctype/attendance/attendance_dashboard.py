@@ -6,7 +6,7 @@ def get_data():
 		'fieldname': 'attendance',
 		'transactions': [
 			{
-				'label': '',
+				'label': _('Checkins'),
 				'items': ['Employee Checkin']
 			}
 		]

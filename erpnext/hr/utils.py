@@ -159,11 +159,11 @@ def get_employee_field_property(employee, fieldname):
 	else:
 		return False
 
-def validate_dates(doc, from_date, to_date):
+def validate_dates(doc, from_date, to_date, allow_future_date=False):
 	date_of_joining, relieving_date = frappe.db.get_value("Employee", doc.employee, ["date_of_joining", "relieving_date"])
 	if getdate(from_date) > getdate(to_date):
 		frappe.throw(_("To date can not be less than from date"))
-	elif getdate(from_date) > getdate(nowdate()):
+	elif not allow_future_date and getdate(from_date) > getdate(nowdate()):
 		frappe.throw(_("Future dates not allowed"))
 	elif date_of_joining and getdate(from_date) < getdate(date_of_joining):
 		frappe.throw(_("From date can not be less than employee's joining date"))
@@ -207,9 +207,14 @@ def get_doc_condition(doctype):
 		return "and company = %(company)s and (from_date between %(from_date)s and %(to_date)s \
 			or to_date between %(from_date)s and %(to_date)s \
 			or (from_date < %(from_date)s and to_date > %(to_date)s))"
+	elif doctype == "Attendance Request":
+		return "and employee = %(employee)s and docstatus < 2 \
+		and (from_date between %(from_date)s and %(to_date)s \
+		or to_date between %(from_date)s and %(to_date)s \
+		or (from_date < %(from_date)s and to_date > %(to_date)s))"
 
 def throw_overlap_error(doc, exists_for, overlap_doc, from_date, to_date):
-	msg = _("A {0} exists between {1} and {2} (").format(doc.doctype,
+	msg = _("{0} exists between {1} and {2} (").format(doc.doctype,
 		formatdate(from_date), formatdate(to_date)) \
 		+ """ <b><a href="#Form/{0}/{1}">{1}</a></b>""".format(doc.doctype, overlap_doc) \
 		+ _(") for {0}").format(exists_for)

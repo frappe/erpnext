@@ -40,7 +40,7 @@ def get_employees(filters):
 		holiday_names[holiday.holiday_date] = holiday.description
 
 	if(holidays_list):
-		cond = " attendance_date in %(holidays_list)s"
+		cond = " docstatus = 1 and status in ('Present', 'Half Day') and attendance_date in %(holidays_list)s"
 
 		if filters.holiday_list:
 			cond += """ and (employee in (select employee from tabEmployee where holiday_list = %(holidays)s))"""

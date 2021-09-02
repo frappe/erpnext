@@ -7,13 +7,17 @@
  "field_order": [
   "employee",
   "employee_name",
-  "log_type",
-  "shift",
+  "designation",
+  "department",
+  "branch",
   "column_break_4",
-  "time",
+  "log_type",
   "device_id",
-  "skip_auto_attendance",
   "attendance",
+  "skip_auto_attendance",
+  "column_break_12",
+  "time",
+  "shift",
   "shift_start",
   "shift_end",
   "shift_actual_start",
@@ -116,9 +120,40 @@
    "label": "Shift Actual End",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2021-06-28 04:04:21.642404",
+ "modified": "2021-09-03 00:51:01.525191",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",

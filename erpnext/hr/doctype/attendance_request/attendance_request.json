@@ -9,9 +9,13 @@
  "field_order": [
   "employee",
   "employee_name",
+  "column_break_3",
+  "designation",
   "department",
+  "branch",
   "company",
   "column_break_5",
+  "amended_from",
   "from_date",
   "to_date",
   "half_day",
@@ -19,14 +23,14 @@
   "reason_section",
   "reason",
   "column_break_4",
-  "explanation",
-  "amended_from"
+  "explanation"
  ],
  "fields": [
   {
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee",
    "reqd": 1
@@ -42,6 +46,7 @@
    "fetch_from": "employee.department",
    "fieldname": "department",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Department",
    "options": "Department",
    "read_only": 1
@@ -76,6 +81,7 @@
    "default": "0",
    "fieldname": "half_day",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Half Day"
   },
   {
@@ -94,7 +100,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Reason",
-   "options": "Work From Home\nOn Duty",
+   "options": "\nWork From Home\nOn Duty",
    "reqd": 1
   },
   {
@@ -114,10 +120,32 @@
    "options": "Attendance Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:15.499371",
+ "modified": "2021-09-03 00:09:27.916969",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Request",

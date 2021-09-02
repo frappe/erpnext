@@ -129,10 +129,10 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.designation",
    "fetch_from": "employee.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Designation",
    "oldfieldname": "designation",
    "oldfieldtype": "Link",
@@ -614,7 +614,7 @@
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2021-08-12 17:07:02.644539",
+ "modified": "2021-09-03 00:52:26.411219",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",

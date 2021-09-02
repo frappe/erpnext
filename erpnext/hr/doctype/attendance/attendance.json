@@ -10,19 +10,24 @@
   "naming_series",
   "employee",
   "employee_name",
-  "working_hours",
-  "status",
-  "leave_type",
-  "leave_application",
-  "column_break0",
-  "attendance_date",
-  "company",
+  "designation",
   "department",
-  "shift",
+  "branch",
+  "company",
+  "column_break_9",
+  "status",
+  "previous_status",
+  "remarks",
+  "leave_application",
+  "leave_type",
   "attendance_request",
+  "column_break0",
   "amended_from",
-  "late_entry",
-  "early_exit"
+  "attendance_date",
+  "shift",
+  "working_hours",
+  "early_exit",
+  "late_entry"
  ],
  "fields": [
   {
@@ -32,8 +37,10 @@
    "options": "Simple"
   },
   {
+   "default": "HR-ATT-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
@@ -111,7 +118,8 @@
    "label": "Attendance Date",
    "oldfieldname": "attendance_date",
    "oldfieldtype": "Date",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "company",
@@ -175,12 +183,47 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Early Exit"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "previous_status",
+   "fieldtype": "Data",
+   "label": "Previous Status",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-09-01 22:54:32.792186",
+ "modified": "2021-09-03 00:33:30.140644",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

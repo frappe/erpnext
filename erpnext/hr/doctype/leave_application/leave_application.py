@@ -21,7 +21,7 @@ from frappe.model.document import Document
 class LeaveApplication(Document):
 
 	def get_feed(self):
-		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
+		return _("{0}: {1}").format(self.employee_name, self.leave_type)
 
 	def validate(self):
 		set_employee_name(self)
@@ -33,7 +33,7 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
-		if frappe.db.get_value("Leave Type", self.leave_type, 'is_optional_leave'):
+		if frappe.get_cached_value("Leave Type", self.leave_type, 'is_optional_leave'):
 			self.validate_optional_leave()
 		self.validate_applicable_after()
 
@@ -56,10 +56,10 @@ class LeaveApplication(Document):
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
+		self.cancel_attendance()
 		self.db_set("status", "Cancelled")
 		# notify leave applier about cancellation
 		self.notify_employee()
-		self.cancel_attendance()
 
 	def validate_applicable_after(self):
 		if self.leave_type:
@@ -79,6 +79,9 @@ class LeaveApplication(Document):
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
+
+		if self.from_date and self.to_date and self.half_day and getdate(self.from_date) == getdate(self.to_date) and not self.half_day_date:
+			self.half_day_date = self._from_date
 
 		if self.half_day and self.half_day_date \
 			and (getdate(self.half_day_date) < getdate(self.from_date)
@@ -125,14 +128,16 @@ class LeaveApplication(Document):
 				status = "Half Day" if getdate(date) == getdate(self.half_day_date) else "On Leave"
 
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
-					attendance_date = date, docstatus = ('!=', 2)))
-
+					attendance_date = date, docstatus = 1))
 				if attendance_name:
 					# update existing attendance, change absent to on leave
 					doc = frappe.get_doc('Attendance', attendance_name)
-					doc.db_set('status', status)
-					doc.db_set('leave_type', self.leave_type)
-					doc.db_set('leave_application', self.name)
+					doc.db_set({
+						'status': status,
+						'previous_status': doc.status,
+						'leave_type': self.leave_type,
+						'leave_application': self.name
+					}, notify=1)
 				else:
 					# make new attendance and submit it
 					doc = frappe.new_doc("Attendance")
@@ -143,16 +148,28 @@ class LeaveApplication(Document):
 					doc.leave_type = self.leave_type
 					doc.leave_application = self.name
 					doc.status = status
-					doc.flags.ignore_validate = True
 					doc.insert(ignore_permissions=True)
 					doc.submit()
 
 	def cancel_attendance(self):
 		if self.docstatus == 2:
-			attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s\
-				and (attendance_date between %s and %s) and docstatus < 2 and status in ('On Leave', 'Half Day')""",(self.employee, self.from_date, self.to_date), as_dict=1)
+			attendance = frappe.db.sql_list("""
+				select name
+				from `tabAttendance`
+				where employee = %s and (attendance_date between %s and %s) and docstatus = 1 and leave_application = %s
+			""", (self.employee, self.from_date, self.to_date, self.name))
 			for name in attendance:
-				frappe.db.set_value("Attendance", name, "docstatus", 2)
+				att_doc = frappe.get_doc("Attendance", name)
+				if att_doc.previous_status:
+					att_doc.db_set({
+						'status': att_doc.previous_status,
+						'previous_status': None,
+						'leave_type': None,
+						'leave_application': None
+					}, notify=1)
+				else:
+					att_doc.flags.ignore_permissions = True
+					att_doc.cancel()
 
 	def validate_salary_processed_days(self):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
