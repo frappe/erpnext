@@ -29,8 +29,9 @@ def get_webform_list_context(module):
 def get_webform_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
 	""" Get List of transactions for custom doctypes """
 	from frappe.www.list import get_list
-	if not filters: 
-		filters = []
+
+	if not filters: filters = []
+
 	meta = frappe.get_meta(doctype)
 
 	for d in meta.fields:
@@ -46,8 +47,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	user = frappe.session.user
 	ignore_permissions = False
 
-	if not filters:
-		filters = []
+	if not filters: filters = []
 
 	if doctype in ['Supplier Quotation', 'Purchase Invoice']:
 		filters.append((doctype, 'docstatus', '<', 2))
