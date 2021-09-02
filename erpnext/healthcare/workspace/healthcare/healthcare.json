@@ -7,7 +7,7 @@
   }
  ],
  "charts_label": "",
- "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Healthcare\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Patient Appointments\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient Appointment\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Service Unit\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Practitioner\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient History\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Consultation Setup\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Consultation\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Laboratory Setup\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Laboratory\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Rehabilitation and Physiotherapy\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Records and History\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Healthcare\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Patient Appointments\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient Appointment\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Service Unit\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Practitioner\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient History\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Consultation Setup\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Consultation\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Facility Management\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Inpatient\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Laboratory Setup\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Laboratory\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Rehabilitation and Physiotherapy\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Records and History\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "creation": "2020-03-02 17:23:17.919682",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -76,54 +76,9 @@
    "type": "Link"
   },
   {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Healthcare Service Unit Type",
-   "link_count": 0,
-   "link_to": "Healthcare Service Unit Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Healthcare Service Unit",
-   "link_count": 0,
-   "link_to": "Healthcare Service Unit",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Medical Code Standard",
-   "link_count": 0,
-   "link_to": "Medical Code Standard",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Medical Code",
-   "link_count": 0,
-   "link_to": "Medical Code",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Consultation Setup",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -132,7 +87,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Appointment Type",
-   "link_count": 0,
    "link_to": "Appointment Type",
    "link_type": "DocType",
    "onboard": 0,
@@ -143,7 +97,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Clinical Procedure Template",
-   "link_count": 0,
    "link_to": "Clinical Procedure Template",
    "link_type": "DocType",
    "onboard": 0,
@@ -154,7 +107,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Prescription Dosage",
-   "link_count": 0,
    "link_to": "Prescription Dosage",
    "link_type": "DocType",
    "onboard": 0,
@@ -165,7 +117,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Prescription Duration",
-   "link_count": 0,
    "link_to": "Prescription Duration",
    "link_type": "DocType",
    "onboard": 0,
@@ -176,60 +127,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Antibiotic",
-   "link_count": 0,
    "link_to": "Antibiotic",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Consultation",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Patient Appointment",
-   "link_count": 0,
-   "link_to": "Patient Appointment",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Clinical Procedure",
-   "link_count": 0,
-   "link_to": "Clinical Procedure",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Patient Encounter",
-   "link_count": 0,
-   "link_to": "Patient Encounter",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Vital Signs",
-   "link_count": 0,
-   "link_to": "Vital Signs",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -239,7 +137,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Complaint",
-   "link_count": 0,
    "link_to": "Complaint",
    "link_type": "DocType",
    "onboard": 0,
@@ -250,8 +147,54 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Diagnosis",
-   "link_count": 0,
    "link_to": "Diagnosis",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Consultation",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Patient Appointment",
+   "link_to": "Patient Appointment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Clinical Procedure",
+   "link_to": "Clinical Procedure",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Patient Encounter",
+   "link_to": "Patient Encounter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Vital Signs",
+   "link_to": "Vital Signs",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -261,8 +204,63 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Fee Validity",
-   "link_count": 0,
    "link_to": "Fee Validity",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Facility Management",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Healthcare Service Unit Type",
+   "link_to": "Healthcare Service Unit Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Healthcare Service Unit",
+   "link_to": "Healthcare Service Unit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Medical Coding",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Medical Code Standard",
+   "link_to": "Medical Code Standard",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Medical Code",
+   "link_to": "Medical Code",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -339,6 +337,16 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dosage Form",
+   "link_to": "Dosage Form",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Laboratory",
@@ -369,12 +377,36 @@
    "type": "Link"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Dosage Form",
-   "link_count": 0,
-   "link_to": "Dosage Form",
+   "label": "Inpatient",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Inpatient Medication Order",
+   "link_to": "Inpatient Medication Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Inpatient Record",
+   "link_to": "Inpatient Record",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Inpatient Medication Entry",
+   "link_to": "Inpatient Medication Entry",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -536,7 +568,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:59.434612",
+ "modified": "2021-08-30 17:37:45.316999",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",

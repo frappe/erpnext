@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, add_days
-from frappe.utils import get_datetime_str, nowdate
+from frappe.utils import add_days, flt, get_datetime_str, nowdate
+
 from erpnext import get_default_company
+
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
@@ -109,7 +111,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			value = response.json()["result"]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
-	except:
+	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0

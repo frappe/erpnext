@@ -3,10 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import print_function, unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, add_years, nowdate, date_diff
+from frappe.utils import add_years, date_diff, getdate, nowdate
+
 
 class StudentApplicant(Document):
 	def autoname(self):

@@ -1101,4 +1101,3 @@ function check_should_not_attach_bom_items(bom_no) {
 }
 
 $.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
-

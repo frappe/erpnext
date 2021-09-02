@@ -2,14 +2,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json, time
 
-from frappe.model.document import Document
-from frappe.utils import add_years, now, get_datetime, get_datetime_str, cint
-from frappe import _
+import json
+
+import frappe
 from frappe.frappeclient import FrappeClient
-from erpnext.utilities.product import get_price, get_qty_in_stock
-from six import string_types
+from frappe.model.document import Document
+from frappe.utils import cint
+
 
 class MarketplaceSettings(Document):
 
@@ -83,7 +83,6 @@ class MarketplaceSettings(Document):
 
 	def unregister(self):
 		"""Disable the User on hubmarket.org"""
-		pass
 
 @frappe.whitelist()
 def is_marketplace_enabled():

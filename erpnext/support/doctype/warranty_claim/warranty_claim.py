@@ -3,13 +3,13 @@
 
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import session, _
-from frappe.utils import today, now_datetime
-
-
+from frappe import _, session
+from frappe.utils import now_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
+
 
 class WarrantyClaim(TransactionBase):
 	def get_feed(self):

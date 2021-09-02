@@ -43,8 +43,6 @@ frappe.ui.form.on("Employee Referral", {
 			});
 		}
 
-
-
 	},
 	create_job_applicant: function(frm) {
 		frappe.model.open_mapped_doc({
