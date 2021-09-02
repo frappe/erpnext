@@ -4,11 +4,7 @@ set -e
 
 cd ~ || exit
 
-sudo apt-get install redis-server
-
-sudo apt install nodejs
-
-sudo apt install npm
+sudo apt-get install redis-server libcups2-dev
 
 pip install frappe-bench
 
@@ -32,7 +28,6 @@ wget -O /tmp/wkhtmltox.tar.xz https://github.com/frappe/wkhtmltopdf/raw/master/w
 tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
 sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
 sudo chmod o+x /usr/local/bin/wkhtmltopdf
-sudo apt-get install libcups2-dev
 
 cd ~/frappe-bench || exit
 

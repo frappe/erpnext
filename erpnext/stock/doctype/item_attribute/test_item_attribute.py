@@ -28,4 +28,3 @@ class TestItemAttribute(unittest.TestCase):
 
 		item_attribute.increment = 0.5
 		item_attribute.save()
-

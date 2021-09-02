@@ -12,4 +12,3 @@ class ExerciseType(Document):
 			self.name = ' - '.join(filter(None, [self.exercise_name, self.difficulty_level]))
 		else:
 			self.name = self.exercise_name
-

@@ -194,4 +194,3 @@ def get_date_range(time_span):
 		return time_span
 	except json.decoder.JSONDecodeError:
 		return get_timespan_date_range(time_span.lower())
-
