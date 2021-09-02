@@ -30,7 +30,7 @@ def get_webform_transaction_list(doctype, txt=None, filters=None, limit_start=0,
 	""" Get List of transactions for custom doctypes """
 	from frappe.www.list import get_list
 
-	if not filters: 
+	if not filters:
 		filters = []
 
 	meta = frappe.get_meta(doctype)

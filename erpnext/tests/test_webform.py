@@ -1,7 +1,6 @@
 import unittest
 
 import frappe
-from frappe.www.list import get_list_context
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 
@@ -25,16 +24,20 @@ class TestWebsite(unittest.TestCase):
 
 		frappe.set_user("supplier1@gmail.com")
 		# checking if data only consist of order assignment of Supplier1
+		self.assertTrue('Supplier1' in [data.supplier for data in get_data()])
 		self.assertFalse([data.supplier for data in get_data() if data.supplier != 'Supplier1'])
 
 		frappe.set_user("supplier2@gmail.com")
 		# checking if data only consist of order assignment of Supplier2
+		self.assertTrue('Supplier2' in [data.supplier for data in get_data()])
 		self.assertFalse([data.supplier for data in get_data() if data.supplier != 'Supplier2'])
 
 		frappe.set_user("Administrator")
 
 def get_data():
-	context = get_list_context('', 'Order Assignment', 'so-schedule')
+	webform_list_contexts = frappe.get_hooks('webform_list_context')
+	if webform_list_contexts:
+		context = frappe._dict(frappe.get_attr(webform_list_contexts[0])('Buying') or {})
 	kwargs = dict(doctype='Order Assignment', order_by = 'modified desc')
 	return context.get_list(**kwargs)
 
