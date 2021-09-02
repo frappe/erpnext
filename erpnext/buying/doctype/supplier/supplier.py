@@ -42,7 +42,12 @@ class Supplier(TransactionBase):
 		if not self.naming_series:
 			self.naming_series = ''
 
+		self.create_primary_contact()
+		self.create_primary_address()
+
 	def validate(self):
+		self.flags.is_new_doc = self.is_new()
+
 		# validation for Naming Series mandatory field...
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.naming_series:
@@ -76,7 +81,39 @@ class Supplier(TransactionBase):
 			frappe.throw(_("Internal Supplier for company {0} already exists").format(
 				frappe.bold(self.represents_company)))
 
+	def create_primary_contact(self):
+		from erpnext.selling.doctype.customer.customer import make_contact
+
+		if not self.supplier_primary_contact:
+			if self.mobile_no or self.email_id:
+				contact = make_contact(self)
+				self.db_set('supplier_primary_contact', contact.name)
+				self.db_set('mobile_no', self.mobile_no)
+				self.db_set('email_id', self.email_id)
+
+	def create_primary_address(self):
+		from erpnext.selling.doctype.customer.customer import make_address
+		from frappe.contacts.doctype.address.address import get_address_display
+
+		if self.flags.is_new_doc and self.get('address_line1'):
+			address = make_address(self)
+			address_display = get_address_display(address.name)
+
+			self.db_set("supplier_primary_address", address.name)
+			self.db_set("primary_address", address_display)
+
 	def on_trash(self):
+		if self.supplier_primary_contact:
+			frappe.db.sql("""
+				UPDATE `tabSupplier`
+				SET
+					supplier_primary_contact=null,
+					supplier_primary_address=null,
+					mobile_no=null,
+					email_id=null,
+					primary_address=null
+				WHERE name=%(name)s""", {"name": self.name})
+
 		delete_contact_and_address('Supplier', self.name)
 
 	def after_rename(self, olddn, newdn, merge=False):
@@ -104,3 +141,21 @@ class Supplier(TransactionBase):
 							doc.name, args.get('supplier_email_' + str(i)))
 				except frappe.NameError:
 					pass
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_supplier_primary_contact(doctype, txt, searchfield, start, page_len, filters):
+	supplier = filters.get("supplier")
+	return frappe.db.sql("""
+		SELECT
+			`tabContact`.name from `tabContact`,
+			`tabDynamic Link`
+		WHERE
+			`tabContact`.name = `tabDynamic Link`.parent
+			and `tabDynamic Link`.link_name = %(supplier)s
+			and `tabDynamic Link`.link_doctype = 'Supplier'
+			and `tabContact`.name like %(txt)s
+		""", {
+			'supplier': supplier,
+			'txt': '%%%s%%' % txt
+		})

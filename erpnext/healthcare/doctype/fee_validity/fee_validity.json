@@ -46,13 +46,13 @@
   {
    "fieldname": "visited",
    "fieldtype": "Int",
-   "label": "Visited yet",
+   "label": "Visits Completed",
    "read_only": 1
   },
   {
    "fieldname": "valid_till",
    "fieldtype": "Date",
-   "label": "Valid till",
+   "label": "Valid Till",
    "read_only": 1
   },
   {
@@ -106,7 +106,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-03-17 20:25:06.487418",
+ "modified": "2021-08-26 10:51:05.609349",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Fee Validity",

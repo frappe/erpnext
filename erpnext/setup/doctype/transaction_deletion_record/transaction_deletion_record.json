@@ -54,7 +54,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-08 23:13:48.049879",
+ "modified": "2021-08-04 20:15:59.071493",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
@@ -70,6 +70,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

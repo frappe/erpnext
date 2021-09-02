@@ -9,9 +9,11 @@ from frappe.model.document import Document
 from frappe import _
 
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift
+from erpnext.hr.utils import validate_active_employee
 
 class EmployeeCheckin(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.validate_duplicate_log()
 		self.fetch_shift()
 
@@ -122,7 +124,7 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 	"""Given a set of logs in chronological order calculates the total working hours based on the parameters.
 	Zero is returned for all invalid cases.
-	
+
 	:param logs: The List of 'Employee Checkin'.
 	:param check_in_out_type: One of: 'Alternating entries as IN and OUT during the same shift', 'Strictly based on Log Type in Employee Checkin'
 	:param working_hours_calc_type: One of: 'First Check-in and Last Check-out', 'Every Valid Check-in and Check-out'
@@ -174,4 +176,3 @@ def time_diff_in_hours(start, end):
 
 def find_index_in_dict(dict_list, key, value):
 	return next((index for (index, d) in enumerate(dict_list) if d[key] == value), None)
-

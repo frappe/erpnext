@@ -28,4 +28,3 @@ def execute():
 
 def get_parent_warehouse_name(warehouse):
 	return frappe.db.get_value('Warehouse', warehouse, 'warehouse_name')
-			
