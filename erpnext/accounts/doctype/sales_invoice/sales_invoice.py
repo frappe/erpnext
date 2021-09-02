@@ -1458,8 +1458,16 @@ class SalesInvoice(SellingController):
 
 		precision = self.precision("outstanding_amount")
 		outstanding_amount = flt(self.outstanding_amount, precision)
+		grand_total = flt(self.grand_total, self.precision("grand_total"))
 		due_date = getdate(self.due_date)
 		nowdate = getdate()
+
+		overdue = check_overdue(
+			self.payment_schedule,
+			outstanding_amount,
+			grand_total,
+			due_date
+		)
 
 		discounting_status = None
 		if self.is_discounted:
@@ -1471,11 +1479,15 @@ class SalesInvoice(SellingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discounting_status=='Disbursed':
+				elif overdue and discounting_status=='Disbursed':
 					self.status = "Overdue and Discounted"
-				elif outstanding_amount > 0 and due_date < nowdate:
+				elif overdue:
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discounting_status=='Disbursed':
+				elif 0 < outstanding_amount < grand_total and discounting_status=='Disbursed':
+					self.status = "Partly Paid and Discounted"
+				elif 0 < outstanding_amount < grand_total:
+					self.status = "Partly Paid"
+				elif outstanding_amount > 0 and due_date >= nowdate and discounting_status=='Disbursed':
 					self.status = "Unpaid and Discounted"
 				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"
@@ -1493,6 +1505,26 @@ class SalesInvoice(SellingController):
 
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
+
+def check_overdue(payment_schedule, outstanding_amount,  grand_total, due_date):
+	nowdate = getdate()
+	due_date = getdate(due_date)
+	if outstanding_amount <= 0:
+		return False
+	
+	if payment_schedule:
+		# count payable amount till date
+		payable_amount = sum(
+			payment.payment_amount 
+			for payment in payment_schedule 
+			if getdate(payment.due_date) < nowdate
+		)
+
+		if payable_amount < (grand_total - outstanding_amount):
+			return True
+
+	if due_date < nowdate:
+		return True
 
 def get_discounting_status(sales_invoice):
 	status = None
