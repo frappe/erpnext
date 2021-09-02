@@ -354,9 +354,6 @@ def process_request_data(data):
 
 def get_company_for_memberships():
 	company = frappe.db.get_single_value("Non Profit Settings", "company")
-	if not company:
-		from healthcare.healthcare.setup import get_company
-		company = get_company()
 	return company
 
 

@@ -40,7 +40,6 @@ from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 )
 from erpnext.controllers.selling_controller import SellingController
-from healthcare.healthcare.utils import manage_invoice_submit_cancel
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
@@ -263,13 +262,6 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and not self.is_consolidated and self.loyalty_points:
 			self.apply_loyalty_points()
 
-		# Healthcare Service Invoice.
-		domain_settings = frappe.get_doc('Domain Settings')
-		active_domains = [d.domain for d in domain_settings.active_domains]
-
-		if "Healthcare" in active_domains:
-			manage_invoice_submit_cancel(self, "on_submit")
-
 		self.process_common_party_accounting()
 
 	def validate_pos_return(self):
@@ -352,12 +344,6 @@ class SalesInvoice(SellingController):
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		# Healthcare Service Invoice.
-		domain_settings = frappe.get_doc('Domain Settings')
-		active_domains = [d.domain for d in domain_settings.active_domains]
-
-		if "Healthcare" in active_domains:
-			manage_invoice_submit_cancel(self, "on_cancel")
 		self.unlink_sales_invoice_from_timesheets()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
