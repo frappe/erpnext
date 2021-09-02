@@ -166,7 +166,7 @@ def create_material_request(material_requests):
 				mr.submit()
 				mr_list.append(mr)
 
-			except:
+			except Exception:
 				_log_exception()
 
 	if mr_list:

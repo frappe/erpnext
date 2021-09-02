@@ -24,7 +24,6 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -933,7 +932,7 @@ class SalesInvoice(SellingController):
 
 						if asset.calculate_depreciation:
 							self.reset_depreciation_schedule(asset)
-							
+
 					else:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
 							item.base_net_amount, item.finance_book)
@@ -947,7 +946,7 @@ class SalesInvoice(SellingController):
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					self.set_asset_status(asset)
-				
+
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
@@ -980,7 +979,7 @@ class SalesInvoice(SellingController):
 			asset = frappe.get_doc("Asset", item.asset)
 		else:
 			frappe.throw(_(
-				"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name), 
+				"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name),
 				title=_("Missing Asset")
 			)
 
@@ -997,7 +996,7 @@ class SalesInvoice(SellingController):
 		asset.flags.ignore_validate_update_after_submit = True
 		asset.prepare_depreciation_data(self.posting_date)
 		asset.save()
-		
+
 		post_depreciation_entries(self.posting_date)
 
 	def reset_depreciation_schedule(self, asset):
@@ -1037,7 +1036,7 @@ class SalesInvoice(SellingController):
 				finance_book = schedule.finance_book
 			else:
 				row += 1
-			
+
 			if schedule.schedule_date == posting_date_of_original_invoice:
 				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice):
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
@@ -1047,13 +1046,13 @@ class SalesInvoice(SellingController):
 	def get_posting_date_of_sales_invoice(self):
 		return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
 
-	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone 
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
 	def sale_was_made_on_original_schedule_date(self, asset, schedule, row, posting_date_of_original_invoice):
 		for finance_book in asset.get('finance_books'):
 			if schedule.finance_book == finance_book.finance_book:
 				orginal_schedule_date = add_months(finance_book.depreciation_start_date,
 					row * cint(finance_book.frequency_of_depreciation))
-			
+
 				if orginal_schedule_date == posting_date_of_original_invoice:
 					return True
 		return False

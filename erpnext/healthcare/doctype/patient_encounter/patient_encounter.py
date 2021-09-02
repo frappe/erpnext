@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, getdate, add_days
-from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
 

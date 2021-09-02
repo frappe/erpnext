@@ -53,10 +53,10 @@ class TwitterSettings(Document):
 			frappe.throw(_('Invalid Consumer Key or Consumer Secret Key'))
 
 	def get_api(self):
-		# authentication of consumer key and secret 
-		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret")) 
-		# authentication of access token and secret 
-		auth.set_access_token(self.access_token, self.access_token_secret) 
+		# authentication of consumer key and secret
+		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
+		# authentication of access token and secret
+		auth.set_access_token(self.access_token, self.access_token_secret)
 
 		return tweepy.API(auth)
 
@@ -90,20 +90,20 @@ class TwitterSettings(Document):
 
 	def delete_tweet(self, tweet_id):
 		api = self.get_api()
-		try: 
+		try:
 			api.destroy_status(tweet_id)
 		except TweepError as e:
 			self.api_error(e)
 
 	def get_tweet(self, tweet_id):
 		api = self.get_api()
-		try: 
+		try:
 			response = api.get_status(tweet_id, trim_user=True, include_entities=True)
 		except TweepError as e:
 			self.api_error(e)
-		
+
 		return response._json
-	
+
 	def api_error(self, e):
 		content = json.loads(e.response.content)
 		content = content["errors"][0]
