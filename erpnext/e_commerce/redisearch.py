@@ -10,15 +10,17 @@ WEBSITE_ITEM_KEY_PREFIX = 'website_item:'
 WEBSITE_ITEM_NAME_AUTOCOMPLETE = 'website_items_name_dict'
 WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE = 'website_items_category_dict'
 
-ALLOWED_INDEXABLE_FIELDS_SET = {
-	'web_item_name',
-	'item_code',
-	'item_name',
-	'item_group',
-	'brand',
-	'description',
-	'web_long_description'
-}
+def get_indexable_web_fields():
+	"Return valid fields from Website Item that can be searched for."
+	web_item_meta = frappe.get_meta("Website Item", cached=True)
+	valid_fields = filter(
+		lambda df: df.fieldtype in ("Link", "Table MultiSelect", "Data", "Small Text", "Text Editor"),
+		web_item_meta.fields)
+
+	return [df.fieldname for df in valid_fields]
+
+ALLOWED_INDEXABLE_FIELDS_SET = get_indexable_web_fields()
+
 
 def is_search_module_loaded():
 	cache = frappe.cache()
@@ -30,8 +32,8 @@ def is_search_module_loaded():
 
 	return "search" in parsed_output
 
-# Decorator for checking wether Redisearch is there or not
 def if_redisearch_loaded(function):
+	"Decorator to check if Redisearch is loaded."
 	def wrapper(*args, **kwargs):
 		if is_search_module_loaded():
 			func = function(*args, **kwargs)
@@ -45,7 +47,8 @@ def make_key(key):
 
 @if_redisearch_loaded
 def create_website_items_index():
-	'''Creates Index Definition'''
+	"Creates Index Definition."
+
 	# CREATE index
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=frappe.cache())
 
@@ -197,7 +200,7 @@ def get_fields_indexed():
 	)
 	fields_to_index = fields_to_index.split(',') if fields_to_index else []
 
-	mandatory_fields = ['name', 'web_item_name', 'route', 'thumbnail']
+	mandatory_fields = ['name', 'web_item_name', 'route', 'thumbnail', 'ranking']
 	fields_to_index = fields_to_index + mandatory_fields
 
 	return fields_to_index

@@ -1344,8 +1344,12 @@ body.product-page {
 	font-weight: 500;
 }
 
+.has-stock {
+	font-weight: 400 !important;
+}
+
 .out-of-stock {
-	font-weight: 500;
+	font-weight: 400;
 	font-size: 14px;
 	line-height: 20px;
 	color: #F47A7A;
