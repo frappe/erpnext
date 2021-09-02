@@ -174,6 +174,7 @@ class Lead(SellingController):
 			"salutation": self.salutation,
 			"gender": self.gender,
 			"designation": self.designation,
+			"company_name": self.company_name,
 		})
 
 		if self.email_id:
@@ -371,4 +372,3 @@ def add_lead_to_prospect(lead, prospect):
 	prospect.save(ignore_permissions=True)
 	frappe.msgprint(_('Lead {0} has been added to prospect {1}.').format(frappe.bold(lead), frappe.bold(prospect.name)),
 		title=_('Lead Added'), indicator='green')
-	

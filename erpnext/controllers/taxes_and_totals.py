@@ -686,7 +686,7 @@ class calculate_taxes_and_totals(object):
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
 				'amount': total_amount_to_pay,
 				'default': 1
-			})	
+			})
 
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:

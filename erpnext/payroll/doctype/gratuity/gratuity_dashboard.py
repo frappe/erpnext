@@ -11,10 +11,6 @@ def get_data():
 			{
 				'label': _('Payment'),
 				'items': ['Payment Entry']
-			},
-			{
-				'label': _('Additional Salary'),
-				'items': ['Additional Salary']
 			}
 		]
 	}

@@ -662,26 +662,30 @@ def is_lwp(leave_type):
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
+	from frappe.desk.reportview import get_filters_cond
 	events = []
 
-	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
-		as_dict=True)
+	employee = frappe.db.get_value("Employee",
+		filters={"user_id": frappe.session.user},
+		fieldname=["name", "company"],
+		as_dict=True
+	)
+
 	if employee:
 		employee, company = employee.name, employee.company
 	else:
-		employee=''
-		company=frappe.db.get_value("Global Defaults", None, "default_company")
+		employee = ''
+		company = frappe.db.get_value("Global Defaults", None, "default_company")
 
-	from frappe.desk.reportview import get_filters_cond
 	conditions = get_filters_cond("Leave Application", filters, [])
 	# show department leaves for employee
 	if "Employee" in frappe.get_roles():
 		add_department_leaves(events, start, end, employee, company)
 
 	add_leaves(events, start, end, conditions)
-
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)
+
 	return events
 
 def add_department_leaves(events, start, end, employee, company):
@@ -697,26 +701,37 @@ def add_department_leaves(events, start, end, employee, company):
 	filter_conditions = " and employee in (\"%s\")" % '", "'.join(department_employees)
 	add_leaves(events, start, end, filter_conditions=filter_conditions)
 
+
 def add_leaves(events, start, end, filter_conditions=None):
+	from frappe.desk.reportview import build_match_conditions
 	conditions = []
 
-
 	if not cint(frappe.db.get_value("HR Settings", None, "show_leaves_of_all_department_members_in_calendar")):
-		from frappe.desk.reportview import build_match_conditions
 		match_conditions = build_match_conditions("Leave Application")
 
 		if match_conditions:
 			conditions.append(match_conditions)
 
-	query = """select name, from_date, to_date, employee_name, half_day,
-		status, employee, docstatus
-		from `tabLeave Application` where
-		from_date <= %(end)s and to_date >= %(start)s <= to_date
-		and docstatus < 2
-		and status!='Rejected' """
+	query = """SELECT
+		docstatus,
+		name,
+		employee,
+		employee_name,
+		leave_type,
+		from_date,
+		to_date,
+		half_day,
+		status,
+		color
+	FROM `tabLeave Application`
+	WHERE
+		from_date <= %(end)s AND to_date >= %(start)s <= to_date
+		AND docstatus < 2
+		AND status != 'Rejected'
+	"""
 
 	if conditions:
-		query += ' and ' + ' and '.join(conditions)
+		query += ' AND ' + ' AND '.join(conditions)
 
 	if filter_conditions:
 		query += filter_conditions
@@ -729,10 +744,12 @@ def add_leaves(events, start, end, filter_conditions=None):
 			"to_date": d.to_date,
 			"docstatus": d.docstatus,
 			"color": d.color,
-			"title": cstr(d.employee_name) + (' ' + _('(Half Day)') if d.half_day else ''),
+			"all_day": int(not d.half_day),
+			"title": cstr(d.employee_name) + f' ({cstr(d.leave_type)})' + (' ' + _('(Half Day)') if d.half_day else ''),
 		}
 		if e not in events:
 			events.append(e)
+
 
 def add_block_dates(events, start, end, employee, company):
 	# block days
