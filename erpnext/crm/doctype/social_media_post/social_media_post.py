@@ -26,7 +26,7 @@ class SocialMediaPost(Document):
 		if self.scheduled_time:
 			self.post_status = "Scheduled"
 		super(SocialMediaPost, self).submit()
-	
+
 	def on_cancel(self):
 		self.db_set('post_status', 'Cancelled')
 
@@ -35,11 +35,11 @@ class SocialMediaPost(Document):
 		if self.twitter and self.twitter_post_id:
 			twitter = frappe.get_doc("Twitter Settings")
 			twitter.delete_tweet(self.twitter_post_id)
-	
+
 		if self.linkedin and self.linkedin_post_id:
 			linkedin = frappe.get_doc("LinkedIn Settings")
 			linkedin.delete_post(self.linkedin_post_id)
-		
+
 		self.db_set('post_status', 'Deleted')
 
 	@frappe.whitelist()
@@ -51,7 +51,7 @@ class SocialMediaPost(Document):
 		if self.twitter and self.twitter_post_id:
 			twitter = frappe.get_doc("Twitter Settings")
 			response['twitter'] = twitter.get_tweet(self.twitter_post_id)
-		
+
 		return response
 
 	@frappe.whitelist()
@@ -67,7 +67,7 @@ class SocialMediaPost(Document):
 				self.db_set("linkedin_post_id", linkedin_post.headers['X-RestLi-Id'])
 			self.db_set("post_status", "Posted")
 
-		except:
+		except Exception:
 			self.db_set("post_status", "Error")
 			title = _("Error while POSTING {0}").format(self.name)
 			frappe.log_error(message=frappe.get_traceback(), title=title)

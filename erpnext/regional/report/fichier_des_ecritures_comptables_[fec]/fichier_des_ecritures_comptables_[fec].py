@@ -116,7 +116,7 @@ def get_result_as_list(data, filters):
 		if d.get("voucher_no").startswith("{0}-".format(JournalCode)) or d.get("voucher_no").startswith("{0}/".format(JournalCode)):
 			EcritureNum = re.split("-|/", d.get("voucher_no"))[1]
 		else:
-			EcritureNum = re.search("{0}(\d+)".format(JournalCode), d.get("voucher_no"), re.IGNORECASE).group(1)
+			EcritureNum = re.search(r"{0}(\d+)".format(JournalCode), d.get("voucher_no"), re.IGNORECASE).group(1)
 
 		EcritureDate = format_datetime(d.get("GlPostDate"), "yyyyMMdd")
 
