@@ -278,6 +278,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		else:
 			args.uom = item.stock_uom
 
+	if (args.get("batch_no") and
+		item.name != frappe.get_cached_value('Batch', args.get("batch_no"), 'item')):
+		args['batch_no'] = ''
+
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,

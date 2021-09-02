@@ -8,7 +8,7 @@ def execute():
 	# Update custom fields
 	fieldname = frappe.db.get_value('Custom Field', {'dt': 'Customer', 'fieldname': 'export_type'})
 	if fieldname:
-		frappe.db.set_value('Custom Field', fieldname, 
+		frappe.db.set_value('Custom Field', fieldname,
 			{
 				'default': '',
 				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)'
@@ -16,7 +16,7 @@ def execute():
 
 	fieldname = frappe.db.get_value('Custom Field', {'dt': 'Supplier', 'fieldname': 'export_type'})
 	if fieldname:
-		frappe.db.set_value('Custom Field', fieldname, 
+		frappe.db.set_value('Custom Field', fieldname,
 			{
 				'default': '',
 				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas"], doc.gst_category)'

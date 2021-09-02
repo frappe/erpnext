@@ -12,6 +12,7 @@ from frappe.model.naming import make_autoname
 from frappe import msgprint, _
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.utils import get_holiday_dates_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import today
@@ -341,20 +342,7 @@ class SalarySlip(TransactionBase):
 		return payment_days
 
 	def get_holidays_for_employee(self, start_date, end_date):
-		holiday_list = get_holiday_list_for_employee(self.employee)
-		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
-			where
-				parent=%(holiday_list)s
-				and holiday_date >= %(start_date)s
-				and holiday_date <= %(end_date)s''', {
-					"holiday_list": holiday_list,
-					"start_date": start_date,
-					"end_date": end_date
-				})
-
-		holidays = [cstr(i) for i in holidays]
-
-		return holidays
+		return get_holiday_dates_for_employee(self.employee, start_date, end_date)
 
 	@frappe.whitelist()
 	def get_payroll(self):
@@ -685,10 +673,13 @@ class SalarySlip(TransactionBase):
 				continue
 
 			if (
-				(not d.additional_salary
-				and (not additional_salary or additional_salary.overwrite))
-				or (additional_salary
-				and additional_salary.name == d.additional_salary)
+				(
+					not d.additional_salary
+					and (not additional_salary or additional_salary.overwrite)
+				) or (
+					additional_salary
+					and additional_salary.name == d.additional_salary
+				)
 			):
 				component_row = d
 				break
@@ -719,8 +710,13 @@ class SalarySlip(TransactionBase):
 			component_row.set('abbr', abbr)
 
 		if additional_salary:
-			component_row.default_amount = 0
-			component_row.additional_amount = amount
+			if additional_salary.overwrite:
+				component_row.additional_amount = flt(flt(amount) - flt(component_row.get("default_amount", 0)),
+					component_row.precision("additional_amount"))
+			else:
+				component_row.default_amount = 0
+				component_row.additional_amount = amount
+
 			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date

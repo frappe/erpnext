@@ -44,6 +44,9 @@ class POSInvoice(SalesInvoice):
 		self.validate_pos()
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+			validate_coupon_code(self.coupon_code)
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -57,6 +60,10 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'used')
 
 	def before_cancel(self):
 		if self.consolidated_invoice and frappe.db.get_value('Sales Invoice', self.consolidated_invoice, 'docstatus') == 1:
@@ -83,6 +90,10 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
+
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'cancelled')
 
 	def check_phone_payments(self):
 		for pay in self.payments:
@@ -127,7 +138,7 @@ class POSInvoice(SalesInvoice):
 						.format(item.idx, bold_delivered_serial_nos), title=_("Item Unavailable"))
 
 	def validate_stock_availablility(self):
-		if self.is_return:
+		if self.is_return or self.docstatus != 1:
 			return
 
 		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')

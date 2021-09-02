@@ -51,4 +51,3 @@ def execute():
 					and parent = %s
 					and salary_component = %s
 			""", (salary["name"], comp_type, salary["salary_slip"], salary["salary_component"]))
-
