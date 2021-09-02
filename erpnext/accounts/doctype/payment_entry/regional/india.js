@@ -7,7 +7,7 @@ frappe.ui.form.on("Payment Entry", {
 				'name': frm.doc.company
 			},
 			'callback': function(r) {
-				me.frm.set_value('company_address', r.message);
+				frm.set_value('company_address', r.message);
 			}
 		});
 	},
@@ -21,7 +21,7 @@ frappe.ui.form.on("Payment Entry", {
 					'name': frm.doc.party
 				},
 				'callback': function(r) {
-					me.frm.set_value('customer_address', r.message);
+					frm.set_value('customer_address', r.message);
 				}
 			});
 		}
