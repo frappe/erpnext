@@ -145,7 +145,7 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 
 	doc = frappe.get_doc(template)
 
-	# Data in country wise json is already pre validated, hence validations can be ignored 
+	# Data in country wise json is already pre validated, hence validations can be ignored
 	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
@@ -177,7 +177,7 @@ def make_item_tax_template(company_name, template):
 
 	doc = frappe.get_doc(template)
 
-	# Data in country wise json is already pre validated, hence validations can be ignored 
+	# Data in country wise json is already pre validated, hence validations can be ignored
 	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True

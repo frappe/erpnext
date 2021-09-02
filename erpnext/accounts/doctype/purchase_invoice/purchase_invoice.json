@@ -668,8 +668,7 @@
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1715,7 +1714,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-07 17:53:14.351439",
+ "modified": "2021-08-17 20:16:12.737743",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
