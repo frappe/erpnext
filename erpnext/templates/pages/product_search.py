@@ -51,7 +51,7 @@ def get_product_data(search=None, start=0, limit=12):
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """ ORDER BY ranking asc, modified desc limit %s, %s""" % (cint(start), cint(limit))
+	query += """ ORDER BY ranking desc, modified desc limit %s, %s""" % (cint(start), cint(limit))
 
 	return frappe.db.sql(query, {
 		"search": search
@@ -101,6 +101,7 @@ def product_search(query, limit=10, fuzzy_search=True):
 
 	results = client.search(q)
 	search_results['results'] = list(map(convert_to_dict, results.docs))
+	search_results['results'] = sorted(search_results['results'], key=lambda k: frappe.utils.cint(k['ranking']), reverse=True)
 
 	return search_results
 
