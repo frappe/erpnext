@@ -174,6 +174,7 @@ class Lead(SellingController):
 			"salutation": self.salutation,
 			"gender": self.gender,
 			"designation": self.designation,
+			"company_name": self.company_name,
 		})
 
 		if self.email_id:
