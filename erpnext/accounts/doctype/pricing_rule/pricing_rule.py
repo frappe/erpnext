@@ -203,13 +203,13 @@ def apply_pricing_rule(args, doc=None):
 	serialized_items = dict()
 	for item_code, val in query_items:
 		serialized_items.setdefault(item_code, val)
-	
+
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
 		data = get_pricing_rule_for_item(args_copy, item.get('price_list_rate'), doc=doc)
 		out.append(data)
-		
+
 		if serialized_items.get(item.get('item_code')) and not item.get("serial_no") and set_serial_nos_based_on_fifo and not args.get('is_return'):
 			out[0].update(get_serial_no_for_item(args_copy))
 
@@ -315,9 +315,8 @@ def update_args_for_pricing_rule(args):
 	if not (args.item_group and args.brand):
 		try:
 			args.item_group, args.brand = frappe.get_cached_value("Item", args.item_code, ["item_group", "brand"])
-		except TypeError:
-			# invalid item_code
-			return item_details
+		except frappe.DoesNotExistError:
+			return
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 

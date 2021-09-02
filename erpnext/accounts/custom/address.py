@@ -31,7 +31,7 @@ class ERPNextAddress(Address):
 		customers = frappe.db.get_all("Customer", filters=filters, as_list=True)
 		for customer_name in customers:
 			frappe.db.set_value("Customer", customer_name[0], "primary_address", address_display)
-			
+
 @frappe.whitelist()
 def get_shipping_address(company, address = None):
 	filters = [

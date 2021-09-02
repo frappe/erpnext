@@ -51,7 +51,7 @@ class LeaveControlPanel(Document):
 				la.docstatus = 1
 				la.save()
 				leave_allocated_for.append(d[0])
-			except:
+			except Exception:
 				pass
 		if leave_allocated_for:
 			msgprint(_("Leaves Allocated Successfully for {0}").format(comma_and(leave_allocated_for)))

@@ -95,7 +95,7 @@ class CourseSchedulingTool(Document):
 				if self.day == calendar.day_name[getdate(d.schedule_date).weekday()]:
 					frappe.delete_doc("Course Schedule", d.name)
 					rescheduled.append(d.name)
-			except:
+			except Exception:
 				reschedule_errors.append(d.name)
 		return rescheduled, reschedule_errors
 
