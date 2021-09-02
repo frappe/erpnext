@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import copy
-import time
 import unittest
 
 import frappe
@@ -30,7 +29,6 @@ from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 	get_qty_after_transaction,
 	make_stock_entry,

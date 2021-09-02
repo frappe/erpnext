@@ -495,7 +495,6 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_invoice_with_terms(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import (
 			automatically_fetch_payment_terms,
-			compare_payment_schedules,
 		)
 
 		automatically_fetch_payment_terms()

@@ -409,10 +409,7 @@ class TestSalarySlip(unittest.TestCase):
 		for doc in delete_docs:
 			frappe.db.sql("delete from `tab%s` where employee='%s'" % (doc, employee))
 
-		from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
-			create_salary_structure_assignment,
-			make_salary_structure,
-		)
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 		salary_structure = make_salary_structure("Stucture to test tax", "Monthly",
 			other_details={"max_benefits": 100000}, test_tax=True,
