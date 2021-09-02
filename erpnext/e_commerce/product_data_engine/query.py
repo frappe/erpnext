@@ -26,9 +26,11 @@ class ProductQuery:
 
 		self.or_filters = []
 		self.filters = [["published", "=", 1]]
-		self.fields = ['web_item_name', 'name', 'item_name', 'item_code', 'website_image',
-			'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description',
-			'short_description', 'route', 'website_warehouse', 'ranking']
+		self.fields = [
+			"web_item_name", "name", "item_name", "item_code", "website_image",
+			"variant_of", "has_variants", "item_group", "image", "web_long_description",
+			"short_description", "route", "website_warehouse", "ranking", "on_backorder"
+		]
 
 	def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None):
 		"""
@@ -238,6 +240,9 @@ class ProductQuery:
 		item.in_stock = False
 		warehouse = item.get("website_warehouse")
 		is_stock_item = frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+
+		if item.get("on_backorder"):
+			return
 
 		if not is_stock_item:
 			if warehouse:
