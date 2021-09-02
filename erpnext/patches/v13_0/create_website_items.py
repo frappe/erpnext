@@ -13,12 +13,12 @@ def execute():
 	item_table_fields = frappe.db.sql("desc `tabItem`", as_dict=1)
 	item_table_fields = [d.get('Field') for d in item_table_fields]
 
-	# prepare fields to query from Item, check if the field exists in Item master
+	# prepare fields to query from Item, check if the web field exists in Item master
 	web_query_fields = []
-	for field in web_fields_to_map:
-		if field in item_table_fields:
-			web_query_fields.append(field)
-			item_fields.append(field)
+	for web_field in web_fields_to_map:
+		if web_field in item_table_fields:
+			web_query_fields.append(web_field)
+			item_fields.append(web_field)
 
 	# check if the filter fields exist in Item master
 	or_filters = {}
@@ -37,6 +37,7 @@ def execute():
 		or_filters=or_filters
 	)
 
+	count = 0
 	for item in items:
 		if frappe.db.exists("Website Item", {"item_code": item.item_code}):
 			continue
@@ -59,5 +60,9 @@ def execute():
 					parent = '{web_item}'
 				where
 					parenttype = 'Item'
-					and parent = '{item}'
+					and parent = '{item_code}'
 				""")
+
+		count += 1
+		if count % 20 == 0: # commit after every 20 items
+			frappe.db.commit()
