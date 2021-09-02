@@ -48,9 +48,9 @@ class AccountingDimension(Document):
 
 	def on_trash(self):
 		if frappe.flags.in_test:
-			delete_accounting_dimension(doc=self, queue='long')
+			delete_accounting_dimension(doc=self)
 		else:
-			frappe.enqueue(delete_accounting_dimension, doc=self)
+			frappe.enqueue(delete_accounting_dimension, doc=self, queue='long')
 
 	def set_fieldname_and_label(self):
 		if not self.label:
