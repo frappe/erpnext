@@ -23,6 +23,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.utils import get_incoming_rate
+from erpnext.accounts.utils import PaymentEntryUnlinkError
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -133,7 +134,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.paid_to_account_currency = si.currency
 		pe.source_exchange_rate = 1
 		pe.target_exchange_rate = 1
-		pe.paid_amount = si.grand_total
+		pe.paid_amount = si.outstanding_amount
 		pe.insert()
 		pe.submit()
 
@@ -141,6 +142,42 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.get_doc('Sales Invoice', si.name)
 		self.assertRaises(frappe.LinkExistsError, si.cancel)
 		unlink_payment_on_cancel_of_invoice()
+
+	def test_payment_entry_unlink_against_standalone_credit_note(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		si1 = create_sales_invoice(rate=1000)
+		si2 = create_sales_invoice(rate=300)
+		si3 = create_sales_invoice(qty=-1, rate=300, is_return=1)
+
+
+		pe = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Bank - _TC")
+		pe.append('references', {
+			'reference_doctype': 'Sales Invoice',
+			'reference_name': si2.name,
+			'total_amount': si2.grand_total,
+			'outstanding_amount': si2.outstanding_amount,
+			'allocated_amount': si2.outstanding_amount
+		})
+
+		pe.append('references', {
+			'reference_doctype': 'Sales Invoice',
+			'reference_name': si3.name,
+			'total_amount': si3.grand_total,
+			'outstanding_amount': si3.outstanding_amount,
+			'allocated_amount': si3.outstanding_amount
+		})
+
+		pe.reference_no = 'Test001'
+		pe.reference_date = nowdate()
+		pe.save()
+		pe.submit()
+
+		si2.load_from_db()
+		si2.cancel()
+
+		si1.load_from_db()
+		self.assertRaises(PaymentEntryUnlinkError, si1.cancel)
+
 
 	def test_sales_invoice_calculation_export_currency(self):
 		si = frappe.copy_doc(test_records[2])
@@ -1070,6 +1107,18 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
 
 
+	def test_incoming_rate_for_stand_alone_credit_note(self):
+		return_si = create_sales_invoice(is_return=1, update_stock=1, qty=-1, rate=90000, incoming_rate=10,
+			company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', debit_to='Debtors - TCP1',
+			income_account='Sales - TCP1', expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1')
+
+		incoming_rate = frappe.db.get_value('Stock Ledger Entry', {'voucher_no': return_si.name}, 'incoming_rate')
+		debit_amount = frappe.db.get_value('GL Entry',
+			{'voucher_no': return_si.name, 'account': 'Stock In Hand - TCP1'}, 'debit')
+
+		self.assertEqual(debit_amount, 10.0)
+		self.assertEqual(incoming_rate, 10.0)
+
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
 		si.apply_discount_on = "Net Total"
@@ -1746,23 +1795,13 @@ class TestSalesInvoice(unittest.TestCase):
 		acc_settings.save()
 
 	def test_inter_company_transaction(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
-		if not frappe.db.exists("Customer", "_Test Internal Customer"):
-			customer = frappe.get_doc({
-				"customer_group": "_Test Customer Group",
-				"customer_name": "_Test Internal Customer",
-				"customer_type": "Individual",
-				"doctype": "Customer",
-				"territory": "_Test Territory",
-				"is_internal_customer": 1,
-				"represents_company": "_Test Company 1"
-			})
-
-			customer.append("companies", {
-				"company": "Wind Power LLC"
-			})
-
-			customer.insert()
+		create_internal_customer(
+			customer_name="_Test Internal Customer",
+			represents_company="_Test Company 1",
+			allowed_to_interact_with="Wind Power LLC"
+		)
 
 		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
 			supplier = frappe.get_doc({
@@ -1805,8 +1844,43 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
+	def test_sle_if_target_warehouse_exists_accidentally(self):
+		"""
+			Check if inward entry exists if Target Warehouse accidentally exists
+			but Customer is not an internal customer.
+		"""
+		se = make_stock_entry(
+			item_code="138-CMS Shoe",
+			target="Finished Goods - _TC",
+			company = "_Test Company",
+			qty=1,
+			basic_rate=500
+		)
+
+		si = frappe.copy_doc(test_records[0])
+		si.update_stock = 1
+		si.set_warehouse = "Finished Goods - _TC"
+		si.set_target_warehouse = "Stores - _TC"
+		si.get("items")[0].warehouse = "Finished Goods - _TC"
+		si.get("items")[0].target_warehouse = "Stores - _TC"
+		si.insert()
+		si.submit()
+
+		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
+			fields=["name", "actual_qty"])
+
+		# check if only one SLE for outward entry is created
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].actual_qty, -1)
+
+		# tear down
+		si.cancel()
+		se.cancel()
+
 	def test_internal_transfer_gl_entry(self):
 		## Create internal transfer account
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
 		account = create_account(account_name="Unrealized Profit",
 			parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
 
@@ -1898,7 +1972,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		data = get_ewb_data("Sales Invoice", [si.name])
 
-		self.assertEqual(data['version'], '1.0.1118')
+		self.assertEqual(data['version'], '1.0.0421')
 		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')
 		self.assertEqual(data['billLists'][0]['fromTrdName'], '_Test Company')
 		self.assertEqual(data['billLists'][0]['toTrdName'], '_Test Customer')
@@ -1994,7 +2068,7 @@ class TestSalesInvoice(unittest.TestCase):
 		discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
 		si = create_sales_invoice(discount_account=discount_account, discount_percentage=10, rate=90)
-		
+
 		expected_gle = [
 			["Debtors - _TC", 90.0, 0.0, nowdate()],
 			["Discount Account - _TC", 10.0, 0.0, nowdate()],
@@ -2010,7 +2084,7 @@ class TestSalesInvoice(unittest.TestCase):
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC", company="_Test Company")
-		
+
 		si = create_sales_invoice(parent_cost_center='Main - _TC', do_not_save=1)
 		si.apply_discount_on = "Grand Total"
 		si.additional_discount_account = additional_discount_account
@@ -2033,6 +2107,50 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 		enable_discount_accounting(enable=0)
+
+	def test_sales_invoice_against_supplier(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import make_customer
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		# create a customer
+		customer = make_customer(customer="_Test Common Supplier")
+		# create a supplier
+		supplier = create_supplier(supplier_name="_Test Common Supplier").name
+
+		# create a party link between customer & supplier
+		# set primary role as supplier
+		party_link = frappe.new_doc("Party Link")
+		party_link.primary_role = "Supplier"
+		party_link.primary_party = supplier
+		party_link.secondary_role = "Customer"
+		party_link.secondary_party = customer
+		party_link.save()
+
+		# enable common party accounting
+		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 1)
+
+		# create a sales invoice
+		si = create_sales_invoice(customer=customer, parent_cost_center="_Test Cost Center - _TC")
+
+		# check outstanding of sales invoice
+		si.reload()
+		self.assertEqual(si.status, 'Paid')
+		self.assertEqual(flt(si.outstanding_amount), 0.0)
+
+		# check creation of journal entry
+		jv = frappe.get_all('Journal Entry Account', {
+			'account': si.debit_to,
+			'party_type': 'Customer',
+			'party': si.customer,
+			'reference_type': si.doctype,
+			'reference_name': si.name
+		}, pluck='credit_in_account_currency')
+
+		self.assertTrue(jv)
+		self.assertEqual(jv[0], si.grand_total)
+
+		party_link.delete()
+		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 0)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
@@ -2246,7 +2364,8 @@ def create_sales_invoice(**args):
 		"discount_amount": args.discount_amount or 0,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
-		"conversion_factor": 1
+		"conversion_factor": 1,
+		"incoming_rate": args.incoming_rate or 0
 	})
 
 	if not args.do_not_save:
@@ -2342,29 +2461,6 @@ def get_taxes_and_charges():
 	"rate": 2,
 	"row_id": 1
 	}]
-
-def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
-	if not frappe.db.exists("Customer", customer_name):
-		customer = frappe.get_doc({
-			"customer_group": "_Test Customer Group",
-			"customer_name": customer_name,
-			"customer_type": "Individual",
-			"doctype": "Customer",
-			"territory": "_Test Territory",
-			"is_internal_customer": 1,
-			"represents_company": represents_company
-		})
-
-		customer.append("companies", {
-			"company": allowed_to_interact_with
-		})
-
-		customer.insert()
-		customer_name = customer.name
-	else:
-		customer_name = frappe.db.get_value("Customer", customer_name)
-
-	return customer_name
 
 def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):
 	if not frappe.db.exists("Supplier", supplier_name):
