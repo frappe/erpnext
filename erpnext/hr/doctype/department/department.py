@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.model.document import Document
 from frappe.utils.nestedset import NestedSet, get_root_of
 
 from erpnext.utilities.transaction_base import delete_events

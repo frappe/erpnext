@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.utils import add_months, flt, fmt_money, get_last_day, getdate, nowdate
+from frappe.utils import add_months, flt, fmt_money, get_last_day, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import json
 
 import frappe
-from frappe import _, msgprint
+from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, get_fullname

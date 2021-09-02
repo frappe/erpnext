@@ -7,8 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cstr, flt
+from frappe.utils import flt
 
 
 class VehicleLog(Document):

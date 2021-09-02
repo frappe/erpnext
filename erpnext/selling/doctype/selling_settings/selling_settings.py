@@ -6,7 +6,6 @@
 from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
 from frappe.utils import cint

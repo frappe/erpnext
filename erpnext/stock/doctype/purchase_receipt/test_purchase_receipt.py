@@ -7,8 +7,7 @@ import json
 import unittest
 
 import frappe
-import frappe.defaults
-from frappe.utils import add_days, cint, cstr, flt, random_string, today
+from frappe.utils import add_days, cint, cstr, flt, today
 from six import iteritems
 
 import erpnext

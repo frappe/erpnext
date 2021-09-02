@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _, session
-from frappe.utils import now_datetime, today
+from frappe.utils import now_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 

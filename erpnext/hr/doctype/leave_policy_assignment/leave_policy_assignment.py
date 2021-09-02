@@ -10,7 +10,7 @@ from math import ceil
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import comma_and, date_diff, flt, formatdate, get_datetime, getdate
+from frappe.utils import date_diff, flt, formatdate, get_datetime, getdate
 from six import string_types
 
 

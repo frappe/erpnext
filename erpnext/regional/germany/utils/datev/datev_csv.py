@@ -7,7 +7,6 @@ from csv import QUOTE_NONNUMERIC
 
 import frappe
 import pandas as pd
-import six
 from frappe import _
 from six import BytesIO
 

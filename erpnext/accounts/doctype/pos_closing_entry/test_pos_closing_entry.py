@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
 	make_closing_entry_from_opening,

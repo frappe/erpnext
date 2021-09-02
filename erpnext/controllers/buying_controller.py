@@ -3,13 +3,11 @@
 
 from __future__ import unicode_literals
 
-from collections import OrderedDict
 
 import frappe
 from frappe import _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, getdate
-from six import iteritems
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import get_party_details
@@ -17,13 +15,7 @@ from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
 from erpnext.controllers.subcontracting import Subcontracting
-from erpnext.stock.doctype.serial_no.serial_no import (
-	auto_make_serial_nos,
-	get_auto_serial_nos,
-	get_serial_nos,
-)
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.utils import get_incoming_rate
 
 

@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
-import math
 
 import frappe
 from dateutil.relativedelta import relativedelta
@@ -19,7 +18,6 @@ from frappe.utils import (
 	nowdate,
 	time_diff_in_hours,
 )
-from frappe.utils.csvutils import getlink
 
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_item_rate,
@@ -29,8 +27,6 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
-from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
-from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import (

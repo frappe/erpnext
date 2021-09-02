@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc

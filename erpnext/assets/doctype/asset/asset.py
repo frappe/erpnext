@@ -9,7 +9,6 @@ import math
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -27,7 +26,6 @@ from six import string_types
 
 import erpnext
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
-from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,

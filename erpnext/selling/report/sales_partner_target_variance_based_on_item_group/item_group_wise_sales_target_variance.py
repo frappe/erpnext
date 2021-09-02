@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import flt
 
 from erpnext.accounts.doctype.monthly_distribution.monthly_distribution import (
 	get_periodwise_distribution_data,

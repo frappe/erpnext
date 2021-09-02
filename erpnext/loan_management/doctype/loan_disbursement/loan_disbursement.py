@@ -6,8 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import add_days, flt, get_datetime, getdate, nowdate
+from frappe.utils import add_days, flt, get_datetime, nowdate
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries

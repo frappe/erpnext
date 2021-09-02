@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
 
-from erpnext.accounts.doctype.account.account import RootNotEditable
 
 from .default_website import website_maker
 

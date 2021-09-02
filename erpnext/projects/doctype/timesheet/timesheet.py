@@ -5,30 +5,18 @@
 from __future__ import unicode_literals
 
 import json
-from datetime import timedelta
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import (
-	add_to_date,
-	cint,
-	date_diff,
-	flt,
-	get_datetime,
+    flt,
 	getdate,
-	time_diff_in_hours,
+	time_diff_in_hours
 )
 
 from erpnext.controllers.queries import get_match_cond
 from erpnext.hr.utils import validate_active_employee
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
-	get_mins_between_operations,
-)
-from erpnext.manufacturing.doctype.workstation.workstation import (
-	WorkstationHolidayError,
-	check_if_within_operating_hours,
-)
 from erpnext.setup.utils import get_exchange_rate
 
 

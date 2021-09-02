@@ -11,7 +11,6 @@ from frappe.model.document import Document
 from frappe.utils import global_date_format
 from six import string_types
 
-from erpnext.hr.doctype.employee.employee import is_holiday
 
 
 class DailyWorkSummary(Document):

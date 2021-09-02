@@ -7,15 +7,11 @@ import frappe
 import frappe.share
 from frappe import _
 from frappe.utils import (
-	cint,
+    cint,
 	cstr,
-	date_diff,
 	flt,
-	get_datetime,
-	get_link_to_form,
 	get_time,
-	now_datetime,
-	nowdate,
+	now_datetime
 )
 from six import string_types
 

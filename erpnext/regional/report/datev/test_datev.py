@@ -16,12 +16,11 @@ from erpnext.regional.germany.utils.datev.datev_constants import (
 )
 from erpnext.regional.germany.utils.datev.datev_csv import get_datev_csv, get_header
 from erpnext.regional.report.datev.datev import (
-	download_datev_csv,
+    download_datev_csv,
 	get_account_names,
 	get_customers,
 	get_suppliers,
-	get_transactions,
-	validate,
+	get_transactions
 )
 
 

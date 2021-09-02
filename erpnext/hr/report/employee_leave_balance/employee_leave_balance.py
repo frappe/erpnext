@@ -7,7 +7,7 @@ from itertools import groupby
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, flt
+from frappe.utils import add_days
 
 from erpnext.hr.doctype.leave_application.leave_application import (
 	get_leave_balance_on,

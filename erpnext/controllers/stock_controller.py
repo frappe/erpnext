@@ -5,7 +5,6 @@ import json
 from collections import defaultdict
 
 import frappe
-import frappe.defaults
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 

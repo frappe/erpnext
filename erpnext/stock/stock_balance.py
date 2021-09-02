@@ -7,7 +7,6 @@ import frappe
 from frappe.utils import cstr, flt, nowdate, nowtime
 
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
-from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.stock.utils import update_bin
 
 

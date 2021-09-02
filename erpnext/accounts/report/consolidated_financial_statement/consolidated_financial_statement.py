@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
 
-import erpnext
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
 	check_opening_balance,
 	get_chart_data,
@@ -32,7 +31,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_report_summary as get_pl_summary,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.report.utils import convert_to_presentation_currency
 
 
 def execute(filters=None):

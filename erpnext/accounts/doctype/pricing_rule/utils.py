@@ -11,7 +11,6 @@ import json
 import frappe
 from frappe import _, bold
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today
-from six import string_types
 
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses

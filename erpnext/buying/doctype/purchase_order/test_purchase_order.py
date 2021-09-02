@@ -7,7 +7,6 @@ import json
 import unittest
 
 import frappe
-import frappe.defaults
 from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -19,9 +18,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_rm_stock_entry as make_subcontract_transfer_entry,
 )
 from erpnext.controllers.accounts_controller import update_child_qty_rate
-from erpnext.controllers.status_updater import OverAllowanceError
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
-from erpnext.stock.doctype.batch.test_batch import make_new_batch
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request

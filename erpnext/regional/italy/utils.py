@@ -5,7 +5,6 @@ import json
 
 import frappe
 from frappe import _
-from frappe.desk.form.load import get_attachments
 from frappe.utils import cstr, flt
 from frappe.utils.file_manager import remove_file
 from six import string_types

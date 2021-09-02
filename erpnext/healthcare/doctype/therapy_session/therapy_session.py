@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate
+from frappe.utils import flt, get_link_to_form, get_time, getdate
 
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
 	get_income_account,

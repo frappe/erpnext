@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-import frappe.defaults
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.sales_analytics.sales_analytics import execute

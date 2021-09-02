@@ -9,7 +9,6 @@ import frappe
 from frappe.utils import today
 
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 test_dependencies = ["Supplier Group", "Customer Group"]
 

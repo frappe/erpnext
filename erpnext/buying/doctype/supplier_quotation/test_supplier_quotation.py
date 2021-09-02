@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-import frappe.defaults
 
 
 class TestPurchaseOrder(unittest.TestCase):

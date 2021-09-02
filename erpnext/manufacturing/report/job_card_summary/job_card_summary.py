@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import getdate
 
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 

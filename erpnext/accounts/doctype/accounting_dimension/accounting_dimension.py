@@ -12,7 +12,6 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model import core_doctypes_list
 from frappe.model.document import Document
 from frappe.utils import cstr
-from frappe.utils.background_jobs import enqueue
 
 
 class AccountingDimension(Document):

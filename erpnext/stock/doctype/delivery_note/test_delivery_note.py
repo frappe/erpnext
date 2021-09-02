@@ -8,7 +8,6 @@ import json
 import unittest
 
 import frappe
-import frappe.defaults
 from frappe.utils import cstr, flt, nowdate, nowtime
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account

@@ -7,9 +7,6 @@ import unittest
 
 import frappe
 
-from erpnext.quality_management.doctype.quality_procedure.test_quality_procedure import (
-	create_procedure,
-)
 
 
 class TestQualityGoal(unittest.TestCase):

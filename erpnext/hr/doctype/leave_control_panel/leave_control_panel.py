@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.utils import cint, comma_and, cstr, date_diff, flt, nowdate
+from frappe.utils import cint, comma_and, cstr, flt
 
 
 class LeaveControlPanel(Document):

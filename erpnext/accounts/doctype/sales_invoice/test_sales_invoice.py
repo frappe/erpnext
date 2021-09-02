@@ -9,7 +9,7 @@ import unittest
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
-from frappe.utils import add_days, add_months, cint, flt, getdate, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate
 from six import iteritems
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account

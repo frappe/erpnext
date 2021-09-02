@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-import frappe.defaults
 from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry

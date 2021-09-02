@@ -6,14 +6,11 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import add_days, get_last_day, now, nowdate
+from frappe.utils import now
 
-import erpnext
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 class TestAssetMovement(unittest.TestCase):

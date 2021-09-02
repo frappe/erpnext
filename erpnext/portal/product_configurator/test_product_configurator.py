@@ -4,11 +4,9 @@ import unittest
 
 import frappe
 from bs4 import BeautifulSoup
-from frappe.utils import get_html_for_route, set_request
-from frappe.website.render import render
+from frappe.utils import get_html_for_route
 
 from erpnext.portal.product_configurator.utils import get_products_for_website
-from erpnext.stock.doctype.item.test_item import make_item_variant
 
 test_dependencies = ["Item"]
 

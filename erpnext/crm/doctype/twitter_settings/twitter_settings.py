@@ -5,13 +5,12 @@
 from __future__ import unicode_literals
 
 import json
-import os
 
 import frappe
 import tweepy
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form, get_url_to_form
+from frappe.utils import get_url_to_form
 from frappe.utils.file_manager import get_file_path
 from tweepy.error import TweepError
 

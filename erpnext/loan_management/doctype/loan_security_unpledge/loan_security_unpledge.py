@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 
-import json
 
 import frappe
 from frappe import _
@@ -12,9 +11,6 @@ from frappe.model.document import Document
 from frappe.utils import flt, get_datetime, getdate
 from six import iteritems
 
-from erpnext.loan_management.doctype.loan_security_price.loan_security_price import (
-	get_loan_security_price,
-)
 
 
 class LoanSecurityUnpledge(Document):

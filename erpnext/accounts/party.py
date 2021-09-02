@@ -27,7 +27,7 @@ from frappe.utils import (
 	getdate,
 	nowdate,
 )
-from six import iteritems, string_types
+from six import iteritems
 
 import erpnext
 from erpnext import get_company_currency

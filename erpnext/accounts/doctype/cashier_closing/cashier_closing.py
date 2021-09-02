@@ -5,9 +5,9 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _, msgprint, throw
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt
+from frappe.utils import flt
 
 
 class CashierClosing(Document):

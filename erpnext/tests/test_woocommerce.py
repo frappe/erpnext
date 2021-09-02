@@ -7,7 +7,6 @@ import unittest
 import frappe
 import requests
 
-import erpnext
 from erpnext.erpnext_integrations.connectors.woocommerce_connection import order
 
 

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet
 
 
 class QualityProcedure(NestedSet):

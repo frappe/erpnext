@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, date_diff, flt, formatdate, getdate, today
+from frappe.utils import add_days, date_diff, flt, formatdate, getdate
 
 from erpnext.hr.doctype.leave_application.leave_application import get_approved_leaves_for_period
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import (

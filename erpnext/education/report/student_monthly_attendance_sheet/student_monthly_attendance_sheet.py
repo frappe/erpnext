@@ -3,11 +3,10 @@
 
 from __future__ import unicode_literals
 
-from calendar import monthrange
 
 import frappe
-from frappe import _, msgprint
-from frappe.utils import add_days, cint, cstr, date_diff, get_first_day, get_last_day, getdate
+from frappe import _
+from frappe.utils import add_days, cstr, date_diff, get_first_day, get_last_day, getdate
 
 from erpnext.education.api import get_student_group_students
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list

@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import unittest
 
-import frappe
 
 test_records = [
 	dict(doctype='Restaurant', name='Test Restaurant 1', company='_Test Company 1',

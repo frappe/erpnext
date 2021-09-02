@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, now_datetime, nowdate
+from frappe.utils import cstr, getdate, now_datetime, nowdate
 
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday

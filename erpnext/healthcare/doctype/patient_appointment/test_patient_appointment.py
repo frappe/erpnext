@@ -7,7 +7,6 @@ import unittest
 
 import frappe
 from frappe.utils import add_days, now_datetime, nowdate
-from frappe.utils.make_random import get_random
 
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import (

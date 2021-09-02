@@ -6,7 +6,7 @@ import itertools
 import json
 
 import frappe
-from frappe import _, msgprint
+from frappe import _
 from frappe.utils import (
 	cint,
 	cstr,

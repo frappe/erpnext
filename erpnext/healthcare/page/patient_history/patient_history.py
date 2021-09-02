@@ -9,7 +9,6 @@ import json
 import frappe
 from frappe.utils import cint
 
-from erpnext.healthcare.utils import render_docs_as_html
 
 
 @frappe.whitelist()

@@ -16,9 +16,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
 	make_purchase_receipt,
 )
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-	test_records as pr_test_records,
-)
 
 
 class TestLandedCostVoucher(unittest.TestCase):

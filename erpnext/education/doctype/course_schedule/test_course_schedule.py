@@ -8,7 +8,6 @@ import unittest
 
 import frappe
 from frappe.utils import to_timedelta, today
-from frappe.utils.make_random import get_random
 
 from erpnext.education.utils import OverlapError
 

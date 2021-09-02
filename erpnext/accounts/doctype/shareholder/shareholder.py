@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 
-import frappe
 from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,

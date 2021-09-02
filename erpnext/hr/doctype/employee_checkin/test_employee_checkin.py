@@ -7,7 +7,7 @@ import unittest
 from datetime import timedelta
 
 import frappe
-from frappe.utils import now_datetime, nowdate, to_timedelta
+from frappe.utils import now_datetime, nowdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.employee_checkin.employee_checkin import (

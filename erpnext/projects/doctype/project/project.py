@@ -9,17 +9,14 @@ from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import (
-	add_days,
+    add_days,
 	flt,
 	get_datetime,
 	get_time,
 	get_url,
-	getdate,
-	now,
 	nowtime,
-	today,
+	today
 )
-from six import iteritems
 
 from erpnext.controllers.queries import get_filters_cond
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list

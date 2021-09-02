@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, rounded
+from frappe.utils import add_days, cint, cstr, date_diff, getdate, rounded
 
 from erpnext.hr.utils import (
 	get_holiday_dates_for_employee,

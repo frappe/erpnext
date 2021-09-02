@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-import frappe.defaults
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import flt, nowdate, nowtime
 from six import iteritems
@@ -17,10 +16,9 @@ from erpnext.stock.doctype.item.test_item import (
 	make_item_variant,
 	set_item_variant_settings,
 )
-from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.stock.doctype.serial_no.serial_no import *  # noqa
 from erpnext.stock.doctype.stock_entry.stock_entry import (
-	make_stock_in_entry,
-	move_sample_to_retention_warehouse,
+    move_sample_to_retention_warehouse
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError

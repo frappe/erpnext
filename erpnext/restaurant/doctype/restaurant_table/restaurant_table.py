@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import re
 
-import frappe
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 

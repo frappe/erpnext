@@ -7,7 +7,6 @@ from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import flt
 
 from erpnext.education.api import get_grade
 
