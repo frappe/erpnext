@@ -9,12 +9,12 @@ from frappe.utils import flt
 
 import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
-    add_sub_total_row,
+	add_sub_total_row,
 	add_total_row,
 	get_grand_total,
 	get_group_by_and_display_fields,
 	get_group_by_conditions,
-	get_tax_accounts
+	get_tax_accounts,
 )
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import get_item_details
 

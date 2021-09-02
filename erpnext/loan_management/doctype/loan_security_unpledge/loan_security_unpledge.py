@@ -4,13 +4,11 @@
 
 from __future__ import unicode_literals
 
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, get_datetime, getdate
 from six import iteritems
-
 
 
 class LoanSecurityUnpledge(Document):

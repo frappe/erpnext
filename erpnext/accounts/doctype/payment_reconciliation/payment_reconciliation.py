@@ -9,10 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, getdate, nowdate, today
 
 import erpnext
-from erpnext.accounts.utils import (
-    get_outstanding_invoices,
-	reconcile_against_document
-)
+from erpnext.accounts.utils import get_outstanding_invoices, reconcile_against_document
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 

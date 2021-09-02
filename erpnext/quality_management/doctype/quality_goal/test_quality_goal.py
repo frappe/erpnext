@@ -8,7 +8,6 @@ import unittest
 import frappe
 
 
-
 class TestQualityGoal(unittest.TestCase):
 	def test_quality_goal(self):
 		# no code, just a basic sanity check

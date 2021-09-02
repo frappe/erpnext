@@ -11,7 +11,6 @@ from frappe.model.document import Document
 from frappe.utils import cint
 
 
-
 class MarketplaceSettings(Document):
 
 	def register_seller(self, company, company_description):

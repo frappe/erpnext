@@ -6,13 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import (
-    cint,
-	cstr,
-	flt,
-	get_time,
-	now_datetime
-)
+from frappe.utils import cint, cstr, flt, get_time, now_datetime
 from six import string_types
 
 from erpnext.controllers.status_updater import StatusUpdater

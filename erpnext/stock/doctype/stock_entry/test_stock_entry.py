@@ -17,9 +17,7 @@ from erpnext.stock.doctype.item.test_item import (
 	set_item_variant_settings,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *  # noqa
-from erpnext.stock.doctype.stock_entry.stock_entry import (
-    move_sample_to_retention_warehouse
-)
+from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (

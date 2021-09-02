@@ -3,20 +3,12 @@
 
 from __future__ import unicode_literals
 
-
 import frappe
 from frappe import _
-from frappe.utils import (
-    add_to_date,
-	formatdate,
-	get_link_to_form,
-	getdate,
-	nowdate
-)
+from frappe.utils import add_to_date, formatdate, get_link_to_form, getdate, nowdate
 from frappe.utils.dashboard import cache_source
 from frappe.utils.dateutils import get_from_date_from_timespan, get_period_ending
 from frappe.utils.nestedset import get_descendants_of
-
 
 
 @frappe.whitelist()

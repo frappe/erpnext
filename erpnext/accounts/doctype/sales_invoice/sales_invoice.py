@@ -24,8 +24,8 @@ from six import iteritems
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
-    get_loyalty_program_details_with_points,
-	validate_loyalty_points
+	get_loyalty_program_details_with_points,
+	validate_loyalty_points,
 )
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,

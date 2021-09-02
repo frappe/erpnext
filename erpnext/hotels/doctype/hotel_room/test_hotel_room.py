@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import unittest
 
-
 test_dependencies = ["Hotel Room Package"]
 test_records = [
 	dict(doctype="Hotel Room", name="1001",

@@ -13,10 +13,10 @@ from six import iteritems
 
 from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
 from erpnext.stock.report.stock_balance.stock_balance import (
-    get_item_details,
+	get_item_details,
 	get_item_warehouse_map,
 	get_items,
-	get_stock_ledger_entries
+	get_stock_ledger_entries,
 )
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 

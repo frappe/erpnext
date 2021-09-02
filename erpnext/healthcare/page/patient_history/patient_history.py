@@ -10,7 +10,6 @@ import frappe
 from frappe.utils import cint
 
 
-
 @frappe.whitelist()
 def get_feed(name, document_types=None, date_range=None, start=0, page_length=20):
 	"""get feed"""

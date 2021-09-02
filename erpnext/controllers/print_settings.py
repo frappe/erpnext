@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 
-
 def set_print_templates_for_item_table(doc, settings):
 	doc.print_templates = {
 		"items": "templates/print_formats/includes/items.html",

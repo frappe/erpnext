@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import unittest
 
 
-
 class TestQualityMeeting(unittest.TestCase):
 	# nothing to test
 	pass

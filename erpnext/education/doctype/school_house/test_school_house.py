@@ -6,6 +6,5 @@ from __future__ import unicode_literals
 import unittest
 
 
-
 class TestSchoolHouse(unittest.TestCase):
 	pass

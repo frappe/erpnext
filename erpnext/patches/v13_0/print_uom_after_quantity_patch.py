@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-
 from erpnext.setup.install import create_print_uom_after_qty_custom_field
 
 
