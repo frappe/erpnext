@@ -49,6 +49,13 @@
   "address_html",
   "column_break1",
   "contact_html",
+  "primary_address_and_contact_detail_section",
+  "supplier_primary_contact",
+  "mobile_no",
+  "email_id",
+  "column_break_44",
+  "supplier_primary_address",
+  "primary_address",
   "default_payable_accounts",
   "accounts",
   "default_tax_withholding_config",
@@ -378,6 +385,47 @@
    "fieldname": "allow_purchase_invoice_creation_without_purchase_receipt",
    "fieldtype": "Check",
    "label": "Allow Purchase Invoice Creation Without Purchase Receipt"
+  },
+  {
+   "fieldname": "primary_address_and_contact_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Primary Address and Contact Detail"
+  },
+  {
+   "description": "Reselect, if the chosen contact is edited after save",
+   "fieldname": "supplier_primary_contact",
+   "fieldtype": "Link",
+   "label": "Supplier Primary Contact",
+   "options": "Contact"
+  },
+  {
+   "fetch_from": "supplier_primary_contact.mobile_no",
+   "fieldname": "mobile_no",
+   "fieldtype": "Read Only",
+   "label": "Mobile No"
+  },
+  {
+   "fetch_from": "supplier_primary_contact.email_id",
+   "fieldname": "email_id",
+   "fieldtype": "Read Only",
+   "label": "Email Id"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "primary_address",
+   "fieldtype": "Text",
+   "label": "Primary Address",
+   "read_only": 1
+  },
+  {
+   "description": "Reselect, if the chosen address is edited after save",
+   "fieldname": "supplier_primary_address",
+   "fieldtype": "Link",
+   "label": "Supplier Primary Address",
+   "options": "Address"
   }
  ],
  "icon": "fa fa-user",
@@ -390,7 +438,7 @@
    "link_fieldname": "supplier"
   }
  ],
- "modified": "2021-05-18 15:10:11.087191",
+ "modified": "2021-08-27 18:02:44.314077",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

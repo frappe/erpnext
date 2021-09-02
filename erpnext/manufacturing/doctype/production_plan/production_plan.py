@@ -3,17 +3,31 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json, copy
-from frappe import msgprint, _
+
+import copy
+import json
+
+import frappe
+from frappe import _, msgprint
+from frappe.model.document import Document
+from frappe.utils import (
+	add_days,
+	ceil,
+	cint,
+	comma_and,
+	flt,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	nowdate,
+)
+from frappe.utils.csvutils import build_csv_response
 from six import iteritems
 
-from frappe.model.document import Document
-from frappe.utils import (flt, cint, nowdate, add_days, comma_and, now_datetime,
-	ceil, get_link_to_form, getdate)
-from frappe.utils.csvutils import build_csv_response
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
+from erpnext.manufacturing.doctype.bom.bom import get_children, validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
 
 class ProductionPlan(Document):
 	def validate(self):
@@ -331,7 +345,7 @@ class ProductionPlan(Document):
 	def get_production_items(self):
 		item_dict = {}
 		for d in self.po_items:
-			item_details= {
+			item_details = {
 				"production_item"		: d.item_code,
 				"use_multi_level_bom"   : d.include_exploded_items,
 				"sales_order"			: d.sales_order,
@@ -346,8 +360,7 @@ class ProductionPlan(Document):
 				"production_plan"       : self.name,
 				"production_plan_item"  : d.name,
 				"product_bundle_item"	: d.product_bundle_item,
-				"planned_start_date"    : d.planned_start_date,
-				"make_work_order_for_sub_assembly_items": d.get("make_work_order_for_sub_assembly_items", 0)
+				"planned_start_date"    : d.planned_start_date
 			}
 
 			item_details.update({
@@ -454,10 +467,14 @@ class ProductionPlan(Document):
 		})
 
 	def create_work_order(self, item):
-		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError, get_default_warehouse
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			OverProductionError,
+			get_default_warehouse,
+		)
 		warehouse = get_default_warehouse()
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
+		wo.planned_start_date = item.get('planned_start_date') or item.get('schedule_date')
 
 		if item.get("warehouse"):
 			wo.fg_warehouse = item.get("warehouse")
@@ -569,7 +586,10 @@ def download_raw_materials(doc, warehouses=None):
 		'Reserved Qty for Production', 'Safety Stock', 'Required Qty']]
 
 	doc.warehouse = None
-	for d in get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True):
+	frappe.flags.show_qty_in_stock_uom = 1
+	items = get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True)
+
+	for d in items:
 		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('warehouse'),
 			d.get('required_bom_qty'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
 			d.get('planned_qty'), d.get('reserved_qty_for_production'), d.get('safety_stock'), d.get('quantity')])
@@ -605,8 +625,15 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			and bom.name=%s and item.is_stock_item in (1, {0})
 		group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
 		(planned_qty, company, bom_no), as_dict=1):
-			item_details.setdefault(d.get('item_code'), d)
+		if not d.conversion_factor and d.purchase_uom:
+			d.conversion_factor = get_uom_conversion_factor(d.item_code, d.purchase_uom)
+		item_details.setdefault(d.get('item_code'), d)
+
 	return item_details
+
+def get_uom_conversion_factor(item_code, uom):
+	return frappe.db.get_value('UOM Conversion Detail',
+		{'parent': item_code, 'uom': uom}, 'conversion_factor')
 
 def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_items,
 	include_subcontracted_items, parent_qty, planned_qty=1):
@@ -642,6 +669,9 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 			if d.item_code in item_details:
 				item_details[d.item_code].qty = item_details[d.item_code].qty + d.qty
 			else:
+				if not d.conversion_factor and d.purchase_uom:
+					d.conversion_factor = get_uom_conversion_factor(d.item_code, d.purchase_uom)
+
 				item_details[d.item_code] = d
 
 		if data.get('include_exploded_items') and d.default_bom:
@@ -669,10 +699,11 @@ def get_material_request_items(row, sales_order, company,
 		row['purchase_uom'] = row['stock_uom']
 
 	if row['purchase_uom'] != row['stock_uom']:
-		if not row['conversion_factor']:
+		if not (row['conversion_factor'] or frappe.flags.show_qty_in_stock_uom):
 			frappe.throw(_("UOM Conversion factor ({0} -> {1}) not found for item: {2}")
 				.format(row['purchase_uom'], row['stock_uom'], row.item_code))
-		required_qty = required_qty / row['conversion_factor']
+
+			required_qty = required_qty / row['conversion_factor']
 
 	if frappe.db.get_value("UOM", row['purchase_uom'], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
@@ -841,10 +872,8 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 		elif data.get('item_code'):
 			item_master = frappe.get_doc('Item', data['item_code']).as_dict()
 			purchase_uom = item_master.purchase_uom or item_master.stock_uom
-			conversion_factor = 0
-			for d in item_master.get("uoms"):
-				if d.uom == purchase_uom:
-					conversion_factor = d.conversion_factor
+			conversion_factor = (get_uom_conversion_factor(item_master.name, purchase_uom)
+				if item_master.purchase_uom else 1.0)
 
 			item_details[item_master.name] = frappe._dict(
 				{

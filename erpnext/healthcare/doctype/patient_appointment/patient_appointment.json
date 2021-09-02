@@ -131,7 +131,7 @@
    "fieldtype": "Link",
    "label": "Service Unit",
    "options": "Healthcare Service Unit",
-   "set_only_once": 1
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.practitioner;",
@@ -349,7 +349,7 @@
   }
  ],
  "links": [],
- "modified": "2021-06-16 00:40:26.841794",
+ "modified": "2021-08-30 09:00:41.329387",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

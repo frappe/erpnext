@@ -2,31 +2,39 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe, erpnext
+import copy
+import unittest
 
-import unittest, copy, time
-from frappe.utils import nowdate, flt, getdate, cint, add_days, add_months
+import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
-from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
-from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
-from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
-from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
-from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
-from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-from erpnext.stock.doctype.item.test_item import create_item
+from frappe.utils import add_days, flt, getdate, nowdate
 from six import iteritems
+
+import erpnext
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+	unlink_payment_on_cancel_of_invoice,
+)
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
-from erpnext.regional.india.utils import get_ewb_data
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
-from erpnext.stock.utils import get_incoming_rate
 from erpnext.accounts.utils import PaymentEntryUnlinkError
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
+from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
+from erpnext.regional.india.utils import get_ewb_data
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
+from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+	get_qty_after_transaction,
+	make_stock_entry,
+)
+from erpnext.stock.utils import get_incoming_rate
+
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -677,8 +685,9 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_payment(self):
 		w = self.make()
 
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
 		jv.get("accounts")[0].reference_type = w.doctype
@@ -944,16 +953,18 @@ class TestSalesInvoice(unittest.TestCase):
 
 
 	def _insert_purchase_receipt(self):
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
-			as pr_test_records
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			test_records as pr_test_records,
+		)
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.naming_series = "_T-Purchase Receipt-"
 		pr.insert()
 		pr.submit()
 
 	def _insert_delivery_note(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import test_records \
-			as dn_test_records
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import (
+			test_records as dn_test_records,
+		)
 		dn = frappe.copy_doc(dn_test_records[0])
 		dn.naming_series = "_T-Delivery Note-"
 		dn.insert()
@@ -961,8 +972,9 @@ class TestSalesInvoice(unittest.TestCase):
 		return dn
 
 	def test_sales_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[0])
 		jv.insert()
@@ -994,8 +1006,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.cancel()
 
 	def test_serialized(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
@@ -1048,9 +1060,9 @@ class TestSalesInvoice(unittest.TestCase):
 			check if the sales invoice item serial numbers and the delivery note items
 			serial numbers are same
 		"""
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
@@ -1290,8 +1302,9 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[0])
 		jv.accounts[0].is_advance = 'Yes'
@@ -1577,8 +1590,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_sales_invoice_with_shipping_rule(self):
-		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
-			import create_shipping_rule
+		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
 		shipping_rule = create_shipping_rule(shipping_rule_type = "Selling", shipping_rule_name = "Shipping Rule - Sales Invoice Test")
 
@@ -2129,7 +2141,9 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
 
 	def test_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			enable_discount_accounting,
+		)
 
 		enable_discount_accounting()
 
@@ -2147,7 +2161,9 @@ class TestSalesInvoice(unittest.TestCase):
 		enable_discount_accounting(enable=0)
 
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import enable_discount_accounting
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			enable_discount_accounting,
+		)
 
 		enable_discount_accounting()
 		additional_discount_account = create_account(account_name="Discount Account",
@@ -2201,7 +2217,9 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertTrue(schedule.journal_entry)
 
 	def test_sales_invoice_against_supplier(self):
-		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import make_customer
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+			make_customer,
+		)
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 		# create a customer

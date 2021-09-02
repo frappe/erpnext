@@ -1,6 +1,11 @@
 from __future__ import unicode_literals
+
 import frappe
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_doctypes_with_dimensions
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_doctypes_with_dimensions,
+)
+
 
 def execute():
 	accounting_dimensions = frappe.db.sql("""select fieldname from

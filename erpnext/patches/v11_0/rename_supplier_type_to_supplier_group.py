@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.utils.rename_field import rename_field
 from frappe import _
+from frappe.model.utils.rename_field import rename_field
 from frappe.utils.nestedset import rebuild_tree
+
 
 def execute():
 	if frappe.db.table_exists("Supplier Group"):

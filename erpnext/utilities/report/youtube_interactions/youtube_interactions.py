@@ -2,9 +2,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt
+
 
 def execute(filters=None):
 	if not frappe.db.get_single_value("Video Settings", "enable_youtube_tracking") or not filters:

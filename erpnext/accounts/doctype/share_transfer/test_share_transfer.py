@@ -3,8 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists
 
 test_dependencies = ["Share Type", "Shareholder"]

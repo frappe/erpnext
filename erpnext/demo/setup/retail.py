@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
-import random, json
+import json
+
 import frappe
-from frappe.utils import nowdate, add_days
-from erpnext.demo.setup.setup_data import import_json
+from six import iteritems
+
 from erpnext.demo.domains import data
 
-from six import iteritems
 
 def setup_data():
 	setup_item()
