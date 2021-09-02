@@ -149,7 +149,7 @@
    "depends_on": "maintain_same_sales_rate",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
-   "label": "Action if Same Rate is Not Maintained",
+   "label": "Action if Same Rate is Not Maintained Throughout Sales Cycle",
    "mandatory_depends_on": "maintain_same_sales_rate",
    "options": "Stop\nWarn"
   },
@@ -204,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-01 22:53:53.394444",
+ "modified": "2021-09-01 22:55:33.803624",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
