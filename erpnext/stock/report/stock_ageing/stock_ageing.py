@@ -2,12 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
+from operator import itemgetter
+
 import frappe
 from frappe import _
-from operator import itemgetter
-from frappe.utils import date_diff, flt, cint
+from frappe.utils import cint, date_diff, flt
 from six import iteritems
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 
 def execute(filters=None):
 	columns = get_columns(filters)

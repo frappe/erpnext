@@ -19,7 +19,6 @@
 # default settings that can be made for a user.
 from __future__ import unicode_literals
 
-
 product_name = "ERPNext"
 user_defaults = {
 	"Company": "company",

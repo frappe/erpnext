@@ -2,11 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import json
+
 import frappe
 from frappe import _
 from frappe.utils import flt, has_common
 from frappe.utils.user import is_website_user
+
 
 def get_list_context(context=None):
 	return {

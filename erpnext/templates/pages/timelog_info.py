@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
-import frappe
 
+import frappe
 from frappe import _
+
 
 def get_context(context):
 	context.no_cache = 1

@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url, getdate
-from frappe.utils.verified_command import verify_request, get_signed_params
+from frappe.utils.verified_command import get_signed_params, verify_request
 
 
 class Appointment(Document):

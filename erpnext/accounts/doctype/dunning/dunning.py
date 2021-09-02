@@ -3,14 +3,21 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
+from frappe.utils import cint, flt, get_datetime, getdate, rounded
 from six import string_types
-from frappe.utils import getdate, get_datetime, rounded, flt, cint
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (
+	days_in_year,
+)
 
 
 class Dunning(AccountsController):

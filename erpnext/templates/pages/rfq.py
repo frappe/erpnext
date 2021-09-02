@@ -2,10 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import formatdate
+
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
+
 
 def get_context(context):
 	context.no_cache = 1

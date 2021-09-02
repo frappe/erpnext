@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import formatdate
+
 import itertools
+
+import frappe
 from frappe import _, get_all
+from frappe.utils import formatdate
+
 
 def execute(filters=None):
 	columns = [

@@ -3,10 +3,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
-from frappe.utils import cint, flt, cstr
 from frappe import _, msgprint, throw
+from frappe.model.document import Document
+from frappe.utils import cint, cstr, flt
+
 
 class CashierClosing(Document):
 	def validate(self):
