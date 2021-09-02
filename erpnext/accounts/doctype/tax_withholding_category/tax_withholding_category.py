@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 

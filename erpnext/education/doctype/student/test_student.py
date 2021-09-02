@@ -6,9 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.test_runner import make_test_records
 
-from erpnext.education.doctype.course.test_course import make_course
 from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
 
 test_records = frappe.get_test_records('Student')

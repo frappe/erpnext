@@ -10,7 +10,6 @@ from frappe.model.meta import get_field_precision
 from frappe.utils import flt
 
 import erpnext
-from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 

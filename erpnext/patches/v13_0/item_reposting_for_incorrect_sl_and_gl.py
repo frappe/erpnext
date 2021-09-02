@@ -1,5 +1,4 @@
 import frappe
-from frappe import _
 from frappe.utils import get_time, getdate, today
 
 from erpnext.accounts.utils import update_gl_entries_after

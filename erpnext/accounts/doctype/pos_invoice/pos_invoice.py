@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 from six import iteritems
 
@@ -19,7 +18,6 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
-from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 
 

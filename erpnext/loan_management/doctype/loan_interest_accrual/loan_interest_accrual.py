@@ -6,18 +6,14 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils import (
-	add_days,
+    add_days,
 	cint,
 	date_diff,
 	flt,
 	get_datetime,
-	get_first_day,
-	get_last_day,
 	getdate,
-	now_datetime,
-	nowdate,
+	nowdate
 )
 
 import erpnext

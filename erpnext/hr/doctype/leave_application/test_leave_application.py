@@ -6,7 +6,7 @@ import unittest
 
 import frappe
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, add_months, getdate, now_datetime, nowdate
+from frappe.utils import add_days, add_months, getdate, nowdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation

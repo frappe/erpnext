@@ -12,7 +12,6 @@ import frappe.defaults
 from frappe import _
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.model.document import Document
 from frappe.utils import cint, formatdate, get_timestamp, today
 from frappe.utils.nestedset import NestedSet
 from past.builtins import cmp

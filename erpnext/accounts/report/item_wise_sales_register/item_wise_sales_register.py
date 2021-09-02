@@ -9,7 +9,6 @@ from frappe.model.meta import get_field_precision
 from frappe.utils import cstr, flt
 from frappe.utils.xlsxutils import handle_html
 
-import erpnext
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,

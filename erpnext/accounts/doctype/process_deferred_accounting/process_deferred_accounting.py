@@ -8,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-import erpnext
 from erpnext.accounts.deferred_revenue import (
 	build_conditions,
 	convert_deferred_expense_to_expense,

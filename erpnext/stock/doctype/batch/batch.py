@@ -10,7 +10,7 @@ from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
-from six import string_types, text_type
+from six import text_type
 
 
 class UnableToSelectBatchError(frappe.ValidationError):

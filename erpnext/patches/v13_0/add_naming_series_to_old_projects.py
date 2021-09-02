@@ -1,10 +1,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.custom.doctype.property_setter.property_setter import (
-	delete_property_setter,
-	make_property_setter,
-)
 
 
 def execute():

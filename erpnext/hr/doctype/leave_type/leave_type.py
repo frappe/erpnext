@@ -3,8 +3,6 @@
 
 from __future__ import unicode_literals
 
-import calendar
-from datetime import datetime
 
 import frappe
 from frappe import _

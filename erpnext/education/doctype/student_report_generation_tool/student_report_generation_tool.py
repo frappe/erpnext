@@ -11,7 +11,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
 
-from erpnext.education.api import get_grade
 from erpnext.education.report.course_wise_assessment_report.course_wise_assessment_report import (
 	get_child_assessment_groups,
 	get_formatted_result,

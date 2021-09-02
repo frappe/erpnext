@@ -4,20 +4,16 @@
 
 from __future__ import unicode_literals
 
-import json
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils import (
-	add_days,
-	add_months,
+    add_days,
 	cint,
 	date_diff,
 	flt,
 	get_datetime,
-	get_first_day,
-	getdate,
+	getdate
 )
 from six import iteritems
 

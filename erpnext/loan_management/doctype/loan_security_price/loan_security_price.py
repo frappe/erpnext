@@ -8,14 +8,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import (
-	add_to_date,
-	get_datetime,
-	get_datetime_str,
-	get_timestamp,
-	getdate,
-	now_datetime,
+    get_datetime
 )
-from six import iteritems
 
 
 class LoanSecurityPrice(Document):

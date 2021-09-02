@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-import erpnext
 
 
 def execute(filters=None):

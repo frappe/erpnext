@@ -7,9 +7,8 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import cint, cstr, flt, formatdate, getdate, now, nowdate, time_diff_in_seconds
+from frappe.utils import cint, cstr, flt, getdate, nowdate
 
-import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,

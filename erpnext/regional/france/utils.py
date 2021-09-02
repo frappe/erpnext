@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import frappe
 
 
 # don't remove this function it is used in tests

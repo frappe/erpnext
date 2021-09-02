@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-from pprint import pprint
 
 import frappe
 

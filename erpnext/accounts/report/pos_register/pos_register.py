@@ -4,9 +4,8 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _, _dict
+from frappe import _
 
-from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 
 

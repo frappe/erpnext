@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import flt, get_datetime
+from frappe.utils import flt
 from six import iteritems
 
 import erpnext

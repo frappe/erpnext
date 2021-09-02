@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from dateutil.parser import parse
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import (

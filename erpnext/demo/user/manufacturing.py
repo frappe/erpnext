@@ -12,7 +12,6 @@ from frappe.utils.make_random import how_many
 
 import erpnext
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 
 
 def work():
@@ -20,8 +19,6 @@ def work():
 
 	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
 	if not frappe.get_all('Sales Order'): return
-
-	from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 
 	ppt = frappe.new_doc("Production Plan")
 	ppt.company = erpnext.get_default_company()

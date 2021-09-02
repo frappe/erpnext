@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import add_months, add_to_date, cint, flt, now, today
+from frappe.utils import add_months, cint, flt, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom

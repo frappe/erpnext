@@ -9,12 +9,10 @@ import frappe.defaults
 from frappe import _, throw
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
-from six import iteritems
 
 import erpnext
 
 # imported to enable erpnext.accounts.utils.get_account_currency
-from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_stock_value_on
 

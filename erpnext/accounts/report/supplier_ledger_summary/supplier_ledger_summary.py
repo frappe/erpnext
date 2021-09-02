@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import frappe
 
 from erpnext.accounts.report.customer_ledger_summary.customer_ledger_summary import (
 	PartyLedgerSummaryReport,

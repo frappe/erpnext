@@ -14,7 +14,6 @@ from frappe.utils import cint, cstr, flt, today
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
-from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_details
 from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate

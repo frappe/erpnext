@@ -8,7 +8,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt
-from six import iteritems
 
 import erpnext
 

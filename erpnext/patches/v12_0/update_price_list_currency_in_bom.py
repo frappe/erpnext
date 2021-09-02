@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import flt, getdate
+from frappe.utils import getdate
 
 from erpnext.setup.utils import get_exchange_rate
 

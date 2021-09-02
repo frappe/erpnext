@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _
 
 from erpnext.projects.report.billing_summary import get_columns, get_data
 

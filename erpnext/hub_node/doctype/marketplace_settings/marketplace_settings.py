@@ -4,17 +4,12 @@
 from __future__ import unicode_literals
 
 import json
-import time
 
 import frappe
-import requests
-from frappe import _
 from frappe.frappeclient import FrappeClient
 from frappe.model.document import Document
-from frappe.utils import add_years, cint, get_datetime, get_datetime_str, now
-from six import string_types
+from frappe.utils import cint
 
-from erpnext.utilities.product import get_price, get_qty_in_stock
 
 
 class MarketplaceSettings(Document):
@@ -89,7 +84,6 @@ class MarketplaceSettings(Document):
 
 	def unregister(self):
 		"""Disable the User on hubmarket.org"""
-		pass
 
 @frappe.whitelist()
 def is_marketplace_enabled():

@@ -6,7 +6,6 @@ from frappe.model.naming import make_autoname
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
-from erpnext.loan_management.doctype.loan.loan import make_repayment_entry
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	get_accrued_interest_entries,
 )

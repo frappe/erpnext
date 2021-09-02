@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import inspect
 
 import frappe
-from frappe.utils import getdate
 
 from erpnext.hooks import regional_overrides
 

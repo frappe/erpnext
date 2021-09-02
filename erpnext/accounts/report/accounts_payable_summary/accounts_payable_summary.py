@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import frappe
 
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
 	AccountsReceivableSummary,

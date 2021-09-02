@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import getdate, nowdate
 
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry

@@ -7,20 +7,15 @@ import frappe
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (
-	cint,
+    cint,
 	cstr,
 	date_diff,
 	flt,
 	getdate,
-	money_in_words,
-	nowdate,
-	round_based_on_smallest_currency_fraction,
+	nowdate
 )
 from six import string_types
 
-import erpnext
-from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.hr.utils import get_salary_assignment

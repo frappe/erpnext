@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import json
 
 import frappe
-from frappe import _
 
 
 def get_company_for_dashboards():

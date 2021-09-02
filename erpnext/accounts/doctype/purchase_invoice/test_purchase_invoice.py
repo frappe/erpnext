@@ -7,8 +7,6 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-import frappe.defaults
-import frappe.model
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext

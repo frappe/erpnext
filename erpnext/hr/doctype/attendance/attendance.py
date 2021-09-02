@@ -135,7 +135,6 @@ def mark_attendance(employee, attendance_date, status, shift=None, leave_type=No
 @frappe.whitelist()
 def mark_bulk_attendance(data):
 	import json
-	from pprint import pprint
 	if isinstance(data, str):
 		data = json.loads(data)
 	data = frappe._dict(data)

@@ -26,7 +26,6 @@ from six import iteritems
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	calculate_amounts,

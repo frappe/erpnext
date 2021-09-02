@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe import ValidationError, _
+from frappe import ValidationError
 
 # test_records = frappe.get_test_records('Bank Account')
 

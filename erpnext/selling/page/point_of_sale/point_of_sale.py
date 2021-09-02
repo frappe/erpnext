@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import json
 
 import frappe
-from frappe.utils import cint
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability

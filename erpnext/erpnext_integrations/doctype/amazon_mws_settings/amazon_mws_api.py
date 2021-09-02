@@ -10,10 +10,8 @@ import base64
 import hashlib
 import hmac
 import re
-import urllib
 from urllib.parse import quote
 
-import six
 
 from erpnext.erpnext_integrations.doctype.amazon_mws_settings import xml_utils
 

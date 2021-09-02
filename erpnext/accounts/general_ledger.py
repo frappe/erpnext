@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, comma_and, cstr, flt, formatdate, getdate, now, today
+from frappe.utils import cint, cstr, flt, formatdate, getdate, now
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (

@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 from frappe import _
 
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
 

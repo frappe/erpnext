@@ -3,10 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.desk.form import assign_to
-from frappe.model.document import Document
 from frappe.utils import (
-	add_days,
+    add_days,
 	cstr,
 	flt,
 	format_datetime,
@@ -15,8 +13,7 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	nowdate,
-	today,
-	unique,
+	today
 )
 
 import erpnext

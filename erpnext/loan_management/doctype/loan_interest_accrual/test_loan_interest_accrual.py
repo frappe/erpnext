@@ -7,14 +7,12 @@ import unittest
 
 import frappe
 from frappe.utils import (
-	add_days,
-	add_to_date,
+    add_to_date,
 	date_diff,
 	flt,
 	get_datetime,
 	get_first_day,
-	get_last_day,
-	nowdate,
+	nowdate
 )
 
 from erpnext.loan_management.doctype.loan.test_loan import (

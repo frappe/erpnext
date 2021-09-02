@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _
 from frappe.model.meta import get_field_precision
 
 from erpnext import get_default_currency

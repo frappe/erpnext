@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
-from frappe.utils import cint, flt, fmt_money, formatdate, getdate
+from frappe.utils import flt, fmt_money
 from six import iteritems
 
 import erpnext

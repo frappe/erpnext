@@ -7,8 +7,7 @@ import datetime
 import unittest
 
 import frappe
-from frappe.utils import add_days, add_months, now_datetime, nowdate
-from frappe.utils.make_random import get_random
+from frappe.utils import add_months, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.hr.doctype.employee.test_employee import make_employee

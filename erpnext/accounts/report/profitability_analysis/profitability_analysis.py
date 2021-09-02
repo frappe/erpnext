@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import cstr, flt, formatdate, getdate
+from frappe.utils import cstr, flt
 
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,

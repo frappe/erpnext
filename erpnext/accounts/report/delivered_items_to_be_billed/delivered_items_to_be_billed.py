@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import frappe
 from frappe import _
 
 from erpnext.accounts.report.non_billed_report import get_ordered_to_be_billed_data

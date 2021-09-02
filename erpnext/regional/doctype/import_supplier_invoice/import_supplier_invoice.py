@@ -3,19 +3,15 @@
 
 from __future__ import unicode_literals
 
-import json
 import re
-import traceback
 import zipfile
-from decimal import Decimal
 
 import dateutil
 import frappe
 from bs4 import BeautifulSoup as bs
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, flt, get_datetime_str, get_files_path, nowdate, today
+from frappe.utils import flt, get_datetime_str, today
 from frappe.utils.data import format_datetime
 from frappe.utils.file_manager import save_file
 

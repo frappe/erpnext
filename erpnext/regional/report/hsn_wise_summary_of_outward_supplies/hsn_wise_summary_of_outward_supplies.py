@@ -9,7 +9,6 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cstr, flt, getdate
-from frappe.utils.xlsxutils import handle_html
 from six import iteritems
 
 import erpnext

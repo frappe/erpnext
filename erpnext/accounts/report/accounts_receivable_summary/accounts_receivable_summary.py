@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import cint, flt
+from frappe.utils import cint
 from six import iteritems
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount

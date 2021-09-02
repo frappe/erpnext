@@ -3,11 +3,9 @@
 
 from __future__ import unicode_literals
 
-import itertools
 
 import frappe
 from frappe import _, get_all
-from frappe.utils import formatdate
 
 
 def execute(filters=None):

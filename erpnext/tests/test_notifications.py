@@ -7,7 +7,6 @@ import unittest
 
 import frappe
 from frappe.desk import notifications
-from frappe.test_runner import make_test_objects
 
 
 class TestNotifications(unittest.TestCase):

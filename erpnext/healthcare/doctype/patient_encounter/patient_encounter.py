@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, cstr, getdate
+from frappe.utils import add_days, getdate
 
 
 class PatientEncounter(Document):

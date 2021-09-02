@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import flt
 
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_details
 from erpnext.hr.report.employee_leave_balance.employee_leave_balance import (

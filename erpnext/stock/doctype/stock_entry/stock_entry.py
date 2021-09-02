@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import json
 
 import frappe
-import frappe.defaults
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate

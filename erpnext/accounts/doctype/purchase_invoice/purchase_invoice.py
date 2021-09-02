@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
 from frappe import _, throw
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate

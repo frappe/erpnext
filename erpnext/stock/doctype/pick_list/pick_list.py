@@ -10,7 +10,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc, map_child_doc
+from frappe.model.mapper import map_child_doc
 from frappe.utils import cint, floor, flt, today
 from six import iteritems
 

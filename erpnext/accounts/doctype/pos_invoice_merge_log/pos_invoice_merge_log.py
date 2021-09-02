@@ -10,7 +10,6 @@ import frappe
 import six
 from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
-from frappe.model import default_fields
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe.utils import flt, getdate, nowdate

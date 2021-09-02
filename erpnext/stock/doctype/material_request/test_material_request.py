@@ -11,7 +11,6 @@ import unittest
 import frappe
 from frappe.utils import flt, today
 
-import erpnext
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.material_request.material_request import (
 	make_purchase_order,

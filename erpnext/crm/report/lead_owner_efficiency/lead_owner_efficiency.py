@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import frappe
 from frappe import _
 
 from erpnext.crm.report.campaign_efficiency.campaign_efficiency import get_lead_data

@@ -6,11 +6,10 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _, msgprint
-from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import comma_and, get_link_to_form, getdate
 
-import erpnext.www.lms as lms
 
 
 class ProgramEnrollment(Document):

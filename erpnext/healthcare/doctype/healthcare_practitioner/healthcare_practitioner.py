@@ -10,7 +10,6 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
-from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from frappe.model.document import Document
 from frappe.model.naming import append_number_if_name_exists
 

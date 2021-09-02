@@ -7,7 +7,7 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
-from frappe.utils import cint, date_diff, flt, getdate, now
+from frappe.utils import cint, date_diff, flt, getdate
 from six import iteritems
 
 import erpnext

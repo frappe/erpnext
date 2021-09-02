@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import cstr, flt, nowdate, random_string
+from frappe.utils import random_string
 
 # test_records = frappe.get_test_records('Vehicle')
 

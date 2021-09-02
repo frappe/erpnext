@@ -6,10 +6,8 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.test_runner import make_test_objects
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.get_item_details import get_item_details
 
 test_dependencies = ['Item']
 

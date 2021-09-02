@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import add_years, cstr, flt, formatdate, getdate, today
+from frappe.utils import cstr, flt, formatdate, getdate
 
 from erpnext.accounts.report.financial_statements import (
 	get_fiscal_year_data,

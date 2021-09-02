@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
 from frappe import _, msgprint
 from frappe.utils import cint, cstr, flt
 
@@ -13,7 +12,7 @@ from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_available_serial_nos, get_incoming_rate, get_stock_balance
+from erpnext.stock.utils import get_stock_balance
 
 
 class OpeningEntryAccountError(frappe.ValidationError): pass

@@ -7,8 +7,7 @@ from frappe.utils import add_days, add_months, getdate, nowdate
 
 import erpnext
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import (
-	expire_allocation,
-	process_expired_allocation,
+    process_expired_allocation
 )
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 

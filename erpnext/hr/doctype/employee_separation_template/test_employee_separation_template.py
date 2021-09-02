@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import unittest
 
-import frappe
 
 
 class TestEmployeeSeparationTemplate(unittest.TestCase):

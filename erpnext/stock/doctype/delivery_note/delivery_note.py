@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications

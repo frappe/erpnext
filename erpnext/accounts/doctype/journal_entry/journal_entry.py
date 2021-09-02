@@ -7,7 +7,7 @@ import json
 
 import frappe
 from frappe import _, msgprint, scrub
-from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
 from six import iteritems, string_types
 
 import erpnext

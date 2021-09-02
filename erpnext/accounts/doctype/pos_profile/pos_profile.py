@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, now
+from frappe.utils import get_link_to_form, now
 from six import iteritems
 
 

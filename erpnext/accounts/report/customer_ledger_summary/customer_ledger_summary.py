@@ -8,7 +8,6 @@ from frappe import _, scrub
 from frappe.utils import getdate, nowdate
 from six import iteritems, itervalues
 
-import erpnext
 
 
 class PartyLedgerSummaryReport(object):

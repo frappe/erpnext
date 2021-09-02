@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import DATE_FORMAT, add_days, flt, getdate, today
+from frappe.utils import DATE_FORMAT, flt, getdate, today
 
 
 class LeaveLedgerEntry(Document):

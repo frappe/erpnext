@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import unittest
 
-import frappe
 
 test_dependencies = ["Hotel Room Package"]
 test_records = [

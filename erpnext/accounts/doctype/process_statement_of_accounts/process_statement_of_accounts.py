@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import copy
-from datetime import timedelta
 
 import frappe
 from frappe import _
@@ -13,7 +12,6 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_months, format_date, getdate, today
 from frappe.utils.jinja import validate_template
 from frappe.utils.pdf import get_pdf
-from frappe.utils.print_format import report_to_pdf
 from frappe.www.printview import get_print_style
 
 from erpnext import get_company_currency

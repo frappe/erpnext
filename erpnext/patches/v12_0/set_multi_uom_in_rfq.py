@@ -4,9 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import flt
 
-from erpnext.stock.get_item_details import get_conversion_factor
 
 
 def execute():

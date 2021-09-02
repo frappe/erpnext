@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.communication.email import make
 from frappe.model.document import Document
-from frappe.utils import add_days, cstr, getdate, nowdate, today
+from frappe.utils import add_days, getdate, today
 
 
 class EmailCampaign(Document):

@@ -9,7 +9,7 @@ import math
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, flt, getdate, now_datetime, nowdate, rounded
+from frappe.utils import add_months, flt, getdate, now_datetime, nowdate
 from six import string_types
 
 import erpnext

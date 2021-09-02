@@ -16,7 +16,6 @@ from frappe.utils import (
 	rounded,
 	today,
 )
-from frappe.utils.background_jobs import enqueue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,

@@ -7,7 +7,6 @@ import unittest
 
 import frappe
 
-from erpnext.education.doctype.course_activity.test_course_activity import make_course_activity
 from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
 from erpnext.education.doctype.student.test_student import create_student, get_student
 

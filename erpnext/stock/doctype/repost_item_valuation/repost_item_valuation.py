@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_to_date, cint, get_link_to_form, now, time_diff_in_hours, today
+from frappe.utils import cint, get_link_to_form, now, today
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 

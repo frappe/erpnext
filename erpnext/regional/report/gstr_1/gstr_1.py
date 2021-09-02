@@ -8,10 +8,9 @@ from datetime import date
 
 import frappe
 from frappe import _
-from frappe.utils import flt, formatdate, getdate, now_datetime
+from frappe.utils import flt, formatdate, getdate
 from six import iteritems
 
-from erpnext.regional.doctype.gstr_3b_report.gstr_3b_report import get_period
 from erpnext.regional.india.utils import get_gst_accounts
 
 
