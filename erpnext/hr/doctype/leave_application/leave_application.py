@@ -132,6 +132,11 @@ class LeaveApplication(Document):
 				if attendance_name:
 					# update existing attendance, change absent to on leave
 					doc = frappe.get_doc('Attendance', attendance_name)
+
+					if doc.attendance_request:
+						frappe.throw(_("Cannot mark On Leave for {0} because attendance is marked by {1} on that date")
+							.format(formatdate(date), frappe.get_desk_link("Attendance Request", doc.attendance_request)))
+
 					doc.db_set({
 						'status': status,
 						'previous_status': doc.status,
@@ -279,7 +284,7 @@ class LeaveApplication(Document):
 
 	def validate_attendance(self):
 		attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s and (attendance_date between %s and %s)
-					and status = "Present" and docstatus = 1""",
+					and (status = 'Present' or ifnull(attendance_request, '') != '') and docstatus = 1""",
 			(self.employee, self.from_date, self.to_date))
 		if attendance:
 			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),
