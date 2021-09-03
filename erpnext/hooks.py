@@ -317,6 +317,9 @@ doc_events = {
 	},
 	"Company": {
 		"on_trash": "erpnext.regional.india.utils.delete_gst_settings_for_company"
+	},
+	"Integration Request": {
+		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"
 	}
 }
 
