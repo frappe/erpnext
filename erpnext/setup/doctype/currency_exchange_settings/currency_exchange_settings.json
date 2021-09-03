@@ -55,15 +55,16 @@
   },
   {
    "fieldname": "result_key",
-   "fieldtype": "Data",
+   "fieldtype": "Table",
    "label": "Result Key",
+   "options": "Currency Exchange Settings Result",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-02 15:18:29.198210",
+ "modified": "2021-09-03 13:21:16.397695",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Currency Exchange Settings",

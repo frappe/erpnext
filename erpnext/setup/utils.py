@@ -98,15 +98,31 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
-			api_url = "https://api.exchangerate.host/convert"
-			response = requests.get(api_url, params={
-				"date": transaction_date,
-				"from": from_currency,
-				"to": to_currency
-			})
+			settings = frappe.get_single('Currency Exchange Settings')
+			req_params={
+				"transaction_date": transaction_date,
+				"from_currency": from_currency,
+				"to_currency": to_currency
+			}
+			params = {}
+			for row in settings.req_params:
+				params[row.key] = req_params[row.value]
+			for eparam in settings.extra_params:
+				params[eparam.key] = eparam.value
+			response = requests.get(settings.api_endpoint.format(
+				transaction_date=transaction_date,
+				to_currency=to_currency,
+				from_currency=from_currency
+			), params=params)
 			# expire in 6 hours
 			response.raise_for_status()
-			value = response.json()["result"]
+			value = response.json()
+			for res_key in settings.result_key:
+				value = value[str(res_key.key).format(
+					transaction_date=transaction_date,
+					to_currency=to_currency,
+					from_currency=from_currency
+				)]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:

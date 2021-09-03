@@ -9,10 +9,13 @@ class CurrencyExchangeSettings(Document):
 	def validate(self):
 		if len(self.req_params) != 3:
 			frappe.throw(_("Make sure all the three mandatory parameters are filled."))
-		req_params = {
-			'transaction_date': '2021-08-01',
-			'from_currency': 'USD',
-			'to_currency': 'INR'
+		transaction_date = '2021-08-01'
+		from_currency = 'USD'
+		to_currency = 'INR'
+		req_params={
+			"transaction_date": transaction_date,
+			"from_currency": from_currency,
+			"to_currency": to_currency
 		}
 		params = {}
 		for row in self.req_params:
@@ -21,8 +24,14 @@ class CurrencyExchangeSettings(Document):
 				req_params.pop(row.value)
 			except:
 				frappe.throw(_("Make sure all the three mandatory parameters are filled."))
+		for eparam in self.extra_params:
+			params[eparam.key] = eparam.value
 		import requests
-		api_url = self.api_endpoint
+		api_url = self.api_endpoint.format(
+			transaction_date=transaction_date,
+			to_currency=to_currency,
+			from_currency=from_currency
+		)
 		try:
 			response = requests.get(api_url, params=params)
 		except requests.exceptions.RequestException as e:
@@ -30,9 +39,14 @@ class CurrencyExchangeSettings(Document):
 		response.raise_for_status()
 		value = response.json()
 		try:
-			rate = value[str(self.result_key)]
+			for key in self.result_key:
+				value = value[str(key.key).format(
+					transaction_date=transaction_date,
+					to_currency=to_currency, 
+					from_currency=from_currency
+				)]
 		except KeyError:
-			frappe.throw(_("Invalid result key."))
-		if not isinstance(rate, (int, float)):
+			frappe.throw(_("Invalid result key. Response: ") + response.text)
+		if not isinstance(value, (int, float)):
 			frappe.throw(_("Returned exchange rate is neither integer not float."))
-		frappe.msgprint(_("Exchange rate of USD to INR on 01-08-2021 is ") + str(rate))
+		frappe.msgprint(_("Exchange rate of USD to INR on 01-08-2021 is ") + str(value))
