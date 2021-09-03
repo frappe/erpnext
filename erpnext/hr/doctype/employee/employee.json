@@ -79,6 +79,8 @@
   "permanent_address",
   "permanent_accommodation_type",
   "personal_details",
+  "father_name",
+  "mother_name",
   "health_insurance_provider",
   "health_insurance_no",
   "column_break6",
@@ -861,12 +863,22 @@
   {
    "fieldname": "column_break_57",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "father_name",
+   "fieldtype": "Data",
+   "label": "Father Name"
+  },
+  {
+   "fieldname": "mother_name",
+   "fieldtype": "Data",
+   "label": "Mother Name"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2021-09-02 00:57:49.084304",
+ "modified": "2021-09-03 15:29:00.460667",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
