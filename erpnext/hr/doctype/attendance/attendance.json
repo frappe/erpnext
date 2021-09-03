@@ -26,8 +26,9 @@
   "attendance_date",
   "shift",
   "working_hours",
-  "early_exit",
-  "late_entry"
+  "late_entry",
+  "previous_late_entry",
+  "early_exit"
  ],
  "fields": [
   {
@@ -213,9 +214,19 @@
    "no_copy": 1
   },
   {
+   "depends_on": "previous_status",
    "fieldname": "previous_status",
    "fieldtype": "Data",
-   "label": "Previous Status",
+   "label": "Status Before Modification",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "previous_status",
+   "fieldname": "previous_late_entry",
+   "fieldtype": "Check",
+   "label": "Late Entry Before Modification",
    "no_copy": 1,
    "read_only": 1
   }
@@ -223,7 +234,7 @@
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-09-03 00:33:30.140644",
+ "modified": "2021-09-03 14:29:05.603874",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

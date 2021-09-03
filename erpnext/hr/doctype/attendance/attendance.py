@@ -19,6 +19,11 @@ class Attendance(Document):
 		self.check_attendance_request_record()
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day"])
 
+	def before_validate_links(self):
+		self.leave_application = None
+		self.leave_type = None
+		self.attendance_request = None
+
 	def validate_duplicate_record(self):
 		res = frappe.db.sql("""
 			select name

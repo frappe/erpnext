@@ -9,21 +9,20 @@
  "field_order": [
   "employee",
   "employee_name",
-  "column_break_3",
   "designation",
   "department",
   "branch",
   "company",
+  "column_break_3",
+  "reason",
+  "explanation",
   "column_break_5",
   "amended_from",
   "from_date",
   "to_date",
+  "remove_late_entry",
   "half_day",
-  "half_day_date",
-  "reason_section",
-  "reason",
-  "column_break_4",
-  "explanation"
+  "half_day_date"
  ],
  "fields": [
   {
@@ -33,7 +32,8 @@
    "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "employee.employee_name",
@@ -68,14 +68,16 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "From Date",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "To Date",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -91,21 +93,12 @@
    "label": "Half Day Date"
   },
   {
-   "fieldname": "reason_section",
-   "fieldtype": "Section Break",
-   "label": "Reason"
-  },
-  {
    "fieldname": "reason",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Reason",
    "options": "\nWork From Home\nOn Duty",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "explanation",
@@ -142,10 +135,16 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "remove_late_entry",
+   "fieldtype": "Check",
+   "label": "Remove Late Entry"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-09-03 00:09:27.916969",
+ "modified": "2021-09-03 14:51:06.303092",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Request",
