@@ -265,10 +265,9 @@ class TestProductDataEngine(unittest.TestCase):
 		)
 		items = result.get("items")
 
-		# check if only product with 10% and below discount are fetched in the right order
-		self.assertEqual(len(items), 2)
-		self.assertEqual(items[0].get("item_code"), "Test 13I Laptop")
-		self.assertEqual(items[1].get("item_code"), "Test 12I Laptop")
+		# check if only product with 10% and below discount are fetched
+		self.assertEqual(len(items), 1)
+		self.assertEqual(items[0].get("item_code"), "Test 12I Laptop")
 
 	def test_product_list_with_api(self):
 		"Test products listing using API."
