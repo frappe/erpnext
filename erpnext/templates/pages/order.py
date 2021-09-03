@@ -8,6 +8,7 @@ from frappe import _
 
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import show_attachments
 
+
 def get_context(context):
 	context.no_cache = 1
 	context.show_sidebar = True

@@ -2,13 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
-from frappe.utils import nowdate, add_months
-from erpnext.tests.utils import create_test_contact_and_address
+from frappe.utils import add_months, nowdate
+
+from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
-from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
-from erpnext.accounts.doctype.tax_rule.tax_rule import  ConflictingTaxRule
+from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, get_party, update_cart
+from erpnext.tests.utils import create_test_contact_and_address
+
 
 class TestShoppingCart(unittest.TestCase):
 	"""

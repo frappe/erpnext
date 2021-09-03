@@ -6,7 +6,10 @@ import unittest
 
 import frappe
 
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import ShoppingCartSetupError
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+	ShoppingCartSetupError,
+)
+
 
 class TestECommerceSettings(unittest.TestCase):
 	def setUp(self):

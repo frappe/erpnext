@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe.utils import cint
+
 
 def execute():
 	frappe.reload_doc("e_commerce", "doctype", "e_commerce_settings")

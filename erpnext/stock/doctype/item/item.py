@@ -7,6 +7,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import (
 	cint,
 	cstr,
@@ -21,7 +22,6 @@ from frappe.utils import (
 )
 from frappe.utils.html_utils import clean_html
 from frappe.website.render import clear_cache
-from frappe.model.document import Document
 
 import erpnext
 from erpnext.controllers.item_variant import (
