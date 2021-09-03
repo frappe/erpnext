@@ -289,7 +289,7 @@ class ProductQuery:
 	def filter_results_by_discount(self, fields, result):
 		if fields and fields.get("discount"):
 			discount_percent = frappe.utils.flt(fields["discount"][0])
-			result = [row for row in result if row.get("discount_percent") and row.discount_percent >= discount_percent]
+			result = [row for row in result if row.get("discount_percent") and row.discount_percent <= discount_percent]
 
 		if self.filter_with_discount:
 			# no limit was added to results while querying
