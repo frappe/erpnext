@@ -35,6 +35,7 @@
   "from_warehouse",
   "source_warehouse_address",
   "source_address_display",
+  "reference",
   "cb0",
   "to_warehouse",
   "target_warehouse_address",
@@ -633,12 +634,21 @@
    "fieldname": "description",
    "fieldtype": "Long Text",
    "label": "Description"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Reference"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-08-17 16:34:08.802258",
+ "modified": "2021-09-03 12:02:19.654485",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
