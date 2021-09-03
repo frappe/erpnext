@@ -2,14 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-import erpnext
+
 import json
-from frappe.desk.reportview import get_match_cond, get_filters_cond
-from frappe.utils import nowdate, getdate
 from collections import defaultdict
+
+import frappe
+from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.utils import nowdate, unique
+
+import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
-from frappe.utils import unique
+
 
 # searches for active employees
 @frappe.whitelist()
@@ -517,7 +520,9 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
+	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+		get_dimension_filter_map,
+	)
 	dimension_filters = get_dimension_filter_map()
 	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
 	query_filters = []
@@ -692,7 +697,9 @@ def get_healthcare_service_units(doctype, txt, searchfield, start, page_len, fil
 				company = frappe.db.escape(filters.get('company')), txt = frappe.db.escape('%{0}%'.format(txt)))
 
 	if filters and filters.get('inpatient_record'):
-		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
+			get_current_healthcare_service_unit,
+		)
 		service_unit = get_current_healthcare_service_unit(filters.get('inpatient_record'))
 
 		# if the patient is admitted, then appointments should be allowed against the admission service unit,

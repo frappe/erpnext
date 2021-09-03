@@ -4,11 +4,14 @@
 from __future__ import unicode_literals
 
 import unittest
+
 import frappe
 from frappe.utils import random_string
-from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
-from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
 from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchError
+from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
 
 class TestJobCard(unittest.TestCase):
 	def test_job_card(self):

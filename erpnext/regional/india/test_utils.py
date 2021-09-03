@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
 
 import unittest
-import frappe
 from unittest.mock import patch
+
+import frappe
+
 from erpnext.regional.india.utils import validate_document_name
 
 

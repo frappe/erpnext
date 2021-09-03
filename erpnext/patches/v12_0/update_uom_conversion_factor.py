@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
-import frappe, json
+
+import frappe
+
 
 def execute():
 	from erpnext.setup.setup_wizard.operations.install_fixtures import add_uom_data

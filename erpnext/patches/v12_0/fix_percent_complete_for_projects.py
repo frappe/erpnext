@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import flt
 
+
 def execute():
 	for project in frappe.get_all("Project", fields=["name", "percent_complete_method"]):
 		total = frappe.db.count('Task', dict(project=project.name))

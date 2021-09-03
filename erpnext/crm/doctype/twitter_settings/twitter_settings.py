@@ -3,12 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, os, tweepy, json
+
+import json
+
+import frappe
+import tweepy
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_url_to_form
 from frappe.utils.file_manager import get_file_path
-from frappe.utils import get_url_to_form, get_link_to_form
 from tweepy.error import TweepError
+
 
 class TwitterSettings(Document):
 	@frappe.whitelist()

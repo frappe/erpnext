@@ -2,12 +2,15 @@
 # See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import unittest
+
+import frappe
 
 test_records = frappe.get_test_records('Item Attribute')
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
+
 
 class TestItemAttribute(unittest.TestCase):
 	def setUp(self):

@@ -3,14 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import os
+
 import json
+import os
+
 import frappe
-from six import iteritems
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, cstr
+from frappe.utils import cstr, flt
+from six import iteritems
+
 from erpnext.regional.india import state_numbers
+
 
 class GSTR3BReport(Document):
 	def validate(self):

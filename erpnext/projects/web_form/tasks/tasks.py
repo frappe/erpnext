@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import frappe
 
+
 def get_context(context):
 	if frappe.form_dict.project:
 		context.parents = [{'title': frappe.form_dict.project, 'route': '/projects?project='+ frappe.form_dict.project}]
