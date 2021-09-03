@@ -3,13 +3,20 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import now_datetime, today
 from frappe.utils.make_random import get_random
-from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
+
+from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+	admit_patient,
+	discharge_patient,
+	schedule_discharge,
+)
 from erpnext.healthcare.doctype.lab_test.test_lab_test import create_patient_encounter
 from erpnext.healthcare.utils import get_encounters_to_invoice
+
 
 class TestInpatientRecord(unittest.TestCase):
 	def test_admit_and_discharge(self):

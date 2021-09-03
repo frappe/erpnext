@@ -2,22 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, os, json
-from frappe import _
-from frappe.utils import get_timestamp
 
-from frappe.utils import cint, today, formatdate
-import frappe.defaults
-from frappe.cache_manager import clear_defaults_cache
-
-from frappe.model.document import Document
-from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils.nestedset import NestedSet
-
-from past.builtins import cmp
 import functools
+import json
+import os
+
+import frappe
+import frappe.defaults
+from frappe import _
+from frappe.cache_manager import clear_defaults_cache
+from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.utils import cint, formatdate, get_timestamp, today
+from frappe.utils.nestedset import NestedSet
+from past.builtins import cmp
+
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
+
 
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
@@ -479,8 +480,9 @@ def update_company_current_month_sales(company):
 
 def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
-	from frappe.utils.goal import get_monthly_results
 	import json
+
+	from frappe.utils.goal import get_monthly_results
 	filter_str = "company = {0} and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
 	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total",
 		"posting_date", filter_str, "sum")

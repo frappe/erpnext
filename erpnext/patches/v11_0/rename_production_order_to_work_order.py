@@ -2,8 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	frappe.rename_doc('DocType', 'Production Order', 'Work Order', force=True)

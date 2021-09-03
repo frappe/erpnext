@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-import frappe
+
 import unittest
 
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import ShoppingCartSetupError
+import frappe
+
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+	ShoppingCartSetupError,
+)
+
 
 class TestECommerceSettings(unittest.TestCase):
 	def setUp(self):

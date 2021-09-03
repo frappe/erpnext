@@ -2,10 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt, nowdate
-import frappe.defaults
 from frappe.model.document import Document
+from frappe.utils import flt, nowdate
+
 
 class Bin(Document):
 	def before_save(self):

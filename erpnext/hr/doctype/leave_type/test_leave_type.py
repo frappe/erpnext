@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _
 
 test_records = frappe.get_test_records('Leave Type')
 

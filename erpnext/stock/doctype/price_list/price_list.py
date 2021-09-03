@@ -2,11 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _, throw
-from frappe.utils import cint
 from frappe.model.document import Document
-import frappe.defaults
+from frappe.utils import cint
+
 
 class PriceList(Document):
 	def validate(self):
@@ -37,7 +38,9 @@ class PriceList(Document):
 
 	def check_impact_on_shopping_cart(self):
 		"Check if Price List currency change impacts E Commerce Cart."
-		from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import validate_cart_settings
+		from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+			validate_cart_settings,
+		)
 
 		doc_before_save = self.get_doc_before_save()
 		currency_changed = self.currency != doc_before_save.currency

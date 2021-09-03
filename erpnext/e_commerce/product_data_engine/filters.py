@@ -4,6 +4,7 @@ import frappe
 from frappe import _dict
 from frappe.utils import floor
 
+
 class ProductFiltersBuilder:
 	def __init__(self, item_group=None):
 		if not item_group:

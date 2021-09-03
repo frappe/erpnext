@@ -3,10 +3,11 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate
 from datetime import date
+
+import frappe
+from frappe.utils import nowdate
 
 test_dependencies = ["Employee"]
 

@@ -3,10 +3,12 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.stock.get_item_details import get_pos_profile
+
+import frappe
+
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes
+from erpnext.stock.get_item_details import get_pos_profile
 
 test_dependencies = ['Item']
 

@@ -2,13 +2,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe import _
-from frappe.utils import flt, formatdate, now_datetime, getdate
+
+import json
 from datetime import date
+
+import frappe
+from frappe import _
+from frappe.utils import flt, formatdate, getdate
 from six import iteritems
-from erpnext.regional.doctype.gstr_3b_report.gstr_3b_report import get_period
+
 from erpnext.regional.india.utils import get_gst_accounts
+
 
 def execute(filters=None):
 	return Gstr1Report(filters).run()
@@ -50,7 +54,7 @@ class Gstr1Report(object):
 			self.get_invoice_items()
 			self.get_items_based_on_tax_rate()
 			self.invoice_fields = [d["fieldname"] for d in self.invoice_columns]
-		
+
 		self.get_data()
 
 		return self.columns, self.data
@@ -709,7 +713,7 @@ class Gstr1Report(object):
 						"width": 100
 				}
 			]
-			
+
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
 
 @frappe.whitelist()
