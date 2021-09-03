@@ -460,6 +460,8 @@ def apply_pricing_rule_on_transaction(doc):
 		if not pricing_rules:
 			remove_free_item(doc)
 
+		free_items = []
+
 		for d in pricing_rules:
 			if d.price_or_product_discount == 'Price':
 				if d.apply_discount_on:
@@ -494,9 +496,13 @@ def apply_pricing_rule_on_transaction(doc):
 			elif d.price_or_product_discount == 'Product':
 				item_details = frappe._dict({'parenttype': doc.doctype, 'free_item_data': []})
 				get_product_discount_rule(d, item_details, doc=doc)
-				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
-				doc.set_missing_values()
-				doc.calculate_taxes_and_totals()
+				if item_details.free_item_data:
+					free_items += item_details.free_item_data
+
+		if free_items:
+			apply_pricing_rule_for_free_items(doc, free_items)
+			doc.set_missing_values()
+			doc.calculate_taxes_and_totals()
 
 def remove_free_item(doc):
 	for d in doc.items:
@@ -552,13 +558,28 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 
 	item_details.free_item_data.append(free_item_data_args)
 
-def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
-	if pricing_rule_args:
-		items = tuple((d.item_code, d.pricing_rules) for d in doc.items if d.is_free_item)
+def apply_pricing_rule_for_free_items(doc, free_item_data, set_missing_values=False):
+	if free_item_data:
+		add_free_items(doc, free_item_data)
+		remove_free_items(doc, free_item_data)
 
-		for args in pricing_rule_args:
-			if not items or (args.get('item_code'), args.get('pricing_rules')) not in items:
-				doc.append('items', args)
+def add_free_items(doc, free_item_data):
+	# get all the free items from item list
+	items = tuple((d.item_code, d.pricing_rules) for d in doc.items if d.is_free_item)
+
+	# Add free item if doesn't exists in item list
+	for args in free_item_data:
+		if not items or (args.get('item_code'), args.get('pricing_rules')) not in items:
+			doc.append('items', args)
+
+def remove_free_items(doc, free_item_data):
+	# only free items which are in `free_item_data` are valid free items
+	valid_free_items = tuple((d.get('item_code'), d.get('pricing_rules')) for d in free_item_data if d.get('is_free_item'))
+
+	# remove all free items from item list which are invalid
+	for item in doc.items:
+		if item.is_free_item and (item.item_code, item.pricing_rules) not in valid_free_items:
+			doc.remove(item)
 
 def get_pricing_rule_items(pr_doc):
 	apply_on_data = []

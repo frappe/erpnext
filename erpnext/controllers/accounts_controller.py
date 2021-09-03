@@ -331,6 +331,7 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			self.pricing_rules = []
+			self.free_items = []
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -380,6 +381,9 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
 
+			if self.free_items:
+				apply_pricing_rule_for_free_items(self, self.free_items)
+
 	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
 		if not pricing_rule_args.get("validate_applied_rule", 0):
 			# if user changed the discount percentage then set user's discount percentage ?
@@ -401,7 +405,7 @@ class AccountsController(TransactionBase):
 					item.rate = pricing_rule_args.get("rate")
 
 			elif pricing_rule_args.get('free_item_data'):
-				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
+				self.free_items += pricing_rule_args.get('free_item_data')
 
 		elif pricing_rule_args.get("validate_applied_rule"):
 			for pricing_rule in get_applied_pricing_rules(item.get('pricing_rules')):
