@@ -550,5 +550,3 @@ def validate_payment(doc, method=""):
 	status = frappe.db.get_value(doc.reference_doctype, doc.reference_docname, 'status')
 	if status == 'Paid':
 		frappe.throw(_("The Payment Request {0} is already paid, cannot process payment twice").format(doc.reference_docname))
-	else:
-		return
