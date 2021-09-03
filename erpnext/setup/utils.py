@@ -101,7 +101,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		if not value:
 			import requests
 			settings = frappe.get_single('Currency Exchange Settings')
-			req_params={
+			req_params = {
 				"transaction_date": transaction_date,
 				"from_currency": from_currency,
 				"to_currency": to_currency
@@ -110,27 +110,26 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			for row in settings.req_params:
 				params[row.key] = req_params[row.value]
 			for eparam in settings.extra_params:
-				params[eparam.key] = eparam.value
-			response = requests.get(settings.api_endpoint.format(
-				transaction_date=transaction_date,
-				to_currency=to_currency,
-				from_currency=from_currency
-			), params=params)
+				params[eparam.key] = format_ces_api(eparam.value, req_params)
+			response = requests.get(format_ces_api(settings.api_endpoint, req_params), params=params)
 			# expire in 6 hours
 			response.raise_for_status()
 			value = response.json()
 			for res_key in settings.result_key:
-				value = value[str(res_key.key).format(
-					transaction_date=transaction_date,
-					to_currency=to_currency,
-					from_currency=from_currency
-				)]
+				value = value[format_ces_api(str(res_key.key), req_params)]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
+
+def format_ces_api(data="", param={}):
+	return data.format(
+		transaction_date=param["transaction_date"],
+		to_currency=param["to_currency"],
+		from_currency=param["from_currency"]
+	)
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """

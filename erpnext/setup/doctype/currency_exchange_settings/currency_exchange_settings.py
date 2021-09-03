@@ -12,7 +12,7 @@ class CurrencyExchangeSettings(Document):
 		transaction_date = '2021-08-01'
 		from_currency = 'USD'
 		to_currency = 'INR'
-		req_params={
+		req_params = {
 			"transaction_date": transaction_date,
 			"from_currency": from_currency,
 			"to_currency": to_currency
@@ -25,7 +25,11 @@ class CurrencyExchangeSettings(Document):
 			except:
 				frappe.throw(_("Make sure no mandatory parameters are repeated."))
 		for eparam in self.extra_params:
-			params[eparam.key] = eparam.value
+			params[eparam.key] = eparam.value.format(
+				transaction_date=transaction_date,
+				to_currency=to_currency,
+				from_currency=from_currency
+			)
 		import requests
 		api_url = self.api_endpoint.format(
 			transaction_date=transaction_date,
@@ -46,7 +50,8 @@ class CurrencyExchangeSettings(Document):
 					from_currency=from_currency
 				)]
 		except KeyError:
-			frappe.throw(_("Invalid result key. Response: ") + response.text)
+			frappe.throw("Invalid result key. Response: " + response.text)
 		if not isinstance(value, (int, float)):
 			frappe.throw(_("Returned exchange rate is neither integer not float."))
-		frappe.msgprint(_("Exchange rate of USD to INR on 01-08-2021 is ") + str(value))
+		self.url = response.url
+		frappe.msgprint("Exchange rate of USD to INR on 01-08-2021 is " + str(value))
