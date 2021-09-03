@@ -1,11 +1,8 @@
 # Copyright (c) 2020, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-<<<<<<< HEAD
-from __future__ import unicode_literals
-=======
->>>>>>> d1fe060e4a (fix: south africa vat patch failure (#27323))
 import frappe
+	
 from erpnext.regional.south_africa.setup import make_custom_fields, add_permissions
 
 def execute():
