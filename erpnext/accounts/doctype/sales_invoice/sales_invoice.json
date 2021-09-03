@@ -728,6 +728,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -737,6 +738,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -2031,7 +2033,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-25 15:46:05.279588",
+ "modified": "2021-08-27 20:13:40.456462",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
