@@ -48,7 +48,8 @@ frappe.query_reports["Sales Person Target Variance Based On Item Group"] = {
 			fieldname: "territory",
 			label: __("Territory"),
 			fieldtype: "Link",
-			options: "Territory"
+			options: "Territory",
+			default: "All Territories"
 		}
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
