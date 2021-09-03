@@ -54,7 +54,7 @@ class Gstr1Report(object):
 			self.get_invoice_items()
 			self.get_items_based_on_tax_rate()
 			self.invoice_fields = [d["fieldname"] for d in self.invoice_columns]
-		
+
 		self.get_data()
 
 		return self.columns, self.data
@@ -713,7 +713,7 @@ class Gstr1Report(object):
 						"width": 100
 				}
 			]
-			
+
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
 
 @frappe.whitelist()
