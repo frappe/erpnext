@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _, scrub
-from frappe.utils import cstr, cint, getdate, get_last_day
+from frappe.utils import cstr, cint, getdate, get_last_day, add_months, today
 from calendar import monthrange
 import datetime
 
@@ -257,10 +257,16 @@ def get_attendance_years():
 		select distinct YEAR(attendance_date)
 		from tabAttendance
 		where docstatus = 1
-		ORDER BY YEAR(attendance_date) DESC
 	""")
+
 	if not year_list:
-		year_list = [getdate().year]
+		year_list = []
+
+	year_list.append(getdate().year)
+	year_list.append(getdate(add_months(today(), -1)).year)
+
+	year_list = list(set(year_list))
+	year_list = sorted(year_list, reverse=True)
 
 	return "\n".join(str(year) for year in year_list)
 
