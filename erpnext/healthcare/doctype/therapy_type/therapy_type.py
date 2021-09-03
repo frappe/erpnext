@@ -3,12 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe import _
-from frappe.utils import cint
 from frappe.model.document import Document
 from frappe.model.rename_doc import rename_doc
+from frappe.utils import cint
+
 
 class TherapyType(Document):
 	def validate(self):

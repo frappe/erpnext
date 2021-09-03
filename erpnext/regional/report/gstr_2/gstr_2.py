@@ -2,9 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 from datetime import date
+
+import frappe
+
 from erpnext.regional.report.gstr_1.gstr_1 import Gstr1Report
+
 
 def execute(filters=None):
 	return Gstr2Report(filters).run()

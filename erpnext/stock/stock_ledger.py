@@ -2,16 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import erpnext
 import copy
-from frappe import _
-from frappe.utils import cint, flt, cstr, now, get_link_to_form, getdate
-from frappe.model.meta import get_field_precision
-from erpnext.stock.utils import get_valuation_method, get_incoming_outgoing_rate_for_cancel
-from erpnext.stock.utils import get_bin
 import json
+
+import frappe
+from frappe import _
+from frappe.model.meta import get_field_precision
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now
 from six import iteritems
+
+import erpnext
+from erpnext.stock.utils import (
+	get_bin,
+	get_incoming_outgoing_rate_for_cancel,
+	get_valuation_method,
+)
 
 
 # future reposting
@@ -478,7 +483,9 @@ class update_entries_after(object):
 		# Sales and Purchase Return
 		elif sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice"):
 			if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return"):
-				from erpnext.controllers.sales_and_purchase_return import get_rate_for_return # don't move this import to top
+				from erpnext.controllers.sales_and_purchase_return import (
+					get_rate_for_return,  # don't move this import to top
+				)
 				rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code,
 					voucher_detail_no=sle.voucher_detail_no, sle = sle)
 			else:

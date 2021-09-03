@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'item_variant_attribute')
 	frappe.db.sql('''

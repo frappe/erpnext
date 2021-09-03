@@ -3,9 +3,10 @@
 
 from __future__ import unicode_literals
 
+import unittest
+
 import frappe
 from frappe.utils import random_string
-import unittest
 
 test_records = frappe.get_test_records('Lead')
 

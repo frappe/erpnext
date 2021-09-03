@@ -2,15 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import cstr, cint
-from frappe import msgprint, throw, _
-
+from frappe import _, msgprint, throw
+from frappe.core.doctype.doctype.doctype import validate_series
 from frappe.model.document import Document
 from frappe.model.naming import parse_naming_series
 from frappe.permissions import get_doctypes_with_read
-from frappe.core.doctype.doctype.doctype import validate_series
+from frappe.utils import cint, cstr
+
 
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 

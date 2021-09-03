@@ -1,5 +1,7 @@
 import frappe
+
 from erpnext.regional.india.setup import make_custom_fields
+
 
 def execute():
 	if frappe.get_all('Company', filters = {'country': 'India'}):

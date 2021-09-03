@@ -3,12 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe import _
-from frappe.utils import cstr, cint
 from frappe.model.document import Document
+from frappe.utils import cint, cstr
+
 from erpnext.healthcare.page.patient_history.patient_history import get_patient_history_doctypes
+
 
 class PatientHistorySettings(Document):
 	def validate(self):

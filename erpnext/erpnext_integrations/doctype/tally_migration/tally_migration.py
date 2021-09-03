@@ -11,18 +11,18 @@ import traceback
 import zipfile
 from decimal import Decimal
 
-from bs4 import BeautifulSoup as bs
-
 import frappe
-from erpnext import encode_company_abbr
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
-from erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer import unset_existing_data
-
+from bs4 import BeautifulSoup as bs
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model.document import Document
-from frappe.model.naming import getseries, revert_series_if_last
 from frappe.utils.data import format_datetime
+
+from erpnext import encode_company_abbr
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+from erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer import (
+	unset_existing_data,
+)
 
 PRIMARY_ACCOUNT = "Primary"
 VOUCHER_CHUNK_SIZE = 500
