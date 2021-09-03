@@ -22,7 +22,7 @@ from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accoun
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc, check_if_return_invoice_linked_with_payment_entry, check_overdue
+	unlink_inter_company_doc, check_if_return_invoice_linked_with_payment_entry, is_overdue
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
@@ -1159,11 +1159,7 @@ class PurchaseInvoice(BuyingController):
 				self.status = 'Draft'
 			return
 
-		precision = self.precision("outstanding_amount")
-		outstanding_amount = flt(self.outstanding_amount, precision)
-		grand_total = flt(self.grand_total, self.precision("grand_total"))
-		due_date = getdate(self.due_date)
-		nowdate = getdate()
+		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
 
 		if not status:
 			if self.docstatus == 2:
@@ -1171,16 +1167,11 @@ class PurchaseInvoice(BuyingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif check_overdue(
-					self.payment_schedule,
-					outstanding_amount,
-					grand_total,
-					due_date
-				):
+				elif is_overdue(self):
 					self.status = "Overdue"
-				elif 0 < outstanding_amount < grand_total:
+				elif 0 < outstanding_amount < flt(self.grand_total, self.precision("grand_total")):
 					self.status = "Partly Paid"
-				elif outstanding_amount > 0 and due_date >= nowdate:
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to debit note issued against invoice
 				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
