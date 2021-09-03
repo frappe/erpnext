@@ -376,7 +376,8 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 			"rate": rate['price_list_rate'],
 			"warehouse": woocommerce_settings.warehouse,
 			"is_stock_item": found_item.is_stock_item,
-			"is_paediatric": True or False
+			"is_paediatric": True or False,
+			"is_swab": True of False,
 		}
 	"""
 
@@ -416,6 +417,14 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 						"item_code": extra_test_kit,
 						"qty": 1,
 					})
+
+				## need to check if is_swab
+				if item["item_code"].startwith("DNA") and item["is_swab"]:
+					extra_test_kit = "DNAKIT"
+					invoice_doc.append("items", {
+						"item_code": extra_test_kit,
+						"qty": 1,
+					})	
 				
 				test_kit = frappe.db.get_value("Item", item['item_code'], "test_kit")
 				
@@ -494,7 +503,13 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 				if meta_data.get('key') == "paediatric" and meta_data.get('value') == "true":
 					is_paediatric = True
 
-
+		# 2. For DNA swab
+		is_swab = False
+		if sku.startswith("DNA"):
+			item_meta_data = item.get('meta_data')
+				for meta_data in item_meta_data:
+					if meta_data.get('key') == "swab" and meta_data.get('value') == "true":
+						is_swab = True
 
 
 
@@ -509,7 +524,8 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			"rate": item.get("price"),
 			"warehouse": woocommerce_settings.warehouse,
 			"is_stock_item": found_item.is_stock_item,
-			"is_paediatric": is_paediatric
+			"is_paediatric": is_paediatric,
+			"is_swab": is_swab,
 		}
 
 		# check if item is out of stock
