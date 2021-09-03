@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def execute():
@@ -18,9 +19,7 @@ def execute():
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='company_gstin',
 				print_hide=1, read_only=1),
-			dict(fieldname='gst_column_break', fieldtype='Column Break',
-					insert_after='place_of_supply'),
-			dict(fieldname='customer_address', label='Customer Address', fieldtype='Link', insert_after='gst_column_break',
+			dict(fieldname='customer_address', label='Customer Address', fieldtype='Link', insert_after='place_of_supply',
 				print_hide=1, options='Address', depends_on = 'eval:doc.party_type == "Customer"'),
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='customer_address',
