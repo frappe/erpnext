@@ -517,7 +517,7 @@ def create_bank_account(args):
 			pass
 
 def update_shopping_cart_settings(args):
-	shopping_cart = frappe.get_doc("Shopping Cart Settings")
+	shopping_cart = frappe.get_doc("E Commerce Settings")
 	shopping_cart.update({
 		"enabled": 1,
 		'company': args.company_name,
