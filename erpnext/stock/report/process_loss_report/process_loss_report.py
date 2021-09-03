@@ -1,9 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from typing import Dict, List, Tuple
+
 import frappe
 from frappe import _
-from typing import Dict, List, Tuple
 
 Filters = frappe._dict
 Row = frappe._dict

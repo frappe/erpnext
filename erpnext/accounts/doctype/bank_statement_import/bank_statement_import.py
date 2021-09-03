@@ -3,22 +3,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import csv
 import json
 import re
 
+import frappe
 import openpyxl
+from frappe import _
+from frappe.core.doctype.data_import.data_import import DataImport
+from frappe.core.doctype.data_import.importer import Importer, ImportFile
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 from six import string_types
 
-import frappe
-from frappe.core.doctype.data_import.importer import Importer, ImportFile
-from frappe.utils.background_jobs import enqueue
-from frappe.utils.xlsxutils import handle_html, ILLEGAL_CHARACTERS_RE
-from frappe import _
-
-from frappe.core.doctype.data_import.data_import import DataImport
 
 class BankStatementImport(DataImport):
 	def __init__(self, *args, **kwargs):

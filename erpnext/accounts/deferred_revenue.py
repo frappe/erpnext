@@ -2,11 +2,26 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_months, today, getdate, add_days, flt, get_last_day, get_first_day, cint, get_link_to_form, rounded
-from erpnext.accounts.utils import get_account_currency
 from frappe.email import sendmail_to_system_managers
-from frappe.utils.background_jobs import enqueue
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	date_diff,
+	flt,
+	get_first_day,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	rounded,
+	today,
+)
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+from erpnext.accounts.utils import get_account_currency
+
 
 def validate_service_stop_date(doc):
 	''' Validates service_stop_date for Purchase Invoice and Sales Invoice '''

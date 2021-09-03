@@ -1,5 +1,6 @@
 import frappe
 
+
 class ItemVariantsCacheManager:
 	def __init__(self, item_code):
 		self.item_code = item_code

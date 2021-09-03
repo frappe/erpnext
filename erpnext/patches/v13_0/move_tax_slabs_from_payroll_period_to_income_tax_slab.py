@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	if not (frappe.db.table_exists("Payroll Period") and frappe.db.table_exists("Taxable Salary Slab")):

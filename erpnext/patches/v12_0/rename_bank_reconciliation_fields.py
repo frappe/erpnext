@@ -3,6 +3,7 @@
 
 import frappe
 
+
 def _rename_single_field(**kwargs):
 	count = frappe.db.sql("SELECT COUNT(*) FROM tabSingles WHERE doctype='{doctype}' AND field='{new_name}';".format(**kwargs))[0][0] #nosec
 	if count == 0:

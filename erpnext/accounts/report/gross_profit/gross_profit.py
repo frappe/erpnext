@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _, scrub
-from erpnext.stock.utils import get_incoming_rate
+from frappe.utils import cint, flt
+
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, cint
+from erpnext.stock.utils import get_incoming_rate
 
 
 def execute(filters=None):
@@ -46,7 +48,7 @@ def execute(filters=None):
 
 	else:
 		get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_columns, data)
-	
+
 	return columns, data
 
 def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_wise_columns, data):
@@ -57,7 +59,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 	# removing Item Code and Item Name columns
 	del columns[4:6]
 
-	for src in gross_profit_data.si_list:	
+	for src in gross_profit_data.si_list:
 		row = frappe._dict()
 		row.indent = src.indent
 		row.parent_invoice = src.parent_invoice
@@ -121,23 +123,23 @@ def get_columns(group_wise_columns, filters):
 
 def get_column_names():
 	return frappe._dict({
-		'parent': 'sales_invoice',     
-		'customer': 'customer', 
-		'customer_group': 'customer_group', 
-		'posting_date': 'posting_date', 
-		'item_code': 'item_code', 
-		'item_name': 'item_name', 
-		'item_group': 'item_group', 
-		'brand': 'brand', 
-		'description': 'description', 
-		'warehouse': 'warehouse', 
-		'qty': 'qty', 
-		'base_rate': 'avg._selling_rate', 
-		'buying_rate': 'valuation_rate', 
-		'base_amount': 'selling_amount', 
-		'buying_amount': 'buying_amount', 
-		'gross_profit': 'gross_profit', 
-		'gross_profit_percent': 'gross_profit_%', 
+		'parent': 'sales_invoice',
+		'customer': 'customer',
+		'customer_group': 'customer_group',
+		'posting_date': 'posting_date',
+		'item_code': 'item_code',
+		'item_name': 'item_name',
+		'item_group': 'item_group',
+		'brand': 'brand',
+		'description': 'description',
+		'warehouse': 'warehouse',
+		'qty': 'qty',
+		'base_rate': 'avg._selling_rate',
+		'buying_rate': 'valuation_rate',
+		'base_amount': 'selling_amount',
+		'buying_amount': 'buying_amount',
+		'gross_profit': 'gross_profit',
+		'gross_profit_percent': 'gross_profit_%',
 		'project': 'project'
 	})
 
@@ -466,16 +468,16 @@ class GrossProfitGenerator(object):
 			'description': None,
 			'warehouse': None,
 			'item_group': None,
-			'brand': None, 
-			'dn_detail': None, 
-			'delivery_note': None, 
-			'qty': None, 
-			'item_row': None, 
-			'is_return': row.is_return, 
+			'brand': None,
+			'dn_detail': None,
+			'delivery_note': None,
+			'qty': None,
+			'item_row': None,
+			'is_return': row.is_return,
 			'cost_center': row.cost_center,
 			'base_net_amount': frappe.db.get_value('Sales Invoice', row.parent, 'base_net_total')
 		})
-			
+
 	def add_bundle_items(self, product_bundle, index):
 		bundle_items = self.get_bundle_items(product_bundle)
 
@@ -509,19 +511,19 @@ class GrossProfitGenerator(object):
 			'description': description,
 			'warehouse': product_bundle.warehouse,
 			'item_group': item_group,
-			'brand': brand, 
-			'dn_detail': product_bundle.dn_detail, 
-			'delivery_note': product_bundle.delivery_note, 
-			'qty': (flt(product_bundle.qty) * flt(item.qty)), 
-			'item_row': None, 
-			'is_return': product_bundle.is_return, 
+			'brand': brand,
+			'dn_detail': product_bundle.dn_detail,
+			'delivery_note': product_bundle.delivery_note,
+			'qty': (flt(product_bundle.qty) * flt(item.qty)),
+			'item_row': None,
+			'is_return': product_bundle.is_return,
 			'cost_center': product_bundle.cost_center
 		})
 
 	def get_bundle_item_details(self, item_code):
 		return frappe.db.get_value(
-			'Item', 
-			item_code, 
+			'Item',
+			item_code,
 			['item_name', 'description', 'item_group', 'brand']
 		)
 

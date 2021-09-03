@@ -2,8 +2,10 @@
 # See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import unittest
+
+import frappe
 
 test_records = frappe.get_test_records('Monthly Distribution')
 

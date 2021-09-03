@@ -3,17 +3,36 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext, math, json
+
+import json
+import math
+
+import frappe
 from frappe import _
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	date_diff,
+	flt,
+	get_datetime,
+	get_last_day,
+	getdate,
+	month_diff,
+	nowdate,
+	today,
+)
 from six import string_types
-from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, month_diff, add_days, get_last_day, get_datetime
-from frappe.model.document import Document
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.assets.doctype.asset.depreciation \
-	import get_disposal_account_and_cost_center, get_depreciation_accounts
+
+import erpnext
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
-from erpnext.accounts.utils import get_account_currency
+from erpnext.assets.doctype.asset.depreciation import (
+	get_depreciation_accounts,
+	get_disposal_account_and_cost_center,
+)
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import AccountsController
+
 
 class Asset(AccountsController):
 	def validate(self):
@@ -783,6 +802,7 @@ def make_journal_entry(asset_name):
 @frappe.whitelist()
 def make_asset_movement(assets, purpose=None):
 	import json
+
 	from six import string_types
 
 	if isinstance(assets, string_types):

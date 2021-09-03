@@ -3,11 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import add_days, getdate, now_datetime
-from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import create_patient, create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
-from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
+
+from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+	admit_patient,
+	discharge_patient,
+	schedule_discharge,
+)
+from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import (
+	create_inpatient,
+	create_patient,
+	get_healthcare_service_unit,
+	mark_invoiced_inpatient_occupancy,
+)
+
 
 class TestInpatientMedicationOrder(unittest.TestCase):
 	def setUp(self):

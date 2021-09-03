@@ -3,11 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from erpnext.controllers.status_updater import StatusUpdater
 from frappe.utils import flt
 from six.moves import reduce
-from frappe import _
+
+from erpnext.controllers.status_updater import StatusUpdater
+
 
 class BankTransaction(StatusUpdater):
 	def after_insert(self):
