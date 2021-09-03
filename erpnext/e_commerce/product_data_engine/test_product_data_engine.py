@@ -37,7 +37,11 @@ class TestProductDataEngine(unittest.TestCase):
 			"enable_field_filters": 1,
 			"filter_fields": [{"fieldname": "item_group"}],
 			"enable_attribute_filters": 1,
-			"filter_attributes": [{"attribute": "Test Size"}]
+			"filter_attributes": [{"attribute": "Test Size"}],
+			"company": "_Test Company",
+			"enabled": 1,
+			"default_customer_group": "_Test Customer Group",
+			"price_list": "_Test Price List India"
 		})
 		frappe.local.shopping_cart_settings = None
 
@@ -210,6 +214,7 @@ class TestProductDataEngine(unittest.TestCase):
 		setup_e_commerce_settings({"show_price": 1})
 		frappe.local.shopping_cart_settings = None
 
+
 		engine = ProductQuery()
 		result = engine.query(
 			attributes={},
@@ -218,7 +223,6 @@ class TestProductDataEngine(unittest.TestCase):
 			start=4,
 			item_group=None
 		)
-
 		self.assertTrue(bool(result.get("discounts")))
 
 		filter_engine = ProductFiltersBuilder()
