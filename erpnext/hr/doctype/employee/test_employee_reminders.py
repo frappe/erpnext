@@ -1,11 +1,12 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe
 import unittest
-
-from frappe.utils import getdate
 from datetime import timedelta
+
+import frappe
+from frappe.utils import getdate
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.hr_settings.hr_settings import set_proceed_with_frequency_change
 
@@ -84,7 +85,10 @@ class TestEmployeeReminders(unittest.TestCase):
 		employee.company = "_Test Company"
 		employee.save()
 
-		from erpnext.hr.doctype.employee.employee_reminders import get_employees_who_are_born_today, send_birthday_reminders
+		from erpnext.hr.doctype.employee.employee_reminders import (
+			get_employees_who_are_born_today,
+			send_birthday_reminders,
+		)
 
 		employees_born_today = get_employees_who_are_born_today()
 		self.assertTrue(employees_born_today.get("_Test Company"))
@@ -105,7 +109,10 @@ class TestEmployeeReminders(unittest.TestCase):
 		employee.company = "_Test Company"
 		employee.save()
 
-		from erpnext.hr.doctype.employee.employee_reminders import get_employees_having_an_event_today, send_work_anniversary_reminders
+		from erpnext.hr.doctype.employee.employee_reminders import (
+			get_employees_having_an_event_today,
+			send_work_anniversary_reminders,
+		)
 
 		employees_having_work_anniversary = get_employees_having_an_event_today('work_anniversary')
 		self.assertTrue(employees_having_work_anniversary.get("_Test Company"))
@@ -120,8 +127,8 @@ class TestEmployeeReminders(unittest.TestCase):
 		self.assertTrue("Subject: Work Anniversary Reminder" in email_queue[0].message)
 
 	def test_send_holidays_reminder_in_advance(self):
-		from erpnext.hr.utils import get_holidays_for_employee
 		from erpnext.hr.doctype.employee.employee_reminders import send_holidays_reminder_in_advance
+		from erpnext.hr.utils import get_holidays_for_employee
 
 		# Get HR settings and enable advance holiday reminders
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
@@ -147,6 +154,7 @@ class TestEmployeeReminders(unittest.TestCase):
 
 	def test_advance_holiday_reminders_monthly(self):
 		from erpnext.hr.doctype.employee.employee_reminders import send_reminders_in_advance_monthly
+
 		# Get HR settings and enable advance holiday reminders
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
 		hr_settings.send_holiday_reminders = 1
@@ -161,6 +169,7 @@ class TestEmployeeReminders(unittest.TestCase):
 
 	def test_advance_holiday_reminders_weekly(self):
 		from erpnext.hr.doctype.employee.employee_reminders import send_reminders_in_advance_weekly
+
 		# Get HR settings and enable advance holiday reminders
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
 		hr_settings.send_holiday_reminders = 1

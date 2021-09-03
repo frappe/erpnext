@@ -2,12 +2,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import random_string, nowdate, flt
-from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
+
+import frappe
+from frappe.utils import flt, nowdate, random_string
+
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 
 test_records = frappe.get_test_records('Expense Claim')
 test_dependencies = ['Employee']

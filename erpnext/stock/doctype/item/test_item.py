@@ -2,20 +2,30 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest
-import frappe
-import json
 
+import json
+import unittest
+
+import frappe
 from frappe.test_runner import make_test_objects
-from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
-	InvalidItemAttributeValueError, get_variant)
-from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
-from erpnext.stock.doctype.item.item import (get_uom_conv_factor, get_item_attribute,
-	validate_is_stock_item, get_timeline_data)
+
+from erpnext.controllers.item_variant import (
+	InvalidItemAttributeValueError,
+	ItemVariantExistsError,
+	create_variant,
+	get_variant,
+)
+from erpnext.stock.doctype.item.item import (
+	InvalidBarcode,
+	StockExistsForTemplate,
+	get_item_attribute,
+	get_timeline_data,
+	get_uom_conv_factor,
+	validate_is_stock_item,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.tests.utils import change_settings
-
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]

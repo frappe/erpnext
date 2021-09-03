@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 
+
 def execute():
     """
         Reset Clearance Date for Payment Entries of type Internal Transfer that have only been reconciled with one Bank Transaction.

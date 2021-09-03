@@ -3,17 +3,31 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json, copy
-from frappe import msgprint, _
+
+import copy
+import json
+
+import frappe
+from frappe import _, msgprint
+from frappe.model.document import Document
+from frappe.utils import (
+	add_days,
+	ceil,
+	cint,
+	comma_and,
+	flt,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	nowdate,
+)
+from frappe.utils.csvutils import build_csv_response
 from six import iteritems
 
-from frappe.model.document import Document
-from frappe.utils import (flt, cint, nowdate, add_days, comma_and, now_datetime,
-	ceil, get_link_to_form, getdate)
-from frappe.utils.csvutils import build_csv_response
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
+from erpnext.manufacturing.doctype.bom.bom import get_children, validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
 
 class ProductionPlan(Document):
 	def validate(self):
@@ -453,7 +467,10 @@ class ProductionPlan(Document):
 		})
 
 	def create_work_order(self, item):
-		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError, get_default_warehouse
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			OverProductionError,
+			get_default_warehouse,
+		)
 		warehouse = get_default_warehouse()
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)

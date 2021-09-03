@@ -5,7 +5,9 @@ from __future__ import unicode_literals
 
 import frappe
 import frappe.defaults
+
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import is_cart_enabled
+
 
 def show_cart_count():
 	if (is_cart_enabled() and

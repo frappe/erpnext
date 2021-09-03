@@ -3,11 +3,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+import frappe
+
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]

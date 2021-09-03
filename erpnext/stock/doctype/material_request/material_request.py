@@ -5,19 +5,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-import json
 
-from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days, get_link_to_form
-from frappe import msgprint, _
+import frappe
+from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
+from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
+
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.stock.doctype.item.item import get_item_defaults
-
-from six import string_types
+from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"

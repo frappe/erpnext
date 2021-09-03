@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import frappe
 import unittest
 
+import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 
-from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 from erpnext.e_commerce.doctype.wishlist.wishlist import add_to_wishlist, remove_from_wishlist
+from erpnext.stock.doctype.item.test_item import make_item
+
 
 class TestWishlist(unittest.TestCase):
 	def setUp(self):

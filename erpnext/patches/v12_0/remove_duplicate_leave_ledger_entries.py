@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	"""Delete duplicate leave ledger entries of type allocation created."""

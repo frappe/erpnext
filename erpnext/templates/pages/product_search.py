@@ -2,18 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import cstr, nowdate, cint
-from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
-from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_website
-
+from frappe.utils import cint, cstr
 from redisearch import AutoCompleter, Client, Query
+
 from erpnext.e_commerce.redisearch import (
-	is_search_module_loaded,
+	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
 	WEBSITE_ITEM_INDEX,
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
-	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
-	make_key
+	is_search_module_loaded,
+	make_key,
 )
+from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_website
+from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
 
 no_cache = 1
 

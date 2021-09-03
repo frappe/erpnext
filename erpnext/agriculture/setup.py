@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 from erpnext.setup.utils import insert_record
+
 
 def setup_agriculture():
 	if frappe.get_all('Agriculture Analysis Criteria'):

@@ -2,13 +2,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import flt, today, getdate, nowdate
-from frappe import msgprint, _
+
+import frappe
+from frappe import _, msgprint
 from frappe.model.document import Document
-from erpnext.accounts.utils import (get_outstanding_invoices,
-	update_reference_in_payment_entry, reconcile_against_document)
+from frappe.utils import flt, getdate, nowdate, today
+
+import erpnext
+from erpnext.accounts.utils import get_outstanding_invoices, reconcile_against_document
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
+
 
 class PaymentReconciliation(Document):
 	@frappe.whitelist()

@@ -2,17 +2,33 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+from datetime import datetime, timedelta
+
+import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import now_datetime, time_diff_in_seconds, get_datetime, date_diff, get_weekdays, add_to_date, cint, getdate, get_time
 from frappe.core.utils import get_parent_doc
-from datetime import timedelta, datetime
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils.user import is_website_user
-from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import (
+	add_to_date,
+	cint,
+	date_diff,
+	get_datetime,
+	get_time,
+	get_weekdays,
+	getdate,
+	now_datetime,
+	time_diff_in_seconds,
+)
+from frappe.utils.user import is_website_user
+
+from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+	get_active_service_level_agreement_for,
+)
+
 
 class Issue(Document):
 	def get_feed(self):

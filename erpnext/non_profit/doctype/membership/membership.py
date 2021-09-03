@@ -3,17 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import json
+from datetime import datetime
+
 import frappe
 import six
-import os
-from datetime import datetime
-from frappe.model.document import Document
-from frappe.email import sendmail_to_system_managers
-from frappe.utils import add_days, add_years, nowdate, getdate, add_months, get_link_to_form
-from erpnext.non_profit.doctype.member.member import create_member
 from frappe import _
+from frappe.email import sendmail_to_system_managers
+from frappe.model.document import Document
+from frappe.utils import add_days, add_months, add_years, get_link_to_form, getdate, nowdate
+
 import erpnext
+from erpnext.non_profit.doctype.member.member import create_member
+
 
 class Membership(Document):
 	def validate(self):

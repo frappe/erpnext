@@ -3,10 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+
+import json
+
+import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.rename_doc import rename_doc
-from frappe import _
+
 
 class LabTestTemplate(Document):
 	def after_insert(self):

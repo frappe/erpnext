@@ -3,9 +3,12 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 from erpnext.projects.doctype.task.test_task import create_task
+
 
 class TestProjectTemplate(unittest.TestCase):
 	pass

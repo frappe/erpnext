@@ -2,21 +2,27 @@
 from __future__ import unicode_literals
 
 import zipfile
-import frappe
-from six import BytesIO
 from unittest import TestCase
-from frappe.utils import today, now_datetime, cstr
+
+import frappe
+from frappe.utils import cstr, now_datetime, today
+from six import BytesIO
+
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-from erpnext.regional.report.datev.datev import validate
-from erpnext.regional.report.datev.datev import get_transactions
-from erpnext.regional.report.datev.datev import get_customers
-from erpnext.regional.report.datev.datev import get_suppliers
-from erpnext.regional.report.datev.datev import get_account_names
-from erpnext.regional.report.datev.datev import download_datev_csv
-
+from erpnext.regional.germany.utils.datev.datev_constants import (
+	AccountNames,
+	DebtorsCreditors,
+	Transactions,
+)
 from erpnext.regional.germany.utils.datev.datev_csv import get_datev_csv, get_header
-from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
+from erpnext.regional.report.datev.datev import (
+	download_datev_csv,
+	get_account_names,
+	get_customers,
+	get_suppliers,
+	get_transactions,
+)
+
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
