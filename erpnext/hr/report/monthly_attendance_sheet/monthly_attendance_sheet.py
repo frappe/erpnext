@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _, scrub
-from frappe.utils import cstr, cint, getdate, get_last_day, add_months, today
+from frappe.utils import cstr, cint, getdate, get_last_day, add_months, today, formatdate
 from calendar import monthrange
 import datetime
 
@@ -108,6 +108,16 @@ def execute(filters=None):
 			row['total_deduction'] += row['total_late_deduction']
 
 		data.append(row)
+
+	if data:
+		days_row = frappe._dict({})
+		for day in range(filters["total_days_in_month"]):
+			attendance_date = datetime.date(year=filters.year, month=filters.month, day=day+1)
+			day_fieldname = "day_{0}".format(day + 1)
+			day_of_the_week = formatdate(attendance_date, "EE")
+			days_row[day_fieldname] = day_of_the_week
+
+		data.insert(0, days_row)
 
 	columns = get_columns(filters, leave_types)
 	return columns, data
