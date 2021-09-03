@@ -12,10 +12,10 @@ def get_data():
 				'items': ['Attendance']
 			}
 		],
-		'reports': [
-			{
-				'label': _('Reports'),
-				'items': ['Employee Leave Balance']
-			}
-		]
+		# 'reports': [
+		# 	{
+		# 		'label': _('Reports'),
+		# 		'items': ['Employee Leave Balance']
+		# 	}
+		# ]
     }
