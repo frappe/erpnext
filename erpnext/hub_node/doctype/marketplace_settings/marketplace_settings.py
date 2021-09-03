@@ -8,7 +8,6 @@ from frappe.model.document import Document
 from frappe.utils import add_years, now, get_datetime, get_datetime_str, cint
 from frappe import _
 from frappe.frappeclient import FrappeClient
-from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
 class MarketplaceSettings(Document):
