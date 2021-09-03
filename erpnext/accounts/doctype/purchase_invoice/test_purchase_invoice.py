@@ -3,20 +3,25 @@
 
 
 from __future__ import unicode_literals
+
 import unittest
-import frappe, erpnext
-import frappe.model
+
+import frappe
+from frappe.utils import add_days, cint, flt, getdate, nowdate, today
+
+import erpnext
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from frappe.utils import cint, flt, today, nowdate, add_days, getdate
-import frappe.defaults
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt, get_taxes
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
-from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.projects.doctype.project.test_project import make_project
-from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+	get_taxes,
+	make_purchase_receipt,
+)
+from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -231,7 +236,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_purchase_invoice_with_exchange_rate_difference(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as create_purchase_invoice
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as create_purchase_invoice,
+		)
 
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse='Stores - TCP1',
 			currency = "USD", conversion_rate = 70)
@@ -401,8 +408,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 
 	def test_purchase_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[1])
 		jv.insert()
@@ -441,8 +449,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			where reference_type='Purchase Invoice' and reference_name=%s""", pi.name))
 
 	def test_invoice_with_advance_and_multi_payment_terms(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[1])
 		jv.insert()
@@ -714,8 +723,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"warehouse"), pi.get("items")[0].rejected_warehouse)
 
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[1])
 		jv.accounts[0].is_advance = 'Yes'
@@ -794,8 +804,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(flt(pi.outstanding_amount), flt(pi.rounded_total + pi.total_advance))
 
 	def test_purchase_invoice_with_shipping_rule(self):
-		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
-			import create_shipping_rule
+		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
 		shipping_rule = create_shipping_rule(shipping_rule_type = "Buying", shipping_rule_name = "Shipping Rule - Purchase Invoice Test")
 
@@ -1133,9 +1142,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
 	def test_purchase_invoice_advance_taxes(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 		from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		# create a new supplier to test
 		supplier = create_supplier(supplier_name = '_Test TDS Advance Supplier',

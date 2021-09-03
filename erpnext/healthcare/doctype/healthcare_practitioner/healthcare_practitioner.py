@@ -3,13 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from erpnext.accounts.party import validate_party_accounts
-from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
+from frappe.model.document import Document
 from frappe.model.naming import append_number_if_name_exists
-from frappe.desk.reportview import build_match_conditions, get_filters_cond
+
+from erpnext.accounts.party import validate_party_accounts
+
 
 class HealthcarePractitioner(Document):
 	def onload(self):

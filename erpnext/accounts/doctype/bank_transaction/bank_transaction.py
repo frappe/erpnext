@@ -3,11 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from erpnext.controllers.status_updater import StatusUpdater
 from frappe.utils import flt
 from six.moves import reduce
-from frappe import _
+
+from erpnext.controllers.status_updater import StatusUpdater
+
 
 class BankTransaction(StatusUpdater):
 	def after_insert(self):
@@ -21,7 +23,7 @@ class BankTransaction(StatusUpdater):
 		self.update_allocations()
 		self.clear_linked_payment_entries()
 		self.set_status(update=True)
-	
+
 	def on_cancel(self):
 		self.clear_linked_payment_entries(for_cancel=True)
 		self.set_status(update=True)
@@ -45,7 +47,7 @@ class BankTransaction(StatusUpdater):
 			frappe.db.set_value(self.doctype, self.name, "status", "Reconciled")
 
 		self.reload()
-	
+
 	def clear_linked_payment_entries(self, for_cancel=False):
 		for payment_entry in self.payment_entries:
 			if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
@@ -77,7 +79,7 @@ class BankTransaction(StatusUpdater):
 
 def get_reconciled_bank_transactions(payment_entry):
 	reconciled_bank_transactions = frappe.get_all(
-		'Bank Transaction Payments', 
+		'Bank Transaction Payments',
 		filters = {
 			'payment_entry': payment_entry.payment_entry
 		},

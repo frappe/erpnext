@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, getdate, get_datetime
+from frappe.utils import add_to_date, get_datetime, getdate
 from six import iteritems
 
 time_slots = {

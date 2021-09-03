@@ -5,6 +5,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 
+
 class EmployeeGrievance(Document):
 	def on_submit(self):
 		if self.status not in ["Invalid", "Resolved"]:

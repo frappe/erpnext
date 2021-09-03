@@ -2,13 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt
 from frappe import _
+from frappe.utils import flt
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimensions,
+)
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (get_accounting_dimensions,
-	get_dimensions)
+
 
 class PeriodClosingVoucher(AccountsController):
 	def validate(self):
@@ -54,7 +59,7 @@ class PeriodClosingVoucher(AccountsController):
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries)
-	
+
 	def get_gl_entries(self):
 		gl_entries = []
 		pl_accounts = self.get_pl_balances()
@@ -77,7 +82,7 @@ class PeriodClosingVoucher(AccountsController):
 			gl_entries += gle_for_net_pl_bal
 
 		return gl_entries
-	
+
 	def get_pnl_gl_entry(self, pl_accounts):
 		company_cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 		gl_entries = []

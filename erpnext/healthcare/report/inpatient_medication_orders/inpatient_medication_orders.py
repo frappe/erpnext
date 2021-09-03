@@ -2,8 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+
+from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
+	get_current_healthcare_service_unit,
+)
+
 
 def execute(filters=None):
 	columns = get_columns()

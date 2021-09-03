@@ -3,18 +3,25 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import json
+
 import frappe
 from frappe import _
+from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, get_url
+from frappe.utils import flt, get_url, nowdate
+from frappe.utils.background_jobs import enqueue
+
+from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	get_company_defaults,
+	get_payment_entry,
+)
+from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
-from frappe.integrations.utils import get_payment_gateway_controller
-from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
-from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -542,3 +549,11 @@ def make_payment_order(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def validate_payment(doc, method=""):
+	if not frappe.db.has_column(doc.reference_doctype, 'status'):
+		return
+
+	status = frappe.db.get_value(doc.reference_doctype, doc.reference_docname, 'status')
+	if status == 'Paid':
+		frappe.throw(_("The Payment Request {0} is already paid, cannot process payment twice").format(doc.reference_docname))
