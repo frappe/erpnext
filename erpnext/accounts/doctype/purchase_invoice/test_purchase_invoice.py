@@ -1230,6 +1230,7 @@ def update_tax_witholding_category(company, account, date):
 	from erpnext.accounts.utils import get_fiscal_year
 
 	fiscal_year = get_fiscal_year(date=date, company=company)
+	print(fiscal_year[0], fiscal_year[1], fiscal_year[2], "$#$#$#")
 
 	if not frappe.db.get_value('Tax Withholding Rate',
 		{'parent': 'TDS - 194 - Dividends - Individual', 'from_date': ('>=', fiscal_year[1]),
