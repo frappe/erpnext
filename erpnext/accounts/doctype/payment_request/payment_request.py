@@ -286,7 +286,7 @@ class PaymentRequest(Document):
 		if not status:
 			return
 
-		shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
+		shopping_cart_settings = frappe.get_doc("E Commerce Settings")
 
 		if status in ["Authorized", "Completed"]:
 			redirect_to = None
@@ -436,7 +436,7 @@ def get_gateway_details(args):
 		return get_payment_gateway_account(args.get("payment_gateway_account"))
 
 	if args.order_type == "Shopping Cart":
-		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
+		payment_gateway_account = frappe.get_doc("E Commerce Settings").payment_gateway_account
 		return get_payment_gateway_account(payment_gateway_account)
 
 	gateway_account = get_payment_gateway_account({"is_default": 1})

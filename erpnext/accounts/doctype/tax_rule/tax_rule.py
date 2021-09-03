@@ -100,7 +100,7 @@ class TaxRule(Document):
 	def validate_use_for_shopping_cart(self):
 		'''If shopping cart is enabled and no tax rule exists for shopping cart, enable this one'''
 		if (not self.use_for_shopping_cart
-			and cint(frappe.db.get_single_value('Shopping Cart Settings', 'enabled'))
+			and cint(frappe.db.get_single_value('E Commerce Settings', 'enabled'))
 			and not frappe.db.get_value('Tax Rule', {'use_for_shopping_cart': 1, 'name': ['!=', self.name]})):
 
 			self.use_for_shopping_cart = 1
