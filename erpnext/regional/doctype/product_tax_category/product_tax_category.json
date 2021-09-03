@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "autoname": "field:product_tax_code",
+ "creation": "2021-08-23 12:33:37.910225",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product_tax_code",
+  "column_break_2",
+  "category_name",
+  "section_break_4",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "product_tax_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Tax Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "category_name",
+   "fieldtype": "Data",
+   "label": "Category Name",
+   "length": 255
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-08-24 09:10:25.313642",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "Product Tax Category",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "category_name",
+ "track_changes": 1
+}

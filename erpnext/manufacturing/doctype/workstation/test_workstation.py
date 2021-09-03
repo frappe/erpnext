@@ -1,13 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 from __future__ import unicode_literals
-from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+import unittest
 
 import frappe
-import unittest
-from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours, NotInWorkingHoursError, WorkstationHolidayError
-from erpnext.manufacturing.doctype.routing.test_routing import setup_bom, create_routing
 from frappe.test_runner import make_test_records
+
+from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
+from erpnext.manufacturing.doctype.workstation.workstation import (
+	NotInWorkingHoursError,
+	WorkstationHolidayError,
+	check_if_within_operating_hours,
+)
 
 test_dependencies = ["Warehouse"]
 test_records = frappe.get_test_records('Workstation')

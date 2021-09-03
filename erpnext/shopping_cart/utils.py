@@ -4,8 +4,11 @@
 from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import is_cart_enabled
+
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+	is_cart_enabled,
+)
+
 
 def show_cart_count():
 	if (is_cart_enabled() and

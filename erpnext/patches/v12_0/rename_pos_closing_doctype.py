@@ -1,7 +1,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	if frappe.db.table_exists("POS Closing Voucher"):

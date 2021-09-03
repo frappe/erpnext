@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-import erpnext
-from frappe.utils import flt, round_based_on_smallest_currency_fraction, money_in_words
-from erpnext.controllers.taxes_and_totals import get_itemised_tax
+from frappe.utils import flt, money_in_words, round_based_on_smallest_currency_fraction
 from six import iteritems
+
+import erpnext
+from erpnext.controllers.taxes_and_totals import get_itemised_tax
+
 
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return

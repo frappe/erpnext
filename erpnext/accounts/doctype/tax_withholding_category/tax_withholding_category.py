@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate, cint
+from frappe.utils import cint, getdate
+
 from erpnext.accounts.utils import get_fiscal_year
+
 
 class TaxWithholdingCategory(Document):
 	pass
@@ -240,7 +243,7 @@ def get_deducted_tax(taxable_vouchers, fiscal_year, tax_details):
 def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_deducted, vouchers):
 	tds_amount = 0
 	invoice_filters = {
-		'name': ('in', vouchers), 
+		'name': ('in', vouchers),
 		'docstatus': 1,
 		'apply_tds': 1
 	}

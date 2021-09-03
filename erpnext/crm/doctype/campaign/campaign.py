@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.naming import set_name_by_naming_series
 
+
 class Campaign(Document):
 	def autoname(self):
 		if frappe.defaults.get_global_default('campaign_naming_by') != 'Naming Series':

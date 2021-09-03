@@ -3,15 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, now_datetime, flt, add_to_date
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests, get_warehouse_list
+
+import frappe
+from frappe.utils import add_to_date, flt, now_datetime, nowdate
+
 from erpnext.controllers.item_variant import create_variant
+from erpnext.manufacturing.doctype.production_plan.production_plan import (
+	get_items_for_material_requests,
+	get_sales_orders,
+	get_warehouse_list,
+)
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):

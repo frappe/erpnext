@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	try:
@@ -11,5 +13,5 @@ def execute():
 
 		frappe.reload_doc("stock", "doctype", "stock_ledger_entry")
 		frappe.reload_doc("stock", "doctype", "serial_no")
-	except:
+	except Exception:
 		pass
