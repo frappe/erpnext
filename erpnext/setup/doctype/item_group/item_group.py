@@ -7,9 +7,8 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, nowdate
+from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
-from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 from six.moves.urllib.parse import quote

@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _, msgprint
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import comma_and, flt, unique
 

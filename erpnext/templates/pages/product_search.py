@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import cint, cstr, nowdate
+from frappe.utils import cint, cstr
 from redisearch import AutoCompleter, Client, Query
 
 from erpnext.e_commerce.redisearch import (

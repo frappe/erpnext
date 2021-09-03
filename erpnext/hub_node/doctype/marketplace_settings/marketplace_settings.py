@@ -1,18 +1,12 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
 import json
-import time
 
 import frappe
-import requests
-from frappe import _
 from frappe.frappeclient import FrappeClient
 from frappe.model.document import Document
-from frappe.utils import add_years, cint, get_datetime, get_datetime_str, now
-from six import string_types
+from frappe.utils import cint
 
 
 class MarketplaceSettings(Document):
