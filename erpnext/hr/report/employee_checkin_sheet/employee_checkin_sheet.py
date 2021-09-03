@@ -76,6 +76,9 @@ def execute(filters=None):
 							row['late_entry'] = attendance_details.late_entry
 							row['early_exit'] = attendance_details.early_exit
 							row['leave_type'] = attendance_details.leave_type
+							row['leave_application'] = attendance_details.leave_application
+							row['attendance_request'] = attendance_details.attendance_request
+							row['remarks'] = attendance_details.remarks or attendance_details.leave_type or attendance_details.attendance_request_reason
 
 							if attendance_details.working_hours:
 								row['working_hours'] = attendance_details.working_hours
@@ -146,12 +149,16 @@ def get_employee_checkin_map(filters):
 def get_attendance_map(filters):
 	employee_condition = ""
 	if filters.employee:
-		employee_condition = " and employee = %(employee)s"
+		employee_condition = " and att.employee = %(employee)s"
 
 	attendance = frappe.db.sql("""
-		select name, employee, attendance_date, shift, status, late_entry, early_exit, working_hours, leave_type
-		from `tabAttendance`
-		where docstatus = 1 and attendance_date between %(from_date)s and %(to_date)s {0}
+		select att.name, att.employee, att.attendance_date, att.shift,
+			att.status, att.late_entry, att.early_exit, att.working_hours,
+			att.leave_application, att.attendance_request,
+			att.remarks, att.leave_type, arq.reason as attendance_request_reason
+		from `tabAttendance` att
+		left join `tabAttendance Request` arq on arq.name = att.attendance_request
+		where att.docstatus = 1 and att.attendance_date between %(from_date)s and %(to_date)s {0}
 		order by attendance_date
 	""".format(employee_condition), filters, as_dict=1)
 
@@ -187,12 +194,14 @@ def get_columns(filters, checkin_column_count):
 		})
 
 	columns += [
-		{"fieldname": "attendance_marked", "label": _("Marked"), "fieldtype": "Check", "width": 65},
 		{"fieldname": "attendance_status", "label": _("Status"), "fieldtype": "Data", "width": 75},
-		{"fieldname": "leave_type", "label": _("Leave Type"), "fieldtype": "Link", "options": "Leave Type", "width": 90},
+		{"fieldname": "remarks", "label": _("Remarks"), "fieldtype": "Data", "width": 100},
 		{"fieldname": "working_hours", "label": _("Hours"), "fieldtype": "Float", "width": 60, "precision": 1},
 		{"fieldname": "late_entry", "label": _("Late Entry"), "fieldtype": "Check", "width": 80},
 		{"fieldname": "early_exit", "label": _("Early Exit"), "fieldtype": "Check", "width": 80},
+		{"fieldname": "attendance_marked", "label": _("Marked"), "fieldtype": "Check", "width": 65},
+		{"fieldname": "leave_application", "label": _("Leave Application"), "fieldtype": "Link", "options": "Leave Application", "width": 130},
+		{"fieldname": "attendance_request", "label": _("Attendance Request"), "fieldtype": "Link", "options": "Attendance Request", "width": 140},
 	]
 
 	return columns
