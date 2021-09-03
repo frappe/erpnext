@@ -13,3 +13,10 @@
 
 # This commit just changes spaces to tabs for indentation in some files
 5f473611bd6ed57703716244a054d3fb5ba9cd23
+
+# Whitespace fix throughout codebase
+4551d7d6029b6f587f6c99d4f8df5519241c6a86
+b147b85e6ac19a9220cd1e2958a6ebd99373283a
+
+# sort and cleanup imports
+915b34391c2066dfc83e60a5813c5a877cebe7ac

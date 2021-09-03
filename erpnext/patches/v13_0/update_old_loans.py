@@ -1,12 +1,18 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import nowdate, flt
-from erpnext.accounts.doctype.account.test_account import create_account
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
-from erpnext.loan_management.doctype.loan.loan import make_repayment_entry
-from erpnext.loan_management.doctype.loan_repayment.loan_repayment import get_accrued_interest_entries
 from frappe.model.naming import make_autoname
+from frappe.utils import flt, nowdate
+
+from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+	get_accrued_interest_entries,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_term_loans,
+)
+
 
 def execute():
 

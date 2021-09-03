@@ -2,12 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import datetime
-from six import iteritems
 
 import frappe
 from frappe import _
 from frappe.utils import flt, formatdate
+from six import iteritems
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
@@ -78,7 +79,7 @@ def get_final_data(dimension, dimension_items, filters, period_month_ranges, dat
 		if filters["period"] != "Yearly" :
 			row += totals
 		data.append(row)
-		
+
 	return data
 
 
@@ -388,7 +389,7 @@ def get_chart_data(filters, columns, data):
 			budget_values[i] += values[index]
 			actual_values[i] += values[index+1]
 			index += 3
-			
+
 	return {
 		'data': {
 			'labels': labels,
@@ -399,4 +400,3 @@ def get_chart_data(filters, columns, data):
 		},
 		'type' : 'bar'
 	}
-

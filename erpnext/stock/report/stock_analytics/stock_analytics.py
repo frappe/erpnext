@@ -1,14 +1,20 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+import datetime
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, flt
-from erpnext.stock.report.stock_balance.stock_balance import (get_items, get_stock_ledger_entries, get_item_details)
+from frappe.utils import get_first_day as get_first_day_of_month
+from frappe.utils import get_first_day_of_week, get_quarter_start, getdate
+
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.stock.report.stock_balance.stock_balance import (
+	get_item_details,
+	get_items,
+	get_stock_ledger_entries,
+)
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
-from six import iteritems
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -71,7 +77,8 @@ def get_columns(filters):
 
 def get_period_date_ranges(filters):
 		from dateutil.relativedelta import relativedelta
-		from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
+		from_date = round_down_to_nearest_frequency(filters.from_date, filters.range)
+		to_date = getdate(filters.to_date)
 
 		increment = {
 			"Monthly": 1,
@@ -96,6 +103,31 @@ def get_period_date_ranges(filters):
 				break
 
 		return periodic_daterange
+
+
+def round_down_to_nearest_frequency(date: str, frequency: str) -> datetime.datetime:
+	"""Rounds down the date to nearest frequency unit.
+	example:
+
+	>>> round_down_to_nearest_frequency("2021-02-21", "Monthly")
+	datetime.datetime(2021, 2, 1)
+
+	>>> round_down_to_nearest_frequency("2021-08-21", "Yearly")
+	datetime.datetime(2021, 1, 1)
+	"""
+
+	def _get_first_day_of_fiscal_year(date):
+		fiscal_year = get_fiscal_year(date)
+		return fiscal_year and fiscal_year[1] or date
+
+	round_down_function = {
+		"Monthly": get_first_day_of_month,
+		"Quarterly": get_quarter_start,
+		"Weekly": get_first_day_of_week,
+		"Yearly": _get_first_day_of_fiscal_year,
+	}.get(frequency, getdate)
+	return round_down_function(date)
+
 
 def get_period(posting_date, filters):
 	months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -177,7 +209,7 @@ def get_data(filters):
 	periodic_data = get_periodic_data(sle, filters)
 	ranges = get_period_date_ranges(filters)
 
-	for dummy, item_data in iteritems(item_details):
+	for dummy, item_data in item_details.items():
 		row = {
 			"name": item_data.name,
 			"item_name": item_data.item_name,
@@ -208,7 +240,3 @@ def get_chart_data(columns):
 	chart["type"] = "line"
 
 	return chart
-
-
-
-

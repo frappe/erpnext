@@ -3,12 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import msgprint, _
+from frappe import _, msgprint
+from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
-from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import comma_and, get_link_to_form, getdate
-import erpnext.www.lms as lms
+
 
 class ProgramEnrollment(Document):
 	def validate(self):
@@ -174,4 +175,3 @@ def get_students(doctype, txt, searchfield, start, page_len, filters):
 			tuple(students + ["%%%s%%" % txt, start, page_len]
 		)
 	)
-

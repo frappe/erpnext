@@ -3,9 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
+
 
 class TrainingFeedback(Document):
 	def validate(self):
@@ -42,4 +44,3 @@ class TrainingFeedback(Document):
 
 		if employee:
 			frappe.db.set_value("Training Event Employee", employee, "status", "Completed")
-

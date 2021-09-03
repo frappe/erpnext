@@ -2,12 +2,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from six import iteritems
+
+import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, flt, add_to_date, add_days
+from frappe.utils import add_days, add_to_date, flt, getdate
+from six import iteritems
+
 from erpnext.accounts.utils import get_fiscal_year
+
 
 def execute(filters=None):
 	return IssueAnalytics(filters).run()
@@ -103,7 +107,7 @@ class IssueAnalytics(object):
 		return period
 
 	def get_period_date_ranges(self):
-		from dateutil.relativedelta import relativedelta, MO
+		from dateutil.relativedelta import MO, relativedelta
 		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
 
 		increment = {

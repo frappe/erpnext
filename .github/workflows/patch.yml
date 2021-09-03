@@ -7,10 +7,13 @@ on:
       - '**.md'
   workflow_dispatch:
 
+concurrency:
+  group: patch-develop-${{ github.event.number }}
+  cancel-in-progress: true
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
 
     name: Patch Test
@@ -31,7 +34,13 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.7
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          check-latest: true
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts

@@ -4,15 +4,13 @@
 
 from __future__ import unicode_literals
 
-import urllib
 from collections import Counter
-from datetime import timedelta
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url, getdate
-from frappe.utils.verified_command import verify_request, get_signed_params
+from frappe.utils.verified_command import get_signed_params
 
 
 class Appointment(Document):
@@ -235,4 +233,3 @@ def _get_employee_from_user(user):
 		# frappe.db.exists returns a tuple of a tuple
 		return frappe.get_doc('Employee', employee_docname[0][0])
 	return None
-

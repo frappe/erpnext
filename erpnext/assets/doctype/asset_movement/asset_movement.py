@@ -3,9 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
+
 
 class AssetMovement(Document):
 	def validate(self):
@@ -40,14 +42,14 @@ class AssetMovement(Document):
 					if current_location != d.source_location:
 						frappe.throw(_("Asset {0} does not belongs to the location {1}").
 							format(d.asset, d.source_location))
-			
+
 			if self.purpose == 'Issue':
 				if d.target_location:
 					frappe.throw(_("Issuing cannot be done to a location. \
 						Please enter employee who has issued Asset {0}").format(d.asset), title="Incorrect Movement Purpose")
 				if not d.to_employee:
 					frappe.throw(_("Employee is required while issuing Asset {0}").format(d.asset))
-			
+
 			if self.purpose == 'Transfer':
 				if d.to_employee:
 					frappe.throw(_("Transferring cannot be done to an Employee. \
@@ -57,7 +59,7 @@ class AssetMovement(Document):
 					frappe.throw(_("Target Location is required while transferring Asset {0}").format(d.asset))
 				if d.source_location == d.target_location:
 					frappe.throw(_("Source and Target Location cannot be same"))
-			
+
 			if self.purpose == 'Receipt':
 				# only when asset is bought and first entry is made
 				if not d.source_location and not (d.target_location or d.to_employee):
@@ -80,14 +82,14 @@ class AssetMovement(Document):
 					if current_custodian != d.from_employee:
 						frappe.throw(_("Asset {0} does not belongs to the custodian {1}").
 							format(d.asset, d.from_employee))
-			
+
 			if d.to_employee and frappe.db.get_value("Employee", d.to_employee, "company") != self.company:
 				frappe.throw(_("Employee {0} does not belongs to the company {1}").
 							format(d.to_employee, self.company))
 
 	def on_submit(self):
 		self.set_latest_location_in_asset()
-		
+
 	def on_cancel(self):
 		self.set_latest_location_in_asset()
 
@@ -105,12 +107,12 @@ class AssetMovement(Document):
 			# In case of cancellation it corresponds to previous latest document's location, employee
 			latest_movement_entry = frappe.db.sql(
 				"""
-				SELECT asm_item.target_location, asm_item.to_employee 
+				SELECT asm_item.target_location, asm_item.to_employee
 				FROM `tabAsset Movement Item` asm_item, `tabAsset Movement` asm
-				WHERE 
+				WHERE
 					asm_item.parent=asm.name and
 					asm_item.asset=%(asset)s and
-					asm.company=%(company)s and 
+					asm.company=%(company)s and
 					asm.docstatus=1 and {0}
 				ORDER BY
 					asm.transaction_date desc limit 1

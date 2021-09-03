@@ -5,14 +5,15 @@
 import json
 
 import frappe
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
-from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
 from frappe import _
 from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
 from frappe.utils import add_months, formatdate, getdate, today
-
 from plaid.errors import ItemError
+
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
+
 
 class PlaidSettings(Document):
 	@staticmethod
@@ -110,7 +111,7 @@ def add_bank_accounts(response, bank, company):
 				frappe.msgprint(_("Bank account {0} already exists and could not be created again").format(account["name"]))
 			except Exception:
 				frappe.log_error(frappe.get_traceback(), title=_("Plaid Link Error"))
-				frappe.throw(_("There was an error creating Bank Account while linking with Plaid."), 
+				frappe.throw(_("There was an error creating Bank Account while linking with Plaid."),
 					title=_("Plaid Link Failed"))
 
 		else:

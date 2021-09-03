@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from erpnext.education.utils import validate_duplicate_student
+from frappe.model.document import Document
 from frappe.utils import cint
+
+from erpnext.education.utils import validate_duplicate_student
+
 
 class StudentGroup(Document):
 	def validate(self):
@@ -128,4 +131,3 @@ def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 			order by idx desc, name
 			limit %s, %s""".format(searchfield),
 			tuple(["%%%s%%" % txt, "%%%s%%" % txt, start, page_len]))
-

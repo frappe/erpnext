@@ -2,12 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
+
 from collections import OrderedDict
+
+import frappe
+from frappe import _, scrub
+from frappe.utils import cint, cstr, flt, getdate, nowdate
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
 from erpnext.accounts.utils import get_currency_precision
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 #  This report gives a summary of all Outstanding Invoices considering the following
 
@@ -534,6 +540,8 @@ class ReceivablePayableReport(object):
 		# ageing buckets should not have amounts if due date is not reached
 		if getdate(entry_date) > getdate(self.filters.report_date):
 			row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
+
+		row.total_due = row.range1 + row.range2 + row.range3 + row.range4 + row.range5
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]

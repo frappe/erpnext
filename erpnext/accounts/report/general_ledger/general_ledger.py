@@ -2,16 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from erpnext import get_company_currency, get_default_company
-from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
-from frappe.utils import getdate, cstr, flt, fmt_money
-from frappe import _, _dict
-from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from six import iteritems
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
+
 from collections import OrderedDict
+
+import frappe
+from frappe import _, _dict
+from frappe.utils import cstr, flt, getdate
+from six import iteritems
+
+from erpnext import get_company_currency, get_default_company
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
+from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.utils import get_account_currency
+
 
 def execute(filters=None):
 	if not filters:
@@ -48,7 +55,7 @@ def validate_filters(filters, account_details):
 
 	if not filters.get("from_date") and not filters.get("to_date"):
 		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date"))))
-			
+
 	if filters.get('account'):
 		filters.account = frappe.parse_json(filters.get('account'))
 		for account in filters.account:
@@ -78,13 +85,10 @@ def validate_filters(filters, account_details):
 def validate_party(filters):
 	party_type, party = filters.get("party_type"), filters.get("party")
 
-	if party:
-		if not party_type:
-			frappe.throw(_("To filter based on Party, select Party Type first"))
-		else:
-			for d in party:
-				if not frappe.db.exists(party_type, d):
-					frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
+	if party and party_type:
+		for d in party:
+			if not frappe.db.exists(party_type, d):
+				frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
 
 def set_account_currency(filters):
 	if filters.get("account") or (filters.get('party') and len(filters.party) == 1):
@@ -92,7 +96,7 @@ def set_account_currency(filters):
 		account_currency = None
 
 		if filters.get("account"):
-			if len(filters.get("account")) == 1:	
+			if len(filters.get("account")) == 1:
 				account_currency = get_account_currency(filters.account[0])
 			else:
 				currency = get_account_currency(filters.account[0])

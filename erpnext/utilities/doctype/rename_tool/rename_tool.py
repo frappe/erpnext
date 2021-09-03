@@ -4,10 +4,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 
+import frappe
 from frappe.model.document import Document
 from frappe.model.rename_doc import bulk_rename
+
 
 class RenameTool(Document):
 	pass
@@ -29,4 +30,3 @@ def upload(select_doctype=None, rows=None):
 	rows = read_csv_content_from_attached_file(frappe.get_doc("Rename Tool", "Rename Tool"))
 
 	return bulk_rename(select_doctype, rows=rows)
-

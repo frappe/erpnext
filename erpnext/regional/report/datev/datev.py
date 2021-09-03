@@ -10,13 +10,18 @@ Provide a report and downloadable CSV according to the German DATEV format.
 from __future__ import unicode_literals
 
 import json
+
 import frappe
+from frappe import _
 from six import string_types
 
-from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.regional.germany.utils.datev.datev_csv import zip_and_download, get_datev_csv
-from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
+from erpnext.regional.germany.utils.datev.datev_constants import (
+	AccountNames,
+	DebtorsCreditors,
+	Transactions,
+)
+from erpnext.regional.germany.utils.datev.datev_csv import get_datev_csv, zip_and_download
 
 COLUMNS = [
 	{
@@ -40,6 +45,12 @@ COLUMNS = [
 	{
 		"label": "Gegenkonto (ohne BU-Schlüssel)",
 		"fieldname": "Gegenkonto (ohne BU-Schlüssel)",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "BU-Schlüssel",
+		"fieldname": "BU-Schlüssel",
 		"fieldtype": "Data",
 		"width": 100
 	},
@@ -114,6 +125,36 @@ COLUMNS = [
 		"fieldname": "Beleginfo - Inhalt 4",
 		"fieldtype": "Data",
 		"width": 150
+	},
+	{
+		"label": "Beleginfo - Art 5",
+		"fieldname": "Beleginfo - Art 5",
+		"fieldtype": "Data",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Inhalt 5",
+		"fieldname": "Beleginfo - Inhalt 5",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Art 6",
+		"fieldname": "Beleginfo - Art 6",
+		"fieldtype": "Data",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Inhalt 6",
+		"fieldname": "Beleginfo - Inhalt 6",
+		"fieldtype": "Date",
+		"width": 100
+	},
+	{
+		"label": "Fälligkeit",
+		"fieldname": "Fälligkeit",
+		"fieldtype": "Date",
+		"width": 100
 	}
 ]
 
@@ -161,6 +202,125 @@ def validate_fiscal_year(from_date, to_date, company):
 
 
 def get_transactions(filters, as_dict=1):
+	def run(params_method, filters):
+		extra_fields, extra_joins, extra_filters = params_method(filters)
+		return run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=as_dict)
+
+	def sort_by(row):
+		# "Belegdatum" is in the fifth column when list format is used
+		return row["Belegdatum" if as_dict else 5]
+
+	type_map = {
+		# specific query methods for some voucher types
+		"Payment Entry": get_payment_entry_params,
+		"Sales Invoice": get_sales_invoice_params,
+		"Purchase Invoice": get_purchase_invoice_params
+	}
+
+	only_voucher_type = filters.get("voucher_type")
+	transactions = []
+
+	for voucher_type, get_voucher_params in type_map.items():
+		if only_voucher_type and only_voucher_type != voucher_type:
+			continue
+
+		transactions.extend(run(params_method=get_voucher_params, filters=filters))
+
+	if not only_voucher_type or only_voucher_type not in type_map:
+		# generic query method for all other voucher types
+		filters["exclude_voucher_types"] = type_map.keys()
+		transactions.extend(run(params_method=get_generic_params, filters=filters))
+
+	return sorted(transactions, key=sort_by)
+
+
+def get_payment_entry_params(filters):
+	extra_fields = """
+		, 'Zahlungsreferenz' as 'Beleginfo - Art 5'
+		, pe.reference_no as 'Beleginfo - Inhalt 5'
+		, 'Buchungstag' as 'Beleginfo - Art 6'
+		, pe.reference_date as 'Beleginfo - Inhalt 6'
+		, '' as 'Fälligkeit'
+	"""
+
+	extra_joins = """
+		LEFT JOIN `tabPayment Entry` pe
+		ON gl.voucher_no = pe.name
+	"""
+
+	extra_filters = """
+		AND gl.voucher_type = 'Payment Entry'
+	"""
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def get_sales_invoice_params(filters):
+	extra_fields = """
+		, '' as 'Beleginfo - Art 5'
+		, '' as 'Beleginfo - Inhalt 5'
+		, '' as 'Beleginfo - Art 6'
+		, '' as 'Beleginfo - Inhalt 6'
+		, si.due_date as 'Fälligkeit'
+	"""
+
+	extra_joins = """
+		LEFT JOIN `tabSales Invoice` si
+		ON gl.voucher_no = si.name
+	"""
+
+	extra_filters = """
+		AND gl.voucher_type = 'Sales Invoice'
+	"""
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def get_purchase_invoice_params(filters):
+	extra_fields = """
+		, 'Lieferanten-Rechnungsnummer' as 'Beleginfo - Art 5'
+		, pi.bill_no as 'Beleginfo - Inhalt 5'
+		, 'Lieferanten-Rechnungsdatum' as 'Beleginfo - Art 6'
+		, pi.bill_date as 'Beleginfo - Inhalt 6'
+		, pi.due_date as 'Fälligkeit'
+	"""
+
+	extra_joins = """
+		LEFT JOIN `tabPurchase Invoice` pi
+		ON gl.voucher_no = pi.name
+	"""
+
+	extra_filters = """
+		AND gl.voucher_type = 'Purchase Invoice'
+	"""
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def get_generic_params(filters):
+	# produce empty fields so all rows will have the same length
+	extra_fields = """
+		, '' as 'Beleginfo - Art 5'
+		, '' as 'Beleginfo - Inhalt 5'
+		, '' as 'Beleginfo - Art 6'
+		, '' as 'Beleginfo - Inhalt 6'
+		, '' as 'Fälligkeit'
+	"""
+	extra_joins = ""
+
+	if filters.get("exclude_voucher_types"):
+		# exclude voucher types that are queried by a dedicated method
+		exclude = "({})".format(', '.join("'{}'".format(key) for key in filters.get("exclude_voucher_types")))
+		extra_filters = "AND gl.voucher_type NOT IN {}".format(exclude)
+
+	# if voucher type filter is set, allow only this type
+	if filters.get("voucher_type"):
+		extra_filters += " AND gl.voucher_type = %(voucher_type)s"
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 	"""
 	Get a list of accounting entries.
 
@@ -171,8 +331,7 @@ def get_transactions(filters, as_dict=1):
 	filters -- dict of filters to be passed to the sql query
 	as_dict -- return as list of dicts [0,1]
 	"""
-	filter_by_voucher = 'AND gl.voucher_type = %(voucher_type)s' if filters.get('voucher_type') else ''
-	gl_entries = frappe.db.sql("""
+	query = """
 		SELECT
 
 			/* either debit or credit amount; always positive */
@@ -187,6 +346,9 @@ def get_transactions(filters, as_dict=1):
 			/* against number or, if empty, party against number */
 			%(temporary_against_account_number)s as 'Gegenkonto (ohne BU-Schlüssel)',
 
+			/* disable automatic VAT deduction */
+			'40' as 'BU-Schlüssel',
+
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
 			LEFT(gl.remarks, 60) as 'Buchungstext',
@@ -199,30 +361,34 @@ def get_transactions(filters, as_dict=1):
 			case gl.party_type when 'Customer' then 'Debitorennummer' when 'Supplier' then 'Kreditorennummer' else NULL end as 'Beleginfo - Art 4',
 			par.debtor_creditor_number as 'Beleginfo - Inhalt 4'
 
+			{extra_fields}
+
 		FROM `tabGL Entry` gl
 
 			/* Kontonummer */
-			left join `tabAccount` acc 
-			on gl.account = acc.name
+			LEFT JOIN `tabAccount` acc
+			ON gl.account = acc.name
 
-			left join `tabCustomer` cus
-			on gl.party_type = 'Customer'
-			and gl.party = cus.name
+			LEFT JOIN `tabParty Account` par
+			ON par.parent = gl.party
+			AND par.parenttype = gl.party_type
+			AND par.company = %(company)s
 
-			left join `tabSupplier` sup
-			on gl.party_type = 'Supplier'
-			and gl.party = sup.name
+			{extra_joins}
 
-			left join `tabParty Account` par
-			on par.parent = gl.party
-			and par.parenttype = gl.party_type
-			and par.company = %(company)s
-
-		WHERE gl.company = %(company)s 
+		WHERE gl.company = %(company)s
 		AND DATE(gl.posting_date) >= %(from_date)s
 		AND DATE(gl.posting_date) <= %(to_date)s
-		{}
-		ORDER BY 'Belegdatum', gl.voucher_no""".format(filter_by_voucher), filters, as_dict=as_dict)
+
+		{extra_filters}
+
+		ORDER BY 'Belegdatum', gl.voucher_no""".format(
+			extra_fields=extra_fields,
+			extra_joins=extra_joins,
+			extra_filters=extra_filters
+		)
+
+	gl_entries = frappe.db.sql(query, filters, as_dict=as_dict)
 
 	return gl_entries
 

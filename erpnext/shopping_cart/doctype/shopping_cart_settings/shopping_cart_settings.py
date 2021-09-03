@@ -4,11 +4,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import _, msgprint
-from frappe.utils import comma_and
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_datetime_str, now_datetime
+from frappe.utils import flt
+
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
@@ -18,46 +19,35 @@ class ShoppingCartSettings(Document):
 
 	def validate(self):
 		if self.enabled:
-			self.validate_exchange_rates_exist()
+			self.validate_price_list_exchange_rate()
 
-	def validate_exchange_rates_exist(self):
-		"""check if exchange rates exist for all Price List currencies (to company's currency)"""
-		company_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
+	def validate_price_list_exchange_rate(self):
+		"Check if exchange rate exists for Price List currency (to Company's currency)."
+		from erpnext.setup.utils import get_exchange_rate
+
+		if not self.enabled or not self.company or not self.price_list:
+			return # this function is also called from hooks, check values again
+
+		company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+		price_list_currency = frappe.db.get_value("Price List", self.price_list, "currency")
+
 		if not company_currency:
-			msgprint(_("Please specify currency in Company") + ": " + self.company,
-				raise_exception=ShoppingCartSetupError)
+			msg = f"Please specify currency in Company {self.company}"
+			frappe.throw(_(msg), title=_("Missing Currency"), exc=ShoppingCartSetupError)
 
-		price_list_currency_map = frappe.db.get_values("Price List",
-			[self.price_list], "currency")
+		if not price_list_currency:
+			msg = f"Please specify currency in Price List {frappe.bold(self.price_list)}"
+			frappe.throw(_(msg), title=_("Missing Currency"), exc=ShoppingCartSetupError)
 
-		price_list_currency_map = dict(price_list_currency_map)
-		
-		# check if all price lists have a currency
-		for price_list, currency in price_list_currency_map.items():
-			if not currency:
-				frappe.throw(_("Currency is required for Price List {0}").format(price_list))
+		if price_list_currency != company_currency:
+			from_currency, to_currency = price_list_currency, company_currency
 
-		expected_to_exist = [currency + "-" + company_currency
-			for currency in price_list_currency_map.values()
-			if currency != company_currency]
+			# Get exchange rate checks Currency Exchange Records too
+			exchange_rate = get_exchange_rate(from_currency, to_currency, args="for_selling")
 
-		# manqala 20/09/2016: set up selection parameters for query from tabCurrency Exchange
-		from_currency = [currency for currency in price_list_currency_map.values() if currency != company_currency]
-		to_currency = company_currency
-		# manqala end
-
-		if expected_to_exist:
-			# manqala 20/09/2016: modify query so that it uses date in the selection from Currency Exchange.
-			# exchange rates defined with date less than the date on which this document is being saved will be selected
-			exists = frappe.db.sql_list("""select CONCAT(from_currency,'-',to_currency) from `tabCurrency Exchange`
-				where from_currency in (%s) and to_currency = "%s" and date <= curdate()""" % (", ".join(["%s"]*len(from_currency)), to_currency), tuple(from_currency))
-			# manqala end
-
-			missing = list(set(expected_to_exist).difference(exists))
-
-			if missing:
-				msgprint(_("Missing Currency Exchange Rates for {0}").format(comma_and(missing)),
-					raise_exception=ShoppingCartSetupError)
+			if not flt(exchange_rate):
+				msg = f"Missing Currency Exchange Rates for {from_currency}-{to_currency}"
+				frappe.throw(_(msg), title=_("Missing"), exc=ShoppingCartSetupError)
 
 	def validate_tax_rule(self):
 		if not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart" : 1}, "name"):
@@ -71,7 +61,7 @@ class ShoppingCartSettings(Document):
 	def get_shipping_rules(self, shipping_territory):
 		return self.get_name_from_territory(shipping_territory, "shipping_rules", "shipping_rule")
 
-def validate_cart_settings(doc, method):
+def validate_cart_settings(doc=None, method=None):
 	frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings").run_method("validate")
 
 def get_shopping_cart_settings():

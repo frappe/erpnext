@@ -3,12 +3,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, get_last_day, add_days
+
+import frappe
+from frappe.utils import add_days, get_last_day, nowdate
+
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
+from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import (
+	get_current_asset_value,
+)
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import get_current_asset_value
+
 
 class TestAssetValueAdjustment(unittest.TestCase):
 	def setUp(self):

@@ -2,10 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-
 from frappe.utils import flt
+
 
 def get_context(context):
 	context.no_cache = 1
@@ -19,7 +20,7 @@ def get_context(context):
 
 	if not frappe.has_website_permission(context.doc):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
-	
+
 	default_print_format = frappe.db.get_value('Property Setter', dict(property='default_print_format', doc_type=frappe.form_dict.doctype), "value")
 	if default_print_format:
 		context.print_format = default_print_format
@@ -45,5 +46,5 @@ def get_more_items_info(items, material_request):
 		item.delivered_qty = flt(frappe.db.sql("""select sum(transfer_qty)
 						from `tabStock Entry Detail` where material_request = %s
 						and item_code = %s and docstatus = 1""",
-						(material_request, item.item_code))[0][0])				
+						(material_request, item.item_code))[0][0])
 	return items

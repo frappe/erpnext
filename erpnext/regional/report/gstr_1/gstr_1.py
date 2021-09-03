@@ -2,13 +2,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe import _
-from frappe.utils import flt, formatdate, now_datetime, getdate
+
+import json
 from datetime import date
+
+import frappe
+from frappe import _
+from frappe.utils import flt, formatdate, getdate
 from six import iteritems
-from erpnext.regional.doctype.gstr_3b_report.gstr_3b_report import get_period
+
 from erpnext.regional.india.utils import get_gst_accounts
+
 
 def execute(filters=None):
 	return Gstr1Report(filters).run()
@@ -588,7 +592,7 @@ def get_json(filters, report_name, data):
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-	gst_json = {"version": "GST2.2.9",
+	gst_json = {"version": "GST3.0.4",
 		"hash": "hash", "gstin": gstin, "fp": fp}
 
 	res = {}
@@ -765,7 +769,7 @@ def get_cdnr_reg_json(res, gstin):
 				"ntty": invoice[0]["document_type"],
 				"pos": "%02d" % int(invoice[0]["place_of_supply"].split('-')[0]),
 				"rchrg": invoice[0]["reverse_charge"],
-				"inv_type": get_invoice_type_for_cdnr(invoice[0])
+				"inv_typ": get_invoice_type_for_cdnr(invoice[0])
 			}
 
 			inv_item["itms"] = []

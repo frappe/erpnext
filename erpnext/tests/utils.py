@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 import frappe
 
+
 def create_test_contact_and_address():
 	frappe.db.sql('delete from tabContact')
 	frappe.db.sql('delete from `tabContact Email`')

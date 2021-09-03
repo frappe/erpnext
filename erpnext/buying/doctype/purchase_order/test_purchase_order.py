@@ -2,24 +2,31 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest
-import frappe
-import json
-import frappe.defaults
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from frappe.utils import flt, add_days, nowdate, getdate
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.buying.doctype.purchase_order.purchase_order \
-	import (make_purchase_receipt, make_purchase_invoice as make_pi_from_po, make_rm_stock_entry as make_subcontract_transfer_entry)
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_pi_from_pr
-from erpnext.stock.doctype.material_request.test_material_request import make_material_request
-from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.controllers.accounts_controller import update_child_qty_rate
-from erpnext.controllers.status_updater import OverAllowanceError
-from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 
-from erpnext.stock.doctype.batch.test_batch import make_new_batch
+import json
+import unittest
+
+import frappe
+from frappe.utils import add_days, flt, getdate, nowdate
+
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_invoice as make_pi_from_po,
+)
+from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_rm_stock_entry as make_subcontract_transfer_entry,
+)
+from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	make_purchase_invoice as make_pi_from_pr,
+)
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -415,10 +422,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].received_qty, 9)
 
 		# Make return purchase receipt, purchase invoice and check quantity
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-				import make_purchase_receipt as make_purchase_receipt_return
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice \
-				import make_purchase_invoice as make_purchase_invoice_return
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			make_purchase_invoice as make_purchase_invoice_return,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt as make_purchase_receipt_return,
+		)
 
 		pr1 = make_purchase_receipt_return(is_return=1, return_against=pr.name, qty=-3, do_not_submit=True)
 		pr1.items[0].purchase_order = po.name
@@ -484,8 +493,10 @@ class TestPurchaseOrder(unittest.TestCase):
 
 
 	def test_make_purchase_invoice_with_terms(self):
-		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
-		
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+		)
+
 		automatically_fetch_payment_terms()
 		po = create_purchase_order(do_not_save=True)
 
@@ -977,9 +988,14 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po_doc.items[0].blanket_order, None)
 
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+		)
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+			compare_payment_schedules,
+		)
 
 		automatically_fetch_payment_terms()
 

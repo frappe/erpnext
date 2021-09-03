@@ -1,25 +1,43 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe
 import json
-import math
-from frappe import _
-from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form, time_diff_in_hours
-from frappe.model.document import Document
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict, get_bom_item_rate
+
+import frappe
 from dateutil.relativedelta import relativedelta
-from erpnext.stock.doctype.item.item import validate_end_of_life, get_item_defaults
-from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
-from erpnext.projects.doctype.timesheet.timesheet import OverlapError
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
-from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from frappe.utils.csvutils import getlink
-from erpnext.stock.utils import get_bin, validate_warehouse_company, get_latest_stock_qty
-from erpnext.utilities.transaction_base import validate_uom_is_integer
+from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import (
+	cint,
+	date_diff,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	time_diff_in_hours,
+)
+
+from erpnext.manufacturing.doctype.bom.bom import (
+	get_bom_item_rate,
+	get_bom_items_as_dict,
+	validate_bom_no,
+)
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_mins_between_operations,
+)
 from erpnext.stock.doctype.batch.batch import make_batch
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_auto_serial_nos, auto_make_serial_nos
+from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
+from erpnext.stock.doctype.serial_no.serial_no import (
+	auto_make_serial_nos,
+	get_auto_serial_nos,
+	get_serial_nos,
+)
+from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
+from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
+from erpnext.utilities.transaction_base import validate_uom_is_integer
+
 
 class OverProductionError(frappe.ValidationError): pass
 class CapacityError(frappe.ValidationError): pass
@@ -214,6 +232,7 @@ class WorkOrder(Document):
 					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
+			self.set_process_loss_qty()
 
 			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
@@ -222,6 +241,22 @@ class WorkOrder(Document):
 
 		if self.production_plan:
 			self.update_production_plan_status()
+
+	def set_process_loss_qty(self):
+		process_loss_qty = flt(frappe.db.sql("""
+				SELECT sum(qty) FROM `tabStock Entry Detail`
+				WHERE
+					is_process_loss=1
+					AND parent IN (
+						SELECT name FROM `tabStock Entry`
+						WHERE
+							work_order=%s
+							AND purpose='Manufacture'
+							AND docstatus=1
+					)
+			""", (self.name, ))[0][0])
+		if process_loss_qty is not None:
+			self.db_set('process_loss_qty', process_loss_qty)
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc('Production Plan', self.production_plan)
@@ -602,7 +637,7 @@ class WorkOrder(Document):
 
 		if self.docstatus==1:
 			# calculate transferred qty based on submitted stock entries
-			self.update_transaferred_qty_for_required_items()
+			self.update_transferred_qty_for_required_items()
 
 			# update in bin
 			self.update_reserved_qty_for_production()
@@ -671,7 +706,7 @@ class WorkOrder(Document):
 
 			self.set_available_qty()
 
-	def update_transaferred_qty_for_required_items(self):
+	def update_transferred_qty_for_required_items(self):
 		'''update transferred qty from submitted stock entries for that item against
 			the work order'''
 
@@ -838,7 +873,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 
 	for item in variant_items:
 		args = frappe._dict({
-			"item_code": item.get("varint_item_code"),
+			"item_code": item.get("variant_item_code"),
 			"required_qty": item.get("qty"),
 			"qty": item.get("qty"), # for bom
 			"source_warehouse": item.get("source_warehouse"),
@@ -859,7 +894,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		}, bom_doc)
 
 		if not args.source_warehouse:
-			args["source_warehouse"] = get_item_defaults(item.get("varint_item_code"),
+			args["source_warehouse"] = get_item_defaults(item.get("variant_item_code"),
 				wo_doc.company).default_warehouse
 
 		args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))

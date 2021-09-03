@@ -3,13 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import now, cint, get_datetime
-from frappe.model.document import Document
-from frappe import _
 
-from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import cint, get_datetime
+
+from erpnext.hr.doctype.shift_assignment.shift_assignment import (
+	get_actual_start_end_datetime_of_shift,
+)
 from erpnext.hr.utils import validate_active_employee
+
 
 class EmployeeCheckin(Document):
 	def validate(self):
@@ -176,4 +180,3 @@ def time_diff_in_hours(start, end):
 
 def find_index_in_dict(dict_list, key, value):
 	return next((index for (index, d) in enumerate(dict_list) if d[key] == value), None)
-

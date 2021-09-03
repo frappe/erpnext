@@ -3,16 +3,32 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import datetime
 import json
-from frappe import _, bold
-from frappe.model.mapper import get_mapped_doc
-from frappe.model.document import Document
-from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate,
-	get_time, add_to_date, time_diff, add_days, get_datetime_str, get_link_to_form, time_diff_in_seconds)
 
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
+import frappe
+from frappe import _, bold
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import (
+	add_days,
+	add_to_date,
+	cint,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	get_time,
+	getdate,
+	time_diff,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
+
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_mins_between_operations,
+)
+
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -26,17 +42,17 @@ class JobCard(Document):
 		self.set_status()
 		self.validate_operation_id()
 		self.validate_sequence_id()
-		self.get_sub_operations()
+		self.set_sub_operations()
 		self.update_sub_operation_status()
 
-	def get_sub_operations(self):
+	def set_sub_operations(self):
 		if self.operation:
 			self.sub_operations = []
-			for row in frappe.get_all("Sub Operation",
-				filters = {"parent": self.operation}, fields=["operation", "idx"]):
-				row.status = "Pending"
+			for row in frappe.get_all('Sub Operation',
+				filters = {'parent': self.operation}, fields=['operation', 'idx'], order_by='idx'):
+				row.status = 'Pending'
 				row.sub_operation = row.operation
-				self.append("sub_operations", row)
+				self.append('sub_operations', row)
 
 	def validate_time_logs(self):
 		self.total_time_in_mins = 0.0
@@ -690,7 +706,7 @@ def make_corrective_job_card(source_name, operation=None, for_operation=None, ta
 		target.set('time_logs', [])
 		target.set('employee', [])
 		target.set('items', [])
-		target.get_sub_operations()
+		target.set_sub_operations()
 		target.get_required_items()
 		target.validate_time_logs()
 

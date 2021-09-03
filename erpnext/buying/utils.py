@@ -2,13 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import flt, cstr, cint
-from frappe import _
+
 import json
 
-from erpnext.stock.doctype.item.item import get_last_purchase_details
-from erpnext.stock.doctype.item.item import validate_end_of_life
+import frappe
+from frappe import _
+from frappe.utils import cint, cstr, flt
+
+from erpnext.stock.doctype.item.item import get_last_purchase_details, validate_end_of_life
+
 
 def update_last_purchase_rate(doc, is_submit):
 	"""updates last_purchase_rate in item table for each item"""
@@ -102,4 +104,3 @@ def get_linked_material_requests(items):
 			mr_list.append(material_request)
 
 	return mr_list
-

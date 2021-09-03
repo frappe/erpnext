@@ -3,10 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from erpnext.controllers.employee_boarding_controller import EmployeeBoardingController
 from frappe.model.mapper import get_mapped_doc
+
+from erpnext.controllers.employee_boarding_controller import EmployeeBoardingController
+
 
 class IncompleteTaskError(frappe.ValidationError): pass
 
@@ -57,4 +60,3 @@ def make_employee(source_name, target_doc=None):
 				}}
 		}, target_doc, set_missing_values)
 	return doc
-

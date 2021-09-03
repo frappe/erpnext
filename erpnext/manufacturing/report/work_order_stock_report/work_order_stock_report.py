@@ -2,18 +2,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.utils import cint
+
 import frappe
+from frappe.utils import cint
+
 
 def execute(filters=None):
 	wo_list = get_work_orders()
 	data = get_item_list(wo_list, filters)
 	columns = get_columns()
 	return columns, data
-	
+
 def get_item_list(wo_list, filters):
 	out = []
-	
+
 	#Add a row for each item/qty
 	for wo_details in wo_list:
 		desc = frappe.db.get_value("BOM", wo_details.bom_no, "description")
@@ -70,13 +72,13 @@ def get_item_list(wo_list, filters):
 			out.append(row)
 
 	return out
-	
+
 def get_work_orders():
 	out =  frappe.get_all("Work Order", filters={"docstatus": 1, "status": ( "!=","Completed")},
 		fields=["name","status", "bom_no", "qty", "produced_qty"], order_by='name')
 
 	return out
-	
+
 def get_columns():
 	columns = [{
 		"fieldname": "work_order",
