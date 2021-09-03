@@ -7,8 +7,8 @@ from frappe.model.document import Document
 
 class CurrencyExchangeSettings(Document):
 	def validate(self):
-		if len(self.req_params) != 3:
-			frappe.throw(_("Make sure all the three mandatory parameters are filled."))
+		if len(self.req_params) > 3:
+			frappe.throw(_("Make sure no mandatory parameters are repeated."))
 		transaction_date = '2021-08-01'
 		from_currency = 'USD'
 		to_currency = 'INR'
@@ -23,7 +23,7 @@ class CurrencyExchangeSettings(Document):
 				params[row.key] = req_params[row.value]
 				req_params.pop(row.value)
 			except:
-				frappe.throw(_("Make sure all the three mandatory parameters are filled."))
+				frappe.throw(_("Make sure no mandatory parameters are repeated."))
 		for eparam in self.extra_params:
 			params[eparam.key] = eparam.value
 		import requests
@@ -42,7 +42,7 @@ class CurrencyExchangeSettings(Document):
 			for key in self.result_key:
 				value = value[str(key.key).format(
 					transaction_date=transaction_date,
-					to_currency=to_currency, 
+					to_currency=to_currency,
 					from_currency=from_currency
 				)]
 		except KeyError:
