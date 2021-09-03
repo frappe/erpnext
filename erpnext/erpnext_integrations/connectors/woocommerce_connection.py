@@ -507,9 +507,9 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 		is_swab = False
 		if sku.startswith("DNA"):
 			item_meta_data = item.get('meta_data')
-				for meta_data in item_meta_data:
-					if meta_data.get('key') == "swab" and meta_data.get('value') == "true":
-						is_swab = True
+			for meta_data in item_meta_data:
+				if meta_data.get('key') == "swab" and meta_data.get('value') == "true":
+					is_swab = True
 
 
 
