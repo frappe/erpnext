@@ -63,6 +63,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -77,6 +78,7 @@
    "fieldname": "leave_type",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Leave Type",
    "options": "Leave Type",
@@ -113,6 +115,7 @@
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "To Date",
    "reqd": 1,
    "search_index": 1
@@ -156,12 +159,14 @@
   {
    "fieldname": "leave_approver",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Leave Approver",
    "options": "User"
   },
   {
    "fieldname": "leave_approver_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Leave Approver Name",
    "read_only": 1
   },
@@ -269,7 +274,7 @@
  "idx": 1,
  "is_submittable": 1,
  "max_attachments": 3,
- "modified": "2021-09-03 00:47:24.758339",
+ "modified": "2021-09-03 19:12:55.667553",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
@@ -353,5 +358,7 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "employee",
- "title_field": "employee_name"
+ "title_field": "employee_name",
+ "track_changes": 1,
+ "track_seen": 1
 }

@@ -1,5 +1,5 @@
-
-{% if data %}
+<div class="leave-application-dashboard">
+{% if data && !$.isEmptyObject(data) %}
 <h5 style="margin-top: 5px;"> {{ __("Allocated Leaves") }} </h5>
 <table class="table table-bordered small">
 	<thead>
@@ -27,5 +27,6 @@
 	</tbody>
 </table>
 {% } else { %}
-<p style="margin-top: 5px;"> No Leaves have been allocated. </p>
+<p style="margin-top: 5px;">No Leaves have been allocated.</p>
 {% } %}
+</div>
