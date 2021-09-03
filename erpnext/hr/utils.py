@@ -428,6 +428,19 @@ def get_holidays_for_employee(employee, start_date, end_date):
 
 	return holidays
 
+
+def get_holiday_description(holiday_list, date):
+	if not holiday_list or not date:
+		return ""
+
+	doc = frappe.get_cached_doc("Holiday List", holiday_list)
+	for d in doc.holidays:
+		if getdate(date) == getdate(d.holiday_date):
+			return cstr(d.description)
+
+	return ""
+
+
 @erpnext.allow_regional
 def calculate_annual_eligible_hra_exemption(doc):
 	# Don't delete this method, used for localization
