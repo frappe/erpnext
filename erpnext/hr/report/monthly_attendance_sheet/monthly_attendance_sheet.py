@@ -222,11 +222,15 @@ def get_employee_details(filters):
 
 def is_date_holiday(attendance_date, holiday_map, employee_details, default_holiday_list):
 	if holiday_map:
-		emp_holiday_list = employee_details.holiday_list if employee_details.holiday_list else default_holiday_list
+		emp_holiday_list = get_employee_holiday_list(employee_details, default_holiday_list)
 		if emp_holiday_list in holiday_map and getdate(attendance_date) in holiday_map[emp_holiday_list]:
 			return True
 
 	return False
+
+
+def get_employee_holiday_list(employee_details, default_holiday_list):
+	return employee_details.holiday_list if employee_details.holiday_list else default_holiday_list
 
 
 def get_holiday_map(employee_map, default_holiday_list, from_date=None, to_date=None):

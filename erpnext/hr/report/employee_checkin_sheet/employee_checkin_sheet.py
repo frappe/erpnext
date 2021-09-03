@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, formatdate
+from erpnext.hr.utils import get_holiday_description
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import get_employee_details,\
-	get_attendance_status_abbr, get_holiday_map, is_date_holiday
+	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list
 
 def execute(filters=None):
 	filters = frappe._dict(filters)
@@ -45,6 +46,9 @@ def execute(filters=None):
 					row_template['attendance_status'] = "Holiday"
 					row_template['attendance_abbr'] = get_attendance_status_abbr(row_template['attendance_status'])
 
+					employee_holiday_list = get_employee_holiday_list(employee_details, filters.default_holiday_list)
+					row_template['remarks'] = get_holiday_description(employee_holiday_list, current_date)
+
 				checkin_shifts = checkin_map.get(current_date, {}).get(employee, {})
 				attendance_shifts = attendance_map.get(current_date, {}).get(employee, {})
 
@@ -78,7 +82,7 @@ def execute(filters=None):
 							row['leave_type'] = attendance_details.leave_type
 							row['leave_application'] = attendance_details.leave_application
 							row['attendance_request'] = attendance_details.attendance_request
-							row['remarks'] = attendance_details.remarks or attendance_details.leave_type or attendance_details.attendance_request_reason
+							row['remarks'] = attendance_details.remarks or attendance_details.leave_type or attendance_details.attendance_request_reason or row.remarks
 
 							if attendance_details.working_hours:
 								row['working_hours'] = attendance_details.working_hours
