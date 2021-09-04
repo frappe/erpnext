@@ -19,17 +19,16 @@
   },
   {
    "fieldname": "value",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Value",
-   "options": "\ntransaction_date\nfrom_currency\nto_currency",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-03 18:50:47.145457",
+ "modified": "2021-09-04 11:24:21.944002",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Currency Exchange Settings Details",

@@ -9,11 +9,11 @@
   "api_endpoint",
   "url",
   "column_break_3",
-  "result_key",
+  "help",
   "section_break_2",
   "req_params",
   "column_break_4",
-  "extra_params"
+  "result_key"
  ],
  "fields": [
   {
@@ -35,15 +35,9 @@
   {
    "fieldname": "req_params",
    "fieldtype": "Table",
-   "label": "Mandatory Parameters",
+   "label": "Parameters",
    "options": "Currency Exchange Settings Details",
    "reqd": 1
-  },
-  {
-   "fieldname": "extra_params",
-   "fieldtype": "Table",
-   "label": "Additional Parameters",
-   "options": "Currency Exchange Settings Extra Details"
   },
   {
    "fieldname": "api_details_section",
@@ -64,14 +58,20 @@
   {
    "fieldname": "url",
    "fieldtype": "Data",
-   "label": "URL",
+   "label": "Example URL",
    "read_only": 1
+  },
+  {
+   "fieldname": "help",
+   "fieldtype": "HTML",
+   "label": "Help",
+   "options": "<h3>Currency Exchange Settings Help</h3>\n<p>There are 3 variables that could be used within the endpoint, result key and in values of the parameter.</p>\n<p>Exchange rate between {from_currency} and {to_currency} on {transaction_date} is fetched by the API.</p>\n<p>Example: If your endpoint is exchange.com/2021-08-01, then, you will have to input exchange.com/{transaction_date}</p>"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-03 19:09:02.741016",
+ "modified": "2021-09-04 11:41:34.375637",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Currency Exchange Settings",

@@ -3,29 +3,17 @@
 
 import frappe
 from frappe import _
+from frappe.utils import nowdate
 from frappe.model.document import Document
 
 class CurrencyExchangeSettings(Document):
 	def validate(self):
-		if len(self.req_params) > 3:
-			frappe.throw(_("Make sure no mandatory parameters are repeated."))
-		transaction_date = '2021-08-01'
+		transaction_date = nowdate()
 		from_currency = 'USD'
 		to_currency = 'INR'
-		req_params = {
-			"transaction_date": transaction_date,
-			"from_currency": from_currency,
-			"to_currency": to_currency
-		}
 		params = {}
 		for row in self.req_params:
-			try:
-				params[row.key] = req_params[row.value]
-				req_params.pop(row.value)
-			except:
-				frappe.throw(_("Make sure no mandatory parameters are repeated."))
-		for eparam in self.extra_params:
-			params[eparam.key] = eparam.value.format(
+			params[row.key] = row.value.format(
 				transaction_date=transaction_date,
 				to_currency=to_currency,
 				from_currency=from_currency
@@ -54,4 +42,4 @@ class CurrencyExchangeSettings(Document):
 		if not isinstance(value, (int, float)):
 			frappe.throw(_("Returned exchange rate is neither integer not float."))
 		self.url = response.url
-		frappe.msgprint("Exchange rate of USD to INR on 01-08-2021 is " + str(value))
+		frappe.msgprint("Exchange rate of USD to INR is " + str(value))

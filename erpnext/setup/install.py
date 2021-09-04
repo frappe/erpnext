@@ -59,15 +59,18 @@ def set_single_defaults():
 				pass
 			except frappe.ValidationError:
 				pass
-	ces = frappe.get_single('Currency Exchange Settings')
-	ces.api_endpoint = "https://api.exchangerate.host/convert"
-	ces.append('result_key', {'key': 'result'})
-	ces.append('req_params', {'key': 'date', 'value': 'transaction_date'})
-	ces.append('req_params', {'key': 'from', 'value': 'from_currency'})
-	ces.append('req_params', {'key': 'to', 'value': 'to_currency'})
-	ces.save()
-	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
+	frappe.db.set_default("date_format", "dd-mm-yyyy")
+	ces = frappe.get_single('Currency Exchange Settings')
+	try:
+		ces.api_endpoint = "https://api.exchangerate.host/convert"
+		ces.append('result_key', {'key': 'result'})
+		ces.append('req_params', {'key': 'date', 'value': '{transaction_date}'})
+		ces.append('req_params', {'key': 'from', 'value': '{from_currency}'})
+		ces.append('req_params', {'key': 'to', 'value': '{to_currency}'})
+		ces.save()
+	except frappe.ValidationError:
+		pass
 
 def create_compact_item_print_custom_field():
 	create_custom_field('Print Settings', {
