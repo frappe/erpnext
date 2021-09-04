@@ -23,7 +23,8 @@ def get_data_column(filters, partner_doctype):
 	for key, value in rows.items():
 		value.update({
 			frappe.scrub(partner_doctype): key[0],
-			'item_group': key[1]
+			'item_group': key[1],
+			'territory': key[2]
 		})
 
 		data.append(value)
@@ -33,9 +34,8 @@ def get_data_column(filters, partner_doctype):
 def get_data(filters, period_list, partner_doctype):
 	sales_field = frappe.scrub(partner_doctype)
 	sales_users_data = get_parents_data(filters, partner_doctype)
-
 	if not sales_users_data: return
-	sales_users, item_groups = [], []
+	sales_users, item_groups, territories = [], [], []
 
 	for d in sales_users_data:
 		if d.parent not in sales_users:
@@ -43,6 +43,9 @@ def get_data(filters, period_list, partner_doctype):
 
 		if d.item_group not in item_groups:
 			item_groups.append(d.item_group)
+
+		if d.territory not in territories:
+			territories.append(d.territory)
 
 	if item_groups:
 		child_items = []
@@ -59,7 +62,7 @@ def get_data(filters, period_list, partner_doctype):
 	date_field = ("transaction_date"
 		if filters.get('doctype') == "Sales Order" else "posting_date")
 
-	actual_data = get_actual_data(filters, item_groups, sales_users, date_field, sales_field)
+	actual_data = get_actual_data(filters, item_groups, sales_users, territories, date_field, sales_field)
 
 	return prepare_data(filters, sales_users_data,
 		actual_data, date_field, period_list, sales_field)
@@ -81,6 +84,12 @@ def get_columns(filters, period_list, partner_doctype):
 		"label": _("Item Group"),
 		"fieldtype": "Link",
 		"options": "Item Group",
+		"width": 150
+	}, {
+		"fieldname": "territory",
+		"label": _("Territory"),
+		"fieldtype": "Link",
+		"options": "Territory",
 		"width": 150
 	}]
 
@@ -140,7 +149,7 @@ def prepare_data(filters, sales_users_data, actual_data, date_field, period_list
 		if filters.get("target_on") == 'Quantity' else "base_net_amount")
 
 	for d in sales_users_data:
-		key = (d.parent, d.item_group)
+		key = (d.parent, d.item_group, d.territory)
 		dist_data = get_periodwise_distribution_data(d.distribution_id, period_list, filters.get("period"))
 
 		if key not in rows:
@@ -163,7 +172,7 @@ def prepare_data(filters, sales_users_data, actual_data, date_field, period_list
 			details["total_target"] += details[target_key]
 
 			for r in actual_data:
-				if (r.get(sales_field) == d.parent and r.item_group == d.item_group and
+				if (r.get(sales_field) == d.parent and r.item_group == d.item_group and r.territory == d.territory and
 					period.from_date <= r.get(date_field) and r.get(date_field) <= period.to_date):
 					details[p_key] += r.get(qty_or_amount_field, 0)
 					details[variance_key] = details.get(p_key) - details.get(target_key)
@@ -173,7 +182,7 @@ def prepare_data(filters, sales_users_data, actual_data, date_field, period_list
 
 	return rows
 
-def get_actual_data(filters, item_groups, sales_users_or_territory_data, date_field, sales_field):
+def get_actual_data(filters, item_groups, sales_users_or_territory_data, territories, date_field, sales_field):
 	fiscal_year = get_fiscal_year(fiscal_year=filters.get("fiscal_year"), as_dict=1)
 	dates = [fiscal_year.year_start_date, fiscal_year.year_end_date]
 
@@ -192,12 +201,13 @@ def get_actual_data(filters, item_groups, sales_users_or_territory_data, date_fi
 
 	return frappe.db.sql(""" SELECT `tab{child_doc}`.item_group,
 			`tab{child_doc}`.stock_qty, `tab{child_doc}`.base_net_amount,
-			{select_field}, `tab{parent_doc}`.{date_field}
+			{select_field}, `tab{parent_doc}`.{date_field}, `tab{parent_doc}`.territory
 		FROM `tab{parent_doc}`, {child_table}
 		WHERE
 			`tab{child_doc}`.parent = `tab{parent_doc}`.name
 			and `tab{parent_doc}`.docstatus = 1 and {cond}
 			and `tab{child_doc}`.item_group in ({item_groups})
+			and `tab{parent_doc}`.territory in ({territories})
 			and `tab{parent_doc}`.{date_field} between %s and %s"""
 			.format(
 				cond = cond,
@@ -206,8 +216,9 @@ def get_actual_data(filters, item_groups, sales_users_or_territory_data, date_fi
 				child_table = child_table,
 				parent_doc = filters.get("doctype"),
 				child_doc = filters.get("doctype") + ' Item',
-				item_groups = ','.join(['%s'] * len(item_groups))
-			), tuple(sales_users_or_territory_data + item_groups + dates), as_dict=1)
+				item_groups = ','.join(['%s'] * len(item_groups)),
+			    territories = ','.join(['%s'] * len(territories))
+			), tuple(sales_users_or_territory_data + item_groups + territories + dates), as_dict=1)
 
 def get_parents_data(filters, partner_doctype):
 	filters_dict = {'parenttype': partner_doctype}
@@ -218,6 +229,20 @@ def get_parents_data(filters, partner_doctype):
 	if filters.get("fiscal_year"):
 		filters_dict["fiscal_year"] = filters.get("fiscal_year")
 
+	if filters.get("territory"):
+		child_territories = []
+		if frappe.db.get_value("Territory", {"name": filters.get("territory")}, "is_group"):
+			for child_territory in frappe.get_all("Territory", {"parent_territory": filters.get("territory")}):
+				if child_territory["name"] not in child_territories:
+					child_territories.append(child_territory["name"])
+
+		territories = [filters.get("territory")]
+		for territory in child_territories:
+			if territory not in territories:
+				territories.append(territory)
+
+		filters_dict["territory"] = ["in", territories]
+
 	return frappe.get_all('Target Detail',
 		filters = filters_dict,
-		fields = ["parent", "item_group", target_qty_amt_field, "fiscal_year", "distribution_id"])
+		fields = ["parent", "item_group", "territory", target_qty_amt_field, "fiscal_year", "distribution_id"])
