@@ -46,15 +46,14 @@ def execute(filters=None):
 			"total_deduction": ss.total_deduction + ss.total_loan_repayment + ss.total_advance_amount,
 			"net_pay": ss.net_pay,
 			"rounded_total": ss.rounded_total,
-			"cheque_amount": ss.rounded_total if ss.salary_mode == "Cheque" else None,
-			"cash_amount": ss.rounded_total if ss.salary_mode == "Cash" else None,
+			"bank_amount": ss.bank_amount or None,
+			"cheque_amount": ss.cheque_amount or None,
+			"cash_amount": ss.cash_amount or None,
+			"no_mode_amount": ss.no_mode_amount or None,
 		})
 
-		if ss.salary_mode == "Bank" and ss.bank_name:
-			row['bank_amount_' + scrub(ss.bank_name)] = ss.rounded_total
-
-		if not ss.salary_mode:
-			row['no_salary_mode'] = ss.rounded_total
+		if ss.salary_mode == "Bank":
+			row['bank_amount_' + scrub(ss.bank_name or 'Unknown Bank')] = ss.bank_amount
 
 		for c in columns:
 			if c.get("is_earning"):
@@ -97,7 +96,7 @@ def get_grouped_data(columns, data, filters):
 
 def get_columns(salary_slips, filters):
 	branch = department = designation = leave_without_pay = late_days = loan_repayment = advance_deduction\
-		= no_salary_mode = cash_amount = cheque_amount = False
+		= no_mode_amount = cash_amount = cheque_amount = False
 
 	period_set = set()
 	for ss in salary_slips:
@@ -108,9 +107,9 @@ def get_columns(salary_slips, filters):
 		if ss.get('leave_without_pay'): leave_without_pay = True
 		if ss.get('total_loan_repayment'): loan_repayment = True
 		if ss.get('total_advance_amount'): advance_deduction = True
-		if not ss.get('salary_mode'): no_salary_mode = True
-		if ss.get('salary_mode') == "Cash": cash_amount = True
-		if ss.get('salary_mode') == "Cheque": cheque_amount = True
+		if ss.get('cheque_amount'): cheque_amount = True
+		if ss.get('cash_amount'): cash_amount = True
+		if ss.get('no_mode_amount'): no_mode_amount = True
 
 		period_set.add((ss.start_date, ss.end_date))
 
@@ -219,21 +218,6 @@ def get_columns(salary_slips, filters):
 		}
 	]
 
-	columns += [
-		{
-			"label": _("No Salary Mode"), "fieldtype": "Currency",
-			"fieldname": "no_salary_mode", "width": 90, "keep": no_salary_mode
-		},
-		{
-			"label": _("Cheque Amount"), "fieldtype": "Currency",
-			"fieldname": "cheque_amount", "width": 90, "keep": cheque_amount
-		},
-		{
-			"label": _("Cash Amount"), "fieldtype": "Currency",
-			"fieldname": "cash_amount", "width": 90, "keep": cash_amount
-		},
-	]
-
 	bank_names = [ss.bank_name or 'Unknown Bank' for ss in salary_slips if ss.salary_mode == "Bank"]
 	bank_names = list(set(bank_names))
 
@@ -244,6 +228,22 @@ def get_columns(salary_slips, filters):
 				"fieldname": 'bank_amount_' + scrub(bank_name), "width": 90
 			},
 		]
+
+	columns += [
+		{
+			"label": _("Cheque Amount"), "fieldtype": "Currency",
+			"fieldname": "cheque_amount", "width": 90, "keep": cheque_amount
+		},
+		{
+			"label": _("Cash Amount"), "fieldtype": "Currency",
+			"fieldname": "cash_amount", "width": 90, "keep": cash_amount
+		},
+		{
+			"label": _("No Salary Mode"), "fieldtype": "Currency",
+			"fieldname": "no_mode_amount", "width": 90, "keep": no_mode_amount
+		},
+	]
+
 	columns = [c for c in columns if c.get('keep', True)]
 	return columns
 

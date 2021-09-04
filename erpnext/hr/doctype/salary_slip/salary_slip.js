@@ -141,11 +141,38 @@ frappe.ui.form.on("Salary Slip", {
 
 		frm.set_df_property('leave_without_pay', 'read_only', cint(frm.doc.set_lwp_manually) ? 0 : 1);
 		frm.set_df_property('late_days', 'read_only', cint(frm.doc.set_lwp_manually) ? 0 : 1);
+
+		frm.set_df_property('bank_amount', 'read_only', cint(frm.doc.salary_mode == "Bank"));
+		frm.set_df_property('cheque_amount', 'read_only', cint(frm.doc.salary_mode == "Cheque"));
+		frm.set_df_property('cash_amount', 'read_only', cint(frm.doc.salary_mode == "Cash"));
 	},
 
 	get_emp_and_leave_details: function(frm) {
 		return frappe.call({
 			method: 'get_emp_and_leave_details',
+			doc: frm.doc,
+			callback: function(r, rt) {
+				frm.dirty();
+				frm.refresh();
+			}
+		});
+	},
+
+	bank_amount: function (frm) {
+		frm.events.calculate_mode_of_payment(frm);
+	},
+
+	cheque_amount: function (frm) {
+		frm.events.calculate_mode_of_payment(frm);
+	},
+
+	cash_amount: function (frm) {
+		frm.events.calculate_mode_of_payment(frm);
+	},
+
+	calculate_mode_of_payment: function (frm) {
+		return frappe.call({
+			method: 'calculate_mode_of_payment',
 			doc: frm.doc,
 			callback: function(r, rt) {
 				frm.dirty();

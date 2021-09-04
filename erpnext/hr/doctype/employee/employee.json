@@ -448,7 +448,6 @@
    "options": "\nBank\nCash\nCheque"
   },
   {
-   "depends_on": "eval:doc.salary_mode == 'Bank'",
    "fieldname": "bank_name",
    "fieldtype": "Link",
    "label": "Bank Name",
@@ -457,10 +456,9 @@
    "options": "Bank"
   },
   {
-   "depends_on": "eval:doc.salary_mode == 'Bank'",
    "fieldname": "bank_ac_no",
    "fieldtype": "Data",
-   "label": "Bank A/C No.",
+   "label": "Bank Account No.",
    "oldfieldname": "bank_ac_no",
    "oldfieldtype": "Data"
   },
@@ -878,7 +876,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2021-09-03 15:29:00.460667",
+ "modified": "2021-09-04 17:43:11.481099",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

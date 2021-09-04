@@ -5,7 +5,6 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "posting_date",
   "employee",
   "employee_name",
   "column_break1",
@@ -15,6 +14,7 @@
   "tax_cnic",
   "tax_id",
   "column_break_10",
+  "posting_date",
   "company",
   "payroll_entry",
   "journal_entry",
@@ -45,13 +45,6 @@
   "column_break_20",
   "total_working_hours",
   "hour_rate",
-  "section_break_26",
-  "salary_mode",
-  "col_break_37",
-  "bank_name",
-  "column_break_37",
-  "bank_account_no",
-  "section_break_32",
   "earning_deduction",
   "earning",
   "earnings",
@@ -78,6 +71,15 @@
   "column_break_53",
   "rounded_total",
   "total_in_words",
+  "section_break_26",
+  "salary_mode",
+  "bank_name",
+  "bank_account_no",
+  "col_break_37",
+  "bank_amount",
+  "cheque_amount",
+  "cash_amount",
+  "no_mode_amount",
   "more_information_section",
   "status",
   "column_break_66",
@@ -290,7 +292,8 @@
   },
   {
    "fieldname": "section_break_26",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Mode of Payment"
   },
   {
    "fieldname": "bank_name",
@@ -308,10 +311,6 @@
    "oldfieldname": "bank_account_no",
    "oldfieldtype": "Data",
    "read_only": 1
-  },
-  {
-   "fieldname": "section_break_32",
-   "fieldtype": "Section Break"
   },
   {
    "default": "0",
@@ -549,10 +548,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_37",
-   "fieldtype": "Column Break"
-  },
-  {
    "fetch_from": "employee.salary_mode",
    "fieldname": "salary_mode",
    "fieldtype": "Data",
@@ -609,12 +604,47 @@
    "label": "Actual Late Days",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "salary_mode",
+   "fieldname": "cash_amount",
+   "fieldtype": "Currency",
+   "label": "Cash Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "depends_on": "salary_mode",
+   "fieldname": "cheque_amount",
+   "fieldtype": "Currency",
+   "label": "Cheque Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "depends_on": "salary_mode",
+   "fieldname": "bank_amount",
+   "fieldtype": "Currency",
+   "label": "Bank Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "no_mode_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "No Salary Mode Amount",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2021-09-03 00:52:26.411219",
+ "modified": "2021-09-04 17:49:50.892161",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",

@@ -134,6 +134,30 @@ frappe.ui.form.on('Payroll Entry', {
 								options: banks,
 								depends_on: "eval:doc.salary_mode == 'Bank'"
 							},
+							{
+								label: 'Employee',
+								fieldname: 'employee',
+								fieldtype: 'Link',
+								options: 'Employee',
+								onchange: function () {
+									var employee = d.get_value('employee');
+									if (employee) {
+										frappe.db.get_value("Employee", employee, "employee_name", (r) => {
+											if (r) {
+												d.set_value('employee_name', r.employee_name);
+											}
+										});
+									} else {
+										d.set_value('employee_name', '');
+									}
+								}
+							},
+							{
+								label: 'Employee Name',
+								fieldname: 'employee_name',
+								fieldtype: 'Data',
+								read_only: 1,
+							},
 						],
 						primary_action_label: 'Submit',
 						primary_action: function(r) {
@@ -143,10 +167,11 @@ frappe.ui.form.on('Payroll Entry', {
 								args: {
 									payment_account: r.payment_account,
 									salary_mode: r.salary_mode,
-									bank_name: r.bank_name
+									bank_name: r.bank_name,
+									employee: r.employee,
 								},
 								freeze: true,
-								freeze_message: __("Creating Payment Entries......"),
+								freeze_message: __("Creating Payment Entry......"),
 								callback: function(r) {
 									if (r.message && r.message.length) {
 										if (r.message.length === 1) {
@@ -168,7 +193,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 	add_bank_entry_button: function(frm) {
 		if (!frm.doc.__onload || !frm.doc.__onload.has_bank_entries) {
-			frm.add_custom_button("Make Bank Entry", function() {
+			frm.add_custom_button("Make Payment Voucher", function() {
 				frm.trigger("make_disbursement_entry");
 			}).addClass("btn-primary");
 		}

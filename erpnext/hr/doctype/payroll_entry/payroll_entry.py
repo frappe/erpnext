@@ -6,8 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from dateutil.relativedelta import relativedelta
-from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT, date_diff
-from frappe import _
+from frappe.utils import cint, flt, add_days, getdate, add_to_date, DATE_FORMAT, date_diff, formatdate
+from frappe import _, scrub
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
@@ -164,6 +164,7 @@ class PayrollEntry(Document):
 					"employee": emp
 				})
 				ss = frappe.get_doc(args)
+				ss.flags.from_payroll_entry = True
 				ss.insert()
 
 			if publish_progress:
@@ -190,6 +191,7 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 		for count, ss in enumerate(sal_slips):
 			doc = frappe.get_doc("Salary Slip", ss.name)
+			doc.flags.from_payroll_entry = True
 			doc.save()
 			if publish_progress:
 				frappe.publish_progress((count + 1) * 100 / len(sal_slips), title=_("Updating Salary Slips..."))
@@ -223,6 +225,7 @@ class PayrollEntry(Document):
 
 		for count, ss in enumerate(sal_slips):
 			ss_obj = frappe.get_doc("Salary Slip", ss.name)
+			ss_obj.flags.from_payroll_entry = True
 			if ss_obj.net_pay < 0:
 				not_submitted_ss.append(ss.name)
 			else:
@@ -469,7 +472,10 @@ class PayrollEntry(Document):
 		filter_cond = self.get_filter_condition()
 
 		salary_slips = frappe.db.sql("""
-			select t1.name, t1.employee, t1.employee_name, t1.salary_mode, t1.bank_name, t1.bank_account_no, t1.net_pay, t1.rounded_total
+			select t1.name, t1.employee, t1.employee_name,
+				t1.salary_mode, t1.bank_name, t1.bank_account_no,
+				t1.bank_amount, t1.cheque_amount, t1.cash_amount, t1.no_mode_amount,
+				t1.net_pay, t1.rounded_total
 			from `tabSalary Slip` t1
 			where {0} and start_date >= %s and end_date <= %s {1}
 		""".format(docstatus_cond, filter_cond), (self.start_date, self.end_date), as_dict=True)
@@ -478,14 +484,14 @@ class PayrollEntry(Document):
 
 	def get_disbursement_mode_details(self):
 		salary_slips = self.get_salary_slips_for_payment()
-		salary_modes = set([ss.salary_mode for ss in salary_slips if ss.salary_mode and ss.salary_mode != "Cheque"])
+		salary_modes = set([ss.salary_mode for ss in salary_slips if ss.salary_mode])
 		bank_names = set([ss.bank_name for ss in salary_slips if ss.salary_mode == 'Bank' and ss.bank_name])
 
 		return list(salary_modes), list(bank_names)
 
 	def get_bank_details(self):
 		sal_slips_in_payroll = self.get_salary_slips_for_payment(include_draft=True)
-		sal_slips_in_payroll = [d for d in sal_slips_in_payroll if d.salary_mode == 'Bank' and d.bank_name]
+		sal_slips_in_payroll = [d for d in sal_slips_in_payroll if d.bank_amount and d.bank_name]
 
 		bank_employee_map = {}
 		for d in sal_slips_in_payroll:
@@ -495,23 +501,34 @@ class PayrollEntry(Document):
 			bank_employee_map[bank_name].employees.append({
 				'employee': d.employee,
 				'employee_name': d.employee_name,
+				'bank_name': d.bank_name,
+				'bank_account_no': d.bank_account_no,
 				'rounded_total': d.rounded_total,
 				'net_pay': d.net_pay,
-				'bank_account_no': d.bank_account_no
+				'bank_amount': d.bank_amount
 			})
-			bank_employee_map[bank_name].total += d.rounded_total
+			bank_employee_map[bank_name].total += d.bank_amount
 
 		return bank_employee_map
 
-	def make_payment_entry(self, payment_account, salary_mode=None, bank_name=None):
+	def make_payment_entry(self, payment_account, salary_mode=None, bank_name=None, employee=None):
 		from erpnext.accounts.utils import get_currency_precision
 
 		self.check_permission('write')
 		self.payment_account = payment_account
 
 		salary_slips = self.get_salary_slips_for_payment()
+
+		salary_mode_field = None
 		if salary_mode:
-			salary_slips = [d for d in salary_slips if d.salary_mode == salary_mode]
+			salary_mode_field = scrub(salary_mode) + '_amount'
+
+		amount_field = salary_mode_field or 'rounded_total'
+
+		if employee:
+			salary_slips = [d for d in salary_slips if d.employee == employee]
+		if salary_mode_field:
+			salary_slips = [d for d in salary_slips if d.get(salary_mode_field)]
 		if salary_mode == "Bank" and bank_name:
 			salary_slips = [d for d in salary_slips if d.bank_name == bank_name]
 
@@ -521,7 +538,7 @@ class PayrollEntry(Document):
 		if salary_slips:
 			for ss in salary_slips:
 				salary_slip = frappe.get_doc("Salary Slip", ss.name)
-				salary_slip_total += salary_slip.rounded_total
+				salary_slip_total += flt(salary_slip.get(amount_field))
 				for sal_detail in salary_slip.earnings:
 					is_flexible_benefit, only_tax_impact, creat_separate_je, statistical_component = frappe.db.get_value("Salary Component", sal_detail.salary_component,
 						['is_flexible_benefit', 'only_tax_impact', 'create_separate_payment_entry_against_benefit_claim', 'statistical_component'])
@@ -546,7 +563,7 @@ class PayrollEntry(Document):
 		journal_entry = frappe.new_doc('Journal Entry')
 		journal_entry.voucher_type = 'Bank Entry'
 		journal_entry.user_remark = _('Payment of {0} from {1} to {2}')\
-			.format(user_remark, self.start_date, self.end_date)
+			.format(user_remark, formatdate(self.start_date), formatdate(self.end_date))
 		journal_entry.company = self.company
 		journal_entry.posting_date = self.posting_date
 

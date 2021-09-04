@@ -8,7 +8,7 @@ import datetime, math
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
 
-from frappe import msgprint, _
+from frappe import msgprint, _, scrub
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
@@ -49,6 +49,7 @@ class SalarySlip(TransactionBase):
 			self.get_leave_details(lwp=self.leave_without_pay, late_days=self.late_days)
 
 		self.calculate_net_pay()
+		self.calculate_mode_of_payment()
 		self.remove_zero_components()
 
 		company_currency = erpnext.get_company_currency(self.company)
@@ -68,6 +69,7 @@ class SalarySlip(TransactionBase):
 		if self.net_pay < 0:
 			frappe.throw(_("Net Pay cannot be less than 0"))
 		else:
+			self.validate_mode_of_payment()
 			self.update_loans()
 			self.set_status()
 			self.update_status(self.name)
@@ -1066,6 +1068,45 @@ class SalarySlip(TransactionBase):
 		for data in pending_advances:
 			self.append('advances', data)
 			total_pending_advance += data.total_advance
+
+	def calculate_mode_of_payment(self):
+		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
+
+		standard_mode_field = scrub(cstr(self.salary_mode)) + "_amount"
+		if not self.salary_mode or not self.meta.has_field(standard_mode_field):
+			self.reset_mode_of_payment_amount()
+			self.no_mode_amount = total
+			return
+
+		# reset amounts if salary mode changed and running from payroll entry
+		if not self.is_new() and self.flags.from_payroll_entry and cstr(self.salary_mode) != cstr(self.db_get('salary_mode')):
+			self.reset_mode_of_payment_amount()
+
+		# round values according to net pay precision
+		fieldnames = ['bank_amount', 'cheque_amount', 'cash_amount', 'no_mode_amount']
+		for f in fieldnames:
+			self.set(f, flt(self.get(f)), self.precision('net_pay'))
+
+		# calculate non standard amount
+		non_standard_amount = 0
+		for f in fieldnames:
+			if f != standard_mode_field:
+				non_standard_amount += flt(self.get(f))
+
+		non_standard_amount = flt(non_standard_amount, self.precision('net_pay'))
+		standard_amount = flt(total - non_standard_amount, self.precision('net_pay'))
+		self.set(standard_mode_field, standard_amount)
+
+	def validate_mode_of_payment(self):
+		fieldnames = ['bank_amount', 'cheque_amount', 'cash_amount', 'no_mode_amount']
+		for f in fieldnames:
+			self.validate_value(f, ">=", 0.0)
+
+	def reset_mode_of_payment_amount(self):
+		fieldnames = ['bank_amount', 'cheque_amount', 'cash_amount', 'no_mode_amount']
+		for f in fieldnames:
+			self.set(f, 0)
+
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
