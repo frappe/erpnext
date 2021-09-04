@@ -4,6 +4,7 @@
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
+
 def execute():
 	frappe.reload_doc('accounts', 'doctype', 'advance_taxes_and_charges')
 	frappe.reload_doc('accounts', 'doctype', 'payment_entry')
