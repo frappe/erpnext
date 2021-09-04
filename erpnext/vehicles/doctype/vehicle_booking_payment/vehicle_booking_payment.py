@@ -38,6 +38,9 @@ class VehicleBookingPayment(Document):
 		self.update_receiving_documents()
 		self.update_vehicle_booking_order()
 
+	def before_print(self):
+		self.company_address_doc = erpnext.get_company_address(self)
+
 	def before_cancel(self):
 		self.set_undeposited()
 
