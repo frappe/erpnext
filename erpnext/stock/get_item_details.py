@@ -321,8 +321,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"transaction_date": args.get("transaction_date"),
 		"against_blanket_order": args.get("against_blanket_order"),
 		"bom_no": item.get("default_bom"),
-		"weight_per_unit": item.get("weight_per_unit"),
-		"weight_uom": item.get("weight_uom")
+		"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
+		"weight_uom": args.get("weight_uom") or item.get("weight_uom")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
