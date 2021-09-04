@@ -114,6 +114,7 @@
   "company_address_and_contact_section",
   "company_logo",
   "phone_no",
+  "mobile_no",
   "fax",
   "email",
   "website",
@@ -894,13 +895,18 @@
    "fieldtype": "Link",
    "label": "Default Leave Policy",
    "options": "Leave Policy"
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2021-08-27 15:33:37.225045",
+ "modified": "2021-09-04 14:25:44.361588",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
