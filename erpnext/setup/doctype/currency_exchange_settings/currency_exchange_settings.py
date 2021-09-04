@@ -37,7 +37,7 @@ class CurrencyExchangeSettings(Document):
 					to_currency=to_currency,
 					from_currency=from_currency
 				)]
-		except KeyError:
+		except Exception:
 			frappe.throw("Invalid result key. Response: " + response.text)
 		if not isinstance(value, (int, float)):
 			frappe.throw(_("Returned exchange rate is neither integer not float."))

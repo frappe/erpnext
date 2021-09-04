@@ -14,8 +14,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Key",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "value",
@@ -28,7 +27,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-04 11:24:21.944002",
+ "modified": "2021-09-04 17:49:17.383982",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Currency Exchange Settings Details",
