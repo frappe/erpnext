@@ -2,27 +2,60 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
 import json
+
+import frappe
 from frappe import _, throw
-from frappe.utils import (today, flt, cint, fmt_money, formatdate,
-	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
-from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
-from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.buying.utils import update_last_purchase_rate
-from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled, get_party_account
-from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
-	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
-from erpnext.exceptions import InvalidCurrency
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	flt,
+	fmt_money,
+	formatdate,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	today,
+)
 from six import text_type
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+from erpnext.accounts.doctype.pricing_rule.utils import (
+	apply_pricing_rule_for_free_items,
+	apply_pricing_rule_on_transaction,
+	get_applied_pricing_rules,
+)
+from erpnext.accounts.party import (
+	get_party_account,
+	get_party_account_currency,
+	validate_party_frozen_disabled,
+)
+from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
+from erpnext.buying.utils import update_last_purchase_rate
+from erpnext.controllers.print_settings import (
+	set_print_templates_for_item_table,
+	set_print_templates_for_taxes,
+)
+from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.exceptions import InvalidCurrency
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-from erpnext.controllers.print_settings import set_print_templates_for_item_table, set_print_templates_for_taxes
+from erpnext.stock.get_item_details import (
+	_get_item_tax_template,
+	get_conversion_factor,
+	get_item_details,
+	get_item_tax_map,
+	get_item_warehouse,
+)
+from erpnext.utilities.transaction_base import TransactionBase
+
 
 class AccountMissingError(frappe.ValidationError): pass
 
@@ -1206,7 +1239,7 @@ class AccountsController(TransactionBase):
 				d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('base_payment_amount'))
 				d.outstanding = d.payment_amount
 			elif not d.invoice_portion:
-				d.base_payment_amount = flt(base_grand_total * self.get("conversion_rate"), d.precision('base_payment_amount'))
+				d.base_payment_amount = flt(d.payment_amount * self.get("conversion_rate"), d.precision('base_payment_amount'))
 
 
 	def get_order_details(self):
@@ -1587,7 +1620,7 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 
 
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=None, condition=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	currency_field = "paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
@@ -1622,14 +1655,14 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
-				select "Payment Entry" as reference_type, name as reference_name,
-				remarks, unallocated_amount as amount, {2} as exchange_rate
+				select "Payment Entry" as reference_type, name as reference_name, posting_date,
+				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency
 				from `tabPayment Entry`
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
-					and docstatus = 1 and unallocated_amount > 0
+					and docstatus = 1 and unallocated_amount > 0 {condition}
 				order by posting_date {1}
-			""".format(party_account_field, limit_cond, exchange_rate_field),
+			""".format(party_account_field, limit_cond, exchange_rate_field, currency_field, condition=condition or ""),
 			(party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
@@ -1811,7 +1844,12 @@ def validate_child_on_delete(row, parent):
 
 def update_bin_on_delete(row, doctype):
 	"""Update bin for deleted item (row)."""
-	from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty, get_ordered_qty, get_indented_qty
+	from erpnext.stock.stock_balance import (
+		get_indented_qty,
+		get_ordered_qty,
+		get_reserved_qty,
+		update_bin_qty,
+	)
 	qty_dict = {}
 
 	if doctype == "Sales Order":

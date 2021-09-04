@@ -298,6 +298,9 @@ erpnext.patches.v13_0.shopify_deprecation_warning
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.einvoicing_deprecation_warning
+erpnext.patches.v13_0.custom_fields_for_taxjar_integration
 erpnext.patches.v14_0.delete_einvoicing_doctypes
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.validate_options_for_data_field
+erpnext.patches.v13_0.create_gst_payment_entry_fields
+erpnext.patches.v14_0.delete_shopify_doctypes

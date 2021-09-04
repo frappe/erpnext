@@ -1,21 +1,23 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-import erpnext
-import frappe
 from unittest import TestCase
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+import frappe
+
+import erpnext
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse_account
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
-	get_total_emiratewise,
-	get_tourist_tax_return_total,
-	get_tourist_tax_return_tax,
-	get_zero_rated_total,
 	get_exempt_total,
-	get_standard_rated_expenses_total,
 	get_standard_rated_expenses_tax,
+	get_standard_rated_expenses_total,
+	get_total_emiratewise,
+	get_tourist_tax_return_tax,
+	get_tourist_tax_return_total,
+	get_zero_rated_total,
 )
+from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse_account
 
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 

@@ -2,27 +2,39 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-import frappe.defaults
-from frappe import _
-from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
-from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
-from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor, get_reserved_qty_for_so
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
-from erpnext.stock.utils import get_bin
-from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
-from erpnext.accounts.general_ledger import process_gl_map
-from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+
 import json
 
-from six import string_types, itervalues, iteritems
+import frappe
+from frappe import _
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
+from six import iteritems, itervalues, string_types
+
+import erpnext
+from erpnext.accounts.general_ledger import process_gl_map
+from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, validate_bom_no
+from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_serial_nos,
+	update_serial_nos_after_submit,
+)
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	OpeningEntryAccountError,
+)
+from erpnext.stock.get_item_details import (
+	get_bin_details,
+	get_conversion_factor,
+	get_default_cost_center,
+	get_reserved_qty_for_so,
+)
+from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
+from erpnext.stock.utils import get_bin, get_incoming_rate
+
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForWorkOrderError(frappe.ValidationError): pass
@@ -1200,10 +1212,10 @@ class StockEntry(StockController):
 
 			wo_item_qty = item.transferred_qty or item.required_qty
 
-			req_qty_each = (
-				(flt(wo_item_qty) - flt(item.consumed_qty)) /
-					(flt(work_order_qty) - flt(wo.produced_qty))
-			)
+			wo_qty_consumed = flt(wo_item_qty) - flt(item.consumed_qty)
+			wo_qty_to_produce = flt(work_order_qty) - flt(wo.produced_qty)
+
+			req_qty_each = (wo_qty_consumed) / (wo_qty_to_produce or 1)
 
 			qty = req_qty_each * flt(self.fg_completed_qty)
 
@@ -1582,7 +1594,7 @@ class StockEntry(StockController):
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
 				frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
-				
+
 	def update_items_for_process_loss(self):
 		process_loss_dict = {}
 		for d in self.get("items"):

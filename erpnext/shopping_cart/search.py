@@ -1,9 +1,9 @@
 import frappe
 from frappe.search.full_text_search import FullTextSearch
-from whoosh.fields import TEXT, ID, KEYWORD, Schema
 from frappe.utils import strip_html_tags
-from whoosh.qparser import MultifieldParser, FieldsPlugin, WildcardPlugin
 from whoosh.analysis import StemmingAnalyzer
+from whoosh.fields import ID, KEYWORD, TEXT, Schema
+from whoosh.qparser import FieldsPlugin, MultifieldParser, WildcardPlugin
 from whoosh.query import Prefix
 
 INDEX_NAME = "products"

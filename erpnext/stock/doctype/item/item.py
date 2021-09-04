@@ -1,23 +1,41 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import copy
 import itertools
 import json
-import erpnext
-import frappe
-import copy
-from erpnext.controllers.item_variant import (ItemVariantExistsError,
-		copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
-from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
-from frappe import _, msgprint
-from frappe.utils import (cint, cstr, flt, formatdate, getdate,
-		now_datetime, random_string, strip, get_link_to_form, nowtime)
-from frappe.utils.html_utils import clean_html
-from frappe.website.doctype.website_slideshow.website_slideshow import \
-	get_slideshow
 
+import frappe
+from frappe import _
+from frappe.utils import (
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	nowtime,
+	random_string,
+	strip,
+)
+from frappe.utils.html_utils import clean_html
+from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from frappe.website.utils import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
+
+import erpnext
+from erpnext.controllers.item_variant import (
+	ItemVariantExistsError,
+	copy_attributes_to_variant,
+	get_variant,
+	make_variant_item_code,
+	validate_item_variant_attributes,
+)
+from erpnext.setup.doctype.item_group.item_group import (
+	get_parent_item_groups,
+	invalidate_cache_for,
+)
 
 
 class DuplicateReorderRows(frappe.ValidationError):

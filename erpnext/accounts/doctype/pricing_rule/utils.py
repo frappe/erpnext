@@ -8,14 +8,14 @@ from __future__ import unicode_literals
 import copy
 import json
 
-from six import string_types
-
 import frappe
+from frappe import _, bold
+from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today
+
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
-from frappe import _, bold
-from frappe.utils import cint, flt, get_link_to_form, getdate, today, fmt_money
+
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
@@ -81,7 +81,7 @@ def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
 				try:
 					if frappe.safe_eval(pricing_rule.condition, None, doc.as_dict()):
 						filtered_pricing_rules.append(pricing_rule)
-				except:
+				except Exception:
 					pass
 			else:
 				filtered_pricing_rules.append(pricing_rule)

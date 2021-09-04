@@ -2,19 +2,22 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import copy
+
+import frappe
 from frappe import _
-from frappe.utils import nowdate, cint, cstr
+from frappe.utils import cint, cstr, nowdate
 from frappe.utils.nestedset import NestedSet
-from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.utils import clear_cache
-from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.shopping_cart.product_info import set_product_info_for_website
-from erpnext.utilities.product import get_qty_in_stock
+from frappe.website.website_generator import WebsiteGenerator
 from six.moves.urllib.parse import quote
-from erpnext.shopping_cart.product_query import ProductQuery
+
 from erpnext.shopping_cart.filters import ProductFiltersBuilder
+from erpnext.shopping_cart.product_info import set_product_info_for_website
+from erpnext.shopping_cart.product_query import ProductQuery
+from erpnext.utilities.product import get_qty_in_stock
+
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'

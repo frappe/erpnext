@@ -2,8 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _dict
+
 
 class ProductFiltersBuilder:
 	def __init__(self, item_group=None):

@@ -8,6 +8,7 @@ import unittest
 import frappe
 from frappe.utils import add_days, nowdate
 
+
 class TestContract(unittest.TestCase):
 
 	def setUp(self):

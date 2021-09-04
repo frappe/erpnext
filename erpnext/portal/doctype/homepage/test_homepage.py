@@ -3,10 +3,12 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import set_request
 from frappe.website.serve import get_response
+
 
 class TestHomepage(unittest.TestCase):
 	def test_homepage_load(self):
