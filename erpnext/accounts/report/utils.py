@@ -104,17 +104,30 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 		credit_in_account_currency = flt(entry['credit_in_account_currency'])
 		account_currency = entry['account_currency']
 
+<<<<<<< HEAD
 		if account_currency != presentation_currency:
 			value = debit or credit
 
 			date = currency_info['report_date'] if not is_p_or_l_account(account) else entry['posting_date']
 			converted_value = convert(value, presentation_currency, company_currency, date)
-
+=======
+		if len(account_currencies) == 1 and account_currency == presentation_currency:
 			if entry.get('debit'):
-				entry['debit'] = converted_value
+				entry['debit'] = debit_in_account_currency
 
 			if entry.get('credit'):
-				entry['credit'] = converted_value
+				entry['credit'] = credit_in_account_currency
+		else:
+			date = currency_info['report_date']
+			converted_debit_value = convert(debit, presentation_currency, company_currency, date)
+			converted_credit_value = convert(credit, presentation_currency, company_currency, date)
+>>>>>>> ceaa804f04 (fix: Presentation currency conversion in reports (#27316))
+
+			if entry.get('debit'):
+				entry['debit'] = converted_debit_value
+
+			if entry.get('credit'):
+				entry['credit'] = converted_credit_value
 
 		elif account_currency == presentation_currency:
 			if entry.get('debit'):
