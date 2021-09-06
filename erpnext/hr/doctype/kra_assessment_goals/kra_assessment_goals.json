@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2013-02-22 01:27:44",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kra",
+  "kpi",
+  "per_weightage"
+ ],
+ "fields": [
+  {
+   "description": "Key Performance Area",
+   "fieldname": "kra",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "KRA",
+   "oldfieldname": "kra",
+   "oldfieldtype": "Small Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "per_weightage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weightage (%)",
+   "oldfieldname": "per_weightage",
+   "oldfieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kpi",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "KPI",
+   "reqd": 1
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-09-16 17:49:31.603670",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "KRA Assessment Goals",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "creation": "2021-09-01 18:48:58.073913",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "skill",
+  "current_score",
+  "target_score",
+  "achieved_score"
+ ],
+ "fields": [
+  {
+   "fieldname": "skill",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Skill",
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Current Score"
+  },
+  {
+   "fieldname": "target_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Target Score"
+  },
+  {
+   "fieldname": "achieved_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Achieved Score"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-09-11 17:27:47.299402",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Self Improvement Areas",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

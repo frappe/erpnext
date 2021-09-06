@@ -10,12 +10,12 @@ from frappe.model.document import Document
 
 class AppraisalTemplate(Document):
 	def validate(self):
-		self.check_total_points()
+		self.check_total_weightage()
 
-	def check_total_points(self):
-		total_points = 0
-		for d in self.get("goals"):
-			total_points += flt(d.per_weightage)
+	def check_total_weightage(self):
+		total_weightage = 0
+		for d in self.get('kra_assessment'):
+			total_weightage += flt(d.per_weightage)
 
-		if cint(total_points) != 100:
-			frappe.throw(_("Sum of points for all goals should be 100. It is {0}").format(total_points))
+		if cint(total_weightage) != 100:
+			frappe.throw(_('Sum of all percentage should be 100. It is {0}').format(int(total_weightage)))

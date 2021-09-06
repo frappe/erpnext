@@ -8,19 +8,34 @@
  "field_order": [
   "employee_details",
   "naming_series",
-  "kra_template",
+  "appraisal_template",
   "employee",
   "employee_name",
+  "designation",
   "column_break0",
   "status",
   "start_date",
   "end_date",
   "department",
+  "department_head",
+  "reports_to",
   "section_break0",
-  "goals",
-  "total_score",
+  "kra_assessment",
+  "overall_self_score",
+  "overall_score",
+  "overall_feedback",
+  "behavioural_assessment_section",
+  "behavioural_assessment",
+  "self_improvement_areas_section",
+  "self_improvement_areas",
   "section_break1",
   "remarks",
+  "section_break_25",
+  "action_taken",
+  "new_designation",
+  "column_break_28",
+  "current_compensation",
+  "revised_compensation",
   "other_details",
   "company",
   "column_break_17",
@@ -43,17 +58,7 @@
    "set_only_once": 1
   },
   {
-   "fieldname": "kra_template",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Appraisal Template",
-   "oldfieldname": "kra_template",
-   "oldfieldtype": "Link",
-   "options": "Appraisal Template",
-   "reqd": 1
-  },
-  {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -66,17 +71,19 @@
    "search_index": 1
   },
   {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "For Employee Name",
    "oldfieldname": "employee_name",
    "oldfieldtype": "Data",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "column_break0",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -84,7 +91,7 @@
   },
   {
    "default": "Draft",
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -98,7 +105,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "start_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -108,7 +115,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "end_date",
    "fieldtype": "Date",
    "label": "End Date",
@@ -125,33 +132,14 @@
    "read_only": 1
   },
   {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "section_break0",
    "fieldtype": "Section Break",
-   "label": "Goals",
-   "oldfieldtype": "Section Break",
-   "options": "Simple"
+   "label": "KRA Assessment",
+   "oldfieldtype": "Section Break"
   },
   {
-   "fieldname": "goals",
-   "fieldtype": "Table",
-   "label": "Goals",
-   "oldfieldname": "appraisal_details",
-   "oldfieldtype": "Table",
-   "options": "Appraisal Goal"
-  },
-  {
-   "fieldname": "total_score",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Total Score (Out of 5)",
-   "no_copy": 1,
-   "oldfieldname": "total_score",
-   "oldfieldtype": "Currency",
-   "read_only": 1
-  },
-  {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "section_break1",
    "fieldtype": "Section Break"
   },
@@ -162,9 +150,10 @@
    "label": "Remarks"
   },
   {
-   "depends_on": "kra_template",
+   "depends_on": "appraisal_template",
    "fieldname": "other_details",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Company"
   },
   {
    "fieldname": "company",
@@ -194,6 +183,118 @@
    "read_only": 1,
    "report_hide": 1,
    "width": "150px"
+  },
+  {
+   "depends_on": "employee",
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "depends_on": "employee",
+   "fieldname": "department_head",
+   "fieldtype": "Link",
+   "label": "Department head",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "employee",
+   "fetch_from": "employee.reports_to",
+   "fieldname": "reports_to",
+   "fieldtype": "Link",
+   "label": "Reports To",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "overall_self_score",
+   "fieldtype": "Float",
+   "label": "Overall Self Score",
+   "no_copy": 1,
+   "oldfieldname": "total_score",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "fieldname": "overall_score",
+   "fieldtype": "Float",
+   "label": "Overall Score"
+  },
+  {
+   "fieldname": "overall_feedback",
+   "fieldtype": "Small Text",
+   "label": "Overall Feedback"
+  },
+  {
+   "depends_on": "appraisal_template",
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break",
+   "label": "Promotion and Compensation"
+  },
+  {
+   "fieldname": "action_taken",
+   "fieldtype": "Select",
+   "label": "Action Taken",
+   "options": "Promoted\nUnder Performance Improvement Plan\nDemoted\nFired"
+  },
+  {
+   "depends_on": "eval: doc.action_taken == \"Promoted\" || doc.action_taken == \"Demoted\"",
+   "fieldname": "new_designation",
+   "fieldtype": "Link",
+   "label": "New Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "current_compensation",
+   "fieldtype": "Int",
+   "label": "Current Compensation"
+  },
+  {
+   "fieldname": "revised_compensation",
+   "fieldtype": "Int",
+   "label": "Revised Compensation"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appraisal_template",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Appraisal Template",
+   "oldfieldname": "kra_template",
+   "oldfieldtype": "Link",
+   "options": "Appraisal Template",
+   "reqd": 1
+  },
+  {
+   "depends_on": "appraisal_template",
+   "fieldname": "behavioural_assessment_section",
+   "fieldtype": "Section Break",
+   "label": "Behavioural Assessment"
+  },
+  {
+   "depends_on": "appraisal_template",
+   "fieldname": "self_improvement_areas_section",
+   "fieldtype": "Section Break",
+   "label": "Self Improvement Areas"
+  },
+  {
+   "fieldname": "kra_assessment",
+   "fieldtype": "Table",
+   "options": "KRA Assessment"
+  },
+  {
+   "fieldname": "behavioural_assessment",
+   "fieldtype": "Table",
+   "options": "Behavioural Assessment"
+  },
+  {
+   "fieldname": "self_improvement_areas",
+   "fieldtype": "Table",
+   "options": "Self Improvement Areas"
   }
  ],
  "icon": "fa fa-thumbs-up",
@@ -201,7 +302,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-03 21:48:33.297065",
+ "modified": "2021-09-20 14:14:05.362730",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Appraisal",
