@@ -138,6 +138,17 @@
    "type": "Link"
   },
   {
+   "dependencies": "Asset",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Capitalization",
+   "link_count": 0,
+   "link_to": "Asset Capitalization",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Reports",
@@ -179,7 +190,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:54.839452",
+ "modified": "2021-09-06 16:59:02.668813",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
