@@ -419,7 +419,7 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 					})
 
 				## need to check if is_swab
-				if item["item_code"].startwith("DNA") and item["is_swab"]:
+				if item["item_code"].startswith("DNA") and item["is_swab"]:
 					extra_test_kit = "DNAKIT"
 					invoice_doc.append("items", {
 						"item_code": extra_test_kit,
