@@ -90,7 +90,6 @@ class OpportunitySummaryBySalesStage(object):
 		self.get_rows()
 
 	def get_data_query(self, based_on, data_based_on):
-
 		if self.filters.get('data_based_on') == 'Number':
 			group_by = '{},{}'.format('sales_stage', based_on)
 			self.query_result = frappe.db.get_list('Opportunity',
@@ -123,7 +122,6 @@ class OpportunitySummaryBySalesStage(object):
 			self.query_result = self.grouped_data
 
 	def get_rows(self):
-		
 		self.data = []
 		self.get_formatted_data()
 

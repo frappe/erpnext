@@ -7,6 +7,7 @@ from datetime import date
 import pandas
 from dateutil.relativedelta import relativedelta
 from six import iteritems
+from frappe import _
 from frappe.utils import flt
 from erpnext.setup.utils import get_exchange_rate
 
@@ -31,7 +32,6 @@ class SalesPipelineAnalytics(object):
 		self.set_pipeline_based_on_column()
 
 	def set_range_columns(self):
-
 		based_on = {
 			'Number': 'Int',
 			'Amount': 'Currency'
@@ -58,23 +58,21 @@ class SalesPipelineAnalytics(object):
 				})
 
 	def set_pipeline_based_on_column(self):
-
 		if self.filters.get('pipeline_by') == 'Owner':
 			self.columns.insert(0, {
 				'fieldname': 'opportunity_owner',
-				'label': 'Opportunity Owner',
+				'label': _('Opportunity Owner'),
 				'width': 200
 			})
 
 		elif self.filters.get('pipeline_by') == 'Sales Stage':
 			self.columns.insert(0, {
 				'fieldname': 'sales_stage',
-				'label': 'Sales Stage',
+				'label': _('Sales Stage'),
 				'width': 200
 			})
 
 	def get_fields(self):
-
 		self.based_on ={
 			'Owner': '_assign as opportunity_owner',
 			'Sales Stage': 'sales_stage'
@@ -111,7 +109,6 @@ class SalesPipelineAnalytics(object):
 		}[self.filters.get('range')]
 
 	def get_data(self):
-
 		self.get_fields()
 
 		if self.filters.get('based_on') == 'Number':
@@ -138,8 +135,8 @@ class SalesPipelineAnalytics(object):
 
 			for i in range(len(result['amount'])):
 				self.grouped_data.append({
-					self.pipeline_by : result[self.pipeline_by][i], 
-					self.period_by : result[self.period_by][i], 
+					self.pipeline_by : result[self.pipeline_by][i],
+					self.period_by : result[self.period_by][i],
 					'amount': result['amount'][i]
 				})
 
