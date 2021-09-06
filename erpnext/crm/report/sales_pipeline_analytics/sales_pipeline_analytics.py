@@ -217,32 +217,31 @@ class SalesPipelineAnalytics(object):
 			count = info.get(based_on)
 
 			if self.filters.get('pipeline_by') == 'Owner':
-
 				if value == 'Not Assigned' or value == '[]' or value is None:
-					temp = ['Not Assigned']
+					assigned_to = ['Not Assigned']
 				else:
-					temp = json.loads(value)
-				self.check_for_assigned_to(period,value,count,temp,info)
+					assigned_to = json.loads(value)
+				self.check_for_assigned_to(period, value, count, assigned_to, info)
 
 			else:
-				self.set_formatted_data(period,value,count,None)
+				self.set_formatted_data(period, value, count, None)
 
-	def set_formatted_data(self, period, value, val, temp):
-		if temp:
-			if len(temp) > 1:
+	def set_formatted_data(self, period, value, val, assigned_to):
+		if assigned_to:
+			if len(assigned_to) > 1:
 				if self.filters.get('assigned_to'):
-					for user in temp:
+					for user in assigned_to:
 						if self.filters.get('assigned_to') == user:
 							value = user
 							self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 							self.periodic_data[value][period] += val
 				else:
-					for user in temp:
+					for user in assigned_to:
 						value = user
 						self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 						self.periodic_data[value][period] += val
 			else:
-				value = temp[0]
+				value = assigned_to[0]
 				self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 				self.periodic_data[value][period] += val
 
@@ -251,13 +250,13 @@ class SalesPipelineAnalytics(object):
 			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
 			self.periodic_data[value][period] += val
 
-	def check_for_assigned_to(self, period, value, count, temp, info):
+	def check_for_assigned_to(self, period, value, count, assigned_to, info):
 		if self.filters.get('assigned_to'):
 			for data in json.loads(info.get('opportunity_owner')):
 				if data == self.filters.get('assigned_to'):
-					self.set_formatted_data(period, data, count, temp)
+					self.set_formatted_data(period, data, count, assigned_to)
 		else:
-			self.set_formatted_data(period, value, count, temp)
+			self.set_formatted_data(period, value, count, assigned_to)
 
 	def get_month_list(self):
 		month_list= []
