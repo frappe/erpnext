@@ -2,10 +2,13 @@
 # See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, flt
 
+import frappe
+from frappe.utils import cint, flt
 from six import string_types
+
+import erpnext
+
 
 @frappe.whitelist()
 def make_stock_entry(**args):

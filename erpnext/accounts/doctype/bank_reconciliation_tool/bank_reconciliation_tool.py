@@ -3,17 +3,21 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import json
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import flt
 
 from erpnext import get_company_currency
-from erpnext.accounts.utils import get_balance_on
-from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import get_entries, get_amounts_not_reflected_in_system
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_paid_amount
+from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
+	get_amounts_not_reflected_in_system,
+	get_entries,
+)
+from erpnext.accounts.utils import get_balance_on
 
 
 class BankReconciliationTool(Document):

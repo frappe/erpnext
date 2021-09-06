@@ -4,11 +4,14 @@
 from __future__ import unicode_literals
 
 import unittest
+
 import frappe
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.item.test_item import make_item
+
 from erpnext.manufacturing.doctype.job_card.job_card import OperationSequenceError
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.stock.doctype.item.test_item import make_item
+
 
 class TestRouting(unittest.TestCase):
 	@classmethod
@@ -91,8 +94,8 @@ class TestRouting(unittest.TestCase):
 
 
 def setup_operations(rows):
-	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 	for row in rows:
 		make_workstation(row)
 		make_operation(row)

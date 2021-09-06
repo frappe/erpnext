@@ -3,20 +3,23 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe import _
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import get_url, cint
-from frappe.utils.user import get_user_fullname
-from frappe.utils.print_format import download_pdf
-from frappe.desk.form.load import get_attachments
-from frappe.core.doctype.communication.email import make
-from erpnext.accounts.party import get_party_account_currency, get_party_details
-from erpnext.stock.doctype.material_request.material_request import set_missing_values
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.buying.utils import validate_for_items
 
+import json
+
+import frappe
+from frappe import _
+from frappe.core.doctype.communication.email import make
+from frappe.desk.form.load import get_attachments
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import get_url
+from frappe.utils.print_format import download_pdf
+from frappe.utils.user import get_user_fullname
 from six import string_types
+
+from erpnext.accounts.party import get_party_account_currency, get_party_details
+from erpnext.buying.utils import validate_for_items
+from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.material_request.material_request import set_missing_values
 
 STANDARD_USERS = ("Guest", "Administrator")
 

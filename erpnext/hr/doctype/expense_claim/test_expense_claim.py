@@ -2,12 +2,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import random_string, nowdate, flt
-from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
+
+import frappe
+from frappe.utils import flt, nowdate, random_string
+
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 
 test_records = frappe.get_test_records('Expense Claim')
 test_dependencies = ['Employee']
@@ -144,20 +146,20 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim = make_expense_claim(payable_account, 5500, 5500, "_Test Company", "Travel Expenses - _TC")
 		expense_claim.save()
 		expense_claim.submit()
-		
+
 		# Payment entry 1: paying 500
 		make_payment_entry(expense_claim, payable_account,500)
 		outstanding_amount, total_amount_reimbursed = get_outstanding_and_total_reimbursed_amounts(expense_claim)
 		self.assertEqual(outstanding_amount, 5000)
 		self.assertEqual(total_amount_reimbursed, 500)
-		
+
 		# Payment entry 1: paying 2000
 		make_payment_entry(expense_claim, payable_account,2000)
 		outstanding_amount, total_amount_reimbursed = get_outstanding_and_total_reimbursed_amounts(expense_claim)
 		self.assertEqual(outstanding_amount, 3000)
 		self.assertEqual(total_amount_reimbursed, 2500)
-		
-		# Payment entry 1: paying 3000		
+
+		# Payment entry 1: paying 3000
 		make_payment_entry(expense_claim, payable_account,3000)
 		outstanding_amount, total_amount_reimbursed = get_outstanding_and_total_reimbursed_amounts(expense_claim)
 		self.assertEqual(outstanding_amount, 0)
@@ -221,7 +223,7 @@ def get_outstanding_and_total_reimbursed_amounts(expense_claim):
 	outstanding_amount = flt(frappe.db.get_value("Expense Claim", expense_claim.name, "total_sanctioned_amount")) - \
 			flt(frappe.db.get_value("Expense Claim", expense_claim.name, "total_amount_reimbursed"))
 	total_amount_reimbursed = flt(frappe.db.get_value("Expense Claim", expense_claim.name, "total_amount_reimbursed"))
-	
+
 	return outstanding_amount,total_amount_reimbursed
 
 def make_payment_entry(expense_claim, payable_account, amt):
@@ -234,5 +236,4 @@ def make_payment_entry(expense_claim, payable_account, amt):
 	pe.paid_to = payable_account
 	pe.references[0].allocated_amount = amt
 	pe.insert()
-	pe.submit() 
-	
+	pe.submit()

@@ -55,10 +55,10 @@ frappe.ui.form.on("Company", {
 				{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
 			]
 		});
-	
+
 		dialog.fields_dict.update.$input.click(function() {
 			var args = dialog.get_values();
-			if (!args) return; 
+			if (!args) return;
 			frappe.show_alert(__("Update in progress. It might take a while."));
 			return frappe.call({
 				method: "erpnext.setup.doctype.company.company.enqueue_replace_abbr",

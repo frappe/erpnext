@@ -1,11 +1,12 @@
-name: Semgrep
+name: Linters
 
 on:
   pull_request: { }
 
 jobs:
-  semgrep:
-    name: Frappe Linter
+
+  linters:
+    name: linters
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,3 +17,11 @@ jobs:
             config: >-
               r/python.lang.correctness
               .github/helper/semgrep_rules
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install and Run Pre-commit
+        uses: pre-commit/action@v2.0.3

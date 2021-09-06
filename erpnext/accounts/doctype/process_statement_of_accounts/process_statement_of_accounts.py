@@ -3,22 +3,24 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import copy
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
-from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute as get_ageing
+from frappe.utils import add_days, add_months, format_date, getdate, today
+from frappe.utils.jinja import validate_template
+from frappe.utils.pdf import get_pdf
+from frappe.www.printview import get_print_style
+
 from erpnext import get_company_currency
 from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
+	execute as get_ageing,
+)
+from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
 
-from frappe.utils.print_format import report_to_pdf
-from frappe.utils.pdf import get_pdf
-from frappe.utils import today, add_days, add_months, getdate, format_date
-from frappe.utils.jinja import validate_template
-
-import copy
-from datetime import timedelta
-from frappe.www.printview import get_print_style
 
 class ProcessStatementOfAccounts(Document):
 	def validate(self):
@@ -158,7 +160,7 @@ def get_recipients_and_cc(customer, doc):
 	if doc.cc_to != '':
 		try:
 			cc=[frappe.get_value('User', doc.cc_to, 'email')]
-		except:
+		except Exception:
 			pass
 
 	return recipients, cc
