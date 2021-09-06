@@ -2,27 +2,39 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-import frappe.defaults
-from frappe import _
-from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
-from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
-from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor, get_reserved_qty_for_so
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
-from erpnext.stock.utils import get_bin
-from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
-from erpnext.accounts.general_ledger import process_gl_map
-from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+
 import json
 
-from six import string_types, itervalues, iteritems
+import frappe
+from frappe import _
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
+from six import iteritems, itervalues, string_types
+
+import erpnext
+from erpnext.accounts.general_ledger import process_gl_map
+from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, validate_bom_no
+from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_serial_nos,
+	update_serial_nos_after_submit,
+)
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	OpeningEntryAccountError,
+)
+from erpnext.stock.get_item_details import (
+	get_bin_details,
+	get_conversion_factor,
+	get_default_cost_center,
+	get_reserved_qty_for_so,
+)
+from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
+from erpnext.stock.utils import get_bin, get_incoming_rate
+
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForWorkOrderError(frappe.ValidationError): pass
@@ -272,7 +284,7 @@ class StockEntry(StockController):
 		item_wise_qty = {}
 		if self.purpose == "Manufacture" and self.work_order:
 			for d in self.items:
-				if d.is_finished_item:
+				if d.is_finished_item or d.is_process_loss:
 					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
 
 		for item_code, qty_list in iteritems(item_wise_qty):
@@ -333,7 +345,7 @@ class StockEntry(StockController):
 
 			if self.purpose == "Manufacture":
 				if validate_for_manufacture:
-					if d.is_finished_item or d.is_scrap_item:
+					if d.is_finished_item or d.is_scrap_item or d.is_process_loss:
 						d.s_warehouse = None
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
@@ -465,7 +477,7 @@ class StockEntry(StockController):
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
-		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item)
+		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item or d.is_process_loss)
 
 		# Set basic rate for incoming items
 		for d in self.get('items'):
@@ -486,6 +498,8 @@ class StockEntry(StockController):
 					raise_error_if_no_rate=raise_error_if_no_rate)
 
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
+			if d.is_process_loss:
+				d.basic_rate = flt(0.)
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 
 	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
@@ -1043,6 +1057,7 @@ class StockEntry(StockController):
 
 		self.set_scrap_items()
 		self.set_actual_qty()
+		self.update_items_for_process_loss()
 		self.validate_customer_provided_item()
 		self.calculate_rate_and_amount()
 
@@ -1197,10 +1212,10 @@ class StockEntry(StockController):
 
 			wo_item_qty = item.transferred_qty or item.required_qty
 
-			req_qty_each = (
-				(flt(wo_item_qty) - flt(item.consumed_qty)) /
-					(flt(work_order_qty) - flt(wo.produced_qty))
-			)
+			wo_qty_consumed = flt(wo_item_qty) - flt(item.consumed_qty)
+			wo_qty_to_produce = flt(work_order_qty) - flt(wo.produced_qty)
+
+			req_qty_each = (wo_qty_consumed) / (wo_qty_to_produce or 1)
 
 			qty = req_qty_each * flt(self.fg_completed_qty)
 
@@ -1400,6 +1415,7 @@ class StockEntry(StockController):
 				get_default_cost_center(item_dict[d], company = self.company))
 			se_child.is_finished_item = item_dict[d].get("is_finished_item", 0)
 			se_child.is_scrap_item = item_dict[d].get("is_scrap_item", 0)
+			se_child.is_process_loss = item_dict[d].get("is_process_loss", 0)
 
 			for field in ["idx", "po_detail", "original_item",
 				"expense_account", "description", "item_name", "serial_no", "batch_no"]:
@@ -1578,6 +1594,29 @@ class StockEntry(StockController):
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
 				frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
+
+	def update_items_for_process_loss(self):
+		process_loss_dict = {}
+		for d in self.get("items"):
+			if not d.is_process_loss:
+				continue
+
+			scrap_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_scrap_warehouse")
+			if scrap_warehouse is not None:
+				d.t_warehouse = scrap_warehouse
+			d.is_scrap_item = 0
+
+			if d.item_code not in process_loss_dict:
+				process_loss_dict[d.item_code] = [flt(0), flt(0)]
+			process_loss_dict[d.item_code][0] += flt(d.transfer_qty)
+			process_loss_dict[d.item_code][1] += flt(d.qty)
+
+		for d in self.get("items"):
+			if not d.is_finished_item or d.item_code not in process_loss_dict:
+				continue
+			# Assumption: 1 finished item has 1 row.
+			d.transfer_qty -= process_loss_dict[d.item_code][0]
+			d.qty -= process_loss_dict[d.item_code][1]
 
 	def set_serial_no_batch_for_finished_good(self):
 		args = {}

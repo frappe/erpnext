@@ -2,11 +2,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
 import re
+
+import frappe
 from frappe import _
 from frappe.utils import nowdate
+
 
 def execute(filters=None):
 	if not filters: filters.setdefault('posting_date', [nowdate(), nowdate()])
@@ -41,7 +44,7 @@ def get_data(filters):
 	}
 
 	# Regular expression set to remove all the special characters
-	special_characters = "[$%^*()+\\[\]{};':\"\\|<>.?]"
+	special_characters = r"[$%^*()+\\[\]{};':\"\\|<>.?]"
 
 	for row in data:
 		set_defaults(row)

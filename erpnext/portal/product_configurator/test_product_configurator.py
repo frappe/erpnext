@@ -1,8 +1,11 @@
 from __future__ import unicode_literals
 
+import unittest
+
+import frappe
 from bs4 import BeautifulSoup
-import frappe, unittest
 from frappe.utils import get_html_for_route
+
 from erpnext.portal.product_configurator.utils import get_products_for_website
 
 test_dependencies = ["Item"]

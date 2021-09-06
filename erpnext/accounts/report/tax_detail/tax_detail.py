@@ -3,8 +3,10 @@
 # Contributed by Case Solved and sponsored by Nulight Studios
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe import _
 
 # NOTE: Payroll is implemented using Journal Entries which are included as GL Entries

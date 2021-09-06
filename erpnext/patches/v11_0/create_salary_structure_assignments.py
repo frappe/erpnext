@@ -2,10 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 from datetime import datetime
+
+import frappe
 from frappe.utils import getdate
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import DuplicateAssignment
+
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+	DuplicateAssignment,
+)
+
 
 def execute():
 	frappe.reload_doc('Payroll', 'doctype', 'Salary Structure')

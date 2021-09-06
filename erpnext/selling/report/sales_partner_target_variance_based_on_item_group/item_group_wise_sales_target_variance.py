@@ -2,12 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt
-from erpnext.accounts.utils import get_fiscal_year
+
+from erpnext.accounts.doctype.monthly_distribution.monthly_distribution import (
+	get_periodwise_distribution_data,
+)
 from erpnext.accounts.report.financial_statements import get_period_list
-from erpnext.accounts.doctype.monthly_distribution.monthly_distribution import get_periodwise_distribution_data
+from erpnext.accounts.utils import get_fiscal_year
+
 
 def get_data_column(filters, partner_doctype):
 	data = []
@@ -43,18 +47,6 @@ def get_data(filters, period_list, partner_doctype):
 
 		if d.item_group not in item_groups:
 			item_groups.append(d.item_group)
-
-	if item_groups:
-		child_items = []
-		for item_group in item_groups:
-			if frappe.db.get_value("Item Group", {"name":item_group}, "is_group"):
-				for child_item_group in frappe.get_all("Item Group", {"parent_item_group":item_group}):
-					if child_item_group['name'] not in child_items:
-						child_items.append(child_item_group['name'])
-
-		for item in child_items:
-			if item not in item_groups:
-				item_groups.append(item)
 
 	date_field = ("transaction_date"
 		if filters.get('doctype') == "Sales Order" else "posting_date")

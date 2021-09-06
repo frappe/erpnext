@@ -2,26 +2,50 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate, get_first_day
+import datetime
+import math
+
+import frappe
+from frappe import _, msgprint
 from frappe.model.naming import make_autoname
-
-from frappe import msgprint, _
-from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.hr.utils import get_holiday_dates_for_employee
-from erpnext.utilities.transaction_base import TransactionBase
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	date_diff,
+	flt,
+	formatdate,
+	get_first_day,
+	getdate,
+	money_in_words,
+	rounded,
+)
 from frappe.utils.background_jobs import enqueue
-from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
-from erpnext.payroll.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
-from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
-from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
-from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.hr.utils import validate_active_employee
 from six import iteritems
+
+import erpnext
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+	calculate_amounts,
+	create_repayment_entry,
+)
+from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
+from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import (
+	get_benefit_component_amount,
+)
+from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import (
+	get_benefit_claim_amount,
+	get_last_payroll_period_benefits,
+)
+from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
+from erpnext.payroll.doctype.payroll_period.payroll_period import (
+	get_payroll_period,
+	get_period_factor,
+)
+from erpnext.utilities.transaction_base import TransactionBase
+
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -1214,7 +1238,7 @@ class SalarySlip(TransactionBase):
 		period_start_date, period_end_date = self.get_year_to_date_period()
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
-			fields = ['sum(net_pay) as sum'],
+			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
 			filters = {'employee_name' : self.employee_name,
 				'start_date' : ['>=', period_start_date],
 				'end_date' : ['<', period_end_date],
@@ -1222,10 +1246,13 @@ class SalarySlip(TransactionBase):
 				'docstatus': 1
 			})
 
-		year_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
+		year_to_date = flt(salary_slip_sum[0].net_sum) if salary_slip_sum else 0.0
+		gross_year_to_date = flt(salary_slip_sum[0].gross_sum) if salary_slip_sum else 0.0
 
 		year_to_date += self.net_pay
+		gross_year_to_date += self.gross_pay
 		self.year_to_date = year_to_date
+		self.gross_year_to_date = gross_year_to_date
 
 	def compute_month_to_date(self):
 		month_to_date = 0
