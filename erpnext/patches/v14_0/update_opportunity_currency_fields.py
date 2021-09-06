@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe.utils import flt
+
+import erpnext
 from erpnext.setup.utils import get_exchange_rate
 
 
