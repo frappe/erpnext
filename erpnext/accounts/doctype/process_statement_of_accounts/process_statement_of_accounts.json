@@ -107,7 +107,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "A customer must have primary contact email.",
    "fieldname": "column_break_17",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -220,6 +219,7 @@
   },
   {
    "default": "1",
+   "description": "A customer must have primary contact email.",
    "fieldname": "primary_mandatory",
    "fieldtype": "Check",
    "label": "Send To Primary Contact"
@@ -287,7 +287,7 @@
   }
  ],
  "links": [],
- "modified": "2021-09-06 20:51:00.538736",
+ "modified": "2021-09-06 21:00:45.732505",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
