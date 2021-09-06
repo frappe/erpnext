@@ -12,15 +12,14 @@ frappe.query_reports["Sales Pipeline Analytics"] = {
 			default: "Owner"
 		},
 		{
-			fieldname:"from_date",
+			fieldname: "from_date",
 			label: __("From Date"),
-			fieldtype: "Date",
-
+			fieldtype: "Date"
 		},
 		{
-			fieldname:"to_date",
+			fieldname: "to_date",
 			label: __("To Date"),
-			fieldtype: "Date",	
+			fieldtype: "Date"
 		},
 		{
 			fieldname: "range",
@@ -33,13 +32,13 @@ frappe.query_reports["Sales Pipeline Analytics"] = {
 			fieldname: "assigned_to",
 			label: __("Assigned To"),
 			fieldtype: "Link",
-			options: "User"	
+			options: "User"
 		},
 		{
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "Select",
-			options: "Open\nQuotation\nConverted\nReplied",
+			options: "Open\nQuotation\nConverted\nReplied"
 		},
 		{
 			fieldname: "based_on",
@@ -59,14 +58,13 @@ frappe.query_reports["Sales Pipeline Analytics"] = {
 			fieldname: "opportunity_source",
 			label: __("Opportunity Source"),
 			fieldtype: "Link",
-			options: "Lead Source"	
+			options: "Lead Source"
 		},
 		{
 			fieldname: "opportunity_type",
 			label: __("Opportunity Type"),
 			fieldtype: "Link",
-			options: "Opportunity Type",
+			options: "Opportunity Type"
 		},
-		
 	]
 };

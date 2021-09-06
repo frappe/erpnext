@@ -1,12 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+import json
 
 import frappe
 import pandas
 from frappe import _
-from six import iteritems
-import json
 from frappe.utils import flt
+from six import iteritems
+
 from erpnext.setup.utils import get_exchange_rate
 
 

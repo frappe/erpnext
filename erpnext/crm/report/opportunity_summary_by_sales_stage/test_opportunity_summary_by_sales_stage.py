@@ -1,10 +1,15 @@
 import unittest
 import frappe
-from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import execute
-from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics import create_company,create_customer,create_opportunity
+from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (
+    execute
+)
+from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics import (
+    create_company,
+    create_customer,
+    create_opportunity
+)
 
 class TestOpportunitySummaryBySalesStage(unittest.TestCase):
-
     @classmethod
     def setUpClass(self):
         frappe.db.delete("Opportunity")
@@ -32,7 +37,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
             'Prospecting': 1
         }]
 
-        self.assertEqual(expected_data,report[1])
+        self.assertEqual(expected_data, report[1])
 
     def check_for_source(self):
         filters = {
@@ -48,7 +53,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
             'Prospecting': 1
         }]
 
-        self.assertEqual(expected_data,report[1])
+        self.assertEqual(expected_data, report[1])
 
     def check_for_opportunity_type(self):
         filters = {
@@ -64,8 +69,8 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
             'Prospecting': 1
         }]
 
-        self.assertEqual(expected_data,report[1])
-    
+        self.assertEqual(expected_data, report[1])
+
     def check_all_filters(self):
         filters = {
             'based_on': "Opportunity Type",
@@ -83,4 +88,4 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
             'Prospecting': 1
         }]
 
-        self.assertEqual(expected_data,report[1])   
+        self.assertEqual(expected_data, report[1])

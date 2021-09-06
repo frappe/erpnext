@@ -1,23 +1,25 @@
 import unittest
+
 import frappe
+
 from erpnext.crm.report.sales_pipeline_analytics.sales_pipeline_analytics import execute
 
+
 class TestSalesPipelineAnalytics(unittest.TestCase):
-    
     @classmethod
     def setUpClass(self):
         frappe.db.delete("Opportunity")
         create_company()
         create_customer()
         create_opportunity()
-        
+
     def test_sales_pipeline_analytics(self):
         self.check_for_monthly_and_number()
         self.check_for_monthly_and_amount()
         self.check_for_quarterly_and_number()
         self.check_for_quarterly_and_amount()
         self.check_for_all_filters()
- 
+
     def check_for_monthly_and_number(self):
         filters = {
             'pipeline_by':"Owner",

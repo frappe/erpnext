@@ -2,14 +2,17 @@
 # For license information, please see license.txt
 
 import json
-import frappe
 from datetime import date
+
+import frappe
 import pandas
 from dateutil.relativedelta import relativedelta
-from six import iteritems
 from frappe import _
 from frappe.utils import flt
+from six import iteritems
+
 from erpnext.setup.utils import get_exchange_rate
+
 
 def execute(filters=None):
 	return SalesPipelineAnalytics(filters).run()
