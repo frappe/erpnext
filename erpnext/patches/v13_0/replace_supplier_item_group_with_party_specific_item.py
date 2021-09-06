@@ -3,6 +3,7 @@
 
 import frappe
 
+
 def execute():
 	if frappe.db.table_exists('Supplier Item Group'):
 		frappe.reload_doc("buying", "doctype", "supplier_item_group")

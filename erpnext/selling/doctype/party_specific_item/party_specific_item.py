@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+
 class PartySpecificItem(Document):
 	def validate(self):
 		exists = frappe.db.exists({

@@ -1,11 +1,11 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import frappe
 import unittest
 
-from erpnext.controllers.queries import item_query
+import frappe
 
+from erpnext.controllers.queries import item_query
 
 item_records = frappe.get_test_records('Item')
 customer_records = frappe.get_test_records('Customer')
