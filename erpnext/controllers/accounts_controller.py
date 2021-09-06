@@ -832,7 +832,7 @@ class AccountsController(TransactionBase):
 				if pe.reference_type == 'Payment Entry':
 					pe = frappe.get_doc('Payment Entry', pe.reference_name)
 					for tax in pe.get('taxes'):
-						allocated_amount = tax_map.get(tax.account_head) - allocated_tax_map.get(tax.account_head)
+						allocated_amount = flt(tax_map.get(tax.account_head)) - flt(allocated_tax_map.get(tax.account_head))
 						if allocated_amount > tax.tax_amount:
 							allocated_amount = tax.tax_amount
 
@@ -931,15 +931,19 @@ class AccountsController(TransactionBase):
 			if pe.reference_type == "Payment Entry" and \
 				frappe.db.get_value('Payment Entry', pe.reference_name, 'advance_tax_account'):
 				pe = frappe.get_doc("Payment Entry", pe.reference_name)
+				advance_tax_account = pe.advance_tax_account
+
 				for tax in pe.get("taxes"):
 					account_currency = get_account_currency(tax.account_head)
 
 					if self.doctype == "Purchase Invoice":
-						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-					else:
 						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
 						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+						advance_tax_account = pe.advance_tax_account if pe.paid_from != pe.advance_tax_account \
+							else self.credit_to
+					else:
+						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
 
 					party = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 					unallocated_amount = tax.tax_amount - tax.allocated_amount
@@ -961,13 +965,15 @@ class AccountsController(TransactionBase):
 
 						gl_entries.append(
 							self.get_gl_dict({
-								"account": pe.advance_tax_account,
+								"account": advance_tax_account,
 								"against": party,
 								rev_dr_cr: unallocated_amount,
 								rev_dr_cr + "_in_account_currency": unallocated_amount
 								if account_currency==self.company_currency
 								else unallocated_amount,
-								"cost_center": tax.cost_center
+								"cost_center": self.get('cost_center') if advance_tax_account == self.get('credit_to') else tax.cost_center,
+								"party_type": 'Supplier' if advance_tax_account == self.get('credit_to') else '',
+								"party": self.get('supplier') if advance_tax_account == self.get('credit_to') else '',
 							}, account_currency, item=tax))
 
 						frappe.db.set_value("Advance Taxes and Charges", tax.name, "allocated_amount",
