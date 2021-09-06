@@ -187,11 +187,11 @@ frappe.ui.form.on("Opportunity", {
 
 	change_form_labels: function(frm) {
 		let company_currency = erpnext.get_currency(frm.doc.company);
-		frm.set_currency_labels(["base_opportunity_amount", "base_total"], company_currency);
-		frm.set_currency_labels(["opportunity_amount", "total"], frm.doc.currency);
+		frm.set_currency_labels(["base_opportunity_amount", "base_total", "base_grand_total"], company_currency);
+		frm.set_currency_labels(["opportunity_amount", "total", "grand_total"], frm.doc.currency);
 
 		// toggle fields
-		frm.toggle_display(["conversion_rate", "base_opportunity_amount", "base_total"],
+		frm.toggle_display(["conversion_rate", "base_opportunity_amount", "base_total", "base_grand_total"],
 			frm.doc.currency != company_currency);
 	},
 
@@ -209,16 +209,21 @@ frappe.ui.form.on("Opportunity", {
 	},
 
 	calculate_total: function(frm) {
-		let total = 0, base_total = 0;
+		let total = 0, base_total = 0, grand_total = 0, base_grand_total = 0;
 		frm.doc.items.forEach(item => {
 			total += item.amount;
 			base_total += item.base_amount;
 		})
 
-		total += frm.doc.opportunity_amount;
-		base_total += frm.doc.base_opportunity_amount;
+		base_grand_total = base_total + frm.doc.base_opportunity_amount;
+		grand_total = total + frm.doc.opportunity_amount;
 
-		frm.set_value({'total': total, 'base_total': base_total});
+		frm.set_value({
+			'total': flt(total),
+			'base_total': flt(base_total),
+			'grand_total': flt(grand_total),
+			'base_grand_total': flt(base_grand_total)
+		});
 	}
 
 });
