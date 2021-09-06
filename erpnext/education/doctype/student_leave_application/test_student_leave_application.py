@@ -3,12 +3,15 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import getdate, add_days, add_months
+
+import frappe
+from frappe.utils import add_days, add_months, getdate
+
 from erpnext import get_default_company
-from erpnext.education.doctype.student_group.test_student_group import get_random_group
 from erpnext.education.doctype.student.test_student import create_student
+from erpnext.education.doctype.student_group.test_student_group import get_random_group
+
 
 class TestStudentLeaveApplication(unittest.TestCase):
 	def setUp(self):

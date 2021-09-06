@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _, bold
-from frappe.utils import getdate, date_diff, comma_and, formatdate
+from frappe.model.document import Document
+from frappe.utils import comma_and, date_diff, formatdate, getdate
+
 from erpnext.hr.utils import validate_active_employee
+
 
 class AdditionalSalary(Document):
 	def on_submit(self):

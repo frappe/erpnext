@@ -2,11 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.utils import flt, format_datetime, get_datetime
+
+import erpnext
 from erpnext.stock.utils import get_incoming_rate
-from frappe.utils import flt, get_datetime, format_datetime
+
 
 class StockOverReturnError(frappe.ValidationError): pass
 
@@ -63,7 +67,7 @@ def validate_returned_items(doc):
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.db.sql("""select item_code, qty, serial_no, batch_no from `tabPacked Item`
-			where parent = %s""".format(doc.doctype), doc.return_against, as_dict=1):
+			where parent = %s""", doc.return_against, as_dict=1):
 				valid_items = get_ref_item_dict(valid_items, d)
 
 	already_returned_items = get_already_returned_items(doc)
@@ -235,6 +239,7 @@ def get_returned_qty_map_for_row(row_name, doctype):
 
 def make_return_doc(doctype, source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
+
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
 	default_warehouse_for_sales_return = frappe.db.get_value("Company", company, "default_warehouse_for_sales_return")

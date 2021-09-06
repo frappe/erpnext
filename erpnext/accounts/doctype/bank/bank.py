@@ -3,9 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
 from frappe.model.document import Document
-from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+
 
 class Bank(Document):
 	def onload(self):

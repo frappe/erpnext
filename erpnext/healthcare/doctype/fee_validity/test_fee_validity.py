@@ -3,11 +3,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, add_days
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_appointment, create_healthcare_service_items
+
+import frappe
+from frappe.utils import add_days, nowdate
+
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import (
+	create_appointment,
+	create_healthcare_docs,
+	create_healthcare_service_items,
+)
 
 test_dependencies = ["Company"]
 
@@ -27,7 +33,7 @@ class TestFeeValidity(unittest.TestCase):
 		healthcare_settings.automate_appointment_invoicing = 1
 		healthcare_settings.op_consulting_charge_item = item
 		healthcare_settings.save(ignore_permissions=True)
-		patient, medical_department, practitioner = create_healthcare_docs()
+		patient, practitioner = create_healthcare_docs()
 
 		# For first appointment, invoice is generated. First appointment not considered in fee validity
 		appointment = create_appointment(patient, practitioner, nowdate())

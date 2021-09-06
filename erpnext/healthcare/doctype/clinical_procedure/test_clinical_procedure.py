@@ -4,14 +4,19 @@
 from __future__ import unicode_literals
 
 import unittest
+
 import frappe
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_clinical_procedure_template
+
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import (
+	create_clinical_procedure_template,
+	create_healthcare_docs,
+)
 
 test_dependencies = ['Item']
 
 class TestClinicalProcedure(unittest.TestCase):
 	def test_procedure_template_item(self):
-		patient, medical_department, practitioner = create_healthcare_docs()
+		patient, practitioner = create_healthcare_docs()
 		procedure_template = create_clinical_procedure_template()
 		self.assertTrue(frappe.db.exists('Item', procedure_template.item))
 
@@ -20,7 +25,7 @@ class TestClinicalProcedure(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value('Item', procedure_template.item, 'disabled'), 1)
 
 	def test_consumables(self):
-		patient, medical_department, practitioner = create_healthcare_docs()
+		patient, practitioner = create_healthcare_docs()
 		procedure_template = create_clinical_procedure_template()
 		procedure_template.allow_stock_consumption = 1
 		consumable = create_consumable()

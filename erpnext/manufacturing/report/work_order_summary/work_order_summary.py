@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import date_diff, today, getdate, flt
 from frappe import _
-from erpnext.stock.report.stock_analytics.stock_analytics import (get_period_date_ranges, get_period)
+from frappe.utils import date_diff, flt, getdate, today
+
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
 
 def execute(filters=None):
 	columns, data = [], []

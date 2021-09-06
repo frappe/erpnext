@@ -3,8 +3,8 @@
 # See license.txt
 from __future__ import unicode_literals
 
-
 import unittest
+
 
 class TestDonorType(unittest.TestCase):
 	pass

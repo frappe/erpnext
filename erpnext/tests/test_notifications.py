@@ -2,11 +2,12 @@
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import unittest
 
+import frappe
 from frappe.desk import notifications
-from frappe.test_runner import make_test_objects
+
 
 class TestNotifications(unittest.TestCase):
 	def test_get_notifications_for_targets(self):

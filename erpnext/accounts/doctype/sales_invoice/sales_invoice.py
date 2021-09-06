@@ -2,33 +2,50 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-import frappe.defaults
-from frappe.utils import cint, flt, getdate, add_days, add_months, cstr, nowdate, get_link_to_form, formatdate
+
+import frappe
 from frappe import _, msgprint, throw
-from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
-from frappe.model.mapper import get_mapped_doc
-from erpnext.controllers.selling_controller import SellingController
-from erpnext.accounts.utils import get_account_currency
-from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
-from erpnext.assets.doctype.asset.depreciation \
-	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal, get_gl_entries_on_asset_regain, post_depreciation_entries
-from erpnext.stock.doctype.batch.batch import set_batch_nos
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
-from erpnext.setup.doctype.company.company import update_company_current_month_sales
-from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
-from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-
-from erpnext.healthcare.utils import manage_invoice_submit_cancel
-
+from frappe.model.mapper import get_mapped_doc
+from frappe.model.utils import get_fetch_values
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	nowdate,
+)
 from six import iteritems
+
+import erpnext
+from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+	get_loyalty_program_details_with_points,
+	validate_loyalty_points,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
+from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
+from erpnext.accounts.utils import get_account_currency
+from erpnext.assets.doctype.asset.depreciation import (
+	get_disposal_account_and_cost_center,
+	get_gl_entries_on_asset_disposal,
+	get_gl_entries_on_asset_regain,
+	post_depreciation_entries,
+)
+from erpnext.controllers.selling_controller import SellingController
+from erpnext.healthcare.utils import manage_invoice_submit_cancel
+from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
+from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.stock.doctype.batch.batch import set_batch_nos
+from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -481,7 +498,7 @@ class SalesInvoice(SellingController):
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
-		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
+		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
@@ -1375,8 +1392,10 @@ class SalesInvoice(SellingController):
 
 	# redeem the loyalty points.
 	def apply_loyalty_points(self):
-		from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry \
-			import get_loyalty_point_entries, get_redemption_details
+		from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry import (
+			get_loyalty_point_entries,
+			get_redemption_details,
+		)
 		loyalty_point_entries = get_loyalty_point_entries(self.customer, self.loyalty_program, self.company, self.posting_date)
 		redemption_details = get_redemption_details(self.customer, self.loyalty_program, self.company)
 
@@ -2009,7 +2028,11 @@ def get_mode_of_payment_info(mode_of_payment, company):
 @frappe.whitelist()
 def create_dunning(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
-	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount
+
+	from erpnext.accounts.doctype.dunning.dunning import (
+		calculate_interest_and_amount,
+		get_dunning_letter_text,
+	)
 	def set_missing_values(source, target):
 		target.sales_invoice = source_name
 		target.outstanding_amount = source.outstanding_amount
