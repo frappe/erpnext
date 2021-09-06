@@ -2,12 +2,13 @@
 # Copyright (c) 2015, Frappe Technologies and Contributors
 # See license.txt
 from __future__ import unicode_literals
-from erpnext.education.doctype.course.test_course import make_course
-from erpnext.education.doctype.topic.test_topic import make_topic_and_linked_content
-from erpnext.education.doctype.course.test_course import make_course_and_linked_topic
+
+import unittest
 
 import frappe
-import unittest
+
+from erpnext.education.doctype.course.test_course import make_course, make_course_and_linked_topic
+from erpnext.education.doctype.topic.test_topic import make_topic_and_linked_content
 
 test_data = {
 	"program_name": "_Test Program",

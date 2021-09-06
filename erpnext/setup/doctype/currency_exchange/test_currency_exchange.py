@@ -1,13 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
-import frappe, unittest
-from frappe.utils import flt
+
+import unittest
+from unittest import mock
+
+import frappe
+from frappe.utils import cint, flt
+
 from erpnext.setup.utils import get_exchange_rate
-from frappe.utils import cint
 
 test_records = frappe.get_test_records('Currency Exchange')
-
 
 def save_new_records(test_records):
 	for record in test_records:
@@ -37,18 +39,45 @@ def save_new_records(test_records):
 			curr_exchange.for_selling = record["for_selling"]
 			curr_exchange.insert()
 
+test_exchange_values = {
+	'2015-12-15': '66.999',
+	'2016-01-15': '65.1'
+}
 
+# Removing API call from get_exchange_rate
+def patched_requests_get(*args, **kwargs):
+	class PatchResponse:
+		def __init__(self, json_data, status_code):
+			self.json_data = json_data
+			self.status_code = status_code
+
+		def raise_for_status(self):
+			if self.status_code != 200:
+				raise frappe.DoesNotExistError
+
+		def json(self):
+			return self.json_data
+
+	if args[0] == "https://api.exchangerate.host/convert" and kwargs.get('params'):
+		if kwargs['params'].get('date') and kwargs['params'].get('from') and kwargs['params'].get('to'):
+			if test_exchange_values.get(kwargs['params']['date']):
+				return PatchResponse({'result': test_exchange_values[kwargs['params']['date']]}, 200)
+
+	return PatchResponse({'result': None}, 404)
+
+@mock.patch('requests.get', side_effect=patched_requests_get)
 class TestCurrencyExchange(unittest.TestCase):
 	def clear_cache(self):
 		cache = frappe.cache()
-		key = "currency_exchange_rate:{0}:{1}".format("USD", "INR")
-		cache.delete(key)
+		for date in test_exchange_values.keys():
+			key = "currency_exchange_rate_{0}:{1}:{2}".format(date, "USD", "INR")
+			cache.delete(key)
 
 	def tearDown(self):
 		frappe.db.set_value("Accounts Settings", None, "allow_stale", 1)
 		self.clear_cache()
 
-	def test_exchange_rate(self):
+	def test_exchange_rate(self, mock_get):
 		save_new_records(test_records)
 
 		frappe.db.set_value("Accounts Settings", None, "allow_stale", 1)
@@ -69,7 +98,11 @@ class TestCurrencyExchange(unittest.TestCase):
 		self.assertFalse(exchange_rate == 60)
 		self.assertEqual(flt(exchange_rate, 3), 66.999)
 
-	def test_exchange_rate_strict(self):
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-20", "for_buying")
+		self.assertFalse(exchange_rate == 60)
+		self.assertEqual(flt(exchange_rate, 3), 65.1)
+
+	def test_exchange_rate_strict(self, mock_get):
 		# strict currency settings
 		frappe.db.set_value("Accounts Settings", None, "allow_stale", 0)
 		frappe.db.set_value("Accounts Settings", None, "stale_days", 1)
@@ -79,7 +112,7 @@ class TestCurrencyExchange(unittest.TestCase):
 
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15", "for_buying")
-		self.assertEqual(flt(exchange_rate, 3), 67.235)
+		self.assertEqual(flt(exchange_rate, 3), 65.100)
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_selling")
 		self.assertEqual(exchange_rate, 62.9)
@@ -89,7 +122,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15", "for_buying")
 		self.assertEqual(flt(exchange_rate, 3), 66.999)
 
-	def test_exchange_rate_strict_switched(self):
+	def test_exchange_rate_strict_switched(self, mock_get):
 		# Start with allow_stale is True
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15", "for_buying")
 		self.assertEqual(exchange_rate, 65.1)
@@ -97,7 +130,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		frappe.db.set_value("Accounts Settings", None, "allow_stale", 0)
 		frappe.db.set_value("Accounts Settings", None, "stale_days", 1)
 
-		# Will fetch from fixer.io
 		self.clear_cache()
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15", "for_buying")
-		self.assertEqual(flt(exchange_rate, 3), 67.235)
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_buying")
+		self.assertFalse(exchange_rate == 65)
+		self.assertEqual(flt(exchange_rate, 3), 62.9)

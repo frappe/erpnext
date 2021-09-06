@@ -90,10 +90,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 
 		this.frm.toggle_display("customer_name",
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
-		if(this.frm.fields_dict.packed_items) {
-			var packing_list_exists = (this.frm.doc.packed_items || []).length;
-			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
-		}
+
 		this.toggle_editable_price_list_rate();
 	}
 
@@ -394,6 +391,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	_set_batch_number(doc) {
+		if (doc.batch_no) {
+			return
+		}
+
 		let args = {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)};
 		if (doc.has_serial_no && doc.serial_no) {
 			args['serial_no'] = doc.serial_no

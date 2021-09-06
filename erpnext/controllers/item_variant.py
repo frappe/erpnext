@@ -2,12 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
+import copy
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt
-import json, copy
-
 from six import string_types
+
 
 class ItemVariantExistsError(frappe.ValidationError): pass
 class InvalidItemAttributeValueError(frappe.ValidationError): pass

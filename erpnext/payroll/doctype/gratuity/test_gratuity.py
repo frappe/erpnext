@@ -3,15 +3,20 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+from frappe.utils import add_days, flt, get_datetime, getdate
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, make_earning_salary_component, \
-	make_deduction_salary_component
-from erpnext.payroll.doctype.gratuity.gratuity import get_last_salary_slip
-from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
-from frappe.utils import getdate, add_days, get_datetime, flt
+from erpnext.payroll.doctype.gratuity.gratuity import get_last_salary_slip
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	make_deduction_salary_component,
+	make_earning_salary_component,
+	make_employee_salary_slip,
+)
+from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 
 test_dependencies = ["Salary Component", "Salary Slip", "Account"]
 class TestGratuity(unittest.TestCase):
@@ -22,14 +27,18 @@ class TestGratuity(unittest.TestCase):
 
 	def setUp(self):
 		frappe.db.sql("DELETE FROM `tabGratuity`")
-		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
-	def test_check_gratuity_amount_based_on_current_slab_and_additional_salary_creation(self):
+	def test_get_last_salary_slip_should_return_none_for_new_employee(self):
+		new_employee = make_employee("new_employee@salary.com", company='_Test Company')
+		salary_slip = get_last_salary_slip(new_employee)
+		assert salary_slip is None
+
+	def test_check_gratuity_amount_based_on_current_slab(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
 
 		rule = get_gratuity_rule("Rule Under Unlimited Contract on termination (UAE)")
 
-		gratuity = create_gratuity(pay_via_salary_slip = 1, employee=employee, rule=rule.name)
+		gratuity = create_gratuity(employee=employee, rule=rule.name)
 
 		#work experience calculation
 		date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
@@ -56,9 +65,6 @@ class TestGratuity(unittest.TestCase):
 		gratuity.reload()
 
 		self.assertEqual(flt(gratuity_amount, 2), flt(gratuity.amount, 2))
-
-		#additional salary creation (Pay via salary slip)
-		self.assertTrue(frappe.db.exists("Additional Salary", {"ref_docname": gratuity.name}))
 
 	def test_check_gratuity_amount_based_on_all_previous_slabs(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
@@ -137,14 +143,9 @@ def create_gratuity(**args):
 	gratuity.employee = args.employee
 	gratuity.posting_date = getdate()
 	gratuity.gratuity_rule = args.rule or "Rule Under Limited Contract (UAE)"
-	gratuity.pay_via_salary_slip = args.pay_via_salary_slip or 0
-	if gratuity.pay_via_salary_slip:
-		gratuity.payroll_date = getdate()
-		gratuity.salary_component = "Performance Bonus"
-	else:
-		gratuity.expense_account =  args.expense_account or 'Payment Account - _TC'
-		gratuity.payable_account = args.payable_account or get_payable_account("_Test Company")
-		gratuity.mode_of_payment = args.mode_of_payment or 'Cash'
+	gratuity.expense_account = args.expense_account or 'Payment Account - _TC'
+	gratuity.payable_account = args.payable_account or get_payable_account("_Test Company")
+	gratuity.mode_of_payment = args.mode_of_payment or 'Cash'
 
 	gratuity.save()
 	gratuity.submit()

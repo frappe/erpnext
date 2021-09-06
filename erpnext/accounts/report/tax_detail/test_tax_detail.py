@@ -1,16 +1,26 @@
 from __future__ import unicode_literals
 
-import frappe
-import unittest
 import datetime
 import json
 import os
-from frappe.utils import getdate, add_to_date, get_first_day, get_last_day, get_year_start, get_year_ending
+import unittest
+
+import frappe
+from frappe.utils import (
+	add_to_date,
+	get_first_day,
+	get_last_day,
+	get_year_ending,
+	get_year_start,
+	getdate,
+)
+
 from .tax_detail import filter_match, save_custom_report
+
 
 class TestTaxDetail(unittest.TestCase):
 	def load_testdocs(self):
-		from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
+		from erpnext.accounts.utils import FiscalYearError, get_fiscal_year
 		datapath, _ = os.path.splitext(os.path.realpath(__file__))
 		with open(datapath + '.json', 'r') as fp:
 			docs = json.load(fp)

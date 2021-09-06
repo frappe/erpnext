@@ -1,11 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-import frappe
+
 import unittest
-from frappe.utils import getdate, nowdate, add_days
+
+import frappe
+from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.task.task import CircularReferenceError
+
 
 class TestTask(unittest.TestCase):
 	def test_circular_reference(self):

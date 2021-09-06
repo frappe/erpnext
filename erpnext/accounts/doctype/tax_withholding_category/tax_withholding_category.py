@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate, cint
+from frappe.utils import cint, getdate
+
 from erpnext.accounts.utils import get_fiscal_year
+
 
 class TaxWithholdingCategory(Document):
 	pass
@@ -241,13 +244,14 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 	tds_amount = 0
 	invoice_filters = {
 		'name': ('in', vouchers),
-		'docstatus': 1
+		'docstatus': 1,
+		'apply_tds': 1
 	}
 
 	field = 'sum(net_total)'
 
-	if not cint(tax_details.consider_party_ledger_amount):
-		invoice_filters.update({'apply_tds': 1})
+	if cint(tax_details.consider_party_ledger_amount):
+		invoice_filters.pop('apply_tds', None)
 		field = 'sum(grand_total)'
 
 	supp_credit_amt = frappe.db.get_value('Purchase Invoice', invoice_filters, field) or 0.0

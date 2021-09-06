@@ -2,9 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from erpnext import get_default_currency
 from frappe import _
+
+from erpnext import get_default_currency
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters)

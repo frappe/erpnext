@@ -1,17 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import getdate, validate_email_address, today, add_years, cstr
+from frappe import _, scrub, throw
 from frappe.model.naming import set_name_by_naming_series
-from frappe import throw, _, scrub
-from frappe.permissions import add_user_permission, remove_user_permission, \
-	set_user_permission_if_allowed, has_permission, get_doc_permissions
-from frappe.model.document import Document
-from erpnext.utilities.transaction_base import delete_events
+from frappe.permissions import (
+	add_user_permission,
+	get_doc_permissions,
+	has_permission,
+	remove_user_permission,
+	set_user_permission_if_allowed,
+)
+from frappe.utils import add_years, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
+
+from erpnext.utilities.transaction_base import delete_events
+
 
 class EmployeeUserDisabledError(frappe.ValidationError):
 	pass
@@ -286,94 +289,8 @@ def update_user_permissions(doc, method):
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
-def send_birthday_reminders():
-	"""Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set."""
-	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
-		return
-
-	employees_born_today = get_employees_who_are_born_today()
-
-	for company, birthday_persons in employees_born_today.items():
-		employee_emails = get_all_employee_emails(company)
-		birthday_person_emails = [get_employee_email(doc) for doc in birthday_persons]
-		recipients = list(set(employee_emails) - set(birthday_person_emails))
-
-		reminder_text, message = get_birthday_reminder_text_and_message(birthday_persons)
-		send_birthday_reminder(recipients, reminder_text, birthday_persons, message)
-
-		if len(birthday_persons) > 1:
-			# special email for people sharing birthdays
-			for person in birthday_persons:
-				person_email = person["user_id"] or person["personal_email"] or person["company_email"]
-				others = [d for d in birthday_persons if d != person]
-				reminder_text, message = get_birthday_reminder_text_and_message(others)
-				send_birthday_reminder(person_email, reminder_text, others, message)
-
 def get_employee_email(employee_doc):
-	return employee_doc["user_id"] or employee_doc["personal_email"] or employee_doc["company_email"]
-
-def get_birthday_reminder_text_and_message(birthday_persons):
-	if len(birthday_persons) == 1:
-		birthday_person_text = birthday_persons[0]['name']
-	else:
-		# converts ["Jim", "Rim", "Dim"] to Jim, Rim & Dim
-		person_names = [d['name'] for d in birthday_persons]
-		last_person = person_names[-1]
-		birthday_person_text = ", ".join(person_names[:-1])
-		birthday_person_text = _("{} & {}").format(birthday_person_text, last_person)
-
-	reminder_text = _("Today is {0}'s birthday 🎉").format(birthday_person_text)
-	message = _("A friendly reminder of an important date for our team.")
-	message += "<br>"
-	message += _("Everyone, let’s congratulate {0} on their birthday.").format(birthday_person_text)
-
-	return reminder_text, message
-
-def send_birthday_reminder(recipients, reminder_text, birthday_persons, message):
-	frappe.sendmail(
-		recipients=recipients,
-		subject=_("Birthday Reminder"),
-		template="birthday_reminder",
-		args=dict(
-			reminder_text=reminder_text,
-			birthday_persons=birthday_persons,
-			message=message,
-		),
-		header=_("Birthday Reminder 🎂")
-	)
-
-def get_employees_who_are_born_today():
-	"""Get all employee born today & group them based on their company"""
-	from collections import defaultdict
-	employees_born_today = frappe.db.multisql({
-		"mariadb": """
-			SELECT `personal_email`, `company`, `company_email`, `user_id`, `employee_name` AS 'name', `image`
-			FROM `tabEmployee`
-			WHERE
-				DAY(date_of_birth) = DAY(%(today)s)
-			AND
-				MONTH(date_of_birth) = MONTH(%(today)s)
-			AND
-				`status` = 'Active'
-		""",
-		"postgres": """
-			SELECT "personal_email", "company", "company_email", "user_id", "employee_name" AS 'name', "image"
-			FROM "tabEmployee"
-			WHERE
-				DATE_PART('day', "date_of_birth") = date_part('day', %(today)s)
-			AND
-				DATE_PART('month', "date_of_birth") = date_part('month', %(today)s)
-			AND
-				"status" = 'Active'
-		""",
-	}, dict(today=today()), as_dict=1)
-
-	grouped_employees = defaultdict(lambda: [])
-
-	for employee_doc in employees_born_today:
-		grouped_employees[employee_doc.get('company')].append(employee_doc)
-
-	return grouped_employees
+	return employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
 	if employee:
@@ -390,17 +307,40 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 	return holiday_list
 
-def is_holiday(employee, date=None, raise_exception=True):
-	'''Returns True if given Employee has an holiday on the given date
-	:param employee: Employee `name`
-	:param date: Date to check. Will check for today if None'''
+def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False, with_description=False):
+	'''
+	Returns True if given Employee has an holiday on the given date
+		:param employee: Employee `name`
+		:param date: Date to check. Will check for today if None
+		:param raise_exception: Raise an exception if no holiday list found, default is True
+		:param only_non_weekly: Check only non-weekly holidays, default is False
+	'''
 
 	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
 
-	if holiday_list:
-		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
+	if not holiday_list:
+		return False
+
+	filters = {
+		'parent': holiday_list,
+		'holiday_date': date
+	}
+	if only_non_weekly:
+		filters['weekly_off'] = False
+
+	holidays = frappe.get_all(
+		'Holiday',
+		fields=['description'],
+		filters=filters,
+		pluck='description'
+	)
+
+	if with_description:
+		return len(holidays) > 0, holidays
+
+	return len(holidays) > 0
 
 @frappe.whitelist()
 def deactivate_sales_person(status = None, employee = None):
@@ -502,7 +442,6 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 		employee.expandable = 1 if is_expandable else 0
 
 	return employees
-
 
 def on_doctype_update():
 	frappe.db.add_index("Employee", ["lft", "rgt"])

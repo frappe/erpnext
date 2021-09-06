@@ -2,17 +2,37 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate
-from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
+from frappe.utils import cint, flt, getdate
+
+from erpnext.accounts.report.balance_sheet.balance_sheet import (
+	check_opening_balance,
+	get_chart_data,
+	get_provisional_profit_loss,
+)
+from erpnext.accounts.report.balance_sheet.balance_sheet import (
+	get_report_summary as get_bs_summary,
+)
+from erpnext.accounts.report.cash_flow.cash_flow import (
+	add_total_row_account,
+	get_account_type_based_gl_data,
+	get_cash_flow_accounts,
+)
+from erpnext.accounts.report.cash_flow.cash_flow import get_report_summary as get_cash_flow_summary
 from erpnext.accounts.report.financial_statements import get_fiscal_year_data, sort_accounts
-from erpnext.accounts.report.balance_sheet.balance_sheet import (get_provisional_profit_loss,
-	check_opening_balance, get_chart_data, get_report_summary as get_bs_summary)
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (get_net_profit_loss,
-	get_chart_data as get_pl_chart_data, get_report_summary as get_pl_summary)
-from erpnext.accounts.report.cash_flow.cash_flow import (get_cash_flow_accounts, get_account_type_based_gl_data,
-	add_total_row_account, get_report_summary as get_cash_flow_summary)
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_chart_data as get_pl_chart_data,
+)
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_net_profit_loss,
+)
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_report_summary as get_pl_summary,
+)
+from erpnext.accounts.report.utils import convert_to_presentation_currency
+
 
 def execute(filters=None):
 	columns, data, message, chart = [], [], [], []
@@ -210,10 +230,10 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	company_currency = get_company_currency(filters)
 
 	if filters.filter_based_on == 'Fiscal Year':
-		start_date = fiscal_year.year_start_date
+		start_date = fiscal_year.year_start_date if filters.report != 'Balance Sheet' else None
 		end_date = fiscal_year.year_end_date
 	else:
-		start_date = filters.period_start_date
+		start_date = filters.period_start_date if filters.report != 'Balance Sheet' else None
 		end_date = filters.period_end_date
 
 	gl_entries_by_account = {}
