@@ -141,7 +141,22 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if(this.frm.fields_dict["items"]) {
-			this["items_remove"] = this.calculate_net_weight;
+			this["items_remove"] = this.calculate_net_weight
+
+			this["before_items_remove"] = function(frm, cdt, cdn) {
+				const item = frappe.get_doc(cdt, cdn);
+				if (!item.is_free_item) {
+					this.remove_pricing_rule_from_items([{
+						"doctype": item.doctype,
+						"name": item.name,
+						"item_code": item.item_code,
+						"pricing_rules": item.pricing_rules,
+						"parenttype": item.parenttype,
+						"parent": item.parent
+					}]);
+					item.pricing_rules = "";
+				}
+			}
 		}
 
 		if(this.frm.fields_dict["recurring_print_format"]) {
@@ -1437,23 +1452,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					})
 				}
 			});
-			return this.frm.call({
-				method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
-				args: { item_list: item_list },
-				callback: function(r) {
-					if (!r.exc && r.message) {
-						r.message.forEach(row_item => {
-							me.remove_pricing_rule(row_item);
-						});
-						me._set_values_for_item_list(r.message);
-						me.calculate_taxes_and_totals();
-						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
-					}
-				}
-			});
+			return this.remove_pricing_rule_from_items(item_list);
 		} else {
 			this.apply_pricing_rule();
 		}
+	}
+
+	remove_pricing_rule_from_items(items) {
+		const me = this;
+		return this.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
+			args: { item_list: items },
+			callback: function(r) {
+				if (!r.exc && r.message) {
+					r.message.forEach(row_item => {
+						me.remove_pricing_rule(row_item);
+					});
+					me._set_values_for_item_list(r.message);
+					me.calculate_taxes_and_totals();
+					if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
+				}
+			}
+		});
 	}
 
 	apply_pricing_rule(item, calculate_taxes_and_totals) {
