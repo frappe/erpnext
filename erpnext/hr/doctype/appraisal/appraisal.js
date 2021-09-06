@@ -16,64 +16,121 @@ frappe.ui.form.on('Appraisal', {
 		}
 	},
 
-	kra_template: function(frm) {
-		frm.doc.goals = [];
+	appraisal_template: function(frm) {
+		frm.doc.kra_assessment = [];
 		erpnext.utils.map_current_doc({
-			method: "erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template",
-			source_name: frm.doc.kra_template,
+			method: 'erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template',
+			source_name: frm.doc.appraisal_template,
 			frm: frm
 		});
 	},
 
 	calculate_total: function(frm) {
-	  	let goals = frm.doc.goals || [];
-		let total = 0;
+	  	let kra_assessment = frm.doc.kra_assessment || [];
+		let total_self_score = 0
+		let total_mentor_score = 0
 
-		if (goals == []) {
-			frm.set_value('total_score', 0);
+		if (kra_assessment == []) {
+			frm.set_value('overall_self_score', 0);
+			frm.set_value('overall_score',0);
 			return;
 		}
-		for (let i = 0; i<goals.length; i++) {
-			total = flt(total)+flt(goals[i].score_earned)
+		for (let i = 0; i<kra_assessment.length; i++) {
+			total_self_score = total_self_score + (kra_assessment[i].per_weightage * (kra_assessment[i].mentor_score/100))
+			total_mentor_score= total_mentor_score + (kra_assessment[i].per_weightage * (kra_assessment[i].self_score/100))
 		}
-		if (!isNaN(total)) {
-			frm.set_value('total_score', total);
-			frm.refresh_field('calculate_total');
+
+		if (!isNaN(total_self_score && total_mentor_score)) {
+			frm.set_value('overall_self_score', total_self_score);
+			frm.set_value('overall_score', total_mentor_score);
+			frm.refresh_field('overall_self_score');
+			frm.refresh_field('overall_score');
 		}
+
 	},
 
-	set_score_earned: function(frm) {
-		let goals = frm.doc.goals || [];
-		for (let i = 0; i<goals.length; i++) {
-			var d = locals[goals[i].doctype][goals[i].name];
-			if (d.score && d.per_weightage) {
-				d.score_earned = flt(d.per_weightage*d.score, precision("score_earned", d))/100;
-			}
-			else {
-				d.score_earned = 0;
-			}
-			refresh_field('score_earned', d.name, 'goals');
+ });
+
+frappe.ui.form.on('KRA Assessment', {
+	mentor_score: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		
+		if (d.mentor_score > 5 || d.mentor_score < 1) {
+			frappe.msgprint(__('Score must be between 1 to 5'));
+			d.mentor_score = 0;
 		}
+		else {
+			frm.trigger('calculate_total');
+		}
+	},
+	self_score: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if (d.self_score > 5 || d.self_score < 1) {
+			frappe.msgprint(__('Score must be, between 1 to 5'));
+			d.self_score = 0;
+		}
+		else {
+			frm.trigger('calculate_total');
+		}
+	},
+	per_weightage: function(frm) {
+		frm.trigger('calculate_total');
+	},
+	kra_remove: function(frm) {
 		frm.trigger('calculate_total');
 	}
 });
 
-frappe.ui.form.on('Appraisal Goal', {
-	score: function(frm, cdt, cdn) {
+
+frappe.ui.form.on('Behavioural Assessment', {
+	mentors_score: function(frm, cdt, cdn){
 		var d = locals[cdt][cdn];
-		if (flt(d.score) > 5) {
-			frappe.msgprint(__("Score must be less than or equal to 5"));
-			d.score = 0;
-			refresh_field('score', d.name, 'goals');
-		}
-		else {
-			frm.trigger('set_score_earned');
+
+		if(d.mentors_score > 5 || d.mentors_score < 1){
+			frappe.msgprint(__('Score must be between 1 to 5'));
+			d.mentors_score = 0;
+			refresh_field('mentors_score');
 		}
 	},
-	per_weightage: function(frm) {
-		frm.trigger('set_score_earned');
+	self_score: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+
+		if(d.self_score > 5 || d.self_score < 1){
+			frappe.msgprint(__('Score must be between 1 to 5'));
+			d.self_score = 0;
+			refresh_field('self_score');
+		}
+	}
+});
+
+
+frappe.ui.form.on('Self Improvement Areas', {
+	current_score: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+
+		if(d.current_score > 5 || d.current_score < 1){
+			frappe.msgprint(__('Score must be between 1 to 5'));
+			d.current_score = 0;
+			refresh_field('current_score');
+		}
 	},
-	goals_remove: function(frm) {
-		frm.trigger('set_score_earned');
+
+	target_score: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+
+		if(d.target_score > 5 || d.target_score < 1){
+			frappe.msgprint(__('Score must be between 1 to 5'));
+			d.target_score = 0;
+			refresh_field('target_score');
+		}
+	},
+	achieved_score: function(frm, cdt, cdn){
+		var d = locals[cdt][cdn];
+
+		if(d.achieved_score > 5 || d.achieved_score < 1){
+			frappe.msgprint(__('Score must be between 1 to 5'));
+			d.achieved_score = 0;
+			refresh_field('achieved_score');
+		}
 	}
 });

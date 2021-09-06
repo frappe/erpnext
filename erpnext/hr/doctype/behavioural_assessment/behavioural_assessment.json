@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "creation": "2021-09-01 18:46:54.142486",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "behavioral_parameter",
+  "description",
+  "mentors_score",
+  "self_score",
+  "feedback"
+ ],
+ "fields": [
+  {
+   "fieldname": "behavioral_parameter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Behavioral Parameter",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "fieldname": "mentors_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Mentor's Score"
+  },
+  {
+   "fieldname": "self_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Self Score"
+  },
+  {
+   "fieldname": "feedback",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Feedback"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-09-11 17:36:07.351114",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Behavioural Assessment",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
