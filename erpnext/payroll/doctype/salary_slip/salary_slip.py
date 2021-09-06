@@ -463,6 +463,7 @@ class SalarySlip(TransactionBase):
 			self.calculate_component_amounts("deductions")
 
 		self.set_loan_repayment()
+		self.set_precision_for_component_amounts()
 		self.set_net_pay()
 
 	def set_net_pay(self):
@@ -688,8 +689,12 @@ class SalarySlip(TransactionBase):
 
 	def update_component_amount_based_on_payment_days(self, component_row):
 		joining_date, relieving_date = self.get_joining_and_relieving_dates()
-		amount = self.get_amount_based_on_payment_days(component_row, joining_date, relieving_date)
-		component_row.amount = flt(amount[0], component_row.precision("amount"))
+		component_row.amount = self.get_amount_based_on_payment_days(component_row, joining_date, relieving_date)[0]
+
+	def set_precision_for_component_amounts(self):
+		for component_type in ("earnings", "deductions"):
+			for component_row in self.get(component_type):
+				component_row.amount = flt(component_row.amount, component_row.precision("amount"))
 
 	def calculate_variable_based_on_taxable_salary(self, tax_component, payroll_period):
 		if not payroll_period:
