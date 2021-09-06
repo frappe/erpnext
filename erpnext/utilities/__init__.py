@@ -1,8 +1,11 @@
 ## temp utility
 from __future__ import print_function, unicode_literals
+
 import frappe
-from erpnext.utilities.activation import get_level
 from frappe.utils import cstr
+
+from erpnext.utilities.activation import get_level
+
 
 def update_doctypes():
 	for d in frappe.db.sql("""select df.parent, df.fieldname

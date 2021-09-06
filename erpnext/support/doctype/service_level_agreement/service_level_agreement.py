@@ -4,16 +4,30 @@
 
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
 from frappe.core.utils import get_parent_doc
-from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
-	get_time_zone, to_timedelta, get_datetime_str, get_link_to_form, cint, nowdate
-from datetime import datetime
+from frappe.model.document import Document
+from frappe.utils import (
+	add_to_date,
+	cint,
+	get_datetime,
+	get_datetime_str,
+	get_link_to_form,
+	get_time,
+	get_time_zone,
+	get_weekdays,
+	getdate,
+	nowdate,
+	time_diff_in_seconds,
+	to_timedelta,
+)
 from frappe.utils.safe_exec import get_safe_globals
+
 from erpnext.support.doctype.issue.issue import get_holidays
-from frappe.utils.safe_exec import get_safe_globals
+
 
 class ServiceLevelAgreement(Document):
 	def validate(self):
@@ -846,7 +860,7 @@ def now_datetime(user):
 
 
 def convert_utc_to_user_timezone(utc_timestamp, user):
-	from pytz import timezone, UnknownTimeZoneError
+	from pytz import UnknownTimeZoneError, timezone
 
 	user_tz = get_tz(user)
 	utcnow = timezone('UTC').localize(utc_timestamp)
