@@ -9,6 +9,7 @@ from erpnext.setup.utils import get_exchange_rate
 
 def execute():
 	frappe.reload_doc('crm', 'doctype', 'opportunity')
+	frappe.reload_doc('crm', 'doctype', 'opportunity_item')
 
 	opportunities = frappe.db.get_list('Opportunity', filters={
 		'opportunity_amount': ['>', 0]
