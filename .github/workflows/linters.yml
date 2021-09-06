@@ -24,4 +24,4 @@ jobs:
           python-version: 3.8
 
       - name: Install and Run Pre-commit
-        uses: pre-commit/action@v2.0.0
+        uses: pre-commit/action@v2.0.3

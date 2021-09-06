@@ -3,14 +3,26 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import csv
+import os
 from functools import reduce
-import frappe, csv, os
+
+import frappe
 from frappe import _
-from frappe.utils import cstr, cint
 from frappe.model.document import Document
+from frappe.utils import cint, cstr
 from frappe.utils.csvutils import UnicodeWriter
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts, build_tree_from_json
-from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file, read_xls_file_from_attached_file
+from frappe.utils.xlsxutils import (
+	read_xls_file_from_attached_file,
+	read_xlsx_file_from_attached_file,
+)
+
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
+	build_tree_from_json,
+	create_charts,
+)
+
 
 class ChartofAccountsImporter(Document):
 	def validate(self):

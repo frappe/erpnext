@@ -2,11 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-
-
 from frappe.utils.nestedset import NestedSet, get_root_of
+
+
 class CustomerGroup(NestedSet):
 	nsm_parent_field = 'parent_customer_group'
 	def validate(self):

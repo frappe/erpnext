@@ -2,14 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt
-from erpnext.hr.doctype.leave_application.leave_application \
-	import get_leave_details
 
-from erpnext.hr.report.employee_leave_balance.employee_leave_balance \
-	import get_department_leave_approver_map
+from erpnext.hr.doctype.leave_application.leave_application import get_leave_details
+from erpnext.hr.report.employee_leave_balance.employee_leave_balance import (
+	get_department_leave_approver_map,
+)
+
 
 def execute(filters=None):
 	leave_types = frappe.db.sql_list("select name from `tabLeave Type` order by name asc")

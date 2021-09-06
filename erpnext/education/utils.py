@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 
-from __future__ import unicode_literals, division
+from __future__ import division, unicode_literals
+
 import frappe
 from frappe import _
+
 
 class OverlapError(frappe.ValidationError): pass
 

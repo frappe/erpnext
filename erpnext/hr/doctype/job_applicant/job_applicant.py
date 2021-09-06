@@ -4,10 +4,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.model.document import Document
+
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import comma_and, validate_email_address
+
 
 class DuplicationError(frappe.ValidationError): pass
 

@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
-from frappe import _
-from erpnext.accounts.report.utils import convert
+import frappe
 import pandas as pd
+from frappe import _
+
+from erpnext.accounts.report.utils import convert
+
 
 def validate_filters(from_date, to_date, company):
 	if from_date and to_date and (from_date >= to_date):

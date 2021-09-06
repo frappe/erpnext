@@ -3,13 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 import requests
 from frappe import _
-from frappe.utils import get_url_to_form
 from frappe.model.document import Document
+from frappe.utils import get_url_to_form
 from frappe.utils.file_manager import get_file_path
 from six.moves.urllib.parse import urlencode
+
 
 class LinkedInSettings(Document):
 	@frappe.whitelist()

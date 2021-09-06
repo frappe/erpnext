@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
+
 import unittest
-from erpnext.accounts.party import get_party_shipping_address
+
 from frappe.test_runner import make_test_objects
+
+from erpnext.accounts.party import get_party_shipping_address
 
 
 class TestUtils(unittest.TestCase):
