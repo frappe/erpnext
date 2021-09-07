@@ -40,8 +40,6 @@
   "section_break_19",
   "selling_price_list",
   "currency",
-  "write_off_account",
-  "write_off_cost_center",
   "account_for_change_amount",
   "column_break_23",
   "income_account",
@@ -49,6 +47,11 @@
   "taxes_and_charges",
   "tax_category",
   "apply_discount_on",
+  "write_off_section",
+  "write_off_account",
+  "write_off_cost_center",
+  "column_break_45",
+  "write_off_outstanding_amount_automatically",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
@@ -350,6 +353,22 @@
   {
    "fieldname": "column_break_25",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "write_off_section",
+   "fieldtype": "Section Break",
+   "label": "Write Off"
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Each time, any outstanding amount left will be considered as write off amount automatically",
+   "fieldname": "write_off_outstanding_amount_automatically",
+   "fieldtype": "Check",
+   "label": "Write Off Outstanding Amount Automatically"
   }
  ],
  "icon": "icon-cog",
@@ -377,7 +396,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2021-02-01 13:52:51.081311",
+ "modified": "2021-09-06 14:10:52.491770",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

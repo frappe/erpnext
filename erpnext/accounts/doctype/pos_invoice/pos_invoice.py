@@ -341,8 +341,8 @@ class POSInvoice(SalesInvoice):
 
 			for fieldname in ('currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
-				'write_off_cost_center', 'apply_discount_on', 'cost_center', 'tax_category',
-				'ignore_pricing_rule', 'company_address', 'update_stock'):
+				'write_off_outstanding_amount_automatically', 'write_off_cost_center', 'apply_discount_on',
+				'cost_center', 'tax_category', 'ignore_pricing_rule', 'company_address', 'update_stock'):
 					if not for_validate:
 						self.set(fieldname, profile.get(fieldname))
 

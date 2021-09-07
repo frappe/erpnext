@@ -111,6 +111,7 @@ class POSInvoiceMergeLog(Document):
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes = [], [], []
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
+		invoice.write_off_amount = 0.0
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
 
@@ -159,6 +160,12 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					payments.append(payment)
+
+			if doc.write_off_outstanding_amount_automatically:
+				invoice.write_off_outstanding_amount_automatically = 1
+				invoice.write_off_amount = invoice.write_off_amount + flt(doc.write_off_amount) if doc.write_off_amount else 0.0
+				invoice.write_off_account = doc.write_off_account
+				invoice.write_off_cost_center = doc.write_off_cost_center
 
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
