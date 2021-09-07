@@ -8,7 +8,7 @@ import frappe
 import pandas
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cint, flt
 from six import iteritems
 
 from erpnext.setup.utils import get_exchange_rate
@@ -51,7 +51,7 @@ class SalesPipelineAnalytics(object):
 					'width': 200
 				})
 
-		elif self.filters.get('range') == 'Quaterly':
+		elif self.filters.get('range') == 'Quarterly':
 			for quarter in range(1, 5):
 				self.columns.append({
 					'fieldname': f'Q{quarter}',
@@ -93,7 +93,7 @@ class SalesPipelineAnalytics(object):
 
 		self.group_by_period = {
 			'Monthly': 'month(expected_closing)',
-			'Quaterly': 'QUARTER(expected_closing)'
+			'Quarterly': 'QUARTER(expected_closing)'
 		}[self.filters.get('range')]
 
 		self.pipeline_by = {
@@ -103,12 +103,12 @@ class SalesPipelineAnalytics(object):
 
 		self.duration = {
 			'Monthly': 'monthname(expected_closing) as month',
-			'Quaterly': 'QUARTER(expected_closing) as quarter'
+			'Quarterly': 'QUARTER(expected_closing) as quarter'
 		}[self.filters.get('range')]
 
 		self.period_by = {
 			'Monthly': 'month',
-			'Quaterly': 'quarter'
+			'Quarterly': 'quarter'
 		}[self.filters.get('range')]
 
 	def get_data(self):
@@ -204,59 +204,58 @@ class SalesPipelineAnalytics(object):
 
 		frequency = {
 			'Monthly': 'month',
-			'Quaterly': 'quarter'
+			'Quarterly': 'quarter'
 		}[self.filters.get('range')]
 
 		for info in self.query_result:
 			if self.filters.get('range') == 'Monthly':
 				period = info.get(frequency)
-			if self.filters.get('range') == 'Quaterly':
-				period = f'Q{info.get("quarter")}'
+			if self.filters.get('range') == 'Quarterly':
+				period = f'Q{cint(info.get("quarter"))}'
 
 			value = info.get(pipeline_by)
-			count = info.get(based_on)
+			count_or_amount = info.get(based_on)
 
 			if self.filters.get('pipeline_by') == 'Owner':
 				if value == 'Not Assigned' or value == '[]' or value is None:
 					assigned_to = ['Not Assigned']
 				else:
 					assigned_to = json.loads(value)
-				self.check_for_assigned_to(period, value, count, assigned_to, info)
+				self.check_for_assigned_to(period, value, count_or_amount, assigned_to, info)
 
 			else:
-				self.set_formatted_data(period, value, count, None)
+				self.set_formatted_data(period, value, count_or_amount, None)
 
-	def set_formatted_data(self, period, value, val, assigned_to):
+	def set_formatted_data(self, period, value, count_or_amount, assigned_to):
 		if assigned_to:
 			if len(assigned_to) > 1:
 				if self.filters.get('assigned_to'):
 					for user in assigned_to:
 						if self.filters.get('assigned_to') == user:
 							value = user
-							self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
-							self.periodic_data[value][period] += val
+							self.periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0)
+							self.periodic_data[value][period] += count_or_amount
 				else:
 					for user in assigned_to:
 						value = user
-						self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
-						self.periodic_data[value][period] += val
+						self.periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0)
+						self.periodic_data[value][period] += count_or_amount
 			else:
 				value = assigned_to[0]
-				self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
-				self.periodic_data[value][period] += val
+				self.periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0)
+				self.periodic_data[value][period] += count_or_amount
 
 		else:
-			value = value
-			self.periodic_data.setdefault(value,frappe._dict()).setdefault(period,0)
-			self.periodic_data[value][period] += val
+			self.periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0)
+			self.periodic_data[value][period] += count_or_amount
 
-	def check_for_assigned_to(self, period, value, count, assigned_to, info):
+	def check_for_assigned_to(self, period, value, count_or_amount, assigned_to, info):
 		if self.filters.get('assigned_to'):
 			for data in json.loads(info.get('opportunity_owner')):
 				if data == self.filters.get('assigned_to'):
-					self.set_formatted_data(period, data, count, assigned_to)
+					self.set_formatted_data(period, data, count_or_amount, assigned_to)
 		else:
-			self.set_formatted_data(period, value, count, assigned_to)
+			self.set_formatted_data(period, value, count_or_amount, assigned_to)
 
 	def get_month_list(self):
 		month_list= []
@@ -272,7 +271,7 @@ class SalesPipelineAnalytics(object):
 	def append_to_dataset(self, datasets):
 		range_by = {
 			'Monthly': 'month',
-			'Quaterly': 'quarter'
+			'Quarterly': 'quarter'
 		}[self.filters.get('range')]
 
 		based_on = {
@@ -280,7 +279,7 @@ class SalesPipelineAnalytics(object):
 			'Number': 'count'
 		}[self.filters.get('based_on')]
 
-		if self.filters.get('range') == 'Quaterly':
+		if self.filters.get('range') == 'Quarterly':
 			frequency_list = [1,2,3,4]
 			count = [0] * 4
 
@@ -292,7 +291,6 @@ class SalesPipelineAnalytics(object):
 			for i in range(len(frequency_list)):
 				if info[range_by] == frequency_list[i]:
 					count[i] = count[i] + info[based_on]
-
 		datasets.append({'name': based_on, 'values': count})
 
 	def append_data(self, pipeline_by, period_by):
@@ -303,8 +301,8 @@ class SalesPipelineAnalytics(object):
 				if self.filters.get('range') == 'Monthly':
 					period = info.get(period_by)
 
-				if self.filters.get('range') == 'Quaterly':
-					period = f'Q{info.get(period_by)}'
+				if self.filters.get('range') == 'Quarterly':
+					period = f'Q{cint(info.get(period_by))}'
 
 				count = period_data.get(period,0.0)
 				row[period] = count

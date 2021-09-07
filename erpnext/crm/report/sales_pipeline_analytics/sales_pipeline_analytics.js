@@ -25,7 +25,7 @@ frappe.query_reports["Sales Pipeline Analytics"] = {
 			fieldname: "range",
 			label: __("Range"),
 			fieldtype: "Select",
-			options: "Monthly\nQuaterly",
+			options: "Monthly\nQuarterly",
 			default: "Monthly"
 		},
 		{
