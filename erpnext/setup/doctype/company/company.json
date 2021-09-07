@@ -92,6 +92,7 @@
   "expenses_included_in_asset_valuation",
   "repair_and_maintenance_account",
   "column_break_40",
+  "enable_finance_books",
   "disposal_account",
   "depreciation_cost_center",
   "capital_work_in_progress_account",
@@ -740,6 +741,12 @@
    "fieldname": "section_break_28",
    "fieldtype": "Section Break",
    "label": "Chart of Accounts"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_finance_books",
+   "fieldtype": "Check",
+   "label": "Enable Finance Books"
   }
  ],
  "icon": "fa fa-building",
@@ -747,7 +754,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-07-12 11:27:06.353860",
+ "modified": "2021-09-08 00:36:55.058639",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
