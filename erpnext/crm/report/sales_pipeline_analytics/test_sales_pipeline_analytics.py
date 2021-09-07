@@ -105,7 +105,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 	def check_for_quarterly_and_number(self):
 		filters = {
 			'pipeline_by':"Owner",
-			'range':"Quaterly",
+			'range':"Quarterly",
 			'based_on':"Number",
 			'status':"Open",
 			'opportunity_type':"Sales",
@@ -125,7 +125,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
 		filters = {
 			'pipeline_by':"Sales Stage",
-			'range':"Quaterly",
+			'range':"Quarterly",
 			'based_on':"Number",
 			'status':"Open",
 			'opportunity_type':"Sales",
@@ -146,7 +146,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 	def check_for_quarterly_and_amount(self):
 		filters = {
 			'pipeline_by':"Owner",
-			'range':"Quaterly",
+			'range':"Quarterly",
 			'based_on':"Amount",
 			'status':"Open",
 			'opportunity_type':"Sales",
@@ -166,7 +166,7 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 
 		filters = {
 			'pipeline_by':"Sales Stage",
-			'range':"Quaterly",
+			'range':"Quarterly",
 			'based_on':"Amount",
 			'status':"Open",
 			'opportunity_type':"Sales",
