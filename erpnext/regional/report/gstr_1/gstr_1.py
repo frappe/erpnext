@@ -50,6 +50,7 @@ class Gstr1Report(object):
 		self.gst_accounts = get_gst_accounts(self.filters.company, only_non_reverse_charge=1)
 		self.get_invoice_data()
 
+		print(self.invoices, "$#$#$#$#$#")
 		if self.invoices:
 			self.get_invoice_items()
 			self.get_items_based_on_tax_rate()
@@ -96,35 +97,36 @@ class Gstr1Report(object):
 	def get_b2c_data(self):
 		b2cs_output = {}
 
-		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
-			invoice_details = self.invoices.get(inv)
-			for rate, items in items_based_on_rate.items():
-				place_of_supply = invoice_details.get("place_of_supply")
-				ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
+		if self.invoices:
+			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
+				invoice_details = self.invoices.get(inv)
+				for rate, items in items_based_on_rate.items():
+					place_of_supply = invoice_details.get("place_of_supply")
+					ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
 
-				b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin),{
-					"place_of_supply": "",
-					"ecommerce_gstin": "",
-					"rate": "",
-					"taxable_value": 0,
-					"cess_amount": 0,
-					"type": "",
-					"invoice_number": invoice_details.get("invoice_number"),
-					"posting_date": invoice_details.get("posting_date"),
-					"invoice_value": invoice_details.get("base_grand_total"),
-				})
+					b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin), {
+						"place_of_supply": "",
+						"ecommerce_gstin": "",
+						"rate": "",
+						"taxable_value": 0,
+						"cess_amount": 0,
+						"type": "",
+						"invoice_number": invoice_details.get("invoice_number"),
+						"posting_date": invoice_details.get("posting_date"),
+						"invoice_value": invoice_details.get("base_grand_total"),
+					})
 
-				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
-				row["place_of_supply"] = place_of_supply
-				row["ecommerce_gstin"] = ecommerce_gstin
-				row["rate"] = rate
-				row["taxable_value"] += sum([abs(net_amount)
-					for item_code, net_amount in self.invoice_items.get(inv).items() if item_code in items])
-				row["cess_amount"] += flt(self.invoice_cess.get(inv), 2)
-				row["type"] = "E" if ecommerce_gstin else "OE"
+					row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
+					row["place_of_supply"] = place_of_supply
+					row["ecommerce_gstin"] = ecommerce_gstin
+					row["rate"] = rate
+					row["taxable_value"] += sum([abs(net_amount)
+						for item_code, net_amount in self.invoice_items.get(inv).items() if item_code in items])
+					row["cess_amount"] += flt(self.invoice_cess.get(inv), 2)
+					row["type"] = "E" if ecommerce_gstin else "OE"
 
-		for key, value in iteritems(b2cs_output):
-			self.data.append(value)
+			for key, value in iteritems(b2cs_output):
+				self.data.append(value)
 
 	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
 		row = []
@@ -173,9 +175,10 @@ class Gstr1Report(object):
 
 		company_gstins = get_company_gstin_number(self.filters.get('company'), all_gstins=True)
 
-		self.filters.update({
-			'company_gstins': company_gstins
-		})
+		if company_gstins:
+			self.filters.update({
+				'company_gstins': company_gstins
+			})
 
 		invoice_data = frappe.db.sql("""
 			select
@@ -185,7 +188,7 @@ class Gstr1Report(object):
 			and is_opening = 'No'
 			order by posting_date desc
 			""".format(select_columns=self.select_columns, doctype=self.doctype,
-				where_conditions=conditions), self.filters, as_dict=1)
+				where_conditions=conditions), self.filters, as_dict=1, debug=1)
 
 		for d in invoice_data:
 			self.invoices.setdefault(d.invoice_number, d)
@@ -1050,6 +1053,7 @@ def get_company_gstin_number(company, address=None, all_gstins=False):
 			["Dynamic Link", "link_doctype", "=", "Company"],
 			["Dynamic Link", "link_name", "=", company],
 			["Dynamic Link", "parenttype", "=", "Address"],
+			["gstin", "!=", '']
 		]
 		gstin = frappe.get_all("Address", filters=filters, pluck="gstin", order_by="is_primary_address desc")
 		if gstin and not all_gstins:
