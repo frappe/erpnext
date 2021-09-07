@@ -50,7 +50,6 @@ class Gstr1Report(object):
 		self.gst_accounts = get_gst_accounts(self.filters.company, only_non_reverse_charge=1)
 		self.get_invoice_data()
 
-		print(self.invoices, "$#$#$#$#$#")
 		if self.invoices:
 			self.get_invoice_items()
 			self.get_items_based_on_tax_rate()
@@ -188,7 +187,7 @@ class Gstr1Report(object):
 			and is_opening = 'No'
 			order by posting_date desc
 			""".format(select_columns=self.select_columns, doctype=self.doctype,
-				where_conditions=conditions), self.filters, as_dict=1, debug=1)
+				where_conditions=conditions), self.filters, as_dict=1)
 
 		for d in invoice_data:
 			self.invoices.setdefault(d.invoice_number, d)
