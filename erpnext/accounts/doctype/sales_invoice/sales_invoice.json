@@ -694,8 +694,7 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode",
-   "options": "Barcode"
+   "label": "Scan Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -726,7 +725,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -736,7 +734,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -1446,8 +1443,7 @@
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.write_off_outstanding_amount_automatically"
+   "print_hide": 1
   },
   {
    "fieldname": "base_write_off_amount",
@@ -1648,7 +1644,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
+   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nPartly Paid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1938,7 +1934,6 @@
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
-   "ignore_user_permissions": 1,
    "label": "Unrealized Profit / Loss Account",
    "options": "Account"
   },
@@ -1960,7 +1955,6 @@
    "depends_on": "eval: doc.is_internal_customer && doc.update_stock",
    "fieldname": "set_target_warehouse",
    "fieldtype": "Link",
-   "ignore_user_permissions": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
   },
@@ -2017,7 +2011,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-27 20:13:40.456462",
+ "modified": "2021-09-07 12:19:06.838743",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
