@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
+
 import unittest
-from erpnext.accounts.party import get_party_shipping_address
-<<<<<<< HEAD
+
 from frappe.test_runner import make_test_objects
-=======
+
+from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import get_future_stock_vouchers, get_voucherwise_gl_entries
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
->>>>>>> 058d98342a (fix: missed to add voucher_type, voucher_no to get GL Entries (#27368))
 
 
 class TestUtils(unittest.TestCase):
