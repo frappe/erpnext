@@ -110,9 +110,9 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by",
 			"label": __("Group by"),
 			"fieldtype": "Select",
-			"options": ["", __("Group by Voucher"), __("Group by Voucher (Consolidated)"),
-				__("Group by Account"), __("Group by Party")],
-			"default": __("Group by Voucher (Consolidated)")
+			"options": ["", "Group by Voucher", "Group by Voucher (Consolidated)",
+				"Group by Account", "Group by Party"],
+			"default": "Group by Voucher (Consolidated)"
 		},
 		{
 			"fieldname":"tax_id",
