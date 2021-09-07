@@ -4,6 +4,7 @@ import frappe
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
+
 class TestWebsite(unittest.TestCase):
 	def test_permission_for_custom_doctype(self):
 		create_user('Supplier 1', 'supplier1@gmail.com')
