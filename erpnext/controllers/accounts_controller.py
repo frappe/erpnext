@@ -385,7 +385,7 @@ class AccountsController(TransactionBase):
 				return get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
 
 			self.pricing_rules = []
-			self.free_items = [] # temporary variable
+			self.free_items = self.get('free_items') or []
 
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -411,6 +411,7 @@ class AccountsController(TransactionBase):
 					if item.get('is_free_item'):
 						item_details = get_args_for_item(item)
 						self.set_item_details(item, item_details)
+				self.free_items = []
 			else:
 				remove_free_item(self)
 

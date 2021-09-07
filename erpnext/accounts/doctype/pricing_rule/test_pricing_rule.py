@@ -451,7 +451,7 @@ class TestPricingRule(unittest.TestCase):
 		so.save()
 
 		# check if free item is removed
-		self.assertFalse([d for d in so.item if d.item_code == "_Test Item 2"])
+		self.assertFalse([d for d in so.items if d.item_code == "_Test Item 2"])
 
 	def test_cumulative_pricing_rule(self):
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Cumulative Pricing Rule')

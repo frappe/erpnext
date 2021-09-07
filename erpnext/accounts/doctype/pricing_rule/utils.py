@@ -459,6 +459,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 		if not pricing_rules:
 			remove_free_item(doc)
+			return
 
 		free_items = []
 
@@ -501,6 +502,9 @@ def apply_pricing_rule_on_transaction(doc):
 
 		if free_items:
 			apply_pricing_rule_for_free_items(doc, free_items)
+			# to prevent these free items from getting removed
+			# in `set_missing_values` -> `set_missing_item_details`
+			doc.free_items = free_items
 			doc.set_missing_values()
 			doc.calculate_taxes_and_totals()
 
