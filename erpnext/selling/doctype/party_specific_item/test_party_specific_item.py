@@ -7,9 +7,7 @@ import frappe
 
 from erpnext.controllers.queries import item_query
 
-item_records = frappe.get_test_records('Item')
-customer_records = frappe.get_test_records('Customer')
-supplier_records = frappe.get_test_records('Supplier')
+test_dependencies = ['Item', 'Customer', 'Supplier']
 
 def create_party_specific_item(**args):
 	psi = frappe.new_doc("Party Specific Item")
@@ -21,18 +19,9 @@ def create_party_specific_item(**args):
 
 class TestPartySpecificItem(unittest.TestCase):
 	def setUp(self):
-		frappe.db.delete("Party Specific Item")
-		frappe.db.delete("Item")
-		frappe.db.delete("Customer")
-		frappe.db.delete("Supplier")
-
-		for i in range(5):
-			frappe.get_doc(item_records[i]).insert()
-
+		self.customer = frappe.get_last_doc("Customer")
+		self.supplier = frappe.get_last_doc("Supplier")
 		self.item = frappe.get_last_doc("Item")
-		self.customer = frappe.get_doc(customer_records[0]).insert()
-		self.supplier = frappe.get_doc(supplier_records[0]).insert()
-		self.test_user = "test1@example.com"
 
 	def test_item_query_for_customer(self):
 		create_party_specific_item(party_type='Customer', party=self.customer.name, restrict_based_on='Item', based_on_value=self.item.name)
@@ -47,6 +36,3 @@ class TestPartySpecificItem(unittest.TestCase):
 		items = item_query(doctype= 'Item', txt= '', searchfield= 'name', start= 0, page_len= 20,filters=filters, as_dict= False)
 		for item in items:
 			self.assertEqual(item[2], self.item.item_group)
-
-	def tearDown(self):
-		frappe.set_user("Administrator")
