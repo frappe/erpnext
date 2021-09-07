@@ -963,6 +963,9 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 	Only fetches GLE fields required for comparing with new GLE.
 	Check compare_existing_and_expected_gle function below.
+
+	returns:
+		Dict[Tuple[voucher_type, voucher_no], List[GL Entries]]
 	"""
 	gl_entries = {}
 	if not future_stock_vouchers:
