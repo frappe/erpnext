@@ -382,14 +382,15 @@ class AccountsController(TransactionBase):
 				if not args.get("transaction_date"):
 					args["transaction_date"] = args.get("posting_date")
 
-				return get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
+				return args
 
 			self.pricing_rules = []
 			self.free_items = self.get('free_items') or []
 
 			for item in self.get("items"):
 				if item.get("item_code"):
-					item_details = get_args_for_item(item)
+					args = get_args_for_item(item)
+					item_details = get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
 					self.set_item_details(item, item_details)
 
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] \
