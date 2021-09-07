@@ -3,10 +3,12 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
 
+import frappe
+
 from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
+
 
 class TestActivityCost(unittest.TestCase):
 	def test_duplication(self):

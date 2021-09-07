@@ -3,16 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import copy
 import json
 from collections import defaultdict
-from six import string_types
+
+import frappe
 from frappe import _
-from frappe.utils import flt, floor, nowdate, cint
 from frappe.model.document import Document
-from erpnext.stock.utils import get_stock_balance
+from frappe.utils import cint, floor, flt, nowdate
+from six import string_types
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_stock_balance
+
 
 class PutawayRule(Document):
 	def validate(self):

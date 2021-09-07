@@ -3,13 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-import json
 from frappe import _
-from frappe.utils import get_datetime, flt
+from frappe.utils import flt, get_datetime
+
+from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+	consolidate_pos_invoices,
+	unconsolidate_pos_invoices,
+)
 from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices, unconsolidate_pos_invoices
+
 
 class POSClosingEntry(StatusUpdater):
 	def validate(self):

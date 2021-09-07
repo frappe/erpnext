@@ -2,11 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest, frappe
+
+import unittest
+
+import frappe
 from frappe.utils import flt, nowdate
+
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.exceptions import InvalidAccountCurrency
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
+from erpnext.exceptions import InvalidAccountCurrency
+
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):

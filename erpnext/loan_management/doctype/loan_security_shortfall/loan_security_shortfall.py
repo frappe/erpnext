@@ -3,11 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import get_datetime, flt
 from frappe.model.document import Document
-from six import iteritems
-from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
+from frappe.utils import flt, get_datetime
+
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
+	get_pledged_security_qty,
+)
+
 
 class LoanSecurityShortfall(Document):
 	pass

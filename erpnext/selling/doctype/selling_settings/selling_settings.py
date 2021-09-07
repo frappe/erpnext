@@ -4,17 +4,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-import frappe.defaults
-from frappe.utils import cint
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.model.document import Document
+from frappe.utils import cint
 from frappe.utils.nestedset import get_root_of
 
-from frappe.model.document import Document
 
 class SellingSettings(Document):
 	def on_update(self):
 		self.toggle_hide_tax_id()
+		self.toggle_editable_rate_for_bundle_items()
 
 	def validate(self):
 		for key in ["cust_master_name", "campaign_naming_by", "customer_group", "territory",
@@ -32,6 +33,11 @@ class SellingSettings(Document):
 		for doctype in ("Sales Order", "Sales Invoice", "Delivery Note"):
 			make_property_setter(doctype, "tax_id", "hidden", self.hide_tax_id, "Check", validate_fields_for_doctype=False)
 			make_property_setter(doctype, "tax_id", "print_hide", self.hide_tax_id, "Check", validate_fields_for_doctype=False)
+
+	def toggle_editable_rate_for_bundle_items(self):
+		editable_bundle_item_rates = cint(self.editable_bundle_item_rates)
+
+		make_property_setter("Packed Item", "rate", "read_only", not(editable_bundle_item_rates), "Check", validate_fields_for_doctype=False)
 
 	def set_default_customer_group_and_territory(self):
 		if not self.customer_group:
