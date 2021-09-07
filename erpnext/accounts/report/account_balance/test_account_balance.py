@@ -62,8 +62,3 @@ def make_sales_invoice():
 		income_account = 'Sales - _TC2',
 		expense_account = 'Cost of Goods Sold - _TC2',
 		cost_center = 'Main - _TC2')
-
-
-
-
-

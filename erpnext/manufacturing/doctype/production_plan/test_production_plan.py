@@ -5,12 +5,13 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import nowdate, now_datetime, flt
+from frappe.utils import nowdate, now_datetime, flt, add_to_date
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
+from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests, get_warehouse_list
+from erpnext.controllers.item_variant import create_variant
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):
@@ -59,6 +60,21 @@ class TestProductionPlan(unittest.TestCase):
 
 		pln = frappe.get_doc('Production Plan', pln.name)
 		pln.cancel()
+
+	def test_production_plan_start_date(self):
+		planned_date = add_to_date(date=None, days=3)
+		plan = create_production_plan(item_code='Test Production Item 1', planned_start_date=planned_date)
+		plan.make_work_order()
+
+		work_orders = frappe.get_all('Work Order', fields = ['name', 'planned_start_date'],
+			filters = {'production_plan': plan.name})
+
+		self.assertEqual(work_orders[0].planned_start_date, planned_date)
+
+		for wo in work_orders:
+			frappe.delete_doc('Work Order', wo.name)
+
+		frappe.get_doc('Production Plan', plan.name).cancel()
 
 	def test_production_plan_for_existing_ordered_qty(self):
 		sr1 = create_stock_reconciliation(item_code="Raw Material Item 1",
@@ -169,7 +185,7 @@ class TestProductionPlan(unittest.TestCase):
 		pln.get_items()
 		pln.submit()
 
-		self.assertTrue(pln.po_items[0].planned_qty, 3)	
+		self.assertTrue(pln.po_items[0].planned_qty, 3)
 
 		pln.make_work_order()
 		work_order = frappe.db.get_value('Work Order', {
@@ -193,10 +209,10 @@ class TestProductionPlan(unittest.TestCase):
 		for so_item in so_items:
 			so_wo_qty = frappe.db.get_value('Sales Order Item', so_item, 'work_order_qty')
 			self.assertEqual(so_wo_qty, 0.0)
-		
+
 		latest_plan = frappe.get_doc('Production Plan', pln.name)
 		latest_plan.cancel()
-	
+
 	def test_pp_to_mr_customer_provided(self):
 		#Material Request from Production Plan for Customer Provided
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
@@ -236,10 +252,10 @@ class TestProductionPlan(unittest.TestCase):
 		pln.append("po_items", {
 			"item_code": item_code,
 			"bom_no": frappe.db.get_value('BOM', {'item': "Test BOM 1"}),
-			"planned_qty": 3,
-			"make_work_order_for_sub_assembly_items": 1
+			"planned_qty": 3
 		})
 
+		pln.get_sub_assembly_items('In House')
 		pln.submit()
 		pln.make_work_order()
 
@@ -250,6 +266,81 @@ class TestProductionPlan(unittest.TestCase):
 		self.assertEqual(to_produce_qty, 18.0)
 		pln.cancel()
 		frappe.delete_doc("Production Plan", pln.name)
+
+	def test_get_warehouse_list_group(self):
+		"""Check if required warehouses are returned"""
+		warehouse_json = '[{\"warehouse\":\"_Test Warehouse Group - _TC\"}]'
+
+		warehouses = set(get_warehouse_list(warehouse_json))
+		expected_warehouses = {"_Test Warehouse Group-C1 - _TC", "_Test Warehouse Group-C2 - _TC"}
+
+		missing_warehouse = expected_warehouses - warehouses
+
+		self.assertTrue(len(missing_warehouse) == 0,
+				msg=f"Following warehouses were expected {', '.join(missing_warehouse)}")
+
+	def test_get_warehouse_list_single(self):
+		warehouse_json = '[{\"warehouse\":\"_Test Scrap Warehouse - _TC\"}]'
+
+		warehouses = set(get_warehouse_list(warehouse_json))
+		expected_warehouses = {"_Test Scrap Warehouse - _TC", }
+
+		self.assertEqual(warehouses, expected_warehouses)
+
+	def test_get_sales_order_with_variant(self):
+		if not frappe.db.exists('Item', {"item_code": 'PIV'}):
+			item = create_item('PIV', valuation_rate = 100)
+			variant_settings = {
+				"attributes": [
+					{
+						"attribute": "Colour"
+					},
+				],
+				"has_variants": 1
+			}
+			item.update(variant_settings)
+			item.save()
+			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+		if not frappe.db.exists('BOM', {"item": 'PIV'}):
+			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+		else:
+			parent_bom = frappe.get_doc('BOM', {"item": 'PIV'})
+
+		if not frappe.db.exists('Item', {"item_code": 'PIV-RED'}):
+			variant = create_variant("PIV", {"Colour": "Red"})
+			variant.save()
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+		else:
+			variant = frappe.get_doc('Item', 'PIV-RED')
+		if not frappe.db.exists('BOM', {"item": 'PIV-RED'}):
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+
+		"""Testing when item variant has a BOM"""
+		so = make_sales_order(item_code="PIV-RED", qty=5)
+		pln = frappe.new_doc('Production Plan')
+		pln.company = so.company
+		pln.get_items_from = 'Sales Order'
+		pln.item_code = 'PIV-RED'
+		pln.get_open_sales_orders()
+		self.assertEqual(pln.sales_orders[0].sales_order, so.name)
+		pln.get_so_items()
+		self.assertEqual(pln.po_items[0].item_code, 'PIV-RED')
+		self.assertEqual(pln.po_items[0].bom_no, variant_bom.name)
+		so.cancel()
+		frappe.delete_doc('Sales Order', so.name)
+		variant_bom.cancel()
+		frappe.delete_doc('BOM', variant_bom.name)
+
+		"""Testing when item variant doesn't have a BOM"""
+		so = make_sales_order(item_code="PIV-RED", qty=5)
+		pln.get_open_sales_orders()
+		self.assertEqual(pln.sales_orders[0].sales_order, so.name)
+		pln.po_items = []
+		pln.get_so_items()
+		self.assertEqual(pln.po_items[0].item_code, 'PIV-RED')
+		self.assertEqual(pln.po_items[0].bom_no, parent_bom.name)
+
+		frappe.db.rollback()
 
 def create_production_plan(**args):
 	args = frappe._dict(args)

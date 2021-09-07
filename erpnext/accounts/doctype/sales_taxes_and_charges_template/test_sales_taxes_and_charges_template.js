@@ -26,4 +26,3 @@ QUnit.test("test sales taxes and charges template", function(assert) {
 		() => done()
 	]);
 });
-

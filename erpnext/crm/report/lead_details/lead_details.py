@@ -107,7 +107,7 @@ def get_columns():
 			"options": "Country",
 			"width": 100
 		},
-		
+
 	]
 	return columns
 
@@ -142,7 +142,7 @@ def get_data(filters):
 			company = %(company)s
 			AND `tabLead`.creation BETWEEN %(from_date)s AND %(to_date)s
 			{conditions}
-		ORDER BY 
+		ORDER BY
 			`tabLead`.creation asc """.format(conditions=get_conditions(filters)), filters, as_dict=1)
 
 def get_conditions(filters) :
@@ -153,6 +153,5 @@ def get_conditions(filters) :
 
 	if filters.get("status"):
 		conditions.append(" and `tabLead`.status=%(status)s")
-	
-	return " ".join(conditions) if conditions else ""
 
+	return " ".join(conditions) if conditions else ""

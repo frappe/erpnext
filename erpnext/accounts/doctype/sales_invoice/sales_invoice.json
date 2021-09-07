@@ -48,6 +48,8 @@
   "shipping_address",
   "company_address",
   "company_address_display",
+  "dispatch_address_name",
+  "dispatch_address",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -104,6 +106,7 @@
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
@@ -125,6 +128,7 @@
   "get_advances",
   "advances",
   "payment_schedule_section",
+  "ignore_default_payment_terms_template",
   "payment_terms_template",
   "payment_schedule",
   "payments_section",
@@ -243,7 +247,7 @@
    "depends_on": "customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "in_global_search": 1,
@@ -690,7 +694,9 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "length": 1,
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1054,6 +1060,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Apply Additional Discount On",
+   "length": 15,
    "options": "\nGrand Total\nNet Total",
    "print_hide": 1
   },
@@ -1140,7 +1147,7 @@
   {
    "description": "In Words will be visible once you save the Sales Invoice.",
    "fieldname": "base_in_words",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words (Company Currency)",
@@ -1200,7 +1207,7 @@
   },
   {
    "fieldname": "in_words",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words",
@@ -1439,7 +1446,8 @@
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.write_off_outstanding_amount_automatically"
   },
   {
    "fieldname": "base_write_off_amount",
@@ -1552,6 +1560,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Print Language",
+   "length": 6,
    "print_hide": 1,
    "read_only": 1
   },
@@ -1639,6 +1648,7 @@
    "hide_seconds": 1,
    "in_standard_filter": 1,
    "label": "Status",
+   "length": 30,
    "no_copy": 1,
    "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1,
@@ -1698,6 +1708,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Is Opening Entry",
+   "length": 4,
    "oldfieldname": "is_opening",
    "oldfieldtype": "Select",
    "options": "No\nYes",
@@ -1709,6 +1720,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "C-Form Applicable",
+   "length": 4,
    "no_copy": 1,
    "options": "No\nYes",
    "print_hide": 1
@@ -1930,6 +1942,7 @@
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Profit / Loss Account",
    "options": "Account"
   },
@@ -1951,6 +1964,7 @@
    "depends_on": "eval: doc.is_internal_customer && doc.update_stock",
    "fieldname": "set_target_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
   },
@@ -1966,6 +1980,37 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_default_payment_terms_template",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ignore Default Payment Terms Template",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address_name",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Name",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address",
+   "fieldtype": "Small Text",
+   "label": "Dispatch Address",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -1978,7 +2023,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-05-20 22:48:33.988881",
+ "modified": "2021-08-25 14:46:05.279588",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

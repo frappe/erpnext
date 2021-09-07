@@ -56,7 +56,7 @@ erpnext.PointOfSale.Payment = class {
 				);
 				let df_events = {
 					onchange: function() {
-						frm.set_value(this.df.fieldname, this.value);
+						frm.set_value(this.df.fieldname, this.get_value());
 					}
 				};
 				if (df.fieldtype == "Button") {
@@ -198,6 +198,7 @@ erpnext.PointOfSale.Payment = class {
 			const is_cash_shortcuts_invisible = !this.$payment_modes.find('.cash-shortcuts').is(':visible');
 			this.attach_cash_shortcuts(frm.doc);
 			!is_cash_shortcuts_invisible && this.$payment_modes.find('.cash-shortcuts').css('display', 'grid');
+			this.render_payment_mode_dom();
 		});
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {

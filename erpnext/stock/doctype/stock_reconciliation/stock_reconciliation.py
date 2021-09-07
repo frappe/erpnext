@@ -31,6 +31,7 @@ class StockReconciliation(StockController):
 		self.validate_expense_account()
 		self.validate_customer_provided_item()
 		self.set_zero_value_for_customer_provided_items()
+		self.clean_serial_nos()
 		self.set_total_qty_and_amount()
 		self.validate_putaway_capacity()
 
@@ -357,6 +358,7 @@ class StockReconciliation(StockController):
 			if row.current_qty:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
+				data.previous_qty_after_transaction = flt(row.qty)
 				data.valuation_rate = flt(row.current_valuation_rate)
 				data.stock_value = data.qty_after_transaction * data.valuation_rate
 				data.stock_value_difference = -1 * flt(row.amount_difference)
@@ -388,7 +390,7 @@ class StockReconciliation(StockController):
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 			sl_entries.reverse()
-			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+			allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
 
@@ -404,17 +406,18 @@ class StockReconciliation(StockController):
 
 			key = (d.item_code, d.warehouse)
 			if key not in merge_similar_entries:
+				d.total_amount = (d.actual_qty * d.valuation_rate)
 				merge_similar_entries[key] = d
 			elif d.serial_no:
 				data = merge_similar_entries[key]
 				data.actual_qty += d.actual_qty
 				data.qty_after_transaction += d.qty_after_transaction
 
-				data.valuation_rate = (data.valuation_rate + d.valuation_rate) / data.actual_qty
+				data.total_amount += (d.actual_qty * d.valuation_rate)
+				data.valuation_rate = (data.total_amount) / data.actual_qty
 				data.serial_no += '\n' + d.serial_no
 
-				if data.incoming_rate:
-					data.incoming_rate = (data.incoming_rate + d.incoming_rate) / data.actual_qty
+				data.incoming_rate = (data.total_amount) / data.actual_qty
 
 		for key, value in merge_similar_entries.items():
 			new_sl_entries.append(value)

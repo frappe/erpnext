@@ -162,19 +162,19 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 
 		out = float(frappe.db.sql("""select sum(actual_qty)
 			from `tabStock Ledger Entry`
-			where warehouse=%s and batch_no=%s {0}""".format(cond),
+			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(cond),
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:
 		out = frappe.db.sql('''select warehouse, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where batch_no=%s
+			where is_cancelled = 0 and batch_no=%s
 			group by warehouse''', batch_no, as_dict=1)
 
 	if not batch_no and item_code and warehouse:
 		out = frappe.db.sql('''select batch_no, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where item_code = %s and warehouse=%s
+			where is_cancelled = 0 and item_code = %s and warehouse=%s
 			group by batch_no''', (item_code, warehouse), as_dict=1)
 
 	return out
@@ -230,9 +230,8 @@ def set_batch_nos(doc, warehouse_field, throw=False, child_table="items"):
 	"""Automatically select `batch_no` for outgoing items in item table"""
 	for d in doc.get(child_table):
 		qty = d.get('stock_qty') or d.get('transfer_qty') or d.get('qty') or 0
-		has_batch_no = frappe.db.get_value('Item', d.item_code, 'has_batch_no')
 		warehouse = d.get(warehouse_field, None)
-		if has_batch_no and warehouse and qty > 0:
+		if warehouse and qty > 0 and frappe.db.get_value('Item', d.item_code, 'has_batch_no'):
 			if not d.batch_no:
 				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw, d.serial_no)
 			else:

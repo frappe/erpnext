@@ -230,6 +230,50 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_purchase_invoice_with_discount_accounting_enabled(self):
+		enable_discount_accounting()
+
+		discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		pi = make_purchase_invoice(discount_account=discount_account, rate=45)
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 225.0, nowdate()],
+			["Discount Account - _TC", 0.0, 25.0, nowdate()]
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		enable_discount_accounting(enable=0)
+
+	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
+		enable_discount_accounting()
+		additional_discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+
+		pi = make_purchase_invoice(do_not_save=1, parent_cost_center="Main - _TC")
+		pi.apply_discount_on = "Grand Total"
+		pi.additional_discount_account = additional_discount_account
+		pi.additional_discount_percentage = 10
+		pi.disable_rounded_total = 1
+		pi.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "Main - _TC",
+			"description": "Test",
+			"rate": 10
+		})
+		pi.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
+			["_Test Account VAT - _TC", 25.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 247.5, nowdate()],
+			["Discount Account - _TC", 0.0, 27.5, nowdate()]
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
@@ -953,6 +997,120 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
+	def test_gain_loss_with_advance_entry(self):
+		unlink_enabled = frappe.db.get_value(
+			"Accounts Settings", "Accounts Settings",
+			"unlink_payment_on_cancel_of_invoice")
+
+		frappe.db.set_value(
+			"Accounts Settings", "Accounts Settings",
+			"unlink_payment_on_cancel_of_invoice", 1)
+
+		original_account = frappe.db.get_value("Company", "_Test Company", "exchange_gain_loss_account")
+		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", "Exchange Gain/Loss - _TC")
+
+		pay = frappe.get_doc({
+			'doctype': 'Payment Entry',
+			'company': '_Test Company',
+			'payment_type': 'Pay',
+			'party_type': 'Supplier',
+			'party': '_Test Supplier USD',
+			'paid_to': '_Test Payable USD - _TC',
+			'paid_from': 'Cash - _TC',
+			'paid_amount': 70000,
+			'target_exchange_rate': 70,
+			'received_amount': 1000,
+		})
+		pay.insert()
+		pay.submit()
+
+		pi = make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
+			conversion_rate=75, rate=500, do_not_save=1, qty=1)
+		pi.cost_center = "_Test Cost Center - _TC"
+		pi.advances = []
+		pi.append("advances", {
+			"reference_type": "Payment Entry",
+			"reference_name": pay.name,
+			"advance_amount": 1000,
+			"remarks": pay.remarks,
+			"allocated_amount": 500,
+			"ref_exchange_rate": 70
+		})
+		pi.save()
+		pi.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 37500.0],
+			["_Test Payable USD - _TC", -35000.0],
+			["Exchange Gain/Loss - _TC", -2500.0]
+		]
+
+		gl_entries = frappe.db.sql("""
+			select account, sum(debit - credit) as balance from `tabGL Entry`
+			where voucher_no=%s
+			group by account
+			order by account asc""", (pi.name), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.balance)
+
+		pi_2 = make_purchase_invoice(supplier='_Test Supplier USD', currency="USD",
+			conversion_rate=73, rate=500, do_not_save=1, qty=1)
+		pi_2.cost_center = "_Test Cost Center - _TC"
+		pi_2.advances = []
+		pi_2.append("advances", {
+			"reference_type": "Payment Entry",
+			"reference_name": pay.name,
+			"advance_amount": 500,
+			"remarks": pay.remarks,
+			"allocated_amount": 500,
+			"ref_exchange_rate": 70
+		})
+		pi_2.save()
+		pi_2.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 36500.0],
+			["_Test Payable USD - _TC", -35000.0],
+			["Exchange Gain/Loss - _TC", -1500.0]
+		]
+
+		gl_entries = frappe.db.sql("""
+			select account, sum(debit - credit) as balance from `tabGL Entry`
+			where voucher_no=%s
+			group by account order by account asc""", (pi_2.name), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.balance)
+
+		expected_gle = [
+			["_Test Payable USD - _TC", 70000.0],
+			["Cash - _TC", -70000.0]
+		]
+
+		gl_entries = frappe.db.sql("""
+			select account, sum(debit - credit) as balance from `tabGL Entry`
+			where voucher_no=%s and is_cancelled=0
+			group by account order by account asc""", (pay.name), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.balance)
+
+		pi.reload()
+		pi.cancel()
+
+		pi_2.reload()
+		pi_2.cancel()
+
+		pay.reload()
+		pay.cancel()
+
+		frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled)
+		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
+
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -1010,21 +1168,33 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Check GLE for Purchase Invoice
 		# Zero net effect on final TDS Payable on invoice
 		expected_gle = [
-			['_Test Account Cost for Goods Sold - _TC', 30000, 0],
-			['_Test Account Excise Duty - _TC', 0, 3000],
-			['Creditors - _TC', 0, 27000],
-			['TDS Payable - _TC', 3000, 3000]
+			['_Test Account Cost for Goods Sold - _TC', 30000],
+			['_Test Account Excise Duty - _TC', -3000],
+			['Creditors - _TC', -27000],
+			['TDS Payable - _TC', 0]
 		]
 
-		gl_entries = frappe.db.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, sum(debit - credit) as amount
 			from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no=%s
+			group by account
 			order by account asc""", (purchase_invoice.name), as_dict=1)
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(expected_gle[i][1], gle.amount)
+
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
+		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+	for i, gle in enumerate(gl_entries):
+		doc.assertEqual(expected_gle[i][0], gle.account)
+		doc.assertEqual(expected_gle[i][1], gle.debit)
+		doc.assertEqual(expected_gle[i][2], gle.credit)
+		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 def update_tax_witholding_category(company, account, date):
 	from erpnext.accounts.utils import get_fiscal_year
@@ -1056,6 +1226,11 @@ def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
 	accounts_settings.save()
 
+def enable_discount_accounting(enable=1):
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	accounts_settings.enable_discount_accounting = enable
+	accounts_settings.save()
+
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
 	args = frappe._dict(args)
@@ -1078,6 +1253,7 @@ def make_purchase_invoice(**args):
 	pi.return_against = args.return_against
 	pi.is_subcontracted = args.is_subcontracted or "No"
 	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
+	pi.cost_center = args.parent_cost_center
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -1086,7 +1262,10 @@ def make_purchase_invoice(**args):
 		"received_qty": args.received_qty or 0,
 		"rejected_qty": args.rejected_qty or 0,
 		"rate": args.rate or 50,
-		'expense_account': args.expense_account or '_Test Account Cost for Goods Sold - _TC',
+		"price_list_rate": args.price_list_rate or 50,
+		"expense_account": args.expense_account or '_Test Account Cost for Goods Sold - _TC',
+		"discount_account": args.discount_account or None,
+		"discount_amount": args.discount_amount or 0,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.uom or "_Test UOM",
