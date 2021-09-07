@@ -302,3 +302,4 @@ erpnext.patches.v14_0.delete_einvoicing_doctypes
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.validate_options_for_data_field
 execute:frappe.delete_doc('Report', 'Sales Person Target Variance based on Item Group', ignore_missing=True)
+execute:frappe.delete_doc('Report', 'Sales Partner Target Variance based on Item Group', ignore_missing=True)
