@@ -506,7 +506,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 def remove_free_item(doc):
 	for d in doc.items:
-		if d.is_free_item:
+		if d.get('is_free_item'):
 			doc.remove(d)
 
 def get_applied_pricing_rules(pricing_rules):
