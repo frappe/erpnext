@@ -31,6 +31,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (
 	apply_pricing_rule_for_free_items,
 	apply_pricing_rule_on_transaction,
 	get_applied_pricing_rules,
+	remove_free_item,
 )
 from erpnext.accounts.party import (
 	get_party_account,
@@ -410,6 +411,8 @@ class AccountsController(TransactionBase):
 					if item.get('is_free_item'):
 						item_details = get_args_for_item(item)
 						self.set_item_details(item, item_details)
+			else:
+				remove_free_item(self)
 
 	def set_item_details(self, item, item_details):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos

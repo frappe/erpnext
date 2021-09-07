@@ -411,6 +411,48 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item 2")
 
+	def test_removal_of_free_item(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		test_record = frappe._dict({
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [{
+				"item_code": "_Test Item",
+			}],
+			"selling": 1,
+			"rate": 0,
+			"min_qty": 0,
+			"max_qty": 7,
+			"price_or_product_discount": "Product",
+			"same_item": 0,
+			"free_item": "_Test Item 2",
+			"free_qty": 1,
+			"company": "_Test Company"
+		})
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=1)
+		so.append("items", {
+			'item_code': '_Test Non Stock Item',
+			'qty': 1,
+			'rate': 100
+		})
+		so.save()
+		so.load_from_db()
+		# check if free item is added
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item 2")
+
+		# remove the pricing rule item
+		so.remove(so.items[0])
+		so.save()
+
+		# check if free item is removed
+		self.assertFalse([d for d in so.item if d.item_code == "_Test Item 2"])
+
 	def test_cumulative_pricing_rule(self):
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Cumulative Pricing Rule')
 		test_record = {
