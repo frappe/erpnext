@@ -507,12 +507,7 @@ erpnext.PointOfSale.Payment = class {
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
 		const currency = doc.currency;
 		const write_off_outstanding_amount_automatically = doc.write_off_outstanding_amount_automatically;
-		if (write_off_outstanding_amount_automatically != 1) {
-			var label = change ? __('Change') : __('To Be Paid');
-		}
-		else {
-			var label = __('Write Off Amount');
-		}
+		var label = write_off_outstanding_amount_automatically ? __('Write Off Amount') : (change ? __('Change') : __('To Be Paid'));
 
 		this.$totals.html(
 			`<div class="col">
