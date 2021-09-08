@@ -791,7 +791,7 @@ class Item(WebsiteGenerator):
 				['Account', 'income_account']
 			]:
 				if item_default.get(field):
-					company = frappe.db.get_value(doctype, item_default.get(field), 'company')
+					company = frappe.db.get_value(doctype, item_default.get(field), 'company', cache=True)
 					if company and company != item_default.company:
 						frappe.throw(_("Row #{}: {} {} doesn't belongs to Company {}. Please select valid {}.")
 							.format(
