@@ -52,6 +52,7 @@ class Company(NestedSet):
 		self.check_country_change()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
+		self.check_if_finance_books_are_enabled()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -210,6 +211,13 @@ class Company(NestedSet):
 
 			if not is_group:
 				frappe.throw(_("Parent Company must be a group company"))
+
+	def check_if_finance_books_are_enabled(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		enable_finance_books = cint(self.enable_finance_books)
+
+		make_property_setter("Asset Finance Book", "finance_book", "hidden", not(enable_finance_books), "Check", validate_fields_for_doctype=False)
 
 	def set_default_accounts(self):
 		default_accounts = {
