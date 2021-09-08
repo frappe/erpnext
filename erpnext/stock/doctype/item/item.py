@@ -782,6 +782,26 @@ class Item(WebsiteGenerator):
 		if len(companies) != len(self.item_defaults):
 			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
 
+		for item_default in self.item_defaults:
+			for doctype, field in [
+				['Warehouse', 'default_warehouse'],
+				['Cost Center', 'buying_cost_center'],
+				['Cost Center', 'selling_cost_center'],
+				['Account', 'expense_account'],
+				['Account', 'income_account']
+			]:
+				if item_default.get(field):
+					company = frappe.db.get_value(doctype, item_default.get(field), 'company')
+					if company and company != item_default.company:
+						frappe.throw(_("Row #{}: {} {} doesn't belongs to Company {}. Please select valid {}.")
+							.format(
+								item_default.idx,
+								doctype,
+								frappe.bold(item_default.get(field)),
+								frappe.bold(item_default.company),
+								frappe.bold(frappe.unscrub(field))
+							), title=_("Invalid Item Defaults"))
+
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
 		if self.item_group and not self.item_defaults:
