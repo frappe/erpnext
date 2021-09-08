@@ -263,6 +263,20 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
+	
+	@frappe.whitelist()
+	def get_commision(self):
+		tot=[]
+		if self.sales_partner:
+			doc=frappe.get_doc("Sales Partner",self.sales_partner)
+			if self.commission_based_on_target_lines==1: 
+				for i in self.items:
+					for j in doc.item_target_details:
+						if i.item_code==j.item_code:
+							if j.commision_formula:
+								data=eval(j.commision_formula)
+								tot.append(data)
+								self.total_commission=sum(tot)	
 
 	def validate_pos_return(self):
 

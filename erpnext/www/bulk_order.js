@@ -21,7 +21,7 @@ handle_qty = (item_code, qty) => {
 handle_date = (date) => {
     console.log('date is:', date)
     frappe.call({
-        method: 'nextsales.www.bulk_order.handle_date',
+        method: 'erpnext.www.bulk_order.handle_date',
         args : {
             date : date
         },
@@ -49,7 +49,7 @@ handleNext = () => {
     // }
     //code to call server side code
     frappe.call({
-        method: 'nextsales.www.bulk_order.make_so',
+        method: 'erpnext.www.bulk_order.make_so',
         args : {
             item_list : all_items_detail
         },

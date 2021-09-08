@@ -12,7 +12,6 @@ frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
-		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 		this.frm.add_fetch("sales_person", "commission_rate", "commission_rate");
 	},
 
@@ -251,6 +250,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	calculate_commission: function() {
+		if(this.frm.doc.commission_based_on_target_lines==0){
+		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 		if(this.frm.fields_dict.commission_rate) {
 			if(this.frm.doc.commission_rate > 100) {
 				var msg = __(frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
@@ -258,9 +259,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				frappe.msgprint(msg);
 				throw msg;
 			}
-
 			this.frm.doc.total_commission = flt(this.frm.doc.base_net_total * this.frm.doc.commission_rate / 100.0,
 				precision("total_commission"));
+
+			}
+			
 		}
 	},
 
