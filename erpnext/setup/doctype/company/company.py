@@ -218,6 +218,7 @@ class Company(NestedSet):
 		enable_finance_books = cint(self.enable_finance_books)
 
 		make_property_setter("Asset Finance Book", "finance_book", "hidden", not(enable_finance_books), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Depreciation Schedule", "finance_book", "hidden", not(enable_finance_books), "Check", validate_fields_for_doctype=False)
 		make_property_setter("Journal Entry", "finance_book", "hidden", not(enable_finance_books), "Check", validate_fields_for_doctype=False)
 
 	def set_default_accounts(self):
