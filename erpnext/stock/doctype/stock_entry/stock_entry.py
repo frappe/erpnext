@@ -1503,7 +1503,8 @@ class StockEntry(StockController):
 					qty_to_reserve -= reserved_qty[0][0]
 				if qty_to_reserve > 0:
 					for item in self.items:
-						if item.item_code == item_code:
+						has_serial_no = frappe.get_cached_value("Item", item.item_code, "has_serial_no")
+						if item.item_code == item_code and has_serial_no:
 							serial_nos = (item.serial_no).split("\n")
 							for serial_no in serial_nos:
 								if qty_to_reserve > 0:

@@ -278,7 +278,7 @@ frappe.ui.form.on('Stock Entry', {
 					get_query_filters: {
 						docstatus: 1,
 						material_request_type: ["in", allowed_request_types],
-						status: ["not in", ["Transferred", "Issued"]]
+						status: ["not in", ["Transferred", "Issued", "Cancelled", "Stopped"]]
 					}
 				})
 			}, __("Get Items From"));
