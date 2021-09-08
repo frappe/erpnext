@@ -148,6 +148,10 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		this.calculate_totals();
 	}
 
+	target_qty() {
+		this.calculate_totals();
+	}
+
 	rate() {
 		this.calculate_totals();
 	}
@@ -156,24 +160,27 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		var me = this;
 
 		if (me.frm.doc.company) {
-			frappe.call({
-				method: "frappe.client.get_value",
-				args: {
-					doctype: "Company",
-					filters: {"name": me.frm.doc.company},
-					fieldname: "cost_center"
-				},
-				callback: function (r) {
-					if (r.message) {
-						$.each(me.frm.doc.service_items || [], function (i, d) {
-							frappe.model.set_value(d.doctype, d.name, "cost_center", r.message.cost_center);
-						});
-					}
-				}
+			frappe.model.set_value(me.frm.doc.doctype, me.frm.doc.name, "cost_center", null);
+			$.each(me.frm.doc.stock_items || [], function (i, d) {
+				frappe.model.set_value(d.doctype, d.name, "cost_center", null);
+			});
+			$.each(me.frm.doc.asset_items || [], function (i, d) {
+				frappe.model.set_value(d.doctype, d.name, "cost_center", null);
+			});
+			$.each(me.frm.doc.service_items || [], function (i, d) {
+				frappe.model.set_value(d.doctype, d.name, "cost_center", null);
 			});
 		}
 
 		erpnext.accounts.dimensions.update_dimension(me.frm, me.frm.doctype);
+	}
+
+	stock_items_add(doc, cdt, cdn) {
+		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, 'stock_items');
+	}
+
+	asset_items_add(doc, cdt, cdn) {
+		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, 'asset_items');
 	}
 
 	serivce_items_add(doc, cdt, cdn) {
@@ -189,6 +196,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				child: me.frm.doc,
 				args: {
 					item_code: me.frm.doc.target_item_code,
+					company: me.frm.doc.company,
 				},
 				callback: function (r) {
 					if (!r.exc) {
@@ -207,7 +215,8 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_target_asset_details",
 				child: me.frm.doc,
 				args: {
-					asset: me.frm.doc.target_asset
+					asset: me.frm.doc.target_asset,
+					company: me.frm.doc.company,
 				},
 				callback: function (r) {
 					if (!r.exc) {
@@ -380,6 +389,10 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 		me.frm.doc.total_value = me.frm.doc.stock_items_total + me.frm.doc.asset_items_total + me.frm.doc.service_items_total;
 		me.frm.doc.total_value = flt(me.frm.doc.total_value, precision('total_value'));
+
+		me.frm.doc.target_qty = flt(me.frm.doc.target_qty, precision('target_qty'));
+		me.frm.doc.target_incoming_rate = me.frm.doc.target_qty ? me.frm.doc.total_value / flt(me.frm.doc.target_qty)
+			: me.frm.doc.total_value;
 
 		me.frm.refresh_fields();
 	}

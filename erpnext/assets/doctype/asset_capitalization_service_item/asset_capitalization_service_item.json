@@ -17,8 +17,7 @@
   "amount",
   "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break",
-  "project"
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -106,18 +105,12 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-06 14:06:34.768152",
+ "modified": "2021-09-08 15:52:08.598100",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization Service Item",

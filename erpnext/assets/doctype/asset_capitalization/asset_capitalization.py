@@ -11,13 +11,14 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import get_current_asset_value
 from six import string_types
 import json
 
 force_fields = ['target_item_name', 'target_asset_name', 'item_name', 'asset_name',
 	'target_is_fixed_asset', 'target_has_serial_no', 'target_has_batch_no',
-	'target_stock_uom', 'stock_uom']
+	'target_stock_uom', 'stock_uom', 'target_fixed_asset_account', 'fixed_asset_account']
 
 
 class AssetCapitalization(AccountsController):
@@ -42,7 +43,7 @@ class AssetCapitalization(AccountsController):
 		self.title = self.target_asset_name or self.target_item_name or self.target_item_code
 
 	def set_missing_values(self, for_validate=False):
-		target_item_details = get_target_item_details(self.target_item_code)
+		target_item_details = get_target_item_details(self.target_item_code, self.company)
 		for k, v in target_item_details.items():
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
@@ -51,7 +52,7 @@ class AssetCapitalization(AccountsController):
 		if not self.target_is_fixed_asset:
 			self.target_asset = None
 
-		target_asset_details = get_target_asset_details(self.target_asset)
+		target_asset_details = get_target_asset_details(self.target_asset, self.company)
 		for k, v in target_asset_details.items():
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
@@ -95,6 +96,8 @@ class AssetCapitalization(AccountsController):
 
 		if target_item.is_fixed_asset:
 			self.target_qty = 1
+		if flt(self.target_qty) <= 0:
+			frappe.throw(_("Target Qty must be a positive number"))
 
 		if not target_item.is_stock_item:
 			self.target_warehouse = None
@@ -233,9 +236,12 @@ class AssetCapitalization(AccountsController):
 		self.total_value = self.stock_items_total + self.asset_items_total + self.service_items_total
 		self.total_value = flt(self.total_value, self.precision('total_value'))
 
+		self.target_qty = flt(self.target_qty, self.precision('target_qty'))
+		self.target_incoming_rate = self.total_value / self.target_qty
+
 
 @frappe.whitelist()
-def get_target_item_details(item_code=None):
+def get_target_item_details(item_code=None, company=None):
 	out = frappe._dict()
 
 	# Get Item Details
@@ -261,6 +267,13 @@ def get_target_item_details(item_code=None):
 	if not out.target_has_serial_no:
 		out.target_serial_no = ""
 
+	# Cost Center
+	item_defaults = get_item_defaults(item.name, company)
+	item_group_defaults = get_item_group_defaults(item.name, company)
+	brand_defaults = get_brand_defaults(item.name, company)
+	out.cost_center = get_default_cost_center(frappe._dict({'item_code': item.name, 'company': company}),
+		item_defaults, item_group_defaults, brand_defaults)
+
 	# Set Entry Type
 	if not item_code:
 		out.entry_type = ""
@@ -273,7 +286,7 @@ def get_target_item_details(item_code=None):
 
 
 @frappe.whitelist()
-def get_target_asset_details(asset=None):
+def get_target_asset_details(asset=None, company=None):
 	out = frappe._dict()
 
 	# Get Asset Details
@@ -288,6 +301,12 @@ def get_target_asset_details(asset=None):
 
 	# Set Asset Details
 	out.asset_name = asset_details.asset_name
+
+	if asset_details.item_code:
+		out.target_fixed_asset_account = get_asset_category_account('fixed_asset_account', item=asset_details.item_code,
+			company=company)
+	else:
+		out.target_fixed_asset_account = None
 
 	return out
 
@@ -312,6 +331,12 @@ def get_consumed_stock_item_details(args, get_valuation_rate=True):
 	out.stock_uom = item.stock_uom
 
 	out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True) if item else None
+
+	# Cost Center
+	item_defaults = get_item_defaults(item.name, args.company)
+	item_group_defaults = get_item_group_defaults(item.name, args.company)
+	brand_defaults = get_brand_defaults(item.name, args.company)
+	out.cost_center = get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults)
 
 	if get_valuation_rate:
 		if args.item_code and out.warehouse:
@@ -372,6 +397,21 @@ def get_consumed_asset_details(args, get_asset_value=True):
 			out.asset_value = flt(get_current_asset_value(args.asset, finance_book=args.finance_book))
 		else:
 			out.asset_value = 0
+
+	# Account
+	if asset_details.item_code:
+		out.fixed_asset_account = get_asset_category_account('fixed_asset_account', item=asset_details.item_code,
+			company=args.company)
+	else:
+		out.fixed_asset_account = None
+
+	# Cost Center
+	if asset_details.item_code:
+		item = frappe.get_cached_doc("Item", asset_details.item_code)
+		item_defaults = get_item_defaults(item.name, args.company)
+		item_group_defaults = get_item_group_defaults(item.name, args.company)
+		brand_defaults = get_brand_defaults(item.name, args.company)
+		out.cost_center = get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults)
 
 	return out
 

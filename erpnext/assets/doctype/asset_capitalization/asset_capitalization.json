@@ -41,7 +41,13 @@
   "service_items",
   "service_items_total",
   "totals_section",
-  "total_value"
+  "total_value",
+  "column_break_36",
+  "target_incoming_rate",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "target_fixed_asset_account"
  ],
  "fields": [
   {
@@ -289,12 +295,45 @@
    "label": "Total Value",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "target_incoming_rate",
+   "fieldtype": "Currency",
+   "label": "Target Incoming Rate",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "target_fixed_asset_account",
+   "fieldtype": "Link",
+   "label": "Target Fixed Asset Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-06 17:18:31.881006",
+ "modified": "2021-09-08 15:58:40.417579",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
