@@ -71,6 +71,13 @@ frappe.ui.form.on('Asset', {
 				filters: { item_code: doc.item_code }
 			}
 		});
+
+		frappe.db.get_value("Company", frm.doc.company, "enable_finance_books", (r) => {
+			if (!r.enable_finance_books) {
+				frm.set_df_property('finance_books', 'cannot_add_rows', true);
+				frm.set_df_property('finance_books', 'cannot_delete_rows', true);
+			}
+		});
 	},
 
 	refresh: function(frm) {
