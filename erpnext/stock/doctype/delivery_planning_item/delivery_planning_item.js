@@ -3,17 +3,45 @@
 
 frappe.ui.form.on('Delivery Planning Item', {
 	
-	before_load: function(frm){
+	// refresh : function(frm){
+	// 	if(frm.doc.docstatus != 1){
 
+	// 		frm.call({
+	// 					doc:frm.doc,
+	// 					method: 'update_stock',	
+	// 				});
+	// 	}
+	// },
+
+	sorce_warehouse: function(frm){
 		if(frm.doc.docstatus != 1){
-
+			console.log("Inside soure_warehouse")
 			frm.call({
 						doc:frm.doc,
-						method: 'update_stock',
-						
+						method: 'update_stock',	
+						callback: function(r){
+							if(r.message)
+							frm.doc.current_stock = r.message.projected_qty
+							frm.refresh_field("current_stock");
+							frm.doc.available_stock = r.message.actual_qty
+							frm.refresh_field("available_stock")
+							
+						}
 					});
 		}
 	},
+
+	// before_load: function(frm){
+
+	// 	if(frm.doc.docstatus != 1){
+
+	// 		frm.call({
+	// 					doc:frm.doc,
+	// 					method: 'update_stock',
+						
+	// 				});
+	// 	}
+	// },
 
 	qty_to_deliver: function(frm){
 		if(frm.doc.qty_to_deliver > frm.doc.ordered_qty)
@@ -38,6 +66,18 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 	onload: function(frm){
 
+		if(frm.doc.docstatus != 1){
+					frm.call({
+								doc:frm.doc,
+								method: 'update_stock',
+								callback: function(r){
+									if(r.message){
+										console.log("Item Updated")
+									}
+								}
+							});
+				}
+
 		cur_frm.set_query("transporter", function() {
 			return {
 			   "filters": {
@@ -46,45 +86,12 @@ frappe.ui.form.on('Delivery Planning Item', {
 			}
 		});
 
-		if( frm.docstatus != 1)	{
+		if( frm.doc.docstatus > 0 )	{
 			console.log("frm.docstatus")
+			frm.set_df_property('split','hidden',1)
+			frm.refresh_field("split")
 		}
-
 		
-		// if(frm.transporter){
-		// 	frm.set_df_property('supplier_dc','hidden',1)
-		// 	frm.refresh_field("supplier_dc")
-		// }
-		// else{
-		// 	frm.set_df_property('supplier_dc','hidden',0)
-		// 	frm.refresh_field("supplier_dc")
-		// }
-
-
-		// if (!frm.doc.approved)
-		// frm.call({
-		// 			doc:frm.doc,
-		// 			method: 'update_stock',
-					
-		// 		});
-				
-
-		// if(frm.doc.approved)
-		// 	{
-		// 		frm.set_df_property('transporter','read_only',1)
-		// 		frm.set_df_property('sorce_warehouse','read_only',1)
-		// 		frm.set_df_property('qty_to_deliver','read_only',1)
-		// 		frm.set_df_property('approved','read_only',1)
-		// 		frm.set_df_property('supplier_dc','read_only',1)
-		// 		frm.set_df_property('supplier','read_only',1)
-		// 		frm.refresh_field("transporter")
-		// 		frm.refresh_field("sorce_warehouse")
-		// 		frm.refresh_field("qty_to_deliver")
-		// 		frm.refresh_field("supplier_dc")
-		// 		frm.refresh_field("approved")
-		// 		frm.refresh_field("supplier")
-	    //     };
-
 		
 	},
 
@@ -94,6 +101,25 @@ frappe.ui.form.on('Delivery Planning Item', {
 			var new_warehouse;
 			var new_transporter;
 			var new_date;
+
+			if(frm.doc.docstatus == 1){
+				
+				frappe.msgprint({
+				title: __('Notification'),
+				indicator: 'red',
+				message: __('Cannot Split Submitted Document')
+				});
+			}
+			else if(frm.doc.docstatus == 2){
+				
+				frappe.msgprint({
+				title: __('Notification'),
+				indicator: 'red',
+				message: __('Cannot Split Cancelled Document')
+				});
+		}
+
+		else{
 			let d = new frappe.ui.Dialog({
 			title: 'Split Planning Item',
 			fields: [
@@ -268,13 +294,10 @@ frappe.ui.form.on('Delivery Planning Item', {
 						}
 					}
 				});
-				}
-
-				
-				
+				}				
 			}
 			});
-
+		}
 			d.show();
 
 		}

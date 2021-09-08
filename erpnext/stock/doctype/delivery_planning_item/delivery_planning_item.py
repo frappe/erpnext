@@ -105,13 +105,13 @@ class DeliveryPlanningItem(Document):
 			print("updated -------------",self.is_updated)
 
 			ref_soi = frappe.db.set_value('Sales Order Item', self.item_dname, {
-					"qty" : self.qty_to_deliver,
-					"stock_qty" : self.qty_to_deliver,
-					"amount" : self.qty_to_deliver * self.rate,
+					# "qty" : self.qty_to_deliver,
+					# "stock_qty" : self.qty_to_deliver,
+					# "amount" : self.qty_to_deliver * self.rate,
 					"delivered_by_supplier" : self.supplier_dc,
-					"supplier" : self.supplier
+					"supplier" : self.supplier,
+					"warehouse" : self.sorce_warehouse
 				})
-		
 			# ref_soi = frappe.get_doc('Sales Order Item', self.item_dname)
 			# ref_soi.qty = self.qty_to_deliver,
 			# ref_soi.stock_qty = self.qty_to_deliver,
@@ -215,11 +215,13 @@ class DeliveryPlanningItem(Document):
 					SET current_stock = {0},
 					available_stock = {1}
 					WHERE name = {2} """.format(doc.projected_qty, doc.actual_qty, "'"+self.name+"'"))	
+
 				# frappe.db.set_value('Delivery Planning Item', self.name, {
 				# 		'available_stock' : doc.actual_qty,
 				# 		'current_stock' : doc.projected_qty
 				# 	})
-		# self.save()			
+		# self.save()
+			return doc			
 
 @frappe.whitelist()
 def approve_function(source_names):

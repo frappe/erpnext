@@ -50,4 +50,3 @@ def get_columns(filters):
 
 def get_data(filters):
 	return get_stock_ledger_entries(filters, '<=', order="asc") or []
-

@@ -3,12 +3,25 @@
 
 frappe.ui.form.on('Delivery Planning', {
 
+	// before_cancel: function(frm){
+	// 	console.log(" Cancelling all DPI")
+	// 	frm.call({
+	// 		method:'on_cancel_all',
+	// 		doc: frm.doc,
+	// 		callback: function(r){
+	// 			if(r.message){
+	// 				console.log("==== before save ==========")
+	// 			}
+	// 		}
+				
+	// 	});
+	// },
+
 	before_save: function(frm){
 		if(frm.doc.delivery_date_from > frm.doc.delivery_date_to)
 		{ frappe.throw(__('Delivery Date To should be greater or equal to Date From '))}
 	},
 	onload: function(frm){
-
 
 		frm.call({
 			method:'refresh_status',
@@ -29,7 +42,7 @@ frappe.ui.form.on('Delivery Planning', {
 			}
 		});
 
-		if( frm.doc.docstatus === 1){
+		if( frm.doc.docstatus === 1 && frm.doc.d_status != "Completed"){
 
 //  setting status doccument
 		// frm.call({
@@ -50,6 +63,7 @@ frappe.ui.form.on('Delivery Planning', {
 			callback: function(r){
 				if(r.message){
 					frm.set_df_property('show_delivery_planning_item','hidden',1)
+					frm.refresh_field('show_delivery_planning_item')
 				}
 			}
 		});
@@ -65,16 +79,20 @@ frappe.ui.form.on('Delivery Planning', {
 
 						else if(r.message == 2){
 							frm.set_df_property('show_purchase_order_planning_item','hidden',1)
+							frm.refresh_field('show_purchase_order_planning_item')
 							console.log("22222222222222 in side tr both available",r.message)
 						}
 						else if (r.message == 3){
 							frm.set_df_property('show_transporter_planning_item','hidden',1)
+							frm.refresh_field('show_transporter_planning_item')
 							console.log("333333333333 in side po available",r.message)
 
 						}
 						else{
 							frm.set_df_property('show_purchase_order_planning_item','hidden',1)
 							frm.set_df_property('show_transporter_planning_item','hidden',1)
+							frm.refresh_field('show_purchase_order_planning_item')
+							frm.refresh_field('show_transporter_planning_item')
 							console.log("444444444444 nothing available",r.message)
 						}
 					}
@@ -99,7 +117,7 @@ frappe.ui.form.on('Delivery Planning', {
 										if(r.message == 1){
 											console.log("-----  --- --item--  ---  ---  ",r);
 											
-											// frm.refresh();
+											frm.refresh();
 											// location.reload();
 											frappe.msgprint("  Transporter wise Delivery Plan created");
 											console.log("msg = 1 create trabsport ")
@@ -140,11 +158,12 @@ frappe.ui.form.on('Delivery Planning', {
 									callback : function(r){
 										if(r.message == 1){
 											console.log("-----  --- --PO Create-  ---  ---  ",r);
+											frm.refresh();
 											frappe.msgprint("  Purchase Order created ");
 											frm.reload_doc();
 										}
 										else{
-											frappe.msgprint(" Unable to create Purchase Order ");
+											frappe.msgprint(" Purchase Order already created ");
 										}
 								   }
 								});
@@ -159,7 +178,8 @@ frappe.ui.form.on('Delivery Planning', {
 									callback : function(r){
 										if(r.message == 1){
 											console.log("-----  --- --Pick List Create-  ---  ---  ",r);
-											frappe.msgprint(" Pick List created ");
+											frm.refresh();
+											// frappe.msgprint(" Pick List created ");
 											frm.reload_doc();
 										}
 										else{
@@ -184,10 +204,10 @@ frappe.ui.form.on('Delivery Planning', {
 										});
 										}
 										else if(r.message == 2){
-											console.log("-----  --- -- 2  Dnote Create-  ---  ---  ",r);
+											console.log("------- 2  Dnote Create-  ---  ---  ",r);
 											frappe.msgprint({
 											title: __('Delivery Note created'),
-											message: __('Created Delivery Note using Sales Order'),
+											message: __('Delivery Note Created'),
 											indicator: 'green'
 											
 										});
@@ -196,16 +216,14 @@ frappe.ui.form.on('Delivery Planning', {
 										else{
 											frappe.msgprint({
 											title: __('Delivery Note not created'),
-											message: __('No Items with of this Delivery Planning is Approved or Pick not created'),
-											indicator: 'orange'
+											message: __('Delivery note already created'),
+											indicator: 'blue'
 										});
 										}
 										frm.reload_doc();
 								   }
 								});
 							}, __('Create'));
-
-
 					}
 					else if(r.message == 2){
 						console.log("----- 2 --- --FOR Purchase Order -  ---  ---  ",r.message);
@@ -220,6 +238,7 @@ frappe.ui.form.on('Delivery Planning', {
 								callback : function(r){
 									if(r.message == 1){
 											console.log("-----  --- --item--  ---  ---  ",r);
+											frm.refresh();
 											frappe.msgprint(" Purchase Order Plan Items created  ");
 											frm.reload_doc();
 										}
@@ -238,18 +257,16 @@ frappe.ui.form.on('Delivery Planning', {
 									callback : function(r){
 										if(r.message == 1){
 											console.log("-----  --- --PO Create-  ---  ---  ",r);
+											frm.refresh()
 											frappe.msgprint("  Purchase Order created ");
 											frm.reload_doc();
 										}
 										else{
-											frappe.msgprint(" Unable to create Purchase Order ");
+											frappe.msgprint(" Purchase Order already created ");
 										}
 								   }
 								});
 							}, __('Create'));
-
-
-
 						}
 
 					else if(r.message == 3 ){
@@ -268,7 +285,7 @@ frappe.ui.form.on('Delivery Planning', {
 											console.log("msg = 3 create transporter ")
 											// location.reload();
 											// frm.dirty();
-											// frm.refresh();
+											frm.refresh();
 											frm.reload_doc();
 											
 										}
@@ -288,6 +305,7 @@ frappe.ui.form.on('Delivery Planning', {
 									callback : function(r){
 										if(r.message == 1){
 											console.log("-----  --- --Pick List Create-  ---  ---  ",r);
+											frm.reload_doc();
 											frappe.msgprint(" Pick List created ");
 											frm.reload_doc();
 										}
@@ -316,14 +334,14 @@ frappe.ui.form.on('Delivery Planning', {
 											console.log("-----  --- -- 2  Dnote Create-  ---  ---  ",r);
 											frappe.msgprint({
 											title: __('Delivery Note created'),
-											message: __('Created Delivery Note using Sales Order'),
+											message: __('Delivery Note Created'),
 											indicator: 'green'
 										});frm.reload_doc();
 										}
 										else{
 											frappe.msgprint({
 											title: __('Delivery Note not created'),
-											message: __('No Items with of this Delivery Planning is Approved or Pick not created'),
+											message: __('Delivery Note already created'),
 											indicator: 'orange'
 										});
 										}
@@ -344,9 +362,13 @@ frappe.ui.form.on('Delivery Planning', {
 
 	 refresh: function(frm) {
 
-		document.getElementByClass("icon icon-sm").style.display = "none";
+		// if (frm.doc.d_status == "Completed"){
+		// 	// frm.remove_custom_button('Pick List','Create');
+		// 	frm.clear_custom_buttons();
+			
+		// }
 
-		if (frm.doc.docstatus === 1){
+		if (frm.doc.docstatus === 1 && frm.doc.d_status != "Pending Planning"){
 			frm.add_custom_button(__("Gantt Chart"), function () {
 				frappe.route_options = {
 					"related_delivey_planning": frm.doc.name,
@@ -355,6 +377,8 @@ frappe.ui.form.on('Delivery Planning', {
 				frappe.set_route("List", "Delivery Planning Item", "Gantt");
 			});
 		};
+
+		document.getElementByClass("icon icon-sm").style.display = "none";
 
 	},
 

@@ -4,8 +4,8 @@
 frappe.views.calendar["Delivery Planning Item"] = {
     
 	field_map: {
-		"start": "delivery_date",
-        "end": "delivery_date",
+		"start": "planned_date",
+        "end": "planned_date",
 		"id": "name",
 		"title": "name",
 	},

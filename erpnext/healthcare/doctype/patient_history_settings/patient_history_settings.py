@@ -18,7 +18,7 @@ class PatientHistorySettings(Document):
 	def validate_submittable_doctypes(self):
 		for entry in self.custom_doctypes:
 			if not cint(frappe.db.get_value('DocType', entry.document_type, 'is_submittable')):
-				msg = _('Row #{0}: Document Type {1} is not submittable. ').format(
+				msg = _('Row #{0}: Document Type {1} is not submittable.').format(
 					entry.idx, frappe.bold(entry.document_type))
 				msg += _('Patient Medical Record can only be created for submittable document types.')
 				frappe.throw(msg)
@@ -116,12 +116,12 @@ def set_subject_field(doc):
 		fieldname = entry.get('fieldname')
 		if entry.get('fieldtype') == 'Table' and doc.get(fieldname):
 			formatted_value = get_formatted_value_for_table_field(doc.get(fieldname), meta.get_field(fieldname))
-			subject += frappe.bold(_(entry.get('label')) + ': ') + '<br>' + cstr(formatted_value) + '<br>'
+			subject += frappe.bold(_(entry.get('label')) + ':') + '<br>' + cstr(formatted_value) + '<br>'
 
 		else:
 			if doc.get(fieldname):
 				formatted_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
-				subject += frappe.bold(_(entry.get('label')) + ': ') + cstr(formatted_value) + '<br>'
+				subject += frappe.bold(_(entry.get('label')) + ':') + cstr(formatted_value) + '<br>'
 
 	return subject
 

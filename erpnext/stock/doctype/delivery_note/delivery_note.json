@@ -534,8 +534,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1454,7 +1454,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-05 21:15:53.757419",
+ "modified": "2021-08-17 20:15:50.574966",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
