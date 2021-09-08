@@ -793,7 +793,7 @@ class Item(WebsiteGenerator):
 				if item_default.get(field):
 					company = frappe.db.get_value(doctype, item_default.get(field), 'company', cache=True)
 					if company and company != item_default.company:
-						frappe.throw(_("Row #{}: {} {} doesn't belongs to Company {}. Please select valid {}.")
+						frappe.throw(_("Row #{}: {} {} doesn't belong to Company {}. Please select valid {}.")
 							.format(
 								item_default.idx,
 								doctype,
