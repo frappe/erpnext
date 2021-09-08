@@ -434,6 +434,25 @@ frappe.ui.form.on("Material Request Plan Item", {
 	}
 });
 
+frappe.ui.form.on("Production Plan Sales Order", {
+	sales_order(frm, cdt, cdn) {
+		const { sales_order } = locals[cdt][cdn];
+		if (!sales_order) {
+			return;
+		}
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_so_details",
+			args: { sales_order },
+			callback(r) {
+				const {transaction_date, customer, grand_total} = r.message;
+				frappe.model.set_value(cdt, cdn, 'sales_order_date', transaction_date);
+				frappe.model.set_value(cdt, cdn, 'customer', customer);
+				frappe.model.set_value(cdt, cdn, 'grand_total', grand_total);
+			}
+		});
+	}
+});
+
 cur_frm.fields_dict['sales_orders'].grid.get_field("sales_order").get_query = function() {
 	return{
 		filters: [
