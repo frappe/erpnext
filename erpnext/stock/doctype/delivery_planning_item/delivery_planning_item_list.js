@@ -1,6 +1,6 @@
 frappe.listview_settings['Delivery Planning Item'] = {
 	add_fields: ["transporter", "sales_order", "customer", "customer_name","postal_code", "item_code", "item_name",
-					"delivery_date", "ordered_qty", "weight_to_deliver"],
+					"planned_date", "ordered_qty", "weight_to_deliver"],
 	filters: [["docstatus", "=", "Submitted"]],				
 	hide_name_column: true,
 
@@ -306,7 +306,7 @@ frappe.listview_settings['Delivery Planning Item'] = {
 			href="/app/delivery_planning_item/${ganttobj.id}""> ${ganttobj.name} </a></h5>`;
 		html += `<p style="color:white">Sales Order: ${delivery_planning_item.sales_order}</p>`
 		html += `<p style="color:white">Customer: ${delivery_planning_item.customer}</p>`
-		html += `<p style="color:white">Qty to deliver: ${delivery_planning_item.qty_to_deliver}</p>`
+		html += `<p style="color:white">Weight to deliver: ${delivery_planning_item.weight_to_deliver}</p>`
 
 		if(delivery_planning_item.transporter) 	
 		html += `<p style="color:white">Transporter: ${delivery_planning_item.transporter_name}</p>`;
@@ -343,6 +343,16 @@ frappe.listview_settings['Delivery Planning Item'] = {
 					message: __('Cannot Split Submitted Document')
 					});
 			}
+
+			else if(doc.docstatus == 2){
+				
+				frappe.msgprint({
+				title: __('Notification'),
+				indicator: 'red',
+				message: __('Cannot Split Cancelled Document')
+				});
+		}
+
 			else if( doc.ordered_qty <=1){
 				frappe.msgprint({
 					title: __('Notification'),

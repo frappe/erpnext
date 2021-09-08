@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import nowdate, now_datetime, flt
+from frappe.utils import nowdate, now_datetime, flt, add_to_date
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
@@ -60,6 +60,21 @@ class TestProductionPlan(unittest.TestCase):
 
 		pln = frappe.get_doc('Production Plan', pln.name)
 		pln.cancel()
+
+	def test_production_plan_start_date(self):
+		planned_date = add_to_date(date=None, days=3)
+		plan = create_production_plan(item_code='Test Production Item 1', planned_start_date=planned_date)
+		plan.make_work_order()
+
+		work_orders = frappe.get_all('Work Order', fields = ['name', 'planned_start_date'],
+			filters = {'production_plan': plan.name})
+
+		self.assertEqual(work_orders[0].planned_start_date, planned_date)
+
+		for wo in work_orders:
+			frappe.delete_doc('Work Order', wo.name)
+
+		frappe.get_doc('Production Plan', plan.name).cancel()
 
 	def test_production_plan_for_existing_ordered_qty(self):
 		sr1 = create_stock_reconciliation(item_code="Raw Material Item 1",

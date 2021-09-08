@@ -28,9 +28,9 @@ def has_deleted_company_transactions():
 def get_child_doctypes_whose_parent_doctypes_were_affected():
     parent_doctypes = get_affected_doctypes()
     child_doctypes = frappe.get_all(
-        'DocField', 
+        'DocField',
         filters={
-            'fieldtype': 'Table', 
+            'fieldtype': 'Table',
             'parent':['in', parent_doctypes]
         }, pluck='options')
 
@@ -39,7 +39,7 @@ def get_child_doctypes_whose_parent_doctypes_were_affected():
 def get_affected_doctypes():
     affected_doctypes = []
     tdr_docs = frappe.get_all('Transaction Deletion Record', pluck="name")
-    
+
     for tdr in tdr_docs:
         tdr_doc = frappe.get_doc("Transaction Deletion Record", tdr)
 

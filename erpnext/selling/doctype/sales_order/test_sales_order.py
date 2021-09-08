@@ -673,6 +673,8 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.cancel()
 
+		dn.load_from_db()
+
 		self.assertRaises(frappe.CancelledLinkError, dn.submit)
 
 	def test_service_type_product_bundle(self):
@@ -1220,7 +1222,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_so_cancellation_when_si_drafted(self):
 		"""
 			Test to check if Sales Order gets cancelled if Sales Invoice is in Draft state
-			Expected result: sales order should not get cancelled 
+			Expected result: sales order should not get cancelled
 		"""
 		so = make_sales_order()
 		so.submit()
@@ -1248,7 +1250,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
 
-		automatically_fetch_payment_terms(enable=0)		
+		automatically_fetch_payment_terms(enable=0)
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

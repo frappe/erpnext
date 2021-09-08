@@ -55,8 +55,8 @@ class StockLedgerEntry(Document):
 				"sum(actual_qty)") or 0
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
 
-	#check for item quantity available in stock
 	def actual_amt_check(self):
+		"""Validate that qty at warehouse for selected batch is >=0"""
 		if self.batch_no and not self.get("allow_negative_stock"):
 			batch_bal_after_transaction = flt(frappe.db.sql("""select sum(actual_qty)
 				from `tabStock Ledger Entry`
@@ -107,7 +107,7 @@ class StockLedgerEntry(Document):
 		self.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
-		stock_settings = frappe.get_doc('Stock Settings', 'Stock Settings')
+		stock_settings = frappe.get_cached_doc('Stock Settings')
 
 		if stock_settings.stock_frozen_upto:
 			if (getdate(self.posting_date) <= getdate(stock_settings.stock_frozen_upto)

@@ -61,4 +61,3 @@ def term_loan_accrual_pending(date):
 	})
 
 	return pending_accrual
-

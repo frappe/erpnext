@@ -25,7 +25,8 @@ class TestBankTransaction(unittest.TestCase):
 	def tearDownClass(cls):
 		for bt in frappe.get_all("Bank Transaction"):
 			doc = frappe.get_doc("Bank Transaction", bt.name)
-			doc.cancel()
+			if doc.docstatus == 1:
+				doc.cancel()
 			doc.delete()
 
 		# Delete directly in DB to avoid validation errors for countries not allowing deletion
@@ -56,6 +57,12 @@ class TestBankTransaction(unittest.TestCase):
 
 		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
 		self.assertTrue(clearance_date is not None)
+
+		bank_transaction.reload()
+		bank_transaction.cancel()
+
+		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
+		self.assertFalse(clearance_date)
 
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
