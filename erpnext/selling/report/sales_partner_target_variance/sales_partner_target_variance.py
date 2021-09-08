@@ -2,7 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from erpnext.selling.report.sales_partner_target_variance.sales_target_variance import get_data_column
+
+from erpnext.selling.report.sales_partner_target_variance.sales_target_variance import (
+	get_data_column,
+)
+
 
 def execute(filters=None):
 	data = []
