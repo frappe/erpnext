@@ -3,11 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+
+import json
+
+import frappe
 from frappe import _
-from frappe.utils import today, now_datetime, getdate, get_datetime, get_link_to_form
-from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond
+from frappe.model.document import Document
+from frappe.utils import get_datetime, get_link_to_form, getdate, now_datetime, today
+
 
 class InpatientRecord(Document):
 	def after_insert(self):

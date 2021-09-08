@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.selling.doctype.customer.customer import get_customer_outstanding, get_credit_limit
+
+from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+
 
 def execute(filters=None):
 	if not filters: filters = {}

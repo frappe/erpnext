@@ -7,12 +7,16 @@ import unittest
 
 import frappe
 from frappe.utils import nowdate
+
+from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+	create_supplier_quotation,
+	make_supplier_quotation_from_rfq,
+)
+from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
+from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
-from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation_from_rfq
-from erpnext.buying.doctype.request_for_quotation.request_for_quotation import create_supplier_quotation
-from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
-from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
+
 
 class TestRequestforQuotation(unittest.TestCase):
 	def test_quote_status(self):

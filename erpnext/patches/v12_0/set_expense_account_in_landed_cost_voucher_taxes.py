@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
+
 import frappe
 from six import iteritems
+
 
 def execute():
 	frappe.reload_doctype('Landed Cost Taxes and Charges')

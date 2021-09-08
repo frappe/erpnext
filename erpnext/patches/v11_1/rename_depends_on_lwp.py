@@ -2,9 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import scrub
 from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	for doctype in ("Salary Component", "Salary Detail"):

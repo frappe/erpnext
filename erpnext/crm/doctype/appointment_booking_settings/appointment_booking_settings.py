@@ -3,9 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import datetime
+
 import frappe
 from frappe import _
-import datetime
 from frappe.model.document import Document
 
 
@@ -28,10 +30,10 @@ class AppointmentBookingSettings(Document):
 			to_time = datetime.datetime.strptime(
 				self.min_date+record.to_time, self.format_string)
 			timedelta = to_time-from_time
-			self.validate_from_and_to_time(from_time, to_time)
+			self.validate_from_and_to_time(from_time, to_time, record)
 			self.duration_is_divisible(from_time, to_time)
 
-	def validate_from_and_to_time(self, from_time, to_time):
+	def validate_from_and_to_time(self, from_time, to_time, record):
 		if from_time > to_time:
 			err_msg = _('<b>From Time</b> cannot be later than <b>To Time</b> for {0}').format(record.day_of_week)
 			frappe.throw(_(err_msg))

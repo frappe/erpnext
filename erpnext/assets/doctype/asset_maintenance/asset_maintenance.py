@@ -3,11 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
+from frappe import _, throw
 from frappe.desk.form import assign_to
-from frappe import throw, _
+from frappe.model.document import Document
 from frappe.utils import add_days, add_months, add_years, getdate, nowdate
+
 
 class AssetMaintenance(Document):
 	def validate(self):
