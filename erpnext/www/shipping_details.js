@@ -1,6 +1,6 @@
 submit_so = () => {
     frappe.call({
-        method: 'nextsales.www.shipping_details.make_so',
+        method: 'erpnext.www.shipping_details.make_so',
         args : {
             item_list : 'test'
         },
@@ -16,7 +16,7 @@ submit_so = () => {
 
 handleCustomerAddress = (e) => {
     frappe.call({
-        method: 'nextsales.www.shipping_details.handle_address',
+        method: 'erpnext.www.shipping_details.handle_address',
         args : {
             name : {key: "custom_add" ,value: e.target.value}
         },
@@ -56,7 +56,7 @@ handleCustomerAddress = (e) => {
 
 handleShippingAddress = e => {
     frappe.call({
-        method: 'nextsales.www.shipping_details.handle_address',
+        method: 'erpnext.www.shipping_details.handle_address',
         args : {
             name : {key: "ship_add" ,value: e.target.value}
         },

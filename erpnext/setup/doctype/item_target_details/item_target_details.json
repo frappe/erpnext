@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "creation": "2021-09-03 22:27:04.540635",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "fiscal_year",
+  "target_qty",
+  "target_amount",
+  "commision_formula"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Item code",
+   "oldfieldname": "item_group",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "search_index": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Fiscal Year",
+   "oldfieldname": "fiscal_year",
+   "oldfieldtype": "Select",
+   "options": "Fiscal Year",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "target_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Target Qty",
+   "oldfieldname": "target_qty",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "fieldname": "target_amount",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Target  Amount",
+   "oldfieldname": "target_amount",
+   "oldfieldtype": "Currency",
+   "search_index": 1
+  },
+  {
+   "description": "<br><br><b>e.g. If qty commission</b><br>\n     <b>Formula</b> : i.total_weight*discount_per_kg <br>\n\n<b>e.g. If amount Commision</b><br>\n           <b>Formula</b> : i.base_amount*discount_percentage<br>\n",
+   "fieldname": "commision_formula",
+   "fieldtype": "Code",
+   "in_list_view": 1,
+   "label": "Commision Formula",
+   "mandatory_depends_on": "eval:doc.item_code"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2021-09-05 20:29:07.091287",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Item Target Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

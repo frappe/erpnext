@@ -342,6 +342,20 @@ class DeliveryNote(SellingController):
 			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
+		
+	@frappe.whitelist()
+	def get_commision(self):
+		tot=[]
+		if self.sales_partner:
+			doc=frappe.get_doc("Sales Partner",self.sales_partner)
+			if self.commission_based_on_target_lines==1: 
+				for i in self.items:
+					for j in doc.item_target_details:
+						if i.item_code==j.item_code:
+							if j.commision_formula:
+								data=eval(j.commision_formula)
+								tot.append(data)
+								self.total_commission=sum(tot)	 
 
 	def make_return_invoice(self):
 		try:

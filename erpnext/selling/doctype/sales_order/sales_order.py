@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from datetime import datetime
 import frappe
 import json
 import frappe.utils
@@ -371,6 +372,20 @@ class SalesOrder(SellingController):
 		else:
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
+
+	@frappe.whitelist()
+	def get_commision(self):
+		tot=[]
+		if self.sales_partner:
+			doc=frappe.get_doc("Sales Partner",self.sales_partner)
+			if self.commission_based_on_target_lines==1: 
+				for i in self.items:
+					for j in doc.item_target_details:
+						if i.item_code==j.item_code:
+							if j.commision_formula:
+								data=eval(j.commision_formula)
+								tot.append(data)
+								self.total_commission=sum(tot)			
 
 	@frappe.whitelist()
 	def get_work_order_items(self, for_raw_material_request=0):

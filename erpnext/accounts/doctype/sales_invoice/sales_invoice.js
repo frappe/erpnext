@@ -158,7 +158,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 		})
 	},
-
 	set_default_print_format: function() {
 		// set default print format to POS type or Credit Note
 		if(cur_frm.doc.is_pos) {
@@ -704,6 +703,17 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
+	before_save:function(frm){
+		frm.call({
+			method:"get_commision",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("total_commission")
+			}
+		});
+	 },
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function(frm){
 		if (frm.doc.company) {
