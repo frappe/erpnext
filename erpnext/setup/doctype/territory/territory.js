@@ -11,6 +11,9 @@ frappe.ui.form.on("Territory", {
 				}
 			}
 		};
+	},
+	onload: function(frm) {
+		frm.fields_dict["targets"].grid.set_column_disp('territory', false);
 	}
 });
 
