@@ -187,8 +187,8 @@ def prepare_data(filters, sales_users_data, actual_data, date_field, period_list
 			details["total_target"] += details[target_key]
 
 			for r in actual_data:
-				if (r.get(sales_field) == d.parent and r.item_group == d.item_group and
-					(r.territory == d.territory or sales_field == "territory") and
+				if (r.get(sales_field) == d.parent and (r.item_group == d.item_group or d.item_group is None) and
+					(r.territory == d.territory or sales_field == "territory" or d.territory is None) and
 					period.from_date <= r.get(date_field) and r.get(date_field) <= period.to_date):
 					details[p_key] += r.get(qty_or_amount_field, 0)
 					details[variance_key] = details.get(p_key) - details.get(target_key)
