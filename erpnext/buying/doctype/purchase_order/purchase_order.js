@@ -90,7 +90,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			},
 			callback: function(resp){
 				if(resp.message){
-					cur_frm.set_value("datenepali",resp.message)
+					cur_frm.set_value("date_nepali",resp.message)
 				}
 			}
 		})
@@ -575,7 +575,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			},
 			callback: function(resp){
 				if(resp.message){
-					cur_frm.set_value("from_datenepali",resp.message)
+					cur_frm.set_value("from_date_nepali",resp.message)
 				}
 			}
 		})
@@ -588,7 +588,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			},
 			callback: function(resp){
 				if(resp.message){
-					cur_frm.set_value("from_datenepali",resp.message)
+					cur_frm.set_value("from_date_nepali",resp.message)
 				}
 			}
 		})
@@ -601,7 +601,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			},
 			callback: function(resp){
 				if(resp.message){
-					cur_frm.set_value("to_datenepali",resp.message)
+					cur_frm.set_value("to_date_nepali",resp.message)
 				}
 			}
 		})
@@ -614,7 +614,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			},
 			callback: function(resp){
 				if(resp.message){
-					cur_frm.set_value("required_bynepal",resp.message)
+					cur_frm.set_value("required_by_nepali",resp.message)
 				}
 			}
 		})

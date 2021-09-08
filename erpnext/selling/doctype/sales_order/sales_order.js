@@ -89,6 +89,20 @@ frappe.ui.form.on("Sales Order", {
 		erpnext.queries.setup_warehouse_query(frm);
 	},
 
+	po_date: function(frm) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.po_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("customers_purchase_order_date_nepali",resp.message)
+				}
+			}
+		})
+	},
+
 	delivery_date: function(frm) {
 		$.each(frm.doc.items || [], function(i, d) {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
