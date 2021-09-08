@@ -221,7 +221,7 @@ def get_actual_data(filters, item_groups, sales_users_or_territory_data, territo
 				parent_doc = filters.get("doctype"),
 				child_doc = filters.get("doctype") + ' Item',
 				item_groups = ','.join(['%s'] * len(item_groups)),
-			    territories = ','.join(['%s'] * len(territories))
+				territories = ','.join(['%s'] * len(territories))
 			), tuple(sales_users_or_territory_data + item_groups + territories + dates), as_dict=1)
 
 def get_parents_data(filters, partner_doctype):
