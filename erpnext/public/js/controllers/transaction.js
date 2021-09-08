@@ -487,6 +487,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
+
+		item.weight_per_unit = 0;
+		item.weight_uom = '';
+
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
@@ -846,21 +850,25 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
-			erpnext.utils.get_shipping_address(this.frm, function(){
+			erpnext.utils.get_shipping_address(this.frm, function() {
 				set_party_account(set_pricing);
 			});
 
 			// Get default company billing address in Purchase Invoice, Order and Receipt
-			frappe.call({
-				'method': 'frappe.contacts.doctype.address.address.get_default_address',
-				'args': {
-					'doctype': 'Company',
-					'name': this.frm.doc.company
-				},
-				'callback': function(r) {
-					me.frm.set_value('billing_address', r.message);
-				}
-			});
+			if (this.frm.doc.company && frappe.meta.get_docfield(this.frm.doctype, "billing_address")) {
+				frappe.call({
+					method: "erpnext.setup.doctype.company.company.get_default_company_address",
+					args: {name: this.frm.doc.company, existing_address: this.frm.doc.billing_address || ""},
+					debounce: 2000,
+					callback: function(r) {
+						if (r.message) {
+							me.frm.set_value("billing_address", r.message);
+						} else {
+							me.frm.set_value("company_address", "");
+						}
+					}
+				});
+			}
 
 		} else {
 			set_party_account(set_pricing);

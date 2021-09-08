@@ -3,10 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate, cint
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
+from frappe.utils import cint, flt, getdate, today
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_checks_for_pl_and_bs_accounts,
+)
+
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled

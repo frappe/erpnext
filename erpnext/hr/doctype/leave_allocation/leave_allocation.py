@@ -2,13 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt, date_diff, formatdate, add_days, today, getdate
 from frappe import _
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name, get_leave_period
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import expire_allocation, create_leave_ledger_entry
+from frappe.utils import add_days, date_diff, flt, formatdate, getdate
+
 from erpnext.hr.doctype.leave_application.leave_application import get_approved_leaves_for_period
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import (
+	create_leave_ledger_entry,
+	expire_allocation,
+)
+from erpnext.hr.utils import get_leave_period, set_employee_name
+
 
 class OverlapError(frappe.ValidationError): pass
 class BackDatedAllocationError(frappe.ValidationError): pass

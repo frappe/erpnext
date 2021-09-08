@@ -1,9 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from typing import Dict, List, Tuple
+
 import frappe
 from frappe import _
-from typing import Dict, List, Tuple
 
 Filters = frappe._dict
 Row = frappe._dict
@@ -92,7 +93,7 @@ def get_query_args(filters: Filters) -> QueryArgs:
 
 def run_query(query_args: QueryArgs) -> Data:
 	return frappe.db.sql("""
-		SELECT 
+		SELECT
 			wo.name, wo.status, wo.production_item, wo.qty,
 			wo.produced_qty, wo.process_loss_qty,
 			(wo.produced_qty - wo.process_loss_qty) as actual_produced_qty,
