@@ -377,14 +377,28 @@ class GrossProfitGenerator(object):
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
 	def map_si_with_dn(self):
+		si_items = map(lambda item: item.item_row, self.si_list)
+		so_items = map(lambda item: item.so_detail, self.si_list)
+		dn_details_si = {}
+		dn_details_so = {}
+
+		for dn in frappe.db.get_list("Delivery Note Item", filters={"si_detail": ["IN", si_items]}, fields=["name", "parent", "si_detail"]):
+			dn_details_si.update({
+				dn.si_detail: (dn.name, dn.parent)
+			})
+		for dn in frappe.db.get_list("Delivery Note Item", filters={"so_detail": ["IN", so_items]}, fields=["name", "parent", "so_detail"]):
+			dn_details_so.update({
+				dn.so_detail: (dn.name, dn.parent)
+			})
+
 		for si in self.si_list:
 			if not si.dn_detail:
 				# Assign si.dn_detail if a delivery note has been created from a sales invoice.
-				si.dn_detail, si.delivery_note = frappe.db.get_value("Delivery Note Item", {"si_detail": si.item_row}, ["name", "parent"]) or (None, None)
+				si.dn_detail, si.delivery_note = dn_details_si.get(si.item_row) or (None, None)
 
 				if not si.dn_detail:
 					# Assign si.dn_detail if sales order created dn and si separately.
-					si.dn_detail, si.delivery_note = frappe.db.get_value("Delivery Note Item", {"so_detail": si.so_detail}, ["name", "parent"]) or (None, None)
+					si.dn_detail, si.delivery_note = dn_details_so.get(si.so_detail) or (None, None)
 
 	def load_invoice_items(self):
 		conditions = ""
