@@ -376,6 +376,16 @@ class GrossProfitGenerator(object):
 
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
+	def map_si_with_dn(self):
+		for si in self.si_list:
+			if not si.dn_detail:
+				# Assign si.dn_detail if a delivery note has been created from a sales invoice.
+				si.dn_detail, si.delivery_note = frappe.db.get_value("Delivery Note Item", {"si_detail": si.item_row}, ["name", "parent"]) or (None, None)
+
+				if not si.dn_detail:
+					# Assign si.dn_detail if sales order created dn and si separately.
+					si.dn_detail, si.delivery_note = frappe.db.get_value("Delivery Note Item", {"so_detail": si.so_detail}, ["name", "parent"]) or (None, None)
+
 	def load_invoice_items(self):
 		conditions = ""
 		if self.filters.company:
@@ -411,7 +421,7 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
-				`tabSales Invoice Item`.cost_center
+				`tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.so_detail
 				{sales_person_cols}
 			from
 				`tabSales Invoice` inner join `tabSales Invoice Item`
@@ -423,6 +433,8 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
 			.format(conditions=conditions, sales_person_cols=sales_person_cols,
 				sales_team_table=sales_team_table, match_cond = get_match_cond('Sales Invoice')), self.filters, as_dict=1)
+
+		self.map_si_with_dn()
 
 	def group_items_by_invoice(self):
 		"""
