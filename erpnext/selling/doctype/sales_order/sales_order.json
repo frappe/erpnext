@@ -21,9 +21,7 @@
   "amended_from",
   "company",
   "transaction_date",
-  "transaction_date_nepali",
   "delivery_date",
-  "delivery_date_nepali",
   "po_no",
   "po_date",
   "tax_id",
@@ -143,9 +141,7 @@
   "sales_team",
   "subscription_section",
   "from_date",
-  "from_date_nepali",
   "to_date",
-  "to_date_nepali",
   "column_break_108",
   "auto_repeat",
   "update_auto_repeat_reference"
@@ -1511,37 +1507,13 @@
    "fieldname": "transporter_information_section",
    "fieldtype": "Section Break",
    "label": "Transporter Information"
-  },
-  {
-   "fieldname": "transaction_date_nepali",
-   "fieldtype": "Data",
-   "label": "Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "delivery_date_nepali",
-   "fieldtype": "Data",
-   "label": "Delivery Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "from_date_nepali",
-   "fieldtype": "Data",
-   "label": "From Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "to_date_nepali",
-   "fieldtype": "Data",
-   "label": "To Date(Nepali)",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-16 14:17:28.451250",
+ "modified": "2021-09-09 11:59:31.849272",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
