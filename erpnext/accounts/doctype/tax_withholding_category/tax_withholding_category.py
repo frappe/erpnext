@@ -9,8 +9,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, getdate
 
-from erpnext.accounts.utils import get_fiscal_year
-
 
 class TaxWithholdingCategory(Document):
 	def validate(self):
@@ -163,9 +161,9 @@ def get_tax_row_for_tds(tax_details, tax_amount):
 	}
 
 def get_lower_deduction_certificate(tax_details, pan_no):
-	ldc_name = frappe.db.get_value('Lower Deduction Certificate', 
+	ldc_name = frappe.db.get_value('Lower Deduction Certificate',
 		{
-			'pan_no': pan_no, 
+			'pan_no': pan_no,
 			'valid_from': ('>=', tax_details.from_date),
 			'valid_upto': ('<=', tax_details.to_date)
 		}, 'name')
