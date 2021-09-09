@@ -63,6 +63,10 @@ class TestOpportunity(unittest.TestCase):
 		self.assertEqual(opp_doc.opportunity_from, "Customer")
 		self.assertEqual(opp_doc.party_name, customer.name)
 
+	def test_opportunity_item(self):
+		opportunity_doc = make_opportunity(with_items=1, rate=1100, qty=2)
+		self.assertEqual(opportunity_doc.total, 2200)
+
 def make_opportunity(**args):
 	args = frappe._dict(args)
 
@@ -71,6 +75,7 @@ def make_opportunity(**args):
 		"company": args.company or "_Test Company",
 		"opportunity_from": args.opportunity_from or "Customer",
 		"opportunity_type": "Sales",
+		"conversion_rate": 1.0,
 		"with_items": args.with_items or 0,
 		"transaction_date": today()
 	})
@@ -85,6 +90,7 @@ def make_opportunity(**args):
 		opp_doc.append('items', {
 			"item_code": args.item_code or "_Test Item",
 			"qty": args.qty or 1,
+			"rate": args.rate or 1000,
 			"uom": "_Test UOM"
 		})
 
