@@ -247,7 +247,7 @@
    "depends_on": "customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "in_global_search": 1,
@@ -1061,6 +1061,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Apply Additional Discount On",
+   "length": 15,
    "options": "\nGrand Total\nNet Total",
    "print_hide": 1
   },
@@ -1147,7 +1148,7 @@
   {
    "description": "In Words will be visible once you save the Sales Invoice.",
    "fieldname": "base_in_words",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words (Company Currency)",
@@ -1207,7 +1208,7 @@
   },
   {
    "fieldname": "in_words",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words",
@@ -1560,6 +1561,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Print Language",
+   "length": 6,
    "print_hide": 1,
    "read_only": 1
   },
@@ -1647,6 +1649,7 @@
    "hide_seconds": 1,
    "in_standard_filter": 1,
    "label": "Status",
+   "length": 30,
    "no_copy": 1,
    "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1,
@@ -1706,6 +1709,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Is Opening Entry",
+   "length": 4,
    "oldfieldname": "is_opening",
    "oldfieldtype": "Select",
    "options": "No\nYes",
@@ -1717,6 +1721,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "C-Form Applicable",
+   "length": 4,
    "no_copy": 1,
    "options": "No\nYes",
    "print_hide": 1
@@ -2017,7 +2022,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-27 20:13:40.456462",
+ "modified": "2021-09-08 15:24:25.486499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

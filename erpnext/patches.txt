@@ -306,4 +306,5 @@ execute:frappe.delete_doc('Report', 'Sales Person Target Variance based on Item 
 execute:frappe.delete_doc('Report', 'Sales Partner Target Variance based on Item Group', ignore_missing=True)
 erpnext.patches.v13_0.create_gst_payment_entry_fields
 erpnext.patches.v14_0.delete_shopify_doctypes
+erpnext.patches.v13_0.update_dates_in_tax_withholding_category
 erpnext.patches.v14_0.update_opportunity_currency_fields
