@@ -15,6 +15,8 @@ from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import get_users_with_role
 
+from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
+from erpnext.utilities.transaction_base import TransactionBase
 
 class Customer(TransactionBase):
 	def get_feed(self):
