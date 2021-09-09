@@ -211,6 +211,10 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 
 @frappe.whitelist()
 def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=True):
+	""" Returns first email from Contact Email table as a Billing email
+		when Is Billing Contact checked
+		and Primary email- email with Is Primary checked """
+
 	billing_email = frappe.db.sql("""
 		SELECT
 			email.email_id
