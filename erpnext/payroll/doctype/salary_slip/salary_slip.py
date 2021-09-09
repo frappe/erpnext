@@ -864,7 +864,10 @@ class SalarySlip(TransactionBase):
 			if based_on_payment_days:
 				amount, additional_amount = self.get_amount_based_on_payment_days(earning, joining_date, relieving_date)
 			else:
-				amount, additional_amount = earning.amount, earning.additional_amount
+				if earning.additional_amount:
+					amount, additional_amount = earning.amount, earning.additional_amount
+				else:
+					amount, additional_amount = earning.default_amount, earning.additional_amount
 
 			if earning.is_tax_applicable:
 				if additional_amount:
