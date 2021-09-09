@@ -8,12 +8,19 @@ import unittest
 import frappe
 from frappe.utils import random_string
 
-from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchError
+from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchError, OverlapError
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 
 
 class TestJobCard(unittest.TestCase):
+
+	def setUp(self):
+		self.work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
+
+	def tearDown(self):
+		self.work_order.cancel()
+
 	def test_job_card(self):
 		data = frappe.get_cached_value('BOM',
 			{'docstatus': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
@@ -76,3 +83,32 @@ class TestJobCard(unittest.TestCase):
 
 			for d in job_cards:
 				frappe.delete_doc("Job Card", d.name)
+
+	def test_job_card_overlap(self):
+		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
+
+		jc1_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
+		jc2_name = frappe.db.get_value("Job Card", {'work_order': wo2.name})
+
+		jc1 = frappe.get_doc("Job Card", jc1_name)
+		jc2 = frappe.get_doc("Job Card", jc2_name)
+
+		employee = "_T-Employee-00001" # from test records
+
+		jc1.append("time_logs", {
+			"from_time": "2021-01-01 00:00:00",
+			"to_time": "2021-01-01 08:00:00",
+			"completed_qty": 1,
+			"employee": employee,
+		})
+		jc1.save()
+
+		# add a new entry in same time slice
+		jc2.append("time_logs", {
+			"from_time": "2021-01-01 00:01:00",
+			"to_time": "2021-01-01 06:00:00",
+			"completed_qty": 1,
+			"employee": employee,
+		})
+		self.assertRaises(OverlapError, jc2.save)
+		frappe.db.rollback()
