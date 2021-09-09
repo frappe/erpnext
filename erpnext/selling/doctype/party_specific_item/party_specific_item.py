@@ -9,7 +9,7 @@ from frappe.model.document import Document
 class PartySpecificItem(Document):
 	def validate(self):
 		exists = frappe.db.exists({
-			'doctype': 'Party Specific Items',
+			'doctype': 'Party Specific Item',
 			'party_type': self.party_type,
 			'party': self.party,
 			'restrict_based_on': self.restrict_based_on,
