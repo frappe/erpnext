@@ -7,12 +7,17 @@ import json
 from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint
 import frappe.defaults
+
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
+
 from frappe.utils import flt, cint, cstr, today, get_formatted_email
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.rename_doc import update_linked_doctypes
-from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
