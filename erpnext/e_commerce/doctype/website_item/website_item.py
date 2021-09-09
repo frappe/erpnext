@@ -134,7 +134,7 @@ class WebsiteItem(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
-		if frappe.flags.in_import:
+		if frappe.flags.in_import or frappe.flags.in_migrate:
 			return
 
 		"""Make a thumbnail of `website_image`"""
