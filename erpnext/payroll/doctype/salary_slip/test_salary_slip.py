@@ -137,7 +137,9 @@ class TestSalarySlip(unittest.TestCase):
 
 	def test_component_amount_dependent_on_another_payment_days_based_component(self):
 		from erpnext.hr.doctype.attendance.attendance import mark_attendance
-		from erpnext.payroll.doctype.salary_structure.test_salary_structure import create_salary_structure_assignment
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
+			create_salary_structure_assignment,
+		)
 
 		no_of_days = self.get_no_of_days()
 		# Payroll based on attendance
@@ -147,7 +149,7 @@ class TestSalarySlip(unittest.TestCase):
 		employee = make_employee("test_payment_days_based_component@salary.com", company="_Test Company")
 
 		# base = 50000
-		create_salary_structure_assignment(employee, salary_structure.name)
+		create_salary_structure_assignment(employee, salary_structure.name, company="_Test Company", currency="INR")
 
 		# mark employee absent for a day since this case works fine if payment days are equal to working days
 		month_start_date = get_first_day(nowdate())
@@ -924,8 +926,6 @@ def make_holiday_list():
 	return holiday_list
 
 def make_salary_structure_for_payment_days_based_component_dependency():
-	from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
-
 	earnings = [
 		{
 			"salary_component": "Basic Salary - Payment Days",
