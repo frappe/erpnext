@@ -7,6 +7,8 @@ def execute():
 	frappe.reload_doc("e_commerce", "doctype", "website_item")
 	frappe.reload_doc("e_commerce", "doctype", "website_item_tabbed_section")
 	frappe.reload_doc("e_commerce", "doctype", "website_offer")
+	frappe.reload_doc("e_commerce", "doctype", "recommended_items")
+	frappe.reload_doc("e_commerce", "doctype", "e_commerce_settings")
 	frappe.reload_doc("stock", "doctype", "item")
 
 	item_fields = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
