@@ -20,7 +20,28 @@ frappe.ui.form.on('Maintenance Visit', {
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
 	},
+<<<<<<< HEAD
 	onload: function(frm) {
+=======
+	onload: function (frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+		if (frm.doc.maintenance_type === "Scheduled") {
+			const schedule_id = item.purposes[0].prevdoc_detail_docname || frm.doc.maintenance_schedule_detail;
+			frappe.call({
+				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.update_serial_nos",
+				args: {
+					s_id: schedule_id
+				},
+				callback: function (r) {
+					serial_nos = r.message;
+				}
+			});
+		}
+		else {
+			frm.clear_table("purposes");
+		}
+
+>>>>>>> acdb10377f (refactor: .doc missing and empty row on new doc (#27408))
 		if (!frm.doc.status) {
 			frm.set_value({status:'Draft'});
 		}
