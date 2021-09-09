@@ -4,8 +4,9 @@ from __future__ import unicode_literals
 
 no_cache = 1
 
-import frappe
+
 from erpnext.shopping_cart.cart import get_cart_quotation
+
 
 def get_context(context):
 	context.update(get_cart_quotation())

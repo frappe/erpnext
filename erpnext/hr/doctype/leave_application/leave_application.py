@@ -2,14 +2,33 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, get_fullname, add_days, nowdate
-from erpnext.hr.utils import set_employee_name, get_leave_period, share_doc_with_approver, validate_active_employee
-from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	date_diff,
+	flt,
+	formatdate,
+	get_fullname,
+	get_link_to_form,
+	getdate,
+	nowdate,
+)
+
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import daterange
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
+from erpnext.hr.utils import (
+	get_leave_period,
+	set_employee_name,
+	share_doc_with_approver,
+	validate_active_employee,
+)
+
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
@@ -17,6 +36,8 @@ class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 class NotAnOptionalHoliday(frappe.ValidationError): pass
 
 from frappe.model.document import Document
+
+
 class LeaveApplication(Document):
 	def get_feed(self):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)

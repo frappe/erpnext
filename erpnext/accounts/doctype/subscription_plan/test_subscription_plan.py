@@ -5,5 +5,6 @@ from __future__ import unicode_literals
 
 import unittest
 
+
 class TestSubscriptionPlan(unittest.TestCase):
 	pass

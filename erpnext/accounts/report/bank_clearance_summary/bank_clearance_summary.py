@@ -2,9 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import nowdate, getdate
+from frappe.utils import getdate, nowdate
+
 
 def execute(filters=None):
 	if not filters: filters = {}
