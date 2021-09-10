@@ -12,5 +12,5 @@ comment:
   layout: "diff, files"
   require_changes: true
   
- ignore:
+ignore:
   - "erpnext/demo"
