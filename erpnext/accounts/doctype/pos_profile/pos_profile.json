@@ -365,7 +365,6 @@
   },
   {
    "default": "0",
-   "description": "Each time, any outstanding amount left will be considered as write off amount automatically",
    "fieldname": "write_off_outstanding_amount_automatically",
    "fieldtype": "Check",
    "label": "Write Off Outstanding Amount Automatically"
