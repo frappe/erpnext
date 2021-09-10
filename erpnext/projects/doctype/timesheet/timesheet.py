@@ -235,7 +235,7 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 			tsd.activity_type as activity_type,
 			tsd.description as description,
 			ts.currency as currency,
-      tsd.project_name as project_name
+      		tsd.project_name as project_name
 
 		FROM `tabTimesheet Detail` tsd
 
