@@ -35,3 +35,40 @@ class TestPatient(unittest.TestCase):
 
 		settings.collect_registration_fee = 0
 		settings.save()
+
+	def test_patient_contact(self):
+		frappe.db.sql("""delete from `tabPatient`""")
+		frappe.db.sql("""delete from `tabCustomer`""")
+		frappe.db.sql("""delete from `tabContact`""")
+		frappe.db.sql("""delete from `tabDynamic Link`""")
+
+		patient = create_patient(patient_name='Test Patient Contact', email='test-patient@example.com', mobile='+910000000001')
+		customer = frappe.db.get_value('Patient', patient, 'customer')
+		self.assertTrue(customer)
+		self.assertTrue(frappe.db.exists('Dynamic Link', {'parenttype': 'Contact', 'link_doctype': 'Patient', 'link_name': patient}))
+		self.assertTrue(frappe.db.exists('Dynamic Link', {'parenttype': 'Contact', 'link_doctype': 'Customer', 'link_name': customer}))
+
+		# a second patient linking with same customer
+		new_patient = create_patient(email='test-patient@example.com', mobile='+910000000009', customer=customer)
+		self.assertTrue(frappe.db.exists('Dynamic Link', {'parenttype': 'Contact', 'link_doctype': 'Patient', 'link_name': new_patient}))
+		self.assertTrue(frappe.db.exists('Dynamic Link', {'parenttype': 'Contact', 'link_doctype': 'Customer', 'link_name': customer}))
+
+	def test_patient_user(self):
+		frappe.db.sql("""delete from `tabUser` where email='test-patient-user@example.com'""")
+		frappe.db.sql("""delete from `tabDynamic Link`""")
+		frappe.db.sql("""delete from `tabPatient`""")
+
+		patient = create_patient(patient_name='Test Patient User', email='test-patient-user@example.com', mobile='+910000000099', create_user=True)
+		user = frappe.db.get_value('Patient', patient, 'user_id')
+		self.assertTrue(frappe.db.exists('User', user))
+
+		new_patient = frappe.get_doc({
+			'doctype': 'Patient',
+			'first_name': '_Another Test Patient',
+			'sex': 'Male',
+			'email': 'test-patient-user@example.com',
+			'mobile': '+910000000099',
+			'invite_user': 1
+			})
+
+		self.assertRaises(frappe.exceptions.DuplicateEntryError, new_patient.insert)
