@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	frappe.reload_doc('HR', 'doctype', 'Leave Allocation')
 	frappe.reload_doc('HR', 'doctype', 'Leave Ledger Entry')

@@ -2,12 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model import data_field_options 
+from frappe.model import data_field_options
+
 
 def execute():
 
-    for field in frappe.get_all('Custom Field', 
+    for field in frappe.get_all('Custom Field',
                             fields = ['name'],
                             filters = {
                                 'fieldtype': 'Data',
@@ -16,7 +18,7 @@ def execute():
 
         if field not in data_field_options:
             frappe.db.sql("""
-                UPDATE 
+                UPDATE
                     `tabCustom Field`
                 SET
                     options=NULL

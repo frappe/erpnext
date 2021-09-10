@@ -2,20 +2,30 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest
-import frappe
-import json
 
+import json
+import unittest
+
+import frappe
 from frappe.test_runner import make_test_objects
-from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
-	InvalidItemAttributeValueError, get_variant)
-from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
-from erpnext.stock.doctype.item.item import (get_uom_conv_factor, get_item_attribute,
-	validate_is_stock_item, get_timeline_data)
+
+from erpnext.controllers.item_variant import (
+	InvalidItemAttributeValueError,
+	ItemVariantExistsError,
+	create_variant,
+	get_variant,
+)
+from erpnext.stock.doctype.item.item import (
+	InvalidBarcode,
+	StockExistsForTemplate,
+	get_item_attribute,
+	get_timeline_data,
+	get_uom_conv_factor,
+	validate_is_stock_item,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.tests.utils import change_settings
-
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
@@ -506,19 +516,6 @@ class TestItem(unittest.TestCase):
 			self.assertIsInstance(count, int)
 			self.assertTrue(count >= 0)
 
-	def test_index_creation(self):
-		"check if index is getting created in db"
-		from erpnext.stock.doctype.item.item import on_doctype_update
-		on_doctype_update()
-
-		indices = frappe.db.sql("show index from tabItem", as_dict=1)
-		expected_columns = {"item_code", "item_name", "item_group", "route"}
-		for index in indices:
-			expected_columns.discard(index.get("Column_name"))
-
-		if expected_columns:
-			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")
-
 	def test_attribute_completions(self):
 		expected_attrs = {"Small", "Extra Small", "Extra Large", "Large", "2XL", "Medium"}
 
@@ -590,8 +587,8 @@ def make_item_variant():
 test_records = frappe.get_test_records('Item')
 
 def create_item(item_code, is_stock_item=1, valuation_rate=0, warehouse="_Test Warehouse - _TC",
-		is_customer_provided_item=None, customer=None, is_purchase_item=None, opening_stock=0,
-		company="_Test Company"):
+		is_customer_provided_item=None, customer=None, is_purchase_item=None, opening_stock=0, is_fixed_asset=0,
+		asset_category=None, company="_Test Company"):
 	if not frappe.db.exists("Item", item_code):
 		item = frappe.new_doc("Item")
 		item.item_code = item_code
@@ -599,6 +596,8 @@ def create_item(item_code, is_stock_item=1, valuation_rate=0, warehouse="_Test W
 		item.description = item_code
 		item.item_group = "All Item Groups"
 		item.is_stock_item = is_stock_item
+		item.is_fixed_asset = is_fixed_asset
+		item.asset_category = asset_category
 		item.opening_stock = opening_stock
 		item.valuation_rate = valuation_rate
 		item.is_purchase_item = is_purchase_item

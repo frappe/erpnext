@@ -3,11 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+from frappe import _
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
 from frappe.utils import cint
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe import _
+
 
 class PayrollSettings(Document):
 	def validate(self):

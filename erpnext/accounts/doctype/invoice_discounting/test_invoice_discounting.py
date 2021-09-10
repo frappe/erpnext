@@ -3,13 +3,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-from frappe.utils import nowdate, add_days, flt
 import unittest
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+
+import frappe
+from frappe.utils import add_days, flt, nowdate
+
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+
+
 class TestInvoiceDiscounting(unittest.TestCase):
 	def setUp(self):
 		self.ar_credit = create_account(account_name="_Test Accounts Receivable Credit", parent_account = "Accounts Receivable - _TC", company="_Test Company")

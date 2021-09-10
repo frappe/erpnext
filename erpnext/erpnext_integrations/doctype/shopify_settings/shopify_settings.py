@@ -3,15 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe import _
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.model.document import Document
 from frappe.utils import get_request_session
 from requests.exceptions import HTTPError
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from erpnext.erpnext_integrations.utils import get_webhook_address
+
 from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log
+from erpnext.erpnext_integrations.utils import get_webhook_address
+
 
 class ShopifySettings(Document):
 	def validate(self):

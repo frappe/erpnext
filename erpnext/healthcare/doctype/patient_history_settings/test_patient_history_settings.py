@@ -3,11 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
 import json
+import unittest
+
+import frappe
 from frappe.utils import getdate, strip_html
+
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
+
 
 class TestPatientHistorySettings(unittest.TestCase):
 	def setUp(self):
