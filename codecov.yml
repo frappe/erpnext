@@ -1,0 +1,13 @@
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 0.5%
+
+comment:
+  layout: "diff, files"
+  require_changes: true
