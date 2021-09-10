@@ -3,12 +3,21 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_days, getdate, cint, format_date
 from frappe.model.document import Document
-from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, validate_active_employee, \
-	create_additional_leave_ledger_entry, get_holiday_dates_for_employee
+from frappe.utils import add_days, cint, date_diff, format_date, getdate
+
+from erpnext.hr.utils import (
+	create_additional_leave_ledger_entry,
+	get_holiday_dates_for_employee,
+	get_leave_period,
+	validate_active_employee,
+	validate_dates,
+	validate_overlap,
+)
+
 
 class CompensatoryLeaveRequest(Document):
 

@@ -3,10 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe, erpnext
 import unittest
+
+import frappe
+
+import erpnext
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.utils import DuplicateDeclarationError
+
 
 class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 	def setUp(self):

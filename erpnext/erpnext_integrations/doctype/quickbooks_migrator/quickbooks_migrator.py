@@ -3,14 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import json
+import traceback
+
 import frappe
+import requests
 from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
-import json
-import requests
-import traceback
+
 from erpnext import encode_company_abbr
+
 
 # QuickBooks requires a redirect URL, User will be redirect to this URL
 # This will be a GET request
@@ -253,8 +257,9 @@ class QuickBooksMigrator(Document):
 		try:
 			# Assumes that exactly one fiscal year has been created so far
 			# Creates fiscal years till oldest ledger entry date is covered
-			from frappe.utils.data import add_years, getdate
 			from itertools import chain
+
+			from frappe.utils.data import add_years, getdate
 			smallest_ledger_entry_date = getdate(min(entry["date"] for entry in chain(*self.gl_entries.values()) if entry["date"]))
 			oldest_fiscal_year = frappe.get_all("Fiscal Year",
 				fields=["year_start_date", "year_end_date"],

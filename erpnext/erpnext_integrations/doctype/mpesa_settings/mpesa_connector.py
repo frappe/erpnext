@@ -1,7 +1,9 @@
 import base64
+import datetime
+
 import requests
 from requests.auth import HTTPBasicAuth
-import datetime
+
 
 class MpesaConnector():
 	def __init__(self, env="sandbox", app_key=None, app_secret=None, sandbox_url="https://sandbox.safaricom.co.ke",

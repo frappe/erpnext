@@ -1,9 +1,12 @@
-import frappe
 import copy
-from frappe import _
-from frappe.utils import flt, cint, get_link_to_form
 from collections import defaultdict
+
+import frappe
+from frappe import _
+from frappe.utils import cint, flt, get_link_to_form
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 
 class Subcontracting():
 	def set_materials_for_subcontracted_items(self, raw_material_table):

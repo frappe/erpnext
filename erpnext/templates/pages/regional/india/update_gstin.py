@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
+
 import frappe
-from frappe import _
 from six import iteritems
+
 
 def get_context(context):
 	context.no_cache = 1

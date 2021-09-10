@@ -2,14 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, cint, get_fullname
-from frappe import msgprint, _
+
+import json
+
+import frappe
+from frappe import _
+from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, get_fullname
+
+from erpnext.accounts.party import get_party_account_currency
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import get_party_account_currency
-from frappe.email.inbox import link_communication_to_document
+
 
 class Opportunity(TransactionBase):
 	def after_insert(self):

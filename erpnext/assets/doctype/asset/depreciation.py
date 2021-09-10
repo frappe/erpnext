@@ -3,10 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate, cint
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
+from frappe.utils import cint, flt, getdate, today
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_checks_for_pl_and_bs_accounts,
+)
+
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
@@ -176,22 +181,34 @@ def restore_asset(asset_name):
 
 	asset.set_status()
 
-@frappe.whitelist()
+def get_gl_entries_on_asset_regain(asset, selling_amount=0, finance_book=None):
+	fixed_asset_account, asset, depreciation_cost_center, accumulated_depr_account, accumulated_depr_amount, disposal_account, value_after_depreciation = \
+		get_asset_details(asset, finance_book)
+
+	gl_entries = [
+		{
+			"account": fixed_asset_account,
+			"debit_in_account_currency": asset.gross_purchase_amount,
+			"debit": asset.gross_purchase_amount,
+			"cost_center": depreciation_cost_center
+		},
+		{
+			"account": accumulated_depr_account,
+			"credit_in_account_currency": accumulated_depr_amount,
+			"credit": accumulated_depr_amount,
+			"cost_center": depreciation_cost_center
+		}
+	]
+
+	profit_amount = abs(flt(value_after_depreciation)) - abs(flt(selling_amount))
+	if profit_amount:
+		get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center)
+
+	return gl_entries
+
 def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None):
-	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
-	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
-	depreciation_cost_center = asset.cost_center or depreciation_cost_center
-
-	idx = 1
-	if finance_book:
-		for d in asset.finance_books:
-			if d.finance_book == finance_book:
-				idx = d.idx
-				break
-
-	value_after_depreciation = (asset.finance_books[idx - 1].value_after_depreciation
-		if asset.calculate_depreciation else asset.value_after_depreciation)
-	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(value_after_depreciation)
+	fixed_asset_account, asset, depreciation_cost_center, accumulated_depr_account, accumulated_depr_amount, disposal_account, value_after_depreciation = \
+		get_asset_details(asset, finance_book)
 
 	gl_entries = [
 		{
@@ -210,15 +227,36 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None)
 
 	profit_amount = flt(selling_amount) - flt(value_after_depreciation)
 	if profit_amount:
-		debit_or_credit = "debit" if profit_amount < 0 else "credit"
-		gl_entries.append({
-			"account": disposal_account,
-			"cost_center": depreciation_cost_center,
-			debit_or_credit: abs(profit_amount),
-			debit_or_credit + "_in_account_currency": abs(profit_amount)
-		})
+		get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center)
 
 	return gl_entries
+
+def get_asset_details(asset, finance_book=None):
+	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
+	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
+	depreciation_cost_center = asset.cost_center or depreciation_cost_center
+
+	idx = 1
+	if finance_book:
+		for d in asset.finance_books:
+			if d.finance_book == finance_book:
+				idx = d.idx
+				break
+
+	value_after_depreciation = (asset.finance_books[idx - 1].value_after_depreciation
+		if asset.calculate_depreciation else asset.value_after_depreciation)
+	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(value_after_depreciation)
+
+	return fixed_asset_account, asset, depreciation_cost_center, accumulated_depr_account, accumulated_depr_amount, disposal_account, value_after_depreciation
+
+def get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center):
+	debit_or_credit = "debit" if profit_amount < 0 else "credit"
+	gl_entries.append({
+		"account": disposal_account,
+		"cost_center": depreciation_cost_center,
+		debit_or_credit: abs(profit_amount),
+		debit_or_credit + "_in_account_currency": abs(profit_amount)
+	})
 
 @frappe.whitelist()
 def get_disposal_account_and_cost_center(company):
