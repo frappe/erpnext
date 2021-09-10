@@ -3,10 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, time, dateutil, math, csv
-from six import StringIO
-import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
+
+import csv
+import math
+import time
+
+import dateutil
+import frappe
 from frappe import _
+from six import StringIO
+
+import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
+
 
 #Get and Create Products
 def get_products_details():
@@ -143,7 +151,6 @@ def create_item_code(amazon_item_json, sku):
 	item.description = amazon_item_json.Product.AttributeSets.ItemAttributes.Title
 	item.brand = new_brand
 	item.manufacturer = new_manufacturer
-	item.web_long_description = amazon_item_json.Product.AttributeSets.ItemAttributes.Title
 
 	item.image = amazon_item_json.Product.AttributeSets.ItemAttributes.SmallImage.URL
 

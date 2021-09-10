@@ -3,13 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe import throw, _
-from frappe.model.document import Document
+
 import time
 from datetime import timedelta
-from frappe.utils import nowdate, get_last_day, getdate, add_days, add_years
-from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import make_supplier_scorecard
+
+import frappe
+from frappe import _, throw
+from frappe.model.document import Document
+from frappe.utils import add_days, add_years, get_last_day, getdate, nowdate
+
+from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+	make_supplier_scorecard,
+)
+
 
 class SupplierScorecard(Document):
 

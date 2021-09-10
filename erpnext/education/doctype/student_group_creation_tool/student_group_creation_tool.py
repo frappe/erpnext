@@ -3,10 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
+
 from erpnext.education.doctype.student_group.student_group import get_students
+
 
 class StudentGroupCreationTool(Document):
 	@frappe.whitelist()

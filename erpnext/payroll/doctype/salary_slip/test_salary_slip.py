@@ -2,20 +2,34 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import unittest
-import frappe
-import erpnext
 import calendar
 import random
+import unittest
+
+import frappe
+from frappe.utils import (
+	add_days,
+	add_months,
+	cstr,
+	flt,
+	get_first_day,
+	get_last_day,
+	getdate,
+	nowdate,
+)
+
+import erpnext
 from erpnext.accounts.utils import get_fiscal_year
-from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_day, get_last_day, cstr
-from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
-from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration \
-	import create_payroll_period, create_exemption_category
+from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import (
+	create_exemption_category,
+	create_payroll_period,
+)
+from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_details
+from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
@@ -154,7 +168,9 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.gross_pay, 78000)
 
 	def test_payment_days(self):
-		from erpnext.payroll.doctype.salary_structure.test_salary_structure import create_salary_structure_assignment
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
+			create_salary_structure_assignment,
+		)
 
 		no_of_days = self.get_no_of_days()
 		# Holidays not included in working days
@@ -231,8 +247,15 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertTrue(email_queue)
 
 	def test_loan_repayment_salary_slip(self):
-		from erpnext.loan_management.doctype.loan.test_loan import create_loan_type, create_loan, make_loan_disbursement_entry, create_loan_accounts
-		from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
+		from erpnext.loan_management.doctype.loan.test_loan import (
+			create_loan,
+			create_loan_accounts,
+			create_loan_type,
+			make_loan_disbursement_entry,
+		)
+		from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+			process_loan_interest_accrual_for_term_loans,
+		)
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 		applicant = make_employee("test_loan_repayment_salary_slip@salary.com", company="_Test Company")
@@ -386,8 +409,7 @@ class TestSalarySlip(unittest.TestCase):
 		for doc in delete_docs:
 			frappe.db.sql("delete from `tab%s` where employee='%s'" % (doc, employee))
 
-		from erpnext.payroll.doctype.salary_structure.test_salary_structure import \
-			make_salary_structure, create_salary_structure_assignment
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 		salary_structure = make_salary_structure("Stucture to test tax", "Monthly",
 			other_details={"max_benefits": 100000}, test_tax=True,

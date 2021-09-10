@@ -1,6 +1,8 @@
 """Import Address Templates from ./templates directory."""
 import os
+
 import frappe
+
 
 def set_up_address_templates(default_country=None):
 	for country, html in get_address_templates():

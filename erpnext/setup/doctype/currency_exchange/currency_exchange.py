@@ -4,10 +4,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import get_datetime_str, formatdate, nowdate, cint
+from frappe.utils import cint, formatdate, get_datetime_str, nowdate
+
 
 class CurrencyExchange(Document):
 	def autoname(self):

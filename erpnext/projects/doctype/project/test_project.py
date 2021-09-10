@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
+import unittest
 
-import frappe, unittest
-from frappe.utils import getdate, nowdate, add_days
+import frappe
+from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
 from erpnext.projects.doctype.task.test_task import create_task

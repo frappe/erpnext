@@ -2,33 +2,50 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-import frappe.defaults
-from frappe.utils import cint, flt, getdate, add_days, cstr, nowdate, get_link_to_form, formatdate
+
+import frappe
 from frappe import _, msgprint, throw
-from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
-from frappe.model.mapper import get_mapped_doc
-from erpnext.controllers.selling_controller import SellingController
-from erpnext.accounts.utils import get_account_currency
-from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
-from erpnext.assets.doctype.asset.depreciation \
-	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
-from erpnext.stock.doctype.batch.batch import set_batch_nos
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
-from erpnext.setup.doctype.company.company import update_company_current_month_sales
-from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
-from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-
-from erpnext.healthcare.utils import manage_invoice_submit_cancel
-
+from frappe.model.mapper import get_mapped_doc
+from frappe.model.utils import get_fetch_values
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	nowdate,
+)
 from six import iteritems
+
+import erpnext
+from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+	get_loyalty_program_details_with_points,
+	validate_loyalty_points,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
+from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
+from erpnext.accounts.utils import get_account_currency
+from erpnext.assets.doctype.asset.depreciation import (
+	get_disposal_account_and_cost_center,
+	get_gl_entries_on_asset_disposal,
+	get_gl_entries_on_asset_regain,
+	post_depreciation_entries,
+)
+from erpnext.controllers.selling_controller import SellingController
+from erpnext.healthcare.utils import manage_invoice_submit_cancel
+from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
+from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.stock.doctype.batch.batch import set_batch_nos
+from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -149,7 +166,7 @@ class SalesInvoice(SellingController):
 					if self.update_stock:
 						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-					elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+					elif asset.status in ("Scrapped", "Cancelled") or (asset.status == "Sold" and not self.is_return):
 						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
 
 	def validate_item_cost_centers(self):
@@ -483,7 +500,7 @@ class SalesInvoice(SellingController):
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
-		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
+		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
@@ -757,7 +774,7 @@ class SalesInvoice(SellingController):
 		if self.project:
 			for data in get_projectwise_timesheet_data(self.project):
 				self.append('timesheets', {
-						'time_sheet': data.parent,
+						'time_sheet': data.time_sheet,
 						'billing_hours': data.billing_hours,
 						'billing_amount': data.billing_amount,
 						'timesheet_detail': data.name,
@@ -768,12 +785,11 @@ class SalesInvoice(SellingController):
 			self.calculate_billing_amount_for_timesheet()
 
 	def calculate_billing_amount_for_timesheet(self):
-		total_billing_amount = 0.0
-		for data in self.timesheets:
-			if data.billing_amount:
-				total_billing_amount += data.billing_amount
+		def timesheet_sum(field):
+			return sum((ts.get(field) or 0.0) for ts in self.timesheets)
 
-		self.total_billing_amount = total_billing_amount
+		self.total_billing_amount = timesheet_sum("billing_amount")
+		self.total_billing_hours = timesheet_sum("billing_hours")
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
@@ -925,22 +941,30 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
-					asset = frappe.get_doc("Asset", item.asset)
+					asset = self.get_asset(item)
 
-					if (len(asset.finance_books) > 1 and not item.finance_book
-						and asset.finance_books[0].finance_book):
-						frappe.throw(_("Select finance book for the item {0} at row {1}")
-							.format(item.item_code, item.idx))
+					if self.is_return:
+						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(asset,
+							item.base_net_amount, item.finance_book)
+						asset.db_set("disposal_date", None)
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
-						item.base_net_amount, item.finance_book)
+						if asset.calculate_depreciation:
+							self.reset_depreciation_schedule(asset)
+
+					else:
+						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
+							item.base_net_amount, item.finance_book)
+						asset.db_set("disposal_date", self.posting_date)
+
+						if asset.calculate_depreciation:
+							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
-					asset.db_set("disposal_date", self.posting_date)
-					asset.set_status("Sold" if self.docstatus==1 else None)
+					self.set_asset_status(asset)
+
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
@@ -967,6 +991,89 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	def get_asset(self, item):
+		if item.get('asset'):
+			asset = frappe.get_doc("Asset", item.asset)
+		else:
+			frappe.throw(_(
+				"Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name),
+				title=_("Missing Asset")
+			)
+
+		self.check_finance_books(item, asset)
+		return asset
+
+	def check_finance_books(self, item, asset):
+		if (len(asset.finance_books) > 1 and not item.finance_book
+			and asset.finance_books[0].finance_book):
+			frappe.throw(_("Select finance book for the item {0} at row {1}")
+				.format(item.item_code, item.idx))
+
+	def depreciate_asset(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.prepare_depreciation_data(self.posting_date)
+		asset.save()
+
+		post_depreciation_entries(self.posting_date)
+
+	def reset_depreciation_schedule(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+
+		# recreate original depreciation schedule of the asset
+		asset.prepare_depreciation_data()
+
+		self.modify_depreciation_schedule_for_asset_repairs(asset)
+		asset.save()
+
+		self.delete_depreciation_entry_made_after_sale(asset)
+
+	def modify_depreciation_schedule_for_asset_repairs(self, asset):
+		asset_repairs = frappe.get_all(
+			'Asset Repair',
+			filters = {'asset': asset.name},
+			fields = ['name', 'increase_in_asset_life']
+		)
+
+		for repair in asset_repairs:
+			if repair.increase_in_asset_life:
+				asset_repair = frappe.get_doc('Asset Repair', repair.name)
+				asset_repair.modify_depreciation_schedule()
+				asset.prepare_depreciation_data()
+
+	def delete_depreciation_entry_made_after_sale(self, asset):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
+
+		row = -1
+		finance_book = asset.get('schedules')[0].get('finance_book')
+		for schedule in asset.get('schedules'):
+			if schedule.finance_book != finance_book:
+				row = 0
+				finance_book = schedule.finance_book
+			else:
+				row += 1
+
+			if schedule.schedule_date == posting_date_of_original_invoice:
+				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice):
+					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry.posting_date = nowdate()
+					reverse_journal_entry.submit()
+
+	def get_posting_date_of_sales_invoice(self):
+		return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
+
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
+	def sale_was_made_on_original_schedule_date(self, asset, schedule, row, posting_date_of_original_invoice):
+		for finance_book in asset.get('finance_books'):
+			if schedule.finance_book == finance_book.finance_book:
+				orginal_schedule_date = add_months(finance_book.depreciation_start_date,
+					row * cint(finance_book.frequency_of_depreciation))
+
+				if orginal_schedule_date == posting_date_of_original_invoice:
+					return True
+		return False
 
 	@property
 	def enable_discount_accounting(self):
@@ -1282,8 +1389,10 @@ class SalesInvoice(SellingController):
 
 	# redeem the loyalty points.
 	def apply_loyalty_points(self):
-		from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry \
-			import get_loyalty_point_entries, get_redemption_details
+		from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry import (
+			get_loyalty_point_entries,
+			get_redemption_details,
+		)
 		loyalty_point_entries = get_loyalty_point_entries(self.customer, self.loyalty_program, self.company, self.posting_date)
 		redemption_details = get_redemption_details(self.customer, self.loyalty_program, self.company)
 
@@ -1916,7 +2025,11 @@ def get_mode_of_payment_info(mode_of_payment, company):
 @frappe.whitelist()
 def create_dunning(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
-	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount
+
+	from erpnext.accounts.doctype.dunning.dunning import (
+		calculate_interest_and_amount,
+		get_dunning_letter_text,
+	)
 	def set_missing_values(source, target):
 		target.sales_invoice = source_name
 		target.outstanding_amount = source.outstanding_amount

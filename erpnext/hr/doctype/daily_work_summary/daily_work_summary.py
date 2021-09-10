@@ -3,11 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
-from frappe import _
 from email_reply_parser import EmailReplyParser
-from erpnext.hr.doctype.employee.employee import is_holiday
+from frappe import _
+from frappe.model.document import Document
 from frappe.utils import global_date_format
 from six import string_types
 
@@ -82,7 +82,7 @@ class DailyWorkSummary(Document):
 							crop=True
 						)
 						d.image = thumbnail_image
-			except:
+			except Exception:
 				d.image = original_image
 
 			if d.sender in did_not_reply:

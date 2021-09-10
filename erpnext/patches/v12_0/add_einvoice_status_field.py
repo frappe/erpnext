@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
+
 import json
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
 
 def execute():
 	company = frappe.get_all('Company', filters = {'country': 'India'})

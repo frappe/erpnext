@@ -3,18 +3,28 @@
 
 
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
-from frappe.utils import flt, now, add_months, cint, today, add_to_date
-from erpnext.manufacturing.doctype.work_order.work_order import (make_stock_entry,
-	ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError, CapacityError)
-from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.stock.utils import get_bin
+from frappe.utils import add_months, cint, flt, now, today
+
+from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	CapacityError,
+	ItemHasVariantError,
+	OverProductionError,
+	StockOverProductionError,
+	make_stock_entry,
+	stop_unstop,
+)
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+from erpnext.stock.utils import get_bin
+
 
 class TestWorkOrder(unittest.TestCase):
 	def setUp(self):
@@ -675,13 +685,18 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_valuation_rate_missing_on_make_stock_entry(self):
 		item_name = 'Test Valuation Rate Missing'
+		rm_item = '_Test raw material item'
 		make_item(item_name, {
+			"is_stock_item": 1,
+			"include_item_in_manufacturing": 1,
+		})
+		make_item('_Test raw material item', {
 			"is_stock_item": 1,
 			"include_item_in_manufacturing": 1,
 		})
 
 		if not frappe.db.get_value('BOM', {'item': item_name}):
-			make_bom(item=item_name, raw_materials=[item_name], rm_qty=1)
+			make_bom(item=item_name, raw_materials=[rm_item], rm_qty=1)
 
 		company = "_Test Company with perpetual inventory"
 		source_warehouse = create_warehouse("Test Valuation Rate Missing Warehouse", company=company)
@@ -691,8 +706,10 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_stock_entry, wo.name, 'Material Transfer for Manufacture')
 
 	def test_wo_completion_with_pl_bom(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_process_loss_bom_items
-		from erpnext.manufacturing.doctype.bom.test_bom import create_bom_with_process_loss_item
+		from erpnext.manufacturing.doctype.bom.test_bom import (
+			create_bom_with_process_loss_item,
+			create_process_loss_bom_items,
+		)
 
 		qty = 4
 		scrap_qty = 0.25 # bom item qty = 1, consider as 25% of FG
