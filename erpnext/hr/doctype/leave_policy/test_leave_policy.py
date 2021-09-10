@@ -3,8 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 
 class TestLeavePolicy(unittest.TestCase):
 	def test_max_leave_allowed(self):

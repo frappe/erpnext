@@ -1,8 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import frappe
 from typing import Dict, List, Tuple
+
+import frappe
+from frappe import _
 
 Filters = frappe._dict
 Row = frappe._dict
@@ -24,57 +26,57 @@ def get_data(filters: Filters) -> Data:
 def get_columns() -> Columns:
 	return [
 		{
-			'label': 'Work Order',
+			'label': _('Work Order'),
 			'fieldname': 'name',
 			'fieldtype': 'Link',
 			'options': 'Work Order',
 			'width': '200'
 		},
 		{
-			'label': 'Item',
+			'label': _('Item'),
 			'fieldname': 'production_item',
 			'fieldtype': 'Link',
 			'options': 'Item',
 			'width': '100'
 		},
 		{
-			'label': 'Status',
+			'label': _('Status'),
 			'fieldname': 'status',
 			'fieldtype': 'Data',
 			'width': '100'
 		},
 		{
-			'label': 'Manufactured Qty',
+			'label': _('Manufactured Qty'),
 			'fieldname': 'produced_qty',
 			'fieldtype': 'Float',
 			'width': '150'
 		},
 		{
-			'label': 'Loss Qty',
+			'label': _('Loss Qty'),
 			'fieldname': 'process_loss_qty',
 			'fieldtype': 'Float',
 			'width': '150'
 		},
 		{
-			'label': 'Actual Manufactured Qty',
+			'label': _('Actual Manufactured Qty'),
 			'fieldname': 'actual_produced_qty',
 			'fieldtype': 'Float',
 			'width': '150'
 		},
 		{
-			'label': 'Loss Value',
+			'label': _('Loss Value'),
 			'fieldname': 'total_pl_value',
 			'fieldtype': 'Float',
 			'width': '150'
 		},
 		{
-			'label': 'FG Value',
+			'label': _('FG Value'),
 			'fieldname': 'total_fg_value',
 			'fieldtype': 'Float',
 			'width': '150'
 		},
 		{
-			'label': 'Raw Material Value',
+			'label': _('Raw Material Value'),
 			'fieldname': 'total_rm_value',
 			'fieldtype': 'Float',
 			'width': '150'
@@ -91,7 +93,7 @@ def get_query_args(filters: Filters) -> QueryArgs:
 
 def run_query(query_args: QueryArgs) -> Data:
 	return frappe.db.sql("""
-		SELECT 
+		SELECT
 			wo.name, wo.status, wo.production_item, wo.qty,
 			wo.produced_qty, wo.process_loss_qty,
 			(wo.produced_qty - wo.process_loss_qty) as actual_produced_qty,

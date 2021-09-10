@@ -2,13 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe import _
-from frappe.utils import flt, cint
-from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template \
-	import get_template_details
+from frappe.utils import cint, flt
+
+from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
+	get_template_details,
+)
+
 
 class QualityInspection(Document):
 	def validate(self):

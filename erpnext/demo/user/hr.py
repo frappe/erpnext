@@ -1,15 +1,23 @@
 from __future__ import unicode_literals
-import frappe, erpnext
-import random
+
 import datetime
-from frappe.utils import random_string, add_days, get_last_day, getdate
+import random
+
+import frappe
+from frappe.utils import add_days, get_last_day, getdate, random_string
+from frappe.utils.make_random import get_random
+
+import erpnext
+from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
+from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
+from erpnext.hr.doctype.leave_application.leave_application import (
+	AttendanceAlreadyMarkedError,
+	OverlapError,
+	get_leave_balance_on,
+)
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
-from frappe.utils.make_random import get_random
-from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
-from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
-from erpnext.hr.doctype.leave_application.leave_application import (get_leave_balance_on,
-	OverlapError, AttendanceAlreadyMarkedError)
+
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_hr_user'))

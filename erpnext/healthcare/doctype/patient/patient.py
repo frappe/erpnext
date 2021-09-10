@@ -3,18 +3,25 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import dateutil
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import cint, cstr, getdate
-import dateutil
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from frappe.model.document import Document
 from frappe.model.naming import set_name_by_naming_series
+from frappe.utils import cint, cstr, getdate
 from frappe.utils.nestedset import get_root_of
+
 from erpnext import get_default_currency
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account, send_registration_sms
 from erpnext.accounts.party import get_dashboard_info
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
+	get_income_account,
+	get_receivable_account,
+	send_registration_sms,
+)
+
 
 class Patient(Document):
 	def onload(self):
@@ -122,13 +129,19 @@ class Patient(Document):
 
 		return name
 
-	def get_age(self):
-		age_str = ''
-		if self.dob:
-			dob = getdate(self.dob)
-			age = dateutil.relativedelta.relativedelta(getdate(), dob)
-			age_str = f'{str(age.years)} {_("Years(s)")} {str(age.months)} {_("Month(s)")} {str(age.days)} {_("Day(s)")}'
+	@property
+	def age(self):
+		if not self.dob:
+			return
+		dob = getdate(self.dob)
+		age = dateutil.relativedelta.relativedelta(getdate(), dob)
+		return age
 
+	def get_age(self):
+		age = self.age
+		if not age:
+			return
+		age_str = str(age.years) + ' ' + _("Years(s)") + ' ' + str(age.months) + ' ' + _("Month(s)") + ' ' + str(age.days) + ' ' + _("Day(s)")
 		return age_str
 
 	@frappe.whitelist()
