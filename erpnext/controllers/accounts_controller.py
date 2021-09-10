@@ -410,7 +410,8 @@ class AccountsController(TransactionBase):
 				apply_pricing_rule_for_free_items(self, self.free_items)
 				for item in self.get('items'):
 					if item.get('is_free_item'):
-						item_details = get_args_for_item(item)
+						args = get_args_for_item(item)
+						item_details = get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
 						self.set_item_details(item, item_details)
 				self.free_items = []
 			else:
