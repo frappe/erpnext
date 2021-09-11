@@ -715,3 +715,4 @@ erpnext.patches.v12_0.rebuild_sle_posting_sort_index
 erpnext.patches.v12_0.set_manufacture_repack_cost_percentage
 erpnext.patches.v12_0.set_stock_ledger_entry_serial_no_table
 erpnext.patches.v12_0.set_salary_slip_mode_of_payment_amount
+erpnext.patches.v12_0.set_delivery_overdue_in_vehicle_booking_order

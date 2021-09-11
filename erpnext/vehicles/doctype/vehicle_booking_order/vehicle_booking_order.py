@@ -324,13 +324,19 @@ class VehicleBookingOrder(VehicleBookingController):
 		else:
 			self.delivery_status = "Delivered"
 
+		if self.delivery_status != "Delivered" and getdate(self.delivery_date) < getdate(today()):
+			self.delivery_overdue = 1
+		else:
+			self.delivery_overdue = 0
+
 		if update:
 			self.db_set({
 				"vehicle_receipt": self.vehicle_receipt,
 				"vehicle_received_date": self.vehicle_received_date,
 				"vehicle_delivered_date": self.vehicle_delivered_date,
 				"lr_no": self.lr_no,
-				"delivery_status": self.delivery_status
+				"delivery_status": self.delivery_status,
+				"delivery_overdue": self.delivery_overdue
 			})
 
 	def check_outstanding_payment_for_delivery(self):
@@ -471,14 +477,8 @@ class VehicleBookingOrder(VehicleBookingController):
 					else:
 						self.status = "To Receive Payment"
 
-			elif getdate(self.delivery_date) < getdate(today()) and self.delivery_status != "Delivered":
-				self.status = "Delivery Overdue"
-
 			elif self.vehicle_allocation_required and not self.vehicle_allocation:
 				self.status = "To Assign Allocation"
-
-			elif not self.vehicle:
-				self.status = "To Assign Vehicle"
 
 			elif self.delivery_status == "Not Received":
 				self.status = "To Receive Vehicle"
@@ -730,16 +730,16 @@ def update_overdue_status():
 			and status = 'To Receive Payment'
 			and due_date < CURDATE()
 			and customer_outstanding > 0
+			and status != 'Cancelled Booking'
 	""")
 
 	frappe.db.sql("""
 		update `tabVehicle Booking Order`
-		set status = 'Delivery Overdue'
+		set delivery_overdue = 1
 		where docstatus = 1
 			and delivery_status != 'Delivered'
 			and delivery_date < CURDATE()
 			and customer_outstanding <= 0
-			and supplier_outstanding <= 0
 			and status != 'Cancelled Booking'
 	""")
 

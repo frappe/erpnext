@@ -57,14 +57,14 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		}
 	},
 
-	allocation_route_options: function() {
+	allocation_route_options: function(dialog) {
 		return {
 			"company": this.frm.doc.company,
 			"item_code": this.frm.doc.item_code,
 			"item_name": this.frm.doc.item_name,
 			"supplier": this.frm.doc.supplier,
-			"allocation_period": this.frm.doc.allocation_period || this.frm.doc.delivery_period,
-			"delivery_period": this.frm.doc.delivery_period
+			"allocation_period": dialog ? dialog.get_value('delivery_period') : this.frm.doc.allocation_period || this.frm.doc.delivery_period,
+			"delivery_period": dialog ? dialog.get_value('delivery_period') : this.frm.doc.delivery_period
 		}
 	},
 
@@ -226,7 +226,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 			if (unpaid) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
-			} else if (this.frm.doc.status === "To Assign Vehicle") {
+			} else if (["To Assign Vehicle", "To Receive Vehicle"].includes(this.frm.doc.status) && !this.frm.doc.vehicle) {
 				this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
 			} else if (["To Receive Vehicle", "Delivery Overdue"].includes(this.frm.doc.status) && this.frm.doc.delivery_status === "Not Received") {
 				this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
@@ -302,6 +302,10 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			delivery_status_color = "green";
 		}
 
+		if (me.frm.doc.delivery_status != "Delivered" && cint(me.frm.doc.delivery_overdue)) {
+			delivery_status_color = "red";
+		}
+
 		var invoice_status_color;
 		if (me.frm.doc.invoice_status == "Not Received") {
 			invoice_status_color = "blue";
@@ -317,7 +321,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				indicator: cint(me.frm.doc.priority) ? 'red' : 'blue'
 			},
 			{
-				contents: __('Delivery Status: {0}', [me.frm.doc.delivery_status]),
+				contents: __('Delivery Status: {0}{1}', [me.frm.doc.delivery_status,
+					me.frm.doc.delivery_status != "Delivered" && cint(me.frm.doc.delivery_overdue) ? __(" (Overdue)") : ""]),
 				indicator: delivery_status_color
 			},
 			{
@@ -660,7 +665,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 								}
 							});
 						}
-					}, get_query: () => me.allocation_query(true, dialog), get_route_options_for_new_doc: () => me.allocation_route_options()
+					}, get_query: () => me.allocation_query(true, dialog), get_route_options_for_new_doc: () => me.allocation_route_options(dialog)
 				},
 				{label: __("Delivery Period"), fieldname: "delivery_period", fieldtype: "Link", options: "Vehicle Allocation Period",
 					default: me.frm.doc.delivery_period, bold: 1, get_query: () => me.delivery_period_query(true)},

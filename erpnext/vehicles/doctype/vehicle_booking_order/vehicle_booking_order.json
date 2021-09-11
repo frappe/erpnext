@@ -94,6 +94,7 @@
   "bill_date",
   "lr_no",
   "priority",
+  "delivery_overdue",
   "section_break_73",
   "vehicle_allocation",
   "column_break_75",
@@ -517,7 +518,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nTo Receive Payment\nPayment Overdue\nTo Assign Allocation\nTo Deposit Payment\nDelivery Overdue\nTo Assign Vehicle\nTo Receive Vehicle\nTo Receive Invoice\nTo Deliver Vehicle\nTo Deliver Invoice\nCompleted\nCancelled Booking\nCancelled",
+   "options": "Draft\nTo Receive Payment\nPayment Overdue\nTo Assign Allocation\nTo Deposit Payment\nTo Receive Vehicle\nTo Receive Invoice\nTo Deliver Vehicle\nTo Deliver Invoice\nCompleted\nCancelled Booking\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -1068,12 +1069,21 @@
    "label": "Territory",
    "options": "Territory",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delivery_overdue",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Delivery Overdue",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-08-16 15:10:06.592832",
+ "modified": "2021-09-12 00:18:43.019750",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

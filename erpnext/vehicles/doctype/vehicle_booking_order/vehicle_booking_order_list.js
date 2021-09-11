@@ -1,19 +1,28 @@
 frappe.listview_settings['Vehicle Booking Order'] = {
-	add_fields: ["status"],
+	add_fields: ["status", "delivery_overdue", "high_priority"],
 	get_indicator: function(doc) {
+		var indicator;
+
 		if(doc.status === "Completed") {
-			return [__("Completed"), "green", "status,=,Completed"];
+			indicator = [__("Completed"), "green", "status,=,Completed"];
 		} else if(["To Assign Allocation", "To Assign Vehicle"].includes(doc.status)) {
-			return [__(doc.status), "purple", `status,=,${doc.status}`];
+			indicator = [__(doc.status), "purple", `status,=,${doc.status}`];
 		} else if (["To Receive Payment", "To Receive Vehicle", "To Receive Invoice"].includes(doc.status)) {
-			return [__(doc.status), "yellow", `status,=,${doc.status}`];
+			indicator = [__(doc.status), "yellow", `status,=,${doc.status}`];
 		} else if(["To Deposit Payment", "To Deliver Vehicle", "To Deliver Invoice"].includes(doc.status)) {
-			return [__(doc.status), "orange", `status,=,${doc.status}`];
+			indicator = [__(doc.status), "orange", `status,=,${doc.status}`];
 		} else if(["Payment Overdue", "Delivery Overdue"].includes(doc.status)) {
-			return [__(doc.status), "red", `status,=,${doc.status}`];
+			indicator = [__(doc.status), "red", `status,=,${doc.status}`];
 		} else if(doc.status === "Cancelled Booking") {
-			return [__(doc.status), "darkgrey", `status,=,${doc.status}`];
+			indicator = [__(doc.status), "darkgrey", `status,=,${doc.status}`];
 		}
+
+		if (cint(doc.delivery_overdue) && indicator && ["To Receive Vehicle", "To Deliver Vehicle"].includes(doc.status)) {
+			indicator[0] += __(" (Overdue)");
+			indicator[1] = "red";
+		}
+
+		return indicator;
 	},
 	onload: function(listview) {
 		listview.page.fields_dict.customer.get_query = () => {

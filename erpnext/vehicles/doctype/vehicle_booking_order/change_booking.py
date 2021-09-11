@@ -490,6 +490,8 @@ def handle_delivery_period_changed(vbo_doc):
 	vbo_doc.due_date = to_date
 	vbo_doc.payment_schedule = []
 	vbo_doc.validate_payment_schedule()
+
+	vbo_doc.update_delivery_status()
 	vbo_doc.update_payment_status()
 
 	frappe.msgprint(_("Delivery Period has been changed from {0} to {1}")
