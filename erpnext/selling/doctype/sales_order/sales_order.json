@@ -14,7 +14,6 @@
   "title",
   "naming_series",
   "customer",
-  "scope_of_supply",
   "customer_name",
   "_party_balance",
   "update_party_balance",
@@ -1599,12 +1598,6 @@
    "fieldtype": "Small Text",
    "label": "Dispatch Address",
    "read_only": 1
-  },
-  {
-   "fieldname": "scope_of_supply",
-   "fieldtype": "Link",
-   "label": "Scope Of Supply",
-   "options": "Scope of Supply"
   },
   {
    "default": "0",
