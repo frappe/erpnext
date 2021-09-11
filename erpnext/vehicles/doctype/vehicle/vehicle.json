@@ -632,7 +632,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-06-16 22:25:27.987042",
+ "modified": "2021-09-12 01:38:10.061103",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -665,9 +665,28 @@
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
    "permlevel": 1,
    "read": 1,
    "role": "Vehicle Stock User",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Sales Admin",
    "write": 1
   },
   {
@@ -689,24 +708,6 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User",
-   "share": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales User",
-   "share": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales User (Read Only)",
    "share": 1
   },
   {

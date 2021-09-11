@@ -424,6 +424,7 @@
    "fieldtype": "Data",
    "label": "Chassis No",
    "no_copy": 1,
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -432,6 +433,7 @@
    "fieldtype": "Data",
    "label": "Engine No",
    "no_copy": 1,
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -673,6 +675,7 @@
    "label": "Vehicle",
    "no_copy": 1,
    "options": "Vehicle",
+   "permlevel": 1,
    "search_index": 1
   },
   {
@@ -744,6 +747,7 @@
    "label": "Allocation Period",
    "no_copy": 1,
    "options": "Vehicle Allocation Period",
+   "permlevel": 2,
    "search_index": 1
   },
   {
@@ -769,6 +773,7 @@
    "label": "Vehicle Allocation",
    "no_copy": 1,
    "options": "Vehicle Allocation",
+   "permlevel": 2,
    "search_index": 1
   },
   {
@@ -777,6 +782,7 @@
    "fieldtype": "Data",
    "label": "Allocation Code / Sr #",
    "no_copy": 1,
+   "permlevel": 2,
    "read_only": 1
   },
   {
@@ -1083,7 +1089,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-12 00:18:43.019750",
+ "modified": "2021-09-12 02:00:26.292542",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
@@ -1122,26 +1128,43 @@
    "write": 1
   },
   {
-   "amend": 1,
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts User",
-   "share": 1,
-   "submit": 1,
-   "write": 1
+   "share": 1
   },
   {
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Sales Admin",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "permlevel": 2,
+   "read": 1,
+   "role": "All"
+  },
+  {
+   "permlevel": 2,
+   "read": 1,
+   "role": "Sales Admin",
+   "write": 1
   }
  ],
  "restrict_to_domain": "Vehicles",

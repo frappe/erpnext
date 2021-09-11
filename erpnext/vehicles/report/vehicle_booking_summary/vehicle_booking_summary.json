@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "Hyundai South",
- "modified": "2021-05-27 04:36:41.397155",
+ "modified": "2021-09-12 01:26:35.271976",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Summary",
@@ -19,16 +19,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Sales User"
-  },
-  {
    "role": "Sales Manager"
   },
   {
    "role": "Accounts User"
-  },
-  {
-   "role": "Sales User (Read Only)"
   },
   {
    "role": "Sales Admin"
