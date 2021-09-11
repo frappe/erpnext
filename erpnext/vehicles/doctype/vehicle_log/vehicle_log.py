@@ -84,5 +84,19 @@ def make_odometer_log(vehicle, odometer, date=None, project=None):
 	doc.odometer = cint(odometer)
 	doc.project = project
 
+	doc.flags.ignore_permissions = True
 	doc.save()
 	doc.submit()
+
+	return doc.name
+
+
+def odometer_log_exists(vehicle, odometer):
+	if not vehicle:
+		frappe.throw(_("No Vehicle Provided"))
+
+	return frappe.db.exists("Vehicle Log", {
+		"vehicle": vehicle,
+		"odometer": cint(odometer),
+		"docstatus": 1
+	})

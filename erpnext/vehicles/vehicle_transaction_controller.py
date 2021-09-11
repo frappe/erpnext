@@ -11,6 +11,7 @@ from erpnext.vehicles.doctype.vehicle.vehicle import warn_vehicle_reserved
 from erpnext.accounts.party import validate_party_frozen_disabled
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log, odometer_log_exists, get_vehicle_odometer
 import json
 from six import string_types
 
@@ -234,6 +235,20 @@ class VehicleTransactionController(StockController):
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
+	def make_odometer_log(self):
+		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
+			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
+				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer, date=self.posting_date)
+				self.db_set('vehicle_log', vehicle_log)
+
+	def cancel_odometer_log(self):
+		if self.meta.has_field('vehicle_log') and self.get('vehicle_log'):
+			doc = frappe.get_doc("Vehicle Log", self.vehicle_log)
+			doc.flags.ignore_permissions = True
+			doc.cancel()
+
+			self.db_set('vehicle_log', None)
+
 
 @frappe.whitelist()
 def get_customer_details(args):
@@ -376,6 +391,9 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	out.vehicle_color = vehicle_details.color
 	out.vehicle_warranty_no = vehicle_details.warranty_no
 	out.image = vehicle_details.image
+
+	if args.vehicle:
+		out.vehicle_odometer = get_vehicle_odometer(args.vehicle, date=args.posting_date)
 
 	if vehicle_details.warehouse:
 		out.warehouse = vehicle_details.warehouse

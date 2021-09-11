@@ -81,6 +81,8 @@
   "delivery_details_section",
   "remarks",
   "column_break_51",
+  "vehicle_odometer",
+  "vehicle_log",
   "keys",
   "section_break_47",
   "image",
@@ -642,12 +644,26 @@
    "fieldtype": "Check",
    "in_standard_filter": 1,
    "label": "Is Return"
+  },
+  {
+   "fieldname": "vehicle_log",
+   "fieldtype": "Link",
+   "label": "Vehicle Odometer Log",
+   "no_copy": 1,
+   "options": "Vehicle Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_odometer",
+   "fieldtype": "Int",
+   "label": "Odometer Reading",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-08-25 00:03:57.609280",
+ "modified": "2021-09-11 14:03:43.521946",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",

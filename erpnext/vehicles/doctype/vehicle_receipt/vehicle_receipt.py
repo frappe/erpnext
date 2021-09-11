@@ -21,12 +21,14 @@ class VehicleReceipt(VehicleTransactionController):
 		self.validate_transporter()
 
 	def on_submit(self):
-		self.update_vehicle_details()
 		self.update_stock_ledger()
+		self.update_vehicle_details()
+		self.make_odometer_log()
 		self.update_vehicle_booking_order()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
+		self.cancel_odometer_log()
 		self.update_vehicle_booking_order()
 
 	def set_title(self):

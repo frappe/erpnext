@@ -446,8 +446,7 @@ def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
 
 	filters = {
 		"vehicle": vehicle,
-		"docstatus": 1,
-		"date": ['<=', date]
+		"docstatus": 1
 	}
 
 	if project:

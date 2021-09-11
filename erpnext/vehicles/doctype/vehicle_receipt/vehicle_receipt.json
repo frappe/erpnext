@@ -50,9 +50,13 @@
   "vehicle_engine_no",
   "column_break_25",
   "vehicle_color",
-  "vehicle_warranty_no",
   "vehicle_license_plate",
-  "vehicle_unregistered"
+  "vehicle_unregistered",
+  "more_info_section",
+  "vehicle_odometer",
+  "vehicle_log",
+  "column_break_48",
+  "vehicle_warranty_no"
  ],
  "fields": [
   {
@@ -385,12 +389,35 @@
    "fieldtype": "Check",
    "in_standard_filter": 1,
    "label": "Is Return"
+  },
+  {
+   "fieldname": "more_info_section",
+   "fieldtype": "Section Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_log",
+   "fieldtype": "Link",
+   "label": "Vehicle Odometer Log",
+   "no_copy": 1,
+   "options": "Vehicle Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_odometer",
+   "fieldtype": "Int",
+   "label": "Odometer Reading",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-08-25 00:04:04.985792",
+ "modified": "2021-09-11 14:03:39.925119",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",

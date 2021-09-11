@@ -20,10 +20,12 @@ class VehicleDelivery(VehicleTransactionController):
 
 	def on_submit(self):
 		self.update_stock_ledger()
+		self.make_odometer_log()
 		self.update_vehicle_booking_order()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
+		self.cancel_odometer_log()
 		self.update_vehicle_booking_order()
 
 	def validate_return(self):
