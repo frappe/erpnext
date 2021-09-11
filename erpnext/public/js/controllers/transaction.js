@@ -864,8 +864,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if (r.message) {
 							me.frm.set_value("billing_address", r.message);
 						} else {
-							if(frappe.meta.get_docfield(me.frm.doctype, 'company_address'))				
-								me.frm.set_value("company_address", "");						
+							if(frappe.meta.get_docfield(me.frm.doctype, 'company_address')){			
+								me.frm.set_value("company_address", "");
+							}						
 						}
 					}
 				});
