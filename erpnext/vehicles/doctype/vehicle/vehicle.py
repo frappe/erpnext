@@ -146,7 +146,7 @@ class Vehicle(Document):
 
 	def delete_serial_no_on_trash(self):
 		if frappe.db.exists("Serial No", self.name):
-			frappe.delete_doc("Serial No", self.name)
+			frappe.delete_doc("Serial No", self.name, ignore_permissions=True)
 
 	def get_serial_no_doc(self):
 		serial_no_doc = None
