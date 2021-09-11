@@ -167,6 +167,7 @@ class VehicleStockReport(object):
 					d.license_plate = vehicle_receipt_data.vehicle_license_plate
 					d.unregistered = vehicle_receipt_data.vehicle_unregistered
 					d.color = vehicle_receipt_data.vehicle_color or d.color
+					d.odometer = cint(vehicle_receipt_data.vehicle_odometer) or None
 					d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
 					d.customer = vehicle_receipt_data.customer
 					d.customer_name = vehicle_receipt_data.customer_name
@@ -175,6 +176,7 @@ class VehicleStockReport(object):
 					d.transporter = vehicle_receipt_data.transporter
 					d.transporter_name = vehicle_receipt_data.transporter_name or vehicle_receipt_data.transporter
 					d.lr_no = vehicle_receipt_data.lr_no
+					d.receipt_remarks = vehicle_receipt_data.remarks
 					d.has_return = cint(vehicle_receipt_data.is_return) or d.has_return
 					d.has_delivery_return = cint(vehicle_receipt_data.is_return)
 
@@ -192,6 +194,7 @@ class VehicleStockReport(object):
 					d.license_plate = vehicle_delivery_data.vehicle_license_plate or d.license_plate
 					d.unregistered = vehicle_delivery_data.vehicle_unregistered or d.unregistered
 					d.color = vehicle_delivery_data.vehicle_color or d.color
+					d.odometer = cint(vehicle_delivery_data.vehicle_odometer) or d.odometer
 					d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
 					d.customer = vehicle_delivery_data.customer
 					d.customer_name = vehicle_delivery_data.booking_customer_name or vehicle_delivery_data.customer_name
@@ -423,7 +426,8 @@ class VehicleStockReport(object):
 			return self.vehicle_data
 
 		data = frappe.db.sql("""
-			select name, item_code, chassis_no, engine_no, license_plate, color, unregistered, dispatch_date
+			select name, item_code, chassis_no, engine_no, license_plate, color, unregistered,
+				dispatch_date, last_odometer
 			from `tabVehicle`
 			where name in %s
 		""", [vehicle_names], as_dict=1)
@@ -476,7 +480,7 @@ class VehicleStockReport(object):
 			data = frappe.db.sql("""
 				select name, vehicle_booking_order, supplier, supplier_name, customer, customer_name,
 					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered, vehicle_color,
-					transporter, transporter_name, lr_no, is_return
+					transporter, transporter_name, lr_no, is_return, vehicle_odometer, remarks
 				from `tabVehicle Receipt`
 				where docstatus = 1 and name in %s
 			""", [receipt_names], as_dict=1)
@@ -493,7 +497,7 @@ class VehicleStockReport(object):
 					customer, customer_name, booking_customer_name, broker, broker_name, vehicle_owner, vehicle_owner_name,
 					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered, vehicle_color,
 					receiver_contact, receiver_contact_display, receiver_contact_mobile, receiver_contact_phone,
-					transporter, transporter_name, lr_no, is_return
+					transporter, transporter_name, lr_no, is_return, vehicle_odometer
 				from `tabVehicle Delivery`
 				where docstatus = 1 and name in %s
 			""", [delivery_names], as_dict=1)
@@ -600,6 +604,7 @@ class VehicleStockReport(object):
 			{"label": _("Engine No"), "fieldname": "engine_no", "fieldtype": "Data", "width": 115},
 			{"label": _("Color"), "fieldname": "color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 60},
+			{"label": _("Odometer"), "fieldname": "odometer", "fieldtype": "Int", "width": 60},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
@@ -609,6 +614,7 @@ class VehicleStockReport(object):
 			{"label": _("Delivered To"), "fieldname": "delivered_to", "fieldtype": "Data", "width": 110},
 			{"label": _("Broker Name"), "fieldname": "broker_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Supplier"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 110},
+			{"label": _("Receipt Remarks"), "fieldname": "receipt_remarks", "fieldtype": "Data", "width": 150},
 			{"label": _("Transporter"), "fieldname": "transporter_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Bilty"), "fieldname": "lr_no", "fieldtype": "Data", "width": 70},
 			{"label": _("Invoice"), "fieldname": "bill_no", "fieldtype": "Data", "width": 80},
