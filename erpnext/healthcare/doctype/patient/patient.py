@@ -167,7 +167,9 @@ class Patient(Document):
 
 		if contact:
 			old_doc = self.get_doc_before_save()
-			if not old_doc: return
+			if not old_doc:
+				return
+
 			if old_doc.email != self.email or old_doc.mobile != self.mobile or old_doc.phone != self.phone:
 				self.update_contact(contact)
 		else:
