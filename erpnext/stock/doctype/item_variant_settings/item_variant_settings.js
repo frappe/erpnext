@@ -4,10 +4,6 @@
 frappe.ui.form.on('Item Variant Settings', {
 	refresh: function(frm) {
 		const allow_fields = [];
-<<<<<<< HEAD
-		const exclude_fields = ["naming_series", "item_code", "item_name", "published_in_website",
-			"opening_stock", "variant_of", "valuation_rate"];
-=======
 
 		const existing_fields = frm.doc.fields.map(row => row.field_name);
 		const exclude_fields = [...existing_fields, "naming_series", "item_code", "item_name",
@@ -16,7 +12,6 @@ frappe.ui.form.on('Item Variant Settings', {
 			"website_specifiations", "web_long_description", "has_variants", "attributes"];
 
 		const exclude_field_types = ['HTML', 'Section Break', 'Column Break', 'Button', 'Read Only'];
->>>>>>> 6ef879fca2 (fix(ux): clean invalid fields from variant setting (#27412))
 
 		frappe.model.with_doctype('Item', () => {
 			frappe.get_meta('Item').fields.forEach(d => {
