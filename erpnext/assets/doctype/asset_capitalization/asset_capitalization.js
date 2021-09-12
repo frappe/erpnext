@@ -136,8 +136,13 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		}
 	}
 
-	finance_book() {
-		this.get_all_asset_values();
+	finance_book(doc, cdt, cdn) {
+		if (cdt === "Asset Capitalization Asset Item") {
+			var row = frappe.get_doc(cdt, cdn);
+			this.get_consumed_asset_details(row);
+		} else {
+			this.get_all_asset_values();
+		}
 	}
 
 	stock_qty() {
@@ -268,7 +273,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 						doctype: me.frm.doc.doctype,
 						name: me.frm.doc.name,
 						company: me.frm.doc.company,
-						finance_book: me.frm.doc.finance_book,
+						finance_book: row.finance_book || me.frm.doc.finance_book,
 						posting_date: me.frm.doc.posting_date,
 						posting_time: me.frm.doc.posting_time,
 					}

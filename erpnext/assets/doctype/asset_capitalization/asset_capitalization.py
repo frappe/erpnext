@@ -72,6 +72,7 @@ class AssetCapitalization(AccountsController):
 			args.update(d.as_dict())
 			args.doctype = self.doctype
 			args.name = self.name
+			args.finance_book = d.get('finance_book') or self.get('finance_book')
 			consumed_asset_details = get_consumed_asset_details(args, get_asset_value=False)
 			for k, v in consumed_asset_details.items():
 				if d.meta.has_field(k) and (not d.get(k) or k in force_fields):
@@ -195,7 +196,7 @@ class AssetCapitalization(AccountsController):
 	def set_asset_values(self):
 		for d in self.asset_items:
 			if d.asset:
-				d.asset_value = flt(get_current_asset_value(d.asset, self.finance_book))
+				d.asset_value = flt(get_current_asset_value(d.asset, d.get('finance_book') or self.finance_book))
 
 	def get_args_for_incoming_rate(self, item):
 		return frappe._dict({
