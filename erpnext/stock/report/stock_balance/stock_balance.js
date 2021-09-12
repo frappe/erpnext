@@ -58,8 +58,8 @@ frappe.query_reports["Stock Balance"] = {
 
 				return {
 					filters: {
-						...(warehouse_type) && {warehouse_type},
-						...(company) && {company}
+						...warehouse_type && {warehouse_type},
+						...company && {company}
 					}
 				}
 			}
