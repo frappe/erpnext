@@ -50,7 +50,7 @@ class TestEmployee(unittest.TestCase):
 
 def make_employee(user, company=None, **kwargs):
 	if not frappe.db.get_value("User", user):
-		user_id = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "User",
 			"email": user,
 			"first_name": user,
