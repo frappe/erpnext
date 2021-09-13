@@ -54,6 +54,7 @@ from erpnext.stock.get_item_details import (
 	get_item_tax_map,
 	get_item_warehouse,
 )
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -1456,6 +1457,86 @@ class AccountsController(TransactionBase):
 
 		jv.save()
 		jv.submit()
+
+	def check_finance_books(self, item, asset):
+		if (len(asset.finance_books) > 1 and not item.get('finance_book') and not self.get('finance_book')
+			and asset.finance_books[0].finance_book):
+			frappe.throw(_("Select finance book for the item {0} at row {1}")
+				.format(item.item_code, item.idx))
+
+	def depreciate_asset(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.prepare_depreciation_data(self.posting_date)
+		asset.save()
+
+		post_depreciation_entries(self.posting_date, commit=False)
+
+	def reset_depreciation_schedule(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+
+		# recreate original depreciation schedule of the asset
+		asset.prepare_depreciation_data()
+
+		self.modify_depreciation_schedule_for_asset_repairs(asset)
+		asset.save()
+
+		self.delete_depreciation_entry_made_after_disposal(asset)
+
+	def modify_depreciation_schedule_for_asset_repairs(self, asset):
+		asset_repairs = frappe.get_all(
+			'Asset Repair',
+			filters={'asset': asset.name},
+			fields=['name', 'increase_in_asset_life']
+		)
+
+		for repair in asset_repairs:
+			if repair.increase_in_asset_life:
+				asset_repair = frappe.get_doc('Asset Repair', repair.name)
+				asset_repair.modify_depreciation_schedule()
+				asset.prepare_depreciation_data()
+
+	def delete_depreciation_entry_made_after_disposal(self, asset):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+		posting_date_of_original_invoice = self.get_posting_date_of_disposal_entry()
+
+		row = -1
+		finance_book = asset.get('schedules')[0].get('finance_book')
+		for schedule in asset.get('schedules'):
+			if schedule.finance_book != finance_book:
+				row = 0
+				finance_book = schedule.finance_book
+			else:
+				row += 1
+
+			if schedule.schedule_date == posting_date_of_original_invoice:
+				if not self.disposal_was_made_on_original_schedule_date(asset, schedule, row,
+					posting_date_of_original_invoice):
+					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry.posting_date = nowdate()
+
+					for d in reverse_journal_entry.accounts:
+						d.reference_type = "Asset"
+						d.reference_name = asset.name
+
+					reverse_journal_entry.submit()
+
+	def get_posting_date_of_disposal_entry(self):
+		if self.doctype == "Sales Invoice" and self.return_against:
+			return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
+		else:
+			return self.posting_date
+
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
+	def disposal_was_made_on_original_schedule_date(self, asset, schedule, row, posting_date_of_original_disposal):
+		for finance_book in asset.get('finance_books'):
+			if schedule.finance_book == finance_book.finance_book:
+				orginal_schedule_date = add_months(finance_book.depreciation_start_date,
+					row * cint(finance_book.frequency_of_depreciation))
+
+				if orginal_schedule_date == posting_date_of_original_disposal:
+					return True
+		return False
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

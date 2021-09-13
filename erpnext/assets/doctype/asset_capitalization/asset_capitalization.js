@@ -15,6 +15,10 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	refresh() {
 		erpnext.hide_company();
+		this.show_general_ledger();
+		if (this.frm.doc.stock_items || !this.frm.doc.target_is_fixed_asset) {
+			this.show_stock_ledger();
+		}
 	}
 
 	setup_queries() {
@@ -33,7 +37,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				filters['item_code'] = me.frm.doc.target_item_code;
 			}
 
-			filters['status'] = ["not in", ["Draft", "Scrapped", "Sold"]]
+			filters['status'] = ["not in", ["Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"]]
 			filters['docstatus'] = 1;
 
 			return {
@@ -43,7 +47,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 		me.frm.set_query("asset", "asset_items", function() {
 			var filters = {
-				'status': ["not in", ["Draft", "Scrapped", "Sold"]],
+				'status': ["not in", ["Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"]],
 				'docstatus': 1
 			}
 
@@ -127,6 +131,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	posting_date() {
 		if (this.frm.doc.posting_date) {
 			this.get_all_item_warehouse_details();
+			this.get_all_asset_values();
 		}
 	}
 

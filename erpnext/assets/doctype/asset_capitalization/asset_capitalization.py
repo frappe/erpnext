@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
+# import erpnext
 from frappe import _
-from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.stock_controller import StockController
 from frappe.utils import cint, flt
 from erpnext.stock.get_item_details import get_item_warehouse, get_default_expense_account, get_default_cost_center
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -13,6 +14,9 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import get_current_asset_value
+from erpnext.stock import get_warehouse_account_map
+from erpnext.assets.doctype.asset.depreciation import get_gl_entries_on_asset_disposal, get_gl_entries_on_asset_regain,\
+	get_value_after_depreciation_on_disposal_date
 from six import string_types
 import json
 
@@ -21,7 +25,7 @@ force_fields = ['target_item_name', 'target_asset_name', 'item_name', 'asset_nam
 	'target_stock_uom', 'stock_uom', 'target_fixed_asset_account', 'fixed_asset_account']
 
 
-class AssetCapitalization(AccountsController):
+class AssetCapitalization(StockController):
 	def validate(self):
 		self.validate_posting_time()
 		self.set_missing_values(for_validate=True)
@@ -35,6 +39,18 @@ class AssetCapitalization(AccountsController):
 		self.set_asset_values()
 		self.calculate_totals()
 		self.set_title()
+
+	def before_submit(self):
+		self.validate_source_mandatory()
+
+	def on_submit(self):
+		self.update_stock_ledger()
+		self.make_gl_entries()
+
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
+		self.update_stock_ledger()
+		self.make_gl_entries()
 
 	def set_entry_type(self):
 		self.entry_type = "Capitalization" if self.target_is_fixed_asset else "Decapitalization"
@@ -104,10 +120,14 @@ class AssetCapitalization(AccountsController):
 			self.target_warehouse = None
 		if not target_item.is_fixed_asset:
 			self.target_asset = None
+			self.target_fixed_asset_account = None
 		if not target_item.has_batch_no:
 			self.target_batch_no = None
 		if not target_item.has_serial_no:
 			self.target_serial_no = ""
+
+		if target_item.is_stock_item and not self.target_warehouse:
+			frappe.throw(_("Target Warehouse is mandatory for Decapitalization"))
 
 		self.validate_item(target_item)
 
@@ -165,6 +185,13 @@ class AssetCapitalization(AccountsController):
 			if not d.cost_center:
 				d.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 
+	def validate_source_mandatory(self):
+		if not self.target_is_fixed_asset and not self.get('asset_items'):
+			frappe.throw(_("Consumed Asset Items is mandatory for Decapitalization"))
+
+		if not self.get('stock_items') and not self.get('asset_items'):
+			frappe.throw(_("Consumed Stock Items or Consumed Asset Items is mandatory for Capitalization"))
+
 	def validate_item(self, item):
 		from erpnext.stock.doctype.item.item import validate_end_of_life
 		validate_end_of_life(item.name, item.end_of_life, item.disabled)
@@ -173,7 +200,7 @@ class AssetCapitalization(AccountsController):
 		return frappe.db.get_value("Asset", asset, ["name", "item_code", "company", "status", "docstatus"], as_dict=1)
 
 	def validate_asset(self, asset):
-		if asset.status in ("Draft", "Scrapped", "Sold"):
+		if asset.status in ("Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"):
 			frappe.throw(_("Asset {0} is {1}").format(asset.name, asset.status))
 
 		if asset.docstatus == 0:
@@ -196,7 +223,10 @@ class AssetCapitalization(AccountsController):
 	def set_asset_values(self):
 		for d in self.asset_items:
 			if d.asset:
-				d.asset_value = flt(get_current_asset_value(d.asset, d.get('finance_book') or self.finance_book))
+				finance_book = d.get('finance_book') or self.get('finance_book')
+				d.current_asset_value = flt(get_current_asset_value(d.asset, finance_book=finance_book))
+				d.asset_value = get_value_after_depreciation_on_disposal_date(d.asset, self.posting_date,
+					finance_book=finance_book)
 
 	def get_args_for_incoming_rate(self, item):
 		return frappe._dict({
@@ -239,6 +269,180 @@ class AssetCapitalization(AccountsController):
 
 		self.target_qty = flt(self.target_qty, self.precision('target_qty'))
 		self.target_incoming_rate = self.total_value / self.target_qty
+
+	def update_stock_ledger(self):
+		sl_entries = []
+
+		for d in self.stock_items:
+			sle = self.get_sl_entries(d, {
+				"actual_qty": -flt(d.stock_qty),
+			})
+			sl_entries.append(sle)
+
+		if not frappe.db.get_value("Item", self.target_item_code, "is_fixed_asset", cache=1):
+			sle = self.get_sl_entries(self, {
+				"item_code": self.target_item_code,
+				"warehouse": self.target_warehouse,
+				"batch_no": self.target_batch_no,
+				"serial_no": self.target_serial_no,
+				"actual_qty": flt(self.target_qty),
+				"incoming_rate": flt(self.target_incoming_rate)
+			})
+			sl_entries.append(sle)
+
+		# reverse sl entries if cancel
+		if self.docstatus == 2:
+			sl_entries.reverse()
+
+		if sl_entries:
+			self.make_sl_entries(sl_entries)
+
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
+		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
+
+		if not gl_entries:
+			gl_entries = self.get_gl_entries()
+
+		if self.docstatus == 1:
+			if gl_entries:
+				make_gl_entries(gl_entries, from_repost=from_repost)
+		elif self.docstatus == 2:
+			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+
+	def get_gl_entries(self, warehouse_account=None, default_expense_account=None, default_cost_center=None):
+		# Stock GL Entries
+		gl_entries = []
+
+		if not warehouse_account:
+			warehouse_account = get_warehouse_account_map(self.company)
+
+		precision = self.get_debit_field_precision()
+		sle_map = self.get_stock_ledger_details()
+
+		if self.target_is_fixed_asset:
+			target_account = self.target_fixed_asset_account
+		else:
+			target_account = warehouse_account[self.target_warehouse]["account"]
+
+		target_against = set()
+
+		# Consumed Stock Items
+		total_consumed_stock_value = 0
+		for item_row in self.stock_items:
+			sle_list = sle_map.get(item_row.name)
+			if sle_list:
+				for sle in sle_list:
+					stock_value_difference = flt(sle.stock_value_difference, precision)
+					total_consumed_stock_value += -1 * sle.stock_value_difference
+
+					account = warehouse_account[sle.warehouse]["account"]
+					target_against.add(account)
+
+					gl_entries.append(self.get_gl_dict({
+						"account": account,
+						"against": target_account,
+						"cost_center": item_row.cost_center,
+						"project": item_row.get('project') or self.get('project'),
+						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+						"credit": -1 * stock_value_difference,
+					}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
+
+		# Consumed Assets
+		for item in self.asset_items:
+			asset = self.get_asset(item)
+
+			if self.docstatus == 2:
+				fixed_asset_gl_entries = get_gl_entries_on_asset_regain(asset,
+					item.asset_value, item.get('finance_book') or self.get('finance_book'))
+				asset.db_set("disposal_date", None)
+
+				self.set_consumed_asset_status(asset)
+
+				if asset.calculate_depreciation:
+					self.reset_depreciation_schedule(asset)
+			else:
+				if asset.calculate_depreciation:
+					self.depreciate_asset(asset)
+
+				asset.reload()
+				fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
+					item.asset_value, item.get('finance_book') or self.get('finance_book'))
+				asset.db_set("disposal_date", self.posting_date)
+
+				self.set_consumed_asset_status(asset)
+
+			for gle in fixed_asset_gl_entries:
+				gle["against"] = target_account
+				gl_entries.append(self.get_gl_dict(gle, item=item))
+
+		# Service Expenses
+		total_service_expenses = 0
+		for item_row in self.service_items:
+			expense_amount = flt(item_row.amount, precision)
+			total_service_expenses += expense_amount
+			target_against.add(item_row.expense_account)
+
+			gl_entries.append(self.get_gl_dict({
+				"account": item_row.expense_account,
+				"against": target_account,
+				"cost_center": item_row.cost_center,
+				"project": item_row.get('project') or self.get('project'),
+				"remarks": self.get("remarks") or "Accounting Entry for Stock",
+				"credit": expense_amount,
+			}, item=item_row))
+
+		target_against = ", ".join(target_against)
+		total_target_stock_value = 0
+		total_target_asset_value = 0
+
+		if self.target_is_fixed_asset:
+			# Target Asset Item
+			total_target_asset_value = flt(self.total_value, precision)
+			gl_entries.append(self.get_gl_dict({
+				"account": self.target_fixed_asset_account,
+				"against": target_against,
+				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+				"debit": total_target_asset_value,
+				"cost_center": self.get('cost_center')
+			}, item=self))
+
+			if self.docstatus == 1:
+				asset_doc = frappe.get_doc("Asset", self.target_asset)
+				asset_doc.purchase_date = self.posting_date
+				asset_doc.gross_purchase_amount = total_target_asset_value
+				asset_doc.purchase_receipt_amount = total_target_asset_value
+				asset_doc.prepare_depreciation_data()
+				asset_doc.flags.ignore_validate_update_after_submit = True
+				asset_doc.save()
+		else:
+			# Target Stock Item
+			sle_list = sle_map.get(self.name)
+			for sle in sle_list:
+				stock_value_difference = flt(sle.stock_value_difference, precision)
+				total_target_stock_value += sle.stock_value_difference
+				account = warehouse_account[sle.warehouse]["account"]
+
+				gl_entries.append(self.get_gl_dict({
+					"account": account,
+					"against": target_against,
+					"cost_center": self.cost_center,
+					"project": self.get('project'),
+					"remarks": self.get("remarks") or "Accounting Entry for Stock",
+					"debit": stock_value_difference,
+				}, warehouse_account[sle.warehouse]["account_currency"], item=self))
+
+		return gl_entries
+
+	def get_asset(self, item):
+		asset = frappe.get_doc("Asset", item.asset)
+		self.check_finance_books(item, asset)
+		return asset
+
+	def set_consumed_asset_status(self, asset):
+		if self.docstatus == 1:
+			asset.set_status("Capitalized" if self.target_is_fixed_asset else "Decapitalized")
+		else:
+			asset.set_status()
 
 
 @frappe.whitelist()
@@ -395,8 +599,11 @@ def get_consumed_asset_details(args, get_asset_value=True):
 
 	if get_asset_value:
 		if args.asset:
-			out.asset_value = flt(get_current_asset_value(args.asset, finance_book=args.finance_book))
+			out.current_asset_value = flt(get_current_asset_value(args.asset, finance_book=args.finance_book))
+			out.asset_value = get_value_after_depreciation_on_disposal_date(args.asset, args.posting_date,
+				finance_book=args.finance_book)
 		else:
+			out.current_asset_value = 0
 			out.asset_value = 0
 
 	# Account

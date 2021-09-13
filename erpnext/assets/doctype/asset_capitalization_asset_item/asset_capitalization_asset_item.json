@@ -12,6 +12,7 @@
   "item_code",
   "item_name",
   "section_break_6",
+  "current_asset_value",
   "asset_value",
   "column_break_9",
   "accounting_dimensions_section",
@@ -102,12 +103,20 @@
    "fieldtype": "Link",
    "label": "Finance Book",
    "options": "Finance Book"
+  },
+  {
+   "fieldname": "current_asset_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Current Asset Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-08 23:42:25.143272",
+ "modified": "2021-09-12 14:30:02.915132",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization Asset Item",
