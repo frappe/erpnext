@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.utils import formatdate, get_link_to_form
 
+
 def execute(filters=None):
 	return VATAuditReport(filters).run()
 
