@@ -307,6 +307,7 @@ class TestSalarySlip(FrappeTestCase):
 			make_salary_slip as make_salary_slip_for_timesheet,
 		)
 
+<<<<<<< HEAD
 		emp = make_employee(
 			"test_employee_timesheet@salary.com",
 			company="_Test Company",
@@ -351,17 +352,27 @@ class TestSalarySlip(FrappeTestCase):
 		self.assertEqual(amount, expected_amount)
 
 	@change_settings("Payroll Settings", {"payroll_based_on": "Attendance"})
+=======
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 	def test_component_amount_dependent_on_another_payment_days_based_component(self):
 		from erpnext.hr.doctype.attendance.attendance import mark_attendance
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
 			create_salary_structure_assignment,
 		)
 
+<<<<<<< HEAD
 		no_of_days = get_no_of_days()
+=======
+		no_of_days = self.get_no_of_days()
+		# Payroll based on attendance
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
+
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 		salary_structure = make_salary_structure_for_payment_days_based_component_dependency()
 		employee = make_employee("test_payment_days_based_component@salary.com", company="_Test Company")
 
 		# base = 50000
+<<<<<<< HEAD
 		create_salary_structure_assignment(
 			employee, salary_structure.name, company="_Test Company", currency="INR"
 		)
@@ -377,11 +388,35 @@ class TestSalarySlip(FrappeTestCase):
 		ss = make_salary_slip_for_payment_days_dependency_test(
 			"test_payment_days_based_component@salary.com", salary_structure.name
 		)
+=======
+		create_salary_structure_assignment(employee, salary_structure.name, company="_Test Company", currency="INR")
+
+		# mark employee absent for a day since this case works fine if payment days are equal to working days
+		month_start_date = get_first_day(nowdate())
+		month_end_date = get_last_day(nowdate())
+
+		first_sunday = frappe.db.sql("""
+			select holiday_date from `tabHoliday`
+			where parent = 'Salary Slip Test Holiday List'
+				and holiday_date between %s and %s
+			order by holiday_date
+		""", (month_start_date, month_end_date))[0][0]
+
+		mark_attendance(employee, add_days(first_sunday, 1), 'Absent', ignore_validate=True) # counted as absent
+
+		# make salary slip and assert payment days
+		ss = make_salary_slip_for_payment_days_dependency_test("test_payment_days_based_component@salary.com", salary_structure.name)
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 		self.assertEqual(ss.absent_days, 1)
 
 		days_in_month = no_of_days[0]
 		no_of_holidays = no_of_days[1]
 
+<<<<<<< HEAD
+=======
+		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 1)
+
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 		ss.reload()
 		payment_days_based_comp_amount = 0
 		for component in ss.earnings:
@@ -401,8 +436,13 @@ class TestSalarySlip(FrappeTestCase):
 		expected_amount = flt((flt(ss.gross_pay) - payment_days_based_comp_amount) * 0.12, precision)
 
 		self.assertEqual(actual_amount, expected_amount)
+<<<<<<< HEAD
 
 	@change_settings("Payroll Settings", {"include_holidays_in_total_working_days": 1})
+=======
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
+
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 	def test_salary_slip_with_holidays_included(self):
 		no_of_days = get_no_of_days()
 		make_employee("test_salary_slip_with_holidays_included@salary.com")
@@ -1639,15 +1679,23 @@ def make_holiday_list(list_name=None, from_date=None, to_date=None, add_weekly_o
 
 	return holiday_list
 
+<<<<<<< HEAD
 
 def make_salary_structure_for_payment_days_based_component_dependency(test_statistical_comp=False):
+=======
+def make_salary_structure_for_payment_days_based_component_dependency():
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 	earnings = [
 		{
 			"salary_component": "Basic Salary - Payment Days",
 			"abbr": "P_BS",
 			"type": "Earning",
 			"formula": "base",
+<<<<<<< HEAD
 			"amount_based_on_formula": 1,
+=======
+			"amount_based_on_formula": 1
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 		},
 		{
 			"salary_component": "HRA - Payment Days",
@@ -1655,6 +1703,7 @@ def make_salary_structure_for_payment_days_based_component_dependency(test_stati
 			"type": "Earning",
 			"depends_on_payment_days": 1,
 			"amount_based_on_formula": 1,
+<<<<<<< HEAD
 			"formula": "base * 0.20",
 		},
 	]
@@ -1679,6 +1728,11 @@ def make_salary_structure_for_payment_days_based_component_dependency(test_stati
 				},
 			]
 		)
+=======
+			"formula": "base * 0.20"
+		}
+	]
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 
 	make_salary_component(earnings, False, company_list=["_Test Company"])
 
@@ -1688,7 +1742,11 @@ def make_salary_structure_for_payment_days_based_component_dependency(test_stati
 			"abbr": "P_PT",
 			"type": "Deduction",
 			"depends_on_payment_days": 1,
+<<<<<<< HEAD
 			"amount": 200.00,
+=======
+			"amount": 200.00
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 		},
 		{
 			"salary_component": "P - Employee Provident Fund",
@@ -1697,8 +1755,13 @@ def make_salary_structure_for_payment_days_based_component_dependency(test_stati
 			"exempted_from_income_tax": 1,
 			"amount_based_on_formula": 1,
 			"depends_on_payment_days": 0,
+<<<<<<< HEAD
 			"formula": "(gross_pay - P_HRA) * 0.12",
 		},
+=======
+			"formula": "(gross_pay - P_HRA) * 0.12"
+		}
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 	]
 
 	make_salary_component(deductions, False, company_list=["_Test Company"])
@@ -1713,7 +1776,11 @@ def make_salary_structure_for_payment_days_based_component_dependency(test_stati
 		"company": "_Test Company",
 		"payroll_frequency": "Monthly",
 		"payment_account": get_random("Account", filters={"account_currency": "INR"}),
+<<<<<<< HEAD
 		"currency": "INR",
+=======
+		"currency": "INR"
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 	}
 
 	salary_structure_doc = frappe.get_doc(details)
@@ -1729,6 +1796,7 @@ def make_salary_structure_for_payment_days_based_component_dependency(test_stati
 
 	return salary_structure_doc
 
+<<<<<<< HEAD
 
 def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure):
 	employee = frappe.db.get_value(
@@ -1738,6 +1806,16 @@ def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure
 	salary_slip_name = frappe.db.get_value(
 		"Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": employee})}
 	)
+=======
+def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure):
+	employee = frappe.db.get_value("Employee", {
+			"user_id": employee
+		},
+		["name", "company", "employee_name"],
+		as_dict=True)
+
+	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": employee})})
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 
 	if not salary_slip_name:
 		salary_slip = make_salary_slip(salary_structure, employee=employee.name)
@@ -1748,6 +1826,7 @@ def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure
 	else:
 		salary_slip = frappe.get_doc("Salary Slip", salary_slip_name)
 
+<<<<<<< HEAD
 	return salary_slip
 
 
@@ -1768,3 +1847,6 @@ def create_recurring_additional_salary(
 			"currency": erpnext.get_default_currency(),
 		}
 	).submit()
+=======
+	return salary_slip
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))

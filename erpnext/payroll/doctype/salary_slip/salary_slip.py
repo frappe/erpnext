@@ -610,7 +610,11 @@ class SalarySlip(TransactionBase):
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
 
+<<<<<<< HEAD
 		self.add_applicable_loans()
+=======
+		self.set_loan_repayment()
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 		self.set_precision_for_component_amounts()
 		self.set_net_pay()
 
@@ -929,6 +933,7 @@ class SalarySlip(TransactionBase):
 		component_row.amount = amount
 
 		self.update_component_amount_based_on_payment_days(component_row)
+<<<<<<< HEAD
 		if data:
 			data[component_row.abbr] = component_row.amount
 
@@ -941,6 +946,12 @@ class SalarySlip(TransactionBase):
 		# remove 0 valued components that have been updated later
 		if component_row.amount == 0:
 			self.remove(component_row)
+=======
+
+	def update_component_amount_based_on_payment_days(self, component_row):
+		joining_date, relieving_date = self.get_joining_and_relieving_dates()
+		component_row.amount = self.get_amount_based_on_payment_days(component_row, joining_date, relieving_date)[0]
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 
 	def set_precision_for_component_amounts(self):
 		for component_type in ("earnings", "deductions"):
@@ -1160,11 +1171,15 @@ class SalarySlip(TransactionBase):
 			"tax_deducted_till_date", start_date, end_date
 		)
 
+<<<<<<< HEAD
 		return total_tax_paid + tax_deducted_till_date
 
 	def get_taxable_earnings(
 		self, allow_tax_exemption=False, based_on_payment_days=0, payroll_period=None
 	):
+=======
+	def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 		joining_date, relieving_date = self.get_joining_and_relieving_dates()
 
 		taxable_earnings = 0
@@ -1435,9 +1450,14 @@ class SalarySlip(TransactionBase):
 		return total
 
 	def get_joining_and_relieving_dates(self):
+<<<<<<< HEAD
 		joining_date, relieving_date = frappe.get_cached_value(
 			"Employee", self.employee, ["date_of_joining", "relieving_date"]
 		)
+=======
+		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
+			["date_of_joining", "relieving_date"])
+>>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
 
 		if not relieving_date:
 			relieving_date = getdate(self.end_date)
