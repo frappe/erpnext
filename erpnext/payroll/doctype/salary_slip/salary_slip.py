@@ -944,8 +944,9 @@ class SalarySlip(TransactionBase):
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		amount, additional_amount = row.amount, row.additional_amount
 		if (self.salary_structure and
-			cint(row.depends_on_payment_days) and cint(self.total_working_days) and
-			(not self.salary_slip_based_on_timesheet or
+			cint(row.depends_on_payment_days) and cint(self.total_working_days)
+			and not (row.additional_salary and row.default_amount) # to identify overwritten additional salary
+			and (not self.salary_slip_based_on_timesheet or
 				getdate(self.start_date) < joining_date or
 				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
