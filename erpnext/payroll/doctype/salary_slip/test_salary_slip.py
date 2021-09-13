@@ -911,6 +911,7 @@ def setup_test():
 
 def make_holiday_list():
 	fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
+	holiday_list = frappe.db.exists("Holiday List", "Salary Slip Test Holiday List")
 	if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
@@ -921,8 +922,6 @@ def make_holiday_list():
 		}).insert()
 		holiday_list.get_weekly_off_dates()
 		holiday_list.save()
-<<<<<<< HEAD
-=======
 		holiday_list = holiday_list.name
 
 	return holiday_list
@@ -1014,4 +1013,3 @@ def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure
 		salary_slip = frappe.get_doc("Salary Slip", salary_slip_name)
 
 	return salary_slip
->>>>>>> bab644a249 (fix(Payroll): incorrect component amount calculation if dependent on another payment days based component (#27349))
