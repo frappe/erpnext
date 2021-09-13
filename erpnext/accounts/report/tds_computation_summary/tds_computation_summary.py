@@ -100,9 +100,7 @@ def get_invoice_and_tds_amount(supplier, account, company, from_date, to_date, f
 		""".format(', '.join("'%s'" % d for d in vouchers)),
 			(account, from_date, to_date, company))[0][0])
 
-	date_range_filter = [fiscal_year, from_date, to_date]
-
-	debit_note_amount = get_debit_note_amount([supplier], date_range_filter, company=company)
+	debit_note_amount = get_debit_note_amount([supplier], from_date, to_date, company=company)
 
 	total_invoiced_amount = supplier_credit_amount + tds_deducted - debit_note_amount
 
