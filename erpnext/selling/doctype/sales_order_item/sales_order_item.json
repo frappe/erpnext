@@ -10,6 +10,7 @@
   "item_code",
   "customer_item_code",
   "ensure_delivery_based_on_produced_serial_no",
+  "grant_commission",
   "col_break1",
   "delivery_date",
   "item_name",
@@ -789,12 +790,18 @@
    "no_copy": 1,
    "options": "currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-23 01:15:05.803091",
+ "modified": "2021-09-11 07:40:40.030937",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

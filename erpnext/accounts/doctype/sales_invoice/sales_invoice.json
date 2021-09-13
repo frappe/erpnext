@@ -182,6 +182,7 @@
   "sales_team_section_break",
   "sales_partner",
   "column_break10",
+  "commission_base",
   "commission_rate",
   "total_commission",
   "section_break2",
@@ -2020,6 +2021,12 @@
    "label": "Total Billing Hours",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "commission_base",
+   "fieldtype": "Currency",
+   "label": "Commission Base",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2032,7 +2039,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-09-08 15:24:25.486499",
+ "modified": "2021-09-11 07:43:24.389890",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

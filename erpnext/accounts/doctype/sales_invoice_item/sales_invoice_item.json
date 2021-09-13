@@ -9,6 +9,7 @@
  "field_order": [
   "barcode",
   "item_code",
+  "grant_commission",
   "col_break1",
   "item_name",
   "customer_item_code",
@@ -829,15 +830,22 @@
    "fieldtype": "Link",
    "label": "Discount Account",
    "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-19 13:41:53.435827",
+ "modified": "2021-09-11 07:45:56.958891",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

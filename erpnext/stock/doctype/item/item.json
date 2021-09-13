@@ -24,6 +24,7 @@
   "allow_alternative_item",
   "is_stock_item",
   "include_item_in_manufacturing",
+  "grant_commission",
   "opening_stock",
   "valuation_rate",
   "standard_rate",
@@ -942,6 +943,12 @@
    "fieldtype": "Check",
    "label": "Published in Website",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission"
   }
  ],
  "icon": "fa fa-tag",
@@ -950,7 +957,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-09-10 12:23:07.277077",
+ "modified": "2021-09-11 07:38:14.395506",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
