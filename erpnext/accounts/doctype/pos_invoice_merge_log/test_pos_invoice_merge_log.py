@@ -152,3 +152,45 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
+
+	def test_consolidated_invoice_write_off_amount(self):
+		frappe.db.sql("delete from `tabPOS Invoice`")
+
+		try:
+			test_user, pos_profile = init_user_and_profile()
+
+			pos_inv = create_pos_invoice(rate=310, do_not_submit=1)
+			pos_inv.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 300
+			})
+			pos_inv.write_off_outstanding_amount_automatically = 1
+			pos_inv.submit()
+
+			pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+			pos_inv2.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3000
+			})
+			pos_inv2.write_off_outstanding_amount_automatically = 1
+			pos_inv2.submit()
+
+			pos_inv3 = create_pos_invoice(rate=2300, do_not_submit=1)
+			pos_inv3.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 2000
+			})
+			pos_inv3.write_off_outstanding_amount_automatically = 1
+			pos_inv3.submit()
+
+			consolidate_pos_invoices()
+
+			pos_inv.load_from_db()
+			pos_inv2.load_from_db()
+			pos_inv3.load_from_db()
+			cons_inv = frappe.get_doc("Sales Invoice", pos_inv.consolidated_invoice)
+
+			self.assertEqual(cons_inv.write_off_amount, 510.0)
+			self.assertEqual(cons_inv.outstanding_amount, 0.0)
+
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.sql("delete from `tabPOS Profile`")
+			frappe.db.sql("delete from `tabPOS Invoice`")

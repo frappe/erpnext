@@ -523,6 +523,22 @@ class TestPOSInvoice(unittest.TestCase):
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv2.consolidated_invoice, "rounded_total")
 		self.assertEqual(rounded_total, 400)
 
+	def test_write_off_amount(self):
+		item = "Test Write Off Amount"
+		make_item(item, {"is_stock_item": 1})
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		pos = create_pos_invoice(company= "_Test Company", item=item, debit_to="Debtors - _TC",
+			income_account = "Sales - _TC", expense_account = "Cost of Goods Sold - _TC", rate=105,
+			cost_center = "Main - _TC", do_not_save=True)
+
+		pos.write_off_outstanding_amount_automatically = 1
+		pos.set('payments', [])
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 100, 'default': 1})
+		pos.save()
+		pos.reload()
+		self.assertEqual(pos.write_off_amount, 5.0)
+		self.assertEqual(pos.outstanding_amount, 0.0)
+
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
 	pos_profile = None
