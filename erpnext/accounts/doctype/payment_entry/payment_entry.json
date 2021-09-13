@@ -552,8 +552,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Title",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "depends_on": "party",
@@ -712,7 +711,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-09 08:58:15.008761",
+ "modified": "2021-09-13 11:58:02.856928",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
