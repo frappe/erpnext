@@ -3,8 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 
 class TestTransactionDeletionRecord(unittest.TestCase):
 	def setUp(self):
@@ -23,7 +25,7 @@ class TestTransactionDeletionRecord(unittest.TestCase):
 					contains_company = True
 					break
 			self.assertTrue(contains_company)
-	
+
 	def test_no_of_docs_is_correct(self):
 		for i in range(5):
 			create_task('Dunder Mifflin Paper Co')
@@ -40,13 +42,13 @@ class TestTransactionDeletionRecord(unittest.TestCase):
 			'company' : 'Dunder Mifflin Paper Co'
 		})
 		self.assertEqual(tasks_containing_company, [])
-		
+
 def create_company(company_name):
 	company = frappe.get_doc({
 		'doctype': 'Company',
 		'company_name': company_name,
 		'default_currency': 'INR'
-	})		
+	})
 	company.insert(ignore_if_duplicate = True)
 
 def create_transaction_deletion_request(company):

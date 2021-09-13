@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import cstr
@@ -158,7 +159,7 @@ def get_sales_invoice_data(filters):
 def get_mode_of_payments(filters):
 	mode_of_payments = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join(['"' + invoice['name'] + '"' for invoice in invoice_list])
+	invoice_list_names = ",".join('"' + invoice['name'] + '"' for invoice in invoice_list)
 	if invoice_list:
 		inv_mop = frappe.db.sql("""select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
 			from `tabSales Invoice` a, `tabSales Invoice Payment` b
@@ -197,7 +198,7 @@ def get_invoices(filters):
 def get_mode_of_payment_details(filters):
 	mode_of_payment_details = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join(['"' + invoice['name'] + '"' for invoice in invoice_list])
+	invoice_list_names = ",".join('"' + invoice['name'] + '"' for invoice in invoice_list)
 	if invoice_list:
 		inv_mop_detail = frappe.db.sql("""select a.owner, a.posting_date,
 			ifnull(b.mode_of_payment, '') as mode_of_payment, sum(b.base_amount) as paid_amount

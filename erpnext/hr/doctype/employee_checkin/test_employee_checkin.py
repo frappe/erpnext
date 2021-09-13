@@ -3,13 +3,19 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-from frappe.utils import now_datetime, nowdate, to_timedelta
 import unittest
 from datetime import timedelta
 
-from erpnext.hr.doctype.employee_checkin.employee_checkin import add_log_based_on_employee_field, mark_attendance_and_link_log, calculate_working_hours
+import frappe
+from frappe.utils import now_datetime, nowdate
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_checkin.employee_checkin import (
+	add_log_based_on_employee_field,
+	calculate_working_hours,
+	mark_attendance_and_link_log,
+)
+
 
 class TestEmployeeCheckin(unittest.TestCase):
 	def test_add_log_based_on_employee_field(self):
@@ -42,11 +48,11 @@ class TestEmployeeCheckin(unittest.TestCase):
 		self.assertEqual(logs_count, 4)
 		attendance_count = frappe.db.count('Attendance', {'status':'Present', 'working_hours':8.2,
 			'employee':employee, 'attendance_date':now_date})
-		self.assertEqual(attendance_count, 1)		
+		self.assertEqual(attendance_count, 1)
 
 	def test_calculate_working_hours(self):
 		check_in_out_type = ['Alternating entries as IN and OUT during the same shift',
-			'Strictly based on Log Type in Employee Checkin'] 
+			'Strictly based on Log Type in Employee Checkin']
 		working_hours_calc_type = ['First Check-in and Last Check-out',
 			'Every Valid Check-in and Check-out']
 		logs_type_1 = [

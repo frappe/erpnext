@@ -1,6 +1,12 @@
 name: Patch
 
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.md'
+  workflow_dispatch:
+
 
 jobs:
   test:
@@ -25,6 +31,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.6
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12
+          check-latest: true
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
@@ -66,4 +78,8 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Patch Tests
-        run: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate
+        run: |
+          cd ~/frappe-bench/
+          wget https://erpnext.com/files/v10-erpnext.sql.gz
+          bench --site test_site --force restore ~/frappe-bench/v10-erpnext.sql.gz
+          bench --site test_site migrate

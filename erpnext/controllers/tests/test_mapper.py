@@ -1,12 +1,14 @@
 from __future__ import unicode_literals
-import unittest
-import frappe
 
-import random, json
+import json
+import unittest
+
+import frappe
 import frappe.utils
-from frappe.utils import nowdate, add_months
 from frappe.model import mapper
 from frappe.test_runner import make_test_records
+from frappe.utils import add_months, nowdate
+
 
 class TestMapper(unittest.TestCase):
 	def test_map_docs(self):
@@ -26,8 +28,8 @@ class TestMapper(unittest.TestCase):
 
 		# Assert that all inserted items are present in updated sales order
 		src_items = item_list_1 + item_list_2 + item_list_3
-		self.assertEqual(set([d for d in src_items]),
-			set([d.item_code for d in updated_so.items]))
+		self.assertEqual(set(d for d in src_items),
+			set(d.item_code for d in updated_so.items))
 
 
 	def make_quotation(self, item_list, customer):

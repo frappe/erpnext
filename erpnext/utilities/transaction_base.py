@@ -2,13 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form, date_diff, nowdate
+from frappe.utils import cint, cstr, flt, get_time, now_datetime
+from six import string_types
+
 from erpnext.controllers.status_updater import StatusUpdater
 
-from six import string_types
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
@@ -147,7 +149,7 @@ class TransactionBase(StatusUpdater):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
 			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
 
-			values = filter(None, tuple([item.as_dict()[fieldname] for item in self.items]))
+			values = filter(None, tuple(item.as_dict()[fieldname] for item in self.items))
 
 			if values:
 				ret = {
@@ -180,7 +182,7 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, string_types):
 		qty_fields = [qty_fields]
 
-	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
+	distinct_uoms = list(set(d.get(uom_field) for d in doc.get_all_children()))
 	integer_uoms = list(filter(lambda uom: frappe.db.get_value("UOM", uom,
 		"must_be_whole_number", cache=True) or None, distinct_uoms))
 

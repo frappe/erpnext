@@ -2,23 +2,30 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.utils import cstr, flt, cint
-from frappe import msgprint, _
-from frappe.model.mapper import get_mapped_doc
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.doctype.item.item import get_last_purchase_details
-from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
+
+import frappe
+from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import validate_for_items, check_on_hold_or_closed_status
-from erpnext.stock.utils import get_bin
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt
+
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	unlink_inter_company_doc,
+	update_linked_doc,
+	validate_inter_company_party,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
 from erpnext.accounts.party import get_party_account_currency
-from six import string_types
-from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from erpnext.controllers.buying_controller import BuyingController
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
+from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
+from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
+from erpnext.stock.utils import get_bin
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -39,10 +46,17 @@ class PurchaseOrder(BuyingController):
 			'percent_join_field': 'material_request'
 		}]
 
+	def onload(self):
+		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		self.set_onload("supplier_tds", supplier_tds)
+
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
 		self.set_status()
+
+		# apply tax withholding only if checked and applicable
+		self.set_tax_withholding()
 
 		self.validate_supplier()
 		self.validate_schedule_date()
@@ -87,6 +101,33 @@ class PurchaseOrder(BuyingController):
 		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')):
 			self.validate_rate_with_reference_doc([["Supplier Quotation", "supplier_quotation", "supplier_quotation_item"]])
 
+	def set_tax_withholding(self):
+		if not self.apply_tds:
+			return
+
+		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
+
+		if not tax_withholding_details:
+			return
+
+		accounts = []
+		for d in self.taxes:
+			if d.account_head == tax_withholding_details.get("account_head"):
+				d.update(tax_withholding_details)
+			accounts.append(d.account_head)
+
+		if not accounts or tax_withholding_details.get("account_head") not in accounts:
+			self.append("taxes", tax_withholding_details)
+
+		to_remove = [d for d in self.taxes
+			if not d.tax_amount and d.account_head == tax_withholding_details.get("account_head")]
+
+		for d in to_remove:
+			self.remove(d)
+
+		# calculate totals again after applying TDS
+		self.calculate_taxes_and_totals()
+
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')
 		if prevent_po:
@@ -104,7 +145,7 @@ class PurchaseOrder(BuyingController):
 
 	def validate_minimum_order_qty(self):
 		if not self.get("items"): return
-		items = list(set([d.item_code for d in self.get("items")]))
+		items = list(set(d.item_code for d in self.get("items")))
 
 		itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
 			from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
@@ -291,10 +332,10 @@ class PurchaseOrder(BuyingController):
 			so.notify_update()
 
 	def has_drop_ship_item(self):
-		return any([d.delivered_by_supplier for d in self.items])
+		return any(d.delivered_by_supplier for d in self.items)
 
 	def is_against_so(self):
-		return any([d.sales_order for d in self.items if d.sales_order])
+		return any(d.sales_order for d in self.items if d.sales_order)
 
 	def set_received_qty_for_drop_ship_items(self):
 		for item in self.items:
@@ -413,9 +454,10 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Purchase Invoice Advance
-
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
+
+		target.set_payment_schedule()
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
@@ -436,6 +478,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				"party_account_currency": "party_account_currency",
 				"supplier_warehouse":"supplier_warehouse"
 			},
+			"field_no_map" : ["payment_terms_template"],
 			"validation": {
 				"docstatus": ["=", 1],
 			}
@@ -455,12 +498,6 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		},
 	}
 
-	if frappe.get_single("Accounts Settings").automatically_fetch_payment_terms == 1:
-		fields["Payment Schedule"] = {
-			"doctype": "Payment Schedule",
-			"add_if_empty": True
-		}
-
 	doc = get_mapped_doc("Purchase Order", source_name,	fields,
 		target_doc, postprocess, ignore_permissions=ignore_permissions)
 
@@ -468,9 +505,11 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 @frappe.whitelist()
 def make_rm_stock_entry(purchase_order, rm_items):
-	if isinstance(rm_items, string_types):
+	rm_items_list = rm_items
+
+	if isinstance(rm_items, str):
 		rm_items_list = json.loads(rm_items)
-	else:
+	elif not rm_items:
 		frappe.throw(_("No Items available for transfer"))
 
 	if rm_items_list:
@@ -508,6 +547,8 @@ def make_rm_stock_entry(purchase_order, rm_items):
 							'qty': rm_item_data["qty"],
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],
+							'serial_no': rm_item_data.get('serial_no'),
+							'batch_no': rm_item_data.get('batch_no'),
 							'main_item_code': rm_item_data["item_code"],
 							'allow_alternative_item': item_wh.get(rm_item_code, {}).get('allow_alternative_item')
 						}
@@ -547,3 +588,58 @@ def update_status(status, name):
 def make_inter_company_sales_order(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
+
+@frappe.whitelist()
+def get_materials_from_supplier(purchase_order, po_details):
+	if isinstance(po_details, str):
+		po_details = json.loads(po_details)
+
+	doc = frappe.get_cached_doc('Purchase Order', purchase_order)
+	doc.initialized_fields()
+	doc.purchase_orders = [doc.name]
+	doc.get_available_materials()
+
+	if not doc.available_materials:
+		frappe.throw(_('Materials are already received against the purchase order {0}')
+			.format(purchase_order))
+
+	return make_return_stock_entry_for_subcontract(doc.available_materials, doc, po_details)
+
+def make_return_stock_entry_for_subcontract(available_materials, po_doc, po_details):
+	ste_doc = frappe.new_doc('Stock Entry')
+	ste_doc.purpose = 'Material Transfer'
+	ste_doc.purchase_order = po_doc.name
+	ste_doc.company = po_doc.company
+	ste_doc.is_return = 1
+
+	for key, value in available_materials.items():
+		if not value.qty:
+			continue
+
+		if value.batch_no:
+			for batch_no, qty in value.batch_no.items():
+				if qty > 0:
+					add_items_in_ste(ste_doc, value, value.qty, po_details, batch_no)
+		else:
+			add_items_in_ste(ste_doc, value, value.qty, po_details)
+
+	ste_doc.set_stock_entry_type()
+	ste_doc.calculate_rate_and_amount()
+
+	return ste_doc
+
+def add_items_in_ste(ste_doc, row, qty, po_details, batch_no=None):
+	item = ste_doc.append('items', row.item_details)
+
+	po_detail = list(set(row.po_details).intersection(po_details))
+	item.update({
+		'qty': qty,
+		'batch_no': batch_no,
+		'basic_rate': row.item_details['rate'],
+		'po_detail': po_detail[0] if po_detail else '',
+		's_warehouse': row.item_details['t_warehouse'],
+		't_warehouse': row.item_details['s_warehouse'],
+		'item_code': row.item_details['rm_item_code'],
+		'subcontracted_item': row.item_details['main_item_code'],
+		'serial_no': '\n'.join(row.serial_no) if row.serial_no else ''
+	})

@@ -9,7 +9,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today, flt
+from frappe.utils import add_days, cstr, date_diff, flt, get_link_to_form, getdate, today
 from frappe.utils.nestedset import NestedSet
 
 
@@ -232,7 +232,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta(doctype)
 	searchfields = meta.get_search_fields()
 	search_columns = ", " + ", ".join(searchfields) if searchfields else ''
-	search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
+	search_cond = " or " + " or ".join(field + " like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql(""" select name {search_columns} from `tabProject`
 		where %(key)s like %(txt)s

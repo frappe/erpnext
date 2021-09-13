@@ -2,13 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import cstr, cint, getdate, get_first_day, get_last_day, date_diff, add_days
-from frappe import msgprint, _
-from calendar import monthrange
+from frappe import _
+from frappe.utils import add_days, cstr, date_diff, get_first_day, get_last_day, getdate
+
 from erpnext.education.api import get_student_group_students
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from erpnext.support.doctype.issue.issue import get_holidays
+
 
 def execute(filters=None):
 	if not filters: filters = {}

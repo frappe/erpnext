@@ -2,10 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt, nowdate
-import frappe.defaults
 from frappe.model.document import Document
+from frappe.utils import flt, nowdate
+
 
 class Bin(Document):
 	def before_save(self):
@@ -54,7 +55,7 @@ class Bin(Document):
 		self.reserved_qty = flt(self.reserved_qty) + flt(args.get("reserved_qty"))
 		self.indented_qty = flt(self.indented_qty) + flt(args.get("indented_qty"))
 		self.planned_qty = flt(self.planned_qty) + flt(args.get("planned_qty"))
-		
+
 		self.set_projected_qty()
 		self.db_update()
 
@@ -115,7 +116,7 @@ class Bin(Document):
 		#Get Transferred Entries
 		materials_transferred = frappe.db.sql("""
 			select
-				ifnull(sum(transfer_qty),0)
+				ifnull(sum(CASE WHEN se.is_return = 1 THEN (transfer_qty * -1) ELSE transfer_qty END),0)
 			from
 				`tabStock Entry` se, `tabStock Entry Detail` sed, `tabPurchase Order` po
 			where

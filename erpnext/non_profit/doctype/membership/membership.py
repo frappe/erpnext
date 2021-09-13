@@ -3,17 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import json
+from datetime import datetime
+
 import frappe
 import six
-import os
-from datetime import datetime
-from frappe.model.document import Document
-from frappe.email import sendmail_to_system_managers
-from frappe.utils import add_days, add_years, nowdate, getdate, add_months, get_link_to_form
-from erpnext.non_profit.doctype.member.member import create_member
 from frappe import _
+from frappe.email import sendmail_to_system_managers
+from frappe.model.document import Document
+from frappe.utils import add_days, add_months, add_years, get_link_to_form, getdate, nowdate
+
 import erpnext
+from erpnext.non_profit.doctype.member.member import create_member
+
 
 class Membership(Document):
 	def validate(self):
@@ -196,21 +199,22 @@ def make_invoice(membership, member, plan, settings):
 	return invoice
 
 
-def get_member_based_on_subscription(subscription_id, email):
-	members = frappe.get_all("Member", filters={
-					"subscription_id": subscription_id,
-					"email_id": email
-				}, order_by="creation desc")
+def get_member_based_on_subscription(subscription_id, email=None, customer_id=None):
+	filters = {"subscription_id": subscription_id}
+	if email:
+		filters.update({"email_id": email})
+	if customer_id:
+		filters.update({"customer_id": customer_id})
+
+	members = frappe.get_all("Member", filters=filters, order_by="creation desc")
 
 	try:
 		return frappe.get_doc("Member", members[0]["name"])
-	except:
+	except Exception:
 		return None
 
 
 def verify_signature(data, endpoint="Membership"):
-	if frappe.flags.in_test or os.environ.get("CI"):
-		return True
 	signature = frappe.request.headers.get("X-Razorpay-Signature")
 
 	settings = frappe.get_doc("Non Profit Settings")
@@ -225,16 +229,7 @@ def verify_signature(data, endpoint="Membership"):
 @frappe.whitelist(allow_guest=True)
 def trigger_razorpay_subscription(*args, **kwargs):
 	data = frappe.request.get_data(as_text=True)
-	try:
-		verify_signature(data)
-	except Exception as e:
-		log = frappe.log_error(e, "Membership Webhook Verification Error")
-		notify_failure(log)
-		return { "status": "Failed", "reason": e}
-
-	if isinstance(data, six.string_types):
-		data = json.loads(data)
-	data = frappe._dict(data)
+	data = process_request_data(data)
 
 	subscription = data.payload.get("subscription", {}).get("entity", {})
 	subscription = frappe._dict(subscription)
@@ -281,7 +276,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		# Update membership values
 		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
 		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
-		member.subscription_activated = 1
+		member.subscription_status = "Active"
 		member.flags.ignore_mandatory = True
 		member.save()
 
@@ -294,9 +289,67 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), _("Payment ID"), payment.id)
 		log = frappe.log_error(message, _("Error creating membership entry for {0}").format(member.name))
 		notify_failure(log)
-		return { "status": "Failed", "reason": e}
+		return {"status": "Failed", "reason": e}
 
-	return { "status": "Success" }
+	return {"status": "Success"}
+
+
+@frappe.whitelist(allow_guest=True)
+def update_halted_razorpay_subscription(*args, **kwargs):
+	"""
+	When all retries have been exhausted, Razorpay moves the subscription to the halted state.
+	The customer has to manually retry the charge or change the card linked to the subscription,
+	for the subscription to move back to the active state.
+	"""
+	if frappe.request:
+		data = frappe.request.get_data(as_text=True)
+		data = process_request_data(data)
+	elif frappe.flags.in_test:
+		data = kwargs.get("data")
+		data = frappe._dict(data)
+	else:
+		return
+
+	if not data.event == "subscription.halted":
+		return
+
+	subscription = data.payload.get("subscription", {}).get("entity", {})
+	subscription = frappe._dict(subscription)
+
+	try:
+		member = get_member_based_on_subscription(subscription.id, customer_id=subscription.customer_id)
+		if not member:
+			frappe.throw(_("Member with Razorpay Subscription ID {0} not found").format(subscription.id))
+
+		member.subscription_status = "Halted"
+		member.flags.ignore_mandatory = True
+		member.save()
+
+		if subscription.get("notes"):
+			member = get_additional_notes(member, subscription)
+
+	except Exception as e:
+		message = "{0}\n\n{1}".format(e, frappe.get_traceback())
+		log = frappe.log_error(message, _("Error updating halted status for member {0}").format(member.name))
+		notify_failure(log)
+		return {"status": "Failed", "reason": e}
+
+	return {"status": "Success"}
+
+
+def process_request_data(data):
+	try:
+		verify_signature(data)
+	except Exception as e:
+		log = frappe.log_error(e, "Membership Webhook Verification Error")
+		notify_failure(log)
+		return {"status": "Failed", "reason": e}
+
+	if isinstance(data, six.string_types):
+		data = json.loads(data)
+	data = frappe._dict(data)
+
+	return data
 
 
 def get_company_for_memberships():
@@ -343,7 +396,7 @@ def notify_failure(log):
 		""".format(get_link_to_form("Error Log", log.name))
 
 		sendmail_to_system_managers("[Important] [ERPNext] Razorpay membership webhook failed , please check.", content)
-	except:
+	except Exception:
 		pass
 
 
@@ -352,7 +405,7 @@ def get_plan_from_razorpay_id(plan_id):
 
 	try:
 		return plan[0]["name"]
-	except:
+	except Exception:
 		return None
 
 

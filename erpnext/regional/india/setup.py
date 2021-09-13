@@ -3,16 +3,24 @@
 
 from __future__ import unicode_literals
 
-import frappe, os, json
+import json
+import os
+
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_permission, update_permission_property
-from erpnext.regional.india import states
-from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 from frappe.utils import today
 
+from erpnext.accounts.utils import FiscalYearError, get_fiscal_year
+from erpnext.regional.india import states
+
+
 def setup(company=None, patch=True):
-	setup_company_independent_fixtures(patch=patch)
+	# Company independent fixtures should be called only once at the first company setup
+	if frappe.db.count('Company', {'country': 'India'}) <=1:
+		setup_company_independent_fixtures(patch=patch)
+
 	if not patch:
 		make_fixtures(company)
 
@@ -25,8 +33,12 @@ def setup_company_independent_fixtures(patch=False):
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	create_gratuity_rule()
 	add_print_formats()
+	update_accounts_settings_for_taxes()
 
 def add_hsn_sac_codes():
+	if frappe.flags.in_test and frappe.flags.created_hsn_codes:
+		return
+
 	# HSN codes
 	with open(os.path.join(os.path.dirname(__file__), 'hsn_code_data.json'), 'r') as f:
 		hsn_codes = json.loads(f.read())
@@ -37,6 +49,9 @@ def add_hsn_sac_codes():
 	with open(os.path.join(os.path.dirname(__file__), 'sac_code_data.json'), 'r') as f:
 		sac_codes = json.loads(f.read())
 	create_hsn_codes(sac_codes, code_field="sac_code")
+
+	if frappe.flags.in_test:
+		frappe.flags.created_hsn_codes = True
 
 def create_hsn_codes(data, code_field):
 	for d in data:
@@ -115,10 +130,12 @@ def add_print_formats():
 def make_property_setters(patch=False):
 	# GST rules do not allow for an invoice no. bigger than 16 characters
 	journal_entry_types = frappe.get_meta("Journal Entry").get_options("voucher_type").split("\n") + ['Reversal Of ITC']
+	sales_invoice_series = ['SINV-.YY.-', 'SRET-.YY.-', ''] + frappe.get_meta("Sales Invoice").get_options("naming_series").split("\n")
+	purchase_invoice_series = ['PINV-.YY.-', 'PRET-.YY.-', ''] + frappe.get_meta("Purchase Invoice").get_options("naming_series").split("\n")
 
 	if not patch:
-		make_property_setter('Sales Invoice', 'naming_series', 'options', 'SINV-.YY.-\nSRET-.YY.-', '')
-		make_property_setter('Purchase Invoice', 'naming_series', 'options', 'PINV-.YY.-\nPRET-.YY.-', '')
+		make_property_setter('Sales Invoice', 'naming_series', 'options', '\n'.join(sales_invoice_series), '')
+		make_property_setter('Purchase Invoice', 'naming_series', 'options', '\n'.join(purchase_invoice_series), '')
 		make_property_setter('Journal Entry', 'voucher_type', 'options', '\n'.join(journal_entry_types), '')
 
 def make_custom_fields(update=True):
@@ -445,7 +462,7 @@ def make_custom_fields(update=True):
 			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
 
 		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
-			depends_on='eval:(doc.irn_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
+			depends_on='eval: doc.irn', allow_on_submit=1, insert_after='customer'),
 
 		dict(fieldname='eway_bill_validity', label='E-Way Bill Validity', fieldtype='Data', no_copy=1, print_hide=1,
 			depends_on='ewaybill', read_only=1, allow_on_submit=1, insert_after='ewaybill'),
@@ -480,6 +497,26 @@ def make_custom_fields(update=True):
 			hidden=1, insert_after='einvoice_status', no_copy=1, print_hide=1, read_only=1)
 	]
 
+	payment_entry_fields = [
+		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break', insert_after='deductions',
+			print_hide=1, collapsible=1),
+		dict(fieldname='company_address', label='Company Address', fieldtype='Link', insert_after='gst_section',
+			print_hide=1, options='Address'),
+		dict(fieldname='company_gstin', label='Company GSTIN',
+			fieldtype='Data', insert_after='company_address',
+			fetch_from='company_address.gstin', print_hide=1, read_only=1),
+		dict(fieldname='place_of_supply', label='Place of Supply',
+			fieldtype='Data', insert_after='company_gstin',
+			print_hide=1, read_only=1),
+		dict(fieldname='gst_column_break', fieldtype='Column Break',
+				insert_after='place_of_supply'),
+		dict(fieldname='customer_address', label='Customer Address', fieldtype='Link', insert_after='gst_column_break',
+			print_hide=1, options='Address', depends_on = 'eval:doc.party_type == "Customer"'),
+		dict(fieldname='customer_gstin', label='Customer GSTIN',
+			fieldtype='Data', insert_after='customer_address',
+			fetch_from='customer_address.gstin', print_hide=1, read_only=1)
+	]
+
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gstin', label='Party GSTIN', fieldtype='Data',
@@ -494,6 +531,7 @@ def make_custom_fields(update=True):
 		'Purchase Receipt': purchase_invoice_gst_fields,
 		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields + delivery_note_gst_category,
+		'Payment Entry': payment_entry_fields,
 		'Journal Entry': journal_entry_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
@@ -629,9 +667,9 @@ def make_custom_fields(update=True):
 				'label': 'Export Type',
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
-				'default': 'Without Payment of Tax',
 				'depends_on':'eval:in_list(["SEZ", "Overseas"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas"], doc.gst_category)'
 			}
 		],
 		'Customer': [
@@ -648,9 +686,9 @@ def make_custom_fields(update=True):
 				'label': 'Export Type',
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
-				'default': 'Without Payment of Tax',
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)'
 			}
 		],
 		'Member': [
@@ -674,7 +712,7 @@ def make_custom_fields(update=True):
 
 def make_fixtures(company=None):
 	docs = []
-	company = company.name if company else frappe.db.get_value("Global Defaults", None, "default_company")
+	company = company or frappe.db.get_value("Global Defaults", None, "default_company")
 
 	set_salary_components(docs)
 	set_tds_account(docs, company)
@@ -691,6 +729,53 @@ def make_fixtures(company=None):
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
+
+def update_regional_tax_settings(country, company):
+	# Will only add default GST accounts if present
+	input_account_names = ['Input Tax CGST', 'Input Tax SGST', 'Input Tax IGST']
+	output_account_names = ['Output Tax CGST', 'Output Tax SGST', 'Output Tax IGST']
+	rcm_accounts = ['Input Tax CGST RCM', 'Input Tax SGST RCM', 'Input Tax IGST RCM']
+	gst_settings = frappe.get_single('GST Settings')
+	existing_account_list = []
+
+	for account in gst_settings.get('gst_accounts'):
+		for key in ['cgst_account', 'sgst_account', 'igst_account']:
+			existing_account_list.append(account.get(key))
+
+	gst_accounts = frappe._dict(frappe.get_all("Account",
+		{'company': company, 'account_name': ('in', input_account_names +
+			output_account_names + rcm_accounts)}, ['account_name', 'name'], as_list=1))
+
+	add_accounts_in_gst_settings(company,  input_account_names, gst_accounts,
+		existing_account_list, gst_settings)
+	add_accounts_in_gst_settings(company, output_account_names, gst_accounts,
+		existing_account_list, gst_settings)
+	add_accounts_in_gst_settings(company, rcm_accounts, gst_accounts,
+		existing_account_list, gst_settings, is_reverse_charge=1)
+
+	gst_settings.save()
+
+def add_accounts_in_gst_settings(company, account_names, gst_accounts,
+	existing_account_list, gst_settings, is_reverse_charge=0):
+	accounts_not_added = 1
+
+	for account in account_names:
+		# Default Account Added does not exists
+		if not gst_accounts.get(account):
+			accounts_not_added = 0
+
+		# Check if already added in GST Settings
+		if gst_accounts.get(account) in existing_account_list:
+			accounts_not_added = 0
+
+	if accounts_not_added:
+		gst_settings.append('gst_accounts', {
+			'company': company,
+			'cgst_account': gst_accounts.get(account_names[0]),
+			'sgst_account': gst_accounts.get(account_names[1]),
+			'igst_account': gst_accounts.get(account_names[2]),
+			'is_reverse_charge_account': is_reverse_charge
+		})
 
 def set_salary_components(docs):
 	docs.extend([
@@ -725,13 +810,14 @@ def set_tax_withholding_category(company):
 	docs = get_tds_details(accounts, fiscal_year)
 
 	for d in docs:
-		try:
+		if not frappe.db.exists("Tax Withholding Category", d.get("name")):
 			doc = frappe.get_doc(d)
+			doc.flags.ignore_validate = True
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
 			doc.insert()
-		except frappe.DuplicateEntryError:
-			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
+		else:
+			doc = frappe.get_doc("Tax Withholding Category", d.get("name"), for_update=True)
 
 			if accounts:
 				doc.append("accounts", accounts[0])
@@ -743,11 +829,12 @@ def set_tax_withholding_category(company):
 					doc.append("rates", d.get('rates')[0])
 
 			doc.flags.ignore_permissions = True
+			doc.flags.ignore_validate = True
 			doc.flags.ignore_mandatory = True
+			doc.flags.ignore_links = True
 			doc.save()
 
 def set_tds_account(docs, company):
-	abbr = frappe.get_value("Company", company, "abbr")
 	parent_account = frappe.db.get_value("Account", filters = {"account_name": "Duties and Taxes", "company": company})
 	if parent_account:
 		docs.extend([
@@ -906,7 +993,6 @@ def get_tds_details(accounts, fiscal_year):
 	]
 
 def create_gratuity_rule():
-
 	# Standard Indain Gratuity Rule
 	if not frappe.db.exists("Gratuity Rule", "Indian Standard Gratuity Rule"):
 		rule = frappe.new_doc("Gratuity Rule")
@@ -924,3 +1010,7 @@ def create_gratuity_rule():
 
 		rule.flags.ignore_mandatory = True
 		rule.save()
+
+def update_accounts_settings_for_taxes():
+	if frappe.db.count('Company') == 1:
+		frappe.db.set_value('Accounts Settings', None, "add_taxes_from_item_tax_template", 0)

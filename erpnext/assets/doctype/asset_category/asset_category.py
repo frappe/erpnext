@@ -3,10 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import cint, get_link_to_form
 from frappe.model.document import Document
+from frappe.utils import cint, get_link_to_form
+
 
 class AssetCategory(Document):
 	def validate(self):
@@ -20,7 +22,7 @@ class AssetCategory(Document):
 			for field in ("Total Number of Depreciations", "Frequency of Depreciation"):
 				if cint(d.get(frappe.scrub(field)))<1:
 					frappe.throw(_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError)
-	
+
 	def validate_account_currency(self):
 		account_types = [
 			'fixed_asset_account', 'accumulated_depreciation_account', 'depreciation_expense_account', 'capital_work_in_progress_account'
@@ -33,13 +35,13 @@ class AssetCategory(Document):
 					account_currency = frappe.get_value("Account", d.get(type_of_account), "account_currency")
 					if account_currency != company_currency:
 						invalid_accounts.append(frappe._dict({ 'type': type_of_account, 'idx': d.idx, 'account': d.get(type_of_account) }))
-	
+
 		for d in invalid_accounts:
 			frappe.throw(_("Row #{}: Currency of {} - {} doesn't matches company currency.")
 				.format(d.idx, frappe.bold(frappe.unscrub(d.type)), frappe.bold(d.account)),
 				title=_("Invalid Account"))
 
-	
+
 	def validate_account_types(self):
 		account_type_map = {
 			'fixed_asset_account': { 'account_type': 'Fixed Asset' },
@@ -59,12 +61,12 @@ class AssetCategory(Document):
 						frappe.throw(_("Row #{}: {} of {} should be {}. Please modify the account or select a different account.")
 							.format(d.idx, frappe.unscrub(key_to_match), frappe.bold(selected_account), frappe.bold(expected_key_type)),
 							title=_("Invalid Account"))
-	
+
 	def valide_cwip_account(self):
 		if self.enable_cwip_accounting:
 			missing_cwip_accounts_for_company = []
 			for d in self.accounts:
-				if (not d.capital_work_in_progress_account and 
+				if (not d.capital_work_in_progress_account and
 					not frappe.db.get_value("Company", d.company_name, "capital_work_in_progress_account")):
 					missing_cwip_accounts_for_company.append(get_link_to_form("Company", d.company_name))
 

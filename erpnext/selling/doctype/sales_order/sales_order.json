@@ -38,6 +38,8 @@
   "col_break46",
   "shipping_address_name",
   "shipping_address",
+  "dispatch_address_name",
+  "dispatch_address",
   "customer_group",
   "territory",
   "currency_and_price_list",
@@ -53,6 +55,8 @@
   "items_section",
   "scan_barcode",
   "items",
+  "packing_list",
+  "packed_items",
   "pricing_rule_details",
   "pricing_rules",
   "section_break_31",
@@ -99,8 +103,6 @@
   "in_words",
   "advance_paid",
   "disable_rounded_total",
-  "packing_list",
-  "packed_items",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -569,7 +571,8 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1016,6 +1019,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1026,14 +1030,14 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Packed Items",
    "options": "Packed Item",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "payment_schedule_section",
@@ -1486,13 +1490,29 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "dispatch_address_name",
+   "fieldtype": "Link",
+   "label": "Dispatch Address Name",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "dispatch_address_name",
+   "fieldname": "dispatch_address",
+   "fieldtype": "Small Text",
+   "label": "Dispatch Address",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 23:55:13.439068",
+ "modified": "2021-09-01 15:12:24.115483",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

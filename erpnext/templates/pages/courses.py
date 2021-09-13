@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
+import frappe
 
 
 def get_context(context):
@@ -17,4 +17,3 @@ def get_context(context):
 	context.doc = course
 	context.sidebar_title = sidebar_title
 	context.intro = course.course_intro
-

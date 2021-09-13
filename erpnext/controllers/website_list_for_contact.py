@@ -2,11 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import json
+
 import frappe
 from frappe import _
 from frappe.utils import flt, has_common
 from frappe.utils.user import is_website_user
+
 
 def get_list_context(context=None):
 	return {
@@ -113,7 +116,7 @@ def post_process(doctype, data):
 			doc.set_indicator()
 
 		doc.status_display = ", ".join(doc.status_display)
-		doc.items_preview = ", ".join([d.item_name for d in doc.items if d.item_name])
+		doc.items_preview = ", ".join(d.item_name for d in doc.items if d.item_name)
 		result.append(doc)
 
 	return result

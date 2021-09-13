@@ -3,16 +3,20 @@
 
 from __future__ import unicode_literals
 
-import frappe, os, json
+import json
+import os
 
+import frappe
 from frappe import _
+from frappe.desk.doctype.global_search_settings.global_search_settings import (
+	update_global_search_doctypes,
+)
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
-from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
+from frappe.utils.nestedset import rebuild_tree
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
-from frappe.utils.nestedset import rebuild_tree
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -449,6 +453,8 @@ def install_defaults(args=None):
 	set_active_domains(args)
 	update_stock_settings()
 	update_shopping_cart_settings(args)
+
+	args.update({"set_default": 1})
 	create_bank_account(args)
 
 def set_global_defaults(args):
@@ -480,17 +486,17 @@ def update_stock_settings():
 	stock_settings.save()
 
 def create_bank_account(args):
-	if not args.bank_account:
+	if not args.get('bank_account'):
 		return
 
-	company_name = args.company_name
+	company_name = args.get('company_name')
 	bank_account_group =  frappe.db.get_value("Account",
 		{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
 			"company": company_name})
 	if bank_account_group:
 		bank_account = frappe.get_doc({
 			"doctype": "Account",
-			'account_name': args.bank_account,
+			'account_name': args.get('bank_account'),
 			'parent_account': bank_account_group,
 			'is_group':0,
 			'company': company_name,
@@ -499,16 +505,19 @@ def create_bank_account(args):
 		try:
 			doc = bank_account.insert()
 
-			frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
+			if args.get('set_default'):
+				frappe.db.set_value("Company", args.get('company_name'), "default_bank_account", bank_account.name, update_modified=False)
+
+			return doc
 
 		except RootNotEditable:
-			frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
+			frappe.throw(_("Bank account cannot be named as {0}").format(args.get('bank_account')))
 		except frappe.DuplicateEntryError:
 			# bank account same as a CoA entry
 			pass
 
 def update_shopping_cart_settings(args):
-	shopping_cart = frappe.get_doc("Shopping Cart Settings")
+	shopping_cart = frappe.get_doc("E Commerce Settings")
 	shopping_cart.update({
 		"enabled": 1,
 		'company': args.company_name,

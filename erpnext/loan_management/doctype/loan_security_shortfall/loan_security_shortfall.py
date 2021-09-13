@@ -3,11 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import get_datetime, flt
 from frappe.model.document import Document
-from six import iteritems
-from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
+from frappe.utils import flt, get_datetime
+
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
+	get_pledged_security_qty,
+)
+
 
 class LoanSecurityShortfall(Document):
 	pass
@@ -71,7 +75,7 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 				- flt(loan.total_principal_paid)
 
 		pledged_securities = get_pledged_security_qty(loan.name)
-		ltv_ratio = ''
+		ltv_ratio = 0.0
 		security_value = 0.0
 
 		for security, qty in pledged_securities.items():
@@ -122,4 +126,3 @@ def update_pending_shortfall(shortfall):
 			"shortfall_amount": 0,
 			"shortfall_percentage": 0
 		})
-

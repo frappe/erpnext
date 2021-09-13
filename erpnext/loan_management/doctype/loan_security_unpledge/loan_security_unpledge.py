@@ -3,13 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime, flt, getdate
-import json
+from frappe.utils import flt, get_datetime, getdate
 from six import iteritems
-from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
+
 
 class LoanSecurityUnpledge(Document):
 	def validate(self):
@@ -30,7 +30,9 @@ class LoanSecurityUnpledge(Document):
 					d.idx, frappe.bold(d.loan_security)))
 
 	def validate_unpledge_qty(self):
-		from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import get_ltv_ratio
+		from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
+			get_ltv_ratio,
+		)
 
 		pledge_qty_map = get_pledged_security_qty(self.loan)
 
@@ -147,8 +149,3 @@ def get_pledged_security_qty(loan):
 		current_pledges[security] -= unpledges.get(security, 0.0)
 
 	return current_pledges
-
-
-
-
-

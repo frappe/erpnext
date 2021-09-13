@@ -3,11 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import add_days, getdate, now_datetime
-from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import create_patient, create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
-from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
+
+from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+	admit_patient,
+	discharge_patient,
+	schedule_discharge,
+)
+from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import (
+	create_inpatient,
+	create_patient,
+	get_healthcare_service_unit,
+	mark_invoiced_inpatient_occupancy,
+)
+
 
 class TestInpatientMedicationOrder(unittest.TestCase):
 	def setUp(self):
@@ -40,13 +52,13 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 
 	def test_inpatient_validation(self):
 		# Discharge
-		schedule_discharge(frappe.as_json({'patient': self.patient}))
+		schedule_discharge(frappe.as_json({'patient': self.patient, 'discharge_ordered_datetime': now_datetime()}))
 
 		self.ip_record.reload()
 		mark_invoiced_inpatient_occupancy(self.ip_record)
 
 		self.ip_record.reload()
-		discharge_patient(self.ip_record)
+		discharge_patient(self.ip_record, now_datetime())
 
 		ipmo = create_ipmo(self.patient)
 		# inpatient validation
@@ -74,12 +86,12 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 	def tearDown(self):
 		if frappe.db.get_value('Patient', self.patient, 'inpatient_record'):
 			# cleanup - Discharge
-			schedule_discharge(frappe.as_json({'patient': self.patient}))
+			schedule_discharge(frappe.as_json({'patient': self.patient, 'discharge_ordered_datetime': now_datetime()}))
 			self.ip_record.reload()
 			mark_invoiced_inpatient_occupancy(self.ip_record)
 
 			self.ip_record.reload()
-			discharge_patient(self.ip_record)
+			discharge_patient(self.ip_record, now_datetime())
 
 		for doctype in ["Inpatient Medication Entry", "Inpatient Medication Order"]:
 			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
@@ -140,4 +152,3 @@ def create_ipme(filters, update_stock=0):
 	ipme = ipme.get_medication_orders()
 
 	return ipme
-

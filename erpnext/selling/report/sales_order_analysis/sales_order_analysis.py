@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import copy
+
+import frappe
 from frappe import _
-from frappe.utils import flt, date_diff, getdate
+from frappe.utils import date_diff, flt, getdate
+
 
 def execute(filters=None):
 	if not filters:
@@ -59,7 +62,7 @@ def get_data(conditions, filters):
 			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
 			soi.qty, soi.delivered_qty,
 			(soi.qty - soi.delivered_qty) AS pending_qty,
-			IFNULL(sii.qty, 0) as billed_qty,
+			IFNULL(SUM(sii.qty), 0) as billed_qty,
 			soi.base_amount as amount,
 			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
 			(soi.billed_amt * IFNULL(so.conversion_rate, 1)) as billed_amount,

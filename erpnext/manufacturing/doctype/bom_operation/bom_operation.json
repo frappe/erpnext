@@ -13,10 +13,10 @@
   "col_break1",
   "hour_rate",
   "time_in_mins",
-  "batch_size",
   "operating_cost",
   "base_hour_rate",
   "base_operating_cost",
+  "batch_size",
   "image"
  ],
  "fields": [
@@ -61,6 +61,8 @@
   },
   {
    "description": "In minutes",
+   "fetch_from": "operation.total_operation_time",
+   "fetch_if_empty": 1,
    "fieldname": "time_in_mins",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -104,7 +106,8 @@
    "label": "Image"
   },
   {
-   "default": "1",
+   "fetch_from": "operation.batch_size",
+   "fetch_if_empty": 1,
    "fieldname": "batch_size",
    "fieldtype": "Int",
    "label": "Batch Size"
@@ -120,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-13 18:14:10.018774",
+ "modified": "2021-01-12 14:48:09.596843",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

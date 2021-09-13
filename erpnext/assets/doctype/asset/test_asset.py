@@ -3,14 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import cstr, nowdate, getdate, flt, get_last_day, add_days, add_months
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
-from erpnext.assets.doctype.asset.asset import make_sales_invoice
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+import frappe
+from frappe.utils import add_days, add_months, cstr, flt, get_last_day, getdate, nowdate
+
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
+)
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	make_purchase_invoice as make_invoice,
+)
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):
@@ -125,7 +134,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 12,
 			"depreciation_start_date": "2030-12-31"
 		})
-		asset.insert()
 		self.assertEqual(asset.status, "Draft")
 		asset.save()
 		expected_schedules = [
@@ -154,9 +162,8 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 12,
 			"depreciation_start_date": '2030-12-31'
 		})
-		asset.insert()
-		self.assertEqual(asset.status, "Draft")
 		asset.save()
+		self.assertEqual(asset.status, "Draft")
 
 		expected_schedules = [
 			['2030-12-31', 66667.00, 66667.00],
@@ -185,7 +192,7 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 12,
 			"depreciation_start_date": "2030-12-31"
 		})
-		asset.insert()
+		asset.save()
 		self.assertEqual(asset.status, "Draft")
 
 		expected_schedules = [
@@ -216,7 +223,6 @@ class TestAsset(unittest.TestCase):
 			"depreciation_start_date": "2030-12-31"
 		})
 
-		asset.insert()
 		asset.save()
 
 		expected_schedules = [
@@ -247,7 +253,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 10,
 			"depreciation_start_date": "2020-12-31"
 		})
-		asset.insert()
 		asset.submit()
 		asset.load_from_db()
 		self.assertEqual(asset.status, "Submitted")
@@ -350,7 +355,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 10,
 			"depreciation_start_date": "2020-12-31"
 		})
-		asset.insert()
 		asset.submit()
 		post_depreciation_entries(date="2021-01-01")
 
@@ -380,7 +384,6 @@ class TestAsset(unittest.TestCase):
 			"total_number_of_depreciations": 10,
 			"frequency_of_depreciation": 1
 		})
-		asset.insert()
 		asset.submit()
 
 		post_depreciation_entries(date=add_months('2020-01-01', 4))
@@ -424,7 +427,6 @@ class TestAsset(unittest.TestCase):
 			"frequency_of_depreciation": 10,
 			"depreciation_start_date": "2020-12-31"
 		})
-		asset.insert()
 		asset.submit()
 		post_depreciation_entries(date="2021-01-01")
 
@@ -468,9 +470,9 @@ class TestAsset(unittest.TestCase):
 			"total_number_of_depreciations": 3,
 			"frequency_of_depreciation": 10
 		})
-		asset.insert()
+		asset.save()
 		accumulated_depreciation_after_full_schedule = \
-			max([d.accumulated_depreciation_amount for d in asset.get("schedules")])
+			max(d.accumulated_depreciation_amount for d in asset.get("schedules"))
 
 		asset_value_after_full_schedule = (flt(asset.gross_purchase_amount) -
 			flt(accumulated_depreciation_after_full_schedule))
@@ -646,7 +648,7 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2030-06-12'
+		asset.available_for_use_date = '2030-07-12'
 		asset.purchase_date = '2030-01-01'
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 1000,
@@ -660,10 +662,10 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
 
 		expected_schedules = [
-			["2030-12-31", 1106.85, 1106.85],
-			["2031-12-31", 3446.58, 4553.43],
-			["2032-12-31", 1723.29, 6276.72],
-			["2033-06-12", 723.28, 7000.00]
+			["2030-12-31", 942.47, 942.47],
+			["2031-12-31", 3528.77, 4471.24],
+			["2032-12-31", 1764.38, 6235.62],
+			["2033-07-12", 764.38, 7000.00]
 		]
 
 		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
@@ -699,7 +701,7 @@ def create_asset(**args):
 		"item_code": args.item_code or "Macbook Pro",
 		"company": args.company or"_Test Company",
 		"purchase_date": "2015-01-01",
-		"calculate_depreciation": 0,
+		"calculate_depreciation": args.calculate_depreciation or 0,
 		"gross_purchase_amount": 100000,
 		"purchase_receipt_amount": 100000,
 		"expected_value_after_useful_life": 10000,
@@ -707,8 +709,15 @@ def create_asset(**args):
 		"available_for_use_date": "2020-06-06",
 		"location": "Test Location",
 		"asset_owner": "Company",
-		"is_existing_asset": args.is_existing_asset or 0
+		"is_existing_asset": 1
 	})
+
+	if asset.calculate_depreciation:
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 5
+		})
 
 	try:
 		asset.save()

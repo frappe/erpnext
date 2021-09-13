@@ -2,24 +2,50 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate, get_first_day
+import datetime
+import math
+
+import frappe
+from frappe import _, msgprint
 from frappe.model.naming import make_autoname
-
-from frappe import msgprint, _
-from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.utilities.transaction_base import TransactionBase
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	date_diff,
+	flt,
+	formatdate,
+	get_first_day,
+	getdate,
+	money_in_words,
+	rounded,
+)
 from frappe.utils.background_jobs import enqueue
-from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
-from erpnext.payroll.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
-from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
-from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
-from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
-from erpnext.accounts.utils import get_fiscal_year
 from six import iteritems
+
+import erpnext
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+	calculate_amounts,
+	create_repayment_entry,
+)
+from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
+from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import (
+	get_benefit_component_amount,
+)
+from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import (
+	get_benefit_claim_amount,
+	get_last_payroll_period_benefits,
+)
+from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
+from erpnext.payroll.doctype.payroll_period.payroll_period import (
+	get_payroll_period,
+	get_period_factor,
+)
+from erpnext.utilities.transaction_base import TransactionBase
+
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -39,6 +65,7 @@ class SalarySlip(TransactionBase):
 
 	def validate(self):
 		self.status = self.get_status()
+		validate_active_employee(self.employee)
 		self.validate_dates()
 		self.check_existing()
 		if not self.salary_slip_based_on_timesheet:
@@ -115,9 +142,22 @@ class SalarySlip(TransactionBase):
 			status = "Cancelled"
 		return status
 
-	def validate_dates(self):
+	def validate_dates(self, joining_date=None, relieving_date=None):
 		if date_diff(self.end_date, self.start_date) < 0:
 			frappe.throw(_("To date cannot be before From date"))
+
+		if not joining_date:
+			joining_date, relieving_date = frappe.get_cached_value(
+				"Employee",
+				self.employee,
+				("date_of_joining", "relieving_date")
+			)
+
+		if date_diff(self.end_date, joining_date) < 0:
+			frappe.throw(_("Cannot create Salary Slip for Employee joining after Payroll Period"))
+
+		if relieving_date and date_diff(relieving_date, self.start_date) < 0:
+			frappe.throw(_("Cannot create Salary Slip for Employee who has left before Payroll Period"))
 
 	def is_rounding_total_disabled(self):
 		return cint(frappe.db.get_single_value("Payroll Settings", "disable_rounded_total"))
@@ -154,9 +194,14 @@ class SalarySlip(TransactionBase):
 
 			if not self.salary_slip_based_on_timesheet:
 				self.get_date_details()
-			self.validate_dates()
-			joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
-				["date_of_joining", "relieving_date"])
+
+			joining_date, relieving_date = frappe.get_cached_value(
+				"Employee",
+				self.employee,
+				("date_of_joining", "relieving_date")
+			)
+
+			self.validate_dates(joining_date, relieving_date)
 
 			#getin leave details
 			self.get_working_days_details(joining_date, relieving_date)
@@ -317,20 +362,7 @@ class SalarySlip(TransactionBase):
 		return payment_days
 
 	def get_holidays_for_employee(self, start_date, end_date):
-		holiday_list = get_holiday_list_for_employee(self.employee)
-		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
-			where
-				parent=%(holiday_list)s
-				and holiday_date >= %(start_date)s
-				and holiday_date <= %(end_date)s''', {
-					"holiday_list": holiday_list,
-					"start_date": start_date,
-					"end_date": end_date
-				})
-
-		holidays = [cstr(i) for i in holidays]
-
-		return holidays
+		return get_holiday_dates_for_employee(self.employee, start_date, end_date)
 
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
@@ -492,11 +524,39 @@ class SalarySlip(TransactionBase):
 	def get_data_for_eval(self):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
+		employee = frappe.get_doc("Employee", self.employee).as_dict()
 
-		data.update(frappe.get_doc("Salary Structure Assignment",
-			{"employee": self.employee, "salary_structure": self.salary_structure}).as_dict())
+		start_date = getdate(self.start_date)
+		date_to_validate = (
+			employee.date_of_joining
+			if employee.date_of_joining > start_date
+			else start_date
+		)
 
-		data.update(frappe.get_doc("Employee", self.employee).as_dict())
+		salary_structure_assignment = frappe.get_value(
+			"Salary Structure Assignment",
+			{
+				"employee": self.employee,
+				"salary_structure": self.salary_structure,
+				"from_date": ("<=", date_to_validate),
+				"docstatus": 1,
+			},
+			"*",
+			order_by="from_date desc",
+			as_dict=True,
+		)
+
+		if not salary_structure_assignment:
+			frappe.throw(
+				_("Please assign a Salary Structure for Employee {0} "
+				"applicable from or before {1} first").format(
+					frappe.bold(self.employee_name),
+					frappe.bold(formatdate(date_to_validate)),
+				)
+			)
+
+		data.update(salary_structure_assignment)
+		data.update(employee)
 		data.update(self.as_dict())
 
 		# set values for components
@@ -598,10 +658,13 @@ class SalarySlip(TransactionBase):
 				continue
 
 			if (
-				(not d.additional_salary
-				and (not additional_salary or additional_salary.overwrite))
-				or (additional_salary
-				and additional_salary.name == d.additional_salary)
+				(
+					not d.additional_salary
+					and (not additional_salary or additional_salary.overwrite)
+				) or (
+					additional_salary
+					and additional_salary.name == d.additional_salary
+				)
 			):
 				component_row = d
 				break
@@ -632,8 +695,13 @@ class SalarySlip(TransactionBase):
 			component_row.set('abbr', abbr)
 
 		if additional_salary:
-			component_row.default_amount = 0
-			component_row.additional_amount = amount
+			if additional_salary.overwrite:
+				component_row.additional_amount = flt(flt(amount) - flt(component_row.get("default_amount", 0)),
+					component_row.precision("additional_amount"))
+			else:
+				component_row.default_amount = 0
+				component_row.additional_amount = amount
+
 			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date
@@ -1045,6 +1113,7 @@ class SalarySlip(TransactionBase):
 				"applicant": self.employee,
 				"docstatus": 1,
 				"repay_from_salary": 1,
+				"company": self.company
 			})
 
 	def make_loan_repayment_entry(self):
@@ -1173,7 +1242,7 @@ class SalarySlip(TransactionBase):
 		period_start_date, period_end_date = self.get_year_to_date_period()
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
-			fields = ['sum(net_pay) as sum'],
+			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
 			filters = {'employee_name' : self.employee_name,
 				'start_date' : ['>=', period_start_date],
 				'end_date' : ['<', period_end_date],
@@ -1181,10 +1250,13 @@ class SalarySlip(TransactionBase):
 				'docstatus': 1
 			})
 
-		year_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
+		year_to_date = flt(salary_slip_sum[0].net_sum) if salary_slip_sum else 0.0
+		gross_year_to_date = flt(salary_slip_sum[0].gross_sum) if salary_slip_sum else 0.0
 
 		year_to_date += self.net_pay
+		gross_year_to_date += self.gross_pay
 		self.year_to_date = year_to_date
+		self.gross_year_to_date = gross_year_to_date
 
 	def compute_month_to_date(self):
 		month_to_date = 0

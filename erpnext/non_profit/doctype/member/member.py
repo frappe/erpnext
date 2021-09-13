@@ -3,13 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils import cint, get_link_to_form
 from frappe.integrations.utils import get_payment_gateway_controller
+from frappe.model.document import Document
+from frappe.utils import cint, get_link_to_form
+
 from erpnext.non_profit.doctype.membership_type.membership_type import get_membership_type
+
 
 class Member(Document):
 	def onload(self):
@@ -84,7 +87,9 @@ def create_member(user_details):
 		"email_id": user_details.email,
 		"pan_number": user_details.pan or None,
 		"membership_type": user_details.plan_id,
-		"subscription_id": user_details.subscription_id or None
+		"customer_id": user_details.customer_id or None,
+		"subscription_id": user_details.subscription_id or None,
+		"subscription_status": user_details.subscription_status or ""
 	})
 
 	member.insert(ignore_permissions=True)

@@ -2,19 +2,25 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.model.naming import set_name_by_naming_series
-from frappe import _, msgprint
+
+import frappe
 import frappe.defaults
-from frappe.utils import flt, cint, cstr, today, get_formatted_email
+from frappe import _, msgprint
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
-from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
-from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
-from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
+from frappe.model.naming import set_name_by_naming_series
+from frappe.model.rename_doc import update_linked_doctypes
+from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
+
+from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
+from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
@@ -75,8 +81,31 @@ class Customer(TransactionBase):
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
 		if self.sales_team:
-			if sum([member.allocated_percentage or 0 for member in self.sales_team]) != 100:
+			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
+
+	@frappe.whitelist()
+	def get_customer_group_details(self):
+		doc = frappe.get_doc('Customer Group', self.customer_group)
+		self.accounts = self.credit_limits = []
+		self.payment_terms = self.default_price_list = ""
+
+		tables = [["accounts", "account"], ["credit_limits", "credit_limit"]]
+		fields = ["payment_terms", "default_price_list"]
+
+		for row in tables:
+			table, field = row[0], row[1]
+			if not doc.get(table): continue
+
+			for entry in doc.get(table):
+				child = self.append(table)
+				child.update({"company": entry.company, field: entry.get(field)})
+
+		for field in fields:
+			if not doc.get(field): continue
+			self.update({field: doc.get(field)})
+
+		self.save()
 
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
@@ -127,16 +156,20 @@ class Customer(TransactionBase):
 				self.db_set('email_id', self.email_id)
 
 	def create_primary_address(self):
+		from frappe.contacts.doctype.address.address import get_address_display
+
 		if self.flags.is_new_doc and self.get('address_line1'):
-			make_address(self)
+			address = make_address(self)
+			address_display = get_address_display(address.name)
+
+			self.db_set("customer_primary_address", address.name)
+			self.db_set("primary_address", address_display)
 
 	def update_lead_status(self):
 		'''If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
-			lead = frappe.get_doc('Lead', self.lead_name)
-			lead.status = 'Converted'
-			lead.save()
+			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
 
 	def create_lead_address_contact(self):
 		if self.lead_name:
@@ -225,9 +258,15 @@ class Customer(TransactionBase):
 
 	def on_trash(self):
 		if self.customer_primary_contact:
-			frappe.db.sql("""update `tabCustomer`
-				set customer_primary_contact=null, mobile_no=null, email_id=null
-				where name=%s""", self.name)
+			frappe.db.sql("""
+				UPDATE `tabCustomer`
+				SET
+					customer_primary_contact=null,
+					customer_primary_address=null,
+					mobile_no=null,
+					email_id=null,
+					primary_address=null
+				WHERE name=%(name)s""", {"name": self.name})
 
 		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
@@ -252,30 +291,6 @@ class Customer(TransactionBase):
 				_("Multiple Loyalty Programs found for Customer {}. Please select manually.")
 				.format(frappe.bold(self.customer_name))
 			)
-
-	def create_onboarding_docs(self, args):
-		defaults = frappe.defaults.get_defaults()
-		company = defaults.get('company') or \
-			frappe.db.get_single_value('Global Defaults', 'default_company')
-
-		for i in range(1, args.get('max_count')):
-			customer = args.get('customer_name_' + str(i))
-			if customer:
-				try:
-					doc = frappe.get_doc({
-						'doctype': self.doctype,
-						'customer_name': customer,
-						'customer_type': 'Company',
-						'customer_group': _('Commercial'),
-						'territory': defaults.get('country'),
-						'company': company
-					}).insert()
-
-					if args.get('customer_email_' + str(i)):
-						create_contact(customer, self.doctype,
-							doc.name, args.get("customer_email_" + str(i)))
-				except frappe.NameError:
-					pass
 
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""

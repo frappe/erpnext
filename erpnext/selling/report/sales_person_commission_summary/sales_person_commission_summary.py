@@ -2,9 +2,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import msgprint, _
-from frappe.utils import flt
+from frappe import _, msgprint
 
 
 def execute(filters=None):
@@ -101,7 +101,7 @@ def get_columns(filters):
 
 def get_entries(filters):
 	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
-	
+
 	conditions, values = get_conditions(filters, date_field)
 	entries = frappe.db.sql("""
 		select
@@ -111,7 +111,7 @@ def get_entries(filters):
 			`tab%s` dt, `tabSales Team` st
 		where
 			st.parent = dt.name and st.parenttype = %s
-			and dt.docstatus = 1 %s order by dt.name desc,st.sales_person 
+			and dt.docstatus = 1 %s order by dt.name desc,st.sales_person
 		""" %(date_field, filters["doc_type"], '%s', conditions),
 			tuple([filters["doc_type"]] + values), as_dict=1)
 
@@ -138,5 +138,3 @@ def get_conditions(filters, date_field):
 		values.append(filters["to_date"])
 
 	return " and ".join(conditions), values
-
-

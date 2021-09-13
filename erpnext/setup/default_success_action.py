@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 from frappe import _
 
 doctype_list = [
@@ -24,4 +25,3 @@ def get_default_success_action():
 		'first_success_message': get_first_success_message(doctype),
 		'next_actions': 'new\nprint\nemail'
 	} for doctype in doctype_list]
-

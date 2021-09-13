@@ -166,7 +166,7 @@
    "options": "Service Level Agreement"
   },
   {
-   "depends_on": "eval: doc.status != 'Replied';",
+   "depends_on": "eval: doc.status != 'Replied' && doc.service_level_agreement;",
    "fieldname": "response_by",
    "fieldtype": "Datetime",
    "label": "Response By",
@@ -180,7 +180,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.status != 'Replied';",
+   "depends_on": "eval: doc.status != 'Replied' && doc.service_level_agreement;",
    "fieldname": "resolution_by",
    "fieldtype": "Datetime",
    "label": "Resolution By",
@@ -410,7 +410,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2021-05-26 10:49:07.574769",
+ "modified": "2021-06-10 03:22:27.098898",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

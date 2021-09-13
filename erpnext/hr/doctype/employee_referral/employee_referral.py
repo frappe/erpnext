@@ -3,13 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import get_link_to_form
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form
+
+from erpnext.hr.utils import validate_active_employee
+
 
 class EmployeeReferral(Document):
 	def validate(self):
+		validate_active_employee(self.referrer)
 		self.set_full_name()
 		self.set_referral_bonus_payment_status()
 
@@ -54,6 +59,7 @@ def create_job_applicant(source_name, target_doc=None):
 @frappe.whitelist()
 def create_additional_salary(doc):
 	import json
+
 	from six import string_types
 
 	if isinstance(doc, string_types):
@@ -68,4 +74,3 @@ def create_additional_salary(doc):
 		additional_salary.ref_docname = doc.name
 
 	return additional_salary
-

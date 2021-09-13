@@ -3,16 +3,16 @@
 
 import json
 
-from PyPDF2 import PdfFileWriter
-
 import frappe
-from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
 from frappe.utils import cstr, nowdate
 from frappe.utils.data import fmt_money
 from frappe.utils.jinja import render_template
 from frappe.utils.pdf import get_pdf
 from frappe.utils.print_format import read_multi_pdf
+from PyPDF2 import PdfFileWriter
+
+from erpnext.accounts.utils import get_fiscal_year
 
 IRS_1099_FORMS_FILE_EXTENSION = ".pdf"
 
@@ -52,7 +52,7 @@ def execute(filters=None):
 				AND gl.party_type = "Supplier"
 				AND gl.company = %(company)s
 				{conditions}
-			
+
 		GROUP BY
 			gl.party
 

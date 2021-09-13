@@ -3,11 +3,18 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.hr.doctype.leave_application.test_leave_application import get_leave_period, get_employee
-from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
+
+import frappe
+
+from erpnext.hr.doctype.leave_application.test_leave_application import (
+	get_employee,
+	get_leave_period,
+)
 from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_policy
+from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import (
+	create_assignment_for_multiple_employees,
+)
 
 test_dependencies = ["Employee"]
 
@@ -99,5 +106,3 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 	def tearDown(self):
 		for doctype in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
 			frappe.db.sql("delete from `tab{0}`".format(doctype)) #nosec
-
-

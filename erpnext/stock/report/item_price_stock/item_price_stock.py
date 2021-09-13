@@ -1,8 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -89,7 +91,7 @@ def get_item_price_qty_data(filters):
 		{conditions}"""
 		.format(conditions=conditions), filters, as_dict=1)
 
-	price_list_names = list(set([item.price_list_name for item in item_results]))
+	price_list_names = list(set(item.price_list_name for item in item_results))
 
 	buying_price_map = get_price_map(price_list_names, buying=1)
 	selling_price_map = get_price_map(price_list_names, selling=1)
