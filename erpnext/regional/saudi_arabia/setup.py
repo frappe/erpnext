@@ -13,7 +13,7 @@ def setup(company=None, patch=True):
 	add_print_formats()
 	add_permissions()
 	create_ksa_vat_setting(company)
-	make_custom_fields()
+	make_qrcode_field()
 	
 
 def add_permissions():
