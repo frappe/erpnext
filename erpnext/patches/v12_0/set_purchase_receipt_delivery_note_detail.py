@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
-import frappe
+
 from collections import defaultdict
+
+import frappe
+
 
 def execute():
 

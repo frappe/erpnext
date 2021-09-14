@@ -1,11 +1,14 @@
-# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe import _
-from frappe.utils import formatdate
+from frappe.utils import formatdate, get_link_to_form
+
 
 def execute(filters=None):
 	return VATAuditReport(filters).run()
@@ -42,7 +45,8 @@ class VATAuditReport(object):
 		self.sa_vat_accounts = frappe.get_list("South Africa VAT Account",
 			filters = {"parent": self.filters.company}, pluck="account")
 		if not self.sa_vat_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
-			frappe.throw(_("Please set VAT Accounts in South Africa VAT Settings"))
+			link_to_settings = get_link_to_form("South Africa VAT Settings", "", label="South Africa VAT Settings")
+			frappe.throw(_("Please set VAT Accounts in {0}").format(link_to_settings))
 
 	def get_invoice_data(self, doctype):
 		conditions = self.get_conditions()
@@ -69,7 +73,7 @@ class VATAuditReport(object):
 
 		items = frappe.db.sql("""
 			SELECT
-				item_code, parent, taxable_value, base_net_amount, is_zero_rated
+				item_code, parent, base_net_amount, is_zero_rated
 			FROM
 				`tab%s Item`
 			WHERE
@@ -79,7 +83,7 @@ class VATAuditReport(object):
 			if d.item_code not in self.invoice_items.get(d.parent, {}):
 				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {
 					'net_amount': 0.0})
-				self.invoice_items[d.parent][d.item_code]['net_amount'] += d.get('taxable_value', 0) or d.get('base_net_amount', 0)
+				self.invoice_items[d.parent][d.item_code]['net_amount'] += d.get('base_net_amount', 0)
 				self.invoice_items[d.parent][d.item_code]['is_zero_rated'] = d.is_zero_rated
 
 	def get_items_based_on_tax_rate(self, doctype):
@@ -189,7 +193,7 @@ class VATAuditReport(object):
 						row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
 						row["voucher_type"] = doctype
 						row["voucher_no"] = inv
-						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier" 
+						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
 						row["party"] = inv_data.get("party")
 						row["remarks"] = inv_data.get("remarks")
 						row["gross_amount"]= item_details[0].get("gross_amount")

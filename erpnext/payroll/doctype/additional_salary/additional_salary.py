@@ -3,20 +3,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _, bold
-from frappe.utils import getdate, date_diff, comma_and, formatdate
+from frappe.model.document import Document
+from frappe.utils import comma_and, date_diff, formatdate, getdate
+
 from erpnext.hr.utils import validate_active_employee
+
 
 class AdditionalSalary(Document):
 	def on_submit(self):
-		if self.ref_doctype == "Employee Advance" and self.ref_docname:
-			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", self.amount)
-
+		self.update_return_amount_in_employee_advance()
 		self.update_employee_referral()
 
 	def on_cancel(self):
+		self.update_return_amount_in_employee_advance()
 		self.update_employee_referral(cancel=True)
 
 	def validate(self):
@@ -95,6 +97,17 @@ class AdditionalSalary(Document):
 				frappe.throw(_("Additional Salary for referral bonus can only be created against Employee Referral with status {0}").format(
 					frappe.bold("Accepted")))
 
+	def update_return_amount_in_employee_advance(self):
+		if self.ref_doctype == "Employee Advance" and self.ref_docname:
+			return_amount = frappe.db.get_value("Employee Advance", self.ref_docname, "return_amount")
+
+			if self.docstatus == 2:
+				return_amount -= self.amount
+			else:
+				return_amount += self.amount
+
+			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", return_amount)
+
 	def update_employee_referral(self, cancel=False):
 		if self.ref_doctype == "Employee Referral":
 			status = "Unpaid" if cancel else "Paid"
@@ -112,11 +125,11 @@ class AdditionalSalary(Document):
 		no_of_days = date_diff(getdate(end_date), getdate(start_date)) + 1
 		return amount_per_day * no_of_days
 
-@frappe.whitelist()
 def get_additional_salaries(employee, start_date, end_date, component_type):
 	additional_salary_list = frappe.db.sql("""
-		select name, salary_component as component, type, amount, overwrite_salary_structure_amount as overwrite,
-		deduct_full_tax_on_selected_payroll_date, is_recurring
+		select name, salary_component as component, type, amount,
+		overwrite_salary_structure_amount as overwrite,
+		deduct_full_tax_on_selected_payroll_date
 		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1

@@ -11,15 +11,9 @@
   "bugs": {
     "url": "https://github.com/frappe/erpnext/issues"
   },
-  "devDependencies": {
-    "snyk": "^1.518.0"
-  },
+  "devDependencies": {},
   "dependencies": {
+    "html2canvas": "^1.1.4",
     "onscan.js": "^1.5.2"
-  },
-  "scripts": {
-    "snyk-protect": "snyk protect",
-    "prepare": "yarn run snyk-protect"
-  },
-  "snyk": true
+  }
 }

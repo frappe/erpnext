@@ -2,16 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe import _
-from frappe.model.document import Document
-from frappe.utils import now_datetime, time_diff_in_seconds, get_datetime, date_diff
-from frappe.core.utils import get_parent_doc
 from datetime import timedelta
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils.user import is_website_user
+
+import frappe
+from frappe import _
+from frappe.core.utils import get_parent_doc
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils.user import is_website_user
+
 
 class Issue(Document):
 	def get_feed(self):
@@ -116,7 +119,7 @@ class Issue(Document):
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name
-	
+
 	def reset_issue_metrics(self):
 		self.db_set("resolution_time", None)
 		self.db_set("user_resolution_time", None)
@@ -231,7 +234,7 @@ def set_first_response_time(communication, method):
 
 def is_first_response(issue):
 	responses = frappe.get_all('Communication', filters = {'reference_name': issue.name, 'sent_or_received': 'Sent'})
-	if len(responses) == 1: 
+	if len(responses) == 1:
 		return True
 	return False
 
@@ -260,7 +263,7 @@ def calculate_first_response_time(issue, first_responded_on):
 			# both issue creation and first response were after working hours
 			else:
 				return 1.0		# this should ideally be zero, but it gets reset when the next response is sent if the value is zero
-			
+
 		else:
 			return 1.0
 

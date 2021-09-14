@@ -4,13 +4,23 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.accounts.party import set_taxes
-from erpnext.controllers.selling_controller import SellingController
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, comma_and, cstr, getdate, has_gravatar, nowdate, validate_email_address
+from frappe.utils import (
+	cint,
+	comma_and,
+	cstr,
+	getdate,
+	has_gravatar,
+	nowdate,
+	validate_email_address,
+)
+
+from erpnext.accounts.party import set_taxes
+from erpnext.controllers.selling_controller import SellingController
+
 
 class Lead(SellingController):
 	def get_feed(self):
@@ -34,9 +44,10 @@ class Lead(SellingController):
 			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if (not cint(self.is_new())) else None,
 			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if (not cint(self.is_new())) else None,
 		})
-		
+
 	def set_full_name(self):
-		self.lead_name = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
+		if self.first_name:
+			self.lead_name = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
 
 	def validate_email_id(self):
 		if self.email_id:
@@ -62,6 +73,7 @@ class Lead(SellingController):
 
 	def on_update(self):
 		self.add_calendar_event()
+		self.update_prospects()
 
 	def before_insert(self):
 		self.contact_doc = self.create_contact()
@@ -87,6 +99,12 @@ class Lead(SellingController):
 			"subject": ('Contact ' + cstr(self.lead_name)),
 			"description": ('Contact ' + cstr(self.lead_name)) + (self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
 		}, force)
+
+	def update_prospects(self):
+		prospects = frappe.get_all('Prospect Lead', filters={'lead': self.name}, fields=['parent'])
+		for row in prospects:
+			prospect = frappe.get_doc('Prospect', row.parent)
+			prospect.save(ignore_permissions=True)
 
 	def check_email_id_is_unique(self):
 		if self.email_id:
@@ -166,6 +184,7 @@ class Lead(SellingController):
 			"salutation": self.salutation,
 			"gender": self.gender,
 			"designation": self.designation,
+			"company_name": self.company_name,
 		})
 
 		if self.email_id:
@@ -353,3 +372,13 @@ def daily_open_lead():
 	leads = frappe.get_all("Lead", filters = [["contact_date", "Between", [nowdate(), nowdate()]]])
 	for lead in leads:
 		frappe.db.set_value("Lead", lead.name, "status", "Open")
+
+@frappe.whitelist()
+def add_lead_to_prospect(lead, prospect):
+	prospect = frappe.get_doc('Prospect', prospect)
+	prospect.append('prospect_lead', {
+		'lead': lead
+	})
+	prospect.save(ignore_permissions=True)
+	frappe.msgprint(_('Lead {0} has been added to prospect {1}.').format(frappe.bold(lead), frappe.bold(prospect.name)),
+		title=_('Lead Added'), indicator='green')

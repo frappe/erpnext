@@ -3,29 +3,43 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form
-from frappe import _, throw
-import frappe.defaults
 
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
-from erpnext.stock import get_warehouse_account_map
-from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, make_reverse_gl_entries
-from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+import frappe
+from frappe import _, throw
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 from six import iteritems
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
+
+import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
+from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	check_if_return_invoice_linked_with_payment_entry,
+	unlink_inter_company_doc,
+	update_linked_doc,
+	validate_inter_company_party,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
+from erpnext.accounts.general_ledger import (
+	get_round_off_account_and_cost_center,
+	make_gl_entries,
+	make_reverse_gl_entries,
+	merge_similar_entries,
+)
+from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	get_item_account_wise_additional_cost,
+	update_billed_amount_based_on_po,
+)
+
 
 class WarehouseMissingError(frappe.ValidationError): pass
 
@@ -415,6 +429,8 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
+		self.process_common_party_accounting()
+
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
@@ -448,6 +464,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries)
 
 		if self.check_asset_cwip_enabled():
 			self.get_asset_gl_entry(gl_entries)
@@ -521,6 +538,8 @@ class PurchaseInvoice(BuyingController):
 			and flt(d.base_tax_amount_after_discount_amount)]
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
+
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -612,7 +631,7 @@ class PurchaseInvoice(BuyingController):
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
 
 					if not item.is_fixed_asset:
-						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
+						dummy, amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
@@ -854,8 +873,11 @@ class PurchaseInvoice(BuyingController):
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		valuation_tax = {}
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
 		for tax in self.get("taxes"):
-			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
+			amount, base_amount = self.get_tax_amounts(tax, enable_discount_accounting)
+			if tax.category in ("Total", "Valuation and Total") and flt(base_amount):
 				account_currency = get_account_currency(tax.account_head)
 
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
@@ -864,21 +886,21 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.supplier,
-						dr_or_cr: tax.base_tax_amount_after_discount_amount,
-						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==self.company_currency \
-							else tax.tax_amount_after_discount_amount,
+						dr_or_cr: base_amount,
+						dr_or_cr + "_in_account_currency": base_amount
+							if account_currency==self.company_currency
+							else amount,
 						"cost_center": tax.cost_center
 					}, account_currency, item=tax)
 				)
 			# accumulate valuation tax
-			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount) \
+			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(base_amount) \
 				and not self.is_internal_transfer():
 				if self.auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.name, 0)
 				valuation_tax[tax.name] += \
-					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(base_amount)
 
 		if self.is_opening == "No" and self.negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
@@ -918,6 +940,13 @@ class PurchaseInvoice(BuyingController):
 							"credit": valuation_tax[tax.name],
 							"remarks": self.remarks or "Accounting Entry for Stock"
 						}, item=tax))
+
+	@property
+	def enable_discount_accounting(self):
+		if not hasattr(self, "_enable_discount_accounting"):
+			self._enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
+		return self._enable_discount_accounting
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
@@ -1014,6 +1043,8 @@ class PurchaseInvoice(BuyingController):
 				}, item=self))
 
 	def on_cancel(self):
+		check_if_return_invoice_linked_with_payment_entry(self)
+
 		super(PurchaseInvoice, self).on_cancel()
 
 		self.check_on_hold_or_closed_status()

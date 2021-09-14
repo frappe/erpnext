@@ -2,11 +2,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from six import iteritems
+
+import frappe
 from frappe import _, scrub
 from frappe.utils import flt
+from six import iteritems
+
 
 def execute(filters=None):
 	return IssueSummary(filters).run()
@@ -362,4 +365,3 @@ class IssueSummary(object):
 				'datatype': 'Int',
 			}
 		]
-

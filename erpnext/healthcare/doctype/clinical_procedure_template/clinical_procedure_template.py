@@ -3,10 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+
+import json
+
+import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.rename_doc import rename_doc
+
 
 class ClinicalProcedureTemplate(Document):
 	def validate(self):
@@ -118,4 +122,3 @@ def change_item_code_from_template(item_code, doc):
 		rename_doc('Item', doc.item_code, item_code, ignore_permissions=True)
 		frappe.db.set_value('Clinical Procedure Template', doc.name, 'item_code', item_code)
 	return
-

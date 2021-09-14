@@ -3,14 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import traceback
 from json import dumps
+
+import frappe
 from frappe import _, scrub
-from frappe.utils import flt, nowdate
 from frappe.model.document import Document
+from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 
 
 class OpeningInvoiceCreationTool(Document):
@@ -241,4 +246,3 @@ def get_temporary_opening_account(company=None):
 		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
 
 	return accounts[0].name
-

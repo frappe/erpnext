@@ -2,11 +2,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import add_to_date
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
+
+from erpnext.accounts.report.financial_statements import get_columns, get_data, get_period_list
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_net_profit_loss,
+)
 
 
 def get_mapper_for(mappers, position):

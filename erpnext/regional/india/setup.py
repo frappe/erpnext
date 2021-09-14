@@ -61,7 +61,7 @@ def create_hsn_codes(data, code_field):
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
-		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill', 'E-Invoice Summary'):
+		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill'):
 
 		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
 			frappe.get_doc(dict(
@@ -100,7 +100,7 @@ def add_custom_roles_for_reports():
 			)).insert()
 
 def add_permissions():
-	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate', 'E Invoice Settings'):
+	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
 		add_permission(doctype, 'All', 0)
 		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
@@ -116,11 +116,9 @@ def add_permissions():
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
 	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
-	frappe.reload_doc("accounts", "print_format", "GST E-Invoice")
 
 	frappe.db.set_value("Print Format", "GST POS Invoice", "disabled", 0)
 	frappe.db.set_value("Print Format", "GST Tax Invoice", "disabled", 0)
-	frappe.db.set_value("Print Format", "GST E-Invoice", "disabled", 0)
 
 def make_property_setters(patch=False):
 	# GST rules do not allow for an invoice no. bigger than 16 characters
@@ -445,51 +443,31 @@ def make_custom_fields(update=True):
 			'fieldname': 'ewaybill',
 			'label': 'E-Way Bill No.',
 			'fieldtype': 'Data',
-			'depends_on': 'eval:((doc.docstatus === 1 || doc.ewaybill) && doc.eway_bill_cancelled === 0)',
+			'depends_on': 'eval:(doc.docstatus === 1)',
 			'allow_on_submit': 1,
 			'insert_after': 'tax_id',
 			'translatable': 0
 		}
 	]
 
-	si_einvoice_fields = [
-		dict(fieldname='irn', label='IRN', fieldtype='Data', read_only=1, insert_after='customer', no_copy=1, print_hide=1,
-			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
-
-		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
-			depends_on='eval:(doc.irn_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
-
-		dict(fieldname='eway_bill_validity', label='E-Way Bill Validity', fieldtype='Data', no_copy=1, print_hide=1,
-			depends_on='ewaybill', read_only=1, allow_on_submit=1, insert_after='ewaybill'),
-
-		dict(fieldname='eway_bill_cancelled', label='E-Way Bill Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
-			depends_on='eval:(doc.eway_bill_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
-
-		dict(fieldname='einvoice_section', label='E-Invoice Fields', fieldtype='Section Break', insert_after='gst_vehicle_type',
-			print_hide=1, hidden=1),
-
-		dict(fieldname='ack_no', label='Ack. No.', fieldtype='Data', read_only=1, hidden=1, insert_after='einvoice_section',
-			no_copy=1, print_hide=1),
-
-		dict(fieldname='ack_date', label='Ack. Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_no', no_copy=1, print_hide=1),
-
-		dict(fieldname='irn_cancel_date', label='Cancel Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_date',
-			no_copy=1, print_hide=1),
-
-		dict(fieldname='signed_einvoice', label='Signed E-Invoice', fieldtype='Code', options='JSON', hidden=1, insert_after='irn_cancel_date',
-			no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='signed_qr_code', label='Signed QRCode', fieldtype='Code', options='JSON', hidden=1, insert_after='signed_einvoice',
-			no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='qrcode_image', label='QRCode', fieldtype='Attach Image', hidden=1, insert_after='signed_qr_code',
-			no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='einvoice_status', label='E-Invoice Status', fieldtype='Select', insert_after='qrcode_image',
-			options='\nPending\nGenerated\nCancelled\nFailed', default=None, hidden=1, no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='failure_description', label='E-Invoice Failure Description', fieldtype='Code', options='JSON',
-			hidden=1, insert_after='einvoice_status', no_copy=1, print_hide=1, read_only=1)
+	payment_entry_fields = [
+		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break', insert_after='deductions',
+			print_hide=1, collapsible=1),
+		dict(fieldname='company_address', label='Company Address', fieldtype='Link', insert_after='gst_section',
+			print_hide=1, options='Address'),
+		dict(fieldname='company_gstin', label='Company GSTIN',
+			fieldtype='Data', insert_after='company_address',
+			fetch_from='company_address.gstin', print_hide=1, read_only=1),
+		dict(fieldname='place_of_supply', label='Place of Supply',
+			fieldtype='Data', insert_after='company_gstin',
+			print_hide=1, read_only=1),
+		dict(fieldname='gst_column_break', fieldtype='Column Break',
+				insert_after='place_of_supply'),
+		dict(fieldname='customer_address', label='Customer Address', fieldtype='Link', insert_after='gst_column_break',
+			print_hide=1, options='Address', depends_on = 'eval:doc.party_type == "Customer"'),
+		dict(fieldname='customer_gstin', label='Customer GSTIN',
+			fieldtype='Data', insert_after='customer_address',
+			fetch_from='customer_address.gstin', print_hide=1, read_only=1)
 	]
 
 	custom_fields = {
@@ -504,8 +482,9 @@ def make_custom_fields(update=True):
 		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
-		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
+		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields + delivery_note_gst_category,
+		'Payment Entry': payment_entry_fields,
 		'Journal Entry': journal_entry_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
@@ -573,6 +552,7 @@ def make_custom_fields(update=True):
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
+			dict(fieldname='hra_column_break', fieldtype='Column Break', insert_after='hra_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
 			dict(fieldname='non_profit_section', label='Non Profit Settings',
@@ -581,6 +561,7 @@ def make_custom_fields(update=True):
 				fieldtype='Data', insert_after='non_profit_section'),
 			dict(fieldname='with_effect_from', label='80G With Effect From',
 				fieldtype='Date', insert_after='company_80g_number'),
+			dict(fieldname='non_profit_column_break', fieldtype='Column Break', insert_after='with_effect_from'),
 			dict(fieldname='pan_details', label='PAN Number',
 				fieldtype='Data', insert_after='with_effect_from')
 		],
@@ -642,7 +623,8 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
 				'depends_on':'eval:in_list(["SEZ", "Overseas"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas"], doc.gst_category)'
 			}
 		],
 		'Customer': [
@@ -660,7 +642,8 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Select',
 				'insert_after': 'gst_category',
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
-				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
+				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)'
 			}
 		],
 		'Member': [

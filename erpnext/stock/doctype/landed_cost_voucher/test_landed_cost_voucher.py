@@ -3,15 +3,20 @@
 
 
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
 from frappe.utils import flt
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import get_gl_entries, test_records as pr_test_records, make_purchase_receipt
+
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+	get_gl_entries,
+	make_purchase_receipt,
+)
+
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
@@ -208,7 +213,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 	def test_multi_currency_lcv(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records, save_new_records
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			save_new_records,
+			test_records,
+		)
 
 		save_new_records(test_records)
 
@@ -253,6 +261,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 	def test_asset_lcv(self):
 		"Check if LCV for an Asset updates the Assets Gross Purchase Amount correctly."
+		frappe.db.set_value("Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC")
+
 		if not frappe.db.exists("Asset Category", "Computers"):
 			create_asset_category()
 
@@ -265,7 +275,6 @@ class TestLandedCostVoucher(unittest.TestCase):
 		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
 		self.assertEqual(len(assets), 1)
 
-		frappe.db.set_value("Company", pr.company, "capital_work_in_progress_account", "CWIP Account - _TC")
 		lcv = make_landed_cost_voucher(
 			company = pr.company,
 			receipt_document_type = "Purchase Receipt",

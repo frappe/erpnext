@@ -18,7 +18,7 @@ QUnit.test("test: Restaurant", function (assert) {
 
 	frappe.run_serially([
 		// insert a new Restaurant
-		() => frappe.tests.setup_doctype('Customer', customer),				
+		() => frappe.tests.setup_doctype('Customer', customer),
 		() => {
 			return frappe.tests.make('Restaurant', [
 				// values to be set

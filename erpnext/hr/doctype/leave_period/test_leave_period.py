@@ -3,8 +3,11 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe, erpnext
 import unittest
+
+import frappe
+
+import erpnext
 
 test_dependencies = ["Employee", "Leave Type", "Leave Policy"]
 

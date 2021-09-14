@@ -2,9 +2,10 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.model.db_query import DatabaseQuery
-from frappe.utils import nowdate
-from frappe.utils import flt
+from frappe.utils import flt, nowdate
+
 from erpnext.stock.utils import get_stock_balance
+
 
 @frappe.whitelist()
 def get_data(item_code=None, warehouse=None, parent_warehouse=None,

@@ -2,11 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt
-from frappe import msgprint, _
+from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
+from frappe.utils import flt
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
+
 
 def execute(filters=None):
 	return _execute(filters)
@@ -84,7 +90,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		# Add amount in unrealized account
 		for account in unrealized_profit_loss_accounts:
 			row.update({
-				frappe.scrub(account): flt(internal_invoice_map.get((inv.name, account)))
+				frappe.scrub(account+"_unrealized"): flt(internal_invoice_map.get((inv.name, account)))
 			})
 
 		# net total
@@ -258,6 +264,7 @@ def get_columns(invoice_list, additional_table_columns):
 
 		unrealized_profit_loss_accounts = frappe.db.sql_list("""SELECT distinct unrealized_profit_loss_account
 			from `tabSales Invoice` where docstatus = 1 and name in (%s)
+			and is_internal_customer = 1
 			and ifnull(unrealized_profit_loss_account, '') != ''
 			order by unrealized_profit_loss_account""" %
 			', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list))
@@ -284,7 +291,7 @@ def get_columns(invoice_list, additional_table_columns):
 	for account in unrealized_profit_loss_accounts:
 		unrealized_profit_loss_account_columns.append({
 			"label": account,
-			"fieldname": frappe.scrub(account),
+			"fieldname": frappe.scrub(account+"_unrealized"),
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120

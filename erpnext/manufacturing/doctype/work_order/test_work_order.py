@@ -3,18 +3,28 @@
 
 
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
-from frappe.utils import flt, now, add_months, cint, today, add_to_date
-from erpnext.manufacturing.doctype.work_order.work_order import (make_stock_entry,
-	ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError, CapacityError)
-from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.stock.utils import get_bin
+from frappe.utils import add_months, cint, flt, now, today
+
+from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	CapacityError,
+	ItemHasVariantError,
+	OverProductionError,
+	StockOverProductionError,
+	make_stock_entry,
+	stop_unstop,
+)
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+from erpnext.stock.utils import get_bin
+
 
 class TestWorkOrder(unittest.TestCase):
 	def setUp(self):
@@ -675,13 +685,18 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_valuation_rate_missing_on_make_stock_entry(self):
 		item_name = 'Test Valuation Rate Missing'
+		rm_item = '_Test raw material item'
 		make_item(item_name, {
+			"is_stock_item": 1,
+			"include_item_in_manufacturing": 1,
+		})
+		make_item('_Test raw material item', {
 			"is_stock_item": 1,
 			"include_item_in_manufacturing": 1,
 		})
 
 		if not frappe.db.get_value('BOM', {'item': item_name}):
-			make_bom(item=item_name, raw_materials=[item_name], rm_qty=1)
+			make_bom(item=item_name, raw_materials=[rm_item], rm_qty=1)
 
 		company = "_Test Company with perpetual inventory"
 		source_warehouse = create_warehouse("Test Valuation Rate Missing Warehouse", company=company)
@@ -689,6 +704,73 @@ class TestWorkOrder(unittest.TestCase):
 			company=company)
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry, wo.name, 'Material Transfer for Manufacture')
+
+	def test_wo_completion_with_pl_bom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import (
+			create_bom_with_process_loss_item,
+			create_process_loss_bom_items,
+		)
+
+		qty = 4
+		scrap_qty = 0.25 # bom item qty = 1, consider as 25% of FG
+		source_warehouse = "Stores - _TC"
+		wip_warehouse = "_Test Warehouse - _TC"
+		fg_item_non_whole, _, bom_item = create_process_loss_bom_items()
+
+		test_stock_entry.make_stock_entry(item_code=bom_item.item_code,
+			target=source_warehouse, qty=4, basic_rate=100)
+
+		bom_no = f"BOM-{fg_item_non_whole.item_code}-001"
+		if not frappe.db.exists("BOM", bom_no):
+			bom_doc = create_bom_with_process_loss_item(
+				fg_item_non_whole, bom_item, scrap_qty=scrap_qty,
+				scrap_rate=0, fg_qty=1, is_process_loss=1
+			)
+			bom_doc.submit()
+
+		wo = make_wo_order_test_record(
+			production_item=fg_item_non_whole.item_code,
+			bom_no=bom_no,
+			wip_warehouse=wip_warehouse,
+			qty=qty,
+			skip_transfer=1,
+			stock_uom=fg_item_non_whole.stock_uom,
+		)
+
+		se = frappe.get_doc(
+			make_stock_entry(wo.name, "Material Transfer for Manufacture", qty)
+		)
+		se.get("items")[0].s_warehouse = "Stores - _TC"
+		se.insert()
+		se.submit()
+
+		se = frappe.get_doc(
+			make_stock_entry(wo.name, "Manufacture", qty)
+		)
+		se.insert()
+		se.submit()
+
+		# Testing stock entry values
+		items = se.get("items")
+		self.assertEqual(len(items), 3, "There should be 3 items including process loss.")
+
+		source_item, fg_item, pl_item = items
+
+		total_pl_qty = qty * scrap_qty
+		actual_fg_qty = qty - total_pl_qty
+
+		self.assertEqual(pl_item.qty, total_pl_qty)
+		self.assertEqual(fg_item.qty, actual_fg_qty)
+
+		# Testing Work Order values
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, "produced_qty"),
+			qty
+		)
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, "process_loss_qty"),
+			total_pl_qty
+		)
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}

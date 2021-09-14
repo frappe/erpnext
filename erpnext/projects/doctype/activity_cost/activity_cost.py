@@ -3,9 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
+
 
 class DuplicationError(frappe.ValidationError): pass
 
@@ -13,7 +15,7 @@ class ActivityCost(Document):
 	def validate(self):
 		self.set_title()
 		self.check_unique()
-		
+
 	def set_title(self):
 		if self.employee:
 			if not self.employee_name:

@@ -31,8 +31,8 @@ frappe.ui.form.on('Maintenance Visit', {
 	},
 	onload: function (frm, cdt, cdn) {
 		let item = locals[cdt][cdn];
-		if (frm.maintenance_type == 'Scheduled') {
-			let schedule_id = item.purposes[0].prevdoc_detail_docname;
+		if (frm.doc.maintenance_type === "Scheduled") {
+			const schedule_id = item.purposes[0].prevdoc_detail_docname || frm.doc.maintenance_schedule_detail;
 			frappe.call({
 				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.update_serial_nos",
 				args: {
@@ -42,6 +42,9 @@ frappe.ui.form.on('Maintenance Visit', {
 					serial_nos = r.message;
 				}
 			});
+		}
+		else {
+			frm.clear_table("purposes");
 		}
 
 		if (!frm.doc.status) {
@@ -73,12 +76,16 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 		if (this.frm.doc.docstatus === 0) {
 			this.frm.add_custom_button(__('Maintenance Schedule'),
 				function () {
+					if (!me.frm.doc.customer) {
+						frappe.msgprint(__('Please select Customer first'));
+						return;
+					}
 					erpnext.utils.map_current_doc({
 						method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 						source_doctype: "Maintenance Schedule",
 						target: me.frm,
 						setters: {
-							customer: me.frm.doc.customer || undefined,
+							customer: me.frm.doc.customer,
 						},
 						get_query_filters: {
 							docstatus: 1,
@@ -104,12 +111,16 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 				}, __("Get Items From"));
 			this.frm.add_custom_button(__('Sales Order'),
 				function () {
+					if (!me.frm.doc.customer) {
+						frappe.msgprint(__('Please select Customer first'));
+						return;
+					}
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 						source_doctype: "Sales Order",
 						target: me.frm,
 						setters: {
-							customer: me.frm.doc.customer || undefined,
+							customer: me.frm.doc.customer,
 						},
 						get_query_filters: {
 							docstatus: 1,

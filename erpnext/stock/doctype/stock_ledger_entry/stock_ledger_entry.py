@@ -3,14 +3,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
+from datetime import date
+
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, add_days, formatdate, get_datetime, cint
-from frappe.model.document import Document
-from datetime import date
-from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
-from erpnext.accounts.utils import get_fiscal_year
 from frappe.core.doctype.role.role import get_users
+from frappe.model.document import Document
+from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
+
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
+
 
 class StockFreezeError(frappe.ValidationError): pass
 class BackDatedStockTransaction(frappe.ValidationError): pass
@@ -27,7 +31,7 @@ class StockLedgerEntry(Document):
 
 	def validate(self):
 		self.flags.ignore_submit_comment = True
-		from erpnext.stock.utils import validate_warehouse_company, validate_disabled_warehouse
+		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 		self.validate_mandatory()
 		self.validate_item()
 		self.validate_batch()
@@ -55,8 +59,8 @@ class StockLedgerEntry(Document):
 				"sum(actual_qty)") or 0
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
 
-	#check for item quantity available in stock
 	def actual_amt_check(self):
+		"""Validate that qty at warehouse for selected batch is >=0"""
 		if self.batch_no and not self.get("allow_negative_stock"):
 			batch_bal_after_transaction = flt(frappe.db.sql("""select sum(actual_qty)
 				from `tabStock Ledger Entry`
@@ -107,7 +111,7 @@ class StockLedgerEntry(Document):
 		self.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
-		stock_settings = frappe.get_doc('Stock Settings', 'Stock Settings')
+		stock_settings = frappe.get_cached_doc('Stock Settings')
 
 		if stock_settings.stock_frozen_upto:
 			if (getdate(self.posting_date) <= getdate(stock_settings.stock_frozen_upto)

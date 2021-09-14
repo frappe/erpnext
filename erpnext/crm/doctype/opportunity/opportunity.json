@@ -33,12 +33,20 @@
   "to_discuss",
   "section_break_14",
   "currency",
-  "opportunity_amount",
+  "conversion_rate",
+  "base_opportunity_amount",
   "with_items",
   "column_break_17",
   "probability",
+  "opportunity_amount",
   "items_section",
   "items",
+  "section_break_32",
+  "base_total",
+  "base_grand_total",
+  "column_break_33",
+  "total",
+  "grand_total",
   "contact_info",
   "customer_address",
   "address_display",
@@ -425,12 +433,65 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "fieldname": "base_opportunity_amount",
+   "fieldtype": "Currency",
+   "label": "Opportunity Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "with_items",
+   "fieldname": "section_break_32",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "base_total",
+   "fieldtype": "Currency",
+   "label": "Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2021-06-04 10:11:22.831139",
+ "modified": "2021-09-06 10:02:18.609136",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

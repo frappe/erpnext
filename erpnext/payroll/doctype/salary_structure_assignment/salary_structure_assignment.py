@@ -3,10 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import getdate
 from frappe.model.document import Document
+from frappe.utils import getdate
+
 
 class DuplicateAssignment(frappe.ValidationError): pass
 
@@ -36,7 +38,7 @@ class SalaryStructureAssignment(Document):
 	def validate_income_tax_slab(self):
 		if not self.income_tax_slab:
 			return
-		
+
 		income_tax_slab_currency = frappe.db.get_value('Income Tax Slab', self.income_tax_slab, 'currency')
 		if self.currency != income_tax_slab_currency:
 			frappe.throw(_("Currency of selected Income Tax Slab should be {0} instead of {1}").format(self.currency, income_tax_slab_currency))

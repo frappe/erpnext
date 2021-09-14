@@ -2,14 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, cint, get_fullname
-from frappe import msgprint, _
+
+import json
+
+import frappe
+from frappe import _
+from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt, get_fullname
+
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import get_party_account_currency
-from frappe.email.inbox import link_communication_to_document
+
 
 class Opportunity(TransactionBase):
 	def after_insert(self):
@@ -35,6 +39,23 @@ class Opportunity(TransactionBase):
 
 		if not self.with_items:
 			self.items = []
+
+		else:
+			self.calculate_totals()
+
+	def calculate_totals(self):
+		total = base_total = 0
+		for item in self.get('items'):
+			item.amount = flt(item.rate) * flt(item.qty)
+			item.base_rate = flt(self.conversion_rate * item.rate)
+			item.base_amount = flt(self.conversion_rate * item.amount)
+			total += item.amount
+			base_total += item.base_amount
+
+		self.total = flt(total)
+		self.base_total = flt(base_total)
+		self.grand_total = flt(self.total) + flt(self.opportunity_amount)
+		self.base_grand_total = flt(self.base_total) + flt(self.base_opportunity_amount)
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
@@ -219,13 +240,6 @@ def make_quotation(source_name, target_doc=None):
 
 		company_currency = frappe.get_cached_value('Company',  quotation.company,  "default_currency")
 
-		if quotation.quotation_to == 'Customer' and quotation.party_name:
-			party_account_currency = get_party_account_currency("Customer", quotation.party_name, quotation.company)
-		else:
-			party_account_currency = company_currency
-
-		quotation.currency = party_account_currency or company_currency
-
 		if company_currency == quotation.currency:
 			exchange_rate = 1
 		else:
@@ -249,7 +263,7 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"opportunity_from": "quotation_to",
-				"name": "enq_no",
+				"name": "enq_no"
 			}
 		},
 		"Opportunity Item": {
@@ -284,6 +298,24 @@ def make_request_for_quotation(source_name, target_doc=None):
 			"postprocess": update_item
 		}
 	}, target_doc)
+
+	return doclist
+
+@frappe.whitelist()
+def make_customer(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		if source.opportunity_from == "Lead":
+			target.lead_name = source.party_name
+
+	doclist = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Customer",
+			"field_map": {
+				"currency": "default_currency",
+				"customer_name": "customer_name"
+			}
+		}
+	}, target_doc, set_missing_values)
 
 	return doclist
 

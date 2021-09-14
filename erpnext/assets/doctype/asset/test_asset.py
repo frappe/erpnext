@@ -3,14 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import cstr, nowdate, getdate, flt, get_last_day, add_days, add_months
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
-from erpnext.assets.doctype.asset.asset import make_sales_invoice
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+import frappe
+from frappe.utils import add_days, add_months, cstr, flt, get_last_day, getdate, nowdate
+
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
+)
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	make_purchase_invoice as make_invoice,
+)
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):
@@ -639,7 +648,7 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2030-06-12'
+		asset.available_for_use_date = '2030-07-12'
 		asset.purchase_date = '2030-01-01'
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 1000,
@@ -653,10 +662,10 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
 
 		expected_schedules = [
-			["2030-12-31", 1106.85, 1106.85],
-			["2031-12-31", 3446.58, 4553.43],
-			["2032-12-31", 1723.29, 6276.72],
-			["2033-06-12", 723.28, 7000.00]
+			["2030-12-31", 942.47, 942.47],
+			["2031-12-31", 3528.77, 4471.24],
+			["2032-12-31", 1764.38, 6235.62],
+			["2033-07-12", 764.38, 7000.00]
 		]
 
 		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]

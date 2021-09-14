@@ -3,13 +3,14 @@
 
 from __future__ import unicode_literals
 
-import frappe
 import unittest
 
-from erpnext.accounts.party import get_due_date
+import frappe
 from frappe.test_runner import make_test_records
-from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
+
+from erpnext.accounts.party import get_due_date
+from erpnext.exceptions import PartyDisabled, PartyFrozen
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 from erpnext.tests.utils import create_test_contact_and_address
 
@@ -18,6 +19,7 @@ test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Customer')
 
 from six import iteritems
+
 
 class TestCustomer(unittest.TestCase):
 	def setUp(self):
@@ -253,10 +255,10 @@ class TestCustomer(unittest.TestCase):
 		return get_customer_outstanding('_Test Customer', '_Test Company')
 
 	def test_customer_credit_limit(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		outstanding_amt = self.get_customer_outstanding_amount()
 		credit_limit = get_credit_limit('_Test Customer', '_Test Company')
@@ -352,3 +354,26 @@ def set_credit_limit(customer, company, credit_limit):
 			'credit_limit': credit_limit
 		})
 		customer.credit_limits[-1].db_insert()
+
+def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
+	if not frappe.db.exists("Customer", customer_name):
+		customer = frappe.get_doc({
+			"doctype": "Customer",
+			"customer_group": "_Test Customer Group",
+			"customer_name": customer_name,
+			"customer_type": "Individual",
+			"territory": "_Test Territory",
+			"is_internal_customer": 1,
+			"represents_company": represents_company
+		})
+
+		customer.append("companies", {
+			"company": allowed_to_interact_with
+		})
+
+		customer.insert()
+		customer_name = customer.name
+	else:
+		customer_name = frappe.db.get_value("Customer", customer_name)
+
+	return customer_name

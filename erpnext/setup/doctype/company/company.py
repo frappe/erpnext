@@ -2,22 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, os, json
-from frappe import _
-from frappe.utils import get_timestamp
 
-from frappe.utils import cint, today, formatdate
-import frappe.defaults
-from frappe.cache_manager import clear_defaults_cache
-
-from frappe.model.document import Document
-from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils.nestedset import NestedSet
-
-from past.builtins import cmp
 import functools
+import json
+import os
+
+import frappe
+import frappe.defaults
+from frappe import _
+from frappe.cache_manager import clear_defaults_cache
+from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.utils import cint, formatdate, get_timestamp, today
+from frappe.utils.nestedset import NestedSet
+from past.builtins import cmp
+
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
+
 
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
@@ -109,6 +110,9 @@ class Company(NestedSet):
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
+		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
+			self.create_default_cost_center()
+
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name, self.country)
 			self.create_default_tax_template()
@@ -116,9 +120,6 @@ class Company(NestedSet):
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
 			install_post_company_fixtures(frappe._dict({'company_name': self.name}))
-
-		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
-			self.create_default_cost_center()
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
@@ -393,6 +394,10 @@ class Company(NestedSet):
 		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
 		frappe.db.sql("delete from `tabItem Tax Template` where company=%s", self.name)
 
+		# delete Process Deferred Accounts if no GL Entry found
+		if not frappe.db.get_value('GL Entry', {'company': self.name}):
+			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
+
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
 	kwargs = dict(queue="long", company=company, old=old, new=new)
@@ -419,11 +424,11 @@ def replace_abbr(company, old, new):
 			_rename_record(d)
 	try:
 		frappe.db.auto_commit_on_many_writes = 1
-		frappe.db.set_value("Company", company, "abbr", new)
 		for dt in ["Warehouse", "Account", "Cost Center", "Department",
 				"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 			_rename_records(dt)
 			frappe.db.commit()
+		frappe.db.set_value("Company", company, "abbr", new)
 
 	except Exception:
 		frappe.log_error(title=_('Abbreviation Rename Error'))
@@ -475,8 +480,9 @@ def update_company_current_month_sales(company):
 
 def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
-	from frappe.utils.goal import get_monthly_results
 	import json
+
+	from frappe.utils.goal import get_monthly_results
 	filter_str = "company = {0} and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
 	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total",
 		"posting_date", filter_str, "sum")
