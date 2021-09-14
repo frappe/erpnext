@@ -532,6 +532,12 @@ def get_data():
 					"is_query_report": True,
 					"name": "Address And Contacts",
 					"doctype": "Address"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Supplier Transaction List Report",
+					"doctype": "GL Entry"
 				}
 			]
 		},
