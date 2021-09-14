@@ -14,11 +14,12 @@ from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	make_expense_claim,
 	notify_customers,
 )
-from erpnext.tests.utils import create_test_contact_and_address
+from erpnext.tests.utils import ERPNextTestCase, create_test_contact_and_address
 
 
-class TestDeliveryTrip(unittest.TestCase):
+class TestDeliveryTrip(ERPNextTestCase):
 	def setUp(self):
+		super().setUp()
 		driver = create_driver()
 		create_vehicle()
 		create_delivery_notification()
@@ -32,6 +33,7 @@ class TestDeliveryTrip(unittest.TestCase):
 		frappe.db.sql("delete from `tabVehicle`")
 		frappe.db.sql("delete from `tabEmail Template`")
 		frappe.db.sql("delete from `tabDelivery Trip`")
+		return super().tearDown()
 
 	def test_expense_claim_fields_are_fetched_properly(self):
 		expense_claim = make_expense_claim(self.delivery_trip.name)

@@ -6,8 +6,6 @@
 
 from __future__ import unicode_literals
 
-import unittest
-
 import frappe
 from frappe.utils import add_days, flt, nowdate, nowtime, random_string
 
@@ -22,10 +20,10 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
-from erpnext.tests.utils import change_settings
+from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestStockReconciliation(unittest.TestCase):
+class TestStockReconciliation(ERPNextTestCase):
 	@classmethod
 	def setUpClass(self):
 		create_batch_or_serial_no_items()
