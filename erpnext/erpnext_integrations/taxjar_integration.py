@@ -103,7 +103,7 @@ def get_tax_data(doc):
 
 	shipping = sum([tax.tax_amount for tax in doc.taxes if tax.account_head == SHIP_ACCOUNT_HEAD])
 
-	line_items = [get_line_item_dict(item) for item in doc.items]
+	line_items = [get_line_item_dict(item,doc.docstatus) for item in doc.items]
 
 	if from_shipping_state not in SUPPORTED_STATE_CODES:
 		from_shipping_state = get_state_code(from_address, 'Company')
@@ -139,13 +139,20 @@ def get_state_code(address, location):
 
 	return state_code
 
-def get_line_item_dict(item):
-	return dict(
+def get_line_item_dict(item, docstatus):
+	tax_dict = dict(
 		id = item.get('idx'),
 		quantity = item.get('qty'),
 		unit_price = item.get('rate'),
 		product_tax_code = item.get('product_tax_category')
 	)
+
+	if docstatus == 1:
+		tax_dict.update({
+			'sales_tax':item.get('tax_collectable')
+		})
+
+	return tax_dict
 
 def set_sales_tax(doc, method):
 	if not TAXJAR_CALCULATE_TAX:
