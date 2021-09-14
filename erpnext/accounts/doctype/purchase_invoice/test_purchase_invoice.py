@@ -1207,7 +1207,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 def update_tax_witholding_category(company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
-	fiscal_year = get_fiscal_year(fiscal_year='2021')
+	fiscal_year = get_fiscal_year(fiscal_year='_Test Fiscal Year 2021')
 
 	if not frappe.db.get_value('Tax Withholding Rate',
 		{'parent': 'TDS - 194 - Dividends - Individual', 'from_date': ('>=', fiscal_year[1]),
