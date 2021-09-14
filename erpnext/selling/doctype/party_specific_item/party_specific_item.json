@@ -24,7 +24,7 @@
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Party",
+   "label": "Party Name",
    "options": "party_type",
    "reqd": 1
   },
@@ -51,7 +51,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-09-02 17:36:37.337094",
+ "modified": "2021-09-14 13:27:58.612334",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Party Specific Item",
@@ -72,5 +72,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "party",
  "track_changes": 1
 }
