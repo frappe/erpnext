@@ -48,7 +48,7 @@ def get_data(filters):
 	company = filters.get('company')
 	if frappe.db.exists('KSA VAT Setting', company) is None:
 		url = get_url_to_list('KSA VAT Setting')
-		frappe.msgprint(f'Create <a href="{url}">KSA VAT Setting</a> for this company')
+		frappe.msgprint(_('Create <a href="{}">KSA VAT Setting</a> for this company').format(url))
 		return data
 
 	ksa_vat_setting = frappe.get_doc('KSA VAT Setting', company)
