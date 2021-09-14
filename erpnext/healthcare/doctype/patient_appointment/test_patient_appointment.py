@@ -2,12 +2,19 @@
 # Copyright (c) 2015, ESS LLP and Contributors
 # See license.txt
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
-from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter, check_payment_fields_reqd, check_is_new_patient
-from frappe.utils import nowdate, add_days, now_datetime
-from frappe.utils.make_random import get_random
+from frappe.utils import add_days, now_datetime, nowdate
+
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.healthcare.doctype.patient_appointment.patient_appointment import (
+	check_is_new_patient,
+	check_payment_fields_reqd,
+	make_encounter,
+	update_status,
+)
 
 
 class TestPatientAppointment(unittest.TestCase):
@@ -131,9 +138,16 @@ class TestPatientAppointment(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'status'), 'Cancelled')
 
 	def test_appointment_booking_for_admission_service_unit(self):
-		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import \
-			create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
+		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+			admit_patient,
+			discharge_patient,
+			schedule_discharge,
+		)
+		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import (
+			create_inpatient,
+			get_healthcare_service_unit,
+			mark_invoiced_inpatient_occupancy,
+		)
 
 		frappe.db.sql("""delete from `tabInpatient Record`""")
 		patient, practitioner = create_healthcare_docs()
@@ -157,9 +171,16 @@ class TestPatientAppointment(unittest.TestCase):
 		discharge_patient(ip_record1)
 
 	def test_invalid_healthcare_service_unit_validation(self):
-		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import \
-			create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
+		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+			admit_patient,
+			discharge_patient,
+			schedule_discharge,
+		)
+		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import (
+			create_inpatient,
+			get_healthcare_service_unit,
+			mark_invoiced_inpatient_occupancy,
+		)
 
 		frappe.db.sql("""delete from `tabInpatient Record`""")
 		patient, practitioner = create_healthcare_docs()
@@ -259,7 +280,10 @@ class TestPatientAppointment(unittest.TestCase):
 		self.assertRaises(OverlapError, appointment.save)
 
 	def test_service_unit_capacity(self):
-		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import MaximumCapacityError, OverlapError
+		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import (
+			MaximumCapacityError,
+			OverlapError,
+		)
 		practitioner = create_practitioner()
 		capacity = 3
 		overlap_service_unit_type = create_service_unit_type(id=10, allow_appointments=1, overlap_appointments=1)

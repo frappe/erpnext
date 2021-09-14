@@ -695,7 +695,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode",
-   "length": 1,
    "options": "Barcode"
   },
   {
@@ -727,6 +726,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -736,6 +736,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -2021,7 +2022,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-25 14:46:05.279588",
+ "modified": "2021-09-08 15:24:25.486499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

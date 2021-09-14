@@ -446,15 +446,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	currency() {
-		this._super();
-		$.each(cur_frm.doc.timesheets, function(i, d) {
-			let row = frappe.get_doc(d.doctype, d.name)
-			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
-		});
-		calculate_total_billing_amount(cur_frm)
-	}
-
-	currency() {
 		var me = this;
 		super.currency();
 		if (this.frm.doc.timesheets) {
@@ -577,6 +568,9 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 		frm.add_fetch('payment_term', 'invoice_portion', 'invoice_portion');
 		frm.add_fetch('payment_term', 'description', 'description');
+
+		frm.set_df_property('packed_items', 'cannot_add_rows', true);
+		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 
 		frm.set_query("account_for_change_amount", function() {
 			return {

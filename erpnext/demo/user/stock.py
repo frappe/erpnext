@@ -3,13 +3,18 @@
 
 from __future__ import print_function, unicode_literals
 
-import frappe, random, erpnext
+import random
+
+import frappe
 from frappe.desk import query_report
-from erpnext.stock.stock_ledger import NegativeStockError
-from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
+
+import erpnext
 from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+from erpnext.stock.doctype.serial_no.serial_no import SerialNoQtyError, SerialNoRequiredError
+from erpnext.stock.stock_ledger import NegativeStockError
+
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
@@ -66,8 +71,10 @@ def make_delivery_note():
 
 def make_stock_reconciliation():
 	# random set some items as damaged
-	from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation \
-		import OpeningEntryAccountError, EmptyStockReconciliationItemsError
+	from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+		EmptyStockReconciliationItemsError,
+		OpeningEntryAccountError,
+	)
 
 	if random.random() < 0.4:
 		stock_reco = frappe.new_doc("Stock Reconciliation")
@@ -88,8 +95,11 @@ def make_stock_reconciliation():
 				frappe.db.rollback()
 
 def submit_draft_stock_entries():
-	from erpnext.stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, \
-		DuplicateEntryForWorkOrderError, OperationsNotCompleteError
+	from erpnext.stock.doctype.stock_entry.stock_entry import (
+		DuplicateEntryForWorkOrderError,
+		IncorrectValuationRateError,
+		OperationsNotCompleteError,
+	)
 
 	# try posting older drafts (if exists)
 	frappe.db.commit()

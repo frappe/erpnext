@@ -3,10 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.model.document import Document
-import frappe
-from frappe.utils import getdate
+
 import datetime
+
+import frappe
+from frappe.model.document import Document
+from frappe.utils import getdate
+
 
 class FeeValidity(Document):
 	def validate(self):

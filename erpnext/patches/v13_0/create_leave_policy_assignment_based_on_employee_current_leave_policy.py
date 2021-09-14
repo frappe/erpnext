@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 
+
 def execute():
     if "leave_policy" in frappe.db.get_table_columns("Employee"):
         employees_with_leave_policy = frappe.db.sql("SELECT name, leave_policy FROM `tabEmployee` WHERE leave_policy IS NOT NULL and leave_policy != ''", as_dict = 1)

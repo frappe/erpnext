@@ -86,9 +86,9 @@ $.extend(erpnext, {
 
 	proceed_save_with_reminders_frequency_change: () => {
 		frappe.ui.hide_open_dialog();
-		
+
 		frappe.call({
-			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change', 
+			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change',
 			callback: () => {
 				cur_frm.save();
 			}
@@ -709,6 +709,9 @@ erpnext.utils.map_current_doc = function(opts) {
 			setters: opts.setters,
 			get_query: opts.get_query,
 			add_filters_group: 1,
+			allow_child_item_selection: opts.allow_child_item_selection,
+			child_fieldname: opts.child_fielname,
+			child_columns: opts.child_columns,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){
@@ -716,7 +719,7 @@ erpnext.utils.map_current_doc = function(opts) {
 					return;
 				}
 				opts.source_name = values;
-				opts.setters = args;
+				opts.args = args;
 				d.dialog.hide();
 				_map();
 			},
