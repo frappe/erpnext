@@ -13,8 +13,7 @@ def setup(company=None, patch=True):
 	add_print_formats()
 	add_permissions()
 	create_ksa_vat_setting(company)
-	make_custom_fields()
-
+	make_qrcode_field()
 
 def add_permissions():
 	"""Add Permissions for KSA VAT Setting."""
@@ -27,7 +26,7 @@ def add_permissions():
 	"""Enable KSA VAT Report"""
 	frappe.db.set_value('Report', 'KSA VAT', 'disabled', 0)
 
-def make_custom_fields():
+def make_qrcode_field():
 	qr_code_field = dict(
 		fieldname='qr_code',
 		label='QR Code',
