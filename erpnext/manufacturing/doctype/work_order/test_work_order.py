@@ -1,9 +1,5 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
-from __future__ import unicode_literals
-
 import unittest
 
 import frappe
@@ -814,6 +810,7 @@ def make_wo_order_test_record(**args):
 	wo_order.get_items_and_operations_from_bom()
 	wo_order.sales_order = args.sales_order or None
 	wo_order.planned_start_date = args.planned_start_date or now()
+	wo_order.transfer_material_against = args.transfer_material_against or "Work Order"
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):
