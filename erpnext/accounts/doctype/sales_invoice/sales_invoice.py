@@ -10,7 +10,6 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (
 	add_days,
-	add_months,
 	cint,
 	cstr,
 	flt,

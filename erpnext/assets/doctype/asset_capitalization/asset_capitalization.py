@@ -5,8 +5,15 @@ import frappe
 # import erpnext
 from frappe import _
 from erpnext.controllers.stock_controller import StockController
-from frappe.utils import cint, flt
-from erpnext.stock.get_item_details import get_item_warehouse, get_default_expense_account, get_default_cost_center
+from frappe.utils import (
+	cint,
+	flt
+)
+from erpnext.stock.get_item_details import (
+	get_item_warehouse,
+	get_default_expense_account,
+	get_default_cost_center
+)
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -15,8 +22,11 @@ from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import get_current_asset_value
 from erpnext.stock import get_warehouse_account_map
-from erpnext.assets.doctype.asset.depreciation import get_gl_entries_on_asset_disposal, get_gl_entries_on_asset_regain,\
+from erpnext.assets.doctype.asset.depreciation import (
+	get_gl_entries_on_asset_disposal,
+	get_gl_entries_on_asset_regain,
 	get_value_after_depreciation_on_disposal_date
+)
 from six import string_types
 import json
 
