@@ -13,7 +13,7 @@ def execute():
 	count = 1
 	for d in accounting_dimensions:
 
-		if count%2 == 0:
+		if count % 2 == 0:
 			insert_after_field = 'dimension_col_break'
 		else:
 			insert_after_field = 'accounting_dimensions_section'
