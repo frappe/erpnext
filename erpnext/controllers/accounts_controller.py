@@ -38,6 +38,7 @@ from erpnext.accounts.party import (
 	validate_party_frozen_disabled,
 )
 from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
@@ -54,7 +55,6 @@ from erpnext.stock.get_item_details import (
 	get_item_tax_map,
 	get_item_warehouse,
 )
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.utilities.transaction_base import TransactionBase
 
 
