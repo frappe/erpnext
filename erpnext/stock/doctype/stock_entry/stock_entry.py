@@ -1264,9 +1264,9 @@ class StockEntry(StockController):
 		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred_for_manufacturing from
 			`tabWork Order` where name=%s""", self.work_order, as_dict=1)[0]
 
-		manufacturing_qty = flt(po_qty.qty)
+		manufacturing_qty = flt(po_qty.qty) or 1
 		produced_qty = flt(po_qty.produced_qty)
-		trans_qty = flt(po_qty.material_transferred_for_manufacturing)
+		trans_qty = flt(po_qty.material_transferred_for_manufacturing) or 1
 
 		for item in transferred_materials:
 			qty= item.qty
