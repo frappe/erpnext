@@ -257,7 +257,7 @@ doc_events = {
 		"validate": "erpnext.regional.india.utils.validate_tax_category"
 	},
 	"Sales Invoice": {
-		"after_insert": "erpnext.regional.create_qr_code",
+		"after_insert": "erpnext.regional.saudi_arabia.utils.create_qr_code",
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
@@ -269,7 +269,7 @@ doc_events = {
 		],
 		"on_trash": [
 			"erpnext.regional.check_deletion_permission",
-			"erpnext.regional.delete_qr_code_file"
+			"erpnext.regional.saudi_arabia.utils.delete_qr_code_file"
 			],
 		"validate": [
 			"erpnext.regional.india.utils.validate_document_name",
