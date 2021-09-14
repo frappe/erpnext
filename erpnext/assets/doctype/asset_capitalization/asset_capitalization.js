@@ -37,27 +37,27 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				filters['item_code'] = me.frm.doc.target_item_code;
 			}
 
-			filters['status'] = ["not in", ["Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"]]
+			filters['status'] = ["not in", ["Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"]];
 			filters['docstatus'] = 1;
 
 			return {
 				filters: filters
-			}
+			};
 		});
 
 		me.frm.set_query("asset", "asset_items", function() {
 			var filters = {
 				'status': ["not in", ["Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"]],
 				'docstatus': 1
-			}
+			};
 
 			if (me.frm.doc.target_asset) {
-				filters['name'] = ['!=', me.frm.doc.target_asset]
+				filters['name'] = ['!=', me.frm.doc.target_asset];
 			}
 
 			return {
 				filters: filters
-			}
+			};
 		});
 
 		me.frm.set_query("item_code", "stock_items", function() {
@@ -70,19 +70,19 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 		me.frm.set_query('batch_no', 'stock_items', function(doc, cdt, cdn) {
 			var item = locals[cdt][cdn];
-			if(!item.item_code) {
+			if (!item.item_code) {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
 				var filters = {
 					'item_code': item.item_code,
 					'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
 					'warehouse': item.warehouse
-				}
+				};
 
 				return {
-					query : "erpnext.controllers.queries.get_batch_no",
+					query: "erpnext.controllers.queries.get_batch_no",
 					filters: filters
-				}
+				};
 			}
 		});
 
@@ -318,7 +318,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	get_warehouse_details(item) {
 		var me = this;
-		if(item.item_code && item.warehouse) {
+		if (item.item_code && item.warehouse) {
 			me.frm.call({
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_warehouse_details",
 				child: item,
