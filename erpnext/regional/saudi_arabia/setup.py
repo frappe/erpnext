@@ -27,7 +27,7 @@ def add_permissions():
 	"""Enable KSA VAT Report"""
 	frappe.db.set_value('Report', 'KSA VAT', 'disabled', 0)
 
-def make_custom_fields():
+def make_qrcode_field():
 	qr_code_field = dict(
 		fieldname='qr_code', 
 		label='QR Code', 
