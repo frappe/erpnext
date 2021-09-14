@@ -150,6 +150,12 @@ def get_result(filters, account_details, accounting_dimensions):
 		gl_entries = merge_similar_entries(filters, gl_entries, supplier_invoice_details)
 
 	set_party_name_in_list(gl_entries)
+	for gle in gl_entries:
+		gle['disable_party_name_formatter'] = 1
+		if gle.get('party') or gle.get('party_type'):
+			filters['show_party'] = True
+		if gle.get('party') and gle.get('party_name') and gle.get('party') != gle.get('party_name'):
+			filters['show_party_name'] = True
 
 	group_by_field = get_group_by_field(filters.get('group_by'))
 	group_by = [None]
@@ -448,20 +454,35 @@ def get_columns(filters, accounting_dimensions):
 			"width": 150,
 			"hide_if_filtered": 1
 		},
-		{
-			"label": _("Party Type"),
-			"fieldname": "party_type",
-			"width": 70,
-			"hide_if_filtered": 1
-		},
-		{
-			"label": _("Party"),
-			"fieldname": "party",
+	]
+
+	if filters.get('show_party'):
+		columns += [
+			{
+				"label": _("Party Type"),
+				"fieldname": "party_type",
+				"width": 70,
+				"hide_if_filtered": 1
+			},
+			{
+				"label": _("Party"),
+				"fieldname": "party",
+				"width": 80 if filters.get('show_party_name') else 150,
+				"fieldtype": "Dynamic Link",
+				"options": "party_type",
+				"hide_if_filtered": 1
+			},
+		]
+
+	if filters.get('show_party_name'):
+		columns.append({
+			"label": _("Party Name"),
+			"fieldname": "party_name",
 			"width": 150,
-			"fieldtype": "Dynamic Link",
-			"options": "party_type",
-			"hide_if_filtered": 1
-		},
+			"fieldtype": "Data",
+		})
+
+	columns += [
 		{
 			"label": _("Debit ({0})".format(filters.ledger_currency)),
 			"fieldname": "debit",

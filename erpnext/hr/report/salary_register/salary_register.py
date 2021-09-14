@@ -28,7 +28,7 @@ def execute(filters=None):
 			"salary_slip_id": ss.name,
 			"employee": ss.employee,
 			"employee_name": ss.employee_name,
-			"disable_employee_formatter": cint(filters.show_employee_name),
+			"disable_party_name_formatter": cint(filters.show_employee_name),
 			"date_of_joining": doj_map.get(ss.employee),
 			"branch": ss.branch,
 			"department": ss.department,

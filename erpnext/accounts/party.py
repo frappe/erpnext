@@ -651,8 +651,7 @@ def set_party_name_in_list(entries):
 		for d in entries:
 			if d.get('party_type') and d.get('party'):
 				party_name = party_name_map.get((d.get('party_type'), d.get('party')))
-				if party_name:
-					d['party_name'] = party_name
+				d['party_name'] = party_name or d.get('party')
 
 def get_party_name_map(entries):
 	if not entries:
