@@ -2,9 +2,24 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import unittest
 from contextlib import contextmanager
 
 import frappe
+
+
+class ERPNextTestCase(unittest.TestCase):
+	"""A sane default test class for ERPNext tests."""
+
+	def setUp(self) -> None:
+		frappe.db.commit()
+		return super().setUp()
+
+
+	def tearDown(self) -> None:
+		frappe.db.rollback()
+		return super().tearDown()
+
 
 
 def create_test_contact_and_address():

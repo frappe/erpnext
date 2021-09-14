@@ -3,8 +3,6 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import unittest
-
 import frappe
 
 from erpnext.stock.doctype.batch.test_batch import make_new_batch
@@ -13,9 +11,10 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPutawayRule(unittest.TestCase):
+class TestPutawayRule(ERPNextTestCase):
 	def setUp(self):
 		if not frappe.db.exists("Item", "_Rice"):
 			make_item("_Rice", {

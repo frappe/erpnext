@@ -4,8 +4,6 @@
 
 from __future__ import unicode_literals
 
-import unittest
-
 import frappe
 from frappe.utils import flt
 
@@ -16,9 +14,10 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
 	make_purchase_receipt,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestLandedCostVoucher(unittest.TestCase):
+class TestLandedCostVoucher(ERPNextTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 

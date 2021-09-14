@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import json
-import unittest
 
 import frappe
 from frappe.utils import cstr, flt, nowdate, nowtime
@@ -37,9 +36,10 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestDeliveryNote(unittest.TestCase):
+class TestDeliveryNote(ERPNextTestCase):
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
