@@ -127,7 +127,7 @@ class ECommerceSettings(Document):
 			if not (new_fields == old_fields):
 				create_website_items_index()
 
-def validate_cart_settings(doc, method):
+def validate_cart_settings(doc=None, method=None):
 	frappe.get_doc("E Commerce Settings", "E Commerce Settings").run_method("validate")
 
 def get_shopping_cart_settings():
