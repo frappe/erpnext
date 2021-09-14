@@ -164,6 +164,11 @@ def set_sales_tax(doc, method):
 		setattr(doc, "taxes", [tax for tax in doc.taxes if tax.account_head != TAX_ACCOUNT_HEAD])
 		return
 
+	# check if delivering within a nexus
+	nexus_list = frappe.get_doc('TaxJar Settings').get("nexus")
+	if tax_dict["to_state"] not in [nex.region_code for nex in nexus_list]:
+		return
+
 	tax_data = validate_tax_request(tax_dict)
 	if tax_data is not None:
 		if not tax_data.amount_to_collect:

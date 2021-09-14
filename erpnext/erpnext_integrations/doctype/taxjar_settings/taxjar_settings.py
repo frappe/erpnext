@@ -4,9 +4,21 @@
 
 from __future__ import unicode_literals
 
-# import frappe
+import frappe
 from frappe.model.document import Document
+
+from erpnext.erpnext_integrations.taxjar_integration import get_client
 
 
 class TaxJarSettings(Document):
-	pass
+
+	@frappe.whitelist()
+	def update_nexus_list(self):
+		client = get_client()
+		nexus = client.nexus_regions()
+
+		new_nexus_list = [frappe._dict(address) for address in nexus]
+
+		self.set('nexus',[])
+		self.set('nexus',new_nexus_list)
+		self.save()
