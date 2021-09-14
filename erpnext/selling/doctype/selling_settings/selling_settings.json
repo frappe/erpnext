@@ -190,7 +190,7 @@
    "label": "Item Price Settings"
   },
   {
-   "fieldname": "transaction_settings_section",
+   "fieldname": "sales_transactions_settings_section",
    "fieldtype": "Section Break",
    "label": "Transaction Settings"
   },
@@ -206,7 +206,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-06 22:05:06.139820",
+ "modified": "2021-09-14 22:05:06.139820",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
