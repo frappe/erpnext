@@ -4,5 +4,6 @@
 # import frappe
 import unittest
 
+
 class TestAssetCapitalization(unittest.TestCase):
 	pass
