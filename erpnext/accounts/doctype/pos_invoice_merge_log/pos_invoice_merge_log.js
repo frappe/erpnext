@@ -14,7 +14,7 @@ frappe.ui.form.on('POS Invoice Merge Log', {
 		});
 	},
 
-	merger_invoices_based_on: function(frm) {
+	merge_invoices_based_on: function(frm) {
 		frm.set_value('customer', '');
 		frm.set_value('customer_group', '');
 	}
