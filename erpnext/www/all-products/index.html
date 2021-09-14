@@ -25,10 +25,34 @@
 				{{ field_filter_section(field_filters) }}
 			{% endif %}
 
+<<<<<<< HEAD
 			<!-- attribute filters -->
 			{% if attribute_filters %}
 				{{ attribute_filter_section(attribute_filters) }}
 			{% endif %}
+=======
+					{% if attribute.item_attribute_values %}
+					<div class="filter-options">
+						{% for attr_value in attribute.item_attribute_values %}
+						<div class="checkbox">
+							<label>
+								<input type="checkbox"
+									class="product-filter attribute-filter"
+									id="{{attr_value}}"
+									data-attribute-name="{{ attribute.name }}"
+									data-attribute-value="{{ attr_value }}"
+									{% if attr_value.checked %} checked {% endif %}>
+									<span class="label-area">{{ attr_value }}</span>
+							</label>
+						</div>
+						{% endfor %}
+					</div>
+					{% else %}
+					<i class="text-muted">{{ _('No values') }}</i>
+					{% endif %}
+				</div>
+			{% endfor %}
+>>>>>>> 1c1b476d67 (perf: Optimize get_attribute_filters (#26729))
 		</div>
 
 		<script>
