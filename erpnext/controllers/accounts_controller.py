@@ -1670,15 +1670,15 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 def update_invoice_status():
 	# Daily update the status of the invoices
 	doctypes = ("Sales Invoice", "Purchase Invoice")
-	
+
 	# If paid amount is less than payable amount till current date then its Overdue
 	for doctype in doctypes:
 		frappe.db.sql("""
 			update `tab{}` as dt set dt.status = 'Overdue'
 			where dt.docstatus = 1
 				and dt.outstanding_amount > 0
-				and (dt.grand_total - dt.outstanding_amount) < 
-					(select sum(payment_amount) from `tabPayment Schedule` as ps  
+				and (dt.grand_total - dt.outstanding_amount) <
+					(select sum(payment_amount) from `tabPayment Schedule` as ps
 						where ps.parent = dt.name and ps.due_date < %s)
 		""".format(doctype), getdate())
 
