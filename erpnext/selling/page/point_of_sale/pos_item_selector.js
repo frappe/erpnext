@@ -237,7 +237,11 @@ erpnext.PointOfSale.ItemSelector = class {
 				value: "+1",
 				item: { item_code, batch_no, serial_no, uom, rate }
 			});
-			me.set_search_value('');
+
+			const search_val = $(me.search_field.$input[0]).val()
+			if (search_val) {
+				me.set_search_value('');
+			}
 		});
 
 		this.search_field.$input.on('input', (e) => {
