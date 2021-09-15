@@ -8,20 +8,19 @@
  "field_order": [
   "title",
   "naming_series",
-  "sales_invoice",
   "customer",
   "customer_name",
-  "outstanding_amount",
   "currency",
   "conversion_rate",
   "column_break_3",
   "company",
   "posting_date",
   "posting_time",
-  "due_date",
-  "overdue_days",
+  "status",
   "address_and_contact_section",
+  "customer_address",
   "address_display",
+  "contact_person",
   "contact_display",
   "contact_mobile",
   "contact_email",
@@ -29,16 +28,17 @@
   "company_address_display",
   "section_break_6",
   "dunning_type",
-  "dunning_fee",
   "column_break_8",
   "rate_of_interest",
-  "interest_amount",
   "section_break_12",
-  "dunning_amount",
+  "overdue_payments",
+  "section_break_28",
+  "column_break_17",
+  "total_interest",
+  "total_outstanding",
+  "dunning_fee",
   "grand_total",
   "income_account",
-  "column_break_17",
-  "status",
   "printing_setting_section",
   "language",
   "body_text",
@@ -63,27 +63,11 @@
    "options": "DUNN-.MM.-.YY.-"
   },
   {
-   "fieldname": "sales_invoice",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Sales Invoice",
-   "options": "Sales Invoice",
-   "reqd": 1
-  },
-  {
    "fetch_from": "sales_invoice.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Customer Name",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "sales_invoice.outstanding_amount",
-   "fieldname": "outstanding_amount",
-   "fieldtype": "Currency",
-   "label": "Outstanding Amount",
    "read_only": 1
   },
   {
@@ -94,13 +78,8 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Date"
-  },
-  {
-   "fieldname": "overdue_days",
-   "fieldtype": "Int",
-   "label": "Overdue Days",
-   "read_only": 1
+   "label": "Date",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_6",
@@ -116,14 +95,6 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "interest_amount",
-   "fieldtype": "Currency",
-   "label": "Interest Amount",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
   },
@@ -134,6 +105,7 @@
    "fieldname": "dunning_fee",
    "fieldtype": "Currency",
    "label": "Dunning Fee",
+   "options": "currency",
    "precision": "2"
   },
   {
@@ -202,13 +174,6 @@
    "label": "Closing Text"
   },
   {
-   "fetch_from": "sales_invoice.due_date",
-   "fieldname": "due_date",
-   "fieldtype": "Date",
-   "label": "Due Date",
-   "read_only": 1
-  },
-  {
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time"
@@ -222,6 +187,7 @@
    "label": "Rate of Interest (%) Yearly"
   },
   {
+   "collapsible": 1,
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
@@ -273,13 +239,14 @@
    "fieldtype": "Link",
    "label": "Customer",
    "options": "Customer",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "default": "0",
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "label": "Grand Total",
+   "options": "currency",
    "precision": "2",
    "read_only": 1
   },
@@ -291,13 +258,6 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nResolved\nUnresolved\nCancelled"
-  },
-  {
-   "fieldname": "dunning_amount",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Dunning Amount",
-   "read_only": 1
   },
   {
    "fieldname": "income_account",
@@ -312,6 +272,44 @@
    "hidden": 1,
    "label": "Conversion Rate",
    "read_only": 1
+  },
+  {
+   "fieldname": "overdue_payments",
+   "fieldtype": "Table",
+   "label": "Overdue Payments",
+   "options": "Overdue Payments"
+  },
+  {
+   "fieldname": "section_break_28",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_interest",
+   "fieldtype": "Currency",
+   "label": "Total Interest",
+   "options": "currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_outstanding",
+   "fieldtype": "Currency",
+   "label": "Total Outstanding",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Link",
+   "label": "Customer Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Contact Person",
+   "options": "Contact"
   }
  ],
  "is_submittable": 1,
