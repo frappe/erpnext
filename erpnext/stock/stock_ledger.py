@@ -681,11 +681,15 @@ class update_entries_after(object):
 			if self.wh_data.stock_queue[-1][1]==incoming_rate:
 				self.wh_data.stock_queue[-1][0] += actual_qty
 			else:
+				# Item has a positive balance qty, add new entry
 				if self.wh_data.stock_queue[-1][0] > 0:
 					self.wh_data.stock_queue.append([actual_qty, incoming_rate])
-				else:
+				else: # negative balance qty
 					qty = self.wh_data.stock_queue[-1][0] + actual_qty
-					self.wh_data.stock_queue[-1] = [qty, incoming_rate]
+					if qty > 0: # new balance qty is positive
+						self.wh_data.stock_queue[-1] = [qty, incoming_rate]
+					else: # new balance qty is still negative, maintain same rate
+						self.wh_data.stock_queue[-1][0] = qty
 		else:
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:

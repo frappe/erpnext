@@ -99,7 +99,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		filter_engine = ProductFiltersBuilder(self.name)
 
 		context.field_filters = filter_engine.get_field_filters()
-		context.attribute_filters = filter_engine.get_attribute_fitlers()
+		context.attribute_filters = filter_engine.get_attribute_filters()
 
 		context.update({
 			"parents": get_parent_item_groups(self.parent_item_group),
