@@ -215,12 +215,14 @@ $.extend(shopping_cart, {
 
 	place_order: function(btn) {
 		shopping_cart.freeze();
+
 		return frappe.call({
 			type: "POST",
 			method: "erpnext.e_commerce.shopping_cart.cart.place_order",
 			btn: btn,
 			callback: function(r) {
 				if(r.exc) {
+					shopping_cart.unfreeze();
 					var msg = "";
 					if(r._server_messages) {
 						msg = JSON.parse(r._server_messages || []).join("<br>");
@@ -239,12 +241,15 @@ $.extend(shopping_cart, {
 	},
 
 	request_quotation: function(btn) {
+		shopping_cart.freeze();
+
 		return frappe.call({
 			type: "POST",
 			method: "erpnext.e_commerce.shopping_cart.cart.request_for_quotation",
 			btn: btn,
 			callback: function(r) {
 				if(r.exc) {
+					shopping_cart.unfreeze();
 					var msg = "";
 					if(r._server_messages) {
 						msg = JSON.parse(r._server_messages || []).join("<br>");
@@ -255,7 +260,6 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
-					$('.cart-container table').hide();
 					$(btn).hide();
 					window.location.href = '/quotations/' + encodeURIComponent(r.message);
 				}
