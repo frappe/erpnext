@@ -20,7 +20,9 @@ frappe.ui.form.on('Training Event', {
 				frappe.set_route("List", "Training Feedback");
 			});
 		}
-	}
+	},
+
+	
 });
 
 frappe.ui.form.on("Training Event Employee", {

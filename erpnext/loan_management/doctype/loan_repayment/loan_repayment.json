@@ -31,6 +31,7 @@
   "reference_number",
   "column_break_21",
   "reference_date",
+  "reference_date_nepal",
   "principal_amount_paid",
   "total_penalty_paid",
   "total_interest_paid",
@@ -243,12 +244,17 @@
    "label": "Total Penalty Paid",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Reference Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:10:00.935364",
+ "modified": "2021-09-14 17:02:38.112480",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

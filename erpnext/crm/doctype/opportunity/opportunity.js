@@ -31,6 +31,33 @@ frappe.ui.form.on("Opportunity", {
 		}
 	},
 
+	expected_closing: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.expected_closing
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("expected_closing_date_nepali",resp.message)
+				}
+			}
+		})
+	},
+	transaction_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("opportunity_date_nepal",resp.message)
+				}
+			}
+		})
+	},
+
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},

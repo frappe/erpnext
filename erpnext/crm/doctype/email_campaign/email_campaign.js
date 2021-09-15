@@ -18,5 +18,21 @@ frappe.ui.form.on('Email Campaign', {
 				}
 			}
 		})
+		set_start_date(this.frm);
 	},
+	
+end_date: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.end_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("_date_nepali",resp.message)
+				}
+			}
+		})
+		set_end_date(this.frm);
+	}
 });
