@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
-import json, os
+
+import json
+import os
 
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-from erpnext.setup.setup_wizard import setup_wizard
+
 
 def complete():
 	with open(os.path.join(os.path.dirname(__file__),

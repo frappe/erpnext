@@ -2,19 +2,30 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form
-from frappe import msgprint, _, scrub
-from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.utils import get_balance_on, get_stock_accounts, get_stock_and_account_balance, \
-	get_account_currency, check_if_stock_and_account_balance_synced
-from erpnext.accounts.party import get_party_account
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.accounts.doctype.invoice_discounting.invoice_discounting \
-	import get_party_account_based_on_invoice_discounting
-from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 
-from six import string_types, iteritems
+import json
+
+import frappe
+from frappe import _, msgprint, scrub
+from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from six import iteritems, string_types
+
+import erpnext
+from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
+	get_party_account_based_on_invoice_discounting,
+)
+from erpnext.accounts.party import get_party_account
+from erpnext.accounts.utils import (
+	check_if_stock_and_account_balance_synced,
+	get_account_currency,
+	get_balance_on,
+	get_stock_accounts,
+	get_stock_and_account_balance,
+)
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
+
 
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
 
@@ -643,7 +654,10 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				update_reimbursed_amount(doc, jv=self.name)
+				if self.docstatus == 2:
+					update_reimbursed_amount(doc, -1 * d.debit)
+				else:
+					update_reimbursed_amount(doc, d.debit)
 
 
 	def validate_expense_claim(self):

@@ -2,14 +2,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-import frappe
 
-import unittest, os, json
-from frappe.utils import cstr, cint
-from erpnext.erpnext_integrations.connectors.shopify_connection import create_order
-from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
-from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
+import json
+import os
+import unittest
+
+import frappe
 from frappe.core.doctype.data_import.data_import import import_doc
+from frappe.utils import cint, cstr
+
+from erpnext.erpnext_integrations.connectors.shopify_connection import create_order
+from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
+from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
 
 
 class ShopifySettings(unittest.TestCase):

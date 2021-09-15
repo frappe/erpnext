@@ -3,15 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, now_datetime, flt, add_to_date
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests, get_warehouse_list
+
+import frappe
+from frappe.utils import add_to_date, flt, now_datetime, nowdate
+
 from erpnext.controllers.item_variant import create_variant
+from erpnext.manufacturing.doctype.production_plan.production_plan import (
+	get_items_for_material_requests,
+	get_sales_orders,
+	get_warehouse_list,
+)
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):
@@ -288,6 +296,7 @@ class TestProductionPlan(unittest.TestCase):
 		self.assertEqual(warehouses, expected_warehouses)
 
 	def test_get_sales_order_with_variant(self):
+		rm_item = create_item('PIV_RM', valuation_rate = 100)
 		if not frappe.db.exists('Item', {"item_code": 'PIV'}):
 			item = create_item('PIV', valuation_rate = 100)
 			variant_settings = {
@@ -300,20 +309,20 @@ class TestProductionPlan(unittest.TestCase):
 			}
 			item.update(variant_settings)
 			item.save()
-			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+			parent_bom = make_bom(item = 'PIV', raw_materials = [rm_item.item_code])
 		if not frappe.db.exists('BOM', {"item": 'PIV'}):
-			parent_bom = make_bom(item = 'PIV', raw_materials = ['PIV'])
+			parent_bom = make_bom(item = 'PIV', raw_materials = [rm_item.item_code])
 		else:
 			parent_bom = frappe.get_doc('BOM', {"item": 'PIV'})
 
 		if not frappe.db.exists('Item', {"item_code": 'PIV-RED'}):
 			variant = create_variant("PIV", {"Colour": "Red"})
 			variant.save()
-			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [rm_item.item_code])
 		else:
 			variant = frappe.get_doc('Item', 'PIV-RED')
 		if not frappe.db.exists('BOM', {"item": 'PIV-RED'}):
-			variant_bom = make_bom(item = variant.item_code, raw_materials = [variant.item_code])
+			variant_bom = make_bom(item = variant.item_code, raw_materials = [rm_item.item_code])
 
 		"""Testing when item variant has a BOM"""
 		so = make_sales_order(item_code="PIV-RED", qty=5)
@@ -395,6 +404,7 @@ def make_bom(**args):
 			'uom': item_doc.stock_uom,
 			'stock_uom': item_doc.stock_uom,
 			'rate': item_doc.valuation_rate or args.rate,
+			'source_warehouse': args.source_warehouse
 		})
 
 	if not args.do_not_save:

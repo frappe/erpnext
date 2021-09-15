@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
 from frappe.contacts.address_and_contact import filter_dynamic_link_doctypes
+
 
 class TestSearch(unittest.TestCase):
 	# Search for the word "cond", part of the word "conduire" (Lead) in french.
