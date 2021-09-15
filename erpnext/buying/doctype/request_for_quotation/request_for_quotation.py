@@ -397,9 +397,7 @@ def get_supplier_tag():
 	filters = {"document_type": "Supplier"}
 	tags = list(set(tag.tag for tag in frappe.get_all("Tag Link", filters=filters, fields=["tag"]) if tag))
 
-	if tags and tags != frappe.cache().hget("Supplier", "Tags"):
-		frappe.cache().hset("Supplier", "Tags", tags)
-	return frappe.cache().hget("Supplier", "Tags")
+	return tags
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
