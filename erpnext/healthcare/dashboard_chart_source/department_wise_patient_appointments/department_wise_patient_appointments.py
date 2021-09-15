@@ -2,8 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.utils.dashboard import cache_source
+
 
 @frappe.whitelist()
 @cache_source

@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.model.document import Document
+
 import dateutil
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.model.document import Document
+
 from erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_methods import get_orders
+
 
 class AmazonMWSSettings(Document):
 	def validate(self):

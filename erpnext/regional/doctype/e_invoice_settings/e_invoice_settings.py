@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+
 class EInvoiceSettings(Document):
 	def validate(self):
 		if self.enable and not self.credentials:

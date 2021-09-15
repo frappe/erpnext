@@ -2,11 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate
 from six import iteritems, itervalues
+
 
 class PartyLedgerSummaryReport(object):
 	def __init__(self, filters=None):

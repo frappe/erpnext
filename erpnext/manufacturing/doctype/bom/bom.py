@@ -1,23 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from typing import List
-from collections import deque
-import frappe, erpnext
-from frappe.utils import cint, cstr, flt, today
-from frappe import _
-from erpnext.setup.utils import get_exchange_rate
-from frappe.website.website_generator import WebsiteGenerator
-from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.get_item_details import get_price_list_rate
-from frappe.core.doctype.version.version import get_diff
-from erpnext.controllers.queries import get_match_cond
-from erpnext.stock.doctype.item.item import get_item_details
-from frappe.model.mapper import get_mapped_doc
-
 import functools
-
+from collections import deque
 from operator import itemgetter
+from typing import List
+
+import frappe
+from frappe import _
+from frappe.core.doctype.version.version import get_diff
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt, today
+from frappe.website.website_generator import WebsiteGenerator
+
+import erpnext
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -448,25 +447,29 @@ class BOM(WebsiteGenerator):
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
 
-	def check_recursion(self, bom_list=[]):
+	def check_recursion(self, bom_list=None):
 		""" Check whether recursion occurs in any bom"""
+		def _throw_error(bom_name):
+			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {0}").format(bom_name))
+
 		bom_list = self.traverse_tree()
-		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
-			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'})
+		child_items = frappe.get_all('BOM Item', fields=["bom_no", "item_code"],
+			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'}) or []
 
-		raise_exception = False
-		if bom_nos and self.name in [d.bom_no for d in bom_nos]:
-			raise_exception = True
+		child_bom = {d.bom_no for d in child_items}
+		child_items_codes = {d.item_code for d in child_items}
 
-		if not raise_exception:
-			bom_nos = frappe.get_all('BOM Item', fields=["parent"],
-				filters={'bom_no': self.name, 'parenttype': 'BOM'})
+		if self.name in child_bom:
+			_throw_error(self.name)
 
-			if self.name in [d.parent for d in bom_nos]:
-				raise_exception = True
+		if self.item in child_items_codes:
+			_throw_error(self.item)
 
-		if raise_exception:
-			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {1}").format(self.name, self.name))
+		bom_nos = frappe.get_all('BOM Item', fields=["parent"],
+			filters={'bom_no': self.name, 'parenttype': 'BOM'}) or []
+
+		if self.name in {d.parent for d in bom_nos}:
+			_throw_error(self.name)
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
@@ -508,8 +511,14 @@ class BOM(WebsiteGenerator):
 			if d.workstation:
 				self.update_rate_and_time(d, update_hour_rate)
 
-			self.operating_cost += flt(d.operating_cost)
-			self.base_operating_cost += flt(d.base_operating_cost)
+			operating_cost = d.operating_cost
+			base_operating_cost = d.base_operating_cost
+			if d.set_cost_based_on_bom_qty:
+				operating_cost = flt(d.cost_per_unit) * flt(self.quantity)
+				base_operating_cost = flt(d.base_cost_per_unit) * flt(self.quantity)
+
+			self.operating_cost += flt(operating_cost)
+			self.base_operating_cost += flt(base_operating_cost)
 
 	def update_rate_and_time(self, row, update_hour_rate = False):
 		if not row.hour_rate or update_hour_rate:
@@ -533,6 +542,8 @@ class BOM(WebsiteGenerator):
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
 			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
 			row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+			row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
+			row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate:
 			row.db_update()

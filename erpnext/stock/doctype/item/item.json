@@ -116,30 +116,14 @@
   "customer_code",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
-  "website_section",
-  "show_in_website",
-  "show_variant_in_website",
-  "route",
-  "weightage",
-  "slideshow",
-  "website_image",
-  "website_image_alt",
-  "thumbnail",
-  "cb72",
-  "website_warehouse",
-  "website_item_groups",
-  "set_meta_tags",
-  "sb72",
-  "copy_from_item_group",
-  "website_specifications",
-  "web_long_description",
-  "website_content",
-  "total_projected_qty",
   "hub_publishing_sb",
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
-  "synced_with_hub"
+  "synced_with_hub",
+  "more_information_section",
+  "published_in_website",
+  "total_projected_qty"
  ],
  "fields": [
   {
@@ -204,6 +188,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_item_from_hub",
    "fieldtype": "Check",
    "label": "Is Item from Hub",
@@ -238,6 +223,7 @@
   {
    "bold": 1,
    "default": "1",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
    "label": "Maintain Stock",
@@ -246,6 +232,7 @@
   },
   {
    "default": "1",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
    "label": "Include Item In Manufacturing"
@@ -282,6 +269,7 @@
    "fieldname": "asset_category",
    "fieldtype": "Link",
    "label": "Asset Category",
+   "mandatory_depends_on": "is_fixed_asset",
    "options": "Asset Category"
   },
   {
@@ -434,8 +422,8 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.has_batch_no || doc.has_serial_no || doc.is_fixed_asset",
-   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
+   "collapsible_depends_on": "eval:doc.has_batch_no || doc.has_serial_no",
+   "depends_on": "eval:doc.is_stock_item",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
    "label": "Serial Nos and Batches"
@@ -492,7 +480,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
+   "depends_on": "eval:doc.is_stock_item",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
    "label": "Has Serial No",
@@ -510,6 +498,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "attributes",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "variants_section",
    "fieldtype": "Section Break",
    "label": "Variants"
@@ -540,6 +529,7 @@
    "options": "Item Variant Attribute"
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "defaults",
    "fieldtype": "Section Break",
    "label": "Sales, Purchase, Accounting Defaults"
@@ -621,6 +611,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "supplier_details",
    "fieldtype": "Section Break",
    "label": "Supplier Details"
@@ -668,6 +659,7 @@
   },
   {
    "collapsible": 1,
+   "default": "eval:!doc.is_fixed_asset",
    "fieldname": "sales_details",
    "fieldtype": "Section Break",
    "label": "Sales Details",
@@ -761,6 +753,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "customer_details",
    "fieldtype": "Section Break",
    "label": "Customer Details"
@@ -791,6 +784,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "inspection_criteria",
    "fieldtype": "Section Break",
    "label": "Inspection Criteria",
@@ -860,124 +854,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "website_section",
-   "fieldtype": "Section Break",
-   "label": "Website",
-   "options": "fa fa-globe"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:!doc.variant_of",
-   "fieldname": "show_in_website",
-   "fieldtype": "Check",
-   "label": "Show in Website",
-   "search_index": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "variant_of",
-   "fieldname": "show_variant_in_website",
-   "fieldtype": "Check",
-   "label": "Show in Website (Variant)",
-   "search_index": 1
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "route",
-   "fieldtype": "Small Text",
-   "label": "Route",
-   "no_copy": 1
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "description": "Items with higher weightage will be shown higher",
-   "fieldname": "weightage",
-   "fieldtype": "Int",
-   "label": "Weightage"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "description": "Show a slideshow at the top of the page",
-   "fieldname": "slideshow",
-   "fieldtype": "Link",
-   "label": "Slideshow",
-   "options": "Website Slideshow"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "description": "Item Image (if not slideshow)",
-   "fieldname": "website_image",
-   "fieldtype": "Attach",
-   "label": "Website Image"
-  },
-  {
-   "fieldname": "thumbnail",
-   "fieldtype": "Data",
-   "label": "Thumbnail",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb72",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "description": "Show \"In Stock\" or \"Not in Stock\" based on stock available in this warehouse.",
-   "fieldname": "website_warehouse",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Website Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "description": "List this Item in multiple groups on the website.",
-   "fieldname": "website_item_groups",
-   "fieldtype": "Table",
-   "label": "Website Item Groups",
-   "options": "Website Item Group"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "set_meta_tags",
-   "fieldtype": "Button",
-   "label": "Set Meta Tags"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "website_specifications",
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "sb72",
-   "fieldtype": "Section Break",
-   "label": "Website Specifications"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "copy_from_item_group",
-   "fieldtype": "Button",
-   "label": "Copy From Item Group"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "website_specifications",
-   "fieldtype": "Table",
-   "label": "Website Specifications",
-   "options": "Item Website Specification"
-  },
-  {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "web_long_description",
-   "fieldtype": "Text Editor",
-   "label": "Website Description"
-  },
-  {
-   "description": "You can use any valid Bootstrap 4 markup in this field. It will be shown on your Item Page.",
-   "fieldname": "website_content",
-   "fieldtype": "HTML Editor",
-   "label": "Website Content"
-  },
-  {
    "fieldname": "total_projected_qty",
    "fieldtype": "Float",
    "hidden": 1,
@@ -987,7 +863,7 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:(!doc.is_item_from_hub)",
+   "depends_on": "eval:(!doc.is_item_from_hub && !doc.is_fixed_asset)",
    "fieldname": "hub_publishing_sb",
    "fieldtype": "Section Break",
    "label": "Hub Publishing Details"
@@ -1021,7 +897,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)",
@@ -1029,7 +905,7 @@
    "oldfieldtype": "Currency"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Float",
    "label": "Over Billing Allowance (%)"
@@ -1054,20 +930,27 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "website_image_alt",
-   "fieldtype": "Data",
-   "label": "Image Description"
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "default": "0",
+   "depends_on": "published_in_website",
+   "fieldname": "published_in_website",
+   "fieldtype": "Check",
+   "label": "Published in Website",
+   "read_only": 1
   }
  ],
- "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-07-13 01:29:06.071827",
+ "modified": "2021-09-10 12:23:07.277077",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

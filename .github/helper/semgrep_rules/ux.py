@@ -1,6 +1,5 @@
 import frappe
-from frappe import msgprint, throw, _
-
+from frappe import _, msgprint, throw
 
 # ruleid: frappe-missing-translate-function-python
 throw("Error Occured")
