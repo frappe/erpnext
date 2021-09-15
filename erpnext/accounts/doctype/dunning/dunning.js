@@ -3,11 +3,12 @@
 
 frappe.ui.form.on("Dunning", {
 	setup: function (frm) {
-		frm.set_query("sales_invoice", () => {
+		frm.set_query("sales_invoice", "overdue_payments", () => {
 			return {
 				filters: {
 					docstatus: 1,
 					company: frm.doc.company,
+					customer: frm.doc.customer,
 					outstanding_amount: [">", 0],
 					status: "Overdue"
 				},
