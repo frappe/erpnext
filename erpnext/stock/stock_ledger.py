@@ -407,7 +407,8 @@ class update_entries_after(object):
 				return
 
 		# Get dynamic incoming/outgoing rate
-		self.get_dynamic_incoming_outgoing_rate(sle)
+		if not self.args.get("sle_id"):
+			self.get_dynamic_incoming_outgoing_rate(sle)
 
 		if sle.serial_no:
 			self.get_serialized_values(sle)
@@ -447,7 +448,8 @@ class update_entries_after(object):
 		sle.doctype="Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
-		self.update_outgoing_rate_on_transaction(sle)
+		if not self.args.get("sle_id"):
+			self.update_outgoing_rate_on_transaction(sle)
 
 	def validate_negative_stock(self, sle):
 		"""
