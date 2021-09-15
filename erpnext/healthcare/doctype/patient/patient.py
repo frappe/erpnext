@@ -114,8 +114,10 @@ class Patient(Document):
 		patient_name_by = frappe.db.get_single_value('Healthcare Settings', 'patient_name_by')
 		if patient_name_by == 'Patient Name':
 			self.name = self.get_patient_name()
-		else:
+		elif patient_name_by == 'Naming Series':
 			set_name_by_naming_series(self)
+		else:
+			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_patient_name(self):
 		self.set_full_name()
