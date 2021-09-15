@@ -227,7 +227,7 @@
    "fieldname": "patient_name_by",
    "fieldtype": "Select",
    "label": "Patient Name By",
-   "options": "Patient Name\nNaming Series"
+   "options": "Patient Name\nNaming Series\nAuto Name"
   },
   {
    "default": "0",
@@ -326,7 +326,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-01-13 09:04:35.877700",
+ "modified": "2021-09-15 22:28:52.771077",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
