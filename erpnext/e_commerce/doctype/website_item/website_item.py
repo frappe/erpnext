@@ -13,10 +13,6 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
-from erpnext.e_commerce.shopping_cart.cart import _set_price_list
-from erpnext.utilities.product import get_price
-
-# SEARCH
 from erpnext.e_commerce.redisearch import (
 	insert_item_to_index,
 	update_index_for_item,
@@ -134,10 +130,10 @@ class WebsiteItem(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
 		if frappe.flags.in_import or frappe.flags.in_migrate:
 			return
 
-		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
 		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
