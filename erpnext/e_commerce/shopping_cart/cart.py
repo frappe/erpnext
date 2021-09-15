@@ -101,7 +101,7 @@ def place_order():
 			if is_stock_item:
 				item_stock = get_web_item_qty_in_stock(item.item_code, "website_warehouse")
 				if not cint(item_stock.in_stock):
-					throw(_("{1} Not in Stock").format(item.item_code))
+					throw(_("{0} Not in Stock").format(item.item_code))
 				if item.qty > item_stock.stock_qty[0][0]:
 					throw(_("Only {0} in Stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
 
@@ -164,8 +164,10 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 		return {
 			"items": frappe.render_template("templates/includes/cart/cart_items.html",
 				context),
-			"taxes": frappe.render_template("templates/includes/order/order_taxes.html",
+			"total": frappe.render_template("templates/includes/cart/cart_items_total.html",
 				context),
+			"taxes_and_totals": frappe.render_template("templates/includes/cart/cart_payment_summary.html",
+				context)
 		}
 	else:
 		return {
