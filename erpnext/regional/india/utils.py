@@ -125,28 +125,22 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 	if not frappe.get_meta(doc.doctype + " Item").has_field('gst_hsn_code'):
 		return itemised_tax, itemised_taxable_amount
 
-	item_hsn_map = frappe._dict()
-	for d in doc.items:
-		item_hsn_map.setdefault(d.item_code or d.item_name, d.get("gst_hsn_code"))
-
 	hsn_tax = {}
 	for item, taxes in itemised_tax.items():
-		hsn_code = item_hsn_map.get(item)
-		hsn_tax.setdefault(hsn_code, frappe._dict())
+		hsn_tax.setdefault(item, frappe._dict())
 		for tax_desc, tax_detail in taxes.items():
 			key = tax_desc
 			if account_wise:
 				key = tax_detail.get('tax_account')
-			hsn_tax[hsn_code].setdefault(key, {"tax_rate": 0, "tax_amount": 0})
-			hsn_tax[hsn_code][key]["tax_rate"] = tax_detail.get("tax_rate")
-			hsn_tax[hsn_code][key]["tax_amount"] += tax_detail.get("tax_amount")
+			hsn_tax[item].setdefault(key, {"tax_rate": 0, "tax_amount": 0})
+			hsn_tax[item][key]["tax_rate"] = tax_detail.get("tax_rate")
+			hsn_tax[item][key]["tax_amount"] += tax_detail.get("tax_amount")
 
 	# set taxable amount
 	hsn_taxable_amount = frappe._dict()
 	for item in itemised_taxable_amount:
-		hsn_code = item_hsn_map.get(item)
-		hsn_taxable_amount.setdefault(hsn_code, 0)
-		hsn_taxable_amount[hsn_code] += itemised_taxable_amount.get(item)
+		hsn_taxable_amount.setdefault(item, 0)
+		hsn_taxable_amount[item] += itemised_taxable_amount.get(item)
 
 	return hsn_tax, hsn_taxable_amount
 
