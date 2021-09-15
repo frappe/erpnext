@@ -57,7 +57,7 @@ $.extend(shopping_cart, {
 					callback: function(r) {
 						d.hide();
 						if (!r.exc) {
-							$(".cart-tax-items").html(r.message.taxes);
+							$(".cart-tax-items").html(r.message.total);
 							shopping_cart.parent.find(
 								`.address-container[data-address-type="${address_type}"]`
 							).html(r.message.address);
@@ -214,6 +214,7 @@ $.extend(shopping_cart, {
 	},
 
 	place_order: function(btn) {
+		shopping_cart.freeze();
 		return frappe.call({
 			type: "POST",
 			method: "erpnext.e_commerce.shopping_cart.cart.place_order",
@@ -230,7 +231,6 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
-					$('.cart-container table').hide();
 					$(btn).hide();
 					window.location.href = '/orders/' + encodeURIComponent(r.message);
 				}
