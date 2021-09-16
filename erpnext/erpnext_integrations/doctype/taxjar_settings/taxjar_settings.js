@@ -8,8 +8,7 @@ frappe.ui.form.on('TaxJar Settings', {
 	},
 
 	refresh: (frm) => {
-
-		frm.add_custom_button(__('Update Nexus List'), function(){
+		frm.add_custom_button(__('Update Nexus List'), function() {
 			frm.call({
 				doc: frm.doc,
 				method: 'update_nexus_list'
