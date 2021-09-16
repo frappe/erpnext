@@ -68,7 +68,7 @@ def delete_qr_code_file(doc, method):
 	if hasattr(doc, 'qr_code'):
 		if doc.get('qr_code'):
 			file_doc = frappe.get_list('File', {
-				'file_url': doc.qr_code
+				'file_url': doc.get('qr_code')
 			})
 			if len(file_doc):
 				frappe.delete_doc('File', file_doc[0].name)
