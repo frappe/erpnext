@@ -46,7 +46,10 @@ def create_qr_code(doc, method):
 				"doctype": "File",
 				"file_name": filename,
 				"is_private": 0,
-				"content": qr_image.getvalue()
+				"content": qr_image.getvalue(),
+				"attached_to_doctype": doc.get("doctype"),
+				"attached_to_name": doc.get("name"),
+				"attached_to_field": "qr_code"
 			})
 
 			_file.save()
