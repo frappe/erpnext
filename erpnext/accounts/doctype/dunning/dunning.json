@@ -276,7 +276,7 @@
    "fieldname": "overdue_payments",
    "fieldtype": "Table",
    "label": "Overdue Payments",
-   "options": "Overdue Payments"
+   "options": "Overdue Payment"
   },
   {
    "fieldname": "section_break_28",
@@ -313,7 +313,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-15 19:08:22.913539",
+ "modified": "2021-09-16 14:06:48.472825",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
