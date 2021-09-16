@@ -12,8 +12,6 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from frappe.website.website_generator import WebsiteGenerator
 
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
-
-# SEARCH
 from erpnext.e_commerce.redisearch import (
 	delete_item_from_index,
 	insert_item_to_index,
@@ -138,10 +136,10 @@ class WebsiteItem(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
-		if frappe.flags.in_import:
+		"""Make a thumbnail of `website_image`"""
+		if frappe.flags.in_import or frappe.flags.in_migrate:
 			return
 
-		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
 		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):

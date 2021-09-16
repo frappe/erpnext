@@ -41,14 +41,14 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Customer Naming By",
-   "options": "Customer Name\nNaming Series"
+   "options": "Customer Name\nNaming Series\nAuto Name"
   },
   {
    "fieldname": "campaign_naming_by",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series"
+   "options": "Campaign Name\nNaming Series\nAuto Name"
   },
   {
    "fieldname": "customer_group",
