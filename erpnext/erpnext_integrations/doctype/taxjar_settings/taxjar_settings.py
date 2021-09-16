@@ -19,6 +19,6 @@ class TaxJarSettings(Document):
 
 		new_nexus_list = [frappe._dict(address) for address in nexus]
 
-		self.set('nexus',[])
-		self.set('nexus',new_nexus_list)
+		self.set('nexus', [])
+		self.set('nexus', new_nexus_list)
 		self.save()
