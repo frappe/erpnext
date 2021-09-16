@@ -2,11 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-import erpnext
+
 import json
-from frappe.utils import flt, nowdate, add_days, cint
+
+import frappe
 from frappe import _
+from frappe.utils import add_days, cint, flt, nowdate
+
+import erpnext
+
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
@@ -166,7 +170,7 @@ def create_material_request(material_requests):
 				mr.submit()
 				mr_list.append(mr)
 
-			except:
+			except Exception:
 				_log_exception()
 
 	if mr_list:

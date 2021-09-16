@@ -1,11 +1,16 @@
 from __future__ import unicode_literals
 
-import frappe, sys
-import erpnext
+import sys
+
+import frappe
 import frappe.utils
-from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset
+
+import erpnext
+from erpnext.demo.setup import education, healthcare, manufacture, retail, setup_data
+from erpnext.demo.user import accounts
 from erpnext.demo.user import education as edu
-from erpnext.demo.setup import education, manufacture, setup_data, healthcare, retail
+from erpnext.demo.user import fixed_asset, hr, manufacturing, projects, purchase, sales, stock
+
 """
 Make a demo
 
@@ -88,7 +93,7 @@ def simulate(domain='Manufacturing', days=100):
 			elif domain=='Education':
 				edu.work()
 
-		except:
+		except Exception:
 			frappe.db.set_global('demo_last_date', current_date)
 			raise
 		finally:

@@ -1,6 +1,5 @@
 from frappe import _
 
-
 # ruleid: frappe-missing-translate-function-in-report-python
 {"label": "Field Label"}
 

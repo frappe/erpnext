@@ -1,14 +1,30 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import erpnext
 import frappe
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, InactiveEmployeeStatusError
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
-from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
-	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
+from frappe.utils import (
+	add_days,
+	cstr,
+	flt,
+	format_datetime,
+	formatdate,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	today,
+	unique,
+)
+
+import erpnext
+from erpnext.hr.doctype.employee.employee import (
+	InactiveEmployeeStatusError,
+	get_holiday_list_for_employee,
+)
+
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
 
@@ -132,7 +148,10 @@ def set_employee_name(doc):
 def update_employee(employee, details, date=None, cancel=False):
 	internal_work_history = {}
 	for item in details:
-		fieldtype = frappe.get_meta("Employee").get_field(item.fieldname).fieldtype
+		field = frappe.get_meta("Employee").get_field(item.fieldname)
+		if not field:
+			continue
+		fieldtype = field.fieldtype
 		new_data = item.new if not cancel else item.current
 		if fieldtype == "Date" and new_data:
 			new_data = getdate(new_data)
@@ -385,6 +404,7 @@ def create_additional_leave_ledger_entry(allocation, leaves, date):
 
 def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining_date):
 	import calendar
+
 	from dateutil import relativedelta
 
 	from_date = get_datetime(from_date)
@@ -450,9 +470,9 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 
 def get_holiday_dates_for_employee(employee, start_date, end_date):
 	"""return a list of holiday dates for the given employee between start_date and end_date"""
-	# return only date	
-	holidays = get_holidays_for_employee(employee, start_date, end_date) 
-	
+	# return only date
+	holidays = get_holidays_for_employee(employee, start_date, end_date)
+
 	return [cstr(h.holiday_date) for h in holidays]
 
 
@@ -465,7 +485,7 @@ def get_holidays_for_employee(employee, start_date, end_date, raise_exception=Tr
 		`raise_exception` (bool)
 		`only_non_weekly` (bool)
 
-		return: list of dicts with `holiday_date` and `description` 
+		return: list of dicts with `holiday_date` and `description`
 	"""
 	holiday_list = get_holiday_list_for_employee(employee, raise_exception=raise_exception)
 
@@ -481,11 +501,11 @@ def get_holidays_for_employee(employee, start_date, end_date, raise_exception=Tr
 		filters['weekly_off'] = False
 
 	holidays = frappe.get_all(
-		'Holiday', 
+		'Holiday',
 		fields=['description', 'holiday_date'],
 		filters=filters
 	)
-	
+
 	return holidays
 
 @erpnext.allow_regional

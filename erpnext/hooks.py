@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 from frappe import _
 
 app_name = "erpnext"
@@ -51,15 +52,15 @@ additional_print_settings = "erpnext.controllers.print_settings.get_print_settin
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
-	"erpnext.shopping_cart.utils.set_cart_count"
+	"erpnext.e_commerce.shopping_cart.utils.set_cart_count"
 ]
-on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
+on_logout = "erpnext.e_commerce.shopping_cart.utils.clear_cart_count"
 
 treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group', 'Department']
 
 # website
-update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
-my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+update_website_context = ["erpnext.e_commerce.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
+my_account_context = "erpnext.e_commerce.shopping_cart.utils.update_my_account_context"
 
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
@@ -75,7 +76,7 @@ domains = {
 	'Services': 'erpnext.domains.services',
 }
 
-website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
+website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 
 website_context = {
@@ -243,11 +244,13 @@ doc_events = {
 		"on_update": ["erpnext.hr.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role"]
 	},
-	"Sales Taxes and Charges Template": {
-		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
+	"Communication": {
+		"on_update": [
+			"erpnext.support.doctype.issue.issue.set_first_response_time"
+		]
 	},
-	"Website Settings": {
-		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
+	"Sales Taxes and Charges Template": {
+		"on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
 	},
 	"Tax Category": {
 		"validate": "erpnext.regional.india.utils.validate_tax_category"
@@ -278,6 +281,7 @@ doc_events = {
 		]
 	},
 	"Payment Entry": {
+		"validate": "erpnext.regional.india.utils.update_place_of_supply",
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
@@ -308,6 +312,9 @@ doc_events = {
 	},
 	"Company": {
 		"on_trash": "erpnext.regional.india.utils.delete_gst_settings_for_company"
+	},
+	"Integration Request": {
+		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"
 	}
 }
 

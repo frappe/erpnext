@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import msgprint, _
-from frappe.utils import cint, now, get_link_to_form
-from six import iteritems
+from frappe import _, msgprint
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form, now
+from six import iteritems
+
 
 class POSProfile(Document):
 	def validate(self):

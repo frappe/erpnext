@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
+
 from .default_website import website_maker
-from erpnext.accounts.doctype.account.account import RootNotEditable
+
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
@@ -34,7 +36,7 @@ def create_fiscal_year_and_company(args):
 def enable_shopping_cart(args):
 	# Needs price_lists
 	frappe.get_doc({
-		"doctype": "Shopping Cart Settings",
+		"doctype": "E Commerce Settings",
 		"enabled": 1,
 		'company': args.get('company_name')	,
 		'price_list': frappe.db.get_value("Price List", {"selling": 1}),

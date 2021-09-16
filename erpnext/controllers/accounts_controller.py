@@ -2,27 +2,60 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
 import json
+
+import frappe
 from frappe import _, throw
-from frappe.utils import (today, flt, cint, fmt_money, formatdate,
-	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
-from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
-from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.buying.utils import update_last_purchase_rate
-from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled, get_party_account
-from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
-	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
-from erpnext.exceptions import InvalidCurrency
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	flt,
+	fmt_money,
+	formatdate,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	today,
+)
 from six import text_type
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+from erpnext.accounts.doctype.pricing_rule.utils import (
+	apply_pricing_rule_for_free_items,
+	apply_pricing_rule_on_transaction,
+	get_applied_pricing_rules,
+)
+from erpnext.accounts.party import (
+	get_party_account,
+	get_party_account_currency,
+	validate_party_frozen_disabled,
+)
+from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
+from erpnext.buying.utils import update_last_purchase_rate
+from erpnext.controllers.print_settings import (
+	set_print_templates_for_item_table,
+	set_print_templates_for_taxes,
+)
+from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.exceptions import InvalidCurrency
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-from erpnext.controllers.print_settings import set_print_templates_for_item_table, set_print_templates_for_taxes
+from erpnext.stock.get_item_details import (
+	_get_item_tax_template,
+	get_conversion_factor,
+	get_item_details,
+	get_item_tax_map,
+	get_item_warehouse,
+)
+from erpnext.utilities.transaction_base import TransactionBase
+
 
 class AccountMissingError(frappe.ValidationError): pass
 
@@ -1811,7 +1844,12 @@ def validate_child_on_delete(row, parent):
 
 def update_bin_on_delete(row, doctype):
 	"""Update bin for deleted item (row)."""
-	from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty, get_ordered_qty, get_indented_qty
+	from erpnext.stock.stock_balance import (
+		get_indented_qty,
+		get_ordered_qty,
+		get_reserved_qty,
+		update_bin_qty,
+	)
 	qty_dict = {}
 
 	if doctype == "Sales Order":

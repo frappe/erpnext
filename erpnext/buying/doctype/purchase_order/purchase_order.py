@@ -2,23 +2,30 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.utils import cstr, flt, cint
-from frappe import msgprint, _
-from frappe.model.mapper import get_mapped_doc
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.doctype.item.item import get_last_purchase_details
-from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
+
+import frappe
+from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import validate_for_items, check_on_hold_or_closed_status
-from erpnext.stock.utils import get_bin
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt
+
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	unlink_inter_company_doc,
+	update_linked_doc,
+	validate_inter_company_party,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
 from erpnext.accounts.party import get_party_account_currency
-from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from erpnext.controllers.buying_controller import BuyingController
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_party,
-	update_linked_doc, unlink_inter_company_doc)
+from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
+from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
+from erpnext.stock.utils import get_bin
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"

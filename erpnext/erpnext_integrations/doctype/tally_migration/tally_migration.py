@@ -11,18 +11,18 @@ import traceback
 import zipfile
 from decimal import Decimal
 
-from bs4 import BeautifulSoup as bs
-
 import frappe
-from erpnext import encode_company_abbr
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
-from erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer import unset_existing_data
-
+from bs4 import BeautifulSoup as bs
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model.document import Document
-from frappe.model.naming import getseries, revert_series_if_last
 from frappe.utils.data import format_datetime
+
+from erpnext import encode_company_abbr
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+from erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer import (
+	unset_existing_data,
+)
 
 PRIMARY_ACCOUNT = "Primary"
 VOUCHER_CHUNK_SIZE = 500
@@ -266,7 +266,7 @@ class TallyMigration(Document):
 
 			self.is_master_data_processed = 1
 
-		except:
+		except Exception:
 			self.publish("Process Master Data", _("Process Failed"), -1, 5)
 			self.log()
 
@@ -302,14 +302,14 @@ class TallyMigration(Document):
 				try:
 					party_doc = frappe.get_doc(party)
 					party_doc.insert()
-				except:
+				except Exception:
 					self.log(party_doc)
 			addresses_file = frappe.get_doc("File", {"file_url": addresses_file_url})
 			for address in json.loads(addresses_file.get_content()):
 				try:
 					address_doc = frappe.get_doc(address)
 					address_doc.insert(ignore_mandatory=True)
-				except:
+				except Exception:
 					self.log(address_doc)
 
 		def create_items_uoms(items_file_url, uoms_file_url):
@@ -319,7 +319,7 @@ class TallyMigration(Document):
 					try:
 						uom_doc = frappe.get_doc(uom)
 						uom_doc.insert()
-					except:
+					except Exception:
 						self.log(uom_doc)
 
 			items_file = frappe.get_doc("File", {"file_url": items_file_url})
@@ -327,7 +327,7 @@ class TallyMigration(Document):
 				try:
 					item_doc = frappe.get_doc(item)
 					item_doc.insert()
-				except:
+				except Exception:
 					self.log(item_doc)
 
 		try:
@@ -346,7 +346,7 @@ class TallyMigration(Document):
 			self.is_master_data_imported = 1
 			frappe.db.commit()
 
-		except:
+		except Exception:
 			self.publish("Import Master Data", _("Process Failed"), -1, 5)
 			frappe.db.rollback()
 			self.log()
@@ -370,7 +370,7 @@ class TallyMigration(Document):
 					if processed_voucher:
 						vouchers.append(processed_voucher)
 					frappe.db.commit()
-				except:
+				except Exception:
 					frappe.db.rollback()
 					self.log(voucher)
 			return vouchers
@@ -494,7 +494,7 @@ class TallyMigration(Document):
 
 			self.is_day_book_data_processed = 1
 
-		except:
+		except Exception:
 			self.publish("Process Day Book Data", _("Process Failed"), -1, 5)
 			self.log()
 
@@ -564,7 +564,7 @@ class TallyMigration(Document):
 					is_last = True
 				frappe.enqueue_doc(self.doctype, self.name, "_import_vouchers", queue="long", timeout=3600, start=index+1, total=total, is_last=is_last)
 
-		except:
+		except Exception:
 			self.log()
 
 		finally:
@@ -583,7 +583,7 @@ class TallyMigration(Document):
 				voucher_doc.submit()
 				self.publish("Importing Vouchers", _("{} of {}").format(index, total), index, total)
 				frappe.db.commit()
-			except:
+			except Exception:
 				frappe.db.rollback()
 				self.log(voucher_doc)
 

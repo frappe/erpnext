@@ -4,8 +4,11 @@
 from __future__ import unicode_literals
 
 import unittest
+
 import frappe
+
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
+
 
 class TestPatient(unittest.TestCase):
 	def test_customer_created(self):

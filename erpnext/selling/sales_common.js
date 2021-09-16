@@ -63,7 +63,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_sales_item': 1}
+					filters: {'is_sales_item': 1, 'customer': cur_frm.doc.customer}
 				}
 			});
 		}
@@ -90,10 +90,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		this.frm.toggle_display("customer_name",
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
-		if(this.frm.fields_dict.packed_items) {
-			var packing_list_exists = (this.frm.doc.packed_items || []).length;
-			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
-		}
+
 		this.toggle_editable_price_list_rate();
 	},
 
@@ -246,7 +243,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var editable_price_list_rate = cint(frappe.defaults.get_default("editable_price_list_rate"));
 
 		if(df && editable_price_list_rate) {
-			df.read_only = 0;
+			const parent_field = frappe.meta.get_parentfield(this.frm.doc.doctype, this.frm.doc.doctype + " Item");
+			if (!this.frm.fields_dict[parent_field]) return;
+
+			this.frm.fields_dict[parent_field].grid.update_docfield_property(
+				'price_list_rate', 'read_only', 0
+			);
 		}
 	},
 

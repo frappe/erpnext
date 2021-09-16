@@ -4,18 +4,19 @@
 
 from __future__ import unicode_literals
 
-import frappe, erpnext
+import frappe
 import frappe.defaults
-from frappe.utils import nowdate, cstr, flt, cint, now, getdate
-from frappe import throw, _
-from frappe.utils import formatdate, get_number_format_info
-from six import iteritems
-# imported to enable erpnext.accounts.utils.get_account_currency
-from erpnext.accounts.doctype.account.account import get_account_currency
+from frappe import _, throw
 from frappe.model.meta import get_field_precision
+from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
 
-from erpnext.stock.utils import get_stock_value_on
+import erpnext
+
+# imported to enable erpnext.accounts.utils.get_account_currency
+from erpnext.accounts.doctype.account.account import get_account_currency  # noqa
 from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.utils import get_stock_value_on
+
 
 class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 class FiscalYearError(frappe.ValidationError): pass
@@ -886,7 +887,9 @@ def get_autoname_with_number(number_value, doc_title, name, company):
 
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root, chart=None):
-	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import build_tree_from_json
+	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
+		build_tree_from_json,
+	)
 
 	# add chart to flags to retrieve when called from expand all function
 	chart = chart if chart else frappe.flags.chart
@@ -960,6 +963,9 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 	Only fetches GLE fields required for comparing with new GLE.
 	Check compare_existing_and_expected_gle function below.
+
+	returns:
+		Dict[Tuple[voucher_type, voucher_no], List[GL Entries]]
 	"""
 	gl_entries = {}
 	if not future_stock_vouchers:
@@ -968,7 +974,7 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	voucher_nos = [d[1] for d in future_stock_vouchers]
 
 	gles = frappe.db.sql("""
-		select name, account, credit, debit, cost_center, project
+		select name, account, credit, debit, cost_center, project, voucher_type, voucher_no
 			from `tabGL Entry`
 		where
 			posting_date >= %s and voucher_no in (%s)""" %
