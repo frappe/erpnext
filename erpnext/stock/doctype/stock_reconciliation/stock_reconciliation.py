@@ -621,8 +621,8 @@ def get_stock_balance_for(item_code, warehouse,
 
 	if not item_dict:
 		# In cases of data upload to Items table
-		msg = f"Item {item_code} does not exist."
-		frappe.throw(msg=_(msg), title=_("Missing"))
+		msg = _("Item {} does not exist.").format(item_code)
+		frappe.throw(msg, title=_("Missing"))
 
 	serial_nos = ""
 	with_serial_no = True if item_dict.get("has_serial_no") else False
