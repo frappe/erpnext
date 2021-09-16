@@ -313,6 +313,7 @@ class StatusUpdater(Document):
 	def _update_percent_field(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
 
+		args['precision'] = frappe.db.get_single_value('System Settings', 'float_precision') or 6
 		self._update_modified(args, update_modified)
 
 		if args.get('target_parent_field'):
@@ -321,7 +322,7 @@ class StatusUpdater(Document):
 					ifnull((select
 						ifnull(sum(if(abs(%(target_ref_field)s) > abs(%(target_field)s), abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
 						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
+					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), %(precision)s)
 					%(update_modified)s
 				where name='%(name)s'""" % args)
 
