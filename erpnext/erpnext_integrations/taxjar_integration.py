@@ -103,7 +103,7 @@ def get_tax_data(doc):
 
 	shipping = sum([tax.tax_amount for tax in doc.taxes if tax.account_head == SHIP_ACCOUNT_HEAD])
 
-	line_items = [get_line_item_dict(item,doc.docstatus) for item in doc.items]
+	line_items = [get_line_item_dict(item, doc.docstatus) for item in doc.items]
 
 	if from_shipping_state not in SUPPORTED_STATE_CODES:
 		from_shipping_state = get_state_code(from_address, 'Company')
