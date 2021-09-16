@@ -1475,12 +1475,11 @@ class AccountsController(TransactionBase):
 		asset.flags.ignore_validate_update_after_submit = True
 
 		# recreate original depreciation schedule of the asset
+		self.delete_depreciation_entry_made_after_disposal(asset)
 		asset.prepare_depreciation_data()
 
 		self.modify_depreciation_schedule_for_asset_repairs(asset)
 		asset.save()
-
-		self.delete_depreciation_entry_made_after_disposal(asset)
 
 	def modify_depreciation_schedule_for_asset_repairs(self, asset):
 		asset_repairs = frappe.get_all(
@@ -1511,7 +1510,7 @@ class AccountsController(TransactionBase):
 
 			if schedule.schedule_date == posting_date_of_original_invoice:
 				if not self.disposal_was_made_on_original_schedule_date(asset, schedule, row,
-					posting_date_of_original_invoice):
+						posting_date_of_original_invoice) or getdate(schedule.schedule_date) > getdate(today()):
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
 
@@ -1520,6 +1519,8 @@ class AccountsController(TransactionBase):
 						d.reference_name = asset.name
 
 					reverse_journal_entry.submit()
+					schedule.db_set('journal_entry', None)
+
 
 	def get_posting_date_of_disposal_entry(self):
 		if self.doctype == "Sales Invoice" and self.return_against:
