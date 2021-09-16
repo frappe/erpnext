@@ -5,12 +5,8 @@ from __future__ import unicode_literals
 
 import itertools
 import json
-<<<<<<< HEAD
 import erpnext
-=======
-from typing import List
 
->>>>>>> 5eba1ccd51 (fix: no validation on item defaults (#27393))
 import frappe
 import copy
 from erpnext.controllers.item_variant import (ItemVariantExistsError,
@@ -26,23 +22,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import \
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
-<<<<<<< HEAD
 from six import iteritems
-=======
-import erpnext
-from erpnext.controllers.item_variant import (
-	ItemVariantExistsError,
-	copy_attributes_to_variant,
-	get_variant,
-	make_variant_item_code,
-	validate_item_variant_attributes,
-)
-from erpnext.setup.doctype.item_group.item_group import (
-	get_parent_item_groups,
-	invalidate_cache_for,
-)
-from erpnext.stock.doctype.item_default.item_default import ItemDefault
->>>>>>> 5eba1ccd51 (fix: no validation on item defaults (#27393))
 
 
 class DuplicateReorderRows(frappe.ValidationError):
@@ -1262,15 +1242,8 @@ def update_variants(variants, template, publish_progress=True):
 def on_doctype_update():
 	# since route is a Text column, it needs a length for indexing
 	frappe.db.add_index("Item", ["route(500)"])
-<<<<<<< HEAD
-=======
 
-@erpnext.allow_regional
-def set_item_tax_from_hsn_code(item):
-	pass
-
-
-def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> None:
+def validate_item_default_company_links(item_defaults):
 	for item_default in item_defaults:
 		for doctype, field in [
 			['Warehouse', 'default_warehouse'],
@@ -1290,4 +1263,3 @@ def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> Non
 							frappe.bold(item_default.company),
 							frappe.bold(frappe.unscrub(field))
 						), title=_("Invalid Item Defaults"))
->>>>>>> 5eba1ccd51 (fix: no validation on item defaults (#27393))
