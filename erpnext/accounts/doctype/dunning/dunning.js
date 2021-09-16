@@ -122,6 +122,12 @@ frappe.ui.form.on("Dunning", {
 	dunning_fee: function (frm) {
 		frm.trigger("calculate_totals");
 	},
+	overdue_payments_add: function(frm) {
+		frm.trigger("calculate_totals");
+	},
+	overdue_payments_remove: function (frm) {
+		frm.trigger("calculate_totals");
+	},
 	calculate_overdue_days: function (frm) {
 		frm.doc.overdue_payments.forEach((row) => {
 			if (frm.doc.posting_date && row.due_date) {
