@@ -24,6 +24,9 @@ frappe.ui.form.on("Dunning", {
 			};
 		});
 
+		frm.set_query('contact_person', erpnext.queries.contact_query);
+		frm.set_query('customer_address', erpnext.queries.address_query);
+
 		// cannot add rows manually, only via button "Fetch Overdue Payments"
 		frm.set_df_property("overdue_payments", "cannot_add_rows", true);
 	},
