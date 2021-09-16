@@ -79,6 +79,7 @@ class Asset(AccountsController):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
+			self.reset_value_after_depreciation()
 			self.make_depreciation_schedule(date_of_sale)
 			self.set_accumulated_depreciation(date_of_sale)
 		else:
@@ -140,11 +141,6 @@ class Asset(AccountsController):
 		if self.is_existing_asset:
 			return
 
-		docname = self.purchase_receipt or self.purchase_invoice
-		if docname:
-			doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
-			date = frappe.db.get_value(doctype, docname, 'posting_date')
-
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
@@ -185,6 +181,10 @@ class Asset(AccountsController):
 		for d in self.get("finance_books"):
 			d.rate_of_depreciation = flt(self.get_depreciation_rate(d, on_validate=True),
 				d.precision("rate_of_depreciation"))
+
+	def reset_value_after_depreciation(self):
+		for d in self.get("finance_books"):
+			d.value_after_depreciation = 0
 
 	def make_depreciation_schedule(self, date_of_sale):
 		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.schedules:
@@ -444,9 +444,10 @@ class Asset(AccountsController):
 			if accumulated_depreciation_after_full_schedule:
 				accumulated_depreciation_after_full_schedule = max(accumulated_depreciation_after_full_schedule)
 
-				asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
-					flt(accumulated_depreciation_after_full_schedule),
-					self.precision('gross_purchase_amount'))
+				asset_value_after_full_schedule = flt(
+					flt(self.gross_purchase_amount) -
+					flt(self.opening_accumulated_depreciation) -
+					flt(accumulated_depreciation_after_full_schedule), self.precision('gross_purchase_amount'))
 
 				if (row.expected_value_after_useful_life and
 					row.expected_value_after_useful_life < asset_value_after_full_schedule):
