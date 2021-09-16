@@ -8,10 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "dunning_type",
-  "overdue_interval_section",
-  "start_day",
-  "column_break_4",
-  "end_day",
+  "is_default",
   "section_break_6",
   "dunning_fee",
   "column_break_8",
@@ -46,10 +43,6 @@
    "options": "Dunning Letter Text"
   },
   {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
   },
@@ -58,32 +51,24 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "overdue_interval_section",
-   "fieldtype": "Section Break",
-   "label": "Overdue Interval"
-  },
-  {
-   "fieldname": "start_day",
-   "fieldtype": "Int",
-   "label": "Start Day"
-  },
-  {
-   "fieldname": "end_day",
-   "fieldtype": "Int",
-   "label": "End Day"
-  },
-  {
    "fieldname": "rate_of_interest",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Rate of Interest (%) Yearly"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Is Default"
   }
  ],
  "links": [],
- "modified": "2020-07-15 17:14:17.835074",
+ "modified": "2021-09-16 15:00:02.610605",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Type",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
