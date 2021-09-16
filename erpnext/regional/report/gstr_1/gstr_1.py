@@ -96,35 +96,36 @@ class Gstr1Report(object):
 	def get_b2c_data(self):
 		b2cs_output = {}
 
-		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
-			invoice_details = self.invoices.get(inv)
-			for rate, items in items_based_on_rate.items():
-				place_of_supply = invoice_details.get("place_of_supply")
-				ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
+		if self.invoices:
+			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
+				invoice_details = self.invoices.get(inv)
+				for rate, items in items_based_on_rate.items():
+					place_of_supply = invoice_details.get("place_of_supply")
+					ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
 
-				b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin),{
-					"place_of_supply": "",
-					"ecommerce_gstin": "",
-					"rate": "",
-					"taxable_value": 0,
-					"cess_amount": 0,
-					"type": "",
-					"invoice_number": invoice_details.get("invoice_number"),
-					"posting_date": invoice_details.get("posting_date"),
-					"invoice_value": invoice_details.get("base_grand_total"),
-				})
+					b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin), {
+						"place_of_supply": "",
+						"ecommerce_gstin": "",
+						"rate": "",
+						"taxable_value": 0,
+						"cess_amount": 0,
+						"type": "",
+						"invoice_number": invoice_details.get("invoice_number"),
+						"posting_date": invoice_details.get("posting_date"),
+						"invoice_value": invoice_details.get("base_grand_total"),
+					})
 
-				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
-				row["place_of_supply"] = place_of_supply
-				row["ecommerce_gstin"] = ecommerce_gstin
-				row["rate"] = rate
-				row["taxable_value"] += sum([abs(net_amount)
-					for item_code, net_amount in self.invoice_items.get(inv).items() if item_code in items])
-				row["cess_amount"] += flt(self.invoice_cess.get(inv), 2)
-				row["type"] = "E" if ecommerce_gstin else "OE"
+					row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
+					row["place_of_supply"] = place_of_supply
+					row["ecommerce_gstin"] = ecommerce_gstin
+					row["rate"] = rate
+					row["taxable_value"] += sum([abs(net_amount)
+						for item_code, net_amount in self.invoice_items.get(inv).items() if item_code in items])
+					row["cess_amount"] += flt(self.invoice_cess.get(inv), 2)
+					row["type"] = "E" if ecommerce_gstin else "OE"
 
-		for key, value in iteritems(b2cs_output):
-			self.data.append(value)
+			for key, value in iteritems(b2cs_output):
+				self.data.append(value)
 
 	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
 		row = []
@@ -173,9 +174,10 @@ class Gstr1Report(object):
 
 		company_gstins = get_company_gstin_number(self.filters.get('company'), all_gstins=True)
 
-		self.filters.update({
-			'company_gstins': company_gstins
-		})
+		if company_gstins:
+			self.filters.update({
+				'company_gstins': company_gstins
+			})
 
 		invoice_data = frappe.db.sql("""
 			select
@@ -212,7 +214,7 @@ class Gstr1Report(object):
 
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += "AND IFNULL(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') AND is_return != 1"
+			conditions += "AND IFNULL(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') AND is_return != 1 AND is_debit_note !=1"
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
 			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
@@ -221,7 +223,7 @@ class Gstr1Report(object):
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ AND ifnull(SUBSTR(place_of_supply, 1, 2),'') != ifnull(SUBSTR(company_gstin, 1, 2),'')
-				AND grand_total > {0} AND is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
+				AND grand_total > {0} AND is_return != 1 AND is_debit_note !=1 AND gst_category ='Unregistered' """.format(flt(b2c_limit))
 
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ AND (
@@ -234,8 +236,8 @@ class Gstr1Report(object):
 		elif self.filters.get("type_of_business") == "CDNR-UNREG":
 			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
 			conditions += """ AND ifnull(SUBSTR(place_of_supply, 1, 2),'') != ifnull(SUBSTR(company_gstin, 1, 2),'')
-				AND ABS(grand_total) > {0} AND (is_return = 1 OR is_debit_note = 1)
-				AND IFNULL(gst_category, '') in ('Unregistered', 'Overseas')""".format(flt(b2c_limit))
+				AND (is_return = 1 OR is_debit_note = 1)
+				AND IFNULL(gst_category, '') in ('Unregistered', 'Overseas')"""
 
 		elif self.filters.get("type_of_business") ==  "EXPORT":
 			conditions += """ AND is_return !=1 and gst_category = 'Overseas' """
@@ -1050,6 +1052,7 @@ def get_company_gstin_number(company, address=None, all_gstins=False):
 			["Dynamic Link", "link_doctype", "=", "Company"],
 			["Dynamic Link", "link_name", "=", company],
 			["Dynamic Link", "parenttype", "=", "Address"],
+			["gstin", "!=", '']
 		]
 		gstin = frappe.get_all("Address", filters=filters, pluck="gstin", order_by="is_primary_address desc")
 		if gstin and not all_gstins:
