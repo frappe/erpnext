@@ -98,14 +98,14 @@
 					<div class="filter-options">
 						{% for attr_value in attribute.item_attribute_values %}
 						<div class="checkbox">
-							<label data-value="{{ value }}">
+							<label>
 								<input type="checkbox"
 									class="product-filter attribute-filter"
-									id="{{attr_value.name}}"
+									id="{{attr_value}}"
 									data-attribute-name="{{ attribute.name }}"
-									data-attribute-value="{{ attr_value.attribute_value }}"
+									data-attribute-value="{{ attr_value }}"
 									{% if attr_value.checked %} checked {% endif %}>
-									<span class="label-area">{{ attr_value.attribute_value }}</span>
+									<span class="label-area">{{ attr_value }}</span>
 							</label>
 						</div>
 						{% endfor %}

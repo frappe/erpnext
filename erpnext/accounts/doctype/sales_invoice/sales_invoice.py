@@ -499,7 +499,7 @@ class SalesInvoice(SellingController):
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
-		if not self.pos_profile:
+		if not self.pos_profile and not self.flags.ignore_pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
 				return
