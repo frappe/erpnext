@@ -4,6 +4,7 @@
 import copy
 import itertools
 import json
+from typing import List
 
 import frappe
 from frappe import _
@@ -36,6 +37,7 @@ from erpnext.setup.doctype.item_group.item_group import (
 	get_parent_item_groups,
 	invalidate_cache_for,
 )
+from erpnext.stock.doctype.item_default.item_default import ItemDefault
 
 
 class DuplicateReorderRows(frappe.ValidationError):
@@ -782,25 +784,8 @@ class Item(WebsiteGenerator):
 		if len(companies) != len(self.item_defaults):
 			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
 
-		for item_default in self.item_defaults:
-			for doctype, field in [
-				['Warehouse', 'default_warehouse'],
-				['Cost Center', 'buying_cost_center'],
-				['Cost Center', 'selling_cost_center'],
-				['Account', 'expense_account'],
-				['Account', 'income_account']
-			]:
-				if item_default.get(field):
-					company = frappe.db.get_value(doctype, item_default.get(field), 'company', cache=True)
-					if company and company != item_default.company:
-						frappe.throw(_("Row #{}: {} {} doesn't belong to Company {}. Please select valid {}.")
-							.format(
-								item_default.idx,
-								doctype,
-								frappe.bold(item_default.get(field)),
-								frappe.bold(item_default.company),
-								frappe.bold(frappe.unscrub(field))
-							), title=_("Invalid Item Defaults"))
+		validate_item_default_company_links(self.item_defaults)
+
 
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
@@ -1349,3 +1334,25 @@ def on_doctype_update():
 @erpnext.allow_regional
 def set_item_tax_from_hsn_code(item):
 	pass
+
+
+def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> None:
+	for item_default in item_defaults:
+		for doctype, field in [
+			['Warehouse', 'default_warehouse'],
+			['Cost Center', 'buying_cost_center'],
+			['Cost Center', 'selling_cost_center'],
+			['Account', 'expense_account'],
+			['Account', 'income_account']
+		]:
+			if item_default.get(field):
+				company = frappe.db.get_value(doctype, item_default.get(field), 'company', cache=True)
+				if company and company != item_default.company:
+					frappe.throw(_("Row #{}: {} {} doesn't belong to Company {}. Please select valid {}.")
+						.format(
+							item_default.idx,
+							doctype,
+							frappe.bold(item_default.get(field)),
+							frappe.bold(item_default.company),
+							frappe.bold(frappe.unscrub(field))
+						), title=_("Invalid Item Defaults"))
