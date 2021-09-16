@@ -42,7 +42,7 @@
  "modified": "2021-09-14 05:33:06.444710",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
- "name": "TaxJar Nexus List",
+ "name": "TaxJar Nexus",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
