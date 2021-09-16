@@ -161,7 +161,7 @@
  "modified": "2021-09-15 19:04:54.082880",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Overdue Payments",
+ "name": "Overdue Payment",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

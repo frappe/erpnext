@@ -277,7 +277,7 @@
    "fieldname": "overdue_payments",
    "fieldtype": "Table",
    "label": "Overdue Payments",
-   "options": "Overdue Payments"
+   "options": "Overdue Payment"
   },
   {
    "fieldname": "section_break_28",
