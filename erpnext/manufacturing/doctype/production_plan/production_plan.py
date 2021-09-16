@@ -561,8 +561,6 @@ class ProductionPlan(Document):
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 
-		self.save()
-
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		bom_data = sorted(bom_data, key = lambda i: i.bom_level)
 
