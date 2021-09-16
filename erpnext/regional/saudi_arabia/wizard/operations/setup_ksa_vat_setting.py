@@ -7,8 +7,7 @@ from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_ch
 
 
 def create_ksa_vat_setting(company):
-    """
-    On creation of first company. Creates KSA VAT Setting"""
+    """On creation of first company. Creates KSA VAT Setting"""
 
     company = frappe.get_doc('Company', company)
     setup_taxes_and_charges(company.name, company.country)
