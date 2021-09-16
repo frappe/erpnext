@@ -172,8 +172,7 @@ def set_sales_tax(doc, method):
 		return
 
 	# check if delivering within a nexus
-	nexus_list = frappe.get_doc('TaxJar Settings').get("nexus")
-	if tax_dict["to_state"] not in [nex.region_code for nex in nexus_list]:
+	if not frappe.db.get_value('TaxJar Nexus List', {'region_code': tax_dict["to_state"]})
 		return
 
 	tax_data = validate_tax_request(tax_dict)
