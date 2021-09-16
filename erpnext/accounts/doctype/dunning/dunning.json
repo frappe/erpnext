@@ -6,7 +6,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "customer",
   "customer_name",
@@ -33,18 +32,24 @@
   "section_break_12",
   "overdue_payments",
   "section_break_28",
-  "column_break_17",
   "total_interest",
-  "total_outstanding",
   "dunning_fee",
+  "column_break_17",
+  "dunning_amount",
+  "section_break_32",
+  "spacer",
+  "column_break_33",
+  "total_outstanding",
   "grand_total",
-  "income_account",
-  "printing_setting_section",
+  "printing_settings_section",
   "language",
   "body_text",
   "column_break_22",
   "letter_head",
   "closing_text",
+  "accounting_details_section",
+  "cost_center",
+  "income_account",
   "amended_from"
  ],
  "fields": [
@@ -60,7 +65,8 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "DUNN-.MM.-.YY.-"
+   "options": "DUNN-.MM.-.YY.-",
+   "print_hide": 1
   },
   {
    "fetch_from": "sales_invoice.customer_name",
@@ -91,8 +97,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Dunning Type",
-   "options": "Dunning Type",
-   "reqd": 1
+   "options": "Dunning Type"
   },
   {
    "fieldname": "column_break_8",
@@ -115,11 +120,6 @@
   {
    "fieldname": "column_break_17",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "printing_setting_section",
-   "fieldtype": "Section Break",
-   "label": "Printing Setting"
   },
   {
    "fieldname": "language",
@@ -154,14 +154,6 @@
    "options": "Dunning",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "{customer_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title"
   },
   {
    "fieldname": "body_text",
@@ -259,10 +251,12 @@
    "options": "Draft\nResolved\nUnresolved\nCancelled"
   },
   {
+   "description": "For dunning fee and interest",
    "fieldname": "income_account",
    "fieldtype": "Link",
    "label": "Income Account",
-   "options": "Account"
+   "options": "Account",
+   "print_hide": 1
   },
   {
    "fetch_from": "sales_invoice.conversion_rate",
@@ -309,6 +303,48 @@
    "fieldtype": "Link",
    "label": "Contact Person",
    "options": "Contact"
+  },
+  {
+   "fieldname": "dunning_amount",
+   "fieldtype": "Currency",
+   "label": "Dunning Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "printing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Printing Settings"
+  },
+  {
+   "fieldname": "section_break_32",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "spacer",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Spacer",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
   }
  ],
  "is_submittable": 1,
