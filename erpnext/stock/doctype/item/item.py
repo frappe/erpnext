@@ -29,15 +29,8 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
-<<<<<<< HEAD
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
-=======
-from erpnext.setup.doctype.item_group.item_group import (
-	get_parent_item_groups,
-	invalidate_cache_for,
-)
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
->>>>>>> 5eba1ccd51 (fix: no validation on item defaults (#27393))
 
 
 class DuplicateReorderRows(frappe.ValidationError):
