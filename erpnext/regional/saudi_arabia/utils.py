@@ -24,10 +24,10 @@ def create_qr_code(doc, method):
 	if qr_code and frappe.db.exists({"doctype": "File", "file_url": qr_code}):
 		return
 
-	fields = frappe.get_meta('Sales Invoice').fields
+	meta = frappe.get_meta('Sales Invoice')
 
-	for field in fields:
-		if field.fieldname == 'qr_code' and field.fieldtype == 'Attach Image':
+	for field in meta.get_image_fields():
+		if field.fieldname == 'qr_code':
 			# Creating public url to print format
 			default_print_format = frappe.db.get_value('Property Setter', dict(property='default_print_format', doc_type=doc.doctype), "value")
 
