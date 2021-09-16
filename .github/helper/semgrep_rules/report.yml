@@ -19,3 +19,16 @@ rules:
   languages: [python]
   severity: ERROR
 
+- id: frappe-translated-values-in-business-logic
+  paths:
+    include:
+    - "**/report"
+  patterns:
+    - pattern-inside: |
+        {..., filters: [...], ...}
+    - pattern: |
+        {..., options: [..., __("..."), ...], ...}
+  message: |
+      Using translated values in options field will require you to translate the values while comparing in business logic. Instead of passing translated labels provide objects that contain both label and value. e.g. { label: __("Option value"), value: "Option value"}
+  languages: [javascript]
+  severity: ERROR

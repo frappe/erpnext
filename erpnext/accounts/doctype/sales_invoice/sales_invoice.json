@@ -696,7 +696,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode",
-   "length": 1,
    "options": "Barcode"
   },
   {
@@ -2033,7 +2032,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-27 20:13:40.456462",
+ "modified": "2021-09-08 15:24:25.486499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

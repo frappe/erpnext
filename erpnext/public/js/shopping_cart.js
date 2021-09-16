@@ -105,6 +105,8 @@ $.extend(shopping_cart, {
 	},
 
 	set_cart_count: function(animate=false) {
+		$(".intermediate-empty-cart").remove();
+
 		var cart_count = frappe.get_cookie("cart_count");
 		if(frappe.session.user==="Guest") {
 			cart_count = 0;
@@ -119,13 +121,20 @@ $.extend(shopping_cart, {
 
 		if(parseInt(cart_count) === 0 || cart_count === undefined) {
 			$cart.css("display", "none");
-			$(".cart-items").html('Cart is Empty');
 			$(".cart-tax-items").hide();
 			$(".btn-place-order").hide();
 			$(".cart-payment-addresses").hide();
+
+			let intermediate_empty_cart_msg = `
+				<div class="text-center w-100 intermediate-empty-cart mt-4 mb-4 text-muted">
+					${ __("Cart is Empty") }
+				</div>
+			`;
+			$(".cart-table").after(intermediate_empty_cart_msg);
 		}
 		else {
 			$cart.css("display", "inline");
+			$("#cart-count").text(cart_count);
 		}
 
 		if(cart_count) {
@@ -152,7 +161,10 @@ $.extend(shopping_cart, {
 			callback: function(r) {
 				if(!r.exc) {
 					$(".cart-items").html(r.message.items);
-					$(".cart-tax-items").html(r.message.taxes);
+					$(".cart-tax-items").html(r.message.total);
+					$(".payment-summary").html(r.message.taxes_and_totals);
+					shopping_cart.set_cart_count();
+
 					if (cart_dropdown != true) {
 						$(".cart-icon").hide();
 					}
