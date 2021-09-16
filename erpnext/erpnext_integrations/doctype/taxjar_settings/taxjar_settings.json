@@ -100,13 +100,13 @@
    "fieldname": "nexus",
    "fieldtype": "Table",
    "label": "Nexus",
-   "options": "TaxJar Nexus List",
+   "options": "TaxJar Nexus",
    "read_only": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-09-14 01:41:55.871028",
+ "modified": "2021-09-16 08:54:48.444487",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "TaxJar Settings",

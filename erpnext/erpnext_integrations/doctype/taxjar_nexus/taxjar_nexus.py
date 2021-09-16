@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class TaxJarNexusList(Document):
+class TaxJarNexus(Document):
 	pass
