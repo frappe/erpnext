@@ -76,7 +76,7 @@ def get_data(filters):
 
 	# Sales Grand Total
 	append_data(data, 'Grand Total', grand_total_taxable_amount,
-		grand_total_taxable_adjustment_amount, grand_total_tax )
+		grand_total_taxable_adjustment_amount, grand_total_tax)
 
 	# Blank Line
 	append_data(data, '', '', '', '')
@@ -102,7 +102,7 @@ def get_data(filters):
 
 	# Purchase Grand Total
 	append_data(data, 'Grand Total', grand_total_taxable_amount,
-		grand_total_taxable_adjustment_amount, grand_total_tax )
+		grand_total_taxable_adjustment_amount, grand_total_tax)
 
 	return data
 
@@ -123,8 +123,7 @@ def get_tax_data_for_each_vat_setting(vat_setting, filters, doctype):
 	filters ={
 		'docstatus': 1,
 		'posting_date': ['between', [from_date, to_date]]
-	},
-	fields =['name', 'is_return'])
+	}, fields =['name', 'is_return'])
 
 	for invoice in invoices:
 		invoice_items = frappe.get_list(f'{doctype} Item',
@@ -132,9 +131,7 @@ def get_tax_data_for_each_vat_setting(vat_setting, filters, doctype):
 			'docstatus': 1,
 			'parent': invoice.name,
 			'item_tax_template': vat_setting.item_tax_template
-		},
-		fields =['item_code', 'net_amount'])
-
+		}, fields =['item_code', 'net_amount'])
 
 		for item in invoice_items:
 			# Summing up total taxable amount
