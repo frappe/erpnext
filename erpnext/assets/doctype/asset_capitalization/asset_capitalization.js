@@ -16,7 +16,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	refresh() {
 		erpnext.hide_company();
 		this.show_general_ledger();
-		if (this.frm.doc.stock_items || !this.frm.doc.target_is_fixed_asset) {
+		if ((this.frm.doc.stock_items && this.frm.doc.stock_items.length) || !this.frm.doc.target_is_fixed_asset) {
 			this.show_stock_ledger();
 		}
 	}
@@ -130,8 +130,10 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	posting_date() {
 		if (this.frm.doc.posting_date) {
-			this.get_all_item_warehouse_details();
-			this.get_all_asset_values();
+			frappe.run_serially([
+				() => this.get_all_item_warehouse_details(),
+				() => this.get_all_asset_values()
+			]);
 		}
 	}
 
@@ -347,7 +349,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	get_all_item_warehouse_details() {
 		var me = this;
-		me.frm.call({
+		return me.frm.call({
 			method: "set_warehouse_details",
 			doc: me.frm.doc,
 			callback: function(r) {
@@ -360,7 +362,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	get_all_asset_values() {
 		var me = this;
-		me.frm.call({
+		return me.frm.call({
 			method: "set_asset_values",
 			doc: me.frm.doc,
 			callback: function(r) {
