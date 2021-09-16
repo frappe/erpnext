@@ -16,6 +16,7 @@
   "make",
   "odometer_reading",
   "date",
+  "date_nepal",
   "odometer",
   "column_break_12",
   "last_odometer",
@@ -160,11 +161,16 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_nepal",
+   "fieldtype": "Data",
+   "label": "Date (Nepal)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-17 00:10:21.188352",
+ "modified": "2021-09-16 10:54:52.312278",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Log",

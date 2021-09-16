@@ -18,8 +18,8 @@
   "to_date",
   "to_date_nepal",
   "half_day",
-  "half_day_nepal",
   "half_day_date",
+  "half_day_date_nepal",
   "reason_section",
   "reason",
   "column_break_4",
@@ -130,14 +130,14 @@
    "label": "To Date (Nepal)"
   },
   {
-   "fieldname": "half_day_nepal",
+   "fieldname": "half_day_date_nepal",
    "fieldtype": "Read Only",
-   "label": "Half Day (Nepal)"
+   "label": "Half Day Date (Nepal)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-14 12:29:00.203297",
+ "modified": "2021-09-16 12:50:50.790342",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Request",

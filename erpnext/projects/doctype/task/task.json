@@ -23,10 +23,12 @@
   "completed_on",
   "sb_timeline",
   "exp_start_date",
+  "expected_start_date_nepal",
   "expected_time",
   "start",
   "column_break_11",
   "exp_end_date",
+  "expected_end_date_nepal",
   "progress",
   "duration",
   "is_milestone",
@@ -390,6 +392,16 @@
    "fieldtype": "Date",
    "label": "Completed On",
    "mandatory_depends_on": "eval: doc.status == \"Completed\""
+  },
+  {
+   "fieldname": "expected_start_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Expected Start Date (Nepal)"
+  },
+  {
+   "fieldname": "expected_end_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Expected End Date (Nepal)"
   }
  ],
  "icon": "fa fa-check",
@@ -397,7 +409,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-04-16 12:46:51.556741",
+ "modified": "2021-09-15 18:48:01.501163",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

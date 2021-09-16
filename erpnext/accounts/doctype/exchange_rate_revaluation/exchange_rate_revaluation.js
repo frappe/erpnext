@@ -2,48 +2,63 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Exchange Rate Revaluation', {
-	setup: function(frm) {
-		frm.set_query("party_type", "accounts", function() {
+	setup: function (frm) {
+		frm.set_query("party_type", "accounts", function () {
 			return {
 				"filters": {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
 				}
 			};
 		});
-		frm.set_query("account", "accounts", function(doc) {
+		frm.set_query("account", "accounts", function (doc) {
 			return {
 				"filters": {
 					"company": doc.company
 				}
+				
 			};
 		});
 	},
 
-	refresh: function(frm) {
-		if(frm.doc.docstatus==1) {
+	refresh: function (frm) {
+		if (frm.doc.docstatus == 1) {
 			frappe.call({
 				method: 'check_journal_entry_condition',
 				doc: frm.doc,
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message) {
-						frm.add_custom_button(__('Journal Entry'), function() {
+						frm.add_custom_button(__('Journal Entry'), function () {
 							return frm.events.make_jv(frm);
 						}, __('Create'));
 					}
 				}
-			});			
+			});
 		}
 	},
 
-	get_entries: function(frm) {
+	posting_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.posting_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("posting_date_nepal", resp.message)
+				}
+			}
+		})
+	},
+
+	get_entries: function (frm) {
 		frappe.call({
 			method: "get_accounts_data",
 			doc: cur_frm.doc,
-			callback: function(r){
+			callback: function (r) {
 				frappe.model.clear_table(frm.doc, "accounts");
-				if(r.message) {
+				if (r.message) {
 					r.message.forEach((d) => {
-						cur_frm.add_child("accounts",d);
+						cur_frm.add_child("accounts", d);
 					});
 					frm.events.get_total_gain_loss(frm);
 					refresh_field("accounts");
@@ -52,8 +67,8 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 		});
 	},
 
-	get_total_gain_loss: function(frm) {
-		if(!(frm.doc.accounts && frm.doc.accounts.length)) return;
+	get_total_gain_loss: function (frm) {
+		if (!(frm.doc.accounts && frm.doc.accounts.length)) return;
 
 		let total_gain_loss = 0;
 		frm.doc.accounts.forEach((d) => {
@@ -65,11 +80,11 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 		frm.refresh_fields();
 	},
 
-	make_jv : function(frm) {
+	make_jv: function (frm) {
 		frappe.call({
 			method: "make_jv_entry",
 			doc: frm.doc,
-			callback: function(r){
+			callback: function (r) {
 				if (r.message) {
 					var doc = frappe.model.sync(r.message)[0];
 					frappe.set_route("Form", doc.doctype, doc.name);
@@ -80,7 +95,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 });
 
 frappe.ui.form.on("Exchange Rate Revaluation Account", {
-	new_exchange_rate: function(frm, cdt, cdn) {
+	new_exchange_rate: function (frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		row.new_balance_in_base_currency = flt(row.new_exchange_rate * flt(row.balance_in_account_currency),
 			precision("new_balance_in_base_currency", row));
@@ -89,40 +104,40 @@ frappe.ui.form.on("Exchange Rate Revaluation Account", {
 		frm.events.get_total_gain_loss(frm);
 	},
 
-	account: function(frm, cdt, cdn) {
+	account: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.account) {
 			get_account_details(frm, cdt, cdn);
 		}
 	},
 
-	party: function(frm, cdt, cdn) {
+	party: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.party && row.account) {
 			get_account_details(frm, cdt, cdn);
 		}
 	},
 
-	accounts_remove: function(frm) {
+	accounts_remove: function (frm) {
 		frm.events.get_total_gain_loss(frm);
 	}
 });
 
-var get_account_details = function(frm, cdt, cdn) {
+var get_account_details = function (frm, cdt, cdn) {
 	var row = frappe.get_doc(cdt, cdn);
-	if(!frm.doc.company || !frm.doc.posting_date) {
+	if (!frm.doc.company || !frm.doc.posting_date) {
 		frappe.throw(__("Please select Company and Posting Date to getting entries"));
 	}
 	frappe.call({
 		method: "erpnext.accounts.doctype.exchange_rate_revaluation.exchange_rate_revaluation.get_account_details",
-		args:{
+		args: {
 			account: row.account,
 			company: frm.doc.company,
 			posting_date: frm.doc.posting_date,
 			party_type: row.party_type,
 			party: row.party
 		},
-		callback: function(r){
+		callback: function (r) {
 			$.extend(row, r.message);
 			refresh_field("accounts");
 			frm.events.get_total_gain_loss(frm);

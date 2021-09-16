@@ -192,7 +192,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			cur_frm.cscript.add_from_mappers();
 		}
 	},
-
+	
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
@@ -572,20 +572,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 		})
 	},
-	schedule_date: function(doc) {
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.schedule_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("required_by_nepali",resp.message)
-				}
-			}
-		})
-		set_schedule_date(this.frm);
-	}
+	
 });
 
 // for backward compatibility: combine new and previous states
@@ -635,3 +622,6 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });
+
+
+

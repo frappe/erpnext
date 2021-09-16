@@ -13,6 +13,7 @@
   "is_short_year",
   "section_break_4",
   "year_start_date",
+  "year_start_date_nepal",
   "year_end_date",
   "column_break_7",
   "nepali_year_start_date",
@@ -114,12 +115,17 @@
    "label": "Nepali Date Table",
    "options": "Nepali Date Table",
    "read_only": 1
+  },
+  {
+   "fieldname": "year_start_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Year Start Date (Nepal)"
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2021-07-14 15:56:20.977320",
+ "modified": "2021-09-16 12:00:48.033851",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
