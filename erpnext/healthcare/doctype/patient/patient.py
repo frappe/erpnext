@@ -50,7 +50,6 @@ class Patient(Document):
 					customer.customer_group = self.customer_group
 				if self.territory:
 					customer.territory = self.territory
-
 				customer.customer_name = self.patient_name
 				customer.default_price_list = self.default_price_list
 				customer.default_currency = self.default_currency
@@ -115,8 +114,10 @@ class Patient(Document):
 		patient_name_by = frappe.db.get_single_value('Healthcare Settings', 'patient_name_by')
 		if patient_name_by == 'Patient Name':
 			self.name = self.get_patient_name()
-		else:
+		elif patient_name_by == 'Naming Series':
 			set_name_by_naming_series(self)
+		else:
+			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_patient_name(self):
 		self.set_full_name()
@@ -141,7 +142,7 @@ class Patient(Document):
 		age = self.age
 		if not age:
 			return
-		age_str = str(age.years) + ' ' + _("Years(s)") + ' ' + str(age.months) + ' ' + _("Month(s)") + ' ' + str(age.days) + ' ' + _("Day(s)")
+		age_str = f'{str(age.years)} {_("Years(s)")} {str(age.months)} {_("Month(s)")} {str(age.days)} {_("Day(s)")}'
 		return age_str
 
 	@frappe.whitelist()
