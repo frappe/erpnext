@@ -2510,55 +2510,58 @@ def get_mode_of_payment_info(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def create_dunning(source_name, target_doc=None):
+def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	from frappe.model.mapper import get_mapped_doc
 
-	from erpnext.accounts.doctype.dunning.dunning import (
-		calculate_interest_and_amount,
-		get_dunning_letter_text,
-	)
+	def postprocess_dunning(source, target):
+		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
 
-	def set_missing_values(source, target):
-		target.sales_invoice = source_name
-		target.outstanding_amount = source.outstanding_amount
-		overdue_days = (getdate(target.posting_date) - getdate(source.due_date)).days
-		target.overdue_days = overdue_days
-		if frappe.db.exists(
-			"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-		):
-			dunning_type = frappe.get_doc(
-				"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-			)
+		dunning_type = frappe.db.exists('Dunning Type', {'is_default': 1})
+		if dunning_type:
+			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
 			target.rate_of_interest = dunning_type.rate_of_interest
 			target.dunning_fee = dunning_type.dunning_fee
-			letter_text = get_dunning_letter_text(dunning_type=dunning_type.name, doc=target.as_dict())
-			if letter_text:
-				target.body_text = letter_text.get("body_text")
-				target.closing_text = letter_text.get("closing_text")
-				target.language = letter_text.get("language")
-			amounts = calculate_interest_and_amount(
-				target.outstanding_amount,
-				target.rate_of_interest,
-				target.dunning_fee,
-				target.overdue_days,
+			letter_text = get_dunning_letter_text(
+				dunning_type=dunning_type.name,
+				doc=target.as_dict(),
+				language=source.language
 			)
-			target.interest_amount = amounts.get("interest_amount")
-			target.dunning_amount = amounts.get("dunning_amount")
-			target.grand_total = amounts.get("grand_total")
 
-	doclist = get_mapped_doc(
-		"Sales Invoice",
-		source_name,
-		{
+			if letter_text:
+				target.body_text = letter_text.get('body_text')
+				target.closing_text = letter_text.get('closing_text')
+				target.language = letter_text.get('language')
+
+	def postprocess_overdue_payment(source, target, source_parent):
+		target.overdue_days = (getdate(nowdate()) - getdate(source.due_date)).days
+
+	return get_mapped_doc(
+		from_doctype="Sales Invoice",
+		from_docname=source_name,
+		table_maps={
 			"Sales Invoice": {
 				"doctype": "Dunning",
+				"field_map": {
+					"customer_address": "customer_address",
+					"parent": "sales_invoice"
+				},
+			},
+			"Payment Schedule": {
+				"doctype": "Overdue Payment",
+				"field_map": {
+					"name": "payment_schedule",
+					"parent": "sales_invoice"
+				},
+				"condition": lambda doc: doc.outstanding > 0,
+				"postprocess": postprocess_overdue_payment
 			}
 		},
-		target_doc,
-		set_missing_values,
+		target_doc=target_doc,
+		postprocess=postprocess_dunning,
+		ignore_permissions=ignore_permissions
 	)
-	return doclist
+
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

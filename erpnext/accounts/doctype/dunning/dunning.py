@@ -15,25 +15,34 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class Dunning(AccountsController):
+
 	def validate(self):
-		self.validate_overdue_days()
-		self.validate_amount()
+		self.validate_overdue_payments()
+		self.validate_totals()
+
 		if not self.income_account:
 			self.income_account = frappe.get_cached_value("Company", self.company, "default_income_account")
 
-	def validate_overdue_days(self):
-		self.overdue_days = (getdate(self.posting_date) - getdate(self.due_date)).days or 0
+	def validate_overdue_payments(self):
+		for row in self.overdue_payments:
+			row.overdue_days = (getdate(self.posting_date) - getdate(row.due_date)).days or 0
+			interest_per_year = flt(row.outstanding) * flt(self.rate_of_interest) / 100
+			row.interest_amount = (interest_per_year * cint(row.overdue_days)) / 365
 
-	def validate_amount(self):
-		amounts = calculate_interest_and_amount(
-			self.outstanding_amount, self.rate_of_interest, self.dunning_fee, self.overdue_days
-		)
-		if self.interest_amount != amounts.get("interest_amount"):
-			self.interest_amount = flt(amounts.get("interest_amount"), self.precision("interest_amount"))
-		if self.dunning_amount != amounts.get("dunning_amount"):
-			self.dunning_amount = flt(amounts.get("dunning_amount"), self.precision("dunning_amount"))
-		if self.grand_total != amounts.get("grand_total"):
-			self.grand_total = flt(amounts.get("grand_total"), self.precision("grand_total"))
+	def validate_totals(self):
+		total_outstanding = sum(row.outstanding for row in self.overdue_payments)
+		total_interest = sum(row.interest_amount for row in self.overdue_payments)
+		dunning_amount = flt(total_interest) + flt(self.dunning_fee)
+		grand_total = flt(total_outstanding) + flt(dunning_amount)
+
+		if self.total_outstanding != total_outstanding:
+			self.total_outstanding = flt(total_outstanding, self.precision('total_outstanding'))
+		if self.total_interest != total_interest:
+			self.total_interest = flt(total_interest, self.precision('total_interest'))
+		if self.dunning_amount != dunning_amount:
+			self.dunning_amount = flt(dunning_amount, self.precision('dunning_amount'))
+		if self.grand_total != grand_total:
+			self.grand_total = flt(grand_total, self.precision('grand_total'))
 
 	def on_submit(self):
 		self.make_gl_entries()
@@ -112,20 +121,6 @@ def resolve_dunning(doc, state):
 			for dunning in dunnings:
 				frappe.db.set_value("Dunning", dunning.name, "status", "Resolved")
 
-
-def calculate_interest_and_amount(outstanding_amount, rate_of_interest, dunning_fee, overdue_days):
-	interest_amount = 0
-	grand_total = flt(outstanding_amount) + flt(dunning_fee)
-	if rate_of_interest:
-		interest_per_year = flt(outstanding_amount) * flt(rate_of_interest) / 100
-		interest_amount = (interest_per_year * cint(overdue_days)) / 365
-		grand_total += flt(interest_amount)
-	dunning_amount = flt(interest_amount) + flt(dunning_fee)
-	return {
-		"interest_amount": interest_amount,
-		"grand_total": grand_total,
-		"dunning_amount": dunning_amount,
-	}
 
 
 @frappe.whitelist()
