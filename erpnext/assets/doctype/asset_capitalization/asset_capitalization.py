@@ -189,7 +189,7 @@ class AssetCapitalization(StockController):
 				if flt(d.qty) <= 0:
 					frappe.throw(_("Row #{0}: Qty must be a positive number").format(d.idx))
 
-				if flt(d.amount) <= 0:
+				if flt(d.rate) <= 0:
 					frappe.throw(_("Row #{0}: Amount must be a positive number").format(d.idx))
 
 				self.validate_item(item)
@@ -221,11 +221,11 @@ class AssetCapitalization(StockController):
 			frappe.throw(_("Asset {0} is cancelled").format(asset.name))
 
 		if asset.company != self.company:
-			frappe.throw(_("Asset {0} does not belong to company {1}").format(self.target_asset, self.company))
+			frappe.throw(_("Asset {0} does not belong to company {1}").format(asset.name, self.company))
 
 	@frappe.whitelist()
 	def set_warehouse_details(self):
-		for d in self.stock_items:
+		for d in self.get('stock_items'):
 			if d.item_code and d.warehouse:
 				args = self.get_args_for_incoming_rate(d)
 				warehouse_details = get_warehouse_details(args)
@@ -233,7 +233,7 @@ class AssetCapitalization(StockController):
 
 	@frappe.whitelist()
 	def set_asset_values(self):
-		for d in self.asset_items:
+		for d in self.get('asset_items'):
 			if d.asset:
 				finance_book = d.get('finance_book') or self.get('finance_book')
 				d.current_asset_value = flt(get_current_asset_value(d.asset, finance_book=finance_book))
