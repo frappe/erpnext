@@ -4,7 +4,7 @@
 
 frappe.query_reports["KSA VAT"] = {
 	onload() {
-		frappe.breadcrumbs.add('Accounts');	
+		frappe.breadcrumbs.add('Accounts');
 	},
 	"filters": [
 		{

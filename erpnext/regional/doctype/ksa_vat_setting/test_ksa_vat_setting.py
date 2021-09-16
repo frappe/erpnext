@@ -4,5 +4,6 @@
 # import frappe
 import unittest
 
+
 class TestKSAVATSetting(unittest.TestCase):
 	pass
