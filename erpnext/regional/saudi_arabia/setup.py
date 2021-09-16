@@ -27,6 +27,7 @@ def add_permissions():
 	frappe.db.set_value('Report', 'KSA VAT', 'disabled', 0)
 
 def make_qrcode_field():
+	"""Created QR code Image file"""
 	qr_code_field = dict(
 		fieldname='qr_code',
 		label='QR Code',
