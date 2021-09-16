@@ -21,10 +21,11 @@
   "address_display",
   "contact_person",
   "contact_display",
+  "column_break_16",
+  "company_address",
+  "company_address_display",
   "contact_mobile",
   "contact_email",
-  "column_break_18",
-  "company_address_display",
   "section_break_6",
   "dunning_type",
   "column_break_8",
@@ -206,14 +207,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
-  },
-  {
    "fetch_from": "sales_invoice.company_address_display",
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
-   "label": "Company Address",
+   "label": "Company Address Display",
    "read_only": 1
   },
   {
@@ -345,6 +342,16 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address",
+   "options": "Address"
   }
  ],
  "is_submittable": 1,
