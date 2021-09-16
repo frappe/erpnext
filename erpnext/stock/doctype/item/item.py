@@ -804,33 +804,34 @@ class Item(WebsiteGenerator):
 
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
-		if self.item_group and not self.item_defaults:
-			item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
-				['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
-				'expense_account','selling_cost_center','income_account'], as_dict = 1)
-			if item_defaults:
-				for item in item_defaults:
-					self.append('item_defaults', {
-						'company': item.company,
-						'default_warehouse': item.default_warehouse,
-						'default_price_list': item.default_price_list,
-						'buying_cost_center': item.buying_cost_center,
-						'default_supplier': item.default_supplier,
-						'expense_account': item.expense_account,
-						'selling_cost_center': item.selling_cost_center,
-						'income_account': item.income_account
-					})
-			else:
-				warehouse = ''
-				defaults = frappe.defaults.get_defaults() or {}
+		if self.item_defaults or not self.item_group:
+			return
 
-				# To check default warehouse is belong to the default company
-				if defaults.get("default_warehouse") and defaults.company and frappe.db.exists("Warehouse",
-					{'name': defaults.default_warehouse, 'company': defaults.company}):
-						self.append("item_defaults", {
-							"company": defaults.get("company"),
-							"default_warehouse": defaults.default_warehouse
-						})
+		item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
+			['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
+			'expense_account','selling_cost_center','income_account'], as_dict = 1)
+		if item_defaults:
+			for item in item_defaults:
+				self.append('item_defaults', {
+					'company': item.company,
+					'default_warehouse': item.default_warehouse,
+					'default_price_list': item.default_price_list,
+					'buying_cost_center': item.buying_cost_center,
+					'default_supplier': item.default_supplier,
+					'expense_account': item.expense_account,
+					'selling_cost_center': item.selling_cost_center,
+					'income_account': item.income_account
+				})
+		else:
+			defaults = frappe.defaults.get_defaults() or {}
+
+			# To check default warehouse is belong to the default company
+			if defaults.get("default_warehouse") and defaults.company and frappe.db.exists("Warehouse",
+				{'name': defaults.default_warehouse, 'company': defaults.company}):
+					self.append("item_defaults", {
+						"company": defaults.get("company"),
+						"default_warehouse": defaults.default_warehouse
+					})
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
