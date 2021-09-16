@@ -3,12 +3,54 @@
 cur_frm.add_fetch('employee', 'company', 'company');
 
 frappe.ui.form.on('Attendance Request', {
-	half_day: function(frm) {
-		if(frm.doc.half_day == 1){
+	half_day: function (frm) {
+		if (frm.doc.half_day == 1) {
 			frm.set_df_property('half_day_date', 'reqd', true);
 		}
-		else{
+		else {
 			frm.set_df_property('half_day_date', 'reqd', false);
 		}
-	}
+		
+	},
+	half_day: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.half_day
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("half_day_nepal", resp.message)
+				}
+			}
+		})
+	},
+
+	from_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.from_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("from_date_nepal", resp.message)
+				}
+			}
+		})
+	},
+	to_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.to_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("to_date_nepal", resp.message)
+				}
+			}
+		})
+	},
+	
 });

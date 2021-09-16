@@ -15,7 +15,9 @@
   "column_break1",
   "leave_type",
   "from_date",
+  "from_date_nepal",
   "to_date",
+  "to_date_nepal",
   "section_break_6",
   "new_leaves_allocated",
   "carry_forward",
@@ -228,6 +230,16 @@
    "options": "Company",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "from_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "From Date (Nepal)"
+  },
+  {
+   "fieldname": "to_date_nepal",
+   "fieldtype": "Data",
+   "label": "To Date (Nepal)"
   }
  ],
  "icon": "fa fa-ok",
@@ -235,7 +247,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-14 15:28:26.335104",
+ "modified": "2021-09-13 16:30:08.679498",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Allocation",

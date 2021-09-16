@@ -706,7 +706,7 @@
   {
    "bold": 1,
    "fieldname": "posting_date_nepali",
-   "fieldtype": "Data",
+   "fieldtype": "Read Only",
    "in_list_view": 1,
    "label": "Posting Date Nepali"
   }
@@ -714,7 +714,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-09 13:09:37.521481",
+ "modified": "2021-09-09 16:25:50.659015",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

@@ -14,8 +14,11 @@
   "column_break_5",
   "company",
   "from_date",
+  "from_date_nepal",
   "to_date",
+  "to_date_nepal",
   "half_day",
+  "half_day_nepal",
   "half_day_date",
   "reason_section",
   "reason",
@@ -115,11 +118,26 @@
    "options": "Attendance Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "from_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "From Date (Nepal)"
+  },
+  {
+   "fieldname": "to_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "To Date (Nepal)"
+  },
+  {
+   "fieldname": "half_day_nepal",
+   "fieldtype": "Read Only",
+   "label": "Half Day (Nepal)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-16 11:49:26.943173",
+ "modified": "2021-09-14 12:29:00.203297",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Request",

@@ -2,15 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Benefit Application', {
-	employee: function(frm) {
+
+	employee: function (frm) {
 		if (frm.doc.employee) {
 			frappe.run_serially([
-				() => 	frm.trigger('get_employee_currency'),
-				() => 	frm.trigger('set_earning_component')
+				() => frm.trigger('get_employee_currency'),
+				() => frm.trigger('set_earning_component')
 			]);
 		}
 		var method, args;
-		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
+		if (frm.doc.employee && frm.doc.date && frm.doc.payroll_period) {
 			method = "erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining";
 			args = {
 				employee: frm.doc.employee,
@@ -19,7 +20,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 			};
 			get_max_benefits(frm, method, args);
 		}
-		else if(frm.doc.employee && frm.doc.date){
+		else if (frm.doc.employee && frm.doc.date) {
 			method = "erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits";
 			args = {
 				employee: frm.doc.employee,
@@ -29,28 +30,41 @@ frappe.ui.form.on('Employee Benefit Application', {
 		}
 	},
 
-	date: function(frm) {
+	date: function (frm) {
 		frm.trigger('set_earning_component');
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("date_nepali", resp.message)
+				}
+			}
+		})
 	},
 
-	set_earning_component: function(frm) {
-		if(!frm.doc.employee && !frm.doc.date) return;
-		frm.set_query("earning_component", "employee_benefits", function() {
+
+
+	set_earning_component: function (frm) {
+		if (!frm.doc.employee && !frm.doc.date) return;
+		frm.set_query("earning_component", "employee_benefits", function () {
 			return {
-				query : "erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
-				filters: {date: frm.doc.date, employee: frm.doc.employee}
+				query: "erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
+				filters: { date: frm.doc.date, employee: frm.doc.employee }
 			};
 		});
 	},
 
-	get_employee_currency: function(frm) {
+	get_employee_currency: function (frm) {
 		if (frm.doc.employee) {
 			frappe.call({
 				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
 				args: {
 					employee: frm.doc.employee,
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message) {
 						frm.set_value('currency', r.message);
 						frm.refresh_fields();
@@ -60,7 +74,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 		}
 	},
 
-	payroll_period: function(frm) {
+	payroll_period: function (frm) {
 		var method, args;
 		if (frm.doc.employee && frm.doc.date && frm.doc.payroll_period) {
 			method = "erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining";
@@ -72,12 +86,14 @@ frappe.ui.form.on('Employee Benefit Application', {
 			get_max_benefits(frm, method, args);
 		}
 	},
-	max_benefits: function(frm) {
+	max_benefits: function (frm) {
 		calculate_all(frm.doc);
-	}
+	},
+	
+	
 });
 
-var get_max_benefits=function(frm, method, args) {
+var get_max_benefits = function (frm, method, args) {
 	frappe.call({
 		method: method,
 		args: args,
@@ -92,18 +108,19 @@ var get_max_benefits=function(frm, method, args) {
 			frm.refresh_fields();
 		}
 	});
+	
 };
 
-frappe.ui.form.on("Employee Benefit Application Detail",{
-	amount:  function(frm) {
+frappe.ui.form.on("Employee Benefit Application Detail", {
+	amount: function (frm) {
 		calculate_all(frm.doc);
 	},
-	employee_benefits_remove: function(frm) {
+	employee_benefits_remove: function (frm) {
 		calculate_all(frm.doc);
 	}
 });
 
-var calculate_all = function(doc) {
+var calculate_all = function (doc) {
 	var tbl = doc.employee_benefits || [];
 	var pro_rata_dispensed_amount = 0;
 	var total_amount = 0;
@@ -123,5 +140,9 @@ var calculate_all = function(doc) {
 	doc.total_amount = total_amount;
 	doc.remaining_benefit = doc.max_benefits - total_amount;
 	doc.pro_rata_dispensed_amount = pro_rata_dispensed_amount;
-	refresh_many(['pro_rata_dispensed_amount', 'total_amount','remaining_benefit']);
+	refresh_many(['pro_rata_dispensed_amount', 'total_amount', 'remaining_benefit']);
+
+	
 };
+
+
