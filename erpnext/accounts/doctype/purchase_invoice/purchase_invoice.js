@@ -83,7 +83,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			}	
 		})
 	},
-
+	
 	onload: function() {
 		this._super();
 
@@ -243,7 +243,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	change_release_date: function() {
 		this.make_dialog_and_set_release_date();
 	},
-
+	
 	can_change_release_date: function(date) {
 		const diff = frappe.datetime.get_diff(date, frappe.datetime.nowdate());
 		if (diff < 0) {
@@ -334,7 +334,20 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.change_release_date',
 			'args': data,
 			'callback': (r) => this.frm.reload_doc()
-		});
+		});	
+	},
+	release_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.release_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("release_date_nepal", resp.message)
+				}
+			}
+		})
 	},
 
 	supplier: function() {

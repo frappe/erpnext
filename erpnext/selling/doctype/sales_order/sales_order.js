@@ -45,17 +45,6 @@ frappe.ui.form.on("Sales Order", {
 		});
 	},
 	refresh: function(frm) {
-		// frappe.call({
-		// 	method:"erpnext.nepali_date.get_converted_date",
-		// 	args: {
-		// 		date: frm.doc.transaction_date
-		// 	},
-		// 	callback: function(resp){
-		// 		if(resp.message){
-		// 			cur_frm.set_value("transaction_date_nepali",resp.message)
-		// 		}
-		// 	}
-		// });
 
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
 			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
@@ -68,6 +57,19 @@ frappe.ui.form.on("Sales Order", {
 				})
 			});
 		}
+	},
+	po_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.po_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("customers_purchase_order_date_nepal", resp.message)
+				}
+			}
+		})
 	},
 	onload: function(frm) {
 		if (!frm.doc.transaction_date){
@@ -87,20 +89,6 @@ frappe.ui.form.on("Sales Order", {
 		});
 
 		erpnext.queries.setup_warehouse_query(frm);
-	},
-
-	po_date: function(frm) {
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.po_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("customers_purchase_order_date_nepali",resp.message)
-				}
-			}
-		})
 	},
 
 	delivery_date: function(frm) {

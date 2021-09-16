@@ -54,6 +54,7 @@
   "campaign",
   "column_break1",
   "transaction_date",
+  "opportunity_date_nepal",
   "language",
   "amended_from",
   "lost_reasons"
@@ -378,7 +379,6 @@
    "search_index": 1
   },
   {
-   "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "label": "Opportunity Date",
@@ -425,12 +425,17 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "fieldname": "opportunity_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Opportunity Date (Nepal)"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2021-06-04 10:11:22.831139",
+ "modified": "2021-09-14 18:13:59.063491",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

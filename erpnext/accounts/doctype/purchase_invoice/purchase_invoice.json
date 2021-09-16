@@ -147,6 +147,7 @@
   "sb_14",
   "on_hold",
   "release_date",
+  "release_date_nepal",
   "cb_17",
   "hold_comment",
   "more_info",
@@ -973,8 +974,7 @@
    "fieldtype": "Date",
    "label": "Clearance Date",
    "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "col_br_payments",
@@ -1411,13 +1411,19 @@
    "fieldtype": "Data",
    "label": "To Date(Nepali)",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.on_hold",
+   "fieldname": "release_date_nepal",
+   "fieldtype": "Data",
+   "label": "Release Date (Nepal)"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-14 19:04:25.592604",
+ "modified": "2021-09-13 17:44:46.945229",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

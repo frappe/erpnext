@@ -23,6 +23,7 @@ frappe.ui.form.on('Maintenance Visit', {
 				};
 			}
 		});
+		
 	},
 	setup: function (frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
@@ -43,7 +44,20 @@ frappe.ui.form.on('Maintenance Visit', {
 				}
 			});
 		}
-
+		
+			frappe.call({
+				method:"erpnext.nepali_date.get_converted_date",
+				args: {
+					date: frm.doc.mntc_date
+				},
+				callback: function(resp){
+					if(resp.message){
+						cur_frm.set_value("maintenance_date_nepali",resp.message)
+					}
+				}
+			})
+		
+		
 		if (!frm.doc.status) {
 			frm.set_value({ status: 'Draft' });
 		}
@@ -51,6 +65,8 @@ frappe.ui.form.on('Maintenance Visit', {
 			frm.set_value({ mntc_date: frappe.datetime.get_today() });
 		}
 	},
+	
+	
 	customer: function (frm) {
 		erpnext.utils.get_party_details(frm);
 	},
