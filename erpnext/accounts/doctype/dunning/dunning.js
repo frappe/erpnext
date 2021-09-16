@@ -78,6 +78,12 @@ frappe.ui.form.on("Dunning", {
 			});
 		}
 	},
+	customer_address: function (frm) {
+		erpnext.utils.get_address_display(frm, "customer_address");
+	},
+	company_address: function (frm) {
+		erpnext.utils.get_address_display(frm, "company_address");
+	},
 	dunning_type: function (frm) {
 		frm.trigger("get_dunning_letter_text");
 	},
