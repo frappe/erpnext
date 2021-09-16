@@ -33,6 +33,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 				self.parent_item_group = _('All Item Groups')
 
 		self.make_route()
+		self.validate_item_group_defaults()
 
 	def on_update(self):
 		NestedSet.on_update(self)
@@ -87,6 +88,10 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def delete_child_item_groups_key(self):
 		frappe.cache().hdel("child_item_groups", self.name)
+
+	def validate_item_group_defaults(self):
+		from erpnext.stock.doctype.item.item import validate_item_default_company_links
+		validate_item_default_company_links(self.item_group_defaults)
 
 @frappe.whitelist(allow_guest=True)
 def get_product_list_for_group(product_group=None, start=0, limit=10, search=None):
