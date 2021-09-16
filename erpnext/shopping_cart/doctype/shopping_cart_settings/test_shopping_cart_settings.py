@@ -4,9 +4,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import unittest
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import ShoppingCartSetupError
+
+import frappe
+
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+	ShoppingCartSetupError,
+)
+
 
 class TestShoppingCartSettings(unittest.TestCase):
 	def setUp(self):

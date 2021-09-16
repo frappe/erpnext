@@ -4,18 +4,24 @@
 
 from __future__ import unicode_literals
 
-import erpnext
-import frappe
 import random
-from frappe.utils import random_string
+
+import frappe
 from frappe.desk import query_report
+from frappe.utils import random_string
+from frappe.utils.make_random import get_random
+
+import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from frappe.utils.make_random import get_random
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	make_payment_entry,
+	make_payment_request,
+)
 from erpnext.demo.user.sales import make_sales_order
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_accounts_user'))

@@ -17,9 +17,9 @@ frappe.ui.form.on('Patient Appointment', {
 	},
 
 	refresh: function(frm) {
-		frm.set_query('patient', function () {
+		frm.set_query('patient', function() {
 			return {
-				filters: {'status': 'Active'}
+				filters: { 'status': 'Active' }
 			};
 		});
 
@@ -64,7 +64,7 @@ frappe.ui.form.on('Patient Appointment', {
 				} else {
 					frappe.call({
 						method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_payment_fields_reqd',
-						args: {'patient': frm.doc.patient},
+						args: { 'patient': frm.doc.patient },
 						callback: function(data) {
 							if (data.message == true) {
 								if (frm.doc.mode_of_payment && frm.doc.paid_amount) {
@@ -97,7 +97,7 @@ frappe.ui.form.on('Patient Appointment', {
 
 		if (frm.doc.patient) {
 			frm.add_custom_button(__('Patient History'), function() {
-				frappe.route_options = {'patient': frm.doc.patient};
+				frappe.route_options = { 'patient': frm.doc.patient };
 				frappe.set_route('patient_history');
 			}, __('View'));
 		}
@@ -111,14 +111,14 @@ frappe.ui.form.on('Patient Appointment', {
 			});
 
 			if (frm.doc.procedure_template) {
-				frm.add_custom_button(__('Clinical Procedure'), function(){
+				frm.add_custom_button(__('Clinical Procedure'), function() {
 					frappe.model.open_mapped_doc({
 						method: 'erpnext.healthcare.doctype.clinical_procedure.clinical_procedure.make_procedure',
 						frm: frm,
 					});
 				}, __('Create'));
 			} else if (frm.doc.therapy_type) {
-				frm.add_custom_button(__('Therapy Session'),function(){
+				frm.add_custom_button(__('Therapy Session'), function() {
 					frappe.model.open_mapped_doc({
 						method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.create_therapy_session',
 						frm: frm,
@@ -148,7 +148,7 @@ frappe.ui.form.on('Patient Appointment', {
 					doctype: 'Patient',
 					name: frm.doc.patient
 				},
-				callback: function (data) {
+				callback: function(data) {
 					let age = null;
 					if (data.message.dob) {
 						age = calculate_age(data.message.dob);
@@ -165,7 +165,7 @@ frappe.ui.form.on('Patient Appointment', {
 	},
 
 	practitioner: function(frm) {
-		if (frm.doc.practitioner ) {
+		if (frm.doc.practitioner) {
 			frm.events.set_payment_details(frm);
 		}
 	},
@@ -230,7 +230,7 @@ frappe.ui.form.on('Patient Appointment', {
 	toggle_payment_fields: function(frm) {
 		frappe.call({
 			method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_payment_fields_reqd',
-			args: {'patient': frm.doc.patient},
+			args: { 'patient': frm.doc.patient },
 			callback: function(data) {
 				if (data.message.fee_validity) {
 					// if fee validity exists and automated appointment invoicing is enabled,
@@ -254,7 +254,7 @@ frappe.ui.form.on('Patient Appointment', {
 					frm.toggle_display('paid_amount', data.message ? 1 : 0);
 					frm.toggle_display('billing_item', data.message ? 1 : 0);
 					frm.toggle_reqd('mode_of_payment', data.message ? 1 : 0);
-					frm.toggle_reqd('paid_amount', data.message ? 1 :0);
+					frm.toggle_reqd('paid_amount', data.message ? 1 : 0);
 					frm.toggle_reqd('billing_item', data.message ? 1 : 0);
 				}
 			}
@@ -265,7 +265,7 @@ frappe.ui.form.on('Patient Appointment', {
 		if (frm.doc.patient) {
 			frappe.call({
 				method: "erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_prescribed_therapies",
-				args: {patient: frm.doc.patient},
+				args: { patient: frm.doc.patient },
 				callback: function(r) {
 					if (r.message) {
 						show_therapy_types(frm, r.message);
@@ -302,13 +302,13 @@ let check_and_set_availability = function(frm) {
 		let d = new frappe.ui.Dialog({
 			title: __('Available slots'),
 			fields: [
-				{ fieldtype: 'Link', options: 'Medical Department', reqd: 1, fieldname: 'department', label: 'Medical Department'},
-				{ fieldtype: 'Column Break'},
-				{ fieldtype: 'Link', options: 'Healthcare Practitioner', reqd: 1, fieldname: 'practitioner', label: 'Healthcare Practitioner'},
-				{ fieldtype: 'Column Break'},
-				{ fieldtype: 'Date', reqd: 1, fieldname: 'appointment_date', label: 'Date'},
-				{ fieldtype: 'Section Break'},
-				{ fieldtype: 'HTML', fieldname: 'available_slots'}
+				{ fieldtype: 'Link', options: 'Medical Department', reqd: 1, fieldname: 'department', label: 'Medical Department' },
+				{ fieldtype: 'Column Break' },
+				{ fieldtype: 'Link', options: 'Healthcare Practitioner', reqd: 1, fieldname: 'practitioner', label: 'Healthcare Practitioner' },
+				{ fieldtype: 'Column Break' },
+				{ fieldtype: 'Date', reqd: 1, fieldname: 'appointment_date', label: 'Date' },
+				{ fieldtype: 'Section Break' },
+				{ fieldtype: 'HTML', fieldname: 'available_slots' }
 
 			],
 			primary_action_label: __('Book'),
@@ -386,59 +386,22 @@ let check_and_set_availability = function(frm) {
 						let $wrapper = d.fields_dict.available_slots.$wrapper;
 
 						// make buttons for each slot
-						let slot_details = data.slot_details;
-						let slot_html = '';
-						for (let i = 0; i < slot_details.length; i++) {
-							slot_html = slot_html + `<label>${slot_details[i].slot_name}</label>`;
-							slot_html = slot_html + `<br/>` + slot_details[i].avail_slot.map(slot => {
-								let disabled = '';
-								let start_str = slot.from_time;
-								let slot_start_time = moment(slot.from_time, 'HH:mm:ss');
-								let slot_to_time = moment(slot.to_time, 'HH:mm:ss');
-								let interval = (slot_to_time - slot_start_time)/60000 | 0;
-								// iterate in all booked appointments, update the start time and duration
-								slot_details[i].appointments.forEach(function(booked) {
-									let booked_moment = moment(booked.appointment_time, 'HH:mm:ss');
-									let end_time = booked_moment.clone().add(booked.duration, 'minutes');
-									// Deal with 0 duration appointments
-									if (booked_moment.isSame(slot_start_time) || booked_moment.isBetween(slot_start_time, slot_to_time)) {
-										if(booked.duration == 0){
-											disabled = 'disabled="disabled"';
-											return false;
-										}
-									}
-									// Check for overlaps considering appointment duration
-									if (slot_start_time.isBefore(end_time) && slot_to_time.isAfter(booked_moment)) {
-										// There is an overlap
-										disabled = 'disabled="disabled"';
-										return false;
-									}
-								});
-								return `<button class="btn btn-default"
-									data-name=${start_str}
-									data-duration=${interval}
-									data-service-unit="${slot_details[i].service_unit || ''}"
-									style="margin: 0 10px 10px 0; width: 72px;" ${disabled}>
-									${start_str.substring(0, start_str.length - 3)}
-								</button>`;
-							}).join("");
-							slot_html = slot_html + `<br/>`;
-						}
+						let slot_html = get_slots(data.slot_details);
 
 						$wrapper
 							.css('margin-bottom', 0)
 							.addClass('text-center')
 							.html(slot_html);
 
-						// blue button when clicked
+						// highlight button when clicked
 						$wrapper.on('click', 'button', function() {
 							let $btn = $(this);
-							$wrapper.find('button').removeClass('btn-primary');
-							$btn.addClass('btn-primary');
+							$wrapper.find('button').removeClass('btn-outline-primary');
+							$btn.addClass('btn-outline-primary');
 							selected_slot = $btn.attr('data-name');
 							service_unit = $btn.attr('data-service-unit');
 							duration = $btn.attr('data-duration');
-							// enable dialog action
+							// enable primary action 'Book'
 							d.get_primary_btn().attr('disabled', null);
 						});
 
@@ -448,11 +411,94 @@ let check_and_set_availability = function(frm) {
 					}
 				},
 				freeze: true,
-				freeze_message: __('Fetching records......')
+				freeze_message: __('Fetching Schedule...')
 			});
 		} else {
 			fd.available_slots.html(__('Appointment date and Healthcare Practitioner are Mandatory').bold());
 		}
+	}
+
+	function get_slots(slot_details) {
+		let slot_html = '';
+		let appointment_count = 0;
+		let disabled = false;
+		let start_str, slot_start_time, slot_end_time, interval, count, count_class, tool_tip, available_slots;
+
+		slot_details.forEach((slot_info) => {
+			slot_html += `<div class="slot-info">
+				<span> <b> ${__('Practitioner Schedule:')} </b> ${slot_info.slot_name} </span><br>
+				<span> <b> ${__('Service Unit:')} </b> ${slot_info.service_unit} </span>`;
+
+			if (slot_info.service_unit_capacity) {
+				slot_html += `<br><span> <b> ${__('Maximum Capacity:')} </b> ${slot_info.service_unit_capacity} </span>`;
+			}
+
+			slot_html += '</div><br><br>';
+
+			slot_html += slot_info.avail_slot.map(slot => {
+				appointment_count = 0;
+				disabled = false;
+				start_str = slot.from_time;
+				slot_start_time = moment(slot.from_time, 'HH:mm:ss');
+				slot_end_time = moment(slot.to_time, 'HH:mm:ss');
+				interval = (slot_end_time - slot_start_time) / 60000 | 0;
+
+				// iterate in all booked appointments, update the start time and duration
+				slot_info.appointments.forEach((booked) => {
+					let booked_moment = moment(booked.appointment_time, 'HH:mm:ss');
+					let end_time = booked_moment.clone().add(booked.duration, 'minutes');
+
+					// Deal with 0 duration appointments
+					if (booked_moment.isSame(slot_start_time) || booked_moment.isBetween(slot_start_time, slot_end_time)) {
+						if (booked.duration == 0) {
+							disabled = true;
+							return false;
+						}
+					}
+
+					// Check for overlaps considering appointment duration
+					if (slot_info.allow_overlap != 1) {
+						if (slot_start_time.isBefore(end_time) && slot_end_time.isAfter(booked_moment)) {
+							// There is an overlap
+							disabled = true;
+							return false;
+						}
+					} else {
+						if (slot_start_time.isBefore(end_time) && slot_end_time.isAfter(booked_moment)) {
+							appointment_count++;
+						}
+						if (appointment_count >= slot_info.service_unit_capacity) {
+							// There is an overlap
+							disabled = true;
+							return false;
+						}
+					}
+				});
+
+				if (slot_info.allow_overlap == 1 && slot_info.service_unit_capacity > 1) {
+					available_slots = slot_info.service_unit_capacity - appointment_count;
+					count = `${(available_slots > 0 ? available_slots : __('Full'))}`;
+					count_class = `${(available_slots > 0 ? 'badge-success' : 'badge-danger')}`;
+					tool_tip =`${available_slots} ${__('slots available for booking')}`;
+				}
+				return `
+					<button class="btn btn-secondary" data-name=${start_str}
+						data-duration=${interval}
+						data-service-unit="${slot_info.service_unit || ''}"
+						style="margin: 0 10px 10px 0; width: auto;" ${disabled ? 'disabled="disabled"' : ""}
+						data-toggle="tooltip" title="${tool_tip}">
+						${start_str.substring(0, start_str.length - 3)}<br>
+						<span class='badge ${count_class}'> ${count} </span>
+					</button>`;
+			}).join("");
+
+			if (slot_info.service_unit_capacity) {
+				slot_html += `<br/><small>${__('Each slot indicates the capacity currently available for booking')}</small>`;
+			}
+			slot_html += `<br/><br/>`;
+		});
+
+		return slot_html;
 	}
 };
 
@@ -460,7 +506,7 @@ let get_prescribed_procedure = function(frm) {
 	if (frm.doc.patient) {
 		frappe.call({
 			method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_procedure_prescribed',
-			args: {patient: frm.doc.patient},
+			args: { patient: frm.doc.patient },
 			callback: function(r) {
 				if (r.message && r.message.length) {
 					show_procedure_templates(frm, r.message);
@@ -480,7 +526,7 @@ let get_prescribed_procedure = function(frm) {
 	}
 };
 
-let show_procedure_templates = function(frm, result){
+let show_procedure_templates = function(frm, result) {
 	let d = new frappe.ui.Dialog({
 		title: __('Prescribed Procedures'),
 		fields: [
@@ -500,9 +546,11 @@ let show_procedure_templates = function(frm, result){
 		data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
 		data-date="%(date)s"  data-department="%(department)s">\
 		<button class="btn btn-default btn-xs">Add\
-		</button></a></div></div><div class="col-xs-12"><hr/><div/>', {name:y[0], procedure_template: y[1],
-				encounter:y[2], consulting_practitioner:y[3], encounter_date:y[4],
-				practitioner:y[5]? y[5]:'', date: y[6]? y[6]:'', department: y[7]? y[7]:''})).appendTo(html_field);
+		</button></a></div></div><div class="col-xs-12"><hr/><div/>', {
+			name: y[0], procedure_template: y[1],
+			encounter: y[2], consulting_practitioner: y[3], encounter_date: y[4],
+			practitioner: y[5] ? y[5] : '', date: y[6] ? y[6] : '', department: y[7] ? y[7] : ''
+		})).appendTo(html_field);
 		row.find("a").click(function() {
 			frm.doc.procedure_template = $(this).attr('data-procedure-template');
 			frm.doc.procedure_prescription = $(this).attr('data-name');
@@ -520,7 +568,7 @@ let show_procedure_templates = function(frm, result){
 	});
 	if (!result) {
 		let msg = __('There are no procedure prescribed for ') + frm.doc.patient;
-		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
+		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', { msg: msg })).appendTo(html_field);
 	}
 	d.show();
 };
@@ -535,7 +583,7 @@ let show_therapy_types = function(frm, result) {
 		]
 	});
 	var html_field = d.fields_dict.therapy_type.$wrapper;
-	$.each(result, function(x, y){
+	$.each(result, function(x, y) {
 		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
 		<div class="col-xs-5"> %(encounter)s <br> %(practitioner)s <br> %(date)s </div>\
 		<div class="col-xs-5"> %(therapy)s </div>\
@@ -544,9 +592,11 @@ let show_therapy_types = function(frm, result) {
 		data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
 		data-date="%(date)s"  data-department="%(department)s">\
 		<button class="btn btn-default btn-xs">Add\
-		</button></a></div></div><div class="col-xs-12"><hr/><div/>', {therapy:y[0],
-		name: y[1], encounter:y[2], practitioner:y[3], date:y[4],
-		department:y[6]? y[6]:'', therapy_plan:y[5]})).appendTo(html_field);
+		</button></a></div></div><div class="col-xs-12"><hr/><div/>', {
+			therapy: y[0],
+			name: y[1], encounter: y[2], practitioner: y[3], date: y[4],
+			department: y[6] ? y[6] : '', therapy_plan: y[5]
+		})).appendTo(html_field);
 
 		row.find("a").click(function() {
 			frm.doc.therapy_type = $(this).attr("data-therapy");
@@ -581,13 +631,13 @@ let create_vital_signs = function(frm) {
 	frappe.new_doc('Vital Signs');
 };
 
-let update_status = function(frm, status){
+let update_status = function(frm, status) {
 	let doc = frm.doc;
 	frappe.confirm(__('Are you sure you want to cancel this appointment?'),
 		function() {
 			frappe.call({
 				method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_status',
-				args: {appointment_id: doc.name, status:status},
+				args: { appointment_id: doc.name, status: status },
 				callback: function(data) {
 					if (!data.exc) {
 						frm.reload_doc();

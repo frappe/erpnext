@@ -3,14 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.model.document import Document
-import frappe, erpnext
+
+import frappe
 from frappe import _
 from frappe.utils import money_in_words
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
-from erpnext.controllers.accounts_controller import AccountsController
+
+import erpnext
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
 
 
 class Fees(AccountsController):

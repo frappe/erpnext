@@ -3,10 +3,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import cstr
-from frappe.model.naming import make_autoname
 from frappe.model.document import Document
 
 pricing_rule_fields = ['apply_on', 'mixed_conditions', 'is_cumulative', 'other_item_code', 'other_item_group',

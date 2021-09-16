@@ -3,9 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils.nestedset import NestedSet, rebuild_tree
 from frappe import _
+from frappe.utils.nestedset import NestedSet
+
 
 class QualityProcedure(NestedSet):
 	nsm_parent_field = 'parent_quality_procedure'

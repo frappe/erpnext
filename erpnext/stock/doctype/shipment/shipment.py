@@ -3,12 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, get_time
-from frappe.model.document import Document
-from erpnext.accounts.party import get_party_shipping_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from frappe.model.document import Document
+from frappe.utils import flt, get_time
+
+from erpnext.accounts.party import get_party_shipping_address
+
 
 class Shipment(Document):
 	def validate(self):

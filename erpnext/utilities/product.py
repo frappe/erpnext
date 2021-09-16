@@ -4,9 +4,11 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cint, fmt_money, flt, nowdate, getdate
+from frappe.utils import cint, flt, fmt_money, getdate, nowdate
+
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from erpnext.stock.doctype.batch.batch import get_batch_qty
+
 
 def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 	in_stock, stock_qty = 0, ''
@@ -127,7 +129,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 			return price_obj
 
 def get_non_stock_item_status(item_code, item_warehouse_field):
-#if item belongs to product bundle, check if bundle items are in stock
+	#if item belongs to product bundle, check if bundle items are in stock
 	if frappe.db.exists("Product Bundle", item_code):
 		items = frappe.get_doc("Product Bundle", item_code).get_all_children()
 		bundle_warehouse = frappe.db.get_value('Item', item_code, item_warehouse_field)

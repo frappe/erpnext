@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+
 class ItemManufacturer(Document):
 	def validate(self):
 		self.validate_duplicate_entry()

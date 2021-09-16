@@ -2,8 +2,11 @@ context('Organizational Chart', () => {
 	before(() => {
 		cy.login();
 		cy.visit('/app/website');
+	});
+
+	it('navigates to org chart', () => {
+		cy.visit('/app');
 		cy.awesomebar('Organizational Chart');
-		cy.wait(500);
 		cy.url().should('include', '/organizational-chart');
 
 		cy.window().its('frappe.csrf_token').then(csrf_token => {
