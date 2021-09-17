@@ -69,8 +69,6 @@ class VehicleBookingController(AccountsController):
 
 		if self.docstatus == 0:
 			self.calculate_taxes_and_totals()
-		elif self.docstatus == 1:
-			self.set_vehicle_details()
 
 	def set_missing_values(self, for_validate=False):
 		customer_details = get_customer_details(self.as_dict(), get_withholding_tax=False)

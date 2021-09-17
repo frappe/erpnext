@@ -90,7 +90,11 @@ class Vehicle(Document):
 				self.db_update()
 
 	def update_vehicle_booking_order(self):
-		orders = frappe.get_all("Vehicle Booking Order", filters={"docstatus": ['<', 2], "vehicle": self.name})
+		orders = frappe.get_all("Vehicle Booking Order", filters={
+			"docstatus": ['<', 2],
+			"vehicle": self.name,
+			"status": ['!=', 'Completed']
+		})
 		for d in orders:
 			doc = frappe.get_doc("Vehicle Booking Order", d.name)
 			doc.set_vehicle_details(update=True)
