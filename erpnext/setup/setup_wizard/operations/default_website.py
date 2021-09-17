@@ -2,10 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
+import frappe
 from frappe import _
 from frappe.utils import nowdate
+
 
 class website_maker(object):
 	def __init__(self, args):

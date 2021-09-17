@@ -3,13 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+from datetime import timedelta
+
 import frappe
 from frappe import _
-from datetime import timedelta
-from frappe.utils import get_link_to_form, getdate, date_diff, flt
-from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
-from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from frappe.model.document import Document
+from frappe.utils import date_diff, flt, get_link_to_form, getdate
+
+from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
+from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+
 
 class StudentLeaveApplication(Document):
 	def validate(self):

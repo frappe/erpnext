@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 
-import os
 import json
+import os
 
 import frappe
 from frappe import _

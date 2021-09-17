@@ -3,8 +3,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.utils.nestedset import NestedSet, get_root_of
+
 
 class SupplierGroup(NestedSet):
 	nsm_parent_field = 'parent_supplier_group'

@@ -562,6 +562,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "label": "Packing List",
@@ -570,6 +571,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Packed Items",
@@ -1454,7 +1456,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-17 20:15:50.574966",
+ "modified": "2021-08-27 20:14:40.215231",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

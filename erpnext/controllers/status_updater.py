@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt, comma_or, nowdate, getdate, now
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import comma_or, flt, getdate, now, nowdate
+
 
 class OverAllowanceError(frappe.ValidationError): pass
 

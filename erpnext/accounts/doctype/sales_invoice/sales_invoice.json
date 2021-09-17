@@ -74,6 +74,7 @@
   "time_sheet_list",
   "timesheets",
   "total_billing_amount",
+  "total_billing_hours",
   "section_break_30",
   "total_qty",
   "base_total",
@@ -696,7 +697,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode",
-   "length": 1,
    "options": "Barcode"
   },
   {
@@ -728,6 +728,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -737,6 +738,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -2018,7 +2020,13 @@
    "fieldname": "commission_based_on_target_lines",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Commission Based On Target Lines",
+   "label": "Commission Based On Target Lines"
+  },
+  {
+   "fieldname": "total_billing_hours",
+   "fieldtype": "Float",
+   "label": "Total Billing Hours",
+   "print_hide": 1,
    "read_only": 1
   }
  ],
@@ -2032,7 +2040,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-25 14:46:05.279588",
+ "modified": "2021-09-08 15:24:25.486499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

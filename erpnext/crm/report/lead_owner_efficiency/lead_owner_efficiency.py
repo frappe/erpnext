@@ -2,9 +2,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 from frappe import _
+
 from erpnext.crm.report.campaign_efficiency.campaign_efficiency import get_lead_data
+
 
 def execute(filters=None):
 	columns, data = [], []

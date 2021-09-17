@@ -2,19 +2,25 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.model.naming import set_name_by_naming_series
-from frappe import _, msgprint
+
+import frappe
 import frappe.defaults
-from frappe.utils import flt, cint, cstr, today, get_formatted_email
+from frappe import _, msgprint
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
-from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
-from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
-from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
+from frappe.model.naming import set_name_by_naming_series
+from frappe.model.rename_doc import update_linked_doctypes
+from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
+
+from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
+from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
@@ -285,30 +291,6 @@ class Customer(TransactionBase):
 				_("Multiple Loyalty Programs found for Customer {}. Please select manually.")
 				.format(frappe.bold(self.customer_name))
 			)
-
-	def create_onboarding_docs(self, args):
-		defaults = frappe.defaults.get_defaults()
-		company = defaults.get('company') or \
-			frappe.db.get_single_value('Global Defaults', 'default_company')
-
-		for i in range(1, args.get('max_count')):
-			customer = args.get('customer_name_' + str(i))
-			if customer:
-				try:
-					doc = frappe.get_doc({
-						'doctype': self.doctype,
-						'customer_name': customer,
-						'customer_type': 'Company',
-						'customer_group': _('Commercial'),
-						'territory': defaults.get('country'),
-						'company': company
-					}).insert()
-
-					if args.get('customer_email_' + str(i)):
-						create_contact(customer, self.doctype,
-							doc.name, args.get("customer_email_" + str(i)))
-				except frappe.NameError:
-					pass
 
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""

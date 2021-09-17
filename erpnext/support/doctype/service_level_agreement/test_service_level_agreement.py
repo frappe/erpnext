@@ -3,10 +3,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_group
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
+
 
 class TestServiceLevelAgreement(unittest.TestCase):
 	def setUp(self):
@@ -143,16 +146,6 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 			},
 			{
 				"workday": "Friday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Saturday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Sunday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
 			}

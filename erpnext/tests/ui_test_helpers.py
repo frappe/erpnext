@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import getdate
 
+
 @frappe.whitelist()
 def create_employee_records():
 	create_company()

@@ -3,12 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import getdate, cstr, add_days, date_diff, getdate, ceil
 from frappe.model.document import Document
+from frappe.utils import getdate
+
 from erpnext.hr.utils import validate_overlap
-from frappe.utils.background_jobs import enqueue
+
 
 class LeavePeriod(Document):
 
