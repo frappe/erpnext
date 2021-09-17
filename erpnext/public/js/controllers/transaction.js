@@ -617,6 +617,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 											me.frm.script_manager.trigger('qty', item.doctype, item.name);
 											if (!me.frm.doc.set_warehouse)
 												me.frm.script_manager.trigger('warehouse', item.doctype, item.name);
+											me.apply_price_list(item, true);
 										}, undefined, !frappe.flags.hide_serial_batch_dialog);
 									}
 								},
