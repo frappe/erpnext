@@ -17,7 +17,7 @@ cur_frm.cscript.vehicle_booking_order = function(doc, dt, dn) {
 
 	if (doc.vehicle_booking_order) {
 		frappe.db.get_value("Vehicle Booking Order", doc.vehicle_booking_order, "vehicle", function (r) {
-			if (r && r.vehicle) {
+			if (r) {
 				frappe.model.set_value(dt, dn, 'applies_to_vehicle', r.vehicle);
 			}
 		});
