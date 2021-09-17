@@ -24,7 +24,7 @@ class Dunning(AccountsController):
 		self.validate_totals()
 
 		if not self.income_account:
-			self.income_account = frappe.db.get_value('Company', self.company, 'default_income_account')
+			self.income_account = frappe.db.get_value("Company", self.company, "default_income_account")
 
 	def validate_overdue_payments(self):
 		for row in self.overdue_payments:
@@ -39,20 +39,20 @@ class Dunning(AccountsController):
 		grand_total = flt(total_outstanding) + flt(dunning_amount)
 
 		if self.total_outstanding != total_outstanding:
-			self.total_outstanding = flt(total_outstanding, self.precision('total_outstanding'))
+			self.total_outstanding = flt(total_outstanding, self.precision("total_outstanding"))
 		if self.total_interest != total_interest:
-			self.total_interest = flt(total_interest, self.precision('total_interest'))
+			self.total_interest = flt(total_interest, self.precision("total_interest"))
 		if self.dunning_amount != dunning_amount:
-			self.dunning_amount = flt(dunning_amount, self.precision('dunning_amount'))
+			self.dunning_amount = flt(dunning_amount, self.precision("dunning_amount"))
 		if self.grand_total != grand_total:
-			self.grand_total = flt(grand_total, self.precision('grand_total'))
+			self.grand_total = flt(grand_total, self.precision("grand_total"))
 
 	def on_submit(self):
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		if self.dunning_amount:
-			self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+			self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def make_gl_entries(self):
@@ -66,7 +66,7 @@ class Dunning(AccountsController):
 		invoice_fields.extend(accounting_dimensions)
 
 		dunning_in_company_currency = flt(self.dunning_amount * inv.conversion_rate)
-		default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
+		default_cost_center = frappe.get_cached_value("Company",  self.company,  "cost_center")
 
 		gl_entries.append(
 			self.get_gl_dict({
@@ -98,12 +98,12 @@ class Dunning(AccountsController):
 
 def resolve_dunning(doc, state):
 	for reference in doc.references:
-		if reference.reference_doctype == 'Sales Invoice' and reference.outstanding_amount <= 0:
-			dunnings = frappe.get_list('Dunning', filters={
-				'sales_invoice': reference.reference_name, 'status': ('!=', 'Resolved')}, ignore_permissions=True)
+		if reference.reference_doctype == "Sales Invoice" and reference.outstanding_amount <= 0:
+			dunnings = frappe.get_list("Dunning", filters={
+				"sales_invoice": reference.reference_name, "status": ("!=", "Resolved")}, ignore_permissions=True)
 
 			for dunning in dunnings:
-				frappe.db.set_value("Dunning", dunning.name, "status", 'Resolved')
+				frappe.db.set_value("Dunning", dunning.name, "status", "Resolved")
 
 
 @frappe.whitelist()
@@ -111,14 +111,14 @@ def get_dunning_letter_text(dunning_type, doc, language=None):
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
 	if language:
-		filters = {'parent': dunning_type, 'language': language}
+		filters = {"parent": dunning_type, "language": language}
 	else:
-		filters = {'parent': dunning_type, 'is_default_language': 1}
-	letter_text = frappe.db.get_value('Dunning Letter Text', filters,
-		['body_text', 'closing_text', 'language'], as_dict=1)
+		filters = {"parent": dunning_type, "is_default_language": 1}
+	letter_text = frappe.db.get_value("Dunning Letter Text", filters,
+		["body_text", "closing_text", "language"], as_dict=1)
 	if letter_text:
 		return {
-			'body_text': frappe.render_template(letter_text.body_text, doc),
-			'closing_text': frappe.render_template(letter_text.closing_text, doc),
-			'language': letter_text.language
+			"body_text": frappe.render_template(letter_text.body_text, doc),
+			"closing_text": frappe.render_template(letter_text.closing_text, doc),
+			"language": letter_text.language
 		}
