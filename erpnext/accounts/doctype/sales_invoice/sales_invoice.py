@@ -2460,7 +2460,6 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 				"condition": lambda doc: doc.outstanding > 0
 			}
 		},
-		target_doc=target_doc,
 		postprocess=postprocess_dunning,
 		ignore_permissions=ignore_permissions
 	)
