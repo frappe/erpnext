@@ -714,12 +714,15 @@ erpnext.utils.map_current_doc = function(opts) {
 			child_columns: opts.child_columns,
 			action: function(selections, args) {
 				let values = selections;
-				if(values.length === 0){
+				if (values.length === 0) {
 					frappe.msgprint(__("Please select {0}", [opts.source_doctype]))
 					return;
 				}
 				opts.source_name = values;
-				opts.args = args;
+				if (opts.allow_child_item_selection) {
+					// args contains filtered child docnames
+					opts.args = args;
+				}
 				d.dialog.hide();
 				_map();
 			},
