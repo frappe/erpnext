@@ -21,7 +21,7 @@ class Dunning(AccountsController):
 		self.validate_totals()
 
 		if not self.income_account:
-			self.income_account = frappe.get_cached_value("Company", self.company, "default_income_account")
+			self.income_account = frappe.db.get_value("Company", self.company, "default_income_account")
 
 	def validate_overdue_payments(self):
 		for row in self.overdue_payments:
@@ -36,13 +36,13 @@ class Dunning(AccountsController):
 		grand_total = flt(total_outstanding) + flt(dunning_amount)
 
 		if self.total_outstanding != total_outstanding:
-			self.total_outstanding = flt(total_outstanding, self.precision('total_outstanding'))
+			self.total_outstanding = flt(total_outstanding, self.precision("total_outstanding"))
 		if self.total_interest != total_interest:
-			self.total_interest = flt(total_interest, self.precision('total_interest'))
+			self.total_interest = flt(total_interest, self.precision("total_interest"))
 		if self.dunning_amount != dunning_amount:
-			self.dunning_amount = flt(dunning_amount, self.precision('dunning_amount'))
+			self.dunning_amount = flt(dunning_amount, self.precision("dunning_amount"))
 		if self.grand_total != grand_total:
-			self.grand_total = flt(grand_total, self.precision('grand_total'))
+			self.grand_total = flt(grand_total, self.precision("grand_total"))
 
 	def on_submit(self):
 		self.make_gl_entries()

@@ -2516,7 +2516,7 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess_dunning(source, target):
 		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
 
-		dunning_type = frappe.db.exists('Dunning Type', {'is_default': 1})
+		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1})
 		if dunning_type:
 			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
@@ -2529,9 +2529,9 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 			)
 
 			if letter_text:
-				target.body_text = letter_text.get('body_text')
-				target.closing_text = letter_text.get('closing_text')
-				target.language = letter_text.get('language')
+				target.body_text = letter_text.get("body_text")
+				target.closing_text = letter_text.get("closing_text")
+				target.language = letter_text.get("language")
 
 		target.validate()
 
