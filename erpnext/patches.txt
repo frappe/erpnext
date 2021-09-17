@@ -313,4 +313,10 @@ erpnext.patches.v13_0.create_website_items
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
+<<<<<<< HEAD
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
+=======
+erpnext.patches.v14_0.update_opportunity_currency_fields
+erpnext.patches.v13_0.gst_fields_for_pos_invoice
+erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
+>>>>>>> d49346ac45 (fix: Tax breakup based on items, missing GST fields (#27524))
