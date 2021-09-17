@@ -21,6 +21,7 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
 	get_receivable_account,
 	send_registration_sms,
 )
+from erpnext.selling.doctype.customer.customer import make_address
 
 
 class Patient(Document):
@@ -31,6 +32,7 @@ class Patient(Document):
 
 	def validate(self):
 		self.set_full_name()
+		self.flags.is_new_doc = self.is_new()
 
 	def before_insert(self):
 		self.set_missing_customer_details()
@@ -61,6 +63,8 @@ class Patient(Document):
 				create_customer(self)
 
 		self.set_contact() # add or update contact
+		if self.flags.is_new_doc and self.get('address_line1'):
+			make_address(self)
 
 		if not self.user_id and self.email and self.invite_user:
 			self.create_website_user()
@@ -208,7 +212,6 @@ class Patient(Document):
 
 		contact.flags.ignore_validate = True # disable hook TODO: safe?
 		contact.save(ignore_permissions=True)
-
 
 def create_customer(doc):
 	customer = frappe.get_doc({
