@@ -126,13 +126,15 @@
    "fieldname": "language",
    "fieldtype": "Link",
    "label": "Print Language",
-   "options": "Language"
+   "options": "Language",
+   "print_hide": 1
   },
   {
    "fieldname": "letter_head",
    "fieldtype": "Link",
    "label": "Letter Head",
-   "options": "Letter Head"
+   "options": "Letter Head",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_22",
@@ -293,13 +295,15 @@
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "label": "Customer Address",
-   "options": "Address"
+   "options": "Address",
+   "print_hide": 1
   },
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
-   "options": "Contact"
+   "options": "Contact",
+   "print_hide": 1
   },
   {
    "fieldname": "dunning_amount",
@@ -318,7 +322,8 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -351,7 +356,8 @@
    "fieldname": "company_address",
    "fieldtype": "Link",
    "label": "Company Address",
-   "options": "Address"
+   "options": "Address",
+   "print_hide": 1
   }
  ],
  "is_submittable": 1,

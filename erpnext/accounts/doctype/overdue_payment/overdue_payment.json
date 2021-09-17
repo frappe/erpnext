@@ -113,6 +113,7 @@
    "fieldname": "discounted_amount",
    "fieldtype": "Currency",
    "label": "Discounted Amount",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -124,6 +125,7 @@
    "fieldtype": "Currency",
    "label": "Payment Amount (Company Currency)",
    "options": "Company:company:default_currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -138,6 +140,7 @@
    "fieldname": "payment_schedule",
    "fieldtype": "Data",
    "label": "Payment Schedule",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -158,7 +161,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-15 19:04:54.082880",
+ "modified": "2021-09-17 12:10:42.278923",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Overdue Payment",
