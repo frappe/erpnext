@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+
 class PartyLink(Document):
 	def validate(self):
 		if self.primary_role not in ['Customer', 'Supplier']:

@@ -2,8 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 from erpnext.manufacturing.doctype.work_order.work_order import create_job_card
+
 
 def execute():
 	frappe.reload_doc('manufacturing', 'doctype', 'work_order')

@@ -1,8 +1,10 @@
 import frappe
 from frappe.utils import cint
+
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
-from erpnext.shopping_cart.product_info import get_product_info_for_website
 from erpnext.setup.doctype.item_group.item_group import get_child_groups
+from erpnext.shopping_cart.product_info import get_product_info_for_website
+
 
 def get_field_filter_data():
 	product_settings = get_product_settings()

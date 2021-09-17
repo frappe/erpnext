@@ -2,12 +2,14 @@ from __future__ import unicode_literals
 
 import io
 import json
+
 import frappe
-from frappe.utils import flt, cstr
-from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe import _
+from frappe.utils import cstr, flt
 from frappe.utils.file_manager import remove_file
 from six import string_types
+
+from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from erpnext.regional.italy import state_codes
 
 

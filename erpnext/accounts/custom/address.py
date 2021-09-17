@@ -1,7 +1,11 @@
 import frappe
 from frappe import _
-from frappe.contacts.doctype.address.address import Address
-from frappe.contacts.doctype.address.address import get_address_templates, get_address_display
+from frappe.contacts.doctype.address.address import (
+	Address,
+	get_address_display,
+	get_address_templates,
+)
+
 
 class ERPNextAddress(Address):
 	def validate(self):

@@ -3,19 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe import _
 
 import json
-from datetime import timedelta
-from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, date_diff, add_to_date
+
+import frappe
+from frappe import _
 from frappe.model.document import Document
-from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
-	WorkstationHolidayError)
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
-from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import flt, getdate, time_diff_in_hours
+
+from erpnext.controllers.queries import get_match_cond
 from erpnext.hr.utils import validate_active_employee
+from erpnext.setup.utils import get_exchange_rate
+
 
 class OverlapError(frappe.ValidationError): pass
 class OverWorkLoggedError(frappe.ValidationError): pass

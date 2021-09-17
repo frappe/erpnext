@@ -3,7 +3,9 @@
 
 from __future__ import unicode_literals
 
-import frappe, unittest
+import unittest
+
+import frappe
 
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import FiscalYearIncorrectDate
 

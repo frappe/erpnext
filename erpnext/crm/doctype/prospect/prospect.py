@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.contacts.address_and_contact import load_address_and_contact
+
 
 class Prospect(Document):
 	def onload(self):

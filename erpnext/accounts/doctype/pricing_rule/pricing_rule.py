@@ -3,15 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-import json
+
 import copy
+import json
 import re
 
-from frappe import throw, _
-from frappe.utils import flt, cint, getdate
+import frappe
+from frappe import _, throw
 from frappe.model.document import Document
-
+from frappe.utils import cint, flt, getdate
 from six import string_types
 
 apply_on_dict = {"Item Code": "items",
@@ -228,8 +228,12 @@ def get_serial_no_for_item(args):
 	return item_details
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
-	from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
-			get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		get_pricing_rule_items,
+		get_pricing_rules,
+		get_product_discount_rule,
+	)
 
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
@@ -389,8 +393,10 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 				if pricing_rule else args.get(field, 0))
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
-	from erpnext.accounts.doctype.pricing_rule.utils import (get_applied_pricing_rules,
-		get_pricing_rule_items)
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		get_pricing_rule_items,
+	)
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)

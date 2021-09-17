@@ -3,13 +3,26 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import date_diff, getdate, rounded, add_days, cstr, cint, flt
 from frappe.model.document import Document
-from erpnext.payroll.doctype.payroll_period.payroll_period import get_payroll_period_days, get_period_factor
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
-from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holiday_dates_for_employee, get_previous_claimed_amount, validate_active_employee
+from frappe.utils import add_days, cint, cstr, date_diff, getdate, rounded
+
+from erpnext.hr.utils import (
+	get_holiday_dates_for_employee,
+	get_previous_claimed_amount,
+	get_sal_slip_total_benefit_given,
+	validate_active_employee,
+)
+from erpnext.payroll.doctype.payroll_period.payroll_period import (
+	get_payroll_period_days,
+	get_period_factor,
+)
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+	get_assigned_salary_structure,
+)
+
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
