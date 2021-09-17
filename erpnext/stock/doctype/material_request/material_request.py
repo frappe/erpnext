@@ -272,8 +272,9 @@ def update_status(name, status):
 	material_request.update_status(status)
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None, args={}):
-
+def make_purchase_order(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
