@@ -24,8 +24,9 @@ frappe.ui.form.on("Dunning", {
 			};
 		});
 
-		frm.set_query('contact_person', erpnext.queries.contact_query);
-		frm.set_query('customer_address', erpnext.queries.address_query);
+		frm.set_query("contact_person", erpnext.queries.contact_query);
+		frm.set_query("customer_address", erpnext.queries.address_query);
+		frm.set_query("company_address", erpnext.queries.company_address_query);
 
 		// cannot add rows manually, only via button "Fetch Overdue Payments"
 		frm.set_df_property("overdue_payments", "cannot_add_rows", true);
@@ -48,7 +49,7 @@ frappe.ui.form.on("Dunning", {
 		}
 
 		if(frm.doc.docstatus > 0) {
-			frm.add_custom_button(__('Ledger'), function() {
+			frm.add_custom_button(__("Ledger"), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,
@@ -57,7 +58,7 @@ frappe.ui.form.on("Dunning", {
 					"show_cancelled_entries": frm.doc.docstatus === 2
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, __('View'));
+			}, __("View"));
 		}
 
 		if(frm.doc.docstatus === 0) {
@@ -151,8 +152,8 @@ frappe.ui.form.on("Dunning", {
 			.reduce((prev, cur) => prev + cur.interest_amount, 0);
 		const total_outstanding = frm.doc.overdue_payments
 			.reduce((prev, cur) => prev + cur.outstanding, 0);
-		const dunning_amount = flt(total_interest + frm.doc.dunning_fee, precision('dunning_amount'));
-		const grand_total = flt(total_outstanding + dunning_amount, precision('grand_total'));
+		const dunning_amount = flt(total_interest + frm.doc.dunning_fee, precision("dunning_amount"));
+		const grand_total = flt(total_outstanding + dunning_amount, precision("grand_total"));
 
 		frm.set_value("total_outstanding", total_outstanding);
 		frm.set_value("total_interest", total_interest);
