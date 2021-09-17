@@ -113,7 +113,7 @@ class Patient(Document):
 		user.enabled = True
 		user.send_welcome_email = True
 		user.add_roles('Patient')
-		frappe.db.set_value(self.doctype, self.name, 'user_id', user.name)
+		self.db_set('user_id', user.name)
 
 	def autoname(self):
 		patient_name_by = frappe.db.get_single_value('Healthcare Settings', 'patient_name_by')
