@@ -41,6 +41,5 @@ class TestNamingSeries(unittest.TestCase):
 		NS = frappe.get_doc('Naming Series')
 
 		prefixes = NS.get_transactions().get('prefixes')
-		print(prefixes)
 		self.assertIn('TODO-Open-', prefixes)
 
