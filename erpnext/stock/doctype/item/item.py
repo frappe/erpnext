@@ -181,6 +181,8 @@ class Item(WebsiteGenerator):
 				"doctype": "Item Price",
 				"price_list": price_list,
 				"item_code": self.name,
+				"uom": self.stock_uom,
+				"brand": self.brand,
 				"currency": erpnext.get_default_currency(),
 				"price_list_rate": self.standard_rate
 			})
@@ -635,8 +637,8 @@ class Item(WebsiteGenerator):
 
 	def update_item_price(self):
 		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, brand=%s where item_code=%s""",
-					(self.item_name, self.description, self.brand, self.name))
+			item_description=%s, brand=%s, uom=%s where item_code=%s""",
+					(self.item_name, self.description, self.brand, self.name, self.stock_uom))
 
 	def on_trash(self):
 		super(Item, self).on_trash()
