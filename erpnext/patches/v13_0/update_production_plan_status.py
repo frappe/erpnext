@@ -5,6 +5,7 @@ import frappe
 
 
 def execute():
+	frappe.reload_doc("manufacturing", "doctype", "production_plan")
 	frappe.db.sql("""
 		UPDATE `tabProduction Plan` ppl
 		SET status = "Completed"
