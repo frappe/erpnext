@@ -1,10 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe
-import erpnext
 import unittest
+
+import frappe
 import frappe.utils
+
+import erpnext
 from erpnext.hr.doctype.employee.employee import InactiveEmployeeStatusError
 
 test_records = frappe.get_test_records('Employee')
@@ -23,9 +25,9 @@ class TestEmployee(unittest.TestCase):
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
 	def test_employee_status_inactive(self):
-		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
-		from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
+		from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 		employee = make_employee("test_employee_status@company.com")
 		employee_doc = frappe.get_doc("Employee", employee)

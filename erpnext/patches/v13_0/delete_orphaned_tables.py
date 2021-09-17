@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import getdate
 
+
 def execute():
     frappe.reload_doc('setup', 'doctype', 'transaction_deletion_record')
 

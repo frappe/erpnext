@@ -59,8 +59,6 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	show() {
-		frappe.breadcrumbs.add('HR');
-
 		let me = this;
 		if ($(`[data-fieldname="company"]`).length) return;
 

@@ -2,14 +2,32 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest
-import frappe
+
 import datetime
+import unittest
+
+import frappe
 from frappe.utils import getdate, now_datetime
-from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import create_patient, create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
-from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-from erpnext.healthcare.doctype.inpatient_medication_order.test_inpatient_medication_order import create_ipmo, create_ipme
-from erpnext.healthcare.report.inpatient_medication_orders.inpatient_medication_orders import execute
+
+from erpnext.healthcare.doctype.inpatient_medication_order.test_inpatient_medication_order import (
+	create_ipme,
+	create_ipmo,
+)
+from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+	admit_patient,
+	discharge_patient,
+	schedule_discharge,
+)
+from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import (
+	create_inpatient,
+	create_patient,
+	get_healthcare_service_unit,
+	mark_invoiced_inpatient_occupancy,
+)
+from erpnext.healthcare.report.inpatient_medication_orders.inpatient_medication_orders import (
+	execute,
+)
+
 
 class TestInpatientMedicationOrders(unittest.TestCase):
 	@classmethod

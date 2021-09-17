@@ -2,14 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
+import json
+
 import frappe
 from frappe import _, throw
-import json
 from frappe.model.document import Document
-from frappe.utils.jinja import validate_template
 from frappe.utils import cint
-
+from frappe.utils.jinja import validate_template
 from six import string_types
+
 
 class TermsandConditions(Document):
 	def validate(self):

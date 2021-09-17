@@ -5,14 +5,15 @@
 import json
 
 import frappe
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
-from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
 from frappe import _
 from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
 from frappe.utils import add_months, formatdate, getdate, today
-
 from plaid.errors import ItemError
+
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
+
 
 class PlaidSettings(Document):
 	@staticmethod

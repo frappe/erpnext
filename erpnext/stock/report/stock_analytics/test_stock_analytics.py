@@ -2,8 +2,8 @@ import datetime
 import unittest
 
 from frappe import _dict
-from erpnext.accounts.utils import get_fiscal_year
 
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period_date_ranges
 
 
