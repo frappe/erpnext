@@ -43,6 +43,9 @@ class NamingSeries(Document):
 		if custom_prefixes:
 			prefixes = prefixes + [d.autoname.rsplit('.', 1)[0] for d in custom_prefixes]
 
+		active_prefixes = frappe.db.sql('Select name from `tabSeries`')
+		active_prefixes = [prefix[0] for prefix in active_prefixes]
+		prefixes = set(prefixes + active_prefixes)
 		prefixes = "\n".join(sorted(prefixes))
 
 		return {
