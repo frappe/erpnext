@@ -3,8 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 
 class TestFertilizer(unittest.TestCase):
 	def test_fertilizer_creation(self):

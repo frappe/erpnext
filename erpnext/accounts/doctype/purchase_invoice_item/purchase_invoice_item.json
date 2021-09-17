@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+  "product_bundle",
   "col_break1",
   "item_name",
   "description_section",
@@ -857,12 +858,19 @@
    "fieldtype": "Link",
    "label": "Discount Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "product_bundle",
+   "fieldtype": "Link",
+   "label": "Product Bundle",
+   "options": "Product Bundle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-12 20:14:45.506639",
+ "modified": "2021-09-01 16:04:03.538643",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

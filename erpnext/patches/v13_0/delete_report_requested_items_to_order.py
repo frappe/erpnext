@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	""" Check for one or multiple Auto Email Reports and delete """
 	auto_email_reports = frappe.db.get_values("Auto Email Report", {"report": "Requested Items to Order"}, ["name"])

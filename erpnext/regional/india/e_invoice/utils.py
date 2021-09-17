@@ -3,24 +3,39 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import base64
+import io
+import json
 import os
 import re
-import jwt
 import sys
-import json
-import base64
-import frappe
-import six
 import traceback
-import io
+
+import frappe
+import jwt
+import six
 from frappe import _, bold
-from pyqrcode import create as qrcreate
-from frappe.utils.background_jobs import enqueue
-from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
-from frappe.integrations.utils import make_post_request, make_get_request
+from frappe.integrations.utils import make_get_request, make_post_request
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.data import (
+	add_to_date,
+	cint,
+	cstr,
+	flt,
+	format_date,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
+from frappe.utils.scheduler import is_scheduler_inactive
+from pyqrcode import create as qrcreate
+
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
+
 
 @frappe.whitelist()
 def validate_eligibility(doc):
@@ -483,7 +498,7 @@ def log_error(data=None):
 		"Data:", data, seperator,
 		"Exception:", err_tb
 	])
-	frappe.log_error(title=_('E Invoice Request Failed'), message=message)
+	return frappe.log_error(title=_('E Invoice Request Failed'), message=message)
 
 def santize_einvoice_fields(einvoice):
 	int_fields = ["Pin","Distance","CrDay"]

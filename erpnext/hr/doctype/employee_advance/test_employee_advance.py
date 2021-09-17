@@ -3,12 +3,18 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe, erpnext
 import unittest
+
+import frappe
 from frappe.utils import nowdate
-from erpnext.hr.doctype.employee_advance.employee_advance import make_bank_entry
-from erpnext.hr.doctype.employee_advance.employee_advance import EmployeeAdvanceOverPayment
+
+import erpnext
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_advance.employee_advance import (
+	EmployeeAdvanceOverPayment,
+	make_bank_entry,
+)
+
 
 class TestEmployeeAdvance(unittest.TestCase):
 	def test_paid_amount_and_status(self):

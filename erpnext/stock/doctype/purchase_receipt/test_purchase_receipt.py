@@ -2,20 +2,22 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest
+
 import json
-import frappe, erpnext
-import frappe.defaults
-from frappe.utils import cint, flt, cstr, today, random_string, add_days
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.stock.doctype.item.test_item import make_item
+import unittest
+
+import frappe
+from frappe.utils import add_days, cint, cstr, flt, today
 from six import iteritems
-from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
+
+import erpnext
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
+
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
@@ -275,11 +277,16 @@ class TestPurchaseReceipt(unittest.TestCase):
 				receive more than the required qty in the PO.
 			Expected Result: Error Raised for Over Receipt against PO.
 		"""
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_rm_stock_entry as make_subcontract_transfer_entry,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_purchase_order,
+			make_subcontracted_item,
+			update_backflush_based_on,
+		)
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import (update_backflush_based_on,
-			make_subcontracted_item, create_purchase_order)
-		from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt,
-			make_rm_stock_entry as make_subcontract_transfer_entry)
 
 		update_backflush_based_on("Material Transferred for Subcontract")
 		item_code = "_Test Subcontracted FG Item 1"
@@ -526,7 +533,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.cancel()
 
 	def test_closed_purchase_receipt(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_purchase_receipt_status
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			update_purchase_receipt_status,
+		)
 
 		pr = make_purchase_receipt(do_not_submit=True)
 		pr.submit()
@@ -539,9 +548,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_pr_billing_status(self):
 		# PO -> PR1 -> PI and PO -> PI and PO -> PR2
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-		from erpnext.buying.doctype.purchase_order.purchase_order \
-			import make_purchase_receipt, make_purchase_invoice as make_purchase_invoice_from_po
 
 		po = create_purchase_order()
 
@@ -748,7 +759,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.cancel()
 
 	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, create_pr_against_po
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_pr_against_po,
+			create_purchase_order,
+		)
 
 		po = create_purchase_order()
 		pr = create_pr_against_po(po.name)
@@ -879,10 +893,15 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 
 	def test_subcontracted_pr_for_multi_transfer_batches(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt,
+			make_rm_stock_entry,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_purchase_order,
+			update_backflush_based_on,
+		)
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_rm_stock_entry, make_purchase_receipt
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import (update_backflush_based_on,
-			create_purchase_order)
 
 		update_backflush_based_on("Material Transferred for Subcontract")
 		item_code = "_Test Subcontracted FG Item 3"
@@ -952,8 +971,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			- Create PI from PO and submit
 			- Create PR from PO and submit
 		"""
-		from erpnext.buying.doctype.purchase_order import test_purchase_order
-		from erpnext.buying.doctype.purchase_order import purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order, test_purchase_order
 
 		po = test_purchase_order.create_purchase_order()
 
@@ -974,8 +992,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			- Create partial PI from PO and submit
 			- Create PR from PO and submit
 		"""
-		from erpnext.buying.doctype.purchase_order import test_purchase_order
-		from erpnext.buying.doctype.purchase_order import purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order, test_purchase_order
 
 		po = test_purchase_order.create_purchase_order()
 
@@ -1038,10 +1055,18 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.db.set_value('Company', company, 'enable_perpetual_inventory_for_non_stock_items', before_test_value)
 
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+		)
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, make_pr_against_po
-		from erpnext.selling.doctype.sales_order.test_sales_order import automatically_fetch_payment_terms, compare_payment_schedules
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_purchase_order,
+			make_pr_against_po,
+		)
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+			compare_payment_schedules,
+		)
 
 		automatically_fetch_payment_terms()
 

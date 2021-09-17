@@ -3,22 +3,37 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext, json
-from frappe import _, scrub, ValidationError, throw
-from frappe.utils import flt, comma_or, nowdate, getdate, cint
-from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
-from erpnext.accounts.party import get_party_account
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
-from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account, get_bank_account_details
-from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
-from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-from six import string_types, iteritems
 
-from erpnext.controllers.accounts_controller import validate_taxes_and_charges
+import json
+
+import frappe
+from frappe import ValidationError, _, scrub, throw
+from frappe.utils import cint, comma_or, flt, getdate, nowdate
+from six import iteritems, string_types
+
+import erpnext
+from erpnext.accounts.doctype.bank_account.bank_account import (
+	get_bank_account_details,
+	get_party_bank_account,
+)
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
+	get_party_account_based_on_invoice_discounting,
+)
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.party import get_party_account
+from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices
+from erpnext.controllers.accounts_controller import (
+	AccountsController,
+	get_supplier_block_status,
+	validate_taxes_and_charges,
+)
+from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
+from erpnext.setup.utils import get_exchange_rate
+
 
 class InvalidPaymentEntry(ValidationError):
 	pass
@@ -75,9 +90,9 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
+		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_donation()
 		self.update_payment_schedule()
 		self.set_status()
@@ -85,9 +100,9 @@ class PaymentEntry(AccountsController):
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.make_gl_entries(cancel=1)
+		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_donation(cancel=1)
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
@@ -484,7 +499,7 @@ class PaymentEntry(AccountsController):
 
 	def validate_amounts(self):
 		self.validate_received_amount()
-	
+
 	def validate_received_amount(self):
 		if self.paid_from_account_currency == self.paid_to_account_currency:
 			if self.paid_amount != self.received_amount:
@@ -755,9 +770,11 @@ class PaymentEntry(AccountsController):
 
 			if self.payment_type in ('Pay', 'Internal Transfer'):
 				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
+				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_from
 			elif self.payment_type == 'Receive':
 				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
+				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_to
 
 			payment_or_advance_account = self.get_party_account_for_taxes()
@@ -779,14 +796,13 @@ class PaymentEntry(AccountsController):
 					"cost_center": d.cost_center
 				}, account_currency, item=d))
 
-			#Intentionally use -1 to get net values in party account
 			if not d.included_in_paid_amount or self.advance_tax_account:
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": payment_or_advance_account,
 						"against": against,
-						dr_or_cr: -1 * tax_amount,
-						dr_or_cr + "_in_account_currency": -1 * base_tax_amount
+						rev_dr_or_cr: tax_amount,
+						rev_dr_or_cr + "_in_account_currency": base_tax_amount
 						if account_currency==self.company_currency
 						else d.tax_amount,
 						"cost_center": self.cost_center,
@@ -830,7 +846,10 @@ class PaymentEntry(AccountsController):
 			for d in self.get("references"):
 				if d.reference_doctype=="Expense Claim" and d.reference_name:
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
-					update_reimbursed_amount(doc, self.name)
+					if self.docstatus == 2:
+						update_reimbursed_amount(doc, -1 * d.allocated_amount)
+					else:
+						update_reimbursed_amount(doc, d.allocated_amount)
 
 	def update_donation(self, cancel=0):
 		if self.payment_type == "Receive" and self.party_type == "Donor" and self.party:
@@ -1386,7 +1405,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 	})
 
 def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_account_currency, company_currency, reference_name):
-	total_amount, outstanding_amount, exchange_rate = None
+	total_amount = outstanding_amount = exchange_rate = None
 	if reference_doctype == "Fees":
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
@@ -1406,7 +1425,7 @@ def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_acc
 	return total_amount, outstanding_amount, exchange_rate
 
 def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_currency, company_currency):
-	total_amount, outstanding_amount, exchange_rate = None
+	total_amount = outstanding_amount = exchange_rate = None
 	if ref_doc.doctype == "Expense Claim":
 			total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 	elif ref_doc.doctype == "Employee Advance":
@@ -1446,7 +1465,7 @@ def get_total_amount_exchange_rate_base_on_currency(party_account_currency, comp
 	return total_amount, exchange_rate
 
 def get_bill_no_and_update_amounts(reference_doctype, ref_doc, total_amount, exchange_rate, party_account_currency, company_currency):
-	outstanding_amount, bill_no = None
+	outstanding_amount = bill_no = None
 	if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 		outstanding_amount = ref_doc.get("outstanding_amount")
 		bill_no = ref_doc.get("bill_no")

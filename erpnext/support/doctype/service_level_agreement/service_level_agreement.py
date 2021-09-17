@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import getdate, get_weekdays, get_link_to_form, nowdate
+from frappe.model.document import Document
+from frappe.utils import get_link_to_form, get_weekdays, getdate, nowdate
 from frappe.utils.safe_exec import get_safe_globals
+
 
 class ServiceLevelAgreement(Document):
 

@@ -1,19 +1,37 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
+
 import unittest
-import erpnext
+
 import frappe
 from dateutil.relativedelta import relativedelta
-from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from frappe.utils import add_months
-from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
+
+import erpnext
+from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
-		make_earning_salary_component, make_deduction_salary_component, create_account, make_employee_salary_slip
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure, create_salary_structure_assignment
-from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry, create_loan_type, create_loan_accounts
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
+from erpnext.loan_management.doctype.loan.test_loan import (
+	create_loan,
+	create_loan_accounts,
+	create_loan_type,
+	make_loan_disbursement_entry,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_term_loans,
+)
+from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_end_date, get_start_end_dates
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	create_account,
+	get_salary_component_account,
+	make_deduction_salary_component,
+	make_earning_salary_component,
+	make_employee_salary_slip,
+)
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
+	create_salary_structure_assignment,
+	make_salary_structure,
+)
 
 test_dependencies = ['Holiday List']
 
