@@ -4,10 +4,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, flt
-from erpnext.stock.get_item_details import get_item_details
+
+import json
+
+import frappe
 from frappe.model.document import Document
+from frappe.utils import cstr, flt
+
+from erpnext.stock.get_item_details import get_item_details
+
 
 class PackedItem(Document):
 	pass
@@ -86,6 +91,9 @@ def make_packing_list(doc):
 
 	cleanup_packing_list(doc, parent_items)
 
+	if frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates"):
+		update_product_bundle_price(doc, parent_items)
+
 def cleanup_packing_list(doc, parent_items):
 	"""Remove all those child items which are no longer present in main item table"""
 	delete_list = []
@@ -102,6 +110,40 @@ def cleanup_packing_list(doc, parent_items):
 	for d in packed_items:
 		if d not in delete_list:
 			doc.append("packed_items", d)
+
+def update_product_bundle_price(doc, parent_items):
+	"""Updates the prices of Product Bundles based on the rates of the Items in the bundle."""
+
+	if not doc.get('items'):
+		return
+
+	parent_items_index = 0
+	bundle_price = 0
+
+	for bundle_item in doc.get("packed_items"):
+		if parent_items[parent_items_index][0] == bundle_item.parent_item:
+			bundle_item_rate = bundle_item.rate if bundle_item.rate else 0
+			bundle_price += bundle_item.qty * bundle_item_rate
+		else:
+			update_parent_item_price(doc, parent_items[parent_items_index][0], bundle_price)
+
+			bundle_price = 0
+			parent_items_index += 1
+
+	# for the last product bundle
+	if doc.get("packed_items"):
+		update_parent_item_price(doc, parent_items[parent_items_index][0], bundle_price)
+
+def update_parent_item_price(doc, parent_item_code, bundle_price):
+	parent_item_doc = doc.get('items', {'item_code': parent_item_code})[0]
+
+	current_parent_item_price = parent_item_doc.amount
+	if current_parent_item_price != bundle_price:
+		parent_item_doc.amount = bundle_price
+		update_parent_item_rate(parent_item_doc, bundle_price)
+
+def update_parent_item_rate(parent_item_doc, bundle_price):
+	parent_item_doc.rate = bundle_price/parent_item_doc.qty
 
 @frappe.whitelist()
 def get_items_from_product_bundle(args):

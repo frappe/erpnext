@@ -2,13 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
-from frappe.utils import getdate, nowdate
+import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, get_datetime, formatdate
+from frappe.utils import cstr, formatdate, get_datetime, getdate, nowdate
+
 from erpnext.hr.utils import validate_active_employee
+
 
 class Attendance(Document):
 	def validate(self):
@@ -134,7 +135,6 @@ def mark_attendance(employee, attendance_date, status, shift=None, leave_type=No
 @frappe.whitelist()
 def mark_bulk_attendance(data):
 	import json
-	from pprint import pprint
 	if isinstance(data, str):
 		data = json.loads(data)
 	data = frappe._dict(data)

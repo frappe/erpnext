@@ -10,13 +10,18 @@ Provide a report and downloadable CSV according to the German DATEV format.
 from __future__ import unicode_literals
 
 import json
+
 import frappe
+from frappe import _
 from six import string_types
 
-from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.regional.germany.utils.datev.datev_csv import zip_and_download, get_datev_csv
-from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
+from erpnext.regional.germany.utils.datev.datev_constants import (
+	AccountNames,
+	DebtorsCreditors,
+	Transactions,
+)
+from erpnext.regional.germany.utils.datev.datev_csv import get_datev_csv, zip_and_download
 
 COLUMNS = [
 	{
@@ -200,7 +205,7 @@ def get_transactions(filters, as_dict=1):
 	def run(params_method, filters):
 		extra_fields, extra_joins, extra_filters = params_method(filters)
 		return run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=as_dict)
-	
+
 	def sort_by(row):
 		# "Belegdatum" is in the fifth column when list format is used
 		return row["Belegdatum" if as_dict else 5]
@@ -361,7 +366,7 @@ def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 		FROM `tabGL Entry` gl
 
 			/* Kontonummer */
-			LEFT JOIN `tabAccount` acc 
+			LEFT JOIN `tabAccount` acc
 				ON gl.account = acc.name
 
 			LEFT JOIN `tabParty Account` par

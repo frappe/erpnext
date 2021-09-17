@@ -6,24 +6,32 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
+  "customer_defaults_section",
   "cust_master_name",
-  "campaign_naming_by",
   "customer_group",
+  "column_break_4",
   "territory",
-  "selling_price_list",
-  "close_opportunity_after_days",
+  "crm_settings_section",
+  "campaign_naming_by",
   "default_valid_till",
-  "column_break_5",
+  "column_break_9",
+  "close_opportunity_after_days",
+  "item_price_settings_section",
+  "selling_price_list",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
+  "column_break_15",
+  "maintain_same_sales_rate",
+  "editable_price_list_rate",
+  "validate_selling_price",
+  "editable_bundle_item_rates",
+  "transaction_settings_section",
   "so_required",
   "dn_required",
   "sales_update_frequency",
-  "maintain_same_sales_rate",
-  "maintain_same_rate_action",
-  "role_to_override_stop_action",
-  "editable_price_list_rate",
+  "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "validate_selling_price",
   "hide_tax_id"
  ],
  "fields": [
@@ -74,10 +82,6 @@
    "fieldname": "default_valid_till",
    "fieldtype": "Data",
    "label": "Default Quotation Validity Days"
-  },
-  {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "so_required",
@@ -152,6 +156,48 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
    "options": "Role"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "editable_bundle_item_rates",
+   "fieldtype": "Check",
+   "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "fieldname": "customer_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "crm_settings_section",
+   "fieldtype": "Section Break",
+   "label": "CRM Settings"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "transaction_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
@@ -159,7 +205,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-04 20:18:12.814624",
+ "modified": "2021-09-06 22:05:06.139820",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

@@ -3,8 +3,8 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
 from erpnext.education.api import get_grade
 
 # test_records = frappe.get_test_records('Assessment Result')

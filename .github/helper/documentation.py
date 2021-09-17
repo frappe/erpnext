@@ -1,7 +1,7 @@
 import sys
-import requests
 from urllib.parse import urlparse
 
+import requests
 
 docs_repos = [
 	"frappe_docs",
@@ -24,6 +24,8 @@ def docs_link_exists(body):
 					parts = parsed_url.path.split('/')
 					if len(parts) == 5 and parts[1] == "frappe" and parts[2] in docs_repos:
 						return True
+				elif parsed_url.netloc == "docs.erpnext.com":
+					return True
 
 
 if __name__ == "__main__":

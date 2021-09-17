@@ -3,13 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import getdate, flt, nowdate
+
+import frappe
+from frappe.utils import flt, getdate, nowdate
+
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import (
+	create_appointment,
+	create_healthcare_docs,
+	create_medical_department,
+	create_patient,
+)
+from erpnext.healthcare.doctype.therapy_plan.therapy_plan import (
+	make_sales_invoice,
+	make_therapy_session,
+)
 from erpnext.healthcare.doctype.therapy_type.test_therapy_type import create_therapy_type
-from erpnext.healthcare.doctype.therapy_plan.therapy_plan import make_therapy_session, make_sales_invoice
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import \
-	create_healthcare_docs, create_patient, create_appointment, create_medical_department
+
 
 class TestTherapyPlan(unittest.TestCase):
 	def test_creation_on_encounter_submission(self):
@@ -31,7 +41,7 @@ class TestTherapyPlan(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'Completed')
 
 		patient, practitioner = create_healthcare_docs()
-		appointment = create_appointment(patient, practitioner, nowdate())		
+		appointment = create_appointment(patient, practitioner, nowdate())
 
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company', appointment.name)
 		session = frappe.get_doc(session)

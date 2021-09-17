@@ -26,6 +26,10 @@
   "overproduction_percentage_for_sales_order",
   "column_break_16",
   "overproduction_percentage_for_work_order",
+  "job_card_section",
+  "add_corrective_operation_cost_in_finished_good_valuation",
+  "column_break_24",
+  "job_card_excess_transfer",
   "other_settings_section",
   "update_bom_costs_automatically",
   "staging_section",
@@ -102,10 +106,10 @@
   },
   {
    "default": "0",
-   "description": "Allow multiple material consumptions against a Work Order",
+   "description": "Allow material consumptions without immediately manufacturing finished goods against a Work Order",
    "fieldname": "material_consumption",
    "fieldtype": "Check",
-   "label": "Allow Multiple Material Consumption"
+   "label": "Allow Continuous Material Consumption"
   },
   {
    "default": "0",
@@ -215,13 +219,29 @@
    "fieldname": "add_corrective_operation_cost_in_finished_good_valuation",
    "fieldtype": "Check",
    "label": "Add Corrective Operation Cost in Finished Good Valuation"
+  },
+  {
+   "fieldname": "job_card_section",
+   "fieldtype": "Section Break",
+   "label": "Job Card"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Allow transferring raw materials even after the Required Quantity is fulfilled",
+   "fieldname": "job_card_excess_transfer",
+   "fieldtype": "Check",
+   "label": "Allow Excess Material Transfer"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-06-25 18:39:37.716874",
+ "modified": "2021-09-13 22:09:09.401559",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

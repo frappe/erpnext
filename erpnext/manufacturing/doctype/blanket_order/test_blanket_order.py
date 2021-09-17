@@ -3,11 +3,15 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import add_months, today
+
 from erpnext import get_company_currency
+
 from .blanket_order import make_order
+
 
 class TestBlanketOrder(unittest.TestCase):
 	def setUp(self):
