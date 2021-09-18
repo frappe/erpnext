@@ -3,12 +3,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import nowdate
-from erpnext.hr.doctype.employee_onboarding.employee_onboarding import make_employee
-from erpnext.hr.doctype.employee_onboarding.employee_onboarding import IncompleteTaskError
+
+from erpnext.hr.doctype.employee_onboarding.employee_onboarding import (
+	IncompleteTaskError,
+	make_employee,
+)
 from erpnext.hr.doctype.job_offer.test_job_offer import create_job_offer
+
 
 class TestEmployeeOnboarding(unittest.TestCase):
 	def test_employee_onboarding_incomplete_task(self):

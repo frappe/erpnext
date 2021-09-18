@@ -3,17 +3,28 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.model.document import Document
-import json
-from frappe.utils import getdate, get_time, flt, get_link_to_form
-from frappe.model.mapper import get_mapped_doc
-from frappe import _
+
 import datetime
+import json
+
+import frappe
+from frappe import _
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, get_link_to_form, get_time, getdate
+
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
+	get_income_account,
+	get_receivable_account,
+)
+from erpnext.healthcare.utils import (
+	check_fee_validity,
+	get_service_item_and_practitioner_charge,
+	manage_fee_validity,
+)
 from erpnext.hr.doctype.employee.employee import is_holiday
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
-from erpnext.healthcare.utils import check_fee_validity, get_service_item_and_practitioner_charge, manage_fee_validity
+
 
 class MaximumCapacityError(frappe.ValidationError):
 	pass
@@ -100,7 +111,9 @@ class PatientAppointment(Document):
 
 	def validate_service_unit(self):
 		if self.inpatient_record and self.service_unit:
-			from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+			from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
+				get_current_healthcare_service_unit,
+			)
 
 			is_inpatient_occupancy_unit = frappe.db.get_value('Healthcare Service Unit', self.service_unit,
 				'inpatient_occupancy')

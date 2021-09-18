@@ -3,15 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import math
-import frappe
+
 import json
+import math
+
+import frappe
 from frappe import _
+from frappe.utils import cstr, rounded, time_diff_in_hours
 from frappe.utils.formatters import format_value
-from frappe.utils import time_diff_in_hours, rounded, cstr
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
+
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
+
 
 @frappe.whitelist()
 def get_healthcare_services_to_invoice(patient, company):
@@ -339,7 +343,9 @@ def get_service_item_and_practitioner_charge(doc):
 
 
 def get_appointment_type_service_item(appointment_type, department, is_inpatient):
-	from erpnext.healthcare.doctype.appointment_type.appointment_type import get_service_item_based_on_department
+	from erpnext.healthcare.doctype.appointment_type.appointment_type import (
+		get_service_item_based_on_department,
+	)
 
 	item_list = get_service_item_based_on_department(appointment_type, department)
 	service_item = None

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 
+
 def execute():
     data = frappe.db.sql('''SELECT *
         FROM `tabSingles`

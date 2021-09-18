@@ -2,21 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import flt, cint, nowdate
-
-from frappe import throw, _
-import frappe.defaults
-from frappe.utils import getdate
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.accounts.utils import get_account_currency
+from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
-from erpnext.buying.utils import check_on_hold_or_closed_status
+from frappe.utils import cint, flt, getdate, nowdate
+from six import iteritems
+
+from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from six import iteritems
+from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 
 form_grid_templates = {

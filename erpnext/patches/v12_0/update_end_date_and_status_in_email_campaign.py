@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe.utils import add_days, getdate, today
+
 
 def execute():
     if frappe.db.exists('DocType', 'Email Campaign'):

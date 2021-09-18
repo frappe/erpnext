@@ -2,13 +2,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data, get_filtered_list_for_consolidated_report)
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
-from erpnext.accounts.utils import get_fiscal_year
 from six import iteritems
+
+from erpnext.accounts.report.financial_statements import (
+	get_columns,
+	get_data,
+	get_filtered_list_for_consolidated_report,
+	get_period_list,
+)
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_net_profit_loss,
+)
+from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):

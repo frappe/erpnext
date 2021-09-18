@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe.data_migration.doctype.data_migration_connector.connectors.base import BaseConnection
 from github import Github
+
 
 class GithubConnection(BaseConnection):
 	def __init__(self, connector):

@@ -5,11 +5,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, unittest, erpnext
+
+import unittest
+
+import frappe
 from frappe.utils import flt, today
-from erpnext.stock.doctype.material_request.material_request \
-	import raise_work_orders, make_stock_entry, make_purchase_order, make_supplier_quotation
+
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.material_request.material_request import (
+	make_purchase_order,
+	make_stock_entry,
+	make_supplier_quotation,
+	raise_work_orders,
+)
+
 
 class TestMaterialRequest(unittest.TestCase):
 	def test_make_purchase_order(self):

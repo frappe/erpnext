@@ -11,7 +11,8 @@
 	],
 	"js/erpnext-web.min.js": [
 		"public/js/website_utils.js",
-		"public/js/shopping_cart.js"
+		"public/js/shopping_cart.js",
+		"public/js/wishlist.js"
 	],
 	"css/erpnext-web.css": [
 		"public/scss/website.scss",
@@ -70,6 +71,12 @@
 		"public/js/bank_reconciliation_tool/number_card.js",
 		"public/js/bank_reconciliation_tool/dialog_manager.js"
 	],
+	"js/e-commerce.min.js": [
+		"e_commerce/product_ui/views.js",
+		"e_commerce/product_ui/grid.js",
+		"e_commerce/product_ui/list.js",
+		"e_commerce/product_ui/search.js"
+  ],
 	"js/hierarchy-chart.min.js": [
 		"public/js/hierarchy_chart/hierarchy_chart_desktop.js",
 		"public/js/hierarchy_chart/hierarchy_chart_mobile.js"

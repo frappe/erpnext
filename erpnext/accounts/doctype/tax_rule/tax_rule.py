@@ -3,18 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from past.builtins import cmp
-import frappe
-from frappe import _
-from frappe.model.document import Document
-from frappe.utils import cstr, cint
-from frappe.contacts.doctype.address.address import get_default_address
-from frappe.utils.nestedset import get_root_of
-from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 
 import functools
 
+import frappe
+from frappe import _
+from frappe.contacts.doctype.address.address import get_default_address
+from frappe.model.document import Document
+from frappe.utils import cint, cstr
+from frappe.utils.nestedset import get_root_of
+from past.builtins import cmp
 from six import iteritems
+
+from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
+
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
 class IncorrectSupplierType(frappe.ValidationError): pass
@@ -100,7 +102,7 @@ class TaxRule(Document):
 	def validate_use_for_shopping_cart(self):
 		'''If shopping cart is enabled and no tax rule exists for shopping cart, enable this one'''
 		if (not self.use_for_shopping_cart
-			and cint(frappe.db.get_single_value('Shopping Cart Settings', 'enabled'))
+			and cint(frappe.db.get_single_value('E Commerce Settings', 'enabled'))
 			and not frappe.db.get_value('Tax Rule', {'use_for_shopping_cart': 1, 'name': ['!=', self.name]})):
 
 			self.use_for_shopping_cart = 1
