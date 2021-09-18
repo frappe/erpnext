@@ -29,6 +29,7 @@
   "next_contact",
   "contact_by",
   "contact_date",
+  "next_contact_date_nepal",
   "column_break2",
   "to_discuss",
   "section_break_14",
@@ -430,12 +431,17 @@
    "fieldname": "opportunity_date_nepal",
    "fieldtype": "Read Only",
    "label": "Opportunity Date (Nepal)"
+  },
+  {
+   "fieldname": "next_contact_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Next Contact Date (Nepal)"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2021-09-14 18:13:59.063491",
+ "modified": "2021-09-16 17:48:41.466312",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

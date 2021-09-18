@@ -13,13 +13,20 @@
   "supplier_name",
   "tax_id",
   "due_date",
-  "due_datenepali",
+  "due_date_nepal",
+  "service_stop_date",
+  "service_stop_date_nepal",
+  "service_start_date",
+  "service_start_date_nepal",
+  "service_end_date",
+  "service_end_date_nepal",
   "tax_withholding_category",
   "column_break1",
   "company",
   "posting_date",
-  "datenepali",
+  "date_nepal",
   "posting_time",
+  "posting_time_nepal",
   "set_posting_time",
   "is_paid",
   "is_return",
@@ -1383,18 +1390,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "due_datenepali",
-   "fieldtype": "Data",
-   "label": " Due Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "datenepali",
-   "fieldtype": "Data",
-   "label": "Date(Nepali)",
-   "read_only": 1
-  },
-  {
    "fieldname": "supplier_invoice_datenepali",
    "fieldtype": "Data",
    "label": "Supplier Invoice Date(Nepali)",
@@ -1417,13 +1412,60 @@
    "fieldname": "release_date_nepal",
    "fieldtype": "Data",
    "label": "Release Date (Nepal)"
+  },
+  {
+   "fieldname": "due_date_nepal",
+   "fieldtype": "Data",
+   "label": " Due Date (Nepal)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_nepal",
+   "fieldtype": "Data",
+   "label": "Date (Nepal)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_time_nepal",
+   "fieldtype": "Read Only",
+   "label": "Posting Time (Nepal)"
+  },
+  {
+   "fieldname": "service_stop_date",
+   "fieldtype": "Date",
+   "label": "Service Stop Date"
+  },
+  {
+   "fieldname": "service_stop_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Service Stop Date (Nepal)"
+  },
+  {
+   "fieldname": "service_start_date",
+   "fieldtype": "Date",
+   "label": "Service Start Date"
+  },
+  {
+   "fieldname": "service_start_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Service Start Date (Nepal)"
+  },
+  {
+   "fieldname": "service_end_date",
+   "fieldtype": "Date",
+   "label": "Service End Date "
+  },
+  {
+   "fieldname": "service_end_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Service End Date (Nepal)"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-13 17:44:46.945229",
+ "modified": "2021-09-18 11:11:44.385134",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -13,6 +13,7 @@
   "column_break_3",
   "company",
   "posting_date",
+  "posting_date_nepal",
   "is_term_loan",
   "rate_of_interest",
   "payment_details_section",
@@ -249,12 +250,17 @@
    "fieldname": "reference_date_nepal",
    "fieldtype": "Read Only",
    "label": "Reference Date (Nepal)"
+  },
+  {
+   "fieldname": "posting_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-14 17:02:38.112480",
+ "modified": "2021-09-16 18:45:11.475120",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

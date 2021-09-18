@@ -57,4 +57,17 @@ frappe.ui.form.on("Contract", {
 		})
 		set_fulfilment_deadline(this.frm);
 	},
+	signed_on: function(frm) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.signed_on
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("signed_on_nepal",resp.message)
+				}
+			}
+		})
+	}
 });

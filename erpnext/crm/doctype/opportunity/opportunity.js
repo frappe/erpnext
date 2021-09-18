@@ -29,6 +29,17 @@ frappe.ui.form.on("Opportunity", {
 			frm.set_value("contact_date", "");
 			frappe.throw(__("Next follow up date should be greater than now."))
 		}
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.contact_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("next_contact_date_nepal",resp.message)
+				}
+			}
+		})
 	},
 
 	expected_closing: function(frm){

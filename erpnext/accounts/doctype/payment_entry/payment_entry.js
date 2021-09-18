@@ -554,7 +554,7 @@ frappe.ui.form.on('Payment Entry', {
 			},
 			callback: function (resp) {
 				if (resp.message) {
-					cur_frm.set_value("posting_date_nepali", resp.message)
+					cur_frm.set_value("posting_date_nepal", resp.message)
 				}
 			}
 		})

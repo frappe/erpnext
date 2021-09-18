@@ -14,10 +14,12 @@
   "item_name",
   "section_break_5",
   "failure_date",
+  "failure_date_nepal",
   "assign_to",
   "assign_to_name",
   "column_break_6",
   "completion_date",
+  "completion_date_nepal",
   "repair_status",
   "repair_cost",
   "section_break_9",
@@ -159,12 +161,22 @@
    "options": "Asset Repair",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "failure_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Failure Date (Nepal)"
+  },
+  {
+   "fieldname": "completion_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Completion Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 15:08:12.495850",
+ "modified": "2021-09-16 18:41:29.086131",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

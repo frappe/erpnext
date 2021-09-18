@@ -1009,7 +1009,24 @@ frappe.ui.form.on('Sales Invoice', {
 		});
 	}
 })
+frappe.ui.form.on('Sales Invoice Item', {
+	service_stop_date: function (frm,cdt,cdn) {
+		var child = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date:child.service_stop_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					frappe.model.set_value(cdt,cdn,"service_stop_date_nepal",resp.message)
+					
+				}
+			}
+		})
+	},
 
+})
 frappe.ui.form.on('Sales Invoice Timesheet', {
 	time_sheet: function (frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
