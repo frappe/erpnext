@@ -27,7 +27,9 @@
   "location",
   "column_break_12",
   "start_time",
+  "start_time_nepal",
   "end_time",
+  "end_time_nepal",
   "section_break_15",
   "introduction",
   "section_break_18",
@@ -195,11 +197,21 @@
    "hidden": 1,
    "label": "Employee Emails",
    "options": "Email"
+  },
+  {
+   "fieldname": "start_time_nepal",
+   "fieldtype": "Read Only",
+   "label": "Start Time (Nepal)"
+  },
+  {
+   "fieldname": "end_time_nepal",
+   "fieldtype": "Read Only",
+   "label": "End Time (Nepal)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-14 15:42:26.193286",
+ "modified": "2021-09-16 18:32:07.782555",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Training Event",

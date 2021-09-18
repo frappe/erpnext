@@ -24,7 +24,6 @@ frappe.ui.form.on('Appointment', {
 		});
 	},
 	scheduled_time: function(frm) {
-		console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ",frm.doc.scheduled_time)
 		frappe.call({
 			method:"erpnext.nepali_date.get_converted_date",
 			args: {
@@ -32,10 +31,9 @@ frappe.ui.form.on('Appointment', {
 			},
 			callback: function(resp){
 				if(resp.message){
-					cur_frm.set_value("scheduled_time_nepali",resp.message)
+					cur_frm.set_value("scheduled_time_nepal",resp.message)
 				}
 			}
 		})
-		set_schedule_time(this.frm);
 	}
 });

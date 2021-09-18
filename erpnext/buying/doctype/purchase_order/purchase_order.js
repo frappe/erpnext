@@ -66,6 +66,36 @@ frappe.ui.form.on("Purchase Order Item", {
 				set_schedule_date(frm);
 			}
 		}
+	},
+	schedule_date: function (frm,cdt,cdn) {
+		var child = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date:child.schedule_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					frappe.model.set_value(cdt,cdn,"required_by_nepali",resp.message)
+					
+				}
+			}
+		})
+	},
+	expected_delivery_date: function (frm,cdt,cdn) {
+		var child = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date:child.expected_delivery_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					frappe.model.set_value(cdt,cdn,"expected_delivery_date_nepal",resp.message)
+					
+				}
+			}
+		})
 	}
 });
 

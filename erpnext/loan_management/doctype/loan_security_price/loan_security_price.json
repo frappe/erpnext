@@ -15,8 +15,10 @@
   "loan_security_price",
   "section_break_6",
   "valid_from",
+  "valid_from_nepal",
   "column_break_8",
-  "valid_upto"
+  "valid_upto",
+  "valid_upto_nepal"
  ],
  "fields": [
   {
@@ -87,11 +89,21 @@
    "fieldtype": "Data",
    "label": "Loan Security Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "valid_from_nepal",
+   "fieldtype": "Read Only",
+   "label": "Valid From (Nepal)"
+  },
+  {
+   "fieldname": "valid_upto_nepal",
+   "fieldtype": "Read Only",
+   "label": "Valid Upto (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-09-14 17:31:49.806675",
+ "modified": "2021-09-17 10:33:32.379035",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Price",

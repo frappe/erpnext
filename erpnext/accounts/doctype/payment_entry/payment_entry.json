@@ -13,7 +13,7 @@
   "payment_order_status",
   "column_break_5",
   "posting_date",
-  "posting_date_nepali",
+  "posting_date_nepal",
   "company",
   "mode_of_payment",
   "party_section",
@@ -705,16 +705,16 @@
   },
   {
    "bold": 1,
-   "fieldname": "posting_date_nepali",
+   "fieldname": "posting_date_nepal",
    "fieldtype": "Read Only",
    "in_list_view": 1,
-   "label": "Posting Date Nepali"
+   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-09 16:25:50.659015",
+ "modified": "2021-09-17 12:40:03.865565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

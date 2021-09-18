@@ -18,4 +18,17 @@ frappe.ui.form.on('Loan Security Price', {
 			}
 		})
 	},
+	valid_from: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.valid_from
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("valid_from_nepal", resp.message)
+				}
+			}
+		})
+	}
 });

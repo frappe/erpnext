@@ -43,7 +43,8 @@ frappe.ui.form.on('Social Media Post', {
             html = `<div class="row">${html}</div>`;
             frm.dashboard.set_headline_alert(html);
         }
-    }
+    },
+    
 });
 var add_post_btn = function(frm){
     frm.add_custom_button(('Post Now'), function(){

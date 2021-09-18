@@ -29,33 +29,33 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	company: function() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 	},
-	from_date: function(doc){
-		console.log(">>>>>>>>>>>")
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.from_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("from_datenepali",resp.message)
-				}
-			}	
-		})
-	},
-	to_date: function(doc){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.to_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("to_datenepali",resp.message)
-				}
-			}	
-		})
-	},
+	// from_date: function(doc){
+	// 	console.log(">>>>>>>>>>>")
+	// 	frappe.call({
+	// 		method:"erpnext.nepali_date.get_converted_date",
+	// 		args: {
+	// 			date: doc.from_date
+	// 		},
+	// 		callback: function(resp){
+	// 			if(resp.message){
+	// 				cur_frm.set_value("from_datenepali",resp.message)
+	// 			}
+	// 		}	
+	// 	})
+	// },
+	// to_date: function(doc){
+	// 	frappe.call({
+	// 		method:"erpnext.nepali_date.get_converted_date",
+	// 		args: {
+	// 			date: doc.to_date
+	// 		},
+	// 		callback: function(resp){
+	// 			if(resp.message){
+	// 				cur_frm.set_value("to_datenepali",resp.message)
+	// 			}
+	// 		}	
+	// 	})
+	// },
 	bill_date: function(doc){
 		frappe.call({
 			method:"erpnext.nepali_date.get_converted_date",
@@ -83,6 +83,46 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			}	
 		})
 	},
+	service_stop_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.service_stop_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("service_stop_date_nepal",resp.message)
+				}
+			}	
+		})
+	},
+	service_start_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.service_start_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("service_start_date_nepal",resp.message)
+				}
+			}	
+		})
+	},
+	service_end_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.service_end_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("service_end_date_nepal",resp.message)
+				}
+			}	
+		})
+	},
+
 	
 	onload: function() {
 		this._super();
@@ -104,17 +144,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	refresh: function(doc) {
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.posting_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("datenepali",resp.message)
-				}
-			}	
-		})
 		const me = this;
 		this._super();
 
@@ -226,7 +255,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
 	},
-
+	
 	unblock_invoice: function() {
 		const me = this;
 		frappe.call({
@@ -349,6 +378,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			}
 		})
 	},
+	
 
 	supplier: function() {
 		var me = this;
