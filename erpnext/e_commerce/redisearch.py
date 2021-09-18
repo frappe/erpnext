@@ -20,14 +20,16 @@ def get_indexable_web_fields():
 	return [df.fieldname for df in valid_fields]
 
 def is_search_module_loaded():
-	cache = frappe.cache()
-	out = cache.execute_command('MODULE LIST')
+	try:
+		cache = frappe.cache()
+		out = cache.execute_command('MODULE LIST')
 
-	parsed_output = " ".join(
-		(" ".join([s.decode() for s in o if not isinstance(s, int)]) for o in out)
-	)
-
-	return "search" in parsed_output
+		parsed_output = " ".join(
+			(" ".join([s.decode() for s in o if not isinstance(s, int)]) for o in out)
+		)
+		return "search" in parsed_output
+	except Exception:
+		return False
 
 def if_redisearch_loaded(function):
 	"Decorator to check if Redisearch is loaded."
