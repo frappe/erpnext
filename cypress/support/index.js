@@ -24,3 +24,10 @@ import '../../../frappe/cypress/support/commands' // eslint-disable-line
 Cypress.Cookies.defaults({
 	preserve: 'sid'
 });
+
+// spy on error and warnings
+Cypress.on('window:before:load', (win) => {
+  cy.spy(win.console, 'error');
+  cy.spy(win.console, 'log');
+  cy.spy(win.console, 'warn');
+});
