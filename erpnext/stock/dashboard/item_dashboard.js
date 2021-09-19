@@ -352,7 +352,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 
 	// Parse boi_results
 	const boi_number_data = boi_results.map( r=> r.qty )
-	const boi_label_data = boi_results.map( r=> `${r.parent} | ${(r.customer_name)? (r.customer_name): "Customer Name Unset!"}`)
+	const boi_label_data = boi_results.map( r=> `${r.parent} | ${(r.customer_name)? (r.customer_name): "Customer Name Unset!"} | ${r.added_time}`)
 	const boi_total_number =  boi_results.reduce((total, r)=>{
 		return total + r.qty
 	}, 0)
