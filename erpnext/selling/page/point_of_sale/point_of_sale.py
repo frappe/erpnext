@@ -10,7 +10,8 @@ from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
-
+from frappe.utils import flt
+from erpnext.stock.get_item_details import get_conversion_factor
 
 def search_by_term(search_term, warehouse, price_list):
 	result = search_for_serial_or_batch_or_barcode_number(search_term) or {}
@@ -73,6 +74,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			item.item_name,
 			item.description,
 			item.stock_uom,
+			item.sales_uom,
 			item.image AS item_image,
 			item.is_stock_item
 		FROM
@@ -109,16 +111,20 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		item_prices = {}
 		for d in item_prices_data:
 			item_prices[d.item_code] = d
-
+		
 		for item in items_data:
+			conv_factor = 1.0
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
 			item_stock_qty = get_stock_availability(item_code, warehouse)
-
+			if item.sales_uom and (item.stock_uom != item.sales_uom):
+				item.stock_uom = item.sales_uom
+				conv_factor = flt(get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0)
+			
 			row = {}
 			row.update(item)
 			row.update({
-				'price_list_rate': item_price.get('price_list_rate'),
+				'price_list_rate': flt(item_price.get('price_list_rate')) * conv_factor,
 				'currency': item_price.get('currency'),
 				'actual_qty': item_stock_qty,
 			})
