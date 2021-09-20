@@ -983,6 +983,8 @@ class AccountsController(TransactionBase):
 		role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
 		user_roles = frappe.get_roles()
 
+		total_overbilled_amt = 0.0
+
 		for item in self.get("items"):
 			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
@@ -1012,11 +1014,18 @@ class AccountsController(TransactionBase):
 						total_billed_amt = abs(total_billed_amt)
 						max_allowed_amt = abs(max_allowed_amt)
 
-					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in user_roles:
+					overbill_amt = total_billed_amt - max_allowed_amt
+					total_overbilled_amt += overbill_amt
+
+					if overbill_amt > 0.01 and role_allowed_to_over_bill not in user_roles:
 						if self.doctype != "Purchase Invoice":
 							self.throw_overbill_exception(item, max_allowed_amt)
 						elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
 							self.throw_overbill_exception(item, max_allowed_amt)
+
+			if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
+				frappe.msgprint(_("INFO: Overbilling of {} ignored because you have {} role.")
+						.format(total_overbilled_amt, role_allowed_to_over_bill))
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
