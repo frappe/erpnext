@@ -980,6 +980,9 @@ class AccountsController(TransactionBase):
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
+		role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+		user_roles = frappe.get_roles()
+
 		for item in self.get("items"):
 			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
@@ -1009,9 +1012,7 @@ class AccountsController(TransactionBase):
 						total_billed_amt = abs(total_billed_amt)
 						max_allowed_amt = abs(max_allowed_amt)
 
-					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
-
-					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
+					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in user_roles:
 						if self.doctype != "Purchase Invoice":
 							self.throw_overbill_exception(item, max_allowed_amt)
 						elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
