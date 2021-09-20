@@ -663,6 +663,15 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Data',
 				'insert_after': 'email'
 			}
+		],
+		'Finance Book': [
+			{
+				'fieldname': 'for_income_tax',
+				'label': 'For Income Tax',
+				'fieldtype': 'Check',
+				'insert_after': 'finance_book_name',
+				'description': 'If the asset is put to use for less than 180 days, the first Depreciation Rate will be reduced by 50%.'
+			}
 		]
 	}
 	create_custom_fields(custom_fields, update=update)
