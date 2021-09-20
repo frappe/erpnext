@@ -4,8 +4,13 @@
 from __future__ import unicode_literals
 
 import unittest
+
 import frappe
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_clinical_procedure_template
+
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import (
+	create_clinical_procedure_template,
+	create_healthcare_docs,
+)
 
 test_dependencies = ['Item']
 

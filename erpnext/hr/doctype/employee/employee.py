@@ -1,14 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 import frappe
-
-from frappe.utils import getdate, validate_email_address, today, add_years, cstr
+from frappe import _, scrub, throw
 from frappe.model.naming import set_name_by_naming_series
-from frappe import throw, _, scrub
-from frappe.permissions import add_user_permission, remove_user_permission, \
-	set_user_permission_if_allowed, has_permission, get_doc_permissions
-from erpnext.utilities.transaction_base import delete_events
+from frappe.permissions import (
+	add_user_permission,
+	get_doc_permissions,
+	has_permission,
+	remove_user_permission,
+	set_user_permission_if_allowed,
+)
+from frappe.utils import add_years, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
+
+from erpnext.utilities.transaction_base import delete_events
+
 
 class EmployeeUserDisabledError(frappe.ValidationError):
 	pass

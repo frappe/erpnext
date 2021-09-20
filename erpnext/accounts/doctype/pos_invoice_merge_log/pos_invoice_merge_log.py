@@ -3,17 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import json
+
 import frappe
+import six
 from frappe import _
-from frappe.model import default_fields
+from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
+from frappe.model.mapper import map_child_doc, map_doc
 from frappe.utils import flt, getdate, nowdate
 from frappe.utils.background_jobs import enqueue
-from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
-from frappe.core.page.background_jobs.background_jobs import get_info
-import json
-import six
+
 
 class POSInvoiceMergeLog(Document):
 	def validate(self):

@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 import frappe.defaults
 from frappe import _, msgprint
@@ -13,7 +14,6 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 
 from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 
 
 class Supplier(TransactionBase):
@@ -99,8 +99,9 @@ class Supplier(TransactionBase):
 				self.db_set('email_id', self.email_id)
 
 	def create_primary_address(self):
-		from erpnext.selling.doctype.customer.customer import make_address
 		from frappe.contacts.doctype.address.address import get_address_display
+
+		from erpnext.selling.doctype.customer.customer import make_address
 
 		if self.flags.is_new_doc and self.get('address_line1'):
 			address = make_address(self)

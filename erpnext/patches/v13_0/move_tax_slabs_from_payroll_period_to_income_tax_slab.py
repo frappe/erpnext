@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	if not (frappe.db.table_exists("Payroll Period") and frappe.db.table_exists("Taxable Salary Slab")):
@@ -86,7 +86,7 @@ def execute():
 			try:
 				employee_other_income.submit()
 				migrated.append([proof.employee, proof.payroll_period])
-			except:
+			except Exception:
 				pass
 
 	if not frappe.db.table_exists("Employee Tax Exemption Declaration"):
@@ -108,5 +108,5 @@ def execute():
 
 			try:
 				employee_other_income.submit()
-			except:
+			except Exception:
 				pass

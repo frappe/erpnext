@@ -2,19 +2,29 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt, fmt_money, getdate, formatdate, cint
 from frappe.model.document import Document
-from frappe.model.naming import set_name_from_naming_options
 from frappe.model.meta import get_field_precision
-from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
-from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.exceptions import InvalidAccountCurrency, InvalidAccountDimensionError, MandatoryAccountDimensionError
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
-from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
+from frappe.model.naming import set_name_from_naming_options
+from frappe.utils import flt, fmt_money
 from six import iteritems
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_checks_for_pl_and_bs_accounts,
+)
+from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+	get_dimension_filter_map,
+)
+from erpnext.accounts.party import validate_party_frozen_disabled, validate_party_gle_currency
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year
+from erpnext.exceptions import (
+	InvalidAccountCurrency,
+	InvalidAccountDimensionError,
+	MandatoryAccountDimensionError,
+)
 
 exclude_from_linked_with = True
 class GLEntry(Document):
