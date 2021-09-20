@@ -141,6 +141,24 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Pipeline Analytics",
+   "link_to": "Sales Pipeline Analytics",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Opportunity Summary by Sales Stage",
+   "link_to": "Opportunity Summary by Sales Stage",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -396,7 +414,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:56.913092",
+ "modified": "2021-08-20 12:15:56.913092",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

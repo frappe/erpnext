@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -684,7 +685,7 @@ class StockEntry(StockController):
 
 	def validate_bom(self):
 		for d in self.get('items'):
-			if d.bom_no and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
+			if d.bom_no and d.is_finished_item:
 				item_code = d.original_item or d.item_code
 				validate_bom_no(item_code, d.bom_no)
 
@@ -1191,12 +1192,87 @@ class StockEntry(StockController):
 
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
-			fetch_exploded = 0, fetch_scrap_items = 1)
+			fetch_exploded = 0, fetch_scrap_items = 1) or {}
 
 		for item in itervalues(item_dict):
 			item.from_warehouse = ""
 			item.is_scrap_item = 1
+
+		for row in self.get_scrap_items_from_job_card():
+			if row.stock_qty <= 0:
+				continue
+
+			item_row = item_dict.get(row.item_code)
+			if not item_row:
+				item_row = frappe._dict({})
+
+			item_row.update({
+				'uom': row.stock_uom,
+				'from_warehouse': '',
+				'qty': row.stock_qty + flt(item_row.stock_qty),
+				'converison_factor': 1,
+				'is_scrap_item': 1,
+				'item_name': row.item_name,
+				'description': row.description,
+				'allow_zero_valuation_rate': 1
+			})
+
+			item_dict[row.item_code] = item_row
+
 		return item_dict
+
+	def get_scrap_items_from_job_card(self):
+		if not self.pro_doc:
+			self.set_work_order_details()
+
+		scrap_items = frappe.db.sql('''
+			SELECT
+				JCSI.item_code, JCSI.item_name, SUM(JCSI.stock_qty) as stock_qty, JCSI.stock_uom, JCSI.description
+			FROM
+				`tabJob Card` JC, `tabJob Card Scrap Item` JCSI
+			WHERE
+				JCSI.parent = JC.name AND JC.docstatus = 1
+				AND JCSI.item_code IS NOT NULL AND JC.work_order = %s
+			GROUP BY
+				JCSI.item_code
+		''', self.work_order, as_dict=1)
+
+		pending_qty = flt(self.pro_doc.qty) - flt(self.pro_doc.produced_qty)
+		if pending_qty <=0:
+			return []
+
+		used_scrap_items = self.get_used_scrap_items()
+		for row in scrap_items:
+			row.stock_qty -= flt(used_scrap_items.get(row.item_code))
+			row.stock_qty = (row.stock_qty) * flt(self.fg_completed_qty) / flt(pending_qty)
+
+			if used_scrap_items.get(row.item_code):
+				used_scrap_items[row.item_code] -= row.stock_qty
+
+			if cint(frappe.get_cached_value('UOM', row.stock_uom, 'must_be_whole_number')):
+				row.stock_qty = frappe.utils.ceil(row.stock_qty)
+
+		return scrap_items
+
+	def get_used_scrap_items(self):
+		used_scrap_items = defaultdict(float)
+		data = frappe.get_all(
+			'Stock Entry',
+			fields = [
+				'`tabStock Entry Detail`.`item_code`', '`tabStock Entry Detail`.`qty`'
+			],
+			filters = [
+				['Stock Entry', 'work_order', '=', self.work_order],
+				['Stock Entry Detail', 'is_scrap_item', '=', 1],
+				['Stock Entry', 'docstatus', '=', 1],
+				['Stock Entry', 'purpose', 'in', ['Repack', 'Manufacture']]
+			]
+		)
+
+		for row in data:
+			used_scrap_items[row.item_code] += row.qty
+
+		return used_scrap_items
 
 	def get_unconsumed_raw_materials(self):
 		wo = frappe.get_doc("Work Order", self.work_order)
@@ -1264,9 +1340,9 @@ class StockEntry(StockController):
 		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred_for_manufacturing from
 			`tabWork Order` where name=%s""", self.work_order, as_dict=1)[0]
 
-		manufacturing_qty = flt(po_qty.qty)
+		manufacturing_qty = flt(po_qty.qty) or 1
 		produced_qty = flt(po_qty.produced_qty)
-		trans_qty = flt(po_qty.material_transferred_for_manufacturing)
+		trans_qty = flt(po_qty.material_transferred_for_manufacturing) or 1
 
 		for item in transferred_materials:
 			qty= item.qty
@@ -1417,8 +1493,8 @@ class StockEntry(StockController):
 			se_child.is_scrap_item = item_dict[d].get("is_scrap_item", 0)
 			se_child.is_process_loss = item_dict[d].get("is_process_loss", 0)
 
-			for field in ["idx", "po_detail", "original_item",
-				"expense_account", "description", "item_name", "serial_no", "batch_no"]:
+			for field in ["idx", "po_detail", "original_item", "expense_account",
+				"description", "item_name", "serial_no", "batch_no", "allow_zero_valuation_rate"]:
 				if item_dict[d].get(field):
 					se_child.set(field, item_dict[d].get(field))
 
@@ -1503,7 +1579,8 @@ class StockEntry(StockController):
 					qty_to_reserve -= reserved_qty[0][0]
 				if qty_to_reserve > 0:
 					for item in self.items:
-						if item.item_code == item_code:
+						has_serial_no = frappe.get_cached_value("Item", item.item_code, "has_serial_no")
+						if item.item_code == item_code and has_serial_no:
 							serial_nos = (item.serial_no).split("\n")
 							for serial_no in serial_nos:
 								if qty_to_reserve > 0:

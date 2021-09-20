@@ -62,6 +62,7 @@ treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Grou
 # website
 update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform_list_context"
 
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
@@ -441,7 +442,7 @@ accounting_dimension_doctypes = ["GL Entry", "Sales Invoice", "Purchase Invoice"
 	"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 	"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
 	"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
-	"Subscription Plan"
+	"Subscription Plan", "POS Invoice", "POS Invoice Item"
 ]
 
 regional_overrides = {
