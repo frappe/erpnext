@@ -457,6 +457,9 @@ def apply_pricing_rule_on_transaction(doc):
 			remove_free_item(doc)
 
 		for d in pricing_rules:
+			if (hasattr(doc, "coupon_code") and not doc.coupon_code) and d.coupon_code_based:
+				continue
+
 			if d.price_or_product_discount == 'Price':
 				if d.apply_discount_on:
 					doc.set('apply_discount_on', d.apply_discount_on)
