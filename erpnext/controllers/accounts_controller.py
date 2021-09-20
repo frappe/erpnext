@@ -837,11 +837,16 @@ class AccountsController(TransactionBase):
 		print("Before unlinking: ", linked_po)
 
 		if linked_po:
-			frappe.db.sql("""update `tabPurchase Order Item`
-				set sales_order = null, sales_order_item = null,
-				modified = %s, modified_by = %s
-				where sales_order = %s and sales_order_item in %s
-				and docstatus < 2""", (now(), frappe.session.user, self.name, so_items))
+			frappe.db.set_value(
+				'Purchase Order Item', {
+					'sales_order': self.name,
+					'sales_order_item': ['in', so_items],
+					'docstatus': ['<', 2]
+				},{
+					'sales_order': None,
+					'sales_order_item': None
+				}
+			)
 
 			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
 
