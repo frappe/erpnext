@@ -54,4 +54,4 @@ frappe.ui.form.PatientQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 
 		return variant_fields;
 	},
-})
+});
