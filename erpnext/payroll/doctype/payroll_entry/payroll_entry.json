@@ -10,6 +10,7 @@
   "section_break0",
   "column_break0",
   "posting_date",
+  "posting_date_nepali",
   "payroll_frequency",
   "company",
   "column_break1",
@@ -31,7 +32,9 @@
   "salary_slip_based_on_timesheet",
   "select_payroll_period",
   "start_date",
+  "start_date_nepali",
   "end_date",
+  "end_date_nepali",
   "column_break_11",
   "deduct_tax_for_unclaimed_employee_benefits",
   "deduct_tax_for_unsubmitted_tax_exemption_proof",
@@ -284,12 +287,30 @@
    "label": "Payroll Payable Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "posting_date_nepali",
+   "fieldtype": "Data",
+   "label": "Posting Date(Nepali)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "start_date_nepali",
+   "fieldtype": "Data",
+   "label": "Start Date(Nepali)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "end_date_nepali",
+   "fieldtype": "Data",
+   "label": "End Date(Nepali)",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-17 15:13:17.766210",
+ "modified": "2021-07-17 12:08:07.278666",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Entry",

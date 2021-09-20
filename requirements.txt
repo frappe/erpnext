@@ -13,3 +13,4 @@ Unidecode~=1.2.0
 nepali-datetime~=1.0.7
 nepali-datetime
 redisearch==2.0.0
+pyconvertdigits~=0.0.2

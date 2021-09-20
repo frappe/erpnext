@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
+  "posting_datenepali",
   "transaction_date",
   "account",
   "party_type",
@@ -253,12 +254,18 @@
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
    "label": "Is Cancelled"
+  },
+  {
+   "fieldname": "posting_datenepali",
+   "fieldtype": "Data",
+   "label": "Posting Date(Nepali)"
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-04-07 16:22:33.766994",
+ "links": [],
+ "modified": "2021-07-15 11:26:08.788705",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",

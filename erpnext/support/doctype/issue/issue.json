@@ -36,6 +36,7 @@
   "response",
   "first_response_time",
   "first_responded_on",
+  "first_responded_on_nepal",
   "column_break_26",
   "avg_response_time",
   "section_break_19",
@@ -405,12 +406,17 @@
    "fieldtype": "Duration",
    "label": "First Response Time",
    "read_only": 1
+  },
+  {
+   "fieldname": "first_responded_on_nepal",
+   "fieldtype": "Read Only",
+   "label": "First Responded On (Nepal)"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2021-06-10 03:22:27.098898",
+ "modified": "2021-09-16 18:08:27.586027",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

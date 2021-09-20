@@ -12,6 +12,7 @@
   "shift",
   "column_break_4",
   "time",
+  "time_nepal",
   "device_id",
   "skip_auto_attendance",
   "attendance",
@@ -104,10 +105,15 @@
    "fieldtype": "Datetime",
    "hidden": 1,
    "label": "Shift Actual End"
+  },
+  {
+   "fieldname": "time_nepal",
+   "fieldtype": "Read Only",
+   "label": "Time (Nepal)"
   }
  ],
  "links": [],
- "modified": "2020-07-08 11:02:32.660986",
+ "modified": "2021-09-17 13:01:05.086394",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",
