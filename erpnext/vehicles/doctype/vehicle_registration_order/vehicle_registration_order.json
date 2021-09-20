@@ -1,0 +1,649 @@
+{
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2021-09-17 13:16:28.482328",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image",
+  "title",
+  "naming_series",
+  "company",
+  "customer",
+  "customer_name",
+  "vehicle_owner",
+  "vehicle_owner_name",
+  "column_break_8",
+  "booking_customer_name",
+  "remarks",
+  "column_break_11",
+  "amended_from",
+  "transaction_date",
+  "address_and_contact_section",
+  "customer_address",
+  "address_display",
+  "col_break_21",
+  "contact_person",
+  "contact_display",
+  "contact_email",
+  "contact_mobile",
+  "contact_phone",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
+  "column_break_32",
+  "booking_address_display",
+  "booking_email",
+  "booking_mobile",
+  "booking_phone",
+  "booking_tax_id",
+  "booking_tax_cnic",
+  "booking_tax_strn",
+  "vehicle_details_section",
+  "vehicle_booking_order",
+  "finance_type",
+  "variant_of",
+  "variant_of_name",
+  "item_code",
+  "item_name",
+  "item_group",
+  "brand",
+  "column_break_21",
+  "vehicle",
+  "serial_no",
+  "vehicle_chassis_no",
+  "vehicle_engine_no",
+  "column_break_25",
+  "vehicle_color",
+  "vehicle_license_plate",
+  "pricing_section",
+  "customer_charges",
+  "column_break_54",
+  "authority_charges",
+  "section_break_56",
+  "customer_total",
+  "column_break_58",
+  "authority_total",
+  "commission_section",
+  "agent",
+  "agent_name",
+  "column_break_60",
+  "agent_commission",
+  "col_break62",
+  "margin_amount",
+  "status_section",
+  "customer_outstanding",
+  "column_break_62",
+  "agent_outstanding",
+  "column_break_70",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VRO-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer (User)",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.customer_name",
+   "fetch_from": "vehicle_booking_order.customer_name",
+   "fieldname": "booking_customer_name",
+   "fieldtype": "Data",
+   "label": "Booking Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_owner",
+   "fieldtype": "Link",
+   "label": "Vehicle Owner",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner",
+   "fieldname": "vehicle_owner_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Owner Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Order Date",
+   "no_copy": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.finance_type",
+   "fieldname": "finance_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Finance Type",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Link",
+   "label": "Customer Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Customer Address Display",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Customer Contact Person",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "contact_display",
+   "fieldtype": "Data",
+   "label": "Customer Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Customer Email",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Customer Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Customer Phone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Tax ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "STRN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_booking_order.address_display",
+   "fieldname": "booking_address_display",
+   "fieldtype": "Small Text",
+   "label": "Booking Address Display",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_email",
+   "fieldname": "booking_email",
+   "fieldtype": "Data",
+   "label": "Booking Email",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_mobile",
+   "fieldname": "booking_mobile",
+   "fieldtype": "Data",
+   "label": "Booking Mobile No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_phone",
+   "fieldname": "booking_phone",
+   "fieldtype": "Data",
+   "label": "Booking Phone No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_id",
+   "fieldname": "booking_tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking Tax ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_cnic",
+   "fieldname": "booking_tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking CNIC",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_strn",
+   "fieldname": "booking_tax_strn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking STRN",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Variant Item Code",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Variant Item Name"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Brand",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle",
+   "search_index": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Serial No",
+   "no_copy": 1,
+   "options": "Serial No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_chassis_no",
+   "fieldtype": "Data",
+   "label": "Chassis No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_color",
+   "fieldtype": "Link",
+   "label": "Color",
+   "no_copy": 1,
+   "options": "Vehicle Color",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Registration Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "pricing_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "authority_charges",
+   "fieldtype": "Table",
+   "label": "Registration Authority Charges",
+   "options": "Vehicle Registration Component",
+   "reqd": 1
+  },
+  {
+   "fieldname": "agent_commission",
+   "fieldtype": "Currency",
+   "label": "Registration Agent Commission",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nTo Receive Payment\nTo Receive Invoice\nTo Issue Invoice\nTo Receive Receipt\nTo Retrieve Invoice\nTo Deliver Invoice\nTo Pay Agent\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_outstanding",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Customer Outstanding",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "customer_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Customer Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "margin_amount",
+   "fieldtype": "Currency",
+   "label": "Registration Margin",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_charges",
+   "fieldtype": "Table",
+   "label": "Customer Charges",
+   "options": "Vehicle Registration Component",
+   "reqd": 1
+  },
+  {
+   "fieldname": "authority_total",
+   "fieldtype": "Currency",
+   "label": "Registration Authority Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "commission_section",
+   "fieldtype": "Section Break",
+   "label": "Commission and Margin"
+  },
+  {
+   "fieldname": "agent_outstanding",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Registration Agent Outstanding",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agent",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Registration Agent",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "column_break_60",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_70",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_56",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_58",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.agent && doc.agent_name != doc.agent",
+   "fetch_from": "agent.supplier_name",
+   "fieldname": "agent_name",
+   "fieldtype": "Data",
+   "label": "Registration Agent Name",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "image_field": "image",
+ "is_submittable": 1,
+ "modified": "2021-09-20 10:25:04.468578",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Registration Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Registration User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
+  }
+ ],
+ "restrict_to_domain": "Vehicles",
+ "search_fields": "customer,item_code,item_name,transaction_date,vehicle_booking_order,vehicle_chassis_no,vehicle_engine_no,vehicle_license_plate",
+ "show_name_in_global_search": 1,
+ "sort_field": "transaction_date",
+ "sort_order": "DESC",
+ "timeline_field": "customer",
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}

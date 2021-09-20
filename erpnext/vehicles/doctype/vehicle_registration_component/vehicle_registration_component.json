@@ -1,0 +1,40 @@
+{
+ "creation": "2021-09-17 16:36:41.608351",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "component",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "component",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Component",
+   "options": "Vehicle Pricing Component",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-09-18 12:26:24.309007",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Registration Component",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

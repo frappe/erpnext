@@ -159,7 +159,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	get_customer_details: function () {
 		var me = this;
 
-		frappe.call({
+		return frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_customer_details",
 			args: {
 				args: {
@@ -171,7 +171,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					transporter: me.frm.doc.transporter,
 					supplier: me.frm.doc.supplier,
 					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
-					posting_date: me.frm.doc.posting_date
+					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
 				}
 			},
 			callback: function (r) {
@@ -184,7 +184,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 
 	get_vehicle_booking_order_details: function () {
 		var me = this;
-		frappe.call({
+		return frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_vehicle_booking_order_details",
 			args: {
 				args: {
@@ -193,7 +193,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					customer: me.frm.doc.customer,
 					supplier: me.frm.doc.supplier,
 					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
-					posting_date: me.frm.doc.posting_date
+					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
 				}
 			},
 			callback: function (r) {
@@ -206,7 +206,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 
 	get_vehicle_details: function () {
 		var me = this;
-		frappe.call({
+		return frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_vehicle_details",
 			args: {
 				args: {
@@ -240,7 +240,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 
 	get_contact_details: function (contact, prefix) {
 		var me = this;
-		frappe.call({
+		return frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_contact_details",
 			args: {
 				contact: contact,

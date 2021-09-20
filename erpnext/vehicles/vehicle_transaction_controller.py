@@ -210,17 +210,17 @@ class VehicleTransactionController(StockController):
 			if self.get('customer'):
 				if project.customer and self.customer != project.customer:
 					frappe.throw(_("Customer does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Project", self.project)))
 
 			if self.get('item_code'):
 				if project.applies_to_item and self.item_code != project.applies_to_item:
 					frappe.throw(_("Variant Item Code does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Project", self.project)))
 
 			if self.get('vehicle'):
 				if project.applies_to_vehicle and self.vehicle != project.applies_to_vehicle:
 					frappe.throw(_("Vehicle does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Project", self.project)))
 
 	def update_vehicle_booking_order(self):
 		if self.get('vehicle_booking_order'):
@@ -238,7 +238,8 @@ class VehicleTransactionController(StockController):
 	def make_odometer_log(self):
 		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
 			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
-				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer, date=self.posting_date)
+				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer,
+					date=self.get('posting_date') or self.get('transaction_date'))
 				self.db_set('vehicle_log', vehicle_log)
 
 	def cancel_odometer_log(self):

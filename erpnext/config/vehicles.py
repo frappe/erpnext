@@ -34,12 +34,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Opportunity",
+					"name": "Lead",
+					"description": _("Lead List."),
 				},
 				{
 					"type": "doctype",
-					"name": "Lead",
-					"description": _("Lead List."),
+					"name": "Opportunity",
 				},
 			]
 		},
@@ -76,6 +76,15 @@ def get_data():
 					"type": "doctype",
 					"name": "Vehicle Invoice Delivery",
 					"dependencies": ["Vehicle Booking Order"],
+				},
+			],
+		},
+		{
+			"label": _("Registration"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Vehicle Registration Order",
 				},
 				{
 					"type": "doctype",
@@ -167,6 +176,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicles Settings",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Pricing Component",
 				},
 				{
 					"type": "doctype",
