@@ -537,6 +537,11 @@ def get_stock_balance_for(item_code, warehouse,
 	item_dict = frappe.db.get_value("Item", item_code,
 		["has_serial_no", "has_batch_no"], as_dict=1)
 
+	if not item_dict:
+		# In cases of data upload to Items table
+		msg = _("Item {} does not exist.").format(item_code)
+		frappe.throw(msg, title=_("Missing"))
+
 	serial_nos = ""
 	with_serial_no = True if item_dict.get("has_serial_no") else False
 	data = get_stock_balance(item_code, warehouse, posting_date, posting_time,
