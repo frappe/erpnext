@@ -283,7 +283,7 @@ class PaymentEntry(AccountsController):
 		elif self.party_type == "Supplier":
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
 		elif self.party_type == "Employee":
-			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance", "Gratuity")
+			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance", "Gratuity", "Sales Commission")
 		elif self.party_type == "Shareholder":
 			valid_reference_doctypes = ("Journal Entry")
 		elif self.party_type == "Donor":
@@ -1355,7 +1355,10 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = 1
 			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 	elif reference_doctype != "Journal Entry":
-		if ref_doc.doctype == "Expense Claim":
+		if ref_doc.doctype == "Sales Commission":
+			total_amount = ref_doc.total_commission_amount
+			exchange_rate = 1
+		elif ref_doc.doctype == "Expense Claim":
 				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 		elif ref_doc.doctype == "Employee Advance":
 			total_amount = ref_doc.advance_amount
@@ -1389,6 +1392,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 					exchange_rate = 1
 		elif reference_doctype == "Gratuity":
 			outstanding_amount = ref_doc.amount - flt(ref_doc.paid_amount)
+		elif reference_doctype == "Sales Commission":
+			outstanding_amount = 0
 		else:
 			outstanding_amount = flt(total_amount) - flt(ref_doc.advance_paid)
 	else:

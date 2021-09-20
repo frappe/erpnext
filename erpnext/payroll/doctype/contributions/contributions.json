@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2021-09-07 12:49:18.526652",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "order_or_invoice",
+  "customer",
+  "customer_name",
+  "posting_date",
+  "column_break_5",
+  "contribution_percent",
+  "contribution_amount",
+  "commission_rate",
+  "commission_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "order_or_invoice",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Order / Invoice",
+   "options": "document_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "commission_rate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Commission Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "commission_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Commission Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "contribution_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Contribution Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contribution_percent",
+   "fieldtype": "Data",
+   "label": "Contribution %",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-09-13 19:11:43.548342",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Contributions",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

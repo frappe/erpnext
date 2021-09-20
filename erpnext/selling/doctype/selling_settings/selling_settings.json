@@ -32,7 +32,8 @@
   "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "hide_tax_id"
+  "hide_tax_id",
+  "approval_required_for_sales_commission_payout"
  ],
  "fields": [
   {
@@ -197,6 +198,12 @@
    "fieldname": "editable_bundle_item_rates",
    "fieldtype": "Check",
    "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "default": "0",
+   "fieldname": "approval_required_for_sales_commission_payout",
+   "fieldtype": "Check",
+   "label": "Approval Required for Sales Commission Payout"
   }
  ],
  "icon": "fa fa-cog",
@@ -204,7 +211,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-08 19:38:10.175989",
+ "modified": "2021-09-20 15:43:29.319488",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
