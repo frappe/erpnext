@@ -30,6 +30,8 @@ class PickList(Document):
 
 	def before_submit(self):
 		for item in self.locations:
+			# set picked_qty to stock_qty, before submit
+			item.picked_qty = item.stock_qty
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
 			if not item.serial_no:
@@ -68,9 +70,10 @@ class PickList(Document):
 			item_doc.name = None
 
 			for row in locations:
-				row.update({
-					'picked_qty': row.stock_qty
-				})
+# Avoid setting picked qty on initial save. It will be set to stock_qty on submit
+#				row.update({
+#					'picked_qty': row.stock_qty
+#				})
 
 				location = item_doc.as_dict()
 				location.update(row)
