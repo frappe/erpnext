@@ -986,46 +986,49 @@ class AccountsController(TransactionBase):
 		total_overbilled_amt = 0.0
 
 		for item in self.get("items"):
-			if item.get(item_ref_dn):
-				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
-					item.get(item_ref_dn), based_on), self.precision(based_on, item))
-				if not ref_amt:
-					frappe.msgprint(
-						_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero")
-							.format(item.item_code, ref_dt))
-				else:
-					already_billed = frappe.db.sql("""
-						select sum(%s)
-						from `tab%s`
-						where %s=%s and docstatus=1 and parent != %s
-					""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
-					   (item.get(item_ref_dn), self.name))[0][0]
+			if not item.get(item_ref_dn):
+				continue
 
-					total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
-						self.precision(based_on, item))
+			ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
+				item.get(item_ref_dn), based_on), self.precision(based_on, item))
+			if not ref_amt:
+				frappe.msgprint(
+					_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero")
+						.format(item.item_code, ref_dt))
+				continue
 
-					allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
-						get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
+			already_billed = frappe.db.sql("""
+				select sum(%s)
+				from `tab%s`
+				where %s=%s and docstatus=1 and parent != %s
+			""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
+			   (item.get(item_ref_dn), self.name))[0][0]
 
-					max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
+			total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
+				self.precision(based_on, item))
 
-					if total_billed_amt < 0 and max_allowed_amt < 0:
-						# while making debit note against purchase return entry(purchase receipt) getting overbill error
-						total_billed_amt = abs(total_billed_amt)
-						max_allowed_amt = abs(max_allowed_amt)
+			allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
+				get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
 
-					overbill_amt = total_billed_amt - max_allowed_amt
-					total_overbilled_amt += overbill_amt
+			max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
 
-					if overbill_amt > 0.01 and role_allowed_to_over_bill not in user_roles:
-						if self.doctype != "Purchase Invoice":
-							self.throw_overbill_exception(item, max_allowed_amt)
-						elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
-							self.throw_overbill_exception(item, max_allowed_amt)
+			if total_billed_amt < 0 and max_allowed_amt < 0:
+				# while making debit note against purchase return entry(purchase receipt) getting overbill error
+				total_billed_amt = abs(total_billed_amt)
+				max_allowed_amt = abs(max_allowed_amt)
 
-			if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
-				frappe.msgprint(_("INFO: Overbilling of {} ignored because you have {} role.")
-						.format(total_overbilled_amt, role_allowed_to_over_bill))
+			overbill_amt = total_billed_amt - max_allowed_amt
+			total_overbilled_amt += overbill_amt
+
+			if overbill_amt > 0.01 and role_allowed_to_over_bill not in user_roles:
+				if self.doctype != "Purchase Invoice":
+					self.throw_overbill_exception(item, max_allowed_amt)
+				elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
+					self.throw_overbill_exception(item, max_allowed_amt)
+
+		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
+			frappe.msgprint(_("INFO: Overbilling of {} ignored because you have {} role.")
+					.format(total_overbilled_amt, role_allowed_to_over_bill))
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
