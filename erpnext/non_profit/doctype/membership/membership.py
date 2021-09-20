@@ -354,6 +354,9 @@ def process_request_data(data):
 
 def get_company_for_memberships():
 	company = frappe.db.get_single_value("Non Profit Settings", "company")
+	if not company:
+		from erpnext.non_profit.utils import get_company
+		company = get_company()
 	return company
 
 
