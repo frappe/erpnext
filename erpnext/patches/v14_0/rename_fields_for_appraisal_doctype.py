@@ -1,7 +1,7 @@
 import frappe
 from frappe.model.utils.rename_field import rename_field
 def execute():
-
+    
     if frappe.db.table_exists("Appraisal"):
         rename_field_map = {
             'total_score': 'overall_score',
