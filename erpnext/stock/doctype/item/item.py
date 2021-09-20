@@ -563,8 +563,12 @@ class Item(WebsiteGenerator):
 					_("Default BOM ({0}) must be active for this item or its template").format(bom_item))
 
 	def fill_customer_code(self):
-		""" Append all the customer codes and insert into "customer_code" field of item table """
-		self.customer_code = ','.join(d.ref_code for d in self.get("customer_items", []))
+		"""
+			Append all the customer codes and insert into "customer_code" field of item table.
+			Used to search Item by customer code.
+		"""
+		customer_codes = set(d.ref_code for d in self.get("customer_items", []))
+		self.customer_code = ','.join(customer_codes)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
