@@ -1801,6 +1801,11 @@ class TestSalesInvoice(unittest.TestCase):
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
 	def test_deferred_revenue_post_account_freeze_upto_by_admin(self):
+		frappe.set_user("Administrator")
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
+
 		deferred_account = create_account(account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
 
