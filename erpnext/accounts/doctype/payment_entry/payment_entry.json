@@ -13,6 +13,7 @@
   "payment_order_status",
   "column_break_5",
   "posting_date",
+  "posting_date_nepal",
   "company",
   "mode_of_payment",
   "party_section",
@@ -126,7 +127,6 @@
   },
   {
    "bold": 1,
-   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -707,12 +707,20 @@
    "label": "Received Amount After Tax (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+
+  },
+  {
+   "bold": 1,
+   "fieldname": "posting_date_nepal",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-09 08:58:15.008761",
+ "modified": "2021-09-17 12:40:03.865565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

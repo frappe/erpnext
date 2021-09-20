@@ -22,7 +22,9 @@
   "company",
   "company_address",
   "transaction_date",
+  "date_nepal",
   "valid_till",
+  "valid_till_nepal",
   "order_type",
   "contact_section",
   "customer_address",
@@ -210,7 +212,6 @@
    "width": "150px"
   },
   {
-   "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -978,6 +979,16 @@
    "label": "Bundle Items",
    "options": "fa fa-suitcase",
    "print_hide": 1
+  },
+  {
+   "fieldname": "valid_till_nepal",
+   "fieldtype": "Read Only",
+   "label": "Valid Till (Nepal)"
+  },
+  {
+   "fieldname": "date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Date (Nepal)"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -985,7 +996,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-08-27 20:10:07.864951",
+ "modified": "2021-09-14 18:48:46.291172",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

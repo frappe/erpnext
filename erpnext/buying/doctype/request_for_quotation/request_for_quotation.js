@@ -28,6 +28,17 @@ frappe.ui.form.on("Request for Quotation",{
 	},
 
 	refresh: function(frm, cdt, cdn) {
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("datenepali",resp.message)
+				}
+			}
+		})
 		if (frm.doc.docstatus === 1) {
 
 			frm.add_custom_button(__('Supplier Quotation'),
@@ -204,6 +215,8 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 	},
 
 })
+
+
 
 erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
@@ -415,3 +428,4 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));
+

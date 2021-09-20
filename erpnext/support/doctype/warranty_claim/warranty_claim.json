@@ -1,13 +1,16 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:30",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "naming_series",
   "status",
   "complaint_date",
+  "complaint_date_nepali",
   "column_break0",
   "customer",
   "serial_no",
@@ -20,7 +23,9 @@
   "column_break1",
   "warranty_amc_status",
   "warranty_expiry_date",
+  "warranty_expiry_date_nepali",
   "amc_expiry_date",
+  "amc_expiry_date_nepali",
   "resolution_section",
   "resolution_date",
   "resolved_by",
@@ -357,11 +362,30 @@
    "options": "Warranty Claim",
    "print_hide": 1,
    "width": "150px"
+  },
+  {
+   "fieldname": "complaint_date_nepali",
+   "fieldtype": "Data",
+   "label": "Issue Date(Nepali)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warranty_expiry_date_nepali",
+   "fieldtype": "Data",
+   "label": "Warranty Expiry Date(Nepali)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amc_expiry_date_nepali",
+   "fieldtype": "Data",
+   "label": "AMC Expiry Date(Nepali)",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-bug",
  "idx": 1,
- "modified": "2020-09-18 17:26:09.703215",
+ "links": [],
+ "modified": "2021-07-17 12:36:15.296696",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",

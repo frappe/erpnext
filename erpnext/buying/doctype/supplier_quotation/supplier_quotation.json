@@ -16,7 +16,9 @@
   "column_break1",
   "company",
   "transaction_date",
+  "datenepali",
   "valid_till",
+  "valid_tillnepali",
   "amended_from",
   "address_section",
   "supplier_address",
@@ -797,6 +799,17 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Valid Till"
+  },
+  {
+   "fieldname": "datenepali",
+   "fieldtype": "Data",
+   "label": "Date(Nepali)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "valid_tillnepali",
+   "fieldtype": "Data",
+   "label": "Valid Till(Nepali)"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -804,7 +817,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 00:58:20.995491",
+ "modified": "2021-07-15 17:45:45.078835",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

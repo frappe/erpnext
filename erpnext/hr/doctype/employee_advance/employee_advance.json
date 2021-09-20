@@ -13,6 +13,7 @@
   "department",
   "column_break_4",
   "posting_date",
+  "posting_date_nepal",
   "currency",
   "exchange_rate",
   "repay_unclaimed_amount_from_salary",
@@ -58,7 +59,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -196,11 +196,16 @@
    "precision": "9",
    "print_hide": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "posting_date_nepal",
+   "fieldtype": "Data",
+   "label": "Posting Date (Nepal)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:31:53.746659",
+ "modified": "2021-09-14 13:30:03.448339",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",

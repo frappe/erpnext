@@ -35,7 +35,8 @@ frappe.ui.form.on('Quotation', {
 
 	set_label: function(frm) {
 		frm.fields_dict.customer_address.set_label(__(frm.doc.quotation_to + " Address"));
-	}
+	},
+	
 });
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
@@ -124,6 +125,34 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this.toggle_reqd_lead_customer();
 
 	},
+	
+	valid_till: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.valid_till
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("valid_till_nepal",resp.message)
+				}
+			}
+		})
+	},
+	transaction_date: function(frm){
+		console.log("$$$$$$$$")
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("date_nepal",resp.message)
+				}
+			}
+		})
+	},
 
 	set_dynamic_field_label: function(){
 		if (this.frm.doc.quotation_to == "Customer")
@@ -199,7 +228,9 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				}
 			}
 		})
-	}
+		
+	},
+	
 });
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
