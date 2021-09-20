@@ -209,6 +209,12 @@ class SalesOrder(SellingController):
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code,'cancelled')
 
+	def cancel(self):
+		import pdb
+
+		pdb.set_trace()
+		super(SalesOrder, self).cancel()
+
 	def update_project(self):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
 			return

@@ -19,7 +19,8 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	nowdate,
-	today,
+	now,
+	today
 )
 from six import text_type
 
@@ -810,6 +811,52 @@ class AccountsController(TransactionBase):
 		elif self.doctype in ["Sales Order", "Purchase Order"]:
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self)
+
+			if self.doctype == "Sales Order":
+				self.unlink_ref_doc_from_po()
+
+	def unlink_ref_doc_from_po(self):
+		print("\n"*5, "*"*50, "\n"*5)
+
+		so_items = []
+		for item in self.items:
+			so_items.append(item.name)
+
+		print("SO Items: ", so_items)
+
+		linked_po = frappe.get_all(
+			'Purchase Order Item',
+			filters = {
+				'sales_order': self.name,
+				'sales_order_item': ['in', so_items],
+				'docstatus': ['<', 2]
+			},
+			pluck='parent'
+		)
+
+		print("Before unlinking: ", linked_po)
+
+		if linked_po:
+			frappe.db.sql("""update `tabPurchase Order Item`
+				set sales_order = null, sales_order_item = null,
+				modified = %s, modified_by = %s
+				where sales_order = %s and sales_order_item in %s
+				and docstatus < 2""", (now(), frappe.session.user, self.name, so_items))
+
+			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+
+		linked_po = frappe.get_all(
+			'Purchase Order Item',
+			filters = {
+				'sales_order': self.name,
+				'sales_order_item': ['in', so_items],
+				'docstatus': ['<', 2]
+			},
+			pluck='parent'
+		)
+		print("After unlinking: ", linked_po)
+
+		print("\n"*5, "*"*50, "\n"*5)
 
 	def get_tax_map(self):
 		tax_map = {}
