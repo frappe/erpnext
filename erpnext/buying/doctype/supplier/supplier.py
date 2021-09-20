@@ -14,6 +14,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 
 from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.accounts.utils import get_fiscal_year
 
 
 class Supplier(TransactionBase):
@@ -149,6 +150,18 @@ class Supplier(TransactionBase):
 							doc.name, args.get('supplier_email_' + str(i)))
 				except frappe.NameError:
 					pass
+
+	def get_fiscal_years_for_irs_1099(self):
+		today = frappe.utils.nowdate()
+		fiscal_year_data = get_fiscal_year(today)
+
+		if not fiscal_year_data:
+			return "NA", "NA"
+
+		from_date = fiscal_year_data[1].year
+		to_date = fiscal_year_data[2].year
+
+		return from_date, to_date
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
