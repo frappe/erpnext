@@ -978,7 +978,7 @@ class WorkOrder(Document):
 		mc.company = wo_doc.company
 		mc.type = "Manual"
 		for res in wo_doc.required_items:
-			item_type = frappe.get_doc("Item",{"item_code":res.get("item_code")}).get("bom_item_type")
+			#item_type = frappe.get_doc("Item",{"item_code":res.get("item_code")}).get("bom_item_type")
 			item_doc = frappe.get_doc("Item",res.item_code)
 			# float_precision = cint(frappe.db.get_default("float_precision")) or 2
 			# qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
@@ -993,7 +993,7 @@ class WorkOrder(Document):
 					"status": "Not Assigned",
 					"qty_to_issue": flt(qty, precision),
 					"weight_per_unit": res.weight_per_unit,
-					"type": item_type
+					"type": item_doc.get("bom_item_type")
 				})
 		# mc.insert(ignore_permissions=True)
 		return mc.as_dict()
