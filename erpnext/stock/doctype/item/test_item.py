@@ -219,6 +219,23 @@ class TestItem(unittest.TestCase):
 		for key, value in iteritems(purchase_item_check):
 			self.assertEqual(value, purchase_item_details.get(key))
 
+	def test_item_default_validations(self):
+
+		with self.assertRaises(frappe.ValidationError) as ve:
+			make_item("Bad Item defaults", {
+				"item_group": "_Test Item Group",
+				"item_defaults": [{
+					"company": "_Test Company 1",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"expense_account": "Stock In Hand - _TC",
+					"buying_cost_center": "_Test Cost Center - _TC",
+					"selling_cost_center": "_Test Cost Center - _TC",
+				}]
+			})
+
+		self.assertTrue("belong to company" in str(ve.exception).lower(),
+				msg="Mismatching company entities in item defaults should not be allowed.")
+
 	def test_item_attribute_change_after_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 
