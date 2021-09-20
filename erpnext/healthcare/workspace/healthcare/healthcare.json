@@ -1,26 +1,18 @@
 {
- "category": "",
  "charts": [
   {
    "chart_name": "Patient Appointments",
    "label": "Patient Appointments"
   }
  ],
- "charts_label": "",
  "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Healthcare\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Patient Appointments\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient Appointment\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Service Unit\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Practitioner\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Patient History\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Consultation Setup\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Consultation\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Facility Management\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Inpatient\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Laboratory Setup\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Laboratory\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Rehabilitation and Physiotherapy\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Records and History\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "creation": "2020-03-02 17:23:17.919682",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "healthcare",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Healthcare",
  "links": [
   {
@@ -568,15 +560,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-30 17:37:45.316999",
+ "modified": "2021-08-30 17:37:45.317999",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
- "onboarding": "Healthcare",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "Healthcare",
  "roles": [],

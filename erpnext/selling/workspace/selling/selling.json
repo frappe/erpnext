@@ -1,26 +1,18 @@
 {
- "category": "",
  "charts": [
   {
    "chart_name": "Sales Order Trends",
    "label": "Sales Order Trends"
   }
  ],
- "charts_label": "Selling ",
  "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Selling\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Sales Order Trends\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Quick Access\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Item\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Order\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Analytics\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Order Analysis\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Selling\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Items and Pricing\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Key Reports\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Other Reports\", \"col\": 4}}]",
  "creation": "2020-01-28 11:49:12.092882",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "sell",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Selling",
  "links": [
   {
@@ -570,15 +562,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:01.990702",
+ "modified": "2021-08-05 12:16:01.990703",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
- "onboarding": "Selling",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],
@@ -619,6 +608,5 @@
    "type": "Dashboard"
   }
  ],
- "shortcuts_label": "Quick Access",
  "title": "Selling"
 }

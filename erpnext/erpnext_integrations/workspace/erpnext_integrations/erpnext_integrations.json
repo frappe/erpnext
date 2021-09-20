@@ -1,20 +1,13 @@
 {
- "category": "",
  "charts": [],
  "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Marketplace\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Payments\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
  "creation": "2020-08-20 19:30:48.138801",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "integration",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "ERPNext Integrations",
  "links": [
   {
@@ -119,15 +112,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:58.740246",
+ "modified": "2021-08-05 12:15:58.740247",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
- "onboarding": "",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],

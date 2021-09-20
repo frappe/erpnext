@@ -1,5 +1,4 @@
 {
- "category": "",
  "charts": [
   {
    "chart_name": "Produced Quantity"
@@ -7,18 +6,12 @@
  ],
  "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Manufacturing\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": null, \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Item\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"BOM\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Work Order\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Production Plan\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Forecasting\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Work Order Summary\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"BOM Stock Report\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Production Planning Report\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Production\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Bill of Materials\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
  "creation": "2020-03-02 17:11:37.032604",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "organization",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Manufacturing",
  "links": [
   {
@@ -304,15 +297,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:00.825741",
+ "modified": "2021-08-05 12:16:00.825742",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
- "onboarding": "Manufacturing",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "Manufacturing",
  "roles": [],

@@ -1,5 +1,4 @@
 {
- "category": "",
  "charts": [
   {
    "chart_name": "Asset Value Analytics",
@@ -8,18 +7,12 @@
  ],
  "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Assets\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Value Analytics\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Asset\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Asset Category\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fixed Asset Register\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Assets\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "creation": "2020-03-02 15:43:27.634865",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "assets",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Assets",
  "links": [
   {
@@ -179,15 +172,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:54.839452",
+ "modified": "2021-08-05 12:15:54.839453",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
- "onboarding": "Assets",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],

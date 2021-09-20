@@ -1,20 +1,13 @@
 {
- "category": "",
  "charts": [],
  "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Loan Application\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Loan\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loan\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loan Processes\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Disbursement and Repayment\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loan Security\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "creation": "2020-03-12 16:35:55.299820",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "loan",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Loans",
  "links": [
   {
@@ -245,15 +238,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:18:13.350904",
+ "modified": "2021-08-05 12:18:13.350905",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loans",
- "onboarding": "",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],
