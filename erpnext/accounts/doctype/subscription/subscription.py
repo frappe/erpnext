@@ -288,6 +288,7 @@ class Subscription(Document):
 		invoice.to_date = self.current_invoice_end
 
 		invoice.flags.ignore_mandatory = True
+		invoice.set_missing_values()
 		invoice.save()
 		
 		if self.submit_invoice:

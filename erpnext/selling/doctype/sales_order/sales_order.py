@@ -714,8 +714,7 @@ def make_maintenance_schedule(source_name, target_doc=None):
 				"doctype": "Maintenance Schedule Item",
 				"field_map": {
 					"parent": "sales_order"
-				},
-				"add_if_empty": True
+				}
 			}
 		}, target_doc)
 
@@ -741,8 +740,7 @@ def make_maintenance_visit(source_name, target_doc=None):
 				"field_map": {
 					"parent": "prevdoc_docname",
 					"parenttype": "prevdoc_doctype"
-				},
-				"add_if_empty": True
+				}
 			}
 		}, target_doc)
 
