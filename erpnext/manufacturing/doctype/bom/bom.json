@@ -10,12 +10,12 @@
   "company",
   "item_name",
   "uom",
+  "batch_size",
   "cb0",
   "is_active",
   "is_default",
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
-  "allow_adding_items",
   "project",
   "quantity",
   "image",
@@ -43,16 +43,6 @@
   "items",
   "scrap_section",
   "scrap_items",
-  "section_break_35",
-  "weight",
-  "rm_weight",
-  "yeild",
-  "column_break_48",
-  "fg_weight",
-  "fg_specific_gravity",
-  "column_break_50",
-  "bom_weight",
-  "bom_volume",
   "costing",
   "operating_cost",
   "raw_material_cost",
@@ -529,66 +519,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "weight",
-   "fieldtype": "Section Break",
-   "label": "Weight Details"
-  },
-  {
-   "fieldname": "rm_weight",
-   "fieldtype": "Float",
-   "label": "RM Weight",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "yeild",
-   "fieldtype": "Float",
-   "label": "Yeild",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_48",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "fg_weight",
-   "fieldtype": "Float",
-   "label": "FG Weight",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_50",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "bom_weight",
-   "fieldtype": "Float",
-   "label": "BOM Weight",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_35",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_adding_items",
-   "fieldtype": "Check",
-   "label": "Allow Adding Items other than BOM Items"
-  },
-  {
-   "fetch_from": "item.specific_gravity",
-   "fieldname": "fg_specific_gravity",
-   "fieldtype": "Float",
-   "label": "FG Specific Gravity",
-   "read_only": 1
-  },
-  {
-   "fieldname": "bom_volume",
-   "fieldtype": "Float",
-   "label": "Bom Volume"
-  },
-  {
    "fieldname": "column_break_31",
    "fieldtype": "Column Break"
   },
@@ -603,6 +533,11 @@
    "fieldname": "section_break_33",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Batch Size"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -610,7 +545,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-30 15:17:34.084403",
+ "modified": "2021-09-20 13:13:44.452733",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
