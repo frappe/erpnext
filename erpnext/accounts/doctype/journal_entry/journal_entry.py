@@ -60,7 +60,8 @@ class JournalEntry(AccountsController):
 
 		self.validate_against_jv()
 		self.validate_reference_doc()
-		self.set_against_account()
+		if self.docstatus == 0:
+			self.set_against_account()
 		self.create_remarks()
 		self.set_print_format_fields()
 		self.validate_expense_claim()
@@ -69,7 +70,9 @@ class JournalEntry(AccountsController):
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
 		self.validate_stock_accounts()
-		self.apply_tax_withholding()
+
+		if self.docstatus == 0:
+			self.apply_tax_withholding()
 
 		if not self.title:
 			self.title = self.get_title()
@@ -200,7 +203,8 @@ class JournalEntry(AccountsController):
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append("accounts", {
 				'account': tax_withholding_details.get("account_head"),
-				rev_debit_or_credit: tax_withholding_details.get('tax_amount')
+				rev_debit_or_credit: tax_withholding_details.get('tax_amount'),
+				'against_account': parties[0]
 			})
 
 		to_remove = [d for d in self.get('accounts')
