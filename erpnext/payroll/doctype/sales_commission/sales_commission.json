@@ -1,0 +1,263 @@
+{
+ "actions": [],
+ "autoname": "format:SAL-COM-{#####}",
+ "creation": "2021-09-07 12:43:03.200379",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_person",
+  "employee",
+  "employee_name",
+  "designation",
+  "department",
+  "branch",
+  "column_break_6",
+  "status",
+  "company",
+  "pay_via_salary",
+  "section_break_10",
+  "from_date",
+  "to_date",
+  "column_break_13",
+  "commission_based_on",
+  "process_sales_commission_reference",
+  "section_break_15",
+  "contributions",
+  "section_break_17",
+  "total_contribution",
+  "total_commission_amount",
+  "remarks",
+  "column_break_21",
+  "commission_rate",
+  "calculate_commission_manually",
+  "amended_from",
+  "reference_doctype",
+  "reference_name"
+ ],
+ "fields": [
+  {
+   "fetch_from": "sales_person.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "depends_on": "employee",
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nUnpaid\nPaid",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "pay_via_salary",
+   "fieldtype": "Check",
+   "label": "Pay Via Salary"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "commission_based_on",
+   "fieldtype": "Select",
+   "label": "Commission Based on",
+   "options": "Sales Order\nSales Invoice"
+  },
+  {
+   "fieldname": "total_contribution",
+   "fieldtype": "Currency",
+   "label": "Total Contribution",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "calculate_commission_manually",
+   "fieldtype": "Check",
+   "label": "Calculate Commission Manually"
+  },
+  {
+   "depends_on": "calculate_commission_manually",
+   "fieldname": "commission_rate",
+   "fieldtype": "Float",
+   "label": "Commission Rate"
+  },
+  {
+   "fieldname": "total_commission_amount",
+   "fieldtype": "Currency",
+   "label": "Total Commission Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Commission",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "contributions",
+   "fieldtype": "Table",
+   "label": "Contributions",
+   "options": "Contributions"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "process_sales_commission_reference",
+   "fieldtype": "Link",
+   "label": "Process Sales Commission Reference",
+   "options": "Process Sales Commission",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Reference Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "hidden": 1,
+   "label": "Reference Name",
+   "options": "reference_doctype"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-09-20 15:46:26.805073",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Sales Commission",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

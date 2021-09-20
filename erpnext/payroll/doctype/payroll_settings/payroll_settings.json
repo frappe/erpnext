@@ -9,6 +9,7 @@
   "payroll_based_on",
   "consider_unmarked_attendance_as",
   "max_working_hours_against_timesheet",
+  "salary_component_for_sales_commission",
   "include_holidays_in_total_working_days",
   "disable_rounded_total",
   "column_break_11",
@@ -91,13 +92,19 @@
    "fieldname": "show_leave_balances_in_salary_slip",
    "fieldtype": "Check",
    "label": "Show Leave Balances in Salary Slip"
+  },
+  {
+   "fieldname": "salary_component_for_sales_commission",
+   "fieldtype": "Link",
+   "label": "Salary Component for Sales Commission",
+   "options": "Salary Component"
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-03 17:49:59.579723",
+ "modified": "2021-09-07 12:21:16.640474",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",
