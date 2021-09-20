@@ -17,7 +17,7 @@ class TestAppraisal(unittest.TestCase):
 		doc = frappe.new_doc('Appraisal')
 		doc.appraisal_template = 'Test Manager'
 		doc.start_date = date.today()
-		doc.end_date  = date.today() + relativedelta(days=1)
+		doc.end_date = date.today() + relativedelta(days=1)
 		doc.employee = get_employee('Test_Employee', 'Test Company')
 		doc.company = 'Test Company'
 		doc.new_designation = "Project Manager"
@@ -56,10 +56,7 @@ class TestAppraisal(unittest.TestCase):
 		doc.save()
 	
 	def test_verify_submission(self):
-		doc = frappe.db.get_list('Appraisal',
-		filters={'employee': get_employee('Test_Employee', 'Test Company')},
-		fields=['*'])
-
+		doc = frappe.db.get_list('Appraisal',filters={'employee': get_employee('Test_Employee', 'Test Company')},fields=['*'])
 		self.assertEqual(doc[0]['overall_self_score'],5.0)
 		self.assertEqual(doc[0]['overall_score'],4.0)
 

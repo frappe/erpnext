@@ -42,7 +42,7 @@ class Appraisal(Document):
 			frappe.throw(_('Appraisal {0} created for Employee {1} in the given date range').format(chk[0][0], self.employee_name))
 
 	def calculate_total_for_kra_assessment(self):
-		total_mentor_score, total_w, total_self_score  = 0, 0, 0
+		total_mentor_score, total_w, total_self_score = 0, 0, 0
 		for d in self.get('kra_assessment'):
 			if d.mentor_score:
 				total_mentor_score = total_mentor_score + flt(d.mentor_score) * (flt(d.per_weightage)/100)
