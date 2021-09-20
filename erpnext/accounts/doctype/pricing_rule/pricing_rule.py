@@ -330,13 +330,17 @@ def get_pricing_rule_details(args, pricing_rule):
 def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-	if ((pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency)
-			or (pricing_rule.margin_type == 'Percentage')):
-		item_details.margin_type = pricing_rule.margin_type
-		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-	else:
-		item_details.margin_type = None
-		item_details.margin_rate_or_amount = 0.0
+	for apply_on in ['Percentage', 'Amount']:
+		if pricing_rule.margin_type != apply_on:
+			continue
+
+		field = 'margin_rate_or_amount'
+		if field not in item_details:
+			item_details.setdefault(field, 0)
+			item_details.setdefault('margin_type', apply_on)
+
+		item_details[field] += (pricing_rule.get(field, 0)
+			if pricing_rule else args.get(field, 0))
 
 	if pricing_rule.rate_or_discount == 'Rate':
 		pricing_rule_rate = 0.0
