@@ -4,14 +4,15 @@ import frappe
 
 from erpnext.controllers.status_updater import OverAllowanceError
 
+documents_to_reload = [
+	('stock', 'doctype', 'purchase_receipt'),
+	('stock', 'doctype', 'purchase_receipt_item'),
+	('stock', 'doctype', 'delivery_note'),
+	('stock', 'doctype', 'delivery_note_item'),
+	('stock', 'doctype', 'stock_settings'),
+]
 
 def execute():
-	frappe.reload_doc('stock', 'doctype', 'purchase_receipt')
-	frappe.reload_doc('stock', 'doctype', 'purchase_receipt_item')
-	frappe.reload_doc('stock', 'doctype', 'delivery_note')
-	frappe.reload_doc('stock', 'doctype', 'delivery_note_item')
-	frappe.reload_doc('stock', 'doctype', 'stock_settings')
-
 	def update_from_return_docs(doctype):
 		for return_doc in frappe.get_all(doctype, filters={'is_return' : 1, 'docstatus' : 1, 'return_against': ('!=', '')}):
 			# Update original receipt/delivery document from return

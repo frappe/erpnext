@@ -6,13 +6,13 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from erpnext.regional.united_states.setup import add_permissions
 
 
-def execute():
+def condition():
 	company = frappe.get_all('Company', filters = {'country': 'United States'}, fields=['name'])
-	if not company:
-		return
+	return bool(company)
 
-	frappe.reload_doc("regional", "doctype", "product_tax_category")
+documents_to_reload = [("regional", "doctype", "product_tax_category")]
 
+def execute():
 	custom_fields = {
 		'Sales Invoice Item': [
 			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='description', options='Product Tax Category',

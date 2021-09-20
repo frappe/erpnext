@@ -6,11 +6,13 @@ from frappe.utils import flt
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
 
+documents_to_reload = [
+	('crm', 'doctype', 'opportunity'),
+	('crm', 'doctype', 'opportunity_item')
+]
+
 
 def execute():
-	frappe.reload_doc('crm', 'doctype', 'opportunity')
-	frappe.reload_doc('crm', 'doctype', 'opportunity_item')
-
 	opportunities = frappe.db.get_list('Opportunity', filters={
 		'opportunity_amount': ['>', 0]
 	}, fields=['name', 'company', 'currency', 'opportunity_amount'])

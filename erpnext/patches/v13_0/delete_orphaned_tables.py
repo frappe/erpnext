@@ -7,21 +7,24 @@ import frappe
 from frappe.utils import getdate
 
 
+def condition():
+	return has_deleted_company_transactions()
+
+documents_to_reload = [('setup', 'doctype', 'transaction_deletion_record')]
+
 def execute():
-    frappe.reload_doc('setup', 'doctype', 'transaction_deletion_record')
 
-    if has_deleted_company_transactions():
-        child_doctypes = get_child_doctypes_whose_parent_doctypes_were_affected()
+	child_doctypes = get_child_doctypes_whose_parent_doctypes_were_affected()
 
-        for doctype in child_doctypes:
-            docs = frappe.get_all(doctype, fields=['name', 'parent', 'parenttype', 'creation'])
+	for doctype in child_doctypes:
+		docs = frappe.get_all(doctype, fields=['name', 'parent', 'parenttype', 'creation'])
 
-            for doc in docs:
-                if not frappe.db.exists(doc['parenttype'], doc['parent']):
-                    frappe.db.delete(doctype, {'name': doc['name']})
+		for doc in docs:
+			if not frappe.db.exists(doc['parenttype'], doc['parent']):
+				frappe.db.delete(doctype, {'name': doc['name']})
 
-                elif check_for_new_doc_with_same_name_as_deleted_parent(doc):
-                    frappe.db.delete(doctype, {'name': doc['name']})
+			elif check_for_new_doc_with_same_name_as_deleted_parent(doc):
+				frappe.db.delete(doctype, {'name': doc['name']})
 
 def has_deleted_company_transactions():
     return frappe.get_all('Transaction Deletion Record')
