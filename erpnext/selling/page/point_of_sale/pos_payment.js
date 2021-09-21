@@ -297,6 +297,7 @@ erpnext.PointOfSale.Payment = class {
 		this.render_payment_mode_dom();
 		this.make_invoice_fields_control();
 		this.update_totals_section();
+		this.focus_on_default_mop();
 	}
 
 	edit_cart() {
@@ -378,17 +379,24 @@ erpnext.PointOfSale.Payment = class {
 			});
 			this[`${mode}_control`].toggle_label(false);
 			this[`${mode}_control`].set_value(p.amount);
+		});
 
+		this.render_loyalty_points_payment_mode();
+
+		this.attach_cash_shortcuts(doc);
+	}
+
+	focus_on_default_mop() {
+		const doc = this.events.get_frm().doc;
+		const payments = doc.payments;
+		payments.forEach(p => {
+			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			if (p.default) {
 				setTimeout(() => {
 					this.$payment_modes.find(`.${mode}.mode-of-payment-control`).parent().click();
 				}, 500);
 			}
 		});
-
-		this.render_loyalty_points_payment_mode();
-
-		this.attach_cash_shortcuts(doc);
 	}
 
 	attach_cash_shortcuts(doc) {

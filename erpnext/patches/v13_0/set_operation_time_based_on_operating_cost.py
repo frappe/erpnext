@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	frappe.reload_doc('manufacturing', 'doctype', 'bom')
 	frappe.reload_doc('manufacturing', 'doctype', 'bom_operation')

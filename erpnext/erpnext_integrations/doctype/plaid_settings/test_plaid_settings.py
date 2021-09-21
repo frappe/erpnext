@@ -6,11 +6,16 @@ import json
 import unittest
 
 import frappe
+from frappe.utils.response import json_handler
+
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
-	add_account_subtype, add_account_type, add_bank_accounts,
-	new_bank_transaction, get_plaid_configuration)
-from frappe.utils.response import json_handler
+	add_account_subtype,
+	add_account_type,
+	add_bank_accounts,
+	get_plaid_configuration,
+	new_bank_transaction,
+)
 
 
 class TestPlaidSettings(unittest.TestCase):

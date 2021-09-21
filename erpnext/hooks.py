@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 from frappe import _
 
 app_name = "erpnext"
@@ -61,6 +62,7 @@ treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Grou
 # website
 update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform_list_context"
 
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
@@ -286,6 +288,7 @@ doc_events = {
 		]
 	},
 	"Payment Entry": {
+		"validate": "erpnext.regional.india.utils.update_place_of_supply",
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
@@ -316,6 +319,9 @@ doc_events = {
 	},
 	"Company": {
 		"on_trash": "erpnext.regional.india.utils.delete_gst_settings_for_company"
+	},
+	"Integration Request": {
+		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"
 	}
 }
 
@@ -436,7 +442,7 @@ accounting_dimension_doctypes = ["GL Entry", "Sales Invoice", "Purchase Invoice"
 	"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 	"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
 	"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
-	"Subscription Plan"
+	"Subscription Plan", "POS Invoice", "POS Invoice Item"
 ]
 
 regional_overrides = {

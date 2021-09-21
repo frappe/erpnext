@@ -2,11 +2,14 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
+
+import unittest
 from datetime import date, timedelta
 
 import frappe
-import unittest
+
 from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
+
 
 class TestShipment(unittest.TestCase):
 	def test_shipment_from_delivery_note(self):

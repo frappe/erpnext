@@ -3,17 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import json
+
 import frappe
+import six
 from frappe import _
-from frappe.model import default_fields
+from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
+from frappe.model.mapper import map_child_doc, map_doc
 from frappe.utils import flt, getdate, nowdate
 from frappe.utils.background_jobs import enqueue
-from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
-from frappe.core.page.background_jobs.background_jobs import get_info
-import json
-import six
+
 
 class POSInvoiceMergeLog(Document):
 	def validate(self):
@@ -21,6 +23,9 @@ class POSInvoiceMergeLog(Document):
 		self.validate_pos_invoice_status()
 
 	def validate_customer(self):
+		if self.merge_invoices_based_on == 'Customer Group':
+			return
+
 		for d in self.pos_invoices:
 			if d.customer != self.customer:
 				frappe.throw(_("Row #{}: POS Invoice {} is not against customer {}").format(d.idx, d.pos_invoice, self.customer))
@@ -122,7 +127,7 @@ class POSInvoiceMergeLog(Document):
 				found = False
 				for i in items:
 					if (i.item_code == item.item_code and not i.serial_no and not i.batch_no and
-						i.uom == item.uom and i.net_rate == item.net_rate):
+						i.uom == item.uom and i.net_rate == item.net_rate and i.warehouse == item.warehouse):
 						found = True
 						i.qty = i.qty + item.qty
 
@@ -170,6 +175,11 @@ class POSInvoiceMergeLog(Document):
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
 		invoice.ignore_pricing_rule = 1
+		invoice.customer = self.customer
+
+		if self.merge_invoices_based_on == 'Customer Group':
+			invoice.flags.ignore_pos_profile = True
+			invoice.pos_profile = ''
 
 		return invoice
 
@@ -226,7 +236,7 @@ def get_all_unconsolidated_invoices():
 	return pos_invoices
 
 def get_invoice_customer_map(pos_invoices):
-	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }
+	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Customer 2' : [{}] }
 	pos_invoice_customer_map = {}
 	for invoice in pos_invoices:
 		customer = invoice.get('customer')

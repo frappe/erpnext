@@ -2,27 +2,60 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
 import json
+
+import frappe
 from frappe import _, throw
-from frappe.utils import (today, flt, cint, fmt_money, formatdate,
-	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
-from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
-from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.buying.utils import update_last_purchase_rate
-from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled, get_party_account
-from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
-	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
-from erpnext.exceptions import InvalidCurrency
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	flt,
+	fmt_money,
+	formatdate,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	today,
+)
 from six import text_type
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+from erpnext.accounts.doctype.pricing_rule.utils import (
+	apply_pricing_rule_for_free_items,
+	apply_pricing_rule_on_transaction,
+	get_applied_pricing_rules,
+)
+from erpnext.accounts.party import (
+	get_party_account,
+	get_party_account_currency,
+	validate_party_frozen_disabled,
+)
+from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
+from erpnext.buying.utils import update_last_purchase_rate
+from erpnext.controllers.print_settings import (
+	set_print_templates_for_item_table,
+	set_print_templates_for_taxes,
+)
+from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.exceptions import InvalidCurrency
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-from erpnext.controllers.print_settings import set_print_templates_for_item_table, set_print_templates_for_taxes
+from erpnext.stock.get_item_details import (
+	_get_item_tax_template,
+	get_conversion_factor,
+	get_item_details,
+	get_item_tax_map,
+	get_item_warehouse,
+)
+from erpnext.utilities.transaction_base import TransactionBase
+
 
 class AccountMissingError(frappe.ValidationError): pass
 
@@ -947,42 +980,55 @@ class AccountsController(TransactionBase):
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
+		role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+		user_roles = frappe.get_roles()
+
+		total_overbilled_amt = 0.0
+
 		for item in self.get("items"):
-			if item.get(item_ref_dn):
-				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
-					item.get(item_ref_dn), based_on), self.precision(based_on, item))
-				if not ref_amt:
-					frappe.msgprint(
-						_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero")
-							.format(item.item_code, ref_dt))
-				else:
-					already_billed = frappe.db.sql("""
-						select sum(%s)
-						from `tab%s`
-						where %s=%s and docstatus=1 and parent != %s
-					""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
-					   (item.get(item_ref_dn), self.name))[0][0]
+			if not item.get(item_ref_dn):
+				continue
 
-					total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
-						self.precision(based_on, item))
+			ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
+				item.get(item_ref_dn), based_on), self.precision(based_on, item))
+			if not ref_amt:
+				frappe.msgprint(
+					_("System will not check overbilling since amount for Item {0} in {1} is zero")
+						.format(item.item_code, ref_dt), title=_("Warning"), indicator="orange")
+				continue
 
-					allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
-						get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
+			already_billed = frappe.db.sql("""
+				select sum(%s)
+				from `tab%s`
+				where %s=%s and docstatus=1 and parent != %s
+			""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
+				(item.get(item_ref_dn), self.name))[0][0]
 
-					max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
+			total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
+				self.precision(based_on, item))
 
-					if total_billed_amt < 0 and max_allowed_amt < 0:
-						# while making debit note against purchase return entry(purchase receipt) getting overbill error
-						total_billed_amt = abs(total_billed_amt)
-						max_allowed_amt = abs(max_allowed_amt)
+			allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
+				get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
 
-					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+			max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
 
-					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
-						if self.doctype != "Purchase Invoice":
-							self.throw_overbill_exception(item, max_allowed_amt)
-						elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
-							self.throw_overbill_exception(item, max_allowed_amt)
+			if total_billed_amt < 0 and max_allowed_amt < 0:
+				# while making debit note against purchase return entry(purchase receipt) getting overbill error
+				total_billed_amt = abs(total_billed_amt)
+				max_allowed_amt = abs(max_allowed_amt)
+
+			overbill_amt = total_billed_amt - max_allowed_amt
+			total_overbilled_amt += overbill_amt
+
+			if overbill_amt > 0.01 and role_allowed_to_over_bill not in user_roles:
+				if self.doctype != "Purchase Invoice":
+					self.throw_overbill_exception(item, max_allowed_amt)
+				elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
+					self.throw_overbill_exception(item, max_allowed_amt)
+
+		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
+			frappe.msgprint(_("Overbilling of {} ignored because you have {} role.")
+					.format(total_overbilled_amt, role_allowed_to_over_bill), title=_("Warning"), indicator="orange")
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
@@ -1811,7 +1857,12 @@ def validate_child_on_delete(row, parent):
 
 def update_bin_on_delete(row, doctype):
 	"""Update bin for deleted item (row)."""
-	from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty, get_ordered_qty, get_indented_qty
+	from erpnext.stock.stock_balance import (
+		get_indented_qty,
+		get_ordered_qty,
+		get_reserved_qty,
+		update_bin_qty,
+	)
 	qty_dict = {}
 
 	if doctype == "Sales Order":

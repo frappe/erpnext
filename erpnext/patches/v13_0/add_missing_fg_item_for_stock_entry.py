@@ -2,9 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import cstr, flt, cint
-from erpnext.stock.stock_ledger import make_sl_entries
+from frappe.utils import cint, cstr, flt
+
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+from erpnext.stock.stock_ledger import make_sl_entries
+
 
 def execute():
 	if not frappe.db.has_column('Work Order', 'has_batch_no'):

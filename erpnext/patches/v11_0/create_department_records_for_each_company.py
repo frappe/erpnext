@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree
+
 
 def execute():
 	frappe.local.lang = frappe.db.get_default("lang") or 'en'

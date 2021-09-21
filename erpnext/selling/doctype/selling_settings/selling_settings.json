@@ -18,17 +18,18 @@
   "close_opportunity_after_days",
   "item_price_settings_section",
   "selling_price_list",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
   "column_break_15",
   "maintain_same_sales_rate",
-  "maintain_same_rate_action",
   "editable_price_list_rate",
   "validate_selling_price",
+  "editable_bundle_item_rates",
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
   "sales_update_frequency",
   "column_break_5",
-  "role_to_override_stop_action",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "hide_tax_id"
@@ -40,14 +41,14 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Customer Naming By",
-   "options": "Customer Name\nNaming Series"
+   "options": "Customer Name\nNaming Series\nAuto Name"
   },
   {
    "fieldname": "campaign_naming_by",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series"
+   "options": "Campaign Name\nNaming Series\nAuto Name"
   },
   {
    "fieldname": "customer_group",
@@ -146,15 +147,14 @@
   {
    "default": "Stop",
    "depends_on": "maintain_same_sales_rate",
-   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
-   "label": "Action if Same Rate is Not Maintained",
+   "label": "Action if Same Rate is Not Maintained Throughout Sales Cycle",
    "mandatory_depends_on": "maintain_same_sales_rate",
    "options": "Stop\nWarn"
   },
   {
-   "depends_on": "eval: doc.maintain_same_rate_action == 'Stop'",
+   "depends_on": "eval: doc.maintain_same_sales_rate && doc.maintain_same_rate_action == 'Stop'",
    "fieldname": "role_to_override_stop_action",
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
@@ -191,6 +191,12 @@
    "fieldname": "sales_transactions_settings_section",
    "fieldtype": "Section Break",
    "label": "Transaction Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "editable_bundle_item_rates",
+   "fieldtype": "Check",
+   "label": "Calculate Product Bundle Price based on Child Items' Rates"
   }
  ],
  "icon": "fa fa-cog",
@@ -198,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-08-06 22:25:50.119458",
+ "modified": "2021-09-08 19:38:10.175989",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

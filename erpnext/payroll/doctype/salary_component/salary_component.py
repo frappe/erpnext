@@ -3,8 +3,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 from frappe.model.document import Document
 from frappe.model.naming import append_number_if_name_exists
+
 
 class SalaryComponent(Document):
 	def validate(self):

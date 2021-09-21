@@ -3,14 +3,23 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import cstr, nowdate, getdate, flt, get_last_day, add_days, add_months
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
-from erpnext.assets.doctype.asset.asset import make_sales_invoice
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+import frappe
+from frappe.utils import add_days, add_months, cstr, flt, get_last_day, getdate, nowdate
+
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
+)
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	make_purchase_invoice as make_invoice,
+)
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):

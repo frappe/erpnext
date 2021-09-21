@@ -425,7 +425,10 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 						status: ["!=", "Stopped"],
 						per_ordered: ["<", 100],
 						company: me.frm.doc.company
-					}
+					},
+					allow_child_item_selection: true,
+					child_fielname: "items",
+					child_columns: ["item_code", "qty"]
 				})
 			}, __("Get Items From"));
 

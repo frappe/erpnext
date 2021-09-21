@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe
-from frappe.utils import flt, add_days, nowdate, add_months, getdate
 import unittest
+
+import frappe
+from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 test_dependencies = ["Product Bundle"]
 
@@ -133,8 +134,10 @@ class TestQuotation(unittest.TestCase):
 
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
-		from erpnext.selling.doctype.sales_order.sales_order \
-			import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_delivery_note,
+			make_sales_invoice,
+		)
 
 		rate_with_margin = flt((1500*18.75)/100 + 1500)
 
@@ -226,8 +229,86 @@ class TestQuotation(unittest.TestCase):
 		expired_quotation.reload()
 		self.assertEqual(expired_quotation.status, "Expired")
 
+	def test_product_bundle_mapping_on_creating_so(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		quotation = make_quotation(item_code="_Test Product Bundle", qty=1, rate=100)
+		sales_order = make_sales_order(quotation.name)
+
+		quotation_item = [quotation.items[0].item_code, quotation.items[0].rate, quotation.items[0].qty, quotation.items[0].amount]
+		so_item = [sales_order.items[0].item_code, sales_order.items[0].rate, sales_order.items[0].qty, sales_order.items[0].amount]
+
+		self.assertEqual(quotation_item, so_item)
+
+		quotation_packed_items = [
+			[quotation.packed_items[0].parent_item, quotation.packed_items[0].item_code, quotation.packed_items[0].qty],
+			[quotation.packed_items[1].parent_item, quotation.packed_items[1].item_code, quotation.packed_items[1].qty]
+		]
+		so_packed_items = [
+			[sales_order.packed_items[0].parent_item, sales_order.packed_items[0].item_code, sales_order.packed_items[0].qty],
+			[sales_order.packed_items[1].parent_item, sales_order.packed_items[1].item_code, sales_order.packed_items[1].qty]
+		]
+
+		self.assertEqual(quotation_packed_items, so_packed_items)
+
+	def test_product_bundle_price_calculation_when_calculate_bundle_price_is_unchecked(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Product Bundle", {"is_stock_item": 0})
+		bundle_item1 = make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		bundle_item2 = make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		bundle_item1.valuation_rate = 100
+		bundle_item1.save()
+
+		bundle_item2.valuation_rate = 200
+		bundle_item2.save()
+
+		quotation = make_quotation(item_code="_Test Product Bundle", qty=2, rate=100)
+		self.assertEqual(quotation.items[0].amount, 200)
+
+	def test_product_bundle_price_calculation_when_calculate_bundle_price_is_checked(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		enable_calculate_bundle_price()
+
+		quotation = make_quotation(item_code="_Test Product Bundle", qty=2, rate=100, do_not_submit=1)
+		quotation.packed_items[0].rate = 100
+		quotation.packed_items[1].rate = 200
+		quotation.save()
+
+		self.assertEqual(quotation.items[0].amount, 600)
+		self.assertEqual(quotation.items[0].rate, 300)
+
+		enable_calculate_bundle_price(enable=0)
 
 test_records = frappe.get_test_records('Quotation')
+
+def enable_calculate_bundle_price(enable=1):
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.editable_bundle_item_rates = enable
+	selling_settings.save()
 
 def get_quotation_dict(party_name=None, item_code=None):
 	if not party_name:

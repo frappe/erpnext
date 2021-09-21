@@ -79,7 +79,6 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 			$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper on removing file
 		} else {
 			generate_tree_preview(frm);
-			validate_csv_data(frm);
 		}
 	},
 
@@ -103,23 +102,6 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		}
 	}
 });
-
-var validate_csv_data = function(frm) {
-	frappe.call({
-		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_accounts",
-		args: {file_name: frm.doc.import_file},
-		callback: function(r) {
-			if(r.message && r.message[0]===true) {
-				frm.page["show_import_button"] = true;
-				frm.page["total_accounts"] = r.message[1];
-				frm.trigger("refresh");
-			} else {
-				frm.page.set_indicator(__('Resolve error and upload again.'), 'orange');
-				frappe.throw(__(r.message));
-			}
-		}
-	});
-};
 
 var create_import_button = function(frm) {
 	frm.page.set_primary_action(__("Import"), function () {
@@ -151,23 +133,25 @@ var create_reset_button = function(frm) {
 };
 
 var generate_tree_preview = function(frm) {
-	let parent = __('All Accounts');
-	$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper to load new data
+	if (frm.doc.import_file) {
+		let parent = __('All Accounts');
+		$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper to load new data
 
-	// generate tree structure based on the csv data
-	new frappe.ui.Tree({
-		parent: $(frm.fields_dict['chart_tree'].wrapper),
-		label: parent,
-		expandable: true,
-		method: 'erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa',
-		args: {
-			file_name: frm.doc.import_file,
-			parent: parent,
-			doctype: 'Chart of Accounts Importer',
-			file_type: frm.doc.file_type
-		},
-		onclick: function(node) {
-			parent = node.value;
-		}
-	});
+		// generate tree structure based on the csv data
+		new frappe.ui.Tree({
+			parent: $(frm.fields_dict['chart_tree'].wrapper),
+			label: parent,
+			expandable: true,
+			method: 'erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa',
+			args: {
+				file_name: frm.doc.import_file,
+				parent: parent,
+				doctype: 'Chart of Accounts Importer',
+				file_type: frm.doc.file_type
+			},
+			onclick: function(node) {
+				parent = node.value;
+			}
+		});
+	}
 };

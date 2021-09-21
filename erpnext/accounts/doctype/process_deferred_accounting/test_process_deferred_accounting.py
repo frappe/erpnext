@@ -3,11 +3,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
+	check_gl_entries,
+	create_sales_invoice,
+)
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice, check_gl_entries
+
 
 class TestProcessDeferredAccounting(unittest.TestCase):
 	def test_creation_of_ledger_entry_on_submit(self):

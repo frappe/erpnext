@@ -3,22 +3,24 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import copy
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
-from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute as get_ageing
+from frappe.utils import add_days, add_months, format_date, getdate, today
+from frappe.utils.jinja import validate_template
+from frappe.utils.pdf import get_pdf
+from frappe.www.printview import get_print_style
+
 from erpnext import get_company_currency
 from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
+	execute as get_ageing,
+)
+from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
 
-from frappe.utils.print_format import report_to_pdf
-from frappe.utils.pdf import get_pdf
-from frappe.utils import today, add_days, add_months, getdate, format_date
-from frappe.utils.jinja import validate_template
-
-import copy
-from datetime import timedelta
-from frappe.www.printview import get_print_style
 
 class ProcessStatementOfAccounts(Document):
 	def validate(self):
@@ -158,7 +160,7 @@ def get_recipients_and_cc(customer, doc):
 	if doc.cc_to != '':
 		try:
 			cc=[frappe.get_value('User', doc.cc_to, 'email')]
-		except:
+		except Exception:
 			pass
 
 	return recipients, cc
@@ -194,7 +196,10 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 		primary_email = customer.get('email_id') or ''
 		billing_email = get_customer_emails(customer.name, 1, billing_and_primary=False)
 
-		if billing_email == '' or (primary_email == '' and int(primary_mandatory)):
+		if int(primary_mandatory):
+			if (primary_email == ''):
+				continue
+		elif (billing_email == '') and (primary_email == ''):
 			continue
 
 		customer_list.append({
@@ -206,10 +211,29 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 
 @frappe.whitelist()
 def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=True):
+	""" Returns first email from Contact Email table as a Billing email
+		when Is Billing Contact checked
+		and Primary email- email with Is Primary checked """
+
 	billing_email = frappe.db.sql("""
-		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent
-		WHERE l.link_doctype='Customer' and l.link_name=%s and c.is_billing_contact=1
-		order by c.creation desc""", customer_name)
+		SELECT
+			email.email_id
+		FROM
+			`tabContact Email` AS email
+		JOIN
+			`tabDynamic Link` AS link
+		ON
+			email.parent=link.parent
+		JOIN
+			`tabContact` AS contact
+		ON
+			contact.name=link.parent
+		WHERE
+			link.link_doctype='Customer'
+			and link.link_name=%s
+			and contact.is_billing_contact=1
+		ORDER BY
+			contact.creation desc""", customer_name)
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:
