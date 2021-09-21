@@ -704,9 +704,8 @@ def create_asset(**args):
 		"calculate_depreciation": args.calculate_depreciation or 0,
 		"gross_purchase_amount": 100000,
 		"purchase_receipt_amount": 100000,
-		"expected_value_after_useful_life": 10000,
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
-		"available_for_use_date": "2020-06-06",
+		"available_for_use_date": args.available_for_use_date or "2020-06-06",
 		"location": "Test Location",
 		"asset_owner": "Company",
 		"is_existing_asset": 1
@@ -715,8 +714,10 @@ def create_asset(**args):
 	if asset.calculate_depreciation:
 		asset.append("finance_books", {
 			"depreciation_method": "Straight Line",
-			"frequency_of_depreciation": 12,
-			"total_number_of_depreciations": 5
+			"frequency_of_depreciation": args.frequency_of_depreciation or 12,
+			"total_number_of_depreciations": args.total_number_of_depreciations or 5,
+			"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
+			"depreciation_start_date": args.depreciation_start_date
 		})
 
 	try:
