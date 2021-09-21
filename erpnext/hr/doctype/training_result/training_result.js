@@ -21,7 +21,7 @@ frappe.ui.form.on('Training Result', {
 					frm.set_value("employees" ,"");
 					if (r.message) {
 						$.each(r.message, function(i, d) {
-							var row = frappe.model.add_child(cur_frm.doc, "Training Result Employee", "employees");
+							var row = frappe.model.add_child(frm.doc, "Training Result Employee", "employees");
 							row.employee = d.employee;
 							row.employee_name = d.employee_name;
 						});

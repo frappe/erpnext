@@ -457,7 +457,8 @@ class ProductionPlan(Document):
 
 	def prepare_args_for_sub_assembly_items(self, row, args):
 		for field in ["production_item", "item_name", "qty", "fg_warehouse",
-			"description", "bom_no", "stock_uom", "bom_level", "production_plan_item"]:
+			"description", "bom_no", "stock_uom", "bom_level",
+			"production_plan_item", "schedule_date"]:
 			args[field] = row.get(field)
 
 		args.update({
