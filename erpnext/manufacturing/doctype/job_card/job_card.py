@@ -687,7 +687,7 @@ def get_job_details(start, end, filters=None):
 
 	for d in job_cards:
 			subject_data = []
-			for field in ["name", "work_order", "remarks", "employee_name"]:
+			for field in ["name", "work_order", "remarks"]:
 				if not d.get(field): continue
 
 				subject_data.append(d.get(field))
