@@ -2214,7 +2214,7 @@ class TestSalesInvoice(unittest.TestCase):
 		expected_values = [
 			["2020-06-30", 1311.48, 1311.48],
 			["2021-06-30", 20000.0, 21311.48],
-			["2021-09-30", 3966.76, 25278.24]
+			["2021-09-30", 5041.1, 26352.58]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
