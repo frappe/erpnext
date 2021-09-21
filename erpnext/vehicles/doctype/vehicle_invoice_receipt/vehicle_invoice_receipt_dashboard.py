@@ -6,7 +6,7 @@ def get_data():
 		'fieldname': 'vehicle_invoice_receipt',
 		'transactions': [
 			{
-				'label': _('Receipt'),
+				'label': _('Reference'),
 				'items': ['Vehicle Invoice Delivery']
 			}
 		]

@@ -46,7 +46,11 @@
   "vehicle_color",
   "column_break_25",
   "vehicle_chassis_no",
-  "vehicle_engine_no"
+  "vehicle_engine_no",
+  "status_section",
+  "delivered_date",
+  "column_break_43",
+  "status"
  ],
  "fields": [
   {
@@ -351,12 +355,39 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "delivered_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Delivered Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nIn Hand\nDelivered\nCancelled",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-03 20:03:10.039861",
+ "modified": "2021-09-21 17:37:49.708792",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Receipt",

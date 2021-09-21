@@ -16,11 +16,13 @@ class VehicleInvoiceReceipt(VehicleTransactionController):
 
 		self.validate_duplicate_invoice_receipt()
 		self.set_title()
+		self.set_status()
 
 	def on_submit(self):
 		self.update_vehicle_booking_order()
 
 	def on_cancel(self):
+		self.db_set('status', 'Cancelled')
 		self.update_vehicle_booking_order()
 
 	def validate_duplicate_invoice_receipt(self):
@@ -35,3 +37,37 @@ class VehicleInvoiceReceipt(VehicleTransactionController):
 
 	def set_title(self):
 		self.title = "{0} ({1})".format(self.get('bill_no'), self.get('supplier_name') or self.get('supplier'))
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		previous_status = self.status
+
+		if self.docstatus == 2:
+			self.status = "Cancelled"
+
+		elif self.docstatus == 1:
+			vehicle_invoice_delivery = frappe.db.get_value("Vehicle Invoice Delivery", fieldname=['name', 'posting_date'],
+				filters={'vehicle_invoice_receipt': self.name, 'docstatus': 1}, as_dict=1)
+			vehicle_invoice_delivery = vehicle_invoice_delivery or frappe._dict()
+
+			self.delivered_date = vehicle_invoice_delivery.posting_date
+
+			if vehicle_invoice_delivery:
+				self.status = "Delivered"
+			else:
+				self.status = "In Hand"
+
+		else:
+			self.status = "Draft"
+
+		self.add_status_comment(previous_status)
+
+		if update:
+			self.db_set({
+				'status': self.status,
+				'delivered_date': self.delivered_date,
+			}, update_modified=update_modified)

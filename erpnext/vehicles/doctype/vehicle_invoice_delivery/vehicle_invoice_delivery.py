@@ -25,9 +25,11 @@ class VehicleInvoiceDelivery(VehicleTransactionController):
 		self.validate_invoice_not_received()
 
 	def on_submit(self):
+		self.update_vehicle_invoice_receipt()
 		self.update_vehicle_booking_order()
 
 	def on_cancel(self):
+		self.update_vehicle_invoice_receipt()
 		self.update_vehicle_booking_order()
 
 	def set_vehicle_invoice_receipt(self):

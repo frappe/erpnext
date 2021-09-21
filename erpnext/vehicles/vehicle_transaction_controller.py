@@ -240,6 +240,13 @@ class VehicleTransactionController(StockController):
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
+
+	def update_vehicle_invoice_receipt(self):
+		if self.get('vehicle_invoice_receipt'):
+			vinvr = frappe.get_doc("Vehicle Invoice Receipt", self.vehicle_invoice_receipt)
+			vinvr.set_status(update=True)
+			vinvr.notify_update()
+
 	def make_odometer_log(self):
 		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
 			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
