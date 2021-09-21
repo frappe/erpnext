@@ -78,7 +78,7 @@ export default {
 			empty_state_message: __('No Items selected yet. Browse and click on items below to publish.'),
 			valid_items_instruction: __('Only items with an image and description can be published. Please update them if an item in your inventory does not appear.'),
 			last_sync_message: (hub.settings.last_sync_datetime)
-				? __('Last sync was {0}.', [`<a href="#marketplace/profile">${comment_when(hub.settings.last_sync_datetime)}</a>`]) + 
+				? __('Last sync was {0}.', [`<a href="#marketplace/profile">${comment_when(hub.settings.last_sync_datetime)}</a>`]) +
 				  ` <a href="#marketplace/published-items">${__('See your Published Items.')}</a>`
 				: ''
 		};

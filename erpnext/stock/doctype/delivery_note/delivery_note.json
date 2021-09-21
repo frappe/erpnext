@@ -515,7 +515,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -542,6 +543,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "label": "Packing List",
@@ -550,6 +552,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Packed Items",
@@ -1305,7 +1308,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-08 21:37:20.802652",
+ "modified": "2021-08-27 20:14:40.215231",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

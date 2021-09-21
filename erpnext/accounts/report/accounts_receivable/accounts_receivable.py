@@ -2,12 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
+
 from collections import OrderedDict
+
+import frappe
+from frappe import _, scrub
+from frappe.utils import cint, cstr, flt, getdate, nowdate
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
 from erpnext.accounts.utils import get_currency_precision
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 #  This report gives a summary of all Outstanding Invoices considering the following
 
@@ -100,6 +106,7 @@ class ReceivablePayableReport(object):
 					party = gle.party,
 					posting_date = gle.posting_date,
 					account_currency = gle.account_currency,
+					remarks = gle.remarks if self.filters.get("show_remarks") else None,
 					invoiced = 0.0,
 					paid = 0.0,
 					credit_note = 0.0,
@@ -535,6 +542,8 @@ class ReceivablePayableReport(object):
 		if getdate(entry_date) > getdate(self.filters.report_date):
 			row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
 
+		row.total_due = row.range1 + row.range2 + row.range3 + row.range4 + row.range5
+
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
 		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
@@ -575,10 +584,12 @@ class ReceivablePayableReport(object):
 		else:
 			select_fields = "debit, credit"
 
+		remarks = ", remarks" if self.filters.get("show_remarks") else ""
+
 		self.gl_entries = frappe.db.sql("""
 			select
 				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
-				against_voucher_type, against_voucher, account_currency, {0}
+				against_voucher_type, against_voucher, account_currency, {0} {remarks}
 			from
 				`tabGL Entry`
 			where
@@ -587,7 +598,7 @@ class ReceivablePayableReport(object):
 				and party_type=%s
 				and (party is not null and party != '')
 				{1} {2} {3}"""
-			.format(select_fields, date_condition, conditions, order_by), values, as_dict=True)
+			.format(select_fields, date_condition, conditions, order_by, remarks=remarks), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
@@ -746,6 +757,10 @@ class ReceivablePayableReport(object):
 		self.add_column(label=_('Voucher Type'), fieldname='voucher_type', fieldtype='Data')
 		self.add_column(label=_('Voucher No'), fieldname='voucher_no', fieldtype='Dynamic Link',
 			options='voucher_type', width=180)
+
+		if self.filters.show_remarks:
+			self.add_column(label=_('Remarks'), fieldname='remarks', fieldtype='Text', width=200),
+
 		self.add_column(label='Due Date', fieldtype='Date')
 
 		if self.party_type == "Supplier":

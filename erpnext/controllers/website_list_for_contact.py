@@ -2,11 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import json
+
 import frappe
 from frappe import _
+from frappe.modules.utils import get_module_app
 from frappe.utils import flt, has_common
 from frappe.utils.user import is_website_user
+
 
 def get_list_context(context=None):
 	return {
@@ -18,8 +22,32 @@ def get_list_context(context=None):
 		"get_list": get_transaction_list
 	}
 
+def get_webform_list_context(module):
+	if get_module_app(module) != 'erpnext':
+		return
+	return {
+		"get_list": get_webform_transaction_list
+	}
 
-def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
+def get_webform_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
+	""" Get List of transactions for custom doctypes """
+	from frappe.www.list import get_list
+
+	if not filters:
+		filters = []
+
+	meta = frappe.get_meta(doctype)
+
+	for d in meta.fields:
+		if d.fieldtype == 'Link' and d.fieldname != 'amended_from':
+			allowed_docs = [d.name for d in get_transaction_list(doctype=d.options, custom=True)]
+			allowed_docs.append('')
+			filters.append((d.fieldname, 'in', allowed_docs))
+
+	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=False,
+		fields=None, order_by="modified")
+
+def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified", custom=False):
 	user = frappe.session.user
 	ignore_permissions = False
 
@@ -43,7 +71,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 				filters.append(('customer', 'in', customers))
 		elif suppliers:
 			filters.append(('supplier', 'in', suppliers))
-		else:
+		elif not custom:
 			return []
 
 		if doctype == 'Request for Quotation':
@@ -53,8 +81,15 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 		# Since customers and supplier do not have direct access to internal doctypes
 		ignore_permissions = True
 
+		if not customers and not suppliers and custom:
+			ignore_permissions = False
+			filters = []
+
 	transactions = get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
 		fields='name', ignore_permissions=ignore_permissions, order_by='modified desc')
+
+	if custom:
+		return transactions
 
 	return post_process(doctype, transactions)
 

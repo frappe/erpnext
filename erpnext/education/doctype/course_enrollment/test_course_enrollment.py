@@ -3,14 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
 
+import frappe
 
-from erpnext.education.doctype.student.test_student import create_student
-from erpnext.education.doctype.student.test_student import get_student
-from erpnext.education.doctype.program.test_program import setup_program
 from erpnext.education.doctype.course_activity.test_course_activity import make_course_activity
+from erpnext.education.doctype.program.test_program import setup_program
+from erpnext.education.doctype.student.test_student import create_student, get_student
+
 
 class TestCourseEnrollment(unittest.TestCase):
 	def setUp(self):
@@ -39,6 +39,3 @@ class TestCourseEnrollment(unittest.TestCase):
 			doc = frappe.get_doc("Program Enrollment", entry.name)
 			doc.cancel()
 			doc.delete()
-
-
-

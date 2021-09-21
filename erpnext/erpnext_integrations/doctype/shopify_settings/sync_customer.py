@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def create_customer(shopify_customer, shopify_settings):
 	import frappe.utils.nestedset

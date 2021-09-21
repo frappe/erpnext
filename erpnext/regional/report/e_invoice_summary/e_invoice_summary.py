@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	validate_filters(filters)
@@ -54,52 +56,52 @@ def get_columns():
 			"width": 0
 		},
 		{
-			"fieldtype": "Link", 
-			"fieldname": "name", 
+			"fieldtype": "Link",
+			"fieldname": "name",
 			"label": _("Sales Invoice"),
 			"options": "Sales Invoice",
 			"width": 140
 		},
-		{ 
-			"fieldtype": "Data", 
-			"fieldname": "einvoice_status", 
-			"label": _("Status"), 
+		{
+			"fieldtype": "Data",
+			"fieldname": "einvoice_status",
+			"label": _("Status"),
 			"width": 100
 		},
-		{ 
+		{
 			"fieldtype": "Link",
 			"fieldname": "customer",
 			"options": "Customer",
 			"label": _("Customer")
 		},
-		{ 
+		{
 			"fieldtype": "Check",
 			"fieldname": "is_return",
 			"label": _("Is Return"),
 			"width": 85
 		},
 		{
-			"fieldtype": "Data", 
-			"fieldname": "ack_no", 
-			"label": "Ack. No.", 
+			"fieldtype": "Data",
+			"fieldname": "ack_no",
+			"label": "Ack. No.",
 			"width": 145
 		},
-		{ 
-			"fieldtype": "Data", 
-			"fieldname": "ack_date", 
-			"label": "Ack. Date", 
+		{
+			"fieldtype": "Data",
+			"fieldname": "ack_date",
+			"label": "Ack. Date",
 			"width": 165
 		},
 		{
-			"fieldtype": "Data", 
-			"fieldname": "irn", 
+			"fieldtype": "Data",
+			"fieldname": "irn",
 			"label": _("IRN No."),
 			"width": 250
 		},
 		{
 			"fieldtype": "Currency",
-			"options": "Company:company:default_currency", 
-			"fieldname": "base_grand_total", 
+			"options": "Company:company:default_currency",
+			"fieldname": "base_grand_total",
 			"label": _("Grand Total"),
 			"width": 120
 		}

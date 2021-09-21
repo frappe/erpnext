@@ -3,12 +3,18 @@
 # Compiled at: 2019-05-06 09:51:46
 # Decompiled by https://python-decompiler.com
 from __future__ import unicode_literals
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+import unittest
+
+import frappe
+
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_to_be_received import (
+	execute,
+)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_to_be_received import execute
-import frappe, unittest
-from pprint import pprint
+
 
 class TestSubcontractedItemToBeReceived(unittest.TestCase):
 

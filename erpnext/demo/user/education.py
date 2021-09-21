@@ -4,13 +4,21 @@
 
 from __future__ import unicode_literals
 
-import frappe
 import random
+from datetime import timedelta
+
+import frappe
 from frappe.utils import cstr
 from frappe.utils.make_random import get_random
-from datetime import timedelta
-from erpnext.education.api import get_student_group_students, make_attendance_records, enroll_student, \
-								get_fee_schedule, collect_fees, get_course
+
+from erpnext.education.api import (
+	collect_fees,
+	enroll_student,
+	get_course,
+	get_fee_schedule,
+	get_student_group_students,
+	make_attendance_records,
+)
 
 
 def work():
@@ -19,7 +27,7 @@ def work():
 		approve_random_student_applicant()
 		enroll_random_student(frappe.flags.current_date)
 	# if frappe.flags.current_date.weekday()== 0:
-	# 	make_course_schedule(frappe.flags.current_date, frappe.utils.add_days(frappe.flags.current_date, 5))	
+	# 	make_course_schedule(frappe.flags.current_date, frappe.utils.add_days(frappe.flags.current_date, 5))
 	mark_student_attendance(frappe.flags.current_date)
 	# make_assessment_plan()
 	make_fees()
@@ -48,7 +56,7 @@ def enroll_random_student(current_date):
 		frappe.db.commit()
 		assign_student_group(enrollment.student, enrollment.student_name, enrollment.program,
 			enrolled_courses, enrollment.student_batch_name)
-		
+
 def assign_student_group(student, student_name, program, courses, batch):
 	course_list = [d["course"] for d in courses]
 	for d in frappe.get_list("Student Group", fields=("name"), filters={"program": program, "course":("in", course_list), "disabled": 0}):
@@ -69,11 +77,11 @@ def mark_student_attendance(current_date):
 		students = get_student_group_students(d.name)
 		for stud in students:
 			make_attendance_records(stud.student, stud.student_name, status[weighted_choice([9,4])], None, d.name, current_date)
-			
+
 def make_fees():
 	for d in range(1,10):
 		random_fee = get_random("Fees", {"paid_amount": 0})
-		collect_fees(random_fee, frappe.db.get_value("Fees", random_fee, "outstanding_amount"))	
+		collect_fees(random_fee, frappe.db.get_value("Fees", random_fee, "outstanding_amount"))
 
 def make_assessment_plan(date):
 	for d in range(1,4):
@@ -84,7 +92,7 @@ def make_assessment_plan(date):
 		doc.assessment_group = get_random("Assessment Group", {"is_group": 0, "parent": "2017-18 (Semester 2)"})
 		doc.grading_scale = get_random("Grading Scale")
 		doc.maximum_assessment_score = 100
-		
+
 def make_course_schedule(start_date, end_date):
 	for d in frappe.db.get_list("Student Group"):
 		cs = frappe.new_doc("Scheduling Tool")

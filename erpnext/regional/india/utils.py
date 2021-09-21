@@ -1,19 +1,19 @@
 from __future__ import unicode_literals
-import frappe, re, json
+
+import json
+import re
+
+import frappe
 from frappe import _
-import erpnext
-from frappe.utils import cstr, flt, cint, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words, getdate
-from erpnext.regional.india import states, state_numbers
-from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
+from frappe.model.utils import get_fetch_values
+from frappe.utils import cint, cstr, date_diff, flt, getdate, nowdate
+from six import string_types
+
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.hr.utils import get_salary_assignment
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.regional.india import number_state_mapping
-from six import string_types
-from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.utils import get_account_currency
-from frappe.model.utils import get_fetch_values
-
+from erpnext.regional.india import number_state_mapping, state_numbers, states
 
 GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")   #alphanumeric and - /
 GSTIN_FORMAT = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
@@ -475,7 +475,7 @@ def get_ewb_data(dt, dn):
 		ewaybills.append(data)
 
 	data = {
-		'version': '1.0.1118',
+		'version': '1.0.0421',
 		'billLists': ewaybills
 	}
 
@@ -767,6 +767,15 @@ def update_itc_availed_fields(doc, method):
 		if tax.account_head in gst_accounts.get('cess_account', []):
 			doc.itc_cess_amount += flt(tax.base_tax_amount_after_discount_amount)
 
+def update_place_of_supply(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+	if country != 'India':
+		return
+
+	address = frappe.db.get_value("Address", doc.get('customer_address'), ["gst_state", "gst_state_number"], as_dict=1)
+	if address and address.gst_state and address.gst_state_number:
+		doc.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
+
 @frappe.whitelist()
 def get_regional_round_off_accounts(company, account_list):
 	country = frappe.get_cached_value('Company', company, 'country')
@@ -845,13 +854,13 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		else:
 			depreciation_amount = (flt(row.value_after_depreciation) -
 				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
-		
+
 	else:
 		rate_of_depreciation = row.rate_of_depreciation
 		# if its the first depreciation
 		if depreciable_value == asset.gross_purchase_amount:
 			# as per IT act, if the asset is purchased in the 2nd half of fiscal year, then rate is divided by 2
-			diff = date_diff(asset.available_for_use_date, row.depreciation_start_date)
+			diff = date_diff(row.depreciation_start_date, asset.available_for_use_date)
 			if diff <= 180:
 				rate_of_depreciation = rate_of_depreciation / 2
 				frappe.msgprint(
@@ -862,7 +871,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	return depreciation_amount
 
 def set_item_tax_from_hsn_code(item):
-	if not item.taxes and item.gst_hsn_code: 
+	if not item.taxes and item.gst_hsn_code:
 		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
 
 		for tax in hsn_doc.taxes:
@@ -871,3 +880,20 @@ def set_item_tax_from_hsn_code(item):
 				'tax_category': tax.tax_category,
 				'valid_from': tax.valid_from
 			})
+
+def delete_gst_settings_for_company(doc, method):
+	if doc.country != 'India':
+		return
+
+	gst_settings = frappe.get_doc("GST Settings")
+	records_to_delete = []
+
+	for d in reversed(gst_settings.get('gst_accounts')):
+		if d.company == doc.name:
+			records_to_delete.append(d)
+
+	for d in records_to_delete:
+		gst_settings.remove(d)
+
+	gst_settings.save()
+

@@ -2,14 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, cint, get_fullname
-from frappe import msgprint, _
+
+import json
+
+import frappe
+from frappe import _
+from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, get_fullname
+
+from erpnext.accounts.party import get_party_account_currency
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import get_party_account_currency
-from frappe.email.inbox import link_communication_to_document
+
 
 class Opportunity(TransactionBase):
 	def after_insert(self):
@@ -284,6 +289,24 @@ def make_request_for_quotation(source_name, target_doc=None):
 			"postprocess": update_item
 		}
 	}, target_doc)
+
+	return doclist
+
+@frappe.whitelist()
+def make_customer(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		if source.opportunity_from == "Lead":
+			target.lead_name = source.party_name
+
+	doclist = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Customer",
+			"field_map": {
+				"currency": "default_currency",
+				"customer_name": "customer_name"
+			}
+		}
+	}, target_doc, set_missing_values)
 
 	return doclist
 

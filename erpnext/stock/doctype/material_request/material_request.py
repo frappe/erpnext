@@ -5,19 +5,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
 
-from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days, get_link_to_form
-from frappe import msgprint, _
+import frappe
+from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
+from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
+from six import string_types
+
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.stock.doctype.item.item import get_item_defaults
-
-from six import string_types
+from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -162,8 +163,15 @@ class MaterialRequest(BuyingController):
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 						(self.name, d.name))[0][0])
+					mr_qty_allowance = frappe.db.get_single_value('Stock Settings', 'mr_qty_allowance')
 
-					if d.ordered_qty and d.ordered_qty > d.stock_qty:
+					if mr_qty_allowance:
+						allowed_qty = d.qty + (d.qty * (mr_qty_allowance/100))
+						if d.ordered_qty and d.ordered_qty > allowed_qty:
+							frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
+								cannot be greater than allowed requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, allowed_qty, d.item_code))
+
+					elif d.ordered_qty and d.ordered_qty > d.stock_qty:
 						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
 							cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
 
@@ -264,7 +272,11 @@ def update_status(name, status):
 	material_request.update_status(status)
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None):
+def make_purchase_order(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, string_types):
+		args = json.loads(args)
 
 	def postprocess(source, target_doc):
 		if frappe.flags.args and frappe.flags.args.default_supplier:
@@ -279,7 +291,10 @@ def make_purchase_order(source_name, target_doc=None):
 		set_missing_values(source, target_doc)
 
 	def select_item(d):
-		return d.ordered_qty < d.stock_qty
+		filtered_items = args.get('filtered_children', [])
+		child_filter = d.name in filtered_items if filtered_items else True
+
+		return d.ordered_qty < d.stock_qty and child_filter
 
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {

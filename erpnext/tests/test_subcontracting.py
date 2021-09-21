@@ -1,16 +1,24 @@
 from __future__ import unicode_literals
-import frappe
-import unittest
+
 import copy
-from frappe.utils import cint
+import unittest
 from collections import defaultdict
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+import frappe
+from frappe.utils import cint
+
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	get_materials_from_supplier,
+	make_purchase_invoice,
+	make_purchase_receipt,
+	make_rm_stock_entry,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.buying.doctype.purchase_order.purchase_order import (make_rm_stock_entry,
-	make_purchase_receipt, make_purchase_invoice, get_materials_from_supplier)
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 
 class TestSubcontracting(unittest.TestCase):
 	def setUp(self):

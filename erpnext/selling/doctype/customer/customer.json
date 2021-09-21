@@ -20,6 +20,7 @@
   "tax_withholding_category",
   "default_bank_account",
   "lead_name",
+  "opportunity_name",
   "image",
   "column_break0",
   "account_manager",
@@ -267,6 +268,7 @@
    "options": "fa fa-map-marker"
   },
   {
+   "depends_on": "eval: !doc.__islocal",
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address HTML",
@@ -283,6 +285,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "eval: !doc.__islocal",
    "fieldname": "contact_html",
    "fieldtype": "HTML",
    "label": "Contact HTML",
@@ -493,14 +496,28 @@
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "opportunity_name",
+   "fieldtype": "Link",
+   "label": "From Opportunity",
+   "no_copy": 1,
+   "options": "Opportunity",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-01-28 12:54:57.258959",
+ "links": [
+  {
+   "group": "Allowed Items",
+   "link_doctype": "Party Specific Item",
+   "link_fieldname": "party"
+  }
+ ],
+ "modified": "2021-09-06 17:38:54.196663",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

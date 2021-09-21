@@ -3,8 +3,11 @@
 
 from __future__ import unicode_literals
 
-import frappe, erpnext
+import frappe
+
+import erpnext
 from erpnext.regional.india.setup import setup
+
 
 def execute():
 
@@ -19,10 +22,10 @@ def execute():
 	]
 
 	for doctype in doctypes:
-		frappe.reload_doc('Payroll', 'doctype', doctype)
+		frappe.reload_doc('Payroll', 'doctype', doctype, force=True)
 
 
-	reports = ['Professional Tax Deductions', 'Provident Fund Deductions']
+	reports = ['Professional Tax Deductions', 'Provident Fund Deductions', 'E-Invoice Summary']
 	for report in reports:
 		frappe.reload_doc('Regional', 'Report', report)
 		frappe.reload_doc('Regional', 'Report', report)

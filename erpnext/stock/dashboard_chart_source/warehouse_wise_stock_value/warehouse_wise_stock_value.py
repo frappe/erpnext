@@ -2,10 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+
+import frappe
 from frappe import _
 from frappe.utils.dashboard import cache_source
+
 from erpnext.stock.utils import get_stock_value_from_bin
+
 
 @frappe.whitelist()
 @cache_source

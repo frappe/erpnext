@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
-import erpnext.education.utils as utils
+
 import frappe
+
+import erpnext.education.utils as utils
 
 no_cache = 1
 

@@ -2,8 +2,9 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import nowdate
 
 test_records = frappe.get_test_records('Attendance')

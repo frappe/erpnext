@@ -2,12 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import datetime
-from six import iteritems
 
 import frappe
 from frappe import _
 from frappe.utils import flt, formatdate
+from six import iteritems
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
@@ -38,8 +39,8 @@ def execute(filters=None):
 				GROUP BY parent''',{'dimension':[dimension]})
 			if DCC_allocation:
 				filters['budget_against_filter'] = [DCC_allocation[0][0]]
-				cam_map = get_dimension_account_month_map(filters)
-				dimension_items = cam_map.get(DCC_allocation[0][0])
+				ddc_cam_map = get_dimension_account_month_map(filters)
+				dimension_items = ddc_cam_map.get(DCC_allocation[0][0])
 				if dimension_items:
 					data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation[0][1])
 
@@ -48,7 +49,6 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
-
 	for account, monthwise_data in iteritems(dimension_items):
 		row = [dimension, account]
 		totals = [0, 0, 0]
@@ -79,7 +79,7 @@ def get_final_data(dimension, dimension_items, filters, period_month_ranges, dat
 		if filters["period"] != "Yearly" :
 			row += totals
 		data.append(row)
-		
+
 	return data
 
 
@@ -389,7 +389,7 @@ def get_chart_data(filters, columns, data):
 			budget_values[i] += values[index]
 			actual_values[i] += values[index+1]
 			index += 3
-			
+
 	return {
 		'data': {
 			'labels': labels,
@@ -400,4 +400,3 @@ def get_chart_data(filters, columns, data):
 		},
 		'type' : 'bar'
 	}
-

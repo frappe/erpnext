@@ -59,7 +59,7 @@ frappe.ui.form.on('Asset Repair', {
 
 		if (frm.doc.repair_status == "Completed") {
 			frm.set_value('completion_date', frappe.datetime.now_datetime());
-		}				
+		}
 	}
 });
 

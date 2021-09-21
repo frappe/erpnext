@@ -3,13 +3,26 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import date_diff, getdate, rounded, add_days, cstr, cint, flt
 from frappe.model.document import Document
-from erpnext.payroll.doctype.payroll_period.payroll_period import get_payroll_period_days, get_period_factor
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
-from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_employee, get_previous_claimed_amount, validate_active_employee
+from frappe.utils import add_days, cint, cstr, date_diff, getdate, rounded
+
+from erpnext.hr.utils import (
+	get_holiday_dates_for_employee,
+	get_previous_claimed_amount,
+	get_sal_slip_total_benefit_given,
+	validate_active_employee,
+)
+from erpnext.payroll.doctype.payroll_period.payroll_period import (
+	get_payroll_period_days,
+	get_period_factor,
+)
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+	get_assigned_salary_structure,
+)
+
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
@@ -139,7 +152,7 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 			# Then the sum multiply with the no of lwp in that period
 			# Include that amount to the prev_sal_slip_flexi_total to get the actual
 			if have_depends_on_payment_days and per_day_amount_total > 0:
-				holidays = get_holidays_for_employee(employee, payroll_period_obj.start_date, on_date)
+				holidays = get_holiday_dates_for_employee(employee, payroll_period_obj.start_date, on_date)
 				working_days = date_diff(on_date, payroll_period_obj.start_date) + 1
 				leave_days = calculate_lwp(employee, payroll_period_obj.start_date, holidays, working_days)
 				leave_days_amount = leave_days * per_day_amount_total
