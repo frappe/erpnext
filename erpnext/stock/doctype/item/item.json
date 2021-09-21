@@ -17,9 +17,6 @@
   "variant_of",
   "item_name",
   "item_group",
-  "gst_hsn_code",
-  "is_nil_exempt",
-  "is_non_gst",
   "intercompany_item",
   "intercompany_item_name",
   "is_item_from_hub",
@@ -981,24 +978,6 @@
    "fieldname": "specific_gravity",
    "fieldtype": "Float",
    "label": "Specific Gravity"
-  },
-  {
-   "fieldname": "gst_hsn_code",
-   "fieldtype": "Link",
-   "label": "HSN/HAC",
-   "options": "GST HSN Code"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_nil_exempt",
-   "fieldtype": "Check",
-   "label": "Is Nil Rated or Exempted"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_non_gst",
-   "fieldtype": "Check",
-   "label": "Is Non GST "
   },
   {
    "collapsible": 1,
