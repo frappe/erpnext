@@ -852,7 +852,8 @@ def get_previous_sle(args, for_update=False):
 		}
 	"""
 	args["name"] = args.get("sle", None) or ""
-	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update)
+	operator = args.get("operator") or "<="
+	sle = get_stock_ledger_entries(args, operator, "desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
 
 def get_stock_ledger_entries(previous_sle, operator=None,

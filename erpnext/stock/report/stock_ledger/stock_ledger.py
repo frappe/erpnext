@@ -21,7 +21,7 @@ def execute(filters=None):
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
-	opening_row = get_opening_balance(filters, columns)
+	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	data = []
@@ -218,7 +218,7 @@ def get_sle_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
-def get_opening_balance(filters, columns):
+def get_opening_balance(filters, columns, sl_entries):
 	if not (filters.item_code and filters.warehouse and filters.from_date):
 		return
 
@@ -227,8 +227,14 @@ def get_opening_balance(filters, columns):
 		"item_code": filters.item_code,
 		"warehouse_condition": get_warehouse_condition(filters.warehouse),
 		"posting_date": filters.from_date,
-		"posting_time": "00:00:00"
+		"posting_time": "00:00:00",
+		"operator": "<"
 	})
+	for sle in sl_entries:
+		if sle.get("date").split()[0] == filters.from_date \
+			and sle.get("voucher_type") == "Stock Reconciliation":
+			last_entry = sle
+			sl_entries.remove(sle)
 
 	row = {
 		"item_code": _("'Opening'"),
