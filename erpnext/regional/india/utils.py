@@ -14,7 +14,6 @@ from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_
 from erpnext.hr.utils import get_salary_assignment
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.regional.india import number_state_mapping, state_numbers, states
-from erpnext.assets.doctype.asset.asset import get_depreciation_left
 
 GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")   #alphanumeric and - /
 GSTIN_FORMAT = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
@@ -843,13 +842,13 @@ def update_taxable_values(doc, method):
 		diff = additional_taxes - total_charges
 		doc.get('items')[item_count - 1].taxable_value += diff
 
-def get_depreciation_amount(asset, depreciable_value, row, date_of_sale=None):
-	depreciation_left = get_depreciation_left(asset, row, date_of_sale)
+def get_depreciation_amount(asset, depreciable_value, row):
+	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (flt(row.value_after_depreciation) -
+			depreciation_amount = ((flt(asset.gross_purchase_amount) - flt(asset.opening_accumulated_depreciation)) -
 				flt(row.expected_value_after_useful_life)) / depreciation_left
 
 		# if the Depreciation Schedule is being modified after Asset Repair

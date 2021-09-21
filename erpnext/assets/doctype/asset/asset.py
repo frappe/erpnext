@@ -221,7 +221,7 @@ class Asset(AccountsController):
 				# If depreciation is already completed (for double declining balance)
 				if skip_row: continue
 
-				depreciation_amount = get_depreciation_amount(self, value_after_depreciation, d, date_of_sale)
+				depreciation_amount = get_depreciation_amount(self, value_after_depreciation, d)
 
 				if not has_pro_rata or n < cint(number_of_pending_depreciations) - 1:
 					schedule_date = add_months(d.depreciation_start_date,
@@ -835,13 +835,13 @@ def get_total_days(date, frequency):
 	return date_diff(date, period_start_date)
 
 @erpnext.allow_regional
-def get_depreciation_amount(asset, depreciable_value, row, date_of_sale=None):
-	depreciation_left = get_depreciation_left(asset, row, date_of_sale)
+def get_depreciation_amount(asset, depreciable_value, row):
+	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (flt(row.value_after_depreciation) -
+			depreciation_amount = ((flt(asset.gross_purchase_amount) - flt(asset.opening_accumulated_depreciation)) -
 				flt(row.expected_value_after_useful_life)) / depreciation_left
 
 		# if the Depreciation Schedule is being modified after Asset Repair
@@ -852,17 +852,3 @@ def get_depreciation_amount(asset, depreciable_value, row, date_of_sale=None):
 		depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
 
 	return depreciation_amount
-
-def get_depreciation_left(asset, row, date_of_sale):
-	if not date_of_sale:
-		return flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
-	else:
-		if len(asset.finance_books) == 1:
-			return (flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)) - len(asset.schedules)
-		else:
-			depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
-			for schedule in asset.get('schedules'):
-				if schedule.finance_book == row.finance_book:
-					depreciation_left -= 1
-
-			return depreciation_left
