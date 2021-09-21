@@ -2201,7 +2201,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_asset_depreciation_on_sale(self):
 		"""
-			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on Sept 30.
+			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.
 		"""
 
 		create_asset_data()
@@ -2215,6 +2215,32 @@ class TestSalesInvoice(unittest.TestCase):
 			["2020-06-30", 1311.48, 1311.48],
 			["2021-06-30", 20000.0, 21311.48],
 			["2021-09-30", 5041.1, 26352.58]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+			self.assertTrue(schedule.journal_entry)
+
+	def test_depreciation_on_sale_for_depreciated_asset(self):
+		"""
+			Tests if an Asset set to depreciate yearly on Dec 31, that gets sold on Dec 31 after two years, created an additional depreciation entry on its date of sale.
+		"""
+
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2020-12-31"), submit=1)
+
+		post_depreciation_entries(getdate("2021-09-30"))
+
+		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-12-31"))
+		asset.load_from_db()
+
+		expected_values = [
+			["2020-12-31", 30000, 30000],
+			["2021-12-31", 30000, 60000]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
