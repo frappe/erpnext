@@ -2,13 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Sales Commission', {
-	setup: function(frm){
+	setup: function(frm) {
 		frm.set_query("commission_based_on", function() {
 			return {
 				filters: [
 					['name', 'in', ["Sales Order", "Sales Invoice"]]
 				]
-			}
+			};
 		});
 	},
 	refresh: function(frm) {
@@ -58,39 +58,36 @@ const create_payment_entry = function (frm) {
 		d.hide();
 		var arg = d.get_values();
 		frappe.confirm(__("Creating Payment Entry. Do you want to proceed?"),
-		function () {
-			frappe.call({
-				method: 'payout_entry',
-				args: {
-					"mode_of_payment": arg.mode_of_payment
-				},
-				callback: function () {
-					frappe.set_route(
-						'Form', "Payment Entry", {
-							"Payment Entry Reference.reference_name": frm.doc.name
-						}
-					);
-				},
-				doc: frm.doc,
-				freeze: true,
-				freeze_message: __('Creating Payment Entry')
-			});
-		},
-		function () {
-			if (frappe.dom.freeze_count) {
-				frappe.dom.unfreeze();
-				frm.events.refresh(frm);
+			function () {
+				frappe.call({
+					method: 'payout_entry',
+					args: {
+						"mode_of_payment": arg.mode_of_payment
+					},
+					callback: function () {
+						frappe.set_route(
+							'Form', "Payment Entry", {
+								"Payment Entry Reference.reference_name": frm.doc.name
+							}
+						);
+					},
+					doc: frm.doc,
+					freeze: true,
+					freeze_message: __('Creating Payment Entry')
+				});
+			},
+			function () {
+				if (frappe.dom.freeze_count) {
+					frappe.dom.unfreeze();
+					frm.events.refresh(frm);
+				}
 			}
-		}
 		);
 	});
 	d.show();
 };
 
 const create_additional_salary = function (frm) {
-	if (!frm.doc.employee) {
-		frappe.throw(__("No employee is linked to Sales Person {0}. Please select an employee for {1} to process this Commission.").format(frappe.bold(frm.doc.sales_person), get_link_to_form("Sales Person", frm.doc.sales_person)))
-	}
 	frappe.confirm(__("Creating Additional Salary. Do you want to proceed?"),
 		function () {
 			frappe.call({
