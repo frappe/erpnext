@@ -1,10 +1,12 @@
 import frappe
 
+
 def execute():
 	# pull from_year and to_year dynamically in irs_1099 print format
 	irs_1099_print_format = frappe.get_doc("Print Format", "IRS 1099 Form")
 	irs_1099_print_format.html = """
 		{% set from_year, to_year = doc.get_fiscal_years_for_irs_1099() %}
+
 		<div id="copy_a" style="position: relative; top:0cm; width:17cm;height:28.0cm;">
 		<table>
 		<tbody>
