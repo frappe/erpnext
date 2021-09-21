@@ -24,6 +24,7 @@
   "address_and_contact_section",
   "customer_address",
   "address_display",
+  "territory",
   "col_break_21",
   "contact_person",
   "contact_display",
@@ -58,6 +59,9 @@
   "column_break_25",
   "vehicle_color",
   "vehicle_license_plate",
+  "registration_details_section",
+  "choice_number_required",
+  "choice_number_details",
   "pricing_section",
   "customer_charges",
   "column_break_54",
@@ -583,12 +587,38 @@
    "fieldtype": "Data",
    "label": "Registration Agent Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory",
+   "read_only": 1
+  },
+  {
+   "fieldname": "registration_details_section",
+   "fieldtype": "Section Break",
+   "label": "Registration Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "choice_number_required",
+   "fieldtype": "Check",
+   "label": "Choice Number Required",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "choice_number_required",
+   "fieldname": "choice_number_details",
+   "fieldtype": "Data",
+   "label": "Choice Number Details",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-20 10:25:04.468578",
+ "modified": "2021-09-20 23:44:59.138371",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

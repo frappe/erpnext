@@ -8,9 +8,13 @@
  "field_order": [
   "component_name",
   "component_type",
-  "disabled",
+  "sorting_index",
   "column_break_4",
-  "price_list"
+  "booking_component_type",
+  "registration_component_type",
+  "disabled",
+  "section_break_6",
+  "price_lists"
  ],
  "fields": [
   {
@@ -28,7 +32,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Component Type",
-   "options": "Registration",
+   "options": "\nRegistration\nBooking",
    "reqd": 1,
    "search_index": 1
   },
@@ -43,16 +47,43 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "999",
+   "description": "Leave zero for default sorting",
+   "fieldname": "sorting_index",
+   "fieldtype": "Int",
+   "label": "Sorting Index",
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
    "allow_in_quick_entry": 1,
-   "fieldname": "price_list",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Price List",
-   "options": "Price List"
+   "fieldname": "price_lists",
+   "fieldtype": "Table",
+   "label": "Price Lists",
+   "no_copy": 1,
+   "options": "Vehicle Pricing Price List"
+  },
+  {
+   "depends_on": "eval:doc.component_type == \"Booking\"",
+   "fieldname": "booking_component_type",
+   "fieldtype": "Select",
+   "label": "Booking Component Type",
+   "no_copy": 1,
+   "options": "\nVehicle Retail\nFreight\nWithholding Tax"
+  },
+  {
+   "depends_on": "eval:doc.component_type == \"Registration\"",
+   "fieldname": "registration_component_type",
+   "fieldtype": "Select",
+   "label": "Registration Component Type",
+   "no_copy": 1,
+   "options": "\nChoice Number\nOwnership Transfer"
   }
  ],
- "modified": "2021-09-17 16:30:49.342523",
+ "modified": "2021-09-20 13:35:59.643350",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Pricing Component",
@@ -99,7 +130,7 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Vehicles",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_field": "sorting_index",
+ "sort_order": "ASC",
  "track_changes": 1
 }

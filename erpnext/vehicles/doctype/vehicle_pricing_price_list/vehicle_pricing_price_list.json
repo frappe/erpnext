@@ -1,0 +1,56 @@
+{
+ "creation": "2021-09-20 12:39:55.755764",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "territory",
+  "is_default",
+  "selling_price_list",
+  "buying_price_list"
+ ],
+ "fields": [
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "selling_price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Selling Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Buying Price List",
+   "options": "Price List"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Default"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-09-20 12:44:15.307205",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Pricing Price List",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

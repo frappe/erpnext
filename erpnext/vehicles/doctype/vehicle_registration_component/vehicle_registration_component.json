@@ -5,7 +5,9 @@
  "engine": "InnoDB",
  "field_order": [
   "component",
-  "amount"
+  "component_amount",
+  "is_choice_number",
+  "is_ownership_transfer"
  ],
  "fields": [
   {
@@ -18,16 +20,32 @@
   },
   {
    "default": "0",
-   "fieldname": "amount",
+   "fieldname": "component_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
    "options": "Company:company:default_currency",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_ownership_transfer",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Ownership Transfer",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_choice_number",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Choice Number",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-09-18 12:26:24.309007",
+ "modified": "2021-09-20 23:53:02.155875",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Component",

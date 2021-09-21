@@ -20,7 +20,7 @@ force_fields = [
 	'customer_name', 'vehicle_owner_name', 'broker_name', 'transporter_name',
 	'variant_of', 'variant_of_name',
 	'tax_id', 'tax_cnic', 'tax_strn',
-	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'territory',
 	'booking_customer_name', 'booking_address_display', 'booking_email', 'booking_mobile', 'booking_phone',
 	'booking_tax_id', 'booking_tax_cnic', 'booking_tax_strn', 'receiver_contact_cnic', 'finance_type'
 	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
@@ -66,6 +66,9 @@ class VehicleTransactionController(StockController):
 		vehicle_details = get_vehicle_details(self.as_dict(), get_vehicle_booking_order=False, warn_reserved=for_validate)
 		for k, v in vehicle_details.items():
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
+				if k == "vehicle_license_plate" and self.doctype == "Vehicle Registration Order":
+					continue
+
 				self.set(k, v)
 
 		customer_details = get_customer_details(self.as_dict())
@@ -104,6 +107,8 @@ class VehicleTransactionController(StockController):
 
 		if self.get('supplier'):
 			validate_party_frozen_disabled("Supplier", self.supplier)
+		if self.get('agent'):
+			validate_party_frozen_disabled("Supplier", self.agent)
 		elif self.get('customer'):
 			validate_party_frozen_disabled("Customer", self.customer)
 
@@ -262,7 +267,7 @@ def get_customer_details(args):
 	customer_details = frappe._dict()
 	if args.customer:
 		customer_details = frappe.get_cached_value("Customer", args.customer,
-			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn'], as_dict=1)
+			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'territory'], as_dict=1)
 
 	owner_details = frappe._dict()
 	if args.vehicle_owner:
@@ -296,6 +301,7 @@ def get_customer_details(args):
 		out.customer_address = get_default_address("Customer", args.customer)
 
 	out.address_display = get_address_display(out.customer_address)
+	out.territory = customer_details.territory
 
 	# Contact
 	out.contact_person = args.contact_person
