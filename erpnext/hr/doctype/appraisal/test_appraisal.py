@@ -1,9 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
-import frappe
 import unittest
 from datetime import date
+
+import frappe
 from dateutil.relativedelta import relativedelta
+
 
 class TestAppraisal(unittest.TestCase):
 
@@ -54,7 +56,7 @@ class TestAppraisal(unittest.TestCase):
 		})
 
 		doc.save()
-	
+
 	def test_verify_submission(self):
 		doc = frappe.db.get_list('Appraisal',filters={'employee': get_employee('Test_Employee', 'Test Company')},fields=['*'])
 		self.assertEqual(doc[0]['overall_self_score'],5.0)

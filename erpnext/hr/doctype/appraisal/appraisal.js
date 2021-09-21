@@ -54,11 +54,12 @@ frappe.ui.form.on('Appraisal', {
 frappe.ui.form.on('KRA Assessment', {
 	mentor_score: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
-		
+
 		if (d.mentor_score > 5 || d.mentor_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
 			d.mentor_score = 0;
 		}
+
 		else {
 			frm.trigger('calculate_total');
 		}
@@ -95,7 +96,7 @@ frappe.ui.form.on('Behavioural Assessment', {
 	self_score: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 
-		if(d.self_score > 5 || d.self_score < 1) {
+		if (d.self_score > 5 || d.self_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
 			d.self_score = 0;
 			refresh_field('self_score');
@@ -108,7 +109,7 @@ frappe.ui.form.on('Self Improvement Areas', {
 	current_score: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 
-		if(d.current_score > 5 || d.current_score < 1) {
+		if (d.current_score > 5 || d.current_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
 			d.current_score = 0;
 			refresh_field('current_score');
@@ -118,7 +119,7 @@ frappe.ui.form.on('Self Improvement Areas', {
 	target_score: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 
-		if(d.target_score > 5 || d.target_score < 1) {
+		if (d.target_score > 5 || d.target_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
 			d.target_score = 0;
 			refresh_field('target_score');
@@ -127,7 +128,7 @@ frappe.ui.form.on('Self Improvement Areas', {
 	achieved_score: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 
-		if(d.achieved_score > 5 || d.achieved_score < 1) {
+		if (d.achieved_score > 5 || d.achieved_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
 			d.achieved_score = 0;
 			refresh_field('achieved_score');

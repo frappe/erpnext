@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt, getdate
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -62,7 +62,7 @@ class Appraisal(Document):
 		for d in self.get('kra_assessment'):
 			if d.mentor_score < 1 or d.mentor_score > 5 and d.self_score < 1 or d.self_score > 5:
 				frappe.throw(_('KRA Assessment Score should be between 1 to 5'))
-			
+
 	def check_for_behavioural_assessment(self):
 
 		for d in self.get('behavioural_assessment'):
@@ -77,7 +77,7 @@ class Appraisal(Document):
 		for d in self.get('self_improvement_areas'):
 			if d.current_score > 5 or d.current_score < 1:
 				frappe.throw(_('Self Improvement Score should be between 1 and 5'))
-			
+
 			if d.target_score > 5 or d.target_score < 1:
 				frappe.throw(_('Self Improvement Score should be between 1 and 5'))
 
