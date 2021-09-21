@@ -855,9 +855,11 @@ def get_previous_sle(args, for_update=False):
 			"posting_date": "2012-12-12",
 			"posting_time": "12:00",
 			"sle": "name of reference Stock Ledger Entry"
+			"batch_no": "Batch 1"
 		}
 	"""
 	args["name"] = args.get("sle", None) or ""
+	args["batch_no"] = args.get("batch_no", None) or ""
 	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
 
@@ -869,6 +871,9 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		conditions += " and warehouse = %(warehouse)s"
 	elif previous_sle.get("warehouse_condition"):
 		conditions += " and " + previous_sle.get("warehouse_condition")
+
+	if previous_sle.get("batch_no"):
+		conditions += "and batch_no = %(batch_no)s"
 
 	if check_serial_no and previous_sle.get("serial_no"):
 		# conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))

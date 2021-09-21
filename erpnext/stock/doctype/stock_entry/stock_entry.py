@@ -426,6 +426,7 @@ class StockEntry(StockController):
 			previous_sle = get_previous_sle({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
+				"batch_no": d.batch_no or "",
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time
 			})
