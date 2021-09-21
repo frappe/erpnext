@@ -555,15 +555,15 @@ class StockEntry(StockController):
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
-		if not any([d.item_code for d in self.items if d.t_warehouse]):
+		if not any(d.item_code for d in self.items if d.t_warehouse):
 			self.additional_costs = []
 
-		self.total_additional_costs = sum([flt(t.base_amount) for t in self.get("additional_costs")])
+		self.total_additional_costs = sum(flt(t.base_amount) for t in self.get("additional_costs"))
 
 		if self.purpose in ("Repack", "Manufacture"):
-			incoming_items_cost = sum([flt(t.basic_amount) for t in self.get("items") if t.is_finished_item])
+			incoming_items_cost = sum(flt(t.basic_amount) for t in self.get("items") if t.is_finished_item)
 		else:
-			incoming_items_cost = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+			incoming_items_cost = sum(flt(t.basic_amount) for t in self.get("items") if t.t_warehouse)
 
 		if incoming_items_cost:
 			for d in self.get("items"):
