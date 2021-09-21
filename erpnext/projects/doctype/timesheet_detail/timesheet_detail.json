@@ -10,6 +10,7 @@
   "from_time",
   "description",
   "section_break_3",
+  "item",
   "expected_hours",
   "to_time",
   "hours",
@@ -262,12 +263,20 @@
    "label": "Costing Amount",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "activity_type.item",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-18 12:19:33.205940",
+ "modified": "2021-09-21 12:02:53.044184",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet Detail",

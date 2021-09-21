@@ -855,6 +855,7 @@ frappe.ui.form.on('Sales Invoice', {
 			'time_sheet': row.parent,
 			'billing_hours': row.billing_hours,
 			'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
+			'item': row.item,
 			'timesheet_detail': row.name,
 			'project_name': row.project_name
 		});
@@ -903,7 +904,7 @@ frappe.ui.form.on('Sales Invoice', {
 							},
 							callback: function(r) {
 								if (!r.exc && r.message.length > 0) {
-									frm.clear_table('timesheets')
+									frm.clear_table('timesheets');
 									r.message.forEach((d) => {
 										let exchange_rate = 1.0;
 										if (frm.doc.currency != d.currency) {
@@ -924,6 +925,7 @@ frappe.ui.form.on('Sales Invoice', {
 											frm.events.add_timesheet_row(frm, d, exchange_rate);
 										}
 									});
+									update_items_from_timesheets(frm);
 								} else {
 									frappe.msgprint(__('No Timesheets found with the selected filters.'))
 								}
@@ -935,6 +937,16 @@ frappe.ui.form.on('Sales Invoice', {
 				});
 				d.show();
 			})
+
+			frm.fields_dict['timesheets'].grid.add_custom_button(
+				__('Update Items'),
+				() => update_items_from_timesheets(frm)
+			);
+			frm.fields_dict["timesheets"].grid.grid_buttons
+				.find('.btn-custom')
+				.removeClass('btn-default')
+				.addClass('btn-secondary')
+				.css('margin-right', '4px');
 		}
 
 		if (frm.doc.is_debit_note) {
@@ -974,6 +986,92 @@ frappe.ui.form.on('Sales Invoice', {
 		});
 	}
 })
+
+function update_items_from_timesheets(frm){
+	const { timesheets } = frm.doc;
+	if(!timesheets || !timesheets.length) return;
+
+	const frm_item_codes = frm.doc.items.map(item => item.item_code);
+
+	let show_confirm_dialog;
+	for (const row of timesheets) {
+		if(frm_item_codes.includes(row.item)){
+			show_confirm_dialog = true;
+			break;
+		}
+	}
+
+	if(show_confirm_dialog){
+		frappe.confirm(
+			"Current items will be updated, Are you sure you want to continue?",
+			() => update_items(frm, timesheets, frm_item_codes)
+		);
+		return;
+	}
+
+	update_items(frm, timesheets, frm_item_codes);
+}
+
+function update_items(frm, timesheets, frm_item_codes){
+	const activities_without_item = new Set();
+	const activity_item_map = {};
+	for (const row of timesheets) {
+		if (!row.item) {
+			activities_without_item.add(row.activity_type);
+			continue;
+		}
+		if (row.activity_type in activity_item_map) continue;
+
+		activity_item_map[row.activity_type] = row.item;
+	}
+
+	// show warning
+	if (activities_without_item.size > 0) {
+		let warning_message =
+			"Following Activity Types don't have a linked item:<br><ul>";
+		for (const activity of activities_without_item) {
+			warning_message += `<li>${activity}</li>`;
+		}
+		warning_message += "</ul>Please add the corresponding items manually.";
+
+		frappe.show_alert({ message: warning_message, indicator: "yellow" });
+	}
+
+	// update items
+	for (const activity in activity_item_map) {
+		const { qty, amount } = timesheets
+			.reduce(
+				(total, row) => {
+					return row.activity_type !== activity ? total : {
+						qty: total.qty + row.billing_hours,
+						amount: total.amount + row.billing_amount,
+					};
+				},
+				{ qty: 0, amount: 0 }
+			);
+		const item = {
+			item_code: activity_item_map[activity],
+			qty,
+			rate: flt(amount / qty, 2),
+		};
+
+		let row;
+		if (frm_item_codes.includes(item.item_code)) {
+			const grid_item = frm.doc.items.find(i => i.item_code === item.item_code);
+			row = frappe.get_doc(grid_item.doctype, grid_item.name);
+		} else {
+			row = frm.add_child("items", {});
+		}
+
+		set_item_row(row, item);
+	}
+}
+
+async function set_item_row(row, item){
+	await frappe.model.set_value(row.doctype, row.name, "item_code", item.item_code);
+	delete item.item_code;
+	await frappe.model.set_value(row.doctype, row.name, item);
+}
 
 var calculate_total_billing_amount =  function(frm) {
 	var doc = frm.doc;

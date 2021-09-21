@@ -570,11 +570,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								() => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
-										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
+										return me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
 											me.frm.doc.doctype, me.frm.doc.company);
-									} else {
-										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 									}
+
+									return me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 								},
 								() => {
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
@@ -675,8 +675,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	get_incoming_rate(item, posting_date, posting_time, voucher_type, company) {
-
-		let item_args = {
+		const args = {
 			'item_code': item.item_code,
 			'warehouse': in_list('Purchase Receipt', 'Purchase Invoice') ? item.from_warehouse : item.warehouse,
 			'posting_date': posting_date,
@@ -688,15 +687,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			'allow_zero_valuation_rate': item.allow_zero_valuation_rate
 		}
 
-		frappe.call({
-			method: 'erpnext.stock.utils.get_incoming_rate',
-			args: {
-				args: item_args
-			},
-			callback: function(r) {
-				frappe.model.set_value(item.doctype, item.name, 'rate', r.message * item.conversion_factor);
-			}
-		});
+		return frappe.xcall('erpnext.stock.utils.get_incoming_rate', { args })
+			.then((incoming_rate) => frappe.model.set_value(
+				item.doctype,
+				item.name,
+				'rate',
+				incoming_rate * item.conversion_factor
+			));
 	}
 
 	add_taxes_from_item_tax_template(item_tax_map) {
