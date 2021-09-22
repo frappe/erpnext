@@ -240,12 +240,14 @@
   {
    "fieldname": "delivery_note",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Delivery Note",
    "read_only": 1
   },
   {
    "fieldname": "purchase_order",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Purchase Order",
    "read_only": 1
   },
@@ -352,6 +354,7 @@
   {
    "fieldname": "pick_list",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Pick List",
    "read_only": 1
   },
@@ -372,7 +375,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-18 18:23:59.486630",
+ "modified": "2021-09-22 15:50:05.272288",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",

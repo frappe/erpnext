@@ -360,6 +360,16 @@ frappe.listview_settings['Delivery Planning Item'] = {
 					message: __('Cannot split item with qty = 1')
 				});
 			}
+
+			else if( doc.transporter == null && doc.supplier == null){
+				frappe.msgprint({
+					title: __('Notification'),
+					indicator: 'Red',
+					message: __('Cannot split Please add Transporter or Supplier')
+				});
+			}
+
+
 			else{
 			let d = new frappe.ui.Dialog({
 				title: 'Split Planning Item',
@@ -401,6 +411,20 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						reqd: 1
 					},
 					{
+						label: 'Current Qty To Deliver',
+						fieldname: 'qty_td',
+						fieldtype: 'Float',
+						default : doc.qty_to_deliver,
+						read_only: 1
+					},
+					{
+						label: 'Current Pending Qty',
+						fieldname: 'qty_pd',
+						fieldtype: 'Float',
+						default : doc.pending_qty,
+						read_only: 1
+					},
+					{
 						label: 'Qty To Deliver',
 						fieldname: 'qty',
 						fieldtype: 'Float',
@@ -430,9 +454,16 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						mandatory_depends_on : "eval: doc.supplier_dc == 1",
 						onchange: function() {
 							frappe.model.get_value('Supplier', {"name":d.fields_dict.supplier.value}, 'supplier_name',
-							function(dd){								
-							d.fields_dict.supplier_name.value = dd.supplier_name
-							d.fields_dict.supplier_name.refresh();
+							function(dd){		
+								if (d.fields_dict.supplier.value){
+									d.fields_dict.supplier_name.value = dd.supplier_name
+									d.fields_dict.supplier_name.refresh();
+								}
+								else{
+									d.fields_dict.supplier_name.value = "Please select Supplier";
+									d.fields_dict.supplier_name.refresh();
+								}						
+							
 							})
 						},
 					},

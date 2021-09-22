@@ -9,6 +9,9 @@ from datetime import date
 
 class DeliveryPlanningItem(Document):
 
+	def before_submit(self):
+		if not self.transporter and not self.supplier:
+			frappe.throw("Please select Transporter or Supplier")
 
 
 	def before_save(self):
@@ -21,12 +24,12 @@ class DeliveryPlanningItem(Document):
 				print("old waarehosue and newware house",old_doc.sorce_warehouse, self.sorce_warehouse)
 				self.is_updated =1
 
-		if self.docstatus != 1 and self.supplier_dc == 1:
+		if self.docstatus != 1 and self.supplier_dc == 0:
 			frappe.db.set_value('Delivery Planning Item', self.name, {
 				'supplier' : "",
 				'supplier_name' : ""
 			})
-		elif self.docstatus != 1  and self.supplier_dc == 0:
+		elif self.docstatus != 1  and self.supplier_dc == 1:
 			frappe.db.set_value('Delivery Planning Item', self.name, {
 				'transporter' : "",
 				'transporter_name' : ""
@@ -36,17 +39,9 @@ class DeliveryPlanningItem(Document):
 	def on_submit(self):
 		
 		newname = ""
-		old_doc = self.get_doc_before_save()
-		# print("-==========--------- old_doc______-", old_doc)
-		# if old_doc.sorce_warehouse != self.sorce_warehouse or old_doc.qty_to_deliver != self.qty_to_deliver or old_doc.supplier != self.supplier:
-  		#   # price changed
-		# 	print("--------------- in side old value",old_doc)
-
-		print("-------- Inside on_submit----------")
 		if self.is_split == 1:
-			# code to add split item SOI of So
-			print("--------- In side is-split is true----------")
-
+			# code to add split item SOI of SO
+			
 			# retriving info from DPI used to split
 			pdpi = frappe.get_doc('Delivery Planning Item', self.sd_item)
 			print("------- previous DPI of split==== ",pdpi)
@@ -55,12 +50,21 @@ class DeliveryPlanningItem(Document):
 			ref_soi = frappe.get_doc('Sales Order Item', self.split_from_item)
 			print("---------- ref SOI --------  ",ref_soi)
 		
+
 			frappe.db.set_value('Sales Order Item', self.split_from_item,
 						{'qty' : pdpi.qty_to_deliver,
 						'stock_qty' : pdpi.qty_to_deliver,
 						'amount' : pdpi.qty_to_deliver * pdpi.rate,
 						})
 			print("--------------- Soi old updated ----")
+
+			# osoi = frappe.get_doc('Sales Order Item', self.split_from_item)
+			# osoi.qty = pdpi.qty_to_deliver
+			# osoi.stock_qty =  pdpi.qty_to_deliver
+			# osoi.amount = pdpi.qty_to_deliver * pdpi.rate
+			# osoi._action = "save"
+			
+
 			
 
 			# getting length soi for sales order child table items for IDX of new SOI
@@ -88,10 +92,15 @@ class DeliveryPlanningItem(Document):
 			soi.warehouse = self.sorce_warehouse
 			soi.conversion_factor = self.conversion_factor
 			print("----------====== new soi ---------========", soi, soi.item_name)
-			soi.save(ignore_permissions=True)
-			# newname = soi.name
+			# soi.save(ignore_permissions=True)
+			soi._action = "save"
+			soi.insert()
 
-			frappe.db.set_value('Delivery Planning Item', self.name, 'item_dname', soi.name)
+			newname = soi.name
+			
+			# setting new soi ID to split DPI
+			frappe.db.set_value('Delivery Planning Item', self.name, 'item_dname', newname)
+			frappe.db.commit()
 
 			if soi:
 				print("new soi created ----------- ",soi.name )
@@ -142,9 +151,10 @@ class DeliveryPlanningItem(Document):
 				# updateing old dpi 
 				frappe.db.set_value('Delivery Planning Item', self.name, {
 					'ordered_qty': new_qty,
-					'pending_qty': new_qty,
+					'pending_qty': 0,
 					'qty_to_deliver': new_qty,
-					'weight_to_deliver': float(new_qty) * float(self.weight_per_unit)
+					'weight_to_deliver': float(new_qty) * float(self.weight_per_unit),
+
 				})
 			print("----------- values -------------", self.sales_order, self.item_code)
 		
@@ -175,7 +185,7 @@ class DeliveryPlanningItem(Document):
 			dp_item.item_code = self.item_code
 			dp_item.item_name = self.item_name
 			dp_item.ordered_qty = n_qty
-			dp_item.pending_qty = n_qty
+			dp_item.pending_qty = 0
 			dp_item.qty_to_deliver = n_qty
 			dp_item.weight_to_deliver = float(self.weight_per_unit) * n_qty
 			dp_item.sales_order = self.sales_order
@@ -320,16 +330,18 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		print("----------- values -------------", doc.sales_order, doc.item_code)
 		dp_item = frappe.new_doc("Delivery Planning Item")
 		# dp_item.item_dname = newname
-		# if(n_supplier_dc == 0):
-		dp_item.transporter = n_transporter
-		# elif n_supplier_dc == 1:
-		dp_item.suppier = n_supplier
+		if n_transporter :
+			dp_item.transporter = n_transporter
+		
+		if n_supplier :
+			dp_item.suppier = n_supplier
 
 		dp_item.customer = doc.customer
+		dp_item.rate = doc.rate
 		dp_item.item_code = doc.item_code
 		dp_item.item_name = doc.item_name
 		dp_item.ordered_qty = n_qty
-		dp_item.pending_qty = n_qty
+		dp_item.pending_qty = 0
 		dp_item.qty_to_deliver = n_qty
 		dp_item.weight_to_deliver = float(doc.weight_per_unit) * float(n_qty)
 		dp_item.sales_order = doc.sales_order
