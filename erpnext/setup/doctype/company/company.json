@@ -86,10 +86,6 @@
   "capital_work_in_progress_account",
   "repair_and_maintenance_account",
   "asset_received_but_not_billed",
-  "hra_section1",
-  "basic_component",
-  "hra_component",
-  "arrear_component",
   "budget_detail",
   "exception_budget_approver_role",
   "company_info",
@@ -741,32 +737,9 @@
    "options": "Account"
   },
   {
-   "fieldname": "hra_section1",
-   "fieldtype": "Section Break",
-   "label": "HRA Settings"
-  },
-  {
    "fieldname": "upi_qr_code_image",
    "fieldtype": "Attach Image",
    "label": "UPI QR Code Image"
-  },
-  {
-   "fieldname": "basic_component",
-   "fieldtype": "Link",
-   "label": "Basic Component",
-   "options": "Salary Component"
-  },
-  {
-   "fieldname": "hra_component",
-   "fieldtype": "Link",
-   "label": "HRA Component",
-   "options": "Salary Component"
-  },
-  {
-   "fieldname": "arrear_component",
-   "fieldtype": "Link",
-   "label": "Arrear Component",
-   "options": "Salary Component"
   },
   {
    "fieldname": "upi_section",

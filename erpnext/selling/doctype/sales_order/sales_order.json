@@ -31,7 +31,6 @@
   "tax_id",
   "contact_info",
   "customer_address",
-  "billing_address_gstin",
   "address_display",
   "contact_person",
   "contact_display",
@@ -39,12 +38,9 @@
   "contact_mobile",
   "contact_email",
   "company_address",
-  "company_gstin",
-  "place_of_supply",
   "company_address_display",
   "col_break46",
   "shipping_address_name",
-  "customer_gstin",
   "shipping_address",
   "dispatch_address_name",
   "dispatch_address",
@@ -85,9 +81,6 @@
   "shipping_rule",
   "section_break_40",
   "taxes_and_charges",
-  "column_break_62",
-  "cost_center",
-  "section_break_64",
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
@@ -1536,36 +1529,6 @@
    "fieldname": "order_warehouse_rule_number",
    "fieldtype": "Read Only",
    "label": "Order Warehouse Rule Number"
-  },
-  {
-   "fieldname": "billing_address_gstin",
-   "fieldtype": "Data",
-   "label": "Billing Address GSTIN",
-   "print_hide": 1,
-   "read_only": 1,
-   "translatable": 1
-  },
-  {
-   "fetch_from": "company_address.gstin",
-   "fieldname": "company_gstin",
-   "fieldtype": "Data",
-   "label": "Company GSTIN",
-   "print_hide": 1,
-   "read_only": 1,
-   "translatable": 1
-  },
-  {
-   "fieldname": "place_of_supply",
-   "fieldtype": "Data",
-   "label": "Place of Supply"
-  },
-  {
-   "fetch_from": "shipping_address_name.gstin",
-   "fieldname": "customer_gstin",
-   "fieldtype": "Data",
-   "label": "Customer GSTIN",
-   "print_hide": 1,
-   "translatable": 1
   },
   {
    "fieldname": "transporter",

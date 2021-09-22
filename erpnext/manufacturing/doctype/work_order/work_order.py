@@ -379,14 +379,8 @@ class WorkOrder(Document):
 		self.actual_yeild_on_wo()
 		self.yeild_calc()
 		self.wo_actual_volume_list()
-		# value = 0
-		# for row in self.required_items:
-		# 	value += flt(row.required_qty)
-		
-		# print(value)
-		# self.qty = flt(value, self.precision('qty'))
-		# self.db_update()
-		# self.reload()
+		self.reload()
+
 
 	def total_weight(self):
 		total_trans = total_planned = 0
