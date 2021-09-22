@@ -15,10 +15,6 @@
   "item_name",
   "section_break_5",
   "description",
-  "gst_hsn_code",
-  "is_nil_exempt",
-  "is_non_gst",
-  "data_12",
   "item_group",
   "brand",
   "image_section",
@@ -52,7 +48,6 @@
   "pricing_rules",
   "stock_uom_rate",
   "is_free_item",
-  "rate_of_stock_uom",
   "section_break_24",
   "net_rate",
   "net_amount",
@@ -796,34 +791,6 @@
    "no_copy": 1,
    "options": "currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "gst_hsn_code",
-   "fieldtype": "Data",
-   "label": "HSN/SAC"
-  },
-  {
-   "default": "0",
-   "fetch_from": "item_code.is_nil_exempt",
-   "fieldname": "is_nil_exempt",
-   "fieldtype": "Check",
-   "label": "Is nil rated or exempted"
-  },
-  {
-   "default": "0",
-   "fetch_from": "item_code.is_non_gst",
-   "fieldname": "is_non_gst",
-   "fieldtype": "Check",
-   "label": "Is Non GST"
-  },
-  {
-   "fieldname": "data_12",
-   "fieldtype": "Data"
-  },
-  {
-   "fieldname": "rate_of_stock_uom",
-   "fieldtype": "Currency",
-   "label": "Rate of Stock UOM"
   },
   {
    "fetch_from": "Quotation Item",

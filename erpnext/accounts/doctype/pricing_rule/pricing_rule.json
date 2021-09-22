@@ -11,7 +11,6 @@
   "naming_series",
   "title",
   "disable",
-  "customer_pricing_rule_id",
   "apply_on",
   "price_or_product_discount",
   "warehouse",
@@ -574,13 +573,6 @@
    "fieldname": "is_recursive",
    "fieldtype": "Check",
    "label": "Is Recursive"
-  },
-  {
-   "fieldname": "customer_pricing_rule_id",
-   "fieldtype": "Link",
-   "label": "Customer Pricing Rule Id",
-   "options": "Customer Pricing Rule",
-   "read_only": 1
   },
   {
    "default": "PRLE-.####",
