@@ -1,0 +1,49 @@
+{
+ "creation": "2021-09-17 10:56:56.181377",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "concepts",
+  "detail",
+  "debit",
+  "credit"
+ ],
+ "fields": [
+  {
+   "fieldname": "concepts",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Concepts"
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Detail"
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Debit"
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Credit"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-09-17 10:59:36.030142",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Transactions Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
