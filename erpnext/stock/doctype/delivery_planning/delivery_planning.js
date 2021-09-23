@@ -378,6 +378,12 @@ frappe.ui.form.on('Delivery Planning', {
 
 
 	refresh: function(frm) {
+
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] == "Delivery Planning Item"){
+
+				location.reload();
+		}
 		
 		if (frm.doc.docstatus == 1 && frm.doc.d_status != "Pending Planning"){
 			frm.add_custom_button(__("Gantt Chart"), function () {

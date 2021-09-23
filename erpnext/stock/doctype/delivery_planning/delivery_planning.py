@@ -617,6 +617,8 @@ class DeliveryPlanning(Document):
 													"sales_order",
 													"name",
 													"pick_list",
+													"item_dname",
+													"qty_to_deliver",
 													"docstatus"]
 											)
 
@@ -671,10 +673,16 @@ class DeliveryPlanning(Document):
 										'd_status' : "Complete"})
 					frappe.db.commit()
 
+					print(" before dnote 00000000000000000000",i.item_dname, i.qty_to_deliver)
 					frappe.db.set_value('Sales Order Item', i.item_dname, {
-								'delivered_qty': i.qty_to_deliver,
-								'ordered_qty' : i.ordered_qty,
-								},  update_modified=False)		
+							'delivered_qty': i.qty_to_deliver,
+							'ordered_qty' : i.ordered_qty,
+							# 'actual_qty' : i.available_stock, 
+							#'projected_qty' : i.current_stock,
+							},  update_modified=False)	
+					print(" ============== after dnote before commit")			
+					frappe.db.commit()				
+					print(" ============== after dnote after commit =============")
 			return 2
 
 		else : return 0
