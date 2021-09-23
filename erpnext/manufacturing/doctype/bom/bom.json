@@ -70,7 +70,14 @@
   "show_items",
   "show_operations",
   "web_long_description",
-  "amended_from"
+  "amended_from",
+  "weight_details_section",
+  "rm_weight",
+  "fg_weight",
+  "bom_weight",
+  "column_break_70",
+  "yeild",
+  "fg_specific_gravity"
  ],
  "fields": [
   {
@@ -538,6 +545,45 @@
    "fieldname": "batch_size",
    "fieldtype": "Float",
    "label": "Batch Size"
+  },
+  {
+   "fieldname": "weight_details_section",
+   "fieldtype": "Section Break",
+   "label": "Weight Details"
+  },
+  {
+   "fieldname": "rm_weight",
+   "fieldtype": "Float",
+   "label": "RM Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fg_weight",
+   "fieldtype": "Float",
+   "label": "Fg Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_weight",
+   "fieldtype": "Float",
+   "label": "Bom Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "yeild",
+   "fieldtype": "Float",
+   "label": "Yeild",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fg_specific_gravity",
+   "fieldtype": "Float",
+   "label": "Fg Specific Gravity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_70",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -545,7 +591,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-20 13:13:44.452733",
+ "modified": "2021-09-23 20:29:54.609337",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
