@@ -9,13 +9,15 @@
   "naming_series",
   "customer",
   "customer_name",
-  "currency",
-  "conversion_rate",
   "column_break_3",
   "company",
   "posting_date",
   "posting_time",
   "status",
+  "section_break_9",
+  "currency",
+  "column_break_11",
+  "conversion_rate",
   "address_and_contact_section",
   "customer_address",
   "address_display",
@@ -37,6 +39,7 @@
   "dunning_fee",
   "column_break_17",
   "dunning_amount",
+  "base_dunning_amount",
   "section_break_32",
   "spacer",
   "column_break_33",
@@ -51,6 +54,7 @@
   "accounting_details_section",
   "cost_center",
   "income_account",
+  "debit_to",
   "amended_from"
  ],
  "fields": [
@@ -139,15 +143,6 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "sales_invoice.currency",
-   "fieldname": "currency",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Currency",
-   "options": "Currency",
-   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -248,7 +243,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nResolved\nUnresolved\nCancelled"
+   "options": "Draft\nResolved\nUnresolved\nCancelled",
+   "read_only": 1
   },
   {
    "description": "For dunning fee and interest",
@@ -257,14 +253,6 @@
    "label": "Income Account",
    "options": "Account",
    "print_hide": 1
-  },
-  {
-   "fetch_from": "sales_invoice.conversion_rate",
-   "fieldname": "conversion_rate",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Conversion Rate",
-   "read_only": 1
   },
   {
    "fieldname": "overdue_payments",
@@ -307,6 +295,7 @@
    "print_hide": 1
   },
   {
+   "default": "0",
    "fieldname": "dunning_amount",
    "fieldtype": "Currency",
    "label": "Dunning Amount",
@@ -359,6 +348,42 @@
    "label": "Company Address",
    "options": "Address",
    "print_hide": 1
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Currency"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Conversion Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "base_dunning_amount",
+   "fieldtype": "Currency",
+   "label": "Dunning Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
