@@ -24,10 +24,11 @@ class Dunning(AccountsController):
 			self.income_account = frappe.db.get_value("Company", self.company, "default_income_account")
 
 	def validate_overdue_payments(self):
+		daily_interest = self.rate_of_interest / 100 / 365
+
 		for row in self.overdue_payments:
 			row.overdue_days = (getdate(self.posting_date) - getdate(row.due_date)).days or 0
-			interest_per_year = flt(row.outstanding) * flt(self.rate_of_interest) / 100
-			row.interest_amount = (interest_per_year * cint(row.overdue_days)) / 365
+			row.interest = row.outstanding * daily_interest * row.overdue_days
 
 	def validate_totals(self):
 		self.total_outstanding = sum(row.outstanding for row in self.overdue_payments)
