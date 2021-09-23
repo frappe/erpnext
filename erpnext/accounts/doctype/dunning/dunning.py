@@ -5,11 +5,8 @@
 import json
 
 import frappe
-from frappe.utils import cint, flt, getdate
+from frappe.utils import getdate
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
-	get_accounting_dimensions,
-)
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -47,57 +44,34 @@ class Dunning(AccountsController):
 	def make_gl_entries(self):
 		if not self.dunning_amount:
 			return
-		gl_entries = []
-		invoice_fields = [
-			"project",
-			"cost_center",
-			"debit_to",
-			"party_account_currency",
-			"conversion_rate",
-			"cost_center",
-		]
-		inv = frappe.db.get_value("Sales Invoice", self.sales_invoice, invoice_fields, as_dict=1)
 
-		accounting_dimensions = get_accounting_dimensions()
-		invoice_fields.extend(accounting_dimensions)
+		cost_center = self.cost_center or frappe.get_cached_value("Company",  self.company,  "cost_center")
 
-		dunning_in_company_currency = flt(self.dunning_amount * inv.conversion_rate)
-		default_cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
-
-		gl_entries.append(
-			self.get_gl_dict(
-				{
-					"account": inv.debit_to,
+		make_gl_entries(
+			[
+				self.get_gl_dict({
+					"account": self.debit_to,
 					"party_type": "Customer",
 					"party": self.customer,
 					"due_date": self.due_date,
 					"against": self.income_account,
-					"debit": dunning_in_company_currency,
+					"debit": self.dunning_amount,
 					"debit_in_account_currency": self.dunning_amount,
 					"against_voucher": self.name,
 					"against_voucher_type": "Dunning",
-					"cost_center": inv.cost_center or default_cost_center,
-					"project": inv.project,
-				},
-				inv.party_account_currency,
-				item=inv,
-			)
-		)
-		gl_entries.append(
-			self.get_gl_dict(
-				{
+					"cost_center": cost_center
+				}),
+				self.get_gl_dict({
 					"account": self.income_account,
 					"against": self.customer,
-					"credit": dunning_in_company_currency,
-					"cost_center": inv.cost_center or default_cost_center,
-					"credit_in_account_currency": self.dunning_amount,
-					"project": inv.project,
-				},
-				item=inv,
-			)
-		)
-		make_gl_entries(
-			gl_entries, cancel=(self.docstatus == 2), update_outstanding="No", merge_entries=False
+					"credit": self.dunning_amount,
+					"cost_center": cost_center,
+					"credit_in_account_currency": self.dunning_amount
+				})
+			],
+			cancel=(self.docstatus == 2),
+			update_outstanding="No",
+			merge_entries=False
 		)
 
 
