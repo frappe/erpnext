@@ -19,6 +19,22 @@ frappe.listview_settings['Lab Test'] = {
 		listview.page.add_menu_item(__('Create Multiple'), function () {
 			create_multiple_dialog(listview);
 		});
+		listview.page.add_menu_item(__('Print Merged'), function () {
+			let names=[];
+			$.each(listview.get_checked_items(), function(key, value) {
+				names.push(value.name);
+			});
+			if (names.length == 0) {
+				frappe.throw(__("No rows selected."));
+			}
+
+			var w = window.open("/api/method/erpnext.healthcare.utils.print_merged_lab_tests?names="
+								+encodeURIComponent(names)+"&lang=ENG");
+
+			if (!w) {
+				frappe.msgprint(__("Please enable pop-ups")); return;
+			}
+		});
 	}
 };
 

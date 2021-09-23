@@ -11,6 +11,7 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, rounded, time_diff_in_hours
 from frappe.utils.formatters import format_value
+from frappe.utils.pdf import get_pdf
 
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
@@ -796,3 +797,28 @@ def update_patient_email_and_phone_numbers(contact, method):
 
 			if new_contact_details:
 				frappe.db.set_value('Patient', link.get('link_name'), new_contact_details)
+
+@frappe.whitelist()
+def print_merged_lab_tests(names):
+	names = names.split(",")
+	lab_test_list = []
+	patient = frappe.get_doc("Lab Test", names[0]).patient
+
+	for name in names:
+		lab_doc = frappe.get_doc("Lab Test", name)
+		if (lab_doc.patient == patient):
+			lab_test_list.append(lab_doc)
+		else:
+			frappe.throw(_("Please select lab tests of the same patient"))
+
+	base_template_path = "frappe/www/printview.html"
+	template_path = "templates/includes/healthcare/lab_test_merged_print.html"
+
+	from frappe.www.printview import get_print_style
+	print_html = frappe.render_template(template_path, {"lab_test_list": lab_test_list})
+	print_html = frappe.render_template(base_template_path, {"body": print_html,
+			"css": get_print_style()})
+
+	frappe.response.filename = "Merged Lab Test Report.pdf"
+	frappe.response.filecontent = get_pdf(print_html)
+	frappe.response.type = "pdf"

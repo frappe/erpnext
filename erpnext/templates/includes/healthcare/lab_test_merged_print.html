@@ -1,0 +1,305 @@
+<div>
+    {% if letter_head and not no_letterhead -%}
+    <div class="letter-head">{{ letter_head }}</div>
+    <hr>
+    {%- endif %}
+
+    <hr>
+    {% set lab_doc = lab_test_list[0] %}
+    <div class="row section-break">
+        <div class="col-xs-6 column-break">
+
+            <div class="row">
+                <div class="col-xs-4 text-left">
+                    <label>Patient</label>
+                </div>
+                {% if lab_doc.patient_name %}
+                <div class="col-xs-7  value">
+                    {{ lab_doc.patient_name }}
+                </div>
+                {% else %}
+                <div class="col-xs-7  value">
+                    {{ lab_doc.patient }}
+                </div>
+                {%- endif -%}
+            </div>
+
+            <div class="row">
+                <div class="col-xs-4 text-left">
+                    <label>Gender</label>
+                </div>
+                <div class="col-xs-7  value">
+                    {{ lab_doc.patient_sex or '' }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-6 column-break">
+            <div class="row">
+                <div class="col-xs-4 text-right">
+                    <label>Age</label>
+                </div>
+                <div class="col-xs-7 text-right value">
+                    {% set age = " " %}
+                    {{ age.join(lab_doc.patient_age.split(" ")[0:2]) or '' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for doc in lab_test_list %}
+    <div>
+        <hr>
+        <h4 class="text-uppercase text-center"><b><u>Department of {{ doc.department }}</u></b></h4>
+    </div>
+
+    <div class="row section-break">
+
+        <div class="col-xs-6 column-break">
+
+            <div class="row">
+                <div class="col-xs-4 text-left">
+                    <label>Practitioner</label>
+                </div>
+                {% if doc.practitioner_name %}
+                <div class="col-xs-7  text-left value">
+                    {{ doc.practitioner_name }}
+                </div>
+                {% else %}
+                {% if doc.referring_practitioner_name %}
+                <div class="col-xs-7  text-left value">
+                    {{ doc.referring_practitioner_name }}
+                </div>
+                {% endif %}
+                {%- endif -%}
+            </div>
+
+        </div>
+
+        <div class="col-xs-6 column-break">
+            {% if doc.sample_date %}
+            <div class="row">
+                <div class="col-xs-4 text-right">
+                    <label>Sample Date</label>
+                </div>
+                <div class="col-xs-7 text-right value">
+                    {{ doc.sample_date }}
+                </div>
+            </div>
+            {%- endif -%}
+
+            {% if doc.result_date %}
+            <div class="row">
+                <div class="col-xs-4 text-right">
+                    <label>Result Date</label>
+                </div>
+                <div class="col-xs-7 text-right value">
+                    {{ doc.result_date }}
+                </div>
+            </div>
+            {%- endif -%}
+
+        </div>
+
+    </div>
+
+
+
+    <div>
+        {% if doc.result_legend and (doc.legend_print_position == "Top" or doc.legend_print_position == "Both")%}
+        <b>Result Legend:</b>
+        {{ doc.result_legend }}
+        {%- endif -%}
+    </div>
+
+    <table class="table">
+        <tbody>
+            {%- if doc.normal_test_items -%}
+            <tr>
+                <th>Name of Test</th>
+                <th class="text-left">Result</th>
+                <th class="text-right">Normal Range</th>
+            </tr>
+
+            {%- if doc.normal_test_items|length > 1 %}
+            <tr>
+                <td style="width: 40%;"> <b>{{ doc.lab_test_name }}</b> </td>
+                <td></td>
+            </tr>
+            {%- endif -%}
+
+            {%- for row in doc.normal_test_items -%}
+            <tr>
+                <td style="width: 40%;border:none;">
+                    {%- if doc.normal_test_items|length > 1 %}&emsp;&emsp;{%- endif -%}
+                    {%- if row.lab_test_name -%}<b>{{ row.lab_test_name }}</b>
+                    {%- else -%}&emsp;&emsp;&emsp;{%- endif -%}
+                    {%- if row.lab_test_event -%} &emsp;&emsp;{{ row.lab_test_event }}{%- endif -%}
+                </td>
+
+                <td style="width: 20%;text-align: left;border:none;">
+                    {%- if row.result_value -%}
+                    {%- if row.bold -%}<b>{% endif %}
+                        {%- if row.underline -%}<u>{% endif %}
+                            {%- if row.italic -%}<i>{% endif %}
+                                {{ row.result_value }}
+                                {%- if row.lab_test_uom -%}&emsp;{{ row.lab_test_uom }}{%- endif -%}
+                                {%- if row.italic -%}</i>{% endif %}
+                            {%- if row.underline -%}</u>{% endif %}
+                        {%- if row.bold -%}</b>{% endif %}
+                    {%- endif -%}
+
+                    {%- if row.secondary_uom and row.conversion_factor and row.secondary_uom_result -%}
+                    <br />
+                    {%- if row.bold -%}<b>{% endif %}
+                        {%- if row.underline -%}<u>{% endif %}
+                            {%- if row.italic -%}<i>{% endif %}
+                                {{ row.secondary_uom_result }}
+                                &emsp;{{ row.secondary_uom }}
+                                {%- if row.italic -%}</i>{% endif %}
+                            {%- if row.underline -%}</u>{% endif %}
+                        {%- if row.bold -%}</b>{% endif %}
+                    &emsp;
+                    {%- endif -%}
+                </td>
+
+                <td style="width: 30%;text-align: right;border:none;">
+                    <div style="border: 0px;">
+                        {%- if row.normal_range -%}{{ row.normal_range }}{%- endif -%}
+                    </div>
+                </td>
+            </tr>
+
+            {%- endfor -%}
+            {%- endif -%}
+        </tbody>
+    </table>
+
+    <table class="table">
+        <tbody>
+            {%- if doc.descriptive_test_items -%}
+            <tr>
+                <th>Name of Test</th>
+                <th class="text-left">Result</th>
+            </tr>
+            <tr>
+                <td style="width: 30%;border:none;"> <b>{{ doc.lab_test_name }}</b> </td>
+                <td></td>
+            </tr>
+            {% set gr_lab_test_name = {'ltname': ''} %}
+            {%- for row in doc.descriptive_test_items -%}
+            {%- if row.lab_test_name -%}
+            {%- if row.lab_test_name != gr_lab_test_name.ltname -%}
+            <tr>
+                <td style="width: 30%;border:none;"> &emsp;{{ row.lab_test_name }} </td>
+                <td style="width: 70%;text-align: left;border:none;"></td>
+            </tr>
+            {% if gr_lab_test_name.update({'ltname': row.lab_test_name}) %} {% endif %}
+            {%- endif -%}
+            {%- endif -%}
+            <tr>
+                <td style="width: 30%;border:none;"> &emsp;&emsp;{{ row.lab_test_particulars }} </td>
+                <td style="width: 70%;text-align: left;border:none;">
+                    {%- if row.result_value -%}{{ row.result_value }}{%- endif -%}
+                </td>
+            </tr>
+            {%- endfor -%}
+            {%- endif -%}
+
+            {%- if doc.organism_test_items -%}
+            <tr>
+                <th>Organism</th>
+                <th class="text-left">Colony Population</th>
+            </tr>
+            {%- for row in doc.organism_test_items -%}
+            <tr>
+                <td style="width: 30%;border:none;"> {{ row.organism }} </td>
+                <td style="width: 60%;text-align: left;border:none;">
+                    {% if row.colony_population %}
+                    {{ row.colony_population }}
+                    {% endif %}
+                    {% if row.colony_uom %}
+                    {{ row.colony_uom }}
+                    {% endif %}
+                </td>
+            </tr>
+            {%- endfor -%}
+            {%- endif -%}
+
+            {%- if doc.sensitivity_test_items -%}
+            <tr>
+                <th>Antibiotic</th>
+                <th class="text-left">Sensitivity</th>
+                {%- if doc.sensitivity_test_items|length > 1-%}
+                <th>Antibiotic</th>
+                <th class="text-left">Sensitivity</th>
+                {%- endif -%}
+            </tr>
+            {%- endif -%}
+
+            {%- for row in range(0, doc.sensitivity_test_items|length, 2) -%}
+            <tr>
+                <td style="width: 20%;border:none;"> {{ doc.sensitivity_test_items[row].antibiotic }} </td>
+                <td style="width: 30%;text-align: left;border:none;">{{
+                    doc.sensitivity_test_items[row].antibiotic_sensitivity }}</td>
+                {%- if doc.sensitivity_test_items[row+1] -%}
+                <td style="width: 20%;border:none;"> {{ doc.sensitivity_test_items[row+1].antibiotic }} </td>
+                <td style="width: 30%;text-align: left;border:none;">{{
+                    doc.sensitivity_test_items[row+1].antibiotic_sensitivity }}</td>
+                {%- endif -%}
+            </tr>
+            {%- endfor -%}
+
+        </tbody>
+    </table>
+    <div>
+        {% if doc.custom_result %}
+        <br />
+        <div> {{ doc.custom_result }} </div>
+        {%- endif -%}
+    </div>
+
+    <div>
+        {% if doc.lab_test_comment %}
+        <br />
+        <b>Comments</b>
+        {{ doc.lab_test_comment }}
+        {%- endif -%}
+    </div>
+
+    <div>
+        {% if doc.result_legend and (doc.legend_print_position == "Bottom" or doc.legend_print_position == "Both" or
+        doc.legend_print_position == "")%}
+        <b>Result Legend</b>
+        {{ doc.result_legend }}
+        {%- endif -%}
+    </div>
+
+    <div class="text-right">
+        {%- if (frappe.db.get_value("Healthcare Settings", "None", "employee_name_and_designation_in_print") == '1') -%}
+        {%- if doc.employee_name -%}
+        <h6 class="text-uppercase"><b>{{ doc.employee_name }}</b></h6>
+        {%- endif -%}
+        {%- if doc.employee_designation -%}
+        <h6 class="text-uppercase"><b>{{ doc.employee_designation }}</b></h6>
+        {%- endif -%}
+        {%- else -%}
+        {%- if frappe.db.get_value("Healthcare Settings", "None", "custom_signature_in_print") -%}
+        <h6><b>{{ frappe.db.get_value("Healthcare Settings", "None", "custom_signature_in_print") }}</b></h6>
+        {%- endif -%}
+        {%- endif -%}
+    </div>
+
+    {%- endfor -%}
+
+    <div id="footer-html" class="visible-pdf">
+        {% if not no_letterhead and footer %}
+        <div class="letter-head-footer">
+            {{ footer }}
+        </div>
+        {% endif %}
+        <p class="text-center small page-number visible-pdf">
+            {{ _("Page {0} of {1}").format('<span class="page"></span>', '<span class="topage"></span>') }}
+        </p>
+    </div>
+</div>
