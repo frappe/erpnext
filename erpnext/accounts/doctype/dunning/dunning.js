@@ -23,7 +23,15 @@ frappe.ui.form.on("Dunning", {
 				}
 			};
 		});
-
+		frm.set_query("debit_to", () => {
+			return {
+				filters: {
+					"account_type": "Receivable",
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			}
+		});
 		frm.set_query("contact_person", erpnext.queries.contact_query);
 		frm.set_query("customer_address", erpnext.queries.address_query);
 		frm.set_query("company_address", erpnext.queries.company_address_query);
@@ -43,13 +51,13 @@ frappe.ui.form.on("Dunning", {
 				__("Payment"),
 				function () {
 					frm.events.make_payment_entry(frm);
-				},__("Create")
+				}, __("Create")
 			);
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if(frm.doc.docstatus > 0) {
-			frm.add_custom_button(__("Ledger"), function() {
+		if (frm.doc.docstatus > 0) {
+			frm.add_custom_button(__("Ledger"), function () {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,
@@ -61,8 +69,8 @@ frappe.ui.form.on("Dunning", {
 			}, __("View"));
 		}
 
-		if(frm.doc.docstatus === 0) {
-			frm.add_custom_button(__("Fetch Overdue Payments"), function() {
+		if (frm.doc.docstatus === 0) {
+			frm.add_custom_button(__("Fetch Overdue Payments"), function () {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 					source_doctype: "Sales Invoice",
@@ -78,6 +86,103 @@ frappe.ui.form.on("Dunning", {
 				});
 			});
 		}
+
+		frappe.dynamic_link = { doc: frm.doc, fieldname: 'customer', doctype: 'Customer' }
+
+		frm.toggle_display("customer_name", (frm.doc.customer_name && frm.doc.customer_name !== frm.doc.customer));
+	},
+	// When multiple companies are set up. in case company name is changed set default company address
+	company: function (frm) {
+		if (frm.doc.company) {
+			frappe.call({
+				method: "erpnext.setup.doctype.company.company.get_default_company_address",
+				args: { name: frm.doc.company, existing_address: frm.doc.company_address || "" },
+				debounce: 2000,
+				callback: function (r) {
+					if (r.message) {
+						frm.set_value("company_address", r.message)
+					}
+					else {
+						frm.set_value("company_address", "")
+					}
+				}
+			});
+
+			if (frm.fields_dict.currency) {
+				var company_currency = erpnext.get_currency(frm.doc.company);
+
+				if (!frm.doc.currency) {
+					frm.set_value("currency", company_currency);
+				}
+
+				if (frm.doc.currency == company_currency) {
+					frm.set_value("conversion_rate", 1.0);
+				}
+			}
+
+			var company_doc = frappe.get_doc(":Company", frm.doc.company);
+			if (company_doc.default_letter_head) {
+				if (frm.fields_dict.letter_head) {
+					frm.set_value("letter_head", company_doc.default_letter_head);
+				}
+			}
+		}
+		frm.trigger("set_debit_to");
+	},
+	set_debit_to: function(frm) {
+		if (frm.doc.customer && frm.doc.company) {
+			return frappe.call({
+				method: "erpnext.accounts.party.get_party_account",
+				args: {
+					company: frm.doc.company,
+					party_type: "Customer",
+					party: frm.doc.customer,
+					currency: erpnext.get_currency(frm.doc.company)
+				},
+				callback: function (r) {
+					if (!r.exc && r.message) {
+						frm.set_value("debit_to", r.message);
+					}
+				}
+			});
+		}
+	},
+	customer: function (frm) {
+		frm.trigger("set_debit_to");
+	},
+	currency: function (frm) {
+		// this.set_dynamic_labels();
+		var company_currency = erpnext.get_currency(frm.doc.company);
+		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
+		if(frm.doc.currency && frm.doc.currency !== company_currency) {
+			frappe.call({
+				method: "erpnext.setup.utils.get_exchange_rate",
+				args: {
+					transaction_date: transaction_date,
+					from_currency: frm.doc.currency,
+					to_currency: company_currency,
+					args: "for_selling"
+				},
+				freeze: true,
+				freeze_message: __("Fetching exchange rates ..."),
+				callback: function(r) {
+					const exchange_rate = flt(r.message);
+					if(exchange_rate != frm.doc.conversion_rate) {
+						frm.set_value("conversion_rate", exchange_rate);
+					}
+				}
+			});
+		} else {
+			frm.trigger("conversion_rate");
+		}
+	},
+	conversion_rate: function (frm) {
+		if(frm.doc.currency === erpnext.get_currency(frm.doc.company)) {
+			frm.set_value("conversion_rate", 1.0);
+		}
+
+		// Make read only if Accounts Settings doesn't allow stale rates
+		frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
 	},
 	customer_address: function (frm) {
 		erpnext.utils.get_address_display(frm, "customer_address");
