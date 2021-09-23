@@ -7,6 +7,7 @@
  "field_order": [
   "sales_invoice",
   "payment_schedule",
+  "dunning_level",
   "payment_term",
   "section_break_15",
   "description",
@@ -16,21 +17,18 @@
   "mode_of_payment",
   "column_break_5",
   "invoice_portion",
-  "section_break_9",
+  "section_break_16",
   "payment_amount",
   "outstanding",
   "paid_amount",
   "discounted_amount",
-  "column_break_3",
-  "base_payment_amount",
-  "interest_amount"
+  "interest"
  ],
  "fields": [
   {
    "columns": 2,
    "fieldname": "payment_term",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Payment Term",
    "options": "Payment Term",
    "print_hide": 1,
@@ -80,10 +78,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
-  },
-  {
    "columns": 2,
    "fieldname": "payment_amount",
    "fieldtype": "Currency",
@@ -117,23 +111,12 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "base_payment_amount",
-   "fieldtype": "Currency",
-   "label": "Payment Amount (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sales Invoice",
    "options": "Sales Invoice",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -151,17 +134,30 @@
    "read_only": 1
   },
   {
-   "fieldname": "interest_amount",
+   "default": "1",
+   "fieldname": "dunning_level",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Dunning Level",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "interest",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Interest Amount",
+   "label": "Interest",
+   "options": "currency",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-17 12:10:42.278923",
+ "modified": "2021-09-23 13:48:27.898830",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Overdue Payment",

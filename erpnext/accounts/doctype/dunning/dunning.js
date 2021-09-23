@@ -200,7 +200,7 @@ frappe.ui.form.on("Dunning", {
 		if (frm.doc.dunning_type) {
 			frappe.call({
 				method:
-				"erpnext.accounts.doctype.dunning.dunning.get_dunning_letter_text",
+					"erpnext.accounts.doctype.dunning.dunning.get_dunning_letter_text",
 				args: {
 					dunning_type: frm.doc.dunning_type,
 					language: frm.doc.language,
@@ -223,12 +223,12 @@ frappe.ui.form.on("Dunning", {
 		frm.trigger("calculate_overdue_days");
 	},
 	rate_of_interest: function (frm) {
-		frm.trigger("calculate_interest_amount");
+		frm.trigger("calculate_interest");
 	},
 	dunning_fee: function (frm) {
 		frm.trigger("calculate_totals");
 	},
-	overdue_payments_add: function(frm) {
+	overdue_payments_add: function (frm) {
 		frm.trigger("calculate_totals");
 	},
 	overdue_payments_remove: function (frm) {
@@ -245,16 +245,16 @@ frappe.ui.form.on("Dunning", {
 			}
 		});
 	},
-	calculate_interest_amount: function (frm) {
+	calculate_interest: function (frm) {
 		frm.doc.overdue_payments.forEach((row) => {
-			const interest_per_year = row.outstanding * frm.doc.rate_of_interest / 100;
-			const interest_amount = flt((interest_per_year * cint(row.overdue_days)) / 365 || 0, precision("interest_amount"));
-			frappe.model.set_value(row.doctype, row.name, "interest_amount", interest_amount);
+			const interest_per_day = frm.doc.rate_of_interest / 100 / 365;
+			const interest = flt((interest_per_day * row.outstanding * cint(row.overdue_days)) / 365 || 0, precision("interest"));
+			frappe.model.set_value(row.doctype, row.name, "interest", interest);
 		});
 	},
 	calculate_totals: function (frm) {
 		const total_interest = frm.doc.overdue_payments
-			.reduce((prev, cur) => prev + cur.interest_amount, 0);
+			.reduce((prev, cur) => prev + cur.interest, 0);
 		const total_outstanding = frm.doc.overdue_payments
 			.reduce((prev, cur) => prev + cur.outstanding, 0);
 		const dunning_amount = flt(total_interest + frm.doc.dunning_fee, precision("dunning_amount"));
@@ -268,7 +268,7 @@ frappe.ui.form.on("Dunning", {
 	make_payment_entry: function (frm) {
 		return frappe.call({
 			method:
-			"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+				"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
 				dt: frm.doc.doctype,
 				dn: frm.doc.name,
@@ -282,7 +282,7 @@ frappe.ui.form.on("Dunning", {
 });
 
 frappe.ui.form.on("Overdue Payment", {
-	interest_amount: function(frm, cdt, cdn) {
+	interest: function (frm, cdt, cdn) {
 		frm.trigger("calculate_totals");
 	}
 });
