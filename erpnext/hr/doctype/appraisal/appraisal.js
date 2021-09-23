@@ -87,7 +87,7 @@ frappe.ui.form.on('Behavioural Assessment', {
 	mentors_score: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 
-		if(d.mentors_score > 5 || d.mentors_score < 1) {
+		if (d.mentors_score > 5 || d.mentors_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
 			d.mentors_score = 0;
 			refresh_field('mentors_score');
