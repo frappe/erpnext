@@ -30,19 +30,10 @@ class Dunning(AccountsController):
 			row.interest_amount = (interest_per_year * cint(row.overdue_days)) / 365
 
 	def validate_totals(self):
-		total_outstanding = sum(row.outstanding for row in self.overdue_payments)
-		total_interest = sum(row.interest_amount for row in self.overdue_payments)
-		dunning_amount = flt(total_interest) + flt(self.dunning_fee)
-		grand_total = flt(total_outstanding) + flt(dunning_amount)
-
-		if self.total_outstanding != total_outstanding:
-			self.total_outstanding = flt(total_outstanding, self.precision("total_outstanding"))
-		if self.total_interest != total_interest:
-			self.total_interest = flt(total_interest, self.precision("total_interest"))
-		if self.dunning_amount != dunning_amount:
-			self.dunning_amount = flt(dunning_amount, self.precision("dunning_amount"))
-		if self.grand_total != grand_total:
-			self.grand_total = flt(grand_total, self.precision("grand_total"))
+		self.total_outstanding = sum(row.outstanding for row in self.overdue_payments)
+		self.total_interest = sum(row.interest for row in self.overdue_payments)
+		self.dunning_amount = self.total_interest + self.dunning_fee
+		self.grand_total = self.total_outstanding + self.dunning_amount
 
 	def on_submit(self):
 		self.make_gl_entries()
