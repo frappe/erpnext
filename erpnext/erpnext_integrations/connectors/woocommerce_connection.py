@@ -511,7 +511,21 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 				if meta_data.get('key') == "swab" and meta_data.get('value') == "true":
 					is_swab = True
 
+		# we want to find the price list for that curreny and calculate the discount percentage
+		default_price_list = frappe.db.get_value("Customer", customer_code, "default_price_list")
+		from erpnext.stock.get_item_details import get_price_list_rate_for
+		args = frappe._dict(
+			customer=customer_code,
+			price_list=default_price_list, 
+			qty=item.get("quantity"),
+			transaction_date=datetime.today().strftime('%Y-%m-%d')
+		)
+		price_list_rate = get_price_list_rate_for(
+			args,
+			found_item.item_code,
+		)
 
+		discount = (price_list_rate - item.get("price")) / price_list_rate * 100
 
 
 		validated_item = {
@@ -521,6 +535,7 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			"item_group": found_item.item_group,
 			"uom": woocommerce_settings.uom or _("Unit"),
 			"qty": item.get("quantity"),
+			"discount_percentage": discount,
 			"rate": item.get("price"),
 			"warehouse": woocommerce_settings.warehouse,
 			"is_stock_item": found_item.is_stock_item,
