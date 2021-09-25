@@ -75,12 +75,12 @@ class Asset(AccountsController):
 		if self.is_existing_asset and self.purchase_invoice:
 			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
 
-	def prepare_depreciation_data(self, date_of_sale=None):
+	def prepare_depreciation_data(self, date_of_sale=None, date_of_return=None):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
 			self.make_depreciation_schedule(date_of_sale)
-			self.set_accumulated_depreciation(date_of_sale)
+			self.set_accumulated_depreciation(date_of_sale, date_of_return)
 		else:
 			self.finance_books = []
 			self.value_after_depreciation = (flt(self.gross_purchase_amount) -
@@ -406,7 +406,7 @@ class Asset(AccountsController):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date")
 				.format(row.idx))
 
-	def set_accumulated_depreciation(self, date_of_sale=None, ignore_booked_entry = False):
+	def set_accumulated_depreciation(self, date_of_sale=None, date_of_return=None, ignore_booked_entry = False):
 		straight_line_idx = [d.idx for d in self.get("schedules") if d.depreciation_method == 'Straight Line']
 		finance_books = []
 
@@ -423,7 +423,7 @@ class Asset(AccountsController):
 			value_after_depreciation -= flt(depreciation_amount)
 
 			# for the last row, if depreciation method = Straight Line
-			if straight_line_idx and i == max(straight_line_idx) - 1 and not date_of_sale:
+			if straight_line_idx and i == max(straight_line_idx) - 1 and not date_of_sale and not date_of_return:
 				book = self.get('finance_books')[cint(d.finance_book_id) - 1]
 				depreciation_amount += flt(value_after_depreciation -
 					flt(book.expected_value_after_useful_life), d.precision("depreciation_amount"))

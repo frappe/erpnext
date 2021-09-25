@@ -1015,7 +1015,7 @@ class SalesInvoice(SellingController):
 
 	def depreciate_asset(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
-		asset.prepare_depreciation_data(self.posting_date)
+		asset.prepare_depreciation_data(date_of_sale=self.posting_date)
 		asset.save()
 
 		post_depreciation_entries(self.posting_date)
@@ -1024,7 +1024,7 @@ class SalesInvoice(SellingController):
 		asset.flags.ignore_validate_update_after_submit = True
 
 		# recreate original depreciation schedule of the asset
-		asset.prepare_depreciation_data()
+		asset.prepare_depreciation_data(date_of_return=self.posting_date)
 
 		self.modify_depreciation_schedule_for_asset_repairs(asset)
 		asset.save()
