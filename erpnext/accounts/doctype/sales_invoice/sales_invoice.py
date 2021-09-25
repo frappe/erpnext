@@ -952,6 +952,7 @@ class SalesInvoice(SellingController):
 						asset.db_set("disposal_date", None)
 
 						if asset.calculate_depreciation:
+							self.reverse_depreciation_entry_made_after_sale(asset)
 							self.reset_depreciation_schedule(asset)
 
 					else:
@@ -1029,8 +1030,6 @@ class SalesInvoice(SellingController):
 		self.modify_depreciation_schedule_for_asset_repairs(asset)
 		asset.save()
 
-		self.delete_depreciation_entry_made_after_sale(asset)
-
 	def modify_depreciation_schedule_for_asset_repairs(self, asset):
 		asset_repairs = frappe.get_all(
 			'Asset Repair',
@@ -1044,7 +1043,7 @@ class SalesInvoice(SellingController):
 				asset_repair.modify_depreciation_schedule()
 				asset.prepare_depreciation_data()
 
-	def delete_depreciation_entry_made_after_sale(self, asset):
+	def reverse_depreciation_entry_made_after_sale(self, asset):
 		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 
 		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
@@ -1059,7 +1058,8 @@ class SalesInvoice(SellingController):
 				row += 1
 
 			if schedule.schedule_date == posting_date_of_original_invoice:
-				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice):
+				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice) \
+					or self.sale_happens_in_the_future(posting_date_of_original_invoice):
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
 					reverse_journal_entry.submit()
@@ -1076,6 +1076,12 @@ class SalesInvoice(SellingController):
 
 				if orginal_schedule_date == posting_date_of_original_invoice:
 					return True
+		return False
+
+	def sale_happens_in_the_future(self, posting_date_of_original_invoice):
+		if posting_date_of_original_invoice > getdate():
+			return True
+
 		return False
 
 	@property
