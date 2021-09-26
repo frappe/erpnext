@@ -4,6 +4,9 @@ import frappe
 
 
 def execute():
+	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice_advance')
+	frappe.reload_doc('accounts', 'doctype', 'sales_invoice_advance')
+
 	purchase_invoices = frappe.db.sql("""
 		select
 			parenttype as type, parent as name
@@ -35,6 +38,7 @@ def execute():
 		doc.docstatus = 2
 		doc.make_gl_entries()
 		for advance in doc.advances:
-			advance.db_set('exchange_gain_loss', 0, False)
+			if advance.ref_exchange_rate == 1:
+				advance.db_set('exchange_gain_loss', 0, False)
 		doc.docstatus = 1
 		doc.make_gl_entries()
