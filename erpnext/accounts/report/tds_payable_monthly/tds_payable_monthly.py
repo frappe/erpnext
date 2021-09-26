@@ -43,13 +43,25 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 			total_amount_credited += (entry.credit - entry.debit)
 
 		if rate and tds_deducted:
-			row = [supplier_map.get(supplier).pan, supplier_map.get(supplier).name]
+			row = {
+				'pan' if frappe.db.has_column('Supplier', 'pan') else 'tax_id': supplier_map.get(supplier).pan,
+				'supplier': supplier_map.get(supplier).name
+			}
 
 			if filters.naming_series == 'Naming Series':
-				row.append(supplier_map.get(supplier).supplier_name)
+				row.update({'supplier_name': supplier_map.get(supplier).supplier_name})
 
-			row.extend([tax_withholding_category, supplier_map.get(supplier).supplier_type, rate, total_amount_credited,
-				tds_deducted, posting_date, voucher_type, name])
+			row.update({
+				'section_code': tax_withholding_category,
+				'entity_type': supplier_map.get(supplier).supplier_type,
+				'tds_rate': rate,
+				'total_amount_credited': total_amount_credited,
+				'tds_deducted': tds_deducted,
+				'transaction_date': posting_date,
+				'transaction_type': voucher_type,
+				'ref_no': name
+			})
+
 			out.append(row)
 
 	return out
