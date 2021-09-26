@@ -133,6 +133,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_payment_entry_unlink_against_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si = frappe.copy_doc(test_records[0])
 		si.is_pos = 0
 		si.insert()
@@ -156,6 +157,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_payment_entry_unlink_against_standalone_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si1 = create_sales_invoice(rate=1000)
 		si2 = create_sales_invoice(rate=300)
 		si3 = create_sales_invoice(qty=-1, rate=300, is_return=1)
@@ -1646,6 +1648,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si = create_sales_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
 
 		outstanding_amount = get_outstanding_amount(si.doctype,
@@ -2268,6 +2271,54 @@ class TestSalesInvoice(unittest.TestCase):
 
 		party_link.delete()
 		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 0)
+
+	def test_payment_statuses(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		today = nowdate()
+
+		# Test Overdue
+		si = create_sales_invoice(do_not_submit=True)
+		si.payment_schedule = []
+		si.append("payment_schedule", {
+			"due_date": add_days(today, -5),
+			"invoice_portion": 50,
+			"payment_amount": si.grand_total / 2
+		})
+		si.append("payment_schedule", {
+			"due_date": add_days(today, 5),
+			"invoice_portion": 50,
+			"payment_amount": si.grand_total / 2
+		})
+		si.submit()
+		self.assertEqual(si.status, "Overdue")
+
+		# Test payment less than due amount
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = 1
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Overdue")
+
+		# Test Partly Paid
+		pe = frappe.copy_doc(pe)
+		pe.paid_amount = si.grand_total / 2
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Partly Paid")
+
+		# Test Paid
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = si.outstanding_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Paid")
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
