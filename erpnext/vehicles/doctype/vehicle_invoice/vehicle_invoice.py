@@ -23,6 +23,9 @@ class VehicleInvoice(VehicleTransactionController):
 		self.set_title()
 		self.set_status()
 
+	def before_submit(self):
+		self.validate_vehicle_mandatory()
+
 	def on_submit(self):
 		self.update_vehicle()
 		self.update_vehicle_booking_order_invoice()

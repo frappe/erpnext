@@ -50,9 +50,6 @@ class VehicleTransactionController(StockController):
 
 		self.clean_remarks()
 
-	def before_submit(self):
-		self.validate_vehicle_mandatory()
-
 	def onload(self):
 		if self.docstatus == 0:
 			self.set_missing_values()

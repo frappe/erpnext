@@ -19,6 +19,9 @@ class VehicleDelivery(VehicleTransactionController):
 		self.validate_return()
 		self.set_title()
 
+	def before_submit(self):
+		self.validate_vehicle_mandatory()
+
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_odometer_log()

@@ -19,6 +19,9 @@ class VehicleTransferLetter(VehicleTransactionController):
 
 		self.set_title()
 
+	def before_submit(self):
+		self.validate_vehicle_mandatory()
+
 	def on_submit(self):
 		self.update_vehicle_party_details()
 		self.update_vehicle_booking_order()

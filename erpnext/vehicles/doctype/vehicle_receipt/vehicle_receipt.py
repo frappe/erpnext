@@ -18,7 +18,7 @@ class VehicleReceipt(VehicleTransactionController):
 		self.set_title()
 
 	def before_submit(self):
-		super(VehicleReceipt, self).before_submit()
+		self.validate_vehicle_mandatory()
 		self.validate_transporter()
 
 	def on_submit(self):
