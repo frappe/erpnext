@@ -276,6 +276,7 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
 
+	# WDV: Written Down Value
 	def test_depreciation_entry_for_wdv_without_pro_rata(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=8000.0, location="Test Location")
@@ -479,6 +480,7 @@ class TestAsset(unittest.TestCase):
 
 		self.assertTrue(asset.finance_books[0].expected_value_after_useful_life >= asset_value_after_full_schedule)
 
+	# CWIP: Capital Work In Progress
 	def test_cwip_accounting(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=5000, do_not_submit=True, location="Test Location")
@@ -676,6 +678,249 @@ class TestAsset(unittest.TestCase):
 		# reset indian company
 		frappe.flags.company = company_flag
 
+	def test_depreciation_without_pro_rata(self):
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2020-12-31"), submit=1)
+
+		expected_values = [
+			["2020-12-31", 30000, 30000],
+			["2021-12-31", 30000, 60000],
+			["2022-12-31", 30000, 90000]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+
+	def test_depreciation_with_pro_rata(self):
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2020-07-01"), submit=1)
+
+		expected_values = [
+			["2020-07-01", 15000, 15000],
+			["2021-07-01", 30000, 45000],
+			["2022-07-01", 30000, 75000],
+			["2022-12-31", 15000, 90000]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+
+	def test_get_depreciation_amount(self):
+		"""Tests if get_depreciation_amount() returns the right value."""
+
+		from erpnext.assets.doctype.asset.asset import get_depreciation_amount
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"))
+
+		asset.finance_books = []
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": getdate("2020-12-31")
+		})
+
+		depreciation_amount = get_depreciation_amount(asset, 100000, asset.finance_books[0])
+		self.assertEqual(depreciation_amount, 30000)
+
+	def test_make_depreciation_schedule(self):
+		"""Tests if make_depreciation_schedule() returns the right values."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), do_not_save=1)
+
+		asset.finance_books = []
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": getdate("2020-12-31")
+		})
+
+		asset.make_depreciation_schedule(date_of_sale=None)
+
+		expected_values = [
+			['2020-12-31', 30000.0],
+			['2021-12-31', 30000.0],
+			['2022-12-31', 30000.0]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+
+	def test_set_accumulated_depreciation(self):
+		"""Tests if set_accumulated_depreciation() returns the right values."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), do_not_save=1)
+
+		asset.finance_books = []
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": getdate("2020-12-31")
+		})
+
+		asset.make_depreciation_schedule(date_of_sale=None)
+		asset.set_accumulated_depreciation()
+
+		expected_values = [30000.0, 60000.0, 90000.0]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(expected_values[i], schedule.accumulated_depreciation_amount)
+
+	def test_check_is_pro_rata(self):
+		"""Tests if check_is_pro_rata() returns the right value(i.e. checks if has_pro_rata is accurate)."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), do_not_save=1)
+
+		asset.finance_books = []
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": getdate("2020-12-31")
+		})
+
+		has_pro_rata = asset.check_is_pro_rata(asset.finance_books[0])
+		self.assertFalse(has_pro_rata)
+
+		asset.finance_books = []
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": getdate("2020-07-01")
+		})
+
+		has_pro_rata = asset.check_is_pro_rata(asset.finance_books[0])
+		self.assertTrue(has_pro_rata)
+
+	def test_expected_value_after_useful_life(self):
+		"""Tests if an error is raised when expected_value_after_useful_life(110,000) > gross_purchase_amount(100,000)."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=110000, depreciation_start_date=getdate("2020-07-01"), do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_depreciation_start_date(self):
+		"""Tests if an error is raised when neither depreciation_start_date nor available_for_use_date are specified."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			total_number_of_depreciations=3, expected_value_after_useful_life=110000, do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_opening_accumulated_depreciation(self):
+		"""Tests if an error is raised when opening_accumulated_depreciation > (gross_purchase_amount - expected_value_after_useful_life)."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2020-07-01"),
+			opening_accumulated_depreciation=100000, do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_number_of_depreciations_booked(self):
+		"""Tests if an error is raised when number_of_depreciations_booked is not specified when opening_accumulated_depreciation is."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2020-07-01"),
+			opening_accumulated_depreciation=10000, do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_number_of_depreciations(self):
+		"""Tests if an error is raised when number_of_depreciations_booked > total_number_of_depreciations."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2020-07-01"),
+			opening_accumulated_depreciation=10000, number_of_depreciations_booked=5,
+			do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_depreciation_start_date_is_before_purchase_date(self):
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2014-07-01"),
+			do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_depreciation_start_date_is_before_available_for_use_date(self):
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2018-07-01"),
+			do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_post_depreciation_entries(self):
+		"""Tests if post_depreciation_entries() works as expected."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), do_not_save=1)
+
+		asset.finance_books = []
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": getdate("2020-12-31")
+		})
+		asset.submit()
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		self.assertTrue(asset.schedules[0].journal_entry)
+		self.assertFalse(asset.schedules[1].journal_entry)
+		self.assertFalse(asset.schedules[2].journal_entry)
+
+	def test_clear_depreciation_schedule(self):
+		"""Tests if clear_depreciation_schedule() works as expected."""
+
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), do_not_save=1)
+
+		asset.finance_books = []
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": getdate("2020-12-31")
+		})
+		asset.submit()
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		asset.clear_depreciation_schedule()
+
+		self.assertEqual(len(asset.schedules), 1)
+
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
 		create_asset_category()
@@ -702,6 +947,8 @@ def create_asset(**args):
 		"company": args.company or"_Test Company",
 		"purchase_date": "2015-01-01",
 		"calculate_depreciation": args.calculate_depreciation or 0,
+		"opening_accumulated_depreciation": args.opening_accumulated_depreciation or 0,
+		"number_of_depreciations_booked": args.number_of_depreciations_booked or 0,
 		"gross_purchase_amount": 100000,
 		"purchase_receipt_amount": 100000,
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
@@ -720,10 +967,11 @@ def create_asset(**args):
 			"depreciation_start_date": args.depreciation_start_date
 		})
 
-	try:
-		asset.save()
-	except frappe.DuplicateEntryError:
-		pass
+	if not args.do_not_save:
+		try:
+			asset.save()
+		except frappe.DuplicateEntryError:
+			pass
 
 	if args.submit:
 		asset.submit()
