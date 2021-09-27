@@ -14,6 +14,7 @@ class VehicleReceipt(VehicleTransactionController):
 
 	def validate(self):
 		super(VehicleReceipt, self).validate()
+		self.validate_party_mandatory()
 		self.set_title()
 
 	def before_submit(self):
@@ -24,12 +25,12 @@ class VehicleReceipt(VehicleTransactionController):
 		self.update_stock_ledger()
 		self.update_vehicle_details()
 		self.make_odometer_log()
-		self.update_vehicle_booking_order()
+		self.update_vehicle_booking_order_delivery()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.cancel_odometer_log()
-		self.update_vehicle_booking_order()
+		self.update_vehicle_booking_order_delivery()
 
 	def set_title(self):
 		party = self.get('customer_name') or self.get('customer') or self.get('supplier_name') or self.get('supplier')

@@ -708,7 +708,6 @@ erpnext.patches.v12_0.set_variant_of_in_vehicle_transaction
 erpnext.patches.v12_0.update_stock_reconciliation_and_sle
 erpnext.patches.v12_0.rename_vehicle_bilty_field
 erpnext.patches.v12_0.set_service_person_name
-erpnext.patches.v12_0.set_vehicle_invoice_receipt_in_delivery
 erpnext.patches.v12_0.rename_booking_delivery_invoice_status
 execute:frappe.delete_doc_if_exists("Report", "FBR Tax Report")
 erpnext.patches.v12_0.rebuild_sle_posting_sort_index
@@ -716,4 +715,5 @@ erpnext.patches.v12_0.set_manufacture_repack_cost_percentage
 erpnext.patches.v12_0.set_stock_ledger_entry_serial_no_table
 erpnext.patches.v12_0.set_salary_slip_mode_of_payment_amount
 erpnext.patches.v12_0.set_delivery_overdue_in_vehicle_booking_order
-erpnext.patches.v12_0.set_vehicle_invoice_receipt_status
+erpnext.patches.v12_0.rename_and_patch_vehicle_invoice_documents
+erpnext.patches.v12_0.set_vehicle_invoice_receipt_in_delivery

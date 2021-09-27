@@ -1,12 +1,15 @@
-frappe.listview_settings['Vehicle Invoice Receipt'] = {
-	add_fields: ["status"],
+frappe.listview_settings['Vehicle Invoice'] = {
+	add_fields: ["status", "issued_for"],
 	get_indicator: function(doc) {
 		var indicator;
 
 		if(doc.status === "Delivered") {
 			indicator = [__(doc.status), "green", `status,=,${doc.status}`];
 		} else if(doc.status === "In Hand") {
-			indicator = [__(doc.status), "blue", `status,=,${doc.status}`];
+			indicator = [__(doc.status), "orange", `status,=,${doc.status}`];
+		} else if(doc.status === "Issued") {
+			indicator = [__(`${(doc.status)} For ${doc.issued_for}`), "purple",
+				`status,=,${doc.status}|issued_for,=,${doc.issued_for}`];
 		}
 
 		return indicator;

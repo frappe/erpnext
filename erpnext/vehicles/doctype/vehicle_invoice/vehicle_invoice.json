@@ -17,6 +17,9 @@
   "booking_customer_name",
   "finance_type",
   "column_break_8",
+  "vehicle_invoice_movement",
+  "received_by",
+  "received_by_name",
   "remarks",
   "column_break_11",
   "amended_from",
@@ -48,8 +51,18 @@
   "vehicle_chassis_no",
   "vehicle_engine_no",
   "status_section",
-  "delivered_date",
+  "delivered_to",
+  "delivered_to_name",
+  "employee",
+  "employee_name",
+  "agent",
+  "agent_name",
+  "column_break_48",
+  "issued_for",
+  "issue_date",
+  "return_date",
   "column_break_43",
+  "delivered_date",
   "status"
  ],
  "fields": [
@@ -247,7 +260,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Vehicle Invoice Receipt",
+   "options": "Vehicle Invoice",
    "print_hide": 1,
    "read_only": 1
   },
@@ -380,17 +393,124 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nIn Hand\nDelivered\nCancelled",
+   "options": "Draft\nIn Hand\nIssued\nDelivered\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivered_to",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Delivered To",
+   "no_copy": 1,
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.delivered_to && doc.delivered_to_name != doc.delivered_to",
+   "fieldname": "delivered_to_name",
+   "fieldtype": "Data",
+   "label": "Delivered To Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "no_copy": 1,
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.employee && doc.employee_name != doc.employee",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "agent",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Agent",
+   "no_copy": 1,
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.agent && doc.agent_name != doc.agent",
+   "fieldname": "agent_name",
+   "fieldtype": "Data",
+   "label": "Agent Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issued_for",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Issued For",
+   "no_copy": 1,
+   "options": "\nRegistration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "label": "Issue Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_invoice_movement",
+   "fieldtype": "Link",
+   "label": "Vehicle Invoice Movement",
+   "no_copy": 1,
+   "options": "Vehicle Invoice Movement",
+   "read_only": 1
+  },
+  {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_by",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Received By",
+   "no_copy": 1,
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval:doc.received_by && doc.received_by_name != doc.received_by",
+   "fetch_from": "received_by.employee_name",
+   "fieldname": "received_by_name",
+   "fieldtype": "Data",
+   "label": "Received By Name",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-21 17:37:49.708792",
+ "modified": "2021-09-26 16:49:26.512169",
  "modified_by": "Administrator",
  "module": "Vehicles",
- "name": "Vehicle Invoice Receipt",
+ "name": "Vehicle Invoice",
  "owner": "Administrator",
  "permissions": [
   {
@@ -422,6 +542,15 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Registration User",
+   "share": 1
   },
   {
    "email": 1,

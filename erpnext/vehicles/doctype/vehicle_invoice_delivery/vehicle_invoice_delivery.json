@@ -15,13 +15,16 @@
   "customer_name",
   "vehicle_booking_order",
   "column_break_8",
-  "remarks",
-  "vehicle_invoice_receipt",
+  "vehicle_invoice",
+  "current_employee",
+  "current_employee_name",
   "column_break_11",
   "amended_from",
   "posting_date",
   "bill_no",
   "bill_date",
+  "remarks_section",
+  "remarks",
   "vehicle_details_section",
   "variant_of",
   "variant_of_name",
@@ -122,7 +125,7 @@
    "search_index": 1
   },
   {
-   "fetch_from": "vehicle_invoice_receipt.bill_no",
+   "fetch_from": "vehicle_invoice.bill_no",
    "fieldname": "bill_no",
    "fieldtype": "Data",
    "in_standard_filter": 1,
@@ -131,7 +134,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "vehicle_invoice_receipt.bill_date",
+   "fetch_from": "vehicle_invoice.bill_date",
    "fieldname": "bill_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,
@@ -257,18 +260,45 @@
    "read_only": 1
   },
   {
-   "fieldname": "vehicle_invoice_receipt",
+   "fieldname": "vehicle_invoice",
    "fieldtype": "Link",
-   "label": "Vehicle Invoice Receipt",
+   "label": "Vehicle Invoice",
    "no_copy": 1,
-   "options": "Vehicle Invoice Receipt",
+   "options": "Vehicle Invoice",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "vehicle_invoice.employee",
+   "fieldname": "current_employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Employee (Before Delivery)",
+   "no_copy": 1,
+   "options": "Employee",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.current_employee && doc.current_employee_name != doc.current_employee",
+   "fetch_from": "vehicle_invoice.employee_name",
+   "fieldname": "current_employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name (Before Delivery)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "remarks",
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-06-03 20:31:19.392901",
+ "modified": "2021-09-23 16:18:28.285404",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",
@@ -303,6 +333,15 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Registration User",
+   "share": 1
   },
   {
    "email": 1,

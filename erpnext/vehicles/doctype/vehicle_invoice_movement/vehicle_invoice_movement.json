@@ -1,0 +1,246 @@
+{
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2021-03-16 22:56:41.350517",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "naming_series",
+  "company",
+  "purpose",
+  "issued_for",
+  "column_break_8",
+  "supplier",
+  "supplier_name",
+  "agent",
+  "agent_name",
+  "employee",
+  "employee_name",
+  "column_break_11",
+  "amended_from",
+  "posting_date",
+  "section_break_17",
+  "invoices",
+  "remarks_section",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VINVM-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_standard_filter": 1,
+   "label": "Remarks",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
+   "no_copy": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Invoice Movement",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Purpose",
+   "options": "\nReceive\nTransfer\nIssue\nReturn",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval:['Issue', 'Return'].includes(doc.purpose)",
+   "fieldname": "agent",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Agent",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:['Issue', 'Return'].includes(doc.purpose) && doc.agent && doc.agent_name != doc.agent",
+   "fetch_from": "agent.supplier_name",
+   "fieldname": "agent_name",
+   "fieldtype": "Data",
+   "label": "Agent Name",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval:['Transfer', 'Return', 'Receive'].includes(doc.purpose)",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Received By",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval:['Transfer', 'Return', 'Receive'].includes(doc.purpose) && doc.employee && doc.employee_name != doc.employee",
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Received By Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "label": "Invoices",
+   "options": "Vehicle Invoice Movement Detail",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:['Issue', 'Return'].includes(doc.purpose)",
+   "fieldname": "issued_for",
+   "fieldtype": "Select",
+   "label": "Issued For",
+   "options": "\nRegistration"
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval:doc.purpose == \"Receive\"",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:doc.purpose == \"Receive\" && doc.supplier && doc.supplier_name != doc.supplier",
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "is_submittable": 1,
+ "modified": "2021-09-27 00:01:32.743602",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Invoice Movement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Registration User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Admin",
+   "share": 1
+  }
+ ],
+ "restrict_to_domain": "Vehicles",
+ "search_fields": "purpose,issued_for,posting_date,agent,agent_name,employee,employee_name",
+ "show_name_in_global_search": 1,
+ "sort_field": "posting_date",
+ "sort_order": "DESC",
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}

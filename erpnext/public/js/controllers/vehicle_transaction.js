@@ -50,16 +50,14 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 			});
 		}
 
-		if (this.frm.fields_dict.item_code) {
-			this.frm.set_query("item_code", function() {
-				var filters = {"is_vehicle": 1};
-				if (me.frm.doc.vehicle_booking_order
-						|| ['Vehicle Invoice Receipt', 'Vehicle Invoice Delivery'].includes(me.frm.doc.doctype)) {
-					filters.include_in_vehicle_booking = 1;
-				}
-				return erpnext.queries.item(filters);
-			});
-		}
+		erpnext.queries.setup_queries(this.frm, "Item", function() {
+			var filters = {"is_vehicle": 1};
+			if (me.frm.doc.vehicle_booking_order
+					|| ['Vehicle Invoice', 'Vehicle Invoice Delivery'].includes(me.frm.doc.doctype)) {
+				filters.include_in_vehicle_booking = 1;
+			}
+			return erpnext.queries.item(filters);
+		});
 
 		if (this.frm.fields_dict.transporter) {
 			this.frm.set_query('transporter', function () {
@@ -140,10 +138,6 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		};
 	},
 
-	vehicle_booking_order: function () {
-		this.get_vehicle_booking_order_details();
-	},
-
 	customer: function () {
 		this.get_customer_details();
 	},
@@ -152,8 +146,20 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		this.get_customer_details();
 	},
 
-	vehicle: function () {
-		this.get_vehicle_details();
+	vehicle: function (doc, cdt, cdn) {
+		doc = this.frm.doc;
+		if (cdt && cdn) {
+			doc = frappe.get_doc(cdt, cdn);
+		}
+		this.get_vehicle_details(doc);
+	},
+
+	vehicle_booking_order: function (doc, cdt, cdn) {
+		doc = this.frm.doc;
+		if (cdt && cdn) {
+			doc = frappe.get_doc(cdt, cdn);
+		}
+		this.get_vehicle_booking_order_details(doc);
 	},
 
 	get_customer_details: function () {
@@ -182,8 +188,12 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		});
 	},
 
-	get_vehicle_booking_order_details: function () {
+	get_vehicle_booking_order_details: function (doc) {
 		var me = this;
+		if (!doc) {
+			doc = me.frm.doc;
+		}
+
 		return frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_vehicle_booking_order_details",
 			args: {
@@ -192,35 +202,39 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					company: me.frm.doc.company,
 					customer: me.frm.doc.customer,
 					supplier: me.frm.doc.supplier,
-					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
+					vehicle_booking_order: doc.vehicle_booking_order,
 					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
 				}
 			},
 			callback: function (r) {
 				if (r.message && !r.exc) {
-					me.frm.set_value(r.message);
+					frappe.model.set_value(doc.doctype, doc.name, r.message);
 				}
 			}
 		});
 	},
 
-	get_vehicle_details: function () {
+	get_vehicle_details: function (doc) {
 		var me = this;
+		if (!doc) {
+			doc = me.frm.doc;
+		}
+
 		return frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_vehicle_details",
 			args: {
 				args: {
 					doctype: me.frm.doc.doctype,
-					vehicle: me.frm.doc.vehicle,
+					vehicle: doc.vehicle,
 					customer: me.frm.doc.customer,
 					is_return: me.frm.doc.is_return,
 					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
 				},
-				get_vehicle_invoice_receipt: cint(me.frm.doc.doctype == "Vehicle Invoice Delivery")
+				get_vehicle_invoice: cint(me.frm.doc.doctype == "Vehicle Invoice Delivery")
 			},
 			callback: function (r) {
 				if (r.message && !r.exc) {
-					me.frm.set_value(r.message);
+					frappe.model.set_value(doc.doctype, doc.name, r.message);
 				}
 			}
 		});

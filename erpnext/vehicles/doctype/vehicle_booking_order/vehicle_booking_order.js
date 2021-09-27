@@ -9,7 +9,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			'Vehicle Booking Payment': 'Customer Payment',
 			'Vehicle Receipt': 'Receive Vehicle',
 			'Vehicle Delivery': 'Deliver Vehicle',
-			'Vehicle Invoice Receipt': 'Receive Invoice',
+			'Vehicle Invoice': 'Receive Invoice',
 			'Vehicle Invoice Delivery': 'Deliver Invoice',
 			'Vehicle Transfer Letter': 'Transfer Letter',
 			'Purchase Order': 'Purchase Order',
@@ -129,7 +129,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				// Invoice Delivery/Receipt buttons
 				if (this.frm.doc.invoice_status === "Not Received") {
 					if (this.can_change('invoice_receipt')) {
-						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
+						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice'));
 					}
 				} else if (this.frm.doc.invoice_status === "In Hand" && this.frm.doc.delivery_status === "Delivered") {
 					if (this.can_change('invoice_delivery')) {

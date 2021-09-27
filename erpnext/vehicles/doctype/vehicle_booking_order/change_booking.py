@@ -48,6 +48,7 @@ def change_vehicle(vehicle_booking_order, vehicle):
 	vbo_doc.set_vehicle_details()
 
 	vbo_doc.update_delivery_status()
+	vbo_doc.update_invoice_status()
 
 	save_vehicle_booking_for_update(vbo_doc)
 
@@ -662,7 +663,7 @@ def can_receive_invoice(vbo_doc, throw=False):
 	if check_cancelled(vbo_doc, throw):
 		return False
 
-	if frappe.has_permission("Vehicle Invoice Receipt", "create"):
+	if frappe.has_permission("Vehicle Invoice", "create"):
 		return True
 	else:
 		if throw:

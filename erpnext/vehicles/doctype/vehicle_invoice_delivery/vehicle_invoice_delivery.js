@@ -9,7 +9,8 @@ erpnext.vehicles.VehicleInvoiceDeliveryController = erpnext.vehicles.VehicleTran
 		var me = this;
 		this.frm.set_query("vehicle", function () {
 			var filters = {
-				item_code: me.frm.doc.item_code
+				item_code: me.frm.doc.item_code,
+				invoice_status: 'In Hand',
 			};
 
 			if (me.frm.doc.supplier) {

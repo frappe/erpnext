@@ -2,14 +2,15 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.vehicles");
-erpnext.vehicles.VehicleInvoiceReceiptController = erpnext.vehicles.VehicleTransactionController.extend({
+erpnext.vehicles.VehicleInvoiceController = erpnext.vehicles.VehicleTransactionController.extend({
 	setup_queries: function () {
 		this._super();
 
 		var me = this;
 		this.frm.set_query("vehicle", function () {
 			var filters = {
-				item_code: me.frm.doc.item_code
+				item_code: me.frm.doc.item_code,
+				invoice_status: 'Not Received'
 			};
 
 			if (me.frm.doc.supplier) {
@@ -34,4 +35,4 @@ erpnext.vehicles.VehicleInvoiceReceiptController = erpnext.vehicles.VehicleTrans
 	}
 });
 
-$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleInvoiceReceiptController({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleInvoiceController({frm: cur_frm}));

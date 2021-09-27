@@ -10,7 +10,7 @@ def execute():
 		'Vehicle Booking Order',
 		'Vehicle Receipt',
 		'Vehicle Delivery',
-		'Vehicle Invoice Receipt',
+		'Vehicle Invoice',
 		'Vehicle Invoice Delivery',
 		'Vehicle Transfer Letter',
 		'Vehicle Allocation',

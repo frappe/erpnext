@@ -18,11 +18,11 @@ def get_data():
 			},
 			{
 				'label': _('Invoice'),
-				'items': ['Vehicle Invoice Receipt', 'Vehicle Invoice Delivery']
+				'items': ['Vehicle Invoice', 'Vehicle Invoice Movement', 'Vehicle Invoice Delivery']
 			},
 			{
-				'label': _('Transfer'),
-				'items': ['Vehicle Transfer Letter']
+				'label': _('Registration'),
+				'items': ['Vehicle Registration Order', 'Vehicle Transfer Letter']
 			}
 		]
 	}

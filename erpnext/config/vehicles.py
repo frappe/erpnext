@@ -69,13 +69,15 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Vehicle Invoice Receipt",
-					"dependencies": ["Vehicle Booking Order"],
+					"name": "Vehicle Invoice",
 				},
 				{
 					"type": "doctype",
 					"name": "Vehicle Invoice Delivery",
-					"dependencies": ["Vehicle Booking Order"],
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Invoice Movement",
 				},
 			],
 		},

@@ -3,19 +3,32 @@ import frappe
 
 def get_data():
 	vehicle_domain_sections = []
-	if 'Vehicles' in frappe.get_active_domains():
+	vehicle_domain_active = 'Vehicles' in frappe.get_active_domains()
+	if vehicle_domain_active:
 		vehicle_domain_sections = [
 			{
 				'label': ['Reference'],
 				'items': ['Vehicle Booking Order', 'Project']
 			},
 			{
-				'label': ['Vehicle Transaction'],
+				'label': ['Stock'],
 				'items': ['Vehicle Receipt', 'Vehicle Delivery']
 			},
 			{
-				'label': ['Transfer'],
-				'items': ['Vehicle Transfer Letter']
+				'label': ['Invoice'],
+				'items': ['Vehicle Invoice', 'Vehicle Invoice Delivery', 'Vehicle Invoice Movement']
+			},
+			{
+				'label': ['Registration'],
+				'items': ['Vehicle Registration Order', 'Vehicle Transfer Letter']
+			},
+			{
+				'label': ['Sales'],
+				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+			},
+			{
+				'label': ['Purchase'],
+				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			},
 			{
 				'label': ['Accounting Entries'],
@@ -29,16 +42,16 @@ def get_data():
 			'Project': 'applies_to_vehicle',
 			'Journal Entry': 'applies_to_vehicle',
 			'Payment Entry': 'applies_to_vehicle',
+			'Quotation': 'applies_to_vehicle',
+			'Sales Order': 'applies_to_vehicle',
+			'Delivery Note': 'applies_to_vehicle',
+			'Sales Invoice': 'applies_to_vehicle',
+			'Supplier Quotation': 'applies_to_vehicle',
+			'Purchase Order': 'applies_to_vehicle',
+			'Purchase Receipt': 'applies_to_vehicle',
+			'Purchase Invoice': 'applies_to_vehicle',
 		},
 		'transactions': vehicle_domain_sections + [
-			{
-				'label': ['Sales'],
-				'items': ['Delivery Note', 'Sales Invoice']
-			},
-			{
-				'label': ['Purchase'],
-				'items': ['Purchase Receipt', 'Purchase Invoice']
-			},
 			{
 				'label': ['Movement'],
 				'items': ['Stock Entry', 'Vehicle Log']

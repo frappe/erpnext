@@ -44,6 +44,15 @@ class Vehicle(Document):
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 
+	def validate(self):
+		self.validate_item()
+		self.validate_vehicle_id()
+		self.update_reference_from_serial_no()
+		self.copy_image_from_item()
+		self.update_invoice_status()
+		self.set_status()
+		self.cant_change()
+
 	def on_update(self):
 		self.update_vehicle_serial_no()
 
@@ -52,53 +61,16 @@ class Vehicle(Document):
 
 		self.db_set("last_odometer", get_vehicle_odometer(self.name))
 
-	def validate(self):
-		self.validate_item()
-		self.validate_vehicle_id()
-
-		self.update_reference_from_serial_no()
-
-		self.copy_image_from_item()
-		self.set_status()
-		self.cant_change()
-
 	def on_trash(self):
 		self.delete_serial_no_on_trash()
+
+	def delete_serial_no_on_trash(self):
+		if frappe.db.exists("Serial No", self.name):
+			frappe.delete_doc("Serial No", self.name, ignore_permissions=True)
 
 	def copy_image_from_item(self):
 		if not self.image:
 			self.image = frappe.get_cached_value('Item', self.item_code, 'image')
-
-	def update_vehicle_serial_no(self):
-		if self.flags.from_serial_no:
-			serial_no_doc = frappe.get_cached_doc("Serial No", self.flags.from_serial_no)
-			serial_no_doc.db_set('vehicle', self.name)
-		else:
-			if not frappe.db.exists("Serial No", self.name):
-				serial_no_doc = frappe.new_doc("Serial No")
-				serial_no_doc.flags.from_vehicle = self.name
-
-				for fieldname in self._copy_fields:
-					serial_no_doc.set(fieldname, self.get(fieldname))
-
-				serial_no_doc.item_code = self.item_code
-				serial_no_doc.serial_no = self.name
-				serial_no_doc.vehicle = self.name
-				serial_no_doc.insert(ignore_permissions=True)
-
-				self.update_reference_from_serial_no(serial_no_doc)
-				self.db_update()
-
-	def update_vehicle_booking_order(self):
-		orders = frappe.get_all("Vehicle Booking Order", filters={
-			"docstatus": ['<', 2],
-			"vehicle": self.name,
-			"status": ['!=', 'Completed']
-		})
-		for d in orders:
-			doc = frappe.get_doc("Vehicle Booking Order", d.name)
-			doc.set_vehicle_details(update=True)
-			doc.notify_update()
 
 	def validate_item(self):
 		item = frappe.get_cached_doc("Item", self.item_code)
@@ -148,10 +120,6 @@ class Vehicle(Document):
 		for f in self._copy_fields:
 			self.set(f, serial_no_doc.get(f))
 
-	def delete_serial_no_on_trash(self):
-		if frappe.db.exists("Serial No", self.name):
-			frappe.delete_doc("Serial No", self.name, ignore_permissions=True)
-
 	def get_serial_no_doc(self):
 		serial_no_doc = None
 		if self.flags.from_serial_no:
@@ -162,6 +130,64 @@ class Vehicle(Document):
 				serial_no_doc = frappe.get_doc("Serial No", serial_no_name)
 
 		return serial_no_doc
+
+	def update_vehicle_serial_no(self):
+		if self.flags.from_serial_no:
+			serial_no_doc = frappe.get_cached_doc("Serial No", self.flags.from_serial_no)
+			serial_no_doc.db_set('vehicle', self.name)
+		else:
+			if not frappe.db.exists("Serial No", self.name):
+				serial_no_doc = frappe.new_doc("Serial No")
+				serial_no_doc.flags.from_vehicle = self.name
+
+				for fieldname in self._copy_fields:
+					serial_no_doc.set(fieldname, self.get(fieldname))
+
+				serial_no_doc.item_code = self.item_code
+				serial_no_doc.serial_no = self.name
+				serial_no_doc.vehicle = self.name
+				serial_no_doc.insert(ignore_permissions=True)
+
+				self.update_reference_from_serial_no(serial_no_doc)
+				self.db_update()
+
+	def update_vehicle_booking_order(self):
+		orders = frappe.get_all("Vehicle Booking Order", filters={
+			"docstatus": ['<', 2],
+			"vehicle": self.name,
+			"status": ['!=', 'Completed']
+		})
+		for d in orders:
+			doc = frappe.get_doc("Vehicle Booking Order", d.name)
+			doc.set_vehicle_details(update=True)
+			doc.notify_update()
+
+	def update_invoice_status(self, update=False, update_modified=True):
+		vehicle_invoice = frappe.db.get_value("Vehicle Invoice", filters={'vehicle': self.name, 'docstatus': 1},
+			fieldname=['status', 'issued_for'], as_dict=1)
+
+		if vehicle_invoice:
+			self.invoice_status = vehicle_invoice.status
+			self.invoice_issued_for = vehicle_invoice.issued_for if self.invoice_status == "Issued" else None
+		else:
+			self.invoice_status = 'Not Received'
+			self.invoice_issued_for = None
+
+		if update:
+			self.db_set({
+				'invoice_status': self.invoice_status,
+				'invoice_issued_for': self.invoice_issued_for
+			}, update_modified=update_modified)
+
+	def set_status(self):
+		if self.delivery_document_type:
+			self.status = "Delivered"
+		elif self.warranty_expiry_date and getdate(self.warranty_expiry_date) <= getdate(nowdate()):
+			self.status = "Expired"
+		elif not self.warehouse:
+			self.status = "Inactive"
+		else:
+			self.status = "Active"
 
 	def cant_change(self):
 		if self.is_new():
@@ -175,11 +201,11 @@ class Vehicle(Document):
 			for f, old_value in previous_values.items():
 				if cstr(self.get(f)) != cstr(old_value):
 					label = self.meta.get_label(f)
-					frappe.throw(_("Cannot change {0} because stock already exists for this Vehicle")
+					frappe.throw(_("Cannot change {0} because transactions already exists for this Vehicle")
 						.format(frappe.bold(label)))
 
 	def get_cant_change_fields(self):
-		return {'chassis_no': self.stock_ledger_created()}
+		return {'chassis_no': self.stock_ledger_created() or self.vehicle_invoice_created()}
 
 	def stock_ledger_created(self):
 		if not hasattr(self, '_stock_ledger_created'):
@@ -192,15 +218,10 @@ class Vehicle(Document):
 			""", self.name))
 		return self._stock_ledger_created
 
-	def set_status(self):
-		if self.delivery_document_type:
-			self.status = "Delivered"
-		elif self.warranty_expiry_date and getdate(self.warranty_expiry_date) <= getdate(nowdate()):
-			self.status = "Expired"
-		elif not self.warehouse:
-			self.status = "Inactive"
-		else:
-			self.status = "Active"
+	def vehicle_invoice_created(self):
+		if not hasattr(self, '_vehicle_invoice_created'):
+			self._vehicle_invoice_created = frappe.db.exists("Vehicle Invoice", {'vehicle': self.name, 'docstatus': 1})
+		return self._vehicle_invoice_created
 
 
 def split_vehicle_items_by_qty(doc):

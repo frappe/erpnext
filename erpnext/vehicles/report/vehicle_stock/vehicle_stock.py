@@ -519,7 +519,7 @@ class VehicleStockReport(object):
 
 		receipt_data = frappe.db.sql("""
 			select name, vehicle, posting_date, bill_no, bill_date
-			from `tabVehicle Invoice Receipt`
+			from `tabVehicle Invoice`
 			where docstatus = 1 and vehicle in %(vehicle_names)s {0}
 		""".format(date_condition), args, as_dict=1)
 

@@ -78,6 +78,8 @@
   "reserved_customer_name",
   "more_info",
   "status",
+  "invoice_status",
+  "invoice_issued_for",
   "column_break_60",
   "employee",
   "amc_expiry_date",
@@ -629,10 +631,29 @@
   {
    "fieldname": "column_break_67",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Not Received",
+   "fieldname": "invoice_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Invoice Status",
+   "no_copy": 1,
+   "options": "Not Received\nIn Hand\nIssued\nDelivered",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_issued_for",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Invoice Issued For",
+   "no_copy": 1,
+   "options": "\nRegistration",
+   "read_only": 1
   }
  ],
  "image_field": "image",
- "modified": "2021-09-12 01:38:10.061103",
+ "modified": "2021-09-26 15:08:09.795655",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
