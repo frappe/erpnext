@@ -123,21 +123,28 @@ frappe.treeview_settings["Account"] = {
 		}, "add");
 	},
 	onrender: function(node) {
-		if (frappe.boot.user.can_read.indexOf("GL Entry") !== -1) {
+		if (frappe.boot.user.can_read.indexOf("GL Entry") !== -1 && !node.is_root && node.data) {
 
-			// show Dr if positive since balance is calculated as debit - credit else show Cr
-			let balance = node.data.balance_in_account_currency || node.data.balance;
-			let dr_or_cr = balance > 0 ? "Dr": "Cr";
+			frappe.call({
+				method: 'erpnext.accounts.utils.get_account_balance',
+				args: {account: node.data, ...cur_tree.args},
+				callback: function(r) {
+					let account = r.message;
+					// show Dr if positive since balance is calculated as debit - credit else show Cr
+					let balance = account.balance_in_account_currency || account.balance;
+					let dr_or_cr = balance > 0 ? "Dr": "Cr";
+					let format = (value, currency) => format_currency(Math.abs(value), currency);
 
-			if (node.data && node.data.balance!==undefined) {
-				$('<span class="balance-area pull-right">'
-					+ (node.data.balance_in_account_currency ?
-						(format_currency(Math.abs(node.data.balance_in_account_currency),
-							node.data.account_currency) + " / ") : "")
-					+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
-					+ " " + dr_or_cr
-					+ '</span>').insertBefore(node.$ul);
-			}
+					if (account.balance!==undefined) {
+						$('<span class="balance-area pull-right">'
+							+ (account.balance_in_account_currency ?
+								(format(account.balance_in_account_currency, account.account_currency) + " / ") : "")
+							+ format(account.balance, account.company_currency)
+							+ " " + dr_or_cr
+							+ '</span>').insertBefore(node.$ul);
+					}
+				}
+			});
 		}
 	},
 	toolbar: [
