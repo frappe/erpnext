@@ -143,6 +143,7 @@ frappe.ui.form.on('Pick List', {
 			docstatus: 1,
 			per_delivered: ['<', 100],
 			status: ['!=', ''],
+			per_picked: ['=',0],
 			customer: frm.doc.customer
 		};
 		frm.get_items_btn = frm.add_custom_button(__('Get Items'), () => {

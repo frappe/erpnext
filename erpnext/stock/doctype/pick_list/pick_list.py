@@ -22,11 +22,18 @@ class PickList(Document):
 
 	def before_save(self):
 		self.set_item_locations()
+		# set percentage picked in SO
+		for i in self.get('locations'):
+			if i.sales_order and frappe.db.get_value("Sales Order",i.sales_order,"per_picked") > 0:
+				frappe.throw("Row " + str(i.idx) + " has been picked already!")
 
 	def before_submit(self):
 		for item in self.locations:
 			# set picked_qty to stock_qty, before submit
 			item.picked_qty = item.stock_qty
+
+			# update the picked_qty in SO Item
+			self.update_so()
 
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
@@ -39,6 +46,24 @@ class PickList(Document):
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
 
+	def before_cancel(self):
+		#update picked_qty in SO Item on cancel of PL
+		self.update_so()
+
+	def update_so(self):
+		for item in self.locations:
+			if item.sales_order_item:
+				frappe.db.set_value("Sales Order Item",item.sales_order_item,"picked_qty",item.picked_qty)
+				so_doc = frappe.get_doc("Sales Order",item.sales_order)
+				if self.docstatus == 2:
+					per_picked = 0
+				else:
+					total_picked_qty = sum(flt(d.picked_qty) for d in so_doc.get('items'))
+					total_so_qty = sum(flt(d.stock_qty) for d in so_doc.get('items'))
+					per_picked = total_picked_qty/total_so_qty * 100
+
+				so_doc.db_set("per_picked", flt(per_picked) ,update_modified=False)
+	
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
 		self.validate_for_qty()
@@ -66,10 +91,11 @@ class PickList(Document):
 			item_doc.name = None
 
 			for row in locations:
-# Avoid setting picked qty on initial save. It will be set to stock_qty on submit
-#				row.update({
-#					'picked_qty': row.stock_qty
-#				})
+
+			# Avoid setting picked qty on initial save. It will be set to stock_qty on submit
+			#	row.update({
+			#		'picked_qty': row.stock_qty
+			#	})
 
 				location = item_doc.as_dict()
 				location.update(row)
@@ -344,6 +370,7 @@ def create_delivery_note(source_name, target_doc=None):
 	pick_list = frappe.get_doc('Pick List', source_name)
 	validate_item_locations(pick_list)
 	sales_dict = dict()
+	sales_orders = []
 	delivery_note = None
 	for d in pick_list.locations:
 		if d.sales_order:
