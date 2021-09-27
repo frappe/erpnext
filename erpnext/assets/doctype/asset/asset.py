@@ -187,7 +187,7 @@ class Asset(AccountsController):
 				d.precision("rate_of_depreciation"))
 
 	def make_depreciation_schedule(self, date_of_sale):
-		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.schedules:
+		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.get('schedules'):
 			self.schedules = []
 
 		if not self.available_for_use_date:
