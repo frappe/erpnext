@@ -1,7 +1,7 @@
 {%- macro slide(image, title, subtitle, action, label, index, align="Left", theme="Dark") -%}
 {%- set align_class = resolve_class({
 	'text-right': align == 'Right',
-	'text-centre': align == 'Center',
+	'text-centre': align == 'Centre',
 	'text-left': align == 'Left',
 }) -%}
 
@@ -15,7 +15,7 @@
 	<div class="carousel-body container d-flex {{ align_class }}">
 		<div class="carousel-content align-self-center">
 			{%- if title -%}<h1 class="{{ heading_class }}">{{ title }}</h1>{%- endif -%}
-			{%- if subtitle -%}<p class="text-muted mt-2">{{ subtitle }}</p>{%- endif -%}
+			{%- if subtitle -%}<p class="{{ heading_class }} mt-2">{{ subtitle }}</p>{%- endif -%}
 			{%- if action -%}
 			<a href="{{ action }}" class="btn btn-primary mt-3">
 				{{ label }}
