@@ -315,3 +315,4 @@ erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
+erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries
