@@ -34,8 +34,8 @@ def execute():
 			parent
 	""", as_dict=1)
 
-if purchase_invoices + sales_invoices:
-	frappe.log_error(json.dumps(purchase_invoices + sales_invoices, indent=2), title="Patch Log")
+	if purchase_invoices + sales_invoices:
+		frappe.log_error(json.dumps(purchase_invoices + sales_invoices, indent=2), title="Patch Log")
 
 	for invoice in purchase_invoices + sales_invoices:
 		doc = frappe.get_doc(invoice.type, invoice.name)
