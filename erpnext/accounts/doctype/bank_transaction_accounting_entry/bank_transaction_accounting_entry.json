@@ -1,11 +1,16 @@
 {
+ "autoname": "naming_series:",
  "creation": "2021-09-20 16:05:07.287559",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "bank_transaction",
-  "detail"
+  "detail",
+  "total_debit",
+  "total_credit",
+  "amended_from"
  ],
  "fields": [
   {
@@ -21,9 +26,37 @@
    "fieldtype": "Table",
    "label": "Detail",
    "options": "Bank Transactions Detail"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Serie",
+   "options": "BAN-TRAN-.YYYY.-"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Bank Transaction Accounting Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_debit",
+   "fieldtype": "Currency",
+   "label": "Amount Debit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credit",
+   "fieldtype": "Currency",
+   "label": "Amount Credit",
+   "read_only": 1
   }
  ],
- "modified": "2021-09-23 11:12:23.884802",
+ "is_submittable": 1,
+ "modified": "2021-09-24 12:15:14.625649",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction Accounting Entry",

@@ -45,6 +45,10 @@
   "document",
   "column7",
   "deposit_date",
+  "section_account",
+  "bank_account",
+  "columna_cuenta",
+  "accounting_seat",
   "section4",
   "movement_detail",
   "status",
@@ -326,10 +330,34 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Amount Data"
+  },
+  {
+   "fieldname": "section_account",
+   "fieldtype": "Section Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "columna_cuenta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "accounting_seat",
+   "fieldtype": "Check",
+   "label": "Accounting seat",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-09-22 14:57:55.499372",
+ "modified": "2021-09-24 10:53:51.747762",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",
@@ -348,7 +376,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

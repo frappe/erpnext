@@ -25,6 +25,9 @@ class BankTransactions(Document):
 		
 		if self.bank_deposit:
 			self.amount_data = 0
+		
+		if self.docstatus == 0:
+			self.set_transaction_data()
 
 		if self.docstatus == 1:
 			self.docstatus = 3
@@ -83,6 +86,12 @@ class BankTransactions(Document):
 			frappe.throw(_("You have already marked the credit note option"))
 	
 	def prereconciled(self):
+		self.set_transaction_data()
+		self.db_set('docstatus', 4, update_modified=False)
+		self.db_set('status', "Pre-reconciled", update_modified=False)
+		self.reload()
+	
+	def set_transaction_data(self):
 		if self.check:
 			self.db_set('transaction_data', "Bank Check", update_modified=False)
 			self.db_set('date_data', self.check_date, update_modified=False)
@@ -98,7 +107,3 @@ class BankTransactions(Document):
 		if self.bank_deposit:
 			self.db_set('transaction_data', "Bank deposit", update_modified=False)
 			self.db_set('date_data', self.deposit_date, update_modified=False)
-
-		self.db_set('docstatus', 4, update_modified=False)
-		self.db_set('status', "Pre-reconciled", update_modified=False)
-		self.reload()
