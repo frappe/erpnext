@@ -165,12 +165,12 @@ def make_custom_fields(update=True):
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
 			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
-			fetch_from='customer.gst_category', fetch_if_empty=1),
+			fetch_from='customer.gst_category', fetch_if_empty=1, length=25),
 		dict(fieldname='export_type', label='Export Type',
 			fieldtype='Select', insert_after='gst_category', print_hide=1,
 			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax', fetch_from='customer.export_type',
-			fetch_if_empty=1),
+			fetch_if_empty=1, length=25),
 	]
 
 	delivery_note_gst_category = [
@@ -181,18 +181,18 @@ def make_custom_fields(update=True):
 	]
 
 	invoice_gst_fields = [
-		dict(fieldname='invoice_copy', label='Invoice Copy',
+		dict(fieldname='invoice_copy', label='Invoice Copy', length=30,
 			fieldtype='Select', insert_after='export_type', print_hide=1, allow_on_submit=1,
 			options='Original for Recipient\nDuplicate for Transporter\nDuplicate for Supplier\nTriplicate for Supplier'),
-		dict(fieldname='reverse_charge', label='Reverse Charge',
+		dict(fieldname='reverse_charge', label='Reverse Charge', length=2,
 			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Y\nN', default='N'),
-		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
+		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN', length=15,
 			fieldtype='Data', insert_after='export_type', print_hide=1),
 		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='ecommerce_gstin'),
 		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
 			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
-			depends_on='eval:doc.is_return==1',
+			depends_on='eval:doc.is_return==1', length=45,
 			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others')
 	]
 
@@ -230,28 +230,28 @@ def make_custom_fields(update=True):
 	sales_invoice_gst_fields = [
 			dict(fieldname='billing_address_gstin', label='Billing Address GSTIN',
 				fieldtype='Data', insert_after='customer_address', read_only=1,
-				fetch_from='customer_address.gstin', print_hide=1),
+				fetch_from='customer_address.gstin', print_hide=1, length=15),
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='shipping_address_name',
-				fetch_from='shipping_address_name.gstin', print_hide=1),
+				fetch_from='shipping_address_name.gstin', print_hide=1, length=15),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='customer_gstin',
-				print_hide=1, read_only=1),
+				print_hide=1, read_only=1, length=50),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
-				fetch_from='company_address.gstin', print_hide=1, read_only=1),
+				fetch_from='company_address.gstin', print_hide=1, read_only=1, length=15),
 		]
 
 	sales_invoice_shipping_fields = [
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
-				depends_on="eval:doc.gst_category=='Overseas' "),
+				depends_on="eval:doc.gst_category=='Overseas' ", length=15),
 			dict(fieldname='shipping_bill_number', label=' Shipping Bill Number',
 				fieldtype='Data', insert_after='port_code', print_hide=1,
-				depends_on="eval:doc.gst_category=='Overseas' "),
+				depends_on="eval:doc.gst_category=='Overseas' ", length=50),
 			dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
-				depends_on="eval:doc.gst_category=='Overseas' "),
+				depends_on="eval:doc.gst_category=='Overseas' ", length=15),
 		]
 
 	journal_entry_fields = [
@@ -354,7 +354,8 @@ def make_custom_fields(update=True):
 			'insert_after': 'transporter',
 			'fetch_from': 'transporter.gst_transporter_id',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 20
 		},
 		{
 			'fieldname': 'driver',
@@ -370,7 +371,8 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Data',
 			'insert_after': 'driver',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 30
 		},
 		{
 			'fieldname': 'vehicle_no',
@@ -378,7 +380,8 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Data',
 			'insert_after': 'lr_no',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 10
 		},
 		{
 			'fieldname': 'distance',
@@ -395,7 +398,7 @@ def make_custom_fields(update=True):
 		{
 			'fieldname': 'transporter_name',
 			'label': 'Transporter Name',
-			'fieldtype': 'Data',
+			'fieldtype': 'Small Text',
 			'insert_after': 'transporter_col_break',
 			'fetch_from': 'transporter.name',
 			'read_only': 1,
@@ -409,12 +412,13 @@ def make_custom_fields(update=True):
 			'options': '\nRoad\nAir\nRail\nShip',
 			'insert_after': 'transporter_name',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 5
 		},
 		{
 			'fieldname': 'driver_name',
 			'label': 'Driver Name',
-			'fieldtype': 'Data',
+			'fieldtype': 'Small Text',
 			'insert_after': 'mode_of_transport',
 			'fetch_from': 'driver.full_name',
 			'print_hide': 1,
@@ -426,7 +430,8 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Date',
 			'insert_after': 'driver_name',
 			'default': 'Today',
-			'print_hide': 1
+			'print_hide': 1,
+			'length': 10
 		},
 		{
 			'fieldname': 'gst_vehicle_type',
@@ -437,7 +442,8 @@ def make_custom_fields(update=True):
 			'default': 'Regular',
 			'insert_after': 'lr_date',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 30
 		},
 		{
 			'fieldname': 'ewaybill',
@@ -446,7 +452,8 @@ def make_custom_fields(update=True):
 			'depends_on': 'eval:(doc.docstatus === 1)',
 			'allow_on_submit': 1,
 			'insert_after': 'tax_id',
-			'translatable': 0
+			'translatable': 0,
+			'length': 20
 		}
 	]
 
