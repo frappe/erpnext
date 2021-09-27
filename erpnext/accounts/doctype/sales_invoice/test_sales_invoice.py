@@ -133,6 +133,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_payment_entry_unlink_against_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si = frappe.copy_doc(test_records[0])
 		si.is_pos = 0
 		si.insert()
@@ -156,6 +157,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_payment_entry_unlink_against_standalone_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si1 = create_sales_invoice(rate=1000)
 		si2 = create_sales_invoice(rate=300)
 		si3 = create_sales_invoice(qty=-1, rate=300, is_return=1)
@@ -1646,6 +1648,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si = create_sales_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
 
 		outstanding_amount = get_outstanding_amount(si.doctype,
@@ -2295,6 +2298,54 @@ class TestSalesInvoice(unittest.TestCase):
 		party_link.delete()
 		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 0)
 
+	def test_payment_statuses(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		today = nowdate()
+
+		# Test Overdue
+		si = create_sales_invoice(do_not_submit=True)
+		si.payment_schedule = []
+		si.append("payment_schedule", {
+			"due_date": add_days(today, -5),
+			"invoice_portion": 50,
+			"payment_amount": si.grand_total / 2
+		})
+		si.append("payment_schedule", {
+			"due_date": add_days(today, 5),
+			"invoice_portion": 50,
+			"payment_amount": si.grand_total / 2
+		})
+		si.submit()
+		self.assertEqual(si.status, "Overdue")
+
+		# Test payment less than due amount
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = 1
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Overdue")
+
+		# Test Partly Paid
+		pe = frappe.copy_doc(pe)
+		pe.paid_amount = si.grand_total / 2
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Partly Paid")
+
+		# Test Paid
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = si.outstanding_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Paid")
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
@@ -2327,6 +2378,7 @@ def make_test_address_for_ewaybill():
 	if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Address for Eway bill",
 			"address_type": "Billing",
 			"city": "_Test City",
@@ -2348,11 +2400,12 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
-	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Customer-Address for Eway bill",
-			"address_type": "Shipping",
+			"address_type": "Billing",
 			"city": "_Test City",
 			"state": "Test State",
 			"country": "India",
@@ -2372,9 +2425,34 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+		address = frappe.get_doc({
+			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
+			"address_title": "_Test Customer-Address for Eway bill",
+			"address_type": "Shipping",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+			"doctype": "Address",
+			"is_primary_address": 1,
+			"phone": "+910000000000",
+			"gst_state": "Maharashtra",
+			"gst_state_number": "27",
+			"pincode": "410098"
+		}).insert()
+
+		address.append("links", {
+			"link_doctype": "Customer",
+			"link_name": "_Test Customer"
+		})
+
+		address.save()
+
 	if not frappe.db.exists('Address', '_Test Dispatch-Address for Eway bill-Shipping'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Dispatch Address Line 1",
+			"address_line2": "_Test Dispatch Address Line 2",
 			"address_title": "_Test Dispatch-Address for Eway bill",
 			"address_type": "Shipping",
 			"city": "_Test City",
@@ -2388,11 +2466,6 @@ def make_test_address_for_ewaybill():
 			"gst_state_number": "07",
 			"pincode": "1100101"
 		}).insert()
-
-		address.append("links", {
-			"link_doctype": "Company",
-			"link_name": "_Test Company"
-		})
 
 		address.save()
 
@@ -2433,7 +2506,8 @@ def make_sales_invoice_for_ewaybill():
 
 	si.distance = 2000
 	si.company_address = "_Test Address for Eway bill-Billing"
-	si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+	si.customer_address = "_Test Customer-Address for Eway bill-Billing"
+	si.shipping_address_name = "_Test Customer-Address for Eway bill-Shipping"
 	si.dispatch_address_name = "_Test Dispatch-Address for Eway bill-Shipping"
 	si.vehicle_no = "KA12KA1234"
 	si.gst_category = "Registered Regular"
