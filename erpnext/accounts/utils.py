@@ -794,17 +794,23 @@ def get_children(doctype, parent, company, is_root=False):
 	return acc
 
 @frappe.whitelist()
-def get_account_balance(account, company):
-	if isinstance(account, string_types):
-		account = loads(account)
+def get_account_balances(accounts, company):
+
+	if isinstance(accounts, string_types):
+		accounts = loads(accounts)
+
+	if not accounts:
+		return []
 
 	company_currency = frappe.get_cached_value("Company",  company,  "default_currency")
-	account["company_currency"] = company_currency
-	account["balance"] = flt(get_balance_on(account["value"], in_account_currency=False, company=company))
-	if account["account_currency"] and account["account_currency"] != company_currency:
-		account["balance_in_account_currency"] = flt(get_balance_on(account["value"], company=company))
 
-	return account
+	for account in accounts:
+		account["company_currency"] = company_currency
+		account["balance"] = flt(get_balance_on(account["value"], in_account_currency=False, company=company))
+		if account["account_currency"] and account["account_currency"] != company_currency:
+			account["balance_in_account_currency"] = flt(get_balance_on(account["value"], company=company))
+
+	return accounts
 
 def create_payment_gateway_account(gateway, payment_channel="Email"):
 	from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
