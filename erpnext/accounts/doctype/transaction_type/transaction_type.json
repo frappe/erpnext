@@ -130,7 +130,7 @@
    "fieldname": "dn_required",
    "fieldtype": "Select",
    "label": "Delivery Note Required",
-   "options": "\nNo\nYes"
+   "options": "\nNo\nYes\nEither Delivery Note or Sales Order"
   },
   {
    "depends_on": "buying",
@@ -197,7 +197,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2021-03-04 14:33:12.120645",
+ "modified": "2021-09-28 12:48:21.881546",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",
