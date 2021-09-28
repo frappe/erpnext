@@ -752,7 +752,7 @@ def set_salary_components(docs):
 
 def set_tax_withholding_category(company):
 	accounts = []
-	fiscal_year = None
+	fiscal_year_details = None
 	abbr = frappe.get_value("Company", company, "abbr")
 	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
 
