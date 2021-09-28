@@ -88,7 +88,7 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 
 	# if no item tax template found, create one
 	item_tax_template = frappe.new_doc("Item Tax Template")
-	item_tax_template.title = make_autoname("Item Tax Template-.####")
+	item_tax_template.title = make_autoname("Item Tax Template-.####", doctype='Item Tax Template')
 
 	for tax_type, tax_rate in iteritems(item_tax_map):
 		account_details = frappe.db.get_value("Account", tax_type, ['name', 'account_type', 'company'], as_dict=1)

@@ -137,7 +137,7 @@ class Batch(Document):
 		# validate_template(naming_series_prefix)
 		naming_series_prefix = render_template(str(naming_series_prefix), self.__dict__)
 		key = _make_naming_series_key(naming_series_prefix)
-		name = make_autoname(key)
+		name = make_autoname(key, doctype = 'Batch')
 
 		return name
 

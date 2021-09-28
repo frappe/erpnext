@@ -37,7 +37,7 @@ class SalarySlip(TransactionBase):
 		}
 
 	def autoname(self):
-		self.name = make_autoname(self.series)
+		self.name = make_autoname(self.series, doctype='SalarySlip')
 
 	def validate(self):
 		self.status = self.get_status()

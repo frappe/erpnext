@@ -17,7 +17,7 @@ class DuplicateBudgetError(frappe.ValidationError): pass
 class Budget(Document):
 	def autoname(self):
 		self.name = make_autoname(self.get(frappe.scrub(self.budget_against))
-			+ "/" + self.fiscal_year + "/.###")
+			+ "/" + self.fiscal_year + "/.###", doctype='Budget')
 
 	def validate(self):
 		if not self.get(frappe.scrub(self.budget_against)):

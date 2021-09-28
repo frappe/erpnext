@@ -189,7 +189,7 @@ class ShareTransfer(Document):
 			doc = self.get_company_shareholder()
 		else:
 			doc = self.get_shareholder_doc(shareholder)
-		doc.folio_no = make_autoname('FN.#####')
+		doc.folio_no = make_autoname('FN.#####', doctype = 'ShareTransfer')
 		doc.save()
 		return doc.folio_no
 
