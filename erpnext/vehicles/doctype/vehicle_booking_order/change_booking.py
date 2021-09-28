@@ -114,9 +114,9 @@ def can_change_allocation(vbo_doc, throw=False):
 	if not can_assign_allocation(vbo_doc, throw=throw):
 		return False
 
-	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
+	if vbo_doc.vehicle_allocation and not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
-	if not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
+	if vbo_doc.vehicle_allocation and not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
 		return False
 
 	if not vbo_doc.vehicle_allocation_required:
