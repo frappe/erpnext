@@ -8,7 +8,8 @@ test_records = frappe.get_test_records('Project')
 test_ignore = ["Sales Order"]
 
 from erpnext.projects.doctype.project_template.test_project_template import get_project_template, make_project_template
-from erpnext.projects.doctype.project.project import set_project_status
+from erpnext.selling.doctype.sales_order.sales_order import make_project as make_project_from_so
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 from frappe.utils import getdate
 
@@ -31,6 +32,21 @@ class TestProject(unittest.TestCase):
 		task4 = tasks[3]
 		self.assertEqual(task4.subject, 'Task 4')
 		self.assertEqual(getdate(task4.exp_end_date), getdate('2019-01-06'))
+
+	def test_project_linking_with_sales_order(self):
+		so = make_sales_order()
+		project = make_project_from_so(so.name)
+
+		project.save()
+		self.assertEqual(project.sales_order, so.name)
+
+		so.reload()
+		self.assertEqual(so.project, project.name)
+
+		project.delete()
+
+		so.reload()
+		self.assertFalse(so.project)
 
 def get_project(name):
 	template = get_project_template()
