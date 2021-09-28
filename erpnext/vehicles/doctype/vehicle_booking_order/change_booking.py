@@ -3,8 +3,7 @@ from frappe import _
 from frappe.utils import cstr, flt, cint
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import update_vehicle_booked,\
 	update_allocation_booked
-from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details,\
-	get_party_tax_status, get_party_doc
+from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details
 
 def set_can_change_onload(vbo_doc):
 	can_change = {
@@ -49,6 +48,7 @@ def change_vehicle(vehicle_booking_order, vehicle):
 
 	vbo_doc.update_delivery_status()
 	vbo_doc.update_invoice_status()
+	vbo_doc.update_registration_status()
 
 	save_vehicle_booking_for_update(vbo_doc)
 

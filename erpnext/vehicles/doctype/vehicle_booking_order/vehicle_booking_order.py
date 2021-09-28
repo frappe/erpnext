@@ -39,6 +39,7 @@ class VehicleBookingOrder(VehicleBookingController):
 		self.update_payment_status()
 		self.update_delivery_status()
 		self.update_invoice_status()
+		self.update_registration_status()
 		self.update_transfer_customer()
 		self.set_status()
 
@@ -420,6 +421,20 @@ class VehicleBookingOrder(VehicleBookingController):
 				"bill_date": self.bill_date,
 				"invoice_status": self.invoice_status,
 				"invoice_issued_for": self.invoice_issued_for,
+			})
+
+	def update_registration_status(self, update=False):
+		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
+		vehicle_registration_order = get_vehicle_registration_order(self.vehicle, self.name)
+
+		if vehicle_registration_order:
+			self.registration_status = 'Ordered'
+		else:
+			self.registration_status = 'Not Ordered'
+
+		if update:
+			self.db_set({
+				'registration_status': self.registration_status
 			})
 
 	def update_transfer_customer(self, update=False):

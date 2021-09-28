@@ -6,6 +6,12 @@ import json
 from six import string_types
 
 
+pricing_force_fields = [
+	'is_vehicle_retail', 'is_freight', 'is_withholding_tax',
+	'is_choice_number', 'is_ownership_transfer'
+]
+
+
 def calculate_total_price(doc, table_field, total_field):
 	doc.set(total_field, 0)
 	for d in doc.get(table_field):
@@ -99,19 +105,16 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 		out.component.component_amount = 0
 
 	if component_doc.component_type == "Booking":
-		if component_doc.booking_component_type == "Vehicle Retail":
-			out.component.is_vehicle_retail = 1
-		elif component_doc.booking_component_type == "Freight":
-			out.component.is_freight = 1
-		elif component_doc.booking_component_type == "Withholding Tax":
-			out.component.is_withholding_tax = 1
+		out.component.is_vehicle_retail = cint(component_doc.booking_component_type == "Vehicle Retail")
+		out.component.is_freight = cint(component_doc.booking_component_type == "Freight")
+		out.component.is_withholding_tax = cint(component_doc.booking_component_type == "Withholding Tax")
 
 	elif component_doc.component_type == "Registration":
+		out.component.is_choice_number = cint(component_doc.registration_component_type == "Choice Number")
+		out.component.is_ownership_transfer = cint(component_doc.registration_component_type == "Ownership Transfer")
+
 		if component_doc.registration_component_type == "Choice Number":
-			out.component.is_choice_number = 1
 			out.doc.choice_number_required = 1
-		elif component_doc.registration_component_type == "Ownership Transfer":
-			out.component.is_ownership_transfer = 1
 
 	return out
 

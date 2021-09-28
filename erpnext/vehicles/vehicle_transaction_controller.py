@@ -154,8 +154,10 @@ class VehicleTransactionController(StockController):
 			if vehicle_item_code != doc.item_code:
 				frappe.throw(_("Vehicle {0} is not {1}").format(doc.vehicle, frappe.bold(doc.item_name or doc.item_code)))
 
-			if not doc.get('vehicle_booking_order'):
-				already_booked = frappe.db.get_value("Vehicle Booking Order", {'vehicle': doc.vehicle, 'docstatus': 1})
+			if doc.meta.has_field('vehicle_booking_order') and not doc.get('vehicle_booking_order'):
+				already_booked = get_vehicle_booking_order_from_vehicle(doc.vehicle, {
+					'status': ['not in', ['Completed', 'Cancelled Booking']]
+				})
 				if already_booked:
 					frappe.throw(_("Vehicle {0} is already booked against {1}. Please set Vehicle Booking Order to use this vehicle.")
 						.format(doc.vehicle, frappe.get_desk_link("Vehicle Booking Order", already_booked)))
@@ -309,17 +311,20 @@ class VehicleTransactionController(StockController):
 		if not doc:
 			doc = self
 
-		vehicle_booking_order = doc.get('vehicle_booking_order')
-		if not vehicle_booking_order and doc.get('vehicle'):
-			vehicle_booking_order = frappe.db.get_value("Vehicle Booking Order", filters={
-				'vehicle': doc.vehicle,
-				'docstatus': 1
-			}, fieldname=['name', 'docstatus'], as_dict=1)
-
+		vehicle_booking_order = self.get_vehicle_booking_order(doc)
 		if vehicle_booking_order:
 			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
 			vbo.update_invoice_status(update=True)
+			vbo.set_status(update=True)
+			vbo.notify_update()
+
+	def update_vehicle_booking_order_registration(self):
+		vehicle_booking_order = self.get_vehicle_booking_order()
+		if vehicle_booking_order:
+			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+			vbo.check_cancelled(throw=True)
+			vbo.update_registration_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
@@ -331,6 +336,43 @@ class VehicleTransactionController(StockController):
 			vinvr = frappe.get_doc("Vehicle Invoice", doc.vehicle_invoice)
 			vinvr.set_status(update=True, update_vehicle=update_vehicle)
 			vinvr.notify_update()
+
+	def update_vehicle_registration_order(self, doc=None):
+		if not doc:
+			doc = self
+
+		vehicle_registration_order = self.get_vehicle_registration_order(doc)
+		if vehicle_registration_order:
+			vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
+
+			if self.doctype in ['Vehicle Invoice', 'Vehicle Invoice Delivery']:
+				vro.update_invoice_status(update=True)
+
+			vro.set_status(update=True)
+			vro.notify_update()
+
+	def get_vehicle_booking_order(self, doc=None):
+		if not doc:
+			doc = self
+
+		vehicle_booking_order = doc.get('vehicle_booking_order')
+		if not vehicle_booking_order and doc.get('vehicle'):
+			vehicle_booking_order = get_vehicle_booking_order_from_vehicle(doc.vehicle)
+
+		return vehicle_booking_order
+
+	def get_vehicle_registration_order(self, doc=None):
+		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
+
+		if not doc:
+			doc = self
+
+		vehicle_registration_order = doc.get('vehicle_registration_order')
+		if not vehicle_registration_order and (doc.get('vehicle') or doc.get('vehicle_booking_order')):
+			vehicle_registration_order = get_vehicle_registration_order(doc.get('vehicle'),
+				doc.get('vehicle_booking_order'))
+
+		return vehicle_registration_order
 
 	def make_odometer_log(self):
 		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
@@ -521,14 +563,16 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	return out
 
 
-def get_vehicle_booking_order_from_vehicle(vehicle, filters=None):
-	filters = filters or {}
-	filters.update({
+def get_vehicle_booking_order_from_vehicle(vehicle, filters=None, fieldname="name", as_dict=False):
+	actual_filters = {
 		"vehicle": vehicle,
 		"docstatus": 1,
-	})
+		"status": ['!=', 'Cancelled Booking']
+	}
+	if filters:
+		actual_filters.update(filters)
 
-	return frappe.db.get_value("Vehicle Booking Order", filters)
+	return frappe.db.get_value("Vehicle Booking Order", actual_filters, fieldname, as_dict=as_dict)
 
 
 @frappe.whitelist()

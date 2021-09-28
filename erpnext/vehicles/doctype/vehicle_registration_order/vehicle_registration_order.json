@@ -79,6 +79,7 @@
   "margin_amount",
   "status_section",
   "customer_outstanding",
+  "authority_outstanding",
   "agent_outstanding",
   "column_break_62",
   "invoice_status",
@@ -147,6 +148,7 @@
   {
    "fieldname": "vehicle_owner",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Vehicle Owner",
    "no_copy": 1,
    "options": "Customer"
@@ -494,7 +496,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nTo Receive Payment\nTo Receive Invoice\nTo Issue Invoice\nTo Receive Receipt\nTo Retrieve Invoice\nTo Deliver Invoice\nTo Pay Agent\nCompleted\nCancelled",
+   "options": "Draft\nTo Receive Payment\nTo Pay Authority\nTo Receive Invoice\nTo Issue Invoice\nTo Receive Receipt\nTo Retrieve Invoice\nTo Deliver Invoice\nTo Pay Agent\nCompleted\nCancelled",
    "read_only": 1
   },
   {
@@ -514,7 +516,6 @@
    "default": "0",
    "fieldname": "customer_total",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Customer Total",
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -549,7 +550,6 @@
   {
    "fieldname": "agent_outstanding",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Registration Agent Outstanding",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -635,12 +635,20 @@
    "no_copy": 1,
    "options": "\nRegistration",
    "read_only": 1
+  },
+  {
+   "fieldname": "authority_outstanding",
+   "fieldtype": "Currency",
+   "label": "Authority Outstanding",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-26 14:42:59.326650",
+ "modified": "2021-09-27 19:49:21.659499",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

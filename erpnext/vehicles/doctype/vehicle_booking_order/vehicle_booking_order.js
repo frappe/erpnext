@@ -315,6 +315,17 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			invoice_status_color = "green";
 		}
 
+		var registration_status_color;
+		if (me.frm.doc.registration_status == "Not Ordered") {
+			registration_status_color = "grey";
+		} else if (me.frm.doc.registration_status == "Ordered") {
+			registration_status_color = "orange";
+		} else if (me.frm.doc.registration_status == "In Process") {
+			registration_status_color = "blue";
+		} else if (me.frm.doc.registration_status == "Registered") {
+			registration_status_color = "green";
+		}
+
 		me.add_indicator_section(__("Fulfilment"), [
 			{
 				contents: __('Priority: {0}', [cint(me.frm.doc.priority) ? 'High' : 'Normal']),
@@ -328,6 +339,10 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			{
 				contents: __('Invoice Status: {0}', [me.frm.doc.invoice_status]),
 				indicator: invoice_status_color
+			},
+			{
+				contents: __('Registration Status: {0}', [me.frm.doc.registration_status]),
+				indicator: registration_status_color
 			},
 		]);
 
