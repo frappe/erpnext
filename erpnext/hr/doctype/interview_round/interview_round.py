@@ -4,6 +4,8 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
+
 from frappe.model.document import Document
 
 class InterviewRound(Document):
@@ -11,26 +13,21 @@ class InterviewRound(Document):
 
 @frappe.whitelist()
 def create_interview(doc):
-	import json
-	from six import string_types
-
-	if isinstance(doc, string_types):
+	if isinstance(doc, str):
 		doc = json.loads(doc)
+		doc = frappe._dict(doc)
 
-	if doc:
-		doc = frappe.get_doc(doc)
+	interview = frappe.new_doc("Interview")
+	interview.interview_round = doc.name
+	interview.designation = doc.designation
 
-		interview = frappe.new_doc("Interview")
-		interview.interview_round = doc.name
-		interview.designation = doc.designation
-
-		if doc.interviewer:
-			interview.interview_detail = []
-			for data in doc.interviewer:
-				interview.append("interview_detail", {
-						"interviewer": data.user
-					})
-		return interview
+	if doc.interviewer:
+		interview.interview_detail = []
+		for data in doc.interviewer:
+			interview.append("interview_detail", {
+					"interviewer": data.user
+				})
+	return interview
 
 
 

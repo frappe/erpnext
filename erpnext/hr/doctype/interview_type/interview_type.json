@@ -17,8 +17,13 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-04-12 14:48:04.956330",
+ "links": [
+  {
+   "link_doctype": "Interview Round",
+   "link_fieldname": "interview_type"
+  }
+ ],
+ "modified": "2021-09-28 21:37:04.712144",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Type",
@@ -33,6 +38,30 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
    "share": 1,
    "write": 1
   }

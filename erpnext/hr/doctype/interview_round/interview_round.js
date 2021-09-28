@@ -1,9 +1,9 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Interview Round', {
+frappe.ui.form.on("Interview Round", {
 	refresh: function(frm) {
-		if (!cur_frm.doc.__islocal) {
+		if (!frm.doc.__islocal) {
 			frm.add_custom_button(__("Create Interview"), function() {
 				frm.events.create_interview(frm);
 			});
