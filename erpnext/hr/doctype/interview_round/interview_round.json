@@ -25,7 +25,6 @@
    "unique": 1
   },
   {
-   "description": "If entered, It will automatically filter Interview Round while creating Job Interview",
    "fieldname": "designation",
    "fieldtype": "Link",
    "label": "Designation",
@@ -61,16 +60,15 @@
    "reqd": 1
   },
   {
-   "description": "If selected, Interviewer will automatically fetch in the Job Interview.",
    "fieldname": "interviewer",
    "fieldtype": "Table MultiSelect",
-   "label": "interviewer",
+   "label": "Interviewer",
    "options": "Interviewer"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-04-21 13:02:54.911120",
+ "modified": "2021-09-28 15:41:58.465876",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Round",
@@ -109,6 +107,7 @@
    "read": 1,
    "report": 1,
    "role": "Interviewer",
+   "select": 1,
    "share": 1,
    "write": 1
   }

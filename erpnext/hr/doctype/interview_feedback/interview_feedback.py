@@ -8,7 +8,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_datetime
 from erpnext.hr.doctype.interview.interview import update_rating
-from erpnext.hr.utils import validate_interviewer_roles
 
 class UnexpectedSkillError(frappe.ValidationError):
 	pass
@@ -16,7 +15,6 @@ class UnexpectedSkillError(frappe.ValidationError):
 class InterviewFeedback(Document):
 	def validate(self):
 		self.calculate_average_rating()
-		validate_interviewer_roles([frappe.session.user])
 		self.validate_interviewer()
 		self.validate_interview_date()
 		self.validate_duplicate()
@@ -26,9 +24,6 @@ class InterviewFeedback(Document):
 		applicable_interviewers = get_applicable_interviewers(self.interview)
 		if self.interviewer not in applicable_interviewers:
 			frappe.throw(_("{0} is not allowed to submit Interview Feedback for Interview: {1}").format(frappe.bold(self.interviewer), frappe.bold(self.interview)))
-
-		if self.interviewer != frappe.session.user:
-			frappe.throw(_("{0} is not allowed to submit {1}'s Interview Feedback").format(frappe.bold(frappe.session.user), frappe.bold(self.interviewer)))
 
 	def validate_interview_date(self):
 		scheduled_date = get_datetime(frappe.db.get_value("Interview", self.interview, "scheduled_on"))

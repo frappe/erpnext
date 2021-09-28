@@ -8,15 +8,12 @@ import datetime
 from frappe import _
 from frappe.utils import get_link_to_form, get_datetime
 from frappe.model.document import Document
-from erpnext.hr.utils import validate_interviewer_roles
 
+class DuplicateInterviewRoundError(frappe.ValidationError): pass
 
-class DuplicateInterviewRoundError(frappe.ValidationError):
-	pass
 class Interview(Document):
 
 	def validate(self):
-		validate_interviewer_roles([d.interviewer for d in self.interview_detail])
 		self.validate_duplicate_interview()
 		self.validate_designation()
 		self.set_status()

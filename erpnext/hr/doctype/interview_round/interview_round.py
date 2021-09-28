@@ -5,11 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from erpnext.hr.utils import validate_interviewer_roles
 
 class InterviewRound(Document):
-	def validate(self):
-		validate_interviewer_roles([d.user for d in self.interviewer])
+	pass
 
 @frappe.whitelist()
 def create_interview(doc):

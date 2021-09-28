@@ -70,7 +70,7 @@
    "allow_on_submit": 1,
    "fieldname": "average_rating",
    "fieldtype": "Rating",
-   "label": "Average rating",
+   "label": "Average Rating",
    "read_only": 1
   },
   {
@@ -119,7 +119,6 @@
   {
    "fieldname": "interview_detail",
    "fieldtype": "Table",
-   "label": "Interview Detail",
    "options": "Interview Detail",
    "reqd": 1
   },
@@ -142,15 +141,14 @@
    "fieldname": "scheduled_on",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "Scheduled on",
+   "label": "Scheduled On",
    "reqd": 1
   },
   {
    "allow_on_submit": 1,
-   "description": "The Value is defined out of 5. It will get updated during Interview Feedback submission",
    "fieldname": "average_rating_value",
    "fieldtype": "Float",
-   "label": "Average Rating(value)",
+   "label": "Average Rating Value",
    "precision": "3",
    "read_only": 1
   },
@@ -165,7 +163,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-24 15:39:12.175191",
+ "modified": "2021-09-28 21:03:08.194980",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview",
