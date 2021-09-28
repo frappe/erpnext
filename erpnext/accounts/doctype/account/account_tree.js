@@ -48,6 +48,7 @@ frappe.treeview_settings["Account"] = {
 	on_get_node: function(nodes, deep=false) {
 		if (frappe.boot.user.can_read.indexOf("GL Entry") == -1) return;
 
+		let accounts = [];
 		if (deep) {
 			// in case of `get_all_nodes`
 			accounts = nodes.reduce((acc, node) => [...acc, ...node.data], []);
