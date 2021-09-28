@@ -8,7 +8,7 @@ sudo apt-get install redis-server libcups2-dev
 
 pip install frappe-bench
 
-git clone https://github.com/frappe/frappe --branch "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}" --depth 1
+git clone https://github.com/ankush/frappe --branch db_wat --depth 1
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
 
 mkdir ~/frappe-bench/sites/test_site
