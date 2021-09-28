@@ -36,7 +36,8 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty"
+   "label": "Qty",
+   "reqd": 1
   },
   {
    "fieldname": "picked_qty",
@@ -180,7 +181,11 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2020-03-13 19:08:21.995986",
+=======
+ "modified": "2021-09-28 12:02:16.923056",
+>>>>>>> b91333afdd (fix: set item.qty as mandatory in picklist (#27680))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",
