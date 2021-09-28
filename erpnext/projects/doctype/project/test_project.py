@@ -48,7 +48,7 @@ class TestProject(unittest.TestCase):
 		so.reload()
 		self.assertFalse(so.project)
 
-def get_project(name, template):
+def get_project(name):
 	template = get_project_template()
 
 	project = frappe.get_doc(dict(
