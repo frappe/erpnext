@@ -2,15 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from collections import deque
 import unittest
+from collections import deque
+
 import frappe
-from frappe.utils import cstr, flt
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+from frappe.utils import cstr, flt
+
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
 from erpnext.tests.test_subcontracting import set_backflush_based_on
 
 test_records = frappe.get_test_records('BOM')
@@ -102,6 +106,24 @@ class TestBOM(unittest.TestCase):
 		self.assertAlmostEqual(bom.base_operating_cost, base_op_cost)
 		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
 		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
+
+	def test_bom_cost_with_batch_size(self):
+		bom = frappe.copy_doc(test_records[2])
+		bom.docstatus = 0
+		op_cost = 0.0
+		for op_row in bom.operations:
+			op_row.docstatus = 0
+			op_row.batch_size = 2
+			op_row.set_cost_based_on_bom_qty = 1
+			op_cost += op_row.operating_cost
+
+		bom.save()
+
+		for op_row in bom.operations:
+			self.assertAlmostEqual(op_row.cost_per_unit, op_row.operating_cost / 2)
+
+		self.assertAlmostEqual(bom.operating_cost, op_cost/2)
+		bom.delete()
 
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)

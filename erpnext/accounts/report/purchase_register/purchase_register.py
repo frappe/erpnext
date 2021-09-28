@@ -2,10 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+from frappe import _, msgprint
 from frappe.utils import flt
-from frappe import msgprint, _
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
+
 
 def execute(filters=None):
 	return _execute(filters)

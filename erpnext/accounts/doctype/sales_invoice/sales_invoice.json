@@ -696,7 +696,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Scan Barcode",
-   "length": 1,
    "options": "Barcode"
   },
   {
@@ -728,6 +727,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -737,6 +737,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -1651,7 +1652,7 @@
    "label": "Status",
    "length": 30,
    "no_copy": 1,
-   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
+   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nPartly Paid\nUnpaid\nUnpaid and Discounted\nPartly Paid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1,
    "read_only": 1
   },
@@ -2031,11 +2032,12 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-08-25 15:46:05.279588",
+ "modified": "2021-09-21 09:27:50.191854",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

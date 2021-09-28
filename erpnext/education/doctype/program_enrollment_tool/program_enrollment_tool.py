@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.education.api import enroll_student
 from frappe.utils import cint
+
+from erpnext.education.api import enroll_student
+
 
 class ProgramEnrollmentTool(Document):
 	def onload(self):

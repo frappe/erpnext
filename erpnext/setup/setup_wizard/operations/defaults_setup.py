@@ -2,9 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
+
 
 def set_default_settings(args):
 	# enable default currency

@@ -2,11 +2,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, add_days
-from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
+
+import frappe
+from frappe.utils import add_days, nowdate
+
 from erpnext.hr.doctype.designation.test_designation import create_designation
+from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
 from erpnext.hr.doctype.staffing_plan.test_staffing_plan import make_company
 
 # test_records = frappe.get_test_records('Job Offer')

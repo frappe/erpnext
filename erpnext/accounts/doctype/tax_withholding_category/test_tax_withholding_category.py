@@ -3,11 +3,12 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import today
+
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 test_dependencies = ["Supplier Group", "Customer Group"]
 
@@ -312,16 +313,16 @@ def create_records():
 		}).insert()
 
 def create_tax_with_holding_category():
-	fiscal_year = get_fiscal_year(today(), company="_Test Company")[0]
-
-	# Cummulative thresold
+	fiscal_year = get_fiscal_year(today(), company="_Test Company")
+	# Cumulative threshold
 	if not frappe.db.exists("Tax Withholding Category", "Cumulative Threshold TDS"):
 		frappe.get_doc({
 			"doctype": "Tax Withholding Category",
 			"name": "Cumulative Threshold TDS",
 			"category_name": "10% TDS",
 			"rates": [{
-				'fiscal_year': fiscal_year,
+				'from_date': fiscal_year[1],
+				'to_date': fiscal_year[2],
 				'tax_withholding_rate': 10,
 				'single_threshold': 0,
 				'cumulative_threshold': 30000.00
@@ -338,7 +339,8 @@ def create_tax_with_holding_category():
 			"name": "Cumulative Threshold TCS",
 			"category_name": "10% TCS",
 			"rates": [{
-				'fiscal_year': fiscal_year,
+				'from_date': fiscal_year[1],
+				'to_date': fiscal_year[2],
 				'tax_withholding_rate': 10,
 				'single_threshold': 0,
 				'cumulative_threshold': 30000.00
@@ -356,7 +358,8 @@ def create_tax_with_holding_category():
 			"name": "Single Threshold TDS",
 			"category_name": "10% TDS",
 			"rates": [{
-				'fiscal_year': fiscal_year,
+				'from_date': fiscal_year[1],
+				'to_date': fiscal_year[2],
 				'tax_withholding_rate': 10,
 				'single_threshold': 20000.00,
 				'cumulative_threshold': 0
@@ -376,7 +379,8 @@ def create_tax_with_holding_category():
 			"consider_party_ledger_amount": 1,
 			"tax_on_excess_amount": 1,
 			"rates": [{
-				'fiscal_year': fiscal_year,
+				'from_date': fiscal_year[1],
+				'to_date': fiscal_year[2],
 				'tax_withholding_rate': 10,
 				'single_threshold': 0,
 				'cumulative_threshold': 30000

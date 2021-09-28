@@ -2,10 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, nowdate, getdate
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -30,6 +31,9 @@ class Quotation(SellingController):
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
+
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		make_packing_list(self)
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
@@ -270,7 +274,7 @@ def _make_customer(source_name, ignore_permissions=False):
 				customer = frappe.get_doc(customer_doclist)
 				customer.flags.ignore_permissions = ignore_permissions
 				if quotation.get("party_name") == "Shopping Cart":
-					customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
+					customer.customer_group = frappe.db.get_value("E Commerce Settings", None,
 						"default_customer_group")
 
 				try:

@@ -2,12 +2,19 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-from json import dumps
-import frappe
+
 import unittest
-from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_settings import process_balance_info, verify_transaction
+from json import dumps
+
+import frappe
+
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_settings import (
+	process_balance_info,
+	verify_transaction,
+)
 from erpnext.erpnext_integrations.utils import create_mode_of_payment
+
 
 class TestMpesaSettings(unittest.TestCase):
 	def setUp(self):

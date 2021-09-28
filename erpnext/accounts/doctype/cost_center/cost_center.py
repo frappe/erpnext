@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr
+from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
+
 from erpnext.accounts.utils import validate_field_number
 
 

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 
+
 def execute():
     """
         Reset Clearance Date for Payment Entries of type Internal Transfer that have only been reconciled with one Bank Transaction.
@@ -35,10 +36,10 @@ def get_reconciled_bank_transactions(intra_company_pe):
 
     for payment_entry in intra_company_pe:
         reconciled_bank_transactions[payment_entry] = frappe.get_all(
-            'Bank Transaction Payments', 
+            'Bank Transaction Payments',
             filters = {
                 'payment_entry': payment_entry
-            }, 
+            },
             pluck='parent'
         )
 

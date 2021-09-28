@@ -2,14 +2,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import (flt, cstr)
 
-from erpnext.accounts.report.financial_statements import filter_accounts, filter_out_zero_value_rows
+import frappe
+from frappe import _
+from frappe.utils import cstr, flt
+from six import itervalues
+
+import erpnext
+from erpnext.accounts.report.financial_statements import (
+	filter_accounts,
+	filter_out_zero_value_rows,
+)
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
-from six import itervalues
 
 def execute(filters=None):
 	validate_filters(filters)

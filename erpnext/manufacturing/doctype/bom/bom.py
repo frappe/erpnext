@@ -1,23 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from typing import List
-from collections import deque
-import frappe, erpnext
-from frappe.utils import cint, cstr, flt, today
-from frappe import _
-from erpnext.setup.utils import get_exchange_rate
-from frappe.website.website_generator import WebsiteGenerator
-from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.get_item_details import get_price_list_rate
-from frappe.core.doctype.version.version import get_diff
-from erpnext.controllers.queries import get_match_cond
-from erpnext.stock.doctype.item.item import get_item_details
-from frappe.model.mapper import get_mapped_doc
-
 import functools
-
+from collections import deque
 from operator import itemgetter
+from typing import List
+
+import frappe
+from frappe import _
+from frappe.core.doctype.version.version import get_diff
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt, today
+from frappe.website.website_generator import WebsiteGenerator
+
+import erpnext
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -512,8 +511,14 @@ class BOM(WebsiteGenerator):
 			if d.workstation:
 				self.update_rate_and_time(d, update_hour_rate)
 
-			self.operating_cost += flt(d.operating_cost)
-			self.base_operating_cost += flt(d.base_operating_cost)
+			operating_cost = d.operating_cost
+			base_operating_cost = d.base_operating_cost
+			if d.set_cost_based_on_bom_qty:
+				operating_cost = flt(d.cost_per_unit) * flt(self.quantity)
+				base_operating_cost = flt(d.base_cost_per_unit) * flt(self.quantity)
+
+			self.operating_cost += flt(operating_cost)
+			self.base_operating_cost += flt(base_operating_cost)
 
 	def update_rate_and_time(self, row, update_hour_rate = False):
 		if not row.hour_rate or update_hour_rate:
@@ -537,6 +542,8 @@ class BOM(WebsiteGenerator):
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
 			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
 			row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+			row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
+			row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate:
 			row.db_update()
@@ -1128,7 +1135,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			query_filters["has_variants"] = 0
 
 	if filters and filters.get("is_stock_item"):
-		query_filters["is_stock_item"] = 1
+		or_cond_filters["is_stock_item"] = 1
+		or_cond_filters["has_variants"] = 1
 
 	return frappe.get_list("Item",
 		fields = fields, filters=query_filters,

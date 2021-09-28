@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import frappe
+
 from erpnext.setup.utils import insert_record
 
 

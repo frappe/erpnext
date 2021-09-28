@@ -6,13 +6,27 @@
 from __future__ import unicode_literals
 
 import frappe
-import erpnext
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.data import nowdate, getdate, cstr, cint, add_days, date_diff, get_last_day, add_to_date, flt
-from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from frappe.utils.data import (
+	add_days,
+	add_to_date,
+	cint,
+	cstr,
+	date_diff,
+	flt,
+	get_last_day,
+	getdate,
+	nowdate,
+)
+
+import erpnext
 from erpnext import get_default_company
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+
 
 class Subscription(Document):
 	def before_insert(self):
@@ -382,6 +396,7 @@ class Subscription(Document):
 		invoice.to_date = self.current_invoice_end
 
 		invoice.flags.ignore_mandatory = True
+		invoice.set_missing_values()
 		invoice.save()
 
 		if self.submit_invoice:

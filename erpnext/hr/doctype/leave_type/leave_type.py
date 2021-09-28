@@ -2,13 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import calendar
-import frappe
-from datetime import datetime
-from frappe.utils import today
-from frappe import _
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import today
+
 
 class LeaveType(Document):
 	def validate(self):
