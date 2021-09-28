@@ -21,12 +21,28 @@ class TaxJarSettings(Document):
 		TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 		TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
 		TAXJAR_SANDBOX_MODE = frappe.db.get_single_value("TaxJar Settings", "is_sandbox")
+		fields_hidden = 0
 
-		if TAXJAR_CREATE_TRANSACTIONS or TAXJAR_CALCULATE_TAX or TAXJAR_SANDBOX_MODE:
-			add_product_tax_categories()
-			make_custom_fields()
-			add_permissions()
-			frappe.enqueue('erpnext.regional.united_states.setup.add_product_tax_categories', now=False)
+		custom_fields = []
+		for dt in ['Item', 'Sales Invoice Item']:
+			doc = frappe.get_doc('Custom Field', {'dt': dt, 'fieldname':'product_tax_category'})
+			custom_fields.append(doc)
+			fields_hidden = doc.get('hidden') if doc else 0
+		fields_already_exist = True if custom_fields else False
+
+
+		if (TAXJAR_CREATE_TRANSACTIONS or TAXJAR_CALCULATE_TAX or TAXJAR_SANDBOX_MODE):
+			if not fields_already_exist:
+				add_product_tax_categories()
+				make_custom_fields()
+				add_permissions()
+				frappe.enqueue('erpnext.regional.united_states.setup.add_product_tax_categories', now=False)
+
+			elif fields_already_exist and fields_hidden:
+				toggle_tax_category_fields('1')
+
+		elif not TAXJAR_CREATE_TRANSACTIONS and not TAXJAR_CALCULATE_TAX and not TAXJAR_SANDBOX_MODE:
+				toggle_tax_category_fields('0')
 
 	@frappe.whitelist()
 	def update_nexus_list(self):
@@ -38,6 +54,11 @@ class TaxJarSettings(Document):
 		self.set('nexus', [])
 		self.set('nexus', new_nexus_list)
 		self.save()
+
+def toggle_tax_category_fields(toggle):
+	frappe.set_value('Custom Field',{'document':'Sales Invoice Item', 'fieldname':'product_tax_category'},'hidden',toggle)
+	frappe.set_value('Custom Field',{'document':'Item', 'fieldname':'product_tax_category'},'hidden',toggle)
+
 
 def add_product_tax_categories():
 	with open(os.path.join(os.path.dirname(__file__), 'product_tax_category_data.json'), 'r') as f:
