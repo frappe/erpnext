@@ -104,9 +104,6 @@ class PickList(Document):
 			item.idx = None
 			item.name = None
 
-			if item.qty == '':
-				item.qty = 0
-
 			if item_map.get(key):
 				item_map[key].qty += item.qty
 				item_map[key].stock_qty += item.stock_qty
