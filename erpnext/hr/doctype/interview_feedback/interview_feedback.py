@@ -59,8 +59,6 @@ class InterviewFeedback(Document):
 		avg_rating = total_rating/len(self.skill_assessment) if len(self.skill_assessment) else 1
 
 		self.average_rating = avg_rating
-		self.average_rating_value = avg_rating
-
 
 	def on_submit(self):
 		self.set_interview_average_rating()

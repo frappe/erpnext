@@ -54,15 +54,15 @@ class TestInterviewFeedback(unittest.TestCase):
 
 		avg_rating = total_rating/len(interview_feedback_1.skill_assessment) if len(interview_feedback_1.skill_assessment) else 1
 
-		self.assertEqual(flt(avg_rating, 3), interview_feedback_1.average_rating_value)
+		self.assertEqual(flt(avg_rating, 3), interview_feedback_1.average_rating)
 
 		avg_on_interview_detail = frappe.get_all("Interview Detail",
 			filters={"interview_feedback": interview_feedback_1.name},
-			fields = ['interviewer', 'average_rating_value']
+			fields = ['interviewer', 'average_rating']
 		)[0]
 
-		# 1. average should be refelected in Interview Detail.
-		self.assertEqual(avg_on_interview_detail["average_rating_value"], interview_feedback_1.average_rating_value)
+		# 1. average should be reflected in Interview Detail.
+		self.assertEqual(avg_on_interview_detail["average_rating"], interview_feedback_1.average_rating)
 
 		# 2. Status Should be "In Review" after first feedback submission no matter what it was before
 		interview.reload()

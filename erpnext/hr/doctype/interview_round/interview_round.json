@@ -33,12 +33,11 @@
   {
    "fieldname": "expected_skills_section",
    "fieldtype": "Section Break",
-   "label": "Expected Skills "
+   "label": "Expected Skillset"
   },
   {
    "fieldname": "expected_skill_set",
    "fieldtype": "Table",
-   "label": "Expected Skill Set",
    "options": "Expected Skill Set",
    "reqd": 1
   },
@@ -68,7 +67,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-09-28 15:41:58.465876",
+ "modified": "2021-09-28 21:47:48.046306",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Round",

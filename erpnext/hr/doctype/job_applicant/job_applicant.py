@@ -77,10 +77,10 @@ def create_interview(doc, interview_round):
 def get_interview_details(job_applicant):
 	interview_detail = frappe.db.get_all("Interview", filters = {
 		"job_applicant":job_applicant,"docstatus": 1}, fields=[
-		"name", "interview_round", "expected_average_rating", "average_rating", "average_rating_value", "status"])
+		"name", "interview_round", "expected_average_rating", "average_rating", "status"])
 	interview_detail_map = {}
 
 	for detail in interview_detail:
 		interview_detail_map[detail.name] = detail
 
-	return interview_detail_map		
+	return interview_detail_map

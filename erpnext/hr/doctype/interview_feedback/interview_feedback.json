@@ -13,7 +13,6 @@
   "section_break_4",
   "skill_assessment",
   "average_rating",
-  "average_rating_value",
   "section_break_7",
   "feedback",
   "amended_from"
@@ -83,18 +82,12 @@
    "options": "Interview Feedback",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "average_rating_value",
-   "fieldtype": "Float",
-   "label": "Average Rating(Value)",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-22 15:22:56.306451",
+ "modified": "2021-09-28 22:01:28.293325",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Feedback",

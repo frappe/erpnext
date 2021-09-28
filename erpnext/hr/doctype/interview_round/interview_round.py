@@ -15,7 +15,7 @@ class InterviewRound(Document):
 def create_interview(doc):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
-		doc = frappe._dict(doc)
+		doc = frappe.get_doc(doc)
 
 	interview = frappe.new_doc("Interview")
 	interview.interview_round = doc.name

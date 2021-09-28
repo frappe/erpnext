@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "HR-INTRV-.YYYY.-.####",
+ "autoname": "HR-INT-.YYYY.-.####",
  "creation": "2021-04-12 15:03:11.524090",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -18,10 +18,9 @@
   "interview_details_section",
   "interview_detail",
   "ratings_section",
-  "average_rating",
-  "average_rating_value",
-  "column_break_12",
   "expected_average_rating",
+  "column_break_12",
+  "average_rating",
   "section_break_13",
   "interview_summary",
   "reminded",
@@ -70,14 +69,13 @@
    "allow_on_submit": 1,
    "fieldname": "average_rating",
    "fieldtype": "Rating",
-   "label": "Average Rating",
+   "label": "Obtained Average Rating",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "interview_summary",
-   "fieldtype": "Text",
-   "label": "Interview Summary"
+   "fieldtype": "Text"
   },
   {
    "fieldname": "column_break_4",
@@ -102,7 +100,8 @@
   },
   {
    "fieldname": "section_break_13",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Interview Summary"
   },
   {
    "fieldname": "column_break_12",
@@ -145,14 +144,6 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "average_rating_value",
-   "fieldtype": "Float",
-   "label": "Average Rating Value",
-   "precision": "3",
-   "read_only": 1
-  },
-  {
    "default": "0",
    "fieldname": "reminded",
    "fieldtype": "Check",
@@ -163,7 +154,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 21:03:08.194980",
+ "modified": "2021-09-28 21:56:53.959355",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview",
@@ -228,5 +219,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "job_applicant",
  "track_changes": 1
 }

@@ -59,14 +59,13 @@ def update_rating(interview_name , interviewer, reference=None, feedback=None, a
 	for d in doc.interview_detail:
 		if d.interviewer == interviewer:
 			d.average_rating = avg_rating
-			d.average_rating_value = avg_rating
 			d.interview_feedback = reference
 
 		if not d.interview_feedback:
 			feedback_submitted_by_all_interviewer = 0
 
-		if d.average_rating_value:
-			total_rating += d.average_rating_value
+		if d.average_rating:
+			total_rating += d.average_rating
 
 
 	if feedback_submitted_by_all_interviewer:
@@ -74,9 +73,8 @@ def update_rating(interview_name , interviewer, reference=None, feedback=None, a
 	else:
 		doc.status = "In Review"
 
-	average_rating_value = total_rating/len(doc.interview_detail) if len(doc.interview_detail) else 1
-	doc.average_rating = average_rating_value
-	doc.average_rating_value = float(average_rating_value)
+	average_rating = total_rating/len(doc.interview_detail) if len(doc.interview_detail) else 1
+	doc.average_rating = average_rating
 	doc.save()
 
 	if doc.status == "In Review":
