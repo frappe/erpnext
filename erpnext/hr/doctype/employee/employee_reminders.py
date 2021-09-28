@@ -184,7 +184,7 @@ def get_employees_having_an_event_today(event_type):
 # --------------------------
 def send_work_anniversary_reminders():
 	"""Send Employee Work Anniversary Reminders if 'Send Work Anniversary Reminders' is checked"""
-	to_send = int(frappe.db.get_single_value("HR Settings", "send_work_anniversary_reminders") or 1)
+	to_send = int(frappe.db.get_single_value("HR Settings", "send_work_anniversary_reminders"))
 	if not to_send:
 		return
 
