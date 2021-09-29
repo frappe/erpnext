@@ -3,11 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import datetime
+
+import frappe
+
 from frappe import _
-from frappe.utils import get_link_to_form, get_datetime
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form, get_datetime
+
 
 class DuplicateInterviewRoundError(frappe.ValidationError): pass
 
@@ -153,6 +157,7 @@ def get_expected_skill_set(interview_round):
 @frappe.whitelist()
 def create_interview_feedback(data, interview_name, interviewer, job_applicant):
 	import json
+
 	from six import string_types
 
 	if isinstance(data, string_types):

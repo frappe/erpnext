@@ -3,9 +3,11 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-from erpnext.hr.doctype.designation.test_designation import create_designation
 import unittest
+
+import frappe
+
+from erpnext.hr.doctype.designation.test_designation import create_designation
 
 class TestJobApplicant(unittest.TestCase):
 	pass

@@ -9,7 +9,9 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import comma_and, validate_email_address
+
 from erpnext.hr.doctype.interview.interview import get_interviewer
+
 
 class DuplicationError(frappe.ValidationError): pass
 
@@ -46,6 +48,7 @@ class JobApplicant(Document):
 @frappe.whitelist()
 def create_interview(doc, interview_round):
 	import json
+
 	from six import string_types
 
 	if isinstance(doc, string_types):

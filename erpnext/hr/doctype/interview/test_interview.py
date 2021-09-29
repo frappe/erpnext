@@ -3,15 +3,18 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
 import datetime
-from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
-from erpnext.hr.doctype.designation.test_designation import create_designation
+
+import unittest
+
+import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from erpnext.hr.doctype.interview_round.test_interview_round import create_interview_round
 from frappe.utils import get_datetime, add_days
+
+from erpnext.hr.doctype.designation.test_designation import create_designation
 from erpnext.hr.doctype.interview.interview import DuplicateInterviewRoundError
+from erpnext.hr.doctype.interview_round.test_interview_round import create_interview_round
+from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
 
 
 class TestInterview(unittest.TestCase):

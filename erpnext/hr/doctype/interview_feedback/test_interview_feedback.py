@@ -3,13 +3,17 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import add_days, get_datetime, flt
-from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
-from erpnext.hr.doctype.interview_round.test_interview_round import create_skill_set
+
 from erpnext.hr.doctype.interview.test_interview import create_interview_and_dependencies
 from erpnext.hr.doctype.interview_feedback.interview_feedback import UnexpectedSkillError
+from erpnext.hr.doctype.interview_round.test_interview_round import create_skill_set
+from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
+
+
 class TestInterviewFeedback(unittest.TestCase):
 
 	def tearDown(self):

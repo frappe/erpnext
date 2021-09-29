@@ -3,9 +3,11 @@
 # See license.txt
 from __future__ import unicode_literals
 
+import unittest
+
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-import unittest
+
 
 class TestInterviewRound(unittest.TestCase):
 	def tearDown(self):
