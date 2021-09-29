@@ -6,8 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime
-from erpnext.hr.doctype.interview.interview import update_rating
+from frappe.utils import flt, get_datetime
 
 class UnexpectedSkillError(frappe.ValidationError):
 	pass
@@ -64,10 +63,35 @@ class InterviewFeedback(Document):
 		self.set_interview_average_rating()
 
 	def set_interview_average_rating(self):
-		update_rating(self.interview, self.interviewer, self.name, self.feedback, self.average_rating)
+		self.update_interview_details()
 
 	def before_cancel(self):
-		update_rating(self.interview, self.interviewer, revert=0)
+		self.update_interview_details()
+
+	def update_interview_details(self):
+		doc = frappe.get_doc('Interview', self.interview)
+		total_rating = 0
+
+		if self.docstatus == 2:
+			for entry in doc.interview_detail:
+				if entry.interview_feedback == self.name:
+					entry.average_rating = entry.interview_feedback = entry.comments = entry.result = None
+					break
+		else:
+			for entry in doc.interview_detail:
+				if entry.interviewer == self.interviewer:
+					entry.average_rating = self.average_rating
+					entry.interview_feedback = self.name
+					entry.comments = self.feedback
+					entry.result = self.result
+
+				if entry.average_rating:
+					total_rating += entry.average_rating
+
+		doc.average_rating = flt(total_rating / len(doc.interview_detail) if len(doc.interview_detail) else 0)
+		doc.save()
+		doc.notify_update()
+
 
 @frappe.whitelist()
 def get_applicable_interviewers(interview):

@@ -23,18 +23,6 @@ frappe.ui.form.on('Interview', {
 				frm.events.show_reschedule_dialog(frm);
 				frm.refresh();
 			});
-		} else if (frm.doc.status === "Scheduled") {
-			frm.add_custom_button(__("End Session"), function () {
-				frappe.db.set_value("Interview", frm.doc.name, "status", "In Review").then(() => {
-					frappe.call({
-						method: "erpnext.hr.interview.interview.send_review_reminder",
-						args: {
-							interview_name: frm.doc.name
-						}
-					});
-					frm.refresh();
-				});
-			}).addClass("btn-primary");
 		}
 
 		if (frm.doc.status != "Completed") {
@@ -44,7 +32,7 @@ frappe.ui.form.on('Interview', {
 			});
 
 			if ((allowed_interviewers.includes(frappe.session.user)) && now_date_time > frm.doc.scheduled_on) {
-				frappe.db.get_value('Interview Feedback', {'interviewer': frappe.session.user}, 'name', (r) => {
+				frappe.db.get_value('Interview Feedback', {'interviewer': frappe.session.user, 'docstatus': 1}, 'name', (r) => {
 					if (Object.keys(r).length === 0) {
 						frm.add_custom_button(__('Submit Feedback'), function () {
 							frappe.call({
@@ -108,7 +96,7 @@ frappe.ui.form.on('Interview', {
 				{
 					fieldname: "skill_set",
 					fieldtype: "Table",
-					label: "Rate Based On Skill Set",
+					label: __("Skill Assessment"),
 					cannot_add_rows: false,
 					in_editable_grid: true,
 					reqd: 1,
@@ -116,9 +104,15 @@ frappe.ui.form.on('Interview', {
 					data: data
 				},
 				{
+					fieldname: "result",
+					fieldtype: "Select",
+					options: ["", "Cleared", "Rejected"],
+					label: __("Result")
+				},
+				{
 					fieldname: "feedback",
 					fieldtype: "Small Text",
-					label: "Feedback"
+					label: __("Feedback")
 				}
 			],
 			size: "large",

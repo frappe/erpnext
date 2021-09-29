@@ -16,7 +16,6 @@ class Interview(Document):
 	def validate(self):
 		self.validate_duplicate_interview()
 		self.validate_designation()
-		self.set_status()
 
 	def validate_duplicate_interview(self):
 		duplicate_interview = frappe.db.exists("Interview", {
@@ -42,43 +41,9 @@ class Interview(Document):
 		else:
 			self.designation = applicant_designation
 
-	def set_status(self):
-		if get_datetime() > get_datetime(self.scheduled_on):
-			self.status = "In Review"
-
 	def before_submit(self):
 		self.original_date = self.scheduled_on
 
-	def before_cancel(self):
-		self.status = "Cancelled"
-
-def update_rating(interview_name , interviewer, reference=None, feedback=None, avg_rating=0):
-	doc = frappe.get_doc("Interview", interview_name)
-	total_rating = 0
-	feedback_submitted_by_all_interviewer = 1
-	for d in doc.interview_detail:
-		if d.interviewer == interviewer:
-			d.average_rating = avg_rating
-			d.interview_feedback = reference
-
-		if not d.interview_feedback:
-			feedback_submitted_by_all_interviewer = 0
-
-		if d.average_rating:
-			total_rating += d.average_rating
-
-
-	if feedback_submitted_by_all_interviewer:
-		doc.status = "Completed"
-	else:
-		doc.status = "In Review"
-
-	average_rating = total_rating/len(doc.interview_detail) if len(doc.interview_detail) else 1
-	doc.average_rating = average_rating
-	doc.save()
-
-	if doc.status == "In Review":
-		send_review_reminder(doc.name)
 
 @frappe.whitelist()
 def get_interviewer(interview_round):
@@ -198,16 +163,8 @@ def create_interview_feedback(data, interview_name, interviewer):
 	interview_feedback.save()
 	interview_feedback.submit()
 
-	# set interview feedback summary in interview
-	frappe.db.set_value('Interview Detail', {'parent': interview_name, 'interviewer': interviewer}, {
-		'interview_feedback': interview_feedback.name,
-		'average_rating': interview_feedback.average_rating,
-		'comments': interview_feedback.feedback
-	})
-
-	frappe.get_doc('Interview', interview_name).notify_update()
-
-	frappe.msgprint(_("Interview Feedback {0} submitted successfully").format(get_link_to_form("Interview Feedback", interview_feedback.name)))
+	frappe.msgprint(_('Interview Feedback {0} submitted successfully').format(
+		get_link_to_form('Interview Feedback', interview_feedback.name)))
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

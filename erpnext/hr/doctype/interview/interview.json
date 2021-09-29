@@ -50,14 +50,12 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
-   "default": "Scheduled",
+   "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Scheduled\nIn Review\nCompleted\nCancelled",
-   "read_only": 1,
+   "options": "Pending\nUnder Review\nCleared\nRejected",
    "reqd": 1
   },
   {
@@ -116,10 +114,10 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "interview_detail",
    "fieldtype": "Table",
-   "options": "Interview Detail",
-   "reqd": 1
+   "options": "Interview Detail"
   },
   {
    "fieldname": "amended_from",
@@ -154,7 +152,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-29 08:48:55.641845",
+ "modified": "2021-09-29 13:00:49.287204",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview",
