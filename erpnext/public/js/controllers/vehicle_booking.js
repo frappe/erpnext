@@ -103,13 +103,17 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 	},
 
 	vehicle_query: function () {
-		return {
-			filters: {
-				item_code: this.frm.doc.item_code,
-				delivery_document_no: ['is', 'not set'],
-				is_booked: 0
-			}
+		var filters = {
+			delivery_document_no: ['is', 'not set']
 		};
+		if (this.frm.doc.item_code) {
+			filters['item_code'] = this.frm.doc.item_code;
+		}
+		if (this.frm.doc.doctype == "Vehicle Booking Order") {
+			filters['is_booked'] = 0;
+		}
+
+		return filters;
 	},
 
 	delivery_period_query: function (ignore_allocation_period) {

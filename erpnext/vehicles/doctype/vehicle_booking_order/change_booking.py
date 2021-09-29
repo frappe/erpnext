@@ -115,9 +115,9 @@ def can_change_allocation(vbo_doc, throw=False):
 	if not can_assign_allocation(vbo_doc, throw=throw):
 		return False
 
-	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
+	if vbo_doc.vehicle_allocation and not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
-	if not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
+	if vbo_doc.vehicle_allocation and not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
 		return False
 
 	if not vbo_doc.vehicle_allocation_required:
@@ -485,6 +485,7 @@ def has_cancel_booking_permission(throw=False):
 def handle_delivery_period_changed(vbo_doc):
 	to_date = frappe.get_cached_value("Vehicle Allocation Period", vbo_doc.delivery_period, 'to_date')
 
+	vbo_doc.lead_time_days = 0
 	vbo_doc.delivery_date = to_date
 	vbo_doc.validate_delivery_date()
 

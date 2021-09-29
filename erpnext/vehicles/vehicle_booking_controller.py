@@ -134,15 +134,12 @@ class VehicleBookingController(AccountsController):
 				frappe.throw(_("Vehicle {0} is not {1}").format(self.vehicle, frappe.bold(self.item_name or self.item_code)))
 
 	def validate_lead_time(self):
-		if self.vehicle_allocation_required:
-			self.lead_time_days = 0
-		else:
-			if self.lead_time_days < 0:
-				frappe.throw(_("Delivery Lead Time cannot be negative"))
+		if self.lead_time_days < 0:
+			frappe.throw(_("Delivery Lead Time cannot be negative"))
 
-			min_lead_time_days = cint(frappe.get_cached_value("Vehicles Settings", None, "minimum_lead_time_days"))
-			if self.lead_time_days and min_lead_time_days and self.lead_time_days < min_lead_time_days:
-				frappe.throw(_("Delivery Lead Time cannot be less than {0} days").format(min_lead_time_days))
+		min_lead_time_days = cint(frappe.get_cached_value("Vehicles Settings", None, "minimum_lead_time_days"))
+		if self.lead_time_days and min_lead_time_days and self.lead_time_days < min_lead_time_days:
+			frappe.throw(_("Delivery Lead Time cannot be less than {0} days").format(min_lead_time_days))
 
 	def validate_delivery_date(self):
 		delivery_date = getdate(self.delivery_date)
@@ -525,10 +522,7 @@ def get_item_details(args):
 				out.valid_till = add_days(getdate(args.transaction_date), out.quotation_validity_days - 1)
 
 	if args.doctype and frappe.get_meta(args.doctype).has_field('lead_time_days'):
-		if not out.vehicle_allocation_required:
-			out.lead_time_days = cint(args.lead_time_days) if 'lead_time_days' in args else cint(item.lead_time_days)
-		else:
-			out.lead_time_days = 0
+		out.lead_time_days = cint(args.lead_time_days) if 'lead_time_days' in args else cint(item.lead_time_days)
 
 		if out.lead_time_days:
 			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))

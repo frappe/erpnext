@@ -178,9 +178,7 @@ class SalesInvoice(SellingController):
 	def validate(self):
 		super(SalesInvoice, self).validate()
 
-		if not self.is_pos:
-			self.so_dn_required()
-
+		self.so_dn_required()
 		self.validate_stin()
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -631,34 +629,39 @@ class SalesInvoice(SellingController):
 		if self.is_return:
 			return
 
-		so_required = frappe.get_cached_value("Selling Settings", None, 'so_required') == 'Yes'
-		dn_required = frappe.get_cached_value("Selling Settings", None, 'dn_required') == 'Yes'
+		so_required = frappe.get_cached_value("Selling Settings", None, 'so_required') or 'No'
+		dn_required = frappe.get_cached_value("Selling Settings", None, 'dn_required') or 'No'
 
 		if so_required and frappe.get_cached_value('Customer', self.customer, 'so_not_required'):
-			so_required = False
+			so_required = 'No'
 		if dn_required and frappe.get_cached_value('Customer', self.customer, 'dn_not_required'):
-			dn_required = False
+			dn_required = 'No'
 
 		if self.get('transaction_type'):
 			tt_so_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'so_required')
 			tt_dn_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'dn_required')
 			if tt_so_required:
-				so_required = tt_so_required == 'Yes'
+				so_required = tt_so_required
 			if tt_dn_required:
-				dn_required = tt_dn_required == 'Yes'
+				dn_required = tt_dn_required
 
-		if not so_required and not dn_required:
+		if so_required == 'No' and dn_required == 'No':
 			return
 
 		for d in self.get('items'):
 			if not d.item_code:
 				continue
 
+			if so_required == 'Yes' and not d.get('sales_order') and not self.get('is_pos'):
+				frappe.throw(_("Row #{0}: Sales Order is mandatory for Item {1}").format(d.idx, d.item_code))
+
 			is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-			if so_required and not d.get('sales_order') and not self.get('is_pos'):
-				frappe.throw(_("Sales Order is mandatory for Item {0}").format(d.item_code))
-			if dn_required and not d.get('delivery_note') and is_stock_item and not self.get('is_pos'):
-				frappe.throw(_("Delivery Note is mandatory for Item {0}").format(d.item_code))
+			skip_dn_check = self.get('is_pos') and self.get('update_stock')
+			if is_stock_item and not skip_dn_check:
+				if dn_required == 'Yes' and not d.get('delivery_note'):
+					frappe.throw(_("Row #{0}: Delivery Note is mandatory for Item {1}").format(d.idx, d.item_code))
+				if dn_required == 'Either Delivery Note or Sales Order' and not d.get('delivery_note') and not d.get('sales_order'):
+					frappe.throw(_("Row #{0}: Delivery Note or Sales Order is mandatory for Item {1}").format(d.idx, d.item_code))
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""

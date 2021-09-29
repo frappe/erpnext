@@ -86,7 +86,7 @@
    "fieldname": "dn_required",
    "fieldtype": "Select",
    "label": "Delivery Note Required",
-   "options": "No\nYes"
+   "options": "No\nYes\nEither Delivery Note or Sales Order"
   },
   {
    "default": "Each Transaction",
@@ -137,7 +137,7 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-10-02 22:25:24.601005",
+ "modified": "2021-09-28 12:48:02.586844",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
