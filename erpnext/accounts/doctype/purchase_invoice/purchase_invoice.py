@@ -1110,6 +1110,12 @@ class PurchaseInvoice(BuyingController):
 		if not self.apply_tds:
 			return
 
+		if self.apply_tds and not self.get('tax_withholding_category'):
+			self.tax_withholding_category = frappe.db.get_value('Supplier', self.supplier, 'tax_withholding_category')
+
+		if not self.tax_withholding_category:
+			return
+
 		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
 
 		if not tax_withholding_details:
