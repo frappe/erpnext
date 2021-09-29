@@ -42,18 +42,23 @@ frappe.ui.form.on('Interview', {
 			frm.doc.interview_detail.forEach(values => {
 				allowed_interviewers.push(values.interviewer);
 			});
+
 			if ((allowed_interviewers.includes(frappe.session.user)) && now_date_time > frm.doc.scheduled_on) {
-				frm.add_custom_button(__("Submit Feedback"), function () {
-					frappe.call({
-						method: "erpnext.hr.doctype.interview.interview.get_expected_skill_set",
-						args: {
-							interview_round: frm.doc.interview_round
-						},
-						callback: function (r) {
-							frm.events.show_feedback_dialog(frm, r.message);
-							frm.refresh();
-						}
-					});
+				frappe.db.get_value('Interview Feedback', {'interviewer': frappe.session.user}, 'name', (r) => {
+					if (Object.keys(r).length === 0) {
+						frm.add_custom_button(__('Submit Feedback'), function () {
+							frappe.call({
+								method: 'erpnext.hr.doctype.interview.interview.get_expected_skill_set',
+								args: {
+									interview_round: frm.doc.interview_round
+								},
+								callback: function (r) {
+									frm.events.show_feedback_dialog(frm, r.message);
+									frm.refresh();
+								}
+							});
+						}).addClass('btn-primary');
+					}
 				});
 			}
 		}
