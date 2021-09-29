@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 
 def get_data():
-	 return {
+	return {
 		'fieldname': 'job_applicant',
 		'transactions': [
 			{
