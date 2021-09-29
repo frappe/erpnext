@@ -5,6 +5,7 @@ from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import
 	update_allocation_booked
 from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details
 
+
 def set_can_change_onload(vbo_doc):
 	can_change = {
 		"vehicle": can_change_vehicle(vbo_doc),
@@ -66,14 +67,16 @@ def can_change_vehicle(vbo_doc, throw=False):
 
 	if not can_assign_vehicle(vbo_doc, throw=throw):
 		return False
-
 	if not vbo_doc.vehicle_receipt and check_vehicle_received(vbo_doc, throw=throw):
 		return False
-
 	if check_vehicle_delivered(vbo_doc, throw=throw):
 		return False
 
-	if check_invoice_received(vbo_doc, throw=throw):
+	if check_invoice_exists(vbo_doc, throw=throw):
+		return False
+	if check_invoice_delivered(vbo_doc, throw=throw):
+		return False
+	if check_invoice_issued(vbo_doc, throw=throw):
 		return False
 
 	return True
@@ -244,7 +247,6 @@ def can_change_customer_details(vbo_doc, throw=False):
 
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
-
 	if not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
 		return False
 
@@ -311,9 +313,15 @@ def can_change_item(vbo_doc, throw=False):
 
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
+
 	if check_vehicle_received(vbo_doc, throw=throw):
 		return False
-	if check_invoice_received(vbo_doc, throw=throw):
+
+	if check_invoice_exists(vbo_doc, throw=throw):
+		return False
+	if check_invoice_delivered(vbo_doc, throw=throw):
+		return False
+	if check_invoice_issued(vbo_doc, throw=throw):
 		return False
 
 	return True
@@ -466,7 +474,14 @@ def can_change_cancellation(vbo_doc, throw=False):
 		return False
 	if check_vehicle_received(vbo_doc, throw):
 		return False
-	if check_invoice_received(vbo_doc, throw):
+	if check_vehicle_delivered(vbo_doc, throw):
+		return False
+
+	if check_invoice_exists(vbo_doc, throw):
+		return False
+	if check_invoice_delivered(vbo_doc, throw):
+		return False
+	if check_invoice_issued(vbo_doc, throw):
 		return False
 
 	return True
@@ -553,20 +568,72 @@ def check_vehicle_received(vbo_doc, throw=False):
 	return False
 
 
-def check_invoice_received(vbo_doc, throw=False):
-	if vbo_doc.invoice_status != 'Not Received':
+def check_vehicle_delivered(vbo_doc, throw=False):
+	if vbo_doc.delivery_status == 'Delivered':
 		if throw:
-			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Invoice is already received")
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Vehicle is already delivered")
 				.format(frappe.bold(vbo_doc.name)))
 		return True
 
 	return False
 
 
-def check_vehicle_delivered(vbo_doc, throw=False):
-	if vbo_doc.delivery_status == 'Delivered':
+def check_invoice_exists(vbo_doc, throw=False):
+	if not hasattr(vbo_doc, '_has_vehicle_invoice'):
+		vbo_doc._has_vehicle_invoice = frappe.db.get_value("Vehicle Invoice",
+			{'vehicle_booking_order': vbo_doc.name, 'docstatus': 1})
+
+	vehicle_invoice = vbo_doc.get('_has_vehicle_invoice')
+	if vehicle_invoice:
 		if throw:
-			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Vehicle is already delivered")
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Invoice is already received against booking")
+				.format(frappe.bold(vbo_doc.name)))
+		return True
+
+	return False
+
+
+def check_invoice_delivered(vbo_doc, throw=False):
+	if vbo_doc.invoice_status == "Delivered":
+		if throw:
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Invoice is already delivered")
+				.format(frappe.bold(vbo_doc.name)))
+			return True
+
+	return False
+
+
+def check_invoice_issued(vbo_doc, throw=False):
+	if not hasattr(vbo_doc, '_has_vehicle_invoice_issue'):
+		vbo_doc._has_vehicle_invoice_issue = frappe.db.sql("""
+			select m.name
+			from `tabVehicle Invoice Movement Detail` d
+			inner join `tabVehicle Invoice Movement` m on m.name = d.parent
+			where m.docstatus = 1 and m.purpose = 'Issue' and d.vehicle_booking_order = %s
+			limit 1
+		""", vbo_doc.name)
+		vbo_doc._has_vehicle_invoice_issue = vbo_doc._has_vehicle_invoice_issue[0][0]\
+			if vbo_doc._has_vehicle_invoice_issue else None
+
+	vehicle_invoice_issue = vbo_doc.get('_has_vehicle_invoice_issue')
+	if vehicle_invoice_issue:
+		if throw:
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Invoice is already issued against booking")
+				.format(frappe.bold(vbo_doc.name)))
+		return True
+
+	return False
+
+
+def check_registration_order_exists(vbo_doc, throw=False):
+	if not hasattr(vbo_doc, '_has_vehicle_registration_order'):
+		vbo_doc._has_vehicle_registration_order = frappe.db.get_value("Vehicle Registration Order",
+			{'vehicle_booking_order': vbo_doc.name, 'docstatus': 1})
+
+	vehicle_registration_order = vbo_doc.get('_has_vehicle_registration_order')
+	if vehicle_registration_order:
+		if throw:
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Registration Order is exists against booking")
 				.format(frappe.bold(vbo_doc.name)))
 		return True
 
