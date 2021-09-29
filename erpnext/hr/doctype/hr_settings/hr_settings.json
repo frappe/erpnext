@@ -30,12 +30,12 @@
   "auto_leave_encashment",
   "restrict_backdated_leave_application",
   "hiring_settings",
-  "interview_reminder",
+  "check_vacancies",
+  "send_interview_reminder",
   "interview_reminder_message",
   "remind_before",
-  "check_vacancies",
-  "column_break_23",
-  "interview_feedback_reminder",
+  "column_break_29",
+  "send_interview_feedback_reminder",
   "feedback_reminder_message"
  ],
  "fields": [
@@ -149,12 +149,6 @@
    "label": "Standard Working Hours"
   },
   {
-   "default": "1",
-   "fieldname": "interview_reminder",
-   "fieldtype": "Check",
-   "label": "Interview Reminder"
-  },
-  {
    "default": "00:15:00",
    "fieldname": "remind_before",
    "fieldtype": "Time",
@@ -162,27 +156,20 @@
    "read_only_depends_on": "eval: !doc.interview_reminder"
   },
   {
-   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} at Frappe technologies\nThank you, Good day!",
+   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} ",
+   "depends_on": "send_interview_reminder",
    "fieldname": "interview_reminder_message",
    "fieldtype": "Small Text",
-   "label": "Interview Reminder Message",
-   "read_only_depends_on": "eval: !doc.interview_reminder"
-  },
-  {
-   "default": "1",
-   "fieldname": "interview_feedback_reminder",
-   "fieldtype": "Check",
-   "label": "Interview Feedback Reminder"
+   "label": "Interview Reminder Message"
   },
   {
    "default": "Interview Feedback for Interview: {{ doc.name }} is not submitted yet. Please, Submit your Feedback.\nThank you, Good day!",
+   "depends_on": "send_interview_feedback_reminder",
    "fieldname": "feedback_reminder_message",
    "fieldtype": "Small Text",
-   "label": "Feedback Reminder Message",
-   "read_only_depends_on": "eval: !doc.interview_feedback_reminder"
+   "label": "Feedback Reminder Message"
   },
   {
-   "fieldname": "column_break_23",
    "collapsible": 1,
    "fieldname": "reminders_section",
    "fieldtype": "Section Break",
@@ -221,13 +208,29 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_interview_reminder",
+   "fieldtype": "Check",
+   "label": "Send Interview Reminder"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_interview_feedback_reminder",
+   "fieldtype": "Check",
+   "label": "Send Interview Feedback Reminder"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-08-30 12:01:12.834162",
+ "modified": "2021-09-29 21:38:38.578279",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
