@@ -56,8 +56,8 @@ class TaxJarSettings(Document):
 		self.save()
 
 def toggle_tax_category_fields(toggle):
-	frappe.set_value('Custom Field',{'document':'Sales Invoice Item', 'fieldname':'product_tax_category'},'hidden',toggle)
-	frappe.set_value('Custom Field',{'document':'Item', 'fieldname':'product_tax_category'},'hidden',toggle)
+	frappe.set_value('Custom Field',{'dt':'Sales Invoice Item', 'fieldname':'product_tax_category'},'hidden',toggle)
+	frappe.set_value('Custom Field',{'dt':'Item', 'fieldname':'product_tax_category'},'hidden',toggle)
 
 
 def add_product_tax_categories():
