@@ -1954,6 +1954,7 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -2032,7 +2033,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-09-21 09:27:50.191854",
+ "modified": "2021-09-28 13:09:34.391799",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

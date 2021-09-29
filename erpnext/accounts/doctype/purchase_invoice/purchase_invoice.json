@@ -1303,6 +1303,7 @@
    "fetch_from": "supplier.is_internal_supplier",
    "fieldname": "is_internal_supplier",
    "fieldtype": "Check",
+   "ignore_user_permissions": 1,
    "label": "Is Internal Supplier",
    "read_only": 1
   },
@@ -1400,7 +1401,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-21 09:27:39.967811",
+ "modified": "2021-09-28 13:10:28.351810",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
