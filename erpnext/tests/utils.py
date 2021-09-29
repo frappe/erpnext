@@ -7,6 +7,7 @@ from typing import Any, Dict, NewType, Optional
 
 import frappe
 from frappe.core.doctype.report.report import get_report_module_dotted_path
+from frappe.model.base_document import get_controller
 
 ReportFilters = Dict[str, Any]
 ReportName = NewType("ReportName", str)
@@ -119,3 +120,23 @@ def execute_script_report(
 			report_execute_fn(filter_with_optional_param)
 
 	return report_data
+
+
+def test_stale_doctypes():
+	"""Check that all doctypes in DB actually exist after patch test"""
+
+	erpnext_modules = frappe.get_all("Module Def", {"app_name": "erpnext"}, pluck="name")
+	doctypes = frappe.get_all("DocType", {"istable": 0, "module": ("in", erpnext_modules)}, pluck="name")
+
+	stale_doctypes = []
+
+	for doctype in doctypes:
+		try:
+			get_controller(doctype)
+		except ImportError:
+			stale_doctypes.append(doctype)
+
+
+	if stale_doctypes:
+		frappe.throw(frappe._("Following doctypes exist in DB without controller.\n {}")
+				.format('\n'.join(stale_doctypes)))

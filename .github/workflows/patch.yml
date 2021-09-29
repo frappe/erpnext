@@ -87,3 +87,4 @@ jobs:
           wget https://erpnext.com/files/v10-erpnext.sql.gz
           bench --site test_site --force restore ~/frappe-bench/v10-erpnext.sql.gz
           bench --site test_site migrate
+          bench --site test_site execute erpnext.tests.utils.test_stale_doctypes
