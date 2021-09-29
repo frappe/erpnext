@@ -2352,6 +2352,7 @@ def make_test_address_for_ewaybill():
 	if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Address for Eway bill",
 			"address_type": "Billing",
 			"city": "_Test City",
@@ -2373,11 +2374,12 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
-	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Customer-Address for Eway bill",
-			"address_type": "Shipping",
+			"address_type": "Billing",
 			"city": "_Test City",
 			"state": "Test State",
 			"country": "India",
@@ -2397,9 +2399,34 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+		address = frappe.get_doc({
+			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
+			"address_title": "_Test Customer-Address for Eway bill",
+			"address_type": "Shipping",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+			"doctype": "Address",
+			"is_primary_address": 1,
+			"phone": "+910000000000",
+			"gst_state": "Maharashtra",
+			"gst_state_number": "27",
+			"pincode": "410098"
+		}).insert()
+
+		address.append("links", {
+			"link_doctype": "Customer",
+			"link_name": "_Test Customer"
+		})
+
+		address.save()
+
 	if not frappe.db.exists('Address', '_Test Dispatch-Address for Eway bill-Shipping'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Dispatch Address Line 1",
+			"address_line2": "_Test Dispatch Address Line 2",
 			"address_title": "_Test Dispatch-Address for Eway bill",
 			"address_type": "Shipping",
 			"city": "_Test City",
@@ -2413,11 +2440,6 @@ def make_test_address_for_ewaybill():
 			"gst_state_number": "07",
 			"pincode": "1100101"
 		}).insert()
-
-		address.append("links", {
-			"link_doctype": "Company",
-			"link_name": "_Test Company"
-		})
 
 		address.save()
 
@@ -2458,7 +2480,8 @@ def make_sales_invoice_for_ewaybill():
 
 	si.distance = 2000
 	si.company_address = "_Test Address for Eway bill-Billing"
-	si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+	si.customer_address = "_Test Customer-Address for Eway bill-Billing"
+	si.shipping_address_name = "_Test Customer-Address for Eway bill-Shipping"
 	si.dispatch_address_name = "_Test Dispatch-Address for Eway bill-Shipping"
 	si.vehicle_no = "KA12KA1234"
 	si.gst_category = "Registered Regular"

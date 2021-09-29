@@ -310,3 +310,5 @@ erpnext.patches.v14_0.update_opportunity_currency_fields
 erpnext.patches.v13_0.gst_fields_for_pos_invoice
 erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
 erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
+erpnext.patches.v13_0.create_custom_field_for_finance_book
+erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries

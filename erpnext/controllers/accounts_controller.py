@@ -685,13 +685,17 @@ class AccountsController(TransactionBase):
 							.format(d.reference_name, d.against_order))
 
 	def set_advance_gain_or_loss(self):
-		if not self.get("advances"):
+		if self.get('conversion_rate') == 1 or not self.get("advances"):
+			return
+
+		is_purchase_invoice = self.doctype == 'Purchase Invoice'
+		party_account = self.credit_to if is_purchase_invoice else self.debit_to
+		if get_account_currency(party_account) != self.currency:
 			return
 
 		for d in self.get("advances"):
 			advance_exchange_rate = d.ref_exchange_rate
-			if (d.allocated_amount and self.conversion_rate != 1
-				and self.conversion_rate != advance_exchange_rate):
+			if (d.allocated_amount and self.conversion_rate != advance_exchange_rate):
 
 				base_allocated_amount_in_ref_rate = advance_exchange_rate * d.allocated_amount
 				base_allocated_amount_in_inv_rate = self.conversion_rate * d.allocated_amount
@@ -710,7 +714,7 @@ class AccountsController(TransactionBase):
 
 					gain_loss_account = frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
 					if not gain_loss_account:
-						frappe.throw(_("Please set Default Exchange Gain/Loss Account in Company {}")
+						frappe.throw(_("Please set default Exchange Gain/Loss Account in Company {}")
 							.format(self.get('company')))
 					account_currency = get_account_currency(gain_loss_account)
 					if account_currency != self.company_currency:
@@ -729,7 +733,7 @@ class AccountsController(TransactionBase):
 							"against": party,
 							dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
 							dr_or_cr: abs(d.exchange_gain_loss),
-							"cost_center": self.cost_center,
+							"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 							"project": self.project
 						}, item=d)
 					)
