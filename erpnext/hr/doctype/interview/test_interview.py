@@ -33,15 +33,13 @@ class TestInterview(unittest.TestCase):
 		self.assertEqual(interview.status, "In Review")
 
 	def test_notification_on_rescheduling(self):
-		from erpnext.hr.doctype.interview.interview import reschedule_interview
-
 		job_applicant = create_job_applicant()
 		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(get_datetime(), -4), save_and_submit=True)
 
 		previous_scheduled_date = interview.scheduled_on
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
 
-		reschedule_interview(interview.name, add_days(get_datetime(previous_scheduled_date), 2))
+		interview.reschedule_interview(add_days(get_datetime(previous_scheduled_date), 2))
 		interview.reload()
 
 		self.assertEqual(interview.scheduled_on, add_days(get_datetime(previous_scheduled_date), 2))

@@ -6,17 +6,18 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "interview_details_section",
   "interview_round",
   "job_applicant",
   "job_opening",
   "designation",
+  "resume_link",
   "column_break_4",
   "scheduled_on",
   "original_date",
   "status",
-  "resume_link",
-  "interview_details_section",
-  "interview_detail",
+  "interview_feedback_section",
+  "interview_details",
   "ratings_section",
   "expected_average_rating",
   "column_break_12",
@@ -87,7 +88,7 @@
   {
    "fieldname": "interview_details_section",
    "fieldtype": "Section Break",
-   "label": "Interview Feedbacks"
+   "label": "Details"
   },
   {
    "fetch_from": "interview_round.expected_average_rating",
@@ -97,6 +98,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_13",
    "fieldtype": "Section Break",
    "label": "Interview Summary"
@@ -112,12 +114,6 @@
    "label": "Designation",
    "options": "Designation",
    "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "interview_detail",
-   "fieldtype": "Table",
-   "options": "Interview Detail"
   },
   {
    "fieldname": "amended_from",
@@ -139,7 +135,8 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Scheduled On",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -147,12 +144,28 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Reminded"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "interview_details",
+   "fieldtype": "Table",
+   "options": "Interview Detail"
+  },
+  {
+   "fieldname": "interview_feedback_section",
+   "fieldtype": "Section Break",
+   "label": "Feedback"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2021-09-29 13:00:49.287204",
+ "links": [
+  {
+   "link_doctype": "Interview Feedback",
+   "link_fieldname": "interview"
+  }
+ ],
+ "modified": "2021-09-29 21:58:59.118631",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview",

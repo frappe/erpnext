@@ -73,12 +73,12 @@ class InterviewFeedback(Document):
 		total_rating = 0
 
 		if self.docstatus == 2:
-			for entry in doc.interview_detail:
+			for entry in doc.interview_details:
 				if entry.interview_feedback == self.name:
 					entry.average_rating = entry.interview_feedback = entry.comments = entry.result = None
 					break
 		else:
-			for entry in doc.interview_detail:
+			for entry in doc.interview_details:
 				if entry.interviewer == self.interviewer:
 					entry.average_rating = self.average_rating
 					entry.interview_feedback = self.name
@@ -88,7 +88,7 @@ class InterviewFeedback(Document):
 				if entry.average_rating:
 					total_rating += entry.average_rating
 
-		doc.average_rating = flt(total_rating / len(doc.interview_detail) if len(doc.interview_detail) else 0)
+		doc.average_rating = flt(total_rating / len(doc.interview_details) if len(doc.interview_details) else 0)
 		doc.save()
 		doc.notify_update()
 

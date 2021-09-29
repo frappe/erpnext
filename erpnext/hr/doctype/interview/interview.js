@@ -5,33 +5,32 @@ frappe.ui.form.on('Interview', {
 	onload: function (frm) {
 		frm.events.set_job_applicant_query(frm);
 
-		frm.set_query("interviewer", "interview_detail", function () {
+		frm.set_query('interviewer', 'interview_details', function () {
 			return {
-				query: "erpnext.hr.doctype.interview.interview.get_interviewer_list"
+				query: 'erpnext.hr.doctype.interview.interview.get_interviewer_list'
 			};
 		});
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.scheduled_on != frm.doc.original_date && frm.doc.status == "Scheduled") {
-			frm.fields_dict.status.set_description(__("Interview was rescheduled from " + frm.doc.original_date + " to " + frm.doc.scheduled_on));
+		if (frm.doc.scheduled_on != frm.doc.original_date && frm.doc.status == 'Scheduled') {
+			frm.set_intro(__('Interview was rescheduled from {0} to {1}', [frm.doc.original_date, frm.doc.scheduled_on]));
 		}
 
-		let now_date_time = frappe.datetime.now_datetime();
-		if (now_date_time < frm.doc.scheduled_on && frm.doc.status === "Scheduled") {
-			frm.add_custom_button(__("Reschedule Interview"), function () {
-				frm.events.show_reschedule_dialog(frm);
-				frm.refresh();
-			});
-		}
+		if (frm.doc.docstatus != 2 && !frm.doc.__islocal) {
+			if (frm.doc.status === 'Pending') {
+				frm.add_custom_button(__('Reschedule Interview'), function() {
+					frm.events.show_reschedule_dialog(frm);
+					frm.refresh();
+				});
+			}
 
-		if (frm.doc.status != "Completed") {
 			let allowed_interviewers = [];
-			frm.doc.interview_detail.forEach(values => {
+			frm.doc.interview_details.forEach(values => {
 				allowed_interviewers.push(values.interviewer);
 			});
 
-			if ((allowed_interviewers.includes(frappe.session.user)) && now_date_time > frm.doc.scheduled_on) {
+			if ((allowed_interviewers.includes(frappe.session.user))) {
 				frappe.db.get_value('Interview Feedback', {'interviewer': frappe.session.user, 'docstatus': 1}, 'name', (r) => {
 					if (Object.keys(r).length === 0) {
 						frm.add_custom_button(__('Submit Feedback'), function () {
@@ -60,43 +59,34 @@ frappe.ui.form.on('Interview', {
 				fieldname: 'scheduled_on',
 				fieldtype: 'Datetime',
 				reqd: 1
-			}, ],
+			}],
 			primary_action_label: 'Reschedule',
 			primary_action(values) {
-				if (values.scheduled_on >= frappe.datetime.get_today()) {
-					frm.events.reschedule_interview(frm, values.scheduled_on);
-					frappe.msgprint(__("Interview Rescheduled"));
+				frm.call({
+					method: 'reschedule_interview',
+					doc: frm.doc,
+					args: {
+						scheduled_on: values.scheduled_on
+					}
+				}).then(() => {
 					frm.refresh();
 					d.hide();
-				} else {
-					frappe.throw(__("You cannot schedule Interview for past date"));
-				}
+				});
 			}
 		});
 		d.show();
-	},
-
-
-	reschedule_interview: function (frm, scheduled_on) {
-		frappe.call({
-			method: "erpnext.hr.doctype.interview.interview.reschedule_interview",
-			args: {
-				name: frm.doc.name,
-				scheduled_on: scheduled_on
-			}
-		});
 	},
 
 	show_feedback_dialog: function (frm, data) {
 		let fields = frm.events.get_fields_for_feedback();
 
 		let d = new frappe.ui.Dialog({
-			title: __("Submit Feedback"),
+			title: __('Submit Feedback'),
 			fields: [
 				{
-					fieldname: "skill_set",
-					fieldtype: "Table",
-					label: __("Skill Assessment"),
+					fieldname: 'skill_set',
+					fieldtype: 'Table',
+					label: __('Skill Assessment'),
 					cannot_add_rows: false,
 					in_editable_grid: true,
 					reqd: 1,
@@ -104,18 +94,18 @@ frappe.ui.form.on('Interview', {
 					data: data
 				},
 				{
-					fieldname: "result",
-					fieldtype: "Select",
-					options: ["", "Cleared", "Rejected"],
-					label: __("Result")
+					fieldname: 'result',
+					fieldtype: 'Select',
+					options: ['', 'Cleared', 'Rejected'],
+					label: __('Result')
 				},
 				{
-					fieldname: "feedback",
-					fieldtype: "Small Text",
-					label: __("Feedback")
+					fieldname: 'feedback',
+					fieldtype: 'Small Text',
+					label: __('Feedback')
 				}
 			],
-			size: "large",
+			size: 'large',
 			minimizable: true,
 			primary_action: function (values) {
 				frappe.call({
@@ -137,7 +127,7 @@ frappe.ui.form.on('Interview', {
 	get_fields_for_feedback: function () {
 		return [{
 			fieldtype: 'Link',
-			fieldname: "skill",
+			fieldname: 'skill',
 			options: 'Skill',
 			in_list_view: 1,
 			label: __('Skill')
@@ -153,7 +143,7 @@ frappe.ui.form.on('Interview', {
 	set_job_applicant_query: function (frm) {
 		frm.set_query('job_applicant', function () {
 			let job_applicant_filters = {
-				status: ["!=", "Rejected"]
+				status: ['!=', 'Rejected']
 			};
 			if (frm.doc.designation) {
 				job_applicant_filters.designation = frm.doc.designation;
@@ -166,30 +156,30 @@ frappe.ui.form.on('Interview', {
 
 	interview_round: async function (frm) {
 		frm.events.reset_values(frm);
-		frm.set_value("job_applicant", '');
+		frm.set_value('job_applicant', '');
 
 		let round_data = (await frappe.db.get_value('Interview Round', frm.doc.interview_round, 'designation')).message;
-		frm.set_value("designation", round_data.designation);
+		frm.set_value('designation', round_data.designation);
 		frm.events.set_job_applicant_query(frm);
 
 		if (frm.doc.interview_round) {
-			frm.events.set_interview_detail(frm);
+			frm.events.set_interview_details(frm);
 		} else {
-			frm.set_value("interview_detail", []);
+			frm.set_value('interview_details', []);
 		}
 	},
 
-	set_interview_detail: function (frm) {
+	set_interview_details: function (frm) {
 		frappe.call({
-			method: "erpnext.hr.doctype.interview.interview.get_interviewer",
+			method: 'erpnext.hr.doctype.interview.interview.get_interviewer',
 			args: {
 				interview_round: frm.doc.interview_round
 			},
 			callback: function (data) {
-				let interview_detail = data.message;
-				frm.set_value("interview_detail", []);
+				let interview_details = data.message;
+				frm.set_value('interview_details', []);
 				if (data.message.length) {
-					frm.set_value("interview_detail", interview_detail);
+					frm.set_value('interview_details', interview_details);
 				}
 			}
 		});
@@ -199,7 +189,7 @@ frappe.ui.form.on('Interview', {
 		if (!frm.doc.interview_round) {
 			frm.doc.job_applicant = '';
 			frm.refresh();
-			frappe.throw(__("Select Interview Round First"));
+			frappe.throw(__('Select Interview Round First'));
 		}
 
 		if (frm.doc.job_applicant) {
@@ -211,7 +201,7 @@ frappe.ui.form.on('Interview', {
 
 	set_designation_and_job_opening: async function (frm) {
 		let round_data = (await frappe.db.get_value('Interview Round', frm.doc.interview_round, 'designation')).message;
-		frm.set_value("designation", round_data.designation);
+		frm.set_value('designation', round_data.designation);
 		frm.events.set_job_applicant_query(frm);
 
 		let job_applicant_data = (await frappe.db.get_value(
@@ -219,16 +209,16 @@ frappe.ui.form.on('Interview', {
 		)).message;
 
 		if (!round_data.designation) {
-			frm.set_value("designation", job_applicant_data.designation);
+			frm.set_value('designation', job_applicant_data.designation);
 		}
 
-		frm.set_value("job_opening", job_applicant_data.job_title);
-		frm.set_value("resume_link", job_applicant_data.resume_link);
+		frm.set_value('job_opening', job_applicant_data.job_title);
+		frm.set_value('resume_link', job_applicant_data.resume_link);
 	},
 
 	reset_values: function (frm) {
-		frm.set_value("designation", '');
-		frm.set_value("job_opening", '');
-		frm.set_value("resume_link", '');
+		frm.set_value('designation', '');
+		frm.set_value('job_opening', '');
+		frm.set_value('resume_link', '');
 	}
 });

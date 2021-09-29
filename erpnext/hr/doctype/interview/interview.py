@@ -12,132 +12,143 @@ from frappe.model.document import Document
 class DuplicateInterviewRoundError(frappe.ValidationError): pass
 
 class Interview(Document):
-
 	def validate(self):
 		self.validate_duplicate_interview()
 		self.validate_designation()
 
+	def before_submit(self):
+		self.original_date = self.scheduled_on
+
+	def on_submit(self):
+		if self.status not in ['Cleared', 'Rejected']:
+			frappe.throw(_('Only Interviews with Cleared or Rejected status can be submitted.'), title=_('Not Allowed'))
+
 	def validate_duplicate_interview(self):
-		duplicate_interview = frappe.db.exists("Interview", {
-				"job_applicant": self.job_applicant,
-				"interview_round": self.interview_round,
-				"docstatus": 1
+		duplicate_interview = frappe.db.exists('Interview', {
+				'job_applicant': self.job_applicant,
+				'interview_round': self.interview_round,
+				'docstatus': 1
 			}
 		)
+
 		if duplicate_interview:
-			frappe.throw(_("Job Applicants are not allowed to appear twice for the same Interview round. Interview already scheduled for Job Applicant: {0}, Reference: {1}").format(
-				frappe.bold(self.job_applicant),
-				frappe.bold(get_link_to_form("Interview", duplicate_interview)))
+			frappe.throw(_('Job Applicants are not allowed to appear twice for the same Interview round. Interview {0} already scheduled for Job Applicant {1}').format(
+				frappe.bold(get_link_to_form('Interview', duplicate_interview))),
+				frappe.bold(self.job_applicant)
 			)
 
-	# Also handeled at Client Side Validation is only For Creation Through API
 	def validate_designation(self):
-		applicant_designation = frappe.db.get_value("Job Applicant", self.job_applicant, 'designation')
-		# intially designation is pulled from Interview round
+		applicant_designation = frappe.db.get_value('Job Applicant', self.job_applicant, 'designation')
 		if self.designation :
 			if self.designation != applicant_designation:
-				frappe.throw(_('Interview Round: {0} is only for Designation: {1}. Job Applicant: {2} had applied for {3}').format(
+				frappe.throw(_('Interview Round: {0} is only for Designation: {1}. Job Applicant: {2} has applied for the role: {3}').format(
 					self.interview_round, self.designation, applicant_designation), exc = DuplicateInterviewRoundError)
 		else:
 			self.designation = applicant_designation
 
-	def before_submit(self):
-		self.original_date = self.scheduled_on
+	@frappe.whitelist()
+	def reschedule_interview(self, scheduled_on):
+		recipients = get_recipients(self.name)
+		self.db_set('scheduled_on', scheduled_on)
+		self.notify_update()
+
+		try:
+			frappe.sendmail(
+				recipients= recipients,
+				subject=_('Interview: {0} Rescheduled').format(interview.name),
+				message=_('Your Interview session is rescheduled from {0} to {1}').format(
+					interview.original_date, scheduled_on),
+				reference_doctype=interview.doctype,
+				reference_name=interview.name
+			)
+		except Exception:
+			frappe.msgprint(_('Failed to send the Interview Reschedule notification. Please configure your email account.'))
+
+		frappe.msgprint(_('Interview Rescheduled successfully'), indicator='green')
+
+
+def get_recipients(name, for_feedback=0):
+	interview = frappe.get_doc('Interview', name)
+
+	if for_feedback:
+		recipients = [d.interviewer for d in interview.interview_details if not d.interview_feedback]
+	else:
+		recipients = [d.interviewer for d in interview.interview_details]
+		recipients.append(frappe.db.get_value('Job Applicant', interview.job_applicant, 'email_id'))
+
+	return recipients
 
 
 @frappe.whitelist()
 def get_interviewer(interview_round):
-	interview_round = frappe.get_all("Interviewer", filters={"parent": interview_round}, fields = ["user as interviewer"])
-	return interview_round
+	return frappe.get_all('Interviewer', filters={'parent': interview_round}, fields=['user as interviewer'])
 
-def get_recipients(name, for_feedback=0):
-	interview = frappe.get_doc("Interview", name)
-	if for_feedback == 0:
-		recipients = [d.interviewer for d in interview.interview_detail]
-		recipients .append(frappe.db.get_value("Job Applicant", interview.job_applicant, "email_id"))
-	else:
-		recipients = [d.interviewer for d in interview.interview_detail if not d.interview_feedback]
 
-	return recipients
+def send_interview_reminder():
+	reminder_settings = frappe.db.get_value('HR Settings', 'HR Settings',
+		['send_interview_reminder', 'interview_reminder_message'])
 
-@frappe.whitelist()
-def reschedule_interview(name, scheduled_on):
-	recipients = get_recipients(name)
+	if not reminder_settings.send_interview_reminder:
+		return
 
-	interview = frappe.get_doc("Interview", name)
-	interview.db_set("scheduled_on", scheduled_on)
+	remind_before = frappe.db.get_single_value('HR Settings',  'remind_before') or '01:00:00'
+	remind_before = datetime.datetime.strptime(remind_before, '%H:%M:%S')
+	reminder_date_time = datetime.datetime.now() + datetime.timedelta(
+		hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
 
-	frappe.sendmail(
-		recipients= recipients,
-		subject='Interview: {0} Rescheduled'.format(interview.name),
-		message='<p>Your Interview session is rescheduled from {0} to {1} </p>'.format(
-			interview.original_date, scheduled_on),
-		reference_doctype=interview.doctype,
-		reference_name=interview.name
-	)
+	interviews = frappe.get_all('Interview', filters={
+		'scheduled_on': ['between', (datetime.datetime.now(), reminder_date_time)],
+		'status': 'Scheduled',
+		'reminded': 0,
+		'docstatus': 1
+	})
 
-@frappe.whitelist()
-def send_review_reminder(interview_name):
-	if frappe.db.get_single_value('Hr Settings', 'interview_feedback_reminder'):
-		recipients = get_recipients(interview_name, for_feedback=1)
+	for d in interviews:
+		doc = frappe.get_doc('Interview', d.name)
+		context = {'doc': doc}
+		message = frappe.render_template(message, context)
+		recipients = get_recipients(doc.name)
 
-		doc = frappe.get_doc("Interview", interview_name)
+		frappe.sendmail(
+			recipients= recipients,
+			subject=_('Interview Reminder'),
+			message=reminder_settings.interview_reminder_message,
+			reference_doctype=doc.doctype,
+			reference_name=doc.name
+		)
+
+		doc.db_set('reminded', 1)
+
+
+def send_daily_feedback_reminder():
+	if not frappe.db.get_single_value('HR Settings', 'send_interview_feedback_reminder'):
+		return
+
+	interviews = frappe.get_all('Interview', filters={'status': 'In Review', 'docstatus': 1})
+
+	for entry in interviews:
+		recipients = get_recipients(entry.name, for_feedback=1)
+
+		doc = frappe.get_doc('Interview', entry.name)
 		context = {'doc': doc}
 
-		message = frappe.db.get_single_value('Hr Settings', 'feedback_reminder_message')
+		message = frappe.db.get_single_value('HR Settings', 'feedback_reminder_message')
 		message = frappe.render_template(message, context)
 
 		if len(recipients):
 			frappe.sendmail(
 				recipients= recipients,
-				subject='Interview Feedback Submission Reminder',
+				subject=_('Interview Feedback Submission Reminder'),
 				message=message,
-				reference_doctype="Interview",
-				reference_name=interview_name
+				reference_doctype='Interview',
+				reference_name=entry.name
 			)
-
-def send_interview_reminder():
-	if frappe.db.get_single_value('Hr Settings', 'interview_reminder'):
-		remind_before = frappe.db.get_single_value('Hr Settings',  'remind_before') or "00:15:00"
-		remind_before = datetime.datetime.strptime(remind_before, '%H:%M:%S')
-		reminder_date_time = datetime.datetime.now() + datetime.timedelta(
-			hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
-
-		interviews = frappe.get_all("Interview", filters={
-			'scheduled_on': ['between', (datetime.datetime.now(), reminder_date_time)],
-			'status': "Scheduled",
-			'reminded': 0,
-			'docstatus': 1})
-
-		if len(interviews):
-			message = frappe.db.get_single_value('Hr Settings', 'interview_reminder_message')
-
-		for d in interviews:
-			doc = frappe.get_doc("Interview", d.name)
-			context = {'doc': doc}
-			message = frappe.render_template(message, context)
-			recipients = get_recipients(doc.name)
-
-			frappe.sendmail(
-				recipients= recipients,
-				subject='Interview Reminder',
-				message=message,
-				reference_doctype=doc.doctype,
-				reference_name=doc.name
-			)
-
-			doc.db_set("reminded", 1)
-
-def send_daily_feedback_reminder():
-	interviews = frappe.get_all("Interview", filters={"status": "In Review", "docstatus": 1})
-
-	for d in interviews:
-		send_review_reminder(d.name)
 
 
 @frappe.whitelist()
 def get_expected_skill_set(interview_round):
-	return frappe.get_all("Expected Skill Set", filters ={"parent": interview_round}, fields=["skill"])
+	return frappe.get_all('Expected Skill Set', filters ={'parent': interview_round}, fields=['skill'])
+
 
 @frappe.whitelist()
 def create_interview_feedback(data, interview_name, interviewer):
@@ -148,15 +159,15 @@ def create_interview_feedback(data, interview_name, interviewer):
 		data = frappe._dict(json.loads(data))
 
 	if frappe.session.user != interviewer:
-		frappe.throw(_("Only Interviewer Are allowed to submit Interview Feedback"))
+		frappe.throw(_('Only Interviewer Are allowed to submit Interview Feedback'))
 
-	interview_feedback = frappe.new_doc("Interview Feedback")
+	interview_feedback = frappe.new_doc('Interview Feedback')
 	interview_feedback.interview = interview_name
 	interview_feedback.interviewer = interviewer
 
 	for d in data.skill_set:
 		d = frappe._dict(d)
-		interview_feedback.append("skill_assessment", {"skill": d.skill, "rating": d.rating})
+		interview_feedback.append('skill_assessment', {'skill': d.skill, 'rating': d.rating})
 
 	interview_feedback.feedback = data.feedback
 
@@ -165,6 +176,7 @@ def create_interview_feedback(data, interview_name, interviewer):
 
 	frappe.msgprint(_('Interview Feedback {0} submitted successfully').format(
 		get_link_to_form('Interview Feedback', interview_feedback.name)))
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
