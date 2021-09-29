@@ -25,9 +25,9 @@ class TaxJarSettings(Document):
 
 		custom_fields = []
 		for dt in ['Item', 'Sales Invoice Item']:
-			doc = frappe.get_doc('Custom Field', {'dt': dt, 'fieldname':'product_tax_category'})
+			doc = frappe.db.exists('Custom Field', {'dt': dt, 'fieldname':'product_tax_category'})
 			custom_fields.append(doc)
-			fields_hidden = doc.get('hidden') if doc else 0
+			fields_hidden = frappe.db.get_value('Custom Field', {'dt': dt, 'fieldname':'product_tax_category'},'hidden')
 		fields_already_exist = True if custom_fields else False
 
 
