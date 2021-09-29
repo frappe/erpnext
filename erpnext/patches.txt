@@ -309,3 +309,4 @@ erpnext.patches.v13_0.update_dates_in_tax_withholding_category
 erpnext.patches.v14_0.update_opportunity_currency_fields
 erpnext.patches.v13_0.gst_fields_for_pos_invoice
 erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
+erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
