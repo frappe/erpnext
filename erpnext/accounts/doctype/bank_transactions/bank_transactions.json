@@ -1,0 +1,390 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2021-09-16 15:05:11.152577",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "sect",
+  "check",
+  "column",
+  "debit_note",
+  "column2",
+  "credit_note",
+  "column3",
+  "bank_deposit",
+  "section",
+  "no_bank_check",
+  "check_date",
+  "release_date",
+  "colum4",
+  "amount",
+  "amount_of",
+  "print_note",
+  "returned_check",
+  "section1",
+  "next_note_nc",
+  "check_date_nc",
+  "release_date_nc",
+  "column5",
+  "amount_nc",
+  "amount_of_nc",
+  "print_note_nc",
+  "returned_check_nc",
+  "section2",
+  "next_note_nd",
+  "check_date_nd",
+  "release_date_nd",
+  "column6",
+  "amount_nd",
+  "amount_of_nd",
+  "print_note_nd",
+  "returned_check_nd",
+  "section3",
+  "document",
+  "column7",
+  "deposit_date",
+  "section_account",
+  "bank_account",
+  "columna_cuenta",
+  "accounting_seat",
+  "section4",
+  "movement_detail",
+  "status",
+  "transaction_data",
+  "date_data",
+  "amount_data",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "debit_note",
+   "fieldtype": "Check",
+   "label": "Debit Note"
+  },
+  {
+   "default": "0",
+   "fieldname": "credit_note",
+   "fieldtype": "Check",
+   "label": "Credit Note"
+  },
+  {
+   "default": "0",
+   "fieldname": "bank_deposit",
+   "fieldtype": "Check",
+   "label": "Bank deposit"
+  },
+  {
+   "depends_on": "check",
+   "fieldname": "no_bank_check",
+   "fieldtype": "Data",
+   "label": "No. Bank Check"
+  },
+  {
+   "depends_on": "check",
+   "fieldname": "check_date",
+   "fieldtype": "Date",
+   "label": "Check Date"
+  },
+  {
+   "depends_on": "check",
+   "fieldname": "release_date",
+   "fieldtype": "Date",
+   "label": "Release Date"
+  },
+  {
+   "depends_on": "bank_deposit",
+   "fieldname": "document",
+   "fieldtype": "Data",
+   "label": "Document"
+  },
+  {
+   "depends_on": "bank_deposit",
+   "fieldname": "deposit_date",
+   "fieldtype": "Date",
+   "label": "Deposit date"
+  },
+  {
+   "depends_on": "check",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "depends_on": "check",
+   "fieldname": "amount_of",
+   "fieldtype": "Data",
+   "label": "The Amount Of",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "check",
+   "fieldname": "print_note",
+   "fieldtype": "Check",
+   "label": "Print Note"
+  },
+  {
+   "default": "0",
+   "depends_on": "check",
+   "fieldname": "returned_check",
+   "fieldtype": "Check",
+   "label": "It's returned check"
+  },
+  {
+   "depends_on": "credit_note",
+   "fieldname": "section1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "movement_detail",
+   "fieldtype": "Long Text",
+   "label": "Movement detail"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Bank Transactions",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "check",
+   "fieldtype": "Check",
+   "label": "Bank Check"
+  },
+  {
+   "fieldname": "column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "colum4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "check",
+   "fieldname": "section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "credit_note",
+   "fieldname": "column5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "debit_note",
+   "fieldname": "section2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "\nDraft\nSubmitted\nCancelled\nTransit\nPre-reconciled\nReconciled"
+  },
+  {
+   "depends_on": "credit_note",
+   "fieldname": "next_note_nc",
+   "fieldtype": "Data",
+   "label": "Next Note"
+  },
+  {
+   "depends_on": "credit_note",
+   "fieldname": "check_date_nc",
+   "fieldtype": "Date",
+   "label": "Check Date"
+  },
+  {
+   "depends_on": "credit_note",
+   "fieldname": "release_date_nc",
+   "fieldtype": "Date",
+   "label": "Release Date"
+  },
+  {
+   "depends_on": "credit_note",
+   "fieldname": "amount_nc",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "depends_on": "credit_note",
+   "fieldname": "amount_of_nc",
+   "fieldtype": "Data",
+   "label": "The Amount Of",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "credit_note",
+   "fieldname": "print_note_nc",
+   "fieldtype": "Check",
+   "label": "Print Note"
+  },
+  {
+   "default": "0",
+   "depends_on": "credit_note",
+   "fieldname": "returned_check_nc",
+   "fieldtype": "Check",
+   "label": "It's returned check"
+  },
+  {
+   "depends_on": "debit_note",
+   "fieldname": "next_note_nd",
+   "fieldtype": "Data",
+   "label": "Next Note"
+  },
+  {
+   "depends_on": "debit_note",
+   "fieldname": "check_date_nd",
+   "fieldtype": "Date",
+   "label": "Check Date"
+  },
+  {
+   "depends_on": "debit_note",
+   "fieldname": "release_date_nd",
+   "fieldtype": "Date",
+   "label": "Release Date"
+  },
+  {
+   "fieldname": "column6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "debit_note",
+   "fieldname": "amount_nd",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "depends_on": "debit_note",
+   "fieldname": "amount_of_nd",
+   "fieldtype": "Data",
+   "label": "The Amount Of",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "debit_note",
+   "fieldname": "print_note_nd",
+   "fieldtype": "Check",
+   "label": "Print Note"
+  },
+  {
+   "default": "0",
+   "depends_on": "debit_note",
+   "fieldname": "returned_check_nd",
+   "fieldtype": "Check",
+   "label": "It's returned check"
+  },
+  {
+   "depends_on": "bank_deposit",
+   "fieldname": "section3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Serie",
+   "options": "BAN-TRAN-.YYYY.-"
+  },
+  {
+   "fieldname": "transaction_data",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transaction Type"
+  },
+  {
+   "fieldname": "date_data",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date Transaction"
+  },
+  {
+   "fieldname": "sect",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amount_data",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Amount Transaction"
+  },
+  {
+   "fieldname": "section_account",
+   "fieldtype": "Section Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "columna_cuenta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "accounting_seat",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Accounting seat",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-09-27 14:23:29.655966",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Transactions",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

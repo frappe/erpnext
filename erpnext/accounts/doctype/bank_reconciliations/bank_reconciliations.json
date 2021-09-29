@@ -1,0 +1,85 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2021-09-21 13:35:06.521702",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "date",
+  "detail",
+  "bank_amount",
+  "transaction_amount",
+  "defference_amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Serie",
+   "options": "BAN-REC-.YYYY.-"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_amount",
+   "fieldtype": "Currency",
+   "label": "Bank Amount"
+  },
+  {
+   "fieldname": "transaction_amount",
+   "fieldtype": "Currency",
+   "label": "Transaction Amount"
+  },
+  {
+   "fieldname": "defference_amount",
+   "fieldtype": "Currency",
+   "label": "Difference Of Amounts"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Bank reconciliations",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Table",
+   "label": "Bank reconciliations Detail",
+   "options": "Bank reconciliations Detail",
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-09-21 13:49:14.439379",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank reconciliations",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
