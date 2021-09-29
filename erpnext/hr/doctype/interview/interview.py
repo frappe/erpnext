@@ -10,7 +10,7 @@ import frappe
 
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form, get_datetime
+from frappe.utils import get_datetime, get_link_to_form
 
 
 class DuplicateInterviewRoundError(frappe.ValidationError): pass

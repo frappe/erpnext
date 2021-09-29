@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import add_days, get_datetime, flt
+from frappe.utils import add_days, flt, get_datetime
 
 from erpnext.hr.doctype.interview.test_interview import create_interview_and_dependencies
 from erpnext.hr.doctype.interview_feedback.interview_feedback import UnexpectedSkillError
