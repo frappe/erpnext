@@ -12,12 +12,10 @@ from frappe.utils import add_days, get_datetime
 
 from erpnext.hr.doctype.designation.test_designation import create_designation
 from erpnext.hr.doctype.interview.interview import DuplicateInterviewRoundError
-from erpnext.hr.doctype.interview_round.test_interview_round import create_interview_round
 from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
 
 
 class TestInterview(unittest.TestCase):
-
 	def tearDown(self):
 		frappe.db.sql("DELETE FROM `tabInterview Round`")
 		frappe.db.sql("DELETE FROM `tabInterview`")
@@ -26,17 +24,12 @@ class TestInterview(unittest.TestCase):
 
 	def test_validations_for_designation(self):
 		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, designation='_Test_Sales_manager')
+		interview = create_interview_and_dependencies(job_applicant.name, designation='_Test_Sales_manager', save=0)
 		self.assertRaises(DuplicateInterviewRoundError, interview.save)
-
-	def test_status_for_backdated_interviews(self):
-		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(get_datetime(), -1), save=True)
-		self.assertEqual(interview.status, "In Review")
 
 	def test_notification_on_rescheduling(self):
 		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(get_datetime(), -4), save_and_submit=True)
+		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(get_datetime(), -4))
 
 		previous_scheduled_date = interview.scheduled_on
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
@@ -52,22 +45,20 @@ class TestInterview(unittest.TestCase):
 	def test_notification_for_scheduling(self):
 		from erpnext.hr.doctype.interview.interview import send_interview_reminder
 
-		frappe.db.set_value("HR Settings", None, "interview_reminder", 1)
+		frappe.db.set_value("HR Settings", None, "send_interview_reminder", 1)
 		message = frappe.get_single("HR Settings").interview_reminder_message
 		if not message:
 			set_reminder_message_and_set_remind_before()
 
-
 		job_applicant = create_job_applicant()
 		scheduled_on = datetime.datetime.now() + datetime.timedelta(minutes=10)
 
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on, save_and_submit=True)
+		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on)
 
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
 		send_interview_reminder()
 
 		interview.reload()
-		self.assertEqual(interview.reminded, 1)
 		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")})
 		self.assertIsNotNone(notification)
 
@@ -75,7 +66,7 @@ class TestInterview(unittest.TestCase):
 	def test_notification_for_feedback_submission(self):
 		from erpnext.hr.doctype.interview.interview import send_daily_feedback_reminder
 
-		frappe.db.set_value("HR Settings", None, "interview_feedback_reminder", 1)
+		frappe.db.set_value("HR Settings", None, "send_interview_feedback_reminder", 1)
 		message = frappe.get_single("HR Settings").feedback_reminder_message
 		if not message:
 			set_reminder_message_and_set_remind_before()
@@ -83,7 +74,7 @@ class TestInterview(unittest.TestCase):
 
 		job_applicant = create_job_applicant()
 		scheduled_on = add_days(get_datetime(), -4)
-		create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on, save_and_submit=True)
+		create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on)
 
 
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
@@ -97,9 +88,9 @@ def set_reminder_message_and_set_remind_before():
 	message = "Message for test"
 	frappe.db.set_value("HR Settings", None, "interview_reminder_message", message)
 	frappe.db.set_value("HR Settings", None, "remind_before", "00:15:00")
-	frappe.db.set_value("HR Settings", None, "feedback_reminder_message", message)
+	frappe.db.set_value("HR Settings", None, "send_feedback_reminder_message", message)
 
-def create_interview_and_dependencies(job_applicant, scheduled_on=None, save=False, save_and_submit = False, designation=None):
+def create_interview_and_dependencies(job_applicant, scheduled_on=None, designation=None, save=1):
 	if designation:
 		designation=create_designation(designation_name = "_Test_Sales_manager").name
 
@@ -119,10 +110,47 @@ def create_interview_and_dependencies(job_applicant, scheduled_on=None, save=Fal
 	interview.append("interview_details", {"interviewer": interviewer_1.name})
 	interview.append("interview_details", {"interviewer": interviewer_2.name})
 
-	if save or save_and_submit:
+	if save:
 		interview.save()
 
-	if save_and_submit:
-		interview.submit()
-
 	return interview
+
+def create_interview_round(name, skill_set, interviewers=[], designation=None, save=True):
+	create_skill_set(skill_set)
+	interview_round = frappe.new_doc("Interview Round")
+	interview_round.round_name = name
+	interview_round.interview_type = create_interview_type()
+	interview_round.expected_average_rating = 4
+	if designation:
+		interview_round.designation = designation
+
+	for skill in skill_set:
+		interview_round.append("expected_skill_set", {"skill": skill})
+
+	for interviewer in interviewers:
+		interview_round.append("interviewer", {
+			"user": interviewer
+		})
+
+	if save:
+		interview_round.save()
+
+	return interview_round
+
+def create_skill_set(skill_set):
+	for skill in skill_set:
+		if not frappe.db.exists("Skill", skill):
+			doc = frappe.new_doc("Skill")
+			doc.skill_name = skill
+			doc.save()
+
+def create_interview_type(name="test_interview_type"):
+	if frappe.db.exists("Interview Type", name):
+		return frappe.get_doc("Interview Type", name).name
+	else:
+		doc = frappe.new_doc("Interview Type")
+		doc.name = name
+		doc.description = "_Test_Description"
+		doc.save()
+
+		return doc.name

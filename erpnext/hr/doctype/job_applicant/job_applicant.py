@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import comma_and, validate_email_address
+from frappe.utils import validate_email_address
 
 from erpnext.hr.doctype.interview.interview import get_interviewer
 

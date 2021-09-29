@@ -19,8 +19,8 @@ from erpnext.hr.doctype.employee_referral.employee_referral import (
 class TestEmployeeReferral(unittest.TestCase):
 
 	def setUp(self):
-		frappe.db.sql("DELETE FROM `TabJob Applicant`")
-		frappe.db.sql("DELETE FROM `TabEmployee Referral`")
+		frappe.db.sql("DELETE FROM `tabJob Applicant`")
+		frappe.db.sql("DELETE FROM `tabEmployee Referral`")
 
 	def test_workflow_and_status_sync(self):
 		emp_ref = create_employee_referral()

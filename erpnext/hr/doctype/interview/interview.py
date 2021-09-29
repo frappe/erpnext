@@ -9,7 +9,7 @@ import datetime
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form
+from frappe.utils import cstr, get_link_to_form
 
 
 class DuplicateInterviewRoundError(frappe.ValidationError):
@@ -45,8 +45,9 @@ class Interview(Document):
 		applicant_designation = frappe.db.get_value('Job Applicant', self.job_applicant, 'designation')
 		if self.designation :
 			if self.designation != applicant_designation:
-				frappe.throw(_('Interview Round: {0} is only for Designation: {1}. Job Applicant: {2} has applied for the role: {3}').format(
-					self.interview_round, self.designation, applicant_designation), exc = DuplicateInterviewRoundError)
+				frappe.throw(_('Interview Round {0} is only for Designation {1}. Job Applicant has applied for the role {2}').format(
+					self.interview_round, frappe.bold(self.designation), applicant_designation),
+					exc=DuplicateInterviewRoundError)
 		else:
 			self.designation = applicant_designation
 
@@ -90,12 +91,12 @@ def get_interviewer(interview_round):
 
 def send_interview_reminder():
 	reminder_settings = frappe.db.get_value('HR Settings', 'HR Settings',
-		['send_interview_reminder', 'interview_reminder_message'])
+		['send_interview_reminder', 'interview_reminder_message'], as_dict=True)
 
 	if not reminder_settings.send_interview_reminder:
 		return
 
-	remind_before = frappe.db.get_single_value('HR Settings',  'remind_before') or '01:00:00'
+	remind_before = cstr(frappe.db.get_single_value('HR Settings', 'remind_before')) or '01:00:00'
 	remind_before = datetime.datetime.strptime(remind_before, '%H:%M:%S')
 	reminder_date_time = datetime.datetime.now() + datetime.timedelta(
 		hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
