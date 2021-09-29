@@ -313,13 +313,17 @@
    "fieldname": "transaction_data",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Transaction Data"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transaction Type"
   },
   {
    "fieldname": "date_data",
    "fieldtype": "Date",
    "hidden": 1,
-   "label": "Date Data"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date Transaction"
   },
   {
    "fieldname": "sect",
@@ -329,7 +333,9 @@
    "fieldname": "amount_data",
    "fieldtype": "Currency",
    "hidden": 1,
-   "label": "Amount Data"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Amount Transaction"
   },
   {
    "fieldname": "section_account",
@@ -352,12 +358,14 @@
    "default": "0",
    "fieldname": "accounting_seat",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Accounting seat",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-09-24 10:53:51.747762",
+ "modified": "2021-09-27 14:23:29.655966",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",

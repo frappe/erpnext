@@ -32,6 +32,7 @@ class BankTransactions(Document):
 		if self.docstatus == 1:
 			self.docstatus = 3
 			self.status = "Transit"
+			self.calculate_diferred_account()
 
 	def verified_check(self, arg=None):		
 		if self.debit_note:
@@ -107,3 +108,13 @@ class BankTransactions(Document):
 		if self.bank_deposit:
 			self.db_set('transaction_data', "Bank deposit", update_modified=False)
 			self.db_set('date_data', self.deposit_date, update_modified=False)
+	
+	def calculate_diferred_account(self):
+		doc = frappe.get_doc("Bank Account", self.bank_account)
+
+		if self.transaction_data == "Bank Check" or self.transaction_data== "Credit Note":
+			doc.deferred_credits += self.amount_data
+		else:
+			doc.deferred_debits += self.amount_data
+		
+		doc.save()

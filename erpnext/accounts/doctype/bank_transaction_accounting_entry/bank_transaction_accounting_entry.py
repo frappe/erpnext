@@ -13,6 +13,7 @@ class BankTransactionAccountingEntry(Document):
 			self.check_transaction()
 			self.calculate_totals()
 			self.verificate_totals()
+			self.add_amount_rate()
 	
 	def on_cancel(self):
 		self.uncheck_transaction()
@@ -76,3 +77,31 @@ class BankTransactionAccountingEntry(Document):
 
 		if difference_totals != 0:
 			frappe.throw(_("Difference amount must be 0"))
+	
+	def add_amount_rate(self):
+		detailamount = frappe.get_all("Bank Transactions Detail", ["account","debit", "credit"], filters = {"parent": self.name})
+
+		for deatil in detailamount:
+			# bank_account = frappe.get_all("Bank Account", ["account"], filters = {"name": deatil.account})
+
+			is_soon = True
+
+			account_name = deatil.account
+
+			while is_soon:
+				account = frappe.get_all("Account", ["parent_account", "tax_rate", "name"], filters = {"name": account_name})
+
+				doc = frappe.get_doc("Account", account[0].name)
+
+				if deatil.debit > 0:
+					doc.tax_rate += deatil.debit
+				elif deatil.credit > 0:
+					doc.tax_rate += deatil.credit
+
+				if doc.parent_account != None:
+					doc.save()
+				
+				if account[0].parent_account == None:
+					is_soon = False
+				else:
+					account_name = account[0].parent_account
