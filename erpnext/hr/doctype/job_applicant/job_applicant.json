@@ -9,25 +9,29 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
+  "details_section",
   "applicant_name",
   "email_id",
-  "job_title",
-  "column_break_3",
-  "status",
-  "designation",
-  "resume_link",
-  "section_break_8",
   "phone_number",
-  "location",
   "country",
-  "column_break_12",
+  "column_break_3",
+  "job_title",
+  "designation",
+  "status",
+  "source_and_rating_section",
   "source",
+  "source_name",
   "employee_referral",
-  "section_break_16",
-  "cover_letter",
+  "column_break_13",
+  "applicant_rating",
+  "section_break_6",
   "notes",
-  "column_break_18",
+  "cover_letter",
+  "resume_attachment",
+  "resume_link",
+  "section_break_16",
   "currency",
+  "column_break_18",
   "lower_range",
   "upper_range"
  ],
@@ -46,8 +50,7 @@
    "fieldtype": "Data",
    "label": "Email Address",
    "options": "Email",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "status",
@@ -77,9 +80,26 @@
    "options": "Job Applicant Source"
   },
   {
+   "depends_on": "eval: doc.source==\"Employee Referral\" ",
+   "fieldname": "source_name",
+   "fieldtype": "Link",
+   "label": "Source Name",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Resume"
+  },
+  {
    "fieldname": "cover_letter",
    "fieldtype": "Text",
    "label": "Cover Letter"
+  },
+  {
+   "fieldname": "resume_attachment",
+   "fieldtype": "Attach",
+   "label": "Resume Attachment"
   },
   {
    "fieldname": "notes",
@@ -105,10 +125,15 @@
    "label": "Resume Link"
   },
   {
-   "collapsible": 1,
+   "fieldname": "applicant_rating",
+   "fieldtype": "Rating",
+   "in_list_view": 1,
+   "label": "Applicant Rating"
+  },
+  {
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
-   "label": "Cover Letter And Salary Expectation"
+   "label": "Salary Expectation"
   },
   {
    "fieldname": "lower_range",
@@ -142,32 +167,32 @@
    "read_only": 1
   },
   {
-   "fieldname": "location",
-   "fieldtype": "Link",
-   "label": "Location",
-   "options": "Location"
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
   },
   {
+   "fieldname": "source_and_rating_section",
+   "fieldtype": "Section Break",
+   "label": "Source and Rating"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "job_opening.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
    "label": "Designation",
-   "options": "Designation",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_break_8",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
+   "options": "Designation"
   }
  ],
  "icon": "fa fa-user",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-05 13:50:48.301140",
+ "modified": "2021-09-29 23:06:10.904260",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Applicant",
@@ -181,42 +206,6 @@
    "read": 1,
    "report": 1,
    "role": "HR User",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Interviewer",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
    "share": 1,
    "write": 1
   }

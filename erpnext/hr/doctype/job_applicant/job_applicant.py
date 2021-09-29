@@ -50,14 +50,12 @@ def create_interview(doc, interview_round):
 
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
-
-	if doc:
 		doc = frappe.get_doc(doc)
 
 	round_designation = frappe.db.get_value("Interview Round", interview_round, "designation")
 
-	if round_designation and round_designation != doc.designation:
-		frappe.throw(_("Interview Round: {0} is only applicable for Designation: {1}").format(interview_round, round_designation))
+	if round_designation and doc.designation and round_designation != doc.designation:
+		frappe.throw(_("Interview Round {0} is only applicable for the Designation {1}").format(interview_round, round_designation))
 
 	interview = frappe.new_doc("Interview")
 	interview.interview_round = interview_round
@@ -68,19 +66,20 @@ def create_interview(doc, interview_round):
 	interviewer_detail = get_interviewer(interview_round)
 
 	for d in interviewer_detail:
-		interview.append("interview_detail", {
+		interview.append("interview_details", {
 			"interviewer": d.interviewer
 		})
 	return interview
 
 @frappe.whitelist()
 def get_interview_details(job_applicant):
-	interview_detail = frappe.db.get_all("Interview", filters = {
-		"job_applicant":job_applicant,"docstatus": 1}, fields=[
-		"name", "interview_round", "expected_average_rating", "average_rating", "status"])
+	interview_details = frappe.db.get_all("Interview",
+		filters={"job_applicant":job_applicant, "docstatus": ["!=", 2]},
+		fields=["name", "interview_round", "expected_average_rating", "average_rating", "status"]
+	)
 	interview_detail_map = {}
 
-	for detail in interview_detail:
+	for detail in interview_details:
 		interview_detail_map[detail.name] = detail
 
 	return interview_detail_map

@@ -31,7 +31,8 @@ frappe.ui.form.on('Interview', {
 			});
 
 			if ((allowed_interviewers.includes(frappe.session.user))) {
-				frappe.db.get_value('Interview Feedback', {'interviewer': frappe.session.user, 'docstatus': 1}, 'name', (r) => {
+				frappe.db.get_value('Interview Feedback', {'interviewer': frappe.session.user, 'interview': frm.doc.name, 'docstatus': 1},
+					'name', (r) => {
 					if (Object.keys(r).length === 0) {
 						frm.add_custom_button(__('Submit Feedback'), function () {
 							frappe.call({

@@ -26,7 +26,7 @@ class TestInterviewFeedback(unittest.TestCase):
 		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(get_datetime(), -1), save_and_submit=True)
 		skill_ratings = get_skills_rating(interview.interview_round)
 
-		interviewer = interview.interview_detail[0].interviewer
+		interviewer = interview.interview_details[0].interviewer
 
 		interview_feedback = create_interview_feedback(interview.name, interviewer, skill_ratings)
 		create_skill_set(['Leadership'])
@@ -42,7 +42,7 @@ class TestInterviewFeedback(unittest.TestCase):
 
 		'''For First Interviewer Feedback'''
 
-		interviewer = interview.interview_detail[0].interviewer
+		interviewer = interview.interview_details[0].interviewer
 		frappe.set_user(interviewer)
 
 		#calculating Average
@@ -69,7 +69,7 @@ class TestInterviewFeedback(unittest.TestCase):
 		self.assertEqual(interview.status, "In Review")
 
 		'''For Second Interviewer Feedback'''
-		interviewer = interview.interview_detail[1].interviewer
+		interviewer = interview.interview_details[1].interviewer
 		frappe.set_user(interviewer)
 
 

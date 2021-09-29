@@ -22,9 +22,9 @@ def create_interview(doc):
 	interview.designation = doc.designation
 
 	if doc.interviewer:
-		interview.interview_detail = []
+		interview.interview_details = []
 		for data in doc.interviewer:
-			interview.append("interview_detail", {
+			interview.append("interview_details", {
 					"interviewer": data.user
 				})
 	return interview

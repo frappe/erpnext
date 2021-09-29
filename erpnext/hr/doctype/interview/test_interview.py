@@ -114,8 +114,8 @@ def create_interview_and_dependencies(job_applicant, scheduled_on=None, save=Fal
 	interview.job_applicant = job_applicant
 	interview.scheduled_on = scheduled_on or get_datetime()
 
-	interview.append("interview_detail", {"interviewer": interviewer_1.name})
-	interview.append("interview_detail", {"interviewer": interviewer_2.name})
+	interview.append("interview_details", {"interviewer": interviewer_1.name})
+	interview.append("interview_details", {"interviewer": interviewer_2.name})
 
 	if save or save_and_submit:
 		interview.save()
