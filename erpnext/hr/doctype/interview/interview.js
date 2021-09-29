@@ -33,20 +33,20 @@ frappe.ui.form.on('Interview', {
 			if ((allowed_interviewers.includes(frappe.session.user))) {
 				frappe.db.get_value('Interview Feedback', {'interviewer': frappe.session.user, 'interview': frm.doc.name, 'docstatus': 1},
 					'name', (r) => {
-					if (Object.keys(r).length === 0) {
-						frm.add_custom_button(__('Submit Feedback'), function () {
-							frappe.call({
-								method: 'erpnext.hr.doctype.interview.interview.get_expected_skill_set',
-								args: {
-									interview_round: frm.doc.interview_round
-								},
-								callback: function (r) {
-									frm.events.show_feedback_dialog(frm, r.message);
-									frm.refresh();
-								}
-							});
-						}).addClass('btn-primary');
-					}
+						if (Object.keys(r).length === 0) {
+							frm.add_custom_button(__('Submit Feedback'), function () {
+								frappe.call({
+									method: 'erpnext.hr.doctype.interview.interview.get_expected_skill_set',
+									args: {
+										interview_round: frm.doc.interview_round
+									},
+									callback: function (r) {
+										frm.events.show_feedback_dialog(frm, r.message);
+										frm.refresh();
+									}
+								});
+							}).addClass('btn-primary');
+						}
 				});
 			}
 		}

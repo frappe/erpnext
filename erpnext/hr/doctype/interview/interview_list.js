@@ -1,5 +1,5 @@
 frappe.listview_settings['Interview'] = {
-    has_indicator_for_draft: 1,
+	has_indicator_for_draft: 1,
 	get_indicator: function(doc) {
 		let status_color = {
 			'Pending': 'orange',

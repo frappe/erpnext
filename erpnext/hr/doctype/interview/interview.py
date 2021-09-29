@@ -10,10 +10,11 @@ import frappe
 
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_link_to_form
+from frappe.utils import get_link_to_form
 
 
-class DuplicateInterviewRoundError(frappe.ValidationError): pass
+class DuplicateInterviewRoundError(frappe.ValidationError):
+	pass
 
 class Interview(Document):
 	def validate(self):
@@ -59,11 +60,11 @@ class Interview(Document):
 		try:
 			frappe.sendmail(
 				recipients= recipients,
-				subject=_('Interview: {0} Rescheduled').format(interview.name),
+				subject=_('Interview: {0} Rescheduled').format(self.name),
 				message=_('Your Interview session is rescheduled from {0} to {1}').format(
-					interview.original_date, scheduled_on),
-				reference_doctype=interview.doctype,
-				reference_name=interview.name
+					self.original_date, scheduled_on),
+				reference_doctype=self.doctype,
+				reference_name=self.name
 			)
 		except Exception:
 			frappe.msgprint(_('Failed to send the Interview Reschedule notification. Please configure your email account.'))
@@ -110,13 +111,13 @@ def send_interview_reminder():
 	for d in interviews:
 		doc = frappe.get_doc('Interview', d.name)
 		context = {'doc': doc}
-		message = frappe.render_template(message, context)
+		message = frappe.render_template(reminder_settings.interview_reminder_message, context)
 		recipients = get_recipients(doc.name)
 
 		frappe.sendmail(
 			recipients= recipients,
 			subject=_('Interview Reminder'),
-			message=reminder_settings.interview_reminder_message,
+			message=message,
 			reference_doctype=doc.doctype,
 			reference_name=doc.name
 		)
