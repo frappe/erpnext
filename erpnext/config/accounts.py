@@ -220,6 +220,30 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Bank Statement"),
+			"items": [
+				{
+					"type": "doctype",
+					"label": _("Bank"),
+					"name": "Bank",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Account"),
+					"name": "Bank Account",
+				},
+				{
+					"type": "doctype",
+					"name": "Bank Statement Transaction Entry",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Statement Settings"),
+					"name": "Bank Statement Settings",
+				},
+			]
+		},
+		{
 			"label": _("Banking and Payments"),
 			"items": [
 				{
@@ -260,6 +284,35 @@ def get_data():
 					"name": "Cheque Print Template",
 					"description": _("Setup cheque dimensions for printing")
 				},
+			]
+		},
+		{
+			"label": _("Bank Transactions"),
+			"items": [
+				{
+              		"type": "doctype",
+              		"name": "Bank Transactions",
+              		"label": _("Bank Transactions"),
+              		"description": _("This option is for create new bank transactions."),
+            	},
+            	{
+              		"type": "doctype",
+              		"name": "Bank Transaction Accounting Entry",
+              		"label": _("Bank Transaction Accounting Entry"),
+              		"description": _("Create Bank Transaction Accounting Entry."),
+            	},
+            	{
+              		"type": "doctype",
+              		"name": "Bank reconciliations",
+              		"label": _("Bank reconciliations"),
+              		"description": _("Create Bank reconciliations"),
+            	},
+            	{
+              		"type": "doctype",
+              		"name": "Reconciled balances",
+              		"label": _("Reconciled balances"),
+              		"description": _("Create Reconciled balances"),
+            	},
 			]
 		},
 		{
@@ -473,30 +526,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Subscription Settings"
 				}
-			]
-		},
-		{
-			"label": _("Bank Statement"),
-			"items": [
-				{
-					"type": "doctype",
-					"label": _("Bank"),
-					"name": "Bank",
-				},
-				{
-					"type": "doctype",
-					"label": _("Bank Account"),
-					"name": "Bank Account",
-				},
-				{
-					"type": "doctype",
-					"name": "Bank Statement Transaction Entry",
-				},
-				{
-					"type": "doctype",
-					"label": _("Bank Statement Settings"),
-					"name": "Bank Statement Settings",
-				},
 			]
 		},
 		{
