@@ -45,15 +45,7 @@
 
 					{% if cart_settings.enable_checkout or cart_settings.show_price_in_quotation %}
 						<tfoot class="cart-tax-items">
-							<tr>
-								<th></th>
-								<th class="text-left item-grand-total" colspan="1">
-									{{ _("Total") }}
-								</th>
-								<th class="text-left item-grand-total totals" colspan="3">
-									{{ doc.get_formatted("total") }}
-								</th>
-							</tr>
+							{% include "templates/includes/cart/cart_items_total.html" %}
 						</tfoot>
 					{% endif %}
 				</table>
@@ -110,7 +102,9 @@
 				{% endif %}
 
 				{% if cart_settings.enable_checkout %}
-					{% include "templates/includes/cart/cart_payment_summary.html" %}
+					<div class="mb-3 frappe-card p-5 payment-summary">
+						{% include "templates/includes/cart/cart_payment_summary.html" %}
+					</div>
 				{% endif %}
 
 				{% include "templates/includes/cart/cart_address.html" %}
@@ -126,11 +120,11 @@
 	</div>
 	<div class="cart-empty-message mt-4">{{ _('Your cart is Empty') }}</p>
 	{% if cart_settings.enable_checkout %}
-		<a class="btn btn-outline-primary" href="/orders">
+		<a class="btn btn-outline-primary" href="/orders" style="font-size: 16px;">
 			{{ _('See past orders') }}
 		</a>
 		{% else %}
-		<a class="btn btn-outline-primary" href="/quotations">
+		<a class="btn btn-outline-primary" href="/quotations" style="font-size: 16px;">
 			{{ _('See past quotations') }}
 		</a>
 	{% endif %}
