@@ -107,13 +107,14 @@ frappe.ui.form.on('Interview', {
 			],
 			size: 'large',
 			minimizable: true,
-			primary_action: function (values) {
+			primary_action: function(values) {
 				frappe.call({
 					method: 'erpnext.hr.doctype.interview.interview.create_interview_feedback',
 					args: {
 						data: values,
 						interview_name: frm.doc.name,
-						interviewer: frappe.session.user
+						interviewer: frappe.session.user,
+						job_applicant: frm.doc.job_applicant
 					}
 				}).then(() => {
 					frm.refresh();

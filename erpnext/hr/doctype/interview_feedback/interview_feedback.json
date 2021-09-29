@@ -6,10 +6,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "details_section",
   "interview",
-  "interviewer",
-  "column_break_3",
   "interview_round",
+  "job_applicant",
+  "column_break_3",
+  "interviewer",
   "result",
   "section_break_4",
   "skill_assessment",
@@ -50,13 +52,13 @@
   },
   {
    "fieldname": "section_break_4",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Skill Assessment"
   },
   {
    "allow_in_quick_entry": 1,
    "fieldname": "skill_assessment",
    "fieldtype": "Table",
-   "label": "Skill Assessment",
    "options": "Skill Assessment",
    "reqd": 1
   },
@@ -69,7 +71,8 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Feedback"
   },
   {
    "fieldname": "column_break_3",
@@ -87,8 +90,7 @@
   {
    "allow_in_quick_entry": 1,
    "fieldname": "feedback",
-   "fieldtype": "Text",
-   "label": "Feedback"
+   "fieldtype": "Text"
   },
   {
    "fieldname": "result",
@@ -96,14 +98,27 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Result",
-   "options": "Cleared\nRejected",
+   "options": "\nCleared\nRejected",
    "reqd": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fetch_from": "interview.job_applicant",
+   "fieldname": "job_applicant",
+   "fieldtype": "Link",
+   "label": "Job Applicant",
+   "options": "Job Applicant",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-29 18:12:47.951849",
+ "modified": "2021-09-29 22:26:41.774936",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Feedback",

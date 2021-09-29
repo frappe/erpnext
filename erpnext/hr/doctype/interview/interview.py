@@ -151,7 +151,7 @@ def get_expected_skill_set(interview_round):
 
 
 @frappe.whitelist()
-def create_interview_feedback(data, interview_name, interviewer):
+def create_interview_feedback(data, interview_name, interviewer, job_applicant):
 	import json
 	from six import string_types
 
@@ -164,12 +164,14 @@ def create_interview_feedback(data, interview_name, interviewer):
 	interview_feedback = frappe.new_doc('Interview Feedback')
 	interview_feedback.interview = interview_name
 	interview_feedback.interviewer = interviewer
+	interview_feedback.job_applicant = job_applicant
 
 	for d in data.skill_set:
 		d = frappe._dict(d)
 		interview_feedback.append('skill_assessment', {'skill': d.skill, 'rating': d.rating})
 
 	interview_feedback.feedback = data.feedback
+	interview_feedback.result = data.result
 
 	interview_feedback.save()
 	interview_feedback.submit()
