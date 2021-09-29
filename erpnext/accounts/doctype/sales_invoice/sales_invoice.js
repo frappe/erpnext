@@ -1004,6 +1004,18 @@ frappe.ui.form.on("Sales Invoice Timesheet", {
 	}
 });
 
+var calculate_total_billing_amount =  function(frm) {
+	var doc = frm.doc;
+
+	doc.total_billing_amount = 0.0
+	if (doc.timesheets) {
+		doc.timesheets.forEach((d) => {
+			doc.total_billing_amount += flt(d.billing_amount)
+		});
+	}
+
+	refresh_field('total_billing_amount')
+}
 
 var set_timesheet_detail_rate = function(cdt, cdn, currency, timelog) {
 	frappe.call({
