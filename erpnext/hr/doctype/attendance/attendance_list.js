@@ -9,10 +9,11 @@ frappe.listview_settings['Attendance'] = {
 			return [__(doc.status), "orange", "status,=," + doc.status];
 		}
 	},
-	onload: function (list_view) {
+
+	onload: function(list_view) {
 		let me = this;
 		const months = moment.months();
-		list_view.page.add_inner_button(__("Mark Attendance"), function () {
+		list_view.page.add_inner_button(__("Mark Attendance"), function() {
 			let dialog = new frappe.ui.Dialog({
 				title: __("Mark Attendance"),
 				fields: [{
@@ -20,11 +21,11 @@ frappe.listview_settings['Attendance'] = {
 					label: __('For Employee'),
 					fieldtype: 'Link',
 					options: 'Employee',
-          get_query: () => {
-            return {query: "erpnext.controllers.queries.employee_query"}
-          },
+					get_query: () => {
+						return {query: "erpnext.controllers.queries.employee_query"}
+					},
 					reqd: 1,
-					onchange: function () {
+					onchange: function() {
 						dialog.set_df_property("unmarked_days", "hidden", 1);
 						dialog.set_df_property("status", "hidden", 1);
 						dialog.set_df_property("month", "value", '');
@@ -38,7 +39,7 @@ frappe.listview_settings['Attendance'] = {
 					fieldname: "month",
 					options: months,
 					reqd: 1,
-					onchange: function () {
+					onchange: function() {
 						if (dialog.fields_dict.employee.value && dialog.fields_dict.month.value) {
 							dialog.set_df_property("status", "hidden", 0);
 							dialog.set_df_property("unmarked_days", "options", []);
@@ -70,11 +71,11 @@ frappe.listview_settings['Attendance'] = {
 					options: [],
 					columns: 2,
 					hidden: 1
-				},
-				],
+				}],
 				primary_action(data) {
 					if (cur_dialog.no_unmarked_days_left) {
-						frappe.msgprint(__("Attendance for the month of {0} , has already been marked for the Employee {1}", [dialog.fields_dict.month.value, dialog.fields_dict.employee.value]));
+						frappe.msgprint(__("Attendance for the month of {0} , has already been marked for the Employee {1}",
+							[dialog.fields_dict.month.value, dialog.fields_dict.employee.value]));
 					} else {
 						frappe.confirm(__('Mark attendance as {0} for {1} on selected dates?', [data.status, data.month]), () => {
 							frappe.call({
@@ -103,7 +104,8 @@ frappe.listview_settings['Attendance'] = {
 			dialog.show();
 		});
 	},
-	get_multi_select_options: function (employee, month) {
+
+	get_multi_select_options: function(employee, month) {
 		return new Promise(resolve => {
 			frappe.call({
 				method: 'erpnext.hr.doctype.attendance.attendance.get_unmarked_days',
