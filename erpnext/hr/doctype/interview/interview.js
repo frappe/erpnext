@@ -13,54 +13,53 @@ frappe.ui.form.on('Interview', {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.docstatus == 1) {
-			if (frm.doc.scheduled_on != frm.doc.original_date && frm.doc.status == "Scheduled") {
-				frm.fields_dict.status.set_description(__("Interview was rescheduled from " + frm.doc.original_date + " to " + frm.doc.scheduled_on));
-			}
+		if (frm.doc.scheduled_on != frm.doc.original_date && frm.doc.status == "Scheduled") {
+			frm.fields_dict.status.set_description(__("Interview was rescheduled from " + frm.doc.original_date + " to " + frm.doc.scheduled_on));
+		}
 
-			let now_date_time = frappe.datetime.now_datetime();
-			if (now_date_time < frm.doc.scheduled_on && frm.doc.status === "Scheduled") {
-				frm.add_custom_button(__("Reschedule Interview"), function () {
-					frm.events.create_dialog(frm);
+		let now_date_time = frappe.datetime.now_datetime();
+		if (now_date_time < frm.doc.scheduled_on && frm.doc.status === "Scheduled") {
+			frm.add_custom_button(__("Reschedule Interview"), function () {
+				frm.events.show_reschedule_dialog(frm);
+				frm.refresh();
+			});
+		} else if (frm.doc.status === "Scheduled") {
+			frm.add_custom_button(__("End Session"), function () {
+				frappe.db.set_value("Interview", frm.doc.name, "status", "In Review").then(() => {
+					frappe.call({
+						method: "erpnext.hr.interview.interview.send_review_reminder",
+						args: {
+							interview_name: frm.doc.name
+						}
+					});
 					frm.refresh();
 				});
-			} else if (frm.doc.status === "Scheduled") {
-				frm.add_custom_button(__("End Session"), function () {
-					frappe.db.set_value("Interview", frm.doc.name, "status", "In Review").then(() => {
-						frappe.call({
-							method: "erpnext.hr.interview.interview.send_review_reminder",
-							args: {
-								interview_name: frm.doc.name
-							}
-						});
-						frm.refresh();
+			}).addClass("btn-primary");
+		}
+
+		if (frm.doc.status != "Completed") {
+			let allowed_interviewers = [];
+			frm.doc.interview_detail.forEach(values => {
+				allowed_interviewers.push(values.interviewer);
+			});
+			if ((allowed_interviewers.includes(frappe.session.user)) && now_date_time > frm.doc.scheduled_on) {
+				frm.add_custom_button(__("Submit Feedback"), function () {
+					frappe.call({
+						method: "erpnext.hr.doctype.interview.interview.get_expected_skill_set",
+						args: {
+							interview_round: frm.doc.interview_round
+						},
+						callback: function (r) {
+							frm.events.show_feedback_dialog(frm, r.message);
+							frm.refresh();
+						}
 					});
-				}).addClass("btn-primary");
-			}
-			if (frm.doc.status != "Completed") {
-				let allowed_interviewers = [];
-				frm.doc.interview_detail.forEach(values => {
-					allowed_interviewers.push(values.interviewer);
 				});
-				if ((allowed_interviewers.includes(frappe.session.user)) && now_date_time > frm.doc.scheduled_on) {
-					frm.add_custom_button(__("Submit Feedback"), function () {
-						frappe.call({
-							method: "erpnext.hr.doctype.interview.interview.get_expected_skill_set",
-							args: {
-								interview_round: frm.doc.interview_round
-							},
-							callback: function (r) {
-								frm.events.create_feedback_dialog(frm, r.message);
-								frm.refresh();
-							}
-						});
-					});
-				}
 			}
 		}
 	},
 
-	create_dialog: function (frm) {
+	show_reschedule_dialog: function (frm) {
 		let d = new frappe.ui.Dialog({
 			title: 'Reschedule Interview',
 			fields: [{
@@ -95,7 +94,7 @@ frappe.ui.form.on('Interview', {
 		});
 	},
 
-	create_feedback_dialog: function (frm, data) {
+	show_feedback_dialog: function (frm, data) {
 		let fields = frm.events.get_fields_for_feedback();
 
 		let d = new frappe.ui.Dialog({
@@ -118,6 +117,7 @@ frappe.ui.form.on('Interview', {
 				}
 			],
 			size: "large",
+			minimizable: true,
 			primary_action: function (values) {
 				frappe.call({
 					method: 'erpnext.hr.doctype.interview.interview.create_interview_feedback',
@@ -126,6 +126,8 @@ frappe.ui.form.on('Interview', {
 						interview_name: frm.doc.name,
 						interviewer: frappe.session.user
 					}
+				}).then(() => {
+					frm.refresh();
 				});
 				d.hide();
 			}

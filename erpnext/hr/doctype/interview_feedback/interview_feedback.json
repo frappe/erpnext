@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "HR-INTRV-FEED-.####",
+ "autoname": "HR-INT-FEED-.####",
  "creation": "2021-04-12 17:03:13.833285",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -19,6 +19,7 @@
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "interview",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -27,6 +28,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fetch_from": "interview.interview_round",
    "fieldname": "interview_round",
    "fieldtype": "Link",
@@ -37,6 +39,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "interviewer",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -49,6 +52,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "skill_assessment",
    "fieldtype": "Table",
    "label": "Skill Assessment",
@@ -56,6 +60,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "average_rating",
    "fieldtype": "Rating",
    "label": "Average Rating",
@@ -64,11 +69,6 @@
   {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "feedback",
-   "fieldtype": "Text",
-   "label": "Feedback"
   },
   {
    "fieldname": "column_break_3",
@@ -82,12 +82,18 @@
    "options": "Interview Feedback",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "feedback",
+   "fieldtype": "Text",
+   "label": "Feedback"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 22:01:28.293325",
+ "modified": "2021-09-29 08:56:10.137389",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Feedback",
@@ -126,7 +132,9 @@
    "share": 1
   }
  ],
+ "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "interviewer",
  "track_changes": 1
 }

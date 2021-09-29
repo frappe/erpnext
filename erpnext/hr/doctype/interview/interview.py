@@ -52,7 +52,7 @@ class Interview(Document):
 	def before_cancel(self):
 		self.status = "Cancelled"
 
-def update_rating(interview_name , interviewer, reference=None, feedback=None, avg_rating=0, revert=0):
+def update_rating(interview_name , interviewer, reference=None, feedback=None, avg_rating=0):
 	doc = frappe.get_doc("Interview", interview_name)
 	total_rating = 0
 	feedback_submitted_by_all_interviewer = 1
@@ -198,7 +198,16 @@ def create_interview_feedback(data, interview_name, interviewer):
 	interview_feedback.save()
 	interview_feedback.submit()
 
-	frappe.msgprint(_("Interview Feedback Submitted Successfully. Reference {0}").format(get_link_to_form("Interview Feedback", interview_feedback.name)))
+	# set interview feedback summary in interview
+	frappe.db.set_value('Interview Detail', {'parent': interview_name, 'interviewer': interviewer}, {
+		'interview_feedback': interview_feedback.name,
+		'average_rating': interview_feedback.average_rating,
+		'comments': interview_feedback.feedback
+	})
+
+	frappe.get_doc('Interview', interview_name).notify_update()
+
+	frappe.msgprint(_("Interview Feedback {0} submitted successfully").format(get_link_to_form("Interview Feedback", interview_feedback.name)))
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

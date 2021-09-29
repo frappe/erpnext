@@ -9,7 +9,7 @@
   "interview_feedback",
   "average_rating",
   "column_break_4",
-  "feedback"
+  "comments"
  ],
  "fields": [
   {
@@ -20,15 +20,14 @@
    "options": "User"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "interview_feedback",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Interview Feedback",
    "options": "Interview Feedback",
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "average_rating",
    "fieldtype": "Rating",
    "in_list_view": 1,
@@ -41,16 +40,17 @@
   },
   {
    "fetch_from": "interview_feedback.feedback",
-   "fieldname": "feedback",
+   "fieldname": "comments",
    "fieldtype": "Text",
-   "label": "Feedback",
+   "in_list_view": 1,
+   "label": "Comments",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-28 21:55:49.421506",
+ "modified": "2021-09-29 09:05:19.565191",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Detail",

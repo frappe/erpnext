@@ -89,7 +89,7 @@
   {
    "fieldname": "interview_details_section",
    "fieldtype": "Section Break",
-   "label": "Interview Detail"
+   "label": "Interview Feedbacks"
   },
   {
    "fetch_from": "interview_round.expected_average_rating",
@@ -154,7 +154,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 21:56:53.959355",
+ "modified": "2021-09-29 08:48:55.641845",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview",
