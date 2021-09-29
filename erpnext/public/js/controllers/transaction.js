@@ -617,6 +617,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 											me.frm.script_manager.trigger('qty', item.doctype, item.name);
 											if (!me.frm.doc.set_warehouse)
 												me.frm.script_manager.trigger('warehouse', item.doctype, item.name);
+											me.apply_price_list(item, true);
 										}, undefined, !frappe.flags.hide_serial_batch_dialog);
 									}
 								},
@@ -864,7 +865,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if (r.message) {
 							me.frm.set_value("billing_address", r.message);
 						} else {
-							me.frm.set_value("company_address", "");
+							if (frappe.meta.get_docfield(me.frm.doctype, 'company_address')) {
+								me.frm.set_value("company_address", "");
+							}
 						}
 					}
 				});

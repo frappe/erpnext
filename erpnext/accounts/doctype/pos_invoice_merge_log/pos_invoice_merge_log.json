@@ -6,9 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
-  "customer",
+  "merge_invoices_based_on",
   "column_break_3",
   "pos_closing_entry",
+  "customer",
+  "customer_group",
   "section_break_3",
   "pos_invoices",
   "references_section",
@@ -88,12 +90,27 @@
    "fieldtype": "Link",
    "label": "POS Closing Entry",
    "options": "POS Closing Entry"
+  },
+  {
+   "fieldname": "merge_invoices_based_on",
+   "fieldtype": "Select",
+   "label": "Merge Invoices Based On",
+   "options": "Customer\nCustomer Group",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.merge_invoices_based_on == 'Customer Group'",
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "mandatory_depends_on": "eval:doc.merge_invoices_based_on == 'Customer Group'",
+   "options": "Customer Group"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-01 11:53:57.267579",
+ "modified": "2021-09-14 11:17:19.001142",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Merge Log",
