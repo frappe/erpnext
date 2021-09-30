@@ -653,7 +653,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-09-26 15:08:09.795655",
+ "modified": "2021-09-29 14:17:06.633892",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -751,7 +751,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "item_code, item_name, customer, license_plate, chassis_no, engine_no, warehouse",
+ "search_fields": "item_code, item_name, license_plate, chassis_no, engine_no, color, customer, customer_name, warehouse",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",
