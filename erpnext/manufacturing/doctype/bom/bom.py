@@ -817,7 +817,7 @@ def get_list_context(context):
 	context.title = _("Bill of Materials")
 	# context.introduction = _('Boms')
 
-def get_bom_items_as_dict( bom, company, qty=1, fetch_exploded=1,
+def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1,
 		fetch_scrap_items=0, include_non_stock_items=False,
 		fetch_qty_in_stock_uom=True, fetch_template_items=False):
 	item_dict = {}
