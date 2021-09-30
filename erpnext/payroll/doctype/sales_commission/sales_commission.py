@@ -21,6 +21,9 @@ class SalesCommission(Document):
 			if not frappe.db.get_single_value("Payroll Settings", "salary_component_for_sales_commission"):
 				frappe.throw(_("Please set {0} in {1}").format(frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
 
+	def on_submit(self):
+		self.db_set("status", "Unpaid")
+
 	@frappe.whitelist()
 	def add_contributions(self):
 		self.set("contributions", [])
@@ -87,6 +90,7 @@ class SalesCommission(Document):
 
 		self.db_set("reference_doctype", "Additional Salary")
 		self.db_set("reference_name", doc.name)
+		self.db_set("status", "Paid")
 
 	def make_payment_entry(self, mode_of_payment, paid_from, paid_to):
 		doc = frappe.new_doc("Payment Entry")
@@ -107,6 +111,7 @@ class SalesCommission(Document):
 
 		self.db_set("reference_doctype", "Payment Entry")
 		self.db_set("reference_name", doc.name)
+		self.db_set("status", "Paid")
 
 	def add_references(self, doc):
 		reference = {}
