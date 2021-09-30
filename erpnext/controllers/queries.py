@@ -7,6 +7,7 @@ import json
 from collections import defaultdict
 
 import frappe
+from frappe import scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.utils import nowdate, unique
 
@@ -223,18 +224,29 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
-	if filters and isinstance(filters, dict) and filters.get('supplier'):
-		item_group_list = frappe.get_all('Supplier Item Group',
-			filters = {'supplier': filters.get('supplier')}, fields = ['item_group'])
+	if filters and isinstance(filters, dict):
+		if filters.get('customer') or filters.get('supplier'):
+			party = filters.get('customer') or filters.get('supplier')
+			item_rules_list = frappe.get_all('Party Specific Item',
+				filters = {'party': party}, fields = ['restrict_based_on', 'based_on_value'])
 
-		item_groups = []
-		for i in item_group_list:
-			item_groups.append(i.item_group)
+			filters_dict = {}
+			for rule in item_rules_list:
+				if rule['restrict_based_on'] == 'Item':
+					rule['restrict_based_on'] = 'name'
+				filters_dict[rule.restrict_based_on] = []
 
-		del filters['supplier']
+			for rule in item_rules_list:
+				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
 
-		if item_groups:
-			filters['item_group'] = ['in', item_groups]
+			for filter in filters_dict:
+				filters[scrub(filter)] = ['in', filters_dict[filter]]
+
+			if filters.get('customer'):
+				del filters['customer']
+			else:
+				del filters['supplier']
+
 
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
@@ -307,7 +319,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
-	if filters.get('customer'):
+	if filters and filters.get('customer'):
 		cond = """(`tabProject`.customer = %s or
 			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
