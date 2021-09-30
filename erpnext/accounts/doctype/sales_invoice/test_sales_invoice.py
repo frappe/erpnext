@@ -1800,6 +1800,47 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
+	def test_deferred_revenue_post_account_freeze_upto_by_admin(self):
+		frappe.set_user("Administrator")
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
+
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_save=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'System Manager')
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		self.assertRaises(frappe.ValidationError, pda1.submit)
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
+
 	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
@@ -2352,6 +2393,7 @@ def make_test_address_for_ewaybill():
 	if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Address for Eway bill",
 			"address_type": "Billing",
 			"city": "_Test City",
@@ -2373,11 +2415,12 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
-	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Customer-Address for Eway bill",
-			"address_type": "Shipping",
+			"address_type": "Billing",
 			"city": "_Test City",
 			"state": "Test State",
 			"country": "India",
@@ -2397,9 +2440,34 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+		address = frappe.get_doc({
+			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
+			"address_title": "_Test Customer-Address for Eway bill",
+			"address_type": "Shipping",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+			"doctype": "Address",
+			"is_primary_address": 1,
+			"phone": "+910000000000",
+			"gst_state": "Maharashtra",
+			"gst_state_number": "27",
+			"pincode": "410098"
+		}).insert()
+
+		address.append("links", {
+			"link_doctype": "Customer",
+			"link_name": "_Test Customer"
+		})
+
+		address.save()
+
 	if not frappe.db.exists('Address', '_Test Dispatch-Address for Eway bill-Shipping'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Dispatch Address Line 1",
+			"address_line2": "_Test Dispatch Address Line 2",
 			"address_title": "_Test Dispatch-Address for Eway bill",
 			"address_type": "Shipping",
 			"city": "_Test City",
@@ -2413,11 +2481,6 @@ def make_test_address_for_ewaybill():
 			"gst_state_number": "07",
 			"pincode": "1100101"
 		}).insert()
-
-		address.append("links", {
-			"link_doctype": "Company",
-			"link_name": "_Test Company"
-		})
 
 		address.save()
 
@@ -2458,7 +2521,8 @@ def make_sales_invoice_for_ewaybill():
 
 	si.distance = 2000
 	si.company_address = "_Test Address for Eway bill-Billing"
-	si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+	si.customer_address = "_Test Customer-Address for Eway bill-Billing"
+	si.shipping_address_name = "_Test Customer-Address for Eway bill-Shipping"
 	si.dispatch_address_name = "_Test Dispatch-Address for Eway bill-Shipping"
 	si.vehicle_no = "KA12KA1234"
 	si.gst_category = "Registered Regular"
