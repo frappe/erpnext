@@ -428,7 +428,10 @@ class VehicleBookingOrder(VehicleBookingController):
 		vehicle_registration_order = get_vehicle_registration_order(self.vehicle, self.name)
 
 		if vehicle_registration_order:
-			self.registration_status = 'Ordered'
+			if self.invoice_status == 'Issued' and self.invoice_issued_for == 'Registration':
+				self.registration_status = 'In Process'
+			else:
+				self.registration_status = 'Ordered'
 		else:
 			self.registration_status = 'Not Ordered'
 

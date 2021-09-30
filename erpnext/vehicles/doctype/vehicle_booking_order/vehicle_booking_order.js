@@ -319,9 +319,9 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		if (me.frm.doc.registration_status == "Not Ordered") {
 			registration_status_color = "grey";
 		} else if (me.frm.doc.registration_status == "Ordered") {
-			registration_status_color = "orange";
-		} else if (me.frm.doc.registration_status == "In Process") {
 			registration_status_color = "blue";
+		} else if (me.frm.doc.registration_status == "In Process") {
+			registration_status_color = "orange";
 		} else if (me.frm.doc.registration_status == "Registered") {
 			registration_status_color = "green";
 		}
