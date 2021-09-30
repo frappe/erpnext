@@ -397,18 +397,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		let batch_no_scan = Boolean(data.batch_no) && frappe.meta.has_field(cur_grid.doctype, "batch_no");
 
 		if (batch_no_scan) {
-			let duplicate = this.check_duplicate_batch_scan(data.batch_no);
-			if (duplicate) {
-				scan_barcode_field.set_value('');
-				return;
-			}
+			row_to_modify = this.get_batch_row_to_modify(data.batch_no);
 		} else {
 			// serial or barcode scan
 			row_to_modify = this.get_row_to_modify_on_scan(row_to_modify, data);
 		}
 
-		if (!row_to_modify || batch_no_scan) {
-			// add new row if new item scanned or batch is scanned
+		if (!row_to_modify) {
+			// add new row if new item/batch is scanned
 			row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
 		}
 
@@ -427,8 +423,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		['serial_no', 'batch_no', 'barcode'].forEach(field => {
 			if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
 				let is_serial_no = row_to_modify[field] && field === "serial_no";
-
 				let value = data[field];
+
 				if (is_serial_no) {
 					value = row_to_modify[field] + '\n' + data[field];
 				}
@@ -455,9 +451,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		return row_to_modify;
 	}
 
-	check_duplicate_batch_scan(batch_no) {
-		// ignore scan if batch already exists in table
+	get_batch_row_to_modify(batch_no) {
+		// get row if batch already exists in table
 		const existing_batch_row = this.frm.doc.items.find(d => d.batch_no === batch_no);
+<<<<<<< HEAD
 
 		if (existing_batch_row) {
 			frappe.show_alert({
@@ -468,11 +465,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		return false;
 	},
+=======
+		return existing_batch_row || null;
+	}
+>>>>>>> abf450dc70 (fix: Increment batch qty if pre-existing batch is scanned)
 
 <<<<<<< HEAD
 	apply_default_taxes: function() {
 =======
 	show_scan_message (idx, exist = null) {
+		// show new row or qty increase toast
 		if (exist) {
 			frappe.show_alert({
 				message: __('Row #{0}: Qty increased by 1', [idx]),
