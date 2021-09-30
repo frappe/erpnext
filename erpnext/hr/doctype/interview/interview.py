@@ -9,7 +9,7 @@ import datetime
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, get_link_to_form
+from frappe.utils import cstr, get_datetime, get_link_to_form
 
 
 class DuplicateInterviewRoundError(frappe.ValidationError):
@@ -34,9 +34,9 @@ class Interview(Document):
 
 		if duplicate_interview:
 			frappe.throw(_('Job Applicants are not allowed to appear twice for the same Interview round. Interview {0} already scheduled for Job Applicant {1}').format(
-				frappe.bold(get_link_to_form('Interview', duplicate_interview))),
+				frappe.bold(get_link_to_form('Interview', duplicate_interview)),
 				frappe.bold(self.job_applicant)
-			)
+			))
 
 	def validate_designation(self):
 		applicant_designation = frappe.db.get_value('Job Applicant', self.job_applicant, 'designation')
@@ -206,3 +206,61 @@ def get_interviewer_list(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.get_all('Has Role', limit_start=start, limit_page_length=page_len,
 		filters=filters, fields = ['parent'], as_list=1)
+
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+
+	events = []
+
+	event_color = {
+		"Pending": "#fff4f0",
+		"Under Review": "#d3e8fc",
+		"Cleared": "#eaf5ed",
+		"Rejected": "#fce7e7"
+	}
+
+	conditions = get_event_conditions('Interview', filters)
+
+	interviews = frappe.db.sql("""
+			SELECT DISTINCT
+				`tabInterview`.name, `tabInterview`.job_applicant, `tabInterview`.interview_round,
+				`tabInterview`.scheduled_on, `tabInterview`.status, `tabInterview`.from_time as from_time,
+				`tabInterview`.to_time as to_time
+			from
+				`tabInterview`
+			where
+				(`tabInterview`.scheduled_on between %(start)s and %(end)s)
+				and docstatus != 2
+				{conditions}
+			""".format(conditions=conditions), {
+				"start": start,
+				"end": end
+			}, as_dict=True, update={"allDay": 0})
+
+	for d in interviews:
+		subject_data = []
+		for field in ["name", "job_applicant", "interview_round"]:
+			if not d.get(field):
+				continue
+			subject_data.append(d.get(field))
+
+		color = event_color.get(d.status)
+		interview_data = {
+			'from': get_datetime('%s %s' % (d.scheduled_on, d.from_time or '00:00:00')),
+			'to': get_datetime('%s %s' % (d.scheduled_on, d.to_time or '00:00:00')),
+			'name': d.name,
+			'subject': '\n'.join(subject_data),
+			'color': color if color else "#89bcde"
+		}
+
+		events.append(interview_data)
+
+	return events
