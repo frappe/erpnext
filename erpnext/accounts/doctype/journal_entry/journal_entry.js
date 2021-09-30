@@ -10,6 +10,14 @@ frappe.ui.form.on("Journal Entry", {
 		frm.add_fetch("bank_account", "account", "account");
 	},
 
+	onload: function(frm) {
+		cur_frm.fields_dict['bank_transaction'].get_query = function(doc, cdt, cdn) {
+			return {
+				filters:{'accounting_seat': 0}
+			}
+		}
+	},
+
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 		frm.cscript.voucher_type(frm.doc);
