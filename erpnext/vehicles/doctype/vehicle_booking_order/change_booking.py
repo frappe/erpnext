@@ -72,9 +72,13 @@ def change_vehicle_in_registration_order(booking_doc):
 	vro_doc = get_document_for_update(vehicle_registration_order, doctype="Vehicle Registration Order")
 
 	vro_doc.vehicle = booking_doc.vehicle
+
 	vro_doc.validate_vehicle_item()
 	vro_doc.validate_vehicle()
+
 	vro_doc.set_vehicle_details()
+
+	vro_doc.validate_vehicle_booking_order()
 	vro_doc.update_invoice_status()
 
 	save_document_for_update(vro_doc)
@@ -89,6 +93,108 @@ def can_change_vehicle(vbo_doc, throw=False):
 	if not vbo_doc.vehicle_receipt and check_vehicle_received(vbo_doc, throw=throw):
 		return False
 	if check_vehicle_delivered(vbo_doc, throw=throw):
+		return False
+
+	if check_invoice_exists(vbo_doc, throw=throw):
+		return False
+	if check_invoice_delivered(vbo_doc, throw=throw):
+		return False
+	if check_invoice_issued(vbo_doc, throw=throw):
+		return False
+
+	return True
+
+
+@frappe.whitelist()
+def change_item(vehicle_booking_order, item_code):
+	if not item_code:
+		frappe.throw(_("Variant Item Code not provided"))
+
+	vbo_doc = get_document_for_update(vehicle_booking_order)
+	can_change_item(vbo_doc, throw=True)
+
+	if item_code == vbo_doc.item_code:
+		frappe.throw(_("Variant Item Code {0} is already selected in {1}").format(frappe.bold(item_code), vehicle_booking_order))
+
+	previous_item_code = vbo_doc.item_code
+	previous_item = frappe.get_cached_doc("Item", previous_item_code)
+	new_item = frappe.get_cached_doc("Item", item_code)
+	model_item_name = frappe.get_cached_value("Item", previous_item.variant_of, "item_name") if previous_item.variant_of else None
+
+	if previous_item.variant_of and new_item.variant_of != previous_item.variant_of:
+		frappe.throw(_("New Variant Item Code must be a variant of {0}").format
+			(frappe.bold(model_item_name or previous_item.variant_of)))
+
+	if not vbo_doc.previous_item_code:
+		vbo_doc.previous_item_code = vbo_doc.item_code
+
+	vbo_doc.item_code = item_code
+
+	if vbo_doc.vehicle_allocation and not flt(vbo_doc.supplier_advance):
+		update_allocation_booked(vbo_doc.vehicle_allocation, 0, 0)
+		vbo_doc.vehicle_allocation = None
+
+	if vbo_doc.vehicle:
+		update_vehicle_booked(vbo_doc.vehicle, 0)
+		vbo_doc.vehicle = None
+
+	item_detail_args = vbo_doc.as_dict()
+	item_detail_args['tc_name'] = None
+	item_details = get_item_details(item_detail_args)
+	vbo_doc.update(item_details)
+
+	vbo_doc.validate_vehicle_item()
+	vbo_doc.validate_allocation()
+	vbo_doc.validate_vehicle()
+
+	vbo_doc.calculate_taxes_and_totals()
+	vbo_doc.validate_payment_schedule()
+	vbo_doc.update_payment_status()
+	vbo_doc.validate_amounts()
+
+	vbo_doc.get_terms_and_conditions()
+
+	save_document_for_update(vbo_doc)
+
+	change_item_in_registration_order(vbo_doc)
+
+	frappe.msgprint(_("Variant Item Changed Successfully"), indicator='green')
+
+
+def change_item_in_registration_order(booking_doc):
+	vehicle_registration_order = get_vehicle_registration_order(vehicle_booking_order=booking_doc.name)
+	if not vehicle_registration_order:
+		return
+
+	vro_doc = get_document_for_update(vehicle_registration_order, doctype="Vehicle Registration Order")
+
+	vro_doc.item_code = booking_doc.item_code
+	vro_doc.vehicle = booking_doc.vehicle
+
+	vro_doc.validate_vehicle_item()
+	vro_doc.validate_vehicle()
+
+	vro_doc.set_item_details(force=1)
+	vro_doc.set_vehicle_details()
+	vro_doc.set_pricing_details(update_component_amounts=True)
+
+	vro_doc.calculate_totals()
+	vro_doc.update_payment_status()
+
+	vro_doc.validate_vehicle_booking_order()
+	vro_doc.update_invoice_status()
+
+	save_document_for_update(vro_doc)
+
+
+def can_change_item(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
+	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
+		return False
+
+	if check_vehicle_received(vbo_doc, throw=throw):
 		return False
 
 	if check_invoice_exists(vbo_doc, throw=throw):
@@ -267,80 +373,6 @@ def can_change_customer_details(vbo_doc, throw=False):
 	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
 		return False
 	if not check_allowed_after_vehicle_receipt(vbo_doc, throw=throw):
-		return False
-
-	return True
-
-
-@frappe.whitelist()
-def change_item(vehicle_booking_order, item_code):
-	if not item_code:
-		frappe.throw(_("Variant Item Code not provided"))
-
-	vbo_doc = get_document_for_update(vehicle_booking_order)
-	can_change_item(vbo_doc, throw=True)
-
-	if item_code == vbo_doc.item_code:
-		frappe.throw(_("Variant Item Code {0} is already selected in {1}").format(frappe.bold(item_code), vehicle_booking_order))
-
-	previous_item_code = vbo_doc.item_code
-	previous_item = frappe.get_cached_doc("Item", previous_item_code)
-	new_item = frappe.get_cached_doc("Item", item_code)
-	model_item_name = frappe.get_cached_value("Item", previous_item.variant_of, "item_name") if previous_item.variant_of else None
-
-	if previous_item.variant_of and new_item.variant_of != previous_item.variant_of:
-		frappe.throw(_("New Variant Item Code must be a variant of {0}").format
-			(frappe.bold(model_item_name or previous_item.variant_of)))
-
-	if not vbo_doc.previous_item_code:
-		vbo_doc.previous_item_code = vbo_doc.item_code
-
-	vbo_doc.item_code = item_code
-
-	if vbo_doc.vehicle_allocation and not flt(vbo_doc.supplier_advance):
-		update_allocation_booked(vbo_doc.vehicle_allocation, 0, 0)
-		vbo_doc.vehicle_allocation = None
-
-	if vbo_doc.vehicle:
-		update_vehicle_booked(vbo_doc.vehicle, 0)
-		vbo_doc.vehicle = None
-
-	item_detail_args = vbo_doc.as_dict()
-	item_detail_args['tc_name'] = None
-	item_details = get_item_details(item_detail_args)
-	vbo_doc.update(item_details)
-
-	vbo_doc.validate_vehicle_item()
-	vbo_doc.validate_allocation()
-	vbo_doc.validate_vehicle()
-
-	vbo_doc.calculate_taxes_and_totals()
-	vbo_doc.validate_payment_schedule()
-	vbo_doc.update_payment_status()
-	vbo_doc.validate_amounts()
-
-	vbo_doc.get_terms_and_conditions()
-
-	save_document_for_update(vbo_doc)
-
-	frappe.msgprint(_("Variant Item Code Updated Successfully"), indicator='green')
-
-
-def can_change_item(vbo_doc, throw=False):
-	if check_cancelled(vbo_doc, throw):
-		return False
-
-	if not check_allowed_after_supplier_payment(vbo_doc, throw=throw):
-		return False
-
-	if check_vehicle_received(vbo_doc, throw=throw):
-		return False
-
-	if check_invoice_exists(vbo_doc, throw=throw):
-		return False
-	if check_invoice_delivered(vbo_doc, throw=throw):
-		return False
-	if check_invoice_issued(vbo_doc, throw=throw):
 		return False
 
 	return True

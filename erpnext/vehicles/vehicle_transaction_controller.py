@@ -98,12 +98,12 @@ class VehicleTransactionController(StockController):
 		if update:
 			doc.db_set(values)
 
-	def set_item_details(self, doc=None, for_validate=False):
+	def set_item_details(self, doc=None, for_validate=False, force=False):
 		if not doc:
 			doc = self
 
 		if doc.get('item_code'):
-			if not doc.get('item_name'):
+			if not doc.get('item_name') or force:
 				doc.item_name = frappe.get_cached_value("Item", doc.item_code, 'item_name')
 
 			doc.variant_of = frappe.get_cached_value("Item", doc.item_code, 'variant_of')
@@ -231,8 +231,8 @@ class VehicleTransactionController(StockController):
 					frappe.throw(_("Variant Item Code does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
-			if doc.get('vehicle'):
-				if doc.vehicle != vbo.vehicle:
+			if doc.meta.has_field('vehicle'):
+				if cstr(doc.get('vehicle')) != cstr(vbo.get('vehicle')):
 					frappe.throw(_("Vehicle does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 

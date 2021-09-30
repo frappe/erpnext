@@ -25,10 +25,11 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 		self.validate_pricing_components()
 		self.calculate_totals()
-		self.reset_outstanding_amount()
+		self.calculate_outstanding_amount()
 
 		self.validate_agent_mandatory()
 
+		self.update_payment_status()
 		self.update_invoice_status()
 		self.update_registration_number()
 		self.set_status()
@@ -52,7 +53,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		super(VehicleRegistrationOrder, self).set_missing_values(doc, for_validate)
 		self.set_pricing_details()
 
-	def set_pricing_details(self):
+	def set_pricing_details(self, update_component_amounts=False):
 		if not self.get('customer_charges') and not self.get('authority_charges'):
 			pricing_data = get_pricing_components("Registration", self.as_dict(),
 				get_selling_components=True, get_buying_components=True)
@@ -68,8 +69,11 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 						component_details = get_component_details(d.component, self.as_dict(),
 							selling_or_buying=selling_or_buying)
 						for k, v in component_details.component.items():
-							if d.meta.has_field(k) and (not d.get(k) or k in pricing_force_fields):
-								d.set(k, v)
+							if d.meta.has_field(k):
+								if k == 'component_amount' and update_component_amounts and v:
+									d.set(k, v)
+								elif not d.get(k) or k in pricing_force_fields:
+									d.set(k, v)
 
 	def validate_duplicate_registration_order(self):
 		if self.vehicle:
@@ -124,10 +128,21 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.margin_amount = flt(self.customer_total - self.authority_total - self.agent_commission,
 			self.precision('margin_amount'))
 
-	def reset_outstanding_amount(self):
+	def calculate_outstanding_amount(self):
 		if self.docstatus == 0:
 			self.customer_outstanding = flt(self.customer_total)
+			self.authority_outstanding = flt(self.authority_total)
 			self.agent_outstanding = 0
+
+	def update_payment_status(self, update=False):
+		self.calculate_outstanding_amount()
+
+		if update:
+			self.db_set({
+				'customer_outstanding': self.customer_outstanding,
+				'authority_outstanding': self.authority_outstanding,
+				'agent_outstanding': self.agent_outstanding,
+			})
 
 	def update_invoice_status(self, update=False):
 		vehicle_invoice = None
