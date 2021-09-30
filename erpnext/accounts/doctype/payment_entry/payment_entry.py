@@ -1849,30 +1849,20 @@ def get_payment_entry(
 				pe.append("references", reference)
 		else:
 			if dt == "Dunning":
-				pe.append(
-					"references",
-					{
+				for overdue_payment in doc.overdue_payments:
+					pe.append("references", {
 						"reference_doctype": "Sales Invoice",
-						"reference_name": doc.get("sales_invoice"),
-						"bill_no": doc.get("bill_no"),
-						"due_date": doc.get("due_date"),
-						"total_amount": doc.get("outstanding_amount"),
-						"outstanding_amount": doc.get("outstanding_amount"),
-						"allocated_amount": doc.get("outstanding_amount"),
-					},
-				)
-				pe.append(
-					"references",
-					{
-						"reference_doctype": dt,
-						"reference_name": dn,
-						"bill_no": doc.get("bill_no"),
-						"due_date": doc.get("due_date"),
-						"total_amount": doc.get("dunning_amount"),
-						"outstanding_amount": doc.get("dunning_amount"),
-						"allocated_amount": doc.get("dunning_amount"),
-					},
-				)
+						"reference_name": overdue_payment.sales_invoice,
+						"payment_term": overdue_payment.payment_term,
+						"due_date": overdue_payment.due_date,
+						"total_amount": overdue_payment.outstanding,
+						"outstanding_amount": overdue_payment.outstanding,
+						"allocated_amount": overdue_payment.outstanding
+					})
+
+				pe.append("deductions", {
+					"amount": doc.dunning_amount
+				})
 			else:
 				pe.append(
 					"references",

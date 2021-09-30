@@ -1,24 +1,44 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+"""
+# Accounting
 
+1. Payment of outstanding invoices with dunning amount
+
+		- Debit full amount to bank
+		- Credit invoiced amount to receivables
+		- Credit dunning amount to interest and similar revenue
+
+		-> Resolves dunning automatically
+"""
+from __future__ import unicode_literals
 
 import json
 
 import frappe
+
+from frappe import _
 from frappe.utils import getdate
 
-from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 
 
 class Dunning(AccountsController):
 
 	def validate(self):
+		self.validate_same_currency()
 		self.validate_overdue_payments()
 		self.validate_totals()
+		self.set_dunning_level()
 
-		if not self.income_account:
-			self.income_account = frappe.db.get_value("Company", self.company, "default_income_account")
+	def validate_same_currency(self):
+		"""
+		Throw an error if invoice currency differs from dunning currency.
+		"""
+		for row in self.overdue_payments:
+			invoice_currency = frappe.get_value("Sales Invoice", row.sales_invoice, "currency")
+			if invoice_currency != self.currency:
+				frappe.throw(_("The currency of invoice {} ({}) is different from the currency of this dunning ({}).").format(row.sales_invoice, invoice_currency, self.currency))
 
 	def validate_overdue_payments(self):
 		daily_interest = self.rate_of_interest / 100 / 365
@@ -31,51 +51,25 @@ class Dunning(AccountsController):
 		self.total_outstanding = sum(row.outstanding for row in self.overdue_payments)
 		self.total_interest = sum(row.interest for row in self.overdue_payments)
 		self.dunning_amount = self.total_interest + self.dunning_fee
+		self.base_dunning_amount = self.dunning_amount * self.conversion_rate
 		self.grand_total = self.total_outstanding + self.dunning_amount
 
-	def on_submit(self):
-		self.make_gl_entries()
-
-	def on_cancel(self):
-		if self.dunning_amount:
-			self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
-			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
-
-	def make_gl_entries(self):
-		if not self.dunning_amount:
-			return
-
-		cost_center = self.cost_center or frappe.get_cached_value("Company",  self.company,  "cost_center")
-
-		make_gl_entries(
-			[
-				self.get_gl_dict({
-					"account": self.debit_to,
-					"party_type": "Customer",
-					"party": self.customer,
-					"due_date": self.due_date,
-					"against": self.income_account,
-					"debit": self.dunning_amount,
-					"debit_in_account_currency": self.dunning_amount,
-					"against_voucher": self.name,
-					"against_voucher_type": "Dunning",
-					"cost_center": cost_center
-				}),
-				self.get_gl_dict({
-					"account": self.income_account,
-					"against": self.customer,
-					"credit": self.dunning_amount,
-					"cost_center": cost_center,
-					"credit_in_account_currency": self.dunning_amount
-				})
-			],
-			cancel=(self.docstatus == 2),
-			update_outstanding="No",
-			merge_entries=False
-		)
+	def set_dunning_level(self):
+		for row in self.overdue_payments:
+			past_dunnings = frappe.get_all("Overdue Payment",
+				filters={
+					"payment_schedule": row.payment_schedule,
+					"parent": ("!=", row.parent),
+					"docstatus": 1
+				}
+			)
+			row.dunning_level = len(past_dunnings) + 1
 
 
 def resolve_dunning(doc, state):
+	"""
+	Todo: refactor
+	"""
 	for reference in doc.references:
 		if reference.reference_doctype == "Sales Invoice" and reference.outstanding_amount <= 0:
 			dunnings = frappe.get_list(
