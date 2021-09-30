@@ -8,7 +8,7 @@ import unittest
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import add_days, get_datetime
+from frappe.utils import add_days, getdate, nowtime
 
 from erpnext.hr.doctype.designation.test_designation import create_designation
 from erpnext.hr.doctype.interview.interview import DuplicateInterviewRoundError
@@ -16,12 +16,6 @@ from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_appli
 
 
 class TestInterview(unittest.TestCase):
-	def tearDown(self):
-		frappe.db.sql("DELETE FROM `tabInterview Round`")
-		frappe.db.sql("DELETE FROM `tabInterview`")
-		frappe.db.sql("DELETE FROM `tabExpected Skill Set`")
-		frappe.db.sql("DELETE FROM `tabInterview Detail`")
-
 	def test_validations_for_designation(self):
 		job_applicant = create_job_applicant()
 		interview = create_interview_and_dependencies(job_applicant.name, designation='_Test_Sales_manager', save=0)
@@ -29,15 +23,16 @@ class TestInterview(unittest.TestCase):
 
 	def test_notification_on_rescheduling(self):
 		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(get_datetime(), -4))
+		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(getdate(), -4))
 
 		previous_scheduled_date = interview.scheduled_on
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
 
-		interview.reschedule_interview(add_days(get_datetime(previous_scheduled_date), 2))
+		interview.reschedule_interview(add_days(getdate(previous_scheduled_date), 2),
+			from_time=nowtime(), to_time=nowtime())
 		interview.reload()
 
-		self.assertEqual(interview.scheduled_on, add_days(get_datetime(previous_scheduled_date), 2))
+		self.assertEqual(interview.scheduled_on, add_days(getdate(previous_scheduled_date), 2))
 
 		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Your Interview session is rescheduled from%")})
 		self.assertIsNotNone(notification)
@@ -73,7 +68,7 @@ class TestInterview(unittest.TestCase):
 
 
 		job_applicant = create_job_applicant()
-		scheduled_on = add_days(get_datetime(), -4)
+		scheduled_on = add_days(getdate(), -4)
 		create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on)
 
 
@@ -83,6 +78,9 @@ class TestInterview(unittest.TestCase):
 		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")})
 		self.assertIsNotNone(notification)
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 
 def set_reminder_message_and_set_remind_before():
 	message = "Message for test"
@@ -90,7 +88,7 @@ def set_reminder_message_and_set_remind_before():
 	frappe.db.set_value("HR Settings", None, "remind_before", "00:15:00")
 	frappe.db.set_value("HR Settings", None, "send_feedback_reminder_message", message)
 
-def create_interview_and_dependencies(job_applicant, scheduled_on=None, designation=None, save=1):
+def create_interview_and_dependencies(job_applicant, scheduled_on=None, from_time=None, to_time=None, designation=None, save=1):
 	if designation:
 		designation=create_designation(designation_name = "_Test_Sales_manager").name
 
@@ -105,7 +103,9 @@ def create_interview_and_dependencies(job_applicant, scheduled_on=None, designat
 	interview = frappe.new_doc("Interview")
 	interview.interview_round = interview_round.name
 	interview.job_applicant = job_applicant
-	interview.scheduled_on = scheduled_on or get_datetime()
+	interview.scheduled_on = scheduled_on or getdate()
+	interview.from_time = from_time or nowtime()
+	interview.to_time = to_time or nowtime()
 
 	interview.append("interview_details", {"interviewer": interviewer_1.name})
 	interview.append("interview_details", {"interviewer": interviewer_2.name})
