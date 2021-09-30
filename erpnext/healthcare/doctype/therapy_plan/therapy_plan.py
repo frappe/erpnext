@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, today
+from frappe.utils import flt
 
 
 class TherapyPlan(Document):
