@@ -29,8 +29,9 @@ class WebsiteItem(WebsiteGenerator):
 
 	def autoname(self):
 		# use naming series to accomodate items with same name (different item code)
-		from erpnext.setup.doctype.naming_series.naming_series import get_default_naming_series
 		from frappe.model.naming import make_autoname
+
+		from erpnext.setup.doctype.naming_series.naming_series import get_default_naming_series
 
 		naming_series = get_default_naming_series("Website Item")
 		if not self.name and naming_series:
