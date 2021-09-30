@@ -297,12 +297,6 @@ def get_data():
             	},
             	{
               		"type": "doctype",
-              		"name": "Bank Transaction Accounting Entry",
-              		"label": _("Bank Transaction Accounting Entry"),
-              		"description": _("Create Bank Transaction Accounting Entry."),
-            	},
-            	{
-              		"type": "doctype",
               		"name": "Bank reconciliations",
               		"label": _("Bank reconciliations"),
               		"description": _("Create Bank reconciliations"),
