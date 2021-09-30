@@ -417,7 +417,10 @@ $.extend(erpnext.item, {
 			frappe.db.get_list('Item Price', {
 				filters: {item_code: frm.doc.name, selling: 1},
 				fields: ['price_list', 'price_list_rate', 'valid_from', 'valid_upto', 'currency']
-			}).then(res => { 
+			}).then(res => {
+				res = res.filter( (item) => {
+					return !item.valid_upto; 
+				})
 				let rows = res.reduce( (accumulator, cur_row) => {
 					return accumulator + (`<div class="row" parent=${cur_row.price_list}>\
 					<div class="col-sm-3 "> ${cur_row.price_list}</div>\
