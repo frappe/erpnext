@@ -21,6 +21,28 @@ class SalesCommission(Document):
 			if not frappe.db.get_single_value("Payroll Settings", "salary_component_for_sales_commission"):
 				frappe.throw(_("Please set {0} in {1}").format(frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
 
+	@frappe.whitelist()
+	def add_contributions(self):
+		self.set("contributions", [])
+		filter_date = "transaction_date" if self.commission_based_on=="Sales Order" else "posting_date"
+		records = [entry.name for entry in frappe.db.get_all(self.commission_based_on, filters={"company": self.company, filter_date: ('between', [self.from_date, self.to_date])})]
+		sales_persons_details = frappe.get_all("Sales Team", filters={"parent": ['in', records], "sales_person": self.sales_person}, fields=["sales_person", "commission_rate", "incentives", "allocated_percentage", "allocated_amount", "parent"])
+		if sales_persons_details:
+			for record in sales_persons_details:
+				if add(record, self.sales_person):
+					record_details = frappe.db.get_value(self.commission_based_on, filters={"name": record["parent"]}, fieldname=["customer", filter_date], as_dict=True)
+					contribution = {
+					"document_type": self.commission_based_on,
+					"order_or_invoice": record["parent"],
+					"customer": record_details["customer"],
+					"posting_date": record_details[filter_date],
+					"contribution_percent": record["allocated_percentage"],
+					"contribution_amount": record["allocated_amount"],
+					"commission_rate": record["commission_rate"],
+					"commission_amount": record["incentives"],
+					}
+					self.append("contributions", contribution)
+
 	def calculate_total_contribution_and_total_commission_amount(self):
 		total_contribution, total_commission_amount = 0,0
 		for entry in self.contributions:
@@ -33,14 +55,6 @@ class SalesCommission(Document):
 
 		self.total_contribution = total_contribution
 		self.total_commission_amount = total_commission_amount
-
-	def on_submit(self):
-		if not self.employee:
-			frappe.throw(_("No employee is linked to Sales Person: {0}. Please select an employee for {1} to submit this document.").format(frappe.bold(self.sales_person), get_link_to_form("Sales Person", self.sales_person)))
-		if self.pay_via_salary:
-			self.make_additional_salary()
-		else:
-			self.make_payment_entry()
 
 	@frappe.whitelist()
 	def payout_entry(self, mode_of_payment=None):
@@ -56,11 +70,12 @@ class SalesCommission(Document):
 		else:
 			self.make_payment_entry(mode_of_payment, paid_from, paid_to)
 
-
 	def make_additional_salary(self):
+		currency = frappe.get_value("Company", self.company, "default_currency")
 		doc = frappe.new_doc("Additional Salary")
 		doc.employee = self.employee
 		doc.company = self.company
+		doc.currency = currency
 		doc.salary_component = frappe.db.get_single_value("Payroll Settings", "salary_component_for_sales_commission")
 		doc.payroll_date = self.to_date
 		doc.amount = self.total_commission_amount
@@ -101,3 +116,11 @@ class SalesCommission(Document):
 		reference['outstanding_amount'] = self.total_commission_amount
 		reference['allocated_amount'] = self.total_commission_amount
 		doc.append("references", reference)
+
+def add(record, sales_person):
+	previous_contibutions =  frappe.get_all("Contributions", filters={"order_or_invoice":record["parent"], "docstatus":["!=", 2]}, fields=["parent"])
+	if previous_contibutions:
+		for contributions in previous_contibutions:
+			if frappe.db.get_value("Sales Commission", {"name":contributions["parent"]}, fieldname=["sales_person"]) == sales_person:
+				return False
+	return True

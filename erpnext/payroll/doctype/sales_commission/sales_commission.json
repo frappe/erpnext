@@ -23,6 +23,7 @@
   "commission_based_on",
   "process_sales_commission_reference",
   "section_break_15",
+  "get_contributions",
   "contributions",
   "section_break_17",
   "total_contribution",
@@ -208,12 +209,18 @@
    "hidden": 1,
    "label": "Reference Name",
    "options": "reference_doctype"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "get_contributions",
+   "fieldtype": "Button",
+   "label": "Get Contributions"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-20 15:46:26.805073",
+ "modified": "2021-09-30 15:52:00.814442",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Sales Commission",

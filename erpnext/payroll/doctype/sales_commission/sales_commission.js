@@ -18,6 +18,18 @@ frappe.ui.form.on('Sales Commission', {
 		}
 	},
 
+	get_contributions: function (frm) {
+		frm.clear_table("contributions");
+		return frappe.call({
+			doc: frm.doc,
+			method: 'add_contributions',
+		}).then(r => {
+			frm.dirty();
+			frm.save();
+			frm.refresh();
+		});
+	},
+
 	add_context_buttons: function (frm) {
 		if (!frm.doc.reference_name) {
 			if (frm.doc.pay_via_salary) {

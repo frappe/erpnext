@@ -73,26 +73,11 @@ class ProcessSalesCommission(Document):
 			doc.to_date = self.to_date
 			doc.pay_via_salary = self.pay_via_salary
 			doc.process_sales_commission_reference = self.name
-			doc.set("contributions", [])
-			self.add_contributions(doc, sales_persons_details_map[record], filter_date)
+			doc.add_contributions()
 			doc.insert()
 			if not frappe.db.get_single_value("Selling Settings", "approval_required_for_sales_commission_payout"):
 				doc.reload()
 				if self.pay_via_salary and doc.employee:
 					if frappe.db.exists('Salary Structure Assignment', {'employee': doc.employee}):
 						doc.submit()
-
-	def add_contributions(self, doc, records, filter_date):
-		for items in records:
-			sales_record_details = frappe.db.get_value(self.commission_based_on, filters={"name": items["parent"]}, fieldname=["customer", filter_date], as_dict=True)
-			contribution = {
-				"document_type": self.commission_based_on,
-				"order_or_invoice": items["parent"],
-				"customer": sales_record_details["customer"],
-				"posting_date": sales_record_details[filter_date],
-				"contribution_percent": items["allocated_percentage"],
-				"contribution_amount": items["allocated_amount"],
-				"commission_rate": items["commission_rate"],
-				"commission_amount": items["incentives"],
-			}
-			doc.append("contributions", contribution)
+						doc.payout_entry()
