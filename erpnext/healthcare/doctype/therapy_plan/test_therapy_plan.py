@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import (
 	create_appointment,
@@ -33,10 +33,12 @@ class TestTherapyPlan(unittest.TestCase):
 		self.assertEqual(plan.status, 'Not Started')
 
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company')
+		session.start_date = getdate()
 		frappe.get_doc(session).submit()
 		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'In Progress')
 
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company')
+		session.start_date = add_days(getdate(), 1)
 		frappe.get_doc(session).submit()
 		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'Completed')
 
@@ -44,6 +46,7 @@ class TestTherapyPlan(unittest.TestCase):
 		appointment = create_appointment(patient, practitioner, nowdate())
 
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company', appointment.name)
+		session.start_date = add_days(getdate(), 2)
 		session = frappe.get_doc(session)
 		session.submit()
 		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
