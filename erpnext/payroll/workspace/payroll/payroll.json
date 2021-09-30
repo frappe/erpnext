@@ -236,6 +236,26 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Sales Commission",
+   "link_count": 0,
+   "link_to": "Sales Commission",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Process Sales Commission",
+   "link_count": 0,
+   "link_to": "Process Sales Commission",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Reports",
    "link_count": 0,
    "onboard": 0,
@@ -319,7 +339,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:01.335324",
+ "modified": "2021-09-30 20:22:16.234761",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",
