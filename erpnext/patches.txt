@@ -318,4 +318,8 @@ erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
 erpnext.patches.v13_0.create_custom_field_for_finance_book
 erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries
 erpnext.patches.v13_0.fix_additional_cost_in_mfg_stock_entry
+<<<<<<< HEAD
 erpnext.patches.v13_0.shopping_cart_to_ecommerce
+=======
+erpnext.patches.v13_0.set_status_in_maintenance_schedule_table
+>>>>>>> 73ac3e0c40 (fix: Add patch to patches.txt for https://github.com/frappe/erpnext/pull/27554)
