@@ -204,8 +204,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.db_set('status', self.status, update_modified=update_modified)
 
 
-@frappe.whitelist()
-def get_vehicle_registration_order(vehicle=None, vehicle_booking_order=None):
+def get_vehicle_registration_order(vehicle=None, vehicle_booking_order=None, fields='name', as_dict=False):
 	vehicle_registration_order = None
 
 	if not vehicle and not vehicle_booking_order:
@@ -215,12 +214,12 @@ def get_vehicle_registration_order(vehicle=None, vehicle_booking_order=None):
 		vehicle_registration_order = frappe.db.get_value("Vehicle Registration Order", filters={
 			'vehicle': vehicle,
 			'docstatus': 1
-		})
+		}, fieldname=fields, as_dict=as_dict)
 
 	if not vehicle_registration_order and vehicle_booking_order:
 		vehicle_registration_order = frappe.db.get_value("Vehicle Registration Order", filters={
 			'vehicle_booking_order': vehicle_booking_order,
 			'docstatus': 1
-		})
+		}, fieldname=fields, as_dict=as_dict)
 
 	return vehicle_registration_order

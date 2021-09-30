@@ -99,11 +99,19 @@ class VehicleBookingController(AccountsController):
 				if df.read_only:
 					values[df.fieldname] = None
 
-		if update:
+		changed = False
+		for k, v in values.items():
+			if self.get(k) != v:
+				changed = True
+				break
+
+		for k, v in values.items():
+			self.set(k, v)
+
+		if update and changed:
 			self.db_set(values)
-		else:
-			for k, v in values.items():
-				self.set(k, v)
+
+		return changed
 
 	def validate_customer(self):
 		if not self.get('customer') and not self.get('customer_is_company') and not self.get('party_name'):

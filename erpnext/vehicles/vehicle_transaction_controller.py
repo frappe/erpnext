@@ -74,7 +74,7 @@ class VehicleTransactionController(StockController):
 			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields):
 				doc.set(k, v)
 
-	def set_vehicle_details(self, doc=None, for_validate=False):
+	def set_vehicle_details(self, doc=None, for_validate=False, update=False):
 		args = self.as_dict()
 		if doc:
 			args.update(doc.as_dict())
@@ -84,12 +84,19 @@ class VehicleTransactionController(StockController):
 			doc = self
 
 		vehicle_details = get_vehicle_details(args, get_vehicle_booking_order=False, warn_reserved=for_validate)
+		values = {}
 		for k, v in vehicle_details.items():
 			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields):
 				if k == "vehicle_license_plate" and self.doctype == "Vehicle Registration Order":
 					continue
 
-				doc.set(k, v)
+				values[k] = v
+
+		for k, v in values.items():
+			doc.set(k, v)
+
+		if update:
+			doc.db_set(values)
 
 	def set_item_details(self, doc=None, for_validate=False):
 		if not doc:
@@ -303,6 +310,7 @@ class VehicleTransactionController(StockController):
 		if doc.get('vehicle_booking_order'):
 			vbo = frappe.get_doc("Vehicle Booking Order", doc.vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
+			doc.validate_and_update_booking_vehicle_details(vbo, doc)
 			vbo.update_delivery_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
@@ -315,9 +323,89 @@ class VehicleTransactionController(StockController):
 		if vehicle_booking_order:
 			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
+			doc.validate_and_update_booking_vehicle_details(vbo, doc)
 			vbo.update_invoice_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
+
+	def validate_and_update_booking_vehicle_details(self, vbo_doc, self_doc=None):
+		if not self_doc:
+			self_doc = self
+
+		if self.docstatus == 2 or not self_doc.get('vehicle'):
+			return
+
+		fields = ['vehicle_color', 'vehicle_chassis_no', 'vehicle_engine_no']
+
+		def get_changes(doc1, doc2, for_updating=False):
+			changes = {}
+			for f in fields:
+				if doc1.get(f) and (for_updating or doc2.get(f)) and doc1.get(f) != doc2.get(f):
+					if for_updating:
+						changes[f] = doc1.get(f)
+					else:
+						changes[f] = (doc1.get(f), doc2.get(f))
+
+			return changes
+
+		def raise_inconsistent_details_error(changes, doc1, doc2):
+			meta = frappe.get_meta(doc1.doctype)
+			change_error_list = []
+			for f, (doc1_val, doc2_val) in changes.items():
+				label = meta.get_label(f)
+				change_error_list.append(_("{0}: {1} in {2}, however, {3} in {4}")
+					.format(frappe.bold(label), frappe.bold(doc1_val), doc1.doctype, frappe.bold(doc2_val), doc2.doctype))
+
+			change_error_html = "".join(["<li>{0}</li>".format(d) for d in change_error_list])
+			frappe.throw(_("""Vehicle details for {0} in {1} do not match with related document {2}<ul>{3}</ul>""")
+				.format(frappe.get_desk_link('Vehicle', self_doc.vehicle),
+					frappe.get_desk_link(doc1.doctype, doc1.name),
+					frappe.get_desk_link(doc2.doctype, doc2.name),
+					change_error_html))
+
+		vehicle_receipt = frappe.get_all("Vehicle Receipt",
+			fields=['name', "'Vehicle Receipt' as doctype"] + fields, filters={
+				'vehicle': self_doc.vehicle,
+				'docstatus': 1,
+				'is_return': 0
+			}, order_by='posting_date desc, creation desc', limit=1)
+		vehicle_receipt = vehicle_receipt[0] if vehicle_receipt else None
+
+		vehicle_invoice = frappe.get_all("Vehicle Invoice",
+			fields=['name', "'Vehicle Invoice' as doctype"] + fields, filters={
+				'vehicle': self_doc.vehicle,
+				'docstatus': 1
+			}, order_by='posting_date desc, creation desc', limit=1)
+		vehicle_invoice = vehicle_invoice[0] if vehicle_invoice else None
+
+		# Difference between Vehicle Receipt and Invoice
+		if vehicle_receipt and vehicle_invoice:
+			receipt_invoice_changes = get_changes(vehicle_receipt, vehicle_invoice)
+			if receipt_invoice_changes:
+				raise_inconsistent_details_error(receipt_invoice_changes, vehicle_receipt, vehicle_invoice)
+
+		# Difference between current doc and first source document
+		if self.doctype not in ['Vehicle Receipt', 'Vehicle Invoice']:
+			validate_against = vehicle_receipt or vehicle_invoice
+			if validate_against:
+				current_doc_changes = get_changes(self_doc, validate_against)
+				if current_doc_changes:
+					raise_inconsistent_details_error(current_doc_changes, self_doc, validate_against)
+
+		if vbo_doc.status != "Completed":
+			# Update Changes in Vehicle Booking
+			vbo_changes = get_changes(self_doc, vbo_doc, for_updating=True)
+			if vbo_changes:
+				vbo_doc.db_set(vbo_changes, notify=1)
+
+			# Update Changes in Vehicle Registration
+			from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
+			vro_values = get_vehicle_registration_order(vehicle_booking_order=vbo_doc.name,
+				fields=['name'] + fields, as_dict=1)
+			if vro_values:
+				vro_changes = get_changes(self_doc, vro_values, for_updating=True)
+				if vro_changes:
+					frappe.db.set_value("Vehicle Registration Order", vro_values.name, vro_changes, None, notify=1)
 
 	def update_vehicle_booking_order_registration(self):
 		vehicle_booking_order = self.get_vehicle_booking_order()
