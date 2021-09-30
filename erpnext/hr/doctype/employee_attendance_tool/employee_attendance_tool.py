@@ -55,8 +55,7 @@ def mark_employee_attendance(employee_list, status, date, leave_type=None, compa
 		else:
 			leave_type = None
 
-		if not company:
-			company = frappe.db.get_value("Employee", employee['employee'], "Company")
+		company = frappe.db.get_value("Employee", employee['employee'], "Company", cache=True)
 
 		attendance=frappe.get_doc(dict(
 			doctype='Attendance',
