@@ -19,6 +19,7 @@ class Interview(Document):
 	def validate(self):
 		self.validate_duplicate_interview()
 		self.validate_designation()
+		self.validate_overlap()
 
 	def on_submit(self):
 		if self.status not in ['Cleared', 'Rejected']:
@@ -47,6 +48,27 @@ class Interview(Document):
 					exc=DuplicateInterviewRoundError)
 		else:
 			self.designation = applicant_designation
+
+	def validate_overlap(self):
+		interviewers = [entry.interviewer for entry in self.interview_details] or ['']
+
+		overlaps = frappe.db.sql("""
+			SELECT interview.name
+			FROM `tabInterview` as interview
+			INNER JOIN `tabInterview Detail` as detail
+			WHERE
+				interview.scheduled_on = %s and interview.name != %s and interview.docstatus != 2
+				and (interview.job_applicant = %s or detail.interviewer IN %s) and
+				((from_time < %s and to_time > %s) or
+				(from_time > %s and to_time < %s) or
+				(from_time = %s))
+			""", (self.scheduled_on, self.name, self.job_applicant, interviewers,
+			self.from_time, self.to_time, self.from_time, self.to_time, self.from_time))
+
+		if overlaps:
+			overlapping_details = _('Interview overlaps with {0}').format(get_link_to_form('Interview', overlaps[0][0]))
+			frappe.throw(overlapping_details, title=_('Overlap'))
+
 
 	@frappe.whitelist()
 	def reschedule_interview(self, scheduled_on, from_time, to_time):
