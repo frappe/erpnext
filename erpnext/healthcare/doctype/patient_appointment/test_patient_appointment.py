@@ -307,14 +307,18 @@ def create_healthcare_docs(id=0):
 	return patient, practitioner
 
 
-def create_patient(id=0):
+def create_patient(id=0, patient_name=None, email=None, mobile=None, customer=None, create_user=False):
 	if frappe.db.exists('Patient', {'firstname':f'_Test Patient {str(id)}'}):
 		patient = frappe.db.get_value('Patient', {'first_name': f'_Test Patient {str(id)}'}, ['name'])
 		return patient
 
 	patient = frappe.new_doc('Patient')
-	patient.first_name = f'_Test Patient {str(id)}'
+	patient.first_name = patient_name if patient_name else f'_Test Patient {str(id)}'
 	patient.sex = 'Female'
+	patient.mobile = mobile
+	patient.email = email
+	patient.customer = customer
+	patient.invite_user = create_user
 	patient.save(ignore_permissions=True)
 
 	return patient.name

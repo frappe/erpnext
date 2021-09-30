@@ -148,7 +148,10 @@ def set_employee_name(doc):
 def update_employee(employee, details, date=None, cancel=False):
 	internal_work_history = {}
 	for item in details:
-		fieldtype = frappe.get_meta("Employee").get_field(item.fieldname).fieldtype
+		field = frappe.get_meta("Employee").get_field(item.fieldname)
+		if not field:
+			continue
+		fieldtype = field.fieldtype
 		new_data = item.new if not cancel else item.current
 		if fieldtype == "Date" and new_data:
 			new_data = getdate(new_data)
