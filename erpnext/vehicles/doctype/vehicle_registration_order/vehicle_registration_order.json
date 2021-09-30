@@ -53,7 +53,6 @@
   "brand",
   "column_break_21",
   "vehicle",
-  "serial_no",
   "vehicle_chassis_no",
   "vehicle_engine_no",
   "column_break_25",
@@ -407,15 +406,7 @@
    "search_index": 1
   },
   {
-   "fieldname": "serial_no",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Serial No",
-   "no_copy": 1,
-   "options": "Serial No",
-   "read_only": 1
-  },
-  {
+   "fetch_from": "vehicle.chassis_no",
    "fieldname": "vehicle_chassis_no",
    "fieldtype": "Data",
    "label": "Chassis No",
@@ -423,6 +414,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "vehicle.engine_no",
    "fieldname": "vehicle_engine_no",
    "fieldtype": "Data",
    "label": "Engine No",
@@ -434,6 +426,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "vehicle.color",
    "fieldname": "vehicle_color",
    "fieldtype": "Link",
    "label": "Color",
@@ -648,7 +641,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-27 19:49:21.659499",
+ "modified": "2021-09-29 14:12:19.879479",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

@@ -4,6 +4,7 @@ from frappe.utils import cstr, flt, cint
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import update_vehicle_booked,\
 	update_allocation_booked
 from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details
+from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
 
 
 def set_can_change_onload(vbo_doc):
@@ -31,7 +32,7 @@ def set_can_change_onload(vbo_doc):
 
 @frappe.whitelist()
 def change_vehicle(vehicle_booking_order, vehicle):
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_vehicle(vbo_doc, throw=True)
 
 	if cstr(vehicle) == cstr(vbo_doc.vehicle):
@@ -51,14 +52,32 @@ def change_vehicle(vehicle_booking_order, vehicle):
 	vbo_doc.update_invoice_status()
 	vbo_doc.update_registration_status()
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	if vehicle:
 		update_vehicle_booked(vehicle, 1)
 	if previous_vehicle:
 		update_vehicle_booked(previous_vehicle, 0)
 
+	change_vehicle_in_registration_order(vbo_doc)
+
 	frappe.msgprint(_("Vehicle Changed Successfully"), indicator='green', alert=True)
+
+
+def change_vehicle_in_registration_order(booking_doc):
+	vehicle_registration_order = get_vehicle_registration_order(vehicle_booking_order=booking_doc.name)
+	if not vehicle_registration_order:
+		return
+
+	vro_doc = get_document_for_update(vehicle_registration_order, doctype="Vehicle Registration Order")
+
+	vro_doc.vehicle = booking_doc.vehicle
+	vro_doc.validate_vehicle_item()
+	vro_doc.validate_vehicle()
+	vro_doc.set_vehicle_details()
+	vro_doc.update_invoice_status()
+
+	save_document_for_update(vro_doc)
 
 
 def can_change_vehicle(vbo_doc, throw=False):
@@ -84,7 +103,7 @@ def can_change_vehicle(vbo_doc, throw=False):
 
 @frappe.whitelist()
 def change_allocation(vehicle_booking_order, vehicle_allocation):
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_allocation(vbo_doc, throw=True)
 
 	if cstr(vehicle_allocation) == cstr(vbo_doc.vehicle_allocation):
@@ -101,7 +120,7 @@ def change_allocation(vehicle_booking_order, vehicle_allocation):
 	if vbo_doc.delivery_period != vbo_doc._doc_before_save.delivery_period:
 		handle_delivery_period_changed(vbo_doc)
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	is_cancelled = cint(vbo_doc.status == "Cancelled Booking")
 	update_allocation_booked(vehicle_allocation, 1, is_cancelled)
@@ -137,7 +156,7 @@ def change_delivery_period(vehicle_booking_order, delivery_period):
 	if not delivery_period:
 		frappe.throw(_("Delivery Period not provided"))
 
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_delivery_period(vbo_doc, throw=True)
 
 	if delivery_period == vbo_doc.delivery_period:
@@ -150,7 +169,7 @@ def change_delivery_period(vehicle_booking_order, delivery_period):
 	vbo_doc.delivery_period = delivery_period
 	handle_delivery_period_changed(vbo_doc)
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	frappe.msgprint(_("Delivery Period Changed Successfully"), indicator='green', alert=True)
 
@@ -172,7 +191,7 @@ def change_color(vehicle_booking_order, color_1, color_2, color_3):
 	if not color_1:
 		frappe.throw(_("Color (1st Priority) not provided"))
 
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_color(vbo_doc, throw=True)
 
 	if cstr(color_1) == cstr(vbo_doc.color_1) and cstr(color_2) == cstr(vbo_doc.color_2) and cstr(color_3) == cstr(vbo_doc.color_3):
@@ -188,7 +207,7 @@ def change_color(vehicle_booking_order, color_1, color_2, color_3):
 	vbo_doc.validate_color_mandatory()
 	vbo_doc.validate_color()
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	frappe.msgprint(_("Color Changed Successfully"), indicator='green', alert=True)
 
@@ -208,7 +227,7 @@ def can_change_color(vbo_doc, throw=False):
 @frappe.whitelist()
 def change_customer_details(vehicle_booking_order, customer_is_company=None, customer=None, financer=None,
 		finance_type=None, customer_address=None, contact_person=None, financer_contact_person=None):
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_customer_details(vbo_doc, throw=True)
 
 	# if previous customer is completely removed
@@ -236,7 +255,7 @@ def change_customer_details(vehicle_booking_order, customer_is_company=None, cus
 	vbo_doc.update_payment_status()
 	vbo_doc.validate_amounts()
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	frappe.msgprint(_("Customer Details Updated Successfully"), indicator='green', alert=True)
 
@@ -258,7 +277,7 @@ def change_item(vehicle_booking_order, item_code):
 	if not item_code:
 		frappe.throw(_("Variant Item Code not provided"))
 
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_item(vbo_doc, throw=True)
 
 	if item_code == vbo_doc.item_code:
@@ -302,7 +321,7 @@ def change_item(vehicle_booking_order, item_code):
 
 	vbo_doc.get_terms_and_conditions()
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	frappe.msgprint(_("Variant Item Code Updated Successfully"), indicator='green')
 
@@ -329,7 +348,7 @@ def can_change_item(vbo_doc, throw=False):
 
 @frappe.whitelist()
 def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_payment_adjustment(vbo_doc, throw=True)
 
 	payment_adjustment = flt(payment_adjustment, vbo_doc.precision('payment_adjustment'))
@@ -344,7 +363,7 @@ def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
 	vbo_doc.validate_amounts()
 	vbo_doc.validate_payment_adjustment()
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	frappe.msgprint(_("Payment Adjustment Updated Successfully"), indicator='green', alert=True)
 
@@ -368,7 +387,7 @@ def can_change_payment_adjustment(vbo_doc, throw=False):
 
 @frappe.whitelist()
 def change_vehicle_price(vehicle_booking_order, vehicle_amount=0, fni_amount=0):
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_vehicle_price(vbo_doc, throw=True)
 
 	vehicle_amount = flt(vehicle_amount, vbo_doc.precision('vehicle_amount'))
@@ -391,7 +410,7 @@ def change_vehicle_price(vehicle_booking_order, vehicle_amount=0, fni_amount=0):
 	vbo_doc.update_payment_status()
 	vbo_doc.validate_amounts()
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	frappe.msgprint(_("Vehicle Price Updated Successfully"), indicator='green', alert=True)
 
@@ -415,7 +434,7 @@ def can_change_vehicle_price(vbo_doc, throw=False):
 
 @frappe.whitelist()
 def change_priority(vehicle_booking_order, priority):
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_priority(vbo_doc, throw=True)
 
 	priority = cint(priority)
@@ -424,7 +443,7 @@ def change_priority(vehicle_booking_order, priority):
 		frappe.throw(_("Priority is the same"))
 
 	vbo_doc.priority = priority
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 
 	frappe.msgprint(_("Payment Adjustment Updated Successfully"), indicator='green', alert=True)
 
@@ -438,7 +457,7 @@ def can_change_priority(vbo_doc, throw=False):
 
 @frappe.whitelist()
 def change_cancellation(vehicle_booking_order, cancelled):
-	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_cancellation(vbo_doc, throw=True)
 
 	cancelled = cint(cancelled)
@@ -456,7 +475,7 @@ def change_cancellation(vehicle_booking_order, cancelled):
 	vbo_doc.status = "Cancelled Booking" if cancelled else None
 	vbo_doc.update_payment_status()
 
-	save_vehicle_booking_for_update(vbo_doc)
+	save_document_for_update(vbo_doc)
 	vbo_doc.update_allocation_status()
 
 	if vbo_doc.status == "Cancelled Booking":
@@ -515,27 +534,27 @@ def handle_delivery_period_changed(vbo_doc):
 		.format(frappe.bold(vbo_doc._doc_before_save.delivery_period or 'None'), frappe.bold(vbo_doc.delivery_period)))
 
 
-def get_vehicle_booking_for_update(vehicle_booking_order):
-	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+def get_document_for_update(name, doctype="Vehicle Booking Order"):
+	vbo_doc = frappe.get_doc(doctype, name)
 	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
 
 	if vbo_doc.docstatus != 1:
-		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
+		frappe.throw(_("{0} {1} is not submitted").format(doctype, name))
 
 	return vbo_doc
 
 
-def save_vehicle_booking_for_update(vbo_doc, update_child_tables=True):
-	vbo_doc.set_status()
+def save_document_for_update(doc, update_child_tables=True):
+	doc.set_status()
 
-	vbo_doc.set_user_and_timestamp()
-	vbo_doc.db_update()
+	doc.set_user_and_timestamp()
+	doc.db_update()
 
 	if update_child_tables:
-		vbo_doc.update_children()
+		doc.update_children()
 
-	vbo_doc.notify_update()
-	vbo_doc.save_version()
+	doc.notify_update()
+	doc.save_version()
 
 
 def check_cancelled(vbo_doc, throw=False):
@@ -627,8 +646,7 @@ def check_invoice_issued(vbo_doc, throw=False):
 
 def check_registration_order_exists(vbo_doc, throw=False):
 	if not hasattr(vbo_doc, '_has_vehicle_registration_order'):
-		vbo_doc._has_vehicle_registration_order = frappe.db.get_value("Vehicle Registration Order",
-			{'vehicle_booking_order': vbo_doc.name, 'docstatus': 1})
+		vbo_doc._has_vehicle_registration_order = get_vehicle_registration_order(vehicle_booking_order=vbo_doc.name)
 
 	vehicle_registration_order = vbo_doc.get('_has_vehicle_registration_order')
 	if vehicle_registration_order:
