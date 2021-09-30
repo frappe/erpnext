@@ -250,9 +250,6 @@ class SalesPurchaseDetailsReport(object):
 		if len(self.group_by) <= 1:
 			return data
 
-		for d in data:
-			d['disable_item_formatter'] = 0
-
 		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
@@ -262,7 +259,7 @@ class SalesPurchaseDetailsReport(object):
 
 		averageif_fields = self.tax_rate_fields
 
-		totals = {}
+		totals = {"disable_item_formatter": cint(self.show_item_name)}
 
 		# Copy grouped by into total row
 		for f, g in iteritems(grouped_by):
@@ -496,6 +493,12 @@ class SalesPurchaseDetailsReport(object):
 					"fieldname": "doc_type",
 					"width": 110
 				},
+				{
+					"label": _("Item Name"),
+					"fieldtype": "Data",
+					"fieldname": "item_name",
+					"width": 150
+				},
 			]
 
 			group_list = [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]
@@ -510,8 +513,8 @@ class SalesPurchaseDetailsReport(object):
 
 			if "Group by Customer" not in group_list and "Group by Supplier" not in group_list:
 				columns.append(party_field)
-				if show_party_name:
-					columns.append(party_name_field)
+			if show_party_name:
+				columns.append(party_name_field)
 
 			columns += [
 				{
