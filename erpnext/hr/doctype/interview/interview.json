@@ -33,6 +33,7 @@
    "fieldname": "job_applicant",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Job Applicant",
    "options": "Job Applicant",
    "reqd": 1
@@ -47,6 +48,8 @@
   {
    "fieldname": "interview_round",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Interview Round",
    "options": "Interview Round",
    "reqd": 1
@@ -56,6 +59,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nUnder Review\nCleared\nRejected",
    "reqd": 1
@@ -69,6 +73,7 @@
    "allow_on_submit": 1,
    "fieldname": "average_rating",
    "fieldtype": "Rating",
+   "in_list_view": 1,
    "label": "Obtained Average Rating",
    "read_only": 1
   },
@@ -112,6 +117,8 @@
    "fetch_from": "interview_round.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Designation",
    "options": "Designation",
    "read_only": 1
@@ -129,6 +136,7 @@
    "fieldname": "scheduled_on",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Scheduled On",
    "reqd": 1,
    "set_only_once": 1
@@ -154,6 +162,7 @@
   {
    "fieldname": "from_time",
    "fieldtype": "Time",
+   "in_list_view": 1,
    "label": "From Time",
    "reqd": 1,
    "set_only_once": 1
@@ -161,6 +170,7 @@
   {
    "fieldname": "to_time",
    "fieldtype": "Time",
+   "in_list_view": 1,
    "label": "To Time",
    "reqd": 1,
    "set_only_once": 1
@@ -174,7 +184,7 @@
    "link_fieldname": "interview"
   }
  ],
- "modified": "2021-09-30 10:48:07.683226",
+ "modified": "2021-09-30 13:30:05.421035",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview",

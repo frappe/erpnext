@@ -60,7 +60,7 @@ frappe.ui.form.on("Job Applicant", {
 					frappe.render_template('job_applicant_dashboard', {
 						data: r.message
 					}),
-					__("Interview Analysis")
+					__("Interview Summary")
 				);
 			}
 		});

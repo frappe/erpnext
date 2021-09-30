@@ -150,13 +150,13 @@
   },
   {
    "default": "00:15:00",
+   "depends_on": "send_interview_reminder",
    "fieldname": "remind_before",
    "fieldtype": "Time",
-   "label": "Remind Before",
-   "read_only_depends_on": "eval: !doc.interview_reminder"
+   "label": "Remind Before"
   },
   {
-   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} from {{ doc.from_time }} to {{ doc.to_time }} ",
+   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} ",
    "depends_on": "send_interview_reminder",
    "fieldname": "interview_reminder_message",
    "fieldtype": "Small Text",
@@ -230,7 +230,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-29 21:38:38.578279",
+ "modified": "2021-09-30 13:47:53.712083",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

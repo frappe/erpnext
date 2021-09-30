@@ -26,6 +26,7 @@
    "fieldname": "interview",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Interview",
    "options": "Interview",
    "reqd": 1
@@ -36,6 +37,7 @@
    "fieldname": "interview_round",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Interview Round",
    "options": "Interview Round",
    "read_only": 1,
@@ -46,6 +48,7 @@
    "fieldname": "interviewer",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Interviewer",
    "options": "User",
    "reqd": 1
@@ -66,6 +69,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "average_rating",
    "fieldtype": "Rating",
+   "in_list_view": 1,
    "label": "Average Rating",
    "read_only": 1
   },
@@ -110,6 +114,8 @@
    "fetch_from": "interview.job_applicant",
    "fieldname": "job_applicant",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Job Applicant",
    "options": "Job Applicant",
    "read_only": 1
@@ -118,7 +124,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-29 22:26:41.774936",
+ "modified": "2021-09-30 13:30:49.955352",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Feedback",
