@@ -282,7 +282,7 @@ erpnext.HierarchyChart = class {
 
 	show_active_path(node) {
 		// mark node parent on active path
-		$(`[id="${node.parent_id}]"`).addClass('active-path');
+		$(`[id="${node.parent_id}"]`).addClass('active-path');
 	}
 
 	load_children(node, deep=false) {
