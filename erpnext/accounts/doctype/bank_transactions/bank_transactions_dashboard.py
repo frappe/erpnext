@@ -8,8 +8,8 @@ def get_data():
 		'fieldname': 'bank_transaction',
 		'transactions': [
 			{
-				'label': _('Accounting Entry'),
-				'items': ['Bank Transaction Accounting Entry']
+				'label': _('Journal Entry'),
+				'items': ['Journal Entry']
 			}
 		]
 	}

@@ -38,11 +38,52 @@ class JournalEntry(AccountsController):
 		self.set_print_format_fields()
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
-		self.validate_empty_accounts_table()
+		# self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
+		# if not self.title:
+		# 	self.title = self.get_title()
+		if self.docstatus == 1:
+			self.check_transaction()
+	
+	def on_update(self):
+		detailamount = frappe.get_all("Journal Entry Account", ["name"], filters = {"parent": self.name})
+		if len(detailamount) == 0 and self.bank_transaction != None:
+			self.create_register()
+		
+		self.validate_empty_accounts_table()
 		if not self.title:
 			self.title = self.get_title()
+	
+	def create_register(self):
+		transaction = frappe.get_all("Bank Transactions", ["name","bank_account", "transaction_data", "amount_data"], filters = {"name": self.bank_transaction})
+
+		account = frappe.get_all("Bank Account", ["account"], filters = {"name": transaction[0].bank_account})
+
+		# doc = frappe.get_doc("Bank Transaction Accounting Entry")
+		row = self.append("accounts", {})
+		row.account = account[0].account
+
+		if transaction[0].transaction_data == "Bank Check" or transaction[0].transaction_data == "Credit Note":
+			row.credit_in_account_currency = transaction[0].amount_data
+			row.debit_in_account_currency = 0
+		else:
+			row.debit_in_account_currency = transaction[0].amount_data
+			row.credit_in_account_currency = 0
+		self.save()
+		# doc.save()
+	
+	def check_transaction(self):
+		transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+		doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
+		doc_tran.accounting_seat = 1
+		doc_tran.save()
+	
+	def uncheck_transaction(self):
+		transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+		doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
+		doc_tran.accounting_seat = 0
+		doc_tran.save()
 
 	def on_submit(self):
 		self.validate_cheque_info()
@@ -68,6 +109,10 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.uncheck_transaction()
+	
+	def on_trash(self):
+		self.uncheck_transaction()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -358,10 +403,11 @@ class JournalEntry(AccountsController):
 			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_total_debit_and_credit(self):
-		self.set_total_debit_credit()
-		if self.difference:
-			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
-				.format(self.difference))
+		if self.bank_transaction == None:
+			self.set_total_debit_credit()
+			if self.difference:
+				frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
+					.format(self.difference))
 
 	def set_total_debit_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
