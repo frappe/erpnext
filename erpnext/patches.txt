@@ -352,4 +352,8 @@ erpnext.patches.v13_0.update_sane_transfer_against
 erpnext.patches.v12_0.add_company_link_to_einvoice_settings
 erpnext.patches.v14_0.migrate_cost_center_allocations
 erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
+<<<<<<< HEAD
 >>>>>>> 456f27724c (fix: Convert Item links to Website Item links in Item Card Group template data)
+=======
+erpnext.patches.v13_0.shopping_cart_to_ecommerce
+>>>>>>> bd3b47fd50 (fix: remove stale doctypes and add msg for ecommerce refactor (#27700))
