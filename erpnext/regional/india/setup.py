@@ -255,7 +255,7 @@ def get_custom_fields():
 				depends_on="eval:doc.gst_category=='Overseas' ", length=50),
 			dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
-				depends_on="eval:doc.gst_category=='Overseas' ", length=15),
+				depends_on="eval:doc.gst_category=='Overseas' "),
 		]
 
 	journal_entry_fields = [
@@ -434,8 +434,7 @@ def get_custom_fields():
 			'fieldtype': 'Date',
 			'insert_after': 'driver_name',
 			'default': 'Today',
-			'print_hide': 1,
-			'length': 10
+			'print_hide': 1
 		},
 		{
 			'fieldname': 'gst_vehicle_type',
