@@ -25,7 +25,7 @@ class SalesCommission(Document):
 	def add_contributions(self):
 		self.set("contributions", [])
 		filter_date = "transaction_date" if self.commission_based_on=="Sales Order" else "posting_date"
-		records = [entry.name for entry in frappe.db.get_all(self.commission_based_on, filters={"company": self.company, filter_date: ('between', [self.from_date, self.to_date])})]
+		records = [entry.name for entry in frappe.db.get_all(self.commission_based_on, filters={"company": self.company, "docstatus":1, filter_date: ('between', [self.from_date, self.to_date])})]
 		sales_persons_details = frappe.get_all("Sales Team", filters={"parent": ['in', records], "sales_person": self.sales_person}, fields=["sales_person", "commission_rate", "incentives", "allocated_percentage", "allocated_amount", "parent"])
 		if sales_persons_details:
 			for record in sales_persons_details:
@@ -42,6 +42,7 @@ class SalesCommission(Document):
 					"commission_amount": record["incentives"],
 					}
 					self.append("contributions", contribution)
+		self.calculate_total_contribution_and_total_commission_amount()
 
 	def calculate_total_contribution_and_total_commission_amount(self):
 		total_contribution, total_commission_amount = 0,0

@@ -25,7 +25,7 @@ class ProcessSalesCommission(Document):
 
 	def process_sales_commission(self):
 		filter_date = "transaction_date" if self.commission_based_on=="Sales Order" else "posting_date"
-		records = [entry.name for entry in frappe.db.get_all(self.commission_based_on, filters={"company": self.company, filter_date: ('between', [self.from_date, self.to_date])})]
+		records = [entry.name for entry in frappe.db.get_all(self.commission_based_on, filters={"company": self.company, "docstatus":1, filter_date: ('between', [self.from_date, self.to_date])})]
 		sales_persons_details = frappe.get_all("Sales Team", filters={"parent": ['in', records]}, fields=["sales_person", "commission_rate", "incentives", "allocated_percentage", "allocated_amount", "parent"])
 		if len(sales_persons_details):
 			sales_persons = set(e['sales_person'] for e in sales_persons_details)
