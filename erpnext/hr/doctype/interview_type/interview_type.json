@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2021-04-12 14:44:40.664034",
  "doctype": "DocType",
@@ -23,7 +24,7 @@
    "link_fieldname": "interview_type"
   }
  ],
- "modified": "2021-09-28 21:37:04.712144",
+ "modified": "2021-09-30 13:00:16.471518",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Type",

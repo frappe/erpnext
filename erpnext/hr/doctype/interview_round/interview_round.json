@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:round_name",
  "creation": "2021-04-12 12:57:19.902866",
  "doctype": "DocType",
@@ -8,10 +9,10 @@
  "field_order": [
   "round_name",
   "interview_type",
-  "expected_average_rating",
+  "interviewers",
   "column_break_3",
   "designation",
-  "interviewer",
+  "expected_average_rating",
   "expected_skills_section",
   "expected_skill_set"
  ],
@@ -59,15 +60,15 @@
    "reqd": 1
   },
   {
-   "fieldname": "interviewer",
+   "fieldname": "interviewers",
    "fieldtype": "Table MultiSelect",
-   "label": "Interviewer",
+   "label": "Interviewers",
    "options": "Interviewer"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-09-28 21:47:48.046306",
+ "modified": "2021-09-30 13:01:25.666660",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview Round",
