@@ -1121,6 +1121,7 @@
    "fetch_from": "supplier.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -1143,7 +1144,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-30 20:03:14.008804",
+ "modified": "2021-09-28 13:10:47.955401",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

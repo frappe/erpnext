@@ -16,9 +16,9 @@ from erpnext.utilities.transaction_base import TransactionBase, delete_events
 class MaintenanceSchedule(TransactionBase):
 	@frappe.whitelist()
 	def generate_schedule(self):
+		if self.docstatus != 0:
+			return
 		self.set('schedules', [])
-		frappe.db.sql("""delete from `tabMaintenance Schedule Detail`
-			where parent=%s""", (self.name))
 		count = 1
 		for d in self.get('items'):
 			self.validate_maintenance_detail()
