@@ -10,7 +10,7 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
-from frappe.model.naming import set_name_by_naming_series
+from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 
 from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
 from erpnext.utilities.transaction_base import TransactionBase
@@ -40,8 +40,10 @@ class Supplier(TransactionBase):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')
 		if supp_master_name == 'Supplier Name':
 			self.name = self.supplier_name
-		else:
+		elif supp_master_name == 'Naming Series':
 			set_name_by_naming_series(self)
+		else:
+			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def on_update(self):
 		if not self.naming_series:

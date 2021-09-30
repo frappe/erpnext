@@ -706,6 +706,15 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Data',
 				'insert_after': 'email'
 			}
+		],
+		'Finance Book': [
+			{
+				'fieldname': 'for_income_tax',
+				'label': 'For Income Tax',
+				'fieldtype': 'Check',
+				'insert_after': 'finance_book_name',
+				'description': 'If the asset is put to use for less than 180 days, the first Depreciation Rate will be reduced by 50%.'
+			}
 		]
 	}
 	create_custom_fields(custom_fields, update=update)
@@ -795,7 +804,7 @@ def set_salary_components(docs):
 
 def set_tax_withholding_category(company):
 	accounts = []
-	fiscal_year = None
+	fiscal_year_details = None
 	abbr = frappe.get_value("Company", company, "abbr")
 	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
 

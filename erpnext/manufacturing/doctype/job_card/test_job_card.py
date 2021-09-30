@@ -6,10 +6,9 @@ import unittest
 import frappe
 from frappe.utils import random_string
 
+from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchError, OverlapError
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
-	OperationMismatchError,
-	OverlapError
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation

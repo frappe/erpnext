@@ -40,7 +40,7 @@ class Patient(Document):
 			frappe.db.set_value('Patient', self.name, 'status', 'Disabled')
 		else:
 			send_registration_sms(self)
-		self.reload() # self.notify_update()
+		self.reload()
 
 	def on_update(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
@@ -93,23 +93,27 @@ class Patient(Document):
 			self.language = frappe.db.get_single_value('System Settings', 'language')
 
 	def create_website_user(self):
-		if self.email and not frappe.db.exists('User', self.email):
-			user = frappe.get_doc({
-				'doctype': 'User',
-				'first_name': self.first_name,
-				'last_name': self.last_name,
-				'email': self.email,
-				'user_type': 'Website User',
-				'gender': self.sex,
-				'phone': self.phone,
-				'mobile_no': self.mobile,
-				'birth_date': self.dob
-			})
-			user.flags.ignore_permissions = True
-			user.enabled = True
-			user.send_welcome_email = True
-			user.add_roles('Patient')
-			frappe.db.set_value(self.doctype, self.name, 'user_id', user.name)
+		users = frappe.db.get_all('User', fields=['email', 'mobile_no'], or_filters={'email': self.email, 'mobile_no': self.mobile})
+		if users and users[0]:
+			frappe.throw(_("User exists with Email {}, Mobile {}<br>Please check email / mobile or disable 'Invite as User' to skip creating User")
+				.format(frappe.bold(users[0].email), frappe.bold(users[0].mobile_no)), frappe.DuplicateEntryError)
+
+		user = frappe.get_doc({
+			'doctype': 'User',
+			'first_name': self.first_name,
+			'last_name': self.last_name,
+			'email': self.email,
+			'user_type': 'Website User',
+			'gender': self.sex,
+			'phone': self.phone,
+			'mobile_no': self.mobile,
+			'birth_date': self.dob
+		})
+		user.flags.ignore_permissions = True
+		user.enabled = True
+		user.send_welcome_email = True
+		user.add_roles('Patient')
+		self.db_set('user_id', user.name)
 
 	def autoname(self):
 		patient_name_by = frappe.db.get_single_value('Healthcare Settings', 'patient_name_by')
@@ -159,54 +163,65 @@ class Patient(Document):
 			return {'invoice': sales_invoice.name}
 
 	def set_contact(self):
-		if frappe.db.exists('Dynamic Link', {'parenttype':'Contact', 'link_doctype':'Patient', 'link_name':self.name}):
-			old_doc = self.get_doc_before_save()
-			if old_doc.email != self.email or old_doc.mobile != self.mobile or old_doc.phone != self.phone:
-				self.update_contact()
-		else:
-			self.reload()
-			if self.email or self.mobile or self.phone:
-				contact = frappe.get_doc({
-					'doctype': 'Contact',
-					'first_name': self.first_name,
-					'middle_name': self.middle_name,
-					'last_name': self.last_name,
-					'gender': self.sex,
-					'is_primary_contact': 1
-				})
-				contact.append('links', dict(link_doctype='Patient', link_name=self.name))
-				if self.customer:
-					contact.append('links', dict(link_doctype='Customer', link_name=self.customer))
-
-				contact.insert(ignore_permissions=True)
-				self.update_contact(contact) # update email, mobile and phone
-
-	def update_contact(self, contact=None):
-		if not contact:
-			contact_name = get_default_contact(self.doctype, self.name)
-			if contact_name:
-				contact = frappe.get_doc('Contact', contact_name)
+		contact = get_default_contact(self.doctype, self.name)
 
 		if contact:
-			if self.email and self.email != contact.email_id:
-				for email in contact.email_ids:
-					email.is_primary = True if email.email_id == self.email else False
-				contact.add_email(self.email, is_primary=True)
-				contact.set_primary_email()
+			old_doc = self.get_doc_before_save()
+			if not old_doc:
+				return
 
-			if self.mobile and self.mobile != contact.mobile_no:
-				for mobile in contact.phone_nos:
-					mobile.is_primary_mobile_no = True if mobile.phone == self.mobile else False
-				contact.add_phone(self.mobile, is_primary_mobile_no=True)
-				contact.set_primary('mobile_no')
+			if old_doc.email != self.email or old_doc.mobile != self.mobile or old_doc.phone != self.phone:
+				self.update_contact(contact)
+		else:
+			if self.customer:
+				# customer contact exists, link patient
+				contact = get_default_contact('Customer', self.customer)
 
-			if self.phone and self.phone != contact.phone:
-				for phone in contact.phone_nos:
-					phone.is_primary_phone = True if phone.phone == self.phone else False
-				contact.add_phone(self.phone, is_primary_phone=True)
-				contact.set_primary('phone')
+			if contact:
+				self.update_contact(contact)
+			else:
+				self.reload()
+				if self.email or self.mobile or self.phone:
+					contact = frappe.get_doc({
+						'doctype': 'Contact',
+						'first_name': self.first_name,
+						'middle_name': self.middle_name,
+						'last_name': self.last_name,
+						'gender': self.sex,
+						'is_primary_contact': 1
+					})
+					contact.append('links', dict(link_doctype='Patient', link_name=self.name))
+					if self.customer:
+						contact.append('links', dict(link_doctype='Customer', link_name=self.customer))
 
-		contact.flags.ignore_validate = True # disable hook TODO: safe?
+					contact.insert(ignore_permissions=True)
+					self.update_contact(contact.name)
+
+	def update_contact(self, contact):
+		contact = frappe.get_doc('Contact', contact)
+
+		if not contact.has_link(self.doctype, self.name):
+			contact.append('links', dict(link_doctype=self.doctype, link_name=self.name))
+
+		if self.email and self.email != contact.email_id:
+			for email in contact.email_ids:
+				email.is_primary = True if email.email_id == self.email else False
+			contact.add_email(self.email, is_primary=True)
+			contact.set_primary_email()
+
+		if self.mobile and self.mobile != contact.mobile_no:
+			for mobile in contact.phone_nos:
+				mobile.is_primary_mobile_no = True if mobile.phone == self.mobile else False
+			contact.add_phone(self.mobile, is_primary_mobile_no=True)
+			contact.set_primary('mobile_no')
+
+		if self.phone and self.phone != contact.phone:
+			for phone in contact.phone_nos:
+				phone.is_primary_phone = True if phone.phone == self.phone else False
+			contact.add_phone(self.phone, is_primary_phone=True)
+			contact.set_primary('phone')
+
+		contact.flags.skip_patient_update = True
 		contact.save(ignore_permissions=True)
 
 

@@ -242,6 +242,8 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	get_sub_assembly_items: function(frm) {
+		frm.dirty();
+
 		frappe.call({
 			method: "get_sub_assembly_items",
 			freeze: true,
