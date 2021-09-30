@@ -156,7 +156,7 @@
    "read_only_depends_on": "eval: !doc.interview_reminder"
   },
   {
-   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} ",
+   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} from {{ doc.from_time }} to {{ doc.to_time }} ",
    "depends_on": "send_interview_reminder",
    "fieldname": "interview_reminder_message",
    "fieldtype": "Small Text",

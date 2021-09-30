@@ -66,7 +66,7 @@ def set_default_settings(args):
 	hr_settings.leave_status_notification_template = _("Leave Status Notification")
 
 	hr_settings.interview_reminder = 1
-	message = _("Interview: {{doc.name}} is scheduled on {{doc.scheduled_on}}")
+	message = _("Interview: {{doc.name}} is scheduled on {{doc.scheduled_on}} from {{doc.from_time}} to {{doc.to_time}}")
 	hr_settings.interview_reminder_message = message
 	hr_settings.remind_before = "00:15:00"
 

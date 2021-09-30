@@ -20,9 +20,6 @@ class Interview(Document):
 		self.validate_duplicate_interview()
 		self.validate_designation()
 
-	def before_submit(self):
-		self.original_date = self.scheduled_on
-
 	def on_submit(self):
 		if self.status not in ['Cleared', 'Rejected']:
 			frappe.throw(_('Only Interviews with Cleared or Rejected status can be submitted.'), title=_('Not Allowed'))
@@ -52,17 +49,26 @@ class Interview(Document):
 			self.designation = applicant_designation
 
 	@frappe.whitelist()
-	def reschedule_interview(self, scheduled_on):
-		recipients = get_recipients(self.name)
-		self.db_set('scheduled_on', scheduled_on)
+	def reschedule_interview(self, scheduled_on, from_time, to_time):
+		original_date = self.scheduled_on
+		from_time = self.from_time
+		to_time = self.to_time
+
+		self.db_set({
+			'scheduled_on': scheduled_on,
+			'from_time': from_time,
+			'to_time': to_time
+		})
 		self.notify_update()
+
+		recipients = get_recipients(self.name)
 
 		try:
 			frappe.sendmail(
 				recipients= recipients,
 				subject=_('Interview: {0} Rescheduled').format(self.name),
-				message=_('Your Interview session is rescheduled from {0} to {1}').format(
-					self.original_date, scheduled_on),
+				message=_('Your Interview session is rescheduled from {0} {1} - {2} to {3} {4} - {5}').format(
+					original_date, from_time, to_time, self.scheduled_on, self.from_time, self.to_time),
 				reference_doctype=self.doctype,
 				reference_name=self.name
 			)
@@ -85,7 +91,7 @@ def get_recipients(name, for_feedback=0):
 
 
 @frappe.whitelist()
-def get_interviewer(interview_round):
+def get_interviewers(interview_round):
 	return frappe.get_all('Interviewer', filters={'parent': interview_round}, fields=['user as interviewer'])
 
 

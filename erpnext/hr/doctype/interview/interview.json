@@ -13,9 +13,10 @@
   "designation",
   "resume_link",
   "column_break_4",
-  "scheduled_on",
-  "original_date",
   "status",
+  "scheduled_on",
+  "from_time",
+  "to_time",
   "interview_feedback_section",
   "interview_details",
   "ratings_section",
@@ -125,14 +126,8 @@
    "read_only": 1
   },
   {
-   "fieldname": "original_date",
-   "fieldtype": "Datetime",
-   "hidden": 1,
-   "label": "Original Date"
-  },
-  {
    "fieldname": "scheduled_on",
-   "fieldtype": "Datetime",
+   "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Scheduled On",
    "reqd": 1,
@@ -155,6 +150,20 @@
    "fieldname": "interview_feedback_section",
    "fieldtype": "Section Break",
    "label": "Feedback"
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "label": "From Time",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "To Time",
+   "reqd": 1,
+   "set_only_once": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -165,7 +174,7 @@
    "link_fieldname": "interview"
   }
  ],
- "modified": "2021-09-29 21:58:59.118631",
+ "modified": "2021-09-30 10:48:07.683226",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Interview",

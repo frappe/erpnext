@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import validate_email_address
 
-from erpnext.hr.doctype.interview.interview import get_interviewer
+from erpnext.hr.doctype.interview.interview import get_interviewers
 
 
 class DuplicationError(frappe.ValidationError): pass
@@ -66,7 +66,7 @@ def create_interview(doc, interview_round):
 	interview.designation = doc.designation
 	interview.resume_link = doc.resume_link
 	interview.job_opening = doc.job_title
-	interviewer_detail = get_interviewer(interview_round)
+	interviewer_detail = get_interviewers(interview_round)
 
 	for d in interviewer_detail:
 		interview.append("interview_details", {

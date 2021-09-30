@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_datetime, get_link_to_form
+from frappe.utils import flt, getdate, get_link_to_form
 
 
 class InterviewFeedback(Document):
@@ -30,9 +30,9 @@ class InterviewFeedback(Document):
 				frappe.bold(self.interviewer), frappe.bold(self.interview)))
 
 	def validate_interview_date(self):
-		scheduled_date = get_datetime(frappe.db.get_value('Interview', self.interview, 'scheduled_on'))
+		scheduled_date = frappe.db.get_value('Interview', self.interview, 'scheduled_on')
 
-		if get_datetime() < scheduled_date and self.docstatus == 1:
+		if getdate() < getdate(scheduled_date) and self.docstatus == 1:
 			frappe.throw(_('{0} submission before {1} is not allowed').format(
 				frappe.bold('Interview Feedback'),
 				frappe.bold('Interview Scheduled Date')

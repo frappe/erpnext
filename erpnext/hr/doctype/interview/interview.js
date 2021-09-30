@@ -13,10 +13,6 @@ frappe.ui.form.on('Interview', {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.scheduled_on != frm.doc.original_date && frm.doc.status == 'Scheduled') {
-			frm.set_intro(__('Interview was rescheduled from {0} to {1}', [frm.doc.original_date, frm.doc.scheduled_on]));
-		}
-
 		if (frm.doc.docstatus != 2 && !frm.doc.__islocal) {
 			if (frm.doc.status === 'Pending') {
 				frm.add_custom_button(__('Reschedule Interview'), function() {
@@ -54,19 +50,35 @@ frappe.ui.form.on('Interview', {
 	show_reschedule_dialog: function (frm) {
 		let d = new frappe.ui.Dialog({
 			title: 'Reschedule Interview',
-			fields: [{
-				label: 'Schedule On',
-				fieldname: 'scheduled_on',
-				fieldtype: 'Datetime',
-				reqd: 1
-			}],
+			fields: [
+				{
+					label: 'Schedule On',
+					fieldname: 'scheduled_on',
+					fieldtype: 'Date',
+					reqd: 1
+				},
+				{
+					label: 'From Time',
+					fieldname: 'from_time',
+					fieldtype: 'Time',
+					reqd: 1
+				},
+				{
+					label: 'To Time',
+					fieldname: 'to_time',
+					fieldtype: 'Time',
+					reqd: 1
+				}
+			],
 			primary_action_label: 'Reschedule',
 			primary_action(values) {
 				frm.call({
 					method: 'reschedule_interview',
 					doc: frm.doc,
 					args: {
-						scheduled_on: values.scheduled_on
+						scheduled_on: values.scheduled_on,
+						from_time: values.from_time,
+						to_time: values.to_time
 					}
 				}).then(() => {
 					frm.refresh();
@@ -172,7 +184,7 @@ frappe.ui.form.on('Interview', {
 
 	set_interview_details: function (frm) {
 		frappe.call({
-			method: 'erpnext.hr.doctype.interview.interview.get_interviewer',
+			method: 'erpnext.hr.doctype.interview.interview.get_interviewers',
 			args: {
 				interview_round: frm.doc.interview_round
 			},
