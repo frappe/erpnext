@@ -21,6 +21,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 	def setUp(self):
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		frappe.db.sql('delete from `tabPatient Appointment`')
 		make_pos_profile()
 
 	def test_medical_record(self):

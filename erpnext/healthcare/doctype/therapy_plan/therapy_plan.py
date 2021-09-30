@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, today
+from frappe.utils import flt
 
 
 class TherapyPlan(Document):
@@ -63,8 +63,6 @@ def make_therapy_session(therapy_plan, patient, therapy_type, company, appointme
 	therapy_session.exercises = therapy_type.exercises
 	therapy_session.appointment = appointment
 
-	if frappe.flags.in_test:
-		therapy_session.start_date = today()
 	return therapy_session.as_dict()
 
 
