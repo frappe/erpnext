@@ -32,11 +32,11 @@
   "hiring_settings",
   "check_vacancies",
   "send_interview_reminder",
-  "interview_reminder_message",
+  "interview_reminder_template",
   "remind_before",
   "column_break_29",
   "send_interview_feedback_reminder",
-  "feedback_reminder_message"
+  "feedback_reminder_notification_template"
  ],
  "fields": [
   {
@@ -156,20 +156,6 @@
    "label": "Remind Before"
   },
   {
-   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} ",
-   "depends_on": "send_interview_reminder",
-   "fieldname": "interview_reminder_message",
-   "fieldtype": "Small Text",
-   "label": "Interview Reminder Message"
-  },
-  {
-   "default": "Interview Feedback for Interview: {{ doc.name }} is not submitted yet. Please, Submit your Feedback.\nThank you, Good day!",
-   "depends_on": "send_interview_feedback_reminder",
-   "fieldname": "feedback_reminder_message",
-   "fieldtype": "Small Text",
-   "label": "Feedback Reminder Message"
-  },
-  {
    "collapsible": 1,
    "fieldname": "reminders_section",
    "fieldtype": "Section Break",
@@ -224,13 +210,29 @@
   {
    "fieldname": "column_break_29",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "send_interview_feedback_reminder",
+   "fieldname": "feedback_reminder_notification_template",
+   "fieldtype": "Link",
+   "label": "Feedback Reminder Notification Template",
+   "mandatory_depends_on": "send_interview_feedback_reminder",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "send_interview_reminder",
+   "fieldname": "interview_reminder_template",
+   "fieldtype": "Link",
+   "label": "Interview Reminder Notification Template",
+   "mandatory_depends_on": "send_interview_reminder",
+   "options": "Email Template"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-30 13:47:53.712083",
+ "modified": "2021-09-30 22:42:14.683983",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

@@ -7,6 +7,7 @@ import datetime
 import unittest
 
 import frappe
+from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, getdate, nowtime
 
@@ -40,10 +41,7 @@ class TestInterview(unittest.TestCase):
 	def test_notification_for_scheduling(self):
 		from erpnext.hr.doctype.interview.interview import send_interview_reminder
 
-		frappe.db.set_value("HR Settings", None, "send_interview_reminder", 1)
-		message = frappe.get_single("HR Settings").interview_reminder_message
-		if not message:
-			set_reminder_message_and_set_remind_before()
+		setup_reminder_settings()
 
 		job_applicant = create_job_applicant()
 		scheduled_on = datetime.datetime.now() + datetime.timedelta(minutes=10)
@@ -54,39 +52,28 @@ class TestInterview(unittest.TestCase):
 		send_interview_reminder()
 
 		interview.reload()
-		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")})
-		self.assertIsNotNone(notification)
 
+		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
+		self.assertTrue("Subject: Interview Reminder" in email_queue[0].message)
 
 	def test_notification_for_feedback_submission(self):
 		from erpnext.hr.doctype.interview.interview import send_daily_feedback_reminder
 
-		frappe.db.set_value("HR Settings", None, "send_interview_feedback_reminder", 1)
-		message = frappe.get_single("HR Settings").feedback_reminder_message
-		if not message:
-			set_reminder_message_and_set_remind_before()
-
+		setup_reminder_settings()
 
 		job_applicant = create_job_applicant()
 		scheduled_on = add_days(getdate(), -4)
 		create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on)
 
-
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
 		send_daily_feedback_reminder()
 
-		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")})
-		self.assertIsNotNone(notification)
+		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
+		self.assertTrue("Subject: Interview Feedback Reminder" in email_queue[0].message)
 
 	def tearDown(self):
 		frappe.db.rollback()
 
-
-def set_reminder_message_and_set_remind_before():
-	message = "Message for test"
-	frappe.db.set_value("HR Settings", None, "interview_reminder_message", message)
-	frappe.db.set_value("HR Settings", None, "remind_before", "00:15:00")
-	frappe.db.set_value("HR Settings", None, "send_feedback_reminder_message", message)
 
 def create_interview_and_dependencies(job_applicant, scheduled_on=None, from_time=None, to_time=None, designation=None, save=1):
 	if designation:
@@ -154,3 +141,33 @@ def create_interview_type(name="test_interview_type"):
 		doc.save()
 
 		return doc.name
+
+def setup_reminder_settings():
+	if not frappe.db.exists('Email Template', _('Interview Reminder')):
+		base_path = frappe.get_app_path('erpnext', 'hr', 'doctype')
+		response = frappe.read_file(os.path.join(base_path, 'interview/interview_reminder_notification_template.html'))
+
+		frappe.get_doc({
+			'doctype': 'Email Template',
+			'name': _('Interview Reminder'),
+			'response': response,
+			'subject': _('Interview Reminder'),
+			'owner': frappe.session.user,
+		}).insert(ignore_permissions=True)
+
+	if not frappe.db.exists('Email Template', _('Interview Feedback Reminder')):
+		base_path = frappe.get_app_path('erpnext', 'hr', 'doctype')
+		response = frappe.read_file(os.path.join(base_path, 'interview/interview_feedback_reminder_template.html'))
+
+		frappe.get_doc({
+			'doctype': 'Email Template',
+			'name': _('Interview Feedback Reminder'),
+			'response': response,
+			'subject': _('Interview Feedback Reminder'),
+			'owner': frappe.session.user,
+		}).insert(ignore_permissions=True)
+
+	hr_settings = frappe.get_doc('HR Settings')
+	hr_settings.interview_reminder_template = _('Interview Reminder')
+	hr_settings.feedback_reminder_notification_template = _('Interview Feedback Reminder')
+	hr_settings.save()

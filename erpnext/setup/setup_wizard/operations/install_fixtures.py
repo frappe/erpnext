@@ -270,6 +270,16 @@ def install(country=None):
 	records += [{'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,\
 		'subject': _("Leave Status Notification"), 'owner': frappe.session.user}]
 
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_reminder_notification_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Reminder'), 'response': response,\
+		'subject': _('Interview Reminder'), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_feedback_reminder_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Feedback Reminder'), 'response': response,\
+		'subject': _('Interview Feedback Reminder'), 'owner': frappe.session.user}]
+
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
 
@@ -318,14 +328,12 @@ def update_hr_defaults():
 	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
 	hr_settings.leave_status_notification_template = _("Leave Status Notification")
 
-	hr_settings.interview_reminder = 1
-	message = _("Interview: {{doc.name}} is scheduled on {{doc.scheduled_on}} from {{doc.from_time}} to {{doc.to_time}}")
-	hr_settings.interview_reminder_message = message
+	hr_settings.send_interview_reminder = 1
+	hr_settings.interview_reminder_template = _("Interview Reminder")
 	hr_settings.remind_before = "00:15:00"
 
-	message = _("Interview Feedback for Interview: {{ doc.name }} is not submitted yet. Please submit your feedback. Thank you, good day!")
-	hr_settings.interview_feedback_reminder = 1
-	hr_settings.feedback_reminder_message = message
+	hr_settings.send_interview_feedback_reminder = 1
+	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
 
 	hr_settings.save()
 

@@ -119,7 +119,7 @@ def get_interviewers(interview_round):
 
 def send_interview_reminder():
 	reminder_settings = frappe.db.get_value('HR Settings', 'HR Settings',
-		['send_interview_reminder', 'interview_reminder_message'], as_dict=True)
+		['send_interview_reminder', 'interview_reminder_template'], as_dict=True)
 
 	if not reminder_settings.send_interview_reminder:
 		return
@@ -131,20 +131,22 @@ def send_interview_reminder():
 
 	interviews = frappe.get_all('Interview', filters={
 		'scheduled_on': ['between', (datetime.datetime.now(), reminder_date_time)],
-		'status': 'Scheduled',
+		'status': 'Pending',
 		'reminded': 0,
-		'docstatus': 1
+		'docstatus': ['!=', 2]
 	})
+
+	interview_template = frappe.get_doc('Email Template', reminder_settings.interview_reminder_template)
 
 	for d in interviews:
 		doc = frappe.get_doc('Interview', d.name)
-		context = {'doc': doc}
-		message = frappe.render_template(reminder_settings.interview_reminder_message, context)
+		context = doc.as_dict()
+		message = frappe.render_template(interview_template.response, context)
 		recipients = get_recipients(doc.name)
 
 		frappe.sendmail(
 			recipients= recipients,
-			subject=_('Interview Reminder'),
+			subject=interview_template.subject,
 			message=message,
 			reference_doctype=doc.doctype,
 			reference_name=doc.name
@@ -154,24 +156,27 @@ def send_interview_reminder():
 
 
 def send_daily_feedback_reminder():
-	if not frappe.db.get_single_value('HR Settings', 'send_interview_feedback_reminder'):
+	reminder_settings = frappe.db.get_value('HR Settings', 'HR Settings',
+		['send_interview_feedback_reminder', 'feedback_reminder_notification_template'], as_dict=True)
+
+	if not reminder_settings.send_interview_feedback_reminder:
 		return
 
-	interviews = frappe.get_all('Interview', filters={'status': 'In Review', 'docstatus': 1})
+	interview_feedback_template = frappe.get_doc('Email Template', reminder_settings.feedback_reminder_notification_template)
+	interviews = frappe.get_all('Interview', filters={'status': ['in', ['Under Review', 'Pending']], 'docstatus': ['!=', 2]})
 
 	for entry in interviews:
 		recipients = get_recipients(entry.name, for_feedback=1)
 
 		doc = frappe.get_doc('Interview', entry.name)
-		context = {'doc': doc}
+		context = doc.as_dict()
 
-		message = frappe.db.get_single_value('HR Settings', 'feedback_reminder_message')
-		message = frappe.render_template(message, context)
+		message = frappe.render_template(interview_feedback_template.response, context)
 
 		if len(recipients):
 			frappe.sendmail(
 				recipients= recipients,
-				subject=_('Interview Feedback Submission Reminder'),
+				subject=interview_feedback_template.subject,
 				message=message,
 				reference_doctype='Interview',
 				reference_name=entry.name

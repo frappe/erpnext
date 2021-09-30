@@ -65,15 +65,12 @@ def set_default_settings(args):
 	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
 	hr_settings.leave_status_notification_template = _("Leave Status Notification")
 
-	hr_settings.interview_reminder = 1
-	message = _("Interview: {{doc.name}} is scheduled on {{doc.scheduled_on}} from {{doc.from_time}} to {{doc.to_time}}")
-	hr_settings.interview_reminder_message = message
+	hr_settings.send_interview_reminder = 1
+	hr_settings.interview_reminder_template = _("Interview Reminder")
 	hr_settings.remind_before = "00:15:00"
 
-	message = _("Interview Feedback for Interview: {{ doc.name }} is not submitted yet. Please submit your feedback. Thank you good day!")
-	hr_settings.interview_feedback_reminder = 1
-	hr_settings.feedback_reminder_message = message
-
+	hr_settings.send_interview_feedback_reminder = 1
+	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
 	hr_settings.save()
 
 def set_no_copy_fields_in_variant_settings():
