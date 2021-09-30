@@ -666,6 +666,10 @@ class WorkOrder(Document):
 
 	def set_required_items(self, reset_only_qty=False):
 		'''set required_items for production to keep track of reserved qty'''
+		ri_map = get_variant_item_map_from_required_items(
+			self.get("required_items", [])
+		)
+
 		if not reset_only_qty:
 			self.required_items = []
 
@@ -674,8 +678,11 @@ class WorkOrder(Document):
 			operation = self.operations[0].operation
 
 		if self.bom_no and self.qty:
-			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
-				fetch_exploded = self.use_multi_level_bom)
+			item_dict = get_bom_items_as_dict(
+				self.bom_no, self.company, qty=self.qty,
+				fetch_exploded=self.use_multi_level_bom,
+				fetch_template_items=True
+			)
 
 			if reset_only_qty:
 				for d in self.get("required_items"):
@@ -688,18 +695,12 @@ class WorkOrder(Document):
 				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
 				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
 				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
-					self.append('required_items', {
-						'rate': item.rate,
-						'amount': item.rate * item.qty,
-						'operation': item.operation or operation,
-						'item_code': item.item_code,
-						'item_name': item.item_name,
-						'description': item.description,
-						'allow_alternative_item': item.allow_alternative_item,
-						'required_qty': item.qty,
-						'source_warehouse': item.source_warehouse or item.default_warehouse,
-						'include_item_in_manufacturing': item.include_item_in_manufacturing
-					})
+					required_item_dict = get_variant_item_from_ri_map_if_present(
+						ri_map, item, operation
+					)
+
+					if required_item_dict:
+						self.append('required_items', required_item_dict)
 
 					if not self.project:
 						self.project = item.get("project")
@@ -1127,3 +1128,47 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 	doc.set_item_locations()
 
 	return doc
+
+def get_variant_item_map_from_required_items(required_items):
+	# Used to replace with Variant Items in the Required Item CT
+	ri_map = {}
+	for item in required_items:
+		variant_of = frappe.db.get_value("Item", item.item_code, "variant_of")
+		if not variant_of:
+			continue
+		ri_map[variant_of] = {
+			"item_code": item.item_code,
+			"item_name": item.item_name,
+			"description": item.description,
+			"operation": item.operation,
+			"allow_alternative_item": item.allow_alternative_item,
+			"include_item_in_manufacturing": item.include_item_in_manufacturing,
+			"source_warehouse": item.source_warehouse
+		}
+	return ri_map
+
+def get_variant_item_from_ri_map_if_present(ri_map, item, operation):
+	if item.has_variants and item.item_code not in ri_map:
+		frappe.msgprint(
+			_("A variant of template item {0} will have to be added manually.")\
+				.format(frappe.bold(item.item_code)),
+			"Please Add Variant Item"
+		)
+		return {}
+
+	item_dict = {
+		'rate': item.rate,
+		'amount': item.rate * item.qty,
+		'operation': item.operation or operation,
+		'item_code': item.item_code,
+		'item_name': item.item_name,
+		'description': item.description,
+		'allow_alternative_item': item.allow_alternative_item,
+		'required_qty': item.qty,
+		'source_warehouse': item.source_warehouse or item.default_warehouse,
+		'include_item_in_manufacturing': item.include_item_in_manufacturing
+	}
+
+	if item.item_code in ri_map:
+		item_dict.update(ri_map[item.item_code])
+	return item_dict

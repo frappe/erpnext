@@ -817,8 +817,15 @@ def get_list_context(context):
 	context.title = _("Bill of Materials")
 	# context.introduction = _('Boms')
 
-def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0, include_non_stock_items=False, fetch_qty_in_stock_uom=True):
+def get_bom_items_as_dict(
+		bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0,
+		include_non_stock_items=False, fetch_qty_in_stock_uom=True,
+		fetch_template_items=False
+	):
 	item_dict = {}
+	variant_where_condition = ""
+	if not fetch_template_items:
+		variant_where_condition = "and ifnull(item.has_variants, 0) = 0"
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
@@ -845,9 +852,9 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 					ON item_default.parent = item.name and item_default.company = %(company)s
 			where
 				bom_item.docstatus < 2
-				and bom.name = %(bom)s
-				and ifnull(item.has_variants, 0) = 0
-				and item.is_stock_item in (1, {is_stock_item})
+				and bom.name = %(bom)s"""\
+					+ variant_where_condition +\
+			"""and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
 				group by item_code, stock_uom
 				order by idx"""
@@ -858,7 +865,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
-			select_columns = """, bom_item.source_warehouse, bom_item.operation,
+			select_columns = """, item.has_variants, bom_item.source_warehouse, bom_item.operation,
 				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
 
