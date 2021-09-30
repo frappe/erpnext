@@ -56,19 +56,6 @@ frappe.ui.form.on("Dunning", {
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if (frm.doc.docstatus > 0) {
-			frm.add_custom_button(__("Ledger"), function () {
-				frappe.route_options = {
-					"voucher_no": frm.doc.name,
-					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
-					"company": frm.doc.company,
-					"show_cancelled_entries": frm.doc.docstatus === 2
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, __("View"));
-		}
-
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("Fetch Overdue Payments"), function () {
 				erpnext.utils.map_current_doc({
@@ -248,22 +235,29 @@ frappe.ui.form.on("Dunning", {
 	calculate_interest: function (frm) {
 		frm.doc.overdue_payments.forEach((row) => {
 			const interest_per_day = frm.doc.rate_of_interest / 100 / 365;
-			const interest = flt((interest_per_day * row.outstanding * cint(row.overdue_days)) / 365 || 0, precision("interest"));
+			const interest = flt((interest_per_day * row.overdue_days * row.outstanding), precision("interest"));
 			frappe.model.set_value(row.doctype, row.name, "interest", interest);
 		});
 	},
 	calculate_totals: function (frm) {
+		debugger;
 		const total_interest = frm.doc.overdue_payments
 			.reduce((prev, cur) => prev + cur.interest, 0);
 		const total_outstanding = frm.doc.overdue_payments
 			.reduce((prev, cur) => prev + cur.outstanding, 0);
-		const dunning_amount = flt(total_interest + frm.doc.dunning_fee, precision("dunning_amount"));
-		const grand_total = flt(total_outstanding + dunning_amount, precision("grand_total"));
+		const dunning_amount = total_interest + frm.doc.dunning_fee;
+		const base_dunning_amount = dunning_amount * frm.doc.conversion_rate;
+		const grand_total = total_outstanding + dunning_amount;
 
-		frm.set_value("total_outstanding", total_outstanding);
-		frm.set_value("total_interest", total_interest);
-		frm.set_value("dunning_amount", dunning_amount);
-		frm.set_value("grand_total", grand_total);
+		function setWithPrecison(field, value) {
+			frm.set_value(field, flt(value, precision(field)));
+		}
+
+		setWithPrecison("total_outstanding", total_outstanding);
+		setWithPrecison("total_interest", total_interest);
+		setWithPrecison("dunning_amount", dunning_amount);
+		setWithPrecison("base_dunning_amount", base_dunning_amount);
+		setWithPrecison("grand_total", grand_total);
 	},
 	make_payment_entry: function (frm) {
 		return frappe.call({
@@ -283,6 +277,7 @@ frappe.ui.form.on("Dunning", {
 
 frappe.ui.form.on("Overdue Payment", {
 	interest: function (frm, cdt, cdn) {
+		debugger;
 		frm.trigger("calculate_totals");
 	}
 });
