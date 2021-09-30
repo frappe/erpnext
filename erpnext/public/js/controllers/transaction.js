@@ -344,27 +344,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.setup_quality_inspection();
 	},
 
-<<<<<<< HEAD
 	scan_barcode: function() {
-		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
-
-		let show_description = function(idx, exist = null) {
-			if (exist) {
-				frappe.show_alert({
-					message: __('Row #{0}: Qty increased by 1', [idx]),
-					indicator: 'green'
-				});
-			} else {
-				frappe.show_alert({
-					message: __('Row #{0}: Item added', [idx]),
-					indicator: 'green'
-				});
-			}
-		}
-=======
-	scan_barcode() {
 		let me = this;
->>>>>>> 596cf3951d (fix: Batch scans get overwritten on the same row)
 
 		if(this.frm.doc.scan_barcode) {
 			frappe.call({
@@ -386,7 +367,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 		return false;
-	}
+	},
 
 	modify_table_after_scan(data) {
 		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
@@ -410,7 +391,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		this.show_scan_message(row_to_modify.idx, row_to_modify.item_code);
 		this.set_scanned_values(row_to_modify, data, scan_barcode_field);
-	}
+	},
 
 	set_scanned_values(row_to_modify, data, scan_barcode_field) {
 		// increase qty and set scanned value and item in row
@@ -435,7 +416,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		scan_barcode_field.set_value('');
 		refresh_field("items");
-	}
+	},
 
 	get_row_to_modify_on_scan(row_to_modify, data) {
 		// get an existing item row to increment or blank row to modify
@@ -449,30 +430,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		return row_to_modify;
-	}
+	},
 
 	get_batch_row_to_modify(batch_no) {
 		// get row if batch already exists in table
 		const existing_batch_row = this.frm.doc.items.find(d => d.batch_no === batch_no);
-<<<<<<< HEAD
-
-		if (existing_batch_row) {
-			frappe.show_alert({
-				message: __('Batch {0} already added', [batch_no]),
-				indicator: 'orange'
-			});
-			return true;
-		}
-		return false;
-	},
-=======
 		return existing_batch_row || null;
-	}
->>>>>>> abf450dc70 (fix: Increment batch qty if pre-existing batch is scanned)
+	},
 
-<<<<<<< HEAD
-	apply_default_taxes: function() {
-=======
 	show_scan_message (idx, exist = null) {
 		// show new row or qty increase toast
 		if (exist) {
@@ -486,10 +451,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				indicator: 'green'
 			});
 		}
-	}
+	},
 
 	apply_default_taxes() {
->>>>>>> 596cf3951d (fix: Batch scans get overwritten on the same row)
 		var me = this;
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
 			me.frm.doc.name);
