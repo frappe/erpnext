@@ -32,14 +32,14 @@ class SalesCommission(Document):
 				if add(record, self.sales_person):
 					record_details = frappe.db.get_value(self.commission_based_on, filters={"name": record["parent"]}, fieldname=["customer", filter_date], as_dict=True)
 					contribution = {
-					"document_type": self.commission_based_on,
-					"order_or_invoice": record["parent"],
-					"customer": record_details["customer"],
-					"posting_date": record_details[filter_date],
-					"contribution_percent": record["allocated_percentage"],
-					"contribution_amount": record["allocated_amount"],
-					"commission_rate": record["commission_rate"],
-					"commission_amount": record["incentives"],
+						"document_type": self.commission_based_on,
+						"order_or_invoice": record["parent"],
+						"customer": record_details["customer"],
+						"posting_date": record_details[filter_date],
+						"contribution_percent": record["allocated_percentage"],
+						"contribution_amount": record["allocated_amount"],
+						"commission_rate": record["commission_rate"],
+						"commission_amount": record["incentives"],
 					}
 					self.append("contributions", contribution)
 		self.calculate_total_contribution_and_total_commission_amount()
@@ -119,7 +119,7 @@ class SalesCommission(Document):
 		doc.append("references", reference)
 
 def add(record, sales_person):
-	previous_contibutions =  frappe.get_all("Contributions", filters={"order_or_invoice":record["parent"], "docstatus":["!=", 2]}, fields=["parent"])
+	previous_contibutions = frappe.get_all("Contributions", filters={"order_or_invoice":record["parent"], "docstatus":["!=", 2]}, fields=["parent"])
 	if previous_contibutions:
 		for contributions in previous_contibutions:
 			if frappe.db.get_value("Sales Commission", {"name":contributions["parent"]}, fieldname=["sales_person"]) == sales_person:
