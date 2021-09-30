@@ -21,8 +21,6 @@
   "colum4",
   "amount",
   "amount_of",
-  "print_note",
-  "returned_check",
   "section1",
   "next_note_nc",
   "check_date_nc",
@@ -30,8 +28,6 @@
   "column5",
   "amount_nc",
   "amount_of_nc",
-  "print_note_nc",
-  "returned_check_nc",
   "section2",
   "next_note_nd",
   "check_date_nd",
@@ -39,10 +35,9 @@
   "column6",
   "amount_nd",
   "amount_of_nd",
-  "print_note_nd",
-  "returned_check_nd",
   "section3",
   "document",
+  "amount_bd",
   "column7",
   "deposit_date",
   "section_account",
@@ -118,20 +113,6 @@
    "fieldtype": "Data",
    "label": "The Amount Of",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "check",
-   "fieldname": "print_note",
-   "fieldtype": "Check",
-   "label": "Print Note"
-  },
-  {
-   "default": "0",
-   "depends_on": "check",
-   "fieldname": "returned_check",
-   "fieldtype": "Check",
-   "label": "It's returned check"
   },
   {
    "depends_on": "credit_note",
@@ -228,20 +209,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "depends_on": "credit_note",
-   "fieldname": "print_note_nc",
-   "fieldtype": "Check",
-   "label": "Print Note"
-  },
-  {
-   "default": "0",
-   "depends_on": "credit_note",
-   "fieldname": "returned_check_nc",
-   "fieldtype": "Check",
-   "label": "It's returned check"
-  },
-  {
    "depends_on": "debit_note",
    "fieldname": "next_note_nd",
    "fieldtype": "Data",
@@ -275,20 +242,6 @@
    "fieldtype": "Data",
    "label": "The Amount Of",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "debit_note",
-   "fieldname": "print_note_nd",
-   "fieldtype": "Check",
-   "label": "Print Note"
-  },
-  {
-   "default": "0",
-   "depends_on": "debit_note",
-   "fieldname": "returned_check_nd",
-   "fieldtype": "Check",
-   "label": "It's returned check"
   },
   {
    "depends_on": "bank_deposit",
@@ -362,10 +315,15 @@
    "in_standard_filter": 1,
    "label": "Accounting seat",
    "read_only": 1
+  },
+  {
+   "fieldname": "amount_bd",
+   "fieldtype": "Currency",
+   "label": "Amount"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-09-27 14:23:29.655966",
+ "modified": "2021-09-30 11:36:30.716340",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",

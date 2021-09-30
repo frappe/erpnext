@@ -25,6 +25,7 @@ class BankTransactions(Document):
 		
 		if self.bank_deposit:
 			self.amount_data = 0
+			self.amount_data = self.amount_bd
 		
 		if self.docstatus == 0:
 			self.set_transaction_data()
