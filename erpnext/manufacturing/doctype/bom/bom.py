@@ -817,11 +817,9 @@ def get_list_context(context):
 	context.title = _("Bill of Materials")
 	# context.introduction = _('Boms')
 
-def get_bom_items_as_dict(
-		bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0,
-		include_non_stock_items=False, fetch_qty_in_stock_uom=True,
-		fetch_template_items=False
-	):
+def get_bom_items_as_dict( bom, company, qty=1, fetch_exploded=1,
+		fetch_scrap_items=0, include_non_stock_items=False,
+		fetch_qty_in_stock_uom=True, fetch_template_items=False):
 	item_dict = {}
 	variant_where_condition = ""
 	if not fetch_template_items:
@@ -854,7 +852,7 @@ def get_bom_items_as_dict(
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s"""\
 					+ variant_where_condition +\
-			"""and item.is_stock_item in (1, {is_stock_item})
+			""" and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
 				group by item_code, stock_uom
 				order by idx"""

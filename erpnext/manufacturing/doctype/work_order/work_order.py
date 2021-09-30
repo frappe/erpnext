@@ -1150,8 +1150,8 @@ def get_variant_item_map_from_required_items(required_items):
 def get_variant_item_from_ri_map_if_present(ri_map, item, operation):
 	if item.has_variants and item.item_code not in ri_map:
 		frappe.msgprint(
-			_("A variant of template item {0} will have to be added manually.")\
-				.format(frappe.bold(item.item_code)),
+			_("A variant of template item {0} will have to be added manually.")
+			.format(frappe.bold(item.item_code)),
 			"Please Add Variant Item"
 		)
 		return {}
