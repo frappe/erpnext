@@ -113,7 +113,9 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 			filters['is_booked'] = 0;
 		}
 
-		return filters;
+		return {
+			filters: filters
+		};
 	},
 
 	delivery_period_query: function (ignore_allocation_period) {
