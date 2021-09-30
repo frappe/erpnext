@@ -56,8 +56,8 @@ class TestEmployeeReferral(unittest.TestCase):
 		self.assertTrue(add_sal.ref_docname, emp_ref.name)
 
 	def tearDown(self):
-		frappe.db.sql("DELETE FROM `TabJob Applicant`")
-		frappe.db.sql("DELETE FROM `TabEmployee Referral`")
+		frappe.db.sql("DELETE FROM `tabJob Applicant`")
+		frappe.db.sql("DELETE FROM `tabEmployee Referral`")
 
 
 def create_employee_referral():

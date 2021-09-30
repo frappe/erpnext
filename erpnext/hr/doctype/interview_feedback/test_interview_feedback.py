@@ -25,8 +25,8 @@ class TestInterviewFeedback(unittest.TestCase):
 		frappe.db.sql("DELETE FROM `tabInterview Detail`")
 		frappe.db.sql("DELETE FROM `tabSkill Assessment`")
 
-
 	def test_validation_for_skill_set(self):
+		frappe.set_user("Administrator")
 		job_applicant = create_job_applicant()
 		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(get_datetime(), -1))
 		skill_ratings = get_skills_rating(interview.interview_round)
@@ -62,13 +62,12 @@ class TestInterviewFeedback(unittest.TestCase):
 
 		self.assertEqual(flt(avg_rating, 3), interview_feedback_1.average_rating)
 
-		avg_on_interview_detail = frappe.get_all("Interview Detail",
-			filters={"interview_feedback": interview_feedback_1.name},
-			fields = ['interviewer', 'average_rating']
-		)[0]
+		avg_on_interview_detail = frappe.db.get_value('Interview Detail', {
+			'parent': interview_feedback_1.interview
+		}, 'average_rating')
 
 		# 1. average should be reflected in Interview Detail.
-		self.assertEqual(avg_on_interview_detail["average_rating"], interview_feedback_1.average_rating)
+		self.assertEqual(avg_on_interview_detail, interview_feedback_1.average_rating)
 
 		'''For Second Interviewer Feedback'''
 		interviewer = interview.interview_details[1].interviewer
