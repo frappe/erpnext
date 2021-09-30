@@ -16,7 +16,6 @@ from erpnext.payroll.doctype.sales_commission.test_sales_commission import (
 	make_salary_structure,
 	make_sales_person,
 	make_so,
-	salary_structure,
 	sales_commission_component,
 	setup_test,
 )

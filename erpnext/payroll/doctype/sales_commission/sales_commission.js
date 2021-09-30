@@ -23,10 +23,11 @@ frappe.ui.form.on('Sales Commission', {
 		return frappe.call({
 			doc: frm.doc,
 			method: 'add_contributions',
-		}).then(r => {
-			frm.dirty();
-			frm.save();
-			frm.refresh();
+			callback: function () {
+				frm.dirty();
+				frm.save();
+				frm.refresh();
+			},
 		});
 	},
 

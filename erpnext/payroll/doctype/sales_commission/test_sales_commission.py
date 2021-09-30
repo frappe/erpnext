@@ -60,7 +60,7 @@ class TestSalesCommission(unittest.TestCase):
 		sc.submit()
 		sc.payout_entry()
 
-		add_sal =  frappe.get_all("Additional Salary", filters={"ref_docname": sc.name})
+		add_sal = frappe.get_all("Additional Salary", filters={"ref_docname": sc.name})
 		for entry in add_sal:
 			if frappe.get_value("Additional Salary", filters={"name": entry["name"]}, fieldname=["employee"]) == sc.employee:
 				add_sal_doc = frappe.get_doc("Additional Salary", entry['name'])
@@ -193,9 +193,9 @@ def make_sales_person(emp, emp_name):
 		sales_person.insert()
 
 def make_so(emp_name):
-		so = make_sales_order(do_not_save=1)
-		add_sales_person(so, emp_name)
-		so.transaction_date = add_to_date(getdate(), days=-1)
-		so.submit()
+	so = make_sales_order(do_not_save=1)
+	add_sales_person(so, emp_name)
+	so.transaction_date = add_to_date(getdate(), days=-1)
+	so.submit()
 
-		return so
+	return so
