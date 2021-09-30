@@ -613,6 +613,8 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	if vehicle_details:
 		out.item_code = vehicle_details.item_code
 
+	item_code = out.item_code or args.item_code
+
 	out.vehicle_chassis_no = vehicle_details.chassis_no
 	out.vehicle_engine_no = vehicle_details.engine_no
 	out.vehicle_license_plate = vehicle_details.license_plate
@@ -620,6 +622,9 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	out.vehicle_color = vehicle_details.color
 	out.vehicle_warranty_no = vehicle_details.warranty_no
 	out.image = vehicle_details.image
+
+	if not out.image and item_code:
+		out.image = frappe.get_cached_value("Item", item_code, 'image')
 
 	if args.vehicle:
 		out.vehicle_odometer = get_vehicle_odometer(args.vehicle, date=args.posting_date)
