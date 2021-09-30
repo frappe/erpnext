@@ -89,13 +89,14 @@
    "width": "160px"
   },
   {
+   "allow_on_submit": 1,
    "columns": 2,
+   "default": "Pending",
    "fieldname": "completion_status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Completion Status",
-   "options": "Pending\nPartially Completed\nFully Completed",
-   "read_only": 1
+   "options": "Pending\nPartially Completed\nFully Completed"
   },
   {
    "fieldname": "column_break_3",
@@ -125,10 +126,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-27 16:07:25.905015",
+ "modified": "2021-09-16 21:25:22.506485",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
