@@ -218,7 +218,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2021-05-19 02:58:32.683178",
+ "modified": "2021-10-01 02:58:32.683178",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
@@ -252,5 +252,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

@@ -1,9 +1,9 @@
 frappe.provide('frappe.ui.form');
 
 frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
-	init: function(doctype, after_insert) {
+	init: function(doctype, after_insert, init_callback, doc, force) {
+		this._super(doctype, after_insert, init_callback, doc, force);
 		this.skip_redirect_on_error = true;
-		this._super(doctype, after_insert);
 	},
 
 	render_dialog: function() {

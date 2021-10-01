@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
-import frappe, requests
+
+import frappe
+import requests
 from frappe import _
-from jinja2 import utils
-from html2text import html2text
-from six import text_type
 from frappe.utils import sanitize_html
 from frappe.utils.global_search import search
+from html2text import html2text
+from jinja2 import utils
+from six import text_type
+
 
 def get_context(context):
 	context.no_cache = 1

@@ -1,27 +1,36 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-
-import itertools
-import json
-import erpnext
-import frappe
 import copy
-from erpnext.controllers.item_variant import (ItemVariantExistsError,
-		copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
-from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
-from frappe import _, msgprint
-from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
-		now_datetime, random_string, strip, get_link_to_form, nowtime)
+import json
+from typing import List
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import (
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	nowtime,
+	strip,
+)
 from frappe.utils.html_utils import clean_html
-from frappe.website.doctype.website_slideshow.website_slideshow import \
-	get_slideshow
 
-from frappe.website.render import clear_cache
-from frappe.website.website_generator import WebsiteGenerator
-
-from six import iteritems
+import erpnext
+from erpnext.controllers.item_variant import (
+	ItemVariantExistsError,
+	copy_attributes_to_variant,
+	get_variant,
+	make_variant_item_code,
+	validate_item_variant_attributes,
+)
+from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
+from erpnext.stock.doctype.item_default.item_default import ItemDefault
 
 
 class DuplicateReorderRows(frappe.ValidationError):
@@ -35,18 +44,11 @@ class StockExistsForTemplate(frappe.ValidationError):
 class InvalidBarcode(frappe.ValidationError):
 	pass
 
+class DataValidationError(frappe.ValidationError):
+	pass
 
-class Item(WebsiteGenerator):
-	website = frappe._dict(
-		page_title_field="item_name",
-		condition_field="show_in_website",
-		template="templates/generators/item/item.html",
-		no_cache=1
-	)
-
+class Item(Document):
 	def onload(self):
-		super(Item, self).onload()
-
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 
@@ -76,8 +78,6 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		# if self.is_sales_item and not self.get('is_item_from_hub'):
-		# 	self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -89,8 +89,6 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
-		super(Item, self).validate()
-
 		if not self.item_name:
 			self.item_name = self.item_code
 
@@ -117,30 +115,26 @@ class Item(WebsiteGenerator):
 		self.validate_attributes()
 		self.validate_variant_attributes()
 		self.validate_variant_based_on_change()
-		self.validate_website_image()
-		self.make_thumbnail()
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
-		self.validate_item_defaults()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
+		self.validate_item_defaults()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
-		self.update_show_in_website()
+		self.validate_item_tax_net_rate_range()
+		set_item_tax_from_hsn_code(self)
 
-		if not self.get("__islocal"):
+		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
-			self.old_website_item_groups = frappe.db.sql_list("""select item_group
-					from `tabWebsite Item Group`
-					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
-		self.update_template_item()
+		self.update_website_item()
 
 	def validate_description(self):
 		'''Clean HTML description if set'''
@@ -200,96 +194,6 @@ class Item(WebsiteGenerator):
 
 				stock_entry.add_comment("Comment", _("Opening Stock"))
 
-	def make_route(self):
-		if not self.route:
-			return cstr(frappe.db.get_value('Item Group', self.item_group,
-					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
-
-	def validate_website_image(self):
-		if frappe.flags.in_import:
-			return
-
-		"""Validate if the website image is a public file"""
-		auto_set_website_image = False
-		if not self.website_image and self.image:
-			auto_set_website_image = True
-			self.website_image = self.image
-
-		if not self.website_image:
-			return
-
-		# find if website image url exists as public
-		file_doc = frappe.get_all("File", filters={
-			"file_url": self.website_image
-		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
-
-		if file_doc:
-			file_doc = file_doc[0]
-
-		if not file_doc:
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found").format(self.website_image, self.name))
-
-			self.website_image = None
-
-		elif file_doc.is_private:
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image should be a public file or website URL"))
-
-			self.website_image = None
-
-	def make_thumbnail(self):
-		if frappe.flags.in_import:
-			return
-
-		"""Make a thumbnail of `website_image`"""
-		import requests.exceptions
-
-		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
-			self.thumbnail = None
-
-		if self.website_image and not self.thumbnail:
-			file_doc = None
-
-			try:
-				file_doc = frappe.get_doc("File", {
-					"file_url": self.website_image,
-					"attached_to_doctype": "Item",
-					"attached_to_name": self.name
-				})
-			except frappe.DoesNotExistError:
-				pass
-				# cleanup
-				frappe.local.message_log.pop()
-
-			except requests.exceptions.HTTPError:
-				frappe.msgprint(_("Warning: Invalid attachment {0}").format(self.website_image))
-				self.website_image = None
-
-			except requests.exceptions.SSLError:
-				frappe.msgprint(
-					_("Warning: Invalid SSL certificate on attachment {0}").format(self.website_image))
-				self.website_image = None
-
-			# for CSV import
-			if self.website_image and not file_doc:
-				try:
-					file_doc = frappe.get_doc({
-						"doctype": "File",
-						"file_url": self.website_image,
-						"attached_to_doctype": "Item",
-						"attached_to_name": self.name
-					}).save()
-
-				except IOError:
-					self.website_image = None
-
-			if file_doc:
-				if not file_doc.thumbnail_url:
-					file_doc.make_thumbnail()
-
-				self.thumbnail = file_doc.thumbnail_url
-
 	def validate_fixed_asset(self):
 		if self.is_fixed_asset:
 			if self.is_stock_item:
@@ -313,165 +217,6 @@ class Item(WebsiteGenerator):
 			frappe.throw(_("{0} Retain Sample is based on batch, please check Has Batch No to retain sample of item").format(
 				self.item_code))
 
-	def get_context(self, context):
-		context.show_search = True
-		context.search_link = '/product_search'
-
-		context.parents = get_parent_item_groups(self.item_group)
-		context.body_class = "product-page"
-
-		self.set_variant_context(context)
-		self.set_attribute_context(context)
-		self.set_disabled_attributes(context)
-		self.set_metatags(context)
-		self.set_shopping_cart_data(context)
-
-		return context
-
-	def set_variant_context(self, context):
-		if self.has_variants:
-			context.no_cache = True
-
-			# load variants
-			# also used in set_attribute_context
-			context.variants = frappe.get_all("Item",
-				 filters={"variant_of": self.name, "show_variant_in_website": 1},
-				 order_by="name asc")
-
-			variant = frappe.form_dict.variant
-			if not variant and context.variants:
-				# the case when the item is opened for the first time from its list
-				variant = context.variants[0]
-
-			if variant:
-				context.variant = frappe.get_doc("Item", variant)
-
-				for fieldname in ("website_image", "website_image_alt", "web_long_description", "description",
-										"website_specifications"):
-					if context.variant.get(fieldname):
-						value = context.variant.get(fieldname)
-						if isinstance(value, list):
-							value = [d.as_dict() for d in value]
-
-						context[fieldname] = value
-
-		if self.slideshow:
-			if context.variant and context.variant.slideshow:
-				context.update(get_slideshow(context.variant))
-			else:
-				context.update(get_slideshow(self))
-
-	def set_attribute_context(self, context):
-		if self.has_variants:
-			attribute_values_available = {}
-			context.attribute_values = {}
-			context.selected_attributes = {}
-
-			# load attributes
-			for v in context.variants:
-				v.attributes = frappe.get_all("Item Variant Attribute",
-					  fields=["attribute", "attribute_value"],
-					  filters={"parent": v.name})
-				# make a map for easier access in templates
-				v.attribute_map = frappe._dict({})
-				for attr in v.attributes:
-					v.attribute_map[attr.attribute] = attr.attribute_value
-
-				for attr in v.attributes:
-					values = attribute_values_available.setdefault(attr.attribute, [])
-					if attr.attribute_value not in values:
-						values.append(attr.attribute_value)
-
-					if v.name == context.variant.name:
-						context.selected_attributes[attr.attribute] = attr.attribute_value
-
-			# filter attributes, order based on attribute table
-			for attr in self.attributes:
-				values = context.attribute_values.setdefault(attr.attribute, [])
-
-				if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
-					for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
-						values.append(val)
-
-				else:
-					# get list of values defined (for sequence)
-					for attr_value in frappe.db.get_all("Item Attribute Value",
-						fields=["attribute_value"],
-						filters={"parent": attr.attribute}, order_by="idx asc"):
-
-						if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
-							values.append(attr_value.attribute_value)
-
-			context.variant_info = json.dumps(context.variants)
-
-	def set_disabled_attributes(self, context):
-		"""Disable selection options of attribute combinations that do not result in a variant"""
-		if not self.attributes or not self.has_variants:
-			return
-
-		context.disabled_attributes = {}
-		attributes = [attr.attribute for attr in self.attributes]
-
-		def find_variant(combination):
-			for variant in context.variants:
-				if len(variant.attributes) < len(attributes):
-					continue
-
-				if "combination" not in variant:
-					ref_combination = []
-
-					for attr in variant.attributes:
-						idx = attributes.index(attr.attribute)
-						ref_combination.insert(idx, attr.attribute_value)
-
-					variant["combination"] = ref_combination
-
-				if not (set(combination) - set(variant["combination"])):
-					# check if the combination is a subset of a variant combination
-					# eg. [Blue, 0.5] is a possible combination if exists [Blue, Large, 0.5]
-					return True
-
-		for i, attr in enumerate(self.attributes):
-			if i == 0:
-				continue
-
-			combination_source = []
-
-			# loop through previous attributes
-			for prev_attr in self.attributes[:i]:
-				combination_source.append([context.selected_attributes.get(prev_attr.attribute)])
-
-			combination_source.append(context.attribute_values[attr.attribute])
-
-			for combination in itertools.product(*combination_source):
-				if not find_variant(combination):
-					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
-
-	def set_metatags(self, context):
-		context.metatags = frappe._dict({})
-
-		safe_description = frappe.utils.to_markdown(self.description)
-
-		context.metatags.url = frappe.utils.get_url() + '/' + context.route
-
-		if context.website_image:
-			if context.website_image.startswith('http'):
-				url = context.website_image
-			else:
-				url = frappe.utils.get_url() + context.website_image
-			context.metatags.image = url
-
-		context.metatags.description = safe_description[:300]
-
-		context.metatags.title = self.item_name or self.item_code
-
-		context.metatags['og:type'] = 'product'
-		context.metatags['og:site_name'] = 'ERPNext'
-
-	def set_shopping_cart_data(self, context):
-		from erpnext.shopping_cart.product_info import get_product_info_for_website
-		context.shopping_cart = get_product_info_for_website(self.name, skip_quotation_creation=True)
-
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
 		if self.stock_uom not in uom_conv_list:
@@ -486,9 +231,34 @@ class Item(WebsiteGenerator):
 
 		[self.remove(d) for d in to_remove]
 
-	def update_show_in_website(self):
-		if self.disabled:
-			self.show_in_website = False
+	def update_website_item(self):
+		"""Update Website Item if change in Item impacts it."""
+		web_item = frappe.db.exists("Website Item", {"item_code": self.item_code})
+
+		if web_item:
+			changed = {}
+			editable_fields = ["item_name", "item_group", "stock_uom", "brand", "description",
+				"disabled"]
+			doc_before_save = self.get_doc_before_save()
+
+			for field in editable_fields:
+				if doc_before_save.get(field) != self.get(field):
+					if field == "disabled":
+						changed["published"] = not self.get(field)
+					else:
+						changed[field] = self.get(field)
+
+			if not changed:
+				return
+
+			web_item_doc = frappe.get_doc("Website Item", web_item)
+			web_item_doc.update(changed)
+			web_item_doc.save()
+
+	def validate_item_tax_net_rate_range(self):
+		for tax in self.get('taxes'):
+			if flt(tax.maximum_net_rate) < flt(tax.minimum_net_rate):
+				frappe.throw(_("Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"))
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
@@ -521,7 +291,7 @@ class Item(WebsiteGenerator):
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
-			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
+			frappe.throw(_("'Has Serial No' can not be 'Yes' for non-stock item"))
 
 		if self.has_serial_no == 0 and self.serial_no_series:
 			self.serial_no_series = None
@@ -541,11 +311,12 @@ class Item(WebsiteGenerator):
 					_("Default BOM ({0}) must be active for this item or its template").format(bom_item))
 
 	def fill_customer_code(self):
-		""" Append all the customer codes and insert into "customer_code" field of item table """
-		cust_code = []
-		for d in self.get('customer_items'):
-			cust_code.append(d.ref_code)
-		self.customer_code = ','.join(cust_code)
+		"""
+			Append all the customer codes and insert into "customer_code" field of item table.
+			Used to search Item by customer code.
+		"""
+		customer_codes = set(d.ref_code for d in self.get("customer_items", []))
+		self.customer_code = ','.join(customer_codes)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
@@ -616,7 +387,6 @@ class Item(WebsiteGenerator):
 					(self.item_name, self.description, self.brand, self.name))
 
 	def on_trash(self):
-		super(Item, self).on_trash()
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.name)
 		frappe.db.sql("delete from `tabItem Price` where item_code=%s", self.name)
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
@@ -627,23 +397,15 @@ class Item(WebsiteGenerator):
 			frappe.db.set_value("Item", old_name, "item_name", new_name)
 
 		if merge:
-			# Validate properties before merging
-			if not frappe.db.exists("Item", new_name):
-				frappe.throw(_("Item {0} does not exist").format(new_name))
-
-			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
-			if new_properties != [cstr(self.get(fld)) for fld in field_list]:
-				frappe.throw(_("To merge, following properties must be same for both items")
-									+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
+			self.validate_properties_before_merge(new_name)
+			self.validate_duplicate_website_item_before_merge(old_name, new_name)
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
 			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
 
-		if self.route:
+		if self.published_in_website:
 			invalidate_cache_for_item(self)
-			clear_cache(self.route)
 
 		frappe.db.set_value("Item", new_name, "item_code", new_name)
 
@@ -683,7 +445,41 @@ class Item(WebsiteGenerator):
 		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}").format(
 			frappe.bold(old_name))
 
-		frappe.throw(_(msg), title=_("Merge not allowed"))
+		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_properties_before_merge(self, new_name):
+		# Validate properties before merging
+		if not frappe.db.exists("Item", new_name):
+			frappe.throw(_("Item {0} does not exist").format(new_name))
+
+		field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
+		new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
+
+		if new_properties != [cstr(self.get(field)) for field in field_list]:
+			msg = _("To merge, following properties must be same for both items")
+			msg += ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list])
+			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_duplicate_website_item_before_merge(self, old_name, new_name):
+		"""
+			Block merge if both old and new items have website items against them.
+			This is to avoid duplicate website items after merging.
+		"""
+		web_items = frappe.get_all(
+			"Website Item",
+			filters={
+				"item_code": ["in", [old_name, new_name]]
+			},
+			fields=["item_code", "name"])
+
+		if len(web_items) <= 1:
+			return
+
+		old_web_item = [d.get("name") for d in web_items if d.get("item_code") == old_name][0]
+		web_item_link = get_link_to_form("Website Item", old_web_item)
+
+		msg = f"Please delete linked Website Item {frappe.bold(web_item_link)} before merging {old_name} and {new_name}"
+		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
@@ -706,16 +502,6 @@ class Item(WebsiteGenerator):
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
-
-	@frappe.whitelist()
-	def copy_specification_from_item_group(self):
-		self.set("website_specifications", [])
-		if self.item_group:
-			for label, desc in frappe.db.get_values("Item Website Specification",
-										   {"parent": self.item_group}, ["label", "description"]):
-				row = self.append("website_specifications")
-				row.label = label
-				row.description = desc
 
 	def update_bom_item_desc(self):
 		if self.is_new():
@@ -740,58 +526,45 @@ class Item(WebsiteGenerator):
 				where item_code = %s and docstatus < 2
 			""", (self.description, self.name))
 
-	def update_template_item(self):
-		"""Set Show in Website for Template Item if True for its Variant"""
-		if self.variant_of:
-			if self.show_in_website:
-				self.show_variant_in_website = 1
-				self.show_in_website = 0
-
-			if self.show_variant_in_website:
-				# show template
-				template_item = frappe.get_doc("Item", self.variant_of)
-
-				if not template_item.show_in_website:
-					template_item.show_in_website = 1
-					template_item.flags.dont_update_variants = True
-					template_item.flags.ignore_permissions = True
-					template_item.save()
-
 	def validate_item_defaults(self):
-		companies = list(set([row.company for row in self.item_defaults]))
+		companies = {row.company for row in self.item_defaults}
 
 		if len(companies) != len(self.item_defaults):
 			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
 
+		validate_item_default_company_links(self.item_defaults)
+
+
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
-		if self.item_group and not self.item_defaults:
-			item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
-				['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
-				'expense_account','selling_cost_center','income_account'], as_dict = 1)
-			if item_defaults:
-				for item in item_defaults:
-					self.append('item_defaults', {
-						'company': item.company,
-						'default_warehouse': item.default_warehouse,
-						'default_price_list': item.default_price_list,
-						'buying_cost_center': item.buying_cost_center,
-						'default_supplier': item.default_supplier,
-						'expense_account': item.expense_account,
-						'selling_cost_center': item.selling_cost_center,
-						'income_account': item.income_account
-					})
-			else:
-				warehouse = ''
-				defaults = frappe.defaults.get_defaults() or {}
+		if self.item_defaults or not self.item_group:
+			return
 
-				# To check default warehouse is belong to the default company
-				if defaults.get("default_warehouse") and defaults.company and frappe.db.exists("Warehouse",
-					{'name': defaults.default_warehouse, 'company': defaults.company}):
-						self.append("item_defaults", {
-							"company": defaults.get("company"),
-							"default_warehouse": defaults.default_warehouse
-						})
+		item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
+			['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
+			'expense_account','selling_cost_center','income_account'], as_dict = 1)
+		if item_defaults:
+			for item in item_defaults:
+				self.append('item_defaults', {
+					'company': item.company,
+					'default_warehouse': item.default_warehouse,
+					'default_price_list': item.default_price_list,
+					'buying_cost_center': item.buying_cost_center,
+					'default_supplier': item.default_supplier,
+					'expense_account': item.expense_account,
+					'selling_cost_center': item.selling_cost_center,
+					'income_account': item.income_account
+				})
+		else:
+			defaults = frappe.defaults.get_defaults() or {}
+
+			# To check default warehouse is belong to the default company
+			if defaults.get("default_warehouse") and defaults.company and frappe.db.exists("Warehouse",
+				{'name': defaults.default_warehouse, 'company': defaults.company}):
+					self.append("item_defaults", {
+						"company": defaults.get("company"),
+						"default_warehouse": defaults.default_warehouse
+					})
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
@@ -813,7 +586,7 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Item has variants."))
 
 	def validate_attributes_in_variants(self):
-		if not self.has_variants or self.get("__islocal"):
+		if not self.has_variants or self.is_new():
 			return
 
 		old_doc = self.get_doc_before_save()
@@ -901,7 +674,7 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
-		if not self.get("__islocal"):
+		if not self.is_new():
 			check_stock_uom_with_bin(self.name, self.stock_uom)
 		if self.has_variants:
 			for d in frappe.db.get_all("Item", filters={"variant_of": self.name}):
@@ -959,20 +732,20 @@ class Item(WebsiteGenerator):
 				d.variant_of = self.variant_of
 
 	def cant_change(self):
-		if not self.get("__islocal"):
-			fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+		if self.is_new():
+			return
 
-			values = frappe.db.get_value("Item", self.name, fields, as_dict=True)
-			if not values.get('valuation_method') and self.get('valuation_method'):
-				values['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+		fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
 
-			if values:
-				for field in fields:
-					if cstr(self.get(field)) != cstr(values.get(field)):
-						if not self.check_if_linked_document_exists(field):
-							break # no linked document, allowed
-						else:
-							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
+		values = frappe.db.get_value("Item", self.name, fields, as_dict=True)
+		if not values.get('valuation_method') and self.get('valuation_method'):
+			values['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+
+		if values:
+			for field in fields:
+				if cstr(self.get(field)) != cstr(values.get(field)):
+					if self.check_if_linked_document_exists(field):
+						frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
 
 	def check_if_linked_document_exists(self, field):
 		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "POS Invoice Item", "Purchase Receipt Item",
@@ -1003,47 +776,6 @@ class Item(WebsiteGenerator):
 			if not enabled:
 				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
 
-	def create_onboarding_docs(self, args):
-		company = frappe.defaults.get_defaults().get('company') or \
-			frappe.db.get_single_value('Global Defaults', 'default_company')
-
-		for i in range(1, args.get('max_count')):
-			item = args.get('item_' + str(i))
-			if item:
-				default_warehouse = ''
-				default_warehouse = frappe.db.get_value('Warehouse', filters={
-					'warehouse_name': _('Finished Goods'),
-					'company': company
-				})
-
-				try:
-					frappe.get_doc({
-						'doctype': self.doctype,
-						'item_code': item,
-						'item_name': item,
-						'description': item,
-						'show_in_website': 1,
-						'is_sales_item': 1,
-						'is_purchase_item': 1,
-						'is_stock_item': 1,
-						'item_group': _('Products'),
-						'stock_uom': _(args.get('item_uom_' + str(i))),
-						'item_defaults': [{
-							'default_warehouse': default_warehouse,
-							'company': company
-						}]
-					}).insert()
-
-				except frappe.NameError:
-					pass
-				else:
-					if args.get('item_price_' + str(i)):
-						item_price = flt(args.get('item_price_' + str(i)))
-
-						price_list_name = frappe.db.get_value('Price List', {'selling': 1})
-						make_item_price(item, price_list_name, item_price)
-						price_list_name = frappe.db.get_value('Price List', {'buying': 1})
-						make_item_price(item, price_list_name, item_price)
 
 def make_item_price(item, price_list_name, item_price):
 	frappe.get_doc({
@@ -1054,56 +786,42 @@ def make_item_price(item, price_list_name, item_price):
 	}).insert()
 
 def get_timeline_data(doctype, name):
-	'''returns timeline data based on stock ledger entry'''
-	out = {}
-	items = dict(frappe.db.sql('''select posting_date, count(*)
-		from `tabStock Ledger Entry` where item_code=%s
-			and posting_date > date_sub(curdate(), interval 1 year)
-			group by posting_date''', name))
+	"""get timeline data based on Stock Ledger Entry. This is displayed as heatmap on the item page."""
 
-	for date, count in iteritems(items):
-		timestamp = get_timestamp(date)
-		out.update({timestamp: count})
+	items = frappe.db.sql("""select unix_timestamp(posting_date), count(*)
+							from `tabStock Ledger Entry`
+							where item_code=%s and posting_date > date_sub(curdate(), interval 1 year)
+							group by posting_date""", name)
 
-	return out
+	return dict(items)
 
 
-def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
+
+def validate_end_of_life(item_code, end_of_life=None, disabled=None):
 	if (not end_of_life) or (disabled is None):
 		end_of_life, disabled = frappe.db.get_value("Item", item_code, ["end_of_life", "disabled"])
 
 	if end_of_life and end_of_life != "0000-00-00" and getdate(end_of_life) <= now_datetime().date():
-		msg = _("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life))
-		_msgprint(msg, verbose)
+		frappe.throw(_("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life)))
 
 	if disabled:
-		_msgprint(_("Item {0} is disabled").format(item_code), verbose)
+		frappe.throw(_("Item {0} is disabled").format(item_code))
 
 
-def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
+def validate_is_stock_item(item_code, is_stock_item=None):
 	if not is_stock_item:
 		is_stock_item = frappe.db.get_value("Item", item_code, "is_stock_item")
 
 	if is_stock_item != 1:
-		msg = _("Item {0} is not a stock Item").format(item_code)
-
-		_msgprint(msg, verbose)
+		frappe.throw(_("Item {0} is not a stock Item").format(item_code))
 
 
-def validate_cancelled_item(item_code, docstatus=None, verbose=1):
+def validate_cancelled_item(item_code, docstatus=None):
 	if docstatus is None:
 		docstatus = frappe.db.get_value("Item", item_code, "docstatus")
 
 	if docstatus == 2:
-		msg = _("Item {0} is cancelled").format(item_code)
-		_msgprint(msg, verbose)
-
-def _msgprint(msg, verbose):
-	if verbose:
-		msgprint(msg, raise_exception=True)
-	else:
-		raise frappe.ValidationError(msg)
-
+		frappe.throw(_("Item {0} is cancelled").format(item_code))
 
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
@@ -1172,13 +890,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 
 def invalidate_cache_for_item(doc):
+	"""Invalidate Item Group cache and rebuild ItemVariantsCacheManager."""
 	invalidate_cache_for(doc, doc.item_group)
-
-	website_item_groups = list(set((doc.get("old_website_item_groups") or [])
-								+ [d.item_group for d in doc.get({"doctype": "Website Item Group"}) if d.item_group]))
-
-	for item_group in website_item_groups:
-		invalidate_cache_for(doc, item_group)
 
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
@@ -1187,12 +900,14 @@ def invalidate_cache_for_item(doc):
 
 
 def invalidate_item_variants_cache_for_website(doc):
-	from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
+	"""Rebuild ItemVariantsCacheManager via Item or Website Item."""
+	from erpnext.e_commerce.variant_selector.item_variants_cache import ItemVariantsCacheManager
 
 	item_code = None
-	if doc.has_variants and doc.show_in_website:
-		item_code = doc.name
-	elif doc.variant_of and frappe.db.get_value('Item', doc.variant_of, 'show_in_website'):
+	is_web_item = doc.get("published_in_website") or doc.get("published")
+	if doc.has_variants and is_web_item:
+		item_code = doc.item_code
+	elif doc.variant_of and frappe.db.get_value('Item', doc.variant_of, 'published_in_website'):
 		item_code = doc.variant_of
 
 	if item_code:
@@ -1203,27 +918,25 @@ def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):
 		return
 
-	matched = True
 	ref_uom = frappe.db.get_value("Stock Ledger Entry",
 							   {"item_code": item}, "stock_uom")
 
 	if ref_uom:
 		if cstr(ref_uom) != cstr(stock_uom):
-			matched = False
-	else:
-		bin_list = frappe.db.sql("select * from tabBin where item_code=%s", item, as_dict=1)
-		for bin in bin_list:
-			if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0
-								or bin.planned_qty > 0) and cstr(bin.stock_uom) != cstr(stock_uom):
-				matched = False
-				break
+			frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 
-		if matched and bin_list:
-			frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
+	bin_list = frappe.db.sql("""
+			select * from tabBin where item_code = %s
+				and (reserved_qty > 0 or ordered_qty > 0 or indented_qty > 0 or planned_qty > 0)
+				and stock_uom != %s
+			""", (item, stock_uom), as_dict=1)
 
-	if not matched:
-		frappe.throw(
-			_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
+	if bin_list:
+		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You need to either cancel the linked documents or create a new Item.").format(item))
+
+	# No SLE or documents against item. Bin UOM can be changed safely.
+	frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
+
 
 def get_item_defaults(item_code, company):
 	item = frappe.get_cached_doc('Item', item_code)
@@ -1264,46 +977,82 @@ def get_item_details(item_code, company=None):
 
 @frappe.whitelist()
 def get_uom_conv_factor(uom, stock_uom):
-	uoms = [uom, stock_uom]
-	value = ""
-	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
-		where to_uom in ({0})
-		""".format(', '.join([frappe.db.escape(i, percent=False) for i in uoms])), as_dict=True)
+	""" Get UOM conversion factor from uom to stock_uom
+		e.g. uom = "Kg", stock_uom = "Gram" then returns 1000.0
+	"""
+	if uom == stock_uom:
+		return 1.0
 
-	for d in uom_details:
-		if d.from_uom == stock_uom and d.to_uom == uom:
-			value = 1/flt(d.value)
-		elif d.from_uom == uom and d.to_uom == stock_uom:
-			value = d.value
+	from_uom, to_uom = uom, stock_uom   # renaming for readability
 
-	if not value:
-		uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
-		uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+	exact_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": to_uom, "from_uom": from_uom}, ["value"], as_dict=1)
+	if exact_match:
+		return exact_match.value
 
-		if uom_stock and uom_row:
-			if uom_stock.from_uom == uom_row.from_uom:
-				value = flt(uom_stock.value) * 1/flt(uom_row.value)
+	inverse_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1)
+	if inverse_match:
+		return 1 / inverse_match.value
 
-	return value
+	# This attempts to try and get conversion from intermediate UOM.
+	# case:
+	#            g -> mg = 1000
+	#            g -> kg = 0.001
+	# therefore  kg -> mg = 1000  / 0.001 = 1,000,000
+	intermediate_match = frappe.db.sql("""
+			select (first.value / second.value) as value
+			from `tabUOM Conversion Factor` first
+			join `tabUOM Conversion Factor` second
+				on first.from_uom = second.from_uom
+			where
+				first.to_uom = %(to_uom)s
+				and second.to_uom = %(from_uom)s
+			limit 1
+			""", {"to_uom": to_uom, "from_uom": from_uom}, as_dict=1)
+
+	if intermediate_match:
+		return intermediate_match[0].value
+
 
 @frappe.whitelist()
-def get_item_attribute(parent, attribute_value=''):
+def get_item_attribute(parent, attribute_value=""):
+	"""Used for providing auto-completions in child table."""
 	if not frappe.has_permission("Item"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
+		frappe.throw(_("No Permission"))
 
 	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
-		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
+		filters = {'parent': parent, 'attribute_value': ("like", f"%{attribute_value}%")})
 
 def update_variants(variants, template, publish_progress=True):
-	count=0
-	for d in variants:
+	total = len(variants)
+	for count, d in enumerate(variants, start=1):
 		variant = frappe.get_doc("Item", d)
 		copy_attributes_to_variant(template, variant)
 		variant.save()
-		count+=1
 		if publish_progress:
-				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
+			frappe.publish_progress(count / total * 100, title=_("Updating Variants..."))
 
-def on_doctype_update():
-	# since route is a Text column, it needs a length for indexing
-	frappe.db.add_index("Item", ["route(500)"])
+@erpnext.allow_regional
+def set_item_tax_from_hsn_code(item):
+	pass
+
+
+def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> None:
+	for item_default in item_defaults:
+		for doctype, field in [
+			['Warehouse', 'default_warehouse'],
+			['Cost Center', 'buying_cost_center'],
+			['Cost Center', 'selling_cost_center'],
+			['Account', 'expense_account'],
+			['Account', 'income_account']
+		]:
+			if item_default.get(field):
+				company = frappe.db.get_value(doctype, item_default.get(field), 'company', cache=True)
+				if company and company != item_default.company:
+					frappe.throw(_("Row #{}: {} {} doesn't belong to Company {}. Please select valid {}.")
+						.format(
+							item_default.idx,
+							doctype,
+							frappe.bold(item_default.get(field)),
+							frappe.bold(item_default.company),
+							frappe.bold(frappe.unscrub(field))
+						), title=_("Invalid Item Defaults"))

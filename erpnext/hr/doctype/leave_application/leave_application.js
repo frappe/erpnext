@@ -18,8 +18,7 @@ frappe.ui.form.on("Leave Application", {
 
 		frm.set_query("employee", erpnext.queries.employee);
 	},
-	onload: function (frm) {
-
+	onload: function(frm) {
 		// Ignore cancellation of doctype on cancel all.
 		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
 
@@ -41,7 +40,7 @@ frappe.ui.form.on("Leave Application", {
 		}
 	},
 
-	validate: function (frm) {
+	validate: function(frm) {
 		if (frm.doc.from_date == frm.doc.to_date && frm.doc.half_day == 1) {
 			frm.doc.half_day_date = frm.doc.from_date;
 		} else if (frm.doc.half_day == 0) {
@@ -84,7 +83,7 @@ frappe.ui.form.on("Leave Application", {
 			// lwps should be allowed, lwps don't have any allocation
 			allowed_leave_types = allowed_leave_types.concat(lwps);
 
-			frm.set_query('leave_type', function () {
+			frm.set_query('leave_type', function() {
 				return {
 					filters: [
 						['leave_type_name', 'in', allowed_leave_types]
@@ -117,7 +116,7 @@ frappe.ui.form.on("Leave Application", {
 		frm.trigger("set_leave_approver");
 	},
 
-	leave_approver: function (frm) {
+	leave_approver: function(frm) {
 		if (frm.doc.leave_approver) {
 			frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
 		}
@@ -164,8 +163,8 @@ frappe.ui.form.on("Leave Application", {
 		});
 	},
 
-	get_leave_balance: function (frm) {
-		if (frm.doc.docstatus == 0 && frm.doc.employee && frm.doc.leave_type && frm.doc.from_date && frm.doc.to_date) {
+	get_leave_balance: function(frm) {
+		if (frm.doc.docstatus === 0 && frm.doc.employee && frm.doc.leave_type && frm.doc.from_date && frm.doc.to_date) {
 			return frappe.call({
 				method: "erpnext.hr.doctype.leave_application.leave_application.get_leave_balance_on",
 				args: {
@@ -186,7 +185,7 @@ frappe.ui.form.on("Leave Application", {
 		}
 	},
 
-	calculate_total_days: function (frm) {
+	calculate_total_days: function(frm) {
 		if (frm.doc.from_date && frm.doc.to_date && frm.doc.employee && frm.doc.leave_type) {
 
 			var from_date = Date.parse(frm.doc.from_date);
@@ -218,7 +217,7 @@ frappe.ui.form.on("Leave Application", {
 		}
 	},
 
-	set_leave_approver: function (frm) {
+	set_leave_approver: function(frm) {
 		if (frm.doc.employee) {
 			// server call is done to include holidays in leave days calculations
 			return frappe.call({

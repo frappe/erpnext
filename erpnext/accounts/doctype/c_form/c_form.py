@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
+
 
 class CForm(Document):
 	def validate(self):
@@ -54,7 +56,7 @@ class CForm(Document):
 			frappe.throw(_("Please enter atleast 1 invoice in the table"))
 
 	def set_total_invoiced_amount(self):
-		total = sum([flt(d.grand_total) for d in self.get('invoices')])
+		total = sum(flt(d.grand_total) for d in self.get('invoices'))
 		frappe.db.set(self, 'total_invoiced_amount', total)
 
 	@frappe.whitelist()

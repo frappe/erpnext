@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import getdate, flt
+from frappe.utils import flt, getdate
+
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -66,7 +67,7 @@ def get_consumed_items(condition):
 			purpose is NULL
 			or purpose not in ({})
 		)
-	""".format(', '.join([f"'{p}'" for p in purpose_to_exclude]))
+	""".format(', '.join(f"'{p}'" for p in purpose_to_exclude))
 	condition = condition.replace("posting_date", "sle.posting_date")
 
 	consumed_items = frappe.db.sql("""

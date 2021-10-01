@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
-import frappe
-import frappe.defaults
+
 import unittest
-from frappe.utils import today, getdate, add_days
-from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+import frappe
+from frappe.utils import add_days, getdate, today
+
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
+
 
 class TestAccountsReceivable(unittest.TestCase):
 	def test_accounts_receivable(self):
@@ -93,4 +96,3 @@ def make_credit_note(docname):
 		cost_center = 'Main - _TC2',
 		is_return = 1,
 		return_against = docname)
-

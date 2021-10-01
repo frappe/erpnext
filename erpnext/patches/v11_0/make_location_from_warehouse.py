@@ -2,8 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.utils.nestedset import rebuild_tree
+
 
 def execute():
 	if not frappe.db.get_value('Asset', {'docstatus': ('<', 2) }, 'name'): return
@@ -28,4 +30,3 @@ def execute():
 
 def get_parent_warehouse_name(warehouse):
 	return frappe.db.get_value('Warehouse', warehouse, 'warehouse_name')
-			

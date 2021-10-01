@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -20,11 +22,11 @@ def get_unclaimed_expese_claims(filters):
 	if filters.get("employee"):
 		cond = "ec.employee = %(employee)s"
 
-	return frappe.db.sql(""" 
+	return frappe.db.sql("""
 		select
 			ec.employee, ec.employee_name, ec.name, ec.total_sanctioned_amount, ec.total_amount_reimbursed,
 			sum(gle.credit_in_account_currency - gle.debit_in_account_currency) as outstanding_amt
-		from 
+		from
 			`tabExpense Claim` ec, `tabGL Entry` gle
 		where
 			gle.against_voucher_type = "Expense Claim" and gle.against_voucher = ec.name

@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import print_function, unicode_literals
+
 import frappe
-from frappe.utils import flt, cstr, nowdate, nowtime
-from erpnext.stock.utils import update_bin
-from erpnext.stock.stock_ledger import update_entries_after
+from frappe.utils import cstr, flt, nowdate, nowtime
+
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+from erpnext.stock.utils import update_bin
+
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
 	"""
@@ -29,7 +31,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		try:
 			repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin, allow_negative_stock)
 			frappe.db.commit()
-		except:
+		except Exception:
 			frappe.db.rollback()
 
 	if allow_negative_stock:
@@ -194,9 +196,6 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 		serial_nos = frappe.db.sql("""select count(name) from `tabSerial No`
 			where item_code=%s and warehouse=%s and docstatus < 2""", (d[0], d[1]))
 
-		if serial_nos and flt(serial_nos[0][0]) != flt(d[2]):
-			print(d[0], d[1], d[2], serial_nos[0][0])
-
 		sle = frappe.db.sql("""select valuation_rate, company from `tabStock Ledger Entry`
 			where item_code = %s and warehouse = %s and is_cancelled = 0
 			order by posting_date desc limit 1""", (d[0], d[1]))
@@ -230,7 +229,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 		})
 
 		update_bin(args)
-		
+
 		create_repost_item_valuation_entry({
 			"item_code": d[0],
 			"warehouse": d[1],
@@ -250,5 +249,5 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 
 				sr.via_stock_ledger = True
 				sr.save()
-			except:
+			except Exception:
 				pass

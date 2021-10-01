@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 
-from __future__ import unicode_literals, division
+from __future__ import division, unicode_literals
+
 import frappe
 from frappe import _
+
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -219,8 +221,7 @@ def get_quiz(quiz_name, course):
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name)
 		questions = quiz.get_questions()
-		duration = quiz.duration
-	except:
+	except Exception:
 		frappe.throw(_("Quiz {0} does not exist").format(quiz_name), frappe.DoesNotExistError)
 		return None
 
@@ -236,15 +237,17 @@ def get_quiz(quiz_name, course):
 		return {
 			'questions': questions,
 			'activity': None,
-			'duration':duration
+			'is_time_bound': quiz.is_time_bound,
+			'duration': quiz.duration
 		}
 
 	student = get_current_student()
 	course_enrollment = get_enrollment("course", course, student.name)
 	status, score, result, time_taken = check_quiz_completion(quiz, course_enrollment)
 	return {
-		'questions': questions, 
+		'questions': questions,
 		'activity': {'is_complete': status, 'score': score, 'result': result, 'time_taken': time_taken},
+		'is_time_bound': quiz.is_time_bound,
 		'duration': quiz.duration
 	}
 
@@ -354,11 +357,11 @@ def get_or_create_course_enrollment(course, program):
 	student = get_current_student()
 	course_enrollment = get_enrollment("course", course, student.name)
 	if not course_enrollment:
-		program_enrollment = get_enrollment('program', program, student.name)
+		program_enrollment = get_enrollment('program', program.name, student.name)
 		if not program_enrollment:
 			frappe.throw(_("You are not enrolled in program {0}").format(program))
 			return
-		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program, student.name))
+		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program.name, student.name))
 	else:
 		return frappe.get_doc('Course Enrollment', course_enrollment)
 
@@ -372,9 +375,9 @@ def check_content_completion(content_name, content_type, enrollment_name):
 def check_quiz_completion(quiz, enrollment_name):
 	attempts = frappe.get_all("Quiz Activity",
 		filters={
-			'enrollment': enrollment_name, 
+			'enrollment': enrollment_name,
 			'quiz': quiz.name
-		}, 
+		},
 		fields=["name", "activity_date", "score", "status", "time_taken"]
 	)
 	status = False if quiz.max_attempts == 0 else bool(len(attempts) >= quiz.max_attempts)

@@ -2,11 +2,26 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_months, today, getdate, add_days, flt, get_last_day, get_first_day, cint, get_link_to_form, rounded
-from erpnext.accounts.utils import get_account_currency
 from frappe.email import sendmail_to_system_managers
-from frappe.utils.background_jobs import enqueue
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	date_diff,
+	flt,
+	get_first_day,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	rounded,
+	today,
+)
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+from erpnext.accounts.utils import get_account_currency
+
 
 def validate_service_stop_date(doc):
 	''' Validates service_stop_date for Purchase Invoice and Sales Invoice '''
@@ -263,6 +278,9 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			amount, base_amount = calculate_amount(doc, item, last_gl_entry,
 				total_days, total_booking_days, account_currency)
 
+		if not amount:
+			return
+
 		if via_journal_entry:
 			book_revenue_via_journal_entry(doc, credit_account, debit_account, against, amount,
 				base_amount, end_date, project, account_currency, item.cost_center, item, deferred_process, submit_journal_entry)
@@ -298,17 +316,21 @@ def process_deferred_accounting(posting_date=None):
 	start_date = add_months(today(), -1)
 	end_date = add_days(today(), -1)
 
-	for record_type in ('Income', 'Expense'):
-		doc = frappe.get_doc(dict(
-			doctype='Process Deferred Accounting',
-			posting_date=posting_date,
-			start_date=start_date,
-			end_date=end_date,
-			type=record_type
-		))
+	companies = frappe.get_all('Company')
 
-		doc.insert()
-		doc.submit()
+	for company in companies:
+		for record_type in ('Income', 'Expense'):
+			doc = frappe.get_doc(dict(
+				doctype='Process Deferred Accounting',
+				company=company.name,
+				posting_date=posting_date,
+				start_date=start_date,
+				end_date=end_date,
+				type=record_type
+			))
+
+			doc.insert()
+			doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
 	amount, base_amount, posting_date, project, account_currency, cost_center, item, deferred_process=None):
@@ -352,12 +374,15 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 		try:
 			make_gl_entries(gl_entries, cancel=(doc.docstatus == 2), merge_entries=True)
 			frappe.db.commit()
-		except:
-			frappe.db.rollback()
-			traceback = frappe.get_traceback()
-			frappe.log_error(message=traceback)
+		except Exception as e:
+			if frappe.flags.in_test:
+				raise e
+			else:
+				frappe.db.rollback()
+				traceback = frappe.get_traceback()
+				frappe.log_error(message=traceback)
 
-			frappe.flags.deferred_accounting_error = True
+				frappe.flags.deferred_accounting_error = True
 
 def send_mail(deferred_process):
 	title = _("Error while processing deferred accounting for {0}").format(deferred_process)
@@ -423,7 +448,7 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 
 		if submit:
 			journal_entry.submit()
-	except:
+	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		frappe.log_error(message=traceback)
@@ -443,5 +468,3 @@ def get_deferred_booking_accounts(doctype, voucher_detail_no, dr_or_cr):
 		return debit_account
 	else:
 		return credit_account
-
-

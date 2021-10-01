@@ -3,9 +3,11 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate,flt, cstr,random_string
+
+import frappe
+from frappe.utils import random_string
+
 # test_records = frappe.get_test_records('Vehicle')
 
 class TestVehicle(unittest.TestCase):

@@ -2,9 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
+
 
 def set_default_settings(args):
 	# enable default currency
@@ -60,7 +62,15 @@ def set_default_settings(args):
 
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
-	hr_settings.allow_backdated_leave_application = 1
+	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
+	hr_settings.leave_status_notification_template = _("Leave Status Notification")
+
+	hr_settings.send_interview_reminder = 1
+	hr_settings.interview_reminder_template = _("Interview Reminder")
+	hr_settings.remind_before = "00:15:00"
+
+	hr_settings.send_interview_feedback_reminder = 1
+	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
 	hr_settings.save()
 
 def set_no_copy_fields_in_variant_settings():

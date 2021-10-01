@@ -2,15 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import flt, getdate, cstr
-from frappe.model.meta import get_field_precision
-from frappe.utils.xlsxutils import handle_html
-from six import iteritems
+
 import json
+
+import frappe
+from frappe import _
+from frappe.model.meta import get_field_precision
+from frappe.utils import cstr, flt, getdate
+from six import iteritems
+
+import erpnext
 from erpnext.regional.india.utils import get_gst_accounts
 from erpnext.regional.report.gstr_1.gstr_1 import get_company_gstin_number
+
 
 def execute(filters=None):
 	return _execute(filters)
@@ -285,5 +289,3 @@ def get_hsn_wise_json_data(filters, report_data):
 		count +=1
 
 	return data
-
-

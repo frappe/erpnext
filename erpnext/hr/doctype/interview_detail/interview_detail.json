@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "creation": "2021-04-12 16:24:10.382863",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "interviewer",
+  "interview_feedback",
+  "average_rating",
+  "result",
+  "column_break_4",
+  "comments"
+ ],
+ "fields": [
+  {
+   "fieldname": "interviewer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Interviewer",
+   "options": "User"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "interview_feedback",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Interview Feedback",
+   "options": "Interview Feedback",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "average_rating",
+   "fieldtype": "Rating",
+   "in_list_view": 1,
+   "label": "Average Rating",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "interview_feedback.feedback",
+   "fieldname": "comments",
+   "fieldtype": "Text",
+   "label": "Comments",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "result",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Result",
+   "options": "\nCleared\nRejected",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-09-29 13:13:25.865063",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Interview Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

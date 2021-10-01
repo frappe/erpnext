@@ -3,24 +3,39 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import base64
+import io
+import json
 import os
 import re
-import jwt
 import sys
-import json
-import base64
-import frappe
-import six
 import traceback
-import io
+
+import frappe
+import jwt
+import six
 from frappe import _, bold
-from pyqrcode import create as qrcreate
-from frappe.utils.background_jobs import enqueue
-from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
-from frappe.integrations.utils import make_post_request, make_get_request
+from frappe.integrations.utils import make_get_request, make_post_request
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.data import (
+	add_to_date,
+	cint,
+	cstr,
+	flt,
+	format_date,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
+from frappe.utils.scheduler import is_scheduler_inactive
+from pyqrcode import create as qrcreate
+
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
+
 
 @frappe.whitelist()
 def validate_eligibility(doc):
@@ -38,12 +53,15 @@ def validate_eligibility(doc):
 	einvoicing_eligible_from = frappe.db.get_single_value('E Invoice Settings', 'applicable_from') or '2021-04-01'
 	if getdate(doc.get('posting_date')) < getdate(einvoicing_eligible_from):
 		return False
-	
+
 	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
-	no_taxes_applied = not doc.get('taxes')
-	has_non_gst_item = any(d for d in doc.get('items') if d.get('is_non_gst'))
+
+	# if export invoice, then taxes can be empty
+	# invoice can only be ineligible if no taxes applied and is not an export invoice
+	no_taxes_applied = not doc.get('taxes') and not doc.get('gst_category') == 'Overseas'
+	has_non_gst_item = any(d for d in doc.get('items', []) if d.get('is_non_gst'))
 
 	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied or has_non_gst_item:
 		return False
@@ -135,7 +153,7 @@ def validate_address_fields(address, is_shipping_address):
 
 def get_party_details(address_name, is_shipping_address=False):
 	addr = frappe.get_doc('Address', address_name)
-	
+
 	validate_address_fields(addr, is_shipping_address)
 
 	if addr.gst_state_number == 97:
@@ -187,19 +205,17 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-
-		if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
-			item.discount_amount = abs(item.base_amount - item.base_net_amount)
+		if flt(item.qty) != 0.0:
+			item.unit_rate = abs(item.taxable_value / item.qty)
 		else:
-			item.discount_amount = 0
-
-		item.unit_rate = abs((abs(item.taxable_value) - item.discount_amount)/ item.qty)
-		item.gross_amount = abs(item.taxable_value) + item.discount_amount
+			item.unit_rate = abs(item.taxable_value)
+		item.gross_amount = abs(item.taxable_value)
 		item.taxable_value = abs(item.taxable_value)
+		item.discount_amount = 0
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
-		item.is_service_item = 'N' if frappe.db.get_value('Item', d.item_code, 'is_stock_item') else 'Y'
+		item.is_service_item = 'Y' if item.gst_hsn_code and item.gst_hsn_code[:2] == "99" else 'N'
 		item.serial_no = ""
 
 		item = update_item_taxes(invoice, item)
@@ -254,18 +270,8 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
-
-	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
-		# Discount already applied on net total which means on items
-		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
-		invoice_value_details.invoice_discount_amt = 0
-	elif invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount:
-		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
-		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
-	else:
-		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
-		# since tax already considers discount amount
-		invoice_value_details.invoice_discount_amt = 0
+	invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
+	invoice_value_details.invoice_discount_amt = 0
 
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
@@ -287,8 +293,7 @@ def update_invoice_taxes(invoice, invoice_value_details):
 	considered_rows = []
 
 	for t in invoice.taxes:
-		tax_amount = t.base_tax_amount if (invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount) \
-						else t.base_tax_amount_after_discount_amount
+		tax_amount = t.base_tax_amount_after_discount_amount
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
 				# using after discount amt since item also uses after discount amt for cess calc
@@ -328,10 +333,6 @@ def get_payment_details(invoice):
 	))
 
 def get_return_doc_reference(invoice):
-	if not invoice.return_against:
-		frappe.throw(_('For generating IRN, reference to the original invoice is mandatory for a credit note. Please set {} field to generate e-invoice.')
-			.format(frappe.bold('Return Against')), title=_('Missing Field'))
-
 	invoice_date = frappe.db.get_value('Sales Invoice', invoice.return_against, 'posting_date')
 	return frappe._dict(dict(
 		invoice_name=invoice.return_against, invoice_date=format_date(invoice_date, 'dd/mm/yyyy')
@@ -447,7 +448,7 @@ def make_einvoice(invoice):
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 
-	if invoice.is_return:
+	if invoice.is_return and invoice.return_against:
 		prev_doc_details = get_return_doc_reference(invoice)
 
 	if invoice.transporter and not invoice.is_return:
@@ -497,7 +498,7 @@ def log_error(data=None):
 		"Data:", data, seperator,
 		"Exception:", err_tb
 	])
-	frappe.log_error(title=_('E Invoice Request Failed'), message=message)
+	return frappe.log_error(title=_('E Invoice Request Failed'), message=message)
 
 def santize_einvoice_fields(einvoice):
 	int_fields = ["Pin","Distance","CrDay"]
@@ -534,11 +535,9 @@ def santize_einvoice_fields(einvoice):
 	return einvoice
 
 def safe_json_load(json_string):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
-
 	try:
 		return json.loads(json_string)
-	except JSONDecodeError as e:
+	except json.JSONDecodeError as e:
 		# print a snippet of 40 characters around the location where error occured
 		pos = e.pos
 		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
@@ -980,7 +979,7 @@ class GSPConnector():
 			"attached_to_doctype": doctype,
 			"attached_to_name": docname,
 			"attached_to_field": "qrcode_image",
-			"is_private": 1,
+			"is_private": 0,
 			"content": qr_image.getvalue()})
 		_file.save()
 		frappe.db.commit()
@@ -997,7 +996,7 @@ class GSPConnector():
 		self.invoice.failure_description = self.get_failure_message(errors) if errors else ""
 		self.update_invoice()
 		frappe.db.commit()
-	
+
 	def get_failure_message(self, errors):
 		if isinstance(errors, list):
 			errors = ', '.join(errors)
@@ -1054,7 +1053,7 @@ def generate_einvoices(docnames):
 			_('{} e-invoices generated successfully').format(success),
 			title=_('Bulk E-Invoice Generation Complete')
 		)
-			
+
 	else:
 		enqueue_bulk_action(schedule_bulk_generate_irn, docnames=docnames)
 

@@ -3,10 +3,16 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee, make_salary_structure
-from erpnext.loan_management.doctype.loan.test_loan import create_loan_type, create_loan_accounts
+
+import frappe
+
+from erpnext.loan_management.doctype.loan.test_loan import create_loan_accounts, create_loan_type
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
+	make_employee,
+	make_salary_structure,
+)
+
 
 class TestLoanApplication(unittest.TestCase):
 	def setUp(self):

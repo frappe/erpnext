@@ -2,11 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt, today
-from erpnext.stock.utils import update_included_uom_in_report, is_reposting_item_valuation_in_progress
+
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
+from erpnext.stock.utils import (
+	is_reposting_item_valuation_in_progress,
+	update_included_uom_in_report,
+)
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -32,7 +38,7 @@ def execute(filters=None):
 
 		if filters.brand and filters.brand != item.brand:
 			continue
-			
+
 		elif filters.item_group and filters.item_group != item.item_group:
 			continue
 

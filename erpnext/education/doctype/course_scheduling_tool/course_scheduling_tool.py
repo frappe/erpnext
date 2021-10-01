@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import calendar
+
+import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
+
 from erpnext.education.utils import OverlapError
 
 
@@ -75,7 +78,7 @@ class CourseSchedulingTool(Document):
 		"""Validates if Course Start Date is greater than Course End Date"""
 		if self.course_start_date > self.course_end_date:
 			frappe.throw(
-				"Course Start Date cannot be greater than Course End Date.")
+				_("Course Start Date cannot be greater than Course End Date."))
 
 	def delete_course_schedule(self, rescheduled, reschedule_errors):
 		"""Delete all course schedule within the Date range and specified filters"""
@@ -95,7 +98,7 @@ class CourseSchedulingTool(Document):
 				if self.day == calendar.day_name[getdate(d.schedule_date).weekday()]:
 					frappe.delete_doc("Course Schedule", d.name)
 					rescheduled.append(d.name)
-			except:
+			except Exception:
 				reschedule_errors.append(d.name)
 		return rescheduled, reschedule_errors
 

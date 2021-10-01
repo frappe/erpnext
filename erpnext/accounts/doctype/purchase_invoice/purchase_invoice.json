@@ -96,6 +96,7 @@
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
+  "additional_discount_account",
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
@@ -131,6 +132,7 @@
   "advances",
   "payment_schedule_section",
   "payment_terms_template",
+  "ignore_default_payment_terms_template",
   "payment_schedule",
   "terms_section_break",
   "tc_name",
@@ -561,7 +563,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -592,11 +595,12 @@
    "label": "Raw Materials Supplied"
   },
   {
+   "depends_on": "update_stock",
    "fieldname": "supplied_items",
    "fieldtype": "Table",
    "label": "Supplied Items",
-   "options": "Purchase Receipt Item Supplied",
-   "read_only": 1
+   "no_copy": 1,
+   "options": "Purchase Receipt Item Supplied"
   },
   {
    "fieldname": "section_break_26",
@@ -837,6 +841,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -883,6 +888,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -1216,7 +1222,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled\nInternal Transfer",
+   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nPartly Paid\nUnpaid\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1
   },
   {
@@ -1297,6 +1303,7 @@
    "fetch_from": "supplier.is_internal_supplier",
    "fieldname": "is_internal_supplier",
    "fieldtype": "Check",
+   "ignore_user_permissions": 1,
    "label": "Is Internal Supplier",
    "read_only": 1
   },
@@ -1374,17 +1381,32 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "additional_discount_account",
+   "fieldtype": "Link",
+   "label": "Additional Discount Account",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_default_payment_terms_template",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ignore Default Payment Terms Template",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-30 22:45:58.334107",
+ "modified": "2021-09-28 13:10:28.351810",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

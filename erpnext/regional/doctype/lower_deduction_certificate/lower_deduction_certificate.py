@@ -3,17 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import getdate, get_link_to_form
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form, getdate
+
 from erpnext.accounts.utils import get_fiscal_year
+
 
 class LowerDeductionCertificate(Document):
 	def validate(self):
 		self.validate_dates()
 		self.validate_supplier_against_section_code()
-		
+
 	def validate_dates(self):
 		if getdate(self.valid_upto) < getdate(self.valid_from):
 			frappe.throw(_("Valid Upto date cannot be before Valid From date"))

@@ -9,17 +9,32 @@
   "employee_settings",
   "emp_created_by",
   "standard_working_hours",
-  "column_break_4",
-  "retirement_age",
-  "stop_birthday_reminders",
-  "leave_and_expense_claim_settings",
+  "expense_approver_mandatory_in_expense_claim",
+  "reminders_section",
+  "send_birthday_reminders",
+  "column_break_9",
+  "send_work_anniversary_reminders",
+  "column_break_11",
+  "send_holiday_reminders",
+  "frequency",
+  "leave_settings",
+  "send_leave_notification",
+  "leave_approval_notification_template",
+  "leave_status_notification_template",
+  "role_allowed_to_create_backdated_leave_application",
+  "column_break_18",
   "leave_approver_mandatory_in_leave_application",
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
-  "column_break_18",
-  "expense_approver_mandatory_in_expense_claim",
-  "allow_backdated_leave_application",
-  "role_allowed_to_create_backdated_leave_application"
+  "restrict_backdated_leave_application",
+  "hiring_settings",
+  "check_vacancies",
+  "send_interview_reminder",
+  "interview_reminder_template",
+  "remind_before",
+  "column_break_29",
+  "send_interview_feedback_reminder",
+  "feedback_reminder_notification_template"
  ],
  "fields": [
   {
@@ -44,13 +59,6 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "Don't send employee birthday reminders",
-   "fieldname": "stop_birthday_reminders",
-   "fieldtype": "Check",
-   "label": "Stop Birthday Reminders"
   },
   {
    "default": "1",
@@ -104,13 +112,92 @@
    "fieldname": "leave_and_expense_claim_settings",
    "fieldtype": "Section Break",
    "label": "Leave and Expense Claim Settings"
+  },
+  {
+   "default": "00:15:00",
+   "depends_on": "send_interview_reminder",
+   "fieldname": "remind_before",
+   "fieldtype": "Time",
+   "label": "Remind Before"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reminders_section",
+   "fieldtype": "Section Break",
+   "label": "Reminders"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_holiday_reminders",
+   "fieldtype": "Check",
+   "label": "Holidays"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_work_anniversary_reminders",
+   "fieldtype": "Check",
+   "label": "Work Anniversaries "
+  },
+  {
+   "default": "Weekly",
+   "depends_on": "eval:doc.send_holiday_reminders",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Set the frequency for holiday reminders",
+   "options": "Weekly\nMonthly"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_birthday_reminders",
+   "fieldtype": "Check",
+   "label": "Birthdays"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_interview_reminder",
+   "fieldtype": "Check",
+   "label": "Send Interview Reminder"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_interview_feedback_reminder",
+   "fieldtype": "Check",
+   "label": "Send Interview Feedback Reminder"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "send_interview_feedback_reminder",
+   "fieldname": "feedback_reminder_notification_template",
+   "fieldtype": "Link",
+   "label": "Feedback Reminder Notification Template",
+   "mandatory_depends_on": "send_interview_feedback_reminder",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "send_interview_reminder",
+   "fieldname": "interview_reminder_template",
+   "fieldtype": "Link",
+   "label": "Interview Reminder Notification Template",
+   "mandatory_depends_on": "send_interview_reminder",
+   "options": "Email Template"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-18 06:28:23.866074",
+ "modified": "2021-09-30 23:42:14.683983",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

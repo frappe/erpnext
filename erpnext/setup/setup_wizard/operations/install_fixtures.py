@@ -3,16 +3,20 @@
 
 from __future__ import unicode_literals
 
-import frappe, os, json
+import json
+import os
 
+import frappe
 from frappe import _
+from frappe.desk.doctype.global_search_settings.global_search_settings import (
+	update_global_search_doctypes,
+)
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
-from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
+from frappe.utils.nestedset import rebuild_tree
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
-from frappe.utils.nestedset import rebuild_tree
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -257,10 +261,29 @@ def install(country=None):
 
 	records += [{'doctype': 'Sales Partner Type', 'sales_partner_type': _(d)} for d in default_sales_partner_type]
 
+	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
+	response = frappe.read_file(os.path.join(base_path, "leave_application/leave_application_email_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _("Leave Approval Notification"), 'response': response,
+		'subject': _("Leave Approval Notification"), 'owner': frappe.session.user}]
+
+	records += [{'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,
+		'subject': _("Leave Status Notification"), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_reminder_notification_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Reminder'), 'response': response,
+		'subject': _('Interview Reminder'), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_feedback_reminder_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Feedback Reminder'), 'response': response,
+		'subject': _('Interview Feedback Reminder'), 'owner': frappe.session.user}]
+
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
 
-	records += [{'doctype': 'Email Template', 'name': _("Dispatch Notification"), 'response': response,\
+	records += [{'doctype': 'Email Template', 'name': _("Dispatch Notification"), 'response': response,
 		'subject': _("Your order is out for delivery!"), 'owner': frappe.session.user}]
 
 	# Records for the Supplier Scorecard
@@ -302,7 +325,16 @@ def update_buying_defaults():
 def update_hr_defaults():
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
-	hr_settings.allow_backdated_leave_application =1
+	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
+	hr_settings.leave_status_notification_template = _("Leave Status Notification")
+
+	hr_settings.send_interview_reminder = 1
+	hr_settings.interview_reminder_template = _("Interview Reminder")
+	hr_settings.remind_before = "00:15:00"
+
+	hr_settings.send_interview_feedback_reminder = 1
+	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
+
 	hr_settings.save()
 
 def update_item_variant_settings():
@@ -439,6 +471,8 @@ def install_defaults(args=None):
 	set_active_domains(args)
 	update_stock_settings()
 	update_shopping_cart_settings(args)
+
+	args.update({"set_default": 1})
 	create_bank_account(args)
 
 def set_global_defaults(args):
@@ -470,17 +504,17 @@ def update_stock_settings():
 	stock_settings.save()
 
 def create_bank_account(args):
-	if not args.bank_account:
+	if not args.get('bank_account'):
 		return
 
-	company_name = args.company_name
+	company_name = args.get('company_name')
 	bank_account_group =  frappe.db.get_value("Account",
 		{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
 			"company": company_name})
 	if bank_account_group:
 		bank_account = frappe.get_doc({
 			"doctype": "Account",
-			'account_name': args.bank_account,
+			'account_name': args.get('bank_account'),
 			'parent_account': bank_account_group,
 			'is_group':0,
 			'company': company_name,
@@ -489,16 +523,19 @@ def create_bank_account(args):
 		try:
 			doc = bank_account.insert()
 
-			frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
+			if args.get('set_default'):
+				frappe.db.set_value("Company", args.get('company_name'), "default_bank_account", bank_account.name, update_modified=False)
+
+			return doc
 
 		except RootNotEditable:
-			frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
+			frappe.throw(_("Bank account cannot be named as {0}").format(args.get('bank_account')))
 		except frappe.DuplicateEntryError:
 			# bank account same as a CoA entry
 			pass
 
 def update_shopping_cart_settings(args):
-	shopping_cart = frappe.get_doc("Shopping Cart Settings")
+	shopping_cart = frappe.get_doc("E Commerce Settings")
 	shopping_cart.update({
 		"enabled": 1,
 		'company': args.company_name,

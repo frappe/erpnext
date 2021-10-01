@@ -6,22 +6,23 @@
 # Extended to include finances object
 from __future__ import unicode_literals
 
-import urllib
+import base64
 import hashlib
 import hmac
-import base64
-import six
-from erpnext.erpnext_integrations.doctype.amazon_mws_settings import xml_utils
 import re
+from urllib.parse import quote
+
+from erpnext.erpnext_integrations.doctype.amazon_mws_settings import xml_utils
+
 try:
 	from xml.etree.ElementTree import ParseError as XMLError
 except ImportError:
 	from xml.parsers.expat import ExpatError as XMLError
-from time import strftime, gmtime
+
+from time import gmtime, strftime
 
 from requests import request
 from requests.exceptions import HTTPError
-
 
 __all__ = [
 	'Feeds',
@@ -68,8 +69,9 @@ def calc_md5(string):
 	"""
 	md = hashlib.md5()
 	md.update(string)
-	return base64.encodestring(md.digest()).strip('\n') if six.PY2 \
-		else base64.encodebytes(md.digest()).decode().strip()
+	return base64.encodebytes(md.digest()).decode().strip()
+
+
 
 def remove_empty(d):
 	"""
@@ -177,7 +179,6 @@ class MWS(object):
 			'SignatureMethod': 'HmacSHA256',
 		}
 		params.update(extra_data)
-		quote = urllib.quote if six.PY2 else urllib.parse.quote
 		request_description = '&'.join(['%s=%s' % (k, quote(params[k], safe='-_.~')) for k in sorted(params)])
 		signature = self.calc_signature(method, request_description)
 		url = '%s%s?%s&Signature=%s' % (self.domain, self.uri, request_description, quote(signature))

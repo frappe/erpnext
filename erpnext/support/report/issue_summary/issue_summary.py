@@ -2,11 +2,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from six import iteritems
+
+import frappe
 from frappe import _, scrub
 from frappe.utils import flt
+from six import iteritems
+
 
 def execute(filters=None):
 	return IssueSummary(filters).run()
@@ -62,7 +65,7 @@ class IssueSummary(object):
 				'width': 200
 			})
 
-		self.statuses = ['Open', 'Replied', 'Resolved', 'Closed']
+		self.statuses = ['Open', 'Replied', 'On Hold', 'Resolved', 'Closed']
 		for status in self.statuses:
 			self.columns.append({
 				'label': _(status),
@@ -265,6 +268,7 @@ class IssueSummary(object):
 		labels = []
 		open_issues = []
 		replied_issues = []
+		on_hold_issues = []
 		resolved_issues = []
 		closed_issues = []
 
@@ -277,6 +281,7 @@ class IssueSummary(object):
 			labels.append(entry.get(entity_field))
 			open_issues.append(entry.get('open'))
 			replied_issues.append(entry.get('replied'))
+			on_hold_issues.append(entry.get('on_hold'))
 			resolved_issues.append(entry.get('resolved'))
 			closed_issues.append(entry.get('closed'))
 
@@ -291,6 +296,10 @@ class IssueSummary(object):
 					{
 						'name': 'Replied',
 						'values': replied_issues[:30]
+					},
+					{
+						'name': 'On Hold',
+						'values': on_hold_issues[:30]
 					},
 					{
 						'name': 'Resolved',
@@ -313,12 +322,14 @@ class IssueSummary(object):
 
 		open_issues = 0
 		replied = 0
+		on_hold = 0
 		resolved = 0
 		closed = 0
 
 		for entry in self.data:
 			open_issues += entry.get('open')
 			replied += entry.get('replied')
+			on_hold += entry.get('on_hold')
 			resolved += entry.get('resolved')
 			closed += entry.get('closed')
 
@@ -336,6 +347,12 @@ class IssueSummary(object):
 				'datatype': 'Int',
 			},
 			{
+				'value': on_hold,
+				'indicator': 'Grey',
+				'label': _('On Hold'),
+				'datatype': 'Int',
+			},
+			{
 				'value': resolved,
 				'indicator': 'Green',
 				'label': _('Resolved'),
@@ -348,4 +365,3 @@ class IssueSummary(object):
 				'datatype': 'Int',
 			}
 		]
-

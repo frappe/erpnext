@@ -3,12 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
-from frappe.utils import getdate,today
 from frappe import _
 from frappe.desk.form.linked_with import get_linked_doctypes
+from frappe.model.document import Document
+from frappe.utils import getdate, today
+
 from erpnext.education.utils import check_content_completion, check_quiz_completion
+
+
 class Student(Document):
 	def validate(self):
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
@@ -74,7 +78,6 @@ class Student(Document):
 			student_user.flags.ignore_permissions = True
 			student_user.add_roles("Student")
 			student_user.save()
-			update_password_link = student_user.reset_password()
 
 	def update_applicant_status(self):
 		"""Updates Student Applicant status to Admitted"""

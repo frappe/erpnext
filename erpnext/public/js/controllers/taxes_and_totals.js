@@ -12,7 +12,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if (in_list(["Sales Order", "Quotation"], item.parenttype) && item.blanket_order_rate) {
 			effective_item_rate = item.blanket_order_rate;
 		}
-		if(item.margin_type == "Percentage"){
+		if (item.margin_type == "Percentage") {
 			item.rate_with_margin = flt(effective_item_rate)
 				+ flt(effective_item_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		} else {
@@ -22,7 +22,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		item_rate = flt(item.rate_with_margin , precision("rate", item));
 
-		if(item.discount_percentage){
+		if (item.discount_percentage) {
 			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
 		}
 
@@ -47,7 +47,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
 			this.frm.doc.is_return) {
-			this.update_paid_amount_for_return();
+			if (this.frm.doc.doctype == "Sales Invoice") {
+				this.set_total_amount_to_default_mop();
+			}
+			this.calculate_paid_amount();
 		}
 
 		// Sales person's commission
@@ -65,7 +68,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.refresh_fields();
 	},
 
-	calculate_discount_amount: function(){
+	calculate_discount_amount: function() {
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount")) {
 			this.set_discount_amount();
 			this.apply_discount_amount();
@@ -102,7 +105,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_item_values: function() {
-		var me = this;
+		let me = this;
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.round_floats_in(item);
@@ -263,6 +266,26 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 	},
 
+	add_taxes_from_item_tax_template: function(item_tax_map) {
+		let me = this;
+
+		if (item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
+			if (typeof (item_tax_map) == "string") {
+				item_tax_map = JSON.parse(item_tax_map);
+			}
+
+			$.each(item_tax_map, function(tax, rate) {
+				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
+				if (!found) {
+					let child = frappe.model.add_child(me.frm.doc, "taxes");
+					child.charge_type = "On Net Total";
+					child.account_head = tax;
+					child.rate = 0;
+				}
+			});
+		}
+	},
+
 	calculate_taxes: function() {
 		var me = this;
 		this.frm.doc.rounding_adjustment = 0;
@@ -406,6 +429,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		let tax_detail = tax.item_wise_tax_detail;
 		let key = item.item_code || item.item_name;
 
+		if(typeof (tax_detail) == "string") {
+			tax.item_wise_tax_detail = JSON.parse(tax.item_wise_tax_detail);
+			tax_detail = tax.item_wise_tax_detail;
+		}
+
 		let item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
 		if (tax_detail && tax_detail[key])
 			item_wise_tax_amount += tax_detail[key][1];
@@ -464,7 +492,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_totals: function() {
-		// Changing sequence can cause rounding_adjustmentng issue and on-screen discrepency
+		// Changing sequence can because of rounding adjustment issue and on-screen discrepancy
 		var me = this;
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
 		this.frm.doc.grand_total = flt(tax_count
@@ -705,7 +733,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 	},
 
-	update_paid_amount_for_return: function() {
+	set_total_amount_to_default_mop: function() {
 		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 
 		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
@@ -718,17 +746,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				precision("base_grand_total")
 			);
 		}
-
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
-			} else {
-				pay.amount = 0.0
 			}
 		});
 		this.frm.refresh_fields();
-
-		this.calculate_paid_amount();
 	},
 
 	set_default_payment: function(total_amount_to_pay, update_paid_amount) {

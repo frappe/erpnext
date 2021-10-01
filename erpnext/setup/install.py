@@ -4,15 +4,17 @@
 from __future__ import print_function, unicode_literals
 
 import frappe
-from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
-from .default_success_action import get_default_success_action
 from frappe import _
-from frappe.utils import cint
-from frappe.installer import update_site_config
-from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
-from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+from frappe.installer import update_site_config
+from frappe.utils import cint
 from six import iteritems
+
+from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
+from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+
+from .default_success_action import get_default_success_action
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
 	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
@@ -39,7 +41,7 @@ def check_setup_wizard_not_completed():
 	if cint(frappe.db.get_single_value('System Settings', 'setup_complete') or 0):
 		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed.
 You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"""
-		frappe.throw(message)
+		frappe.throw(message)   # nosemgrep
 
 
 def set_single_defaults():

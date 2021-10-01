@@ -2,13 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-import erpnext
-from frappe.desk.reportview import get_match_cond, get_filters_cond
-from frappe.utils import nowdate, getdate
+
+import json
 from collections import defaultdict
+
+import frappe
+from frappe import scrub
+from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.utils import nowdate, unique
+
+import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
-from frappe.utils import unique
+
 
 # searches for active employees
 @frappe.whitelist()
@@ -18,7 +23,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Employee", ["name", "employee_name"])
 
 	return frappe.db.sql("""select {fields} from `tabEmployee`
-		where status = 'Active'
+		where status in ('Active', 'Suspended')
 			and docstatus < 2
 			and ({key} like %(txt)s
 				or employee_name like %(txt)s)
@@ -87,7 +92,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Customer", fields)
 
 	searchfields = frappe.get_meta("Customer").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2
@@ -198,6 +203,9 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
 	#Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
@@ -216,11 +224,34 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
+	if filters and isinstance(filters, dict):
+		if filters.get('customer') or filters.get('supplier'):
+			party = filters.get('customer') or filters.get('supplier')
+			item_rules_list = frappe.get_all('Party Specific Item',
+				filters = {'party': party}, fields = ['restrict_based_on', 'based_on_value'])
+
+			filters_dict = {}
+			for rule in item_rules_list:
+				if rule['restrict_based_on'] == 'Item':
+					rule['restrict_based_on'] = 'name'
+				filters_dict[rule.restrict_based_on] = []
+
+			for rule in item_rules_list:
+				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
+
+			for filter in filters_dict:
+				filters[scrub(filter)] = ['in', filters_dict[filter]]
+
+			if filters.get('customer'):
+				del filters['customer']
+			else:
+				del filters['supplier']
+
+
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
-
 	return frappe.db.sql("""select tabItem.name,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
@@ -288,7 +319,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
-	if filters.get('customer'):
+	if filters and filters.get('customer'):
 		cond = """(`tabProject`.customer = %s or
 			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
@@ -299,7 +330,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select {fields} from `tabProject`
 		where
 			`tabProject`.status not in ("Completed", "Cancelled")
-			and {cond} {match_cond} {scond}
+			and {cond} {scond} {match_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc,
@@ -391,6 +422,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 			where
 				batch.disabled = 0
+				and sle.is_cancelled = 0
 				and sle.item_code = %(item_code)s
 				and sle.warehouse = %(warehouse)s
 				and (sle.batch_no like %(txt)s
@@ -500,7 +532,9 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
+	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+		get_dimension_filter_map,
+	)
 	dimension_filters = get_dimension_filter_map()
 	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
 	query_filters = []
@@ -508,6 +542,9 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	meta = frappe.get_meta(doctype)
 	if meta.is_tree:
 		query_filters.append(['is_group', '=', 0])
+
+	if meta.has_field('disabled'):
+		query_filters.append(['disabled', '!=', 1])
 
 	if meta.has_field('company'):
 		query_filters.append(['company', '=', filters.get('company')])
@@ -672,7 +709,9 @@ def get_healthcare_service_units(doctype, txt, searchfield, start, page_len, fil
 				company = frappe.db.escape(filters.get('company')), txt = frappe.db.escape('%{0}%'.format(txt)))
 
 	if filters and filters.get('inpatient_record'):
-		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
+			get_current_healthcare_service_unit,
+		)
 		service_unit = get_current_healthcare_service_unit(filters.get('inpatient_record'))
 
 		# if the patient is admitted, then appointments should be allowed against the admission service unit,

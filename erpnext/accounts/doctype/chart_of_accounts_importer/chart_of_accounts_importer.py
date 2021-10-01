@@ -3,17 +3,38 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import csv
+import os
 from functools import reduce
-import frappe, csv, os
+
+import frappe
 from frappe import _
-from frappe.utils import cstr, cint
 from frappe.model.document import Document
+from frappe.utils import cint, cstr
 from frappe.utils.csvutils import UnicodeWriter
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts, build_tree_from_json
-from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file, read_xls_file_from_attached_file
+from frappe.utils.xlsxutils import (
+	read_xls_file_from_attached_file,
+	read_xlsx_file_from_attached_file,
+)
+
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
+	build_tree_from_json,
+	create_charts,
+)
+
 
 class ChartofAccountsImporter(Document):
 	pass
+
+def validate_columns(data):
+	if not data:
+		frappe.throw(_('No data found. Seems like you uploaded a blank file'))
+
+	no_of_columns = max([len(d) for d in data])
+
+	if no_of_columns > 7:
+		frappe.throw(_('More columns found than expected. Please compare the uploaded file with standard template'))
 
 @frappe.whitelist()
 def validate_company(company):
@@ -22,7 +43,7 @@ def validate_company(company):
 		'allow_account_creation_against_child_company'])
 
 	if parent_company and (not allow_account_creation_against_child_company):
-		msg = _("{} is a child company. ").format(frappe.bold(company))
+		msg = _("{} is a child company.").format(frappe.bold(company)) + " "
 		msg += _("Please import accounts against parent company or enable {} in company master.").format(
 			frappe.bold('Allow Account Creation Against Child Company'))
 		frappe.throw(msg, title=_('Wrong Company'))
@@ -56,7 +77,7 @@ def get_file(file_name):
 	extension = extension.lstrip(".")
 
 	if extension not in ('csv',  'xlsx', 'xls'):
-		frappe.throw("Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload")
+		frappe.throw(_("Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload"))
 
 	return  file_doc, extension
 
@@ -118,6 +139,8 @@ def get_coa(doctype, parent, is_root=False, file_name=None):
 	else:
 		data = generate_data_from_excel(file_doc, extension)
 
+	validate_columns(data)
+	validate_accounts(data)
 	forest = build_forest(data)
 	accounts = build_tree_from_json("", chart_data=forest) # returns alist of dict in a tree render-able form
 
@@ -293,7 +316,7 @@ def validate_accounts(file_name):
 	accounts_dict = {}
 	for account in accounts:
 		accounts_dict.setdefault(account["account_name"], account)
-		if not hasattr(account, "parent_account"):
+		if "parent_account" not in account:
 			msg = _("Please make sure the file you are using has 'Parent Account' column present in the header.")
 			msg += "<br><br>"
 			msg += _("Alternatively, you can download the template and fill your data in.")
@@ -301,28 +324,24 @@ def validate_accounts(file_name):
 		if account["parent_account"] and accounts_dict.get(account["parent_account"]):
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
-	message = validate_root(accounts_dict)
-	if message: return message
-	message = validate_account_types(accounts_dict)
-	if message: return message
+	validate_root(accounts_dict)
+
+	validate_account_types(accounts_dict)
 
 	return [True, len(accounts)]
 
 def validate_root(accounts):
 	roots = [accounts[d] for d in accounts if not accounts[d].get('parent_account')]
-	if len(roots) < 4:
-		return _("Number of root accounts cannot be less than 4")
-
 	error_messages = []
 
 	for account in roots:
 		if not account.get("root_type") and account.get("account_name"):
-			error_messages.append("Please enter Root Type for account- {0}".format(account.get("account_name")))
+			error_messages.append(_("Please enter Root Type for account- {0}").format(account.get("account_name")))
 		elif account.get("root_type") not in get_root_types() and account.get("account_name"):
-			error_messages.append("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity".format(account.get("account_name")))
+			error_messages.append(_("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity").format(account.get("account_name")))
 
 	if error_messages:
-		return "<br>".join(error_messages)
+		frappe.throw("<br>".join(error_messages))
 
 def get_root_types():
 	return ('Asset', 'Liability', 'Expense', 'Income', 'Equity')
@@ -352,19 +371,11 @@ def get_mandatory_account_types():
 
 def validate_account_types(accounts):
 	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
-	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group'] == 1]
+	account_types = [accounts[d]["account_type"] for d in accounts if not cint(accounts[d]['is_group']) == 1]
 
 	missing = list(set(account_types_for_ledger) - set(account_types))
 	if missing:
-		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
-
-	account_types_for_group = ["Bank", "Cash", "Stock"]
-	# fix logic bug
-	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] == 1]
-
-	missing = list(set(account_types_for_group) - set(account_groups))
-	if missing:
-		return _("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing))
+		frappe.throw(_("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing)))
 
 def unset_existing_data(company):
 	linked = frappe.db.sql('''select fieldname from tabDocField
@@ -391,5 +402,5 @@ def set_default_accounts(company):
 	})
 
 	company.save()
-	install_country_fixtures(company.name)
+	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()

@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	data = get_data(filters)
@@ -108,5 +110,3 @@ def get_columns(filters):
 		"fieldtype": "Int",
 		"width": 180
 	}]
-
-

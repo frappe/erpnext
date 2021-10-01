@@ -3,17 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import json
+
 import frappe
+import six
 from frappe import _
-from frappe.model import default_fields
+from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
+from frappe.model.mapper import map_child_doc, map_doc
 from frappe.utils import flt, getdate, nowdate
 from frappe.utils.background_jobs import enqueue
-from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
-from frappe.core.page.background_jobs.background_jobs import get_info
-import json
-import six
+
 
 class POSInvoiceMergeLog(Document):
 	def validate(self):
@@ -21,6 +23,9 @@ class POSInvoiceMergeLog(Document):
 		self.validate_pos_invoice_status()
 
 	def validate_customer(self):
+		if self.merge_invoices_based_on == 'Customer Group':
+			return
+
 		for d in self.pos_invoices:
 			if d.customer != self.customer:
 				frappe.throw(_("Row #{}: POS Invoice {} is not against customer {}").format(d.idx, d.pos_invoice, self.customer))
@@ -42,8 +47,9 @@ class POSInvoiceMergeLog(Document):
 				if return_against_status != "Consolidated":
 					# if return entry is not getting merged in the current pos closing and if it is not consolidated
 					bold_unconsolidated = frappe.bold("not Consolidated")
-					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}. ")
+					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}.")
 								.format(d.idx, bold_return_against, bold_pos_invoice, bold_unconsolidated))
+					msg += " "
 					msg += _("Original invoice should be consolidated before or along with the return invoice.")
 					msg += "<br><br>"
 					msg += _("You can add original invoice {} manually to proceed.").format(bold_return_against)
@@ -56,11 +62,11 @@ class POSInvoiceMergeLog(Document):
 		sales = [d for d in pos_invoice_docs if d.get('is_return') == 0]
 
 		sales_invoice, credit_note = "", ""
-		if sales:
-			sales_invoice = self.process_merging_into_sales_invoice(sales)
-
 		if returns:
 			credit_note = self.process_merging_into_credit_note(returns)
+
+		if sales:
+			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
 		self.save() # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 
@@ -121,7 +127,7 @@ class POSInvoiceMergeLog(Document):
 				found = False
 				for i in items:
 					if (i.item_code == item.item_code and not i.serial_no and not i.batch_no and
-						i.uom == item.uom and i.net_rate == item.net_rate):
+						i.uom == item.uom and i.net_rate == item.net_rate and i.warehouse == item.warehouse):
 						found = True
 						i.qty = i.qty + item.qty
 
@@ -169,6 +175,11 @@ class POSInvoiceMergeLog(Document):
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
 		invoice.ignore_pricing_rule = 1
+		invoice.customer = self.customer
+
+		if self.merge_invoices_based_on == 'Customer Group':
+			invoice.flags.ignore_pos_profile = True
+			invoice.pos_profile = ''
 
 		return invoice
 
@@ -225,7 +236,7 @@ def get_all_unconsolidated_invoices():
 	return pos_invoices
 
 def get_invoice_customer_map(pos_invoices):
-	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }
+	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Customer 2' : [{}] }
 	pos_invoice_customer_map = {}
 	for invoice in pos_invoices:
 		customer = invoice.get('customer')
@@ -274,9 +285,9 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			closing_entry.db_set('error_message', '')
 			closing_entry.update_opening_entry()
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
-		message_log = frappe.message_log.pop()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
 		error_message = safe_load_json(message_log)
 
 		if closing_entry:
@@ -300,9 +311,9 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			closing_entry.db_set('error_message', '')
 			closing_entry.update_opening_entry(for_cancel=True)
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
-		message_log = frappe.message_log.pop()
+		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
 		error_message = safe_load_json(message_log)
 
 		if closing_entry:
@@ -348,11 +359,9 @@ def job_already_enqueued(job_name):
 		return True
 
 def safe_load_json(message):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
-
 	try:
 		json_message = json.loads(message).get('message')
-	except JSONDecodeError:
+	except Exception:
 		json_message = message
 
 	return json_message

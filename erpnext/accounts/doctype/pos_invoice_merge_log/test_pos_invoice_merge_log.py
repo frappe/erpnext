@@ -3,13 +3,18 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
 import json
-from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
-from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
+import unittest
+
+import frappe
+
 from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+	consolidate_pos_invoices,
+)
+
 
 class TestPOSInvoiceMergeLog(unittest.TestCase):
 	def test_consolidated_invoice_creation(self):
@@ -147,4 +152,3 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
-
