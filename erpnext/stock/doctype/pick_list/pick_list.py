@@ -61,8 +61,6 @@ class PickList(Document):
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
-		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		print(self.as_dict())
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
