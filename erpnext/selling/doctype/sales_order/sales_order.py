@@ -249,7 +249,7 @@ class SalesOrder(SellingController):
 			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order")
 				.format(", ".join(submit_rv)))
 
-		draft_rv = frappe.db.sql_list("""select t1.name
+		draft_rv = frappe.db.sql_list("""select distinct t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
 			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
 			self.name)
