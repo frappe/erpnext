@@ -19,6 +19,7 @@
   "material_consumption",
   "parent_warehouse",
   "get_item_locations",
+  "manual_picking",
   "section_break_6",
   "locations",
   "weight_details_section",
@@ -31,7 +32,6 @@
   "transaction_date",
   "delivery_note_done",
   "related_delivery_planning"
-
  ],
  "fields": [
   {
@@ -198,11 +198,17 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": " Delivery Note done"
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_picking",
+   "fieldtype": "Check",
+   "label": "Manual Picking"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-17 14:46:54.727434",
+ "modified": "2021-10-01 11:50:20.958460",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
