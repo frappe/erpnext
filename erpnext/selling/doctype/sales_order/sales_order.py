@@ -241,13 +241,23 @@ class SalesOrder(SellingController):
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql_list("""select t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus < 2""",
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""",
 			self.name)
 
 		if submit_rv:
 			submit_rv = [get_link_to_form("Sales Invoice", si) for si in submit_rv]
 			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order")
 				.format(", ".join(submit_rv)))
+
+		draft_rv = frappe.db.sql_list("""select t1.name
+			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
+			self.name)
+
+		if draft_rv:
+			draft_rv = [get_link_to_form("Sales Invoice", si) for si in draft_rv]
+			frappe.throw(_("Sales Invoice {0} must be deleted before cancelling this Sales Order")
+				.format(", ".join(draft_rv)))
 
 		#check maintenance schedule
 		submit_ms = frappe.db.sql_list("""
