@@ -17,6 +17,11 @@ from erpnext.hr.doctype.employee_referral.employee_referral import (
 
 
 class TestEmployeeReferral(unittest.TestCase):
+
+	def setUp(self):
+		frappe.db.sql("DELETE FROM `tabJob Applicant`")
+		frappe.db.sql("DELETE FROM `tabEmployee Referral`")
+
 	def test_workflow_and_status_sync(self):
 		emp_ref = create_employee_referral()
 
@@ -49,6 +54,10 @@ class TestEmployeeReferral(unittest.TestCase):
 
 		add_sal = create_additional_salary(emp_ref)
 		self.assertTrue(add_sal.ref_docname, emp_ref.name)
+
+	def tearDown(self):
+		frappe.db.sql("DELETE FROM `tabJob Applicant`")
+		frappe.db.sql("DELETE FROM `tabEmployee Referral`")
 
 
 def create_employee_referral():
