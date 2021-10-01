@@ -235,35 +235,35 @@ frappe.ui.form.on("Leave Application", {
 	}
 });
 
-frappe.tour['Leave Application'] = [
+frappe.tour["Leave Application"] = [
 	{
 		fieldname: "employee",
 		title: "Employee",
-		description: __("Select Employee, You want to apply for some leaves")
+		description: __("Select the Employee.")
 	},
 	{
 		fieldname: "leave_type",
 		title: "Leave Type",
-		description: __("Select Leave Type like  Sick leave, privilege leave, Casual leave, etc.")
+		description: __("Select type of leave the employee wants to apply for, like Sick Leave, Privilege Leave, Casual Leave, etc.")
 	},
 	{
 		fieldname: "from_date",
 		title: "From Date",
-		description: __("Select From Date for your Leave Application")
+		description: __("Select the start date for your Leave Application.")
 	},
 	{
 		fieldname: "to_date",
-		title: 'To Date',
-		description: __("Select to Date for your Leave Application")
+		title: "To Date",
+		description: __("Select the end date for your Leave Application.")
 	},
 	{
 		fieldname: "half_day",
-		title: 'Half Day',
-		description: __("To apply for Half day check half day and select Half Day Date")
+		title: "Half Day",
+		description: __("To apply for a Half Day check 'Half Day' and select the Half Day Date")
 	},
 	{
 		fieldname: "leave_approver",
 		title: "Leave Approver",
-		description: __("Select Your Leave approver, person who look for your leave Application approval and rejection")
+		description: __("Select your Leave Approver i.e. the person who approves or rejects your leaves.")
 	}
 ];

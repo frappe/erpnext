@@ -102,30 +102,30 @@ frappe.ui.form.on("Leave Allocation", {
 	}
 });
 
-frappe.tour['Leave Allocation'] = [
+frappe.tour["Leave Allocation"] = [
 	{
 		fieldname: "employee",
 		title: "Employee",
-		description: __("Select Employee, You want to allocate with some leaves")
+		description: __("Select the Employee for which you want to allocate leaves.")
 	},
 	{
 		fieldname: "leave_type",
 		title: "Leave Type",
-		description: __("Select Leave Type like  Sick leave, privilege leave, Casual leave, etc.")
+		description: __("Select the Leave Type like Sick leave, Privilege Leave, Casual Leave, etc.")
 	},
 	{
 		fieldname: "from_date",
 		title: "From Date",
-		description: __("Select From Date from that Leave Allocation will be valid")
+		description: __("Select the date from which this Leave Allocation will be valid.")
 	},
 	{
 		fieldname: "to_date",
-		title: 'To Date',
-		description: __("Select To Date after this Leave Allocation will expire")
+		title: "To Date",
+		description: __("Select the date after which this Leave Allocation will expire.")
 	},
 	{
 		fieldname: "new_leaves_allocated",
 		title: "New Leaves Allocated",
-		description: __("Type number of leaves you want to allocate for the period")
+		description: __("Enter the number of leaves you want to allocate for the period.")
 	}
 ];
