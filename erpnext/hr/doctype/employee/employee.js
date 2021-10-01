@@ -3,8 +3,8 @@
 
 frappe.provide("erpnext.hr");
 erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
-	setup: function () {
-		this.frm.fields_dict.user_id.get_query = function () {
+	setup: function() {
+		this.frm.fields_dict.user_id.get_query = function() {
 			return {
 				query: "frappe.core.doctype.user.user.user_query",
 				filters: {
@@ -12,18 +12,18 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 				}
 			};
 		};
-		this.frm.fields_dict.reports_to.get_query = function () {
+		this.frm.fields_dict.reports_to.get_query = function() {
 			return {
 				query: "erpnext.controllers.queries.employee_query"
 			};
 		};
 	},
 
-	refresh: function () {
+	refresh: function() {
 		erpnext.toggle_naming_series();
 	},
 
-	date_of_birth: function () {
+	date_of_birth: function() {
 		return cur_frm.call({
 			method: "get_retirement_date",
 			args: {
@@ -32,7 +32,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	salutation: function () {
+	salutation: function() {
 		if (this.frm.doc.salutation) {
 			this.frm.set_value("gender", {
 				"Mr": "Male",
@@ -44,7 +44,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 });
 frappe.ui.form.on('Employee', {
 	setup: function (frm) {
-		frm.set_query("leave_policy", function () {
+		frm.set_query("leave_policy", function() {
 			return {
 				"filters": {
 					"docstatus": 1
@@ -53,7 +53,7 @@ frappe.ui.form.on('Employee', {
 		});
 	},
 	onload: function (frm) {
-		frm.set_query("department", function () {
+		frm.set_query("department", function() {
 			return {
 				"filters": {
 					"company": frm.doc.company,
@@ -61,24 +61,29 @@ frappe.ui.form.on('Employee', {
 			};
 		});
 	},
-	prefered_contact_email: function (frm) {
+	prefered_contact_email: function(frm) {
 		frm.events.update_contact(frm);
 	},
-	personal_email: function (frm) {
+
+	personal_email: function(frm) {
 		frm.events.update_contact(frm);
 	},
-	company_email: function (frm) {
+
+	company_email: function(frm) {
 		frm.events.update_contact(frm);
 	},
-	user_id: function (frm) {
+
+	user_id: function(frm) {
 		frm.events.update_contact(frm);
 	},
-	update_contact: function (frm) {
+
+	update_contact: function(frm) {
 		var prefered_email_fieldname = frappe.model.scrub(frm.doc.prefered_contact_email) || 'user_id';
 		frm.set_value("prefered_email",
 			frm.fields_dict[prefered_email_fieldname].value);
 	},
-	status: function (frm) {
+
+	status: function(frm) {
 		return frm.call({
 			method: "deactivate_sales_person",
 			args: {
@@ -87,7 +92,8 @@ frappe.ui.form.on('Employee', {
 			}
 		});
 	},
-	create_user: function (frm) {
+
+	create_user: function(frm) {
 		if (!frm.doc.prefered_email) {
 			frappe.throw(__("Please enter Preferred Contact Email"));
 		}
@@ -103,6 +109,7 @@ frappe.ui.form.on('Employee', {
 		});
 	}
 });
+
 cur_frm.cscript = new erpnext.hr.EmployeeController({
 	frm: cur_frm
 });

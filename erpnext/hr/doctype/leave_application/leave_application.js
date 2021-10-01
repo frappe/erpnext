@@ -5,8 +5,8 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 cur_frm.add_fetch('employee', 'company', 'company');
 
 frappe.ui.form.on("Leave Application", {
-	setup: function (frm) {
-		frm.set_query("leave_approver", function () {
+	setup: function(frm) {
+		frm.set_query("leave_approver", function() {
 			return {
 				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
 				filters: {
@@ -31,7 +31,7 @@ frappe.ui.form.on("Leave Application", {
 				args: {
 					doctype: frm.doc.doctype,
 				},
-				callback: function (r) {
+				callback: function(r) {
 					if (!r.exc && r.message) {
 						frm.toggle_reqd("leave_approver", true);
 					}
@@ -49,7 +49,7 @@ frappe.ui.form.on("Leave Application", {
 		frm.toggle_reqd("half_day_date", frm.doc.half_day == 1);
 	},
 
-	make_dashboard: function (frm) {
+	make_dashboard: function(frm) {
 		var leave_details;
 		let lwps;
 		if (frm.doc.employee) {
@@ -60,7 +60,7 @@ frappe.ui.form.on("Leave Application", {
 					employee: frm.doc.employee,
 					date: frm.doc.from_date || frm.doc.posting_date
 				},
-				callback: function (r) {
+				callback: function(r) {
 					if (!r.exc && r.message['leave_allocation']) {
 						leave_details = r.message['leave_allocation'];
 					}
@@ -93,7 +93,7 @@ frappe.ui.form.on("Leave Application", {
 		}
 	},
 
-	refresh: function (frm) {
+	refresh: function(frm) {
 		if (frm.is_new()) {
 			frm.trigger("calculate_total_days");
 		}
@@ -110,7 +110,7 @@ frappe.ui.form.on("Leave Application", {
 		}
 	},
 
-	employee: function (frm) {
+	employee: function(frm) {
 		frm.trigger("make_dashboard");
 		frm.trigger("get_leave_balance");
 		frm.trigger("set_leave_approver");
@@ -122,11 +122,11 @@ frappe.ui.form.on("Leave Application", {
 		}
 	},
 
-	leave_type: function (frm) {
+	leave_type: function(frm) {
 		frm.trigger("get_leave_balance");
 	},
 
-	half_day: function (frm) {
+	half_day: function(frm) {
 		if (frm.doc.half_day) {
 			if (frm.doc.from_date == frm.doc.to_date) {
 				frm.set_value("half_day_date", frm.doc.from_date);
@@ -139,13 +139,13 @@ frappe.ui.form.on("Leave Application", {
 		frm.trigger("calculate_total_days");
 	},
 
-	from_date: function (frm) {
+	from_date: function(frm) {
 		frm.trigger("make_dashboard");
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
 	},
 
-	to_date: function (frm) {
+	to_date: function(frm) {
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
 	},
@@ -154,7 +154,7 @@ frappe.ui.form.on("Leave Application", {
 		frm.trigger("calculate_total_days");
 	},
 
-	half_day_datepicker: function (frm) {
+	half_day_datepicker: function(frm) {
 		frm.set_value('half_day_date', '');
 		var half_day_datepicker = frm.fields_dict.half_day_date.datepicker;
 		half_day_datepicker.update({
@@ -207,7 +207,7 @@ frappe.ui.form.on("Leave Application", {
 					"half_day": frm.doc.half_day,
 					"half_day_date": frm.doc.half_day_date,
 				},
-				callback: function (r) {
+				callback: function(r) {
 					if (r && r.message) {
 						frm.set_value('total_leave_days', r.message);
 						frm.trigger("get_leave_balance");
@@ -225,7 +225,7 @@ frappe.ui.form.on("Leave Application", {
 				args: {
 					"employee": frm.doc.employee,
 				},
-				callback: function (r) {
+				callback: function(r) {
 					if (r && r.message) {
 						frm.set_value('leave_approver', r.message);
 					}
