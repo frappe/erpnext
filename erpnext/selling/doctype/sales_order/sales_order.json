@@ -1481,6 +1481,7 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -1519,7 +1520,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-11 07:29:55.610459",
+ "modified": "2021-10-01 13:09:51.515542",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

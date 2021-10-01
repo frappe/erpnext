@@ -1278,6 +1278,7 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -1315,7 +1316,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-11 07:47:49.022061",
+ "modified": "2021-10-01 13:10:09.761714",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
