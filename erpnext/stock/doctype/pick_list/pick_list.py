@@ -203,13 +203,12 @@ def get_items_with_location_and_quantity(manual_picking,item_doc, item_location_
 			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
 
 		item_dict = item_doc.as_dict()
-		parent_doc = frappe.get_doc("Pick List",item_dict.get("parent"))
+		#parent_doc = frappe.get_doc("Pick List",item_dict.get("parent"))
 		if manual_picking == 1:
 			item_batch_no = item_dict.batch_no
 		else:
 			item_batch_no = item_location.batch_no
 
-		print(item_dict)
 		locations.append(frappe._dict({
 			'qty': qty,
 			'stock_qty': stock_qty,
