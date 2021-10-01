@@ -9,16 +9,20 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
+  "details_section",
   "applicant_name",
   "email_id",
   "phone_number",
   "country",
-  "status",
   "column_break_3",
   "job_title",
+  "designation",
+  "status",
+  "source_and_rating_section",
   "source",
   "source_name",
   "employee_referral",
+  "column_break_13",
   "applicant_rating",
   "section_break_6",
   "notes",
@@ -84,7 +88,8 @@
   },
   {
    "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Resume"
   },
   {
    "fieldname": "cover_letter",
@@ -160,13 +165,34 @@
    "label": "Employee Referral",
    "options": "Employee Referral",
    "read_only": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "source_and_rating_section",
+   "fieldtype": "Section Break",
+   "label": "Source and Rating"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "job_opening.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
   }
  ],
  "icon": "fa fa-user",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-24 15:51:11.117517",
+ "modified": "2021-09-29 23:06:10.904260",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Applicant",
