@@ -118,4 +118,6 @@ class BankTransactions(Document):
 		else:
 			doc.deferred_debits += self.amount_data
 		
+		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+		
 		doc.save()

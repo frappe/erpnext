@@ -43,10 +43,15 @@ class Bankreconciliations(Document):
 			doc.save()
 	
 	def create_reconciled_balance(self):
+		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction", "amount"], filters = {"parent": self.name})
+
+		transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
+
 		doc = frappe.new_doc("Reconciled balances")
 		doc.reconciled_date = self.date
 		doc.reconciled_balance = self.transaction_amount
 		doc.docstatus = 1
+		doc.bank_account = transaction[0].bank_account
 		doc.insert()
 	
 	def on_cancel(self):
@@ -67,5 +72,7 @@ class Bankreconciliations(Document):
 				doc.deferred_credits -= detail.amount
 			else:
 				doc.deferred_debits -= detail.amount
+		
+		doc.current_balance = doc.deferred_credits - doc.deferred_debits
 
 		doc.save()

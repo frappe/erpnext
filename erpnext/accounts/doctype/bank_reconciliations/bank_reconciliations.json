@@ -35,12 +35,14 @@
   {
    "fieldname": "transaction_amount",
    "fieldtype": "Currency",
-   "label": "Transaction Amount"
+   "label": "Transaction Amount",
+   "read_only": 1
   },
   {
    "fieldname": "defference_amount",
    "fieldtype": "Currency",
-   "label": "Difference Of Amounts"
+   "label": "Difference Of Amounts",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -60,7 +62,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-09-21 13:49:14.439379",
+ "modified": "2021-10-01 08:39:37.892380",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank reconciliations",
