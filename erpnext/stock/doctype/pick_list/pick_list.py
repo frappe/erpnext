@@ -61,6 +61,8 @@ class PickList(Document):
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
+		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		print(self.as_dict())
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
@@ -83,7 +85,7 @@ class PickList(Document):
 			self.item_location_map.setdefault(item_code,
 				get_available_item_locations(self,item_code, from_warehouses, self.item_count_map.get(item_code), self.company))
 
-			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
+			locations = get_items_with_location_and_quantity(self.manual_picking,item_doc, self.item_location_map, self.docstatus)
 
 			item_doc.idx = None
 			item_doc.name = None
@@ -176,7 +178,7 @@ def validate_item_locations(pick_list):
 	if not pick_list.locations:
 		frappe.throw(_("Add items in the Item Locations table"))
 
-def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
+def get_items_with_location_and_quantity(manual_picking,item_doc, item_location_map, docstatus):
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
 
@@ -199,14 +201,21 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 		serial_nos = None
 		if item_location.serial_no:
 			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
-		
+
 		item_dict = item_doc.as_dict()
+		parent_doc = frappe.get_doc("Pick List",item_dict.get("parent"))
+		if manual_picking == 1:
+			item_batch_no = item_dict.batch_no
+		else:
+			item_batch_no = item_location.batch_no
+
+		print(item_dict)
 		locations.append(frappe._dict({
 			'qty': qty,
 			'stock_qty': stock_qty,
 			'warehouse': item_location.warehouse,
 			'serial_no': serial_nos,
-			'batch_no': item_dict.batch_no
+			'batch_no': item_batch_no
 		}))
 
 		remaining_stock_qty -= stock_qty
