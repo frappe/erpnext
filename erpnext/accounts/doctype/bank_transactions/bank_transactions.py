@@ -114,8 +114,10 @@ class BankTransactions(Document):
 		doc = frappe.get_doc("Bank Account", self.bank_account)
 
 		if self.transaction_data == "Bank Check" or self.transaction_data== "Credit Note":
-			doc.deferred_credits += self.amount_data
-		else:
 			doc.deferred_debits += self.amount_data
+		else:
+			doc.deferred_credits += self.amount_data
+		
+		doc.current_balance = doc.deferred_credits - doc.deferred_debits
 		
 		doc.save()

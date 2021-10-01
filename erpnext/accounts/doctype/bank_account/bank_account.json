@@ -21,6 +21,7 @@
   "account_balance_column",
   "deferred_debits",
   "deferred_credits",
+  "current_balance",
   "section_break_11",
   "party_type",
   "column_break_14",
@@ -224,14 +225,12 @@
   {
    "fieldname": "reconciliation_date",
    "fieldtype": "Date",
-   "label": "Last Reconciliation date",
-   "read_only": 1
+   "label": "Last Reconciliation date"
   },
   {
    "fieldname": "total_reconciliation",
    "fieldtype": "Currency",
-   "label": "Total Last Reconciliation",
-   "read_only": 1
+   "label": "Total Last Reconciliation"
   },
   {
    "fieldname": "account_balance_column",
@@ -240,7 +239,7 @@
   {
    "fieldname": "deferred_debits",
    "fieldtype": "Currency",
-   "label": "Deferred debits",
+   "label": "Deferred Debits",
    "read_only": 1
   },
   {
@@ -248,9 +247,15 @@
    "fieldtype": "Currency",
    "label": "Deferred Credits",
    "read_only": 1
+  },
+  {
+   "fieldname": "current_balance",
+   "fieldtype": "Currency",
+   "label": "Current Balance",
+   "read_only": 1
   }
  ],
- "modified": "2021-09-28 15:41:30.108758",
+ "modified": "2021-10-01 08:36:32.035990",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
