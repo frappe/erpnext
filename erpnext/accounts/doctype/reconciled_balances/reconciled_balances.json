@@ -8,6 +8,7 @@
   "naming_series",
   "reconciled_date",
   "reconciled_balance",
+  "bank_account",
   "amended_from"
  ],
  "fields": [
@@ -35,10 +36,16 @@
    "options": "Reconciled balances",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bnk Account",
+   "options": "Bank Account"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-09-22 16:03:52.338511",
+ "modified": "2021-10-01 08:27:52.904928",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Reconciled balances",
