@@ -93,13 +93,14 @@ class LeaveApplication(Document):
 						frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, leave_type.applicable_after))
 
 	def validate_dates(self):
-		if not frappe.db.get_single_value("HR Settings", "allow_backdated_leave_application"):
-			if self.from_date and self.from_date < frappe.utils.today():
+		if frappe.db.get_single_value("HR Settings", "restrict_backdated_leave_application"):
+			if self.from_date and getdate(self.from_date) < getdate():
 				allowed_role = frappe.db.get_single_value("HR Settings", "role_allowed_to_create_backdated_leave_application")
 				user = frappe.get_doc("User", frappe.session.user)
 				user_roles = [d.role for d in user.roles]
 				if not allowed_role:
-					frappe.throw(_('Backdated Leave Application is restricted. Please set "Role Allowed to Create Backdated Leave Application" in Hr settings'))
+					frappe.throw(_("Backdated Leave Application is restricted. Please set the {} in {}").format(
+						frappe.bold("Role Allowed to Create Backdated Leave Application"), get_link_to_form("HR Settings", "HR Settings")))
 
 				if (allowed_role and allowed_role not in user_roles):
 					frappe.throw(_("Only users with the {0} role can create backdated leave applications").format(allowed_role))
