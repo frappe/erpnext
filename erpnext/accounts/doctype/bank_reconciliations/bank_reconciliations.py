@@ -9,6 +9,9 @@ from frappe import _
 
 class Bankreconciliations(Document):
 	def validate(self):
+		if self.docstatus == 0:
+			self.verificate_bank_account()
+
 		if self.docstatus == 1:
 			self.verificate_defference_amount()
 			self.conciliation_transactions()
@@ -43,10 +46,15 @@ class Bankreconciliations(Document):
 			doc.save()
 	
 	def create_reconciled_balance(self):
+		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction", "amount"], filters = {"parent": self.name})
+
+		transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
+
 		doc = frappe.new_doc("Reconciled balances")
 		doc.reconciled_date = self.date
 		doc.reconciled_balance = self.transaction_amount
 		doc.docstatus = 1
+		doc.bank_account = transaction[0].bank_account
 		doc.insert()
 	
 	def on_cancel(self):
@@ -64,8 +72,19 @@ class Bankreconciliations(Document):
 		for detail in details:
 			transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": detail.bank_trasaction})
 			if transac[0].transaction_data == "Bank Check" or transac[0].transaction_data== "Credit Note":
-				doc.deferred_credits -= detail.amount
+				doc.deferred_debits -= self.amount_data
 			else:
-				doc.deferred_debits -= detail.amount
+				doc.deferred_credits -= self.amount_data
+		
+		doc.current_balance = doc.deferred_credits - doc.deferred_debits
 
 		doc.save()
+	
+	def verificate_bank_account(self):
+		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction", "amount"], filters = {"parent": self.name})
+
+		for detail in details:
+			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": detail.bank_trasaction})
+
+			if transaction[0].bank_account != self.bank_account:
+				frappe.throw(_("Bank transaction {} has a different bank account {} than the one selected".format(detail.bank_trasaction, transaction[0].bank_account)))

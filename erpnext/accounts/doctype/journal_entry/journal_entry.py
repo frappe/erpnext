@@ -48,7 +48,7 @@ class JournalEntry(AccountsController):
 	
 	def on_update(self):
 		detailamount = frappe.get_all("Journal Entry Account", ["name"], filters = {"parent": self.name})
-		if len(detailamount) == 0 and self.bank_transaction != None:
+		if len(detailamount) == 0 and self.bank_transaction != None and self.is_transaction:
 			self.create_register()
 		
 		self.validate_empty_accounts_table()
@@ -74,16 +74,18 @@ class JournalEntry(AccountsController):
 		# doc.save()
 	
 	def check_transaction(self):
-		transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
-		doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
-		doc_tran.accounting_seat = 1
-		doc_tran.save()
+		if self.bank_transaction != None and self.is_transaction:
+			transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+			doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
+			doc_tran.accounting_seat = 1
+			doc_tran.save()
 	
 	def uncheck_transaction(self):
-		transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
-		doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
-		doc_tran.accounting_seat = 0
-		doc_tran.save()
+		if self.bank_transaction != None and self.is_transaction:
+			transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+			doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
+			doc_tran.accounting_seat = 0
+			doc_tran.save()
 
 	def on_submit(self):
 		self.validate_cheque_info()
