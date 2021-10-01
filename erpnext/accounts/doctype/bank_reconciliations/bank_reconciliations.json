@@ -7,6 +7,7 @@
  "field_order": [
   "naming_series",
   "date",
+  "bank_account",
   "detail",
   "bank_amount",
   "transaction_amount",
@@ -59,10 +60,17 @@
    "label": "Bank reconciliations Detail",
    "options": "Bank reconciliations Detail",
    "reqd": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-10-01 08:39:37.892380",
+ "modified": "2021-10-01 09:37:28.473168",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank reconciliations",

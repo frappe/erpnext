@@ -9,6 +9,9 @@ from frappe import _
 
 class Bankreconciliations(Document):
 	def validate(self):
+		if self.docstatus == 0:
+			self.verificate_bank_account()
+
 		if self.docstatus == 1:
 			self.verificate_defference_amount()
 			self.conciliation_transactions()
@@ -76,3 +79,12 @@ class Bankreconciliations(Document):
 		doc.current_balance = doc.deferred_credits - doc.deferred_debits
 
 		doc.save()
+	
+	def verificate_bank_account(self):
+		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction", "amount"], filters = {"parent": self.name})
+
+		for detail in details:
+			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": detail.bank_trasaction})
+
+			if transaction[0].bank_account != self.bank_account:
+				frappe.throw(_("Bank transaction {} has a different bank account {} than the one selected".format(detail.bank_trasaction, transaction[0].bank_account)))
