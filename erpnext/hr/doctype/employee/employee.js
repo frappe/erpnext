@@ -27,16 +27,16 @@ erpnext.hr.EmployeeController = class EmployeeController extends frappe.ui.form.
 		});
 	}
 
-	salutation: function() {
+	salutation() {
 		if (this.frm.doc.salutation) {
 			this.frm.set_value("gender", {
 				"Mr": "Male",
 				"Ms": "Female"
-			} [this.frm.doc.salutation]);
+			}[this.frm.doc.salutation]);
 		}
 	}
 
-});
+};
 
 frappe.ui.form.on('Employee', {
 	setup: function (frm) {
