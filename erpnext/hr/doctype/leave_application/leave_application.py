@@ -12,6 +12,7 @@ from frappe.utils import (
 	date_diff,
 	flt,
 	formatdate,
+	get_fullname,
 	get_link_to_form,
 	getdate,
 	nowdate,
@@ -58,6 +59,11 @@ class LeaveApplication(Document):
 		self.validate_applicable_after()
 
 	def on_update(self):
+		if self.status == "Open" and self.docstatus < 1:
+			# notify leave approver about creation
+			if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+				self.notify_leave_approver()
+
 		share_doc_with_approver(self, self.leave_approver)
 
 	def on_submit(self):
@@ -67,6 +73,10 @@ class LeaveApplication(Document):
 		self.validate_back_dated_application()
 		self.update_attendance()
 
+		# notify leave applier about approval
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
+
 		self.create_leave_ledger_entry()
 		self.reload()
 
@@ -75,6 +85,9 @@ class LeaveApplication(Document):
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
+		# notify leave applier about cancellation
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
 		self.cancel_attendance()
 
 	def validate_applicable_after(self):
@@ -315,6 +328,74 @@ class LeaveApplication(Document):
 
 		if self.half_day == 0:
 			self.half_day_date = None
+
+	def notify_employee(self):
+		employee = frappe.get_doc("Employee", self.employee)
+		if not employee.user_id:
+			return
+
+		parent_doc = frappe.get_doc('Leave Application', self.name)
+		args = parent_doc.as_dict()
+
+		template = frappe.db.get_single_value('HR Settings', 'leave_status_notification_template')
+		if not template:
+			frappe.msgprint(_("Please set default template for Leave Status Notification in HR Settings."))
+			return
+		email_template = frappe.get_doc("Email Template", template)
+		message = frappe.render_template(email_template.response, args)
+
+		self.notify({
+			# for post in messages
+			"message": message,
+			"message_to": employee.user_id,
+			# for email
+			"subject": email_template.subject,
+			"notify": "employee"
+		})
+
+	def notify_leave_approver(self):
+		if self.leave_approver:
+			parent_doc = frappe.get_doc('Leave Application', self.name)
+			args = parent_doc.as_dict()
+
+			template = frappe.db.get_single_value('HR Settings', 'leave_approval_notification_template')
+			if not template:
+				frappe.msgprint(_("Please set default template for Leave Approval Notification in HR Settings."))
+				return
+			email_template = frappe.get_doc("Email Template", template)
+			message = frappe.render_template(email_template.response, args)
+
+			self.notify({
+				# for post in messages
+				"message": message,
+				"message_to": self.leave_approver,
+				# for email
+				"subject": email_template.subject
+			})
+
+	def notify(self, args):
+		args = frappe._dict(args)
+		# args -> message, message_to, subject
+		if cint(self.follow_via_email):
+			contact = args.message_to
+			if not isinstance(contact, list):
+				if not args.notify == "employee":
+					contact = frappe.get_doc('User', contact).email or contact
+
+			sender      	    = dict()
+			sender['email']     = frappe.get_doc('User', frappe.session.user).email
+			sender['full_name'] = get_fullname(sender['email'])
+
+			try:
+				frappe.sendmail(
+					recipients = contact,
+					sender = sender['email'],
+					subject = args.subject,
+					message = args.message,
+				)
+				frappe.msgprint(_("Email sent to {0}").format(contact))
+			except frappe.OutgoingEmailError:
+				pass
 
 	def create_leave_ledger_entry(self, submit=True):
 		if self.status != 'Approved' and submit:

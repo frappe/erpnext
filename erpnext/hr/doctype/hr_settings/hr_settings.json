@@ -19,12 +19,15 @@
   "send_holiday_reminders",
   "frequency",
   "leave_and_expense_claim_settings",
+  "send_leave_notification",
+  "leave_approval_notification_template",
+  "leave_status_notification_template",
   "leave_approver_mandatory_in_leave_application",
-  "show_leaves_of_all_department_members_in_calendar",
   "restrict_backdated_leave_application",
   "role_allowed_to_create_backdated_leave_application",
   "column_break_29",
   "expense_approver_mandatory_in_expense_claim",
+  "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
   "hiring_settings_section",
   "check_vacancies",
@@ -93,6 +96,28 @@
    "label": "Role Allowed to Create Backdated Leave Application",
    "mandatory_depends_on": "eval:doc.restrict_backdated_leave_application == 1",
    "options": "Role"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_leave_notification",
+   "fieldtype": "Check",
+   "label": "Send Leave Notification"
+  },
+  {
+   "depends_on": "eval: doc.send_leave_notification == 1",
+   "fieldname": "leave_approval_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Approval Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "eval: doc.send_leave_notification == 1",
+   "fieldname": "leave_status_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Status Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
+   "options": "Email Template"
   },
   {
    "fieldname": "standard_working_hours",
@@ -207,7 +232,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-01 23:27:39.247585",
+ "modified": "2021-10-01 23:46:11.098236",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
