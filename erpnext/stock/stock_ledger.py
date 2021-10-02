@@ -904,7 +904,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 		company = erpnext.get_default_company()
 
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
 			item_code = %s
 			AND warehouse = %s
@@ -915,7 +915,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry`
+			from `tabStock Ledger Entry` force index (item_code)
 			where
 				item_code = %s
 				AND valuation_rate > 0
