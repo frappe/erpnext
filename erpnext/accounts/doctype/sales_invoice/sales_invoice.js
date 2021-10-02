@@ -453,7 +453,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				let row = frappe.get_doc(d.doctype, d.name)
 				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
 			});
-			calculate_total_billing_amount(this.frm);
+			frm.trigger("calculate_timesheet_totals");
 		}
 	}
 };
@@ -1001,7 +1001,7 @@ frappe.ui.form.on('Sales Invoice', {
 });
 
 frappe.ui.form.on("Sales Invoice Timesheet", {
-	timesheets_remove(frm, cdt, cdn) {
+	timesheets_remove(frm) {
 		frm.trigger("calculate_timesheet_totals");
 	}
 });
