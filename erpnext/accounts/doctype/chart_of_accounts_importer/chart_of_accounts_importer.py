@@ -286,7 +286,7 @@ def get_template(template_type):
 def get_sample_template(writer):
 	template = [
 		["Application Of Funds(Assets)", "", "", "", 1, "", "Asset"],
-		# ["Sources Of Funds(Liabilities)", "", "", "", 1, "", "Liability"],
+		["Sources Of Funds(Liabilities)", "", "", "", 1, "", "Liability"],
 		["Equity", "", "", "", 1, "", "Equity"],
 		["Expenses", "", "", "", 1, "", "Expense"],
 		["Income", "", "", "", 1, "", "Income"],
