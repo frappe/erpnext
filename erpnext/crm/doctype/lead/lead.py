@@ -75,22 +75,6 @@ class Lead(SellingController):
 		self.add_calendar_event()
 		self.update_prospects()
 
-	def before_insert(self):
-		self.contact_doc = self.create_contact()
-
-	def after_insert(self):
-		self.update_links()
-
-	def update_links(self):
-		# update contact links
-		if self.contact_doc:
-			self.contact_doc.append("links", {
-				"link_doctype": "Lead",
-				"link_name": self.name,
-				"link_title": self.lead_name
-			})
-			self.contact_doc.save()
-
 	def add_calendar_event(self, opts=None, force=False):
 		super(Lead, self).add_calendar_event({
 			"owner": self.lead_owner,
