@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.hr");
-<<<<<<< HEAD
 erpnext.hr.EmployeeController = class EmployeeController extends frappe.ui.form.Controller {
 	setup() {
 		this.frm.fields_dict.user_id.get_query = function(doc, cdt, cdn) {
@@ -16,27 +15,6 @@ erpnext.hr.EmployeeController = class EmployeeController extends frappe.ui.form.
 	}
 
 	refresh() {
-		var me = this;
-=======
-erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
-	setup: function() {
-		this.frm.fields_dict.user_id.get_query = function() {
-			return {
-				query: "frappe.core.doctype.user.user.user_query",
-				filters: {
-					ignore_user_type: 1
-				}
-			};
-		};
-		this.frm.fields_dict.reports_to.get_query = function() {
-			return {
-				query: "erpnext.controllers.queries.employee_query"
-			};
-		};
-	},
-
-	refresh: function() {
->>>>>>> 4837238f3d (feat(HR): Some Enhancements and Onboarding (#25741))
 		erpnext.toggle_naming_series();
 	}
 
@@ -49,13 +27,8 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		});
 	}
 
-<<<<<<< HEAD
-	salutation() {
-		if(this.frm.doc.salutation) {
-=======
 	salutation: function() {
 		if (this.frm.doc.salutation) {
->>>>>>> 4837238f3d (feat(HR): Some Enhancements and Onboarding (#25741))
 			this.frm.set_value("gender", {
 				"Mr": "Male",
 				"Ms": "Female"
@@ -63,15 +36,10 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		}
 	}
 
-<<<<<<< HEAD
-};
-frappe.ui.form.on('Employee',{
-	setup: function(frm) {
-=======
 });
+
 frappe.ui.form.on('Employee', {
 	setup: function (frm) {
->>>>>>> 4837238f3d (feat(HR): Some Enhancements and Onboarding (#25741))
 		frm.set_query("leave_policy", function() {
 			return {
 				"filters": {
