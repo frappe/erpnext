@@ -115,7 +115,7 @@ var create_import_button = function(frm) {
 				freeze: true,
 				freeze_message: __("Creating Accounts..."),
 				callback: function(r) {
-					if(!r.exc) {
+					if (!r.exc) {
 						clearInterval(frm.page["interval"]);
 						frm.page.set_indicator(__('Import Successful'), 'blue');
 						create_reset_button(frm);
@@ -152,7 +152,7 @@ var validate_coa = function(frm) {
 					frm.page['show_import_button'] = Boolean(r.message['show_import_button']);
 				}
 			}
-		})
+		});
 	}
 };
 
