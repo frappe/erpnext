@@ -48,7 +48,6 @@
    "unique": 1
   },
   {
-   "description": "Allows you to set the maximum number of the annual allocation of this Leave Type while creating the Leave Policy.",
    "fieldname": "max_leaves_allowed",
    "fieldtype": "Int",
    "label": "Maximum Leave Allocation Allowed"
@@ -59,7 +58,6 @@
    "label": "Applicable After (Working Days)"
   },
   {
-   "description": "Set the maximum number of leaves employees can take for consecutive days while creating the Leave Application.",
    "fieldname": "max_continuous_days_allowed",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -208,7 +206,7 @@
   },
   {
    "depends_on": "eval:doc.is_ppl == 1",
-   "description": "For a day of leave taken, if you still pay (say) 50% of your daily salary, then put 0.50 in this field.",
+   "description": "For a day of leave taken, if you still pay (say) 50% of the daily salary, then enter 0.50 in this field.",
    "fieldname": "fraction_of_daily_salary_per_leave",
    "fieldtype": "Float",
    "label": "Fraction of Daily Salary per Leave",
@@ -218,7 +216,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2021-10-01 02:58:32.683178",
+ "modified": "2021-10-02 11:59:40.503359",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
