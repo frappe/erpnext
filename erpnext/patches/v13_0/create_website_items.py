@@ -46,28 +46,32 @@ def execute():
 	count = 0
 	for item in items:
 		if frappe.db.exists("Website Item", {"item_code": item.item_code}):
-			continue
+			# if website item already exists check for empty thumbnail
+			web_item_doc = frappe.get_doc("Website Item", {"item_code": item.item_code})
+			if web_item_doc.website_image and not web_item_doc.thumbnail:
+				web_item_doc.make_thumbnail()
+				web_item_doc.save()
+		else:
+			# else make new website item from item (publish item)
+			website_item = make_website_item(item, save=False)
+			website_item.ranking = item.get("weightage")
+			for field in web_fields_to_map:
+				website_item.update({field: item.get(field)})
+			website_item.save()
 
-		# make website item from item (publish item)
-		website_item = make_website_item(item, save=False)
-		website_item.ranking = item.get("weightage")
-		for field in web_fields_to_map:
-			website_item.update({field: item.get(field)})
-		website_item.save()
-
-		# move Website Item Group & Website Specification table to Website Item
-		for doctype in ("Website Item Group", "Item Website Specification"):
-			web_item, item_code = website_item.name, item.item_code
-			frappe.db.sql(f"""
-				Update
-					`tab{doctype}`
-				set
-					parenttype = 'Website Item',
-					parent = '{web_item}'
-				where
-					parenttype = 'Item'
-					and parent = '{item_code}'
-				""")
+			# move Website Item Group & Website Specification table to Website Item
+			for doctype in ("Website Item Group", "Item Website Specification"):
+				web_item, item_code = website_item.name, item.item_code
+				frappe.db.sql(f"""
+					Update
+						`tab{doctype}`
+					set
+						parenttype = 'Website Item',
+						parent = '{web_item}'
+					where
+						parenttype = 'Item'
+						and parent = '{item_code}'
+					""")
 
 		count += 1
 		if count % 20 == 0: # commit after every 20 items
