@@ -1,0 +1,44 @@
+
+{% if not jQuery.isEmptyObject(data) %}
+
+<table class="table table-bordered small">
+	<thead>
+		<tr>
+			<th style="width: 16%" class="text-left">{{ __("Interview") }}</th>
+			<th style="width: 16%" class="text-left">{{ __("Interview Round") }}</th>
+			<th style="width: 12%" class="text-left">{{ __("Status") }}</th>
+			<th style="width: 14%" class="text-left">{{ __("Expected Rating") }}</th>
+			<th style="width: 10%" class="text-left">{{ __("Rating") }}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(const [key, value] of Object.entries(data)) { %}
+			<tr>
+				<td class="text-left"> {%= key %} </td>
+				<td class="text-left"> {%= value["interview_round"] %} </td>
+				<td class="text-left"> {%= value["status"] %} </td>
+				<td class="text-left">
+					{% for (i = 0; i < value["expected_average_rating"]; i++) { %}
+						<span class="fa fa-star " style="color: #F6C35E;"></span>
+					{% } %}
+					{% for (i = 0; i < (5-value["expected_average_rating"]); i++) { %}
+					<span class="fa fa-star " style="color: #E7E9EB;"></span>
+					{% } %}
+				</td>
+				<td class="text-left">
+					{% if(value["average_rating"]){ %}
+						{% for (i = 0; i < value["average_rating"]; i++) { %}
+							<span class="fa fa-star " style="color: #F6C35E;"></span>
+						{% } %}
+						{% for (i = 0; i < (5-value["average_rating"]); i++) { %}
+						<span class="fa fa-star " style="color: #E7E9EB;"></span>
+						{% } %}
+					{% } %}
+				</td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+{% else %}
+<p style="margin-top: 30px;"> No Interview has been scheduled.</p>
+{% endif %}
