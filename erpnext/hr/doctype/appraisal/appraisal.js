@@ -46,29 +46,26 @@ frappe.ui.form.on('Appraisal', {
 			frm.refresh_field('overall_self_score');
 			frm.refresh_field('overall_score');
 		}
-
 	},
-
 });
 
 frappe.ui.form.on('KRA Assessment', {
 	mentor_score: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
+		var d = get_doc(cdt, cdn);
 
 		if (d.mentor_score > 5 || d.mentor_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
-			d.mentor_score = 0;
+			frappe.model.set_value(cdt, cdn, 'mentor_score', 0);
 		}
-
 		else {
 			frm.trigger('calculate_total');
 		}
 	},
 	self_score: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
+		var d = get_doc(cdt, cdn);
 		if (d.self_score > 5 || d.self_score < 1) {
 			frappe.msgprint(__('Score must be, between 1 to 5'));
-			d.self_score = 0;
+			frappe.model.set_value(cdt, cdn, 'self_score', 0);
 		}
 		else {
 			frm.trigger('calculate_total');
@@ -85,20 +82,20 @@ frappe.ui.form.on('KRA Assessment', {
 
 frappe.ui.form.on('Behavioural Assessment', {
 	mentors_score: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
+		var d = get_doc(cdt, cdn);
 
 		if (d.mentors_score > 5 || d.mentors_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
-			d.mentors_score = 0;
+			frappe.model.set_value(cdt, cdn, 'mentors_score', 0);
 			refresh_field('mentors_score');
 		}
 	},
 	self_score: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
+		var d = frappe.get_doc(cdt, cdn);
 
 		if (d.self_score > 5 || d.self_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
-			d.self_score = 0;
+			frappe.model.set_value(cdt, cdn, 'self_score', 0)
 			refresh_field('self_score');
 		}
 	}
@@ -107,30 +104,30 @@ frappe.ui.form.on('Behavioural Assessment', {
 
 frappe.ui.form.on('Self Improvement Areas', {
 	current_score: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
+		var d = get_doc(cdt, cdn);
 
 		if (d.current_score > 5 || d.current_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
-			d.current_score = 0;
+			frappe.model.set_value(cdt, cdn, 'current_score', 0)
 			refresh_field('current_score');
 		}
 	},
 
 	target_score: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
+		var d = get_doc(cdt, cdn);
 
 		if (d.target_score > 5 || d.target_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
-			d.target_score = 0;
+			frappe.model.set_value(cdt, cdn, 'target_score', 0)
 			refresh_field('target_score');
 		}
 	},
 	achieved_score: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
+		var d = get_doc(cdt, cdn);
 
 		if (d.achieved_score > 5 || d.achieved_score < 1) {
 			frappe.msgprint(__('Score must be between 1 to 5'));
-			d.achieved_score = 0;
+			frappe.model.set_value(cdt, cdn, 'achieved_score', 0)
 			refresh_field('achieved_score');
 		}
 	}
