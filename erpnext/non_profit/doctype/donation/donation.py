@@ -171,7 +171,7 @@ def create_donor(payment):
 def get_company_for_donations():
 	company = frappe.db.get_single_value('Non Profit Settings', 'donation_company')
 	if not company:
-		from erpnext.healthcare.setup import get_company
+		from erpnext.non_profit.utils import get_company
 		company = get_company()
 	return company
 

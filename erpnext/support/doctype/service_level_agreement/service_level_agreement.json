@@ -203,10 +203,11 @@
   }
  ],
  "links": [],
- "modified": "2021-07-27 11:16:45.596579",
+ "modified": "2021-10-02 11:32:55.556024",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

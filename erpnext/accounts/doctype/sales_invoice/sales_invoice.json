@@ -74,6 +74,7 @@
   "time_sheet_list",
   "timesheets",
   "total_billing_amount",
+  "total_billing_hours",
   "section_break_30",
   "total_qty",
   "base_total",
@@ -1953,6 +1954,7 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -2010,6 +2012,13 @@
    "hidden": 1,
    "label": "Ignore Default Payment Terms Template",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_billing_hours",
+   "fieldtype": "Float",
+   "label": "Total Billing Hours",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2022,7 +2031,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-09-21 09:27:50.191854",
+ "modified": "2021-10-02 03:36:10.251715",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
