@@ -1,0 +1,64 @@
+{
+ "creation": "2021-10-04 15:06:50.150010",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bank_trasaction",
+  "type",
+  "date",
+  "mode",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "bank_trasaction",
+   "fieldtype": "Link",
+   "label": "Bank Transaction",
+   "options": "Bank Transaction"
+  },
+  {
+   "fetch_from": "bank_trasaction.transaction_data",
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_trasaction.date_data",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_trasaction.status",
+   "fieldname": "mode",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mode",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_trasaction.amount_data",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-10-04 15:08:51.027650",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank reconciliations Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
