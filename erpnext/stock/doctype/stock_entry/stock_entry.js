@@ -282,6 +282,12 @@ frappe.ui.form.on('Stock Entry', {
 		frm.trigger("setup_quality_inspection");
 	},
 
+	before_save: function(frm) {
+		frm.doc.items.forEach((item) => {
+			item.uom = item.uom || item.stock_uom;
+		})
+	},
+
 	purpose: function(frm) {
 		frm.trigger('validate_purpose_consumption');
 		frm.fields_dict.items.grid.refresh();
