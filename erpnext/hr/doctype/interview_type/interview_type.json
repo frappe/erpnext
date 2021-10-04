@@ -1,37 +1,33 @@
 {
  "actions": [],
- "creation": "2021-05-07 18:16:40.621421",
+ "allow_rename": 1,
+ "autoname": "Prompt",
+ "creation": "2021-04-12 14:44:40.664034",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "supplier",
-  "item_group"
+  "description"
  ],
  "fields": [
   {
-   "fieldname": "supplier",
-   "fieldtype": "Link",
+   "fieldname": "description",
+   "fieldtype": "Text",
    "in_list_view": 1,
-   "label": "Supplier",
-   "options": "Supplier",
-   "reqd": 1
-  },
-  {
-   "fieldname": "item_group",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item Group",
-   "options": "Item Group",
-   "reqd": 1
+   "label": "Description"
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-05-19 13:48:16.742303",
+ "links": [
+  {
+   "link_doctype": "Interview Round",
+   "link_fieldname": "interview_type"
+  }
+ ],
+ "modified": "2021-09-30 13:00:16.471518",
  "modified_by": "Administrator",
- "module": "Buying",
- "name": "Supplier Item Group",
+ "module": "HR",
+ "name": "Interview Type",
  "owner": "Administrator",
  "permissions": [
   {
@@ -54,7 +50,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Purchase User",
+   "role": "HR Manager",
    "share": 1,
    "write": 1
   },
@@ -66,7 +62,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Purchase Manager",
+   "role": "HR User",
    "share": 1,
    "write": 1
   }

@@ -1151,10 +1151,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			tax_withholding_category = 'TDS - 194 - Dividends - Individual')
 
 		# Update tax withholding category with current fiscal year and rate details
-		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
+		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC')
 
 		# Create Purchase Order with TDS applied
-		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item')
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item',
+			posting_date='2021-09-15')
 		po.apply_tds = 1
 		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
@@ -1226,16 +1227,20 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
-def update_tax_witholding_category(company, account, date):
+def update_tax_witholding_category(company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
-	fiscal_year = get_fiscal_year(date=date, company=company)
+	fiscal_year = get_fiscal_year(fiscal_year='2021')
 
 	if not frappe.db.get_value('Tax Withholding Rate',
-		{'parent': 'TDS - 194 - Dividends - Individual', 'fiscal_year': fiscal_year[0]}):
+		{'parent': 'TDS - 194 - Dividends - Individual', 'from_date': ('>=', fiscal_year[1]),
+			'to_date': ('<=', fiscal_year[2])}):
 		tds_category = frappe.get_doc('Tax Withholding Category', 'TDS - 194 - Dividends - Individual')
+		tds_category.set('rates', [])
+
 		tds_category.append('rates', {
-			'fiscal_year': fiscal_year[0],
+			'from_date': fiscal_year[1],
+			'to_date': fiscal_year[2],
 			'tax_withholding_rate': 10,
 			'single_threshold': 2500,
 			'cumulative_threshold': 0

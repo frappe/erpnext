@@ -3,9 +3,11 @@
 # See license.txt
 from __future__ import unicode_literals
 
-# import frappe
 import unittest
 
+# import frappe
 
-class TestSupplierItemGroup(unittest.TestCase):
+
+class TestInterviewRound(unittest.TestCase):
 	pass
+
