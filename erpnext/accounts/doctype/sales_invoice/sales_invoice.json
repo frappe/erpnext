@@ -2021,6 +2021,13 @@
    "label": "Total Billing Hours",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "total_billing_hours",
+   "fieldtype": "Float",
+   "label": "Total Billing Hours",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2033,7 +2040,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-09-28 13:09:34.391799",
+ "modified": "2021-10-02 03:36:10.251715",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

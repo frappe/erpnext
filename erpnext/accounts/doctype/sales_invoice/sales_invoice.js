@@ -446,12 +446,24 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	currency() {
+<<<<<<< HEAD
 		this._super();
 		$.each(cur_frm.doc.timesheets, function(i, d) {
 			let row = frappe.get_doc(d.doctype, d.name)
 			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
 		});
 		calculate_total_billing_amount(cur_frm)
+=======
+		var me = this;
+		super.currency();
+		if (this.frm.doc.timesheets) {
+			this.frm.doc.timesheets.forEach((d) => {
+				let row = frappe.get_doc(d.doctype, d.name)
+				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
+			});
+			frm.trigger("calculate_timesheet_totals");
+		}
+>>>>>>> 09ccdee2db ( feat: add `total_billing_hours` to Sales Invoice (fp #26783) (#27742))
 	}
 });
 
@@ -996,6 +1008,7 @@ frappe.ui.form.on('Sales Invoice', {
 		});
 	}
 });
+<<<<<<< HEAD
 
 
 frappe.ui.form.on("Sales Invoice Timesheet", {
@@ -1004,6 +1017,14 @@ frappe.ui.form.on("Sales Invoice Timesheet", {
 	}
 });
 
+=======
+
+frappe.ui.form.on("Sales Invoice Timesheet", {
+	timesheets_remove(frm) {
+		frm.trigger("calculate_timesheet_totals");
+	}
+});
+>>>>>>> 09ccdee2db ( feat: add `total_billing_hours` to Sales Invoice (fp #26783) (#27742))
 
 var set_timesheet_detail_rate = function(cdt, cdn, currency, timelog) {
 	frappe.call({
