@@ -7,12 +7,15 @@
  "engine": "InnoDB",
  "field_order": [
   "campaign_naming_by",
-  "default_valid_till",
   "column_break_9",
-  "close_opportunity_after_days",
+  "default_valid_till",
   "section_break_5",
   "allow_creation_of_leads_form_a_email",
-  "create_event_on_next_contact_date"
+  "auto_creation_of_contact",
+  "create_event_on_next_contact_date",
+  "opportunity_section",
+  "close_opportunity_after_days",
+  "create_event_on_next_contact_date_opportunity"
  ],
  "fields": [
   {
@@ -40,26 +43,44 @@
   },
   {
    "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Lead"
   },
   {
    "default": "0",
    "fieldname": "allow_creation_of_leads_form_a_email",
    "fieldtype": "Check",
-   "label": "Allow Creation of Leads form a Email"
+   "label": "Allow Creation of Multiple Leads form a Email"
   },
   {
    "default": "1",
    "fieldname": "create_event_on_next_contact_date",
    "fieldtype": "Check",
-   "label": "Create Event on Next Contact Date(Opportunity)"
+   "label": "Create Event on Next Contact Date"
+  },
+  {
+   "fieldname": "opportunity_section",
+   "fieldtype": "Section Break",
+   "label": "Opportunity"
+  },
+  {
+   "default": "1",
+   "fieldname": "create_event_on_next_contact_date_opportunity",
+   "fieldtype": "Check",
+   "label": "Create Event on Next Contact Date"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_creation_of_contact",
+   "fieldtype": "Check",
+   "label": "Auto Creation of Contact"
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 12:31:22.525307",
+ "modified": "2021-10-04 15:42:30.981243",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "CRM Settings",

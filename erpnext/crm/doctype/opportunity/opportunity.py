@@ -29,7 +29,6 @@ class Opportunity(TransactionBase):
 		})
 
 		self.make_new_lead_if_required()
-
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
@@ -61,19 +60,20 @@ class Opportunity(TransactionBase):
 		"""Set lead against new opportunity"""
 		if (not self.get("party_name")) and self.contact_email:
 			# check if customer is already created agains the self.contact_email
-			customer = frappe.db.sql("""select
-				distinct `tabDynamic Link`.link_name as customer
-				from
+			customer = frappe.db.sql("""SELECT
+				DISTINCT `tabDynamic Link`.link_name AS customer
+				FROM
 					`tabContact`,
 					`tabDynamic Link`
-				where `tabContact`.email_id='{0}'
-				and
+				WHERE `tabContact`.email_id='{0}'
+				AND
 					`tabContact`.name=`tabDynamic Link`.parent
-				and
+				AND
 					ifnull(`tabDynamic Link`.link_name, '')<>''
-				and
+				AND
 					`tabDynamic Link`.link_doctype='Customer'
 			""".format(self.contact_email), as_dict=True)
+
 			if customer and customer[0].customer:
 				self.party_name = customer[0].customer
 				self.opportunity_from = "Customer"
@@ -178,30 +178,31 @@ class Opportunity(TransactionBase):
 		self.add_calendar_event()
 
 	def add_calendar_event(self, opts=None, force=False):
-		if not opts:
-			opts = frappe._dict()
+		if frappe.db.get_single_value('CRM Settings', 'create_event_on_next_contact_date_opportunity'):
+			if not opts:
+				opts = frappe._dict()
 
-		opts.description = ""
-		opts.contact_date = self.contact_date
+			opts.description = ""
+			opts.contact_date = self.contact_date
 
-		if self.party_name and self.opportunity_from == 'Customer':
-			if self.contact_person:
-				opts.description = 'Contact '+cstr(self.contact_person)
-			else:
-				opts.description = 'Contact customer '+cstr(self.party_name)
-		elif self.party_name and self.opportunity_from == 'Lead':
-			if self.contact_display:
-				opts.description = 'Contact '+cstr(self.contact_display)
-			else:
-				opts.description = 'Contact lead '+cstr(self.party_name)
+			if self.party_name and self.opportunity_from == 'Customer':
+				if self.contact_person:
+					opts.description = 'Contact '+cstr(self.contact_person)
+				else:
+					opts.description = 'Contact customer '+cstr(self.party_name)
+			elif self.party_name and self.opportunity_from == 'Lead':
+				if self.contact_display:
+					opts.description = 'Contact '+cstr(self.contact_display)
+				else:
+					opts.description = 'Contact lead '+cstr(self.party_name)
 
-		opts.subject = opts.description
-		opts.description += '. By : ' + cstr(self.contact_by)
+			opts.subject = opts.description
+			opts.description += '. By : ' + cstr(self.contact_by)
 
-		if self.to_discuss:
-			opts.description += ' To Discuss : ' + cstr(self.to_discuss)
+			if self.to_discuss:
+				opts.description += ' To Discuss : ' + cstr(self.to_discuss)
 
-		super(Opportunity, self).add_calendar_event(opts, force)
+			super(Opportunity, self).add_calendar_event(opts, force)
 
 	def validate_item_details(self):
 		if not self.get('items'):
