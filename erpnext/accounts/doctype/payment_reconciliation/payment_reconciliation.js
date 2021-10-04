@@ -52,9 +52,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 	refresh() {
 		this.frm.disable_save();
-		this.frm.set_df_property('invoices','cannot_delete_rows',true);
-		this.frm.set_df_property('payments','cannot_delete_rows',true);
-		this.frm.set_df_property('allocation','cannot_delete_rows',true);
+		this.frm.set_df_property('invoices', 'cannot_delete_rows', true);
+		this.frm.set_df_property('payments', 'cannot_delete_rows', true);
+		this.frm.set_df_property('allocation', 'cannot_delete_rows', true);
 
 
 		if (this.frm.doc.receivable_payable_account) {
