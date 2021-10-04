@@ -139,19 +139,18 @@ class PickList(Document):
 		count = 0
 
 		for item in self.locations:
-			group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
-			group_picked_qty[item.item_code] = group_picked_qty.get(item.item_code, 0) + item.qty
-
+			group_item_qty[(item.item_code, item.warehouse)] = group_item_qty.get((item.item_code,item.warehouse), 0) + item.qty
+			group_picked_qty[(item.item_code, item.warehouse)] = group_picked_qty.get((item.item_code,item.warehouse), 0) + item.qty
 
 		duplicate_list = []
 		for item in self.locations:
-			if item.item_code in group_item_qty:
+			if (item.item_code, item.warehouse) in group_item_qty:
 				count += 1
-				item.qty = group_item_qty[item.item_code]
-				item.picked_qty = group_picked_qty[item.item_code]
-				item.stock_qty = group_item_qty[item.item_code]
+				item.qty = group_item_qty[(item.item_code, item.warehouse)]
+				item.picked_qty = group_picked_qty[(item.item_code, item.warehouse)]
+				item.stock_qty = group_item_qty[(item.item_code, item.warehouse)]
 				item.idx = count
-				del group_item_qty[item.item_code]
+				del group_item_qty[(item.item_code, item.warehouse)]
 			else:
 				duplicate_list.append(item)
 		for item in duplicate_list:
