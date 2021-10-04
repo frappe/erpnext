@@ -230,6 +230,7 @@ class PaymentReconciliation(Document):
 		if dr_or_cr_notes:
 			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
+		frappe.throw('Pass')
 		msgprint(_("Successfully Reconciled"))
 		self.get_unreconciled_entries()
 
