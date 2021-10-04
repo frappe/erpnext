@@ -433,11 +433,12 @@ let check_and_set_availability = function(frm) {
 				slot_html += `<br><span> <b> ${__('Maximum Capacity:')} </b> ${slot_info.service_unit_capacity} </span>`;
 			}
 
-			slot_html += '</div><br><br>';
+			slot_html += '</div><br>';
 
 			slot_html += slot_info.avail_slot.map(slot => {
 				appointment_count = 0;
 				disabled = false;
+				count_class = tool_tip = '';
 				start_str = slot.from_time;
 				slot_start_time = moment(slot.from_time, 'HH:mm:ss');
 				slot_end_time = moment(slot.to_time, 'HH:mm:ss');
@@ -486,10 +487,11 @@ let check_and_set_availability = function(frm) {
 						data-duration=${interval}
 						data-service-unit="${slot_info.service_unit || ''}"
 						style="margin: 0 10px 10px 0; width: auto;" ${disabled ? 'disabled="disabled"' : ""}
-						data-toggle="tooltip" title="${tool_tip}">
-						${start_str.substring(0, start_str.length - 3)}<br>
-						<span class='badge ${count_class}'> ${count} </span>
+						data-toggle="tooltip" title="${tool_tip || ''}">
+						${start_str.substring(0, start_str.length - 3)}
+						${slot_info.service_unit_capacity ? `<br><span class='badge ${count_class}'> ${count} </span>` : ''}
 					</button>`;
+
 			}).join("");
 
 			if (slot_info.service_unit_capacity) {
