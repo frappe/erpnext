@@ -30,6 +30,14 @@ def set_employee_name(doc):
 		doc.employee_name = frappe.db.get_value("Employee", doc.employee, "employee_name")
 
 def update_employee(employee, details, date=None, cancel=False):
+	if not employee.internal_work_history and not cancel:
+		employee.append("internal_work_history",{
+			"branch": employee.branch,
+			"designation": employee.designation,
+			"department": employee.department,
+			"from_date": employee.date_of_joining
+		})
+
 	internal_work_history = {}
 	for item in details:
 		field = frappe.get_meta("Employee").get_field(item.fieldname)
@@ -44,9 +52,30 @@ def update_employee(employee, details, date=None, cancel=False):
 		setattr(employee, item.fieldname, new_data)
 		if item.fieldname in ["department", "designation", "branch"]:
 			internal_work_history[item.fieldname] = item.new
+
 	if internal_work_history and not cancel:
 		internal_work_history["from_date"] = date
 		employee.append("internal_work_history", internal_work_history)
+
+	if cancel:
+		filters = {}
+		for d in details:
+			for h in employee.internal_work_history:
+				if d.property == "Department" and h.department == d.new:
+					department = d.new
+					filters["department"] = department
+				if d.property == "Designation" and h.designation == d.new:
+					designation = d.new
+					filters["designation"] = designation
+				if d.property == "Branch" and h.branch == d.new:
+					branch = d.new
+					filters["branch"] = branch
+				if date and date == h.from_date:
+					filters["from_date"] = date
+		if filters:
+			frappe.db.delete("Employee Internal Work History", filters)
+			frappe.db.commit()
+
 	return employee
 
 @frappe.whitelist()

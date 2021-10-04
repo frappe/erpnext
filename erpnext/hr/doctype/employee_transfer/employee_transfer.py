@@ -56,7 +56,7 @@ class EmployeeTransfer(Document):
 			employee.status = "Active"
 			employee.relieving_date = ''
 		else:
-			employee = update_employee(employee, self.transfer_details, cancel=True)
+			employee = update_employee(employee, self.transfer_details, date=self.transfer_date, cancel=True)
 		if self.new_company != self.company:
 			employee.company = self.company
 		employee.save()
