@@ -280,6 +280,22 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		frm.trigger("setup_quality_inspection");
+<<<<<<< HEAD
+=======
+		attach_bom_items(frm.doc.bom_no)
+	},
+
+	before_save: function(frm) {
+		frm.doc.items.forEach((item) => {
+			item.uom = item.uom || item.stock_uom;
+		})
+	},
+
+	stock_entry_type: function(frm){
+		frm.remove_custom_button('Bill of Materials', "Get Items From");
+		frm.events.show_bom_custom_button(frm);
+		frm.trigger('add_to_transit');
+>>>>>>> 5c372202d5 (fix: set item uom as stock_uom if it isn't set (#27623))
 	},
 
 	purpose: function(frm) {
