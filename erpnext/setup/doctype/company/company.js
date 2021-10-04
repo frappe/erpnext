@@ -46,43 +46,6 @@ frappe.ui.form.on("Company", {
 		});
 	},
 
-	change_abbreviation(frm) {
-		var dialog = new frappe.ui.Dialog({
-			title: "Replace Abbr",
-			fields: [
-				{"fieldtype": "Data", "label": "New Abbreviation", "fieldname": "new_abbr",
-					"reqd": 1 },
-				{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
-			]
-		});
-
-		dialog.fields_dict.update.$input.click(function() {
-			var args = dialog.get_values();
-			if (!args) return;
-			frappe.show_alert(__("Update in progress. It might take a while."));
-			return frappe.call({
-				method: "erpnext.setup.doctype.company.company.enqueue_replace_abbr",
-				args: {
-					"company": frm.doc.name,
-					"old": frm.doc.abbr,
-					"new": args.new_abbr
-				},
-				callback: function(r) {
-					if (r.exc) {
-						frappe.msgprint(__("There were errors."));
-						return;
-					} else {
-						frm.set_value("abbr", args.new_abbr);
-					}
-					dialog.hide();
-					frm.refresh();
-				},
-				btn: this
-			});
-		});
-		dialog.show();
-	},
-
 	company_name: function(frm) {
 		if(frm.doc.__islocal) {
 			// add missing " " arg in split method
@@ -164,10 +127,6 @@ frappe.ui.form.on("Company", {
 					}, __('Manage'));
 				}
 			}
-
-			frm.add_custom_button(__('Change Abbreviation'), () => {
-				frm.trigger('change_abbreviation');
-			}, __('Manage'));
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
