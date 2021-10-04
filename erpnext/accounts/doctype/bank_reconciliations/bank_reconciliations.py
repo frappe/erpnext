@@ -22,7 +22,7 @@ class Bankreconciliations(Document):
 		self.update_amount()
 	
 	def update_amount(self):
-		details = frappe.get_all("Bank reconciliations Detail", ["amount"], filters = {"parent": self.name})
+		details = frappe.get_all("Bank reconciliations Table", ["amount"], filters = {"parent": self.name})
 
 		self.transaction_amount = 0
 		for detail in details:
@@ -37,7 +37,7 @@ class Bankreconciliations(Document):
 			frappe.throw(_("Difference amount must be 0"))
 	
 	def conciliation_transactions(self):
-		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction"], filters = {"parent": self.name})
+		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction"], filters = {"parent": self.name})
 
 		for detail in details:
 			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
@@ -46,7 +46,7 @@ class Bankreconciliations(Document):
 			doc.save()
 	
 	def create_reconciled_balance(self):
-		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction", "amount"], filters = {"parent": self.name})
+		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
 
 		transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
 
@@ -61,7 +61,7 @@ class Bankreconciliations(Document):
 		frappe.throw(_("Bank reconciliation cannot be canceled"))
 	
 	def modified_total_reconcilitiation_account(self):
-		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction", "amount"], filters = {"parent": self.name})
+		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
 
 		transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
 
@@ -81,7 +81,7 @@ class Bankreconciliations(Document):
 		doc.save()
 	
 	def verificate_bank_account(self):
-		details = frappe.get_all("Bank reconciliations Detail", ["bank_trasaction", "amount"], filters = {"parent": self.name})
+		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
 
 		for detail in details:
 			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": detail.bank_trasaction})
