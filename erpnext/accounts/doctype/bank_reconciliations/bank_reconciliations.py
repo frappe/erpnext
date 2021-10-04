@@ -70,11 +70,11 @@ class Bankreconciliations(Document):
 		doc.total_reconciliation = self.transaction_amount
 
 		for detail in details:
-			transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": detail.bank_trasaction})
+			transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data", "amount_data"], filters = {"name": detail.bank_trasaction})
 			if transac[0].transaction_data == "Bank Check" or transac[0].transaction_data== "Credit Note":
-				doc.deferred_debits -= self.amount_data
+				doc.deferred_debits -= transac[0].amount_data
 			else:
-				doc.deferred_credits -= self.amount_data
+				doc.deferred_credits -= transac[0].amount_data
 		
 		doc.current_balance = doc.deferred_credits - doc.deferred_debits
 
