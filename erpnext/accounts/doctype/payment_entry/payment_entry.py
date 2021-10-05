@@ -1730,7 +1730,15 @@ def get_payment_entry(
 						},
 					)
 
-				pe.append("deductions", {"amount": doc.dunning_amount})
+				pe.append(
+					"deductions",
+					{
+						"account": doc.income_account,
+						"cost_center": doc.cost_center,
+						"amount": doc.dunning_amount,
+						"description": _("Interest and/or dunning fee"),
+					},
+				)
 			else:
 				pe.append(
 					"references",
