@@ -1947,11 +1947,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
-	def test_sle_if_target_warehouse_exists_accidentally(self):
-		"""
-			Check if inward entry exists if Target Warehouse accidentally exists
-			but Customer is not an internal customer.
-		"""
+	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
 			target="Finished Goods - _TC",
@@ -1972,9 +1968,9 @@ class TestSalesInvoice(unittest.TestCase):
 		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
 			fields=["name", "actual_qty"])
 
-		# check if only one SLE for outward entry is created
-		self.assertEqual(len(sles), 1)
-		self.assertEqual(sles[0].actual_qty, -1)
+		# check if both SLEs are created
+		self.assertEqual(len(sles), 2)
+		self.assertEqual(sum(d.actual_qty for d in sles), 0.0)
 
 		# tear down
 		si.cancel()
