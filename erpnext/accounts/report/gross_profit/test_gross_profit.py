@@ -34,10 +34,10 @@ class TestGrossProfit(unittest.TestCase):
         })
 
         generate_expected_data()
-        cls.income = abs(get_balance_on(account=frappe.get_cached_value("Company", test_company, "default_income_account")))
-        cls.cogs = get_balance_on(account=frappe.get_cached_value("Company", test_company, "default_expense_account"))
-        cls.gross_profit = cls.income - cls.cogs
-        cls.gross_profit_percentage = 100 * (cls.cogs / cls.income)
+        cls.income = flt(abs(get_balance_on(account=frappe.get_cached_value("Company", test_company, "default_income_account"))), 2)
+        cls.cogs = flt(get_balance_on(account=frappe.get_cached_value("Company", test_company, "default_expense_account")), 2)
+        cls.gross_profit = flt(cls.income - cls.cogs, 2)
+        cls.gross_profit_percentage = flt(100 * (cls.gross_profit / cls.income), 3)
         report = execute(filters)
         cls.totals = report[-1][-1]
 
