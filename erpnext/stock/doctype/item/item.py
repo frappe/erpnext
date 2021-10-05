@@ -159,6 +159,8 @@ class Item(Document):
 				"doctype": "Item Price",
 				"price_list": price_list,
 				"item_code": self.name,
+				"uom": self.stock_uom,
+				"brand": self.brand,
 				"currency": erpnext.get_default_currency(),
 				"price_list_rate": self.standard_rate
 			})
@@ -382,9 +384,21 @@ class Item(Document):
 				_("An Item Group exists with same name, please change the item name or rename the item group"))
 
 	def update_item_price(self):
-		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, brand=%s where item_code=%s""",
-					(self.item_name, self.description, self.brand, self.name))
+		frappe.db.sql("""
+				UPDATE `tabItem Price`
+				SET
+					item_name=%(item_name)s,
+					item_description=%(item_description)s,
+					brand=%(brand)s
+				WHERE item_code=%(item_code)s
+			""",
+			dict(
+				item_name=self.item_name,
+				item_description=self.description,
+				brand=self.brand,
+				item_code=self.name
+			)
+		)
 
 	def on_trash(self):
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.name)
