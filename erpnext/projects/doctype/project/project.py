@@ -87,8 +87,8 @@ class Project(Document):
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
 	def on_trash(self):
-		for so in frappe.get_all("Sales Order", {"project": self.name}, ["name"], as_dict=1):
-			frappe.db.set_value("Sales Order", so.name, "project", "")
+		for so in frappe.get_all("Sales Order", {"project": self.name}, ["name"]):
+			frappe.db.set_value("Sales Order", so.get('name'), "project", "")
 
 	def update_percent_complete(self):
 		if self.percent_complete_method == "Manual":
