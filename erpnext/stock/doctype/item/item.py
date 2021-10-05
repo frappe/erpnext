@@ -641,7 +641,7 @@ class Item(WebsiteGenerator):
 				SET
 					item_name=%(item_name)s,
 					item_description=%(item_description)s,
-					brand=%(brand)s,
+					brand=%(brand)s
 				WHERE item_code=%(item_code)s
 			""",
 			dict(
