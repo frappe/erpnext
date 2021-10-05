@@ -388,6 +388,7 @@ class Company(NestedSet):
 		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
 		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
 		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
+		frappe.db.sql("delete from `tabTransaction Deletion Record` where company=%s", self.name)
 
 		# delete tax templates
 		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
