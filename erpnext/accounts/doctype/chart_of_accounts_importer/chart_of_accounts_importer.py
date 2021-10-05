@@ -25,7 +25,9 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 
 
 class ChartofAccountsImporter(Document):
-	pass
+	def validate(self):
+		if self.import_file:
+			get_coa('Chart of Accounts Importer', 'All Accounts', file_name=self.import_file, for_validate=1)
 
 def validate_columns(data):
 	if not data:
@@ -34,7 +36,8 @@ def validate_columns(data):
 	no_of_columns = max([len(d) for d in data])
 
 	if no_of_columns > 7:
-		frappe.throw(_('More columns found than expected. Please compare the uploaded file with standard template'))
+		frappe.throw(_('More columns found than expected. Please compare the uploaded file with standard template'),
+			title=(_("Wrong Template")))
 
 @frappe.whitelist()
 def validate_company(company):
