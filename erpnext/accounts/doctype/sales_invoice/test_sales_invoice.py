@@ -2202,7 +2202,7 @@ class TestSalesInvoice(unittest.TestCase):
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 		enable_discount_accounting(enable=0)
 
-	def test_asset_depreciation_on_sale(self):
+	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
 			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.
 		"""
@@ -2226,7 +2226,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
 			self.assertTrue(schedule.journal_entry)
 
-	def test_depreciation_on_sale_for_depreciated_asset(self):
+	def test_asset_depreciation_on_sale_without_pro_rata(self):
 		"""
 			Tests if an Asset set to depreciate yearly on Dec 31, that gets sold on Dec 31 after two years, created an additional depreciation entry on its date of sale.
 		"""
