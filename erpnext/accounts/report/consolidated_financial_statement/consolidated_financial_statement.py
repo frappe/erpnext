@@ -260,7 +260,12 @@ def get_company_currency(filters=None):
 def calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters):
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
-			d = accounts_by_name.get(entry.account_name)
+			if entry.account_number:
+				account_name = entry.account_number + ' - ' + entry.account_name
+			else:
+				account_name =  entry.account_name
+
+			d = accounts_by_name.get(account_name)
 			if d:
 				for company in companies:
 					# check if posting date is within the period
@@ -307,7 +312,14 @@ def update_parent_account_names(accounts):
 		of account_number and suffix of company abbr. This function adds key called
 		`parent_account_name` which does not have such prefix/suffix.
 	"""
-	name_to_account_map = { d.name : d.account_name for d in accounts }
+	name_to_account_map = {}
+
+	for d in accounts:
+		if d.account_number:
+			account_name = d.account_number + ' - ' + d.account_name
+		else:
+			account_name =  d.account_name
+		name_to_account_map[d.name] = account_name
 
 	for account in accounts:
 		if account.parent_account:
@@ -420,7 +432,11 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 			convert_to_presentation_currency(gl_entries, currency_info, filters.get('company'))
 
 		for entry in gl_entries:
-			account_name =  entry.account_name
+			if entry.account_number:
+				account_name = entry.account_number + ' - ' + entry.account_name
+			else:
+				account_name =  entry.account_name
+
 			validate_entries(account_name, entry, accounts_by_name, accounts)
 			gl_entries_by_account.setdefault(account_name, []).append(entry)
 
@@ -491,7 +507,12 @@ def filter_accounts(accounts, depth=10):
 	parent_children_map = {}
 	accounts_by_name = {}
 	for d in accounts:
-		accounts_by_name[d.account_name] = d
+		if d.account_number:
+			account_name = d.account_number + ' - ' + d.account_name
+		else:
+			account_name =  d.account_name
+		accounts_by_name[account_name] = d
+
 		parent_children_map.setdefault(d.parent_account or None, []).append(d)
 
 	filtered_accounts = []
