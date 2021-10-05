@@ -140,7 +140,7 @@ class PickList(Document):
 
 		for item in self.locations:
 			group_item_qty[(item.item_code, item.warehouse)] = group_item_qty.get((item.item_code,item.warehouse), 0) + item.qty
-			group_picked_qty[(item.item_code, item.warehouse)] = group_picked_qty.get((item.item_code,item.warehouse), 0) + item.qty
+			group_picked_qty[(item.item_code, item.warehouse)] = group_picked_qty.get((item.item_code,item.warehouse), 0) + item.picked_qty
 
 		duplicate_list = []
 		for item in self.locations:
