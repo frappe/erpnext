@@ -249,6 +249,9 @@ def is_internal_transfer(party_details, doctype):
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		destination_gstin = party_details.supplier_gstin
 
+	if not destination_gstin or party_details.gstin:
+		return False
+
 	if party_details.gstin == destination_gstin:
 		return True
 	else:
