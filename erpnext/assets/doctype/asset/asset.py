@@ -262,11 +262,15 @@ class Asset(AccountsController):
 						self.to_date = add_months(self.available_for_use_date,
 							n * cint(d.frequency_of_depreciation))
 
+					depreciation_amount_without_pro_rata = depreciation_amount
+
 					depreciation_amount, days, months = self.get_pro_rata_amt(d,
 						depreciation_amount, schedule_date, self.to_date)
 
-					monthly_schedule_date = add_months(schedule_date, 1)
+					depreciation_amount = self.get_adjusted_depreciation_amount(depreciation_amount_without_pro_rata,
+						depreciation_amount, d.finance_book)
 
+					monthly_schedule_date = add_months(schedule_date, 1)
 					schedule_date = add_days(schedule_date, days)
 					last_schedule_date = schedule_date
 
@@ -405,6 +409,27 @@ class Asset(AccountsController):
 		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(self.available_for_use_date):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date")
 				.format(row.idx))
+
+	# to ensure that final accumulated depreciation amount is accurate
+	def get_adjusted_depreciation_amount(self, depreciation_amount_without_pro_rata, depreciation_amount_for_last_row, finance_book):
+		depreciation_amount_for_first_row = self.get_depreciation_amount_for_first_row(finance_book)
+
+		if depreciation_amount_for_first_row + depreciation_amount_for_last_row != depreciation_amount_without_pro_rata:
+			depreciation_amount_for_last_row = depreciation_amount_without_pro_rata - depreciation_amount_for_first_row
+
+		return depreciation_amount_for_last_row
+
+	def get_depreciation_amount_for_first_row(self, finance_book):
+		if self.has_only_one_finance_book():
+			return self.schedules[0].depreciation_amount
+		else:
+			for schedule in self.schedules:
+				if schedule.finance_book == finance_book:
+					return schedule.depreciation_amount
+
+	def has_only_one_finance_book(self):
+		if len(self.finance_books) == 1:
+			return True
 
 	def set_accumulated_depreciation(self, date_of_sale=None, date_of_return=None, ignore_booked_entry = False):
 		straight_line_idx = [d.idx for d in self.get("schedules") if d.depreciation_method == 'Straight Line']
