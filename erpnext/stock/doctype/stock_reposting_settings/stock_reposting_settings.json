@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2021-10-01 10:56:30.814787",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "scheduling_section",
+  "limit_reposting_timeslot",
+  "start_time",
+  "end_time",
+  "limits_dont_apply_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "scheduling_section",
+   "fieldtype": "Section Break",
+   "label": "Scheduling"
+  },
+  {
+   "depends_on": "limit_reposting_timeslot",
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "label": "Start Time",
+   "mandatory_depends_on": "limit_reposting_timeslot"
+  },
+  {
+   "depends_on": "limit_reposting_timeslot",
+   "fieldname": "end_time",
+   "fieldtype": "Time",
+   "label": "End Time",
+   "mandatory_depends_on": "limit_reposting_timeslot"
+  },
+  {
+   "depends_on": "limit_reposting_timeslot",
+   "fieldname": "limits_dont_apply_on",
+   "fieldtype": "Select",
+   "label": "Limits don't apply on",
+   "options": "\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
+  },
+  {
+   "default": "0",
+   "fieldname": "limit_reposting_timeslot",
+   "fieldtype": "Check",
+   "label": "Limit timeslot for Stock Reposting"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-10-01 11:27:28.981594",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Reposting Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

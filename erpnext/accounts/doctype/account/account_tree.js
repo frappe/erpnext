@@ -45,6 +45,49 @@ frappe.treeview_settings["Account"] = {
 	],
 	root_label: "Accounts",
 	get_tree_nodes: 'erpnext.accounts.utils.get_children',
+	on_get_node: function(nodes, deep=false) {
+		if (frappe.boot.user.can_read.indexOf("GL Entry") == -1) return;
+
+		let accounts = [];
+		if (deep) {
+			// in case of `get_all_nodes`
+			accounts = nodes.reduce((acc, node) => [...acc, ...node.data], []);
+		} else {
+			accounts = nodes;
+		}
+
+		const get_balances = frappe.call({
+			method: 'erpnext.accounts.utils.get_account_balances',
+			args: {
+				accounts: accounts,
+				company: cur_tree.args.company
+			},
+		});
+
+		get_balances.then(r => {
+			if (!r.message || r.message.length == 0) return;
+
+			for (let account of r.message) {
+
+				const node = cur_tree.nodes && cur_tree.nodes[account.value];
+				if (!node || node.is_root) continue;
+
+				// show Dr if positive since balance is calculated as debit - credit else show Cr
+				const balance = account.balance_in_account_currency || account.balance;
+				const dr_or_cr = balance > 0 ? "Dr": "Cr";
+				const format = (value, currency) => format_currency(Math.abs(value), currency);
+
+				if (account.balance!==undefined) {
+					$('<span class="balance-area pull-right">'
+						+ (account.balance_in_account_currency ?
+							(format(account.balance_in_account_currency, account.account_currency) + " / ") : "")
+						+ format(account.balance, account.company_currency)
+						+ " " + dr_or_cr
+						+ '</span>').insertBefore(node.$ul);
+				}
+			}
+		});
+	},
 	add_tree_node: 'erpnext.accounts.utils.add_ac',
 	menu_items:[
 		{
@@ -121,24 +164,6 @@ frappe.treeview_settings["Account"] = {
 				treeview.new_node();
 			}
 		}, "add");
-	},
-	onrender: function(node) {
-		if (frappe.boot.user.can_read.indexOf("GL Entry") !== -1) {
-
-			// show Dr if positive since balance is calculated as debit - credit else show Cr
-			let balance = node.data.balance_in_account_currency || node.data.balance;
-			let dr_or_cr = balance > 0 ? "Dr": "Cr";
-
-			if (node.data && node.data.balance!==undefined) {
-				$('<span class="balance-area pull-right">'
-					+ (node.data.balance_in_account_currency ?
-						(format_currency(Math.abs(node.data.balance_in_account_currency),
-							node.data.account_currency) + " / ") : "")
-					+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
-					+ " " + dr_or_cr
-					+ '</span>').insertBefore(node.$ul);
-			}
-		}
 	},
 	toolbar: [
 		{

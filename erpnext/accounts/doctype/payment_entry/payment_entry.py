@@ -390,6 +390,9 @@ class PaymentEntry(AccountsController):
 						invoice_paid_amount_map[invoice_key]['discounted_amt'] = ref.total_amount * (term.discount / 100)
 
 		for key, allocated_amount in iteritems(invoice_payment_amount_map):
+			if not invoice_paid_amount_map.get(key):
+				frappe.throw(_('Payment term {0} not used in {1}').format(key[0], key[1]))
+
 			outstanding = flt(invoice_paid_amount_map.get(key, {}).get('outstanding'))
 			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get('discounted_amt'))
 

@@ -100,6 +100,7 @@ def get_tax_withholding_details(tax_withholding_category, posting_date, company)
 	for account_detail in tax_withholding.accounts:
 		if company == account_detail.company:
 			return frappe._dict({
+				"tax_withholding_category": tax_withholding_category,
 				"account_head": account_detail.account,
 				"rate": tax_rate_detail.tax_withholding_rate,
 				"from_date": tax_rate_detail.from_date,
@@ -206,18 +207,39 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 
 def get_invoice_vouchers(parties, tax_details, company, party_type='Supplier'):
 	dr_or_cr = 'credit' if party_type == 'Supplier' else 'debit'
+	doctype = 'Purchase Invoice' if party_type == 'Supplier' else 'Sales Invoice'
 
 	filters = {
-		dr_or_cr: ['>', 0],
 		'company': company,
-		'party_type': party_type,
-		'party': ['in', parties],
+		frappe.scrub(party_type): ['in', parties],
 		'posting_date': ['between', (tax_details.from_date, tax_details.to_date)],
 		'is_opening': 'No',
-		'is_cancelled': 0
+		'docstatus': 1
 	}
 
-	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck="voucher_no") or [""]
+	if not tax_details.get('consider_party_ledger_amount') and doctype != "Sales Invoice":
+		filters.update({
+			'apply_tds': 1,
+			'tax_withholding_category': tax_details.get('tax_withholding_category')
+		})
+
+	invoices = frappe.get_all(doctype, filters=filters, pluck="name") or [""]
+
+	journal_entries = frappe.db.sql("""
+		SELECT j.name
+			FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
+		WHERE
+			j.docstatus = 1
+			AND j.is_opening = 'No'
+			AND j.posting_date between %s and %s
+			AND ja.{dr_or_cr} > 0
+			AND ja.party in %s
+	""".format(dr_or_cr=dr_or_cr), (tax_details.from_date, tax_details.to_date, tuple(parties)), as_list=1)
+
+	if journal_entries:
+		journal_entries = journal_entries[0]
+
+	return invoices + journal_entries
 
 def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, party_type='Supplier'):
 	# for advance vouchers, debit and credit is reversed
