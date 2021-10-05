@@ -2023,12 +2023,6 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.local.enable_perpetual_inventory['_Test Company 1'] = old_perpetual_inventory
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
 
-	def test_sle_if_target_warehouse_exists_accidentally(self):
-		"""
-			Check if inward entry exists if Target Warehouse accidentally exists
-			but Customer is not an internal customer.
-		"""
-
 	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
