@@ -128,6 +128,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
+		self.validate_target_warehouse_without_internal_customer()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -184,6 +185,17 @@ class DeliveryNote(SellingController):
 		for d in self.get_item_list():
 			if not d['warehouse'] and frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
+
+	def validate_target_warehouse_without_internal_customer(self):
+		if self.is_internal_customer:
+			return
+
+		if any(d.target_warehouse for d in self.items):
+			msg = _("Target Warehouse set for some items but the customer is not an internal customer.")
+			msg += " " + _("This delivery note will be treated as material transfer.")
+			frappe.msgprint(msg, title="Internal Transfer")
+
+
 
 
 	def update_current_stock(self):
