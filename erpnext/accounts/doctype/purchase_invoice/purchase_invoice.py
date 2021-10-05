@@ -15,6 +15,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
+	is_overdue,
 	unlink_inter_company_doc,
 	update_linked_doc,
 	validate_inter_company_party,
@@ -1109,6 +1110,12 @@ class PurchaseInvoice(BuyingController):
 		if not self.apply_tds:
 			return
 
+		if self.apply_tds and not self.get('tax_withholding_category'):
+			self.tax_withholding_category = frappe.db.get_value('Supplier', self.supplier, 'tax_withholding_category')
+
+		if not self.tax_withholding_category:
+			return
+
 		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
 
 		if not tax_withholding_details:
@@ -1139,10 +1146,7 @@ class PurchaseInvoice(BuyingController):
 				self.status = 'Draft'
 			return
 
-		precision = self.precision("outstanding_amount")
-		outstanding_amount = flt(self.outstanding_amount, precision)
-		due_date = getdate(self.due_date)
-		nowdate = getdate()
+		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
 
 		if not status:
 			if self.docstatus == 2:
@@ -1150,9 +1154,11 @@ class PurchaseInvoice(BuyingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate:
+				elif is_overdue(self):
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate:
+				elif 0 < outstanding_amount < flt(self.grand_total, self.precision("grand_total")):
+					self.status = "Partly Paid"
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to debit note issued against invoice
 				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):

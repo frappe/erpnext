@@ -23,6 +23,9 @@ class POSInvoiceMergeLog(Document):
 		self.validate_pos_invoice_status()
 
 	def validate_customer(self):
+		if self.merge_invoices_based_on == 'Customer Group':
+			return
+
 		for d in self.pos_invoices:
 			if d.customer != self.customer:
 				frappe.throw(_("Row #{}: POS Invoice {} is not against customer {}").format(d.idx, d.pos_invoice, self.customer))
@@ -124,7 +127,7 @@ class POSInvoiceMergeLog(Document):
 				found = False
 				for i in items:
 					if (i.item_code == item.item_code and not i.serial_no and not i.batch_no and
-						i.uom == item.uom and i.net_rate == item.net_rate):
+						i.uom == item.uom and i.net_rate == item.net_rate and i.warehouse == item.warehouse):
 						found = True
 						i.qty = i.qty + item.qty
 
@@ -172,6 +175,11 @@ class POSInvoiceMergeLog(Document):
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
 		invoice.ignore_pricing_rule = 1
+		invoice.customer = self.customer
+
+		if self.merge_invoices_based_on == 'Customer Group':
+			invoice.flags.ignore_pos_profile = True
+			invoice.pos_profile = ''
 
 		return invoice
 
@@ -228,7 +236,7 @@ def get_all_unconsolidated_invoices():
 	return pos_invoices
 
 def get_invoice_customer_map(pos_invoices):
-	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }
+	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Customer 2' : [{}] }
 	pos_invoice_customer_map = {}
 	for invoice in pos_invoices:
 		customer = invoice.get('customer')

@@ -690,13 +690,17 @@ class AccountsController(TransactionBase):
 							.format(d.reference_name, d.against_order))
 
 	def set_advance_gain_or_loss(self):
-		if not self.get("advances"):
+		if self.get('conversion_rate') == 1 or not self.get("advances"):
+			return
+
+		is_purchase_invoice = self.doctype == 'Purchase Invoice'
+		party_account = self.credit_to if is_purchase_invoice else self.debit_to
+		if get_account_currency(party_account) != self.currency:
 			return
 
 		for d in self.get("advances"):
 			advance_exchange_rate = d.ref_exchange_rate
-			if (d.allocated_amount and self.conversion_rate != 1
-				and self.conversion_rate != advance_exchange_rate):
+			if (d.allocated_amount and self.conversion_rate != advance_exchange_rate):
 
 				base_allocated_amount_in_ref_rate = advance_exchange_rate * d.allocated_amount
 				base_allocated_amount_in_inv_rate = self.conversion_rate * d.allocated_amount
@@ -715,7 +719,7 @@ class AccountsController(TransactionBase):
 
 					gain_loss_account = frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
 					if not gain_loss_account:
-						frappe.throw(_("Please set Default Exchange Gain/Loss Account in Company {}")
+						frappe.throw(_("Please set default Exchange Gain/Loss Account in Company {}")
 							.format(self.get('company')))
 					account_currency = get_account_currency(gain_loss_account)
 					if account_currency != self.company_currency:
@@ -734,7 +738,7 @@ class AccountsController(TransactionBase):
 							"against": party,
 							dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
 							dr_or_cr: abs(d.exchange_gain_loss),
-							"cost_center": self.cost_center,
+							"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 							"project": self.project
 						}, item=d)
 					)
@@ -985,42 +989,55 @@ class AccountsController(TransactionBase):
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
+		role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+		user_roles = frappe.get_roles()
+
+		total_overbilled_amt = 0.0
+
 		for item in self.get("items"):
-			if item.get(item_ref_dn):
-				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
-					item.get(item_ref_dn), based_on), self.precision(based_on, item))
-				if not ref_amt:
-					frappe.msgprint(
-						_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero")
-							.format(item.item_code, ref_dt))
-				else:
-					already_billed = frappe.db.sql("""
-						select sum(%s)
-						from `tab%s`
-						where %s=%s and docstatus=1 and parent != %s
-					""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
-					   (item.get(item_ref_dn), self.name))[0][0]
+			if not item.get(item_ref_dn):
+				continue
 
-					total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
-						self.precision(based_on, item))
+			ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
+				item.get(item_ref_dn), based_on), self.precision(based_on, item))
+			if not ref_amt:
+				frappe.msgprint(
+					_("System will not check overbilling since amount for Item {0} in {1} is zero")
+						.format(item.item_code, ref_dt), title=_("Warning"), indicator="orange")
+				continue
 
-					allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
-						get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
+			already_billed = frappe.db.sql("""
+				select sum(%s)
+				from `tab%s`
+				where %s=%s and docstatus=1 and parent != %s
+			""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
+				(item.get(item_ref_dn), self.name))[0][0]
 
-					max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
+			total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
+				self.precision(based_on, item))
 
-					if total_billed_amt < 0 and max_allowed_amt < 0:
-						# while making debit note against purchase return entry(purchase receipt) getting overbill error
-						total_billed_amt = abs(total_billed_amt)
-						max_allowed_amt = abs(max_allowed_amt)
+			allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
+				get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
 
-					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+			max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
 
-					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
-						if self.doctype != "Purchase Invoice":
-							self.throw_overbill_exception(item, max_allowed_amt)
-						elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
-							self.throw_overbill_exception(item, max_allowed_amt)
+			if total_billed_amt < 0 and max_allowed_amt < 0:
+				# while making debit note against purchase return entry(purchase receipt) getting overbill error
+				total_billed_amt = abs(total_billed_amt)
+				max_allowed_amt = abs(max_allowed_amt)
+
+			overbill_amt = total_billed_amt - max_allowed_amt
+			total_overbilled_amt += overbill_amt
+
+			if overbill_amt > 0.01 and role_allowed_to_over_bill not in user_roles:
+				if self.doctype != "Purchase Invoice":
+					self.throw_overbill_exception(item, max_allowed_amt)
+				elif not cint(frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")):
+					self.throw_overbill_exception(item, max_allowed_amt)
+
+		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
+			frappe.msgprint(_("Overbilling of {} ignored because you have {} role.")
+					.format(total_overbilled_amt, role_allowed_to_over_bill), title=_("Warning"), indicator="orange")
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
@@ -1673,14 +1690,18 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
 def update_invoice_status():
-	# Daily update the status of the invoices
+	"""Updates status as Overdue for applicable invoices. Runs daily."""
 
-	frappe.db.sql(""" update `tabSales Invoice` set status = 'Overdue'
-		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
-
-	frappe.db.sql(""" update `tabPurchase Invoice` set status = 'Overdue'
-		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
-
+	for doctype in ("Sales Invoice", "Purchase Invoice"):
+		frappe.db.sql("""
+			update `tab{}` as dt set dt.status = 'Overdue'
+			where dt.docstatus = 1
+				and dt.status != 'Overdue'
+				and dt.outstanding_amount > 0
+				and (dt.grand_total - dt.outstanding_amount) <
+					(select sum(payment_amount) from `tabPayment Schedule` as ps
+						where ps.parent = dt.name and ps.due_date < %s)
+		""".format(doctype), getdate())
 
 @frappe.whitelist()
 def get_payment_terms(terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
