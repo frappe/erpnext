@@ -15,7 +15,6 @@ Portal
 Maintenance
 Education
 Regional
-Healthcare
 Restaurant
 Agriculture
 ERPNext Integrations

@@ -1,7 +1,7 @@
 {%- macro slide(image, title, subtitle, action, label, index, align="Left", theme="Dark") -%}
 {%- set align_class = resolve_class({
 	'text-right': align == 'Right',
-	'text-centre': align == 'Center',
+	'text-centre': align == 'Centre',
 	'text-left': align == 'Left',
 }) -%}
 
@@ -15,7 +15,7 @@
 	<div class="carousel-body container d-flex {{ align_class }}">
 		<div class="carousel-content align-self-center">
 			{%- if title -%}<h1 class="{{ heading_class }}">{{ title }}</h1>{%- endif -%}
-			{%- if subtitle -%}<p class="text-muted mt-2">{{ subtitle }}</p>{%- endif -%}
+			{%- if subtitle -%}<p class="{{ heading_class }} mt-2">{{ subtitle }}</p>{%- endif -%}
 			{%- if action -%}
 			<a href="{{ action }}" class="btn btn-primary mt-3">
 				{{ label }}
@@ -27,12 +27,14 @@
 </div>
 {%- endmacro -%}
 
-<div id="{{ slider_name }}" class="section-carousel carousel slide" data-ride="carousel">
+{%- set hero_slider_id = 'id-' + frappe.utils.generate_hash('HeroSlider', 12) -%}
+
+<div id="{{ hero_slider_id }}" class="section-carousel carousel slide" data-ride="carousel">
 	{%- if show_indicators -%}
 	<ol class="carousel-indicators">
 		{%- for index in ['1', '2', '3', '4', '5'] -%}
 		{%- if values['slide_' + index + '_image'] -%}
-			<li data-target="#{{ slider_name }}" data-slide-to="{{ frappe.utils.cint(index) - 1 }}" class="{{ 'active' if index=='1' else ''}}"></li>
+			<li data-target="#{{ hero_slider_id }}" data-slide-to="{{ frappe.utils.cint(index) - 1 }}" class="{{ 'active' if index=='1' else ''}}"></li>
 		{%- endif -%}
 		{%- endfor -%}
 	</ol>
@@ -54,7 +56,7 @@
 		{%- endfor -%}
 	</div>
 	{%- if show_controls -%}
-	<a class="carousel-control-prev" href="#{{ slider_name }}" role="button" data-slide="prev">
+	<a class="carousel-control-prev" href="#{{ hero_slider_id }}" role="button" data-slide="prev">
 		<div class="carousel-control">
 			<svg class="mr-1" width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<path d="M11.625 3.75L6.375 9L11.625 14.25" stroke="#4C5A67" stroke-linecap="round" stroke-linejoin="round"/>
@@ -62,7 +64,7 @@
 		</div>
 		<span class="sr-only">Previous</span>
 	</a>
-	<a class="carousel-control-next" href="#{{ slider_name }}" role="button" data-slide="next">
+	<a class="carousel-control-next" href="#{{ hero_slider_id }}" role="button" data-slide="next">
 		<div class="carousel-control">
 			<svg class="ml-1" width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<path d="M6.375 14.25L11.625 9L6.375 3.75" stroke="#4C5A67" stroke-linecap="round" stroke-linejoin="round"/>
@@ -73,13 +75,12 @@
 	{%- endif -%}
 </div>
 
-<script type="text/javascript">
-	$('.carousel').carousel({
-		interval: false,
-		pause: "hover",
-		wrap: true
-	})
+<script>
+	frappe.ready(function () {
+		$('.carousel').carousel({
+			interval: false,
+			pause: "hover",
+			wrap: true
+		})
+	});
 </script>
-
-<style>
-</style>
