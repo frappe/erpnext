@@ -6,10 +6,12 @@ import unittest
 import frappe
 from frappe.utils import add_days, nowdate, today
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import create_dunning as create_dunning_from_sales_invoice
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
+)
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	create_dunning as create_dunning_from_sales_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
