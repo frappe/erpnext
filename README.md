@@ -77,6 +77,12 @@ The ERPNext code is licensed as GNU General Public License (v3) and the Document
 
 ---
 
+## Learning
+
+1. [Frappe School](https://frappe.school) - Learn Frappe Framework and ERPNext from the various courses by the maintainers or from the community.
+
+---
+
 ## Logo and Trademark
 
 The brand name ERPNext and the logo are trademarks of Frappe Technologies Pvt. Ltd.
