@@ -30,7 +30,7 @@ frappe.ui.form.on("Dunning", {
 					"is_group": 0,
 					"company": frm.doc.company
 				}
-			}
+			};
 		});
 		frm.set_query("contact_person", erpnext.queries.contact_query);
 		frm.set_query("customer_address", erpnext.queries.address_query);
@@ -74,7 +74,7 @@ frappe.ui.form.on("Dunning", {
 			});
 		}
 
-		frappe.dynamic_link = { doc: frm.doc, fieldname: 'customer', doctype: 'Customer' }
+		frappe.dynamic_link = { doc: frm.doc, fieldname: 'customer', doctype: 'Customer' };
 
 		frm.toggle_display("customer_name", (frm.doc.customer_name && frm.doc.customer_name !== frm.doc.customer));
 	},
@@ -87,10 +87,9 @@ frappe.ui.form.on("Dunning", {
 				debounce: 2000,
 				callback: function (r) {
 					if (r.message) {
-						frm.set_value("company_address", r.message)
-					}
-					else {
-						frm.set_value("company_address", "")
+						frm.set_value("company_address", r.message);
+					} else {
+						frm.set_value("company_address", "");
 					}
 				}
 			});
@@ -141,11 +140,11 @@ frappe.ui.form.on("Dunning", {
 		// this.set_dynamic_labels();
 		var company_currency = erpnext.get_currency(frm.doc.company);
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
-		if(frm.doc.currency && frm.doc.currency !== company_currency) {
+		if (frm.doc.currency && frm.doc.currency !== company_currency) {
 			frappe.call({
 				method: "erpnext.setup.utils.get_exchange_rate",
 				args: {
-					transaction_date: transaction_date,
+					transaction_date: frm.doc.posting_date,
 					from_currency: frm.doc.currency,
 					to_currency: company_currency,
 					args: "for_selling"
@@ -154,7 +153,7 @@ frappe.ui.form.on("Dunning", {
 				freeze_message: __("Fetching exchange rates ..."),
 				callback: function(r) {
 					const exchange_rate = flt(r.message);
-					if(exchange_rate != frm.doc.conversion_rate) {
+					if (exchange_rate != frm.doc.conversion_rate) {
 						frm.set_value("conversion_rate", exchange_rate);
 					}
 				}
@@ -164,7 +163,7 @@ frappe.ui.form.on("Dunning", {
 		}
 	},
 	conversion_rate: function (frm) {
-		if(frm.doc.currency === erpnext.get_currency(frm.doc.company)) {
+		if (frm.doc.currency === erpnext.get_currency(frm.doc.company)) {
 			frm.set_value("conversion_rate", 1.0);
 		}
 
@@ -240,7 +239,6 @@ frappe.ui.form.on("Dunning", {
 		});
 	},
 	calculate_totals: function (frm) {
-		debugger;
 		const total_interest = frm.doc.overdue_payments
 			.reduce((prev, cur) => prev + cur.interest, 0);
 		const total_outstanding = frm.doc.overdue_payments
@@ -276,8 +274,7 @@ frappe.ui.form.on("Dunning", {
 });
 
 frappe.ui.form.on("Overdue Payment", {
-	interest: function (frm, cdt, cdn) {
-		debugger;
+	interest: function (frm) {
 		frm.trigger("calculate_totals");
 	}
 });
