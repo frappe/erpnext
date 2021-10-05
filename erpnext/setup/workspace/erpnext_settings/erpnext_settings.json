@@ -17,7 +17,7 @@
  "is_standard": 0,
  "label": "ERPNext Settings",
  "links": [],
- "modified": "2021-08-05 12:15:59.052327",
+ "modified": "2021-10-05 11:29:30.598900",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",
@@ -124,6 +124,13 @@
    "icon": "retail",
    "label": "Products Settings",
    "link_to": "Products Settings",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "icon": "crm",
+   "label": "CRM Settings",
+   "link_to": "CRM Settings",
    "type": "DocType"
   }
  ],
