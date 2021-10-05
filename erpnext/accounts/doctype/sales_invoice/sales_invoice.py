@@ -1060,9 +1060,14 @@ class SalesInvoice(SellingController):
 			if schedule.schedule_date == posting_date_of_original_invoice:
 				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice) \
 					or self.sale_happens_in_the_future(posting_date_of_original_invoice):
+
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
 					reverse_journal_entry.submit()
+
+					asset.flags.ignore_validate_update_after_submit = True
+					schedule.journal_entry = None
+					asset.save()
 
 	def get_posting_date_of_sales_invoice(self):
 		return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
