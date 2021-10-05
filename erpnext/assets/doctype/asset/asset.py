@@ -79,7 +79,6 @@ class Asset(AccountsController):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
-			self.reset_value_after_depreciation()
 			self.make_depreciation_schedule(date_of_sale)
 			self.set_accumulated_depreciation(date_of_sale)
 		else:
@@ -181,10 +180,6 @@ class Asset(AccountsController):
 		for d in self.get("finance_books"):
 			d.rate_of_depreciation = flt(self.get_depreciation_rate(d, on_validate=True),
 				d.precision("rate_of_depreciation"))
-
-	def reset_value_after_depreciation(self):
-		for d in self.get("finance_books"):
-			d.value_after_depreciation = 0
 
 	def make_depreciation_schedule(self, date_of_sale):
 		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.schedules:
