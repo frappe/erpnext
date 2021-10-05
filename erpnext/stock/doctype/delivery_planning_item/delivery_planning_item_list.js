@@ -329,7 +329,6 @@ frappe.listview_settings['Delivery Planning Item'] = {
             return __('View {0}', [`${doc.reference_type} ${doc.reference_name}`])
         },
         action(doc) {
-			console.log("inside action", doc.name)
 			var new_supplier;
 				var new_warehouse;
 				var new_transporter;
@@ -360,6 +359,16 @@ frappe.listview_settings['Delivery Planning Item'] = {
 					message: __('Cannot split item with qty = 1')
 				});
 			}
+
+			else if( doc.transporter == null && doc.supplier == null){
+				frappe.msgprint({
+					title: __('Notification'),
+					indicator: 'Red',
+					message: __('Cannot split Please add Transporter or Supplier')
+				});
+			}
+
+
 			else{
 			let d = new frappe.ui.Dialog({
 				title: 'Split Planning Item',
@@ -401,6 +410,20 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						reqd: 1
 					},
 					{
+						label: 'Current Qty To Deliver',
+						fieldname: 'qty_td',
+						fieldtype: 'Float',
+						default : doc.qty_to_deliver,
+						read_only: 1
+					},
+					{
+						label: 'Current Pending Qty',
+						fieldname: 'qty_pd',
+						fieldtype: 'Float',
+						default : doc.pending_qty,
+						read_only: 1
+					},
+					{
 						label: 'Qty To Deliver',
 						fieldname: 'qty',
 						fieldtype: 'Float',
@@ -430,9 +453,16 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						mandatory_depends_on : "eval: doc.supplier_dc == 1",
 						onchange: function() {
 							frappe.model.get_value('Supplier', {"name":d.fields_dict.supplier.value}, 'supplier_name',
-							function(dd){								
-							d.fields_dict.supplier_name.value = dd.supplier_name
-							d.fields_dict.supplier_name.refresh();
+							function(dd){		
+								if (d.fields_dict.supplier.value){
+									d.fields_dict.supplier_name.value = dd.supplier_name
+									d.fields_dict.supplier_name.refresh();
+								}
+								else{
+									d.fields_dict.supplier_name.value = "Please select Supplier";
+									d.fields_dict.supplier_name.refresh();
+								}						
+							
 							})
 						},
 					},
@@ -449,31 +479,24 @@ frappe.listview_settings['Delivery Planning Item'] = {
 	
 				primary_action_label: 'Submit',
 				primary_action(values) {
-					console.log(values);
 					if(values.transporter)
 					{ new_transporter = values.transporter;
-						console.log("0000000110000000",new_transporter);
 					}
 					
 					else{ new_transporter = "";
-						console.log("0000000011000000",new_transporter);
 					}
 					if(values.supplier)
 					{ new_supplier = values.supplier;
-						console.log("00000000000000",new_supplier);
 					}
 					
 					else{ new_supplier = "";
-						console.log("00000000000000",new_supplier);
 					}
 	
 					if(values.src_warehouse)
-					{ new_warehouse = values.src_warehouse;
-						console.log("0000000110000000",new_warehouse);
+					{ new_warehouse = values.src_warehouse; 
 					}
 					
-					else{ new_warehouse = "";
-						console.log("0000000011000000",new_warehouse);
+					else{ new_warehouse = ""; 
 					}
 	
 					if(values.qty == 0 || values.qty >= doc.qty_to_deliver)
@@ -483,7 +506,6 @@ frappe.listview_settings['Delivery Planning Item'] = {
 							indicator: 'red',
 							message: __('Qty To Deliver should be greater than 0 or  less than Item selected to split')
 							});
-							console.log("values.qty",values.qty,doc.qty_to_deliver)
 					}
 				
 					else {			
@@ -498,11 +520,10 @@ frappe.listview_settings['Delivery Planning Item'] = {
 								"n_supplier_dc" : values.supplier_dc,
 								"n_supplier" : new_supplier,
 								"n_date" : values.delivery_date
-							  },
+						},
 	
 						callback: function(r){
 							if(r.message){
-								console.log("item",r);
 								frappe.msgprint({
 									title: __('Notification'),
 									indicator: 'green',
@@ -511,8 +532,7 @@ frappe.listview_settings['Delivery Planning Item'] = {
 									d.hide();
 									// location.reload();
 									cur_list.refresh();
-									
-									console.log("curent list", cur_list)	
+										
 								}
 							else{
 								frappe.msgprint({

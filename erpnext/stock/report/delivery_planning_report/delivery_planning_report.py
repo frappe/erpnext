@@ -354,7 +354,7 @@ def get_data(conditions, group_by, filters):
 				"""
 	if filters.get('group_by'):
 		query +=",dpi.item_code, dpi.item_name, dpi.planned_date, dpi.delivery_note, delay_days, dpi.pick_list, dpi.purchase_order,dpi.supplier,dpi.supplier_name,dpi.name, dpi.company"
-	print('------query',query)
+	# print('------query',query)
 	result = frappe.db.sql( query.format(conditions=conditions, groupby = group_by),filters, as_dict=1)	
 	# print("------------------------",result)
 		
@@ -399,23 +399,23 @@ def get_data(conditions, group_by, filters):
 				'customer' : d.get('customer'),
 				'customer_name' : d.get('customer_name'),
 				'delivery_date' : d.get('expected_date'),
-				 'item_code' : d.get('item_code'),
-				 'item_name' : d.get('item_name'),
-				 'ordered_qty' : d.get('ordered_qty'),
-				 'qty_to_deliver' : d.get('qty_to_deliver'),
-				 'planned_date' : d.get('planned_date'),
-				 'delivery_note' : d.get('delivery_note'),
-				 'delivery_note_date' : d.get('delivery_note_date'),
-				 'delay_days' : d.get('delay_days'),
-				 'pick_list' : d.get('pick_list'),
-				 'weight_ordered' : d.get('weight_ordered'),
-				 'planned_delivery_weight' : d.get('planned_delivery_weight'),
-				 'actual_delivery_weight' :  d.get('actual_delivery_weight'),
-				 'purchase_order' : d.get('purchase_order'),
-				 'supplier' : d.get('supplier'),
-				 'supplier_name' : d.get('supplier_name'),
-				 'item_planning_id' : d.get('item_planning_id'),
-				 'company' : d.get('company')
+				'item_code' : d.get('item_code'),
+				'item_name' : d.get('item_name'),
+				'ordered_qty' : d.get('ordered_qty'),
+				'qty_to_deliver' : d.get('qty_to_deliver'),
+				'planned_date' : d.get('planned_date'),
+				'delivery_note' : d.get('delivery_note'),
+				'delivery_note_date' : d.get('delivery_note_date'),
+				'delay_days' : d.get('delay_days'),
+				'pick_list' : d.get('pick_list'),
+				'weight_ordered' : d.get('weight_ordered'),
+				'planned_delivery_weight' : d.get('planned_delivery_weight'),
+				'actual_delivery_weight' :  d.get('actual_delivery_weight'),
+				'purchase_order' : d.get('purchase_order'),
+				'supplier' : d.get('supplier'),
+				'supplier_name' : d.get('supplier_name'),
+				'item_planning_id' : d.get('item_planning_id'),
+				'company' : d.get('company')
 
 			})
 			ordered_qty += float(d.get('ordered_qty'))
@@ -431,23 +431,23 @@ def get_data(conditions, group_by, filters):
 				'customer' : None,
 				'customer_name' : None,
 				'delivery_date' : None,
-				 'item_code' : None,
-				 'item_name' : '<b>Total</b>',
-				 'ordered_qty' :'<b> ordered_qty</b>',
-				 'qty_to_deliver' : '<b>qty_to_deliver</b>',
-				 'planned_date' : None,
-				 'delivery_note' : None,
-				 'delivery_note_date' : None,
-				 'delay_days' : None,
-				 'pick_list' : None,
-				 'weight_ordered' :'<b> weight_ordered</b>',
-				 'planned_delivery_weight' : '<b>planned_delivery_weight</b>',
-				 'actual_delivery_weight' : '<b>actual_delivery_weight</b>',
-				 'purchase_order' : None,
-				 'supplier' : None,
-				 'supplier_name' : None,
-				 'item_planning_id' : None,
-				 'company' : None
+				'item_code' : None,
+				'item_name' : '<b>Total</b>',
+				'ordered_qty' : ordered_qty ,
+				'qty_to_deliver' : qty_to_deliver,
+				'planned_date' : None,
+				'delivery_note' : None,
+				'delivery_note_date' : None,
+				'delay_days' : None,
+				'pick_list' : None,
+				'weight_ordered' : weight_ordered,
+				'planned_delivery_weight' : planned_delivery_weight,
+				'actual_delivery_weight' : actual_delivery_weight,
+				'purchase_order' : None,
+				'supplier' : None,
+				'supplier_name' : None,
+				'item_planning_id' : None,
+				'company' : None
 
 			})
 		data.append(dd)
