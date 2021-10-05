@@ -99,6 +99,8 @@ jobs:
 
       - name: Build Assets
         run: cd ~/frappe-bench/ && bench build
+        env:
+          CI: Yes
 
       - name: UI Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-ui-tests erpnext --headless
