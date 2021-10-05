@@ -112,10 +112,7 @@ def validate_gstin_check_digit(gstin, label='GSTIN'):
 		frappe.throw(_("""Invalid {0}! The check digit validation has failed. Please ensure you've typed the {0} correctly.""").format(label))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
-	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
-		return [_("HSN/SAC"), _("Taxable Amount")] + tax_accounts
-	else:
-		return [_("Item"), _("Taxable Amount")] + tax_accounts
+	return [_("Item"), _("Taxable Amount")] + tax_accounts
 
 def get_itemised_tax_breakup_data(doc, account_wise=False):
 	itemised_tax = get_itemised_tax(doc.taxes, with_tax_account=account_wise)
@@ -250,6 +247,9 @@ def is_internal_transfer(party_details, doctype):
 		destination_gstin = party_details.company_gstin
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		destination_gstin = party_details.supplier_gstin
+
+	if not destination_gstin or party_details.gstin:
+		return False
 
 	if party_details.gstin == destination_gstin:
 		return True
@@ -859,12 +859,13 @@ def get_depreciation_amount(asset, depreciable_value, row):
 		rate_of_depreciation = row.rate_of_depreciation
 		# if its the first depreciation
 		if depreciable_value == asset.gross_purchase_amount:
-			# as per IT act, if the asset is purchased in the 2nd half of fiscal year, then rate is divided by 2
-			diff = date_diff(row.depreciation_start_date, asset.available_for_use_date)
-			if diff <= 180:
-				rate_of_depreciation = rate_of_depreciation / 2
-				frappe.msgprint(
-					_('As per IT Act, the rate of depreciation for the first depreciation entry is reduced by 50%.'))
+			if row.finance_book and frappe.db.get_value('Finance Book', row.finance_book, 'for_income_tax'):
+				# as per IT act, if the asset is purchased in the 2nd half of fiscal year, then rate is divided by 2
+				diff = date_diff(row.depreciation_start_date, asset.available_for_use_date)
+				if diff <= 180:
+					rate_of_depreciation = rate_of_depreciation / 2
+					frappe.msgprint(
+						_('As per IT Act, the rate of depreciation for the first depreciation entry is reduced by 50%.'))
 
 		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
 

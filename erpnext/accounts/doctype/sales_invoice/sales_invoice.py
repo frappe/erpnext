@@ -233,9 +233,6 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		if self.update_stock == 1:
-			self.repost_future_sle_and_gle()
-
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
@@ -501,7 +498,7 @@ class SalesInvoice(SellingController):
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
-		if not self.pos_profile:
+		if not self.pos_profile and not self.flags.ignore_pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
 				return
@@ -1472,14 +1469,7 @@ class SalesInvoice(SellingController):
 				self.status = 'Draft'
 			return
 
-		precision = self.precision("outstanding_amount")
-		outstanding_amount = flt(self.outstanding_amount, precision)
-		due_date = getdate(self.due_date)
-		nowdate = getdate()
-
-		discounting_status = None
-		if self.is_discounted:
-			discounting_status = get_discounting_status(self.name)
+		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
 
 		if not status:
 			if self.docstatus == 2:
@@ -1487,15 +1477,13 @@ class SalesInvoice(SellingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discounting_status=='Disbursed':
-					self.status = "Overdue and Discounted"
-				elif outstanding_amount > 0 and due_date < nowdate:
+				elif is_overdue(self):
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discounting_status=='Disbursed':
-					self.status = "Unpaid and Discounted"
-				elif outstanding_amount > 0 and due_date >= nowdate:
+				elif 0 < outstanding_amount < flt(self.grand_total, self.precision("grand_total")):
+					self.status = "Partly Paid"
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
-				#Check if outstanding amount is 0 due to credit note issued against invoice
+				# Check if outstanding amount is 0 due to credit note issued against invoice
 				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
@@ -1504,11 +1492,41 @@ class SalesInvoice(SellingController):
 					self.status = "Paid"
 				else:
 					self.status = "Submitted"
+
+				if (
+					self.status in ("Unpaid", "Partly Paid", "Overdue")
+					and self.is_discounted
+					and get_discounting_status(self.name) == "Disbursed"
+				):
+					self.status += " and Discounted"
+
 			else:
 				self.status = "Draft"
 
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
+
+def is_overdue(doc):
+	outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
+
+	if outstanding_amount <= 0:
+		return
+
+	grand_total = flt(doc.grand_total, doc.precision("grand_total"))
+	nowdate = getdate()
+	if doc.payment_schedule:
+		# calculate payable amount till date
+		payable_amount = sum(
+			payment.payment_amount
+			for payment in doc.payment_schedule
+			if getdate(payment.due_date) < nowdate
+		)
+
+		if (grand_total - outstanding_amount) < payable_amount:
+			return True
+
+	elif getdate(doc.due_date) < nowdate:
+		return True
 
 def get_discounting_status(sales_invoice):
 	status = None

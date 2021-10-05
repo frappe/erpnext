@@ -6,7 +6,7 @@ context('Organizational Chart', () => {
 
 	it('navigates to org chart', () => {
 		cy.visit('/app');
-		cy.awesomebar('Organizational Chart');
+		cy.visit('/app/organizational-chart');
 		cy.url().should('include', '/organizational-chart');
 
 		cy.window().its('frappe.csrf_token').then(csrf_token => {
