@@ -18,44 +18,9 @@ from frappe.utils.data import (
 
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
 
+test_dependencies = ("UOM", "Item Group", "Item")
 
 def create_plan():
-	if not frappe.db.exists('UOM', {"name": '_Test UOM'}):
-		frappe.get_doc({
-			"doctype": "UOM",
-			"uom_name": "_Test UOM"
-		}).insert()
-
-	if not frappe.db.exists('Item Group', {"name": '_Test Item Group Desktops'}):
-		frappe.get_doc({
-			"doctype": "Item Group",
-			"is_group": 0,
-			"item_group_name": "_Test Item Group Desktops",
-			"parent_item_group": "All Item Groups"
-		}).insert()
-
-	if not frappe.db.exists('Item', {"item_name": '_Test Non Stock Item'}):
-		frappe.get_doc({
-			"description": "_Test Non Stock Item 7",
-			"doctype": "Item",
-			"has_batch_no": 0,
-			"has_serial_no": 0,
-			"inspection_required": 0,
-			"is_stock_item": 0,
-			"is_sub_contracted_item": 0,
-			"item_code": "_Test Non Stock Item",
-			"item_group": "_Test Item Group Desktops",
-			"item_name": "_Test Non Stock Item",
-			"stock_uom": "_Test UOM",
-			"gst_hsn_code": "999800",
-			"item_defaults": [{
-				"company": "_Test Company",
-				"default_warehouse": "Finished Goods - _TC",
-				"expense_account": "Gegenkonto zu Konto 9260 - 9268 - _TC",
-				"income_account": "Kurzfristige Rückstellungen - _TC"
-			}]
-		}).insert()
-
 	if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):
 		plan = frappe.new_doc('Subscription Plan')
 		plan.plan_name = '_Test Plan Name'
@@ -104,7 +69,6 @@ def create_plan():
 		supplier.insert()
 
 class TestSubscription(unittest.TestCase):
-
 	def setUp(self):
 		create_plan()
 
