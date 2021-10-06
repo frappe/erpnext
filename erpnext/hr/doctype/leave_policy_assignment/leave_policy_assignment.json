@@ -15,6 +15,7 @@
   "assignment_based_on",
   "leave_period",
   "effective_from",
+  "effective_from_nepal",
   "effective_to",
   "leaves_allocated",
   "amended_from"
@@ -109,11 +110,17 @@
    "label": "Leaves Allocated",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "effective_from_nepal",
+   "fieldtype": "Read Only",
+   "label": "Effective From (Nepal)",
+   "read_only_depends_on": "eval:doc.assignment_based_on"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-01 17:54:01.014509",
+ "modified": "2021-09-13 15:09:17.516080",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Policy Assignment",

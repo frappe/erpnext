@@ -16,11 +16,8 @@ class FiscalYearIncorrectDate(frappe.ValidationError): pass
 
 class FiscalYear(Document):
 	def before_save(self):
-		# set nepali date in date table
-		company = frappe.db.get_single_value("System Settings",'country')
-		if company == 'Nepal':
-			self.set('date_tablenepal', [])
-			self.handle_nepali_calendar()
+		self.set('nepali_date_table', [])
+		self.handle_nepali_calendar()
 	@frappe.whitelist()
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
@@ -101,7 +98,6 @@ class FiscalYear(Document):
 				if overlap:
 					frappe.throw(_("Year start date or end date is overlapping with {0}. To avoid please set company")
 						.format(existing.name), frappe.NameError)
-
 	def handle_nepali_calendar(self):
 		sdt = datetime.datetime.strptime(self.year_start_date, "%Y-%m-%d").date()
 		edt = datetime.datetime.strptime(self.year_end_date, "%Y-%m-%d").date()
@@ -118,21 +114,13 @@ class FiscalYear(Document):
 
 		while start_date <= end_date:
 			converted_date = nepali_datetime.date.from_datetime_date(start_date)
-			self.append("date_tablenepal",{
+			self.append("nepali_date_table",{
 				"gregorian_date" : start_date,
 				"nepali_date" : converted_date.strftime("%D-%n-%K"),
 				"nepali_month" : converted_date.strftime("%N")
 			})
 			start_date += delta
-
-		start_date_nepal = nepali_datetime.date.from_datetime_date(start_date)
-		end_date_nepal = nepali_datetime.date.from_datetime_date(end_date)
 		
-		self.year_start_date_nepal = start_date_nepal.strftime("%D-%n-%K")
-		self.year_end_date_nepal = end_date_nepal.strftime("%D-%n-%K")
-
-		
-
 @frappe.whitelist()
 def check_duplicate_fiscal_year(doc):
 	year_start_end_dates = frappe.db.sql("""select name, year_start_date, year_end_date from `tabFiscal Year` where name!=%s""", (doc.name))

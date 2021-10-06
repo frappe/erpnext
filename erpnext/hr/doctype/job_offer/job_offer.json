@@ -13,6 +13,7 @@
   "column_break_3",
   "status",
   "offer_date",
+  "offer_date_nepal",
   "designation",
   "company",
   "section_break_4",
@@ -156,11 +157,16 @@
    "options": "Job Offer",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "offer_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Offer Date (Nepal)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 00:56:24.756395",
+ "modified": "2021-09-14 15:01:02.570473",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Offer",

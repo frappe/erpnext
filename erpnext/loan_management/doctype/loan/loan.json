@@ -15,6 +15,7 @@
   "column_break_3",
   "company",
   "posting_date",
+  "posting_date_nepal",
   "status",
   "repay_from_salary",
   "section_break_8",
@@ -94,7 +95,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -355,12 +355,17 @@
    "fieldtype": "Date",
    "label": "Closure Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "posting_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:10:32.360818",
+ "modified": "2021-09-14 16:06:23.737822",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

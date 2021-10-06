@@ -11,6 +11,34 @@ frappe.ui.form.on('Coupon Code', {
 			};
 		});
 	},
+
+	valid_from: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.valid_from
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("valid_from_nepali",resp.message)
+				}
+			}
+		})
+	},
+	valid_upto: function(frm){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.valid_upto
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("valid_upto_nepali",resp.message)
+				}
+			}
+		})
+	},
+
 	coupon_name:function(frm){
 		if (frm.doc.__islocal===1) {
 			frm.trigger("make_coupon_code");

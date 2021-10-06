@@ -21,6 +21,7 @@
   "amended_from",
   "payroll",
   "encashment_date",
+  "encashment_date_nepal",
   "additional_salary",
   "column_break_14",
   "currency",
@@ -116,7 +117,6 @@
    "read_only": 1
   },
   {
-   "default": "Today",
    "fieldname": "encashment_date",
    "fieldtype": "Date",
    "label": "Encashment Date"
@@ -150,11 +150,16 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "encashment_date_nepal",
+   "fieldtype": "Data",
+   "label": "Encashment Date (Nepal)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:32:55.492327",
+ "modified": "2021-09-13 16:39:33.641054",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Encashment",

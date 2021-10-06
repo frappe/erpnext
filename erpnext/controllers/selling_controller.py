@@ -121,7 +121,16 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if self.commission_based_on_target_lines==0:
+		if self.doctype !="Quotation":
+			if self.commission_based_on_target_lines==0:
+				if self.meta.get_field("commission_rate"):
+					self.round_floats_in(self, ["base_net_total", "commission_rate"])
+					if self.commission_rate > 100.0:
+						throw(_("Commission rate cannot be greater than 100"))
+
+					self.total_commission = flt(self.base_net_total * self.commission_rate / 100.0,
+						self.precision("total_commission"))
+		else:
 			if self.meta.get_field("commission_rate"):
 				self.round_floats_in(self, ["base_net_total", "commission_rate"])
 				if self.commission_rate > 100.0:
@@ -129,17 +138,18 @@ class SellingController(StockController):
 
 				self.total_commission = flt(self.base_net_total * self.commission_rate / 100.0,
 					self.precision("total_commission"))
-		if self.commission_based_on_target_lines==1: 
-			tot=[]
-			if self.sales_partner:
-				doc=frappe.get_doc("Sales Partner",self.sales_partner)
-				for i in self.items:
-					for j in doc.item_target_details:
-						if i.item_code==j.item_code:
-							if j.commision_formula:
-								data=eval(j.commision_formula)
-								tot.append(data)
-								self.total_commission=sum(tot)			
+		if self.doctype !="Quotation":
+			if self.commission_based_on_target_lines==1: 
+				tot=[]
+				if self.sales_partner:
+					doc=frappe.get_doc("Sales Partner",self.sales_partner)
+					for i in self.items:
+						for j in doc.item_target_details:
+							if i.item_code==j.item_code:
+								if j.commision_formula:
+									data=eval(j.commision_formula)
+									tot.append(data)
+									self.total_commission=sum(tot)			
 
 
 	def calculate_contribution(self):

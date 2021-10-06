@@ -99,6 +99,36 @@ frappe.ui.form.on("Purchase Order Item", {
 				set_schedule_date(frm);
 			}
 		}
+	},
+	schedule_date: function (frm,cdt,cdn) {
+		var child = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date:child.schedule_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					frappe.model.set_value(cdt,cdn,"required_by_nepali",resp.message)
+					
+				}
+			}
+		})
+	},
+	expected_delivery_date: function (frm,cdt,cdn) {
+		var child = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date:child.expected_delivery_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					frappe.model.set_value(cdt,cdn,"expected_delivery_date_nepal",resp.message)
+					
+				}
+			}
+		})
 	}
 });
 
@@ -116,6 +146,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	refresh: function(doc, cdt, cdn) {
+		
 		var me = this;
 		this._super();
 		var allow_receipt = false;
@@ -224,7 +255,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			cur_frm.cscript.add_from_mappers();
 		}
 	},
-
+	
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
@@ -601,10 +632,22 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	items_on_form_rendered: function() {
 		set_schedule_date(this.frm);
 	},
-
-	schedule_date: function() {
-		set_schedule_date(this.frm);
-	}
+	
+	
+	to_date: function(doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date: doc.to_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("to_date_nepali",resp.message)
+				}
+			}
+		})
+	},
+	
 });
 
 // for backward compatibility: combine new and previous states
@@ -654,3 +697,6 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });
+
+
+

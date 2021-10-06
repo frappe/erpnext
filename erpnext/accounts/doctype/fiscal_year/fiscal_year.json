@@ -11,11 +11,22 @@
   "year",
   "disabled",
   "is_short_year",
+  "section_break_4",
   "year_start_date",
+  "year_start_date_nepal",
   "year_end_date",
+  "column_break_7",
+  "nepali_year_start_date",
+  "nepali_year_end_date",
+  "section_break_10",
   "companies",
+<<<<<<< HEAD
   "auto_created",
   "date_tablenepal"
+=======
+  "nepali_date_table",
+  "auto_created"
+>>>>>>> version-13-nepal
  ],
  "fields": [
   {
@@ -80,17 +91,58 @@
    "set_only_once": 1
   },
   {
+<<<<<<< HEAD
    "fieldname": "date_tablenepal",
    "fieldtype": "Table",
    "label": "Date Table(Nepal)",
    "options": "Nepali Date",
    "read_only": 1
+=======
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nepali_year_start_date",
+   "fieldtype": "Data",
+   "label": "Nepali Year Start Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nepali_year_end_date",
+   "fieldtype": "Data",
+   "label": "Nepali Year End Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nepali_date_table",
+   "fieldtype": "Table",
+   "label": "Nepali Date Table",
+   "options": "Nepali Date Table",
+   "read_only": 1
+  },
+  {
+   "fieldname": "year_start_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Year Start Date (Nepal)"
+>>>>>>> version-13-nepal
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-07-22 15:04:13.724137",
+=======
+ "modified": "2021-09-16 12:00:48.033851",
+>>>>>>> version-13-nepal
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",

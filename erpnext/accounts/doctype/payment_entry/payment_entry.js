@@ -167,12 +167,30 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
 	},
+	reference_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.reference_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("cheque_reference_date_nepali", resp.message)
+				}
+			}
+		})
+		set_reference_date(this.frm);
+	},
+	
+
 
 	validate_company: (frm) => {
 		if (!frm.doc.company){
 			frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")});
 		}
 	},
+	
+
 
 	company: function(frm) {
 		frm.events.hide_unhide_fields(frm);
@@ -525,9 +543,23 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		})
 	},
+	
+
+
 
 	posting_date: function(frm) {
 		frm.events.paid_from_account_currency(frm);
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.posting_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("posting_date_nepal", resp.message)
+				}
+			}
+		})
 	},
 
 	source_exchange_rate: function(frm) {

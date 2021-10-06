@@ -12,6 +12,7 @@
   "vendor",
   "column_break1",
   "transaction_date",
+  "datenepali",
   "status",
   "amended_from",
   "suppliers_section",
@@ -246,13 +247,19 @@
    "fieldname": "sec_break_email_2",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "fieldname": "datenepali",
+   "fieldtype": "Data",
+   "label": "Date(Nepali)",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-05 22:04:29.017134",
+ "modified": "2021-07-15 17:27:28.119391",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

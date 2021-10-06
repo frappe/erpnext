@@ -56,27 +56,29 @@
   "operations",
   "section_break_22",
   "planned_operating_cost",
+  "actual_operating_cost",
   "additional_operating_cost",
   "column_break_24",
-  "actual_operating_cost",
   "corrective_operation_cost",
   "total_operating_cost",
-  "column_break_47",
+  "weight_details_section",
+  "specific_gravity",
+  "rm_weight",
+  "column_break_58",
   "planned_rm_cost",
   "scrap_cost",
   "actual_rm_cost",
-  "weight_details_section",
+  "weight_details_section_section",
   "bom_yeild",
   "bom_weight",
   "planned_total_weight",
   "transferred_total_weight",
   "consumed_total_weight",
-  "column_break_53",
+  "column_break_68",
   "planned_rm_weight",
   "transfered_rm_weight",
-  "actual_rm_weight",
   "consumption_deviation",
-  "column_break_56",
+  "actual_rm_weight",
   "actual_fg_weight",
   "wo_actual_volume",
   "actual_yeild",
@@ -92,7 +94,8 @@
   "production_plan_item",
   "production_plan_sub_assembly_item",
   "product_bundle_item",
-  "amended_from"
+  "amended_from",
+  "wo_specific_gravity"
  ],
  "fields": [
   {
@@ -210,7 +213,6 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "depends_on": "eval:doc.docstatus==1 && doc.skip_transfer==0",
    "fieldname": "material_transferred_for_manufacturing",
@@ -292,7 +294,6 @@
    "label": "Required Items"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "required_items",
    "fieldtype": "Table",
    "label": "Required Items",
@@ -376,7 +377,6 @@
    "fieldname": "planned_operating_cost",
    "fieldtype": "Currency",
    "label": "Planned Operating Cost",
-   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -403,6 +403,7 @@
    "fieldname": "total_operating_cost",
    "fieldtype": "Currency",
    "label": "Total Operating Cost",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -521,130 +522,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_47",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "planned_rm_cost",
-   "fieldtype": "Currency",
-   "label": "Planned RM Cost",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "actual_rm_cost",
-   "fieldtype": "Currency",
-   "label": "Actual RM Cost",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "weight_details_section",
    "fieldtype": "Section Break",
    "label": "Weight Details"
-  },
-  {
-   "fieldname": "bom_yeild",
-   "fieldtype": "Float",
-   "label": "BOM Yeild",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "bom_weight",
-   "fieldtype": "Float",
-   "label": "BOM Weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_53",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "actual_rm_weight",
-   "fieldtype": "Float",
-   "label": "Actual RM weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "actual_fg_weight",
-   "fieldtype": "Float",
-   "label": "Actual FG Weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_56",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "actual_yeild",
-   "fieldtype": "Float",
-   "label": "Actual Yeild",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "yeild_deviation",
-   "fieldtype": "Float",
-   "label": "Yeild Deviation",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "scrap_cost",
-   "fieldtype": "Currency",
-   "label": "Scrap Cost",
-   "options": "Company:company:default_currency"
-  },
-  {
-   "fieldname": "planned_rm_weight",
-   "fieldtype": "Float",
-   "label": "Planned RM Weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "consumption_deviation",
-   "fieldtype": "Float",
-   "label": "Consumption Deviation",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "transfered_rm_weight",
-   "fieldtype": "Float",
-   "label": "Transfered RM Weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "planned_total_weight",
-   "fieldtype": "Float",
-   "label": "Planned Total Weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "transferred_total_weight",
-   "fieldtype": "Float",
-   "label": "Transferred Total Weight",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "consumed_total_weight",
-   "fieldtype": "Float",
-   "label": "Consumed Total Weight",
-   "no_copy": 1,
-   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -685,13 +565,7 @@
    "depends_on": "has_batch_no",
    "fieldname": "batch_size",
    "fieldtype": "Float",
-
    "label": "Batch Size"
-  },
-  {
-   "fieldname": "wo_actual_volume",
-   "fieldtype": "Float",
-   "label": "WO Actual Volume"
   },
   {
    "allow_on_submit": 1,
@@ -719,6 +593,132 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "specific_gravity",
+   "fieldtype": "Float",
+   "label": "Specific Gravity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rm_weight",
+   "fieldtype": "Float",
+   "label": "RM Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_58",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "planned_rm_cost",
+   "fieldtype": "Float",
+   "label": "Planned RM Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scrap_cost",
+   "fieldtype": "Currency",
+   "label": "Scrap Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_rm_cost",
+   "fieldtype": "Currency",
+   "label": "Actual RM Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight_details_section_section",
+   "fieldtype": "Section Break",
+   "label": "Weight details"
+  },
+  {
+   "fieldname": "bom_yeild",
+   "fieldtype": "Float",
+   "label": "BOM Yeild",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_weight",
+   "fieldtype": "Float",
+   "label": "BOM Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_total_weight",
+   "fieldtype": "Float",
+   "label": "Planned Total Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transferred_total_weight",
+   "fieldtype": "Float",
+   "label": "Transferred Total Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumed_total_weight",
+   "fieldtype": "Float",
+   "label": "Consumed Total Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_68",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "planned_rm_weight",
+   "fieldtype": "Float",
+   "label": "Planned RM Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transfered_rm_weight",
+   "fieldtype": "Float",
+   "label": "Transfered RM Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_rm_weight",
+   "fieldtype": "Float",
+   "label": "Actual RM weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumption_deviation",
+   "fieldtype": "Float",
+   "label": "Consumption Deviation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wo_actual_volume",
+   "fieldtype": "Float",
+   "label": "WO Actual Volume",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_yeild",
+   "fieldtype": "Float",
+   "label": "Actual Yeild",
+   "read_only": 1
+  },
+  {
+   "fieldname": "yeild_deviation",
+   "fieldtype": "Float",
+   "label": "Yeild Deviation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_fg_weight",
+   "fieldtype": "Float",
+   "label": "Actual FG Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wo_specific_gravity",
+   "fieldtype": "Data",
+   "label": "Wo Specific Gravity"
   }
  ],
  "icon": "fa fa-cogs",
@@ -726,7 +726,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-24 15:14:03.844937",
+ "modified": "2021-10-01 11:47:04.368440",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Asset Maintenance Log', {
 	asset_maintenance: (frm) => {
-		frm.set_query('task', function(doc) {
+		frm.set_query('task', function (doc) {
 			return {
 				query: "erpnext.assets.doctype.asset_maintenance_log.asset_maintenance_log.get_maintenance_tasks",
 				filters: {
@@ -11,5 +11,19 @@ frappe.ui.form.on('Asset Maintenance Log', {
 				}
 			};
 		});
-	}
+	},
+
+	completion_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.completion_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("completion_date_nepal", resp.message)
+				}
+			}
+		})
+	},
 });
