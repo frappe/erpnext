@@ -93,7 +93,7 @@
    "fieldtype": "Table",
    "label": "Date Table(Nepal)",
    "options": "Nepali Date",
-   "read_only": 1
+   "read_only": 1,
    "fieldname": "section_break_4",
    "fieldtype": "Section Break"
   },
