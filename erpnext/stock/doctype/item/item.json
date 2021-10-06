@@ -89,6 +89,7 @@
   "sales_details",
   "sales_uom",
   "is_sales_item",
+  "grant_commission",
   "column_break3",
   "max_discount",
   "deferred_revenue",
@@ -1069,6 +1070,12 @@
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
+  },
+  {
+   "default": "1",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission"
   }
  ],
  "has_web_view": 1,
@@ -1078,10 +1085,11 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-08-26 12:23:07.277077",
+ "modified": "2021-09-23 06:39:33.641540",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
