@@ -118,8 +118,8 @@
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Outstanding Amount",
+   "hidden": 1,
+   "label": "Amount",
    "options": "Currency",
    "read_only": 1
   },
@@ -127,12 +127,13 @@
    "fieldname": "reference_row",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Reference Row"
+   "label": "Reference Row",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-10-04 20:59:13.113592",
+ "modified": "2021-10-06 11:48:59.616562",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",
