@@ -15,6 +15,7 @@
   "column3",
   "bank_deposit",
   "section",
+  "person_name",
   "no_bank_check",
   "check_date",
   "release_date",
@@ -320,10 +321,16 @@
    "fieldname": "amount_bd",
    "fieldtype": "Currency",
    "label": "Amount"
+  },
+  {
+   "depends_on": "check",
+   "fieldname": "person_name",
+   "fieldtype": "Data",
+   "label": "Person Name"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-09-30 11:36:30.716340",
+ "modified": "2021-10-06 11:06:18.393259",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",

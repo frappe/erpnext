@@ -64,7 +64,7 @@ class JournalEntry(AccountsController):
 		row = self.append("accounts", {})
 		row.account = account[0].account
 
-		if transaction[0].transaction_data == "Bank Check" or transaction[0].transaction_data == "Credit Note":
+		if transaction[0].transaction_data == "Bank Check" or transaction[0].transaction_data == "Debit Note":
 			row.credit_in_account_currency = transaction[0].amount_data
 			row.debit_in_account_currency = 0
 		else:
