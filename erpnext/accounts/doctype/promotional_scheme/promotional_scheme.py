@@ -80,7 +80,9 @@ def get_pricing_rules(doc, rules=None):
 
 	return new_doc
 
-def _get_pricing_rules(doc, child_doc, discount_fields, rules):
+def _get_pricing_rules(doc, child_doc, discount_fields, rules=None):
+	if rules is None:
+		rules = {}
 	new_doc = []
 	args = get_args_for_pricing_rule(doc)
 	applicable_for = frappe.scrub(doc.get('applicable_for'))
