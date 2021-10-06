@@ -150,7 +150,7 @@ def create_material_request(material_requests):
 							conversion_factor = frappe.db.get_value("UOM Conversion Detail",
 								{'parent': item.name, 'uom': uom}, 'conversion_factor') or 1.0
 
-					must_be_whole_number = frappe.get_value("UOM", uom, "must_be_whole_number")
+					must_be_whole_number = frappe.db.get_value("UOM", uom, "must_be_whole_number", cache=True)
 					qty = d.reorder_qty / conversion_factor
 					if must_be_whole_number:
 						qty = ceil(qty)
