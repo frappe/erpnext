@@ -54,7 +54,7 @@ class TaxJarSettings(Document):
 
 	def calculate_taxes_validation_for_create_transactions(self):
 		if not self.taxjar_calculate_tax and (self.taxjar_create_transactions or self.is_sandbox):
-			frappe.throw('Before enabling <b>Create Transaction</b> or <b>Sandbox Mode</b>, you need to check the <b>Enable Tax Calculation</b> box')
+			frappe.throw(frappe._('Before enabling <b>Create Transaction</b> or <b>Sandbox Mode</b>, you need to check the <b>Enable Tax Calculation</b> box'))
 
 
 def toggle_tax_category_fields(hidden):
