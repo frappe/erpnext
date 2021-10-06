@@ -59,6 +59,7 @@ frappe.ui.form.on('Pick List', {
 		frm.events.set_item_locations(frm, false);
 	},
 	refresh: (frm,cdt,cdn) => {
+
 		frm.trigger('add_get_items_button');
 		if (frm.doc.docstatus === 1) {
 			frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.target_document_exists', {
@@ -78,8 +79,25 @@ frappe.ui.form.on('Pick List', {
 				}
 			});
 		}
+		
 	},
+	// transaction_date: function(doc){
+	// 	frappe.call({
+	// 		method:"erpnext.nepali_date.get_converted_date",
+	// 		args: {
+	// 			date:doc.transaction_date
+	// 		},
+	// 		callback: function(resp){
+	// 			if(resp.message){
+	// 				cur_frm.set_value("transaction_date_nepal",resp.message)
+	// 			}
+	// 		}	
+	// 	})
+	// 	set_transaction_date(this.doc)
+		
+	// },
 	onload_post_render: (frm) => {
+
 		if(frm.doc.purpose === "Material Transfer"){
 			if(frm.doc.consume_work_order && frm.doc.material_consumption) {
 				frm.doc.is_material_consumption = 1
@@ -174,7 +192,22 @@ frappe.ui.form.on('Pick List', {
 			});
 		});
 	},
+	transaction_date: function(frm, doc){
+		frappe.call({
+			method:"erpnext.nepali_date.get_converted_date",
+			args: {
+				date:frm.doc.transaction_date
+			},
+			callback: function(resp){
+				if(resp.message){
+					cur_frm.set_value("transaction_date_nepal",resp.message)
+				}
+			}	
+		})
+	},
+	
 });
+
 
 frappe.ui.form.on('Pick List Item', {
 	item_code: (frm, cdt, cdn) => {

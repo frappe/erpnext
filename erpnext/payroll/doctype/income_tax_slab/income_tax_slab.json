@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "effective_from",
+  "effective_from_nepali",
   "company",
   "column_break_3",
   "currency",
@@ -100,11 +101,17 @@
    "options": "Currency",
    "print_hide": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "effective_from_nepali",
+   "fieldtype": "Data",
+   "label": "Effective From(Nepali)",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:42:08.139520",
+ "modified": "2021-07-19 11:26:02.357960",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Income Tax Slab",

@@ -1,5 +1,5 @@
 frappe.ui.form.on("Issue", {
-	onload: function(frm) {
+	onload: function (frm) {
 		frm.email_field = "raised_by";
 		frm.set_query("customer", function () {
 			return {
@@ -9,7 +9,7 @@ frappe.ui.form.on("Issue", {
 			};
 		});
 
-		frappe.db.get_value("Support Settings", {name: "Support Settings"},
+		frappe.db.get_value("Support Settings", { name: "Support Settings" },
 			["allow_resetting_service_level_agreement", "track_service_level_agreement"], (r) => {
 				if (r && r.track_service_level_agreement == "0") {
 					frm.set_df_property("service_level_section", "hidden", 1);
@@ -17,7 +17,7 @@ frappe.ui.form.on("Issue", {
 				if (r && r.allow_resetting_service_level_agreement == "0") {
 					frm.set_df_property("reset_service_level_agreement", "hidden", 1);
 				}
-		});
+			});
 
 		if (frm.doc.service_level_agreement) {
 			frappe.call({
@@ -28,14 +28,14 @@ frappe.ui.form.on("Issue", {
 				},
 				callback: function (r) {
 					if (r && r.message) {
-						frm.set_query("priority", function() {
+						frm.set_query("priority", function () {
 							return {
 								filters: {
 									"name": ["in", r.message.priority],
 								}
 							};
 						});
-						frm.set_query("service_level_agreement", function() {
+						frm.set_query("service_level_agreement", function () {
 							return {
 								filters: {
 									"name": ["in", r.message.service_level_agreements],
@@ -48,7 +48,19 @@ frappe.ui.form.on("Issue", {
 		}
 	},
 
-	refresh: function(frm) {
+	refresh: function (frm) {
+
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.opening_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("opening_date_nepali", resp.message)
+				}
+			}
+		})
 
 		// alert messages
 		if (frm.doc.status !== "Closed" && frm.doc.service_level_agreement
@@ -59,7 +71,7 @@ frappe.ui.form.on("Issue", {
 					doctype: "Service Level Agreement",
 					name: frm.doc.service_level_agreement
 				},
-				callback: function(data) {
+				callback: function (data) {
 					let statuses = data.message.pause_sla_on;
 					const hold_statuses = [];
 					$.each(statuses, (_i, entry) => {
@@ -98,12 +110,12 @@ frappe.ui.form.on("Issue", {
 
 		// buttons
 		if (frm.doc.status !== "Closed") {
-			frm.add_custom_button(__("Close"), function() {
+			frm.add_custom_button(__("Close"), function () {
 				frm.set_value("status", "Closed");
 				frm.save();
 			});
 
-			frm.add_custom_button(__("Task"), function() {
+			frm.add_custom_button(__("Task"), function () {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.support.doctype.issue.issue.make_task",
 					frm: frm
@@ -111,14 +123,28 @@ frappe.ui.form.on("Issue", {
 			}, __("Create"));
 
 		} else {
-			frm.add_custom_button(__("Reopen"), function() {
+			frm.add_custom_button(__("Reopen"), function () {
 				frm.set_value("status", "Open");
 				frm.save();
 			});
 		}
+
+	},
+	first_responded_on: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.first_responded_on
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("first_responded_on_nepal", resp.message)
+				}
+			}
+		})
 	},
 
-	reset_service_level_agreement: function(frm) {
+	reset_service_level_agreement: function (frm) {
 		let reset_sla = new frappe.ui.Dialog({
 			title: __("Reset Service Level Agreement"),
 			fields: [
@@ -155,7 +181,7 @@ frappe.ui.form.on("Issue", {
 	},
 
 
-	timeline_refresh: function(frm) {
+	timeline_refresh: function (frm) {
 		if (!frm.timeline.wrapper.find(".btn-split-issue").length) {
 			let split_issue_btn = $(`
 				<a class="action-btn btn-split-issue" title="${__("Split Issue")}">
@@ -239,12 +265,12 @@ function set_time_to_resolve_and_response(frm) {
 
 	frm.dashboard.set_headline_alert(
 		'<div class="row">' +
-			'<div class="col-xs-12 col-sm-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span>Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
-			'</div>' +
-			'<div class="col-xs-12 col-sm-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span>Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
-			'</div>' +
+		'<div class="col-xs-12 col-sm-6">' +
+		'<span class="indicator whitespace-nowrap ' + time_to_respond.indicator + '"><span>Time to Respond: ' + time_to_respond.diff_display + '</span></span> ' +
+		'</div>' +
+		'<div class="col-xs-12 col-sm-6">' +
+		'<span class="indicator whitespace-nowrap ' + time_to_resolve.indicator + '"><span>Time to Resolve: ' + time_to_resolve.diff_display + '</span></span> ' +
+		'</div>' +
 		'</div>'
 	);
 }
@@ -253,13 +279,13 @@ function get_time_left(timestamp, agreement_status) {
 	const diff = moment(timestamp).diff(moment());
 	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : "Failed";
 	let indicator = (diff_display == "Failed" && agreement_status != "Fulfilled") ? "red" : "green";
-	return {"diff_display": diff_display, "indicator": indicator};
+	return { "diff_display": diff_display, "indicator": indicator };
 }
 
 function get_status(variance) {
 	if (variance > 0) {
-		return {"diff_display": "Fulfilled", "indicator": "green"};
+		return { "diff_display": "Fulfilled", "indicator": "green" };
 	} else {
-		return {"diff_display": "Failed", "indicator": "red"};
+		return { "diff_display": "Failed", "indicator": "red" };
 	}
 }

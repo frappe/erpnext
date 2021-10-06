@@ -72,7 +72,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 								method: 'update_stock',
 								callback: function(r){
 									if(r.message){
-										console.log("Item Updated")
+										console.log("Item stock Updated")
 									}
 								}
 							});
@@ -117,9 +117,8 @@ frappe.ui.form.on('Delivery Planning Item', {
 				indicator: 'red',
 				message: __('Cannot Split Cancelled Document')
 				});
-		}
-
-		else{
+			}
+			else{	
 			let d = new frappe.ui.Dialog({
 			title: 'Split Planning Item',
 			fields: [
@@ -163,7 +162,21 @@ frappe.ui.form.on('Delivery Planning Item', {
 					reqd: 1
 				},
 				{
-					label: 'Qty To Deliver',
+					label: 'Current Qty To Deliver',
+					fieldname: 'qty_td',
+					fieldtype: 'Float',
+					default : frm.doc.qty_to_deliver,
+					read_only: 1
+				},
+				{
+					label: 'Current Pending Qty',
+					fieldname: 'qty_pd',
+					fieldtype: 'Float',
+					default : frm.doc.pending_qty,
+					read_only: 1
+				},
+				{
+					label: 'New Qty To Deliver',
 					fieldname: 'qty',
 					fieldtype: 'Float',
 					default : 1,
@@ -297,8 +310,9 @@ frappe.ui.form.on('Delivery Planning Item', {
 				}				
 			}
 			});
-		}
 			d.show();
+		}
+			// d.show();
 
 		}
 });

@@ -25,5 +25,16 @@ frappe.ui.form.on('Fiscal Year', {
 				frappe.datetime.add_days(frappe.datetime.add_months(frm.doc.year_start_date, 12), -1);
 			frm.set_value("year_end_date", year_end_date);
 		}
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.year_start_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("year_start_date_nepal", resp.message)
+				}
+			}
+		})
 	},
 });

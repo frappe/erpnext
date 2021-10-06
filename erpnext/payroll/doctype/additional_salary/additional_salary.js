@@ -2,10 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Additional Salary', {
-	setup: function(frm) {
+	setup: function (frm) {
 		frm.add_fetch("salary_component", "deduct_full_tax_on_selected_payroll_date", "deduct_full_tax_on_selected_payroll_date");
 
-		frm.set_query("employee", function() {
+		frm.set_query("employee", function () {
 			return {
 				filters: {
 					company: frm.doc.company
@@ -20,18 +20,18 @@ frappe.ui.form.on('Additional Salary', {
 		}
 	},
 
-	employee: function(frm) {
+	employee: function (frm) {
 		if (frm.doc.employee) {
 			frappe.run_serially([
-				() => 	frm.trigger('get_employee_currency'),
-				() => 	frm.trigger('set_company')
+				() => frm.trigger('get_employee_currency'),
+				() => frm.trigger('set_company')
 			]);
 		} else {
 			frm.set_value("company", null);
 		}
 	},
 
-	set_company: function(frm) {
+	set_company: function (frm) {
 		frappe.call({
 			method: "frappe.client.get_value",
 			args: {
@@ -41,7 +41,7 @@ frappe.ui.form.on('Additional Salary', {
 					name: frm.doc.employee
 				}
 			},
-			callback: function(data) {
+			callback: function (data) {
 				if (data.message) {
 					frm.set_value("company", data.message.company);
 				}
@@ -67,13 +67,13 @@ frappe.ui.form.on('Additional Salary', {
 		});
 	},
 
-	get_employee_currency: function(frm) {
+	get_employee_currency: function (frm) {
 		frappe.call({
 			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
 			args: {
 				employee: frm.doc.employee,
 			},
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message) {
 					frm.set_value('currency', r.message);
 					frm.refresh_fields();
@@ -81,4 +81,47 @@ frappe.ui.form.on('Additional Salary', {
 			}
 		});
 	},
+
+	payroll_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.payroll_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("payroll_date_nepali", resp.message)
+				}
+			}
+		})
+		set_payroll_date(this.frm);
+	},
+	from_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.from_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("from_date_nepali", resp.message)
+				}
+			}
+		})
+		from_date_date(this.frm);
+	},
+	to_date: function (frm) {
+		frappe.call({
+			method: "erpnext.nepali_date.get_converted_date",
+			args: {
+				date: frm.doc.to_date
+			},
+			callback: function (resp) {
+				if (resp.message) {
+					cur_frm.set_value("to_date_nepali", resp.message)
+				}
+			}
+		})
+		to_date_date(this.frm);
+	}
 });

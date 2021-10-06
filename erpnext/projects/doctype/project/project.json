@@ -18,7 +18,9 @@
   "column_break_5",
   "project_template",
   "expected_start_date",
+  "expected_start_date_nepal",
   "expected_end_date",
+  "expected_end_date_nepal",
   "priority",
   "department",
   "customer_details",
@@ -134,7 +136,7 @@
   {
    "fieldname": "expected_start_date",
    "fieldtype": "Date",
-   "label": "Expected Start Date",
+   "label": "Expected Start Date ",
    "oldfieldname": "project_start_date",
    "oldfieldtype": "Date"
   },
@@ -451,6 +453,16 @@
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "fieldname": "expected_start_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Expected Start Date (Nepal)"
+  },
+  {
+   "fieldname": "expected_end_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Expected End Date (Nepal)"
   }
  ],
  "icon": "fa fa-puzzle-piece",
@@ -458,7 +470,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2021-04-28 16:36:11.654632",
+ "modified": "2021-09-16 10:13:07.407984",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

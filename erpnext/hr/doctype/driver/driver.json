@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -20,8 +21,10 @@
   "license_number",
   "column_break_8",
   "issuing_date",
+  "issuing_date_nepal",
   "column_break_10",
   "expiry_date",
+  "expiry_date_nepal",
   "driving_license_categories",
   "driving_license_category"
  ],
@@ -115,10 +118,21 @@
    "fieldtype": "Link",
    "label": "Address",
    "options": "Address"
+  },
+  {
+   "fieldname": "issuing_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Issuing Date (Nepal)"
+  },
+  {
+   "fieldname": "expiry_date_nepal",
+   "fieldtype": "Read Only",
+   "label": "Expiry Date (Nepal)"
   }
  ],
  "icon": "fa fa-user",
- "modified": "2019-07-18 16:29:14.151380",
+ "links": [],
+ "modified": "2021-09-15 18:21:17.038164",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Driver",
