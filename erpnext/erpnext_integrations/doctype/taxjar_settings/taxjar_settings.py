@@ -21,15 +21,9 @@ class TaxJarSettings(Document):
 		TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 		TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
 		TAXJAR_SANDBOX_MODE = frappe.db.get_single_value("TaxJar Settings", "is_sandbox")
-		fields_hidden = 0
 
-		custom_fields = []
-		for dt in ['Item', 'Sales Invoice Item']:
-			doc = frappe.db.exists('Custom Field', {'dt': dt, 'fieldname':'product_tax_category'})
-			custom_fields.append(doc)
-			fields_hidden = frappe.db.get_value('Custom Field', {'dt': dt, 'fieldname':'product_tax_category'},'hidden')
-		fields_already_exist = True if custom_fields else False
-
+		fields_already_exist = frappe.db.exists('Custom Field', {'dt': ('in', ['Item','Sales Invoice Item']), 'fieldname':'product_tax_category'})
+		fields_hidden = frappe.get_value('Custom Field', {'dt': ('in', ['Sales Invoice Item'])}, 'hidden')
 
 		if (TAXJAR_CREATE_TRANSACTIONS or TAXJAR_CALCULATE_TAX or TAXJAR_SANDBOX_MODE):
 			if not fields_already_exist:
@@ -39,10 +33,13 @@ class TaxJarSettings(Document):
 				frappe.enqueue('erpnext.regional.united_states.setup.add_product_tax_categories', now=False)
 
 			elif fields_already_exist and fields_hidden:
-				toggle_tax_category_fields(hidden='1')
+				toggle_tax_category_fields(hidden='0')
 
-		else:
-			toggle_tax_category_fields(hidden='0')
+		elif fields_already_exist:
+			toggle_tax_category_fields(hidden='1')
+
+	def validate(self):
+		self.calculate_taxes_validation_for_create_transactions()
 
 	@frappe.whitelist()
 	def update_nexus_list(self):
@@ -55,9 +52,14 @@ class TaxJarSettings(Document):
 		self.set('nexus', new_nexus_list)
 		self.save()
 
+	def calculate_taxes_validation_for_create_transactions(self):
+		if not self.taxjar_calculate_tax and (self.taxjar_create_transactions or self.is_sandbox):
+			frappe.throw('Before enabling <b>Create Transaction</b> or <b>Sandbox Mode</b>, you need to check the <b>Enable Tax Calculation</b> box')
+
+
 def toggle_tax_category_fields(hidden):
-	frappe.set_value('Custom Field',{'dt':'Sales Invoice Item', 'fieldname':'product_tax_category'},'hidden',hidden)
-	frappe.set_value('Custom Field',{'dt':'Item', 'fieldname':'product_tax_category'},'hidden',hidden)
+	frappe.set_value('Custom Field', {'dt':'Sales Invoice Item', 'fieldname':'product_tax_category'}, 'hidden', hidden)
+	frappe.set_value('Custom Field', {'dt':'Item', 'fieldname':'product_tax_category'}, 'hidden', hidden)
 
 
 def add_product_tax_categories():
