@@ -725,6 +725,7 @@ class POSCart {
 
 	make() {
 		this.make_dom();
+		this.make_pos_field()
 		this.make_customer_field();
 		if (frappe.boot.active_domains.includes("Healthcare")){
 			this.make_patient_field()
@@ -736,6 +737,8 @@ class POSCart {
 	make_dom() {
 		this.wrapper.append(`
 			<div class="pos-cart">
+				<div class="pos-field">
+				</div>
 				<div class="customer-field">
 				</div>
 				<div class="patient-field">
@@ -964,6 +967,22 @@ class POSCart {
 		});
 
 		this.customer_field.set_value(this.frm.doc.customer);
+	}
+
+	make_pos_field() {
+		this.pos_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Data',
+				label: 'POS',
+				fieldname: 'pos',
+				read_only: 1,
+				default: this.frm.doc.pos_profile,
+			},
+			parent: this.wrapper.find('.pos-field'),
+			render_input: true
+		});
+
+		this.pos_field.set_value(this.frm.doc.pos_profile,);
 	}
 
 	make_patient_field() {
