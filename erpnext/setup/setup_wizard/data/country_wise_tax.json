@@ -2116,9 +2116,9 @@
 	},
 
 	"Saudi Arabia": {
-		"KSA VAT 5%": {
-			"account_name": "VAT 5%",
-			"tax_rate": 5.00
+		"KSA VAT 15%": {
+			"account_name": "VAT 15%",
+			"tax_rate": 15.00
 		},
 		"KSA VAT Zero": {
 			"account_name": "VAT Zero",

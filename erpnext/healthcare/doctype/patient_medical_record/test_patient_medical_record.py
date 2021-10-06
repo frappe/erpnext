@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import (
@@ -38,7 +38,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 		medical_rec = frappe.db.exists('Patient Medical Record', {'status': 'Open', 'reference_name': vital_signs.name})
 		self.assertTrue(medical_rec)
 
-		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1, procedure_template=1)
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 1), invoice=1, procedure_template=1)
 		procedure = create_procedure(appointment)
 		procedure.start_procedure()
 		procedure.complete_procedure()
