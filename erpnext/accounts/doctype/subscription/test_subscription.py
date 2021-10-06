@@ -619,7 +619,7 @@ class TestSubscription(unittest.TestCase):
 		# subscription
 
 		subscription.process()
-		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(len(subscription.invoices), 2)
 
 	def test_subscription_without_generate_invoice_past_due(self):
 		subscription = frappe.new_doc('Subscription')
