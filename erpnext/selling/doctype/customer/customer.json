@@ -181,8 +181,7 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
-   "label": "Tax ID",
-   "reqd": 1
+   "label": "Tax ID"
   },
   {
    "fieldname": "tax_category",
@@ -536,7 +535,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-05-17 10:50:56.663419",
+ "modified": "2021-10-05 13:36:46.046484",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

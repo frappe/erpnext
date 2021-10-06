@@ -16,6 +16,7 @@
   "naming_series",
   "patient_name",
   "sex",
+  "dni",
   "blood_group",
   "dob",
   "age_html",
@@ -154,7 +155,6 @@
    "ignore_user_permissions": 1,
    "label": "Customer",
    "options": "Customer",
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -343,12 +343,21 @@
    "label": "Default Currency",
    "options": "Currency",
    "print_hide": 1
+  },
+  {
+   "fieldname": "dni",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "DNI",
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2021-06-23 14:35:33.619341",
+ "modified": "2021-10-05 15:12:06.171951",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
