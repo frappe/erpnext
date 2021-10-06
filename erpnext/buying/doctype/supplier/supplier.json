@@ -433,12 +433,12 @@
  "image_field": "image",
  "links": [
   {
-   "group": "Item Group",
-   "link_doctype": "Supplier Item Group",
-   "link_fieldname": "supplier"
+   "group": "Allowed Items",
+   "link_doctype": "Party Specific Item",
+   "link_fieldname": "party"
   }
  ],
- "modified": "2021-08-27 18:02:44.314077",
+ "modified": "2021-09-06 17:37:56.522233",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

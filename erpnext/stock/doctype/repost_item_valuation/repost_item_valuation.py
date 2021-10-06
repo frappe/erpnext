@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, now, today
+from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime, today
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
@@ -126,6 +126,9 @@ def notify_error_to_stock_managers(doc, traceback):
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
 def repost_entries():
+	if not in_configured_timeslot():
+		return
+
 	riv_entries = get_repost_item_valuation_entries()
 
 	for row in riv_entries:
@@ -144,3 +147,26 @@ def get_repost_item_valuation_entries():
 		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
 	""", now(), as_dict=1)
+
+
+def in_configured_timeslot(repost_settings=None, current_time=None):
+	"""Check if current time is in configured timeslot for reposting."""
+
+	if repost_settings is None:
+		repost_settings = frappe.get_cached_doc("Stock Reposting Settings")
+
+	if not repost_settings.limit_reposting_timeslot:
+		return True
+
+	if get_weekday() == repost_settings.limits_dont_apply_on:
+		return True
+
+	start_time = repost_settings.start_time
+	end_time = repost_settings.end_time
+
+	now_time = current_time or nowtime()
+
+	if start_time < end_time:
+		return end_time >= now_time >= start_time
+	else:
+		return now_time >= start_time or now_time <= end_time
