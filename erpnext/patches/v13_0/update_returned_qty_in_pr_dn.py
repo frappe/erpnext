@@ -13,7 +13,7 @@ def execute():
 	frappe.reload_doc('stock', 'doctype', 'stock_settings')
 
 	def update_from_return_docs(doctype):
-		for return_doc in frappe.get_all(doctype, filters={'is_return' : 1, 'docstatus' : 1}):
+		for return_doc in frappe.get_all(doctype, filters={'is_return' : 1, 'docstatus' : 1, 'return_against': ('!=', '')}):
 			# Update original receipt/delivery document from return
 			return_doc = frappe.get_cached_doc(doctype, return_doc.name)
 			try:

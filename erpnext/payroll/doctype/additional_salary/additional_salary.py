@@ -14,12 +14,11 @@ from erpnext.hr.utils import validate_active_employee
 
 class AdditionalSalary(Document):
 	def on_submit(self):
-		if self.ref_doctype == "Employee Advance" and self.ref_docname:
-			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", self.amount)
-
+		self.update_return_amount_in_employee_advance()
 		self.update_employee_referral()
 
 	def on_cancel(self):
+		self.update_return_amount_in_employee_advance()
 		self.update_employee_referral(cancel=True)
 
 	def validate(self):
@@ -97,6 +96,17 @@ class AdditionalSalary(Document):
 			if referral_details.status != "Accepted":
 				frappe.throw(_("Additional Salary for referral bonus can only be created against Employee Referral with status {0}").format(
 					frappe.bold("Accepted")))
+
+	def update_return_amount_in_employee_advance(self):
+		if self.ref_doctype == "Employee Advance" and self.ref_docname:
+			return_amount = frappe.db.get_value("Employee Advance", self.ref_docname, "return_amount")
+
+			if self.docstatus == 2:
+				return_amount -= self.amount
+			else:
+				return_amount += self.amount
+
+			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", return_amount)
 
 	def update_employee_referral(self, cancel=False):
 		if self.ref_doctype == "Employee Referral":
