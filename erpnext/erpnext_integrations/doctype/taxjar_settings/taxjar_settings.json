@@ -6,8 +6,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "is_sandbox",
   "taxjar_calculate_tax",
+  "is_sandbox",
   "taxjar_create_transactions",
   "credentials",
   "api_key",
@@ -57,6 +57,7 @@
   },
   {
    "default": "0",
+   "depends_on": "taxjar_calculate_tax",
    "fieldname": "is_sandbox",
    "fieldtype": "Check",
    "label": "Sandbox Mode"
@@ -72,6 +73,7 @@
   },
   {
    "default": "0",
+   "depends_on": "taxjar_calculate_tax",
    "fieldname": "taxjar_create_transactions",
    "fieldtype": "Check",
    "label": "Create TaxJar Transaction"
@@ -106,7 +108,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-09-16 08:54:48.444487",
+ "modified": "2021-10-06 10:59:13.475442",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "TaxJar Settings",
