@@ -424,7 +424,7 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sle_for_source_warehouse(d))
 
-				if d.target_warehouse and self.get("is_internal_customer"):
+				if d.target_warehouse:
 					sl_entries.append(self.get_sle_for_target_warehouse(d))
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
@@ -558,6 +558,12 @@ class SellingController(StockController):
 				warehouse = frappe.bold(d.get("target_warehouse"))
 				frappe.throw(_("Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same")
 					.format(d.idx, warehouse, warehouse))
+
+		if not self.get("is_internal_customer") and any(d.get("target_warehouse") for d in items):
+			msg = _("Target Warehouse is set for some items but the customer is not an internal customer.")
+			msg += " " + _("This {} will be treated as material transfer.").format(_(self.doctype))
+			frappe.msgprint(msg, title="Internal Transfer", alert=True)
+
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled
