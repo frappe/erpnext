@@ -644,9 +644,7 @@ frappe.ui.form.on('Stock Entry', {
 	calculate_basic_amount: function (frm, item) {
 		item.basic_amount = flt(flt(item.transfer_qty) * flt(item.basic_rate),
 			precision("basic_amount", item));
-<<<<<<< HEAD
 		frm.events.calculate_total_additional_costs(frm);
-=======
 
 		frm.events.calculate_amount(frm);
 	},
@@ -685,7 +683,6 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		refresh_field('items');
->>>>>>> a4f3f9f609c0b2636a66c0fb50978913977297f0
 	},
 
 	calculate_total_additional_costs: function (frm) {
