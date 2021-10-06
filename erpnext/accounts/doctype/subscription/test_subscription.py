@@ -20,7 +20,6 @@ from erpnext.accounts.doctype.subscription.subscription import get_prorata_facto
 
 
 def create_plan():
-
 	if not frappe.db.exists('UOM', {"name": '_Test UOM'}):
 		frappe.get_doc({
 			"doctype": "UOM",
