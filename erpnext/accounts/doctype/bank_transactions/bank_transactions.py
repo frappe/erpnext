@@ -113,7 +113,7 @@ class BankTransactions(Document):
 	def calculate_diferred_account(self):
 		doc = frappe.get_doc("Bank Account", self.bank_account)
 
-		if self.transaction_data == "Bank Check" or self.transaction_data== "Credit Note":
+		if self.transaction_data == "Bank Check" or self.transaction_data== "Debit Note":
 			doc.deferred_debits += self.amount_data
 		else:
 			doc.deferred_credits += self.amount_data
@@ -121,3 +121,18 @@ class BankTransactions(Document):
 		doc.current_balance = doc.deferred_credits - doc.deferred_debits
 		
 		doc.save()
+
+	def calculate_diferred_account_cancel(self):
+		doc = frappe.get_doc("Bank Account", self.bank_account)
+
+		if self.transaction_data == "Bank Check" or self.transaction_data== "Debit Note":
+			doc.deferred_debits -= self.amount_data
+		else:
+			doc.deferred_credits -= self.amount_data
+		
+		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+		
+		doc.save()
+	
+	def on_cancel(self):
+		self.calculate_diferred_account_cancel()
