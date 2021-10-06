@@ -33,7 +33,9 @@ class TestPOSProfile(unittest.TestCase):
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
-def get_customers_list(pos_profile={}):
+def get_customers_list(pos_profile=None):
+	if pos_profile is None:
+		pos_profile = {}
 	cond = "1=1"
 	customer_groups = []
 	if pos_profile.get('customer_groups'):
