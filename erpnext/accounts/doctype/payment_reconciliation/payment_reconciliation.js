@@ -56,6 +56,10 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.set_df_property('payments', 'cannot_delete_rows', true);
 		this.frm.set_df_property('allocation', 'cannot_delete_rows', true);
 
+		this.frm.set_df_property('invoices', 'cannot_add_rows', true);
+		this.frm.set_df_property('payments', 'cannot_add_rows', true);
+		this.frm.set_df_property('allocation', 'cannot_add_rows', true);
+
 
 		if (this.frm.doc.receivable_payable_account) {
 			this.frm.add_custom_button(__('Get Unreconciled Entries'), () =>
