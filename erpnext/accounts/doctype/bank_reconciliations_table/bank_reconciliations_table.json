@@ -16,7 +16,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Bank Transaction",
-   "options": "Bank Transaction"
+   "options": "Bank Transactions"
   },
   {
    "fetch_from": "bank_trasaction.transaction_data",
@@ -52,7 +52,7 @@
   }
  ],
  "istable": 1,
- "modified": "2021-10-04 15:40:15.107684",
+ "modified": "2021-10-06 09:17:50.128529",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank reconciliations Table",
