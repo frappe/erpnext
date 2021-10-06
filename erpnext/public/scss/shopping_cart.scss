@@ -32,6 +32,14 @@ body.product-page {
 .carousel-control-prev,
 .carousel-control-next {
 	opacity: 1;
+	width: 8%;
+
+	@media (max-width: 1200px) {
+		width: 10%;
+	}
+	@media (max-width: 768px) {
+		width: 15%;
+	}
 }
 
 .carousel-body {
@@ -44,6 +52,8 @@ body.product-page {
 
 .carousel-content {
 	max-width: 400px;
+	margin-left: 5rem;
+	margin-right: 5rem;
 }
 
 .card {

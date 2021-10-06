@@ -131,6 +131,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_payment_entry_unlink_against_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si = frappe.copy_doc(test_records[0])
 		si.is_pos = 0
 		si.insert()
@@ -154,6 +155,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_payment_entry_unlink_against_standalone_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si1 = create_sales_invoice(rate=1000)
 		si2 = create_sales_invoice(rate=300)
 		si3 = create_sales_invoice(qty=-1, rate=300, is_return=1)
@@ -1658,6 +1660,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		si = create_sales_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
 
 		outstanding_amount = get_outstanding_amount(si.doctype,
@@ -1809,6 +1812,47 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
+	def test_deferred_revenue_post_account_freeze_upto_by_admin(self):
+		frappe.set_user("Administrator")
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
+
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_save=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'System Manager')
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		self.assertRaises(frappe.ValidationError, pda1.submit)
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
+
 	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
@@ -1908,11 +1952,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
-	def test_sle_if_target_warehouse_exists_accidentally(self):
-		"""
-			Check if inward entry exists if Target Warehouse accidentally exists
-			but Customer is not an internal customer.
-		"""
+	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
 			target="Finished Goods - _TC",
@@ -1933,9 +1973,9 @@ class TestSalesInvoice(unittest.TestCase):
 		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
 			fields=["name", "actual_qty"])
 
-		# check if only one SLE for outward entry is created
-		self.assertEqual(len(sles), 1)
-		self.assertEqual(sles[0].actual_qty, -1)
+		# check if both SLEs are created
+		self.assertEqual(len(sles), 2)
+		self.assertEqual(sum(d.actual_qty for d in sles), 0.0)
 
 		# tear down
 		si.cancel()
@@ -2245,6 +2285,54 @@ class TestSalesInvoice(unittest.TestCase):
 
 		party_link.delete()
 		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 0)
+
+	def test_payment_statuses(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		today = nowdate()
+
+		# Test Overdue
+		si = create_sales_invoice(do_not_submit=True)
+		si.payment_schedule = []
+		si.append("payment_schedule", {
+			"due_date": add_days(today, -5),
+			"invoice_portion": 50,
+			"payment_amount": si.grand_total / 2
+		})
+		si.append("payment_schedule", {
+			"due_date": add_days(today, 5),
+			"invoice_portion": 50,
+			"payment_amount": si.grand_total / 2
+		})
+		si.submit()
+		self.assertEqual(si.status, "Overdue")
+
+		# Test payment less than due amount
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = 1
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Overdue")
+
+		# Test Partly Paid
+		pe = frappe.copy_doc(pe)
+		pe.paid_amount = si.grand_total / 2
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Partly Paid")
+
+		# Test Paid
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = si.outstanding_amount
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.status, "Paid")
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
