@@ -399,6 +399,7 @@ class Company(NestedSet):
 		if not frappe.db.get_value('GL Entry', {'company': self.name}):
 			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
 	kwargs = dict(queue="long", company=company, old=old, new=new)
@@ -437,6 +438,8 @@ def replace_abbr(company, old, new):
 		frappe.db.auto_commit_on_many_writes = 0
 
 
+=======
+>>>>>>> 64c1347d1e (refactor!: remove abbreviation renaming (#27766))
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
 	parts = name.split(" - ")
