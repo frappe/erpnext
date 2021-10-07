@@ -12,7 +12,6 @@
   "vendor",
   "column_break1",
   "transaction_date",
-  "datenepali",
   "status",
   "amended_from",
   "suppliers_section",
@@ -247,12 +246,6 @@
    "fieldname": "sec_break_email_2",
    "fieldtype": "Section Break",
    "hide_border": 1
-  },
-  {
-   "fieldname": "datenepali",
-   "fieldtype": "Data",
-   "label": "Date(Nepali)",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",

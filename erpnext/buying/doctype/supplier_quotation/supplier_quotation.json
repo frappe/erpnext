@@ -16,9 +16,7 @@
   "column_break1",
   "company",
   "transaction_date",
-  "datenepali",
   "valid_till",
-  "valid_tillnepali",
   "amended_from",
   "address_section",
   "supplier_address",
@@ -799,17 +797,6 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Valid Till"
-  },
-  {
-   "fieldname": "datenepali",
-   "fieldtype": "Data",
-   "label": "Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "valid_tillnepali",
-   "fieldtype": "Data",
-   "label": "Valid Till(Nepali)"
   }
  ],
  "icon": "fa fa-shopping-cart",

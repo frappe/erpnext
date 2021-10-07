@@ -22,11 +22,9 @@
   "company",
   "company_tax_id",
   "posting_date",
-  "nepali_date",
   "posting_time",
   "set_posting_time",
   "due_date",
-  "payment_due_datenepali",
   "return_against",
   "amended_from",
   "accounting_dimensions_section",
@@ -37,7 +35,6 @@
   "po_no",
   "column_break_23",
   "po_date",
-  "customers_purchase_order_datenepali",
   "address_and_contact",
   "customer_address",
   "address_display",
@@ -192,9 +189,7 @@
   "sales_team",
   "subscription_section",
   "from_date",
-  "from_datenepali",
   "to_date",
-  "to_datenepali",
   "column_break_140",
   "auto_repeat",
   "update_auto_repeat_reference",
@@ -2034,35 +2029,6 @@
    "fieldtype": "Float",
    "label": "Total Billing Hours",
    "print_hide": 1
-  },
-  {
-   "fieldname": "nepali_date",
-   "fieldtype": "Data",
-   "label": "Nepali Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "payment_due_datenepali",
-   "fieldtype": "Data",
-   "label": "Payment Due Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "customers_purchase_order_datenepali",
-   "fieldtype": "Data",
-   "label": "Customer's Purchase Order Date(Nepali)"
-  },
-  {
-   "fieldname": "from_datenepali",
-   "fieldtype": "Data",
-   "label": "From Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "to_datenepali",
-   "fieldtype": "Data",
-   "label": "To Date(Nepali)",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",

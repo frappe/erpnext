@@ -11,7 +11,6 @@ from frappe.model.naming import set_name_from_naming_options
 from frappe.utils import flt, fmt_money
 from six import iteritems
 import datetime
-import nepali_datetime
 from datetime import timedelta
 
 import erpnext
@@ -42,7 +41,6 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
-		self.set_nepali_date()
 		if not self.flags.from_repost:
 			self.check_mandatory()
 			self.validate_cost_center()
@@ -50,8 +48,7 @@ class GLEntry(Document):
 			self.validate_party()
 			self.validate_currency()
 		company = frappe.db.get_single_value("System Settings",'country')
-		if company == 'Nepal':
-			self.set_nepali_date()
+		
 
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
@@ -68,12 +65,6 @@ class GLEntry(Document):
 					update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 						self.against_voucher)
 	
-	def set_nepali_date(self):
-		from erpnext.nepali_date import get_converted_date
-		if self.posting_date:
-			nepali_date = get_converted_date(self.posting_date)
-			self.posting_datenepali = nepali_date
-			
 	def check_mandatory(self):
 		mandatory = ['account','voucher_type','voucher_no','company']
 		for k in mandatory:
@@ -109,11 +100,7 @@ class GLEntry(Document):
 					self.voucher_type)
 
 				frappe.throw(msg, title=_("Missing Cost Center"))
-	def set_nepali_date(self):
-		from erpnext.nepali_date import get_converted_date
-		if self.posting_date:
-			nepali_date = get_converted_date(self.posting_date)
-			self.posting_datenepali = nepali_date
+	
 	def validate_dimensions_for_pl_and_bs(self):
 		account_type = frappe.db.get_value("Account", self.account, "report_type")
 

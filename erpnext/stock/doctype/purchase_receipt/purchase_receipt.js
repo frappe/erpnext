@@ -53,18 +53,6 @@ frappe.ui.form.on("Purchase Receipt", {
 
 	refresh: function(frm) {
 
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.posting_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("date_nepali",resp.message)
-				}
-			}	
-		})
-
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
@@ -215,32 +203,6 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		}
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
-	},
-	posting_date: function(doc){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.posting_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("date_nepali",resp.message)
-				}
-			}	
-		})
-	},
-	lr_date: function(doc){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.lr_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("vehicle_date_nepal",resp.message)
-				}
-			}	
-		})
 	},
 
 

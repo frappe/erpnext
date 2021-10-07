@@ -36,33 +36,6 @@ frappe.ui.form.on('Leave Policy Assignment', {
 			frm.events.set_effective_date(frm);
 		}
 	},
-	effective_from: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.effective_from
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("effective_from_nepal", resp.message)
-				}
-			}
-		})
-	},
-
-	effective_to: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.effective_to
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("effective_to_nepal", resp.message)
-				}
-			}
-		})
-	},
 
 	set_effective_date: function(frm) {
 		if (frm.doc.assignment_based_on == "Leave Period" && frm.doc.leave_period) {

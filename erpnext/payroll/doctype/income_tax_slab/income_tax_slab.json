@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "effective_from",
-  "effective_from_nepali",
   "company",
   "column_break_3",
   "currency",
@@ -101,12 +100,6 @@
    "options": "Currency",
    "print_hide": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "effective_from_nepali",
-   "fieldtype": "Data",
-   "label": "Effective From(Nepali)",
-   "read_only": 1
   }
  ],
  "is_submittable": 1,

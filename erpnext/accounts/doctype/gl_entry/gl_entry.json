@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
-  "posting_datenepali",
   "transaction_date",
   "account",
   "party_type",
@@ -254,11 +253,6 @@
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
    "label": "Is Cancelled"
-  },
-  {
-   "fieldname": "posting_datenepali",
-   "fieldtype": "Data",
-   "label": "Posting Date(Nepali)"
   }
  ],
  "icon": "fa fa-list",

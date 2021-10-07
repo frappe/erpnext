@@ -115,19 +115,6 @@ frappe.ui.form.on('Loan Application', {
 		}
 	},
 
-	posting_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.posting_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("posting_date_nepal", resp.message)
-				}
-			}
-		})
-	},
 });
 
 frappe.ui.form.on("Proposed Pledge", {

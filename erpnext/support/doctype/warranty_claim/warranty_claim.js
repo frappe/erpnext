@@ -25,19 +25,6 @@ frappe.ui.form.on("Warranty Claim", {
 			frm.set_value('status', 'Open');
 		}
 	},
-	refresh: function(frm) {
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.complaint_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("complaint_date_nepali",resp.message)
-				}
-			}
-		})
-	},
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm);
 	},
@@ -46,46 +33,7 @@ frappe.ui.form.on("Warranty Claim", {
 	},
 	contact_person: function(frm) {
 		erpnext.utils.get_contact_details(frm);
-	},
-	complaint_date: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.complaint_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("complaint_date_nepali",resp.message)
-				}
-			}
-		})
-	},
-	warranty_expiry_date: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.warranty_expiry_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("warranty_expiry_date_nepali",resp.message)
-				}
-			}
-		})
-	},
-	amc_expiry_date: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.amc_expiry_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("amc_expiry_date_nepali",resp.message)
-				}
-			}
-		})
-	},
+	}
 });
 
 erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({

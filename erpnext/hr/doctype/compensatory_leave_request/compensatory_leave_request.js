@@ -19,43 +19,4 @@ frappe.ui.form.on('Compensatory Leave Request', {
 			frm.set_df_property('half_day_date', 'reqd', false);
 		}
 	},
-	work_from_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.work_from_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("work_from_date_nepal", resp.message)
-				}
-			}
-		})
-	},
-	work_end_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.work_end_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("work_end_date_nepal", resp.message)
-				}
-			}
-		})
-	},
-	half_day_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.half_day_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("half_day_date_nepal", resp.message)
-				}
-			}
-		})
-	}
 });

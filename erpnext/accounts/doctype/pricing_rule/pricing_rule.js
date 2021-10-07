@@ -23,32 +23,6 @@ frappe.ui.form.on('Pricing Rule', {
 			};
 		})
 	},
-	valid_from: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.valid_from
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("valid_fromnepal",resp.message)
-				}
-			}	
-		})
-	},
-	valid_upto: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.valid_from
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("valid_uptonepal",resp.message)
-				}
-			}	
-		})
-	},
 	onload: function(frm) {
 		if(frm.doc.__islocal && !frm.doc.applicable_for && (frm.doc.customer || frm.doc.supplier)) {
 			if(frm.doc.customer) {

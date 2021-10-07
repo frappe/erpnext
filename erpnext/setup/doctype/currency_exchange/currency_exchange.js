@@ -11,19 +11,6 @@ $.extend(cur_frm.cscript, {
 	refresh: function() {
 		cur_frm.cscript.set_exchange_rate_label();
 	},
-	date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_nepal", resp.message)
-				}
-			}
-		})
-	},
 	
 	from_currency: function() {
 		cur_frm.cscript.set_exchange_rate_label();

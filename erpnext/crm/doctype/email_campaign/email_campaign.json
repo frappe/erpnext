@@ -12,7 +12,6 @@
   "sender",
   "column_break_4",
   "start_date",
-  "start_date_nepali",
   "end_date",
   "status"
  ],
@@ -70,12 +69,6 @@
    "fieldtype": "Link",
    "label": "Sender",
    "options": "User"
-  },
-  {
-   "fieldname": "start_date_nepali",
-   "fieldtype": "Data",
-   "label": "Start Date(Nepali)",
-   "read_only": 1
   }
  ],
  "links": [],

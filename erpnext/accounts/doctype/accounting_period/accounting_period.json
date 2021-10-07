@@ -8,9 +8,7 @@
  "field_order": [
   "period_name",
   "start_date",
-  "start_date_nepal",
   "end_date",
-  "end_date_nepal",
   "column_break_4",
   "company",
   "section_break_7",
@@ -61,16 +59,6 @@
    "label": "Closed Documents",
    "options": "Closed Document",
    "reqd": 1
-  },
-  {
-   "fieldname": "start_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Start Date (Nepal)"
-  },
-  {
-   "fieldname": "end_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "End Date (Nepal)"
   }
  ],
  "links": [],

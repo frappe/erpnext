@@ -17,32 +17,6 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 		this.show_upload();
 		this.setup_import_progress();
 	},
-	att_fr_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.att_fr_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("attendance_from_date_nepal", resp.message)
-				}
-			}
-		})
-	},
-	att_to_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.att_to_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("attendance_to_date_nepal", resp.message)
-				}
-			}
-		})
-	},
 
 	get_template:function() {
 		if(!this.frm.doc.att_fr_date || !this.frm.doc.att_to_date) {

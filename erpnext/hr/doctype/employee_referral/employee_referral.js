@@ -46,19 +46,6 @@ frappe.ui.form.on("Employee Referral", {
 
 
 	},
-	date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_nepal", resp.message)
-				}
-			}
-		})
-	},
 	create_job_applicant: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.hr.doctype.employee_referral.employee_referral.create_job_applicant",
