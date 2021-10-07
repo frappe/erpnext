@@ -54,7 +54,6 @@
   "accounting_details_section",
   "cost_center",
   "income_account",
-  "debit_to",
   "amended_from"
  ],
  "fields": [
@@ -347,14 +346,6 @@
    "label": "Company Address",
    "options": "Address",
    "print_hide": 1
-  },
-  {
-   "fieldname": "debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "print_hide": 1,
-   "reqd": 1
   },
   {
    "fieldname": "section_break_9",
