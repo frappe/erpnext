@@ -138,7 +138,9 @@ class Student(Document):
 			enrollment.submit()
 			return enrollment
 
-	def enroll_in_course(self, course_name, program_enrollment, enrollment_date=frappe.utils.datetime.datetime.now()):
+	def enroll_in_course(self, course_name, program_enrollment, enrollment_date=None):
+		if enrollment_date is None:
+			enrollment_date = frappe.utils.datetime.datetime.now()
 		try:
 			enrollment = frappe.get_doc({
 					"doctype": "Course Enrollment",
