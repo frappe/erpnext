@@ -20,7 +20,10 @@ repos:
     rev: 3.9.2
     hooks:
       - id: flake8
-        args: ['--config', '.github/helper/.flake8_strict']
+        additional_dependencies: [
+          'flake8-mutable',
+        ]
+        args: ['--select=M511', '--config', '.github/helper/.flake8_strict']
         exclude: ".*setup.py$"
 
   - repo: https://github.com/timothycrosley/isort
