@@ -110,17 +110,6 @@ frappe.ui.form.on("Leave Application", {
 				frm.set_value('employee', perm['Employee'].map(perm_doc => perm_doc.doc)[0]);
 			}
 		}
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.posting_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("posting_date_nepal", resp.message)
-				}
-			}
-		})
 	},
 	
 
@@ -160,53 +149,14 @@ frappe.ui.form.on("Leave Application", {
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
 	},
-	from_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.from_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("from_date_nepal", resp.message)
-				}
-			}
-		})
-	},
 
 	to_date: function(frm) {
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
 	},
-	to_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.to_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("to_date_nepal", resp.message)
-				}
-			}
-		})
-	},
 
 	half_day_date(frm) {
 		frm.trigger("calculate_total_days");
-	},
-	half_day_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.half_day_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("half_day_date_nepal", resp.message)
-				}
-			}
-		})
 	},
 
 	half_day_datepicker: function(frm) {

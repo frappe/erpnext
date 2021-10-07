@@ -84,19 +84,7 @@ frappe.ui.form.on('Asset Movement', {
 		});
 		frm.refresh_field('assets');
 	},
-	transaction_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.transaction_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("transaction_date_nepal", resp.message)
-				}
-			}
-		})
-	},
+
 });
 
 frappe.ui.form.on('Asset Movement Item', {

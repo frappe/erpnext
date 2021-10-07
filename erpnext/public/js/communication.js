@@ -5,21 +5,6 @@ frappe.ui.form.on("Communication", {
 			frm.events.setup_custom_buttons(frm);
 		}
 	},
-	read_by_recipient_on: function(frm) {
-		
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.read_by_recipient_on
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("read_by_recipient_on_nepali",resp.message)
-				}
-			}
-		})
-		set_read_by_recipient_on(this.frm);
-	},
 
 	setup_custom_buttons: (frm) => {
 		let confirm_msg = "Are you sure you want to create {0} from this email?";

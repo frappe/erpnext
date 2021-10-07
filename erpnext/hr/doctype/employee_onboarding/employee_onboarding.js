@@ -66,21 +66,6 @@ frappe.ui.form.on('Employee Onboarding', {
 		}
 
 	},
-	date_of_joining: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date_of_joining
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_of_joining_nepal", resp.message)
-				}
-			}
-		})
-
-
-	},
 
 	employee_onboarding_template: function(frm) {
 		frm.set_value("activities" ,"");

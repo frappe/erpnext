@@ -61,32 +61,7 @@ frappe.ui.form.on('Asset Repair', {
 			frm.set_value('completion_date', frappe.datetime.now_datetime());
 		}
 	},
-	failure_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.failure_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("failure_date_nepal", resp.message)
-				}
-			}
-		})
-	},
-	completion_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.completion_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("completion_date_nepal", resp.message)
-				}
-			}
-		})
-	},
+	
 });
 
 frappe.ui.form.on('Asset Repair Consumed Item', {

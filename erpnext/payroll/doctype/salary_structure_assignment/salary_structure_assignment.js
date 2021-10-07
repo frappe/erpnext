@@ -42,19 +42,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
 		});
 	},
 
-	from_date: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.from_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("from_date_nepali",resp.message)
-				}
-			}
-		})
-	},
 
 	employee: function(frm) {
 		if(frm.doc.employee){

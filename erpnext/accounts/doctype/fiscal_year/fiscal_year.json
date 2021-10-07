@@ -13,16 +13,11 @@
   "is_short_year",
   "section_break_4",
   "year_start_date",
-  "year_start_date_nepal",
   "year_end_date",
   "column_break_7",
-  "nepali_year_start_date",
-  "nepali_year_end_date",
   "section_break_10",
   "companies",
   "auto_created",
-  "date_tablenepal",
-  "nepali_date_table",
   "auto_created"
  ],
  "fields": [
@@ -88,47 +83,12 @@
    "set_only_once": 1
   },
   {
-
-   "fieldname": "date_tablenepal",
-   "fieldtype": "Table",
-   "label": "Date Table(Nepal)",
-   "options": "Nepali Date",
-   "read_only": 1,
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "nepali_year_start_date",
-   "fieldtype": "Data",
-   "label": "Nepali Year Start Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "nepali_year_end_date",
-   "fieldtype": "Data",
-   "label": "Nepali Year End Date",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "nepali_date_table",
-   "fieldtype": "Table",
-   "label": "Nepali Date Table",
-   "options": "Nepali Date Table",
-   "read_only": 1
-  },
-  {
-   "fieldname": "year_start_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Year Start Date (Nepal)"
-
   }
  ],
  "icon": "fa fa-calendar",

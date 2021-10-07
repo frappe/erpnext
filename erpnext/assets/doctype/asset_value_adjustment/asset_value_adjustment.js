@@ -52,17 +52,5 @@ frappe.ui.form.on('Asset Value Adjustment', {
 			});
 		}
 	},
-	date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_nepal", resp.message)
-				}
-			}
-		})
-	},
+	
 });

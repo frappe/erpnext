@@ -66,18 +66,5 @@ frappe.ui.form.on('Employee Incentive', {
 			}
 		});
 	},
-	payroll_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.payroll_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("payroll_date_nepali", resp.message)
-				}
-			}
-		})
-		set_payroll_date(this.frm);
-	},
+
 });

@@ -187,33 +187,8 @@ frappe.ui.form.on("Salary Slip", {
 				}
 			});
 		}
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.posting_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					console.log("Coming inside nepali")
-					cur_frm.set_value("posting_date_nepali",resp.message)
-				}
-			}
-		})
 	},
 
-	posting_date: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.posting_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("posting_date_nepali",resp.message)
-				}
-			}
-		})
-	},
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields");

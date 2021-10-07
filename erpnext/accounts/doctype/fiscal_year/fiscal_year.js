@@ -18,23 +18,5 @@ frappe.ui.form.on('Fiscal Year', {
 	},
 	set_as_default: function(frm) {
 		return frm.call('set_as_default');
-	},
-	year_start_date: function(frm) {
-		if (!frm.doc.is_short_year) {
-			let year_end_date =
-				frappe.datetime.add_days(frappe.datetime.add_months(frm.doc.year_start_date, 12), -1);
-			frm.set_value("year_end_date", year_end_date);
-		}
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.year_start_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("year_start_date_nepal", resp.message)
-				}
-			}
-		})
-	},
+	}
 });

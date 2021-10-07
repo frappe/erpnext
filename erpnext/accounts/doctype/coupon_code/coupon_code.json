@@ -16,9 +16,7 @@
   "pricing_rule",
   "uses",
   "valid_from",
-  "valid_from_nepali",
   "valid_upto",
-  "valid_upto_nepali",
   "maximum_use",
   "used",
   "column_break_11",
@@ -115,18 +113,6 @@
    "no_copy": 1,
    "options": "Coupon Code",
    "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "valid_from_nepali",
-   "fieldtype": "Data",
-   "label": "Valid From(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "valid_upto_nepali",
-   "fieldtype": "Data",
-   "label": "Valid Upto(Nepali)",
    "read_only": 1
   }
  ],

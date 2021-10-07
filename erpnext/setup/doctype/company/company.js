@@ -131,45 +131,6 @@ frappe.ui.form.on("Company", {
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
 	},
-	date_of_establishment: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date_of_establishment
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_of_establishment_nepal", resp.message)
-				}
-			}
-		})
-	},
-	date_of_incorporation: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date_of_incorporation
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_of_incorporation_nepal", resp.message)
-				}
-			}
-		})
-	},
-	date_of_commencement: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date_of_commencement
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_of_commencement_nepal", resp.message)
-				}
-			}
-		})
-	},
 
 	make_default_tax_template: function(frm) {
 		frm.call({

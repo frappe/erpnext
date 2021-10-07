@@ -7,17 +7,6 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.__islocal) cur_frm.set_value("attendance_date", frappe.datetime.get_today());
 	
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date:doc.attendance_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("attendance_date_nepal", resp.message)
-				}
-			}
-		})
 
 }
 

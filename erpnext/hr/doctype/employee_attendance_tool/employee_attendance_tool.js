@@ -11,20 +11,6 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	date: function(frm) {
 		erpnext.employee_attendance_tool.load_employees(frm);
 	},
-	date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_nepal", resp.message)
-				}
-			}
-		})
-	},
-
 	department: function(frm) {
 		erpnext.employee_attendance_tool.load_employees(frm);
 	},

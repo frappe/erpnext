@@ -100,36 +100,6 @@ frappe.ui.form.on("Purchase Order Item", {
 			}
 		}
 	},
-	schedule_date: function (frm,cdt,cdn) {
-		var child = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date:child.schedule_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					frappe.model.set_value(cdt,cdn,"required_by_nepali",resp.message)
-					
-				}
-			}
-		})
-	},
-	expected_delivery_date: function (frm,cdt,cdn) {
-		var child = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date:child.expected_delivery_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					frappe.model.set_value(cdt,cdn,"expected_delivery_date_nepal",resp.message)
-					
-				}
-			}
-		})
-	}
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
@@ -631,21 +601,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	items_on_form_rendered: function() {
 		set_schedule_date(this.frm);
-	},
-	
-	
-	to_date: function(doc){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.to_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("to_date_nepali",resp.message)
-				}
-			}
-		})
 	},
 	
 });

@@ -967,20 +967,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
 	},
-	posting_date: function (doc) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.posting_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("posting_date_nepali", resp.message)
-				}
-			}
-		})
-	},
-
 	scan_barcode: function () {
 		let transaction_controller = new erpnext.TransactionController({ frm: this.frm });
 		transaction_controller.scan_barcode();

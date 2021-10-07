@@ -10,19 +10,6 @@ frappe.ui.form.on("Vehicle Log", {
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 	},
-	date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("date_nepal", resp.message)
-				}
-			}
-		})
-	},
 
 	expense_claim: function(frm){
 		frappe.call({

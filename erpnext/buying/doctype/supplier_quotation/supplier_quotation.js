@@ -13,31 +13,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 
 		this._super();
 	},
-	valid_till: function(doc){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.valid_till
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("valid_tillnepali",resp.message)
-				}
-			}
-		})
-	},
 	refresh: function(doc) {
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: doc.transaction_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("datenepali",resp.message)
-				}
-			}
-		})
 		var me = this;
 		this._super();
 

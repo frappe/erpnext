@@ -10,7 +10,6 @@
   "naming_series",
   "status",
   "complaint_date",
-  "complaint_date_nepali",
   "column_break0",
   "customer",
   "serial_no",
@@ -23,9 +22,7 @@
   "column_break1",
   "warranty_amc_status",
   "warranty_expiry_date",
-  "warranty_expiry_date_nepali",
   "amc_expiry_date",
-  "amc_expiry_date_nepali",
   "resolution_section",
   "resolution_date",
   "resolved_by",
@@ -362,24 +359,6 @@
    "options": "Warranty Claim",
    "print_hide": 1,
    "width": "150px"
-  },
-  {
-   "fieldname": "complaint_date_nepali",
-   "fieldtype": "Data",
-   "label": "Issue Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "warranty_expiry_date_nepali",
-   "fieldtype": "Data",
-   "label": "Warranty Expiry Date(Nepali)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amc_expiry_date_nepali",
-   "fieldtype": "Data",
-   "label": "AMC Expiry Date(Nepali)",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-bug",

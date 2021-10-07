@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
-  "posting_date_nepali",
   "employee",
   "employee_name",
   "department",
@@ -653,12 +652,6 @@
    "fieldtype": "Currency",
    "label": "Gross Year To Date(Company Currency)",
    "options": "Company:company:default_currency"
-  },
-  {
-   "fieldname": "posting_date_nepali",
-   "fieldtype": "Data",
-   "label": "Posting Date(Nepali)",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",

@@ -13,7 +13,6 @@
   "payment_order_status",
   "column_break_5",
   "posting_date",
-  "posting_date_nepal",
   "company",
   "mode_of_payment",
   "party_section",
@@ -708,13 +707,6 @@
    "options": "Company:company:default_currency",
    "read_only": 1
 
-  },
-  {
-   "bold": 1,
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

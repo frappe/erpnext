@@ -24,34 +24,6 @@ frappe.ui.form.on('Training Event', {
 	},
 	
 
-	start_time: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.start_time
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("start_time_nepal", resp.message)
-				}
-			}
-		})
-	},
-	end_time: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.end_time
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("end_time_nepal", resp.message)
-				}
-			}
-		})
-	},
-
-
 	set_employee_query: function(frm) {
 		let emp = [];
 		for (let d in frm.doc.employees) {

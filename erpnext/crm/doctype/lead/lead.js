@@ -86,35 +86,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
 		}
 	},
-	contact_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.contact_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("next_contact_date_nepali", resp.message)
-				}
-			}
-		})
-		set_contact_date(this.frm);
-	},
-
-	ends_on: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.ends_on
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("ends_on_nepali", resp.message)
-				}
-			}
-		})
-		set_ends_on(this.frm);
-	},
+	
 });
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));

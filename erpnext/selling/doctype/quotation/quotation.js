@@ -126,33 +126,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	},
 	
-	valid_till: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.valid_till
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("valid_till_nepal",resp.message)
-				}
-			}
-		})
-	},
-	transaction_date: function(frm){
-		console.log("$$$$$$$$")
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.transaction_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("date_nepal",resp.message)
-				}
-			}
-		})
-	},
 
 	set_dynamic_field_label: function(){
 		if (this.frm.doc.quotation_to == "Customer")

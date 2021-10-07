@@ -138,17 +138,6 @@ frappe.ui.form.on('Material Request', {
 		if(d.length > 0){
 			frm.set_df_property("items",'read_only',1)
 		}
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.transaction_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("transaction_datenepali",resp.message)
-				}
-			}	
-		})
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 
@@ -172,19 +161,6 @@ frappe.ui.form.on('Material Request', {
 				__("Get Items From"));
 		}
 
-	},
-	schedule_date: function(frm){
-		frappe.call({
-			method:"erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.schedule_date
-			},
-			callback: function(resp){
-				if(resp.message){
-					cur_frm.set_value("required_bynepali",resp.message)
-				}
-			}	
-		})
 	},
 	set_from_warehouse: function(frm) {
 		if (frm.doc.material_request_type == "Material Transfer"

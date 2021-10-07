@@ -39,19 +39,5 @@ frappe.ui.form.on('Retention Bonus', {
 				}
 			});
 		}
-	},
-	bonus_payment_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.bonus_payment_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("bonus_payment_date_nepali", resp.message)
-				}
-			}
-		})
-		set_bonus_payment_date(this.frm);
 	}
 });

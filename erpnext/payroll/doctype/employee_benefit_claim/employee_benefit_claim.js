@@ -33,18 +33,5 @@ frappe.ui.form.on('Employee Benefit Claim', {
 		frm.refresh_fields();
 	},
 
-	claim_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.claim_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("claim_date_nepali", resp.message)
-				}
-			}
-		})
-	},
 
 });

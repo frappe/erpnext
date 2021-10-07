@@ -141,45 +141,7 @@ frappe.ui.form.on('Asset', {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 		}
 	},
-	available_for_use_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.available_for_use_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("available_for_use_date_nepal", resp.message)
-				}
-			}
-		})
-	},
-	insurance_start_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.insurance_start_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("insurance_start_date_nepal", resp.message)
-				}
-			}
-		})
-	},
-	insurance_start_date: function (frm) {
-		frappe.call({
-			method: "erpnext.nepali_date.get_converted_date",
-			args: {
-				date: frm.doc.insurance_start_date
-			},
-			callback: function (resp) {
-				if (resp.message) {
-					cur_frm.set_value("insurance_start_date_nepal", resp.message)
-				}
-			}
-		})
-	},
+	
 
 	toggle_reference_doc: function (frm) {
 		if (frm.doc.purchase_receipt && frm.doc.purchase_invoice && frm.doc.docstatus === 1) {
