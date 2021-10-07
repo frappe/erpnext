@@ -12,7 +12,6 @@
   "column_break_3",
   "company",
   "posting_date",
-  "posting_date_nepal",
   "accounting_dimensions_section",
   "cost_center",
   "section_break_9",
@@ -111,11 +110,6 @@
    "options": "Loan Write Off",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

@@ -8,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
-  "date_nepal",
   "from_currency",
   "to_currency",
   "exchange_rate",
@@ -69,11 +68,6 @@
    "fieldname": "for_selling",
    "fieldtype": "Check",
    "label": "For Selling"
-  },
-  {
-   "fieldname": "date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Date (Nepal)"
   }
  ],
  "icon": "fa fa-exchange",

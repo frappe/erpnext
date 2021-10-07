@@ -17,12 +17,9 @@
   "leave_balance",
   "section_break_5",
   "from_date",
-  "from_date_nepal",
   "to_date",
-  "to_date_nepal",
   "half_day",
   "half_day_date",
-  "half_day_date_nepal",
   "total_leave_days",
   "column_break1",
   "description",
@@ -34,7 +31,6 @@
   "salary_slip",
   "sb10",
   "posting_date",
-  "posting_date_nepal",
   "follow_via_email",
   "color",
   "column_break_17",
@@ -246,31 +242,6 @@
    "options": "Leave Application",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "from_date_nepal",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "label": "From Date (Nepal)",
-   "search_index": 1
-  },
-  {
-   "fieldname": "to_date_nepal",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "label": "To Date Nepal",
-   "search_index": 1
-  },
-  {
-   "depends_on": "eval:doc.half_day && (doc.from_date != doc.to_date)",
-   "fieldname": "half_day_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Half Day Date Nepal"
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date Nepal"
   }
  ],
  "icon": "fa fa-calendar",

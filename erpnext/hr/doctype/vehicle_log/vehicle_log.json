@@ -16,7 +16,6 @@
   "make",
   "odometer_reading",
   "date",
-  "date_nepal",
   "odometer",
   "column_break_12",
   "last_odometer",
@@ -161,11 +160,6 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "date_nepal",
-   "fieldtype": "Data",
-   "label": "Date (Nepal)"
   }
  ],
  "is_submittable": 1,

@@ -18,9 +18,7 @@
   "column_break_5",
   "project_template",
   "expected_start_date",
-  "expected_start_date_nepal",
   "expected_end_date",
-  "expected_end_date_nepal",
   "priority",
   "department",
   "customer_details",
@@ -453,16 +451,6 @@
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
-  },
-  {
-   "fieldname": "expected_start_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Expected Start Date (Nepal)"
-  },
-  {
-   "fieldname": "expected_end_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Expected End Date (Nepal)"
   }
  ],
  "icon": "fa fa-puzzle-piece",

@@ -33,7 +33,6 @@
   "purchase_receipt",
   "purchase_invoice",
   "available_for_use_date",
-  "available_for_use_date_nepal",
   "column_break_23",
   "gross_purchase_amount",
   "purchase_date",
@@ -60,9 +59,7 @@
   "insured_value",
   "column_break_48",
   "insurance_start_date",
-  "insurance_start_date_nepal",
   "insurance_end_date",
-  "insurance_end_date_nepal",
   "comprehensive_insurance",
   "section_break_31",
   "maintenance_required",
@@ -483,21 +480,6 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
-  },
-  {
-   "fieldname": "available_for_use_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Available-for-use Date (Nepal)"
-  },
-  {
-   "fieldname": "insurance_start_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Insurance Start Date (Nepal)"
-  },
-  {
-   "fieldname": "insurance_end_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Insurance End Date (Nepal)"
   }
  ],
  "idx": 72,

@@ -15,12 +15,9 @@
   "leave_allocation",
   "worked_on",
   "work_from_date",
-  "work_from_date_nepal",
   "work_end_date",
-  "work_end_date_nepal",
   "half_day",
   "half_day_date",
-  "half_day_date_nepal",
   "column_break_4",
   "reason",
   "amended_from"
@@ -113,22 +110,6 @@
    "options": "Compensatory Leave Request",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "work_from_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Work From Date (Nepal)"
-  },
-  {
-   "fieldname": "work_end_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Work End Date (Nepal)"
-  },
-  {
-   "depends_on": "half_day",
-   "fieldname": "half_day_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Half Day Date (Nepal)"
   }
  ],
  "is_submittable": 1,

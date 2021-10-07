@@ -10,7 +10,6 @@
   "purpose",
   "column_break_4",
   "transaction_date",
-  "transaction_date_nepal",
   "section_break_10",
   "assets",
   "reference",
@@ -91,11 +90,6 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "transaction_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Transaction Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
