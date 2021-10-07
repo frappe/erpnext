@@ -714,7 +714,7 @@ class PaymentEntry(AccountsController):
 			for d in self.get("references"):
 				cost_center = self.cost_center
 				if d.reference_doctype == "Sales Invoice" and not cost_center:
-						cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
+					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
 				gle = party_gl_dict.copy()
 				gle.update({
 					"against_voucher_type": d.reference_doctype,
