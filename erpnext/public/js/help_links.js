@@ -397,7 +397,7 @@ frappe.help.help_links["List/Purchase Order"] = [
 	},
 	{
 		label: "Recurring Purchase Order",
-		url: docsUrl + "user/manual/en/accounts/recurring-orders-and-invoices",
+		url: docsUrl + "user/manual/en/accounts/articles/recurring-orders-and-invoices",
 	},
 ];
 
@@ -420,7 +420,7 @@ frappe.help.help_links["Form/Purchase Order"] = [
 	},
 	{
 		label: "Recurring Purchase Order",
-		url: docsUrl + "user/manual/en/accounts/recurring-orders-and-invoices",
+		url: docsUrl + "user/manual/en/accounts/articles/recurring-orders-and-invoices",
 	},
 	{
 		label: "Subcontracting",
@@ -604,11 +604,11 @@ frappe.help.help_links["List/Purchase Invoice"] = [
 	},
 	{
 		label: "Accounts Opening Balance",
-		url: docsUrl + "user/manual/en/accounts/opening-accounts",
+		url: docsUrl + "user/manual/en/accounts/opening-balance",
 	},
 	{
 		label: "Recurring Purchase Invoice",
-		url: docsUrl + "user/manual/en/accounts/recurring-orders-and-invoices",
+		url: docsUrl + "user/manual/en/accounts/articles/recurring-orders-and-invoices",
 	},
 ];
 
@@ -623,7 +623,7 @@ frappe.help.help_links["List/Journal Entry"] = [
 	},
 	{
 		label: "Accounts Opening Balance",
-		url: docsUrl + "user/manual/en/accounts/opening-accounts",
+		url: docsUrl + "user/manual/en/accounts/opening-balance",
 	},
 ];
 
