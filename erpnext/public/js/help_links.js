@@ -300,7 +300,7 @@ frappe.help.help_links["List/Sales Order"] = [
 	},
 	{
 		label: "Recurring Sales Order",
-		url: docsUrl + "user/manual/en/accounts/recurring-orders-and-invoices",
+		url: docsUrl + "user/manual/en/accounts/articles/recurring-orders-and-invoices",
 	},
 	{
 		label: "Applying Discount",
@@ -552,7 +552,7 @@ frappe.help.help_links["Form/Sales Invoice"] = [
 	},
 	{
 		label: "Accounts Opening Balance",
-		url: docsUrl + "user/manual/en/accounts/opening-accounts",
+		url: docsUrl + "user/manual/en/accounts/opening-balance",
 	},
 	{
 		label: "Sales Return",
