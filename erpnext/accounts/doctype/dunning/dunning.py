@@ -71,18 +71,30 @@ class Dunning(AccountsController):
 
 def resolve_dunning(doc, state):
 	"""
-	Todo: refactor
+	Check if all payments have been made and resolve dunning, if yes. Called
+	when a Payment Entry is submitted.
 	"""
 	for reference in doc.references:
 		if reference.reference_doctype == "Sales Invoice" and reference.outstanding_amount <= 0:
-			dunnings = frappe.get_list(
-				"Dunning",
-				filters={"sales_invoice": reference.reference_name, "status": ("!=", "Resolved")},
-				ignore_permissions=True,
+			unresolved_dunnings = frappe.get_all("Dunning",
+				filters={
+					"sales_invoice": reference.reference_name,
+					"status": ("!=", "Resolved")
+				},
+				pluck="name"
 			)
 
-			for dunning in dunnings:
-				frappe.db.set_value("Dunning", dunning.name, "status", "Resolved")
+			for dunning_name in unresolved_dunnings:
+				resolve = True
+				dunning = frappe.get_doc("Dunning", dunning_name)
+				for overdue_payment in dunning.overdue_payments:
+					outstanding = frappe.get_value("Payment Schedule", overdue_payment.payment_schedule, "outstanding")
+					if outstanding >= 0:
+						resolve = False
+
+				if resolve:
+					dunning.status = "Resolved"
+					dunning.save()
 
 
 @frappe.whitelist()
