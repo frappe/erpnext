@@ -23,15 +23,7 @@ frappe.ui.form.on("Dunning", {
 				}
 			};
 		});
-		frm.set_query("debit_to", () => {
-			return {
-				filters: {
-					"account_type": "Receivable",
-					"is_group": 0,
-					"company": frm.doc.company
-				}
-			};
-		});
+
 		frm.set_query("contact_person", erpnext.queries.contact_query);
 		frm.set_query("customer_address", erpnext.queries.address_query);
 		frm.set_query("company_address", erpnext.queries.company_address_query);
@@ -113,28 +105,6 @@ frappe.ui.form.on("Dunning", {
 				}
 			}
 		}
-		frm.trigger("set_debit_to");
-	},
-	set_debit_to: function(frm) {
-		if (frm.doc.customer && frm.doc.company) {
-			return frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
-				args: {
-					company: frm.doc.company,
-					party_type: "Customer",
-					party: frm.doc.customer,
-					currency: erpnext.get_currency(frm.doc.company)
-				},
-				callback: function (r) {
-					if (!r.exc && r.message) {
-						frm.set_value("debit_to", r.message);
-					}
-				}
-			});
-		}
-	},
-	customer: function (frm) {
-		frm.trigger("set_debit_to");
 	},
 	currency: function (frm) {
 		// this.set_dynamic_labels();

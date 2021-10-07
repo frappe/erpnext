@@ -54,7 +54,6 @@
   "accounting_details_section",
   "cost_center",
   "income_account",
-  "debit_to",
   "amended_from"
  ],
  "fields": [
@@ -349,14 +348,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "print_hide": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_9",
    "fieldtype": "Section Break",
    "label": "Currency"
@@ -387,7 +378,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-30 17:23:23.030561",
+ "modified": "2021-10-07 07:43:43.023590",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
