@@ -15,8 +15,8 @@ def execute(filters=None):
 
 	return columns, data
 
-def validate_filters(filters={}):
-	filters = frappe._dict(filters)
+def validate_filters(filters=None):
+	filters = frappe._dict(filters or {})
 
 	if not filters.company:
 		frappe.throw(_('{} is mandatory for generating E-Invoice Summary Report').format(_('Company')), title=_('Invalid Filter'))
@@ -28,7 +28,9 @@ def validate_filters(filters={}):
 	if filters.from_date > filters.to_date:
 		frappe.throw(_('From Date must be before To Date'), title=_('Invalid Filter'))
 
-def get_data(filters={}):
+def get_data(filters=None):
+	if not filters:
+		filters = {}
 	query_filters = {
 		'posting_date': ['between', [filters.from_date, filters.to_date]],
 		'einvoice_status': ['is', 'set'],
