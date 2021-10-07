@@ -47,26 +47,6 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(dunning.dunning_amount, 2), 10.41)
 		self.assertEqual(round(dunning.grand_total, 2), 110.41)
 
-	def test_gl_entries(self):
-		dunning = create_second_dunning()
-		dunning.submit()
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Dunning' and voucher_no=%s
-			order by account asc""",
-			dunning.name,
-			as_dict=1,
-		)
-		self.assertTrue(gl_entries)
-		expected_values = dict((d[0], d) for d in [
-			['Debtors - _TC', 10.41, 0.0],
-			['Sales - _TC',  0.0, 10.41]
-		])
-		for gle in gl_entries:
-			self.assertEqual(expected_values[gle.account][0], gle.account)
-			self.assertEqual(expected_values[gle.account][1], gle.debit)
-			self.assertEqual(expected_values[gle.account][2], gle.credit)
-
 	def test_payment_entry(self):
 		dunning = create_second_dunning()
 		dunning.submit()
