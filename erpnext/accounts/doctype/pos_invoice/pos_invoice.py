@@ -40,6 +40,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_change_amount()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
+		self.validate_warehouse()
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
 		self.validate_return_items_qty()
