@@ -11,7 +11,6 @@
   "full_name",
   "column_break_6",
   "date",
-  "date_nepal",
   "status",
   "for_designation",
   "referral_details_section",
@@ -201,11 +200,6 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "date_nepal",
-   "fieldtype": "Data",
-   "label": "Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

@@ -12,7 +12,6 @@
   "column_break_2",
   "company",
   "posting_date",
-  "posting_date_nepal",
   "status",
   "section_break_4",
   "loan_type",
@@ -210,11 +209,6 @@
    "fieldtype": "Check",
    "label": "Is Term Loan",
    "read_only": 1
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

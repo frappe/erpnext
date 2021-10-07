@@ -15,7 +15,6 @@
   "assignment_based_on",
   "leave_period",
   "effective_from",
-  "effective_from_nepal",
   "effective_to",
   "leaves_allocated",
   "amended_from"
@@ -110,12 +109,6 @@
    "label": "Leaves Allocated",
    "no_copy": 1,
    "print_hide": 1
-  },
-  {
-   "fieldname": "effective_from_nepal",
-   "fieldtype": "Read Only",
-   "label": "Effective From (Nepal)",
-   "read_only_depends_on": "eval:doc.assignment_based_on"
   }
  ],
  "is_submittable": 1,

@@ -21,7 +21,6 @@
   "amended_from",
   "payroll",
   "encashment_date",
-  "encashment_date_nepal",
   "additional_salary",
   "column_break_14",
   "currency",
@@ -150,11 +149,6 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
-  },
-  {
-   "fieldname": "encashment_date_nepal",
-   "fieldtype": "Data",
-   "label": "Encashment Date (Nepal)"
   }
  ],
  "is_submittable": 1,

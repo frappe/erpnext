@@ -14,7 +14,6 @@
   "vehicle_details",
   "last_odometer",
   "acquisition_date",
-  "acquisition_date_nepal",
   "location",
   "column_break_8",
   "chassis_no",
@@ -25,14 +24,11 @@
   "policy_no",
   "column_break_15",
   "start_date",
-  "start_date_nepal",
   "end_date",
-  "end_date_nepal",
   "additional_details",
   "fuel_type",
   "uom",
   "carbon_check_date",
-  "last_carbon_check_nepal",
   "column_break_21",
   "color",
   "wheels",
@@ -196,26 +192,6 @@
    "options": "Vehicle",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "acquisition_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Acquisition Date (Nepal)"
-  },
-  {
-   "fieldname": "start_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Start Date (Nepal)"
-  },
-  {
-   "fieldname": "end_date_nepal",
-   "fieldtype": "Data",
-   "label": "End Date (Nepal)"
-  },
-  {
-   "fieldname": "last_carbon_check_nepal",
-   "fieldtype": "Read Only",
-   "label": "Last Carbon Check (Nepal)"
   }
  ],
  "links": [],

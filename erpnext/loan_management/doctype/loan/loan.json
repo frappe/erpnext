@@ -15,7 +15,6 @@
   "column_break_3",
   "company",
   "posting_date",
-  "posting_date_nepal",
   "status",
   "repay_from_salary",
   "section_break_8",
@@ -355,11 +354,6 @@
    "fieldtype": "Date",
    "label": "Closure Date",
    "read_only": 1
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

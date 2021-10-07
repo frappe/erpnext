@@ -27,7 +27,6 @@
         "po_no",
         "order_warehouse_rule_number",
         "po_date",
-        "customers_purchase_order_date_nepal",
         "tax_id",
         "contact_info",
         "customer_address",
@@ -1573,12 +1572,6 @@
             "hidden": 1,
             "label": "Commission Based On Target Lines",
             "read_only": 1
-        },
-        {
-            "depends_on": "eval:doc.po_no",
-            "fieldname": "customers_purchase_order_date_nepal",
-            "fieldtype": "Read Only",
-            "label": "Customer's Purchase Order Date (Nepal)"
         }
     ],
     "icon": "fa fa-file-text",

@@ -10,9 +10,7 @@
   "department",
   "column_break_3",
   "from_date",
-  "from_date_nepal",
   "to_date",
-  "to_date_nepal",
   "staffing_plan_details",
   "staffing_details",
   "section_break_8",
@@ -81,16 +79,6 @@
    "options": "Staffing Plan",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "from_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "From Date (Nepal)"
-  },
-  {
-   "fieldname": "to_date_nepal",
-   "fieldtype": "Data",
-   "label": "To Date (Nepal)"
   }
  ],
  "is_submittable": 1,

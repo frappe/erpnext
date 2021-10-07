@@ -28,11 +28,9 @@
   "price_list_rate",
   "section_break_15",
   "valid_from",
-  "valid_fromnepal",
   "lead_time_days",
   "column_break_18",
   "valid_upto",
-  "valid_uptonepal",
   "section_break_24",
   "note",
   "reference"
@@ -212,18 +210,6 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
-  },
-  {
-   "fieldname": "valid_fromnepal",
-   "fieldtype": "Data",
-   "label": "Valid From(Nepal)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "valid_uptonepal",
-   "fieldtype": "Data",
-   "label": "Valid Upto(Nepal)",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-flag",

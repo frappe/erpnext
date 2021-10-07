@@ -10,7 +10,6 @@
   "title",
   "campaign_name",
   "scheduled_time",
-  "scheduled_time_nepal",
   "post_status",
   "column_break_6",
   "twitter",
@@ -149,11 +148,6 @@
    "fieldtype": "Data",
    "label": "Title",
    "reqd": 1
-  },
-  {
-   "fieldname": "scheduled_time_nepal",
-   "fieldtype": "Read Only",
-   "label": "Scheduled Time (Nepal)"
   }
  ],
  "is_submittable": 1,

@@ -20,9 +20,7 @@
   "amended_from",
   "company",
   "transaction_date",
-  "date_nepal",
   "valid_till",
-  "valid_till_nepal",
   "order_type",
   "contact_section",
   "customer_address",
@@ -956,16 +954,6 @@
    "label": "Bundle Items",
    "options": "fa fa-suitcase",
    "print_hide": 1
-  },
-  {
-   "fieldname": "valid_till_nepal",
-   "fieldtype": "Read Only",
-   "label": "Valid Till (Nepal)"
-  },
-  {
-   "fieldname": "date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Date (Nepal)"
   }
  ],
  "icon": "fa fa-shopping-cart",

@@ -13,7 +13,6 @@
         "department",
         "column_break_4",
         "posting_date",
-        "posting_date_nepal",
         "currency",
         "exchange_rate",
         "repay_unclaimed_amount_from_salary",
@@ -196,11 +195,6 @@
             "precision": "9",
             "print_hide": 1,
             "reqd": 1
-        },
-        {
-            "fieldname": "posting_date_nepal",
-            "fieldtype": "Data",
-            "label": "Posting Date (Nepal)"
         }
     ],
     "is_submittable": 1,

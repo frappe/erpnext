@@ -19,12 +19,10 @@
   "column_break_14",
   "project",
   "accounting_details",
-  "failure_date_nepal",
   "assign_to",
   "assign_to_name",
   "column_break_6",
   "completion_date",
-  "completion_date_nepal",
   "repair_status",
   "repair_cost",
   "capitalize_repair_cost",
@@ -262,16 +260,6 @@
    "label": "Stock Entry",
    "options": "Stock Entry",
    "read_only": 1
-  },
-  {
-   "fieldname": "failure_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Failure Date (Nepal)"
-  },
-  {
-   "fieldname": "completion_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Completion Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

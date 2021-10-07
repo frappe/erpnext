@@ -33,7 +33,6 @@
   "existing_company",
   "tax_id",
   "date_of_establishment",
-  "date_of_establishment_nepal",
   "sales_settings",
   "monthly_sales_target",
   "sales_monthly_history",
@@ -91,10 +90,8 @@
   "company_info",
   "company_logo",
   "date_of_incorporation",
-  "date_of_incorporation_nepal",
   "address_html",
   "date_of_commencement",
-  "date_of_commencement_nepal",
   "phone_no",
   "fax",
   "email",
@@ -763,22 +760,6 @@
    "fieldtype": "Link",
    "label": "Repair and Maintenance Account",
    "options": "Account"
-  },
-  {
-   "fieldname": "date_of_establishment_nepal",
-   "fieldtype": "Read Only",
-   "label": "Date of Establishment (Nepal)"
-  },
-  {
-   "fieldname": "date_of_incorporation_nepal",
-   "fieldtype": "Read Only",
-   "label": "Date of Incorporation (Nepal)"
-  },
-  {
-   "depends_on": "eval:doc.date_of_commencement",
-   "fieldname": "date_of_commencement_nepal",
-   "fieldtype": "Read Only",
-   "label": "Date of Commencement (Nepal)"
   }
  ],
  "icon": "fa fa-building",
