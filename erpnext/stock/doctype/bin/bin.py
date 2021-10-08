@@ -55,7 +55,6 @@ class Bin(Document):
 		self.db_set('projected_qty', self.projected_qty)
 
 	def update_reserved_qty_for_sub_contracting(self):
-		print("Inininiinin")
 		#reserved qty
 		reserved_qty_for_sub_contract = frappe.db.sql('''
 			select ifnull(sum(itemsup.required_qty),0)
