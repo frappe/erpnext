@@ -329,7 +329,7 @@
   {
    "fieldname": "earning_deduction",
    "fieldtype": "Section Break",
-   "label": "Earning & Deduction",
+   "label": "Earnings & Deductions",
    "oldfieldtype": "Section Break"
   },
   {
@@ -380,7 +380,7 @@
    "depends_on": "total_loan_repayment",
    "fieldname": "loan_repayment",
    "fieldtype": "Section Break",
-   "label": "Loan repayment"
+   "label": "Loan Repayment"
   },
   {
    "fieldname": "loans",
@@ -425,7 +425,7 @@
   {
    "fieldname": "net_pay_info",
    "fieldtype": "Section Break",
-   "label": "net pay info"
+   "label": "Net Pay Info"
   },
   {
    "fieldname": "net_pay",
@@ -647,7 +647,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-01 10:22:52.374549",
+ "modified": "2021-10-08 11:48:47.098248",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
