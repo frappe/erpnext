@@ -421,8 +421,6 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 			update_value_in_dict(totals, 'closing', gle)
 
 		elif gle.posting_date <= to_date:
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
-			update_value_in_dict(totals, 'total', gle)
 			if filters.get("group_by") != 'Group by Voucher (Consolidated)':
 				gle_map[gle.get(group_by)].entries.append(gle)
 			elif filters.get("group_by") == 'Group by Voucher (Consolidated)':
@@ -436,8 +434,11 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				else:
 					update_value_in_dict(consolidated_gle, key, gle)
 
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
-			update_value_in_dict(totals, 'closing', gle)
+	for key, gle_entry in consolidated_gle.items():
+		update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle_entry)
+		update_value_in_dict(totals, 'total', gle_entry)
+		update_value_in_dict(gle_map[gle_entry.get(group_by)].totals, 'closing', gle_entry)
+		update_value_in_dict(totals, 'closing', gle_entry)
 
 	for key, value in consolidated_gle.items():
 		entries.append(value)
