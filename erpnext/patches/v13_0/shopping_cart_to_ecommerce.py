@@ -26,4 +26,4 @@ def notify_users():
 	note.public = 1
 	note.notify_on_login = 1
 	note.content = """<div class="ql-editor read-mode"><p>You are seeing this message because Shopping Cart is enabled on your site. </p><p><br></p><p>Shopping Cart Settings and Products settings are now merged into "E Commerce Settings". </p><p><br></p><p>You can learn about new and improved E-Commerce features in the official documentation.</p><ol><li data-list="bullet"><span class="ql-ui" contenteditable="false"></span><a href="https://docs.erpnext.com/docs/v13/user/manual/en/e_commerce/set_up_e_commerce" rel="noopener noreferrer">https://docs.erpnext.com/docs/v13/user/manual/en/e_commerce/set_up_e_commerce</a></li></ol><p><br></p></div>"""
-	note.save()
+	note.insert(ignore_mandatory=True)
