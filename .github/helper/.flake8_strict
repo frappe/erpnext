@@ -65,6 +65,11 @@ ignore =
     E713,
     E712,
 
+enable-extensions =
+    M90
+
+select =
+    M511
 
 max-line-length = 200
 exclude=.github/helper/semgrep_rules,test_*.py
