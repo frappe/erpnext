@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
 
+import erpnext
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
 	check_opening_balance,
 	get_chart_data,
@@ -31,7 +32,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_report_summary as get_pl_summary,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency
+from erpnext.accounts.report.utils import convert, convert_to_presentation_currency
 
 
 def execute(filters=None):
@@ -42,7 +43,7 @@ def execute(filters=None):
 
 	fiscal_year = get_fiscal_year_data(filters.get('from_fiscal_year'), filters.get('to_fiscal_year'))
 	companies_column, companies = get_companies(filters)
-	columns = get_columns(companies_column)
+	columns = get_columns(companies_column, filters)
 
 	if filters.get('report') == "Balance Sheet":
 		data, message, chart, report_summary = get_balance_sheet_data(fiscal_year, companies, columns, filters)
@@ -193,30 +194,37 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	data["total"] = total
 	return data
 
-def get_columns(companies):
-	columns = [{
-		"fieldname": "account",
-		"label": _("Account"),
-		"fieldtype": "Link",
-		"options": "Account",
-		"width": 300
-	}]
-
-	columns.append({
-		"fieldname": "currency",
-		"label": _("Currency"),
-		"fieldtype": "Link",
-		"options": "Currency",
-		"hidden": 1
-	})
+def get_columns(companies, filters):
+	columns = [
+		{
+			"fieldname": "account",
+			"label": _("Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 300
+		}, {
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
+		}
+	]
 
 	for company in companies:
+		apply_currency_formatter = 1 if not filters.presentation_currency else 0
+		currency = filters.presentation_currency
+		if not currency:
+			currency = erpnext.get_company_currency(company)
+
 		columns.append({
 			"fieldname": company,
-			"label": company,
+			"label": f'{company} ({currency})',
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 150
+			"width": 150,
+			"apply_currency_formatter": apply_currency_formatter,
+			"company_name": company
 		})
 
 	return columns
@@ -236,6 +244,8 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 		start_date = filters.period_start_date if filters.report != 'Balance Sheet' else None
 		end_date = filters.period_end_date
 
+	filters.end_date = end_date
+
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
 			where root_type=%s and ifnull(parent_account, '') = ''""", root_type, as_dict=1):
@@ -246,7 +256,7 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 
 	calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
-	out = prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency)
+	out = prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters)
 
 	if out:
 		add_total_row(out, root_type, balance_must_be, companies, company_currency)
@@ -271,10 +281,20 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, start_d
 					# check if posting date is within the period
 					if (entry.company == company or (filters.get('accumulated_in_group_company'))
 						and entry.company in companies.get(company)):
-						d[company] = d.get(company, 0.0) + flt(entry.debit) - flt(entry.credit)
+						parent_company_currency = erpnext.get_company_currency(d.company)
+						child_company_currency = erpnext.get_company_currency(entry.company)
+
+						debit, credit = flt(entry.debit), flt(entry.credit)
+
+						if (entry.company != company and parent_company_currency != child_company_currency
+							and filters.get('accumulated_in_group_company')):
+							debit = convert(debit, parent_company_currency, child_company_currency, filters.end_date)
+							credit = convert(credit, parent_company_currency, child_company_currency, filters.end_date)
+
+						d[company] = d.get(company, 0.0) + flt(debit) - flt(credit)
 
 				if entry.posting_date < getdate(start_date):
-					d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
+					d["opening_balance"] = d.get("opening_balance", 0.0) + flt(debit) - flt(credit)
 
 def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 	"""accumulate children's values in parent accounts"""
@@ -353,7 +373,7 @@ def get_accounts(root_type, filters):
 			`tabAccount` where company = %s and root_type = %s
 		""" , (filters.get('company'), root_type), as_dict=1)
 
-def prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency):
+def prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters):
 	data = []
 
 	for d in accounts:
@@ -368,9 +388,10 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 			"indent": flt(d.indent),
 			"year_start_date": start_date,
 			"year_end_date": end_date,
-			"currency": company_currency,
+			"currency": filters.presentation_currency,
 			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be == "Debit" else -1)
 		})
+
 		for company in companies:
 			if d.get(company) and balance_must_be == "Credit":
 				# change sign based on Debit or Credit, since calculation is done using (debit - credit)
@@ -385,6 +406,7 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 
 		row["has_value"] = has_value
 		row["total"] = total
+
 		data.append(row)
 
 	return data
