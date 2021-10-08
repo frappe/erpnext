@@ -3,14 +3,21 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import getdate
+
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.non_profit.doctype.donation.test_donation import create_donor, create_mode_of_payment, create_donor_type
 from erpnext.non_profit.doctype.donation.donation import create_donation
-from erpnext.non_profit.doctype.membership.test_membership import setup_membership, make_membership
+from erpnext.non_profit.doctype.donation.test_donation import (
+	create_donor,
+	create_donor_type,
+	create_mode_of_payment,
+)
 from erpnext.non_profit.doctype.member.member import create_member
+from erpnext.non_profit.doctype.membership.test_membership import make_membership, setup_membership
+
 
 class TestTaxExemption80GCertificate(unittest.TestCase):
 	def setUp(self):

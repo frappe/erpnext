@@ -2,14 +2,19 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-import frappe
+
 import unittest
-from frappe.utils import nowdate
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+import frappe
+
+from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+	make_closing_entry_from_opening,
+)
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
-from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import make_closing_entry_from_opening
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 
 class TestPOSClosingEntry(unittest.TestCase):
 	def setUp(self):
@@ -85,9 +90,15 @@ class TestPOSClosingEntry(unittest.TestCase):
 
 		pcv_doc.load_from_db()
 		pcv_doc.cancel()
-		si_doc.load_from_db()
+
+		cancelled_invoice = frappe.db.get_value(
+			'POS Invoice Merge Log', {'pos_closing_entry': pcv_doc.name},
+			'consolidated_invoice'
+		)
+		docstatus = frappe.db.get_value("Sales Invoice", cancelled_invoice, 'docstatus')
+		self.assertEqual(docstatus, 2)
+
 		pos_inv1.load_from_db()
-		self.assertEqual(si_doc.docstatus, 2)
 		self.assertEqual(pos_inv1.status, 'Paid')
 
 

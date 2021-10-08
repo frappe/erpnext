@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	validate_warehouse(filters)
@@ -58,14 +60,14 @@ def get_data(warehouse):
 	serial_item_list = frappe.get_all("Item", filters={
 		'has_serial_no': True,
 	}, fields=['item_code', 'item_name'])
-	
+
 	status_list = ['Active', 'Expired']
 	data = []
 	for item in serial_item_list:
-		total_serial_no = frappe.db.count("Serial No", 
+		total_serial_no = frappe.db.count("Serial No",
 			filters={"item_code": item.item_code, "status": ("in", status_list), "warehouse": warehouse})
 
-		actual_qty = frappe.db.get_value('Bin', fieldname=['actual_qty'], 
+		actual_qty = frappe.db.get_value('Bin', fieldname=['actual_qty'],
 			filters={"warehouse": warehouse, "item_code": item.item_code})
 
 		# frappe.db.get_value returns null if no record exist.

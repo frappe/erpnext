@@ -1,23 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from typing import List
-from collections import deque
-import frappe, erpnext
-from frappe.utils import cint, cstr, flt, today
-from frappe import _
-from erpnext.setup.utils import get_exchange_rate
-from frappe.website.website_generator import WebsiteGenerator
-from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.get_item_details import get_price_list_rate
-from frappe.core.doctype.version.version import get_diff
-from erpnext.controllers.queries import get_match_cond
-from erpnext.stock.doctype.item.item import get_item_details
-from frappe.model.mapper import get_mapped_doc
-
 import functools
-
+from collections import deque
 from operator import itemgetter
+from typing import List
+
+import frappe
+from frappe import _
+from frappe.core.doctype.version.version import get_diff
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt, today
+from frappe.website.website_generator import WebsiteGenerator
+
+import erpnext
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -148,12 +147,15 @@ class BOM(WebsiteGenerator):
 		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
+		self.set_bom_scrap_items_detail()
 		self.validate_materials()
 		self.set_routing_operations()
 		self.validate_operations()
 		self.calculate_cost()
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
+		self.set_bom_level()
+		self.validate_scrap_items()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -199,7 +201,7 @@ class BOM(WebsiteGenerator):
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
-			self.validate_bom_currecny(item)
+			self.validate_bom_currency(item)
 
 			ret = self.get_bom_material_detail({
 				"company": self.company,
@@ -217,6 +219,19 @@ class BOM(WebsiteGenerator):
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
+
+	def set_bom_scrap_items_detail(self):
+		for item in self.get("scrap_items"):
+			args = {
+				"item_code": item.item_code,
+				"company": self.company,
+				"scrap_items": True,
+				"bom_no": '',
+			}
+			ret = self.get_bom_material_detail(args)
+			for key, value in ret.items():
+				if item.get(key) is None:
+					item.set(key, value)
 
 	@frappe.whitelist()
 	def get_bom_material_detail(self, args=None):
@@ -254,7 +269,7 @@ class BOM(WebsiteGenerator):
 
 		return ret_item
 
-	def validate_bom_currecny(self, item):
+	def validate_bom_currency(self, item):
 		if item.get('bom_no') and frappe.db.get_value('BOM', item.get('bom_no'), 'currency') != self.currency:
 			frappe.throw(_("Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}")
 				.format(item.idx, item.bom_no, self.currency))
@@ -329,7 +344,7 @@ class BOM(WebsiteGenerator):
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
 
 		if not from_child_bom:
-			frappe.msgprint(_("Cost Updated"))
+			frappe.msgprint(_("Cost Updated"), alert=True)
 
 	def update_parent_cost(self):
 		if self.total_cost:
@@ -431,25 +446,29 @@ class BOM(WebsiteGenerator):
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
 
-	def check_recursion(self, bom_list=[]):
+	def check_recursion(self, bom_list=None):
 		""" Check whether recursion occurs in any bom"""
+		def _throw_error(bom_name):
+			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {0}").format(bom_name))
+
 		bom_list = self.traverse_tree()
-		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
-			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'})
+		child_items = frappe.get_all('BOM Item', fields=["bom_no", "item_code"],
+			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'}) or []
 
-		raise_exception = False
-		if bom_nos and self.name in [d.bom_no for d in bom_nos]:
-			raise_exception = True
+		child_bom = {d.bom_no for d in child_items}
+		child_items_codes = {d.item_code for d in child_items}
 
-		if not raise_exception:
-			bom_nos = frappe.get_all('BOM Item', fields=["parent"],
-				filters={'bom_no': self.name, 'parenttype': 'BOM'})
+		if self.name in child_bom:
+			_throw_error(self.name)
 
-			if self.name in [d.parent for d in bom_nos]:
-				raise_exception = True
+		if self.item in child_items_codes:
+			_throw_error(self.item)
 
-		if raise_exception:
-			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {1}").format(self.name, self.name))
+		bom_nos = frappe.get_all('BOM Item', fields=["parent"],
+			filters={'bom_no': self.name, 'parenttype': 'BOM'}) or []
+
+		if self.name in {d.parent for d in bom_nos}:
+			_throw_error(self.name)
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
@@ -491,27 +510,39 @@ class BOM(WebsiteGenerator):
 			if d.workstation:
 				self.update_rate_and_time(d, update_hour_rate)
 
-			self.operating_cost += flt(d.operating_cost)
-			self.base_operating_cost += flt(d.base_operating_cost)
+			operating_cost = d.operating_cost
+			base_operating_cost = d.base_operating_cost
+			if d.set_cost_based_on_bom_qty:
+				operating_cost = flt(d.cost_per_unit) * flt(self.quantity)
+				base_operating_cost = flt(d.base_cost_per_unit) * flt(self.quantity)
+
+			self.operating_cost += flt(operating_cost)
+			self.base_operating_cost += flt(base_operating_cost)
 
 	def update_rate_and_time(self, row, update_hour_rate = False):
 		if not row.hour_rate or update_hour_rate:
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
-			row.hour_rate = (hour_rate / flt(self.conversion_rate)
-				if self.conversion_rate and hour_rate else hour_rate)
+
+			if hour_rate:
+				row.hour_rate = (hour_rate / flt(self.conversion_rate)
+					if self.conversion_rate and hour_rate else hour_rate)
 
 			if self.routing:
-				row.time_in_mins = flt(frappe.db.get_value("BOM Operation", {
+				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
 						"workstation": row.workstation,
 						"operation": row.operation,
-						"sequence_id": row.sequence_id,
 						"parent": self.routing
 				}, ["time_in_mins"]))
+
+				if time_in_mins:
+					row.time_in_mins = time_in_mins
 
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
 			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
 			row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+			row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
+			row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate:
 			row.db_update()
@@ -676,6 +707,45 @@ class BOM(WebsiteGenerator):
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)
 
+	def set_bom_level(self, update=False):
+		levels = []
+
+		self.bom_level = 0
+		for row in self.items:
+			if row.bom_no:
+				levels.append(frappe.get_cached_value("BOM", row.bom_no, "bom_level") or 0)
+
+		if levels:
+			self.bom_level = max(levels) + 1
+
+		if update:
+			self.db_set("bom_level", self.bom_level)
+
+	def validate_scrap_items(self):
+		for item in self.scrap_items:
+			msg = ""
+			if item.item_code == self.item and not item.is_process_loss:
+				msg = _('Scrap/Loss Item: {0} should have Is Process Loss checked as it is the same as the item to be manufactured or repacked.') \
+					.format(frappe.bold(item.item_code))
+			elif item.item_code != self.item and item.is_process_loss:
+				msg = _('Scrap/Loss Item: {0} should not have Is Process Loss checked as it is different from  the item to be manufactured or repacked') \
+					.format(frappe.bold(item.item_code))
+
+			must_be_whole_number = frappe.get_value("UOM", item.stock_uom, "must_be_whole_number")
+			if item.is_process_loss and must_be_whole_number:
+				msg = _("Item: {0} with Stock UOM: {1} cannot be a Scrap/Loss Item as {1} is a whole UOM.") \
+					.format(frappe.bold(item.item_code), frappe.bold(item.stock_uom))
+
+			if item.is_process_loss and (item.stock_qty >= self.quantity):
+				msg = _("Scrap/Loss Item: {0} should have Qty less than finished goods Quantity.") \
+					.format(frappe.bold(item.item_code))
+
+			if item.is_process_loss and (item.rate > 0):
+				msg = _("Scrap/Loss Item: {0} should have Rate set to 0 because Is Process Loss is checked.") \
+					.format(frappe.bold(item.item_code))
+
+			if msg:
+				frappe.throw(msg, title=_("Note"))
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
@@ -699,12 +769,12 @@ def get_bom_item_rate(args, bom_doc):
 			"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 			"conversion_factor": args.get("conversion_factor") or 1,
 			"plc_conversion_rate": 1,
-			"ignore_party": True
+			"ignore_party": True,
+			"ignore_conversion_rate": True
 		})
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
-		out = frappe._dict()
-		get_price_list_rate(bom_args, item_doc, out)
-		rate = out.price_list_rate
+		price_list_data = get_price_list_rate(bom_args, item_doc)
+		rate = price_list_data.price_list_rate
 
 	return rate
 
@@ -733,7 +803,7 @@ def get_valuation_rate(args):
 	if valuation_rate <= 0:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0
+			where item_code = %s and valuation_rate > 0 and is_cancelled = 0
 			order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
 
 		valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
@@ -759,7 +829,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				bom_item.rate,
-				bom_item.amount,
+				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
@@ -794,8 +864,11 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", where_conditions="",
-			select_columns=", bom_item.idx, item.description", is_stock_item=is_stock_item, qty_field="stock_qty")
+		query = query.format(
+			table="BOM Scrap Item", where_conditions="",
+			select_columns=", bom_item.idx, item.description, is_process_loss",
+			is_stock_item=is_stock_item, qty_field="stock_qty"
+		)
 
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
@@ -860,7 +933,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		frappe.form_dict.parent = parent
 
 	if frappe.form_dict.parent:
-		bom_doc = frappe.get_doc("BOM", frappe.form_dict.parent)
+		bom_doc = frappe.get_cached_doc("BOM", frappe.form_dict.parent)
 		frappe.has_permission("BOM", doc=bom_doc, throw=True)
 
 		bom_items = frappe.get_all('BOM Item',
@@ -871,7 +944,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		item_names = tuple(d.get('item_code') for d in bom_items)
 
 		items = frappe.get_list('Item',
-			fields=['image', 'description', 'name', 'stock_uom', 'item_name'],
+			fields=['image', 'description', 'name', 'stock_uom', 'item_name', 'is_sub_contracted_item'],
 			filters=[['name', 'in', item_names]]) # to get only required item dicts
 
 		for bom_item in bom_items:
@@ -884,6 +957,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 
 			bom_item.parent_bom_qty = bom_doc.quantity
 			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
+			bom_item.image = frappe.db.escape(bom_item.image)
 
 		return bom_items
 
@@ -1053,22 +1127,16 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if barcodes:
 			or_cond_filters["name"] = ("in", barcodes)
 
-	for cond in get_match_cond(doctype, as_condition=False):
-		for key, value in cond.items():
-			if key == doctype:
-				key = "name"
-
-			query_filters[key] = ("in", value)
-
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")
 		if not has_variants:
 			query_filters["has_variants"] = 0
 
 	if filters and filters.get("is_stock_item"):
-		query_filters["is_stock_item"] = 1
+		or_cond_filters["is_stock_item"] = 1
+		or_cond_filters["has_variants"] = 1
 
-	return frappe.get_all("Item",
+	return frappe.get_list("Item",
 		fields = fields, filters=query_filters,
 		or_filters = or_cond_filters, order_by=order_by,
 		limit_start=start, limit_page_length=page_len, as_list=1)

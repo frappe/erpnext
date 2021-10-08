@@ -23,27 +23,13 @@ frappe.ui.form.on('Employee Separation', {
 				frappe.set_route('List', 'Task', {project: frm.doc.project});
 			},__("View"));
 		}
-		if (frm.doc.docstatus === 1 && frm.doc.project) {
-			frappe.call({
-				method: "erpnext.hr.utils.get_boarding_status",
-				args: {
-					"project": frm.doc.project
-				},
-				callback: function(r) {
-					if (r.message) {
-						frm.set_value('boarding_status', r.message);
-					}
-					refresh_field("boarding_status");
-				}
-			});
-		}
 	},
 
 	employee_separation_template: function(frm) {
 		frm.set_value("activities" ,"");
 		if (frm.doc.employee_separation_template) {
 			frappe.call({
-				method: "erpnext.hr.utils.get_onboarding_details",
+				method: "erpnext.controllers.employee_boarding_controller.get_onboarding_details",
 				args: {
 					"parent": frm.doc.employee_separation_template,
 					"parenttype": "Employee Separation Template"

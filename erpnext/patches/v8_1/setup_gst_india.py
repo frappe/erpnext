@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe.email import sendmail_to_system_managers
+
 
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'item')

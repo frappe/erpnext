@@ -2,13 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from erpnext.support.doctype.issue.issue import get_holidays
-from frappe.utils import (flt, cint, getdate, formatdate,
-	comma_and, time_diff_in_seconds, to_timedelta, add_days)
 from frappe.model.document import Document
-from dateutil.parser import parse
+from frappe.utils import (
+	add_days,
+	cint,
+	comma_and,
+	flt,
+	formatdate,
+	getdate,
+	time_diff_in_seconds,
+	to_timedelta,
+)
+
+from erpnext.support.doctype.issue.issue import get_holidays
+
 
 class WorkstationHolidayError(frappe.ValidationError): pass
 class NotInWorkingHoursError(frappe.ValidationError): pass

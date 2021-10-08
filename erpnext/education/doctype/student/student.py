@@ -3,12 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
-from frappe.utils import getdate,today
 from frappe import _
 from frappe.desk.form.linked_with import get_linked_doctypes
+from frappe.model.document import Document
+from frappe.utils import getdate, today
+
 from erpnext.education.utils import check_content_completion, check_quiz_completion
+
+
 class Student(Document):
 	def validate(self):
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
@@ -134,7 +138,9 @@ class Student(Document):
 			enrollment.submit()
 			return enrollment
 
-	def enroll_in_course(self, course_name, program_enrollment, enrollment_date=frappe.utils.datetime.datetime.now()):
+	def enroll_in_course(self, course_name, program_enrollment, enrollment_date=None):
+		if enrollment_date is None:
+			enrollment_date = frappe.utils.datetime.datetime.now()
 		try:
 			enrollment = frappe.get_doc({
 					"doctype": "Course Enrollment",

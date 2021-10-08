@@ -1,7 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
 
 test_records = frappe.get_test_records('Cost Center')
@@ -62,6 +64,3 @@ def create_cost_center(**args):
 			cc.is_group = args.is_group or 0
 			cc.parent_cost_center = args.parent_cost_center or "_Test Company - _TC"
 			cc.insert()
-
-
-

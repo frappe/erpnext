@@ -2,9 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.accounts.doctype.shipping_rule.shipping_rule import FromGreaterThanToError, ManyBlankToValuesError, OverlappingConditionError
+
+import frappe
+
+from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
+	FromGreaterThanToError,
+	ManyBlankToValuesError,
+	OverlappingConditionError,
+)
 
 test_records = frappe.get_test_records('Shipping Rule')
 

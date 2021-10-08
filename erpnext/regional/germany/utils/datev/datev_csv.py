@@ -4,12 +4,12 @@ from __future__ import unicode_literals
 import datetime
 import zipfile
 from csv import QUOTE_NONNUMERIC
-from six import BytesIO
 
-import six
 import frappe
 import pandas as pd
 from frappe import _
+from six import BytesIO
+
 from .datev_constants import DataCategory
 
 
@@ -32,6 +32,14 @@ def get_datev_csv(data, filters, csv_class):
 
 	if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS:
 		result['Belegdatum'] = pd.to_datetime(result['Belegdatum'])
+
+		result['Beleginfo - Inhalt 6'] = pd.to_datetime(result['Beleginfo - Inhalt 6'])
+		result['Beleginfo - Inhalt 6'] = result['Beleginfo - Inhalt 6'].dt.strftime('%d%m%Y')
+
+		result['Fälligkeit'] = pd.to_datetime(result['Fälligkeit'])
+		result['Fälligkeit'] = result['Fälligkeit'].dt.strftime('%d%m%y')
+
+		result.sort_values(by='Belegdatum', inplace=True, kind='stable', ignore_index=True)
 
 	if csv_class.DATA_CATEGORY == DataCategory.ACCOUNT_NAMES:
 		result['Sprach-ID'] = 'de-DE'

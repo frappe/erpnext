@@ -3,15 +3,19 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 test_dependencies = ['Item', 'Sales Invoice', 'Stock Entry', 'Batch']
 
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation \
-		import EmptyStockReconciliationItemsError
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	EmptyStockReconciliationItemsError,
+)
+
 
 class TestPickList(unittest.TestCase):
 

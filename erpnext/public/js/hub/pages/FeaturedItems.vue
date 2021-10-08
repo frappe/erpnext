@@ -69,7 +69,7 @@ export default {
 
 			const item_name = this.items.filter(item => item.hub_item_name === hub_item_name);
 
-			alert_message = __('{0} removed. {1}', [item_name, 
+			alert_message = __('{0} removed. {1}', [item_name,
 				`<a href="#" data-action="undo-remove"><b>${__('Undo')}</b></a>`]);
 			alert = frappe.show_alert(alert_message, grace_period / 1000,
 				{

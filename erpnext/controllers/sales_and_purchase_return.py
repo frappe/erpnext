@@ -2,11 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.utils import flt, format_datetime, get_datetime
+
+import erpnext
 from erpnext.stock.utils import get_incoming_rate
-from frappe.utils import flt, get_datetime, format_datetime
+
 
 class StockOverReturnError(frappe.ValidationError): pass
 
@@ -63,7 +67,7 @@ def validate_returned_items(doc):
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.db.sql("""select item_code, qty, serial_no, batch_no from `tabPacked Item`
-			where parent = %s""".format(doc.doctype), doc.return_against, as_dict=1):
+			where parent = %s""", doc.return_against, as_dict=1):
 				valid_items = get_ref_item_dict(valid_items, d)
 
 	already_returned_items = get_already_returned_items(doc)
@@ -235,6 +239,7 @@ def get_returned_qty_map_for_row(row_name, doctype):
 
 def make_return_doc(doctype, source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
+
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
 	default_warehouse_for_sales_return = frappe.db.get_value("Company", company, "default_warehouse_for_sales_return")
@@ -329,7 +334,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
 			target_doc.purchase_invoice_item = source_doc.name
-			target_doc.price_list_rate = 0
 
 		elif doctype == "Delivery Note":
 			returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
@@ -360,7 +364,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			else:
 				target_doc.pos_invoice_item = source_doc.name
 
-			target_doc.price_list_rate = 0
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 
@@ -396,19 +399,6 @@ def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None
 	if not return_against:
 		return_against = frappe.get_cached_value(voucher_type, voucher_no, "return_against")
 
-	if not return_against and voucher_type == 'Sales Invoice' and sle:
-		return get_incoming_rate({
-			"item_code": sle.item_code,
-			"warehouse": sle.warehouse,
-			"posting_date": sle.get('posting_date'),
-			"posting_time": sle.get('posting_time'),
-			"qty": sle.actual_qty,
-			"serial_no": sle.get('serial_no'),
-			"company": sle.company,
-			"voucher_type": sle.voucher_type,
-			"voucher_no": sle.voucher_no
-		}, raise_error_if_no_rate=False)
-
 	return_against_item_field = get_return_against_item_fields(voucher_type)
 
 	filters = get_filters(voucher_type, voucher_no, voucher_detail_no,
@@ -419,7 +409,24 @@ def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None
 	else:
 		select_field = "abs(stock_value_difference / actual_qty)"
 
-	return flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
+	rate = flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
+	if not (rate and return_against) and voucher_type in ['Sales Invoice', 'Delivery Note']:
+		rate = frappe.db.get_value(f'{voucher_type} Item', voucher_detail_no, 'incoming_rate')
+
+		if not rate and sle:
+			rate = get_incoming_rate({
+				"item_code": sle.item_code,
+				"warehouse": sle.warehouse,
+				"posting_date": sle.get('posting_date'),
+				"posting_time": sle.get('posting_time'),
+				"qty": sle.actual_qty,
+				"serial_no": sle.get('serial_no'),
+				"company": sle.company,
+				"voucher_type": sle.voucher_type,
+				"voucher_no": sle.voucher_no
+			}, raise_error_if_no_rate=False)
+
+	return rate
 
 def get_return_against_item_fields(voucher_type):
 	return_against_item_fields = {

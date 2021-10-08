@@ -3,9 +3,11 @@
 
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, flt
+from frappe.utils import flt, time_diff_in_hours
+
 
 def get_columns():
 	return [

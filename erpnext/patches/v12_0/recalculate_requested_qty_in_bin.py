@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
+
 import frappe
-from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
+
+from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
+
 
 def execute():
 	bin_details = frappe.db.sql("""

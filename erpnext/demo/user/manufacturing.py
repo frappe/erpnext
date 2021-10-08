@@ -3,20 +3,22 @@
 
 from __future__ import unicode_literals
 
-import frappe, random, erpnext
+import random
 from datetime import timedelta
-from frappe.utils.make_random import how_many
+
+import frappe
 from frappe.desk import query_report
-from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
+from frappe.utils.make_random import how_many
+
+import erpnext
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
 
 def work():
 	if random.random() < 0.3: return
 
 	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
 	if not frappe.get_all('Sales Order'): return
-
-	from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 
 	ppt = frappe.new_doc("Production Plan")
 	ppt.company = erpnext.get_default_company()
@@ -68,9 +70,12 @@ def work():
 
 def make_stock_entry_from_pro(pro_id, purpose):
 	from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
+	from erpnext.stock.doctype.stock_entry.stock_entry import (
+		DuplicateEntryForWorkOrderError,
+		IncorrectValuationRateError,
+		OperationsNotCompleteError,
+	)
 	from erpnext.stock.stock_ledger import NegativeStockError
-	from erpnext.stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, \
-		DuplicateEntryForWorkOrderError, OperationsNotCompleteError
 
 	try:
 		st = frappe.get_doc(make_stock_entry(pro_id, purpose))

@@ -24,6 +24,8 @@ def docs_link_exists(body):
 					parts = parsed_url.path.split('/')
 					if len(parts) == 5 and parts[1] == "frappe" and parts[2] in docs_repos:
 						return True
+				elif parsed_url.netloc == "docs.erpnext.com":
+					return True
 
 
 if __name__ == "__main__":
@@ -32,11 +34,15 @@ if __name__ == "__main__":
 
 	if response.ok:
 		payload = response.json()
-		title = payload.get("title", "").lower()
-		head_sha = payload.get("head", {}).get("sha")
-		body = payload.get("body", "").lower()
+		title = (payload.get("title") or "").lower().strip()
+		head_sha = (payload.get("head") or {}).get("sha")
+		body = (payload.get("body") or "").lower()
 
-		if title.startswith("feat") and head_sha and "no-docs" not in body:
+		if (title.startswith("feat")
+			and head_sha
+			and "no-docs" not in body
+			and "backport" not in body
+		):
 			if docs_link_exists(body):
 				print("Documentation Link Found. You're Awesome! 🎉")
 

@@ -2,10 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+from collections import OrderedDict, defaultdict
+
 import frappe
 from frappe import _
-from frappe.utils import flt
-from collections import defaultdict, OrderedDict
+
 from erpnext.education.api import get_grade
 
 

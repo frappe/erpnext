@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
+
 import frappe
+
 from erpnext.regional.india.setup import make_custom_fields
+
 
 def execute():
 
@@ -38,5 +41,3 @@ def execute():
 			WHERE fieldname = 'is_inter_state'
 			AND dt IN ('Sales Taxes and Charges Template', 'Purchase Taxes and Charges Template')
 		""")
-
-

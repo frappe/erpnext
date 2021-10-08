@@ -12,7 +12,7 @@ def execute():
 	German companies used to use a dedicated payable/receivable account for
 	every party to mimick party accounts in the external accounting software
 	"DATEV". This is no longer necessary. The reference ID for DATEV will be
-	stored in a new custom field "debtor_creditor_number". 
+	stored in a new custom field "debtor_creditor_number".
 	"""
 	company_list = frappe.get_all('Company', filters={'country': 'Germany'})
 

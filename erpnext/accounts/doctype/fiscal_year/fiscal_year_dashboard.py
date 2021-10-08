@@ -13,7 +13,7 @@ def get_data():
 			},
 			{
 				'label': _('References'),
-				'items': ['Period Closing Voucher', 'Tax Withholding Category']
+				'items': ['Period Closing Voucher']
 			},
 			{
 				'label': _('Target Details'),

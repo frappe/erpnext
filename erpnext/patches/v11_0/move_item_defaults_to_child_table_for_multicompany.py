@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	'''
@@ -30,7 +32,7 @@ def execute():
 						buying_cost_center, selling_cost_center, expense_account, income_account, default_supplier
 					FROM `tabItem`;
 			''', companies[0].name)
-		except:
+		except Exception:
 			pass
 	else:
 		item_details = frappe.db.sql(""" SELECT name, default_warehouse,

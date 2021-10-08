@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 from erpnext.accounts.report.purchase_register.purchase_register import _execute
 
+
 def execute(filters=None):
 	return _execute(filters, additional_table_columns=[
 		dict(fieldtype='Data', label='Supplier GSTIN', fieldname="supplier_gstin", width=120),
@@ -21,4 +22,3 @@ def execute(filters=None):
 		'export_type',
 		'ecommerce_gstin'
 	])
-

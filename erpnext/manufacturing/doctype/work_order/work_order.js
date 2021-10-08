@@ -731,3 +731,63 @@ erpnext.work_order = {
 		});
 	}
 };
+
+frappe.tour['Work Order'] = [
+	{
+		fieldname: "production_item",
+		title: "Item to Manufacture",
+		description: __("Select the Item to be manufactured.")
+	},
+	{
+		fieldname: "bom_no",
+		title: "BOM No",
+		description: __("The default BOM for that item will be fetched by the system. You can also change the BOM.")
+	},
+	{
+		fieldname: "qty",
+		title: "Qty to Manufacture",
+		description: __("Enter the quantity to manufacture. Raw material Items will be fetched only when this is set.")
+	},
+	{
+		fieldname: "use_multi_level_bom",
+		title: "Use Multi-Level BOM",
+		description: __("This is enabled by default. If you want to plan materials for sub-assemblies of the Item you're manufacturing leave this enabled. If you plan and manufacture the sub-assemblies separately, you can disable this checkbox.")
+	},
+	{
+		fieldname: "source_warehouse",
+		title: "Source Warehouse",
+		description: __("The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage.")
+	},
+	{
+		fieldname: "fg_warehouse",
+		title: "Target Warehouse",
+		description: __("The warehouse where you store finished Items before they are shipped.")
+	},
+	{
+		fieldname: "wip_warehouse",
+		title: "Work-in-Progress Warehouse",
+		description: __("The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse.")
+	},
+	{
+		fieldname: "scrap_warehouse",
+		title: "Scrap Warehouse",
+		description: __("If the BOM results in Scrap material, the Scrap Warehouse needs to be selected.")
+	},
+	{
+		fieldname: "required_items",
+		title: "Required Items",
+		description: __("All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table.")
+	},
+	{
+		fieldname: "planned_start_date",
+		title: "Planned Start Date",
+		description: __("Set the Planned Start Date (an Estimated Date at which you want the Production to begin)")
+	},
+	{
+		fieldname: "operations",
+		title: "Operations",
+		description: __("If the selected BOM has Operations mentioned in it, the system will fetch all Operations from BOM, these values can be changed.")
+	},
+
+
+];

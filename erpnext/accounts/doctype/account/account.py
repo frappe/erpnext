@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+from frappe import _, throw
 from frappe.utils import cint, cstr
-from frappe import throw, _
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
+
 
 class RootNotEditable(frappe.ValidationError): pass
 class BalanceMismatchError(frappe.ValidationError): pass
@@ -230,7 +232,7 @@ class Account(NestedSet):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be converted to group."))
 		elif self.account_type and not self.flags.exclude_account_type_check:
-			throw(_("Cannot covert to Group because Account Type is selected."))
+			throw(_("Cannot convert to Group because Account Type is selected."))
 		else:
 			self.is_group = 1
 			self.save()

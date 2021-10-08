@@ -3,8 +3,8 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-
 import frappe
+
 test_records = frappe.get_test_records('Product Bundle')
 
 def make_product_bundle(parent, items, qty=None):

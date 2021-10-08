@@ -3,10 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.model.document import Document
-import requests
+
 import frappe
+import requests
 from frappe import _
+from frappe.model.document import Document
+
 
 class ExotelSettings(Document):
 	def validate(self):

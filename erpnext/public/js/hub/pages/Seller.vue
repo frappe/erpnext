@@ -24,7 +24,7 @@
 
 		<div v-if="items.length">
 			<h5>
-				{{ item_container_heading }} 
+				{{ item_container_heading }}
 				<small v-if="is_user_registered() && is_own_company">
 					<a class="pull-right" href="#marketplace/featured-items">Customize your Featured Items</a>
 				</small>
@@ -160,7 +160,7 @@ export default {
 				];
 
 				setTimeout(() => this.init_seller_traffic_chart(), 1);
-				
+
 			});
 		},
 

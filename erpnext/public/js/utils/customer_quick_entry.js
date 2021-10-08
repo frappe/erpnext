@@ -1,8 +1,8 @@
 frappe.provide('frappe.ui.form');
 
 frappe.ui.form.CustomerQuickEntryForm = class CustomerQuickEntryForm extends frappe.ui.form.QuickEntryForm {
-	constructor(doctype, after_insert) {
-		super(doctype, after_insert);
+	constructor(doctype, after_insert, init_callback, doc, force) {
+		super(doctype, after_insert, init_callback, doc, force);
 		this.skip_redirect_on_error = true;
 	}
 

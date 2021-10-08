@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils.make_random import get_random
+
 from erpnext.assets.doctype.asset.asset import make_sales_invoice
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
 

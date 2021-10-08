@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from pprint import pprint
+
 
 def execute(filters=None):
 	data = []
@@ -20,17 +21,20 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 		fields= ['qty','bom_no','qty','scrap','item_code','item_name','description','uom'])
 
 	for item in exploded_items:
+		print(item.bom_no, indent)
 		item["indent"] = indent
 		data.append({
 			'item_code': item.item_code,
 			'item_name': item.item_name,
 			'indent': indent,
+			'bom_level': (frappe.get_cached_value("BOM", item.bom_no, "bom_level")
+				if item.bom_no else ""),
 			'bom': item.bom_no,
 			'qty': item.qty * qty,
 			'uom': item.uom,
 			'description': item.description,
 			'scrap': item.scrap
-			})
+		})
 		if item.bom_no:
 			get_exploded_items(item.bom_no, data, indent=indent+1, qty=item.qty)
 
@@ -66,6 +70,12 @@ def get_columns():
 			"label": "UOM",
 			"fieldtype": "data",
 			"fieldname": "uom",
+			"width": 100
+		},
+		{
+			"label": "BOM Level",
+			"fieldtype": "Data",
+			"fieldname": "bom_level",
 			"width": 100
 		},
 		{

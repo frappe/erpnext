@@ -2,15 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from six import text_type
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import flt, cint, get_link_to_form
-from frappe.utils.jinja import render_template
+from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
-from six import string_types
+from frappe.utils.jinja import render_template
+from six import text_type
+
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -162,19 +163,19 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 
 		out = float(frappe.db.sql("""select sum(actual_qty)
 			from `tabStock Ledger Entry`
-			where warehouse=%s and batch_no=%s {0}""".format(cond),
+			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(cond),
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:
 		out = frappe.db.sql('''select warehouse, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where batch_no=%s
+			where is_cancelled = 0 and batch_no=%s
 			group by warehouse''', batch_no, as_dict=1)
 
 	if not batch_no and item_code and warehouse:
 		out = frappe.db.sql('''select batch_no, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where item_code = %s and warehouse=%s
+			where is_cancelled = 0 and item_code = %s and warehouse=%s
 			group by batch_no''', (item_code, warehouse), as_dict=1)
 
 	return out

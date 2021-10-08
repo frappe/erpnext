@@ -2,21 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import flt, cint, getdate, now, date_diff
-from erpnext.stock.utils import add_additional_uom_columns
-from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-from erpnext.stock.utils import is_reposting_item_valuation_in_progress
-from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
+from operator import itemgetter
+
+import frappe
+from frappe import _
+from frappe.utils import cint, date_diff, flt, getdate
 from six import iteritems
+
+import erpnext
+from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	if not filters: filters = {}
-
-	validate_filters(filters)
 
 	from_date = filters.get('from_date')
 	to_date = filters.get('to_date')
@@ -46,7 +48,7 @@ def execute(filters=None):
 	data = []
 	conversion_factors = {}
 
-	_func = lambda x: x[1]
+	_func = itemgetter(1)
 
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
@@ -237,12 +239,15 @@ def filter_items_with_no_transactions(iwb_map, float_precision):
 	return iwb_map
 
 def get_items(filters):
+	"Get items based on item code, item group or brand."
 	conditions = []
 	if filters.get("item_code"):
 		conditions.append("item.name=%(item_code)s")
 	else:
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
+		if filters.get("brand"): # used in stock analytics report
+			conditions.append("item.brand=%(brand)s")
 
 	items = []
 	if conditions:
@@ -294,12 +299,6 @@ def get_item_reorder_details(items):
 		""".format(', '.join(frappe.db.escape(i, percent=False) for i in items)), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
-
-def validate_filters(filters):
-	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
-		if sle_count > 500000:
-			frappe.throw(_("Please set filter based on Item or Warehouse due to a large amount of entries."))
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''

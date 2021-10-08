@@ -278,7 +278,7 @@ frappe.ui.form.on('Stock Entry', {
 					get_query_filters: {
 						docstatus: 1,
 						material_request_type: ["in", allowed_request_types],
-						status: ["not in", ["Transferred", "Issued"]]
+						status: ["not in", ["Transferred", "Issued", "Cancelled", "Stopped"]]
 					}
 				})
 			}, __("Get Items From"));
@@ -321,6 +321,12 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.trigger("setup_quality_inspection");
 		attach_bom_items(frm.doc.bom_no)
+	},
+
+	before_save: function(frm) {
+		frm.doc.items.forEach((item) => {
+			item.uom = item.uom || item.stock_uom;
+		})
 	},
 
 	stock_entry_type: function(frm){
@@ -548,44 +554,7 @@ frappe.ui.form.on('Stock Entry', {
 	calculate_basic_amount: function(frm, item) {
 		item.basic_amount = flt(flt(item.transfer_qty) * flt(item.basic_rate),
 			precision("basic_amount", item));
-
-		frm.events.calculate_amount(frm);
-	},
-
-	calculate_amount: function(frm) {
 		frm.events.calculate_total_additional_costs(frm);
-		let total_basic_amount = 0;
-		if (in_list(["Repack", "Manufacture"], frm.doc.purpose)) {
-			total_basic_amount = frappe.utils.sum(
-				(frm.doc.items || []).map(function(i) {
-					return i.is_finished_item ? flt(i.basic_amount) : 0;
-				})
-			);
-		} else {
-			total_basic_amount = frappe.utils.sum(
-				(frm.doc.items || []).map(function(i) {
-					return i.t_warehouse ? flt(i.basic_amount) : 0;
-				})
-			);
-		}
-		for (let i in frm.doc.items) {
-			let item = frm.doc.items[i];
-
-			if (((in_list(["Repack", "Manufacture"], frm.doc.purpose) && item.is_finished_item) || item.t_warehouse) && total_basic_amount) {
-				item.additional_cost = (flt(item.basic_amount) / total_basic_amount) * frm.doc.total_additional_costs;
-			} else {
-				item.additional_cost = 0;
-			}
-
-			item.amount = flt(item.basic_amount + flt(item.additional_cost), precision("amount", item));
-
-			if (flt(item.transfer_qty)) {
-				item.valuation_rate = flt(flt(item.basic_rate) + (flt(item.additional_cost) / flt(item.transfer_qty)),
-					precision("valuation_rate", item));
-			}
-		}
-
-		refresh_field('items');
 	},
 
 	calculate_total_additional_costs: function(frm) {
@@ -781,11 +750,6 @@ frappe.ui.form.on('Landed Cost Taxes and Charges', {
 	amount: function(frm, cdt, cdn) {
 		frm.events.set_base_amount(frm, cdt, cdn);
 
-		// Adding this check because same table in used in LCV
-		// This causes an error if you try to post an LCV immediately after a Stock Entry
-		if (frm.doc.doctype == 'Stock Entry') {
-			frm.events.calculate_amount(frm);
-		}
 	},
 
 	expense_account: function(frm, cdt, cdn) {
@@ -1100,4 +1064,4 @@ function check_should_not_attach_bom_items(bom_no) {
   );
 }
 
-$.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));

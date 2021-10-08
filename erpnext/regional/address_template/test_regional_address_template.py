@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
+
 from unittest import TestCase
 
 import frappe
-from erpnext.regional.address_template.setup import get_address_templates
-from erpnext.regional.address_template.setup import update_address_template
+
+from erpnext.regional.address_template.setup import get_address_templates, update_address_template
+
 
 def ensure_country(country):
 	if frappe.db.exists("Country", country):

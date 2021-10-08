@@ -2,11 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, get_root_of
+
 from erpnext import get_default_currency
+
 
 class SalesPerson(NestedSet):
 	nsm_parent_field = 'parent_sales_person'

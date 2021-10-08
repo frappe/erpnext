@@ -3,14 +3,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from rq.timeouts import JobTimeoutException
-from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, add_to_date, now, today, time_diff_in_hours
-from erpnext.stock.stock_ledger import repost_future_sle
-from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
-from frappe.utils.user import get_users_with_role
+
+import frappe
 from frappe import _
+from frappe.model.document import Document
+from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime, today
+from frappe.utils.user import get_users_with_role
+from rq.timeouts import JobTimeoutException
+
+import erpnext
+from erpnext.accounts.utils import (
+	check_if_stock_and_account_balance_synced,
+	update_gl_entries_after,
+)
+from erpnext.stock.stock_ledger import repost_future_sle
+
+
 class RepostItemValuation(Document):
 	def validate(self):
 		self.set_status()
@@ -81,7 +89,7 @@ def repost(doc):
 def repost_sl_entries(doc):
 	if doc.based_on == 'Transaction':
 		repost_future_sle(voucher_type=doc.voucher_type, voucher_no=doc.voucher_no,
-			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
+			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher, doc=doc)
 	else:
 		repost_future_sle(args=[frappe._dict({
 			"item_code": doc.item_code,
@@ -118,6 +126,9 @@ def notify_error_to_stock_managers(doc, traceback):
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
 def repost_entries():
+	if not in_configured_timeslot():
+		return
+
 	riv_entries = get_repost_item_valuation_entries()
 
 	for row in riv_entries:
@@ -133,6 +144,29 @@ def repost_entries():
 
 def get_repost_item_valuation_entries():
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
-		WHERE status != 'Completed' and creation <= %s and docstatus = 1
+		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
 	""", now(), as_dict=1)
+
+
+def in_configured_timeslot(repost_settings=None, current_time=None):
+	"""Check if current time is in configured timeslot for reposting."""
+
+	if repost_settings is None:
+		repost_settings = frappe.get_cached_doc("Stock Reposting Settings")
+
+	if not repost_settings.limit_reposting_timeslot:
+		return True
+
+	if get_weekday() == repost_settings.limits_dont_apply_on:
+		return True
+
+	start_time = repost_settings.start_time
+	end_time = repost_settings.end_time
+
+	now_time = current_time or nowtime()
+
+	if start_time < end_time:
+		return end_time >= now_time >= start_time
+	else:
+		return now_time >= start_time or now_time <= end_time

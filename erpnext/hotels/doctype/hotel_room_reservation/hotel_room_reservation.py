@@ -3,10 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.model.document import Document
+
+import json
+
+import frappe
 from frappe import _
-from frappe.utils import date_diff, add_days, flt
+from frappe.model.document import Document
+from frappe.utils import add_days, date_diff, flt
+
 
 class HotelRoomUnavailableError(frappe.ValidationError): pass
 class HotelRoomPricingNotSetError(frappe.ValidationError): pass

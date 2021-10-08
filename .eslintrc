@@ -154,7 +154,8 @@
 		"before": true,
 		"beforeEach": true,
 		"onScan": true,
+		"html2canvas": true,
 		"extend_cscript": true,
-		"localforage": true,
+		"localforage": true
 	}
 }

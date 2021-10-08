@@ -2,12 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt, getdate, formatdate, cstr
-from erpnext.accounts.report.financial_statements \
-	import filter_accounts, set_gl_entries_by_account, filter_out_zero_value_rows
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
+from frappe.utils import cstr, flt, formatdate, getdate
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
+from erpnext.accounts.report.financial_statements import (
+	filter_accounts,
+	filter_out_zero_value_rows,
+	set_gl_entries_by_account,
+)
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 

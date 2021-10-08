@@ -2,12 +2,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe import _
+
 from collections import defaultdict
 
-from erpnext.education.report.course_wise_assessment_report.course_wise_assessment_report import get_formatted_result
-from erpnext.education.report.course_wise_assessment_report.course_wise_assessment_report import get_chart_data
+import frappe
+from frappe import _
+
+from erpnext.education.report.course_wise_assessment_report.course_wise_assessment_report import (
+	get_chart_data,
+	get_formatted_result,
+)
 
 
 def execute(filters=None):

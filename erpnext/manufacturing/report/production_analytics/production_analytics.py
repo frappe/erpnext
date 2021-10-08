@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _, scrub
 from frappe.utils import getdate
-from erpnext.stock.report.stock_analytics.stock_analytics import (get_period_date_ranges, get_period)
+
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -139,7 +142,3 @@ def get_chart_data(periodic_data, columns):
 	chart["type"] = "line"
 
 	return chart
-
-
-
-

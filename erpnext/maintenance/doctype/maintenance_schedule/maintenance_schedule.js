@@ -18,7 +18,7 @@ frappe.ui.form.on('Maintenance Schedule', {
 	},
 	refresh: function (frm) {
 		setTimeout(() => {
-			frm.toggle_display('generate_schedule', !(frm.is_new()));
+			frm.toggle_display('generate_schedule', !(frm.is_new() || frm.doc.docstatus));
 			frm.toggle_display('schedule', !(frm.is_new()));
 		}, 10);
 	},
@@ -69,10 +69,10 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 			if (flag) {
 				this.frm.add_custom_button(__('Maintenance Visit'), function () {
 					let options = "";
-					
+
 					me.frm.call('get_pending_data', {data_type: "items"}).then(r => {
 						options = r.message;
-						
+
 						let schedule_id = "";
 						let d = new frappe.ui.Dialog({
 							title: __("Enter Visit Details"),
@@ -86,7 +86,7 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 									let field = d.get_field("scheduled_date");
 									me.frm.call('get_pending_data',
 										{
-											item_name: this.value, 
+											item_name: this.value,
 											data_type: "date"
 										}).then(r => {
 										field.df.options = r.message;
@@ -157,10 +157,9 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 		let me = this;
 		if (item.start_date && item.periodicity) {
 			me.frm.call('validate_end_date_visits');
-			
+
 		}
 	}
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({frm: cur_frm}));
-

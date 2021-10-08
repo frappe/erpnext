@@ -76,7 +76,7 @@ frappe.query_reports["Fixed Asset Register"] = {
 			fieldtype: "Link",
 			options: "Asset Category"
 		},
-		{	
+		{
 			fieldname:"finance_book",
 			label: __("Finance Book"),
 			fieldtype: "Link",

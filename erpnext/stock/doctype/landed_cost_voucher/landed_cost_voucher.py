@@ -2,14 +2,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt
-from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.accounts.doctype.account.account import get_account_currency
+from frappe.model.meta import get_field_precision
+from frappe.utils import flt
+
+import erpnext
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 
 class LandedCostVoucher(Document):
 	@frappe.whitelist()

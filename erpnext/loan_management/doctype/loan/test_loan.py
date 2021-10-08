@@ -3,23 +3,40 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import erpnext
 import unittest
-from frappe.utils import (nowdate, add_days, getdate, now_datetime, add_to_date, get_datetime,
-	add_months, get_first_day, get_last_day, flt, date_diff)
-from erpnext.selling.doctype.customer.test_customer import get_customer_dict
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (process_loan_interest_accrual_for_demand_loans,
-	process_loan_interest_accrual_for_term_loans)
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
-from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import create_process_loan_security_shortfall
-from erpnext.loan_management.doctype.loan.loan import unpledge_security, request_loan_closure, make_loan_write_off
-from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
+
+import frappe
+from frappe.utils import add_days, add_months, add_to_date, date_diff, flt, get_datetime, nowdate
+
+from erpnext.loan_management.doctype.loan.loan import (
+	make_loan_write_off,
+	request_loan_closure,
+	unpledge_security,
+)
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
-from erpnext.loan_management.doctype.loan_disbursement.loan_disbursement import get_disbursal_amount
+from erpnext.loan_management.doctype.loan_disbursement.loan_disbursement import (
+	get_disbursal_amount,
+)
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (
+	days_in_year,
+)
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
+	get_pledged_security_qty,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_demand_loans,
+	process_loan_interest_accrual_for_term_loans,
+)
+from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import (
+	create_process_loan_security_shortfall,
+)
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
+	make_employee,
+	make_salary_structure,
+)
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
