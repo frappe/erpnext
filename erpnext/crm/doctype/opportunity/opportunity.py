@@ -10,6 +10,7 @@ from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_fullname
+from erpnext.regional.india.setup import get_custom_fields
 
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
@@ -33,6 +34,7 @@ class Opportunity(TransactionBase):
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.map_fields()
 
 		if not self.title:
 			self.title = self.customer_name
@@ -105,6 +107,21 @@ class Opportunity(TransactionBase):
 
 			self.opportunity_from = "Lead"
 			self.party_name = lead_name
+
+	def map_fields(self):
+		print("called")
+		for field in self.meta.fields:
+			print(field.fieldname, "in here")
+			print(hasattr(self, field.fieldname), self.get(field.fieldname))
+			if not self.get(field.fieldname):
+				print("in if")
+				try:
+					print(field.fieldname)
+					value = frappe.db.get_value(self.opportunity_from, self.party_name, field.fieldname)
+					print(value, field.fieldname)
+					frappe.db.set(self, field.fieldname, value)
+				except Exception:
+					continue
 
 	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
