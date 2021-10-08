@@ -55,6 +55,7 @@ class Bin(Document):
 		self.db_set('projected_qty', self.projected_qty)
 
 	def update_reserved_qty_for_sub_contracting(self):
+		print("Inininiinin")
 		#reserved qty
 		reserved_qty_for_sub_contract = frappe.db.sql('''
 			select ifnull(sum(itemsup.required_qty),0)
@@ -100,9 +101,9 @@ def on_doctype_update():
 	frappe.db.add_index("Bin", ["item_code", "warehouse"])
 
 
-def update_stock(bin, args, allow_negative_stock=False, via_landed_cost_voucher=False):
+def update_stock(bin_name, args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	'''Called from erpnext.stock.utils.update_bin'''
-	# self.update_qty(args)
+	update_qty(bin_name, args)
 
 	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
 		from erpnext.stock.stock_ledger import update_entries_after, update_qty_in_future_sle
@@ -137,10 +138,8 @@ def update_qty(bin_name, args):
 	# update the stock values (for current quantities)
 	if args.get("voucher_type")=="Stock Reconciliation":
 		actual_qty = args.get('qty_after_transaction')
-		# self.actual_qty = args.get("qty_after_transaction")
 	else:
 		actual_qty = bin_details.actual_qty + args.get('qty_after_transaction')
-		# self.actual_qty = flt(self.actual_qty) + flt(args.get("actual_qty"))
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))
