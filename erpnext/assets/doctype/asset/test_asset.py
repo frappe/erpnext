@@ -21,7 +21,8 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 class AssetSetup(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		frappe.db.sql("delete from `tabTax Rule`")
