@@ -27,6 +27,10 @@ class AssetSetup(unittest.TestCase):
 		create_asset_data()
 		frappe.db.sql("delete from `tabTax Rule`")
 
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.rollback()
+
 class TestAsset(AssetSetup):
 	def test_purchase_asset(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
