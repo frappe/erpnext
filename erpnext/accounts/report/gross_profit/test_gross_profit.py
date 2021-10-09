@@ -4,7 +4,7 @@ from random import uniform
 import unittest
 
 import frappe
-from frappe.utils import today, flt, cint
+from frappe.utils import today, flt
 
 from erpnext.accounts.utils import get_balance_on
 from erpnext.selling.doctype.sales_order.test_sales_order import (
