@@ -150,7 +150,7 @@ def get_tax_data_for_each_vat_setting(vat_setting, filters, doctype):
 
 def append_data(data, title, amount, adjustment_amount, vat_amount):
 	"""Returns data with appended value."""
-	data.append({"title":title, "amount": amount, "adjustment_amount": adjustment_amount, "vat_amount": vat_amount})
+	data.append({"title": _(title), "amount": amount, "adjustment_amount": adjustment_amount, "vat_amount": vat_amount})
 
 def get_tax_amount(item_code, account_head, doctype, parent):
 	if doctype == 'Sales Invoice':
