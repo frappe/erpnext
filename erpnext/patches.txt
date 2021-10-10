@@ -299,7 +299,7 @@ erpnext.patches.v13_0.gst_fields_for_pos_invoice
 erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
 erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
 erpnext.patches.v13_0.create_custom_field_for_finance_book
-erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries
+erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries #2
 erpnext.patches.v13_0.fix_additional_cost_in_mfg_stock_entry
 erpnext.patches.v13_0.set_status_in_maintenance_schedule_table
 erpnext.patches.v13_0.add_default_interview_notification_templates
