@@ -129,16 +129,19 @@ def update_stock(bin_name, args, allow_negative_stock=False, via_landed_cost_vou
 		# update qty in future sle and Validate negative qty
 		update_qty_in_future_sle(args, allow_negative_stock)
 
+def get_bin_details(bin_name):
+	return frappe.db.get_value('Bin', bin_name, ['actual_qty', 'ordered_qty',
+	'reserved_qty', 'indented_qty', 'planned_qty', 'reserved_qty_for_production',
+	'reserved_qty_for_sub_contract'], as_dict=1)
+
 def update_qty(bin_name, args):
-	bin_details = frappe.db.get_value('Bin', bin_name, ['actual_qty', 'ordered_qty',
-		'reserved_qty', 'indented_qty', 'planned_qty', 'reserved_qty_for_production',
-		'reserved_qty_for_sub_contract'], as_dict=1)
+	bin_details = get_bin_details(bin_name)
 
 	# update the stock values (for current quantities)
 	if args.get("voucher_type")=="Stock Reconciliation":
 		actual_qty = args.get('qty_after_transaction')
 	else:
-		actual_qty = bin_details.actual_qty + args.get('qty_after_transaction')
+		actual_qty = bin_details.actual_qty + flt(args.get("actual_qty"))
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))
