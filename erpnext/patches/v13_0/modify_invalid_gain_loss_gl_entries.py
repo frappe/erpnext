@@ -39,14 +39,21 @@ def execute():
 		frappe.log_error(json.dumps(purchase_invoices + sales_invoices, indent=2), title="Patch Log")
 
 	acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
-	frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+	if acc_frozen_upto:
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+
 	for invoice in purchase_invoices + sales_invoices:
-		doc = frappe.get_doc(invoice.type, invoice.name)
-		doc.docstatus = 2
-		doc.make_gl_entries()
-		for advance in doc.advances:
-			if advance.ref_exchange_rate == 1:
-				advance.db_set('exchange_gain_loss', 0, False)
-		doc.docstatus = 1
-		doc.make_gl_entries()
-	frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', acc_frozen_upto)
+		try:
+			doc = frappe.get_doc(invoice.type, invoice.name)
+			doc.docstatus = 2
+			doc.make_gl_entries()
+			for advance in doc.advances:
+				if advance.ref_exchange_rate == 1:
+					advance.db_set('exchange_gain_loss', 0, False)
+			doc.docstatus = 1
+			doc.make_gl_entries()
+		except Exception:
+			print(f'Failed to correct gl entries of {invoice.name}')
+
+	if acc_frozen_upto:
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', acc_frozen_upto)
