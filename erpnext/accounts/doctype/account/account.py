@@ -4,10 +4,11 @@
 from __future__ import unicode_literals
 
 import frappe
-import erpnext
 from frappe import _, throw
 from frappe.utils import cint, cstr
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
+
+import erpnext
 
 
 class RootNotEditable(frappe.ValidationError): pass
