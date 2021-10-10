@@ -16,7 +16,6 @@ def create_ksa_vat_setting(company):
     with open(file_path, 'r') as json_file:
         account_data = json.load(json_file)
 
-
     # Creating KSA VAT Setting
     ksa_vat_setting = frappe.get_doc({
         'doctype': 'KSA VAT Setting',
