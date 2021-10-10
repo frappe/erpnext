@@ -8,8 +8,8 @@ from frappe import _
 from frappe.utils import cint, flt, getdate
 
 import erpnext
+from collections import defaultdict
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
-	check_opening_balance,
 	get_chart_data,
 	get_provisional_profit_loss,
 )
@@ -74,21 +74,24 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
 		companies, filters.get('company'), company_currency, True)
 
-	message, opening_balance = check_opening_balance(asset, liability, equity)
+	message, opening_balance = prepare_companywise_opening_balance(asset, liability, equity, companies)
 
-	if opening_balance and round(opening_balance,2) !=0:
-		unclosed ={
+	if opening_balance:
+		unclosed = {
 			"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"warn_if_negative": True,
 			"currency": company_currency
 		}
-		for company in companies:
-			unclosed[company] = opening_balance
-			if provisional_profit_loss:
-				provisional_profit_loss[company] = provisional_profit_loss[company] - opening_balance
 
-		unclosed["total"]=opening_balance
+		for company in companies:
+			unclosed[company] = opening_balance.get(company)
+			if provisional_profit_loss and provisional_profit_loss.get(company):
+				provisional_profit_loss[company] = (
+					flt(provisional_profit_loss[company]) - flt(opening_balance.get(company))
+				)
+
+		unclosed["total"] = opening_balance.get(company)
 		data.append(unclosed)
 
 	if provisional_profit_loss:
@@ -102,6 +105,37 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
 	return data, message, chart, report_summary
+
+def prepare_companywise_opening_balance(asset_data, liability_data, equity_data, companies):
+	opening_balance = {}
+	for company in companies:
+		opening_value = 0
+
+		# opening_value = Aseet - liability - equity
+		for data in [asset_data, liability_data, equity_data]:
+			account_name = get_root_account_name(data[0].root_type, company)
+			opening_value += get_opening_balance(account_name, data, company)
+
+		opening_balance[company] = opening_value
+
+	if opening_balance:
+		return _("Previous Financial Year is not closed"), opening_balance
+
+	return '', {}
+
+def get_opening_balance(account_name, data, company):
+	for row in data:
+		if row.get('account_name') == account_name:
+			return row.get('company_wise_opening_bal', {}).get(company, 0.0)
+
+def get_root_account_name(root_type, company):
+	return frappe.get_all(
+		'Account',
+		fields=['account_name'],
+		filters = {'root_type': root_type, 'is_group': 1,
+			'company': company, 'parent_account': ('is', 'not set')},
+		as_list=1
+	)[0][0]
 
 def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
@@ -254,8 +288,9 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 			end_date, root.lft, root.rgt, filters,
 			gl_entries_by_account, accounts_by_name, accounts, ignore_closing_entries=False)
 
-	calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters)
+	calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year)
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
+
 	out = prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters)
 
 	if out:
@@ -267,7 +302,10 @@ def get_company_currency(filters=None):
 	return (filters.get('presentation_currency')
 		or frappe.get_cached_value('Company',  filters.company,  "default_currency"))
 
-def calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters):
+def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year):
+	start_date = (fiscal_year.year_start_date
+		if filters.filter_based_on == 'Fiscal Year' else filters.period_start_date)
+
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			if entry.account_number:
@@ -276,7 +314,9 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, start_d
 				account_name =  entry.account_name
 
 			d = accounts_by_name.get(account_name)
+
 			if d:
+				debit, credit = 0, 0
 				for company in companies:
 					# check if posting date is within the period
 					if (entry.company == company or (filters.get('accumulated_in_group_company'))
@@ -286,12 +326,17 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, start_d
 
 						debit, credit = flt(entry.debit), flt(entry.credit)
 
-						if (entry.company != company and parent_company_currency != child_company_currency
+						if (not filters.get('presentation_currency')
+							and entry.company != company
+							and parent_company_currency != child_company_currency
 							and filters.get('accumulated_in_group_company')):
 							debit = convert(debit, parent_company_currency, child_company_currency, filters.end_date)
 							credit = convert(credit, parent_company_currency, child_company_currency, filters.end_date)
 
 						d[company] = d.get(company, 0.0) + flt(debit) - flt(credit)
+
+						if entry.posting_date < getdate(start_date):
+							d['company_wise_opening_bal'][company] += (flt(debit) - flt(credit))
 
 				if entry.posting_date < getdate(start_date):
 					d["opening_balance"] = d.get("opening_balance", 0.0) + flt(debit) - flt(credit)
@@ -302,16 +347,17 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 		if d.parent_account:
 			account = d.parent_account_name
 
-			if not accounts_by_name.get(account):
-				continue
+			# if not accounts_by_name.get(account):
+			# 	continue
 
 			for company in companies:
 				accounts_by_name[account][company] = \
 					accounts_by_name[account].get(company, 0.0) + d.get(company, 0.0)
 
+				accounts_by_name[account]['company_wise_opening_bal'][company] += d.get('company_wise_opening_bal', {}).get(company, 0.0)
+
 			accounts_by_name[account]["opening_balance"] = \
 				accounts_by_name[account].get("opening_balance", 0.0) + d.get("opening_balance", 0.0)
-
 
 def get_account_heads(root_type, companies, filters):
 	accounts = get_accounts(root_type, filters)
@@ -387,8 +433,10 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
 			"year_start_date": start_date,
+			"root_type": d.root_type,
 			"year_end_date": end_date,
 			"currency": filters.presentation_currency,
+			"company_wise_opening_bal": d.company_wise_opening_bal,
 			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be == "Debit" else -1)
 		})
 
@@ -469,6 +517,7 @@ def get_account_details(account):
 		'is_group', 'account_name', 'account_number', 'parent_account', 'lft', 'rgt'], as_dict=1)
 
 def validate_entries(key, entry, accounts_by_name, accounts):
+	# If an account present in the child company and not in the parent company
 	if key not in accounts_by_name:
 		args = get_account_details(entry.account)
 
@@ -478,12 +527,23 @@ def validate_entries(key, entry, accounts_by_name, accounts):
 			args.update({
 				'lft': parent_args.lft + 1,
 				'rgt': parent_args.rgt - 1,
+				'indent': 3,
 				'root_type': parent_args.root_type,
-				'report_type': parent_args.report_type
+				'report_type': parent_args.report_type,
+				'parent_account_name': parent_args.account_name,
+				'company_wise_opening_bal': defaultdict(float)
 			})
 
 		accounts_by_name.setdefault(key, args)
-		accounts.append(args)
+
+		idx = len(accounts)
+		# To identify parent account index
+		for index, row in enumerate(accounts):
+			if row.parent_account_name == args.parent_account_name:
+				idx = index
+				break
+
+		accounts.insert(idx+1, args)
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
@@ -513,7 +573,6 @@ def add_total_row(out, root_type, balance_must_be, companies, company_currency):
 			for company in companies:
 				total_row.setdefault(company, 0.0)
 				total_row[company] += row.get(company, 0.0)
-				row[company] = 0.0
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])
@@ -533,6 +592,7 @@ def filter_accounts(accounts, depth=10):
 			account_name = d.account_number + ' - ' + d.account_name
 		else:
 			account_name =  d.account_name
+		d['company_wise_opening_bal'] = defaultdict(float)
 		accounts_by_name[account_name] = d
 
 		parent_children_map.setdefault(d.parent_account or None, []).append(d)
