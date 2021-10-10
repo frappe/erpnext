@@ -24,32 +24,21 @@ def validate_gstin_for_india(doc, method):
 	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
-	gst_category = []
-
-	if hasattr(doc, 'gst_category'):
-		if len(doc.links):
-			link_doctype = doc.links[0].get("link_doctype")
-			link_name = doc.links[0].get("link_name")
-
-			if link_doctype in ["Customer", "Supplier"]:
-				gst_category = frappe.db.get_value(link_doctype, {'name': link_name}, ['gst_category'])
-
 	doc.gstin = doc.gstin.upper().strip()
-	if not doc.gstin or doc.gstin == 'NA':
+	if doc.gstin == 'NA' or doc.gstin == 'URP':
+		valid_gst_category = ['Unregistered', 'Overseas', 'Consumer']
+		validate_gst_category(doc, valid_gst_category)
+		set_gst_state_and_state_number(doc)
 		return
 
 	if len(doc.gstin) != 15:
 		frappe.throw(_("A GSTIN must have 15 characters."), title=_("Invalid GSTIN"))
 
-	if gst_category and gst_category == 'UIN Holders':
-		if not GSTIN_UIN_FORMAT.match(doc.gstin):
-			frappe.throw(_("The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers"),
-				title=_("Invalid GSTIN"))
-	else:
-		if not GSTIN_FORMAT.match(doc.gstin):
-			frappe.throw(_("The input you've entered doesn't match the format of GSTIN."), title=_("Invalid GSTIN"))
+	validate_gstin_check_digit(doc.gstin)
 
-		validate_gstin_check_digit(doc.gstin)
+	if GSTIN_FORMAT.match(doc.gstin):
+		valid_gst_category = ['Registered Regular', 'Registered Composition', 'SEZ', 'Deemed Exports']
+		validate_gst_category(doc, valid_gst_category)
 		set_gst_state_and_state_number(doc)
 
 		if not doc.gst_state:
@@ -58,6 +47,17 @@ def validate_gstin_for_india(doc, method):
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number), title=_("Invalid GSTIN"))
+
+	elif GSTIN_UIN_FORMAT.match(doc.gstin):
+		doc.gst_category = 'UIN Holders' # only one valid input.
+
+	else:
+		frappe.throw(_("The input you've entered doesn't match the format of GSTIN."), title=_("Invalid GSTIN"))
+
+def validate_gst_category(doc, valid_gst_category):
+	if doc.gst_category not in valid_gst_category:
+		frappe.throw(_("GST Category can be one of {}."
+			.format(', '.join(valid_gst_category))), title=_("Invalid GST Category"))
 
 def validate_pan_for_india(doc, method):
 	if doc.get('country') != 'India' or not doc.get('pan'):
@@ -72,13 +72,6 @@ def validate_tax_category(doc, method):
 			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
 		else:
 			frappe.throw(_("Intra State tax category for GST State {0} already exists").format(doc.gst_state))
-
-def update_gst_category(doc, method):
-	for link in doc.links:
-		if link.link_doctype in ['Customer', 'Supplier']:
-			meta = frappe.get_meta(link.link_doctype)
-			if doc.get('gstin') and meta.has_field('gst_category'):
-				frappe.db.set_value(link.link_doctype, {'name': link.link_name, 'gst_category': 'Unregistered'}, 'gst_category', 'Registered Regular')
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:

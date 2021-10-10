@@ -148,6 +148,7 @@ def create_shipment_address(address_title, company_name, postal_code):
 	address.city = 'Random City'
 	address.postal_code = postal_code
 	address.country = 'Germany'
+	address.gst_category = 'Unregistered'
 	address.insert()
 	return address
 
@@ -182,7 +183,6 @@ def create_shipment_customer(customer_name):
 	customer.customer_type = 'Company'
 	customer.customer_group = 'All Customer Groups'
 	customer.territory = 'All Territories'
-	customer.gst_category = 'Unregistered'
 	customer.insert()
 	return customer
 

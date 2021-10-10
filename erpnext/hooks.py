@@ -286,7 +286,6 @@ doc_events = {
 		'validate': [
 			'erpnext.regional.india.utils.validate_gstin_for_india',
 			'erpnext.regional.italy.utils.set_state_code',
-			'erpnext.regional.india.utils.update_gst_category',
 		],
 	},
 	'Supplier': {
