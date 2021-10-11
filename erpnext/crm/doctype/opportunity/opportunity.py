@@ -33,6 +33,7 @@ class Opportunity(TransactionBase):
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.map_fields()
 
 		if not self.title:
 			self.title = self.customer_name
@@ -42,6 +43,15 @@ class Opportunity(TransactionBase):
 
 		else:
 			self.calculate_totals()
+
+	def map_fields(self):
+		for field in self.meta.fields:
+			if not self.get(field.fieldname):
+				try:
+					value = frappe.db.get_value(self.opportunity_from, self.party_name, field.fieldname)
+					frappe.db.set(self, field.fieldname, value)
+				except Exception:
+					continue
 
 	def calculate_totals(self):
 		total = base_total = 0
