@@ -180,7 +180,7 @@ def get_bin(item_code, warehouse):
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
-def get_or_make_bin(item_code, warehouse):
+def get_or_make_bin(item_code, warehouse) -> str:
 	bin_record = frappe.db.get_value('Bin', {'item_code': item_code, 'warehouse': warehouse})
 
 	if not bin_record:
