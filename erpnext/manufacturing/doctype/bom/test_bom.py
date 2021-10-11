@@ -4,12 +4,14 @@
 
 import unittest
 from collections import deque
+from functools import partial
 
 import frappe
 from frappe.test_runner import make_test_records
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.manufacturing.doctype.bom.bom import item_query
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
@@ -343,6 +345,16 @@ class TestBOM(unittest.TestCase):
 
 		for reqd_item, created_item in zip(reqd_order, created_order):
 			self.assertEqual(reqd_item, created_item.item_code)
+
+	def test_bom_item_query(self):
+		query = partial(item_query, doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters={"is_stock_item": 1})
+
+		test_items = query(txt="_Test")
+		filtered = query(txt="_Test Item 2")
+
+		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
+		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
