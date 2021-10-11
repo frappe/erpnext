@@ -11,10 +11,7 @@ from frappe.test_runner import make_test_records
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-<<<<<<< HEAD
-=======
 from erpnext.manufacturing.doctype.bom.bom import item_query, make_variant_bom
->>>>>>> 0a3dd3e954 (fix: bom item query #27890)
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
@@ -327,7 +324,6 @@ class TestBOM(unittest.TestCase):
 		# FG Items in Scrap/Loss Table should have Is Process Loss set
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
-<<<<<<< HEAD
 	def test_bom_tree_representation(self):
 		bom_tree = {
 			"Assembly": {
@@ -349,7 +345,7 @@ class TestBOM(unittest.TestCase):
 
 		for reqd_item, created_item in zip(reqd_order, created_order):
 			self.assertEqual(reqd_item, created_item.item_code)
-=======
+
 	def test_bom_item_query(self):
 		query = partial(item_query, doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters={"is_stock_item": 1})
 
@@ -359,7 +355,6 @@ class TestBOM(unittest.TestCase):
 		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
 		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
 
->>>>>>> 0a3dd3e954 (fix: bom item query #27890)
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
