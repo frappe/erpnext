@@ -11,7 +11,7 @@ from frappe.test_runner import make_test_records
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.manufacturing.doctype.bom.bom import item_query, make_variant_bom
+from erpnext.manufacturing.doctype.bom.bom import item_query
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
