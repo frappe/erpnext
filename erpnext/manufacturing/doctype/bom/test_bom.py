@@ -382,8 +382,8 @@ class TestBOM(unittest.TestCase):
 		test_items = query(txt="_Test")
 		filtered = query(txt="_Test Item 2")
 
-		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive reulsts")
-		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive reulsts")
+		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
+		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
