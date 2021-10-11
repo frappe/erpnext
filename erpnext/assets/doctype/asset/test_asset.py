@@ -32,6 +32,49 @@ class AssetSetup(unittest.TestCase):
 		frappe.db.rollback()
 
 class TestAsset(AssetSetup):
+	def test_asset_category_is_fetched(self):
+		"""Tests if the Item's Asset Category value is assigned to the Asset, if the field is empty."""
+
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.asset_category = None
+		asset.save()
+
+		self.assertEqual(asset.asset_category, "Computers")
+
+	def test_gross_purchase_amount_is_mandatory(self):
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.gross_purchase_amount = 0
+
+		self.assertRaises(frappe.MandatoryError, asset.save)
+
+	def test_pr_or_pi_mandatory_if_not_existing_asset(self):
+		"""Tests if either PI or PR is present if CWIP is enabled and is_existing_asset=0."""
+
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		enable_cwip_accounting(asset.asset_category)
+		asset.is_existing_asset=0
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+		enable_cwip_accounting(asset.asset_category, enable=0)
+
+	def test_finance_books_are_present_if_calculate_depreciation_is_enabled(self):
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.calculate_depreciation = 1
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	# def test_available_for_use_date_is_after_purchase_date(self):
+	# 	pr = make_purchase_receipt(item_code="Macbook Pro",
+	# 		qty=1, rate=100000.0, location="Test Location", posting_date=add_days(nowdate(), -15))
+
+	# 	asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+	# 	asset.is_existing_asset = 0
+	# 	asset.purchase_receipt = pr
+	# 	asset.available_for_use_date = nowdate()
+
+	# 	self.assertRaises(frappe.ValidationError, asset.save)
+
 	def test_purchase_asset(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
@@ -950,20 +993,20 @@ def create_asset(**args):
 	asset = frappe.get_doc({
 		"doctype": "Asset",
 		"asset_name": args.asset_name or "Macbook Pro 1",
-		"asset_category": "Computers",
+		"asset_category": args.asset_category or "Computers",
 		"item_code": args.item_code or "Macbook Pro",
-		"company": args.company or"_Test Company",
-		"purchase_date": "2015-01-01",
+		"company": args.company or "_Test Company",
+		"purchase_date": args.purchase_date or "2015-01-01",
 		"calculate_depreciation": args.calculate_depreciation or 0,
 		"opening_accumulated_depreciation": args.opening_accumulated_depreciation or 0,
 		"number_of_depreciations_booked": args.number_of_depreciations_booked or 0,
-		"gross_purchase_amount": 100000,
-		"purchase_receipt_amount": 100000,
+		"gross_purchase_amount": args.gross_purchase_amount or 100000,
+		"purchase_receipt_amount": args.purchase_receipt_amount or 100000,
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"available_for_use_date": args.available_for_use_date or "2020-06-06",
-		"location": "Test Location",
-		"asset_owner": "Company",
-		"is_existing_asset": 1
+		"location": args.location or "Test Location",
+		"asset_owner": args.asset_owner or "Company",
+		"is_existing_asset": args.is_existing_asset or 1
 	})
 
 	if asset.calculate_depreciation:
@@ -1030,3 +1073,6 @@ def set_depreciation_settings_in_company():
 
 	# Enable booking asset depreciation entry automatically
 	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
+
+def enable_cwip_accounting(asset_category, enable=1):
+	frappe.db.set_value("Asset Category", asset_category, "enable_cwip_accounting", enable)
