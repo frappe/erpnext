@@ -85,6 +85,27 @@ class TestAsset(AssetSetup):
 		item.is_stock_item = 1
 		self.assertRaises(frappe.ValidationError, asset.save)
 
+	def test_item_exists(self):
+		asset = create_asset(item_code="MacBook", do_not_save=1)
+
+		self.assertRaises(frappe.DoesNotExistError, asset.save)
+
+	def test_validate_item(self):
+		asset = create_asset(item_code="MacBook Pro", do_not_save=1)
+		item = frappe.get_doc("Item", "MacBook Pro")
+
+		item.disabled = 1
+		item.save()
+		self.assertRaises(frappe.ValidationError, asset.save)
+		item.disabled = 0
+
+		item.is_fixed_asset = 0
+		self.assertRaises(frappe.ValidationError, asset.save)
+		item.is_fixed_asset = 1
+
+		item.is_stock_item = 1
+		self.assertRaises(frappe.ValidationError, asset.save)
+
 	def test_purchase_asset(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
