@@ -31,8 +31,7 @@ def validate_payer_details(doc, method):
 
 def validate_bank_details_and_generate_csv(doc, method):
 	if frappe.get_cached_value('Company', doc.company, 'country') == "Qatar":
-		if not doc.payer_establishment_id:
-			company_bank_details = get_company_bank_details(doc.company)
+		company_bank_details = get_company_bank_details(doc.company)
 
 		if len(company_bank_details):
 			company_bank_details = company_bank_details[0]
@@ -63,7 +62,6 @@ def validate_bank_details_and_generate_csv(doc, method):
 		if update_document == 1:
 			doc.save()
 
-
 def generate_csv(sif_header_column, sif_header_data, sif_records_column, employee_records, name):
 	site_path = frappe.utils.get_site_path()
 
@@ -93,7 +91,6 @@ def create_and_attach_file(doc):
 	file.folder = "Home"
 	file.is_private = 0
 	file.save()
-
 
 def get_sif_header_column():
 	return ["Employer EID", "File Creation Date", "File Creation Time", "Payer EID", "Payer QID", "Payer Bank",
@@ -134,7 +131,6 @@ def get_sif_header_data(doc, company_bank_details):
 	]
 	return row
 
-
 def get_sif_record_data(month, year, company):
 	total_salaries = 0
 	missing_fields_for_employee = {}
@@ -144,7 +140,7 @@ def get_sif_record_data(month, year, company):
 	salary_slips = get_salary_slip(month_abbr, year, company)
 
 	if not len(salary_slips):
-		frappe.throw(_("Salary Slip not found {0}, {1}").format(month, year))
+		frappe.throw(_("No Salary Slip not found for {0},{1}").format(month, year))
 
 	data = itertools.groupby(salary_slips, key=lambda x: (x['employee']))
 
@@ -211,7 +207,6 @@ def set_missing_fields_data(key, field, missing_fields_for_employee):
 
 	return missing_fields_for_employee
 
-
 def get_salary_slip(month, year, company):
 	return frappe.db.sql("""SELECT ss.name, ss.employee, ss.payroll_frequency, ss.total_deduction,
 		ss.total_working_days, ss.net_pay, sd.parentfield, sd.salary_component, sd.amount, ss.gross_pay,
@@ -220,9 +215,9 @@ def get_salary_slip(month, year, company):
 		WHERE sd.parent = ss.name
 		AND MONTH(ss.start_date) = %(month)s
 		AND YEAR(ss.start_date) = %(year)s
+		AND ss.company = %(company)s
 		AND ss.docstatus = 1
 	""", {"month": month, "year": year, "company": company}, as_dict=1)
-
 
 def get_basic_components():
 	basic_components = frappe.get_all("Salary Component", filters = {"is_basic": 1})
@@ -250,5 +245,3 @@ def get_total_component_amount(data, component_list):
 def get_employee_data(employee):
 	return frappe.db.get_value("Employee", employee, ["residential_id", "visa_id", "employee_name",
 		"bank_abbr", "bank_ac_no"], as_dict=1)
-
-

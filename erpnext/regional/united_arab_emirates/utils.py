@@ -154,7 +154,6 @@ def make_gl_entry(tax, gl_entries, doc, tax_accounts):
 		))
 	return gl_entries
 
-
 def validate_returns(doc, method):
 	"""Standard Rated expenses should not be set when Reverse Charge Applicable is set."""
 	country = frappe.get_cached_value('Company', doc.company, 'country')
@@ -169,31 +168,30 @@ def validate_bank_details_and_generate_csv(doc, method):
 	if frappe.get_cached_value("Company", doc.company, "country") == "United Arab Emirates":
 		company_bank_details = get_company_bank_details(doc.company)
 
-	if not len(company_bank_details):
-		frappe.throw(_("Please create Bank Account for Company: {0}").format(doc.company))
+		if not len(company_bank_details):
+			frappe.throw(_("Please create Bank Account for Company: {0}").format(doc.company))
 
-	company_bank_details = company_bank_details[0]
+		company_bank_details = company_bank_details[0]
 
-	employee_records, missing_fields_for_employees = get_employee_record_details_row(doc.month, doc.year, doc.company)
-	salary_control_record = get_salary_control_record(doc, company_bank_details, len(employee_records))
+		employee_records, missing_fields_for_employees = get_employee_record_details_row(doc.month, doc.year, doc.company)
+		salary_control_record = get_salary_control_record(doc, company_bank_details, len(employee_records))
+		genrate_csv(doc.name, employee_records, salary_control_record)
+		create_and_attach_file(doc)
 
-	genrate_csv(doc.name, employee_records, salary_control_record)
-	create_and_attach_file(doc)
+		update_document = 0
+		if len(employee_records) != doc.number_of_records:
+			doc.missing_fields = None
+			doc.number_of_records = len(employee_records)
+			update_document = 1
 
-	update_document = 0
-	if len(employee_records) != doc.number_of_records:
-		doc.missing_fields = None
-		doc.number_of_records = len(employee_records)
-		update_document = 1
+		if doc.missing_fields != json.dumps(missing_fields_for_employees):
+			doc.missing_fields = json.dumps(missing_fields_for_employees)
+			if missing_fields_for_employees:
+				frappe.msgprint(_("Mandatory Fields Missing for employee, Reload page to check"))
+			update_document = 1
 
-	if doc.missing_fields != json.dumps(missing_fields_for_employees):
-		doc.missing_fields = json.dumps(missing_fields_for_employees)
-		if missing_fields_for_employees:
-			frappe.msgprint(_("Mandatory Fields Missing for employee, Reload page to check"))
-		update_document = 1
-
-	if update_document == 1:
-		doc.save()
+		if update_document == 1:
+			doc.save()
 
 def get_employee_record_details_row(month, year, company):
 	employee_records = []
@@ -203,12 +201,11 @@ def get_employee_record_details_row(month, year, company):
 	salary_slips = get_salary_slip(month_abbr, year, company)
 
 	if not len(salary_slips):
-		frappe.throw(_("Salary Slip not found {0}, {1}").format(month, year))
+		frappe.throw(_("No Salary Slip not found for {0}, {1}").format(month, year))
 
 	data = itertools.groupby(salary_slips, key=lambda x: (x['employee']))
 
 	for employee, group in data:
-		print(employee, group)
 		group = list(group)
 
 		employee_details = get_employee_details(employee)
@@ -279,7 +276,6 @@ def genrate_csv(name ,employee_records, salary_control_record):
 
 		salary_control_record.insert(0, "SDR")
 		writer.writerow(salary_control_record)
-
 
 def get_fixed_salary_component():
 	return frappe.get_all("Salary Component", filters = {"is_fixed_component": 1}, as_list=1)

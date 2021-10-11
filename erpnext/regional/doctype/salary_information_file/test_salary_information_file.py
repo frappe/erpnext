@@ -4,17 +4,24 @@
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 import frappe
 import unittest
+import datetime
 from erpnext.accounts.doctype.period_closing_voucher.test_period_closing_voucher import create_company
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, make_earning_salary_component, make_deduction_salary_component
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 class TestSalaryInformationFile(unittest.TestCase):
-	def test_for_csv_genration_for_qatar_region():
+	def setUp(self):
+		frappe.db.sql("""delete from `tabHoliday List`""")
+		create_holiday_list()
+		
+	def test_csv_generation_for_qatar_region(self):
 		company = create_company("Qatar Financial", "QF", "Qatar")
 		employee = make_employee("test_employee@qatar.com", company=company.name)
+		doc = frappe.get_doc("Employee", employee)
+		doc.holiday_list = "Holiday 2021"
+		doc.save()
 		set_data_for_employee(employee, "Qatar")
-		employee.reload()
 
 		make_earning_salary_component(setup=True, test_tax=True, company_list=[company.name])
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=[company.name])
@@ -23,11 +30,13 @@ class TestSalaryInformationFile(unittest.TestCase):
 		make_employee_salary_slip("test_employee@qatar.com", "Monthly")
 		setup_bank_and_bank_account("Qatar Bank", "QIB", company.name)
 
-	def test_for_csv_generation_for_uae_region():
+	def test_csv_generation_for_uae_region(self):
 		company = create_company("UAE Financial", "UF", "United Arab Emirates")
 		employee = make_employee("test_employee@uae.com", company=company.name)
+		doc = frappe.get_doc("Employee", employee)
+		doc.holiday_list = "Holiday 2021"
+		doc.save()
 		set_data_for_employee(employee, "United Arab Emirates")
-		employee.reload()
 
 		make_earning_salary_component(setup=True, test_tax=True, company_list=[company.name])
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=[company.name])
@@ -57,13 +66,13 @@ def create_salary_information_file(company):
 	sif = frappe.new_doc("Salary Information File")
 	sif.company = company
 	date = frappe.utils.get_datetime()
-	sif.month =
+	sif.month = date.month
 	sif.year = date.year
 
 def set_data_for_employee(employee, country):
 	employee = frappe.get_doc("Employee", employee)
 	employee.residential_id = "123457890"
-	employee.salary_mode = "Salary"
+	employee.salary_mode = "Cash"
 	employee.bank = "Qatar International"
 	employee.bank_abbr = "QIB"
 	employee.bank_ac_no = "9876543210"
@@ -83,7 +92,7 @@ def set_data_for_salary_component(country):
 def setup_bank_and_bank_account(bank_name, abbr, company):
 	bank = create_bank(bank_name, abbr)
 	account = create_bank_account({"company_name": company, "bank_account": "WPS test bank"})
-	company_bank_account = create_company_bank_account(account, bank, company)
+	create_company_bank_account(account, bank, company)
 
 def create_bank(bank_name, abbr):
 	bank = frappe.db.exists("Bank", bank_name)
@@ -110,4 +119,9 @@ def create_company_bank_account(account, bank, company):
 
 	bank_account.save()
 
-
+def create_holiday_list():
+	doc = frappe.new_doc("Holiday List")
+	doc.holiday_list_name = "Holiday 2021"
+	doc.from_date = datetime.date(2021, 1, 1)
+	doc.to_date = datetime.date(2021, 12, 31)
+	doc.save()
