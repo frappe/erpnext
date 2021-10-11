@@ -2,6 +2,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
+
 import json
 import frappe
 from operator import itemgetter
@@ -14,13 +15,9 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 	create_landed_cost_voucher,
 )
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-	make_purchase_receipt,
-)
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import (
-	BackDatedStockTransaction,
-)
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDatedStockTransaction
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
@@ -746,8 +743,8 @@ def create_purchase_receipt_entries_for_batchwise_item_valuation_test(pr_entry_l
 	return prs
 
 def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list):
-	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 	dns = []
 	for item, warehouse, batch_no, qty, rate in dn_entry_list:
 		so = make_sales_order(

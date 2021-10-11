@@ -3,9 +3,10 @@
 
 from __future__ import unicode_literals
 
+from typing import Dict, List, OrderedDict, Tuple
+
 import frappe
 from frappe import _
-from typing import Dict, List, Tuple, OrderedDict
 from frappe.utils import cint, flt
 
 Filters = frappe._dict
@@ -169,7 +170,7 @@ def get_stock_ledger_entries(conditions: Conditions) -> Data:
 			AND docstatus < 2
 			AND ifnull(batch_no, '') != ''
 			{conditions}
-		ORDER BY 
+		ORDER BY
 			item_code,
 			batch_no,
 			timestamp(posting_date, posting_time)
@@ -207,7 +208,7 @@ def get_item_map(filters: Filters) -> ItemMap:
 		condition = f"WHERE item_code = '{frappe.db.escape(item_code)}'"
 
 	item_list = frappe.db.sql("""
-		SELECT name, item_name, description, stock_uom 
+		SELECT name, item_name, description, stock_uom
 		FROM tabItem
 		{condition}""".format(condition=condition), as_dict=1)
 
