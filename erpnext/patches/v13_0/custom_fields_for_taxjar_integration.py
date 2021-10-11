@@ -12,7 +12,7 @@ def execute():
 	if not company:
 		return
 
-	frappe.reload_doctype("Taxjar Settings", force=True)
+	frappe.reload_doctype("TaxJar Settings", force=True)
 
 	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 	TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
