@@ -837,6 +837,39 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.db.set_default("allow_negative_stock", 0)
 
+	def test_additional_cost_distribution_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Manufacture",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RM", basic_amount=10),
+					frappe._dict(item_code="FG", basic_amount=20, t_warehouse="X", is_finished_item=1),
+					frappe._dict(item_code="scrap", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
+
+	def test_additional_cost_distribution_non_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Material Receipt",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RECEIVED_1", basic_amount=20, t_warehouse="X"),
+					frappe._dict(item_code="RECEIVED_2", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([40.0, 60.0], distributed_costs)
+
 def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])

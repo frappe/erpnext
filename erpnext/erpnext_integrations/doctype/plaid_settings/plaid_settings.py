@@ -85,10 +85,8 @@ def add_bank_accounts(response, bank, company):
 		if not acc_subtype:
 			add_account_subtype(account["subtype"])
 
-		existing_bank_account = frappe.db.exists("Bank Account", {
-			'account_name': account["name"],
-			'bank': bank["bank_name"]
-		})
+		bank_account_name = "{} - {}".format(account["name"], bank["bank_name"])
+		existing_bank_account = frappe.db.exists("Bank Account", bank_account_name)
 
 		if not existing_bank_account:
 			try:
@@ -197,6 +195,7 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 
 	plaid = PlaidConnector(access_token)
 
+	transactions = []
 	try:
 		transactions = plaid.get_transactions(start_date=start_date, end_date=end_date, account_id=account_id)
 	except ItemError as e:
@@ -205,7 +204,7 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 			msg += _("Please refresh or reset the Plaid linking of the Bank {}.").format(bank) + " "
 			frappe.log_error(msg, title=_("Plaid Link Refresh Required"))
 
-	return transactions or []
+	return transactions
 
 
 def new_bank_transaction(transaction):
