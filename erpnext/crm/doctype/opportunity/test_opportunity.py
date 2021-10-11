@@ -2,11 +2,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
+import unittest
+
 import frappe
-from frappe.utils import today, random_string
+from frappe.utils import random_string, today
+
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
-import unittest
 
 test_records = frappe.get_test_records('Opportunity')
 

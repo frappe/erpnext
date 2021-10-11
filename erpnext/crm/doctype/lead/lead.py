@@ -4,13 +4,23 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.accounts.party import set_taxes
-from erpnext.controllers.selling_controller import SellingController
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, comma_and, cstr, getdate, has_gravatar, nowdate, validate_email_address
+from frappe.utils import (
+	cint,
+	comma_and,
+	cstr,
+	getdate,
+	has_gravatar,
+	nowdate,
+	validate_email_address,
+)
+
+from erpnext.accounts.party import set_taxes
+from erpnext.controllers.selling_controller import SellingController
+
 
 class Lead(SellingController):
 	def get_feed(self):
@@ -157,6 +167,7 @@ class Lead(SellingController):
 			"salutation": self.salutation,
 			"gender": self.gender,
 			"designation": self.designation,
+			"company_name": self.company_name,
 		})
 
 		if self.email_id:
@@ -168,12 +179,13 @@ class Lead(SellingController):
 		if self.phone:
 			contact.append("phone_nos", {
 				"phone": self.phone,
-				"is_primary": 1
+				"is_primary_phone": 1
 			})
 
 		if self.mobile_no:
 			contact.append("phone_nos", {
-				"phone": self.mobile_no
+				"phone": self.mobile_no,
+				"is_primary_mobile_no":1
 			})
 
 		contact.insert(ignore_permissions=True)

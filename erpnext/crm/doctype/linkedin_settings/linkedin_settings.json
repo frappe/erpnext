@@ -2,6 +2,7 @@
  "actions": [],
  "creation": "2020-01-30 13:36:39.492931",
  "doctype": "DocType",
+ "documentation": "https://docs.erpnext.com/docs/user/manual/en/CRM/linkedin-settings",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -87,7 +88,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-04-16 23:22:51.966397",
+ "modified": "2021-02-18 15:19:21.920725",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "LinkedIn Settings",

@@ -3,10 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
+
 from erpnext.stock.utils import get_stock_balance, get_stock_value_on
+
 
 class QuickStockBalance(Document):
 	pass

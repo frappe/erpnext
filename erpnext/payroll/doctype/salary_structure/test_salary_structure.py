@@ -2,17 +2,24 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-import erpnext
-from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_years, get_first_day, date_diff
-from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
-	make_deduction_salary_component, make_employee_salary_slip, create_tax_slab
-from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import create_payroll_period
 
+import frappe
+from frappe.utils import add_years, date_diff, get_first_day, nowdate
+from frappe.utils.make_random import get_random
+
+import erpnext
+from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import (
+	create_payroll_period,
+)
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	create_tax_slab,
+	make_deduction_salary_component,
+	make_earning_salary_component,
+	make_employee_salary_slip,
+)
+from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
 test_dependencies = ["Fiscal Year"]
 
@@ -119,26 +126,25 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None,
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 
-	if not frappe.db.exists('Salary Structure', salary_structure):
-		details = {
-			"doctype": "Salary Structure",
-			"name": salary_structure,
-			"company": company or erpnext.get_default_company(),
-			"earnings": make_earning_salary_component(setup=True,  test_tax=test_tax, company_list=["_Test Company"]),
-			"deductions": make_deduction_salary_component(setup=True, test_tax=test_tax, company_list=["_Test Company"]),
-			"payroll_frequency": payroll_frequency,
-			"payment_account": get_random("Account", filters={'account_currency': currency}),
-			"currency": currency
-		}
-		if other_details and isinstance(other_details, dict):
-			details.update(other_details)
-		salary_structure_doc = frappe.get_doc(details)
-		salary_structure_doc.insert()
-		if not dont_submit:
-			salary_structure_doc.submit()
+	if frappe.db.exists("Salary Structure", salary_structure):
+		frappe.db.delete("Salary Structure", salary_structure)
 
-	else:
-		salary_structure_doc = frappe.get_doc("Salary Structure", salary_structure)
+	details = {
+		"doctype": "Salary Structure",
+		"name": salary_structure,
+		"company": company or erpnext.get_default_company(),
+		"earnings": make_earning_salary_component(setup=True,  test_tax=test_tax, company_list=["_Test Company"]),
+		"deductions": make_deduction_salary_component(setup=True, test_tax=test_tax, company_list=["_Test Company"]),
+		"payroll_frequency": payroll_frequency,
+		"payment_account": get_random("Account", filters={'account_currency': currency}),
+		"currency": currency
+	}
+	if other_details and isinstance(other_details, dict):
+		details.update(other_details)
+	salary_structure_doc = frappe.get_doc(details)
+	salary_structure_doc.insert()
+	if not dont_submit:
+		salary_structure_doc.submit()
 
 	filters = {'employee':employee, 'docstatus': 1}
 	if not from_date and payroll_period:

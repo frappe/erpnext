@@ -2,12 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-import json
-from frappe.utils import flt, cstr, nowdate, nowtime, get_link_to_form
 
+import json
+
+import frappe
+from frappe import _
+from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 from six import string_types
+
+import erpnext
+
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
@@ -224,7 +228,7 @@ def get_avg_purchase_rate(serial_nos):
 
 def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
-	val_method = frappe.db.get_value('Item', item_code, 'valuation_method')
+	val_method = frappe.db.get_value('Item', item_code, 'valuation_method', cache=True)
 	if not val_method:
 		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method") or "FIFO"
 	return val_method
@@ -275,17 +279,17 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	return valid_serial_nos
 
 def validate_warehouse_company(warehouse, company):
-	warehouse_company = frappe.db.get_value("Warehouse", warehouse, "company")
+	warehouse_company = frappe.db.get_value("Warehouse", warehouse, "company", cache=True)
 	if warehouse_company and warehouse_company != company:
 		frappe.throw(_("Warehouse {0} does not belong to company {1}").format(warehouse, company),
 			InvalidWarehouseCompany)
 
 def is_group_warehouse(warehouse):
-	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+	if frappe.db.get_value("Warehouse", warehouse, "is_group", cache=True):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 
 def validate_disabled_warehouse(warehouse):
-	if frappe.db.get_value("Warehouse", warehouse, "disabled"):
+	if frappe.db.get_value("Warehouse", warehouse, "disabled", cache=True):
 		frappe.throw(_("Disabled Warehouse {0} cannot be used for this transaction.").format(get_link_to_form('Warehouse', warehouse)))
 
 def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
@@ -314,13 +318,16 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 	for row_idx, row in enumerate(result):
 		data = row.items() if is_dict_obj else enumerate(row)
 		for key, value in data:
-			if key not in convertible_columns or not conversion_factors[row_idx-1]:
+			if key not in convertible_columns:
 				continue
+			# If no conversion factor for the UOM, defaults to 1
+			if not conversion_factors[row_idx]:
+				conversion_factors[row_idx] = 1
 
 			if convertible_columns.get(key) == 'rate':
-				new_value = flt(value) * conversion_factors[row_idx-1]
+				new_value = flt(value) * conversion_factors[row_idx]
 			else:
-				new_value = flt(value) / conversion_factors[row_idx-1]
+				new_value = flt(value) / conversion_factors[row_idx]
 
 			if not is_dict_obj:
 				row.insert(key+1, new_value)

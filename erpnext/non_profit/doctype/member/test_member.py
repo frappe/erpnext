@@ -5,5 +5,6 @@ from __future__ import unicode_literals
 
 import unittest
 
+
 class TestMember(unittest.TestCase):
 	pass

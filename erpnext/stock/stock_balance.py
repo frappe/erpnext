@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import print_function, unicode_literals
+
 import frappe
-from frappe.utils import flt, cstr, nowdate, nowtime
-from erpnext.stock.utils import update_bin
-from erpnext.stock.stock_ledger import update_entries_after
+from frappe.utils import cstr, flt, nowdate, nowtime
+
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+from erpnext.stock.utils import update_bin
+
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
 	"""
@@ -29,7 +31,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		try:
 			repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin, allow_negative_stock)
 			frappe.db.commit()
-		except:
+		except Exception:
 			frappe.db.rollback()
 
 	if allow_negative_stock:
@@ -247,5 +249,5 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 
 				sr.via_stock_ledger = True
 				sr.save()
-			except:
+			except Exception:
 				pass

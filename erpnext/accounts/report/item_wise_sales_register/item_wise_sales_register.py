@@ -2,13 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt, cstr
 from frappe.model.meta import get_field_precision
+from frappe.utils import cstr, flt
 from frappe.utils.xlsxutils import handle_html
+
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import get_item_details, get_customer_details
+from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
+	get_customer_details,
+	get_item_details,
+)
+
 
 def execute(filters=None):
 	return _execute(filters)
@@ -76,7 +82,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'company': d.company,
 			'sales_order': d.sales_order,
 			'delivery_note': d.delivery_note,
-			'income_account': d.unrealized_profit_loss_account or d.income_account,
+			'income_account': d.unrealized_profit_loss_account if d.is_internal_customer == 1 else d.income_account,
 			'cost_center': d.cost_center,
 			'stock_qty': d.stock_qty,
 			'stock_uom': d.stock_uom
@@ -380,6 +386,7 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
 			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
 			`tabSales Invoice`.unrealized_profit_loss_account,
+			`tabSales Invoice`.is_internal_customer,
 			`tabSales Invoice`.project, `tabSales Invoice`.customer, `tabSales Invoice`.remarks,
 			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,
 			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.description,
@@ -625,7 +632,3 @@ def add_sub_total_row(item, total_row_map, group_by_value, tax_columns):
 	for tax in tax_columns:
 		total_row.setdefault(frappe.scrub(tax + ' Amount'), 0.0)
 		total_row[frappe.scrub(tax + ' Amount')] += flt(item[frappe.scrub(tax + ' Amount')])
-
-
-
-

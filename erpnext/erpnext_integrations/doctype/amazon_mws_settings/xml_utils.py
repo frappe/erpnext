@@ -8,8 +8,8 @@ Borrowed from https://github.com/timotheus/ebaysdk-python
 """
 from __future__ import unicode_literals
 
-import xml.etree.ElementTree as ET
 import re
+import xml.etree.ElementTree as ET
 
 
 class object_dict(dict):
@@ -88,7 +88,7 @@ class xml2dict(object):
 		ns = http://cs.sfsu.edu/csc867/myscheduler
 		name = patients
 		"""
-		result = re.compile("\{(.*)\}(.*)").search(tag)
+		result = re.compile(r"\{(.*)\}(.*)").search(tag)
 		if result:
 			value.namespace, tag = result.groups()
 

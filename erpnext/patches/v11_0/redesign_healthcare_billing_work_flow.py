@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.modules import get_doctype_module, scrub
+
 from erpnext.domains.healthcare import data
-from frappe.modules import scrub, get_doctype_module
 
 sales_invoice_referenced_doc = {
 	"Patient Appointment": "sales_invoice",

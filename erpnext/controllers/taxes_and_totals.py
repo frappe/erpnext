@@ -2,15 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import json
-import frappe, erpnext
+
+import frappe
 from frappe import _, scrub
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
-from erpnext.controllers.accounts_controller import validate_conversion_rate, \
-	validate_taxes_and_charges, validate_inclusive_tax
-from erpnext.stock.get_item_details import _get_item_tax_template
-from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+
+import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.controllers.accounts_controller import (
+	validate_conversion_rate,
+	validate_inclusive_tax,
+	validate_taxes_and_charges,
+)
+from erpnext.stock.get_item_details import _get_item_tax_template
+
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
@@ -152,7 +160,7 @@ class calculate_taxes_and_totals(object):
 				validate_taxes_and_charges(tax)
 				validate_inclusive_tax(tax, self.doc)
 
-			if not self.doc.get('is_consolidated'):
+			if not (self.doc.get('is_consolidated') or tax.get("dont_recompute_tax")):
 				tax.item_wise_tax_detail = {}
 
 			tax_fields = ["total", "tax_amount_after_discount_amount",
@@ -347,7 +355,7 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
-		if not self.doc.get("is_consolidated"):
+		if not (self.doc.get("is_consolidated") or tax.get("dont_recompute_tax")):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
 		return current_tax_amount
@@ -455,7 +463,8 @@ class calculate_taxes_and_totals(object):
 	def _cleanup(self):
 		if not self.doc.get('is_consolidated'):
 			for tax in self.doc.get("taxes"):
-				tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
+				if not tax.get("dont_recompute_tax"):
+					tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:
@@ -678,17 +687,13 @@ class calculate_taxes_and_totals(object):
 		default_mode_of_payment = frappe.db.get_value('POS Payment Method',
 			{'parent': self.doc.pos_profile, 'default': 1}, ['mode_of_payment'], as_dict=1)
 
-		self.doc.payments = []
-
 		if default_mode_of_payment:
+			self.doc.payments = []
 			self.doc.append('payments', {
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
 				'amount': total_amount_to_pay,
 				'default': 1
 			})
-		else:
-			self.doc.is_pos = 0
-			self.doc.pos_profile = ''
 
 		self.calculate_paid_amount()
 

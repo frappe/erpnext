@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	company = frappe.get_all('Company', filters = {'country': 'India'})
@@ -15,4 +17,4 @@ def execute():
 				dict(role='Accounts User'),
 				dict(role='Accounts Manager')
 			]
-		)).insert()	
+		)).insert()

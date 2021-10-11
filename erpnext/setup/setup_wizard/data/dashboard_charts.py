@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
-from frappe import _
-import frappe
+
 import json
+
+import frappe
+
 
 def get_company_for_dashboards():
 	company = frappe.defaults.get_defaults().company

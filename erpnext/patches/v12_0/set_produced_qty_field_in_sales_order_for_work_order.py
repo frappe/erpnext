@@ -1,6 +1,7 @@
 import frappe
-from frappe.utils import flt
+
 from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
+
 
 def execute():
 	frappe.reload_doctype('Sales Order Item')

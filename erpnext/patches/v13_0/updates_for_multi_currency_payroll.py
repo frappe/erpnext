@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.utils.rename_field import rename_field
 
+
 def execute():
 
 	frappe.reload_doc('Accounts', 'doctype', 'Salary Component Account')
@@ -96,8 +97,8 @@ def execute():
 
 		# update currency in following doctypes based on company currency
 		doctypes_for_currency = ['Employee Advance', 'Leave Encashment', 'Employee Benefit Application',
-			'Employee Benefit Claim', 'Employee Incentive', 'Additional Salary', 
-			'Employee Tax Exemption Declaration', 'Employee Tax Exemption Proof Submission', 
+			'Employee Benefit Claim', 'Employee Incentive', 'Additional Salary',
+			'Employee Tax Exemption Declaration', 'Employee Tax Exemption Proof Submission',
 			'Income Tax Slab', 'Retention Bonus', 'Salary Structure']
 
 		for dt in doctypes_for_currency:

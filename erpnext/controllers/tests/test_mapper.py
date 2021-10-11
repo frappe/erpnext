@@ -1,12 +1,14 @@
 from __future__ import unicode_literals
-import unittest
-import frappe
 
-import random, json
+import json
+import unittest
+
+import frappe
 import frappe.utils
-from frappe.utils import nowdate, add_months
 from frappe.model import mapper
 from frappe.test_runner import make_test_records
+from frappe.utils import add_months, nowdate
+
 
 class TestMapper(unittest.TestCase):
 	def test_map_docs(self):

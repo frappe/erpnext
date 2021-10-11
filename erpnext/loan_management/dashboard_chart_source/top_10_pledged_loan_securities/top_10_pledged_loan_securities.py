@@ -2,11 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.utils.dashboard import cache_source
-from erpnext.loan_management.report.applicant_wise_loan_security_exposure.applicant_wise_loan_security_exposure \
-	 import get_loan_security_details
 from six import iteritems
+
+from erpnext.loan_management.report.applicant_wise_loan_security_exposure.applicant_wise_loan_security_exposure import (
+	get_loan_security_details,
+)
+
 
 @frappe.whitelist()
 @cache_source

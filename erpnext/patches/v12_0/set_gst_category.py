@@ -1,5 +1,7 @@
 import frappe
+
 from erpnext.regional.india.setup import make_custom_fields
+
 
 def execute():
 
@@ -48,5 +50,3 @@ def execute():
 
 		frappe.db.sql(""" UPDATE `tab{doctype}` t1, `tabAddress` t2, `tabDynamic Link` t3 SET t1.gst_category = "Overseas"
 			where t3.link_name = t1.name and t3.parent = t2.name and t2.country != 'India' """.format(doctype=doctype)) #nosec
-
-

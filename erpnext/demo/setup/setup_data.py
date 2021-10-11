@@ -1,13 +1,18 @@
 from __future__ import print_function, unicode_literals
 
-import random, json
-import frappe, erpnext
-from frappe.utils.nestedset import get_root_of
-from frappe.utils import flt, now_datetime, cstr, random_string
-from frappe.utils.make_random import add_random_children, get_random
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from erpnext.demo.domains import data
+import json
+import random
+
+import frappe
 from frappe import _
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.utils import cstr, flt, now_datetime, random_string
+from frappe.utils.make_random import add_random_children, get_random
+from frappe.utils.nestedset import get_root_of
+
+import erpnext
+from erpnext.demo.domains import data
+
 
 def setup(domain):
 	frappe.flags.in_demo = 1

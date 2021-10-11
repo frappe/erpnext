@@ -3,13 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import money_in_words
-from frappe.utils import cint, flt, cstr
+from frappe.utils import cint, cstr, flt, money_in_words
 from frappe.utils.background_jobs import enqueue
-from frappe import _
+
+import erpnext
 
 
 class FeeSchedule(Document):

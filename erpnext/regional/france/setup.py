@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
+
 def setup(company=None, patch=True):
 	make_custom_fields()
 	add_custom_roles_for_reports()

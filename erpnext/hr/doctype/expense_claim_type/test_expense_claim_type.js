@@ -27,4 +27,3 @@ QUnit.test("Test: Expense Claim Type [HR]", function (assert) {
 		() => done()
 	]);
 });
-

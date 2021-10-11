@@ -2,12 +2,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _
-from frappe.utils import flt, getdate, add_days
-from erpnext.loan_management.report.applicant_wise_loan_security_exposure.applicant_wise_loan_security_exposure \
-	 import get_loan_security_details
+from frappe.utils import add_days, flt, getdate
+
+import erpnext
+from erpnext.loan_management.report.applicant_wise_loan_security_exposure.applicant_wise_loan_security_exposure import (
+	get_loan_security_details,
+)
 
 
 def execute(filters=None):

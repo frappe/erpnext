@@ -2,11 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+from frappe import _, msgprint
 from frappe.utils import formatdate
-from frappe import msgprint, _
+
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+
 
 def execute(filters=None):
 	if not filters: filters = {}

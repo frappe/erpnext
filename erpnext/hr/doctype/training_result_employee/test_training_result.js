@@ -50,4 +50,3 @@ QUnit.test("Test: Training Result [HR]", function (assert) {
 		() => done()
 	]);
 });
-

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from setuptools import setup, find_packages
-import re, ast
+
+import ast
+import re
+
+from setuptools import find_packages, setup
 
 # get version from __version__ variable in erpnext/__init__.py
 _version_re = re.compile(r'__version__\s+=\s+(.*)')

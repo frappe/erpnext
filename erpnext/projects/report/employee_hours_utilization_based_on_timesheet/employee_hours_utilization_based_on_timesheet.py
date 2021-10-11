@@ -2,10 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate
 from six import iteritems
+
 
 def execute(filters=None):
 	return EmployeeHoursReport(filters).run()

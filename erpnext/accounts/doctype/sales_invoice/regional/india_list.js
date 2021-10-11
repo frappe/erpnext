@@ -67,7 +67,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 				"default": "1-Duplicate",
 				"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
 			},
-			{ 
+			{
 				"label": "Remark",
 				"fieldname": "remark",
 				"fieldtype": "Data",
@@ -82,7 +82,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 				const data = d.get_values();
 				frappe.call({
 					method: 'erpnext.regional.india.e_invoice.utils.cancel_irns',
-					args: { 
+					args: {
 						doctype: list_view.doctype,
 						docnames,
 						reason: data.reason.split('-')[0],
@@ -122,7 +122,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 
 	frappe.realtime.on("bulk_einvoice_generation_complete", (data) => {
 		const { failures, user, invoices } = data;
-		
+
 		if (invoices.length != failures.length) {
 			frappe.msgprint({
 				message: __('{0} e-invoices generated successfully', [invoices.length]),

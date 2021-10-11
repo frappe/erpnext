@@ -2,10 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from six.moves import range
-from six import iteritems
-import frappe
 
+import frappe
+from six import iteritems
+from six.moves import range
 
 field_map = {
 	"Contact": [ "first_name", "last_name", "phone", "mobile_no", "email_id", "is_primary_contact" ],

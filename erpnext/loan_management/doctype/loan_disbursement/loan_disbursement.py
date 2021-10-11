@@ -3,15 +3,21 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import nowdate, getdate, add_days, flt
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import add_days, flt, get_datetime, nowdate
+
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
-from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
-from frappe.utils import get_datetime
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
+	get_pledged_security_qty,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_demand_loans,
+)
+
 
 class LoanDisbursement(AccountsController):
 
@@ -203,5 +209,3 @@ def get_disbursal_amount(loan, on_current_security_price=0):
 		disbursal_amount = loan_details.loan_amount - loan_details.disbursed_amount
 
 	return disbursal_amount
-
-

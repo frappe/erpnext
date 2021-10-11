@@ -2,9 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 from erpnext import get_region
+
 
 def check_deletion_permission(doc, method):
 	region = get_region(doc.company)

@@ -43,6 +43,8 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
+  "bundle_items_section",
+  "packed_items",
   "pricing_rule_details",
   "pricing_rules",
   "sec_break23",
@@ -926,6 +928,24 @@
    "label": "Lost Reasons",
    "options": "Quotation Lost Reason Detail",
    "read_only": 1
+  },
+  {
+   "depends_on": "packed_items",
+   "fieldname": "packed_items",
+   "fieldtype": "Table",
+   "label": "Bundle Items",
+   "options": "Packed Item",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
+   "fieldname": "bundle_items_section",
+   "fieldtype": "Section Break",
+   "label": "Bundle Items",
+   "options": "fa fa-suitcase",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -933,7 +953,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-10-30 13:58:59.212060",
+ "modified": "2021-08-27 20:10:07.864951",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

@@ -1,8 +1,15 @@
 
 from __future__ import unicode_literals
-import frappe, base64, hashlib, hmac, json
-from frappe.utils import cstr
+
+import base64
+import hashlib
+import hmac
+import json
+
+import frappe
 from frappe import _
+from frappe.utils import cstr
+
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")

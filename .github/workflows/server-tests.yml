@@ -1,6 +1,16 @@
 name: Server
 
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.md'
+  workflow_dispatch:
+  push:
+    branches: [ develop ]
+    paths-ignore:
+      - '**.js'
+      - '**.md'
 
 jobs:
   test:
@@ -31,6 +41,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12
+          check-latest: true
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts

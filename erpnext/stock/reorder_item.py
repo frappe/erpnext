@@ -2,11 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-import erpnext
+
 import json
-from frappe.utils import flt, nowdate, add_days, cint
+from math import ceil
+
+import frappe
 from frappe import _
+from frappe.utils import add_days, cint, flt, nowdate
+
+import erpnext
+
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
@@ -145,11 +150,16 @@ def create_material_request(material_requests):
 							conversion_factor = frappe.db.get_value("UOM Conversion Detail",
 								{'parent': item.name, 'uom': uom}, 'conversion_factor') or 1.0
 
+					must_be_whole_number = frappe.db.get_value("UOM", uom, "must_be_whole_number", cache=True)
+					qty = d.reorder_qty / conversion_factor
+					if must_be_whole_number:
+						qty = ceil(qty)
+
 					mr.append("items", {
 						"doctype": "Material Request Item",
 						"item_code": d.item_code,
 						"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
-						"qty": d.reorder_qty / conversion_factor,
+						"qty": qty,
 						"uom": uom,
 						"stock_uom": item.stock_uom,
 						"warehouse": d.warehouse,
@@ -166,7 +176,7 @@ def create_material_request(material_requests):
 				mr.submit()
 				mr_list.append(mr)
 
-			except:
+			except Exception:
 				_log_exception()
 
 	if mr_list:

@@ -3,13 +3,15 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, now_datetime
+
+import frappe
+from frappe.utils import now_datetime, nowdate
+
+from erpnext.accounts.doctype.budget.budget import BudgetError, get_actual_expense
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.accounts.doctype.budget.budget import get_actual_expense, BudgetError
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 test_dependencies = ['Monthly Distribution']
 
@@ -249,7 +251,7 @@ class TestBudget(unittest.TestCase):
 
 def set_total_expense_zero(posting_date, budget_against_field=None, budget_against_CC=None):
 	if budget_against_field == "project":
-		budget_against = "_Test Project"
+		budget_against = frappe.db.get_value("Project", {"project_name": "_Test Project"})
 	else:
 		budget_against = budget_against_CC or "_Test Cost Center - _TC"
 
@@ -275,7 +277,7 @@ def set_total_expense_zero(posting_date, budget_against_field=None, budget_again
 			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", posting_date=nowdate(), submit=True)
 		elif budget_against_field == "project":
 			make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True, project="_Test Project", posting_date=nowdate())
+			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True, project=budget_against, posting_date=nowdate())
 
 def make_budget(**args):
 	args = frappe._dict(args)

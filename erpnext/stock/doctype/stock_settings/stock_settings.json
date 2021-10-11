@@ -18,12 +18,16 @@
   "section_break_9",
   "over_delivery_receipt_allowance",
   "role_allowed_to_over_deliver_receive",
+  "mr_qty_allowance",
   "column_break_12",
   "auto_insert_price_list_rate_if_missing",
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
+  "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
+  "column_break_21",
+  "action_if_quality_inspection_is_rejected",
   "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
   "set_qty_in_transactions_based_on_serial_no_input",
@@ -264,6 +268,28 @@
   {
    "fieldname": "column_break_31",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_inspection_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Quality Inspection Settings"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Stop",
+   "fieldname": "action_if_quality_inspection_is_rejected",
+   "fieldtype": "Select",
+   "label": "Action If Quality Inspection Is Rejected",
+   "options": "Stop\nWarn"
+  },
+  {
+   "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
+   "fieldname": "mr_qty_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance"
   }
  ],
  "icon": "icon-cog",
@@ -271,7 +297,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-30 17:27:42.709231",
+ "modified": "2021-06-28 17:02:26.683002",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

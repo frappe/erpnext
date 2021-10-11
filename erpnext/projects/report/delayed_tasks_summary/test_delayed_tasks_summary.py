@@ -1,16 +1,20 @@
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
-from frappe.utils import nowdate, add_days, add_months
+from frappe.utils import add_days, add_months, nowdate
+
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.report.delayed_tasks_summary.delayed_tasks_summary import execute
+
 
 class TestDelayedTasksSummary(unittest.TestCase):
 	@classmethod
 	def setUp(self):
 		task1 = create_task("_Test Task 98", add_days(nowdate(), -10), nowdate())
 		create_task("_Test Task 99", add_days(nowdate(), -10), add_days(nowdate(), -1))
-		
+
 		task1.status = "Completed"
 		task1.completed_on = add_days(nowdate(), -1)
 		task1.save()
@@ -38,7 +42,7 @@ class TestDelayedTasksSummary(unittest.TestCase):
 		]
 		report = execute(filters)
 		data = list(filter(lambda x: x.subject == "_Test Task 99", report[1]))[0]
-		
+
 		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[0].get(key), data.get(key))
 

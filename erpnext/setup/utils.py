@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, add_days
-from frappe.utils import get_datetime_str, nowdate
+from frappe.utils import add_days, flt, get_datetime_str, nowdate
+
 from erpnext import get_default_company
+
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
@@ -93,23 +95,23 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 	try:
 		cache = frappe.cache()
-		key = "currency_exchange_rate_{0}:{1}:{2}".format(transaction_date,from_currency, to_currency)
+		key = "currency_exchange_rate_{0}:{1}:{2}".format(transaction_date, from_currency, to_currency)
 		value = cache.get(key)
 
 		if not value:
 			import requests
-			api_url = "https://frankfurter.app/{0}".format(transaction_date)
+			api_url = "https://api.exchangerate.host/convert"
 			response = requests.get(api_url, params={
-				"base": from_currency,
-				"symbols": to_currency
+				"date": transaction_date,
+				"from": from_currency,
+				"to": to_currency
 			})
 			# expire in 6 hours
 			response.raise_for_status()
-			value = response.json()["rates"][to_currency]
-
-			cache.set_value(key, value, expires_in_sec=6 * 60 * 60)
+			value = response.json()["result"]
+			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
-	except:
+	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0

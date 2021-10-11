@@ -41,17 +41,36 @@ frappe.ui.form.on('Inpatient Record', {
 });
 
 let discharge_patient = function(frm) {
-	frappe.call({
-		doc: frm.doc,
-		method: 'discharge',
-		callback: function(data) {
-			if (!data.exc) {
-				frm.reload_doc();
+	let dialog = new frappe.ui.Dialog({
+		title: 'Discharge Patient',
+		width: 100,
+		fields: [
+			{fieldtype: 'Datetime', label: 'Discharge Datetime', fieldname: 'check_out',
+				reqd: 1, default: frappe.datetime.now_datetime()
 			}
-		},
-		freeze: true,
-		freeze_message: __('Processing Inpatient Discharge')
+		],
+		primary_action_label: __('Discharge'),
+		primary_action: function() {
+			let check_out = dialog.get_value('check_out');
+			frappe.call({
+				doc: frm.doc,
+				method: 'discharge',
+				args: {
+					'check_out': check_out
+				},
+				callback: function(data) {
+					if (!data.exc) {
+						frm.reload_doc();
+					}
+				},
+				freeze: true,
+				freeze_message: __('Processing Inpatient Discharge')
+			});
+			frm.refresh_fields();
+			dialog.hide();
+		}
 	});
+	dialog.show();
 };
 
 let admit_patient_dialog = function(frm) {

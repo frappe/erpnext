@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import add_to_date
 
+
 def execute():
 	frappe.reload_doc("manufacturing", "doctype", "work_order")
 	frappe.reload_doc("manufacturing", "doctype", "work_order_item")

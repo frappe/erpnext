@@ -3,14 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import datetime
-from frappe.model.document import Document
-from frappe.utils import get_time, flt
-from frappe.model.mapper import get_mapped_doc
+
+import frappe
 from frappe import _
-from frappe.utils import cstr, getdate, get_link_to_form
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, get_link_to_form, get_time, getdate
+
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
+	get_income_account,
+	get_receivable_account,
+)
+
 
 class TherapySession(Document):
 	def validate(self):

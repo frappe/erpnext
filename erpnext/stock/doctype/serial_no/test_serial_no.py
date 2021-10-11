@@ -5,18 +5,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, unittest
 
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+import unittest
+
+import frappe
+
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 test_dependencies = ["Item"]
 test_records = frappe.get_test_records('Serial No')
 
 from erpnext.stock.doctype.serial_no.serial_no import *
+
 
 class TestSerialNo(unittest.TestCase):
 	def test_cannot_create_direct(self):
@@ -173,6 +177,24 @@ class TestSerialNo(unittest.TestCase):
 		self.assertEqual(sn_doc.company, "_Test Company")
 		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.purchase_document_no, se.name)
+
+	def test_serial_no_sanitation(self):
+		"Test if Serial No input is sanitised before entering the DB."
+		item_code = "_Test Serialized Item"
+		test_records = frappe.get_test_records('Stock Entry')
+
+		se = frappe.copy_doc(test_records[0])
+		se.get("items")[0].item_code = item_code
+		se.get("items")[0].qty = 3
+		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  "
+		se.get("items")[0].transfer_qty = 3
+		se.set_stock_entry_type()
+		se.insert()
+		se.submit()
+
+		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3")
+
+		frappe.db.rollback()
 
 	def tearDown(self):
 		frappe.db.rollback()

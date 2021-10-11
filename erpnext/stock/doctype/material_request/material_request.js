@@ -434,7 +434,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			if (doc.material_request_type == "Customer Provided") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 
+					filters:{
 						'customer': me.frm.doc.customer,
 						'is_stock_item':1
 					}

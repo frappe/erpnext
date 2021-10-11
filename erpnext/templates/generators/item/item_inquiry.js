@@ -52,7 +52,7 @@ frappe.ready(() => {
 
 		d.hide();
 
-		frappe.call('erpnext.shopping_cart.cart.create_lead_for_item_inquiry', {
+		frappe.call('erpnext.e_commerce.shopping_cart.cart.create_lead_for_item_inquiry', {
 			lead: doc,
 			subject: values.subject,
 			message: values.message

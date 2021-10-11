@@ -3,10 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cint, flt
+
 from erpnext.healthcare.doctype.therapy_type.therapy_type import make_item_price
+
 
 class TherapyPlanTemplate(Document):
 	def after_insert(self):

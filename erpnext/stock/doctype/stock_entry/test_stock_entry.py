@@ -2,20 +2,32 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, unittest
-import frappe.defaults
-from frappe.utils import flt, nowdate, nowtime
-from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
-from erpnext.stock.stock_ledger import get_previous_sle
+
+import unittest
+
+import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
-from erpnext.stock.doctype.item.test_item import set_item_variant_settings, make_item_variant, create_item
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse, make_stock_in_entry
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
+from frappe.utils import flt, nowdate, nowtime
 from six import iteritems
+
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.stock.doctype.item.test_item import (
+	create_item,
+	make_item_variant,
+	set_item_variant_settings,
+)
+from erpnext.stock.doctype.serial_no.serial_no import *  # noqa
+from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	OpeningEntryAccountError,
+)
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+from erpnext.stock.stock_ledger import get_previous_sle
+
 
 def get_sle(**args):
 	condition, values = "", []
@@ -539,8 +551,9 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
 	def test_work_order(self):
-		from erpnext.manufacturing.doctype.work_order.work_order \
-			import make_stock_entry as _make_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as _make_stock_entry,
+		)
 		bom_no, bom_operation_cost = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
 
@@ -618,8 +631,8 @@ class TestStockEntry(unittest.TestCase):
 		s2.cancel()
 
 	def test_retain_sample(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		create_warehouse("Test Warehouse for Sample Retention")
 		frappe.db.set_value("Stock Settings", None, "sample_retention_warehouse", "Test Warehouse for Sample Retention - _TC")
@@ -823,6 +836,39 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(repack_entry.items[0].transfer_qty, 100)
 
 		frappe.db.set_default("allow_negative_stock", 0)
+
+	def test_additional_cost_distribution_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Manufacture",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RM", basic_amount=10),
+					frappe._dict(item_code="FG", basic_amount=20, t_warehouse="X", is_finished_item=1),
+					frappe._dict(item_code="scrap", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
+
+	def test_additional_cost_distribution_non_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Material Receipt",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RECEIVED_1", basic_amount=20, t_warehouse="X"),
+					frappe._dict(item_code="RECEIVED_2", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([40.0, 60.0], distributed_costs)
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)

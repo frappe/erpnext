@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	''' Move credit limit and bypass credit limit to the child table of customer credit limit '''

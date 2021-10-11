@@ -22,10 +22,10 @@ frappe.query_reports["First Response Time for Issues"] = {
 	get_chart_data: function(_columns, result) {
 		return {
 			data: {
-				labels: result.map(d => d[0]),
+				labels: result.map(d => d.creation_date),
 				datasets: [{
 					name: 'First Response Time',
-					values: result.map(d => d[1])
+					values: result.map(d => d.first_response_time)
 				}]
 			},
 			type: "line",
@@ -35,8 +35,7 @@ frappe.query_reports["First Response Time for Issues"] = {
 						hide_days: 0,
 						hide_seconds: 0
 					};
-					value = frappe.utils.get_formatted_duration(d, duration_options);
-					return value;
+					return frappe.utils.get_formatted_duration(d, duration_options);
 				}
 			}
 		}

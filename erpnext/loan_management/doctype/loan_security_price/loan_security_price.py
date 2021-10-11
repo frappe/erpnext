@@ -3,11 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, now_datetime, add_to_date, get_datetime, get_timestamp, get_datetime_str
-from six import iteritems
+from frappe.utils import get_datetime
+
 
 class LoanSecurityPrice(Document):
 	def validate(self):
@@ -40,12 +41,3 @@ def get_loan_security_price(loan_security, valid_time=None):
 		frappe.throw(_("No valid Loan Security Price found for {0}").format(frappe.bold(loan_security)))
 	else:
 		return loan_security_price
-
-
-
-
-
-
-
-
-

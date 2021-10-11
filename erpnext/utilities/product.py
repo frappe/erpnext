@@ -4,19 +4,21 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cint, fmt_money, flt, nowdate, getdate
+from frappe.utils import cint, flt, fmt_money, getdate, nowdate
+
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 
-def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
+
+def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 	in_stock, stock_qty = 0, ''
 	template_item_code, is_stock_item = frappe.db.get_value("Item", item_code, ["variant_of", "is_stock_item"])
 
 	if not warehouse:
-		warehouse = frappe.db.get_value("Item", item_code, item_warehouse_field)
+		warehouse = frappe.db.get_value("Website Item", {"item_code": item_code}, item_warehouse_field)
 
 	if not warehouse and template_item_code and template_item_code != item_code:
-		warehouse = frappe.db.get_value("Item", template_item_code, item_warehouse_field)
+		warehouse = frappe.db.get_value("Website Item", {"item_code": template_item_code}, item_warehouse_field)
 
 	if warehouse:
 		stock_qty = frappe.db.sql("""
@@ -91,17 +93,27 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				"for_shopping_cart": True,
 				"currency": frappe.db.get_value("Price List", price_list, "currency")
 			}))
+			price_obj = price[0]
 
 			if pricing_rule:
+				# price without any rules applied
+				mrp = price_obj.price_list_rate or 0
+
 				if pricing_rule.pricing_rule_for == "Discount Percentage":
-					price[0].price_list_rate = flt(price[0].price_list_rate * (1.0 - (flt(pricing_rule.discount_percentage) / 100.0)))
+					price_obj.discount_percent = pricing_rule.discount_percentage
+					price_obj.formatted_discount_percent = str(flt(pricing_rule.discount_percentage, 0)) + "%"
+					price_obj.price_list_rate = flt(price_obj.price_list_rate * (1.0 - (flt(pricing_rule.discount_percentage) / 100.0)))
 
 				if pricing_rule.pricing_rule_for == "Rate":
-					price[0].price_list_rate = pricing_rule.price_list_rate
+					rate_discount = flt(mrp) - flt(pricing_rule.price_list_rate)
+					if rate_discount > 0:
+						price_obj.formatted_discount_rate = fmt_money(rate_discount, currency=price_obj["currency"])
+					price_obj.price_list_rate = pricing_rule.price_list_rate or 0
 
-			price_obj = price[0]
 			if price_obj:
 				price_obj["formatted_price"] = fmt_money(price_obj["price_list_rate"], currency=price_obj["currency"])
+				if mrp != price_obj["price_list_rate"]:
+					price_obj["formatted_mrp"] = fmt_money(mrp, currency=price_obj["currency"])
 
 				price_obj["currency_symbol"] = not cint(frappe.db.get_default("hide_currency_symbol")) \
 					and (frappe.db.get_value("Currency", price_obj.currency, "symbol", cache=True) or price_obj.currency) \
@@ -122,15 +134,15 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 					price_obj["currency"] = ""
 
 				if not price_obj["formatted_price"]:
-					price_obj["formatted_price"] = ""
+					price_obj["formatted_price"], price_obj["formatted_mrp"] = "", ""
 
 			return price_obj
 
 def get_non_stock_item_status(item_code, item_warehouse_field):
-#if item belongs to product bundle, check if bundle items are in stock
+	# if item is a product bundle, check if its bundle items are in stock
 	if frappe.db.exists("Product Bundle", item_code):
 		items = frappe.get_doc("Product Bundle", item_code).get_all_children()
-		bundle_warehouse = frappe.db.get_value('Item', item_code, item_warehouse_field)
-		return all(get_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock for d in items)
+		bundle_warehouse = frappe.db.get_value("Website Item", {"item_code": item_code}, item_warehouse_field)
+		return all(get_web_item_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock for d in items)
 	else:
 		return 1

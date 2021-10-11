@@ -6,7 +6,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
-from .operations import install_fixtures as fixtures, company_setup, sample_data
+from .operations import company_setup
+from .operations import install_fixtures as fixtures
+from .operations import sample_data
+
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -106,7 +109,7 @@ def fin(args):
 def make_sample_data(domains):
 	try:
 		sample_data.make_sample_data(domains)
-	except:
+	except Exception:
 		# clear message
 		if frappe.message_log:
 			frappe.message_log.pop()

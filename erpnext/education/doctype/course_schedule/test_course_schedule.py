@@ -3,13 +3,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
+import datetime
 import unittest
 
-import datetime
-from frappe.utils import today, to_timedelta
+import frappe
+from frappe.utils import to_timedelta, today
+
 from erpnext.education.utils import OverlapError
-from frappe.utils.make_random import get_random
 
 # test_records = frappe.get_test_records('Course Schedule')
 
@@ -17,28 +17,28 @@ class TestCourseSchedule(unittest.TestCase):
 	def test_student_group_conflict(self):
 		cs1 = make_course_schedule_test_record(simulate= True)
 
-		cs2 = make_course_schedule_test_record(schedule_date=cs1.schedule_date, from_time= cs1.from_time, 
+		cs2 = make_course_schedule_test_record(schedule_date=cs1.schedule_date, from_time= cs1.from_time,
 			to_time= cs1.to_time, instructor="_Test Instructor 2", room=frappe.get_all("Room")[1].name, do_not_save= 1)
 		self.assertRaises(OverlapError, cs2.save)
 
 	def test_instructor_conflict(self):
 		cs1 = make_course_schedule_test_record(simulate= True)
-		
-		cs2 = make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
+
+		cs2 = make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time,
 			student_group="Course-TC101-2014-2015 (_Test Academic Term)", room=frappe.get_all("Room")[1].name, do_not_save= 1)
 		self.assertRaises(OverlapError, cs2.save)
 
 	def test_room_conflict(self):
 		cs1 = make_course_schedule_test_record(simulate= True)
-		
-		cs2 = make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
+
+		cs2 = make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time,
 			student_group="Course-TC101-2014-2015 (_Test Academic Term)", instructor="_Test Instructor 2", do_not_save= 1)
 		self.assertRaises(OverlapError, cs2.save)
-		
+
 	def test_no_conflict(self):
 		cs1 = make_course_schedule_test_record(simulate= True)
-		
-		make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
+
+		make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time,
 			student_group="Course-TC102-2014-2015 (_Test Academic Term)", instructor="_Test Instructor 2", room=frappe.get_all("Room")[1].name)
 
 def make_course_schedule_test_record(**args):
@@ -49,12 +49,12 @@ def make_course_schedule_test_record(**args):
 	course_schedule.course = args.course or "TC101"
 	course_schedule.instructor = args.instructor or "_Test Instructor"
 	course_schedule.room = args.room or frappe.get_all("Room")[0].name
-	
+
 	course_schedule.schedule_date = args.schedule_date or today()
 	course_schedule.from_time = args.from_time or to_timedelta("01:00:00")
 	course_schedule.to_time = args.to_time or course_schedule.from_time + datetime.timedelta(hours= 1)
 
-	
+
 	if not args.do_not_save:
 		if args.simulate:
 			while True:

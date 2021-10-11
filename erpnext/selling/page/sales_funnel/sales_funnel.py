@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
-from frappe import _
-from erpnext.accounts.report.utils import convert
+import frappe
 import pandas as pd
+from frappe import _
+
+from erpnext.accounts.report.utils import convert
+
 
 def validate_filters(from_date, to_date, company):
 	if from_date and to_date and (from_date >= to_date):
@@ -32,7 +34,7 @@ def get_funnel_data(from_date, to_date, company):
 		and (opportunity!="" or quotation_to="Lead") and company=%s""", (from_date, to_date, company))[0][0]
 
 	converted = frappe.db.sql("""select count(*) from `tabCustomer`
-		JOIN `tabLead` ON `tabLead`.name = `tabCustomer`.lead_name 
+		JOIN `tabLead` ON `tabLead`.name = `tabCustomer`.lead_name
 		WHERE (date(`tabCustomer`.creation) between %s and %s)
 		and `tabLead`.company=%s""", (from_date, to_date, company))[0][0]
 

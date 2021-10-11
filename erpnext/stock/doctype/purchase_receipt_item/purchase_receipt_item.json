@@ -10,6 +10,7 @@
   "barcode",
   "section_break_2",
   "item_code",
+  "product_bundle",
   "supplier_part_no",
   "column_break_2",
   "item_name",
@@ -956,12 +957,19 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "product_bundle",
+   "fieldtype": "Link",
+   "label": "Product Bundle",
+   "options": "Product Bundle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-29 04:17:00.336298",
+ "modified": "2021-09-01 16:02:40.338597",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

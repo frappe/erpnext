@@ -20,4 +20,3 @@ QUnit.test("test Batch", function(assert) {
 		() => done()
 	]);
 });
-

@@ -3,10 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe.model.document import Document
+
 from erpnext.erpnext_integrations.utils import get_webhook_address
+
 
 class ShopifyLog(Document):
 	pass

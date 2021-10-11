@@ -3,14 +3,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, math, json
-import erpnext
+
+import json
+import math
+
+import frappe
 from frappe import _
+from frappe.utils import add_months, flt, getdate, now_datetime, nowdate
 from six import string_types
-from frappe.utils import flt, rounded, add_months, nowdate, getdate, now_datetime
-from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
+
+import erpnext
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
+	get_pledged_security_qty,
+)
+
 
 class Loan(AccountsController):
 	def validate(self):
@@ -361,7 +369,9 @@ def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, a
 	return unpledge_request
 
 def validate_employee_currency_with_company_currency(applicant, company):
-	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
+	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+		get_employee_currency,
+	)
 	if not applicant:
 		frappe.throw(_("Please select Applicant"))
 	if not company:

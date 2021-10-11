@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import cstr, cint, getdate
-from frappe import msgprint, _
+
 from calendar import monthrange
+
+import frappe
+from frappe import _, msgprint
+from frappe.utils import cint, cstr, getdate
 
 status_map = {
 	"Absent": "A",

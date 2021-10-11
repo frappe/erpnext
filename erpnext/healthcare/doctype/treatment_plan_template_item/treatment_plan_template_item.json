@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "creation": "2021-06-10 11:47:29.194795",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "template",
+  "qty",
+  "instructions"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Template",
+   "options": "type",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "label": "Qty"
+  },
+  {
+   "fieldname": "instructions",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Instructions"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-08-17 11:19:03.515441",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Treatment Plan Template Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -3,15 +3,18 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.accounts.doctype.tax_rule.tax_rule import IncorrectCustomerGroup, IncorrectSupplierType, ConflictingTaxRule, get_tax_template
-from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+import frappe
+
+from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
+from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 
 test_records = frappe.get_test_records('Tax Rule')
 
 from six import iteritems
+
 
 class TestTaxRule(unittest.TestCase):
 	@classmethod
@@ -50,7 +53,7 @@ class TestTaxRule(unittest.TestCase):
 		tax_rule1 = make_tax_rule(customer_group= "All Customer Groups",
 			sales_tax_template = "_Test Sales Taxes and Charges Template - _TC", priority = 1, from_date = "2015-01-01")
 		tax_rule1.save()
-		self.assertEqual(get_tax_template("2015-01-01", {"customer_group" : "Commercial", "use_for_shopping_cart":0}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer_group" : "Commercial", "use_for_shopping_cart":1}),
 			"_Test Sales Taxes and Charges Template - _TC")
 
 	def test_conflict_with_overlapping_dates(self):

@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.model.document import Document
 
@@ -18,5 +19,3 @@ class CashFlowMapping(Document):
 				frappe._('You can only select a maximum of one option from the list of check boxes.'),
 				title='Error'
 			)
-
-

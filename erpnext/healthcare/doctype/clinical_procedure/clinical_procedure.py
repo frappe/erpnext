@@ -3,15 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, nowtime, cstr
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, nowdate, nowtime
+
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
-from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.get_item_details import get_item_details
-from frappe.model.mapper import get_mapped_doc
+from erpnext.stock.stock_ledger import get_previous_sle
+
 
 class ClinicalProcedure(Document):
 	def validate(self):

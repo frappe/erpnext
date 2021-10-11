@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Service Level Agreement', {
-	setup: function(frm) {
+	refresh: function(frm) {
 		let allow_statuses = [];
 		const exclude_statuses = ['Open', 'Closed', 'Resolved'];
 

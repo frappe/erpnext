@@ -150,8 +150,8 @@ frappe.ui.form.on('Shipment', {
 							frm.set_value('pickup_contact_name', '');
 							frm.set_value('pickup_contact', '');
 						}
-						frappe.throw(__("Email or Phone/Mobile of the Contact are mandatory to continue.") 
-							+ "</br>" + __("Please set Email/Phone for the contact") 
+						frappe.throw(__("Email or Phone/Mobile of the Contact are mandatory to continue.")
+							+ "</br>" + __("Please set Email/Phone for the contact")
 							+ ` <a href='/app/contact/${contact_name}'>${contact_name}</a>`);
 					}
 					let contact_display = r.message.contact_display;
@@ -244,8 +244,8 @@ frappe.ui.form.on('Shipment', {
 					frm.set_value('pickup_company', '');
 					frm.set_value('pickup_contact', '');
 				}
-				frappe.throw(__("Last Name, Email or Phone/Mobile of the user are mandatory to continue.") + "</br>" 
-					+ __("Please first set Last Name, Email and Phone for the user") 
+				frappe.throw(__("Last Name, Email or Phone/Mobile of the user are mandatory to continue.") + "</br>"
+					+ __("Please first set Last Name, Email and Phone for the user")
 					+ ` <a href="/app/user/${frappe.session.user}">${frappe.session.user}</a>`);
 			}
 			let contact_display = r.full_name;

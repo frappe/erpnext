@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
+
 import unittest
 
 import frappe
-from erpnext import encode_company_abbr
 from six.moves import range
+
+from erpnext import encode_company_abbr
 
 test_records = frappe.get_test_records('Company')
 

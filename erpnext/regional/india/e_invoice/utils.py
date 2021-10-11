@@ -3,24 +3,39 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import base64
+import io
+import json
 import os
 import re
-import jwt
 import sys
-import json
-import base64
-import frappe
-import six
 import traceback
-import io
+
+import frappe
+import jwt
+import six
 from frappe import _, bold
-from pyqrcode import create as qrcreate
-from frappe.utils.background_jobs import enqueue
-from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
-from frappe.integrations.utils import make_post_request, make_get_request
+from frappe.integrations.utils import make_get_request, make_post_request
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.data import (
+	add_to_date,
+	cint,
+	cstr,
+	flt,
+	format_date,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
+from frappe.utils.scheduler import is_scheduler_inactive
+from pyqrcode import create as qrcreate
+
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
+
 
 @frappe.whitelist()
 def validate_eligibility(doc):
@@ -42,7 +57,10 @@ def validate_eligibility(doc):
 	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
-	no_taxes_applied = not doc.get('taxes')
+
+	# if export invoice, then taxes can be empty
+	# invoice can only be ineligible if no taxes applied and is not an export invoice
+	no_taxes_applied = not doc.get('taxes') and not doc.get('gst_category') == 'Overseas'
 	has_non_gst_item = any(d for d in doc.get('items', []) if d.get('is_non_gst'))
 
 	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied or has_non_gst_item:
@@ -187,10 +205,13 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-
-		item.unit_rate = abs((abs(item.taxable_value) - item.discount_amount)/ item.qty)
-		item.gross_amount = abs(item.taxable_value) + item.discount_amount
+		if flt(item.qty) != 0.0:
+			item.unit_rate = abs(item.taxable_value / item.qty)
+		else:
+			item.unit_rate = abs(item.taxable_value)
+		item.gross_amount = abs(item.taxable_value)
 		item.taxable_value = abs(item.taxable_value)
+		item.discount_amount = 0
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
@@ -312,10 +333,6 @@ def get_payment_details(invoice):
 	))
 
 def get_return_doc_reference(invoice):
-	if not invoice.return_against:
-		frappe.throw(_('For generating IRN, reference to the original invoice is mandatory for a credit note. Please set {} field to generate e-invoice.')
-			.format(frappe.bold('Return Against')), title=_('Missing Field'))
-
 	invoice_date = frappe.db.get_value('Sales Invoice', invoice.return_against, 'posting_date')
 	return frappe._dict(dict(
 		invoice_name=invoice.return_against, invoice_date=format_date(invoice_date, 'dd/mm/yyyy')
@@ -431,7 +448,7 @@ def make_einvoice(invoice):
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 
-	if invoice.is_return:
+	if invoice.is_return and invoice.return_against:
 		prev_doc_details = get_return_doc_reference(invoice)
 
 	if invoice.transporter and not invoice.is_return:
@@ -481,7 +498,7 @@ def log_error(data=None):
 		"Data:", data, seperator,
 		"Exception:", err_tb
 	])
-	frappe.log_error(title=_('E Invoice Request Failed'), message=message)
+	return frappe.log_error(title=_('E Invoice Request Failed'), message=message)
 
 def santize_einvoice_fields(einvoice):
 	int_fields = ["Pin","Distance","CrDay"]
@@ -910,7 +927,7 @@ class GSPConnector():
 
 		return errors
 
-	def raise_error(self, raise_exception=False, errors=[]):
+	def raise_error(self, raise_exception=False, errors=None):
 		title = _('E Invoice Request Failed')
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
@@ -962,7 +979,7 @@ class GSPConnector():
 			"attached_to_doctype": doctype,
 			"attached_to_name": docname,
 			"attached_to_field": "qrcode_image",
-			"is_private": 1,
+			"is_private": 0,
 			"content": qr_image.getvalue()})
 		_file.save()
 		frappe.db.commit()

@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	"""Set the payment gateway account as Email for all the existing payment channel."""

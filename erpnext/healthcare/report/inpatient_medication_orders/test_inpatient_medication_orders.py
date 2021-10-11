@@ -2,14 +2,32 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest
-import frappe
+
 import datetime
+import unittest
+
+import frappe
 from frappe.utils import getdate, now_datetime
-from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import create_patient, create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
-from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-from erpnext.healthcare.doctype.inpatient_medication_order.test_inpatient_medication_order import create_ipmo, create_ipme
-from erpnext.healthcare.report.inpatient_medication_orders.inpatient_medication_orders import execute
+
+from erpnext.healthcare.doctype.inpatient_medication_order.test_inpatient_medication_order import (
+	create_ipme,
+	create_ipmo,
+)
+from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+	admit_patient,
+	discharge_patient,
+	schedule_discharge,
+)
+from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import (
+	create_inpatient,
+	create_patient,
+	get_healthcare_service_unit,
+	mark_invoiced_inpatient_occupancy,
+)
+from erpnext.healthcare.report.inpatient_medication_orders.inpatient_medication_orders import (
+	execute,
+)
+
 
 class TestInpatientMedicationOrders(unittest.TestCase):
 	@classmethod
@@ -25,7 +43,7 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 			'from_date': getdate(),
 			'to_date': getdate(),
 			'patient': '_Test IPD Patient',
-			'service_unit': 'Test Service Unit Ip Occupancy - _TC'
+			'service_unit': '_Test Service Unit Ip Occupancy - _TC'
 		}
 
 		report = execute(filters)
@@ -42,7 +60,7 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 				'date': getdate(),
 				'time': datetime.timedelta(seconds=32400),
 				'is_completed': 0,
-				'healthcare_service_unit': 'Test Service Unit Ip Occupancy - _TC'
+				'healthcare_service_unit': '_Test Service Unit Ip Occupancy - _TC'
 			},
 			{
 				'patient': '_Test IPD Patient',
@@ -55,7 +73,7 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 				'date': getdate(),
 				'time': datetime.timedelta(seconds=50400),
 				'is_completed': 0,
-				'healthcare_service_unit': 'Test Service Unit Ip Occupancy - _TC'
+				'healthcare_service_unit': '_Test Service Unit Ip Occupancy - _TC'
 			},
 			{
 				'patient': '_Test IPD Patient',
@@ -68,7 +86,7 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 				'date': getdate(),
 				'time': datetime.timedelta(seconds=75600),
 				'is_completed': 0,
-				'healthcare_service_unit': 'Test Service Unit Ip Occupancy - _TC'
+				'healthcare_service_unit': '_Test Service Unit Ip Occupancy - _TC'
 			}
 		]
 
@@ -83,7 +101,7 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 			'from_date': getdate(),
 			'to_date': getdate(),
 			'patient': '_Test IPD Patient',
-			'service_unit': 'Test Service Unit Ip Occupancy - _TC',
+			'service_unit': '_Test Service Unit Ip Occupancy - _TC',
 			'show_completed_orders': 0
 		}
 
@@ -93,12 +111,12 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 	def tearDown(self):
 		if frappe.db.get_value('Patient', self.patient, 'inpatient_record'):
 			# cleanup - Discharge
-			schedule_discharge(frappe.as_json({'patient': self.patient}))
+			schedule_discharge(frappe.as_json({'patient': self.patient, 'discharge_ordered_datetime': now_datetime()}))
 			self.ip_record.reload()
 			mark_invoiced_inpatient_occupancy(self.ip_record)
 
 			self.ip_record.reload()
-			discharge_patient(self.ip_record)
+			discharge_patient(self.ip_record, now_datetime())
 
 		for entry in frappe.get_all('Inpatient Medication Entry'):
 			doc = frappe.get_doc('Inpatient Medication Entry', entry.name)
@@ -119,7 +137,7 @@ def create_records(patient):
 	ip_record.expected_length_of_stay = 0
 	ip_record.save()
 	ip_record.reload()
-	service_unit = get_healthcare_service_unit('Test Service Unit Ip Occupancy')
+	service_unit = get_healthcare_service_unit('_Test Service Unit Ip Occupancy')
 	admit_patient(ip_record, service_unit, now_datetime())
 
 	ipmo = create_ipmo(patient)

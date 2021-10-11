@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	if not filters:
@@ -121,4 +123,3 @@ def get_chart_data(data):
 		},
 		'type': 'bar'
 	}
-

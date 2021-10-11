@@ -2,11 +2,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt, nowdate, add_years, cint, getdate
+from frappe.utils import add_years, cint, flt, getdate
+
+import erpnext
 from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
 
 def execute(filters=None):
 	return ForecastingReport(filters).execute_report()

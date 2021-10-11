@@ -1,6 +1,8 @@
 """Import Address Templates from ./templates directory."""
 import os
+
 import frappe
+
 
 def set_up_address_templates(default_country=None):
 	for country, html in get_address_templates():
@@ -10,7 +12,7 @@ def set_up_address_templates(default_country=None):
 def get_address_templates():
 	"""
 	Return country and path for all HTML files in this directory.
-	
+
 	Returns a list of dicts.
 	"""
 	def country(file_name):

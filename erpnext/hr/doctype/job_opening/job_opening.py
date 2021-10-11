@@ -4,11 +4,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 
-from frappe.website.website_generator import WebsiteGenerator
+import frappe
 from frappe import _
-from erpnext.hr.doctype.staffing_plan.staffing_plan import get_designation_counts, get_active_staffing_plan_details
+from frappe.website.website_generator import WebsiteGenerator
+
+from erpnext.hr.doctype.staffing_plan.staffing_plan import (
+	get_active_staffing_plan_details,
+	get_designation_counts,
+)
+
 
 class JobOpening(WebsiteGenerator):
 	website = frappe._dict(

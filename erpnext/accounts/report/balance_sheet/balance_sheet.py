@@ -2,11 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, cint
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data,
-	get_filtered_list_for_consolidated_report)
+from frappe.utils import cint, flt
+
+from erpnext.accounts.report.financial_statements import (
+	get_columns,
+	get_data,
+	get_filtered_list_for_consolidated_report,
+	get_period_list,
+)
+
 
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,

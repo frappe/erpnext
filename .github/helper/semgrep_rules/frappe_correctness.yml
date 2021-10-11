@@ -98,8 +98,6 @@ rules:
   languages: [python]
   severity: WARNING
   paths:
-      exclude:
-        - test_*.py
       include:
         - "*/**/doctype/*"
 

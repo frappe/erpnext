@@ -3,20 +3,28 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from six import iteritems
-from frappe.model.document import Document
-from frappe import _
 from collections import OrderedDict
-from frappe.utils import floor, flt, today, cint
-from frappe.model.mapper import get_mapped_doc, map_child_doc
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.model.mapper import map_child_doc
+from frappe.utils import cint, floor, flt, today
+from six import iteritems
+
+from erpnext.selling.doctype.sales_order.sales_order import (
+	make_delivery_note as create_delivery_note_from_sales_order,
+)
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
 
 # TODO: Prioritize SO or WO group warehouse
 
 class PickList(Document):
+	def validate(self):
+		self.validate_for_qty()
+
 	def before_save(self):
 		self.set_item_locations()
 
@@ -35,6 +43,7 @@ class PickList(Document):
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
+		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
@@ -106,6 +115,11 @@ class PickList(Document):
 			self.item_count_map[item_code] += item.stock_qty
 
 		return item_map.values()
+
+	def validate_for_qty(self):
+		if self.purpose == "Material Transfer for Manufacture" \
+				and (self.for_qty is None or self.for_qty == 0):
+			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
 
 
 def validate_item_locations(pick_list):
@@ -230,6 +244,7 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			and sle.`item_code`=%(item_code)s
 			and sle.`company` = %(company)s
 			and batch.disabled = 0
+			and sle.is_cancelled=0
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY

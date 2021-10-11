@@ -3,13 +3,20 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import now_datetime, today
 from frappe.utils.make_random import get_random
-from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
+
+from erpnext.healthcare.doctype.inpatient_record.inpatient_record import (
+	admit_patient,
+	discharge_patient,
+	schedule_discharge,
+)
 from erpnext.healthcare.doctype.lab_test.test_lab_test import create_patient_encounter
 from erpnext.healthcare.utils import get_encounters_to_invoice
+
 
 class TestInpatientRecord(unittest.TestCase):
 	def test_admit_and_discharge(self):
@@ -29,7 +36,7 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertEqual("Occupied", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		# Discharge
-		schedule_discharge(frappe.as_json({'patient': patient}))
+		schedule_discharge(frappe.as_json({'patient': patient, 'discharge_ordered_datetime': now_datetime()}))
 		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
@@ -37,7 +44,7 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, ip_record.discharge)
 		mark_invoiced_inpatient_occupancy(ip_record1)
 
-		discharge_patient(ip_record1)
+		discharge_patient(ip_record1, now_datetime())
 
 		self.assertEqual(None, frappe.db.get_value("Patient", patient, "inpatient_record"))
 		self.assertEqual(None, frappe.db.get_value("Patient", patient, "inpatient_status"))
@@ -56,7 +63,7 @@ class TestInpatientRecord(unittest.TestCase):
 		admit_patient(ip_record, service_unit, now_datetime())
 
 		# Discharge
-		schedule_discharge(frappe.as_json({"patient": patient}))
+		schedule_discharge(frappe.as_json({"patient": patient, 'discharge_ordered_datetime': now_datetime()}))
 		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record = frappe.get_doc("Inpatient Record", ip_record.name)
@@ -88,12 +95,12 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertFalse(patient_encounter.name in encounter_ids)
 
 		# Discharge
-		schedule_discharge(frappe.as_json({"patient": patient}))
+		schedule_discharge(frappe.as_json({"patient": patient, 'discharge_ordered_datetime': now_datetime()}))
 		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record)
-		discharge_patient(ip_record)
+		discharge_patient(ip_record, now_datetime())
 		setup_inpatient_settings(key="do_not_bill_inpatient_encounters", value=0)
 
 	def test_validate_overlap_admission(self):
@@ -151,7 +158,7 @@ def get_healthcare_service_unit(unit_name=None):
 
 	if not service_unit:
 		service_unit = frappe.new_doc("Healthcare Service Unit")
-		service_unit.healthcare_service_unit_name = unit_name or "Test Service Unit Ip Occupancy"
+		service_unit.healthcare_service_unit_name = unit_name or "_Test Service Unit Ip Occupancy"
 		service_unit.company = "_Test Company"
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1
@@ -159,12 +166,12 @@ def get_healthcare_service_unit(unit_name=None):
 		service_unit.is_group = 0
 		service_unit_parent_name = frappe.db.exists({
 				"doctype": "Healthcare Service Unit",
-				"healthcare_service_unit_name": "All Healthcare Service Units",
+				"healthcare_service_unit_name": "_Test All Healthcare Service Units",
 				"is_group": 1
 				})
 		if not service_unit_parent_name:
 			parent_service_unit = frappe.new_doc("Healthcare Service Unit")
-			parent_service_unit.healthcare_service_unit_name = "All Healthcare Service Units"
+			parent_service_unit.healthcare_service_unit_name = "_Test All Healthcare Service Units"
 			parent_service_unit.is_group = 1
 			parent_service_unit.save(ignore_permissions = True)
 			service_unit.parent_healthcare_service_unit = parent_service_unit.name
@@ -180,7 +187,7 @@ def get_service_unit_type():
 
 	if not service_unit_type:
 		service_unit_type = frappe.new_doc("Healthcare Service Unit Type")
-		service_unit_type.service_unit_type = "Test Service Unit Type Ip Occupancy"
+		service_unit_type.service_unit_type = "_Test Service Unit Type Ip Occupancy"
 		service_unit_type.inpatient_occupancy = 1
 		service_unit_type.save(ignore_permissions = True)
 		return service_unit_type.name
