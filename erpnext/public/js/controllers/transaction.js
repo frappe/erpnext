@@ -1443,6 +1443,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	apply_price_list: function(item, reset_plc_conversion) {
+		if(this.frm.doctype == "Sales Invoice" && this.frm.doc.items.length > 0){
+			if(this.frm.doc.items[0].pb_quotation){
+				console.log("Price List Ignored")
+				return 0
+			}
+		}
 		// We need to reset plc_conversion_rate sometimes because the call to
 		// `erpnext.stock.get_item_details.apply_price_list` is sensitive to its value
 		if (!reset_plc_conversion) {
