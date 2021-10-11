@@ -275,6 +275,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 						company: me.frm.doc.company,
 						item_code: me.frm.doc.item_code,
 						transaction_date: me.frm.doc.transaction_date,
+						delivery_period: me.frm.doc.delivery_period,
 						vehicle_price_list: me.frm.doc.vehicle_price_list,
 						supplier: me.frm.doc.supplier,
 						customer: me.frm.doc.customer,
@@ -292,7 +293,8 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 							() => me.frm.trigger('payment_terms_template'),
 							() => me.frm.trigger('tc_name'),
 							() => me.frm.trigger('image'),
-							() => callback && callback(r)
+							() => callback && callback(r),
+							() => me.frm.refresh_fields()
 						]);
 					}
 				}
@@ -313,9 +315,16 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 				me.frm.refresh_field('lead_time_days');
 			}
 
-			frappe.db.get_value("Vehicle Allocation Period", me.frm.doc.delivery_period, "to_date", function (r) {
-				if (r) {
-					me.frm.set_value("delivery_date", r.to_date);
+			frappe.call({
+				method: "erpnext.vehicles.vehicle_booking_controller.get_delivery_period_details",
+				args: {
+					delivery_period: me.frm.doc.delivery_period,
+					item_code: me.frm.doc.item_code,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.set_value(r.message);
+					}
 				}
 			});
 		}
@@ -420,7 +429,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 
 	delivery_date: function () {
 		if (this.frm.doc.delivery_date) {
-			this.get_delivery_period();
+			this.get_delivery_period_details_from_date();
 			this.set_lead_time_days();
 			this.frm.trigger('payment_terms_template');
 		}
@@ -445,18 +454,21 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	get_delivery_period: function () {
+	get_delivery_period_details_from_date: function () {
 		var me = this;
 		if (me.frm.doc.delivery_date) {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_allocation_period.vehicle_allocation_period.get_delivery_period",
+				method: "erpnext.vehicles.vehicle_booking_controller.get_delivery_period_details_from_date",
 				args: {
-					date: me.frm.doc.delivery_date
+					delivery_date: me.frm.doc.delivery_date,
+					item_code: me.frm.doc.item_code,
 				},
 				callback: function (r) {
 					if (!r.exc) {
-						me.frm.doc.delivery_period = r.message;
+						me.frm.doc.delivery_period = r.message.delivery_period;
 						me.frm.refresh_field('delivery_period');
+
+						me.frm.set_value('vehicle_allocation_required', cint(r.message.vehicle_allocation_required));
 					}
 				}
 			});
