@@ -9,6 +9,8 @@
  "field_order": [
   "sb_disabled",
   "disabled",
+  "column_break_24",
+  "use_batchwise_valuation",
   "sb_batch",
   "batch_id",
   "item",
@@ -186,6 +188,18 @@
    "fieldtype": "Float",
    "label": "Produced Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_batchwise_valuation",
+   "fieldtype": "Check",
+   "label": "Use Batch-wise Valuation",
+   "read_only": 1,
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-archive",
@@ -193,7 +207,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2021-07-08 16:22:01.343105",
+ "modified": "2021-10-11 13:38:12.806976",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
