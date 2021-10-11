@@ -109,16 +109,10 @@ class Opportunity(TransactionBase):
 			self.party_name = lead_name
 
 	def map_fields(self):
-		print("called")
 		for field in self.meta.fields:
-			print(field.fieldname, "in here")
-			print(hasattr(self, field.fieldname), self.get(field.fieldname))
 			if not self.get(field.fieldname):
-				print("in if")
 				try:
-					print(field.fieldname)
 					value = frappe.db.get_value(self.opportunity_from, self.party_name, field.fieldname)
-					print(value, field.fieldname)
 					frappe.db.set(self, field.fieldname, value)
 				except Exception:
 					continue
