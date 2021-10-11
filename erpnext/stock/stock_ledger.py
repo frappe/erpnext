@@ -123,6 +123,10 @@ def set_as_cancel(voucher_type, voucher_no):
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+	batch_no = args.get("batch_no")
+	args.update({"use_batchwise_valuation": 0})
+	if batch_no and frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation"):
+		args.update({"use_batchwise_valuation": 1})
 	args.update({"doctype": "Stock Ledger Entry"})
 	sle = frappe.get_doc(args)
 	sle.flags.ignore_permissions = 1
@@ -941,8 +945,7 @@ def get_valuation_rate(item_code, warehouse=None, voucher_type=None,
 
 	has_voucher_details = voucher_no and voucher_type
 	last_valuation_rate = None
-	if batch_no and warehouse and has_voucher_details and\
-		frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation", cache=True):
+	if batch_no and warehouse and has_voucher_details:
 		# Get valuation_rate from last SLE with matching batch_no, warehouse
 		last_valuation_rate = frappe.db.sql("""SELECT valuation_rate
 			FROM `tabStock Ledger Entry` FORCE INDEX (item_warehouse)
@@ -952,7 +955,6 @@ def get_valuation_rate(item_code, warehouse=None, voucher_type=None,
 				AND warehouse = %s
 				AND valuation_rate >= 0
 				AND NOT (voucher_no = %s AND voucher_type = %s)
-				AND use_batchwise_valuation = 1
 			ORDER BY posting_date desc, posting_time desc, name DESC LIMIT 1""",
 			(item_code, batch_no, warehouse, voucher_no, voucher_type))
 

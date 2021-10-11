@@ -356,7 +356,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		frappe.db.commit()
 		frappe.db.begin()
 
-		item, warehouses, batches = setup_batchwise_item_valuation_test(
+		item, warehouses, batches = setup_item_valuation_test(
 			valuation_method="FIFO", suffix="010"
 		)
 
@@ -400,7 +400,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		frappe.db.commit()
 		frappe.db.begin()
 
-		item, warehouses, batches = setup_batchwise_item_valuation_test(
+		item, warehouses, batches = setup_item_valuation_test(
 			valuation_method="Moving Average", suffix="001"
 		)
 
@@ -445,7 +445,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		frappe.db.commit()
 		frappe.db.begin()
 
-		item, warehouses, batches = setup_batchwise_item_valuation_test(
+		item, warehouses, batches = setup_item_valuation_test(
 			valuation_method="FIFO", suffix="000"
 		)
 
@@ -509,6 +509,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 
 		frappe.db.rollback()
 
+
 	def test_batchwise_item_valuation_stock_entry(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
 		frappe.db.commit()
@@ -521,7 +522,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				'qty_after_transaction',
 				'stock_queue',
 		]
-		item, warehouses, batches = setup_batchwise_item_valuation_test(
+		item, warehouses, batches = setup_item_valuation_test(
 			valuation_method="FIFO", suffix="001"
 		)
 
@@ -651,6 +652,165 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			check_sle_details_against_expected(*details)
 
 
+	def test_joint_item_valuation_stock_entry(self):
+		"""
+			Checking the valuation of a single item
+			with three batches. Where the first batch
+			uses batch-wise item valuation.
+
+			Legacy valuation should ignore batches using
+			batch-wise item valuation.
+		"""
+		frappe.db.commit()
+		frappe.db.begin()
+
+		columns = [
+				'stock_value_difference',
+				'stock_value',
+				'actual_qty',
+				'qty_after_transaction',
+				'stock_queue',
+		]
+		item, warehouses, batches = setup_item_valuation_test(
+			valuation_method="FIFO", suffix="0101",
+			use_batchwise_valuation=[1, 0, 0], batches_list=['X', 'Y', 'Z']
+		)
+
+		def check_sle_details_against_expected(sle_details, expected_sle_details, detail, columns):
+			for i, (sle_vals, ex_sle_vals) in enumerate(zip(sle_details, expected_sle_details)):
+				for col, sle_val, ex_sle_val in zip(columns, sle_vals, ex_sle_vals):
+					if col == 'stock_queue':
+						sle_val = get_stock_value_from_q(sle_val)
+						ex_sle_val = get_stock_value_from_q(ex_sle_val)
+					self.assertEqual(
+						sle_val, ex_sle_val,
+						f"Incorrect {col} value on transaction #: {i} in {detail}"
+					)
+
+		# List used to defer assertions to prevent commits cause of error skipped rollback
+		details_list = []
+
+
+		# Test Material Receipt Entries
+		se_entry_list_mr = [
+			(item, None, warehouses[0], batches[0], 1, 150, "2021-01-21"),
+			(item, None, warehouses[0], batches[1], 1, 50, "2021-01-23"),
+			(item, None, warehouses[0], batches[2], 1, 100, "2021-01-25"),
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_mr, "Material Receipt"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			(150.0, 150.0, 1.0, 1.0, '[[1.0, 150.0]]'),
+			(50.0, 50.0, 1.0, 1.0, '[[1.0, 50.0]]'),
+			(100.0, 150.0, 1.0, 2.0, '[[1.0, 50.0], [1.0, 100.0]]'),
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Receipt Entries", columns
+		))
+
+
+		# Test Material Issue Entries
+		se_entry_list_mi = [
+			(item, warehouses[0], None, batches[2], 1, None, "2021-01-27"),
+			(item, warehouses[0], None, batches[0], 1, None, "2021-01-29"),
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_mi, "Material Issue"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			(-50.0, 100.0, -1.0, 1.0, '[[1, 100.0]]'),
+			(-150.0, 0.0, -1.0, 0.0, '[[0, 150.0]]')
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Issue Entries", columns
+		))
+
+
+		frappe.db.rollback()
+
+		# Run assertions
+		for details in details_list:
+			check_sle_details_against_expected(*details)
+
+
+	def test_legacy_item_valuation_stock_entry(self):
+		frappe.db.commit()
+		frappe.db.begin()
+
+		columns = [
+				'stock_value_difference',
+				'stock_value',
+				'actual_qty',
+				'qty_after_transaction',
+				'stock_queue',
+		]
+		item, warehouses, batches = setup_item_valuation_test(
+			valuation_method="FIFO", suffix="1001", use_batchwise_valuation=0
+		)
+
+		def check_sle_details_against_expected(sle_details, expected_sle_details, detail, columns):
+			for i, (sle_vals, ex_sle_vals) in enumerate(zip(sle_details, expected_sle_details)):
+				for col, sle_val, ex_sle_val in zip(columns, sle_vals, ex_sle_vals):
+					if col == 'stock_queue':
+						sle_val = get_stock_value_from_q(sle_val)
+						ex_sle_val = get_stock_value_from_q(ex_sle_val)
+					self.assertEqual(
+						sle_val, ex_sle_val,
+						f"Incorrect {col} value on transaction #: {i} in {detail}"
+					)
+
+		# List used to defer assertions to prevent commits cause of error skipped rollback
+		details_list = []
+
+
+		# Test Material Receipt Entries
+		se_entry_list_mr = [
+			(item, None, warehouses[0], batches[0], 1,  50, "2021-01-21"),
+			(item, None, warehouses[0], batches[1], 1, 100, "2021-01-23"),
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_mr, "Material Receipt"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			(50.0, 50.0, 1.0, 1.0, '[[1.0, 50.0]]'),
+			(100.0, 150.0, 1.0, 2.0, '[[1.0, 50.0], [1.0, 100.0]]'),
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Receipt Entries", columns
+		))
+
+
+		# Test Material Issue Entries
+		se_entry_list_mi = [
+			(item, warehouses[0], None, batches[1], 1, None, "2021-01-29"),
+		]
+		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
+			se_entry_list_mi, "Material Issue"
+		)
+		sle_details = fetch_sle_details_for_doc_list(ses, columns=columns, as_dict=0)
+		expected_sle_details = [
+			(-50.0, 100.0, -1.0, 1.0, '[[1, 100.0]]')
+		]
+		details_list.append((
+			sle_details, expected_sle_details,
+			"Material Issue Entries", columns
+		))
+
+
+		frappe.db.rollback()
+
+		# Run assertions
+		for details in details_list:
+			check_sle_details_against_expected(*details)
+
+
 def create_repack_entry(**args):
 	args = frappe._dict(args)
 	repack = frappe.new_doc("Stock Entry")
@@ -714,21 +874,30 @@ def create_items():
 
 	return items
 
-def setup_batchwise_item_valuation_test(valuation_method, suffix):
+def setup_item_valuation_test(valuation_method, suffix, use_batchwise_valuation=1, batches_list=['X', 'Y']):
 	from erpnext.stock.doctype.batch.batch import make_batch
 	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	item = make_item(
-		f"BWIV - Test Item {valuation_method} {suffix}",
+		f"IV - Test Item {valuation_method} {suffix}",
 		dict(valuation_method=valuation_method, has_batch_no=1)
 	)
-	warehouses = [create_warehouse(f"BWIV - Test Warehouse {i}") for i in ['J', 'K']]
-	batches = [f"BWIV - Test Batch {i} {valuation_method} {suffix}" for i in ['X', 'Y']]
+	warehouses = [create_warehouse(f"IV - Test Warehouse {i}") for i in ['J', 'K']]
+	batches = [f"IV - Test Batch {i} {valuation_method} {suffix}" for i in batches_list]
 
-	for batch_id in batches:
+	for i, batch_id in enumerate(batches):
 		if not frappe.db.exists("Batch", batch_id):
-			make_batch(frappe._dict(batch_id=batch_id, item=item.item_code, use_batchwise_valuation=1))
+			ubw = use_batchwise_valuation
+			if isinstance(use_batchwise_valuation, (list, tuple)):
+				ubw = use_batchwise_valuation[i]
+			make_batch(
+				frappe._dict(
+					batch_id=batch_id,
+					item=item.item_code,
+					use_batchwise_valuation=ubw
+				)
+			)
 
 	return item.item_code, warehouses, batches
 
@@ -765,7 +934,7 @@ def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list
 def fetch_sle_details_for_doc_list(doc_list, columns, as_dict=1):
 	return frappe.db.sql(f"""
 		SELECT { ', '.join(columns)}
-		FROM `tabstock Ledger Entry`
+		FROM `tabStock Ledger Entry`
 		WHERE
 			voucher_no IN %(voucher_nos)s
 			and docstatus = 1
