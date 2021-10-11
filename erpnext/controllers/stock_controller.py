@@ -643,7 +643,8 @@ def get_conditions_to_validate_future_sle(sl_entries):
 	conditions_map = {}
 	for entry in sl_entries:
 		key = (entry.warehouse, 'item_code')
-		if entry.get('batch_no'):
+		batch_no = entry.get('batch_no')
+		if batch_no and frappe.db.get_value('Batch', batch_no, "use_batchwise_valuation", cache=True):
 			key = (entry.warehouse, 'batch_no')
 
 		if key not in conditions_map:

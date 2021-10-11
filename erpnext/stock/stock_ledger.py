@@ -292,9 +292,7 @@ class update_entries_after(object):
 		"""
 		self.data.setdefault(args.warehouse, frappe._dict())
 		warehouse_dict = self.data[args.warehouse]
-		previous_sle = get_previous_sle_of_current_voucher(
-			args, filter_batch_wise=True
-		)
+		previous_sle = get_previous_sle_of_current_voucher(args)
 		warehouse_dict.previous_sle = previous_sle
 
 		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
@@ -332,13 +330,13 @@ class update_entries_after(object):
 			self.raise_exceptions()
 
 	def process_sle_against_current_timestamp(self):
-		sl_entries = self.get_sle_against_current_voucher(filter_batch_wise=True)
+		sl_entries = self.get_sle_against_current_voucher()
 		for sle in sl_entries:
 			self.process_sle(sle)
 
-	def get_sle_against_current_voucher(self, filter_batch_wise=False):
+	def get_sle_against_current_voucher(self):
 		self.args['time_format'] = '%H:%i:%s'
-		batch_condition = get_batch_condition(self.args, filter_batch_wise)
+		batch_condition = get_batch_condition(self.args)
 
 		return frappe.db.sql("""
 			select
@@ -782,13 +780,13 @@ class update_entries_after(object):
 
 	def get_sle_before_datetime(self, args):
 		"""get previous stock ledger entry before current time-bucket"""
-		sle = get_stock_ledger_entries(args, "<", "desc", "limit 1", for_update=False, check_batch_no=True)
+		sle = get_stock_ledger_entries(args, "<", "desc", "limit 1", for_update=False)
 		sle = sle[0] if sle else frappe._dict()
 		return sle
 
 	def get_sle_after_datetime(self, args):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
-		return get_stock_ledger_entries(args, ">", "asc", for_update=True, check_serial_no=False, check_batch_no=True)
+		return get_stock_ledger_entries(args, ">", "asc", for_update=True, check_serial_no=False)
 
 	def raise_exceptions(self):
 		msg_list = []
@@ -830,7 +828,7 @@ class update_entries_after(object):
 			})
 
 
-def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False, filter_batch_wise=False):
+def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 
 	args['time_format'] = '%H:%i:%s'
@@ -844,7 +842,7 @@ def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False, fil
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	batch_condition = get_batch_condition(args, filter_batch_wise)
+	batch_condition = get_batch_condition(args)
 
 	sle = frappe.db.sql("""
 		select *, timestamp(posting_date, posting_time) as "timestamp"
@@ -879,11 +877,11 @@ def get_previous_sle(args, for_update=False):
 		}
 	"""
 	args["name"] = args.get("sle", None) or ""
-	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update, check_batch_no=True)
+	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
 
 def get_stock_ledger_entries(previous_sle, operator=None,
-	order="desc", limit=None, for_update=False, debug=False, check_serial_no=True, check_batch_no=False):
+	order="desc", limit=None, for_update=False, debug=False, check_serial_no=True):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
 	if previous_sle.get("warehouse"):
@@ -891,8 +889,7 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	elif previous_sle.get("warehouse_condition"):
 		conditions += " and " + previous_sle.get("warehouse_condition")
 
-	if check_batch_no:
-		conditions += get_batch_condition(previous_sle, filter_batch_wise=True)
+	conditions += get_batch_condition(previous_sle)
 
 	if check_serial_no and previous_sle.get("serial_no"):
 		# conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))
@@ -944,30 +941,32 @@ def get_valuation_rate(item_code, warehouse=None, voucher_type=None,
 
 	has_voucher_details = voucher_no and voucher_type
 	last_valuation_rate = None
-	if batch_no and warehouse and has_voucher_details:
+	if batch_no and warehouse and has_voucher_details and\
+		frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation", cache=True):
 		# Get valuation_rate from last SLE with matching batch_no, warehouse
-		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry` force index (item_warehouse)
-			where
+		last_valuation_rate = frappe.db.sql("""SELECT valuation_rate
+			FROM `tabStock Ledger Entry` FORCE INDEX (item_warehouse)
+			WHERE
 				item_code = %s
 				AND batch_no = %s
 				AND warehouse = %s
 				AND valuation_rate >= 0
 				AND NOT (voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""",
+				AND use_batchwise_valuation = 1
+			ORDER BY posting_date desc, posting_time desc, name DESC LIMIT 1""",
 			(item_code, batch_no, warehouse, voucher_no, voucher_type))
 
 
 	if not last_valuation_rate and warehouse and has_voucher_details:
 		# Get valuation_rate from last SLE with any batch_no, and matching warehouse
-		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry` force index (item_warehouse)
-			where
+		last_valuation_rate = frappe.db.sql("""SELECT valuation_rate
+			FROM `tabStock Ledger Entry` FORCE INDEX (item_warehouse)
+			WHERE
 				item_code = %s
 				AND warehouse = %s
 				AND valuation_rate >= 0
 				AND NOT (voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""",
+			ORDER BY posting_date desc, posting_time desc, name DESC LIMIT 1""",
 			(item_code, warehouse, voucher_no, voucher_type))
 
 	if not last_valuation_rate and has_voucher_details:
@@ -1049,7 +1048,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		""".format(
 			qty_shift=qty_shift,
 			datetime_limit_condition=datetime_limit_condition,
-			batch_condition=get_batch_condition(args, filter_batch_wise=True)
+			batch_condition=get_batch_condition(args)
 		), args)
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
@@ -1066,7 +1065,7 @@ def get_stock_reco_qty_shift(args):
 	else:
 		# reco is being submitted
 		last_balance = get_previous_sle_of_current_voucher(args,
-			exclude_current_voucher=True, filter_batch_wise=True).get("qty_after_transaction")
+			exclude_current_voucher=True).get("qty_after_transaction")
 
 		if last_balance is not None:
 			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
@@ -1097,7 +1096,7 @@ def get_next_stock_reco(args):
 				)
 			)
 		limit 1
-	""".format(batch_condition=get_batch_condition(args, filter_batch_wise=True)), args, as_dict=1)
+	""".format(batch_condition=get_batch_condition(args)), args, as_dict=1)
 
 def get_datetime_limit_condition(detail):
 	return f"""
@@ -1141,7 +1140,7 @@ def get_future_sle_with_negative_qty(args):
 			and qty_after_transaction < 0
 		order by timestamp(posting_date, posting_time) asc
 		limit 1
-	""".format(batch_condition=get_batch_condition(args, filter_batch_wise=True)), args, as_dict=1)
+	""".format(batch_condition=get_batch_condition(args)), args, as_dict=1)
 
 def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 	""" Rounds off the number to zero only if number is close to zero for decimal
@@ -1152,9 +1151,9 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 
 	return flt(number)
 
-def get_batch_condition(args, filter_batch_wise=False):
+def get_batch_condition(args):
 	batch_no = args.get("batch_no", "")
-	batch_condition = ""
-	if batch_no and filter_batch_wise:
-		batch_condition = f"and batch_no = '{batch_no}'"
+	batch_condition = "and use_batchwise_valuation = 0"
+	if batch_no and frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation", cache=True):
+		batch_condition = f"and batch_no = '{batch_no}' and use_batchwise_valuation = 1"
 	return batch_condition

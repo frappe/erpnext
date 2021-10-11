@@ -728,7 +728,7 @@ def setup_batchwise_item_valuation_test(valuation_method, suffix):
 
 	for batch_id in batches:
 		if not frappe.db.exists("Batch", batch_id):
-			make_batch(frappe._dict(batch_id=batch_id, item=item.item_code))
+			make_batch(frappe._dict(batch_id=batch_id, item=item.item_code, use_batchwise_valuation=1))
 
 	return item.item_code, warehouses, batches
 

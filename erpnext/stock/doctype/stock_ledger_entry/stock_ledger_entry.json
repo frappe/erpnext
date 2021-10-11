@@ -17,6 +17,7 @@
   "voucher_detail_no",
   "dependant_sle_voucher_detail_no",
   "recalculate_rate",
+  "use_batchwise_valuation",
   "section_break_11",
   "actual_qty",
   "qty_after_transaction",
@@ -309,6 +310,14 @@
    "label": "Recalculate Incoming/Outgoing Rate",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "use_batchwise_valuation",
+   "fieldtype": "Check",
+   "label": "Use Batch-wise Valuation",
+   "read_only": 1,
+   "set_only_once": 1
   }
  ],
  "hide_toolbar": 1,
@@ -317,7 +326,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-10-08 13:42:51.857631",
+ "modified": "2021-10-11 14:23:10.367348",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
