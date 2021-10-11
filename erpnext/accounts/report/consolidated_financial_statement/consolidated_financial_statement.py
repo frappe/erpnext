@@ -3,12 +3,13 @@
 
 from __future__ import unicode_literals
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
 
 import erpnext
-from collections import defaultdict
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
 	get_chart_data,
 	get_provisional_profit_loss,
