@@ -2,10 +2,34 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+<<<<<<< HEAD
 import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, cint
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
+=======
+
+from collections import defaultdict
+
+import frappe
+from frappe import _
+from frappe.utils import cint, flt, getdate
+
+import erpnext
+from erpnext.accounts.report.balance_sheet.balance_sheet import (
+	get_chart_data,
+	get_provisional_profit_loss,
+)
+from erpnext.accounts.report.balance_sheet.balance_sheet import (
+	get_report_summary as get_bs_summary,
+)
+from erpnext.accounts.report.cash_flow.cash_flow import (
+	add_total_row_account,
+	get_account_type_based_gl_data,
+	get_cash_flow_accounts,
+)
+from erpnext.accounts.report.cash_flow.cash_flow import get_report_summary as get_cash_flow_summary
+>>>>>>> 7acdcc70ad (fix: v12 migrate error - unknown column ‘mandatory_depends_on’ (#27897))
 from erpnext.accounts.report.financial_statements import get_fiscal_year_data, sort_accounts
 from erpnext.accounts.report.balance_sheet.balance_sheet import (get_provisional_profit_loss,
 	check_opening_balance, get_chart_data)
