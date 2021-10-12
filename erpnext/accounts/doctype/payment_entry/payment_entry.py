@@ -506,7 +506,7 @@ class PaymentEntry(AccountsController):
 	def validate_received_amount(self):
 		if self.paid_from_account_currency == self.paid_to_account_currency:
 			if self.paid_amount < self.received_amount:
-				frappe.throw(_("Received Amount cannot be greater tha Paid Amount"))
+				frappe.throw(_("Received Amount cannot be greater than Paid Amount"))
 
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
