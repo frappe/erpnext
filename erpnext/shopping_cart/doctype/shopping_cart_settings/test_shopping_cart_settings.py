@@ -4,9 +4,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import unittest
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import ShoppingCartSetupError
+
+import frappe
+
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+	ShoppingCartSetupError,
+)
+
 
 class TestShoppingCartSettings(unittest.TestCase):
 	def setUp(self):
@@ -38,7 +44,6 @@ class TestShoppingCartSettings(unittest.TestCase):
 
 	def test_tax_rule_validation(self):
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 0")
-		frappe.db.commit()
 
 		cart_settings = self.get_cart_settings()
 		cart_settings.enabled = 1

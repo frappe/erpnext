@@ -3,11 +3,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from bs4 import BeautifulSoup
 from frappe.utils import set_request
 from frappe.website.serve import get_response
+
 
 class TestHomepageSection(unittest.TestCase):
 	def test_homepage_section_card(self):

@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	frappe.reload_doctype("Payment Entry")
 	frappe.db.sql("""update `tabPayment Entry` set status = CASE

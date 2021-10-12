@@ -3,10 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import (strip)
+from frappe.utils import strip
+
+
 class CouponCode(Document):
 	def autoname(self):
 		self.coupon_name = strip(self.coupon_name)

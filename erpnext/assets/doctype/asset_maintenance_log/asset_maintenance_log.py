@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import nowdate, getdate
+from frappe.model.document import Document
+from frappe.utils import getdate, nowdate
+
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
+
 
 class AssetMaintenanceLog(Document):
 	def validate(self):

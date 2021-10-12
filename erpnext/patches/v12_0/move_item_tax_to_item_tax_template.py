@@ -1,7 +1,9 @@
-import frappe
 import json
-from six import iteritems
+
+import frappe
 from frappe.model.naming import make_autoname
+from six import iteritems
+
 
 def execute():
 	if "tax_type" not in frappe.db.get_table_columns("Item Tax"):

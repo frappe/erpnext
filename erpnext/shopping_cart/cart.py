@@ -2,16 +2,20 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import throw, _
 import frappe.defaults
-from frappe.utils import cint, flt, get_fullname, cstr
+from frappe import _, throw
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
-from frappe.utils.nestedset import get_root_of
-from erpnext.accounts.utils import get_account_name
-from erpnext.utilities.product import get_qty_in_stock
 from frappe.contacts.doctype.contact.contact import get_contact_name
+from frappe.utils import cint, cstr, flt, get_fullname
+from frappe.utils.nestedset import get_root_of
+
+from erpnext.accounts.utils import get_account_name
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+	get_shopping_cart_settings,
+)
+from erpnext.utilities.product import get_qty_in_stock
 
 
 class WebsitePriceListMissingError(frappe.ValidationError):

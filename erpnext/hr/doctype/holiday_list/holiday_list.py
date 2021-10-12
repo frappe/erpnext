@@ -1,13 +1,15 @@
-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.utils import cint, getdate, formatdate, today
-from frappe import throw, _
+
+import frappe
+from frappe import _, throw
 from frappe.model.document import Document
+from frappe.utils import cint, formatdate, getdate, today
+
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -44,9 +46,10 @@ class HolidayList(Document):
 	def get_weekly_off_date_list(self, start_date, end_date):
 		start_date, end_date = getdate(start_date), getdate(end_date)
 
-		from dateutil import relativedelta
-		from datetime import timedelta
 		import calendar
+		from datetime import timedelta
+
+		from dateutil import relativedelta
 
 		date_list = []
 		existing_date_list = []
@@ -90,9 +93,11 @@ def get_events(start, end, filters=None):
 		update={"allDay": 1})
 
 
-def is_holiday(holiday_list, date=today()):
+def is_holiday(holiday_list, date=None):
 	"""Returns true if the given date is a holiday in the given holiday list
 	"""
+	if date is None:
+		date = today()
 	if holiday_list:
 		return bool(frappe.get_all('Holiday List',
 			dict(name=holiday_list, holiday_date=date)))

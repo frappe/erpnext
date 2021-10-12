@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
     user_permissions = frappe.db.sql("""select name, for_value from `tabUser Permission`

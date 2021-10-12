@@ -3,17 +3,21 @@
 
 
 from __future__ import unicode_literals
-import unittest
+
 import frappe
 from frappe.utils import flt
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import get_gl_entries, test_records as pr_test_records, make_purchase_receipt
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.accounts.doctype.account.test_account import create_account
-from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
 
-class TestLandedCostVoucher(unittest.TestCase):
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+	get_gl_entries,
+	make_purchase_receipt,
+)
+from erpnext.tests.utils import ERPNextTestCase
+
+
+class TestLandedCostVoucher(ERPNextTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
@@ -208,7 +212,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 	def test_multi_currency_lcv(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records, save_new_records
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			save_new_records,
+			test_records,
+		)
 
 		save_new_records(test_records)
 

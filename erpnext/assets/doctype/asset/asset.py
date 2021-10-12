@@ -3,17 +3,36 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext, math, json
+
+import json
+import math
+
+import frappe
 from frappe import _
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	date_diff,
+	flt,
+	get_datetime,
+	get_last_day,
+	getdate,
+	month_diff,
+	nowdate,
+	today,
+)
 from six import string_types
-from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, month_diff, add_days, get_last_day, get_datetime
-from frappe.model.document import Document
+
+import erpnext
+from erpnext.accounts.general_ledger import make_reverse_gl_entries
+from erpnext.assets.doctype.asset.depreciation import (
+	get_depreciation_accounts,
+	get_disposal_account_and_cost_center,
+)
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.assets.doctype.asset.depreciation \
-	import get_disposal_account_and_cost_center, get_depreciation_accounts
-from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
-from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
+
 
 class Asset(AccountsController):
 	def validate(self):
@@ -120,11 +139,6 @@ class Asset(AccountsController):
 
 		if self.is_existing_asset:
 			return
-
-		docname = self.purchase_receipt or self.purchase_invoice
-		if docname:
-			doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
-			date = frappe.db.get_value(doctype, docname, 'posting_date')
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
@@ -375,10 +389,6 @@ class Asset(AccountsController):
 			if cint(self.number_of_depreciations_booked) > cint(row.total_number_of_depreciations):
 				frappe.throw(_("Number of Depreciations Booked cannot be greater than Total Number of Depreciations"))
 
-		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(nowdate()):
-			frappe.msgprint(_("Depreciation Row {0}: Depreciation Start Date is entered as past date")
-				.format(row.idx), title=_('Warning'), indicator='red')
-
 		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(self.purchase_date):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date")
 				.format(row.idx))
@@ -425,9 +435,10 @@ class Asset(AccountsController):
 			if accumulated_depreciation_after_full_schedule:
 				accumulated_depreciation_after_full_schedule = max(accumulated_depreciation_after_full_schedule)
 
-				asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
-					flt(accumulated_depreciation_after_full_schedule),
-					self.precision('gross_purchase_amount'))
+				asset_value_after_full_schedule = flt(
+					flt(self.gross_purchase_amount) -
+					flt(self.opening_accumulated_depreciation) -
+					flt(accumulated_depreciation_after_full_schedule), self.precision('gross_purchase_amount'))
 
 				if (row.expected_value_after_useful_life and
 					row.expected_value_after_useful_life < asset_value_after_full_schedule):
@@ -546,7 +557,7 @@ class Asset(AccountsController):
 		cwip_account = None
 		try:
 			cwip_account = get_asset_account("capital_work_in_progress_account", self.name, self.asset_category, self.company)
-		except:
+		except Exception:
 			# if no cwip account found in category or company and "cwip is enabled" then raise else silently pass
 			if cwip_enabled:
 				raise
@@ -783,6 +794,7 @@ def make_journal_entry(asset_name):
 @frappe.whitelist()
 def make_asset_movement(assets, purpose=None):
 	import json
+
 	from six import string_types
 
 	if isinstance(assets, string_types):

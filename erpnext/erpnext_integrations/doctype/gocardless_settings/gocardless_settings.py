@@ -3,13 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 import gocardless_pro
 from frappe import _
+from frappe.integrations.utils import create_payment_gateway, create_request_log
+from frappe.model.document import Document
+from frappe.utils import call_hook_method, cint, flt, get_url
 from six.moves.urllib.parse import urlencode
-from frappe.utils import get_url, call_hook_method, flt, cint
-from frappe.integrations.utils import create_request_log, create_payment_gateway
+
 
 class GoCardlessSettings(Document):
 	supported_currencies = ["EUR", "DKK", "GBP", "SEK"]

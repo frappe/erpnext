@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
 from erpnext.regional.united_states.setup import add_permissions
+
 
 def execute():
 	company = frappe.get_all('Company', filters = {'country': 'United States'}, fields=['name'])
@@ -14,9 +17,9 @@ def execute():
 		'Sales Invoice Item': [
 			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='description', options='Product Tax Category',
 				label='Product Tax Category', fetch_from='item_code.product_tax_category'),
-			dict(fieldname='tax_collectable', fieldtype='Currency', insert_after='net_amount', 
+			dict(fieldname='tax_collectable', fieldtype='Currency', insert_after='net_amount',
 				label='Tax Collectable', read_only=1),
-			dict(fieldname='taxable_amount', fieldtype='Currency', insert_after='tax_collectable', 
+			dict(fieldname='taxable_amount', fieldtype='Currency', insert_after='tax_collectable',
 				label='Taxable Amount', read_only=1)
 		],
 		'Item': [

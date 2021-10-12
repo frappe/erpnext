@@ -2,16 +2,24 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
 
-from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError, NotAnOptionalHoliday, get_leave_balance_on
+import frappe
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, nowdate, now_datetime, getdate, add_months
-from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
-from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
-from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
+from frappe.utils import add_days, add_months, getdate, nowdate
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
+from erpnext.hr.doctype.leave_application.leave_application import (
+	LeaveDayBlockedError,
+	NotAnOptionalHoliday,
+	OverlapError,
+	get_leave_balance_on,
+)
+from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import (
+	create_assignment_for_multiple_employees,
+)
+from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 
 test_dependencies = ["Leave Allocation", "Leave Block List", "Employee"]
 
@@ -113,6 +121,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		application = self.get_application(_test_records[0])
 		application.insert()
+		application.reload()
 		application.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 

@@ -3,20 +3,37 @@
 
 from __future__ import unicode_literals
 
-import frappe, erpnext
+import frappe
 from frappe import _, msgprint, scrub
+from frappe.contacts.doctype.address.address import (
+	get_address_display,
+	get_company_address,
+	get_default_address,
+)
+from frappe.contacts.doctype.contact.contact import get_contact_details
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (add_days, getdate, formatdate, date_diff,
-	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day, cint)
-from frappe.contacts.doctype.address.address import (get_address_display,
-	get_default_address, get_company_address)
-from frappe.contacts.doctype.contact.contact import get_contact_details
-from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext import get_company_currency
+from frappe.utils import (
+	add_days,
+	add_months,
+	add_years,
+	cint,
+	cstr,
+	date_diff,
+	flt,
+	formatdate,
+	get_last_day,
+	get_timestamp,
+	getdate,
+	nowdate,
+)
+from six import iteritems
 
-from six import iteritems, string_types
+import erpnext
+from erpnext import get_company_currency
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
+
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
@@ -386,7 +403,7 @@ def get_address_tax_category(tax_category=None, billing_address=None, shipping_a
 @frappe.whitelist()
 def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None, tax_category=None,
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
-	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
+	from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details, get_tax_template
 	args = {
 		party_type.lower(): party,
 		"company": company
@@ -648,7 +665,7 @@ def get_default_contact(doctype, name):
 	if out:
 		try:
 			return out[0][0]
-		except:
+		except Exception:
 			return None
 	else:
 		return None

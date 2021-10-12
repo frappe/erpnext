@@ -3,8 +3,9 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 
 test_records = [
 	dict(doctype='Item', item_code='Food Item 1',

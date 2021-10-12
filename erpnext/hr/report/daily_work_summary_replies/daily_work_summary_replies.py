@@ -2,9 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe import _
+
 import frappe
+from frappe import _
+
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_user_emails_from_group
+
 
 def execute(filters=None):
 	if not filters.group: return [], []

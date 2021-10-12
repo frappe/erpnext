@@ -3,8 +3,9 @@
 
 import frappe
 from frappe import _
-from frappe.utils import get_link_to_form, today, flt
 from frappe.model.document import Document
+from frappe.utils import flt, get_link_to_form, today
+
 
 class FullandFinalStatement(Document):
 	def validate(self):

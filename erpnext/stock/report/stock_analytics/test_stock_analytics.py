@@ -2,12 +2,13 @@ import datetime
 import unittest
 
 from frappe import _dict
+
 from erpnext.accounts.utils import get_fiscal_year
-
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period_date_ranges
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestStockAnalyticsReport(unittest.TestCase):
+class TestStockAnalyticsReport(ERPNextTestCase):
 	def test_get_period_date_ranges(self):
 
 		filters = _dict(range="Monthly", from_date="2020-12-28", to_date="2021-02-06")

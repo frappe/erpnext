@@ -4,16 +4,19 @@
 from __future__ import unicode_literals
 
 import frappe
-import unittest
+
 test_dependencies = ['Item', 'Sales Invoice', 'Stock Entry', 'Batch']
 
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation \
-		import EmptyStockReconciliationItemsError
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	EmptyStockReconciliationItemsError,
+)
+from erpnext.tests.utils import ERPNextTestCase
 
-class TestPickList(unittest.TestCase):
+
+class TestPickList(ERPNextTestCase):
 
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		try:

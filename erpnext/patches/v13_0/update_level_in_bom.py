@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	for document in ["bom", "bom_item", "bom_explosion_item"]:

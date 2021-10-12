@@ -13,10 +13,12 @@
   "voucher_type",
   "naming_series",
   "finance_book",
+  "tax_withholding_category",
   "column_break1",
   "from_template",
   "company",
   "posting_date",
+  "apply_tds",
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
@@ -498,16 +500,32 @@
    "options": "Journal Entry Template",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.apply_tds",
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "mandatory_depends_on": "eval:doc.apply_tds",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Credit Note', 'Debit Note'].includes(doc.voucher_type)",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply Tax Withholding Amount "
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-30 13:56:01.121995",
+ "modified": "2021-09-09 15:31:14.484029",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

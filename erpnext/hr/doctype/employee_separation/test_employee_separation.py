@@ -3,9 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
+import unittest
+
 import frappe
 from frappe.utils import getdate
-import unittest
 
 test_dependencies = ['Employee Onboarding']
 

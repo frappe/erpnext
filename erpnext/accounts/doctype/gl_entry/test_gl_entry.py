@@ -2,10 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, unittest
+
+import unittest
+
+import frappe
 from frappe.model.naming import parse_naming_series
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
 
 class TestGLEntry(unittest.TestCase):
 	def test_round_off_entry(self):

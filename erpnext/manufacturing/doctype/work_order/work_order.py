@@ -1,25 +1,43 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe
 import json
-import math
-from frappe import _
-from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form, time_diff_in_hours
-from frappe.model.document import Document
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict, get_bom_item_rate
+
+import frappe
 from dateutil.relativedelta import relativedelta
-from erpnext.stock.doctype.item.item import validate_end_of_life, get_item_defaults
-from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
-from erpnext.projects.doctype.timesheet.timesheet import OverlapError
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
-from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from frappe.utils.csvutils import getlink
-from erpnext.stock.utils import get_bin, validate_warehouse_company, get_latest_stock_qty
-from erpnext.utilities.transaction_base import validate_uom_is_integer
+from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import (
+	cint,
+	date_diff,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	time_diff_in_hours,
+)
+
+from erpnext.manufacturing.doctype.bom.bom import (
+	get_bom_item_rate,
+	get_bom_items_as_dict,
+	validate_bom_no,
+)
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_mins_between_operations,
+)
 from erpnext.stock.doctype.batch.batch import make_batch
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_auto_serial_nos, auto_make_serial_nos
+from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
+from erpnext.stock.doctype.serial_no.serial_no import (
+	auto_make_serial_nos,
+	get_auto_serial_nos,
+	get_serial_nos,
+)
+from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
+from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
+from erpnext.utilities.transaction_base import validate_uom_is_integer
+
 
 class OverProductionError(frappe.ValidationError): pass
 class CapacityError(frappe.ValidationError): pass

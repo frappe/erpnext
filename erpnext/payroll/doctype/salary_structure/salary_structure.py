@@ -2,13 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
 
-from frappe.utils import flt, cint, cstr
+import frappe
 from frappe import _
-from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
-from six import iteritems
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt
+
+import erpnext
+
 
 class SalaryStructure(Document):
 	def validate(self):

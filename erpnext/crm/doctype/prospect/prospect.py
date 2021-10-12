@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.contacts.address_and_contact import load_address_and_contact
+
 
 class Prospect(Document):
 	def onload(self):
@@ -15,7 +16,7 @@ class Prospect(Document):
 
 	def on_update(self):
 		self.link_with_lead_contact_and_address()
-	
+
 	def on_trash(self):
 		self.unlink_dynamic_links()
 

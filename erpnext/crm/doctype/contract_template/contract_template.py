@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import json
+
 import frappe
 from frappe.model.document import Document
 from frappe.utils.jinja import validate_template
 from six import string_types
-import json
+
 
 class ContractTemplate(Document):
 	def validate(self):

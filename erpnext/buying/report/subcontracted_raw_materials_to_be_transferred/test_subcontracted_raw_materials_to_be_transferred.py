@@ -3,11 +3,19 @@
 # Compiled at: 2019-05-06 10:24:35
 # Decompiled by https://python-decompiler.com
 from __future__ import unicode_literals
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+import json
+import unittest
+
+import frappe
+
 from erpnext.buying.doctype.purchase_order.purchase_order import make_rm_stock_entry
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.buying.report.subcontracted_raw_materials_to_be_transferred.subcontracted_raw_materials_to_be_transferred import (
+	execute,
+)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.buying.report.subcontracted_raw_materials_to_be_transferred.subcontracted_raw_materials_to_be_transferred import execute
-import json, frappe, unittest
+
 
 class TestSubcontractedItemToBeTransferred(unittest.TestCase):
 

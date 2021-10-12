@@ -3,14 +3,21 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt
 from frappe.model.document import Document
-from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits
+from frappe.utils import flt
+
 from erpnext.hr.utils import get_previous_claimed_amount, validate_active_employee
+from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import (
+	get_max_benefits,
+)
 from erpnext.payroll.doctype.payroll_period.payroll_period import get_payroll_period
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+	get_assigned_salary_structure,
+)
+
 
 class EmployeeBenefitClaim(Document):
 	def validate(self):

@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import get_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
+
 
 class MaintenanceVisit(TransactionBase):
 	def get_feed(self):

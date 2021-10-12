@@ -80,10 +80,10 @@ frappe.ui.form.on('Social Media Post', {
 
 	refresh: function(frm) {
 		frm.trigger('text');
-	
+
 		if (frm.doc.docstatus === 1) {
 			if (!['Posted', 'Deleted'].includes(frm.doc.post_status)) {
-				frm.trigger('add_post_btn'); 
+				frm.trigger('add_post_btn');
 			}
 			if (frm.doc.post_status !='Deleted') {
 				frm.add_custom_button(('Delete Post'), function() {

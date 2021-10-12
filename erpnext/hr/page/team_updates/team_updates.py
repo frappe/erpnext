@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import frappe
 from email_reply_parser import EmailReplyParser
 
+
 @frappe.whitelist()
 def get_data(start=0):
 	#frappe.only_for('Employee', 'System Manager')

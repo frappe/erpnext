@@ -3,13 +3,19 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-from frappe.utils import now_datetime, nowdate, to_timedelta
 import unittest
 from datetime import timedelta
 
-from erpnext.hr.doctype.employee_checkin.employee_checkin import add_log_based_on_employee_field, mark_attendance_and_link_log, calculate_working_hours
+import frappe
+from frappe.utils import now_datetime, nowdate
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_checkin.employee_checkin import (
+	add_log_based_on_employee_field,
+	calculate_working_hours,
+	mark_attendance_and_link_log,
+)
+
 
 class TestEmployeeCheckin(unittest.TestCase):
 	def test_add_log_based_on_employee_field(self):

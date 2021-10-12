@@ -4,17 +4,17 @@
 from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
-from erpnext.controllers.selling_controller import SellingController
-from erpnext.stock.doctype.batch.batch import set_batch_nos
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt
+
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.controllers.selling_controller import SellingController
+from erpnext.stock.doctype.batch.batch import set_batch_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -185,7 +185,6 @@ class DeliveryNote(SellingController):
 			if not d['warehouse'] and frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
-
 	def update_current_stock(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			for d in self.get('items'):
@@ -331,7 +330,7 @@ class DeliveryNote(SellingController):
 			credit_note_link = frappe.utils.get_link_to_form('Sales Invoice', return_invoice.name)
 
 			frappe.msgprint(_("Credit Note {0} has been created automatically").format(credit_note_link))
-		except:
+		except Exception:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
@@ -668,8 +667,13 @@ def make_inter_company_purchase_receipt(source_name, target_doc=None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_transaction,
-		get_inter_company_details, update_address, update_taxes, set_purchase_references)
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+		get_inter_company_details,
+		set_purchase_references,
+		update_address,
+		update_taxes,
+		validate_inter_company_transaction,
+	)
 
 	if doctype == 'Delivery Note':
 		source_doc = frappe.get_doc(doctype, source_name)

@@ -3,16 +3,21 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from six import iteritems
-from frappe.model.document import Document
-from frappe import _
 from collections import OrderedDict
-from frappe.utils import floor, flt, today, cint
-from frappe.model.mapper import get_mapped_doc, map_child_doc
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.model.mapper import map_child_doc
+from frappe.utils import cint, floor, flt, today
+from six import iteritems
+
+from erpnext.selling.doctype.sales_order.sales_order import (
+	make_delivery_note as create_delivery_note_from_sales_order,
+)
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
 
 # TODO: Prioritize SO or WO group warehouse
 

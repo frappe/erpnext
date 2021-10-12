@@ -1,10 +1,15 @@
 from __future__ import unicode_literals
-import frappe
-import erpnext
+
 import unittest
-from frappe.utils import nowdate, add_months, getdate, add_days
+
+import frappe
+from frappe.utils import add_days, add_months, getdate, nowdate
+
+import erpnext
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import process_expired_allocation
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import process_expired_allocation, expire_allocation
+
+
 class TestLeaveAllocation(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):

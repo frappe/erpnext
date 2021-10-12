@@ -9,7 +9,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today, flt
+from frappe.utils import add_days, cstr, date_diff, flt, get_link_to_form, getdate, today
 from frappe.utils.nestedset import NestedSet
 
 

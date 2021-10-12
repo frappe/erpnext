@@ -3,18 +3,23 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.party import get_party_account, get_due_date
-from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
-from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option, get_mode_of_payment_info
-
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 from six import iteritems
+
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	SalesInvoice,
+	get_bank_cash_account,
+	get_mode_of_payment_info,
+	update_multi_mode_option,
+)
+from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
+
 
 class POSInvoice(SalesInvoice):
 	def __init__(self, *args, **kwargs):
@@ -35,6 +40,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_change_amount()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
+		self.validate_warehouse()
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
 		self.validate_return_items_qty()
@@ -309,7 +315,7 @@ class POSInvoice(SalesInvoice):
 
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
-		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
+		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
@@ -519,6 +525,7 @@ def make_sales_return(source_name, target_doc=None):
 @frappe.whitelist()
 def make_merge_log(invoices):
 	import json
+
 	from six import string_types
 
 	if isinstance(invoices, string_types):

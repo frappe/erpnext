@@ -1,11 +1,14 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import frappe
 import copy
+
+import frappe
 from frappe import _
 from six import iteritems
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 
 def execute(filters=None):
 	columns, data = [], []

@@ -3,12 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-import erpnext
+
+import frappe
 from frappe.utils import getdate
-from erpnext.hr.doctype.upload_attendance.upload_attendance import get_data
+
+import erpnext
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.upload_attendance.upload_attendance import get_data
 
 test_dependencies = ['Holiday List']
 

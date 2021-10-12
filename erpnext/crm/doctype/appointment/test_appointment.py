@@ -3,9 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
 import datetime
+import unittest
+
+import frappe
 
 
 def create_test_lead():

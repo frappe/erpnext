@@ -2,13 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 import frappe.defaults
-from frappe import msgprint, _
-from frappe.model.naming import set_name_by_naming_series
-from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe import _, msgprint
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
+from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
+
+from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 
 
 class Supplier(TransactionBase):
@@ -35,8 +40,10 @@ class Supplier(TransactionBase):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')
 		if supp_master_name == 'Supplier Name':
 			self.name = self.supplier_name
-		else:
+		elif supp_master_name == 'Naming Series':
 			set_name_by_naming_series(self)
+		else:
+			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def on_update(self):
 		if not self.naming_series:
@@ -92,8 +99,9 @@ class Supplier(TransactionBase):
 				self.db_set('email_id', self.email_id)
 
 	def create_primary_address(self):
-		from erpnext.selling.doctype.customer.customer import make_address
 		from frappe.contacts.doctype.address.address import get_address_display
+
+		from erpnext.selling.doctype.customer.customer import make_address
 
 		if self.flags.is_new_doc and self.get('address_line1'):
 			address = make_address(self)

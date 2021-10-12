@@ -3,12 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, os, tweepy, json
+
+import json
+
+import frappe
+import tweepy
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_url_to_form
 from frappe.utils.file_manager import get_file_path
-from frappe.utils import get_url_to_form, get_link_to_form
 from tweepy.error import TweepError
+
 
 class TwitterSettings(Document):
 	@frappe.whitelist()
@@ -53,10 +58,10 @@ class TwitterSettings(Document):
 			frappe.throw(_('Invalid Consumer Key or Consumer Secret Key'))
 
 	def get_api(self):
-		# authentication of consumer key and secret 
-		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret")) 
-		# authentication of access token and secret 
-		auth.set_access_token(self.access_token, self.access_token_secret) 
+		# authentication of consumer key and secret
+		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
+		# authentication of access token and secret
+		auth.set_access_token(self.access_token, self.access_token_secret)
 
 		return tweepy.API(auth)
 
@@ -90,20 +95,20 @@ class TwitterSettings(Document):
 
 	def delete_tweet(self, tweet_id):
 		api = self.get_api()
-		try: 
+		try:
 			api.destroy_status(tweet_id)
 		except TweepError as e:
 			self.api_error(e)
 
 	def get_tweet(self, tweet_id):
 		api = self.get_api()
-		try: 
+		try:
 			response = api.get_status(tweet_id, trim_user=True, include_entities=True)
 		except TweepError as e:
 			self.api_error(e)
-		
+
 		return response._json
-	
+
 	def api_error(self, e):
 		content = json.loads(e.response.content)
 		content = content["errors"][0]

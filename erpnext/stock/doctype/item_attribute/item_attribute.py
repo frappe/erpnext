@@ -2,13 +2,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.controllers.item_variant import (validate_is_incremental,
-	validate_item_attribute_value, InvalidItemAttributeValueError)
+from erpnext.controllers.item_variant import (
+	InvalidItemAttributeValueError,
+	validate_is_incremental,
+	validate_item_attribute_value,
+)
 
 
 class ItemAttributeIncrementError(frappe.ValidationError): pass

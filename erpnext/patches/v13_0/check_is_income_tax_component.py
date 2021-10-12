@@ -3,8 +3,11 @@
 
 from __future__ import unicode_literals
 
-import frappe, erpnext
+import frappe
+
+import erpnext
 from erpnext.regional.india.setup import setup
+
 
 def execute():
 

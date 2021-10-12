@@ -2,12 +2,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _, scrub
-from frappe.utils import flt, cint
+from frappe.utils import cint
+from six import iteritems
+
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from six import iteritems
+
 
 def execute(filters=None):
 	args = {

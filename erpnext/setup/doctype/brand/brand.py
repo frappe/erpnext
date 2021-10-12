@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import copy
 
+import frappe
 from frappe.model.document import Document
+
 
 class Brand(Document):
 	pass

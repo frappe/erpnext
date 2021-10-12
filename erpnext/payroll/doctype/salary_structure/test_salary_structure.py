@@ -2,17 +2,24 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-import erpnext
-from frappe.utils.make_random import get_random
-from frappe.utils import nowdate, add_years, get_first_day, date_diff
-from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
-	make_deduction_salary_component, make_employee_salary_slip, create_tax_slab
-from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import create_payroll_period
 
+import frappe
+from frappe.utils import add_years, date_diff, get_first_day, nowdate
+from frappe.utils.make_random import get_random
+
+import erpnext
+from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import (
+	create_payroll_period,
+)
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	create_tax_slab,
+	make_deduction_salary_component,
+	make_earning_salary_component,
+	make_employee_salary_slip,
+)
+from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
 test_dependencies = ["Fiscal Year"]
 

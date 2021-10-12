@@ -2,10 +2,18 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import nowdate, flt
+
 import unittest
-from erpnext.assets.doctype.asset.test_asset import create_asset_data, create_asset, set_depreciation_settings_in_company
+
+import frappe
+from frappe.utils import flt, nowdate
+
+from erpnext.assets.doctype.asset.test_asset import (
+	create_asset,
+	create_asset_data,
+	set_depreciation_settings_in_company,
+)
+
 
 class TestAssetRepair(unittest.TestCase):
 	def setUp(self):
@@ -110,8 +118,8 @@ def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations
 
 def create_asset_repair(**args):
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 	from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	args = frappe._dict(args)
 

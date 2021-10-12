@@ -2,11 +2,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, add_days
-from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
+
+import frappe
+from frappe.utils import add_days, nowdate
+
 from erpnext.hr.doctype.designation.test_designation import create_designation
+from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
 from erpnext.hr.doctype.staffing_plan.test_staffing_plan import make_company
 
 # test_records = frappe.get_test_records('Job Offer')
@@ -30,6 +32,7 @@ class TestJobOffer(unittest.TestCase):
 		self.assertTrue(frappe.db.exists("Job Offer", job_offer.name))
 
 	def test_job_applicant_update(self):
+		frappe.db.set_value("HR Settings", None, "check_vacancies", 0)
 		create_staffing_plan()
 		job_applicant = create_job_applicant(email_id="test_job_applicants@example.com")
 		job_offer = create_job_offer(job_applicant=job_applicant.name)
@@ -41,7 +44,11 @@ class TestJobOffer(unittest.TestCase):
 		job_offer.status = "Rejected"
 		job_offer.submit()
 		job_applicant.reload()
-		self.assertEqual(job_applicant.status, "Rejected")
+		self.assertEquals(job_applicant.status, "Rejected")
+		frappe.db.set_value("HR Settings", None, "check_vacancies", 1)
+
+	def tearDown(self):
+		frappe.db.sql("DELETE FROM `tabJob Offer` WHERE 1")
 
 def create_job_offer(**args):
 	args = frappe._dict(args)

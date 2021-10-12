@@ -2,11 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 """Global Defaults"""
 import frappe
 import frappe.defaults
-from frappe.utils import cint
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.utils import cint
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"
@@ -21,6 +22,7 @@ keydict = {
 }
 
 from frappe.model.document import Document
+
 
 class GlobalDefaults(Document):
 

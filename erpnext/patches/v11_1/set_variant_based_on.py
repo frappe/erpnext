@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	frappe.db.sql("""update tabItem set variant_based_on = 'Item Attribute'

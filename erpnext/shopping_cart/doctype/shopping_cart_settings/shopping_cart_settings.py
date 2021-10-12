@@ -4,11 +4,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import _, msgprint
-from frappe.utils import flt
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_datetime_str, now_datetime
+from frappe.utils import flt
+
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 

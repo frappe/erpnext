@@ -3,13 +3,17 @@
 
 
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
-from frappe.utils import flt, today
-from erpnext.accounts.utils import get_fiscal_year, now
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from frappe.utils import today
+
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.utils import get_fiscal_year, now
+
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):

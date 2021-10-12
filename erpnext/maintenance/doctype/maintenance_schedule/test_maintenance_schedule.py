@@ -2,11 +2,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-from frappe.utils.data import add_days, today, formatdate
-from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import make_maintenance_visit
+
+import unittest
 
 import frappe
-import unittest
+from frappe.utils.data import add_days, formatdate, today
+
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+	make_maintenance_visit,
+)
 
 # test_records = frappe.get_test_records('Maintenance Schedule')
 

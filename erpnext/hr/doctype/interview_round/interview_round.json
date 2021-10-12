@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:round_name",
+ "creation": "2021-04-12 12:57:19.902866",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "round_name",
+  "interview_type",
+  "interviewers",
+  "column_break_3",
+  "designation",
+  "expected_average_rating",
+  "expected_skills_section",
+  "expected_skill_set"
+ ],
+ "fields": [
+  {
+   "fieldname": "round_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Round Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "expected_skills_section",
+   "fieldtype": "Section Break",
+   "label": "Expected Skillset"
+  },
+  {
+   "fieldname": "expected_skill_set",
+   "fieldtype": "Table",
+   "options": "Expected Skill Set",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_average_rating",
+   "fieldtype": "Rating",
+   "label": "Expected Average Rating",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interview_type",
+   "fieldtype": "Link",
+   "label": "Interview Type",
+   "options": "Interview Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "interviewers",
+   "fieldtype": "Table MultiSelect",
+   "label": "Interviewers",
+   "options": "Interviewer"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-09-30 13:01:25.666660",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Interview Round",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Interviewer",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

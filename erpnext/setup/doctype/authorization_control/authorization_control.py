@@ -2,10 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import cstr, flt, has_common, comma_or
-from frappe import session, _
+from frappe import _, session
+from frappe.utils import comma_or, cstr, flt, has_common
+
 from erpnext.utilities.transaction_base import TransactionBase
+
 
 class AuthorizationControl(TransactionBase):
 	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, item, company):

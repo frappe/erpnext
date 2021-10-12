@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import cstr, flt
-from frappe import _, msgprint
-
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cstr, flt
+
 
 class AuthorizationRule(Document):
 	def check_duplicate_entry(self):

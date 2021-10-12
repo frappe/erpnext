@@ -3,12 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import throw, _
+from frappe import _, throw
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+
 import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
-from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import get_variables
+from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import (
+	get_variables,
+)
+
 
 class SupplierScorecardPeriod(Document):
 
