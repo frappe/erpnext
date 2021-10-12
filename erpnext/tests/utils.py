@@ -16,15 +16,16 @@ ReportName = NewType("ReportName", str)
 class ERPNextTestCase(unittest.TestCase):
 	"""A sane default test class for ERPNext tests."""
 
-	def setUp(self) -> None:
+
+	@classmethod
+	def setUpClass(cls) -> None:
 		frappe.db.commit()
-		return super().setUp()
+		return super().setUpClass()
 
-
-	def tearDown(self) -> None:
+	@classmethod
+	def tearDownClass(cls) -> None:
 		frappe.db.rollback()
-		return super().tearDown()
-
+		return super().tearDownClass()
 
 
 def create_test_contact_and_address():
