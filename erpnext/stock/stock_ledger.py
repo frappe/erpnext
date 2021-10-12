@@ -939,61 +939,97 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 def get_valuation_rate(item_code, warehouse=None, voucher_type=None,
 	voucher_no=None, allow_zero_rate=False, currency=None, company=None,
 	raise_error_if_no_rate=True, batch_no=None):
-	# Get valuation rate from last sle for the same item and warehouse
+	"""
+		Valuation rate of an item_code is fetched, in decreasing order of
+		precedence, from the following places:
+
+			1. Last SLE having matching item_code, batch_no, warehouse;
+				field: valuation_rate
+
+			2. Last SLE having matching item_code, warehouse;
+				field: valuation_rate
+
+			3. Last SLE having matching item_code;
+				field: valuation_rate
+
+			4. Item Master;
+				field: valuation_rate
+
+			5. Item Master;
+				field: standard_rate
+
+			6. Item Price Master, buying, having matching item_code;
+				field: price_list_rate
+
+		if it isn't found in the above list then return 0.0 if allow_zero_rate.
+	"""
 	if not company:
 		company = erpnext.get_default_company()
 
-	has_voucher_details = voucher_no and voucher_type
+	voucher_condition = ""
+	if voucher_no and voucher_type:
+		voucher_condition = "AND NOT (voucher_no = %(voucher_no)s AND voucher_type = %(voucher_type)s)"
+
+	query_args = dict(
+		item_code=item_code,
+		batch_no=batch_no,
+		warehouse=warehouse,
+		voucher_no=voucher_no,
+		voucher_type=voucher_type
+	)
+
 	last_valuation_rate = None
-	if batch_no and warehouse and has_voucher_details:
-		# Get valuation_rate from last SLE with matching batch_no, warehouse
+	if batch_no and warehouse:
+		# 1. Get valuation_rate from last SLE with matching batch_no, warehouse
+		last_valuation_rate = frappe.db.sql("""SELECT valuation_rate
+			FROM `tabStock Ledger Entry` FORCE INDEX (batch_no_item_code_warehouse_index)
+			WHERE
+				item_code = %(item_code)s
+				AND batch_no = %(batch_no)s
+				AND warehouse = %(warehouse)s
+				AND valuation_rate >= 0
+				{voucher_condition}
+			ORDER BY posting_date DESC, posting_time DESC, name
+			DESC LIMIT 1""".format(voucher_condition=voucher_condition),
+			query_args)
+
+	if not last_valuation_rate and warehouse:
+		# 2. Get valuation_rate from last SLE with any batch_no, and matching warehouse
 		last_valuation_rate = frappe.db.sql("""SELECT valuation_rate
 			FROM `tabStock Ledger Entry` FORCE INDEX (item_warehouse)
 			WHERE
-				item_code = %s
-				AND batch_no = %s
-				AND warehouse = %s
+				item_code = %(item_code)s
+				AND warehouse = %(warehouse)s
 				AND valuation_rate >= 0
-				AND NOT (voucher_no = %s AND voucher_type = %s)
-			ORDER BY posting_date desc, posting_time desc, name DESC LIMIT 1""",
-			(item_code, batch_no, warehouse, voucher_no, voucher_type))
+				{voucher_condition}
+			ORDER BY posting_date DESC, posting_time DESC, name
+			DESC LIMIT 1""".format(voucher_condition=voucher_condition),
+			query_args)
 
-
-	if not last_valuation_rate and warehouse and has_voucher_details:
-		# Get valuation_rate from last SLE with any batch_no, and matching warehouse
-		last_valuation_rate = frappe.db.sql("""SELECT valuation_rate
-			FROM `tabStock Ledger Entry` FORCE INDEX (item_warehouse)
-			WHERE
-				item_code = %s
-				AND warehouse = %s
-				AND valuation_rate >= 0
-				AND NOT (voucher_no = %s AND voucher_type = %s)
-			ORDER BY posting_date desc, posting_time desc, name DESC LIMIT 1""",
-			(item_code, warehouse, voucher_no, voucher_type))
-
-	if not last_valuation_rate and has_voucher_details:
-		# Get valuation rate from last sle for the item against any warehouse
+	if not last_valuation_rate:
+		# 3. Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry` force index (item_code)
 			where
-				item_code = %s
+				item_code = %(item_code)s
 				AND valuation_rate > 0
-				AND NOT(voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
+				{voucher_condition}
+			ORDER BY posting_date DESC, posting_time DESC, name
+			DESC LIMIT 1""".format(voucher_condition=voucher_condition),
+			query_args)
 
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0])
 
-	# If negative stock allowed, and item delivered without any incoming entry,
-	# system does not found any SLE, then take valuation rate from Item
+	# 4. Get valuation_rate from Item.valuation_rate
 	valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
 
 	if not valuation_rate:
-		# try Item Standard rate
+		# 5. Get valuation_rate from Item.standard_rate
 		valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
 
 		if not valuation_rate:
-			# try in price list
+			# 6. Get valuation_rate from Item Price.price_list_rate
 			valuation_rate = frappe.db.get_value('Item Price',
 				dict(item_code=item_code, buying=1, currency=currency),
 				'price_list_rate')
@@ -1013,7 +1049,7 @@ def get_valuation_rate(item_code, warehouse=None, voucher_type=None,
 
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
-	return valuation_rate
+	return flt(valuation_rate)
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
 	"""Recalculate Qty after Transaction in future SLEs based on current SLE."""
