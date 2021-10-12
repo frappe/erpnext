@@ -1686,17 +1686,23 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 def update_invoice_status():
 	"""Updates status as Overdue for applicable invoices. Runs daily."""
-
+	nowdate = getdate()
 	for doctype in ("Sales Invoice", "Purchase Invoice"):
 		frappe.db.sql("""
 			update `tab{}` as dt set dt.status = 'Overdue'
-			where dt.docstatus = 1
+			where
+				dt.docstatus = 1
 				and dt.status != 'Overdue'
-				and dt.outstanding_amount > 0
-				and (dt.grand_total - dt.outstanding_amount) <
-					(select sum(payment_amount) from `tabPayment Schedule` as ps
-						where ps.parent = dt.name and ps.due_date < %s)
-		""".format(doctype), getdate())
+				and (
+						((dt.is_pos or dt_is_return) and dt.due_date < %s)
+						or (
+							dt.outstanding_amount > 0
+							and (dt.base_grand_total - dt.outstanding_amount) <
+								(select sum(payment_amount) from `tabPayment Schedule` as ps
+									where ps.parent = dt.name and ps.due_date < %s)
+						)
+					)
+		""".format(doctype), nowdate, nowdate)
 
 @frappe.whitelist()
 def get_payment_terms(terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
