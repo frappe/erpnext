@@ -52,7 +52,9 @@ def execute():
 					advance.db_set('exchange_gain_loss', 0, False)
 			doc.docstatus = 1
 			doc.make_gl_entries()
+			frappe.db.commit()
 		except Exception:
+			frappe.db.rollback()
 			print(f'Failed to correct gl entries of {invoice.name}')
 
 	if acc_frozen_upto:
