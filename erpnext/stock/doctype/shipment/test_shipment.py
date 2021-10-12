@@ -47,7 +47,6 @@ def create_test_delivery_note():
 		}
 	)
 	delivery_note.insert()
-	frappe.db.commit()
 	return delivery_note
 
 
@@ -91,7 +90,6 @@ def create_test_shipment(delivery_notes = None):
 		}
 	)
 	shipment.insert()
-	frappe.db.commit()
 	return shipment
 
 
