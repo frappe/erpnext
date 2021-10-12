@@ -1122,6 +1122,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					},
 
 					callback: function(r) {
+						if (cdt == "Backorder Items") return ;
 						if(!r.exc) {
 							frappe.run_serially([
 								() => {

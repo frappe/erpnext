@@ -525,7 +525,10 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			found_item.item_code,
 		)
 
-		discount = (price_list_rate - item.get("price")) / price_list_rate * 100
+		if price_list_rate:
+			discount = (price_list_rate - item.get("price")) / price_list_rate * 100
+		else:
+			discount = 0
 
 
 		validated_item = {
