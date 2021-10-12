@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe.utils import getdate
 from frappe.utils.dateutils import parse_date
 from six import iteritems
+
 
 @frappe.whitelist()
 def upload_bank_statement():

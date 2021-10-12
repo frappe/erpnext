@@ -5,12 +5,15 @@ import json
 from collections import defaultdict
 
 import frappe
-import frappe.defaults
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
-from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
+from erpnext.accounts.general_ledger import (
+	make_gl_entries,
+	make_reverse_gl_entries,
+	process_gl_map,
+)
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
@@ -27,6 +30,7 @@ class StockController(AccountsController):
 		if not self.get('is_return'):
 			self.validate_inspection()
 		self.validate_serialized_batch()
+		self.clean_serial_nos()
 		self.validate_customer_provided_item()
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
@@ -71,6 +75,12 @@ class StockController(AccountsController):
 				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
 					frappe.throw(_("Row #{0}: The batch {1} has already expired.")
 						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
+
+	def clean_serial_nos(self):
+		for row in self.get("items"):
+			if hasattr(row, "serial_no") and row.serial_no:
+				# replace commas by linefeed and remove all spaces in string
+				row.serial_no = row.serial_no.replace(",", "\n").replace(" ", "")
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):

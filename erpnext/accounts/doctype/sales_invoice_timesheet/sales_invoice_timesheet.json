@@ -7,10 +7,19 @@
  "field_order": [
   "activity_type",
   "description",
+  "section_break_3",
+  "from_time",
+  "column_break_5",
+  "to_time",
+  "section_break_7",
   "billing_hours",
+  "column_break_9",
   "billing_amount",
+  "section_break_11",
   "time_sheet",
-  "timesheet_detail"
+  "timesheet_detail",
+  "column_break_13",
+  "project_name"
  ],
  "fields": [
   {
@@ -61,11 +70,54 @@
    "in_list_view": 1,
    "label": "Description",
    "read_only": 1
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Datetime",
+   "label": "From Time"
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Datetime",
+   "label": "To Time"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Time"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "label": "Project Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-05-20 22:33:57.234846",
+ "modified": "2021-10-02 03:48:44.979777",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Timesheet",

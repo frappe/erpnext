@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today
@@ -15,7 +16,7 @@ class LoyaltyPointEntry(Document):
 
 def get_loyalty_point_entries(customer, loyalty_program, company, expiry_date=None):
 	if not expiry_date:
-		date = today()
+		expiry_date = today()
 
 	return frappe.db.sql('''
 		select name, loyalty_points, expiry_date, loyalty_program_tier, invoice_type, invoice

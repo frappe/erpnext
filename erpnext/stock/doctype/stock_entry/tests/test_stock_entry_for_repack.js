@@ -39,4 +39,3 @@ QUnit.test("test repack", function(assert) {
 		() => done()
 	]);
 });
-

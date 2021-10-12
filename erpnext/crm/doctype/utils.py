@@ -1,6 +1,6 @@
+
 import frappe
-from frappe import _
-import json
+
 
 @frappe.whitelist()
 def get_last_interaction(contact=None, lead=None):

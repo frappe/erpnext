@@ -204,4 +204,3 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 		frappe.set_route("query-report", "Stock Ledger");
 	}
 };
-

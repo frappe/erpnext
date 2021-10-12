@@ -3,9 +3,11 @@
  "autoname": "format: CRM-SMP-{YYYY}-{MM}-{DD}-{###}",
  "creation": "2020-01-30 11:53:13.872864",
  "doctype": "DocType",
+ "documentation": "https://docs.erpnext.com/docs/user/manual/en/CRM/social-media-post",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "campaign_name",
   "scheduled_time",
   "post_status",
@@ -30,32 +32,24 @@
    "fieldname": "text",
    "fieldtype": "Small Text",
    "label": "Tweet",
-   "mandatory_depends_on": "eval:doc.twitter ==1",
-   "show_days": 1,
-   "show_seconds": 1
+   "mandatory_depends_on": "eval:doc.twitter ==1"
   },
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
-   "label": "Image",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Image"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "twitter",
    "fieldtype": "Check",
-   "label": "Twitter",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Twitter"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "linkedin",
    "fieldtype": "Check",
-   "label": "LinkedIn",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "LinkedIn"
   },
   {
    "fieldname": "amended_from",
@@ -64,27 +58,22 @@
    "no_copy": 1,
    "options": "Social Media Post",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.twitter ==1",
    "fieldname": "content",
    "fieldtype": "Section Break",
-   "label": "Twitter",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Twitter"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "post_status",
    "fieldtype": "Select",
    "label": "Post Status",
-   "options": "\nScheduled\nPosted\nError",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "no_copy": 1,
+   "options": "\nScheduled\nPosted\nCancelled\nDeleted\nError",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -92,9 +81,8 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Twitter Post Id",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -102,82 +90,69 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "LinkedIn Post Id",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "campaign_name",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Campaign",
-   "options": "Campaign",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Campaign"
   },
   {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break",
-   "label": "Share On",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Share On"
   },
   {
    "fieldname": "column_break_14",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "tweet_preview",
-   "fieldtype": "HTML",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "HTML"
   },
   {
    "collapsible": 1,
    "depends_on": "eval:doc.linkedin==1",
    "fieldname": "linkedin_section",
    "fieldtype": "Section Break",
-   "label": "LinkedIn",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "LinkedIn"
   },
   {
    "collapsible": 1,
    "fieldname": "attachments_section",
    "fieldtype": "Section Break",
-   "label": "Attachments",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Attachments"
   },
   {
    "fieldname": "linkedin_post",
    "fieldtype": "Text",
    "label": "Post",
-   "mandatory_depends_on": "eval:doc.linkedin ==1",
-   "show_days": 1,
-   "show_seconds": 1
+   "mandatory_depends_on": "eval:doc.linkedin ==1"
   },
   {
    "fieldname": "column_break_15",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "scheduled_time",
    "fieldtype": "Datetime",
    "label": "Scheduled Time",
-   "read_only_depends_on": "eval:doc.post_status == \"Posted\"",
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only_depends_on": "eval:doc.post_status == \"Posted\""
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-14 10:31:33.961381",
+ "modified": "2021-04-14 14:24:59.821223",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
@@ -228,5 +203,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1
 }

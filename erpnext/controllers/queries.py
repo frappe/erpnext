@@ -2,14 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-import erpnext
+
 import json
-from frappe.desk.reportview import get_match_cond, get_filters_cond
-from frappe.utils import nowdate, getdate
 from collections import defaultdict
+
+import frappe
+from frappe import scrub
+from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.utils import nowdate, unique
+
+import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
-from frappe.utils import unique
+
 
 # searches for active employees
 @frappe.whitelist()
@@ -220,18 +224,29 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
-	if filters and isinstance(filters, dict) and filters.get('supplier'):
-		item_group_list = frappe.get_all('Supplier Item Group',
-			filters = {'supplier': filters.get('supplier')}, fields = ['item_group'])
+	if filters and isinstance(filters, dict):
+		if filters.get('customer') or filters.get('supplier'):
+			party = filters.get('customer') or filters.get('supplier')
+			item_rules_list = frappe.get_all('Party Specific Item',
+				filters = {'party': party}, fields = ['restrict_based_on', 'based_on_value'])
 
-		item_groups = []
-		for i in item_group_list:
-			item_groups.append(i.item_group)
+			filters_dict = {}
+			for rule in item_rules_list:
+				if rule['restrict_based_on'] == 'Item':
+					rule['restrict_based_on'] = 'name'
+				filters_dict[rule.restrict_based_on] = []
 
-		del filters['supplier']
+			for rule in item_rules_list:
+				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
 
-		if item_groups:
-			filters['item_group'] = ['in', item_groups]
+			for filter in filters_dict:
+				filters[scrub(filter)] = ['in', filters_dict[filter]]
+
+			if filters.get('customer'):
+				del filters['customer']
+			else:
+				del filters['supplier']
+
 
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
@@ -304,7 +319,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
-	if filters.get('customer'):
+	if filters and filters.get('customer'):
 		cond = """(`tabProject`.customer = %s or
 			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
@@ -517,7 +532,9 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
+	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+		get_dimension_filter_map,
+	)
 	dimension_filters = get_dimension_filter_map()
 	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
 	query_filters = []
@@ -525,6 +542,9 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	meta = frappe.get_meta(doctype)
 	if meta.is_tree:
 		query_filters.append(['is_group', '=', 0])
+
+	if meta.has_field('disabled'):
+		query_filters.append(['disabled', '!=', 1])
 
 	if meta.has_field('company'):
 		query_filters.append(['company', '=', filters.get('company')])
@@ -672,34 +692,6 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 
 	if filters and filters.get('item_code'):
 		query += " and piitem.item_code = {item_code}".format(item_code = frappe.db.escape(filters.get('item_code')))
-
-	return frappe.db.sql(query, filters)
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_healthcare_service_units(doctype, txt, searchfield, start, page_len, filters):
-	query = """
-		select name
-		from `tabHealthcare Service Unit`
-		where
-			is_group = 0
-			and company = {company}
-			and name like {txt}""".format(
-				company = frappe.db.escape(filters.get('company')), txt = frappe.db.escape('%{0}%'.format(txt)))
-
-	if filters and filters.get('inpatient_record'):
-		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
-		service_unit = get_current_healthcare_service_unit(filters.get('inpatient_record'))
-
-		# if the patient is admitted, then appointments should be allowed against the admission service unit,
-		# inspite of it being an Inpatient Occupancy service unit
-		if service_unit:
-			query += " and (allow_appointments = 1 or name = {service_unit})".format(service_unit = frappe.db.escape(service_unit))
-		else:
-			query += " and allow_appointments = 1"
-	else:
-		query += " and allow_appointments = 1"
 
 	return frappe.db.sql(query, filters)
 

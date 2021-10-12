@@ -2,14 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import cstr
-from frappe import msgprint, _
-
-from frappe.model.document import Document
-
+from frappe import _, msgprint
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from frappe.model.document import Document
+from frappe.utils import cstr
+
 
 class SMSCenter(Document):
 	@frappe.whitelist()
@@ -83,4 +82,3 @@ class SMSCenter(Document):
 			receiver_list = self.get_receiver_nos()
 		if receiver_list:
 			send_sms(receiver_list, cstr(self.message))
-

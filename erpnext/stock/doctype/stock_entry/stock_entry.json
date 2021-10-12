@@ -84,8 +84,6 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "allow_on_submit": 1,
-   "default": "{purpose}",
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -355,6 +353,7 @@
   },
   {
    "fieldname": "scan_barcode",
+   "options": "Barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode"
   },
@@ -629,7 +628,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-26 17:07:58.015737",
+ "modified": "2021-08-20 19:19:31.514846",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'item_price')

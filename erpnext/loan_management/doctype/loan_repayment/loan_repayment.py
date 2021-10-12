@@ -3,18 +3,26 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-import json
+
+import frappe
 from frappe import _
-from frappe.utils import flt, getdate, cint
+from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate
 from six import iteritems
-from frappe.model.document import Document
-from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day, get_datetime
-from erpnext.controllers.accounts_controller import AccountsController
+
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import get_per_day_interest, get_last_accrual_date
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (
+	get_last_accrual_date,
+	get_per_day_interest,
+)
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
+	update_shortfall_status,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_demand_loans,
+)
+
 
 class LoanRepayment(AccountsController):
 
@@ -107,12 +115,13 @@ class LoanRepayment(AccountsController):
 				lia = frappe.db.get_value('Loan Interest Accrual', {'process_loan_interest_accrual':
 					process}, ['name', 'interest_amount', 'payable_principal_amount'], as_dict=1)
 
-				self.append('repayment_details', {
-					'loan_interest_accrual': lia.name,
-					'paid_interest_amount': flt(self.total_interest_paid - self.interest_payable, precision),
-					'paid_principal_amount': 0.0,
-					'accrual_type': 'Repayment'
-				})
+				if lia:
+					self.append('repayment_details', {
+						'loan_interest_accrual': lia.name,
+						'paid_interest_amount': flt(self.total_interest_paid - self.interest_payable, precision),
+						'paid_principal_amount': 0.0,
+						'accrual_type': 'Repayment'
+					})
 
 	def update_paid_amount(self):
 		loan = frappe.get_doc("Loan", self.against_loan)
@@ -402,7 +411,7 @@ def get_amounts(amounts, against_loan, posting_date):
 		if due_date and not final_due_date:
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
-	if against_loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
+	if against_loan_doc.status in ('Disbursed', 'Closed') or against_loan_doc.disbursed_amount >= against_loan_doc.loan_amount:
 		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid \
 			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
 	else:
@@ -455,6 +464,3 @@ def calculate_amounts(against_loan, posting_date, payment_type=''):
 		amounts['payable_amount'] = amounts['payable_principal_amount'] + amounts['interest_amount']
 
 	return amounts
-
-
-

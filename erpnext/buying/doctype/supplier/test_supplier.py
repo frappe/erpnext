@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
+import unittest
 
-import frappe, unittest
+import frappe
+from frappe.test_runner import make_test_records
+
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled
-from frappe.test_runner import make_test_records
 
 test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Supplier')

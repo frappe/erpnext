@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	warehouse_perm = frappe.get_all("User Permission",
@@ -66,6 +68,3 @@ def execute():
 
 		frappe.db.sql(""" UPDATE `tabPacked Item` set target_warehouse = null
 			WHERE creation > '2020-04-16' and docstatus < 2 and parenttype = 'Sales Order' """)
-
-
-

@@ -65,7 +65,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		// if item is null or highlighted cart item is clicked twice
 		const hide_item_details = !Boolean(item) || !current_item_changed;
-		
+
 		this.events.toggle_item_selector(!hide_item_details);
 		this.toggle_component(!hide_item_details);
 
@@ -127,7 +127,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
 		if (!this.hide_images && image) {
 			this.$item_image.html(
-				`<img 
+				`<img
 					onerror="cur_pos.item_details.handle_broken_image(this)"
 					class="h-full" src="${image}"
 					alt="${frappe.get_abbr(item_name)}"
@@ -236,7 +236,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				if (this.value) {
 					me.events.form_updated(me.current_item, 'warehouse', this.value).then(() => {
 						me.item_stock_map = me.events.get_item_stock_map();
-						const available_qty = me.item_stock_map[me.item_row.item_code][this.value];
+						const available_qty = me.item_stock_map[me.item_row.item_code] && me.item_stock_map[me.item_row.item_code][this.value];
 						if (available_qty === undefined) {
 							me.events.get_available_stock(me.item_row.item_code, this.value).then(() => {
 								// item stock map is updated now reset warehouse

@@ -25,4 +25,3 @@ QUnit.test("test material request get items from BOM", function(assert) {
 		() => done()
 	]);
 });
-

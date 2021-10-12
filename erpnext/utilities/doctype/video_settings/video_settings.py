@@ -3,10 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+from apiclient.discovery import build
 from frappe import _
 from frappe.model.document import Document
-from apiclient.discovery import build
+
 
 class VideoSettings(Document):
 	def validate(self):

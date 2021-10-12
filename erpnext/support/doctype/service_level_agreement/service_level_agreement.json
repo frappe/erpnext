@@ -18,6 +18,10 @@
   "entity_type",
   "column_break_10",
   "entity",
+  "filters_section",
+  "condition",
+  "column_break_15",
+  "condition_description",
   "agreement_details_section",
   "start_date",
   "column_break_7",
@@ -176,13 +180,34 @@
    "fieldname": "apply_sla_for_resolution",
    "fieldtype": "Check",
    "label": "Apply SLA for Resolution Time"
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Assignment Condition"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition",
+   "options": "Python"
+  },
+  {
+   "fieldname": "condition_description",
+   "fieldtype": "HTML",
+   "options": "<p><strong>Condition Examples:</strong></p>\n<pre>doc.status==\"Open\"<br>doc.due_date==nowdate()<br>doc.total &gt; 40000\n</pre>"
   }
  ],
  "links": [],
- "modified": "2021-07-08 12:28:46.283334",
+ "modified": "2021-10-02 11:32:55.556024",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

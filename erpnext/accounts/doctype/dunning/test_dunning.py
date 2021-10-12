@@ -3,13 +3,19 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import add_days, today, nowdate
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice_against_cost_center
+
+import frappe
+from frappe.utils import add_days, nowdate, today
+
 from erpnext.accounts.doctype.dunning.dunning import calculate_interest_and_amount
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+	unlink_payment_on_cancel_of_invoice,
+)
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
+	create_sales_invoice_against_cost_center,
+)
 
 
 class TestDunning(unittest.TestCase):
@@ -143,4 +149,4 @@ def create_dunning_type_with_zero_interest_rate():
 			'closing_text': 'We kindly request that you pay the outstanding amount immediately, and late fees.'
 		}
 	)
-	dunning_type.save() 
+	dunning_type.save()

@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
+
 from erpnext.regional.germany.setup import make_custom_fields
 
 

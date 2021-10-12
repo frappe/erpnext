@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Twitter Settings', {
-	onload: function(frm){
+	onload: function(frm) {
 		if (frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.confirm(
 				__('Session not valid, Do you want to login?'),
@@ -14,10 +14,11 @@ frappe.ui.form.on('Twitter Settings', {
 				}
 			);
 		}
+		frm.dashboard.set_headline(__("For more information, {0}.", [`<a target='_blank' href='https://docs.erpnext.com/docs/user/manual/en/CRM/twitter-settings'>${__('Click here')}</a>`]));
 	},
-	refresh: function(frm){
+	refresh: function(frm) {
 		let msg, color, flag=false;
-		if (frm.doc.session_status == "Active"){
+		if (frm.doc.session_status == "Active") {
 			msg = __("Session Active");
 			color = 'green';
 			flag = true;
@@ -28,7 +29,7 @@ frappe.ui.form.on('Twitter Settings', {
 			flag = true;
 		}
 
-		if (flag){
+		if (flag) {
 			frm.dashboard.set_headline_alert(
 				`<div class="row">
 					<div class="col-xs-12">
@@ -38,7 +39,7 @@ frappe.ui.form.on('Twitter Settings', {
 			);
 		}
 	},
-	login: function(frm){
+	login: function(frm) {
 		if (frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.dom.freeze();
 			frappe.call({
@@ -52,7 +53,7 @@ frappe.ui.form.on('Twitter Settings', {
 			});
 		}
 	},
-	after_save: function(frm){
+	after_save: function(frm) {
 		frm.trigger("login");
 	}
 });

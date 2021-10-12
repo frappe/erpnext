@@ -3,12 +3,14 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, add_months
-from erpnext.accounts.general_ledger import ClosedAccountingPeriod
+
+import frappe
+from frappe.utils import add_months, nowdate
+
 from erpnext.accounts.doctype.accounting_period.accounting_period import OverlapError
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.general_ledger import ClosedAccountingPeriod
 
 test_dependencies = ['Item']
 

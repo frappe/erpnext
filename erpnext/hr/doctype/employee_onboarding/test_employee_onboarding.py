@@ -3,12 +3,18 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate
-from erpnext.hr.doctype.employee_onboarding.employee_onboarding import make_employee
-from erpnext.hr.doctype.employee_onboarding.employee_onboarding import IncompleteTaskError
+
+import frappe
+from frappe.utils import getdate
+
+from erpnext.hr.doctype.employee_onboarding.employee_onboarding import (
+	IncompleteTaskError,
+	make_employee,
+)
 from erpnext.hr.doctype.job_offer.test_job_offer import create_job_offer
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
+
 
 class TestEmployeeOnboarding(unittest.TestCase):
 	def setUp(self):
@@ -46,7 +52,7 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		onboarding.reload()
 		employee = make_employee(onboarding.name)
 		employee.first_name = employee.employee_name
-		employee.date_of_joining = nowdate()
+		employee.date_of_joining = getdate()
 		employee.date_of_birth = '1990-05-08'
 		employee.gender = 'Female'
 		employee.insert()
@@ -65,6 +71,7 @@ def get_job_applicant():
 	applicant = frappe.new_doc('Job Applicant')
 	applicant.applicant_name = 'Test Researcher'
 	applicant.email_id = 'test@researcher.com'
+	applicant.designation = 'Researcher'
 	applicant.status = 'Open'
 	applicant.cover_letter = 'I am a great Researcher.'
 	applicant.insert()
@@ -82,11 +89,14 @@ def get_job_offer(applicant_name):
 def create_employee_onboarding():
 	applicant = get_job_applicant()
 	job_offer = get_job_offer(applicant.name)
+	holiday_list = make_holiday_list()
 
 	onboarding = frappe.new_doc('Employee Onboarding')
 	onboarding.job_applicant = applicant.name
 	onboarding.job_offer = job_offer.name
+	onboarding.date_of_joining = onboarding.boarding_begins_on = getdate()
 	onboarding.company = '_Test Company'
+	onboarding.holiday_list = holiday_list
 	onboarding.designation = 'Researcher'
 	onboarding.append('activities', {
 		'activity_name': 'Assign ID Card',

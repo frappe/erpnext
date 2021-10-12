@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from frappe import _
+
 
 def get_data():
 	return {
@@ -13,7 +13,7 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'items': ['Opportunity', 'Quotation']
+				'items': ['Opportunity', 'Quotation', 'Prospect']
 			},
 		]
 	}

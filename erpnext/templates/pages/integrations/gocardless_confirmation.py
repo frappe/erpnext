@@ -1,9 +1,14 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from erpnext.erpnext_integrations.doctype.gocardless_settings.gocardless_settings import gocardless_initialization, get_gateway_controller
+
+from erpnext.erpnext_integrations.doctype.gocardless_settings.gocardless_settings import (
+	get_gateway_controller,
+	gocardless_initialization,
+)
 
 no_cache = 1
 

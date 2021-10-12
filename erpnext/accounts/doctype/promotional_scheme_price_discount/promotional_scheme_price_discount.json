@@ -106,7 +106,6 @@
    "depends_on": "eval:doc.rate_or_discount==\"Rate\"",
    "fieldname": "rate",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Rate"
   },
   {
@@ -170,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-07 11:56:23.424137",
+ "modified": "2021-08-19 15:49:29.598727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Price Discount",

@@ -2,15 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import json
-import frappe, erpnext
+
+import frappe
 from frappe import _, scrub
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
-from erpnext.controllers.accounts_controller import validate_conversion_rate, \
-	validate_taxes_and_charges, validate_inclusive_tax
-from erpnext.stock.get_item_details import _get_item_tax_template
-from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+
+import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.controllers.accounts_controller import (
+	validate_conversion_rate,
+	validate_inclusive_tax,
+	validate_taxes_and_charges,
+)
+from erpnext.stock.get_item_details import _get_item_tax_template
+
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
@@ -595,7 +603,8 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("outstanding_amount"))
 
 			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
-			 	self.update_paid_amount_for_return(total_amount_to_pay)
+				self.set_total_amount_to_default_mop(total_amount_to_pay)
+				self.calculate_paid_amount()
 
 	def calculate_paid_amount(self):
 
@@ -675,23 +684,17 @@ class calculate_taxes_and_totals(object):
 	def set_item_wise_tax_breakup(self):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 
-	def update_paid_amount_for_return(self, total_amount_to_pay):
+	def set_total_amount_to_default_mop(self, total_amount_to_pay):
 		default_mode_of_payment = frappe.db.get_value('POS Payment Method',
 			{'parent': self.doc.pos_profile, 'default': 1}, ['mode_of_payment'], as_dict=1)
 
-		self.doc.payments = []
-
 		if default_mode_of_payment:
+			self.doc.payments = []
 			self.doc.append('payments', {
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
 				'amount': total_amount_to_pay,
 				'default': 1
 			})
-		else:
-			self.doc.is_pos = 0
-			self.doc.pos_profile = ''
-
-		self.calculate_paid_amount()
 
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:

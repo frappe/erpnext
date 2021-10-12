@@ -3,14 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import re
-import pytz
-from frappe.model.document import Document
-from frappe import _
 from datetime import datetime
-from six import string_types
+
+import frappe
+import pytz
+from frappe import _
+from frappe.model.document import Document
 from pyyoutube import Api
+from six import string_types
+
 
 class Video(Document):
 	def validate(self):

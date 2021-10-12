@@ -2,12 +2,16 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
+
 import unittest
+
 import frappe
+from frappe.utils import add_months, nowdate
+
 import erpnext
 from erpnext.non_profit.doctype.member.member import create_member
 from erpnext.non_profit.doctype.membership.membership import update_halted_razorpay_subscription
-from frappe.utils import nowdate, add_months
+
 
 class TestMembership(unittest.TestCase):
 	def setUp(self):

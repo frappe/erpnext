@@ -3,11 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import sys
+
+import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
+
 
 class VariablePathNotFound(frappe.ValidationError): pass
 
@@ -18,7 +21,9 @@ class SupplierScorecardVariable(Document):
 	def validate_path_exists(self):
 		if '.' in self.path:
 			try:
-				from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import import_string_path
+				from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+					import_string_path,
+				)
 				import_string_path(self.path)
 			except AttributeError:
 				frappe.throw(_("Could not find path for " + self.path), VariablePathNotFound)

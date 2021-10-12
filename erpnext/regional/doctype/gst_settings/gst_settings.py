@@ -3,11 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, os
+
+import os
+
+import frappe
 from frappe import _
-from frappe.utils import get_url, nowdate, date_diff
-from frappe.model.document import Document
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from frappe.model.document import Document
+from frappe.utils import date_diff, get_url, nowdate
+
 
 class EmailMissing(frappe.ValidationError): pass
 

@@ -3,14 +3,19 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
 import json
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+import unittest
+
+import frappe
+
+from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+	get_linked_payments,
+	reconcile_vouchers,
+)
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import reconcile_vouchers, get_linked_payments
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 test_dependencies = ["Item", "Cost Center"]
 
@@ -25,7 +30,8 @@ class TestBankTransaction(unittest.TestCase):
 	def tearDownClass(cls):
 		for bt in frappe.get_all("Bank Transaction"):
 			doc = frappe.get_doc("Bank Transaction", bt.name)
-			doc.cancel()
+			if doc.docstatus == 1:
+				doc.cancel()
 			doc.delete()
 
 		# Delete directly in DB to avoid validation errors for countries not allowing deletion
@@ -56,6 +62,12 @@ class TestBankTransaction(unittest.TestCase):
 
 		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
 		self.assertTrue(clearance_date is not None)
+
+		bank_transaction.reload()
+		bank_transaction.cancel()
+
+		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
+		self.assertFalse(clearance_date)
 
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):

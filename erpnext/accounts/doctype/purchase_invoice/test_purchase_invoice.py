@@ -3,20 +3,25 @@
 
 
 from __future__ import unicode_literals
+
 import unittest
-import frappe, erpnext
-import frappe.model
+
+import frappe
+from frappe.utils import add_days, cint, flt, getdate, nowdate, today
+
+import erpnext
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from frappe.utils import cint, flt, today, nowdate, add_days, getdate
-import frappe.defaults
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt, get_taxes
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
-from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.projects.doctype.project.test_project import make_project
-from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+	get_taxes,
+	make_purchase_receipt,
+)
+from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -231,7 +236,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_purchase_invoice_with_exchange_rate_difference(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as create_purchase_invoice
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as create_purchase_invoice,
+		)
 
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse='Stores - TCP1',
 			currency = "USD", conversion_rate = 70)
@@ -250,6 +257,50 @@ class TestPurchaseInvoice(unittest.TestCase):
 		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
+
+	def test_purchase_invoice_with_discount_accounting_enabled(self):
+		enable_discount_accounting()
+
+		discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+		pi = make_purchase_invoice(discount_account=discount_account, rate=45)
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 225.0, nowdate()],
+			["Discount Account - _TC", 0.0, 25.0, nowdate()]
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		enable_discount_accounting(enable=0)
+
+	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
+		enable_discount_accounting()
+		additional_discount_account = create_account(account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC", company="_Test Company")
+
+		pi = make_purchase_invoice(do_not_save=1, parent_cost_center="Main - _TC")
+		pi.apply_discount_on = "Grand Total"
+		pi.additional_discount_account = additional_discount_account
+		pi.additional_discount_percentage = 10
+		pi.disable_rounded_total = 1
+		pi.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "Main - _TC",
+			"description": "Test",
+			"rate": 10
+		})
+		pi.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
+			["_Test Account VAT - _TC", 25.0, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 247.5, nowdate()],
+			["Discount Account - _TC", 0.0, 27.5, nowdate()]
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
@@ -357,8 +408,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 
 	def test_purchase_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[1])
 		jv.insert()
@@ -397,8 +449,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			where reference_type='Purchase Invoice' and reference_name=%s""", pi.name))
 
 	def test_invoice_with_advance_and_multi_payment_terms(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[1])
 		jv.insert()
@@ -670,8 +723,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"warehouse"), pi.get("items")[0].rejected_warehouse)
 
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+			test_records as jv_test_records,
+		)
 
 		jv = frappe.copy_doc(jv_test_records[1])
 		jv.accounts[0].is_advance = 'Yes'
@@ -750,8 +804,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(flt(pi.outstanding_amount), flt(pi.rounded_total + pi.total_advance))
 
 	def test_purchase_invoice_with_shipping_rule(self):
-		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
-			import create_shipping_rule
+		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
 		shipping_rule = create_shipping_rule(shipping_rule_type = "Buying", shipping_rule_name = "Shipping Rule - Purchase Invoice Test")
 
@@ -1089,19 +1142,20 @@ class TestPurchaseInvoice(unittest.TestCase):
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
 	def test_purchase_invoice_advance_taxes(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 		from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		# create a new supplier to test
 		supplier = create_supplier(supplier_name = '_Test TDS Advance Supplier',
 			tax_withholding_category = 'TDS - 194 - Dividends - Individual')
 
 		# Update tax withholding category with current fiscal year and rate details
-		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
+		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC')
 
 		# Create Purchase Order with TDS applied
-		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item')
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item',
+			posting_date='2021-09-15')
 		po.apply_tds = 1
 		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
@@ -1161,16 +1215,32 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.amount)
 
-def update_tax_witholding_category(company, account, date):
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
+		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+	for i, gle in enumerate(gl_entries):
+		doc.assertEqual(expected_gle[i][0], gle.account)
+		doc.assertEqual(expected_gle[i][1], gle.debit)
+		doc.assertEqual(expected_gle[i][2], gle.credit)
+		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+def update_tax_witholding_category(company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
-	fiscal_year = get_fiscal_year(date=date, company=company)
+	fiscal_year = get_fiscal_year(fiscal_year='2021')
 
 	if not frappe.db.get_value('Tax Withholding Rate',
-		{'parent': 'TDS - 194 - Dividends - Individual', 'fiscal_year': fiscal_year[0]}):
+		{'parent': 'TDS - 194 - Dividends - Individual', 'from_date': ('>=', fiscal_year[1]),
+			'to_date': ('<=', fiscal_year[2])}):
 		tds_category = frappe.get_doc('Tax Withholding Category', 'TDS - 194 - Dividends - Individual')
+		tds_category.set('rates', [])
+
 		tds_category.append('rates', {
-			'fiscal_year': fiscal_year[0],
+			'from_date': fiscal_year[1],
+			'to_date': fiscal_year[2],
 			'tax_withholding_rate': 10,
 			'single_threshold': 2500,
 			'cumulative_threshold': 0
@@ -1189,6 +1259,11 @@ def update_tax_witholding_category(company, account, date):
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
+	accounts_settings.save()
+
+def enable_discount_accounting(enable=1):
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	accounts_settings.enable_discount_accounting = enable
 	accounts_settings.save()
 
 def make_purchase_invoice(**args):
@@ -1213,6 +1288,7 @@ def make_purchase_invoice(**args):
 	pi.return_against = args.return_against
 	pi.is_subcontracted = args.is_subcontracted or "No"
 	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
+	pi.cost_center = args.parent_cost_center
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -1221,7 +1297,10 @@ def make_purchase_invoice(**args):
 		"received_qty": args.received_qty or 0,
 		"rejected_qty": args.rejected_qty or 0,
 		"rate": args.rate or 50,
-		'expense_account': args.expense_account or '_Test Account Cost for Goods Sold - _TC',
+		"price_list_rate": args.price_list_rate or 50,
+		"expense_account": args.expense_account or '_Test Account Cost for Goods Sold - _TC',
+		"discount_account": args.discount_account or None,
+		"discount_amount": args.discount_amount or 0,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.uom or "_Test UOM",

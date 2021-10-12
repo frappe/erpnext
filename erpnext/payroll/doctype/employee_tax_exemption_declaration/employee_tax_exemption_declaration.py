@@ -3,13 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe.model.document import Document
-from frappe import _
-from frappe.utils import flt
 from frappe.model.mapper import get_mapped_doc
-from erpnext.hr.utils import validate_tax_declaration, get_total_exemption_amount, validate_active_employee, \
-	calculate_annual_eligible_hra_exemption, validate_duplicate_exemption_for_payroll_period
+from frappe.utils import flt
+
+from erpnext.hr.utils import (
+	calculate_annual_eligible_hra_exemption,
+	get_total_exemption_amount,
+	validate_active_employee,
+	validate_duplicate_exemption_for_payroll_period,
+	validate_tax_declaration,
+)
+
 
 class EmployeeTaxExemptionDeclaration(Document):
 	def validate(self):

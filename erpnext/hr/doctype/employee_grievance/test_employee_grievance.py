@@ -1,10 +1,14 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import today
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
+
+
 class TestEmployeeGrievance(unittest.TestCase):
 	def test_create_employee_grievance(self):
 		create_employee_grievance()
@@ -48,4 +52,3 @@ def create_grievance_type():
 	grievance_type.save()
 
 	return grievance_type.name
-

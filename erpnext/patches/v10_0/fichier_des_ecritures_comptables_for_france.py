@@ -2,8 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
+
 from erpnext.setup.doctype.company.company import install_country_fixtures
+
 
 def execute():
 	frappe.reload_doc('regional', 'report', 'fichier_des_ecritures_comptables_[fec]')

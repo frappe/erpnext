@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
+
 import frappe
+
 
 # accounts
 class PartyFrozen(frappe.ValidationError): pass

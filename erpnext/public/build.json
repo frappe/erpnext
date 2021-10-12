@@ -3,7 +3,8 @@
 		"public/less/erpnext.less",
 		"public/less/hub.less",
 		"public/scss/call_popup.scss",
-		"public/scss/point-of-sale.scss"
+		"public/scss/point-of-sale.scss",
+		"public/scss/hierarchy_chart.scss"
 	],
 	"css/marketplace.css": [
 		"public/less/hub.less"
@@ -37,13 +38,15 @@
 		"public/js/templates/item_quick_entry.html",
 		"public/js/utils/item_quick_entry.js",
 		"public/js/utils/customer_quick_entry.js",
+		"public/js/utils/supplier_quick_entry.js",
 		"public/js/education/student_button.html",
 		"public/js/education/assessment_result_tool.html",
 		"public/js/hub/hub_factory.js",
 		"public/js/call_popup/call_popup.js",
 		"public/js/utils/dimension_tree_filter.js",
 		"public/js/telephony.js",
-		"public/js/templates/call_link.html"
+		"public/js/templates/call_link.html",
+		"public/js/templates/node_card.html"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",
@@ -66,5 +69,9 @@
 		"public/js/bank_reconciliation_tool/data_table_manager.js",
 		"public/js/bank_reconciliation_tool/number_card.js",
 		"public/js/bank_reconciliation_tool/dialog_manager.js"
+	],
+	"js/hierarchy-chart.min.js": [
+		"public/js/hierarchy_chart/hierarchy_chart_desktop.js",
+		"public/js/hierarchy_chart/hierarchy_chart_mobile.js"
 	]
 }

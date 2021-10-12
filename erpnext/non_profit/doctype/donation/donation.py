@@ -3,14 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import json
+
 import frappe
 import six
-import json
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import getdate, flt, get_link_to_form
 from frappe.email import sendmail_to_system_managers
+from frappe.model.document import Document
+from frappe.utils import flt, get_link_to_form, getdate
+
 from erpnext.non_profit.doctype.membership.membership import verify_signature
+
 
 class Donation(Document):
 	def validate(self):
@@ -167,7 +171,7 @@ def create_donor(payment):
 def get_company_for_donations():
 	company = frappe.db.get_single_value('Non Profit Settings', 'donation_company')
 	if not company:
-		from erpnext.healthcare.setup import get_company
+		from erpnext.non_profit.utils import get_company
 		company = get_company()
 	return company
 
@@ -217,4 +221,3 @@ def notify_failure(log):
 		sendmail_to_system_managers(_('[Important] [ERPNext] Razorpay donation webhook failed, please check.'), content)
 	except Exception:
 		pass
-

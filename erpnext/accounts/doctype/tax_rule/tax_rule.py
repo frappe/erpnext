@@ -3,18 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from past.builtins import cmp
-import frappe
-from frappe import _
-from frappe.model.document import Document
-from frappe.utils import cstr, cint
-from frappe.contacts.doctype.address.address import get_default_address
-from frappe.utils.nestedset import get_root_of
-from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 
 import functools
 
+import frappe
+from frappe import _
+from frappe.contacts.doctype.address.address import get_default_address
+from frappe.model.document import Document
+from frappe.utils import cint, cstr
+from frappe.utils.nestedset import get_root_of
+from past.builtins import cmp
 from six import iteritems
+
+from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
+
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
 class IncorrectSupplierType(frappe.ValidationError): pass

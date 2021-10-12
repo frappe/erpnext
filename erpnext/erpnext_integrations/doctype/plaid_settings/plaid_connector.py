@@ -2,12 +2,11 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
 import plaid
 import requests
-from plaid.errors import APIError, ItemError, InvalidRequestError
-
-import frappe
 from frappe import _
+from plaid.errors import APIError, InvalidRequestError, ItemError
 
 
 class PlaidConnector():
@@ -50,7 +49,7 @@ class PlaidConnector():
 				"secret": self.settings.plaid_secret,
 				"products": self.products,
 			})
-		
+
 		return args
 
 	def get_link_token(self, update_mode=False):

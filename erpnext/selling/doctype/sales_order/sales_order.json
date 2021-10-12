@@ -55,6 +55,8 @@
   "items_section",
   "scan_barcode",
   "items",
+  "packing_list",
+  "packed_items",
   "pricing_rule_details",
   "pricing_rules",
   "section_break_31",
@@ -101,8 +103,6 @@
   "in_words",
   "advance_paid",
   "disable_rounded_total",
-  "packing_list",
-  "packed_items",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -571,7 +571,8 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1018,6 +1019,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1028,14 +1030,14 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Packed Items",
    "options": "Packed Item",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "payment_schedule_section",
@@ -1478,6 +1480,7 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -1510,7 +1513,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-08 21:37:44.177493",
+ "modified": "2021-09-28 13:09:51.515542",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

@@ -253,41 +253,6 @@ erpnext.PointOfSale.Payment = class {
 		}
 	}
 
-	setup_listener_for_payments() {
-		frappe.realtime.on("process_phone_payment", (data) => {
-			const doc = this.events.get_frm().doc;
-			const { response, amount, success, failure_message } = data;
-			let message, title;
-
-			if (success) {
-				title = __("Payment Received");
-				if (amount >= doc.grand_total) {
-					frappe.dom.unfreeze();
-					message = __("Payment of {0} received successfully.", [format_currency(amount, doc.currency, 0)]);
-					this.events.submit_invoice();
-					cur_frm.reload_doc();
-
-				} else {
-					message = __("Payment of {0} received successfully. Waiting for other requests to complete...", [format_currency(amount, doc.currency, 0)]);
-				}
-			} else if (failure_message) {
-				message = failure_message;
-				title = __("Payment Failed");
-			}
-
-			frappe.msgprint({ "message": message, "title": title });
-		});
-	}
-
-	auto_set_remaining_amount() {
-		const doc = this.events.get_frm().doc;
-		const remaining_amount = doc.grand_total - doc.paid_amount;
-		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
-		if (!current_value && remaining_amount > 0 && this.selected_mode) {
-			this.selected_mode.set_value(remaining_amount);
-		}
-	}
-
 	attach_shortcuts() {
 		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
 		this.$component.find('.submit-order-btn').attr("title", `${ctrl_label}+Enter`);
@@ -332,6 +297,7 @@ erpnext.PointOfSale.Payment = class {
 		this.render_payment_mode_dom();
 		this.make_invoice_fields_control();
 		this.update_totals_section();
+		this.focus_on_default_mop();
 	}
 
 	edit_cart() {
@@ -413,17 +379,24 @@ erpnext.PointOfSale.Payment = class {
 			});
 			this[`${mode}_control`].toggle_label(false);
 			this[`${mode}_control`].set_value(p.amount);
+		});
 
+		this.render_loyalty_points_payment_mode();
+
+		this.attach_cash_shortcuts(doc);
+	}
+
+	focus_on_default_mop() {
+		const doc = this.events.get_frm().doc;
+		const payments = doc.payments;
+		payments.forEach(p => {
+			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			if (p.default) {
 				setTimeout(() => {
 					this.$payment_modes.find(`.${mode}.mode-of-payment-control`).parent().click();
 				}, 500);
 			}
 		});
-
-		this.render_loyalty_points_payment_mode();
-
-		this.attach_cash_shortcuts(doc);
 	}
 
 	attach_cash_shortcuts(doc) {

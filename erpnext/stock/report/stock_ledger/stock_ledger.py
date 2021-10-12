@@ -4,10 +4,15 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cint, flt
-from erpnext.stock.utils import update_included_uom_in_report, is_reposting_item_valuation_in_progress
 from frappe import _
+from frappe.utils import cint, flt
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import (
+	is_reposting_item_valuation_in_progress,
+	update_included_uom_in_report,
+)
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -23,6 +28,7 @@ def execute(filters=None):
 	conversion_factors = []
 	if opening_row:
 		data.append(opening_row)
+		conversion_factors.append(0)
 
 	actual_qty = stock_value = 0
 

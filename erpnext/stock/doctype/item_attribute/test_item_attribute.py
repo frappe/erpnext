@@ -2,15 +2,18 @@
 # See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-import unittest
 
 test_records = frappe.get_test_records('Item Attribute')
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
+from erpnext.tests.utils import ERPNextTestCase
 
-class TestItemAttribute(unittest.TestCase):
+
+class TestItemAttribute(ERPNextTestCase):
 	def setUp(self):
+		super().setUp()
 		if frappe.db.exists("Item Attribute", "_Test_Length"):
 			frappe.delete_doc("Item Attribute", "_Test_Length")
 
@@ -28,4 +31,3 @@ class TestItemAttribute(unittest.TestCase):
 
 		item_attribute.increment = 0.5
 		item_attribute.save()
-

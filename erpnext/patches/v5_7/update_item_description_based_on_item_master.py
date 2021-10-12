@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	name = frappe.db.sql(""" select name from `tabPatch Log` \

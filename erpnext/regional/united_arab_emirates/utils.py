@@ -12,6 +12,7 @@ from frappe.utils import flt, round_based_on_smallest_currency_fraction, money_i
 from erpnext.regional.doctype.salary_information_file.salary_information_file import get_company_bank_details
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 
+
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return
 

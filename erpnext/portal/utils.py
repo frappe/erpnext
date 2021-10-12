@@ -1,8 +1,13 @@
 from __future__ import unicode_literals
+
 import frappe
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
-from erpnext.shopping_cart.cart import get_debtors_account
 from frappe.utils.nestedset import get_root_of
+
+from erpnext.shopping_cart.cart import get_debtors_account
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+	get_shopping_cart_settings,
+)
+
 
 def set_default_role(doc, method):
 	'''Set customer, supplier, student, guardian based on email'''

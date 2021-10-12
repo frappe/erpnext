@@ -3,11 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import get_datetime
-from frappe import _
 from frappe.model.document import Document
-from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import check_for_ltv_shortfall
+from frappe.utils import get_datetime
+
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
+	check_for_ltv_shortfall,
+)
+
 
 class ProcessLoanSecurityShortfall(Document):
 	def onload(self):

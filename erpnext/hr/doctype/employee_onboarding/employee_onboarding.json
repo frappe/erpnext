@@ -8,20 +8,24 @@
  "field_order": [
   "job_applicant",
   "job_offer",
-  "employee_name",
-  "employee",
-  "date_of_joining",
-  "boarding_status",
-  "notify_users_by_email",
-  "column_break_7",
   "employee_onboarding_template",
+  "column_break_7",
   "company",
+  "boarding_status",
+  "project",
+  "details_section",
+  "employee",
+  "employee_name",
   "department",
   "designation",
   "employee_grade",
-  "project",
+  "holiday_list",
+  "column_break_13",
+  "date_of_joining",
+  "boarding_begins_on",
   "table_for_activity",
   "activities",
+  "notify_users_by_email",
   "amended_from"
  ],
  "fields": [
@@ -58,7 +62,8 @@
    "fieldname": "date_of_joining",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date of Joining"
+   "label": "Date of Joining",
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -90,7 +95,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "department",
@@ -121,7 +127,8 @@
   },
   {
    "fieldname": "table_for_activity",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Onboarding Activities"
   },
   {
    "allow_on_submit": 1,
@@ -138,11 +145,32 @@
    "options": "Employee Onboarding",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "boarding_begins_on",
+   "fieldtype": "Date",
+   "label": "Onboarding Begins On",
+   "reqd": 1
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "label": "Holiday List",
+   "options": "Holiday List"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-03 18:01:51.097927",
+ "modified": "2021-07-30 14:55:04.560683",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Onboarding",

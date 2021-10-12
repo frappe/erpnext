@@ -2,17 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import get_fullname, flt, cstr, get_link_to_form
-from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name, share_doc_with_approver, validate_active_employee
-from erpnext.accounts.party import get_party_account
-from erpnext.accounts.general_ledger import make_gl_entries
+from frappe.utils import cstr, flt, get_link_to_form
+
+import erpnext
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
-from frappe.utils.csvutils import getlink
-from erpnext.accounts.utils import get_account_currency
+from erpnext.hr.utils import set_employee_name, share_doc_with_approver, validate_active_employee
+
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 class ExpenseApproverIdentityError(frappe.ValidationError): pass
@@ -77,7 +77,7 @@ class ExpenseClaim(AccountsController):
 		self.make_gl_entries()
 
 		if self.is_paid:
-			update_reimbursed_amount(self)
+			update_reimbursed_amount(self, self.grand_total)
 
 		self.set_status(update=True)
 		self.update_claimed_amount_in_employee_advance()
@@ -89,7 +89,7 @@ class ExpenseClaim(AccountsController):
 			self.make_gl_entries(cancel=True)
 
 		if self.is_paid:
-			update_reimbursed_amount(self)
+			update_reimbursed_amount(self, -1 * self.grand_total)
 
 		self.update_claimed_amount_in_employee_advance()
 
@@ -270,20 +270,10 @@ class ExpenseClaim(AccountsController):
 			if not expense.default_account or not validate:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
-def update_reimbursed_amount(doc, jv=None):
+def update_reimbursed_amount(doc, amount):
 
-	condition = ""
-
-	if jv:
-		condition += "and voucher_no = '{0}'".format(jv)
-
-	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) - ifnull(sum(credit_in_account_currency), 0)as amt
-		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
-		and party = %s {condition}""".format(condition=condition), #nosec
-		(doc.name, doc.employee) ,as_dict=1)[0].amt
-
-	doc.total_amount_reimbursed = amt
-	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
+	doc.total_amount_reimbursed += amount
+	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", doc.total_amount_reimbursed)
 
 	doc.set_status()
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)

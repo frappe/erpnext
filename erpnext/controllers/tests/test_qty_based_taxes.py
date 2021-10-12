@@ -1,7 +1,10 @@
-from __future__ import unicode_literals, print_function
+from __future__ import print_function, unicode_literals
+
 import unittest
-import frappe
 from uuid import uuid4 as _uuid4
+
+import frappe
+
 
 def uuid4():
     return str(_uuid4())

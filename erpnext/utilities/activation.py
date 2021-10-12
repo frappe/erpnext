@@ -2,10 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
 
+import frappe
 from frappe import _
 from six import iteritems
+
+import erpnext
+
 
 def get_level():
 	activation_level = 0
@@ -13,33 +16,33 @@ def get_level():
 	min_count = 0
 	doctypes = {
 		"Asset": 5,
-		"BOM": 3, 
-		"Customer": 5, 
+		"BOM": 3,
+		"Customer": 5,
 		"Delivery Note": 5,
-		"Employee": 3, 
-		"Instructor": 5, 
+		"Employee": 3,
+		"Instructor": 5,
 		"Issue": 5,
-		"Item": 5, 
-		"Journal Entry": 3, 
+		"Item": 5,
+		"Journal Entry": 3,
 		"Lead": 3,
 		"Leave Application": 5,
 		"Material Request": 5,
-		"Opportunity": 5, 
-		"Payment Entry": 2, 
+		"Opportunity": 5,
+		"Payment Entry": 2,
 		"Project": 5,
-		"Purchase Order": 2, 
+		"Purchase Order": 2,
 		"Purchase Invoice": 5,
 		"Purchase Receipt": 5,
 		"Quotation": 3,
 		"Salary Slip": 5,
 		"Salary Structure": 5,
-		"Sales Order": 2, 
-		"Sales Invoice": 2, 
+		"Sales Order": 2,
+		"Sales Invoice": 2,
 		"Stock Entry": 3,
-		"Student": 5, 
+		"Student": 5,
 		"Supplier": 5,
 		"Task": 5,
-		"User": 5, 
+		"User": 5,
 		"Work Order": 5
 	}
 

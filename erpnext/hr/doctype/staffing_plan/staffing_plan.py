@@ -3,11 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import getdate, nowdate, cint, flt
+from frappe.model.document import Document
+from frappe.utils import cint, flt, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
+
 
 class SubsidiaryCompanyError(frappe.ValidationError): pass
 class ParentCompanyError(frappe.ValidationError): pass
@@ -153,7 +155,11 @@ def get_designation_counts(designation, company):
 	return employee_counts
 
 @frappe.whitelist()
-def get_active_staffing_plan_details(company, designation, from_date=getdate(nowdate()), to_date=getdate(nowdate())):
+def get_active_staffing_plan_details(company, designation, from_date=None, to_date=None):
+	if from_date is None:
+		from_date = getdate(nowdate())
+	if to_date is None:
+		to_date = getdate(nowdate())
 	if not company or not designation:
 		frappe.throw(_("Please select Company and Designation"))
 

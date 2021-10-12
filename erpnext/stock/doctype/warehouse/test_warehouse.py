@@ -2,21 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import unittest
-
 import frappe
-from frappe.utils import cint
 from frappe.test_runner import make_test_records
+from frappe.utils import cint
 
 import erpnext
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestCase
 
 test_records = frappe.get_test_records('Warehouse')
 
-class TestWarehouse(unittest.TestCase):
+class TestWarehouse(ERPNextTestCase):
 	def setUp(self):
+		super().setUp()
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
 

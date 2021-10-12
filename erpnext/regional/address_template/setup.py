@@ -10,7 +10,7 @@ def set_up_address_templates(default_country=None):
 def get_address_templates():
 	"""
 	Return country and path for all HTML files in this directory.
-	
+
 	Returns a list of dicts.
 	"""
 	def country(file_name):

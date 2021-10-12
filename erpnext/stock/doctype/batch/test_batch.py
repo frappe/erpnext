@@ -1,17 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import frappe
 from frappe.exceptions import ValidationError
-import unittest
-
-from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError, get_batch_no
 from frappe.utils import cint, flt
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.get_item_details import get_item_details
 
-class TestBatch(unittest.TestCase):
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
+from erpnext.stock.get_item_details import get_item_details
+from erpnext.tests.utils import ERPNextTestCase
+
+
+class TestBatch(ERPNextTestCase):
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
 			"doctype": "Batch",
@@ -269,11 +269,14 @@ class TestBatch(unittest.TestCase):
 		batch2 = create_batch('_Test Batch Price Item', 300, 1)
 		batch3 = create_batch('_Test Batch Price Item', 400, 0)
 
+		company = "_Test Company with perpetual inventory"
+		currency = frappe.get_cached_value("Company",  company,  "default_currency")
+
 		args = frappe._dict({
 			"item_code": "_Test Batch Price Item",
-			"company": "_Test Company with perpetual inventory",
+			"company": company,
 			"price_list": "_Test Price List",
-			"currency": "_Test Currency",
+			"currency": currency,
 			"doctype": "Sales Invoice",
 			"conversion_rate": 1,
 			"price_list_currency": "_Test Currency",

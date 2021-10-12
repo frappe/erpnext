@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 from six import iteritems
 
 states = [

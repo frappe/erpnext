@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+
 class Operation(Document):
 	def validate(self):
 		if not self.description:

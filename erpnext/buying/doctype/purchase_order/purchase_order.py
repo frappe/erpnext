@@ -2,23 +2,30 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.utils import cstr, flt, cint
-from frappe import msgprint, _
-from frappe.model.mapper import get_mapped_doc
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.doctype.item.item import get_last_purchase_details
-from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
+
+import frappe
+from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import validate_for_items, check_on_hold_or_closed_status
-from erpnext.stock.utils import get_bin
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt
+
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	unlink_inter_company_doc,
+	update_linked_doc,
+	validate_inter_company_party,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
 from erpnext.accounts.party import get_party_account_currency
-from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from erpnext.controllers.buying_controller import BuyingController
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_party,
-	update_linked_doc, unlink_inter_company_doc)
+from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
+from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
+from erpnext.stock.utils import get_bin
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -447,9 +454,10 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Purchase Invoice Advance
-
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
+
+		target.set_payment_schedule()
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
@@ -470,6 +478,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				"party_account_currency": "party_account_currency",
 				"supplier_warehouse":"supplier_warehouse"
 			},
+			"field_no_map" : ["payment_terms_template"],
 			"validation": {
 				"docstatus": ["=", 1],
 			}
@@ -488,12 +497,6 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"add_if_empty": True
 		},
 	}
-
-	if frappe.get_single("Accounts Settings").automatically_fetch_payment_terms == 1:
-		fields["Payment Schedule"] = {
-			"doctype": "Payment Schedule",
-			"add_if_empty": True
-		}
 
 	doc = get_mapped_doc("Purchase Order", source_name,	fields,
 		target_doc, postprocess, ignore_permissions=ignore_permissions)

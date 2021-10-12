@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from six import iteritems
+
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
 
 def execute(filters=None):

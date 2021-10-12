@@ -2,24 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt,cint, cstr, getdate
-from six import iteritems
-from collections import OrderedDict
-from erpnext.accounts.party import get_party_details
-from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
-from erpnext.stock.stock_ledger import get_valuation_rate
-from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.utils import cint, cstr, flt, getdate
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.accounts.party import get_party_details
+from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
-from erpnext.stock.utils import get_incoming_rate
-
 from erpnext.controllers.stock_controller import StockController
 from erpnext.controllers.subcontracting import Subcontracting
+from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.utils import get_incoming_rate
+
 
 class BuyingController(StockController, Subcontracting):
 
@@ -72,7 +69,8 @@ class BuyingController(StockController, Subcontracting):
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions,
-			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address')))
+			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address'),
+			fetch_payment_terms_template= not self.get('ignore_default_payment_terms_template')))
 
 		self.set_missing_item_details(for_validate)
 

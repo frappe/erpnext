@@ -3,12 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
+from frappe.utils import add_months, cint, flt, getdate, time_diff_in_hours
+
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.controllers.accounts_controller import AccountsController
+
 
 class AssetRepair(AccountsController):
 	def validate(self):
@@ -18,7 +21,7 @@ class AssetRepair(AccountsController):
 		if self.get('stock_items'):
 			self.set_total_value()
 		self.calculate_total_repair_cost()
-		
+
 	def update_status(self):
 		if self.repair_status == 'Pending':
 			frappe.db.set_value('Asset', self.asset, 'status', 'Out of Order')
@@ -98,7 +101,7 @@ class AssetRepair(AccountsController):
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation -= self.repair_cost
-		
+
 	def get_total_value_of_stock_consumed(self):
 		total_value_of_stock_consumed = 0
 		if self.get('stock_consumption'):
@@ -141,7 +144,7 @@ class AssetRepair(AccountsController):
 		gl_entries = []
 		repair_and_maintenance_account = frappe.db.get_value('Company', self.company, 'repair_and_maintenance_account')
 		fixed_asset_account = get_asset_account("fixed_asset_account", asset=self.asset, company=self.company)
-		expense_account = frappe.get_doc('Purchase Invoice', self.purchase_invoice).items[0].expense_account	
+		expense_account = frappe.get_doc('Purchase Invoice', self.purchase_invoice).items[0].expense_account
 
 		gl_entries.append(
 			self.get_gl_dict({
@@ -149,7 +152,7 @@ class AssetRepair(AccountsController):
 				"credit": self.repair_cost,
 				"credit_in_account_currency": self.repair_cost,
 				"against": repair_and_maintenance_account,
-				"voucher_type": self.doctype,		
+				"voucher_type": self.doctype,
 				"voucher_no": self.name,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(),
@@ -167,7 +170,7 @@ class AssetRepair(AccountsController):
 						"credit": item.amount,
 						"credit_in_account_currency": item.amount,
 						"against": repair_and_maintenance_account,
-						"voucher_type": self.doctype,		
+						"voucher_type": self.doctype,
 						"voucher_no": self.name,
 						"cost_center": self.cost_center,
 						"posting_date": getdate(),

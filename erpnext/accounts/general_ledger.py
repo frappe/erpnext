@@ -2,12 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import flt, cstr, cint, comma_and, today, getdate, formatdate, now
+
+import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.utils import cint, cstr, flt, formatdate, getdate, now
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+
 
 class ClosedAccountingPeriod(frappe.ValidationError): pass
 
@@ -100,8 +106,8 @@ def merge_similar_entries(gl_map, precision=None):
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_map, dimensions=None):
-	account_head_fieldnames = ['party_type', 'party', 'against_voucher', 'against_voucher_type',
-		'cost_center', 'project', 'voucher_detail_no']
+	account_head_fieldnames = ['voucher_detail_no', 'party', 'against_voucher',
+			'cost_center', 'against_voucher_type', 'party_type', 'project', 'finance_book']
 
 	if dimensions:
 		account_head_fieldnames = account_head_fieldnames + dimensions
@@ -110,10 +116,12 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 		same_head = True
 		if e.account != gle.account:
 			same_head = False
+			continue
 
 		for fieldname in account_head_fieldnames:
 			if cstr(e.get(fieldname)) != cstr(gle.get(fieldname)):
 				same_head = False
+				break
 
 		if same_head:
 			return e
@@ -143,16 +151,19 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 		validate_expense_against_budget(args)
 
 def validate_cwip_accounts(gl_map):
-	cwip_enabled = any(cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting"))
+	"""Validate that CWIP account are not used in Journal Entry"""
+	if gl_map and gl_map[0].voucher_type != "Journal Entry":
+		return
 
-	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
-			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-				where account_type = 'Capital Work in Progress' and is_group=0""")]
+	cwip_enabled = any(cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category", "enable_cwip_accounting"))
+	if cwip_enabled:
+		cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
+			where account_type = 'Capital Work in Progress' and is_group=0""")]
 
-			for entry in gl_map:
-				if entry.account in cwip_accounts:
-					frappe.throw(
-						_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
+		for entry in gl_map:
+			if entry.account in cwip_accounts:
+				frappe.throw(
+					_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
@@ -273,13 +284,16 @@ def check_freezing_date(posting_date, adv_adj=False):
 	"""
 		Nobody can do GL Entries where posting date is before freezing date
 		except authorized person
+
+		Administrator has all the roles so this check will be bypassed if any role is allowed to post
+		Hence stop admin to bypass if accounts are freezed
 	"""
 	if not adv_adj:
 		acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
 		if acc_frozen_upto:
 			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
 			if getdate(posting_date) <= getdate(acc_frozen_upto) \
-					and not frozen_accounts_modifier in frappe.get_roles():
+					and not frozen_accounts_modifier in frappe.get_roles() or frappe.session.user == 'Administrator':
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
 def set_as_cancel(voucher_type, voucher_no):

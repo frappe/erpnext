@@ -2,10 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
+import frappe
 from frappe import _
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import show_attachments
+
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+	show_attachments,
+)
+
 
 def get_context(context):
 	context.no_cache = 1
@@ -32,11 +36,13 @@ def get_context(context):
 
 	if not frappe.has_website_permission(context.doc):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
-	
+
 	# check for the loyalty program of the customer
-	customer_loyalty_program = frappe.db.get_value("Customer", context.doc.customer, "loyalty_program")	
+	customer_loyalty_program = frappe.db.get_value("Customer", context.doc.customer, "loyalty_program")
 	if customer_loyalty_program:
-		from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
+		from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+			get_loyalty_program_details_with_points,
+		)
 		loyalty_program_details = get_loyalty_program_details_with_points(context.doc.customer, customer_loyalty_program)
 		context.available_loyalty_points = int(loyalty_program_details.get("loyalty_points"))
 

@@ -3,10 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.model.document import Document
+
+import json
+
+import frappe
 from frappe import _
 from frappe.desk.search import sanitize_searchfield
+from frappe.model.document import Document
+
 
 class BankGuarantee(Document):
 	def validate(self):
@@ -25,6 +29,6 @@ class BankGuarantee(Document):
 def get_vouchar_detials(column_list, doctype, docname):
 	column_list = json.loads(column_list)
 	for col in column_list:
-		sanitize_searchfield(col) 
+		sanitize_searchfield(col)
 	return frappe.db.sql(''' select {columns} from `tab{doctype}` where name=%s'''
 		.format(columns=", ".join(column_list), doctype=doctype), docname, as_dict=1)[0]

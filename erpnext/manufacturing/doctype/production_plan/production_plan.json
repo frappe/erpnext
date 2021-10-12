@@ -16,10 +16,12 @@
   "customer",
   "warehouse",
   "project",
+  "sales_order_status",
   "column_break2",
   "from_date",
   "to_date",
-  "sales_order_status",
+  "from_delivery_date",
+  "to_delivery_date",
   "sales_orders_detail",
   "get_sales_orders",
   "sales_orders",
@@ -300,7 +302,7 @@
   {
    "fieldname": "for_warehouse",
    "fieldtype": "Link",
-   "label": "Material Request Warehouse",
+   "label": "Make Material Request for Warehouse",
    "options": "Warehouse"
   },
   {
@@ -358,13 +360,23 @@
    "fieldname": "get_sub_assembly_items",
    "fieldtype": "Button",
    "label": "Get Sub Assembly Items"
+  },
+  {
+   "fieldname": "from_delivery_date",
+   "fieldtype": "Date",
+   "label": "From Delivery Date"
+  },
+  {
+   "fieldname": "to_delivery_date",
+   "fieldtype": "Date",
+   "label": "To Delivery Date"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-28 20:00:33.905114",
+ "modified": "2021-09-06 18:35:59.642232",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

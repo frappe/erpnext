@@ -2,15 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import cstr, cint
-from frappe import msgprint, throw, _
-
+from frappe import _, msgprint, throw
+from frappe.core.doctype.doctype.doctype import validate_series
 from frappe.model.document import Document
 from frappe.model.naming import parse_naming_series
 from frappe.permissions import get_doctypes_with_read
-from frappe.core.doctype.doctype.doctype import validate_series
+from frappe.utils import cint, cstr
+
 
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 
@@ -79,7 +79,8 @@ class NamingSeries(Document):
 		options = self.scrub_options_list(ol)
 
 		# validate names
-		for i in options: self.validate_series_name(i)
+		for i in options:
+			self.validate_series_name(i)
 
 		if options and self.user_must_always_select:
 			options = [''] + options
@@ -138,7 +139,7 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
-		if not re.match("^[\w\- /.#{}]*$", n, re.UNICODE):
+		if not re.match(r"^[\w\- \/.#{}]+$", n, re.UNICODE):
 			throw(_('Special Characters except "-", "#", ".", "/", "{" and "}" not allowed in naming series'))
 
 	@frappe.whitelist()

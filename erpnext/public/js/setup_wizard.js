@@ -147,7 +147,7 @@ erpnext.setup.slides_settings = [
 			}
 
 			// Validate bank name
-			if(me.values.bank_account) { 
+			if(me.values.bank_account) {
 				frappe.call({
 					async: false,
 					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",

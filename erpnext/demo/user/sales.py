@@ -3,12 +3,20 @@
 
 from __future__ import unicode_literals
 
-import frappe, random, erpnext
+import random
+
+import frappe
 from frappe.utils import flt
 from frappe.utils.make_random import add_random_children, get_random
-from erpnext.setup.utils import get_exchange_rate
+
+import erpnext
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	make_payment_entry,
+	make_payment_request,
+)
 from erpnext.accounts.party import get_party_account_currency
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
+from erpnext.setup.utils import get_exchange_rate
+
 
 def work(domain="Manufacturing"):
 	frappe.set_user(frappe.db.get_global('demo_sales_user_2'))

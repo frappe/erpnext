@@ -3,15 +3,21 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import nowdate, getdate, add_days, flt
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import add_days, flt, get_datetime, nowdate
+
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
-from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
-from frappe.utils import get_datetime
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
+	get_pledged_security_qty,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_demand_loans,
+)
+
 
 class LoanDisbursement(AccountsController):
 
@@ -192,7 +198,7 @@ def get_disbursal_amount(loan, on_current_security_price=0):
 		security_value = get_total_pledged_security_value(loan)
 
 	if loan_details.is_secured_loan and not on_current_security_price:
-		security_value = flt(loan_details.maximum_loan_amount)
+		security_value = get_maximum_amount_as_per_pledged_security(loan)
 
 	if not security_value and not loan_details.is_secured_loan:
 		security_value = flt(loan_details.loan_amount)
@@ -204,4 +210,5 @@ def get_disbursal_amount(loan, on_current_security_price=0):
 
 	return disbursal_amount
 
-
+def get_maximum_amount_as_per_pledged_security(loan):
+	return flt(frappe.db.get_value('Loan Security Pledge', {'loan': loan}, 'sum(maximum_loan_value)'))

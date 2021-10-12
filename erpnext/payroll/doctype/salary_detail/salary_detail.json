@@ -12,7 +12,6 @@
   "year_to_date",
   "section_break_5",
   "additional_salary",
-  "is_recurring_additional_salary",
   "statistical_component",
   "depends_on_payment_days",
   "exempted_from_income_tax",
@@ -236,19 +235,11 @@
    "label": "Year To Date",
    "options": "currency",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.parenttype=='Salary Slip' && doc.parentfield=='earnings' && doc.additional_salary",
-   "fieldname": "is_recurring_additional_salary",
-   "fieldtype": "Check",
-   "label": "Is Recurring Additional Salary",
-   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-03-14 13:39:15.847158",
+ "modified": "2021-01-14 13:39:15.847158",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Detail",

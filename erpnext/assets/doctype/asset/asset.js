@@ -103,11 +103,11 @@ frappe.ui.form.on('Asset', {
 					frm.trigger("create_asset_maintenance");
 				}, __("Manage"));
 			}
-		
+
 			frm.add_custom_button(__("Repair Asset"), function() {
 				frm.trigger("create_asset_repair");
 			}, __("Manage"));
-			
+
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Adjust Asset Value"), function() {
 					frm.trigger("create_asset_adjustment");
