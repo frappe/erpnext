@@ -1,5 +1,7 @@
 import frappe
+
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "overdue_payment")
@@ -39,7 +41,7 @@ def execute():
 		dunning.save()
 
 		if dunning.status != "Resolved":
-			# With the new logic, dunning amount gets recorded as additional income 
+			# With the new logic, dunning amount gets recorded as additional income
 			# at time of payment. We don't want to record the dunning amount twice,
 			# so we reverse previous GL Entries that recorded the dunning amount at
 			# time of submission of the Dunning.
