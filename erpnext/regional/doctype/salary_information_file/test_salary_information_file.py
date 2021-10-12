@@ -8,10 +8,10 @@ import frappe
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
-    make_deduction_salary_component, make_earning_salary_component,
-    make_employee_salary_slip)
+	make_deduction_salary_component, make_earning_salary_component,
+	make_employee_salary_slip)
 from erpnext.setup.setup_wizard.operations.install_fixtures import \
-    create_bank_account
+	create_bank_account
 
 
 class TestSalaryInformationFile(unittest.TestCase):
