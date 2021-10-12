@@ -63,8 +63,14 @@
    "label": "Is Default"
   }
  ],
- "links": [],
- "modified": "2021-09-16 15:00:02.610605",
+ "links": [
+  {
+   "link_doctype": "Dunning",
+   "link_fieldname": "dunning_type"
+  }
+ ],
+ "migration_hash": "3a2c71ceb1a15469ffe1eca6053656a0",
+ "modified": "2021-10-12 17:26:48.080519",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Type",
