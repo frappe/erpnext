@@ -1399,9 +1399,11 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_details_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Details"
+   "label": "Accounting Details",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_147",
@@ -1412,7 +1414,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-11 20:08:21.822856",
+ "modified": "2021-10-12 20:55:16.145651",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
