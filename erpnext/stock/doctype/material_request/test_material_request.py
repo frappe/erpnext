@@ -6,8 +6,6 @@
 
 from __future__ import unicode_literals
 
-import unittest
-
 import frappe
 from frappe.utils import flt, today
 
@@ -18,9 +16,10 @@ from erpnext.stock.doctype.material_request.material_request import (
 	make_supplier_quotation,
 	raise_work_orders,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestMaterialRequest(unittest.TestCase):
+class TestMaterialRequest(ERPNextTestCase):
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(test_records[0]).insert()
 

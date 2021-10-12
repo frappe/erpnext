@@ -3,8 +3,6 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import unittest
-
 import frappe
 
 test_dependencies = ['Item', 'Sales Invoice', 'Stock Entry', 'Batch']
@@ -15,9 +13,10 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPickList(unittest.TestCase):
+class TestPickList(ERPNextTestCase):
 
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		try:
