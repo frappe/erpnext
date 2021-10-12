@@ -22,15 +22,11 @@ def set_cart_count(login_manager):
 		return
 
 	if show_cart_count():
-<<<<<<< HEAD:erpnext/e_commerce/shopping_cart/utils.py
 		from erpnext.e_commerce.shopping_cart.cart import set_cart_count
-=======
-		from erpnext.shopping_cart.cart import set_cart_count
 
 		# set_cart_count will try to fetch existing cart quotation
 		# or create one if non existent (and create a customer too)
 		# cart count is calculated from this quotation's items
->>>>>>> d824a90fac (fix: Avoid automatic customer creation on website user login):erpnext/shopping_cart/utils.py
 		set_cart_count()
 
 def clear_cart_count(login_manager):
