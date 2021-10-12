@@ -371,7 +371,6 @@ class TestStockReconciliation(ERPNextTestCase):
 		"""
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.stock_ledger import NegativeStockError
-		frappe.db.commit()
 
 		item_code = "Backdated-Reco-Cancellation-Item"
 		warehouse = "_Test Warehouse - _TC"
@@ -393,10 +392,6 @@ class TestStockReconciliation(ERPNextTestCase):
 
 		repost_exists = bool(frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name}))
 		self.assertFalse(repost_exists, msg="Negative stock validation not working on reco cancellation")
-
-		# teardown
-		frappe.db.rollback()
-
 
 	def test_valid_batch(self):
 		create_batch_item_with_batch("Testing Batch Item 1", "001")
