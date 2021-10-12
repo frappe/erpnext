@@ -123,12 +123,11 @@ def set_as_cancel(voucher_type, voucher_no):
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	args.update({"doctype": "Stock Ledger Entry"})
+	args["doctype"] = "Stock Ledger Entry"
 	sle = frappe.get_doc(args)
 	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock=allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
-	sle.insert()
 	sle.submit()
 	return sle
 
@@ -232,8 +231,7 @@ class update_entries_after(object):
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
 		self.via_landed_cost_voucher = via_landed_cost_voucher
-		self.allow_negative_stock = allow_negative_stock \
-			or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+		self.allow_negative_stock = True
 
 		self.args = frappe._dict(args)
 		self.item_code = args.get("item_code")
