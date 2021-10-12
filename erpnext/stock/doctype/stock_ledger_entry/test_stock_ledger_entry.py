@@ -511,9 +511,20 @@ class TestStockLedgerEntry(ERPNextTestCase):
 
 
 	def test_batchwise_item_valuation_stock_entry(self):
+		from uuid import uuid4
+
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
-		frappe.db.commit()
-		frappe.db.begin()
+		"""
+		-	Backdated entry causes some ghost commit despite
+			commit-transact-rollback.
+		-	This causes all future runs of this test to fail.
+		-	Creating a unique item will prevent this by isolating
+			all runs of this test.
+		"""
+		suffix = str(uuid4())[:8].upper()
+		item, warehouses, batches = setup_item_valuation_test(
+			valuation_method="FIFO", suffix=suffix
+		)
 
 		columns = [
 				'stock_value_difference',
@@ -522,9 +533,6 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				'qty_after_transaction',
 				'stock_queue',
 		]
-		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="FIFO", suffix="001"
-		)
 
 		def check_sle_details_against_expected(sle_details, expected_sle_details, detail, columns):
 			for i, (sle_vals, ex_sle_vals) in enumerate(zip(sle_details, expected_sle_details)):
@@ -603,7 +611,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			(item, None, warehouses[1], batches[1], 1, 150, "2021-01-19"),
 			(item, None, warehouses[1], batches[0], 1, 200, "2021-01-17")
 		]
-		# Prevent Repost from commiting (check RepostItemValuation.on_submit)
+		# Prevent Repost from enqueuing (check RepostItemValuation.on_submit)
 		frappe.flags.in_test = False
 		ses = create_stock_entry_entries_for_batchwise_item_valuation_test(
 			se_entry_list_bd_mr, "Material Receipt"
@@ -644,8 +652,6 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			"Material Issue to Test Backdated Entries", columns
 		))
 
-
-		frappe.db.rollback()
 
 		# Run assertions
 		for details in details_list:
