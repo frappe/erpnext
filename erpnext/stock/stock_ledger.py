@@ -1155,7 +1155,10 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 
 def get_batch_condition(args):
 	batch_no = args.get("batch_no", "")
-	batch_condition = "and use_batchwise_valuation = 0"
-	if batch_no and frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation", cache=True):
-		batch_condition = f"and batch_no = '{batch_no}' and use_batchwise_valuation = 1"
+	batch_condition = ""
+	if batch_no:
+		if frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation", cache=True):
+			batch_condition = f"and batch_no = '{batch_no}' and use_batchwise_valuation = 1"
+		else:
+			batch_condition = "and use_batchwise_valuation = 0"
 	return batch_condition
