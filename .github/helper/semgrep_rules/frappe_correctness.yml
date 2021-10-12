@@ -131,3 +131,21 @@ rules:
       key `$X` is uselessly assigned twice. This could be a potential bug.
   languages: [python]
   severity: ERROR
+
+
+- id: frappe-manual-commit
+  patterns:
+    - pattern: frappe.db.commit()
+    - pattern-not-inside: |
+        try:
+          ...
+        except ...:
+          ...
+  message: |
+    Manually commiting a transaction is highly discouraged. Read about the transaction model implemented by Frappe Framework before adding manual commits: https://frappeframework.com/docs/user/en/api/database#database-transaction-model If you think manual commit is required then add a comment explaining why and `// nosemgrep` on the same line.
+  paths:
+      exclude:
+        - "**/patches/**"
+        - "**/demo/**"
+  languages: [python]
+  severity: ERROR
