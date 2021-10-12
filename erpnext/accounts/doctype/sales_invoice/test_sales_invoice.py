@@ -1087,8 +1087,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		actual_qty_1 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
 
-		frappe.db.commit()
-
 		self.assertEqual(actual_qty_0 - 5, actual_qty_1)
 
 		# outgoing_rate
