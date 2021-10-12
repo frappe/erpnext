@@ -176,6 +176,29 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		for d in invoices:
 			d.cancel()
 
+	def test_multi_category_single_supplier(self):
+		frappe.db.set_value("Supplier", "Test TDS Supplier5", "tax_withholding_category", "Test Service Category")
+		invoices = []
+
+		pi = create_purchase_invoice(supplier = "Test TDS Supplier5", rate = 500, do_not_save=True)
+		pi.tax_withholding_category = "Test Service Category"
+		pi.save()
+		pi.submit()
+		invoices.append(pi)
+
+		# Second Invoice will apply TDS checked
+		pi1 = create_purchase_invoice(supplier = "Test TDS Supplier5", rate = 2500, do_not_save=True)
+		pi1.tax_withholding_category = "Test Goods Category"
+		pi1.save()
+		pi1.submit()
+		invoices.append(pi1)
+
+		self.assertEqual(pi1.taxes[0].tax_amount, 250)
+
+		#delete invoices to avoid clashing
+		for d in invoices:
+			d.cancel()
+
 def cancel_invoices():
 	purchase_invoices = frappe.get_all("Purchase Invoice", {
 		'supplier': ['in', ['Test TDS Supplier', 'Test TDS Supplier1', 'Test TDS Supplier2']],
@@ -251,7 +274,8 @@ def create_sales_invoice(**args):
 
 def create_records():
 	# create a new suppliers
-	for name in ['Test TDS Supplier', 'Test TDS Supplier1', 'Test TDS Supplier2', 'Test TDS Supplier3', 'Test TDS Supplier4']:
+	for name in ['Test TDS Supplier', 'Test TDS Supplier1', 'Test TDS Supplier2', 'Test TDS Supplier3',
+		'Test TDS Supplier4', 'Test TDS Supplier5']:
 		if frappe.db.exists('Supplier', name):
 			continue
 
@@ -384,6 +408,42 @@ def create_tax_with_holding_category():
 				'tax_withholding_rate': 10,
 				'single_threshold': 0,
 				'cumulative_threshold': 30000
+			}],
+			"accounts": [{
+				'company': '_Test Company',
+				'account': 'TDS - _TC'
+			}]
+		}).insert()
+
+	if not frappe.db.exists("Tax Withholding Category", "Test Service Category"):
+		frappe.get_doc({
+			"doctype": "Tax Withholding Category",
+			"name": "Test Service Category",
+			"category_name": "Test Service Category",
+			"rates": [{
+				'from_date': fiscal_year[1],
+				'to_date': fiscal_year[2],
+				'tax_withholding_rate': 10,
+				'single_threshold': 2000,
+				'cumulative_threshold': 2000
+			}],
+			"accounts": [{
+				'company': '_Test Company',
+				'account': 'TDS - _TC'
+			}]
+		}).insert()
+
+	if not frappe.db.exists("Tax Withholding Category", "Test Goods Category"):
+		frappe.get_doc({
+			"doctype": "Tax Withholding Category",
+			"name": "Test Goods Category",
+			"category_name": "Test Goods Category",
+			"rates": [{
+				'from_date': fiscal_year[1],
+				'to_date': fiscal_year[2],
+				'tax_withholding_rate': 10,
+				'single_threshold': 2000,
+				'cumulative_threshold': 2000
 			}],
 			"accounts": [{
 				'company': '_Test Company',

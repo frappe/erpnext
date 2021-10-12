@@ -645,12 +645,18 @@ class TestAsset(unittest.TestCase):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=8000.0, location="Test Location")
 
+		finance_book = frappe.new_doc('Finance Book')
+		finance_book.finance_book_name = 'Income Tax'
+		finance_book.for_income_tax = 1
+		finance_book.insert(ignore_if_duplicate=1)
+
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
 		asset.available_for_use_date = '2030-07-12'
 		asset.purchase_date = '2030-01-01'
 		asset.append("finance_books", {
+			"finance_book": finance_book.name,
 			"expected_value_after_useful_life": 1000,
 			"depreciation_method": "Written Down Value",
 			"total_number_of_depreciations": 3,

@@ -457,7 +457,8 @@ class ProductionPlan(Document):
 
 	def prepare_args_for_sub_assembly_items(self, row, args):
 		for field in ["production_item", "item_name", "qty", "fg_warehouse",
-			"description", "bom_no", "stock_uom", "bom_level", "production_plan_item"]:
+			"description", "bom_no", "stock_uom", "bom_level",
+			"production_plan_item", "schedule_date"]:
 			args[field] = row.get(field)
 
 		args.update({
@@ -560,8 +561,6 @@ class ProductionPlan(Document):
 			bom_data = []
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
-
-		self.save()
 
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		bom_data = sorted(bom_data, key = lambda i: i.bom_level)
