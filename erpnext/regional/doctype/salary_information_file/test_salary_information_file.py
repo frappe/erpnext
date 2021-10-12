@@ -1,20 +1,25 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-import frappe
-import unittest
 import datetime
-from erpnext.accounts.doctype.period_closing_voucher.test_period_closing_voucher import create_company
+import unittest
+
+import frappe
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, make_earning_salary_component, make_deduction_salary_component
-from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+    make_deduction_salary_component, make_earning_salary_component,
+    make_employee_salary_slip)
+from erpnext.setup.setup_wizard.operations.install_fixtures import \
+    create_bank_account
+
 
 class TestSalaryInformationFile(unittest.TestCase):
 	def setUp(self):
+		frappe.db.sql("""delete from Bank""")
 		frappe.db.sql("""delete from `tabHoliday List`""")
 		create_holiday_list()
-		
+
 	def test_csv_generation_for_qatar_region(self):
 		company = create_company("Qatar Financial", "QF", "Qatar")
 		employee = make_employee("test_employee@qatar.com", company=company.name)
