@@ -19,10 +19,12 @@ def set_cart_count(login_manager):
 	# make sure user is already a customer
 	# before trying to set cart count
 	user_is_customer = is_customer()
-	if not user_is_customer: return
+	if not user_is_customer:
+		return
 
 	if show_cart_count():
 		from erpnext.shopping_cart.cart import set_cart_count
+
 		# set_cart_count will try to fetch existing cart quotation
 		# or create one if non existent (and create a customer too)
 		# cart count is calculated from this quotation's items
