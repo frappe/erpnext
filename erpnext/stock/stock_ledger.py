@@ -231,7 +231,8 @@ class update_entries_after(object):
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
 		self.via_landed_cost_voucher = via_landed_cost_voucher
-		self.allow_negative_stock = True
+		self.allow_negative_stock = allow_negative_stock \
+			or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 
 		self.args = frappe._dict(args)
 		self.item_code = args.get("item_code")
