@@ -26,6 +26,7 @@ from erpnext.tests.utils import ERPNextTestCase, change_settings
 class TestStockReconciliation(ERPNextTestCase):
 	@classmethod
 	def setUpClass(self):
+		super().setUpClass()
 		create_batch_or_serial_no_items()
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
