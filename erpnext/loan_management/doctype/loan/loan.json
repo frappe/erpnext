@@ -334,7 +334,6 @@
   },
   {
    "depends_on": "eval:doc.is_secured_loan",
-   "fetch_from": "loan_application.maximum_loan_amount",
    "fieldname": "maximum_loan_amount",
    "fieldtype": "Currency",
    "label": "Maximum Loan Amount",
@@ -360,7 +359,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:10:32.360818",
+ "modified": "2021-10-12 18:10:32.360818",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
