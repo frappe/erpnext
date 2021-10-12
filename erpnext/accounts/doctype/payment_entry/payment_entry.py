@@ -336,7 +336,7 @@ class PaymentEntry(AccountsController):
 
 	def get_valid_reference_doctypes(self):
 		if self.party_type == "Customer":
-			return ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
+			return ("Sales Order", "Sales Invoice", "Journal Entry")
 		elif self.party_type == "Supplier":
 			return ("Purchase Order", "Purchase Invoice", "Journal Entry")
 		elif self.party_type == "Shareholder":
@@ -1584,11 +1584,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		ref_doc.company
 	)
 
-	if reference_doctype == "Dunning":
-		total_amount = outstanding_amount = ref_doc.get("dunning_amount")
-		exchange_rate = 1
-
-	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
+	if reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
 			exchange_rate = get_exchange_rate(
@@ -1787,7 +1783,7 @@ def get_bank_cash_account(doc, bank_account):
 
 
 def set_party_type(dt):
-	if dt in ("Sales Invoice", "Sales Order", "Dunning"):
+	if dt in ("Sales Invoice", "Sales Order"):
 		party_type = "Customer"
 	elif dt in ("Purchase Invoice", "Purchase Order"):
 		party_type = "Supplier"
@@ -1814,7 +1810,7 @@ def set_party_account_currency(dt, party_account, doc):
 
 def set_payment_type(dt, doc):
 	if (
-		dt == "Sales Order" or (dt in ("Sales Invoice", "Dunning") and doc.outstanding_amount > 0)
+		dt == "Sales Order" or (dt == "Sales Invoice" and doc.outstanding_amount > 0)
 	) or (dt == "Purchase Invoice" and doc.outstanding_amount < 0):
 		payment_type = "Receive"
 	else:
@@ -1832,9 +1828,6 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 		else:
 			grand_total = doc.rounded_total or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
-	elif dt == "Dunning":
-		grand_total = doc.grand_total
-		outstanding_amount = doc.grand_total
 	else:
 		if party_account_currency == doc.company_currency:
 			grand_total = flt(doc.get("base_rounded_total") or doc.get("base_grand_total"))
