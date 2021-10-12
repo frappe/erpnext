@@ -73,7 +73,7 @@ frappe.ui.form.on('Employee Advance', {
 					frm.trigger('make_return_entry');
 				}, __('Create'));
 			} else if (frm.doc.repay_unclaimed_amount_from_salary == 1 && frappe.model.can_create("Additional Salary")) {
-				frm.add_custom_button(__("Deduction from salary"), function() {
+				frm.add_custom_button(__("Deduction from Salary"), function() {
 					frm.events.make_deduction_via_additional_salary(frm);
 				}, __('Create'));
 			}

@@ -400,6 +400,7 @@ class Subscription(Document):
 
 		invoice.flags.ignore_mandatory = True
 
+		invoice.set_missing_values()
 		invoice.save()
 
 		if self.submit_invoice:
