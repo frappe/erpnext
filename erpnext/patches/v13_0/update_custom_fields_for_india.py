@@ -35,16 +35,14 @@ def execute():
         .on(link.link_name == cust.name)
         .select(link.parent, cust.gst_category, cust.export_type)
         .where(link.parenttype == 'Address')
-        .where(link.link_doctype == 'Customer')
-        .limit(3)).run(as_dict = True)
+        .where(link.link_doctype == 'Customer')).run(as_dict = True)
 
     supp_addr = (frappe.qb.from_(link)
         .join(supp)
         .on(link.link_name == supp.name)
         .select(link.parent, supp.gst_category, supp.export_type)
         .where(link.parenttype == 'Address')
-        .where(link.link_doctype == 'Supplier')
-        .limit(3)).run(as_dict = True)
+        .where(link.link_doctype == 'Supplier')).run(as_dict = True)
 
     address = cust_addr + supp_addr
 
