@@ -6,8 +6,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "is_sandbox",
   "taxjar_calculate_tax",
+  "is_sandbox",
   "taxjar_create_transactions",
   "credentials",
   "api_key",
@@ -16,7 +16,10 @@
   "configuration",
   "tax_account_head",
   "configuration_cb",
-  "shipping_account_head"
+  "shipping_account_head",
+  "section_break_12",
+  "nexus_address",
+  "nexus"
  ],
  "fields": [
   {
@@ -54,6 +57,7 @@
   },
   {
    "default": "0",
+   "depends_on": "taxjar_calculate_tax",
    "fieldname": "is_sandbox",
    "fieldtype": "Check",
    "label": "Sandbox Mode"
@@ -69,6 +73,7 @@
   },
   {
    "default": "0",
+   "depends_on": "taxjar_calculate_tax",
    "fieldname": "taxjar_create_transactions",
    "fieldtype": "Check",
    "label": "Create TaxJar Transaction"
@@ -82,11 +87,28 @@
   {
    "fieldname": "cb_keys",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break",
+   "label": "Nexus List"
+  },
+  {
+   "fieldname": "nexus_address",
+   "fieldtype": "HTML",
+   "label": "Nexus Address"
+  },
+  {
+   "fieldname": "nexus",
+   "fieldtype": "Table",
+   "label": "Nexus",
+   "options": "TaxJar Nexus",
+   "read_only": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-04-30 04:38:03.311089",
+ "modified": "2021-10-06 10:59:13.475442",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "TaxJar Settings",
