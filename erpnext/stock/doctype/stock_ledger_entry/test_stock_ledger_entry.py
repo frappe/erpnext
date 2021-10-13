@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import json
 from operator import itemgetter
+from uuid import uuid4
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
@@ -353,11 +354,9 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			user.remove_roles("Stock Manager")
 
 	def test_batchwise_item_valuation_fifo(self):
-		frappe.db.commit()
-		frappe.db.begin()
-
+		suffix = get_unique_suffix()
 		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="FIFO", suffix="010"
+			valuation_method="FIFO", suffix=suffix
 		)
 
 		# Incoming Entries for Stock Value check
@@ -394,14 +393,10 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				"Incorrect 'Incoming Rate' values fetched for DN items"
 			)
 
-		frappe.db.rollback()
-
 	def test_batchwise_item_valuation_moving_average(self):
-		frappe.db.commit()
-		frappe.db.begin()
-
+		suffix = get_unique_suffix()
 		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="Moving Average", suffix="001"
+			valuation_method="Moving Average", suffix=suffix
 		)
 
 		# Incoming Entries for Stock Value check
@@ -438,15 +433,11 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				"Incorrect 'Incoming Rate' values fetched for DN items"
 			)
 
-		frappe.db.rollback()
-
 
 	def test_batchwise_item_valuation_stock_reco(self):
-		frappe.db.commit()
-		frappe.db.begin()
-
+		suffix = get_unique_suffix()
 		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="FIFO", suffix="000"
+			valuation_method="FIFO", suffix=suffix
 		)
 
 		# Check Opening Stock Entries
@@ -507,21 +498,10 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			self.assertEqual(aq, ex_aq)
 			self.assertEqual(qat, ex_qat)
 
-		frappe.db.rollback()
-
 
 	def test_batchwise_item_valuation_stock_entry(self):
-		from uuid import uuid4
-
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
-		"""
-		-	Backdated entry causes some ghost commit despite
-			commit-transact-rollback.
-		-	This causes all future runs of this test to fail.
-		-	Creating a unique item will prevent this by isolating
-			all runs of this test.
-		"""
-		suffix = str(uuid4())[:8].upper()
+		suffix = get_unique_suffix()
 		item, warehouses, batches = setup_item_valuation_test(
 			valuation_method="FIFO", suffix=suffix
 		)
@@ -667,9 +647,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			Legacy valuation should ignore batches using
 			batch-wise item valuation.
 		"""
-		frappe.db.commit()
-		frappe.db.begin()
-
+		suffix = get_unique_suffix()
 		columns = [
 				'stock_value_difference',
 				'stock_value',
@@ -678,7 +656,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				'stock_queue',
 		]
 		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="FIFO", suffix="0101",
+			valuation_method="FIFO", suffix=suffix,
 			use_batchwise_valuation=[1, 0, 0], batches_list=['X', 'Y', 'Z']
 		)
 
@@ -737,17 +715,13 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		))
 
 
-		frappe.db.rollback()
-
 		# Run assertions
 		for details in details_list:
 			check_sle_details_against_expected(*details)
 
 
 	def test_legacy_item_valuation_stock_entry(self):
-		frappe.db.commit()
-		frappe.db.begin()
-
+		suffix = get_unique_suffix()
 		columns = [
 				'stock_value_difference',
 				'stock_value',
@@ -756,7 +730,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				'stock_queue',
 		]
 		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="FIFO", suffix="1001", use_batchwise_valuation=0
+			valuation_method="FIFO", suffix=suffix, use_batchwise_valuation=0
 		)
 
 		def check_sle_details_against_expected(sle_details, expected_sle_details, detail, columns):
@@ -809,8 +783,6 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			"Material Issue Entries", columns
 		))
 
-
-		frappe.db.rollback()
 
 		# Run assertions
 		for details in details_list:
@@ -998,3 +970,8 @@ def create_stock_entry_entries_for_batchwise_item_valuation_test(se_entry_list, 
 		ses.append(make_stock_entry(**args))
 
 	return ses
+
+def get_unique_suffix():
+	# Used to isolate valuation sensitive
+	# tests to prevent future tests from failing.
+	return str(uuid4())[:8].upper()
