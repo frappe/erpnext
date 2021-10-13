@@ -18,6 +18,7 @@ from frappe.utils.data import (
 
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
 
+test_dependencies = ("UOM", "Item Group", "Item")
 
 def create_plan():
 	if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):
@@ -68,7 +69,6 @@ def create_plan():
 		supplier.insert()
 
 class TestSubscription(unittest.TestCase):
-
 	def setUp(self):
 		create_plan()
 
