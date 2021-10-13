@@ -149,16 +149,18 @@
   "cb_17",
   "hold_comment",
   "more_info",
+  "status",
+  "inter_company_invoice_reference",
+  "represents_company",
+  "column_break_147",
+  "is_internal_supplier",
+  "accounting_details_section",
   "credit_to",
   "party_account_currency",
   "is_opening",
   "against_expense_account",
   "column_break_63",
   "unrealized_profit_loss_account",
-  "status",
-  "inter_company_invoice_reference",
-  "is_internal_supplier",
-  "represents_company",
   "remarks",
   "subscription_section",
   "from_date",
@@ -1172,6 +1174,15 @@
    "print_hide": 1
   },
   {
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "ignore_user_permissions": 1,
+   "label": "Is Internal Supplier",
+   "read_only": 1
+  },
+  {
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
@@ -1196,7 +1207,7 @@
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
-   "label": "Is Opening",
+   "label": "Is Opening Entry",
    "oldfieldname": "is_opening",
    "oldfieldtype": "Select",
    "options": "No\nYes",
@@ -1299,15 +1310,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fetch_from": "supplier.is_internal_supplier",
-   "fieldname": "is_internal_supplier",
-   "fieldtype": "Check",
-   "ignore_user_permissions": 1,
-   "label": "Is Internal Supplier",
-   "read_only": 1
-  },
-  {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "hidden": 1,
@@ -1395,13 +1397,24 @@
    "hidden": 1,
    "label": "Ignore Default Payment Terms Template",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_147",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 13:10:28.351810",
+ "modified": "2021-10-12 20:55:16.145651",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
