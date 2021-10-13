@@ -1,7 +1,7 @@
-import unittest
 from functools import partial
 
 from erpnext.controllers import queries
+from erpnext.tests.utils import ERPNextTestCase
 
 
 def add_default_params(func, doctype):
@@ -10,7 +10,7 @@ def add_default_params(func, doctype):
 	)
 
 
-class TestQueries(unittest.TestCase):
+class TestQueries(ERPNextTestCase):
 
 	# All tests are based on doctype/test_records.json
 

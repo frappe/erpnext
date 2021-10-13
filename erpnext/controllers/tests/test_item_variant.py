@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import json
-import unittest
 
 import frappe
 from six import string_types
@@ -11,9 +10,10 @@ from erpnext.stock.doctype.item.test_item import set_item_variant_settings
 from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
 	create_quality_inspection_parameter,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestItemVariant(unittest.TestCase):
+class TestItemVariant(ERPNextTestCase):
 	def test_tables_in_template_copied_to_variant(self):
 		fields = [{'field_name': 'quality_inspection_template'}]
 		set_item_variant_settings(fields)
