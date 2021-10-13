@@ -7,14 +7,10 @@ from erpnext.erpnext_integrations.doctype.taxjar_settings.taxjar_settings import
 
 
 def execute():
-	frappe.reload_doctype("TaxJar Settings", force=True)
-	frappe.reload_doctype("Product Tax Category", force=True)
-
 	company = frappe.get_all('Company', filters = {'country': 'United States'}, fields=['name'])
 	if not company:
 		return
 
-	
 	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 	TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
 	TAXJAR_SANDBOX_MODE = frappe.db.get_single_value("TaxJar Settings", "is_sandbox")
