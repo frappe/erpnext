@@ -34,7 +34,7 @@ def execute():
         .join(cust)
         .on(link.link_name == cust.name)
         .select(link.parent, cust.gst_category, cust.export_type)
-        .where(link.parenttype == 'Address' )
+        .where(link.parenttype == 'Address')
         .where(link.link_doctype == 'Customer')
         .limit(3)).run(as_dict = True)
 
@@ -42,7 +42,7 @@ def execute():
         .join(supp)
         .on(link.link_name == supp.name)
         .select(link.parent, supp.gst_category, supp.export_type)
-        .where(link.parenttype == 'Address' )
+        .where(link.parenttype == 'Address')
         .where(link.link_doctype == 'Supplier')
         .limit(3)).run(as_dict = True)
 
@@ -62,7 +62,7 @@ def execute():
         .select(cf.name, cf.dt, cf.fieldname)
         .where((cf.dt == 'Customer') | (cf.dt == 'Supplier'))
         .where((cf.fieldname == 'export_type') | (cf.fieldname == 'gst_category'))
-        ).run(as_dict = True)
+    ).run(as_dict = True)
 
     for field in field_to_delete:
         frappe.delete_doc('Custom Field', field.name)

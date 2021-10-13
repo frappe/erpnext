@@ -85,63 +85,72 @@ website_context = {
 
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},
-	{"from_route": "/orders/<path:name>", "to_route": "order",
+	{
+		"from_route": "/orders/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Sales Order",
 			"parents": [{"label": _("Orders"), "route": "orders"}]
 		}
 	},
 	{"from_route": "/invoices", "to_route": "Sales Invoice"},
-	{"from_route": "/invoices/<path:name>", "to_route": "order",
+	{
+		"from_route": "/invoices/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Sales Invoice",
 			"parents": [{"label": _("Invoices"), "route": "invoices"}]
 		}
 	},
 	{"from_route": "/supplier-quotations", "to_route": "Supplier Quotation"},
-	{"from_route": "/supplier-quotations/<path:name>", "to_route": "order",
+	{
+		"from_route": "/supplier-quotations/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Supplier Quotation",
 			"parents": [{"label": _("Supplier Quotation"), "route": "supplier-quotations"}]
 		}
 	},
 	{"from_route": "/purchase-orders", "to_route": "Purchase Order"},
-	{"from_route": "/purchase-orders/<path:name>", "to_route": "order",
+	{
+		"from_route": "/purchase-orders/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Purchase Order",
 			"parents": [{"label": _("Purchase Order"), "route": "purchase-orders"}]
 		}
 	},
 	{"from_route": "/purchase-invoices", "to_route": "Purchase Invoice"},
-	{"from_route": "/purchase-invoices/<path:name>", "to_route": "order",
+	{
+		"from_route": "/purchase-invoices/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Purchase Invoice",
 			"parents": [{"label": _("Purchase Invoice"), "route": "purchase-invoices"}]
 		}
 	},
 	{"from_route": "/quotations", "to_route": "Quotation"},
-	{"from_route": "/quotations/<path:name>", "to_route": "order",
+	{
+		"from_route": "/quotations/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Quotation",
 			"parents": [{"label": _("Quotations"), "route": "quotations"}]
 		}
 	},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
-	{"from_route": "/shipments/<path:name>", "to_route": "order",
+	{
+		"from_route": "/shipments/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Delivery Note",
 			"parents": [{"label": _("Shipments"), "route": "shipments"}]
 		}
 	},
 	{"from_route": "/rfq", "to_route": "Request for Quotation"},
-	{"from_route": "/rfq/<path:name>", "to_route": "rfq",
+	{
+		"from_route": "/rfq/<path:name>", "to_route": "rfq",
 		"defaults": {
 			"doctype": "Request for Quotation",
 			"parents": [{"label": _("Request for Quotation"), "route": "rfq"}]
 		}
 	},
 	{"from_route": "/addresses", "to_route": "Address"},
-	{"from_route": "/addresses/<path:name>", "to_route": "addresses",
+	{
+		"from_route": "/addresses/<path:name>", "to_route": "addresses",
 		"defaults": {
 			"doctype": "Address",
 			"parents": [{"label": _("Addresses"), "route": "addresses"}]
@@ -152,7 +161,8 @@ website_route_rules = [
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
 	{"from_route": "/material-requests", "to_route": "Material Request"},
-	{"from_route": "/material-requests/<path:name>", "to_route": "material_request_info",
+	{
+		"from_route": "/material-requests/<path:name>", "to_route": "material_request_info",
 		"defaults": {
 			"doctype": "Material Request",
 			"parents": [{"label": _("Material Request"), "route": "material-requests"}]
@@ -423,7 +433,8 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
-accounting_dimension_doctypes = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
+accounting_dimension_doctypes = [
+	"GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
 	"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
 	"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
 	"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",

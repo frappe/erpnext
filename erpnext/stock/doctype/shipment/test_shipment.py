@@ -13,7 +13,7 @@ class TestShipment(ERPNextTestCase):
 	def test_shipment_from_delivery_note(self):
 		delivery_note = create_test_delivery_note()
 		delivery_note.submit()
-		shipment = create_test_shipment([ delivery_note ])
+		shipment = create_test_shipment([delivery_note])
 		shipment.submit()
 		second_shipment = make_shipment(delivery_note.name)
 		self.assertEqual(second_shipment.value_of_goods, delivery_note.grand_total)

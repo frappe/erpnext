@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import frappe, os, json
+import frappe
+import os
+import json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_permission, update_permission_property
@@ -335,12 +337,12 @@ def get_custom_fields():
 	si_ewaybill_fields = [
 		{
 			'fieldname': 'transporter_info',
- 			'label': 'Transporter Info',
- 			'fieldtype': 'Section Break',
- 			'insert_after': 'terms',
- 			'collapsible': 1,
- 			'collapsible_depends_on': 'transporter',
- 			'print_hide': 1
+			'label': 'Transporter Info',
+			'fieldtype': 'Section Break',
+			'insert_after': 'terms',
+			'collapsible': 1,
+			'collapsible_depends_on': 'transporter',
+			'print_hide': 1
 		},
 		{
 			'fieldname': 'transporter',
@@ -524,31 +526,33 @@ def get_custom_fields():
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Salary Component': [
-			dict(fieldname=  'component_type',
+			dict(
+				fieldname= 'component_type',
 				label= 'Component Type',
-				fieldtype=  'Select',
+				fieldtype= 'Select',
 				insert_after= 'description',
 				options= "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax",
 				depends_on = 'eval:doc.type == "Deduction"'
 			)
 		],
 		'Employee': [
-			dict(fieldname='ifsc_code',
+			dict(
+				fieldname='ifsc_code',
 				label='IFSC Code',
 				fieldtype='Data',
 				insert_after='bank_ac_no',
 				print_hide=1,
 				depends_on='eval:doc.salary_mode == "Bank"'
-				),
+			),
 			dict(
-				fieldname =  'pan_number',
+				fieldname = 'pan_number',
 				label = 'PAN Number',
 				fieldtype = 'Data',
 				insert_after = 'payroll_cost_center',
 				print_hide = 1
 			),
 			dict(
-				fieldname =  'micr_code',
+				fieldname = 'micr_code',
 				label = 'MICR Code',
 				fieldtype = 'Data',
 				insert_after = 'ifsc_code',
@@ -785,7 +789,7 @@ def set_tax_withholding_category(company):
 
 			if fiscal_year_details:
 				# if fiscal year don't match with any of the already entered data, append rate row
-				fy_exist = [k for k in doc.get('rates') if k.get('from_date') <= fiscal_year_details[1] \
+				fy_exist = [k for k in doc.get('rates') if k.get('from_date') <= fiscal_year_details[1]
 					and k.get('to_date') >= fiscal_year_details[2]]
 				if not fy_exist:
 					doc.append("rates", d.get('rates')[0])
