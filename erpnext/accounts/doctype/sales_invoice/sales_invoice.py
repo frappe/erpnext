@@ -1284,12 +1284,20 @@ class SalesInvoice(SellingController):
 
 			serial_nos = item.serial_no or ""
 			si_serial_nos = set(get_serial_nos(serial_nos))
+			serial_no_diff = si_serial_nos - dn_serial_nos
 
-			if si_serial_nos - dn_serial_nos:
-				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note").format(item.idx))
+			if serial_no_diff:
+				dn_link = frappe.utils.get_link_to_form("Delivery Note", item.delivery_note)
+				serial_no_msg = ", ".join(frappe.bold(d) for d in serial_no_diff)
+
+				msg = _("Row #{0}: The following Serial Nos are not present in \
+					Delivery Note {1}: ").format(item.idx, dn_link)
+				msg += serial_no_msg
+
+				frappe.throw(msg=msg, title=_("Serial Nos Mismatch"))
 
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
-				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
+				frappe.throw(_("Row #{0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
 					item.idx, item.qty, item.item_code, len(si_serial_nos)))
 
 	def update_project(self):
