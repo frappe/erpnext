@@ -56,12 +56,6 @@ class TestAsset(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
-	def test_finance_books_are_present_if_calculate_depreciation_is_enabled(self):
-		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
-		asset.calculate_depreciation = 1
-
-		self.assertRaises(frappe.ValidationError, asset.save)
-
 	def test_available_for_use_date_is_after_purchase_date(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0,
 			location="Test Location", posting_date=getdate("2021-10-10"))
@@ -849,6 +843,12 @@ class TestDepreciationBasics(AssetSetup):
 			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
 			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2018-07-01"),
 			do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_finance_books_are_present_if_calculate_depreciation_is_enabled(self):
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.calculate_depreciation = 1
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
