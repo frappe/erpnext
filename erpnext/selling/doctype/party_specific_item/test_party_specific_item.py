@@ -6,6 +6,7 @@ import unittest
 import frappe
 
 from erpnext.controllers.queries import item_query
+from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ['Item', 'Customer', 'Supplier']
 
