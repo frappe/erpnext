@@ -25,6 +25,7 @@ class AssetSetup(unittest.TestCase):
 	def setUpClass(cls):
 		set_depreciation_settings_in_company()
 		create_asset_data()
+		enable_cwip_accounting("Computers")
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	@classmethod
@@ -51,12 +52,9 @@ class TestAsset(AssetSetup):
 		"""Tests if either PI or PR is present if CWIP is enabled and is_existing_asset=0."""
 
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
-		enable_cwip_accounting(asset.asset_category)
 		asset.is_existing_asset=0
 
 		self.assertRaises(frappe.ValidationError, asset.save)
-
-		enable_cwip_accounting(asset.asset_category, enable=0)
 
 	def test_finance_books_are_present_if_calculate_depreciation_is_enabled(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
@@ -330,7 +328,6 @@ class TestAsset(AssetSetup):
 	def test_expense_head(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=2, rate=200000.0, location="Test Location")
-
 		doc = make_invoice(pr.name)
 
 		self.assertEqual('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
