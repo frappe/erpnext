@@ -1063,6 +1063,7 @@ class SalesInvoice(SellingController):
 
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
+					reverse_journal_entry.flags.is_reverse_depr_entry = True
 					reverse_journal_entry.submit()
 
 					asset.flags.ignore_validate_update_after_submit = True
