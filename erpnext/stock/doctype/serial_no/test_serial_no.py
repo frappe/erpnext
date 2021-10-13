@@ -6,8 +6,6 @@
 
 from __future__ import unicode_literals
 
-import unittest
-
 import frappe
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -20,9 +18,10 @@ test_dependencies = ["Item"]
 test_records = frappe.get_test_records('Serial No')
 
 from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestSerialNo(unittest.TestCase):
+class TestSerialNo(ERPNextTestCase):
 	def test_cannot_create_direct(self):
 		frappe.delete_doc_if_exists("Serial No", "_TCSER0001")
 

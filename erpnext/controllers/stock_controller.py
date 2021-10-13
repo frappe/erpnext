@@ -591,7 +591,7 @@ def future_sle_exists(args, sl_entries=None):
 
 	data = frappe.db.sql("""
 		select item_code, warehouse, count(name) as total_row
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
 			({})
 			and timestamp(posting_date, posting_time)
