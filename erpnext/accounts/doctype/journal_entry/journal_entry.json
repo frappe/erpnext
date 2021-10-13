@@ -23,7 +23,7 @@
   "project",
   "2_add_edit_gl_entries",
   "accounts",
-  "section_break99",
+  "reference_section",
   "expense_entry_name",
   "cheque_no",
   "cheque_date",
@@ -155,10 +155,6 @@
    "oldfieldtype": "Table",
    "options": "Journal Entry Account",
    "reqd": 1
-  },
-  {
-   "fieldname": "section_break99",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "cheque_no",
@@ -533,12 +529,16 @@
    "options": "Expense Entry",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2021-03-12 15:08:33.210118",
+ "modified": "2021-10-04 15:14:53.210450",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

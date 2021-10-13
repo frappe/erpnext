@@ -28,6 +28,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.calculate_outstanding_amount()
 
 		self.validate_agent_mandatory()
+		self.set_missing_accounts()
 
 		self.update_payment_status()
 		self.update_invoice_status()
@@ -39,6 +40,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 	def before_submit(self):
 		if not self.vehicle and not self.vehicle_booking_order:
 			frappe.throw(_("Please set either Vehicle Booking Order or Vehicle"))
+
+		self.validate_account_mandatory()
 
 	def on_submit(self):
 		self.update_vehicle_booking_order_registration()
@@ -119,6 +122,18 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		if flt(self.agent_commission) and not self.agent:
 			frappe.throw(_("Registration Agent is mandatory for Registration Agent Commission"))
 
+	def validate_account_mandatory(self):
+		if not self.customer_account:
+			frappe.throw(_("Customer Receivable Account is mandatory"))
+		if not self.agent_account and self.agent:
+			frappe.throw(_("Agent Payable Account is mandatory"))
+
+	def set_missing_accounts(self):
+		if not self.customer_account:
+			self.customer_account = frappe.get_cached_value("Vehicles Settings", None, "registration_customer_account")
+		if not self.agent_account:
+			self.agent_account = frappe.get_cached_value("Vehicles Settings", None, "registration_customer_account")
+
 	def calculate_totals(self):
 		calculate_total_price(self, 'customer_charges', 'customer_total')
 		calculate_total_price(self, 'authority_charges', 'authority_total')
@@ -130,17 +145,89 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 	def calculate_outstanding_amount(self):
 		if self.docstatus == 0:
-			self.customer_outstanding = flt(self.customer_total)
-			self.authority_outstanding = flt(self.authority_total)
+			self.customer_payment = 0
+			self.authority_payment = 0
+			self.agent_payment = 0
 			self.agent_outstanding = 0
+		else:
+			gl_values = self.get_values_from_gl_entries()
+			self.update(gl_values)
+
+		self.customer_outstanding = flt(self.customer_total) - flt(self.customer_payment)
+		self.authority_outstanding = flt(self.authority_total) - flt(self.authority_payment)
+
+	def get_values_from_gl_entries(self):
+		args = {
+			'vehicle_registration_order': self.name,
+			'customer': self.customer,
+			'customer_account': self.customer_account,
+			'agent': self.agent,
+			'agent_account': self.agent_account
+		}
+
+		customer_payment = frappe.db.sql("""
+			select sum(gle.credit-gle.debit) as amount
+			from `tabGL Entry` gle
+			left join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
+			left join `tabPayment Entry` pe on gle.voucher_type = 'Payment Entry' and gle.voucher_no = pe.name
+			where (jv.vehicle_registration_purpose = 'Customer Payment' or pe.payment_type = 'Receive')
+				and gle.vehicle_registration_order = %(vehicle_registration_order)s
+				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
+		""", args)
+		customer_payment = flt(customer_payment[0][0]) if customer_payment else 0
+
+		authority_payment = frappe.db.sql("""
+			select sum(gle.debit-gle.credit) as amount
+			from `tabGL Entry` gle
+			inner join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
+			where jv.vehicle_registration_purpose = 'Authority Payment'
+				and gle.vehicle_registration_order = %(vehicle_registration_order)s
+				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
+		""", args)
+		authority_payment = flt(authority_payment[0][0]) if authority_payment else 0
+
+		if self.agent:
+			agent_payment = frappe.db.sql("""
+				select sum(gle.debit-gle.credit) as amount
+				from `tabGL Entry` gle
+				left join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
+				left join `tabPayment Entry` pe on gle.voucher_type = 'Payment Entry' and gle.voucher_no = pe.name
+				where (jv.vehicle_registration_purpose = 'Agent Payment' or pe.payment_type = 'Pay')
+					and gle.vehicle_registration_order = %(vehicle_registration_order)s
+					and gle.account = %(agent_account)s and gle.party_type = 'Supplier' and gle.party = %(agent)s
+			""", args)
+			agent_payment = flt(agent_payment[0][0]) if agent_payment else 0
+
+			agent_outstanding = frappe.db.sql("""
+				select sum(gle.credit-gle.debit) as amount
+				from `tabGL Entry` gle
+				left join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
+				left join `tabPayment Entry` pe on gle.voucher_type = 'Payment Entry' and gle.voucher_no = pe.name
+				where gle.vehicle_registration_order = %(vehicle_registration_order)s
+					and gle.account = %(agent_account)s and gle.party_type = 'Supplier' and gle.party = %(agent)s
+			""", args)
+			agent_outstanding = flt(agent_outstanding[0][0]) if agent_outstanding else 0
+		else:
+			agent_payment = 0
+			agent_outstanding = 0
+
+		return frappe._dict({
+			'customer_payment': customer_payment,
+			'authority_payment': authority_payment,
+			'agent_payment': agent_payment,
+			'agent_outstanding': agent_outstanding,
+		})
 
 	def update_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
 
 		if update:
 			self.db_set({
+				'customer_payment': self.customer_payment,
 				'customer_outstanding': self.customer_outstanding,
+				'authority_payment': self.authority_payment,
 				'authority_outstanding': self.authority_outstanding,
+				'agent_payment': self.agent_payment,
 				'agent_outstanding': self.agent_outstanding,
 			})
 

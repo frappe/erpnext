@@ -70,21 +70,29 @@
   "column_break_58",
   "authority_total",
   "commission_section",
+  "agent_commission",
+  "column_break_60",
   "agent",
   "agent_name",
-  "column_break_60",
-  "agent_commission",
   "col_break62",
   "margin_amount",
   "status_section",
+  "customer_payment",
   "customer_outstanding",
+  "column_break_73",
+  "authority_payment",
   "authority_outstanding",
+  "column_break_70",
+  "agent_payment",
   "agent_outstanding",
   "column_break_62",
   "invoice_status",
   "invoice_issued_for",
-  "column_break_70",
-  "status"
+  "status",
+  "accounting_details_section",
+  "customer_account",
+  "column_break_85",
+  "agent_account"
  ],
  "fields": [
   {
@@ -636,12 +644,67 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "customer_payment",
+   "fieldtype": "Currency",
+   "label": "Customer Payment",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_73",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "authority_payment",
+   "fieldtype": "Currency",
+   "label": "Authority Payment",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "agent_payment",
+   "fieldtype": "Currency",
+   "label": "Registration Agent Payment",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "customer_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Customer Receivable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_85",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "agent_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Agent Payable Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-29 14:12:19.879479",
+ "modified": "2021-10-13 15:17:38.121788",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",
