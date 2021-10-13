@@ -97,7 +97,7 @@ def set_data_for_salary_component(country):
 
 def setup_bank_and_bank_account(bank_name, abbr, company):
 	bank = create_bank(bank_name, abbr)
-	account = create_bank_account({"company_name": company, "bank_account": "WPS test bank"})
+	account = create_bank_account({"company_name": company, "bank_account": "WPS Account"})
 	create_company_bank_account(account, bank, company)
 
 def create_bank(bank_name, abbr):
@@ -115,9 +115,9 @@ def create_bank(bank_name, abbr):
 def create_company_bank_account(account, bank, company):
 	bank_account = frappe.new_doc("Bank Account")
 	bank_account.company = company
-	bank_account.is_bank_account = 1
-	bank_account.account_name = "WPS bank"
-	bank_account.account = account
+	bank_account.is_company_account = 1
+	bank_account.account_name = "WPS Bank Account"
+	bank_account.account = account.name
 	bank_account.bank = bank
 	bank_account.iban = "AT483200000012345864"
 	bank_account.bank_code = "53276382839"
