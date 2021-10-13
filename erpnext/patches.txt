@@ -298,6 +298,8 @@ erpnext.patches.v13_0.shopify_deprecation_warning
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.einvoicing_deprecation_warning
+execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
+execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration
 erpnext.patches.v14_0.delete_einvoicing_doctypes
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
