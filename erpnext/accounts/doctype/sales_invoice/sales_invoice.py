@@ -325,7 +325,7 @@ class SalesInvoice(SellingController):
 		elif day_in == 6:
 			day = "Domingo"
 
-		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time]})
+		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time], "company":self.company})
 
 		if len(price_list_schedule_detail) > 0:
 			self.set('selling_price_list', price_list_schedule_detail[0].price_list)
@@ -350,7 +350,9 @@ class SalesInvoice(SellingController):
 		elif day_in == 6:
 			day = "Domingo"
 
-		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time]})
+		company = self.company
+
+		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time], "company":self.company})
 
 		if len(price_list_schedule_detail) > 0:
 			price_list = price_list_schedule_detail[0].price_list
