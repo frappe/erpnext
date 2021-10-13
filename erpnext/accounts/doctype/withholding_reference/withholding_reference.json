@@ -30,12 +30,11 @@
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Net Total",
-   "read_only": 1
+   "label": "Net Total"
   }
  ],
  "istable": 1,
- "modified": "2021-05-25 15:15:39.935190",
+ "modified": "2021-10-11 11:46:29.700801",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Withholding Reference",
