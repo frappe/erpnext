@@ -2355,6 +2355,18 @@ class TestSalesInvoice(unittest.TestCase):
 		si.reload()
 		self.assertEqual(si.status, "Paid")
 
+	def test_sales_invoice_submission_post_account_freezing_date(self):
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
+		si = create_sales_invoice(do_not_save=True)
+		si.posting_date = add_days(getdate(), 1)
+		si.save()
+
+		self.assertRaises(frappe.ValidationError, si.submit)
+		si.posting_date = getdate()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
