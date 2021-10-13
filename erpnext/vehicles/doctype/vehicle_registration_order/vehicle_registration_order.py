@@ -233,25 +233,24 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 	def update_invoice_status(self, update=False):
 		vehicle_invoice = None
-		vehicle_invoice_delivery = None
 
 		if self.vehicle:
-			vehicle_invoice = frappe.get_all("Vehicle Invoice", {"vehicle": self.vehicle, "docstatus": 1})
-			vehicle_invoice_delivery = frappe.get_all("Vehicle Invoice Delivery", {"vehicle": self.vehicle, "docstatus": 1})
+			vehicle_invoice = frappe.db.get_all("Vehicle Invoice", {"vehicle": self.vehicle, "docstatus": 1},
+				['name', 'status', 'issued_for'], order_by="posting_date desc, creation desc")
 
 		vehicle_invoice = vehicle_invoice[0] if vehicle_invoice else frappe._dict()
-		vehicle_invoice_delivery = vehicle_invoice_delivery[0] if vehicle_invoice_delivery else frappe._dict()
 
-		if not vehicle_invoice:
-			self.invoice_status = "Not Received"
-		elif not vehicle_invoice_delivery:
-			self.invoice_status = "In Hand"
+		if vehicle_invoice:
+			self.invoice_status = vehicle_invoice.status
+			self.invoice_issued_for = vehicle_invoice.issued_for if vehicle_invoice.status == "Issued" else None
 		else:
-			self.invoice_status = "Delivered"
+			self.invoice_status = "Not Received"
+			self.invoice_issued_for = None
 
 		if update:
 			self.db_set({
-				"invoice_status": self.invoice_status
+				"invoice_status": self.invoice_status,
+				"invoice_issued_for": self.invoice_issued_for,
 			})
 
 	def update_registration_number(self, update=False):

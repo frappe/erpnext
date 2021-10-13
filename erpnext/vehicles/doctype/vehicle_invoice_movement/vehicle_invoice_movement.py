@@ -30,7 +30,6 @@ class VehicleInvoiceMovement(VehicleTransactionController):
 		self.set_title()
 
 	def before_submit(self):
-		super(VehicleInvoiceMovement, self).before_submit()
 		self.validate_invoice_not_received()
 
 	def on_submit(self):

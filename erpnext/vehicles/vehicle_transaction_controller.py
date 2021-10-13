@@ -323,7 +323,7 @@ class VehicleTransactionController(StockController):
 		if vehicle_booking_order:
 			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
-			doc.validate_and_update_booking_vehicle_details(vbo, doc)
+			self.validate_and_update_booking_vehicle_details(vbo, doc)
 			vbo.update_invoice_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
@@ -433,7 +433,7 @@ class VehicleTransactionController(StockController):
 		if vehicle_registration_order:
 			vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
 
-			if self.doctype in ['Vehicle Invoice', 'Vehicle Invoice Delivery']:
+			if self.doctype in ['Vehicle Invoice', 'Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
 				vro.update_invoice_status(update=True)
 
 			vro.set_status(update=True)
