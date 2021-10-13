@@ -30,7 +30,6 @@ class SellingSettings(Document):
 
 		# Make property setters to hide tax_id fields
 		for doctype in ("Sales Order", "Sales Invoice", "Delivery Note"):
-			make_property_setter(doctype, "tax_id", "hidden", self.hide_tax_id, "Check")
 			make_property_setter(doctype, "tax_id", "print_hide", self.hide_tax_id, "Check")
 
 	def set_default_customer_group_and_territory(self):
