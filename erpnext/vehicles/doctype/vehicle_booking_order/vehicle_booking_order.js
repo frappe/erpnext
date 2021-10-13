@@ -311,6 +311,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			invoice_status_color = "blue";
 		} else if (me.frm.doc.invoice_status == "In Hand") {
 			invoice_status_color = "orange";
+		} else if (me.frm.doc.invoice_status == "Issued") {
+			invoice_status_color = "purple";
 		} else if (me.frm.doc.invoice_status == "Delivered") {
 			invoice_status_color = "green";
 		}
@@ -337,7 +339,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				indicator: delivery_status_color
 			},
 			{
-				contents: __('Invoice Status: {0}', [me.frm.doc.invoice_status]),
+				contents: __('Invoice Status: {0}{1}', [me.frm.doc.invoice_status,
+					me.frm.doc.invoice_status == "Issued" && me.frm.doc.invoice_issued_for ? " For " + me.frm.doc.invoice_issued_for : ""]),
 				indicator: invoice_status_color
 			},
 			{
