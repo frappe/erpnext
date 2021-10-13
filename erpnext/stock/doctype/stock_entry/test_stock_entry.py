@@ -989,7 +989,6 @@ def initialize_records_for_future_negative_sle_test(
 		item_code, batch_no, warehouses, opening_qty, posting_date):
 	from erpnext.stock.doctype.batch.test_batch import TestBatch, make_new_batch
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-	from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 
 	TestBatch.make_batch_item(item_code)
 	make_new_batch(item_code=item_code, batch_id=batch_no)
