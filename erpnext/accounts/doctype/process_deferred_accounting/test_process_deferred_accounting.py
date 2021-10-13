@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
@@ -13,9 +10,10 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 )
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestProcessDeferredAccounting(unittest.TestCase):
+class TestProcessDeferredAccounting(ERPNextTestCase):
 	def test_creation_of_ledger_entry_on_submit(self):
 		''' test creation of gl entries on submission of document '''
 		deferred_account = create_account(account_name="Deferred Revenue",

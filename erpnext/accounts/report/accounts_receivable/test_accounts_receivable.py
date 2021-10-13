@@ -1,6 +1,3 @@
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 from frappe.utils import add_days, getdate, today
@@ -8,9 +5,10 @@ from frappe.utils import add_days, getdate, today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestAccountsReceivable(unittest.TestCase):
+class TestAccountsReceivable(ERPNextTestCase):
 	def test_accounts_receivable(self):
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")

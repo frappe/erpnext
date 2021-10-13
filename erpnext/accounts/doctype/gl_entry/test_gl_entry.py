@@ -1,18 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-
-import unittest
-
 import frappe
 from frappe.model.naming import parse_naming_series
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestGLEntry(unittest.TestCase):
+class TestGLEntry(ERPNextTestCase):
 	def test_round_off_entry(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
 		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")

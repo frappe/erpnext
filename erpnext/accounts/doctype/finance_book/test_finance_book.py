@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestFinanceBook(unittest.TestCase):
+class TestFinanceBook(ERPNextTestCase):
 	def test_finance_book(self):
 		finance_book = create_finance_book()
 

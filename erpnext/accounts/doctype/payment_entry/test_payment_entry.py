@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 from frappe.utils import flt, nowdate
@@ -22,11 +19,12 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 )
 from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_claim
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Item"]
 
 
-class TestPaymentEntry(unittest.TestCase):
+class TestPaymentEntry(ERPNextTestCase):
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")

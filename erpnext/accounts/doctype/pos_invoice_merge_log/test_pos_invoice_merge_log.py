@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import json
-import unittest
 
 import frappe
 
@@ -14,9 +12,10 @@ from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_inv
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPOSInvoiceMergeLog(unittest.TestCase):
+class TestPOSInvoiceMergeLog(ERPNextTestCase):
 	def test_consolidated_invoice_creation(self):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 

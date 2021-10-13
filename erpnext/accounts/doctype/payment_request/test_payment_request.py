@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
@@ -11,6 +8,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import make_paymen
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 
@@ -35,7 +33,7 @@ payment_method = [
 	}
 ]
 
-class TestPaymentRequest(unittest.TestCase):
+class TestPaymentRequest(ERPNextTestCase):
 	def setUp(self):
 		if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
 			frappe.get_doc(payment_gateway).insert(ignore_permissions=True)

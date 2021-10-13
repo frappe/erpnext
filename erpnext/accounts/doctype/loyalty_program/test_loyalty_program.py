@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 from frappe.utils import cint, flt, getdate, today
@@ -12,11 +9,13 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 )
 from erpnext.accounts.party import get_dashboard_info
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestLoyaltyProgram(unittest.TestCase):
+class TestLoyaltyProgram(ERPNextTestCase):
 	@classmethod
 	def setUpClass(self):
+		super().setUpClass()
 		# create relevant item, customer, loyalty program, etc
 		create_records()
 

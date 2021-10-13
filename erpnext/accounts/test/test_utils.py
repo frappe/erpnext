@@ -1,15 +1,13 @@
-from __future__ import unicode_literals
-
-import unittest
 
 from frappe.test_runner import make_test_objects
 
 from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import get_future_stock_vouchers, get_voucherwise_gl_entries
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestUtils(unittest.TestCase):
+class TestUtils(ERPNextTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super(TestUtils, cls).setUpClass()

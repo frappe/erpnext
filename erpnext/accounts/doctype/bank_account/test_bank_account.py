@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 from frappe import ValidationError
 
+from erpnext.tests.utils import ERPNextTestCase
+
 # test_records = frappe.get_test_records('Bank Account')
 
-class TestBankAccount(unittest.TestCase):
+class TestBankAccount(ERPNextTestCase):
 
 	def test_validate_iban(self):
 		valid_ibans = [

@@ -1,9 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import copy
-import unittest
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
@@ -34,9 +32,10 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 	make_stock_entry,
 )
 from erpnext.stock.utils import get_incoming_rate
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestSalesInvoice(unittest.TestCase):
+class TestSalesInvoice(ERPNextTestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
 		w.is_pos = 0
@@ -46,11 +45,13 @@ class TestSalesInvoice(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(self):
+		super().setUpClass()
 		unlink_payment_on_cancel_of_invoice()
 
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+		super().tearDownClass()
 
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(test_records[0])

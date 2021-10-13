@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
+from erpnext.tests.utils import ERPNextTestCase
 
-class TestCashFlowMapping(unittest.TestCase):
+
+class TestCashFlowMapping(ERPNextTestCase):
 	def setUp(self):
 		if frappe.db.exists("Cash Flow Mapping", "Test Mapping"):
 			frappe.delete_doc('Cash Flow Mappping', 'Test Mapping')

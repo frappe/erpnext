@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 from frappe.utils import now_datetime, nowdate
@@ -12,10 +9,11 @@ from erpnext.accounts.doctype.budget.budget import BudgetError, get_actual_expen
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ['Monthly Distribution']
 
-class TestBudget(unittest.TestCase):
+class TestBudget(ERPNextTestCase):
 	def test_monthly_budget_crossed_ignore(self):
 		set_total_expense_zero(nowdate(), "cost_center")
 

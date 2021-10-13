@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.tests.utils import ERPNextTestCase
 
 test_records = frappe.get_test_records('Tax Rule')
 
 from six import iteritems
 
 
-class TestTaxRule(unittest.TestCase):
+class TestTaxRule(ERPNextTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.db.set_value("Shopping Cart Settings", None, "enabled", 0)
 
 	@classmethod
 	def tearDownClass(cls):
 		frappe.db.sql("delete from `tabTax Rule`")
+		super().tearDownClass()
 
 	def setUp(self):
 		frappe.db.sql("delete from `tabTax Rule`")

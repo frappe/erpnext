@@ -1,18 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import FiscalYearIncorrectDate
+from erpnext.tests.utils import ERPNextTestCase
 
 test_records = frappe.get_test_records('Fiscal Year')
 test_ignore = ["Company"]
 
-class TestFiscalYear(unittest.TestCase):
+class TestFiscalYear(ERPNextTestCase):
 
 	def test_extra_year(self):
 		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 2000"):

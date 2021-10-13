@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ['Item']
 
@@ -98,7 +96,7 @@ def test_create_test_data():
 		})
 		coupon_code.insert()
 
-class TestCouponCode(unittest.TestCase):
+class TestCouponCode(ERPNextTestCase):
 	def setUp(self):
 		test_create_test_data()
 
