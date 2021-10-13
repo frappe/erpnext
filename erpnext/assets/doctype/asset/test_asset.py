@@ -956,6 +956,11 @@ class TestDepreciationBasics(AssetSetup):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
 
+		finance_book = frappe.new_doc('Finance Book')
+		finance_book.finance_book_name = 'Income Tax'
+		finance_book.for_income_tax = 1
+		finance_book.insert(ignore_if_duplicate=1)
+
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1

@@ -1087,8 +1087,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		actual_qty_1 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
 
-		frappe.db.commit()
-
 		self.assertEqual(actual_qty_0 - 5, actual_qty_1)
 
 		# outgoing_rate
@@ -1800,6 +1798,47 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
+	def test_deferred_revenue_post_account_freeze_upto_by_admin(self):
+		frappe.set_user("Administrator")
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
+
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_save=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'System Manager')
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		self.assertRaises(frappe.ValidationError, pda1.submit)
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
+
 	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
@@ -1982,11 +2021,7 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.local.enable_perpetual_inventory['_Test Company 1'] = old_perpetual_inventory
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
 
-	def test_sle_if_target_warehouse_exists_accidentally(self):
-		"""
-			Check if inward entry exists if Target Warehouse accidentally exists
-			but Customer is not an internal customer.
-		"""
+	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
 			target="Finished Goods - _TC",
@@ -2007,9 +2042,9 @@ class TestSalesInvoice(unittest.TestCase):
 		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
 			fields=["name", "actual_qty"])
 
-		# check if only one SLE for outward entry is created
-		self.assertEqual(len(sles), 1)
-		self.assertEqual(sles[0].actual_qty, -1)
+		# check if both SLEs are created
+		self.assertEqual(len(sles), 2)
+		self.assertEqual(sum(d.actual_qty for d in sles), 0.0)
 
 		# tear down
 		si.cancel()
@@ -2372,6 +2407,18 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 		si.reload()
 		self.assertEqual(si.status, "Paid")
+
+	def test_sales_invoice_submission_post_account_freezing_date(self):
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
+		si = create_sales_invoice(do_not_save=True)
+		si.posting_date = add_days(getdate(), 1)
+		si.save()
+
+		self.assertRaises(frappe.ValidationError, si.submit)
+		si.posting_date = getdate()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
