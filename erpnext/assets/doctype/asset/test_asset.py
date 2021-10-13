@@ -62,16 +62,17 @@ class TestAsset(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
-	# def test_available_for_use_date_is_after_purchase_date(self):
-	# 	pr = make_purchase_receipt(item_code="Macbook Pro",
-	# 		qty=1, rate=100000.0, location="Test Location", posting_date=add_days(nowdate(), -15))
+	def test_available_for_use_date_is_after_purchase_date(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0,
+			location="Test Location", posting_date=getdate("2021-10-10"))
 
-	# 	asset = create_asset(item_code="Macbook Pro", do_not_save=1)
-	# 	asset.is_existing_asset = 0
-	# 	asset.purchase_receipt = pr
-	# 	asset.available_for_use_date = nowdate()
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, do_not_save=1)
+		asset.is_existing_asset = 0
+		asset.purchase_receipt = pr.name
+		asset.purchase_date = getdate("2021-10-10")
+		asset.available_for_use_date = getdate("2021-10-1")
 
-	# 	self.assertRaises(frappe.ValidationError, asset.save)
+		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_item_exists(self):
 		asset = create_asset(item_code="MacBook", do_not_save=1)
