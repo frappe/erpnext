@@ -8,15 +8,16 @@ import frappe
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
-	make_deduction_salary_component, make_earning_salary_component,
-	make_employee_salary_slip)
-from erpnext.setup.setup_wizard.operations.install_fixtures import \
-	create_bank_account
+	make_deduction_salary_component,
+	make_earning_salary_component,
+	make_employee_salary_slip,
+)
+from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
 class TestSalaryInformationFile(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("""delete from Bank""")
+		frappe.db.sql("""delete from tabBank""")
 		frappe.db.sql("""delete from `tabHoliday List`""")
 		create_holiday_list()
 
@@ -120,7 +121,7 @@ def create_company_bank_account(account, bank, company):
 	bank_account.bank = bank
 	bank_account.iban = "AT483200000012345864"
 	bank_account.bank_code = "53276382839"
-	bank_account.bank_account_no = "788989778789"
+	bank_account.bank_account_no = "1234567891012"
 
 	bank_account.save()
 
