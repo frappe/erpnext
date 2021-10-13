@@ -1140,18 +1140,23 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 								'allocated_amount': payment_term.outstanding
 							}))
 
+	outstanding_invoices_after_split = []
 	if invoice_ref_based_on_payment_terms:
 		for idx, ref in invoice_ref_based_on_payment_terms.items():
-			voucher_no = outstanding_invoices[idx]['voucher_no']
-			voucher_type = outstanding_invoices[idx]['voucher_type']
+			voucher_no = ref[0]['voucher_no']
+			voucher_type = ref[0]['voucher_type']
 
-			frappe.msgprint(_("Spliting {} {} into {} rows as per payment terms").format(
+			frappe.msgprint(_("Spliting {} {} into {} row(s) as per Payment Terms").format(
 				voucher_type, voucher_no, len(ref)), alert=True)
 
-			outstanding_invoices.pop(idx - 1)
-			outstanding_invoices += invoice_ref_based_on_payment_terms[idx]
+			outstanding_invoices_after_split += invoice_ref_based_on_payment_terms[idx]
 
-	return outstanding_invoices
+			existing_row = list(filter(lambda x: x.get('voucher_no') == voucher_no, outstanding_invoices))
+			index = outstanding_invoices.index(existing_row[0])
+			outstanding_invoices.pop(index)
+
+	outstanding_invoices_after_split += outstanding_invoices
+	return outstanding_invoices_after_split
 
 def get_orders_to_be_billed(posting_date, party_type, party,
 	company, party_account_currency, company_currency, cost_center=None, filters=None):
