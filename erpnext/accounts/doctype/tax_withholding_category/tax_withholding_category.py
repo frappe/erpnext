@@ -191,6 +191,9 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 				tax_amount = get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net_total)
 			else:
 				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
+
+			if cint(tax_details.round_off_tax_amount):
+				tax_amount = round(tax_amount)
 		else:
 			tax_amount = get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers)
 
