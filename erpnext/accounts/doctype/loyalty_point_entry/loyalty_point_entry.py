@@ -16,7 +16,7 @@ class LoyaltyPointEntry(Document):
 
 def get_loyalty_point_entries(customer, loyalty_program, company, expiry_date=None):
 	if not expiry_date:
-		date = today()
+		expiry_date = today()
 
 	return frappe.db.sql('''
 		select name, loyalty_points, expiry_date, loyalty_program_tier, invoice_type, invoice
