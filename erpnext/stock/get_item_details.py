@@ -1140,7 +1140,8 @@ def get_valuation_rate(item_code, company, warehouse=None):
 	valuation_rate = get_valuation_rate(
 		item_code,
 		warehouse=warehouse,
-		company=company
+		company=company,
+		allow_zero_rate=True
 	)
 	return {"valuation_rate": valuation_rate}
 
