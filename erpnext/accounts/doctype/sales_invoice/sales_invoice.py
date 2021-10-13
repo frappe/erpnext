@@ -1290,9 +1290,9 @@ class SalesInvoice(SellingController):
 				dn_link = frappe.utils.get_link_to_form("Delivery Note", item.delivery_note)
 				serial_no_msg = ", ".join(frappe.bold(d) for d in serial_no_diff)
 
-				msg = _("Row #{0}: The following Serial Nos are not present in \
-					Delivery Note {1}: ").format(item.idx, dn_link)
-				msg += serial_no_msg
+				msg = _("Row #{0}: The following Serial Nos are not present in Delivery Note {1}:").format(
+					item.idx, dn_link)
+				msg += " " + serial_no_msg
 
 				frappe.throw(msg=msg, title=_("Serial Nos Mismatch"))
 
