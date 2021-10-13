@@ -868,6 +868,12 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
+	def test_finance_books_are_present_if_calculate_depreciation_is_enabled(self):
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.calculate_depreciation = 1
+
+		self.assertRaises(frappe.ValidationError, asset.save)
+
 	def test_post_depreciation_entries(self):
 		"""Tests if post_depreciation_entries() works as expected."""
 
