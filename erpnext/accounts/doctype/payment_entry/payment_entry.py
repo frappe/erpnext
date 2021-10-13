@@ -1052,12 +1052,6 @@ def get_outstanding_reference_documents(args):
 	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.get_cached_value('Company',  args.get("company"),  "default_currency")
 
-	# Get negative outstanding sales /purchase invoices
-	negative_outstanding_invoices = []
-	if args.get("party_type") not in ["Student", "Employee"] and not args.get("voucher_no"):
-		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"), args.get("party"),
-			args.get("party_account"), args.get("company"), party_account_currency, company_currency)
-
 	# Get positive outstanding sales /purchase invoices/ Fees
 	condition = ""
 	if args.get("voucher_type") and args.get("voucher_no"):
@@ -1103,6 +1097,12 @@ def get_outstanding_reference_documents(args):
 	if (args.get("party_type") != "Student"):
 		orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
 			args.get("party"), args.get("company"), party_account_currency, company_currency, filters=args)
+
+	# Get negative outstanding sales /purchase invoices
+	negative_outstanding_invoices = []
+	if args.get("party_type") not in ["Student", "Employee"] and not args.get("voucher_no"):
+		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"), args.get("party"),
+			args.get("party_account"), party_account_currency, company_currency, condition=condition)
 
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
@@ -1223,7 +1223,7 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 	return order_list
 
 def get_negative_outstanding_invoices(party_type, party, party_account,
-	company, party_account_currency, company_currency, cost_center=None):
+	party_account_currency, company_currency, cost_center=None, condition=None):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	supplier_condition = ""
 	if voucher_type == "Purchase Invoice":
@@ -1245,19 +1245,21 @@ def get_negative_outstanding_invoices(party_type, party, party_account,
 			`tab{voucher_type}`
 		where
 			{party_type} = %s and {party_account} = %s and docstatus = 1 and
-			company = %s and outstanding_amount < 0
+			outstanding_amount < 0
 			{supplier_condition}
+			{condition}
 		order by
 			posting_date, name
 		""".format(**{
 			"supplier_condition": supplier_condition,
+			"condition": condition,
 			"rounded_total_field": rounded_total_field,
 			"grand_total_field": grand_total_field,
 			"voucher_type": voucher_type,
 			"party_type": scrub(party_type),
 			"party_account": "debit_to" if party_type == "Customer" else "credit_to",
 			"cost_center": cost_center
-		}), (party, party_account, company), as_dict=True)
+		}), (party, party_account), as_dict=True)
 
 
 @frappe.whitelist()
