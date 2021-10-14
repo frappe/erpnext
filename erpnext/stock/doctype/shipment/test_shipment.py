@@ -3,15 +3,15 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import unittest
 from datetime import date, timedelta
 
 import frappe
 
 from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestShipment(unittest.TestCase):
+class TestShipment(ERPNextTestCase):
 	def test_shipment_from_delivery_note(self):
 		delivery_note = create_test_delivery_note()
 		delivery_note.submit()
@@ -47,7 +47,6 @@ def create_test_delivery_note():
 		}
 	)
 	delivery_note.insert()
-	frappe.db.commit()
 	return delivery_note
 
 
@@ -91,7 +90,6 @@ def create_test_shipment(delivery_notes = None):
 		}
 	)
 	shipment.insert()
-	frappe.db.commit()
 	return shipment
 
 

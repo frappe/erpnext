@@ -927,7 +927,7 @@ class GSPConnector():
 
 		return errors
 
-	def raise_error(self, raise_exception=False, errors=[]):
+	def raise_error(self, raise_exception=False, errors=None):
 		title = _('E Invoice Request Failed')
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
