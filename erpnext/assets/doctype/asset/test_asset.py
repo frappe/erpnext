@@ -668,7 +668,7 @@ class TestDepreciationBasics(AssetSetup):
 			depreciation_method = "Straight Line",
 			frequency_of_depreciation = 12,
 			total_number_of_depreciations = 3,
-			expected_value_after_useful_life = 1000,
+			expected_value_after_useful_life = 10000,
 			depreciation_start_date = "2020-12-31"
 		)
 
