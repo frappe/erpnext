@@ -18,6 +18,7 @@
   "item_group",
   "category_for_purchase",
   "category_for_sale",
+  "delivery_area",
   "is_item_from_hub",
   "stock_uom",
   "column_break0",
@@ -1064,6 +1065,12 @@
    "fieldname": "active_component",
    "fieldtype": "Small Text",
    "label": "Active Component"
+  },
+  {
+   "fieldname": "delivery_area",
+   "fieldtype": "Link",
+   "label": "Delivery Area",
+   "options": "Delivery Area"
   }
  ],
  "has_web_view": 1,
@@ -1071,7 +1078,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-08-16 14:51:14.139635",
+ "modified": "2021-10-14 13:30:53.414886",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
