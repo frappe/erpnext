@@ -22,7 +22,7 @@ def get_data():
 			},
 			{
 				'label': _('Registration'),
-				'items': ['Vehicle Registration Order', 'Vehicle Transfer Letter']
+				'items': ['Vehicle Registration Order', 'Vehicle Registration Receipt', 'Vehicle Transfer Letter']
 			}
 		]
 	}

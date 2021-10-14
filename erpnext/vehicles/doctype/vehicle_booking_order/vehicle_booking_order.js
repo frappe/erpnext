@@ -12,7 +12,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			'Vehicle Invoice': 'Receive Invoice',
 			'Vehicle Invoice Delivery': 'Deliver Invoice',
 			'Vehicle Transfer Letter': 'Transfer Letter',
-			'Purchase Order': 'Purchase Order',
+			'Vehicle Registration Order': 'Registration Order',
+			'Vehicle Invoice Movement': 'Invoice Movement',
 		}
 	},
 
@@ -113,6 +114,12 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Payment'));
 			}
 
+			// Registration Order button
+			if (this.frm.doc.registration_status == "Not Ordered" && this.frm.doc.invoice_status != "Delivered") {
+				this.frm.add_custom_button(__('Registration Order'), () => this.make_next_document('Vehicle Registration Order'),
+					__("Registration"));
+			}
+
 			// Receive/Deliver Vehicle and Invoice
 			if (this.frm.doc.vehicle) {
 				// Vehicle Delivery/Receipt buttons
@@ -140,7 +147,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				// Transfer Letter button
 				if (this.frm.doc.delivery_status === "Delivered" && !this.frm.doc.transfer_customer) {
 					if (this.can_change('vehicle_transfer')) {
-						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'));
+						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'),
+							__("Registration"));
 					}
 				}
 

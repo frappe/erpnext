@@ -547,6 +547,8 @@ def get_next_document(vehicle_booking_order, doctype):
 		return get_vehicle_invoice_delivery(doc)
 	elif doctype == "Vehicle Transfer Letter":
 		return get_vehicle_transfer_letter(doc)
+	elif doctype == "Vehicle Registration Order":
+		return get_vehicle_registration_order(doc)
 	else:
 		frappe.throw(_("Invalid DocType"))
 
@@ -608,10 +610,15 @@ def get_vehicle_transfer_letter(source):
 	can_transfer_vehicle(source, throw=True)
 	check_if_doc_exists("Vehicle Transfer Letter", source.name)
 
-	if not has_previous_doc("Vehicle Delivery", source):
-		frappe.throw(_("Cannot make Vehicle Transfer Letter against Vehicle Booking Order before making Vehicle Delivery"))
-
 	target = frappe.new_doc("Vehicle Transfer Letter")
+	set_next_document_values(source, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+def get_vehicle_registration_order(source):
+	check_if_doc_exists("Vehicle Registration Order", source.name)
+	target = frappe.new_doc("Vehicle Registration Order")
 	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
 	return target
@@ -660,7 +667,7 @@ def has_previous_doc(doctype, source):
 
 
 def set_next_document_values(source, target):
-	if not source.vehicle and target.doctype != 'Purchase Order':
+	if not source.vehicle and target.doctype != 'Vehicle Registration Order':
 		frappe.throw(_("Please set Vehicle first"))
 	if source.vehicle_allocation_required and not source.vehicle_allocation and target.doctype != 'Purchase Order':
 		frappe.throw(_("Please set Vehicle Allocation first"))

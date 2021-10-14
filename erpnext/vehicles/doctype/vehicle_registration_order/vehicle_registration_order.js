@@ -4,6 +4,14 @@
 frappe.provide("erpnext.vehicles");
 
 erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAdditionalServiceController.extend({
+	setup: function () {
+		this._super();
+		this.frm.custom_make_buttons = {
+			'Vehicle Invoice Movement': 'Issue Invoice',
+			'Vehicle Registration Receipt': 'Registration Receipt',
+		}
+	},
+
 	refresh: function () {
 		this._super();
 		this.setup_buttons();
