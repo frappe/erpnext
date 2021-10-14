@@ -69,7 +69,9 @@ class PromotionalScheme(Document):
 			{'promotional_scheme': self.name}):
 			frappe.delete_doc('Pricing Rule', rule.name)
 
-def get_pricing_rules(doc, rules = {}):
+def get_pricing_rules(doc, rules=None):
+	if rules is None:
+		rules = {}
 	new_doc = []
 	for child_doc, fields in {'price_discount_slabs': price_discount_fields,
 		'product_discount_slabs': product_discount_fields}.items():
@@ -78,7 +80,9 @@ def get_pricing_rules(doc, rules = {}):
 
 	return new_doc
 
-def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
+def _get_pricing_rules(doc, child_doc, discount_fields, rules=None):
+	if rules is None:
+		rules = {}
 	new_doc = []
 	args = get_args_for_pricing_rule(doc)
 	applicable_for = frappe.scrub(doc.get('applicable_for'))

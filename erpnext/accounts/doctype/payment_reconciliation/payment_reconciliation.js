@@ -52,21 +52,35 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 	refresh: function() {
 		this.frm.disable_save();
+		this.frm.set_df_property('invoices', 'cannot_delete_rows', true);
+		this.frm.set_df_property('payments', 'cannot_delete_rows', true);
+		this.frm.set_df_property('allocation', 'cannot_delete_rows', true);
+
+		this.frm.set_df_property('invoices', 'cannot_add_rows', true);
+		this.frm.set_df_property('payments', 'cannot_add_rows', true);
+		this.frm.set_df_property('allocation', 'cannot_add_rows', true);
+
 
 		if (this.frm.doc.receivable_payable_account) {
 			this.frm.add_custom_button(__('Get Unreconciled Entries'), () =>
 				this.frm.trigger("get_unreconciled_entries")
 			);
+			this.frm.change_custom_button_type('Get Unreconciled Entries', null, 'primary');
 		}
 		if (this.frm.doc.invoices.length && this.frm.doc.payments.length) {
 			this.frm.add_custom_button(__('Allocate'), () =>
 				this.frm.trigger("allocate")
 			);
+			this.frm.change_custom_button_type('Allocate', null, 'primary');
+			this.frm.change_custom_button_type('Get Unreconciled Entries', null, 'default');
 		}
 		if (this.frm.doc.allocation.length) {
 			this.frm.add_custom_button(__('Reconcile'), () =>
 				this.frm.trigger("reconcile")
 			);
+			this.frm.change_custom_button_type('Reconcile', null, 'primary');
+			this.frm.change_custom_button_type('Get Unreconciled Entries', null, 'default');
+			this.frm.change_custom_button_type('Allocate', null, 'default');
 		}
 	},
 

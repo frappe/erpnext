@@ -712,6 +712,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			allow_child_item_selection: opts.allow_child_item_selection,
 			child_fieldname: opts.child_fielname,
 			child_columns: opts.child_columns,
+			size: opts.size,
 			action: function(selections, args) {
 				let values = selections;
 				if (values.length === 0) {

@@ -175,7 +175,7 @@
    "default": "0",
    "fieldname": "automatically_fetch_payment_terms",
    "fieldtype": "Check",
-   "label": "Automatically Fetch Payment Terms"
+   "label": "Automatically Fetch Payment Terms from Order"
   },
   {
    "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
@@ -283,7 +283,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-08-19 11:17:38.788054",
+ "modified": "2021-10-11 17:42:36.427699",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
