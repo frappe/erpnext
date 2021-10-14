@@ -104,6 +104,7 @@ class PurchaseOrder(BuyingController):
 
 	def validate_minimum_order_qty(self):
 		if not self.get("items"): return
+
 		items = list(set([d.item_code for d in self.get("items")]))
 
 		itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
@@ -116,7 +117,11 @@ class PurchaseOrder(BuyingController):
 
 		for item_code, qty in itemwise_qty.items():
 			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
-				frappe.throw(_("Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).").format(item_code,
+				roles = frappe.get_roles(frappe.session.user) 
+				if "Purchase Manager" in roles:
+					frappe.msgprint(_("Please be aware that Item {0} has a minimum order qty {1}.").format(item_code, itemwise_min_order_qty.get(item_code)), title=_("Purchase Manager Override"), indicator='orange')
+				else:
+					frappe.throw(_("Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).").format(item_code,
 					qty, itemwise_min_order_qty.get(item_code)))
 
 	def validate_bom_for_subcontracting_items(self):
