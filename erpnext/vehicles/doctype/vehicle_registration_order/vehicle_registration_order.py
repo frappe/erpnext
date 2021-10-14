@@ -243,6 +243,26 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			'agent_closed_amount': agent_closed_amount,
 		})
 
+	def get_unclosed_customer_amount(self):
+		customer_margin = flt(flt(self.customer_total) - flt(self.authority_total),
+			self.precision('customer_total'))
+		unclosed_customer_amount = flt(customer_margin - flt(self.customer_closed_amount),
+			self.precision('customer_total'))
+		return unclosed_customer_amount
+
+	def get_unclosed_agent_amount(self):
+		unclosed_agent_amount = flt(flt(self.agent_commission) - flt(self.agent_closed_amount),
+			self.precision('agent_commission'))
+		return unclosed_agent_amount
+
+	def get_unclosed_income_amount(self):
+		unclosed_customer_amount = self.get_unclosed_customer_amount()
+		unclosed_agent_amount = self.get_unclosed_agent_amount()
+
+		unclosed_income_amount = flt(unclosed_customer_amount - unclosed_agent_amount,
+			self.precision('margin_amount'))
+		return unclosed_income_amount
+
 	def update_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
 
@@ -334,11 +354,14 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				if self.invoice_status == "Issued":
 					self.status = "To Retrieve Invoice"
 
-				elif self.invoice_status == "In Hand":
-					self.status = "To Deliver Invoice"
+				elif self.get_unclosed_customer_amount() or self.get_unclosed_agent_amount() or self.get_unclosed_income_amount():
+					self.status = "To Close Accounts"
 
 				elif self.agent_balance > 0:
 					self.status = "To Pay Agent"
+
+				elif self.invoice_status == "In Hand":
+					self.status = "To Deliver Invoice"
 
 				else:
 					self.status = "Completed"
@@ -428,14 +451,9 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		add_row(vro.agent_balance, vro.agent_account, 'Supplier', vro.agent)
 		add_row(-1 * vro.agent_balance)
 	elif purpose == "Closing Entry":
-		customer_margin = flt(flt(vro.customer_total) - flt(vro.authority_total),
-			vro.precision('customer_total'))
-		unclosed_customer_amount = flt(customer_margin - flt(vro.customer_closed_amount),
-			vro.precision('customer_total'))
-		unclosed_agent_amount = flt(flt(vro.agent_commission) - flt(vro.agent_closed_amount),
-			vro.precision('agent_commission'))
-		unclosed_income_amount = flt(unclosed_customer_amount - unclosed_agent_amount,
-			vro.precision('margin_amount'))
+		unclosed_customer_amount = vro.get_unclosed_customer_amount()
+		unclosed_agent_amount = vro.get_unclosed_agent_amount()
+		unclosed_income_amount = vro.get_unclosed_income_amount()
 
 		if unclosed_customer_amount:
 			registration_income_account = frappe.get_cached_value("Vehicles Settings", None, 'registration_income_account')

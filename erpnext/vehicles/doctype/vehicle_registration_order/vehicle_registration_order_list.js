@@ -9,7 +9,7 @@ frappe.listview_settings['Vehicle Registration Order'] = {
 			indicator = [__(doc.status), "purple", `status,=,${doc.status}`];
 		} else if (["To Receive Payment", "To Receive Invoice", "To Receive Receipt"].includes(doc.status)) {
 			indicator = [__(doc.status), "yellow", `status,=,${doc.status}`];
-		} else if(["To Pay Authority", "To Issue Invoice", "To Deliver Invoice"].includes(doc.status)) {
+		} else if(["To Pay Authority", "To Issue Invoice", "To Deliver Invoice", "To Close Accounts"].includes(doc.status)) {
 			indicator = [__(doc.status), "orange", `status,=,${doc.status}`];
 		}
 
