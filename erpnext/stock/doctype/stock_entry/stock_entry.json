@@ -638,17 +638,18 @@
   {
    "allow_in_quick_entry": 1,
    "fieldname": "reference",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_global_search": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Reference"
+   "label": "Reference",
+   "options": "Requisition Reference"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-09-03 12:02:19.654485",
+ "modified": "2021-10-14 14:06:18.007081",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
