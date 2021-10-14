@@ -177,6 +177,12 @@ class StockLedgerEntry(Document):
 		if allow_neg or self.actual_qty is None or self.actual_qty >= 0 or self.batch_no is None:
 			return
 
+		voucher_condition = ""
+		voucher_no = self.get("voucher_no")
+		voucher_type = self.get("voucher_type")
+		if voucher_no and voucher_type:
+			voucher_condition = f"and not (voucher_no = '{voucher_no}' and voucher_type = '{voucher_type}')"
+
 		future_negative_entries = frappe.db.sql("""select
 					voucher_type, voucher_no, item_code, warehouse, posting_date
 				from `tabStock Ledger Entry`
@@ -187,15 +193,16 @@ class StockLedgerEntry(Document):
 					and (qty_after_transaction + %(actual_qty)s) < 0
 					and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 					and is_cancelled = 0
-				order by timestamp(posting_date, posting_time)""", dict(
-					warehouse=self.warehouse, item_code=self.item_code,
+					{voucher_condition}
+				order by timestamp(posting_date, posting_time)""".format(voucher_condition=voucher_condition),
+				dict(warehouse=self.warehouse, item_code=self.item_code,
 					batch_no=self.batch_no, actual_qty=self.actual_qty,
 					posting_date=self.posting_date, posting_time=self.posting_time))
 
 		if len(future_negative_entries) > 0:
 			voucher_type, voucher_no, item_code, warehouse, posting_date = future_negative_entries[0]
 			frappe.throw(_('Quantity not available for {} in warehouse {} for future {} {} at the date of posting ({})').format(
-					frappe.bold(item_code), frappe.bold(warehouse), frappe.bold(voucher_type), 
+					frappe.bold(item_code), frappe.bold(warehouse), frappe.bold(voucher_type),
 					frappe.bold(voucher_no), posting_date
 				))
 
