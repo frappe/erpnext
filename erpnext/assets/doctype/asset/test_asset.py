@@ -26,6 +26,7 @@ class AssetSetup(unittest.TestCase):
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		enable_cwip_accounting("Computers")
+		make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	@classmethod
@@ -57,12 +58,8 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_available_for_use_date_is_after_purchase_date(self):
-		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0,
-			location="Test Location", posting_date=getdate("2021-10-10"))
-
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, do_not_save=1)
 		asset.is_existing_asset = 0
-		asset.purchase_receipt = pr.name
 		asset.purchase_date = getdate("2021-10-10")
 		asset.available_for_use_date = getdate("2021-10-1")
 
@@ -152,21 +149,9 @@ class TestAsset(AssetSetup):
 		self.assertEqual(doc.items[0].is_fixed_asset, 1)
 
 	def test_scrap_asset(self):
-		pr = make_purchase_receipt(item_code="Macbook Pro",
-			qty=1, rate=100000.0, location="Test Location")
-
-		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
-		asset = frappe.get_doc('Asset', asset_name)
-		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2020-01-01'
-		asset.purchase_date = '2020-01-01'
-		asset.append("finance_books", {
-			"expected_value_after_useful_life": 10000,
-			"depreciation_method": "Straight Line",
-			"total_number_of_depreciations": 10,
-			"frequency_of_depreciation": 1
-		})
-		asset.submit()
+		asset = create_asset(calculate_depreciation=1, available_for_use_date='2020-01-01',
+			purchase_date = '2020-01-01', expected_value_after_useful_life=10000,
+			total_number_of_depreciations=10, frequency_of_depreciation=1, submit=1)
 
 		post_depreciation_entries(date=add_months('2020-01-01', 4))
 
@@ -194,22 +179,11 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.status, "Partially Depreciated")
 
 	def test_gle_made_by_asset_sale(self):
-		pr = make_purchase_receipt(item_code="Macbook Pro",
-			qty=1, rate=100000.0, location="Test Location")
+		asset = create_asset(calculate_depreciation=1, available_for_use_date='2020-06-06',
+			purchase_date = '2020-01-01', expected_value_after_useful_life=10000,
+			total_number_of_depreciations=3, frequency_of_depreciation=10,
+			depreciation_start_date='2020-12-31', submit=1)
 
-		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
-		asset = frappe.get_doc('Asset', asset_name)
-		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2020-06-06'
-		asset.purchase_date = '2020-06-06'
-		asset.append("finance_books", {
-			"expected_value_after_useful_life": 10000,
-			"depreciation_method": "Straight Line",
-			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-12-31"
-		})
-		asset.submit()
 		post_depreciation_entries(date="2021-01-01")
 
 		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
@@ -236,6 +210,13 @@ class TestAsset(AssetSetup):
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
+
+	def test_expense_head(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=2, rate=200000.0, location="Test Location")
+		doc = make_invoice(pr.name)
+
+		self.assertEqual('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
 
 	# CWIP: Capital Work In Progress
 	def test_cwip_accounting(self):
@@ -319,13 +300,6 @@ class TestAsset(AssetSetup):
 
 
 		self.assertEqual(gle, expected_gle)
-
-	def test_expense_head(self):
-		pr = make_purchase_receipt(item_code="Macbook Pro",
-			qty=2, rate=200000.0, location="Test Location")
-		doc = make_invoice(pr.name)
-
-		self.assertEqual('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
 
 	def test_asset_cwip_toggling_cases(self):
 		cwip = frappe.db.get_value("Asset Category", "Computers", "enable_cwip_accounting")
