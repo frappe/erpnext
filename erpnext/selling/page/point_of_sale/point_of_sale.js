@@ -725,7 +725,6 @@ class POSCart {
 
 	make() {
 		this.make_dom();
-		this.make_pos_field()
 		this.make_customer_field();
 		if (frappe.boot.active_domains.includes("Healthcare")){
 			this.make_patient_field()
@@ -737,8 +736,6 @@ class POSCart {
 	make_dom() {
 		this.wrapper.append(`
 			<div class="pos-cart">
-				<div class="pos-field">
-				</div>
 				<div class="customer-field">
 				</div>
 				<div class="patient-field">
