@@ -85,7 +85,7 @@ class StockController(AccountsController):
 				# strip preceeding and succeeding spaces for each SN
 				# (SN could have valid spaces in between e.g. SN - 123 - 2021)
 				serial_no_list = row.serial_no.split("\n")
-				serial_no_list = [sn.lstrip().rstrip() for sn in serial_no_list]
+				serial_no_list = [sn.strip() for sn in serial_no_list]
 
 				row.serial_no = "\n".join(serial_no_list)
 
