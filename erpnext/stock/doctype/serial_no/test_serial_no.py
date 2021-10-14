@@ -184,14 +184,14 @@ class TestSerialNo(ERPNextTestCase):
 
 		se = frappe.copy_doc(test_records[0])
 		se.get("items")[0].item_code = item_code
-		se.get("items")[0].qty = 3
-		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  "
-		se.get("items")[0].transfer_qty = 3
+		se.get("items")[0].qty = 4
+		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  , _TS4 - 2021"
+		se.get("items")[0].transfer_qty = 4
 		se.set_stock_entry_type()
 		se.insert()
 		se.submit()
 
-		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3")
+		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3\n_TS4 - 2021")
 
 		frappe.db.rollback()
 
