@@ -13,7 +13,7 @@ frappe.ui.form.on('Credit Note CXC', {
 
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
 			const child = locals[cdt][cdn];
-			const filters = {"docstatus": 1,"status": "Unpaid"};
+			const filters = {"docstatus": 1,"status": ["in",["Unpaid", "overdue"]]};
 			const party_type_doctypes = ['Sales Invoice'];
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				filters[doc.party_type.toLowerCase()] = doc.customer;
