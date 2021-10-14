@@ -155,6 +155,7 @@
    "ignore_user_permissions": 1,
    "label": "Customer",
    "options": "Customer",
+   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -357,7 +358,7 @@
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2021-10-05 15:12:06.171951",
+ "modified": "2021-10-14 13:28:36.907071",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
