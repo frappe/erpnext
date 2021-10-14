@@ -505,17 +505,8 @@ class PaymentEntry(AccountsController):
 
 	def validate_received_amount(self):
 		if self.paid_from_account_currency == self.paid_to_account_currency:
-<<<<<<< HEAD
-			if self.paid_amount != self.received_amount:
-				frappe.throw(_("Received Amount should be same as Paid Amount"))
-=======
 			if self.paid_amount < self.received_amount:
-<<<<<<< HEAD
-				frappe.throw(_("Received Amount cannot be greater tha Paid Amount"))
->>>>>>> 1b7414e948 (fix: cannot add deductions in internal transfer payment entry)
-=======
 				frappe.throw(_("Received Amount cannot be greater than Paid Amount"))
->>>>>>> 3b9514d6e1 (fix: Update message string)
 
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
