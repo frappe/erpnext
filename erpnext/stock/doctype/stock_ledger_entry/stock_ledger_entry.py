@@ -174,7 +174,7 @@ class StockLedgerEntry(Document):
 
 	def validate_future_sle_by_batch_for_outgoing_entries(self):
 		allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-		if allow_neg or self.actual_qty is None or self.actual_qty >= 0 or self.batch_no is None:
+		if not self.batch_no or allow_neg or self.actual_qty is None or self.actual_qty >= 0:
 			return
 
 		voucher_condition = ""
