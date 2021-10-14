@@ -481,4 +481,18 @@ def get_invoice_movement(vehicle_registration_order, purpose):
 
 @frappe.whitelist()
 def get_registration_receipt(vehicle_registration_order):
-	pass
+	vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
+
+	if vro.docstatus != 1:
+		frappe.throw(_("Vehicle Registration Order must be submitted"))
+
+	receipt = frappe.new_doc("Vehicle Registration Receipt")
+	receipt.company = vro.company
+	receipt.vehicle_registration_order = vro.name
+	receipt.agent = vro.agent
+	receipt.vehicle = vro.vehicle
+	receipt.vehicle_booking_order = vro.vehicle_booking_order
+
+	receipt.run_method("set_missing_values")
+
+	return receipt
