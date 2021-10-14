@@ -682,7 +682,7 @@ class TestAsset(unittest.TestCase):
 		# reset indian company
 		frappe.flags.company = company_flag
 
-	def test_asset_1(self):
+	def test_expected_value_change(self):
 		"""
 			tests if changing `expected_value_after_useful_life`
 			affects `value_after_depreciation`
