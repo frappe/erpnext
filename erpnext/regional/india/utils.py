@@ -112,7 +112,11 @@ def validate_gstin_check_digit(gstin, label='GSTIN'):
 		frappe.throw(_("""Invalid {0}! The check digit validation has failed. Please ensure you've typed the {0} correctly.""").format(label))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
-	return [_("Item"), _("Taxable Amount")] + tax_accounts
+	hsn_wise_in_gst_settings = frappe.db.get_single_value('GST Settings','hsn_wise_tax_breakup')
+	if frappe.get_meta(item_doctype).has_field('gst_hsn_code') and hsn_wise_in_gst_settings:
+		return [_("HSN/SAC"), _("Taxable Amount")] + tax_accounts
+	else:
+		return [_("Item"), _("Taxable Amount")] + tax_accounts
 
 def get_itemised_tax_breakup_data(doc, account_wise=False, hsn_wise=False):
 	itemised_tax = get_itemised_tax(doc.taxes, with_tax_account=account_wise)
@@ -122,14 +126,17 @@ def get_itemised_tax_breakup_data(doc, account_wise=False, hsn_wise=False):
 	if not frappe.get_meta(doc.doctype + " Item").has_field('gst_hsn_code'):
 		return itemised_tax, itemised_taxable_amount
 
-	if hsn_wise:
+	hsn_wise_in_gst_settings = frappe.db.get_single_value('GST Settings','hsn_wise_tax_breakup')
+
+	tax_breakup_hsn_wise = hsn_wise or hsn_wise_in_gst_settings
+	if tax_breakup_hsn_wise:
 		item_hsn_map = frappe._dict()
 		for d in doc.items:
 			item_hsn_map.setdefault(d.item_code or d.item_name, d.get("gst_hsn_code"))
 
 	hsn_tax = {}
 	for item, taxes in itemised_tax.items():
-		item_or_hsn = item if not hsn_wise else item_hsn_map.get(item)
+		item_or_hsn = item if not tax_breakup_hsn_wise else item_hsn_map.get(item)
 		hsn_tax.setdefault(item_or_hsn, frappe._dict())
 		for tax_desc, tax_detail in taxes.items():
 			key = tax_desc
@@ -142,7 +149,7 @@ def get_itemised_tax_breakup_data(doc, account_wise=False, hsn_wise=False):
 	# set taxable amount
 	hsn_taxable_amount = frappe._dict()
 	for item in itemised_taxable_amount:
-		item_or_hsn = item if not hsn_wise else item_hsn_map.get(item)
+		item_or_hsn = item if not tax_breakup_hsn_wise else item_hsn_map.get(item)
 		hsn_taxable_amount.setdefault(item_or_hsn, 0)
 		hsn_taxable_amount[item_or_hsn] += itemised_taxable_amount.get(item)
 
