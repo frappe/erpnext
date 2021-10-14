@@ -446,12 +446,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	currency() {
+		var me = this;
 		this._super();
-		$.each(cur_frm.doc.timesheets, function(i, d) {
-			let row = frappe.get_doc(d.doctype, d.name)
-			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
-		});
-		calculate_total_billing_amount(cur_frm)
+		if (this.frm.doc.timesheets) {
+			this.frm.doc.timesheets.forEach((d) => {
+				let row = frappe.get_doc(d.doctype, d.name)
+				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
+			});
+			frm.trigger("calculate_timesheet_totals");
+		}
 	}
 });
 
@@ -999,7 +1002,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 
 frappe.ui.form.on("Sales Invoice Timesheet", {
-	timesheets_remove(frm, cdt, cdn) {
+	timesheets_remove(frm) {
 		frm.trigger("calculate_timesheet_totals");
 	}
 });
