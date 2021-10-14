@@ -952,6 +952,7 @@ def get_payment_entry(ref_doc, args):
 
 	je.set_amounts_in_company_currency()
 	je.set_total_debit_credit()
+	je.set_party_name()
 
 	return je if args.get("journal_entry") else je.as_dict()
 

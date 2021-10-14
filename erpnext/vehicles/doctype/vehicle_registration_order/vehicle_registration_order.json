@@ -78,13 +78,15 @@
   "margin_amount",
   "status_section",
   "customer_payment",
+  "customer_closed_amount",
   "customer_outstanding",
   "column_break_73",
   "authority_payment",
+  "agent_closed_amount",
   "authority_outstanding",
   "column_break_70",
   "agent_payment",
-  "agent_outstanding",
+  "agent_balance",
   "column_break_62",
   "invoice_status",
   "invoice_issued_for",
@@ -549,14 +551,6 @@
    "label": "Commission and Margin"
   },
   {
-   "fieldname": "agent_outstanding",
-   "fieldtype": "Currency",
-   "label": "Registration Agent Outstanding",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "agent",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -699,12 +693,36 @@
    "ignore_user_permissions": 1,
    "label": "Agent Payable Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "agent_balance",
+   "fieldtype": "Currency",
+   "label": "Registration Agent Balance",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_closed_amount",
+   "fieldtype": "Currency",
+   "label": "Customer Closed Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agent_closed_amount",
+   "fieldtype": "Currency",
+   "label": "Agent Closed Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-13 15:17:38.121788",
+ "modified": "2021-10-14 14:04:10.124947",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

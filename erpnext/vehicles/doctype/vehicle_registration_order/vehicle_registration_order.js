@@ -4,6 +4,11 @@
 frappe.provide("erpnext.vehicles");
 
 erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAdditionalServiceController.extend({
+	refresh: function () {
+		this._super();
+		this.setup_buttons();
+	},
+
 	setup_queries: function () {
 		this._super();
 
@@ -53,6 +58,52 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		var authority_component_field = this.frm.get_docfield("authority_charges", "component");
 		authority_component_field.get_route_options_for_new_doc = () => {
 			return erpnext.vehicles.pricing.pricing_component_route_options('Registration');
+		}
+	},
+
+	setup_buttons: function () {
+		if (this.frm.doc.docstatus == 1) {
+			// Payment
+			if (flt(this.frm.doc.customer_outstanding) > 0) {
+				this.frm.add_custom_button(__('Customer Payment'),
+					() => this.make_journal_entry('Customer Payment'), __('Make'));
+			}
+			if (flt(this.frm.doc.authority_outstanding) > 0) {
+				this.frm.add_custom_button(__('Authority Payment'),
+					() => this.make_journal_entry('Authority Payment'), __('Make'));
+			}
+			if (flt(this.frm.doc.agent_balance) > 0) {
+				this.frm.add_custom_button(__('Agent Payment'),
+					() => this.make_journal_entry('Agent Payment'), __('Make'));
+			}
+
+			// Invoice
+			if (this.frm.doc.invoice_status == "In Hand" && !this.frm.doc.vehicle_license_plate) {
+				this.frm.add_custom_button(__('Issue Invoice'), () => this.make_invoice_movement('Issue'),
+					__('Make'));
+			}
+			if (this.frm.doc.invoice_status == "Issued" && this.frm.doc.vehicle_license_plate) {
+				this.frm.add_custom_button(__('Retrieve Invoice'), () => this.make_invoice_movement('Return'),
+					__('Make'));
+			}
+
+			// Registration Receipt
+			if (this.frm.doc.invoice_status == "Issued" && !this.frm.doc.vehicle_license_plate) {
+				this.frm.add_custom_button(__('Registration Receipt'), () => this.make_registration_receipt(),
+					__('Make'));
+			}
+
+			// Closing Entry
+			var customer_margin = flt(flt(this.frm.doc.customer_total) - flt(this.frm.doc.authority_total),
+				precision('customer_total'));
+			var unclosed_customer_amount = flt(customer_margin - flt(this.frm.doc.customer_closed_amount),
+				precision('customer_total'));
+			var unclosed_agent_amount = flt(flt(this.frm.doc.agent_commission) - flt(this.frm.doc.agent_closed_amount),
+				precision('agent_commission'));
+			if (unclosed_customer_amount || (this.frm.doc.agent && unclosed_agent_amount)) {
+				this.frm.add_custom_button(__('Closing Entry'), () => this.make_journal_entry('Closing Entry'),
+					__('Make'));
+			}
 		}
 	},
 
@@ -152,10 +203,70 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 
 	reset_outstanding_amount: function () {
 		if (this.frm.doc.docstatus === 0) {
-			this.frm.doc.customer_outstanding = flt(this.frm.doc.customer_total);
-			this.frm.doc.agent_outstanding = 0;
+			this.frm.doc.customer_payment = 0;
+			this.frm.doc.customer_closed_amount = 0;
+			this.frm.doc.authority_payment = 0;
+			this.frm.doc.agent_payment = 0;
+			this.frm.doc.agent_balance = 0;
+			this.frm.doc.agent_closed_amount = 0;
+
+			this.frm.doc.customer_outstanding = flt(this.frm.doc.customer_total) - flt(this.frm.doc.customer_payment);
+			this.frm.doc.authority_outstanding = flt(this.frm.doc.authority_total) - flt(this.frm.doc.authority_payment);
 		}
 	},
+
+	make_journal_entry: function(purpose) {
+		if (!purpose)
+			return;
+
+		return frappe.call({
+			method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.get_journal_entry",
+			args: {
+				"vehicle_registration_order": this.frm.doc.name,
+				"purpose": purpose
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	},
+
+	make_invoice_movement: function(purpose) {
+		if (!purpose)
+			return;
+
+		return frappe.call({
+			method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.get_invoice_movement",
+			args: {
+				"vehicle_registration_order": this.frm.doc.name,
+				"purpose": purpose
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	},
+
+	make_registration_receipt: function () {
+		return frappe.call({
+			method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.get_registration_receipt",
+			args: {
+				"vehicle_registration_order": this.frm.doc.name,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.vehicles.VehicleRegistrationOrderController({frm: cur_frm}));

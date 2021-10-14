@@ -94,6 +94,10 @@ for d in service_person_fields:
 	d['translatable'] = 0
 for d in accounting_dimension_fields:
 	d['translatable'] = 0
+for d in accounting_dimension_table_fields:
+	d['translatable'] = 0
+for d in vehicle_registration_purpose_fields:
+	d['translatable'] = 0
 
 common_properties = [
 	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail'),
