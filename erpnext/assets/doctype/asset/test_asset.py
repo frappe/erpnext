@@ -679,7 +679,7 @@ class TestDepreciationBasics(AssetSetup):
 		]
 
 		for i, schedule in enumerate(asset.schedules):
-			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][0], schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 
 	def test_set_accumulated_depreciation(self):
