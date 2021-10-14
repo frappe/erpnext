@@ -64,33 +64,32 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 	setup_buttons: function () {
 		if (this.frm.doc.docstatus == 1) {
 			// Payment
-			if (flt(this.frm.doc.customer_outstanding) > 0) {
+			if (flt(this.frm.doc.customer_outstanding)) {
 				this.frm.add_custom_button(__('Customer Payment'),
-					() => this.make_journal_entry('Customer Payment'), __('Make'));
+					() => this.make_journal_entry('Customer Payment'), __('Payment'));
 			}
-			if (flt(this.frm.doc.authority_outstanding) > 0) {
+			if (flt(this.frm.doc.authority_outstanding)) {
 				this.frm.add_custom_button(__('Authority Payment'),
-					() => this.make_journal_entry('Authority Payment'), __('Make'));
+					() => this.make_journal_entry('Authority Payment'), __('Payment'));
 			}
-			if (flt(this.frm.doc.agent_balance) > 0) {
+			if (flt(this.frm.doc.agent_balance)) {
 				this.frm.add_custom_button(__('Agent Payment'),
-					() => this.make_journal_entry('Agent Payment'), __('Make'));
+					() => this.make_journal_entry('Agent Payment'), __('Payment'));
 			}
 
-			// Invoice
-			if (this.frm.doc.invoice_status == "In Hand" && !this.frm.doc.vehicle_license_plate) {
-				this.frm.add_custom_button(__('Issue Invoice'), () => this.make_invoice_movement('Issue'),
-					__('Make'));
-			}
-			if (this.frm.doc.invoice_status == "Issued" && this.frm.doc.vehicle_license_plate) {
-				this.frm.add_custom_button(__('Retrieve Invoice'), () => this.make_invoice_movement('Return'),
-					__('Make'));
-			}
+			if (this.frm.doc.vehicle) {
+				// Invoice
+				if (this.frm.doc.invoice_status == "In Hand" && !this.frm.doc.vehicle_license_plate) {
+					this.frm.add_custom_button(__('Issue Invoice'), () => this.make_invoice_movement('Issue'));
+				}
+				else if (this.frm.doc.invoice_status == "Issued" && this.frm.doc.vehicle_license_plate) {
+					this.frm.add_custom_button(__('Retrieve Invoice'), () => this.make_invoice_movement('Return'));
+				}
 
-			// Registration Receipt
-			if (this.frm.doc.invoice_status == "Issued" && !this.frm.doc.vehicle_license_plate) {
-				this.frm.add_custom_button(__('Registration Receipt'), () => this.make_registration_receipt(),
-					__('Make'));
+				// Registration Receipt
+				if (!this.frm.doc.vehicle_license_plate) {
+					this.frm.add_custom_button(__('Registration Receipt'), () => this.make_registration_receipt());
+				}
 			}
 
 			// Closing Entry
@@ -101,9 +100,25 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			var unclosed_agent_amount = flt(flt(this.frm.doc.agent_commission) - flt(this.frm.doc.agent_closed_amount),
 				precision('agent_commission'));
 			if (unclosed_customer_amount || (this.frm.doc.agent && unclosed_agent_amount)) {
-				this.frm.add_custom_button(__('Closing Entry'), () => this.make_journal_entry('Closing Entry'),
-					__('Make'));
+				this.frm.add_custom_button(__('Closing Entry'), () => this.make_journal_entry('Closing Entry'));
 			}
+
+			// Primary Button
+			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.authority_outstanding) > 0
+				|| flt(this.frm.doc.agent_balance) > 0;
+
+			if (unpaid) {
+				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
+			} else if (this.frm.doc.status == "To Issue Invoice" && this.frm.doc.vehicle) {
+				this.frm.custom_buttons[__('Issue Invoice')] && this.frm.custom_buttons[__('Issue Invoice')].addClass('btn-primary');
+			} else if (this.frm.doc.status == "To Retrieve Invoice" && this.frm.doc.vehicle) {
+				this.frm.custom_buttons[__('Retrieve Invoice')] && this.frm.custom_buttons[__('Retrieve Invoice')].addClass('btn-primary');
+			} else if (this.frm.doc.status == "To Receive Receipt" && this.frm.doc.vehicle) {
+				this.frm.custom_buttons[__('Registration Receipt')] && this.frm.custom_buttons[__('Registration Receipt')].addClass('btn-primary');
+			} else if (this.frm.doc.status == "To Close Accounts") {
+				this.frm.custom_buttons[__('Closing Entry')] && this.frm.custom_buttons[__('Closing Entry')].addClass('btn-primary');
+			}
+
 		}
 	},
 
