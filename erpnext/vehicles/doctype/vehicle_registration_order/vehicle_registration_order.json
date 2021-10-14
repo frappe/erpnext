@@ -61,6 +61,8 @@
   "registration_details_section",
   "choice_number_required",
   "choice_number_details",
+  "column_break_55",
+  "call_date",
   "pricing_section",
   "customer_charges",
   "column_break_54",
@@ -717,12 +719,23 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "call_date",
+   "fieldtype": "Date",
+   "label": "Call Date",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-14 14:04:10.124947",
+ "modified": "2021-10-14 17:54:35.873796",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

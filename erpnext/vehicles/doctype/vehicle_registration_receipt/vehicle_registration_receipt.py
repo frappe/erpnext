@@ -1,0 +1,68 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+import frappe
+from frappe import _
+from frappe.utils import getdate, cstr
+from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
+from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
+import re
+
+
+class VehicleRegistrationReceipt(VehicleTransactionController):
+	def get_feed(self):
+		return _("For {0} | {1}").format(self.get("item_name") or self.get('item_code'), self.get("vehicle_license_plate"))
+
+	def validate(self):
+		super(VehicleRegistrationReceipt, self).validate()
+
+		self.validate_duplicate_registration_receipt()
+		self.set_vehicle_registration_order()
+		self.validate_vehicle_registration_order()
+		self.validate_registration_number()
+		self.validate_call_date()
+		self.set_title()
+
+	def before_submit(self):
+		self.validate_vehicle_mandatory()
+
+	def on_submit(self):
+		self.update_vehicle_details()
+		self.update_vehicle_registration_order()
+		self.update_vehicle_booking_order_registration()
+
+	def on_cancel(self):
+		self.update_vehicle_registration_order()
+		self.update_vehicle_booking_order_registration()
+
+	def set_title(self):
+		self.title = "{0}{1}".format(self.get('vehicle_license_plate'),
+			" ({0})".format(self.get('agent_name') or self.get('agent')) if self.get('agent') else "")
+
+	def validate_duplicate_registration_receipt(self):
+		registration_receipt = frappe.db.get_value("Vehicle Registration Receipt",
+			filters={"vehicle": self.vehicle, "docstatus": 1, "name": ['!=', self.name]})
+
+		if registration_receipt:
+			frappe.throw(_("Registration Receipt for {0} has already been received in {1}")
+				.format(frappe.get_desk_link("Vehicle", self.vehicle),
+				frappe.get_desk_link("Vehicle Registration Receipt", registration_receipt)))
+
+	def set_vehicle_registration_order(self):
+		self.vehicle_registration_order = get_vehicle_registration_order(vehicle=self.vehicle)
+
+	def validate_registration_number(self):
+		self.vehicle_license_plate = re.sub(r"\s+", "", cstr(self.vehicle_license_plate).upper())
+
+	def validate_call_date(self):
+		if self.call_date and self.posting_date:
+			if getdate(self.call_date) < getdate(self.posting_date):
+				frappe.throw(_("Call Date cannot be before Received Date"))
+
+	def update_vehicle_details(self):
+		vehicle_doc = frappe.get_doc("Vehicle", self.vehicle)
+		vehicle_doc.unregistered = 0
+		vehicle_doc.license_plate = self.vehicle_license_plate
+		vehicle_doc.save(ignore_permissions=True)

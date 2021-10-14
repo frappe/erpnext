@@ -11,7 +11,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Vehicle Invoice Movement']
+				'items': ['Vehicle Invoice Movement', 'Vehicle Registration Receipt']
 			},
 		]
 	}

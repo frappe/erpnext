@@ -131,7 +131,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					if (this.can_change('invoice_receipt')) {
 						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice'));
 					}
-				} else if (this.frm.doc.invoice_status === "In Hand" && this.frm.doc.delivery_status === "Delivered") {
+				} else if (this.frm.doc.invoice_status === "In Hand") {
 					if (this.can_change('invoice_delivery')) {
 						this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
 					}

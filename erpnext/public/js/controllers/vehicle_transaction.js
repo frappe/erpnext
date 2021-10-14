@@ -230,8 +230,8 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					is_return: me.frm.doc.is_return,
 					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date,
 					item_code: me.frm.doc.item_code,
-				},
-				get_vehicle_invoice: cint(me.frm.doc.doctype == "Vehicle Invoice Delivery")
+					issued_for: me.frm.doc.issued_for,
+				}
 			},
 			callback: function (r) {
 				if (r.message && !r.exc) {

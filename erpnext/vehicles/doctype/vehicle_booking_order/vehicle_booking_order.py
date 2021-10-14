@@ -425,10 +425,13 @@ class VehicleBookingOrder(VehicleBookingController):
 
 	def update_registration_status(self, update=False):
 		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
-		vehicle_registration_order = get_vehicle_registration_order(self.vehicle, self.name)
+		vehicle_registration_order = get_vehicle_registration_order(self.vehicle, self.name,
+			['name', 'vehicle_license_plate'], as_dict=1)
 
 		if vehicle_registration_order:
-			if self.invoice_status == 'Issued' and self.invoice_issued_for == 'Registration':
+			if vehicle_registration_order.vehicle_license_plate:
+				self.registration_status = 'Registered'
+			elif self.invoice_status == 'Issued' and self.invoice_issued_for == 'Registration':
 				self.registration_status = 'In Process'
 			else:
 				self.registration_status = 'Ordered'

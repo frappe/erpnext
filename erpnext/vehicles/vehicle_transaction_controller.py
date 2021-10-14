@@ -87,7 +87,7 @@ class VehicleTransactionController(StockController):
 		values = {}
 		for k, v in vehicle_details.items():
 			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields):
-				if k == "vehicle_license_plate" and self.doctype == "Vehicle Registration Order":
+				if k == "vehicle_license_plate" and self.doctype in ["Vehicle Registration Order", "Vehicle Registration Receipt"]:
 					continue
 
 				values[k] = v
@@ -435,6 +435,8 @@ class VehicleTransactionController(StockController):
 
 			if self.doctype in ['Vehicle Invoice', 'Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
 				vro.update_invoice_status(update=True)
+			elif self.doctype == "Vehicle Registration Receipt":
+				vro.update_registration_number(update=True)
 
 			vro.set_status(update=True)
 			vro.notify_update()
@@ -590,7 +592,7 @@ def get_vehicle_booking_order_details(args):
 
 
 @frappe.whitelist()
-def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoice=False, warn_reserved=True):
+def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -644,11 +646,18 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 		if vehicle_booking_order:
 			out.vehicle_booking_order = vehicle_booking_order
 
-	if cint(get_vehicle_invoice):
+	if args.doctype in ['Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
 		from erpnext.vehicles.doctype.vehicle_invoice.vehicle_invoice import get_vehicle_invoice,\
 			get_vehicle_invoice_details
 		out.vehicle_invoice = get_vehicle_invoice(args.vehicle)
 		out.update(get_vehicle_invoice_details(out.vehicle_invoice))
+
+	if args.doctype == 'Vehicle Registration Receipt' or (args.doctype == 'Vehicle Invoice Movement'
+			and args.issued_for == "Registration"):
+		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order,\
+			get_vehicle_registration_order_details
+		out.vehicle_registration_order = get_vehicle_registration_order(vehicle=args.vehicle)
+		out.update(get_vehicle_registration_order_details(out.vehicle_registration_order))
 
 	if warn_reserved and args.doctype == "Vehicle Delivery":
 		warn_vehicle_reserved(args.vehicle, args.customer)

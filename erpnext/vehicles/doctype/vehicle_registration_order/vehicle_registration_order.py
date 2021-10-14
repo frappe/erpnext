@@ -52,7 +52,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.update_vehicle_booking_order_registration()
 
 	def set_title(self):
-		self.title = "{0}{1}".format(self.customer_name or self.customer, ' ({0})'.format(self.get('received_by')) if self.get('received_by') else '')
+		self.title = self.customer_name or self.customer
 
 	def set_missing_values(self, doc=None, for_validate=False):
 		super(VehicleRegistrationOrder, self).set_missing_values(doc, for_validate)
@@ -281,7 +281,27 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			})
 
 	def update_registration_number(self, update=False):
-		pass
+		fields = ['name', 'vehicle_license_plate', 'call_date']
+
+		registration_receipt = frappe.db.get_all("Vehicle Registration Receipt",
+			{"vehicle_registration_order": self.name, "docstatus": 1}, fields,
+			order_by="posting_date desc, creation desc")
+
+		if not registration_receipt and self.vehicle:
+			registration_receipt = frappe.db.get_all("Vehicle Registration Receipt",
+				{"vehicle": self.vehicle, "docstatus": 1}, fields,
+				order_by="posting_date desc, creation desc")
+
+		registration_receipt = registration_receipt[0] if registration_receipt else frappe._dict()
+
+		self.vehicle_license_plate = registration_receipt.vehicle_license_plate
+		self.call_date = registration_receipt.call_date
+
+		if update:
+			self.db_set({
+				"vehicle_license_plate": self.vehicle_license_plate,
+				"call_date": self.call_date,
+			})
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
@@ -305,7 +325,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				if self.invoice_status == "In Hand":
 					self.status = "To Issue Invoice"
 
-				elif self.invoice_status == "Issued" and self.invoice_issued_for == "Registration":
+				elif self.invoice_status == "Delivered" or (self.invoice_status == "Issued" and self.invoice_issued_for == "Registration"):
 					self.status = "To Receive Receipt"
 
 				else:
@@ -351,6 +371,22 @@ def get_vehicle_registration_order(vehicle=None, vehicle_booking_order=None, fie
 		}, fieldname=fields, as_dict=as_dict)
 
 	return vehicle_registration_order
+
+
+def get_vehicle_registration_order_details(vehicle_registration_order):
+	details = frappe._dict()
+	if vehicle_registration_order:
+		details = frappe.db.get_value("Vehicle Registration Order", vehicle_registration_order, [
+			'agent', 'agent_name',
+		], as_dict=1) or frappe._dict()
+
+	out = frappe._dict()
+
+	if details.agent:
+		out.agent = details.agent
+		out.agent_name = details.agent_name
+
+	return out
 
 
 @frappe.whitelist()
