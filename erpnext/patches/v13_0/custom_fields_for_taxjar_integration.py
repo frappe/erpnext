@@ -34,8 +34,5 @@ def execute():
 	}
 	create_custom_fields(custom_fields, update=True)
 	add_permissions()
-<<<<<<< HEAD
-	frappe.enqueue('erpnext.regional.united_states.setup.add_product_tax_categories', now=True)
-=======
+	
 	frappe.enqueue('erpnext.erpnext_integrations.doctype.taxjar_settings.taxjar_settings.add_product_tax_categories', now=True)
->>>>>>> 54754f4eb8 (fix: updated patch, add fields only if fields are checked)
