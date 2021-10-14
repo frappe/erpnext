@@ -58,14 +58,14 @@ class TestGrossProfit(unittest.TestCase):
 
 	def test_gross_profit(self):
 		self.assertEqual(self.gross_profit, self.totals[-3],
-						 "Incorrect gross profit amount got {0} but expected {1}".format(
-							 frappe.format(self.totals[-3], "Currency"), frappe.format(self.gross_profit, "Currency")))
+							"Incorrect gross profit amount got {0} but expected {1}".format(
+							frappe.format(self.totals[-3], "Currency"), frappe.format(self.gross_profit, "Currency")))
 
 	def test_gross_profit_percentage(self):
 		self.assertEqual(self.gross_profit_percentage, self.totals[-2],
-						 "Incorrect gross profit percentage got {0} but expected {1}".format(
-							 frappe.format(self.totals[-2], "Percentage"),
-							 frappe.format(self.gross_profit_percentage, "Percentage")))
+							"Incorrect gross profit percentage got {0} but expected {1}".format(
+							frappe.format(self.totals[-2], "Percentage"),
+							frappe.format(self.gross_profit_percentage, "Percentage")))
 
 
 def generate_expected_data():
@@ -88,7 +88,7 @@ def generate_expected_data():
 
 	for i in range(6):
 		make_stock_entry(qty=6 * (i + 1), rate=uniform(1.5, 99.5), to_warehouse="Stores - TCP1",
-						 purpose="Material Receipt", company=test_company)
+							purpose="Material Receipt", company=test_company)
 
 		if i == 0 or i == 3:
 			make_so_against_dn_and_si()
