@@ -119,17 +119,17 @@ def get_vehicle_invoice_state(vehicle_invoice, posting_date=None):
 	# Macros
 	def raise_invalid_state_error(action):
 		frappe.throw(_("{0}: Cannot {1} invoice because invoice status is {2} on {3}")
-			.format(frappe.get_desk_link("Vehicle Invoice Movement", trn.name),
+			.format(frappe.get_desk_link(trn.doctype, trn.name),
 				_(action), state.status, formatdate(trn.posting_date)))
 
 	def raise_invalid_date_error():
 		frappe.throw(_("{0} Date {1} cannot be before Vehicle Invoice Received Date {2}")
-			.format(frappe.get_desk_link("Vehicle Invoice Movement", trn.name),
+			.format(frappe.get_desk_link(trn.doctype, trn.name),
 				formatdate(trn.posting_date), formatdate(vehicle_invoice.posting_date)))
 
 	def raise_invalid_issued_for_error(action):
 		frappe.throw(_("{0}: Cannot {1} invoice because invoice is not issued for {2} on {3}")
-			.format(frappe.get_desk_link("Vehicle Invoice Movement", trn.name),
+			.format(frappe.get_desk_link(trn.doctype, trn.name),
 				_(action), state.issued_for, formatdate(trn.posting_date)))
 
 	# Get Doc
