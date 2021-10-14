@@ -31,10 +31,12 @@ class VehicleInvoiceDelivery(VehicleTransactionController):
 	def on_submit(self):
 		self.update_vehicle_invoice()
 		self.update_vehicle_booking_order_invoice()
+		self.update_vehicle_registration_order()
 
 	def on_cancel(self):
 		self.update_vehicle_invoice()
 		self.update_vehicle_booking_order_invoice()
+		self.update_vehicle_registration_order()
 
 	def set_title(self):
 		self.title = "{0} ({1})".format(self.get('bill_no'), self.get('customer_name') or self.get('customer'))

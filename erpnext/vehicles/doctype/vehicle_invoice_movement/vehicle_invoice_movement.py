@@ -164,11 +164,10 @@ class VehicleInvoiceMovement(VehicleTransactionController):
 
 	def validate_vehicle_registration_order(self, doc=None):
 		for d in self.invoices:
-			if self.purpose in ('Issue', 'Return'):
-				if self.issued_for == "Registration" and not d.vehicle_registration_order:
-					frappe.throw(_("Row #{0}: Vehicle Registration Order is mandatory for Registration {1}")
-						.format(d.idx, self.purpose))
-
+			# if self.purpose in ('Issue', 'Return'):
+			# 	if self.issued_for == "Registration" and not d.vehicle_registration_order:
+			# 		frappe.throw(_("Row #{0}: Vehicle Registration Order is mandatory for Registration {1}")
+			# 			.format(d.idx, self.purpose))
 			super(VehicleInvoiceMovement, self).validate_vehicle_registration_order(d)
 
 	def update_vehicle_invoice(self, doc=None, update_vehicle=True):
