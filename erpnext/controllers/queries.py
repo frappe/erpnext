@@ -769,8 +769,10 @@ def vehicle_allocation_period_query(doctype, txt, searchfield, start, page_len, 
 			and `tabVehicle Allocation`.is_booked = 0
 			and `tabVehicle Allocation`.is_cancelled = 0
 			and `tabVehicle Allocation`.is_expired = 0
+			{fcond}
 	""".format(
-		searchfield=searchfield
+		searchfield=searchfield,
+		fcond=get_filters_cond("Vehicle Allocation", filters, conditions, ignore_permissions=True).replace('%', '%%')
 	)
 
 	query = """select `tabVehicle Allocation Period`.name, ({subquery}) as allocations

@@ -274,16 +274,13 @@ def get_party_account(party_type, party, company, transaction_type=None):
 			if account_row.account and frappe.get_cached_value("Account", account_row.account, 'account_type') == party_account_type:
 				account = account_row.account
 
-	if not party:
-		return account
-
-	if not account:
+	if not account and party:
 		party_doc = frappe.get_cached_doc(party_type, party)
 		account_row = party_doc.get('accounts', filters={'company': company})
 		if account_row:
 			account = account_row[0].account
 
-	if not account and party_type in ['Customer', 'Supplier']:
+	if not account and party and party_type in ['Customer', 'Supplier']:
 		party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Group"
 		group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
 		account = frappe.db.get_value("Party Account",
@@ -299,12 +296,13 @@ def get_party_account(party_type, party, company, transaction_type=None):
 
 		account = frappe.get_cached_value('Company',  company,  default_account_name)
 
-	existing_gle_currency = get_party_gle_currency(party_type, party, company)
-	if existing_gle_currency:
-		if account:
-			account_currency = frappe.get_cached_value("Account", account, "account_currency")
-		if (account and account_currency != existing_gle_currency) or not account:
-				account = get_party_gle_account(party_type, party, company)
+	if party:
+		existing_gle_currency = get_party_gle_currency(party_type, party, company)
+		if existing_gle_currency:
+			if account:
+				account_currency = frappe.get_cached_value("Account", account, "account_currency")
+			if (account and account_currency != existing_gle_currency) or not account:
+					account = get_party_gle_account(party_type, party, company)
 
 	return account
 

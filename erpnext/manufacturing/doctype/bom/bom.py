@@ -488,8 +488,8 @@ class BOM(WebsiteGenerator):
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
 		self.calculate_sm_cost()
-		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
-		self.base_total_cost = self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
+		self.total_cost = self.total_operating_cost + self.raw_material_cost - self.scrap_material_cost
+		self.base_total_cost = self.base_total_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
 		self.total_raw_material_qty = sum([d.qty for d in self.items])
 		self.total_raw_material_qty = flt(self.total_raw_material_qty, self.precision("total_raw_material_qty"))
 

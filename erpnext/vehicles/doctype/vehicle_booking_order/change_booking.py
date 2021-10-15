@@ -3,7 +3,8 @@ from frappe import _
 from frappe.utils import cstr, flt, cint
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import update_vehicle_booked,\
 	update_allocation_booked
-from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details
+from erpnext.vehicles.vehicle_booking_controller import force_fields, get_customer_details, get_item_details,\
+	get_delivery_period_details
 from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
 
 
@@ -549,13 +550,14 @@ def has_cancel_booking_permission(throw=False):
 
 
 def handle_delivery_period_changed(vbo_doc):
-	to_date = frappe.get_cached_value("Vehicle Allocation Period", vbo_doc.delivery_period, 'to_date')
+	delivery_period_details = get_delivery_period_details(vbo_doc.delivery_period, vbo_doc.item_code)
+	vbo_doc.delivery_date = delivery_period_details.delivery_date
+	vbo_doc.vehicle_allocation_required = delivery_period_details.vehicle_allocation_required
 
 	vbo_doc.lead_time_days = 0
-	vbo_doc.delivery_date = to_date
 	vbo_doc.validate_delivery_date()
 
-	vbo_doc.due_date = to_date
+	vbo_doc.due_date = vbo_doc.delivery_date
 	vbo_doc.payment_schedule = []
 	vbo_doc.validate_payment_schedule()
 

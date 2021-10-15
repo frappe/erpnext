@@ -470,8 +470,6 @@ def get_item_details(args):
 	out.brand = item.brand
 	out.image = item.image
 
-	out.vehicle_allocation_required = cint(item.vehicle_allocation_required)
-
 	out.variant_of = item.variant_of
 	out.variant_of_name = frappe.get_cached_value("Item", item.variant_of, "item_name") if item.variant_of else None
 
@@ -536,7 +534,50 @@ def get_item_details(args):
 			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))
 			out.delivery_period = get_delivery_period(out.delivery_date)
 
+	out.vehicle_allocation_required = get_vehicle_allocation_required(item.name,
+		delivery_period=out.delivery_period or args.delivery_period)
+
 	return out
+
+
+@frappe.whitelist()
+def get_delivery_period_details(delivery_period, item_code=None):
+	out = frappe._dict()
+	out.delivery_date = frappe.get_cached_value("Vehicle Allocation Period", delivery_period, 'to_date')
+	out.vehicle_allocation_required = get_vehicle_allocation_required(item_code, delivery_period)
+	return out
+
+
+@frappe.whitelist()
+def get_delivery_period_details_from_date(delivery_date, item_code=None):
+	out = frappe._dict()
+	out.delivery_period = get_delivery_period(delivery_date)
+	out.vehicle_allocation_required = get_vehicle_allocation_required(item_code, out.delivery_period)
+	return out
+
+
+@frappe.whitelist()
+def get_vehicle_allocation_required(item_code, delivery_period=None):
+	if not item_code:
+		return 0
+
+	item = frappe.get_cached_doc("Item", item_code)
+	if not cint(item.vehicle_allocation_required):
+		return 0
+
+	if item.vehicle_allocation_required_from_delivery_period:
+		if not delivery_period:
+			return 0
+
+		transaction_delivery_period_date = frappe.get_cached_value("Vehicle Allocation Period",
+			delivery_period, 'from_date')
+		item_delivery_period_date = frappe.get_cached_value("Vehicle Allocation Period",
+			item.vehicle_allocation_required_from_delivery_period, 'from_date')
+
+		if getdate(transaction_delivery_period_date) < getdate(item_delivery_period_date):
+			return 0
+
+	return 1
 
 
 @frappe.whitelist()
