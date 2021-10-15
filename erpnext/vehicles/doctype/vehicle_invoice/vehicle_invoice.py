@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, get_datetime, formatdate
+from frappe.utils import getdate, get_datetime, formatdate, cstr
 from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
 from six import string_types
 
@@ -187,7 +187,7 @@ def get_vehicle_invoice_state(vehicle_invoice, posting_date=None):
 		elif trn.purpose == "Return":
 			if state.status != 'Issued':
 				raise_invalid_state_error('Return')
-			if state.issued_for != trn.issued_for:
+			if cstr(state.issued_for) != cstr(trn.issued_for):
 				raise_invalid_issued_for_error('Return')
 
 			state.status = "In Hand"

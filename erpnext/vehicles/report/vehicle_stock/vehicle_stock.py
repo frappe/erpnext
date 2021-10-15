@@ -249,6 +249,17 @@ class VehicleStockReport(object):
 				d.bill_date = invoice_data.get('bill_date')
 				d.invoice_received_date = invoice_data.get('posting_date')
 
+			# Invoice Movement Data
+			if d.vehicle in self.vehicle_invoice_movement_data:
+				for invoice_data in self.vehicle_invoice_movement_data[d.vehicle]:
+					if invoice_data.purpose in ['Issue', 'Return']:
+						d.invoice_issued_for = invoice_data.get('issued_for')
+
+					if invoice_data.purpose == "Issue":
+						d.invoice_issue_date = invoice_data.get('posting_date')
+					elif invoice_data.purpose == "Return":
+						d.invoice_return_date = invoice_data.get('posting_date')
+
 			# Invoice Delivery Data
 			if d.vehicle in self.vehicle_invoice_delivery_data:
 				invoice_data = self.vehicle_invoice_delivery_data[d.vehicle]
@@ -283,11 +294,14 @@ class VehicleStockReport(object):
 				d.invoice_status = "Delivered"
 				d.invoice_status_color = "green"
 			elif d.invoice_received_date:
-				d.invoice_status = "In Hand"
-				d.invoice_status_color = "orange"
-
-			# Mark Unregistered
-			d.license_plate = 'Unregistered' if d.unregistered else d.license_plate
+				was_issued = d.invoice_issue_date and getdate(d.invoice_issue_date) >= getdate(d.invoice_received_date)
+				was_returned = d.invoice_issue_date and d.invoice_return_date and getdate(d.invoice_return_date) >= getdate(d.invoice_issue_date)
+				if was_issued and not was_returned:
+					d.invoice_status = "Issued{0}".format(" For {0}".format(d.invoice_issued_for) if d.invoice_issued_for else "")
+					d.invoice_status_color = "purple"
+				else:
+					d.invoice_status = "In Hand"
+					d.invoice_status_color = "orange"
 
 		self.data = self.filter_rows(self.data)
 		self.data = sorted(self.data, key=lambda d: (not bool(d.received_date), cstr(d.received_date), cstr(d.dispatch_date)))
@@ -527,10 +541,23 @@ class VehicleStockReport(object):
 		for d in receipt_data:
 			self.vehicle_invoice_receipt_data[d.vehicle] = d
 
+		movement_data = frappe.db.sql("""
+			select trn.name, d.vehicle, trn.posting_date, trn.purpose, trn.issued_for
+			from `tabVehicle Invoice Movement Detail` d
+			inner join `tabVehicle Invoice Movement` trn on trn.name = d.parent
+			where trn.docstatus = 1 and trn.purpose in ('Issue', 'Return') and d.vehicle in %(vehicle_names)s {0}
+			order by trn.posting_date, trn.creation
+		""".format(date_condition), args, as_dict=1)
+
+		self.vehicle_invoice_movement_data = {}
+		for d in movement_data:
+			self.vehicle_invoice_movement_data.setdefault(d.vehicle, []).append(d)
+
 		delivery_data = frappe.db.sql("""
 			select name, vehicle, posting_date
 			from `tabVehicle Invoice Delivery`
 			where docstatus = 1 and vehicle in %(vehicle_names)s {0}
+			order by posting_date desc, creation desc
 		""".format(date_condition), args, as_dict=1)
 
 		self.vehicle_invoice_delivery_data = {}
@@ -600,12 +627,12 @@ class VehicleStockReport(object):
 			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
 			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			# {"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
+			{"label": _("Color"), "fieldname": "color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("Chassis No"), "fieldname": "chassis_no", "fieldtype": "Data", "width": 150},
 			{"label": _("Engine No"), "fieldname": "engine_no", "fieldtype": "Data", "width": 115},
-			{"label": _("Color"), "fieldname": "color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
-			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 60},
+			{"label": _("Reg No"), "fieldname": "license_plate", "fieldtype": "Data", "width": 70},
 			{"label": _("Odometer"), "fieldname": "odometer", "fieldtype": "Int", "width": 60},
-			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
+			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
