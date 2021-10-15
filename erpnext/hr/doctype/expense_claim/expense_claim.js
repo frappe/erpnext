@@ -10,6 +10,26 @@ frappe.ui.form.on('Expense Claim', {
 	},
 	company: function(frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		var expenses = frm.doc.expenses;
+		for (var i = 0; i < expenses.length; i++) {
+			var expense = expenses[i];
+			if (!expense.expense_type) {
+				continue;
+			}
+			frappe.call({
+				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account_and_cost_center",
+				args: {
+					"expense_claim_type": expense.expense_type,
+					"company": frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message) {
+						expense.default_account = r.message.account;
+						expense.cost_center = r.message.cost_center;
+					}
+				}
+			});
+		}
 	},
 });
 
