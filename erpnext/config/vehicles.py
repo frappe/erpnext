@@ -82,11 +82,16 @@ def get_data():
 			],
 		},
 		{
-			"label": _("Registration"),
+			"label": _("Vehicle Registration"),
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Vehicle Registration Order",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Registration Receipt",
+					"dependencies": ["Vehicle"],
 				},
 				{
 					"type": "doctype",
