@@ -11,6 +11,7 @@
  ],
  "fields": [
   {
+   "allow_on_submit": 1,
    "fieldname": "component",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -19,6 +20,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "component_amount",
    "fieldtype": "Currency",
@@ -28,6 +30,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_ownership_transfer",
    "fieldtype": "Check",
@@ -36,6 +39,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_choice_number",
    "fieldtype": "Check",
@@ -45,7 +49,7 @@
   }
  ],
  "istable": 1,
- "modified": "2021-09-20 23:53:02.155875",
+ "modified": "2021-10-15 23:37:19.759567",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Component",

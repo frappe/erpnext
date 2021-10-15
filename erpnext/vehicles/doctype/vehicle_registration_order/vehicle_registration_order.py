@@ -19,10 +19,24 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		return _("From {0} | {1}").format(self.get("customer_name") or self.get('customer'),
 			self.get("item_name") or self.get("item_code"))
 
+	def onload(self):
+		if self.docstatus == 1:
+			self.set_onload('disallow_on_submit', self.get_disallow_on_submit_fields())
+
 	def validate(self):
 		super(VehicleRegistrationOrder, self).validate()
 		self.validate_duplicate_registration_order()
 		self.validate_vehicle_unregistered()
+
+		self.validate_common()
+
+		self.set_title()
+
+	def before_update_after_submit(self):
+		self.get_disallow_on_submit_fields()
+		self.validate_common()
+
+	def validate_common(self):
 		self.validate_choice_number()
 
 		self.validate_pricing_components()
@@ -37,7 +51,44 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.update_registration_number()
 		self.set_status()
 
-		self.set_title()
+	def get_disallow_on_submit_fields(self):
+		if self.is_new():
+			return []
+
+		disallowed_fields = []
+
+		# Cannot edit anything after completion or after receiving registration receipt
+		if self.status == "Completed" or self.vehicle_license_plate:
+			excluding_fields = []
+			if self.status != "Completed":
+				excluding_fields.append('agent_commission')
+				excluding_fields.append('margin_amount')
+				excluding_fields.append('status')
+
+			disallowed_fields = [(df.fieldname, None) for df in self.meta.fields if df.allow_on_submit
+				and df.fieldname not in excluding_fields]
+
+			table_fields = self.meta.get_table_fields()
+			for table_df in table_fields:
+				table_meta = frappe.get_meta(table_df.options)
+				disallowed_fields += [(df.fieldname, table_df.fieldname) for df in table_meta.fields if df.get('allow_on_submit')]
+
+		else:
+			if self.agent_gl_entry_exists():
+				disallowed_fields.append(('agent', None))
+
+		self.flags.disallow_on_submit = disallowed_fields
+		return disallowed_fields
+
+	def agent_gl_entry_exists(self):
+		if not hasattr(self, '_agent_gl_entry_exists'):
+			self._agent_gl_entry_exists = frappe.db.exists("GL Entry", {
+				'vehicle_registration_order': self.name,
+				'party_type': 'Supplier',
+				'account': self.agent_account
+			})
+
+		return self._agent_gl_entry_exists
 
 	def before_submit(self):
 		if not self.vehicle and not self.vehicle_booking_order:
