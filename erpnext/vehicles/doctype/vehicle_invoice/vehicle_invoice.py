@@ -173,7 +173,7 @@ def get_vehicle_invoice_state(vehicle_invoice, posting_date=None):
 
 		elif trn.purpose == "Issue":
 			if state.status != 'In Hand':
-				raise_invalid_state_error('Transfer')
+				raise_invalid_state_error('Issue')
 
 			state.status = "Issued"
 			state.issued_for = trn.issued_for
