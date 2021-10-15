@@ -1,0 +1,77 @@
+{
+ "creation": "2021-07-28 11:51:42.319984",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-10-05 13:06:56.414584",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying Settings",
+ "owner": "Administrator",
+ "reference_doctype": "Buying Settings",
+ "save_on_complete": 0,
+ "steps": [
+  {
+   "description": "When a Supplier is saved, system generates a unique identity or name for that Supplier which can be used to refer the Supplier in various Buying transactions.",
+   "field": "",
+   "fieldname": "supp_master_name",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Supplier Naming By",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Supplier Naming By"
+  },
+  {
+   "description": "Configure what should be the default value of Supplier Group when creating a new Supplier.",
+   "field": "",
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Default Supplier Group",
+   "parent_field": "",
+   "position": "Right",
+   "title": "Default Supplier Group"
+  },
+  {
+   "description": "Item prices will be fetched from this Price List.",
+   "field": "",
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Default Buying Price List",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Default Buying Price List"
+  },
+  {
+   "description": "If this option is configured \"Yes\", ERPNext will prevent you from creating a Purchase Invoice or a Purchase Receipt directly without creating a Purchase Order first.",
+   "field": "",
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Purchase Order Required"
+  },
+  {
+   "description": "If this option is configured \"Yes\", ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first.",
+   "field": "",
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Purchase Receipt Required"
+  }
+ ],
+ "title": "Buying Settings"
+}

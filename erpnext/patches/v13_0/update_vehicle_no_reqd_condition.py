@@ -2,7 +2,7 @@ import frappe
 
 
 def execute():
-	frappe.reload_doc('custom', 'doctype', 'custom_field')
+	frappe.reload_doc('custom', 'doctype', 'custom_field', force=True)
 	company = frappe.get_all('Company', filters = {'country': 'India'})
 	if not company:
 		return
