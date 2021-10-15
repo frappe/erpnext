@@ -263,6 +263,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.precision('margin_amount'))
 		return unclosed_income_amount
 
+	def is_unclosed(self):
+		return self.get_unclosed_customer_amount() or self.get_unclosed_agent_amount() or self.get_unclosed_income_amount()\
+			or self.customer_outstanding or self.authority_outstanding or self.agent_balance
+
 	def update_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
 
@@ -354,7 +358,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				if self.invoice_status == "Issued":
 					self.status = "To Retrieve Invoice"
 
-				elif self.get_unclosed_customer_amount() or self.get_unclosed_agent_amount() or self.get_unclosed_income_amount():
+				elif self.is_unclosed():
 					self.status = "To Close Accounts"
 
 				elif self.agent_balance > 0:
@@ -456,10 +460,11 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		unclosed_income_amount = vro.get_unclosed_income_amount()
 
 		if unclosed_customer_amount:
-			registration_income_account = frappe.get_cached_value("Vehicles Settings", None, 'registration_income_account')
-
 			add_row(unclosed_customer_amount, vro.customer_account, 'Customer', vro.customer)
+		if unclosed_agent_amount:
 			add_row(-1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent)
+		if unclosed_income_amount:
+			registration_income_account = frappe.get_cached_value("Vehicles Settings", None, 'registration_income_account')
 			add_row(-1 * unclosed_income_amount, registration_income_account)
 	else:
 		frappe.throw(_("Invalid Purpose"))
