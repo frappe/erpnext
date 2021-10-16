@@ -47,7 +47,7 @@ def get_data(filters):
 			row.cost_as_on_to_date = (flt(row.cost_as_on_from_date) + flt(row.cost_of_new_purchase) -
 					flt(row.cost_of_sold_asset) - flt(row.cost_of_scrapped_asset))
 
-			row.update(next(asset for asset in assets if asset["asset_category"] == asset_category.get("asset_category", "")))
+			# row.update(next(asset for asset in assets if asset["asset_category"] == asset_category.get("asset_category", "")))
 			row.accumulated_depreciation_as_on_to_date = (flt(row.accumulated_depreciation_as_on_from_date) +
 					flt(row.depreciation_amount_during_the_period) - flt(row.depreciation_eliminated_during_the_period))
 
