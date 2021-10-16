@@ -19,6 +19,7 @@
   "total",
   "total_advance",
   "outstanding_balance",
+  "total_sale_invoice",
   "column_total",
   "cash_total_medical_fees",
   "bank_check_total_medical_fees",
@@ -166,7 +167,7 @@
   {
    "depends_on": "discount_check",
    "fieldname": "total_discount",
-   "fieldtype": "Currency",
+   "fieldtype": "Data",
    "label": "Total With Discount",
    "read_only": 1
   },
@@ -197,10 +198,16 @@
    "fieldtype": "Currency",
    "label": "Bank Check Total Medical Fees",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_sale_invoice",
+   "fieldtype": "Currency",
+   "label": "Total Sale Invoice",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-10-14 16:21:49.561335",
+ "modified": "2021-10-15 14:06:13.313392",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
