@@ -1,5 +1,4 @@
 {
- "category": "",
  "charts": [
   {
    "chart_name": "Project Summary",
@@ -8,18 +7,12 @@
  ],
  "content": "[{\"type\": \"chart\", \"data\": {\"chart_name\": \"Open Projects\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Task\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Project\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Timesheet\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Project Billing Summary\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Projects\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Time Tracking\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "creation": "2020-03-02 15:46:04.874669",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "project",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Projects",
  "links": [
   {
@@ -201,15 +194,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:01.540145",
+ "modified": "2021-08-05 12:16:01.540147",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
- "onboarding": "",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],

@@ -160,7 +160,7 @@ frappe.ui.form.on("Leave Application", {
 		half_day_datepicker.update({
 			minDate: frappe.datetime.str_to_obj(frm.doc.from_date),
 			maxDate: frappe.datetime.str_to_obj(frm.doc.to_date)
-		})
+		});
 	},
 
 	get_leave_balance: function(frm) {
@@ -174,7 +174,7 @@ frappe.ui.form.on("Leave Application", {
 					leave_type: frm.doc.leave_type,
 					consider_all_leaves_in_the_allocation_period: true
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (!r.exc && r.message) {
 						frm.set_value('leave_balance', r.message);
 					} else {
@@ -234,3 +234,36 @@ frappe.ui.form.on("Leave Application", {
 		}
 	}
 });
+
+frappe.tour["Leave Application"] = [
+	{
+		fieldname: "employee",
+		title: "Employee",
+		description: __("Select the Employee.")
+	},
+	{
+		fieldname: "leave_type",
+		title: "Leave Type",
+		description: __("Select type of leave the employee wants to apply for, like Sick Leave, Privilege Leave, Casual Leave, etc.")
+	},
+	{
+		fieldname: "from_date",
+		title: "From Date",
+		description: __("Select the start date for your Leave Application.")
+	},
+	{
+		fieldname: "to_date",
+		title: "To Date",
+		description: __("Select the end date for your Leave Application.")
+	},
+	{
+		fieldname: "half_day",
+		title: "Half Day",
+		description: __("To apply for a Half Day check 'Half Day' and select the Half Day Date")
+	},
+	{
+		fieldname: "leave_approver",
+		title: "Leave Approver",
+		description: __("Select your Leave Approver i.e. the person who approves or rejects your leaves.")
+	}
+];

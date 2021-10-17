@@ -39,6 +39,12 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
 
 ---
 
+<div align="center">
+    <a href="https://frappecloud.com/deploy?apps=frappe,erpnext&source=erpnext_readme">
+        <img src=".github/try-on-f-cloud-button.svg" height="40">
+    </a>
+</div>
+
 ### Containerized Installation
 
 Use docker to deploy ERPNext in production or for development of [Frappe](https://github.com/frappe/frappe) apps. See https://github.com/frappe/frappe_docker for more details.
@@ -74,6 +80,12 @@ The ERPNext code is licensed as GNU General Public License (v3) and the Document
 1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
 1. [Translations](https://translate.erpnext.com)
 1. [Chart of Accounts](https://charts.erpnext.com)
+
+---
+
+## Learning
+
+1. [Frappe School](https://frappe.school) - Learn Frappe Framework and ERPNext from the various courses by the maintainers or from the community.
 
 ---
 
