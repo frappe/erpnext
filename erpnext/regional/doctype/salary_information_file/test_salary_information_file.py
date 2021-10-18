@@ -123,7 +123,7 @@ def create_company_bank_account(account, bank, company):
 	bank_account.company = company
 	bank_account.is_company_account = 1
 	bank_account.account_name = "WPS Bank Account"
-	bank_account.account = account
+	bank_account.account = account.name
 	bank_account.bank = bank
 	bank_account.iban = "AT483200000012345864"
 	bank_account.bank_code = "53276382839"
