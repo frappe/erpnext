@@ -1997,8 +1997,7 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			mp.name in (%s)
 		group by
 			mp.name
-		""",
-	(company, mode_of_payments), as_dict=1)
+		""", (company, mode_of_payments), as_dict=1)
 
 	return {row.get('mop'): row for row in data}
 
