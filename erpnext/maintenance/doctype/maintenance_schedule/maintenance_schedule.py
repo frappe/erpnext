@@ -47,7 +47,7 @@ class MaintenanceSchedule(TransactionBase):
 			"Yearly": 365
 		}
 		for item in self.items:
-			if item.periodicity and item.start_date:
+			if item.periodicity and item.periodicity != "Random" and item.start_date:
 				if not item.end_date:
 					if item.no_of_visits:
 						item.end_date = add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity])

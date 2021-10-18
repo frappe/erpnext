@@ -13,8 +13,8 @@ from six import iteritems
 
 import erpnext
 from erpnext.stock.utils import (
-	get_bin,
 	get_incoming_outgoing_rate_for_cancel,
+	get_or_make_bin,
 	get_valuation_method,
 )
 
@@ -805,14 +805,13 @@ class update_entries_after(object):
 	def update_bin(self):
 		# update bin for each warehouse
 		for warehouse, data in iteritems(self.data):
-			bin_doc = get_bin(self.item_code, warehouse)
-			bin_doc.update({
+			bin_record = get_or_make_bin(self.item_code, warehouse)
+
+			frappe.db.set_value('Bin', bin_record, {
 				"valuation_rate": data.valuation_rate,
 				"actual_qty": data.qty_after_transaction,
 				"stock_value": data.stock_value
 			})
-			bin_doc.flags.via_stock_ledger_entry = True
-			bin_doc.save(ignore_permissions=True)
 
 
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
@@ -918,7 +917,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 		company = erpnext.get_default_company()
 
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
 			item_code = %s
 			AND warehouse = %s
@@ -929,7 +928,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry`
+			from `tabStock Ledger Entry` force index (item_code)
 			where
 				item_code = %s
 				AND valuation_rate > 0
