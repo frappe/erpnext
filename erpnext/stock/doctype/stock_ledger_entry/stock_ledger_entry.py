@@ -173,8 +173,10 @@ class StockLedgerEntry(Document):
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
 	def validate_future_sle_by_batch_for_outgoing_entries(self):
-		allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-		if not self.batch_no or allow_neg or self.actual_qty is None or self.actual_qty >= 0:
+		if not self.batch_no or self.actual_qty is None or self.actual_qty >= 0:
+			return
+
+		if frappe.db.get_single_value('Stock Settings', 'allow_negative_stock'):
 			return
 
 		voucher_condition = ""
