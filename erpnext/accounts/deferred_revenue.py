@@ -374,12 +374,15 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 		try:
 			make_gl_entries(gl_entries, cancel=(doc.docstatus == 2), merge_entries=True)
 			frappe.db.commit()
-		except Exception:
-			frappe.db.rollback()
-			traceback = frappe.get_traceback()
-			frappe.log_error(message=traceback)
+		except Exception as e:
+			if frappe.flags.in_test:
+				raise e
+			else:
+				frappe.db.rollback()
+				traceback = frappe.get_traceback()
+				frappe.log_error(message=traceback)
 
-			frappe.flags.deferred_accounting_error = True
+				frappe.flags.deferred_accounting_error = True
 
 def send_mail(deferred_process):
 	title = _("Error while processing deferred accounting for {0}").format(deferred_process)

@@ -38,6 +38,8 @@
   "total_time_in_mins",
   "section_break_8",
   "items",
+  "scrap_items_section",
+  "scrap_items",
   "corrective_operation_section",
   "for_job_card",
   "is_corrective_job_card",
@@ -185,7 +187,7 @@
    "default": "0",
    "fieldname": "transferred_qty",
    "fieldtype": "Float",
-   "label": "Transferred Qty",
+   "label": "FG Qty from Transferred Raw Materials",
    "read_only": 1
   },
   {
@@ -392,14 +394,28 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
+  },
+  {
+   "fieldname": "scrap_items_section",
+   "fieldtype": "Section Break",
+   "label": "Scrap Items"
+  },
+  {
+   "fieldname": "scrap_items",
+   "fieldtype": "Table",
+   "label": "Scrap Items",
+   "no_copy": 1,
+   "options": "Job Card Scrap Item",
+   "print_hide": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-16 15:59:32.766484",
+ "modified": "2021-09-14 00:38:46.873105",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
