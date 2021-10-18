@@ -1469,7 +1469,11 @@ def is_overdue(doc):
 	if outstanding_amount <= 0:
 		return
 
-	grand_total = flt(doc.grand_total, doc.precision("grand_total"))
+	if doc.rounding_adjustment and doc.rounded_total:
+		invoice_total = flt(doc.rounded_total, doc.precision("rounded_total"))
+	else:
+		invoice_total = flt(doc.grand_total, doc.precision("grand_total"))
+
 	nowdate = getdate()
 	if doc.payment_schedule:
 		# calculate payable amount till date
@@ -1479,7 +1483,7 @@ def is_overdue(doc):
 			if getdate(payment.due_date) < nowdate
 		)
 
-		if (grand_total - outstanding_amount) < payable_amount:
+		if (invoice_total - outstanding_amount) < payable_amount:
 			return True
 
 	elif getdate(doc.due_date) < nowdate:
