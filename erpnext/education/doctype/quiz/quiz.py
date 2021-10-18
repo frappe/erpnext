@@ -3,10 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-import json
 from frappe import _
 from frappe.model.document import Document
+
 
 class Quiz(Document):
 	def validate(self):

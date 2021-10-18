@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt, comma_or, nowdate, getdate, now
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import comma_or, flt, getdate, now, nowdate
+
 
 class OverAllowanceError(frappe.ValidationError): pass
 
@@ -86,7 +88,8 @@ status_map = {
 	],
 	"Bank Transaction": [
 		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
-		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
+		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"],
+		["Cancelled", "eval:self.docstatus == 2"]
 	],
 	"POS Opening Entry": [
 		["Draft", None],

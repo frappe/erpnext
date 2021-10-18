@@ -1,5 +1,4 @@
 {
- "category": "",
  "charts": [
   {
    "chart_name": "Outgoing Salary",
@@ -8,18 +7,12 @@
  ],
  "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Human Resource\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Outgoing Salary\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Employee\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Leave Application\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Attendance\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Job Applicant\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Monthly Attendance Sheet\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Employee\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Employee Lifecycle\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Shift Management\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Leaves\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Attendance\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Expense Claims\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Fleet Management\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Recruitment\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loans\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Training\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Performance\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Key Reports\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Other Reports\", \"col\": 4}}]",
  "creation": "2020-03-02 15:48:58.322521",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "hr",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "HR",
  "links": [
   {
@@ -219,6 +212,17 @@
    "label": "Employee Separation Template",
    "link_count": 0,
    "link_to": "Employee Separation Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Employee",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Full and Final Statement",
+   "link_count": 0,
+   "link_to": "Full and Final Statement",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -931,15 +935,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:59.842918",
+ "modified": "2021-08-31 12:18:59.842919",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
- "onboarding": "Human Resource",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],

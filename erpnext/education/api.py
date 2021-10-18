@@ -3,12 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe import _
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, cstr, getdate
 from frappe.email.doctype.email_group.email_group import add_subscribers
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cstr, flt, getdate
+
 
 def get_course(program):
 	'''Return list of courses for a particular program

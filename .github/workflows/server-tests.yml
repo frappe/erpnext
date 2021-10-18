@@ -12,9 +12,13 @@ on:
       - '**.js'
       - '**.md'
 
+concurrency:
+  group: server-develop-${{ github.event.number }}
+  cancel-in-progress: true
+
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
 
     strategy:
@@ -42,6 +46,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          check-latest: true
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
@@ -89,34 +99,10 @@ jobs:
           CI_BUILD_ID: ${{ github.run_id }}
           ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
 
-      - name: Upload Coverage Data
-        run: |
-          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
-          cd ${GITHUB_WORKSPACE}
-          pip3 install coverage==5.5
-          pip3 install coveralls==3.0.1
-          coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-          COVERALLS_FLAG_NAME: run-${{ matrix.container }}
-          COVERALLS_SERVICE_NAME: ${{ github.event_name == 'pull_request' && 'github' || 'github-actions' }}
-          COVERALLS_PARALLEL: true
-
-  coveralls:
-    name: Coverage Wrap Up
-    needs: test
-    container: python:3-slim
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-
-      - name: Coveralls Finished
-        run: |
-          cd ${GITHUB_WORKSPACE}
-          pip3 install coverage==5.5
-          pip3 install coveralls==3.0.1
-          coveralls --finish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload coverage data
+        uses: codecov/codecov-action@v2
+        with:
+          name: MariaDB
+          fail_ci_if_error: true
+          files: /home/runner/frappe-bench/sites/coverage.xml
+          verbose: true

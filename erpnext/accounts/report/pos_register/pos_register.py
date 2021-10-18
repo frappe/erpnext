@@ -2,10 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe import _, _dict
-from erpnext import get_company_currency, get_default_company
+from frappe import _
+
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
+
 
 def execute(filters=None):
 	if not filters:

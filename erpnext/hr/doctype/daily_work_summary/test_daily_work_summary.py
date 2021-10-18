@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 
 import os
-import frappe
 import unittest
+
+import frappe
 import frappe.utils
 
 # test_records = frappe.get_test_records('Daily Work Summary')
@@ -64,8 +65,7 @@ class TestDailyWorkSummary(unittest.TestCase):
 			filters=dict(email=('!=', 'test@example.com')))
 		self.setup_groups(hour)
 
-		from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group \
-			import trigger_emails
+		from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group import trigger_emails
 		trigger_emails()
 
 		# check if emails are created
@@ -74,7 +74,6 @@ class TestDailyWorkSummary(unittest.TestCase):
 			from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r \
 			where q.name = r.parent""", as_dict=1)
 
-		frappe.db.commit()
 
 	def setup_groups(self, hour=None):
 		# setup email to trigger at this hour

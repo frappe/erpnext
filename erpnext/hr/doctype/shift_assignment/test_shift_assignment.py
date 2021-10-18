@@ -3,9 +3,10 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import nowdate, add_days
+
+import frappe
+from frappe.utils import add_days, nowdate
 
 test_dependencies = ["Shift Type"]
 

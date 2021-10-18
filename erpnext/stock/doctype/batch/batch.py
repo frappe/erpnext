@@ -2,15 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from six import text_type
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import flt, cint, get_link_to_form
-from frappe.utils.jinja import render_template
+from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
-from six import string_types
+from frappe.utils.jinja import render_template
+from six import text_type
+
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass

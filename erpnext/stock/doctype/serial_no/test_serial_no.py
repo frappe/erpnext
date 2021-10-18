@@ -5,20 +5,23 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, unittest
 
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+import frappe
+
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 test_dependencies = ["Item"]
 test_records = frappe.get_test_records('Serial No')
 
 from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.tests.utils import ERPNextTestCase
 
-class TestSerialNo(unittest.TestCase):
+
+class TestSerialNo(ERPNextTestCase):
 	def test_cannot_create_direct(self):
 		frappe.delete_doc_if_exists("Serial No", "_TCSER0001")
 
@@ -181,14 +184,14 @@ class TestSerialNo(unittest.TestCase):
 
 		se = frappe.copy_doc(test_records[0])
 		se.get("items")[0].item_code = item_code
-		se.get("items")[0].qty = 3
-		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  "
-		se.get("items")[0].transfer_qty = 3
+		se.get("items")[0].qty = 4
+		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  , _TS4 - 2021"
+		se.get("items")[0].transfer_qty = 4
 		se.set_stock_entry_type()
 		se.insert()
 		se.submit()
 
-		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3")
+		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3\n_TS4 - 2021")
 
 		frappe.db.rollback()
 

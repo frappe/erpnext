@@ -3,15 +3,15 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-import erpnext
-from erpnext.stock.doctype.item.test_item import make_item
-from frappe.utils import now, nowdate, get_last_day, add_days
+
+import frappe
+from frappe.utils import now
+
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
 
 class TestAssetMovement(unittest.TestCase):
 	def setUp(self):

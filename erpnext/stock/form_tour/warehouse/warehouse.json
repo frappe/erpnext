@@ -1,0 +1,54 @@
+{
+ "creation": "2021-08-24 14:43:44.465237",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-08-24 14:50:31.988256",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Warehouse",
+ "owner": "Administrator",
+ "reference_doctype": "Warehouse",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Select a name for the warehouse. This should reflect its location or purpose.",
+   "field": "",
+   "fieldname": "warehouse_name",
+   "fieldtype": "Data",
+   "has_next_condition": 1,
+   "is_table_field": 0,
+   "label": "Warehouse Name",
+   "next_step_condition": "eval: doc.warehouse_name",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Warehouse Name"
+  },
+  {
+   "description": "Select a warehouse type to categorize the warehouse into a sub-group.",
+   "field": "",
+   "fieldname": "warehouse_type",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Warehouse Type",
+   "parent_field": "",
+   "position": "Top",
+   "title": "Warehouse Type"
+  },
+  {
+   "description": "Select an account to set a default account for all transactions with this warehouse.",
+   "field": "",
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Account",
+   "parent_field": "",
+   "position": "Top",
+   "title": "Account"
+  }
+ ],
+ "title": "Warehouse"
+}

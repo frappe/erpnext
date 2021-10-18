@@ -3,11 +3,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.website.website_generator import WebsiteGenerator
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils import get_url
+from frappe.website.website_generator import WebsiteGenerator
+
 
 class GrantApplication(WebsiteGenerator):
 	_website = frappe._dict(

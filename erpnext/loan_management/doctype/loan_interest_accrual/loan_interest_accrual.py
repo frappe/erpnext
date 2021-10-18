@@ -3,13 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import (nowdate, getdate, now_datetime, get_datetime, flt, date_diff, get_last_day, cint,
-	get_first_day, get_datetime, add_days)
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate, nowdate
+
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
+
 
 class LoanInterestAccrual(AccountsController):
 	def validate(self):

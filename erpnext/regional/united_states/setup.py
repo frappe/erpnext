@@ -3,9 +3,17 @@
 
 from __future__ import unicode_literals
 import frappe
+import os
+import json
+from frappe.permissions import add_permission, update_permission_property
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def setup(company=None, patch=True):
+	# Company independent fixtures should be called only once at the first company setup
+	if frappe.db.count('Company', {'country': 'United States'}) <=1:
+		setup_company_independent_fixtures(patch=patch)
+
+def setup_company_independent_fixtures(company=None, patch=True):
 	make_custom_fields()
 	add_print_formats()
 

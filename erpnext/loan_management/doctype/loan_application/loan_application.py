@@ -3,16 +3,27 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, math
-from frappe import _
-from frappe.utils import flt, rounded, cint
-from frappe.model.mapper import get_mapped_doc
-from frappe.model.document import Document
-from erpnext.loan_management.doctype.loan.loan import (get_monthly_repayment_amount, validate_repayment_method,
-		get_total_loan_amount, get_sanctioned_amount_limit)
-from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
+
 import json
+import math
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, flt, rounded
 from six import string_types
+
+from erpnext.loan_management.doctype.loan.loan import (
+	get_monthly_repayment_amount,
+	get_sanctioned_amount_limit,
+	get_total_loan_amount,
+	validate_repayment_method,
+)
+from erpnext.loan_management.doctype.loan_security_price.loan_security_price import (
+	get_loan_security_price,
+)
+
 
 class LoanApplication(Document):
 	def validate(self):
@@ -119,10 +130,11 @@ class LoanApplication(Document):
 def create_loan(source_name, target_doc=None, submit=0):
 	def update_accounts(source_doc, target_doc, source_parent):
 		account_details = frappe.get_all("Loan Type",
-		 fields=["mode_of_payment", "payment_account","loan_account", "interest_income_account", "penalty_income_account"],
-		 filters = {'name': source_doc.loan_type}
-		)[0]
+			fields=["mode_of_payment", "payment_account","loan_account", "interest_income_account", "penalty_income_account"],
+			filters = {'name': source_doc.loan_type})[0]
 
+		if source_doc.is_secured_loan:
+			target_doc.maximum_loan_amount = 0
 
 		target_doc.mode_of_payment = account_details.mode_of_payment
 		target_doc.payment_account = account_details.payment_account

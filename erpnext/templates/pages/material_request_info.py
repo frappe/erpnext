@@ -2,10 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-
 from frappe.utils import flt
+
 
 def get_context(context):
 	context.no_cache = 1

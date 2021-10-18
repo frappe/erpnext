@@ -3,12 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
+from frappe.utils import add_months, cint, flt, getdate, time_diff_in_hours
+
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.controllers.accounts_controller import AccountsController
+
 
 class AssetRepair(AccountsController):
 	def validate(self):

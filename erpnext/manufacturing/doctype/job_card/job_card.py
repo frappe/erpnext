@@ -1,18 +1,31 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
-from __future__ import unicode_literals
-import frappe
 import datetime
 import json
-from frappe import _, bold
-from frappe.model.mapper import get_mapped_doc
-from frappe.model.document import Document
-from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate,
-	get_time, add_to_date, time_diff, add_days, get_datetime_str, get_link_to_form, time_diff_in_seconds)
 
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
+import frappe
+from frappe import _, bold
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import (
+	add_days,
+	add_to_date,
+	cint,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	get_time,
+	getdate,
+	time_diff,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
+
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_mins_between_operations,
+)
+
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -21,22 +34,26 @@ class OperationSequenceError(frappe.ValidationError): pass
 class JobCardCancelError(frappe.ValidationError): pass
 
 class JobCard(Document):
+	def onload(self):
+		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
+		self.set_onload("job_card_excess_transfer", excess_transfer)
+
 	def validate(self):
 		self.validate_time_logs()
 		self.set_status()
 		self.validate_operation_id()
 		self.validate_sequence_id()
-		self.get_sub_operations()
+		self.set_sub_operations()
 		self.update_sub_operation_status()
 
-	def get_sub_operations(self):
+	def set_sub_operations(self):
 		if self.operation:
 			self.sub_operations = []
-			for row in frappe.get_all("Sub Operation",
-				filters = {"parent": self.operation}, fields=["operation", "idx"]):
-				row.status = "Pending"
+			for row in frappe.get_all('Sub Operation',
+				filters = {'parent': self.operation}, fields=['operation', 'idx'], order_by='idx'):
+				row.status = 'Pending'
 				row.sub_operation = row.operation
-				self.append("sub_operations", row)
+				self.append('sub_operations', row)
 
 	def validate_time_logs(self):
 		self.total_time_in_mins = 0.0
@@ -75,7 +92,7 @@ class JobCard(Document):
 		if args.get("employee"):
 			# override capacity for employee
 			production_capacity = 1
-			validate_overlap_for = " and jc.employee = %(employee)s "
+			validate_overlap_for = " and jctl.employee = %(employee)s "
 
 		extra_cond = ''
 		if check_next_available_slot:
@@ -433,6 +450,7 @@ class JobCard(Document):
 			frappe.db.set_value('Job Card Item', row.job_card_item, 'transferred_qty', flt(qty))
 
 	def set_transferred_qty(self, update_status=False):
+		"Set total FG Qty for which RM was transferred."
 		if not self.items:
 			self.transferred_qty = self.for_quantity if self.docstatus == 1 else 0
 
@@ -441,6 +459,7 @@ class JobCard(Document):
 			return
 
 		if self.items:
+			# sum of 'For Quantity' of Stock Entries against JC
 			self.transferred_qty = frappe.db.get_value('Stock Entry', {
 				'job_card': self.name,
 				'work_order': self.work_order,
@@ -484,7 +503,9 @@ class JobCard(Document):
 			self.status = 'Work In Progress'
 
 		if (self.docstatus == 1 and
-			(self.for_quantity == self.transferred_qty or not self.items)):
+			(self.for_quantity <= self.transferred_qty or not self.items)):
+			# consider excess transfer
+			# completed qty is checked via separate validation
 			self.status = 'Completed'
 
 		if self.status != 'Completed':
@@ -602,7 +623,11 @@ def make_stock_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
-		target.fg_completed_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
+
+		# avoid negative 'For Quantity'
+		pending_fg_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
+		target.fg_completed_qty = pending_fg_qty if pending_fg_qty > 0 else 0
+
 		target.set_transfer_qty()
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
@@ -652,7 +677,7 @@ def get_job_details(start, end, filters=None):
 	conditions = get_filters_cond("Job Card", filters, [])
 
 	job_cards = frappe.db.sql(""" SELECT `tabJob Card`.name, `tabJob Card`.work_order,
-			`tabJob Card`.employee_name, `tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''),
+			`tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''),
 			min(`tabJob Card Time Log`.from_time) as from_time,
 			max(`tabJob Card Time Log`.to_time) as to_time
 		FROM `tabJob Card` , `tabJob Card Time Log`
@@ -662,7 +687,7 @@ def get_job_details(start, end, filters=None):
 
 	for d in job_cards:
 			subject_data = []
-			for field in ["name", "work_order", "remarks", "employee_name"]:
+			for field in ["name", "work_order", "remarks"]:
 				if not d.get(field): continue
 
 				subject_data.append(d.get(field))
@@ -690,7 +715,7 @@ def make_corrective_job_card(source_name, operation=None, for_operation=None, ta
 		target.set('time_logs', [])
 		target.set('employee', [])
 		target.set('items', [])
-		target.get_sub_operations()
+		target.set_sub_operations()
 		target.get_required_items()
 		target.validate_time_logs()
 

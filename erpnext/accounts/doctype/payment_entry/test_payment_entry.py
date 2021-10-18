@@ -3,14 +3,25 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
 from frappe.utils import flt, nowdate
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, InvalidPaymentEntry
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice, create_sales_invoice_against_cost_center
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice, make_purchase_invoice_against_cost_center
+
+from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	InvalidPaymentEntry,
+	get_payment_entry,
+)
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+	make_purchase_invoice,
+	make_purchase_invoice_against_cost_center,
+)
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
+	create_sales_invoice,
+	create_sales_invoice_against_cost_center,
+)
 from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_claim
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 test_dependencies = ["Item"]
 
@@ -107,7 +118,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-		pe.target_exchange_rate = 50
+		pe.source_exchange_rate = 50
 		pe.insert()
 		pe.submit()
 
@@ -154,7 +165,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-		pe.target_exchange_rate = 50
+		pe.source_exchange_rate = 50
 		pe.insert()
 		pe.submit()
 
@@ -324,7 +335,10 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(flt(pe.unallocated_amount, 2), 0.0)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records, save_new_records
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			save_new_records,
+			test_records,
+		)
 
 		save_new_records(test_records)
 
@@ -491,7 +505,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-		pe.target_exchange_rate = 55
+		pe.source_exchange_rate = 55
 
 		pe.append("deductions", {
 			"account": "_Test Exchange Gain/Loss - _TC",

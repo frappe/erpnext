@@ -2,21 +2,27 @@
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 
+
 @frappe.whitelist()
-def get_all_nodes(parent, parent_name, method, company):
+def get_all_nodes(method, company):
 	'''Recursively gets all data from nodes'''
 	method = frappe.get_attr(method)
 
 	if method not in frappe.whitelisted:
 		frappe.throw(_('Not Permitted'), frappe.PermissionError)
 
-	data = method(parent, company)
-	result = [dict(parent=parent, parent_name=parent_name, data=data)]
+	root_nodes = method(company=company)
+	result = []
+	nodes_to_expand = []
 
-	nodes_to_expand = [{'id': d.get('id'), 'name': d.get('name')} for d in data if d.get('expandable')]
+	for root in root_nodes:
+		data = method(root.id, company)
+		result.append(dict(parent=root.id, parent_name=root.name, data=data))
+		nodes_to_expand.extend([{'id': d.get('id'), 'name': d.get('name')} for d in data if d.get('expandable')])
 
 	while nodes_to_expand:
 		parent = nodes_to_expand.pop(0)

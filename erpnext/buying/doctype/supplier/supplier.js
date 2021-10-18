@@ -24,7 +24,26 @@ frappe.ui.form.on("Supplier", {
 				}
 			}
 		});
+
+		frm.set_query("supplier_primary_contact", function(doc) {
+			return {
+				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary_contact",
+				filters: {
+					"supplier": doc.name
+				}
+			};
+		});
+
+		frm.set_query("supplier_primary_address", function(doc) {
+			return {
+				filters: {
+					"link_doctype": "Supplier",
+					"link_name": doc.name
+				}
+			};
+		});
 	},
+
 	refresh: function (frm) {
 		frappe.dynamic_link = { doc: frm.doc, fieldname: 'name', doctype: 'Supplier' }
 
@@ -76,6 +95,30 @@ frappe.ui.form.on("Supplier", {
 				frm.refresh();
 			}
 		});
+	},
+
+	supplier_primary_address: function(frm) {
+		if (frm.doc.supplier_primary_address) {
+			frappe.call({
+				method: 'frappe.contacts.doctype.address.address.get_address_display',
+				args: {
+					"address_dict": frm.doc.supplier_primary_address
+				},
+				callback: function(r) {
+					frm.set_value("primary_address", r.message);
+				}
+			});
+		}
+		if (!frm.doc.supplier_primary_address) {
+			frm.set_value("primary_address", "");
+		}
+	},
+
+	supplier_primary_contact: function(frm) {
+		if (!frm.doc.supplier_primary_contact) {
+			frm.set_value("mobile_no", "");
+			frm.set_value("email_id", "");
+		}
 	},
 
 	is_internal_supplier: function(frm) {

@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.utils.rename_field import rename_field
 
+
 def execute():
 
 	frappe.reload_doc('Accounts', 'doctype', 'Salary Component Account')

@@ -2,10 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
 
+import frappe
 from frappe import _
 from six import iteritems
+
+import erpnext
+
 
 def get_level():
 	activation_level = 0

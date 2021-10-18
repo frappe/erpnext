@@ -2,10 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import print_function, unicode_literals
+
 import unittest
+
 import frappe
-from frappe.utils.nestedset import NestedSetRecursionError, NestedSetMultipleRootsError, \
-	NestedSetChildExistsError, NestedSetInvalidMergeError, rebuild_tree, get_ancestors_of
+from frappe.utils.nestedset import (
+	NestedSetChildExistsError,
+	NestedSetInvalidMergeError,
+	NestedSetMultipleRootsError,
+	NestedSetRecursionError,
+	get_ancestors_of,
+	rebuild_tree,
+)
 
 test_records = frappe.get_test_records('Item Group')
 

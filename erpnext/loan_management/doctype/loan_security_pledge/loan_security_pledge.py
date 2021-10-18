@@ -3,12 +3,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import now_datetime, cint
 from frappe.model.document import Document
-from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
-from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
+from frappe.utils import cint, now_datetime
+
+from erpnext.loan_management.doctype.loan_security_price.loan_security_price import (
+	get_loan_security_price,
+)
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
+	update_shortfall_status,
+)
+
 
 class LoanSecurityPledge(Document):
 	def validate(self):

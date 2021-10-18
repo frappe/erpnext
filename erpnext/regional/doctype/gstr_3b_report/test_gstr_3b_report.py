@@ -3,13 +3,15 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
-import unittest
-from frappe.utils import getdate
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.doctype.item.test_item import make_item
 import json
+import unittest
+
+import frappe
+from frappe.utils import getdate
+
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.stock.doctype.item.test_item import make_item
 
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 

@@ -99,6 +99,7 @@
   "loyalty_redemption_account",
   "loyalty_redemption_cost_center",
   "section_break_49",
+  "coupon_code",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_51",
@@ -595,7 +596,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -620,6 +622,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "label": "Packing List",
@@ -627,6 +630,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Packed Items",
@@ -1182,7 +1186,8 @@
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.write_off_outstanding_amount_automatically"
   },
   {
    "fieldname": "base_write_off_amount",
@@ -1548,12 +1553,20 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "depends_on": "coupon_code",
+   "fieldname": "coupon_code",
+   "fieldtype": "Link",
+   "label": "Coupon Code",
+   "options": "Coupon Code",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-29 13:37:20.636171",
+ "modified": "2021-08-27 20:12:57.306772",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

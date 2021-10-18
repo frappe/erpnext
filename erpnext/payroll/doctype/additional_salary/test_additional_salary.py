@@ -2,12 +2,19 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
+
 import unittest
-import frappe, erpnext
-from frappe.utils import nowdate, add_days
+
+import frappe
+from frappe.utils import add_days, nowdate
+
+import erpnext
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_component.test_salary_component import create_salary_component
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, setup_test
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	make_employee_salary_slip,
+	setup_test,
+)
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 

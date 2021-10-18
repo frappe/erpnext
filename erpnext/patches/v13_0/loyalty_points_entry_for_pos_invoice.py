@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 
+
 def execute():
 	'''`sales_invoice` field from loyalty point entry is splitted into `invoice_type` & `invoice` fields'''
 

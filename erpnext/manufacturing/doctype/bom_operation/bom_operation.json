@@ -8,15 +8,23 @@
  "field_order": [
   "sequence_id",
   "operation",
-  "workstation",
-  "description",
   "col_break1",
-  "hour_rate",
+  "workstation",
   "time_in_mins",
-  "operating_cost",
+  "costing_section",
+  "hour_rate",
   "base_hour_rate",
+  "column_break_9",
+  "operating_cost",
   "base_operating_cost",
+  "column_break_11",
   "batch_size",
+  "set_cost_based_on_bom_qty",
+  "cost_per_unit",
+  "base_cost_per_unit",
+  "more_information_section",
+  "description",
+  "column_break_18",
   "image"
  ],
  "fields": [
@@ -117,13 +125,59 @@
    "fieldname": "sequence_id",
    "fieldtype": "Int",
    "label": "Sequence ID"
+  },
+  {
+   "depends_on": "eval:doc.batch_size > 0 && doc.set_cost_based_on_bom_qty",
+   "fieldname": "cost_per_unit",
+   "fieldtype": "Float",
+   "label": "Cost Per Unit",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_cost_per_unit",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Base Cost Per Unit",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "costing_section",
+   "fieldtype": "Section Break",
+   "label": "Costing"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "set_cost_based_on_bom_qty",
+   "fieldtype": "Check",
+   "label": "Set Operating Cost Based On BOM Quantity"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-12 14:48:09.596843",
+ "modified": "2021-09-13 16:45:01.092868",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

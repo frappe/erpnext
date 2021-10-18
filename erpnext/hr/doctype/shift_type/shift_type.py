@@ -3,16 +3,25 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import itertools
 from datetime import timedelta
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import cint, getdate, get_datetime
-from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
-from erpnext.hr.doctype.employee_checkin.employee_checkin import mark_attendance_and_link_log, calculate_working_hours
+from frappe.utils import cint, get_datetime, getdate
+
 from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee_checkin.employee_checkin import (
+	calculate_working_hours,
+	mark_attendance_and_link_log,
+)
+from erpnext.hr.doctype.shift_assignment.shift_assignment import (
+	get_actual_start_end_datetime_of_shift,
+	get_employee_shift,
+)
+
 
 class ShiftType(Document):
 	@frappe.whitelist()
@@ -88,7 +97,7 @@ class ShiftType(Document):
 		assigned_employees = [x[0] for x in assigned_employees]
 
 		if consider_default_shift:
-			filters = {'default_shift': self.name}
+			filters = {'default_shift': self.name, 'status': ['!=', 'Inactive']}
 			default_shift_employees = frappe.get_all('Employee', 'name', filters, as_list=True)
 			default_shift_employees = [x[0] for x in default_shift_employees]
 			return list(set(assigned_employees+default_shift_employees))

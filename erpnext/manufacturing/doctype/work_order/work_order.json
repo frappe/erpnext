@@ -19,6 +19,7 @@
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
+  "process_loss_qty",
   "sales_order",
   "project",
   "serial_no_and_batch_for_finished_good_section",
@@ -64,16 +65,12 @@
   "description",
   "stock_uom",
   "column_break2",
-  "references_section",
   "material_request",
   "material_request_item",
   "sales_order_item",
-  "column_break_61",
   "production_plan",
   "production_plan_item",
   "production_plan_sub_assembly_item",
-  "parent_work_order",
-  "bom_level",
   "product_bundle_item",
   "amended_from"
  ],
@@ -553,20 +550,29 @@
    "read_only": 1
   },
   {
-    "fieldname": "production_plan_sub_assembly_item",
-    "fieldtype": "Data",
-    "label": "Production Plan Sub-assembly Item",
-    "no_copy": 1,
-    "print_hide": 1,
-    "read_only": 1
-   }
+   "fieldname": "production_plan_sub_assembly_item",
+   "fieldtype": "Data",
+   "label": "Production Plan Sub-assembly Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.process_loss_qty",
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  }
  ],
  "icon": "fa fa-cogs",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-28 16:19:14.902699",
+ "modified": "2021-08-24 15:14:03.844937",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

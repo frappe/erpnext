@@ -2,13 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt, cstr
 from frappe.model.meta import get_field_precision
+from frappe.utils import cstr, flt
 from frappe.utils.xlsxutils import handle_html
+
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import get_item_details, get_customer_details
+from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
+	get_customer_details,
+	get_item_details,
+)
+
 
 def execute(filters=None):
 	return _execute(filters)

@@ -1,40 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
+import unittest
 
 import frappe
-import erpnext
-import unittest
 import frappe.utils
+
+import erpnext
 from erpnext.hr.doctype.employee.employee import InactiveEmployeeStatusError
 
 test_records = frappe.get_test_records('Employee')
 
 class TestEmployee(unittest.TestCase):
-	def test_birthday_reminders(self):
-		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
-		employee.date_of_birth = "1992" + frappe.utils.nowdate()[4:]
-		employee.company_email = "test@example.com"
-		employee.company = "_Test Company"
-		employee.save()
-
-		from erpnext.hr.doctype.employee.employee import get_employees_who_are_born_today, send_birthday_reminders
-
-		employees_born_today = get_employees_who_are_born_today()
-		self.assertTrue(employees_born_today.get("_Test Company"))
-
-		frappe.db.sql("delete from `tabEmail Queue`")
-
-		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
-		hr_settings.stop_birthday_reminders = 0
-		hr_settings.save()
-
-		send_birthday_reminders()
-
-		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
-		self.assertTrue("Subject: Birthday Reminder" in email_queue[0].message)
-
 	def test_employee_status_left(self):
 		employee1 = make_employee("test_employee_1@company.com")
 		employee2 = make_employee("test_employee_2@company.com")
@@ -48,9 +25,9 @@ class TestEmployee(unittest.TestCase):
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
 	def test_employee_status_inactive(self):
-		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
-		from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
+		from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 		employee = make_employee("test_employee_status@company.com")
 		employee_doc = frappe.get_doc("Employee", employee)

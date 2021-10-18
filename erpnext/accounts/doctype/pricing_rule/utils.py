@@ -8,14 +8,14 @@ from __future__ import unicode_literals
 import copy
 import json
 
-from six import string_types
-
 import frappe
+from frappe import _, bold
+from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today
+
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
-from frappe import _, bold
-from frappe.utils import cint, flt, get_link_to_form, getdate, today, fmt_money
+
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
@@ -81,7 +81,7 @@ def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
 				try:
 					if frappe.safe_eval(pricing_rule.condition, None, doc.as_dict()):
 						filtered_pricing_rules.append(pricing_rule)
-				except:
+				except Exception:
 					pass
 			else:
 				filtered_pricing_rules.append(pricing_rule)
@@ -398,7 +398,9 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules):
 				pricing_rules[0].apply_rule_on_other_items = items
 				return pricing_rules
 
-def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
+def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
+	if items is None:
+		items = []
 	sum_qty, sum_amt = [0, 0]
 	doctype = doc.get('parenttype') or doc.doctype
 
@@ -475,7 +477,20 @@ def apply_pricing_rule_on_transaction(doc):
 						frappe.msgprint(_("User has not applied rule on the invoice {0}")
 							.format(doc.name))
 					else:
-						doc.set(field, d.get(pr_field))
+						if not d.coupon_code_based:
+							doc.set(field, d.get(pr_field))
+						elif doc.get('coupon_code'):
+							# coupon code based pricing rule
+							coupon_code_pricing_rule = frappe.db.get_value('Coupon Code', doc.get('coupon_code'), 'pricing_rule')
+							if coupon_code_pricing_rule == d.name:
+								# if selected coupon code is linked with pricing rule
+								doc.set(field, d.get(pr_field))
+							else:
+								# reset discount if not linked
+								doc.set(field, 0)
+						else:
+							# if coupon code based but no coupon code selected
+							doc.set(field, 0)
 
 				doc.calculate_taxes_and_totals()
 			elif d.price_or_product_discount == 'Product':

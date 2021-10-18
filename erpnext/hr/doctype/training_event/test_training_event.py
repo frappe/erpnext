@@ -3,10 +3,13 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from frappe.utils import today, add_days
+
+import frappe
+from frappe.utils import add_days, today
+
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
+
 
 class TestTrainingEvent(unittest.TestCase):
 	def setUp(self):

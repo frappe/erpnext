@@ -3,13 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.model.document import Document
-from frappe import _, bold
-from frappe.utils import getdate, date_diff, comma_and, formatdate, get_datetime, flt
-from math import ceil
+
 import json
+from math import ceil
+
+import frappe
+from frappe import _, bold
+from frappe.model.document import Document
+from frappe.utils import date_diff, flt, formatdate, get_datetime, getdate
 from six import string_types
+
 
 class LeavePolicyAssignment(Document):
 

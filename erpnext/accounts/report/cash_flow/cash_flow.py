@@ -2,13 +2,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data, get_filtered_list_for_consolidated_report)
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
-from erpnext.accounts.utils import get_fiscal_year
 from six import iteritems
+
+from erpnext.accounts.report.financial_statements import (
+	get_columns,
+	get_data,
+	get_filtered_list_for_consolidated_report,
+	get_period_list,
+)
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_net_profit_loss,
+)
+from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
@@ -130,9 +139,9 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
-def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters={}):
+def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters=None):
 	cond = ""
-	filters = frappe._dict(filters)
+	filters = frappe._dict(filters or {})
 
 	if filters.include_default_book_entries:
 		company_fb = frappe.db.get_value("Company", company, 'default_finance_book')

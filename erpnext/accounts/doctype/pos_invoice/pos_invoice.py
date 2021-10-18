@@ -3,18 +3,23 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.party import get_party_account, get_due_date
-from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
-from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option, get_mode_of_payment_info
-
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 from six import iteritems
+
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	SalesInvoice,
+	get_bank_cash_account,
+	get_mode_of_payment_info,
+	update_multi_mode_option,
+)
+from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
+
 
 class POSInvoice(SalesInvoice):
 	def __init__(self, *args, **kwargs):
@@ -35,6 +40,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_change_amount()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
+		self.validate_warehouse()
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
 		self.validate_return_items_qty()
@@ -44,6 +50,9 @@ class POSInvoice(SalesInvoice):
 		self.validate_pos()
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+			validate_coupon_code(self.coupon_code)
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -57,6 +66,10 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'used')
 
 	def before_cancel(self):
 		if self.consolidated_invoice and frappe.db.get_value('Sales Invoice', self.consolidated_invoice, 'docstatus') == 1:
@@ -83,6 +96,10 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
+
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'cancelled')
 
 	def check_phone_payments(self):
 		for pay in self.payments:
@@ -127,7 +144,7 @@ class POSInvoice(SalesInvoice):
 						.format(item.idx, bold_delivered_serial_nos), title=_("Item Unavailable"))
 
 	def validate_stock_availablility(self):
-		if self.is_return:
+		if self.is_return or self.docstatus != 1:
 			return
 
 		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
@@ -298,7 +315,7 @@ class POSInvoice(SalesInvoice):
 
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
-		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
+		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
@@ -508,6 +525,7 @@ def make_sales_return(source_name, target_doc=None):
 @frappe.whitelist()
 def make_merge_log(invoices):
 	import json
+
 	from six import string_types
 
 	if isinstance(invoices, string_types):

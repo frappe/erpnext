@@ -3,13 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, flt
-from frappe import _
-from six import string_types
-from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
-from frappe.model.document import Document
+
+import json
+
 import click
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import cstr, flt
+from six import string_types
+
+from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
+
 
 class BOMUpdateTool(Document):
 	def replace_bom(self):

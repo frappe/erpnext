@@ -3,9 +3,12 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
+import frappe
+
 import erpnext.education
+
 
 def get_random_group():
 	doc = frappe.get_doc({

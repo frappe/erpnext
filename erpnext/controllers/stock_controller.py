@@ -5,12 +5,15 @@ import json
 from collections import defaultdict
 
 import frappe
-import frappe.defaults
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
-from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
+from erpnext.accounts.general_ledger import (
+	make_gl_entries,
+	make_reverse_gl_entries,
+	process_gl_map,
+)
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
@@ -76,8 +79,15 @@ class StockController(AccountsController):
 	def clean_serial_nos(self):
 		for row in self.get("items"):
 			if hasattr(row, "serial_no") and row.serial_no:
-				# replace commas by linefeed and remove all spaces in string
-				row.serial_no = row.serial_no.replace(",", "\n").replace(" ", "")
+				# replace commas by linefeed
+				row.serial_no = row.serial_no.replace(",", "\n")
+
+				# strip preceeding and succeeding spaces for each SN
+				# (SN could have valid spaces in between e.g. SN - 123 - 2021)
+				serial_no_list = row.serial_no.split("\n")
+				serial_no_list = [sn.strip() for sn in serial_no_list]
+
+				row.serial_no = "\n".join(serial_no_list)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
@@ -588,7 +598,7 @@ def future_sle_exists(args, sl_entries=None):
 
 	data = frappe.db.sql("""
 		select item_code, warehouse, count(name) as total_row
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
 			({})
 			and timestamp(posting_date, posting_time)

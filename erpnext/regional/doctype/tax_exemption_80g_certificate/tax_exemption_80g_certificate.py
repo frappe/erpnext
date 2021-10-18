@@ -3,12 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import getdate, flt, get_link_to_form
-from erpnext.accounts.utils import get_fiscal_year
 from frappe.contacts.doctype.address.address import get_company_address
+from frappe.model.document import Document
+from frappe.utils import flt, get_link_to_form, getdate
+
+from erpnext.accounts.utils import get_fiscal_year
+
 
 class TaxExemption80GCertificate(Document):
 	def validate(self):

@@ -3,12 +3,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import date_diff, add_days, getdate
+from frappe.utils import add_days, date_diff, getdate
+
 from erpnext.hr.doctype.employee.employee import is_holiday
-from erpnext.hr.utils import validate_dates, validate_active_employee
+from erpnext.hr.utils import validate_active_employee, validate_dates
+
 
 class AttendanceRequest(Document):
 	def validate(self):

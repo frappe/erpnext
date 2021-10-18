@@ -219,6 +219,7 @@
   },
   {
    "default": "1",
+   "description": "A customer must have primary contact email.",
    "fieldname": "primary_mandatory",
    "fieldtype": "Check",
    "label": "Send To Primary Contact"
@@ -286,10 +287,11 @@
   }
  ],
  "links": [],
- "modified": "2021-05-21 11:14:22.426672",
+ "modified": "2021-09-06 21:00:45.732505",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {

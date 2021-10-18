@@ -3,12 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
+
+import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.hr.utils import validate_active_employee
+
 
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
@@ -168,7 +172,10 @@ def get_paying_amount_paying_exchange_rate(payment_account, doc):
 @frappe.whitelist()
 def create_return_through_additional_salary(doc):
 	import json
-	doc = frappe._dict(json.loads(doc))
+
+	if isinstance(doc, str):
+		doc = frappe._dict(json.loads(doc))
+
 	additional_salary = frappe.new_doc('Additional Salary')
 	additional_salary.employee = doc.employee
 	additional_salary.currency = doc.currency

@@ -3,8 +3,8 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
+
 test_dependencies = ["Hotel Room Package"]
 test_records = [
 	dict(doctype="Hotel Room Pricing", enabled=1,

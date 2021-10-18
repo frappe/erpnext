@@ -141,9 +141,8 @@ frappe.ui.form.on("Item", {
 	is_fixed_asset: function(frm) {
 		// set serial no to false & toggles its visibility
 		frm.set_value('has_serial_no', 0);
+		frm.set_value('has_batch_no', 0);
 		frm.toggle_enable(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
-		frm.toggle_reqd(['asset_category'], frm.doc.is_fixed_asset);
-		frm.toggle_display(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
 
 		frm.call({
 			method: "set_asset_naming_series",
@@ -792,4 +791,49 @@ frappe.ui.form.on("UOM Conversion Detail", {
 			});
 		}
 	}
-})
+});
+
+frappe.tour['Item'] = [
+	{
+		fieldname: "item_code",
+		title: "Item Code",
+		description: __("Enter an Item Code, the name will be auto-filled the same as Item Code on clicking inside the Item Name field.")
+	},
+	{
+		fieldname: "item_group",
+		title: "Item Group",
+		description: __("Select an Item Group.")
+	},
+	{
+		fieldname: "is_stock_item",
+		title: "Maintain Stock",
+		description: __("If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item.")
+	},
+	{
+		fieldname: "include_item_in_manufacturing",
+		title: "Include Item in Manufacturing",
+		description: __("This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked.")
+	},
+	{
+		fieldname: "opening_stock",
+		title: "Opening Stock",
+		description: __("Enter the opening stock units.")
+	},
+	{
+		fieldname: "valuation_rate",
+		title: "Valuation Rate",
+		description: __("There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>")
+	},
+	{
+		fieldname: "standard_rate",
+		title: "Standard Selling Rate",
+		description: __("When creating an Item, entering a value for this field will automatically create an Item Price at the backend.")
+	},
+	{
+		fieldname: "item_defaults",
+		title: "Item Defaults",
+		description: __("In this section, you can define Company-wide transaction-related defaults for this Item. Eg. Default Warehouse, Default Price List, Supplier, etc.")
+	}
+
+
+];

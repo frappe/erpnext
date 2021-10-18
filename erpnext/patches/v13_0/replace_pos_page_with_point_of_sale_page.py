@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	if frappe.db.exists("Page", "point-of-sale"):

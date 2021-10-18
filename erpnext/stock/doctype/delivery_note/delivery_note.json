@@ -395,8 +395,7 @@
    "fieldtype": "Link",
    "label": "Billing Address Name",
    "options": "Address",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "tax_id",
@@ -515,7 +514,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -542,6 +542,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "label": "Packing List",
@@ -550,6 +551,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Packed Items",
@@ -1274,6 +1276,7 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -1305,7 +1308,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-08 21:37:20.802652",
+ "modified": "2021-10-08 14:29:13.428984",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

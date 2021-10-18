@@ -61,7 +61,7 @@ def create_hsn_codes(data, code_field):
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
-		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill', 'E-Invoice Summary'):
+		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill'):
 
 		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
 			frappe.get_doc(dict(
@@ -100,7 +100,7 @@ def add_custom_roles_for_reports():
 			)).insert()
 
 def add_permissions():
-	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate', 'E Invoice Settings'):
+	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
 		add_permission(doctype, 'All', 0)
 		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
@@ -116,11 +116,9 @@ def add_permissions():
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
 	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
-	frappe.reload_doc("accounts", "print_format", "GST E-Invoice")
 
 	frappe.db.set_value("Print Format", "GST POS Invoice", "disabled", 0)
 	frappe.db.set_value("Print Format", "GST Tax Invoice", "disabled", 0)
-	frappe.db.set_value("Print Format", "GST E-Invoice", "disabled", 0)
 
 def make_property_setters(patch=False):
 	# GST rules do not allow for an invoice no. bigger than 16 characters
@@ -134,6 +132,10 @@ def make_property_setters(patch=False):
 		make_property_setter('Journal Entry', 'voucher_type', 'options', '\n'.join(journal_entry_types), '')
 
 def make_custom_fields(update=True):
+	custom_fields = get_custom_fields()
+	create_custom_fields(custom_fields, update=update)
+
+def get_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1, fetch_if_empty=1)
@@ -167,12 +169,12 @@ def make_custom_fields(update=True):
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
 			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
-			fetch_from='customer.gst_category', fetch_if_empty=1),
+			fetch_from='customer.gst_category', fetch_if_empty=1, length=25),
 		dict(fieldname='export_type', label='Export Type',
 			fieldtype='Select', insert_after='gst_category', print_hide=1,
 			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax', fetch_from='customer.export_type',
-			fetch_if_empty=1),
+			fetch_if_empty=1, length=25),
 	]
 
 	delivery_note_gst_category = [
@@ -183,18 +185,18 @@ def make_custom_fields(update=True):
 	]
 
 	invoice_gst_fields = [
-		dict(fieldname='invoice_copy', label='Invoice Copy',
+		dict(fieldname='invoice_copy', label='Invoice Copy', length=30,
 			fieldtype='Select', insert_after='export_type', print_hide=1, allow_on_submit=1,
 			options='Original for Recipient\nDuplicate for Transporter\nDuplicate for Supplier\nTriplicate for Supplier'),
-		dict(fieldname='reverse_charge', label='Reverse Charge',
+		dict(fieldname='reverse_charge', label='Reverse Charge', length=2,
 			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Y\nN', default='N'),
-		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
+		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN', length=15,
 			fieldtype='Data', insert_after='export_type', print_hide=1),
 		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='ecommerce_gstin'),
 		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
 			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
-			depends_on='eval:doc.is_return==1',
+			depends_on='eval:doc.is_return==1', length=45,
 			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others')
 	]
 
@@ -232,25 +234,25 @@ def make_custom_fields(update=True):
 	sales_invoice_gst_fields = [
 			dict(fieldname='billing_address_gstin', label='Billing Address GSTIN',
 				fieldtype='Data', insert_after='customer_address', read_only=1,
-				fetch_from='customer_address.gstin', print_hide=1),
+				fetch_from='customer_address.gstin', print_hide=1, length=15),
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='shipping_address_name',
-				fetch_from='shipping_address_name.gstin', print_hide=1),
+				fetch_from='shipping_address_name.gstin', print_hide=1, length=15),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='customer_gstin',
-				print_hide=1, read_only=1),
+				print_hide=1, read_only=1, length=50),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
-				fetch_from='company_address.gstin', print_hide=1, read_only=1),
+				fetch_from='company_address.gstin', print_hide=1, read_only=1, length=15),
 		]
 
 	sales_invoice_shipping_fields = [
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
-				depends_on="eval:doc.gst_category=='Overseas' "),
+				depends_on="eval:doc.gst_category=='Overseas' ", length=15),
 			dict(fieldname='shipping_bill_number', label=' Shipping Bill Number',
 				fieldtype='Data', insert_after='port_code', print_hide=1,
-				depends_on="eval:doc.gst_category=='Overseas' "),
+				depends_on="eval:doc.gst_category=='Overseas' ", length=50),
 			dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
 				depends_on="eval:doc.gst_category=='Overseas' "),
@@ -356,7 +358,8 @@ def make_custom_fields(update=True):
 			'insert_after': 'transporter',
 			'fetch_from': 'transporter.gst_transporter_id',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 20
 		},
 		{
 			'fieldname': 'driver',
@@ -372,7 +375,8 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Data',
 			'insert_after': 'driver',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 30
 		},
 		{
 			'fieldname': 'vehicle_no',
@@ -380,7 +384,8 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Data',
 			'insert_after': 'lr_no',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 10
 		},
 		{
 			'fieldname': 'distance',
@@ -397,7 +402,7 @@ def make_custom_fields(update=True):
 		{
 			'fieldname': 'transporter_name',
 			'label': 'Transporter Name',
-			'fieldtype': 'Data',
+			'fieldtype': 'Small Text',
 			'insert_after': 'transporter_col_break',
 			'fetch_from': 'transporter.name',
 			'read_only': 1,
@@ -411,12 +416,13 @@ def make_custom_fields(update=True):
 			'options': '\nRoad\nAir\nRail\nShip',
 			'insert_after': 'transporter_name',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 5
 		},
 		{
 			'fieldname': 'driver_name',
 			'label': 'Driver Name',
-			'fieldtype': 'Data',
+			'fieldtype': 'Small Text',
 			'insert_after': 'mode_of_transport',
 			'fetch_from': 'driver.full_name',
 			'print_hide': 1,
@@ -439,57 +445,39 @@ def make_custom_fields(update=True):
 			'default': 'Regular',
 			'insert_after': 'lr_date',
 			'print_hide': 1,
-			'translatable': 0
+			'translatable': 0,
+			'length': 30
 		},
 		{
 			'fieldname': 'ewaybill',
 			'label': 'E-Way Bill No.',
 			'fieldtype': 'Data',
-			'depends_on': 'eval:((doc.docstatus === 1 || doc.ewaybill) && doc.eway_bill_cancelled === 0)',
+			'depends_on': 'eval:(doc.docstatus === 1)',
 			'allow_on_submit': 1,
 			'insert_after': 'tax_id',
-			'translatable': 0
+			'translatable': 0,
+			'length': 20
 		}
 	]
 
-	si_einvoice_fields = [
-		dict(fieldname='irn', label='IRN', fieldtype='Data', read_only=1, insert_after='customer', no_copy=1, print_hide=1,
-			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
-
-		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
-			depends_on='eval: doc.irn', allow_on_submit=1, insert_after='customer'),
-
-		dict(fieldname='eway_bill_validity', label='E-Way Bill Validity', fieldtype='Data', no_copy=1, print_hide=1,
-			depends_on='ewaybill', read_only=1, allow_on_submit=1, insert_after='ewaybill'),
-
-		dict(fieldname='eway_bill_cancelled', label='E-Way Bill Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
-			depends_on='eval:(doc.eway_bill_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
-
-		dict(fieldname='einvoice_section', label='E-Invoice Fields', fieldtype='Section Break', insert_after='gst_vehicle_type',
-			print_hide=1, hidden=1),
-
-		dict(fieldname='ack_no', label='Ack. No.', fieldtype='Data', read_only=1, hidden=1, insert_after='einvoice_section',
-			no_copy=1, print_hide=1),
-
-		dict(fieldname='ack_date', label='Ack. Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_no', no_copy=1, print_hide=1),
-
-		dict(fieldname='irn_cancel_date', label='Cancel Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_date',
-			no_copy=1, print_hide=1),
-
-		dict(fieldname='signed_einvoice', label='Signed E-Invoice', fieldtype='Code', options='JSON', hidden=1, insert_after='irn_cancel_date',
-			no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='signed_qr_code', label='Signed QRCode', fieldtype='Code', options='JSON', hidden=1, insert_after='signed_einvoice',
-			no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='qrcode_image', label='QRCode', fieldtype='Attach Image', hidden=1, insert_after='signed_qr_code',
-			no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='einvoice_status', label='E-Invoice Status', fieldtype='Select', insert_after='qrcode_image',
-			options='\nPending\nGenerated\nCancelled\nFailed', default=None, hidden=1, no_copy=1, print_hide=1, read_only=1),
-
-		dict(fieldname='failure_description', label='E-Invoice Failure Description', fieldtype='Code', options='JSON',
-			hidden=1, insert_after='einvoice_status', no_copy=1, print_hide=1, read_only=1)
+	payment_entry_fields = [
+		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break', insert_after='deductions',
+			print_hide=1, collapsible=1),
+		dict(fieldname='company_address', label='Company Address', fieldtype='Link', insert_after='gst_section',
+			print_hide=1, options='Address'),
+		dict(fieldname='company_gstin', label='Company GSTIN',
+			fieldtype='Data', insert_after='company_address',
+			fetch_from='company_address.gstin', print_hide=1, read_only=1),
+		dict(fieldname='place_of_supply', label='Place of Supply',
+			fieldtype='Data', insert_after='company_gstin',
+			print_hide=1, read_only=1),
+		dict(fieldname='gst_column_break', fieldtype='Column Break',
+				insert_after='place_of_supply'),
+		dict(fieldname='customer_address', label='Customer Address', fieldtype='Link', insert_after='gst_column_break',
+			print_hide=1, options='Address', depends_on = 'eval:doc.party_type == "Customer"'),
+		dict(fieldname='customer_gstin', label='Customer GSTIN',
+			fieldtype='Data', insert_after='customer_address',
+			fetch_from='customer_address.gstin', print_hide=1, read_only=1)
 	]
 
 	custom_fields = {
@@ -504,8 +492,10 @@ def make_custom_fields(update=True):
 		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
-		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
+		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields,
+		'POS Invoice': sales_invoice_gst_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields + delivery_note_gst_category,
+		'Payment Entry': payment_entry_fields,
 		'Journal Entry': journal_entry_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
@@ -522,6 +512,7 @@ def make_custom_fields(update=True):
 		'Sales Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Delivery Note Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
+		'POS Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
@@ -573,6 +564,7 @@ def make_custom_fields(update=True):
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
+			dict(fieldname='hra_column_break', fieldtype='Column Break', insert_after='hra_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
 			dict(fieldname='non_profit_section', label='Non Profit Settings',
@@ -581,6 +573,7 @@ def make_custom_fields(update=True):
 				fieldtype='Data', insert_after='non_profit_section'),
 			dict(fieldname='with_effect_from', label='80G With Effect From',
 				fieldtype='Date', insert_after='company_80g_number'),
+			dict(fieldname='non_profit_column_break', fieldtype='Column Break', insert_after='with_effect_from'),
 			dict(fieldname='pan_details', label='PAN Number',
 				fieldtype='Data', insert_after='with_effect_from')
 		],
@@ -680,9 +673,19 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Data',
 				'insert_after': 'email'
 			}
+		],
+		'Finance Book': [
+			{
+				'fieldname': 'for_income_tax',
+				'label': 'For Income Tax',
+				'fieldtype': 'Check',
+				'insert_after': 'finance_book_name',
+				'description': 'If the asset is put to use for less than 180 days, the first Depreciation Rate will be reduced by 50%.'
+			}
 		]
 	}
-	create_custom_fields(custom_fields, update=update)
+
+	return custom_fields
 
 def make_fixtures(company=None):
 	docs = []
@@ -769,7 +772,7 @@ def set_salary_components(docs):
 
 def set_tax_withholding_category(company):
 	accounts = []
-	fiscal_year = None
+	fiscal_year_details = None
 	abbr = frappe.get_value("Company", company, "abbr")
 	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
 
@@ -777,11 +780,11 @@ def set_tax_withholding_category(company):
 		accounts = [dict(company=company, account=tds_account)]
 
 	try:
-		fiscal_year = get_fiscal_year(today(), verbose=0, company=company)[0]
+		fiscal_year_details = get_fiscal_year(today(), verbose=0, company=company)
 	except FiscalYearError:
 		pass
 
-	docs = get_tds_details(accounts, fiscal_year)
+	docs = get_tds_details(accounts, fiscal_year_details)
 
 	for d in docs:
 		if not frappe.db.exists("Tax Withholding Category", d.get("name")):
@@ -796,9 +799,10 @@ def set_tax_withholding_category(company):
 			if accounts:
 				doc.append("accounts", accounts[0])
 
-			if fiscal_year:
+			if fiscal_year_details:
 				# if fiscal year don't match with any of the already entered data, append rate row
-				fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
+				fy_exist = [k for k in doc.get('rates') if k.get('from_date') <= fiscal_year_details[1] \
+					and k.get('to_date') >= fiscal_year_details[2]]
 				if not fy_exist:
 					doc.append("rates", d.get('rates')[0])
 
@@ -821,149 +825,149 @@ def set_tds_account(docs, company):
 			}
 		])
 
-def get_tds_details(accounts, fiscal_year):
+def get_tds_details(accounts, fiscal_year_details):
 	# bootstrap default tax withholding sections
 	return [
 		dict(name="TDS - 194C - Company",
 			category_name="Payment to Contractors (Single / Aggregate)",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 2,
-			"single_threshold": 30000, "cumulative_threshold": 100000}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 2, "single_threshold": 30000, "cumulative_threshold": 100000}]),
 		dict(name="TDS - 194C - Individual",
 			category_name="Payment to Contractors (Single / Aggregate)",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 1,
-			"single_threshold": 30000, "cumulative_threshold": 100000}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 1, "single_threshold": 30000, "cumulative_threshold": 100000}]),
 		dict(name="TDS - 194C - No PAN / Invalid PAN",
 			category_name="Payment to Contractors (Single / Aggregate)",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 30000, "cumulative_threshold": 100000}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 30000, "cumulative_threshold": 100000}]),
 		dict(name="TDS - 194D - Company",
 			category_name="Insurance Commission",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
-			"single_threshold": 15000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 5, "single_threshold": 15000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194D - Company Assessee",
 			category_name="Insurance Commission",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 15000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 15000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194D - Individual",
 			category_name="Insurance Commission",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
-			"single_threshold": 15000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 5, "single_threshold": 15000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194D - No PAN / Invalid PAN",
 			category_name="Insurance Commission",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 15000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 15000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194DA - Company",
 			category_name="Non-exempt payments made under a life insurance policy",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 1,
-			"single_threshold": 100000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 1, "single_threshold": 100000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194DA - Individual",
 			category_name="Non-exempt payments made under a life insurance policy",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 1,
-			"single_threshold": 100000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 1, "single_threshold": 100000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194DA - No PAN / Invalid PAN",
 			category_name="Non-exempt payments made under a life insurance policy",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 100000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 100000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194H - Company",
 			category_name="Commission / Brokerage",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
-			"single_threshold": 15000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 5, "single_threshold": 15000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194H - Individual",
 			category_name="Commission / Brokerage",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
-			"single_threshold": 15000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 5, "single_threshold": 15000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194H - No PAN / Invalid PAN",
 			category_name="Commission / Brokerage",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 15000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 15000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194I - Rent - Company",
 			category_name="Rent",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 180000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 180000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194I - Rent - Individual",
 			category_name="Rent",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 180000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 180000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194I - Rent - No PAN / Invalid PAN",
 			category_name="Rent",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 180000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 180000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194I - Rent/Machinery - Company",
 			category_name="Rent-Plant / Machinery",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 2,
-			"single_threshold": 180000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 2, "single_threshold": 180000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194I - Rent/Machinery - Individual",
 			category_name="Rent-Plant / Machinery",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 2,
-			"single_threshold": 180000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 2, "single_threshold": 180000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194I - Rent/Machinery - No PAN / Invalid PAN",
 			category_name="Rent-Plant / Machinery",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 180000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 180000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194J - Professional Fees - Company",
 			category_name="Professional Fees",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 30000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 30000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194J - Professional Fees - Individual",
 			category_name="Professional Fees",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 30000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 30000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194J - Professional Fees - No PAN / Invalid PAN",
 			category_name="Professional Fees",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 30000, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 30000, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194J - Director Fees - Company",
 			category_name="Director Fees",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 0, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 0, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194J - Director Fees - Individual",
 			category_name="Director Fees",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 0, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 0, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194J - Director Fees - No PAN / Invalid PAN",
 			category_name="Director Fees",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 0, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 0, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194 - Dividends - Company",
 			category_name="Dividends",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 2500, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 2500, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194 - Dividends - Individual",
 			category_name="Dividends",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
-			"single_threshold": 2500, "cumulative_threshold": 0}]),
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 10, "single_threshold": 2500, "cumulative_threshold": 0}]),
 		dict(name="TDS - 194 - Dividends - No PAN / Invalid PAN",
 			category_name="Dividends",
 			doctype="Tax Withholding Category", accounts=accounts,
-			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
-			"single_threshold": 2500, "cumulative_threshold": 0}])
+			rates=[{"from_date": fiscal_year_details[1], "to_date": fiscal_year_details[2],
+			"tax_withholding_rate": 20, "single_threshold": 2500, "cumulative_threshold": 0}])
 	]
 
 def create_gratuity_rule():

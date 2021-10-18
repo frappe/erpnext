@@ -2,16 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from collections import deque
 import unittest
+from collections import deque
+from functools import partial
+
 import frappe
-from frappe.utils import cstr, flt
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
-from erpnext.manufacturing.doctype.bom.bom import make_variant_bom
+from frappe.utils import cstr, flt
+
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.manufacturing.doctype.bom.bom import item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
 from erpnext.tests.test_subcontracting import set_backflush_based_on
 
 test_records = frappe.get_test_records('BOM')
@@ -103,6 +108,24 @@ class TestBOM(unittest.TestCase):
 		self.assertAlmostEqual(bom.base_operating_cost, base_op_cost)
 		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
 		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
+
+	def test_bom_cost_with_batch_size(self):
+		bom = frappe.copy_doc(test_records[2])
+		bom.docstatus = 0
+		op_cost = 0.0
+		for op_row in bom.operations:
+			op_row.docstatus = 0
+			op_row.batch_size = 2
+			op_row.set_cost_based_on_bom_qty = 1
+			op_cost += op_row.operating_cost
+
+		bom.save()
+
+		for op_row in bom.operations:
+			self.assertAlmostEqual(op_row.cost_per_unit, op_row.operating_cost / 2)
+
+		self.assertAlmostEqual(bom.operating_cost, op_cost/2)
+		bom.delete()
 
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
@@ -280,12 +303,91 @@ class TestBOM(unittest.TestCase):
 			self.assertEqual(reqd_item.qty, created_item.qty)
 			self.assertEqual(reqd_item.exploded_qty, created_item.exploded_qty)
 
+	def test_bom_recursion_1st_level(self):
+		"""BOM should not allow BOM item again in child"""
+		item_code = "_Test BOM Recursion"
+		make_item(item_code, {'is_stock_item': 1})
+
+		bom = frappe.new_doc("BOM")
+		bom.item = item_code
+		bom.append("items", frappe._dict(item_code=item_code))
+		with self.assertRaises(frappe.ValidationError) as err:
+			bom.save()
+
+		self.assertTrue("recursion" in str(err.exception).lower())
+		frappe.delete_doc("BOM", bom.name, ignore_missing=True)
+
+	def test_bom_recursion_transitive(self):
+		item1 = "_Test BOM Recursion"
+		item2 = "_Test BOM Recursion 2"
+		make_item(item1, {'is_stock_item': 1})
+		make_item(item2, {'is_stock_item': 1})
+
+		bom1 = frappe.new_doc("BOM")
+		bom1.item = item1
+		bom1.append("items", frappe._dict(item_code=item2))
+		bom1.save()
+		bom1.submit()
+
+		bom2 = frappe.new_doc("BOM")
+		bom2.item = item2
+		bom2.append("items", frappe._dict(item_code=item1))
+
+		with self.assertRaises(frappe.ValidationError) as err:
+			bom2.save()
+			bom2.submit()
+
+		self.assertTrue("recursion" in str(err.exception).lower())
+
+		bom1.cancel()
+		frappe.delete_doc("BOM", bom1.name, ignore_missing=True, force=True)
+		frappe.delete_doc("BOM", bom2.name, ignore_missing=True, force=True)
+
+	def test_bom_with_process_loss_item(self):
+		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
+
+		if not frappe.db.exists("BOM", f"BOM-{fg_item_non_whole.item_code}-001"):
+			bom_doc = create_bom_with_process_loss_item(
+				fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, fg_qty=1
+			)
+			bom_doc.submit()
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0
+		)
+		#  PL Item qty can't be >= FG Item qty
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_non_whole, bom_item, scrap_qty=1, scrap_rate=100
+		)
+		# PL Item rate has to be 0
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_whole, bom_item, scrap_qty=0.25, scrap_rate=0
+		)
+		#  Items with whole UOMs can't be PL Items
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, is_process_loss=0
+		)
+		# FG Items in Scrap/Loss Table should have Is Process Loss set
+		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+	def test_bom_item_query(self):
+		query = partial(item_query, doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters={"is_stock_item": 1})
+
+		test_items = query(txt="_Test")
+		filtered = query(txt="_Test Item 2")
+
+		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
+		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
-
-
-
 
 def level_order_traversal(node):
 	traversal = []
@@ -332,6 +434,7 @@ def create_nested_bom(tree, prefix="_Test bom "):
 			bom = frappe.get_doc(doctype="BOM", item=bom_item_code)
 			for child_item in child_items.keys():
 				bom.append("items", {"item_code": prefix + child_item})
+			bom.currency = "INR"
 			bom.insert()
 			bom.submit()
 
@@ -353,3 +456,45 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 
 	for warehouse in warehouse_list:
 		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=qty, rate=rate)
+
+def create_bom_with_process_loss_item(
+		fg_item, bom_item, scrap_qty, scrap_rate, fg_qty=2, is_process_loss=1):
+	bom_doc = frappe.new_doc("BOM")
+	bom_doc.item = fg_item.item_code
+	bom_doc.quantity = fg_qty
+	bom_doc.append("items", {
+		"item_code": bom_item.item_code,
+		"qty": 1,
+		"uom": bom_item.stock_uom,
+		"stock_uom": bom_item.stock_uom,
+		"rate": 100.0
+	})
+	bom_doc.append("scrap_items", {
+		"item_code": fg_item.item_code,
+		"qty": scrap_qty,
+		"stock_qty": scrap_qty,
+		"uom": fg_item.stock_uom,
+		"stock_uom": fg_item.stock_uom,
+		"rate": scrap_rate,
+		"is_process_loss": is_process_loss
+	})
+	bom_doc.currency = "INR"
+	return bom_doc
+
+def create_process_loss_bom_items():
+	item_list = [
+		("_Test Item - Non Whole UOM", "Kg"),
+		("_Test Item - Whole UOM", "Unit"),
+		("_Test PL BOM Item", "Unit")
+	]
+	return [create_process_loss_bom_item(it) for it in item_list]
+
+def create_process_loss_bom_item(item_tuple):
+	item_code, stock_uom = item_tuple
+	if frappe.db.exists("Item", item_code) is None:
+		return make_item(
+			item_code,
+			{'stock_uom':stock_uom, 'valuation_rate':100}
+		)
+	else:
+		return frappe.get_doc("Item", item_code)

@@ -82,6 +82,17 @@ $.extend(erpnext, {
 			});
 			frappe.set_route('Form','Journal Entry', journal_entry.name);
 		});
+	},
+
+	proceed_save_with_reminders_frequency_change: () => {
+		frappe.ui.hide_open_dialog();
+
+		frappe.call({
+			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change',
+			callback: () => {
+				cur_frm.save();
+			}
+		});
 	}
 });
 
@@ -563,7 +574,7 @@ erpnext.utils.update_child_items = function(opts) {
 			},
 		],
 		primary_action: function() {
-			const trans_items = this.get_values()["trans_items"];
+			const trans_items = this.get_values()["trans_items"].filter((item) => !!item.item_code);
 			frappe.call({
 				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
 				freeze: true,
@@ -698,14 +709,21 @@ erpnext.utils.map_current_doc = function(opts) {
 			setters: opts.setters,
 			get_query: opts.get_query,
 			add_filters_group: 1,
+			allow_child_item_selection: opts.allow_child_item_selection,
+			child_fieldname: opts.child_fielname,
+			child_columns: opts.child_columns,
+			size: opts.size,
 			action: function(selections, args) {
 				let values = selections;
-				if(values.length === 0){
+				if (values.length === 0) {
 					frappe.msgprint(__("Please select {0}", [opts.source_doctype]))
 					return;
 				}
 				opts.source_name = values;
-				opts.setters = args;
+				if (opts.allow_child_item_selection) {
+					// args contains filtered child docnames
+					opts.args = args;
+				}
 				d.dialog.hide();
 				_map();
 			},

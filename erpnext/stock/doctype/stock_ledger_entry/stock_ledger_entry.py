@@ -3,14 +3,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
+from datetime import date
+
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, add_days, formatdate, get_datetime, cint
-from frappe.model.document import Document
-from datetime import date
-from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
-from erpnext.accounts.utils import get_fiscal_year
 from frappe.core.doctype.role.role import get_users
+from frappe.model.document import Document
+from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
+
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
+
 
 class StockFreezeError(frappe.ValidationError): pass
 class BackDatedStockTransaction(frappe.ValidationError): pass
@@ -27,7 +31,7 @@ class StockLedgerEntry(Document):
 
 	def validate(self):
 		self.flags.ignore_submit_comment = True
-		from erpnext.stock.utils import validate_warehouse_company, validate_disabled_warehouse
+		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 		self.validate_mandatory()
 		self.validate_item()
 		self.validate_batch()
@@ -177,4 +181,4 @@ def on_doctype_update():
 
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
-	frappe.db.add_index("Stock Ledger Entry", ["voucher_detail_no"])
+	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")

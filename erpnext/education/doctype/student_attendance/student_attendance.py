@@ -3,13 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import get_link_to_form, getdate, formatdate
+from frappe.model.document import Document
+from frappe.utils import formatdate, get_link_to_form, getdate
+
 from erpnext import get_default_company
 from erpnext.education.api import get_student_group_students
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+
 
 class StudentAttendance(Document):
 	def validate(self):

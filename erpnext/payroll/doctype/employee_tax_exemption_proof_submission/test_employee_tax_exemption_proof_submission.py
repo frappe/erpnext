@@ -3,9 +3,15 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
 import unittest
-from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import create_exemption_category, create_payroll_period
+
+import frappe
+
+from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import (
+	create_exemption_category,
+	create_payroll_period,
+)
+
 
 class TestEmployeeTaxExemptionProofSubmission(unittest.TestCase):
 	def setup(self):

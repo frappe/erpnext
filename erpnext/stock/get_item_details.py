@@ -2,22 +2,27 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
+import json
+
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, add_days, cstr, add_months, getdate
-import json, copy
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
-from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
-from erpnext.stock.doctype.batch.batch import get_batch_no
-from erpnext import get_company_currency
-from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
-from erpnext.stock.doctype.price_list.price_list import get_price_list_details
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
+from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
+from six import iteritems, string_types
 
-from six import string_types, iteritems
+from erpnext import get_company_currency
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
+	get_pricing_rule_for_item,
+	set_transaction_type,
+)
+from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.batch.batch import get_batch_no
+from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
+from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
+from erpnext.stock.doctype.price_list.price_list import get_price_list_details
 
 sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'POS Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
@@ -278,6 +283,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		else:
 			args.uom = item.stock_uom
 
+	if (args.get("batch_no") and
+		item.name != frappe.get_cached_value('Batch', args.get("batch_no"), 'item')):
+		args['batch_no'] = ''
+
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
@@ -312,8 +321,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"transaction_date": args.get("transaction_date"),
 		"against_blanket_order": args.get("against_blanket_order"),
 		"bom_no": item.get("default_bom"),
-		"weight_per_unit": item.get("weight_per_unit"),
-		"weight_uom": item.get("weight_uom")
+		"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
+		"weight_uom": args.get("weight_uom") or item.get("weight_uom")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -373,7 +382,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	return out
 
-def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
+def get_item_warehouse(item, args, overwrite_warehouse, defaults=None):
 	if not defaults:
 		defaults = frappe._dict({
 			'item_defaults' : get_item_defaults(item.name, args.company),
