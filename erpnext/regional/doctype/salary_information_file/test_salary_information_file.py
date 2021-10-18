@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import calendar
 import datetime
 import unittest
 
@@ -33,8 +34,11 @@ class TestSalaryInformationFile(unittest.TestCase):
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=[company.name])
 		set_data_for_salary_component("Qatar")
 
-		make_employee_salary_slip("test_employee@qatar.com", "Monthly")
+		salary_slip_qatar = make_employee_salary_slip("test_employee@qatar.com", "Monthly")
+		salary_slip_qatar.submit()
 		setup_bank_and_bank_account("Qatar Bank", "QIB", company.name)
+
+		create_salary_information_file(company)
 
 	def test_csv_generation_for_uae_region(self):
 		company = create_company("UAE Financial", "UF", "United Arab Emirates")
@@ -48,7 +52,8 @@ class TestSalaryInformationFile(unittest.TestCase):
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=[company.name])
 		set_data_for_salary_component("United Arab Emirates")
 
-		make_employee_salary_slip("test_employee@qatar.com", "Monthly")
+		salary_slip_uae = make_employee_salary_slip("test_employee@uae.com", "Monthly")
+		salary_slip_uae.submit()
 		setup_bank_and_bank_account("UAE Bank", "UIB", company.name)
 
 		create_salary_information_file(company)
@@ -70,9 +75,9 @@ def create_company(name, abbr, country):
 
 def create_salary_information_file(company):
 	sif = frappe.new_doc("Salary Information File")
-	sif.company = company
+	sif.company = company.company_name
 	date = frappe.utils.get_datetime()
-	sif.month = date.month
+	sif.month = calendar.month_name[date.month]
 	sif.year = date.year
 	sif.save()
 
@@ -118,7 +123,7 @@ def create_company_bank_account(account, bank, company):
 	bank_account.company = company
 	bank_account.is_company_account = 1
 	bank_account.account_name = "WPS Bank Account"
-	bank_account.account = account.name
+	bank_account.account = account
 	bank_account.bank = bank
 	bank_account.iban = "AT483200000012345864"
 	bank_account.bank_code = "53276382839"
