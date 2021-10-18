@@ -463,11 +463,7 @@ def update_reference_in_journal_entry(d, jv_doc):
 		jv_detail.set("reference_name", d["against_voucher"])
 
 		if amt_allocatable < original_dr_or_cr:
-			jvd = frappe.db.sql("""
-				select cost_center, balance, against_account, account_type, exchange_rate, account_currency,
-					project, cheque_no, cheque_date, user_remark, party_name, original_reference_type, original_reference_name
-				from `tabJournal Entry Account` where name = %s
-			""", jv_detail.name, as_dict=True)
+			jvd = frappe.db.sql("select * from `tabJournal Entry Account` where name = %s", jv_detail.name, as_dict=True)
 
 			amount_in_account_currency = flt(original_dr_or_cr) - flt(amt_allocatable)
 			amount_in_company_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
@@ -497,6 +493,11 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.user_remark = jvd[0]["user_remark"]
 			ch.original_reference_type = jvd[0]["original_reference_type"]
 			ch.original_reference_name = jvd[0]["original_reference_type"]
+			ch.against_account = cstr(jvd[0]["against_account"])
+
+			from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+			for dimension_fieldname in get_accounting_dimensions():
+				ch.set(dimension_fieldname, jvd[0].get(dimension_fieldname))
 
 			ch.set(d['dr_or_cr'], amount_in_account_currency)
 			ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
@@ -505,7 +506,6 @@ def update_reference_in_journal_entry(d, jv_doc):
 				else 'debit_in_account_currency', 0)
 			ch.set('credit' if d['dr_or_cr']== 'debit_in_account_currency' else 'debit', 0)
 
-			ch.against_account = cstr(jvd[0]["against_account"])
 			ch.reference_type = original_reference_type
 			ch.reference_name = original_reference_name
 			ch.docstatus = 1
