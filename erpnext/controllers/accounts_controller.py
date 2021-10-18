@@ -1694,7 +1694,7 @@ def update_invoice_status():
 				dt.docstatus = 1
 				and dt.status != 'Overdue'
 				and (
-						((dt.is_pos or dt_is_return) and dt.due_date < %s)
+						((dt.is_pos or dt.is_return) and dt.due_date < %s)
 						or (
 							dt.outstanding_amount > 0
 							and (dt.base_grand_total - dt.outstanding_amount) <

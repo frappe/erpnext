@@ -1183,6 +1183,11 @@ class PurchaseInvoice(BuyingController):
 			return
 
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
+		total = (
+			flt(self.base_grand_total, self.precision("base_grand_total"))
+			if self.disable_rounded_total
+			else flt(self.base_rounded_total, self.precision("base_rounded_total"))
+		)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1192,7 +1197,7 @@ class PurchaseInvoice(BuyingController):
 					self.status = 'Internal Transfer'
 				elif is_overdue(self):
 					self.status = "Overdue"
-				elif 0 < abs(outstanding_amount) < abs(flt(self.base_grand_total, self.precision("base_grand_total"))):
+				elif 0 < abs(outstanding_amount) < abs(total):
 					self.status = "Partly Paid"
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"

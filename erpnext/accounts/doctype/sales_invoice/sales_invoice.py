@@ -1419,6 +1419,11 @@ class SalesInvoice(SellingController):
 			return
 
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
+		total = (
+			flt(self.base_grand_total, self.precision("base_grand_total"))
+			if self.disable_rounded_total
+			else flt(self.base_rounded_total, self.precision("base_rounded_total"))
+		)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1428,7 +1433,7 @@ class SalesInvoice(SellingController):
 					self.status = 'Internal Transfer'
 				elif is_overdue(self):
 					self.status = "Overdue"
-				elif 0 < abs(outstanding_amount) < abs(flt(self.base_grand_total, self.precision("base_grand_total"))):
+				elif 0 < abs(outstanding_amount) < abs(total):
 					self.status = "Partly Paid"
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
@@ -1457,7 +1462,7 @@ class SalesInvoice(SellingController):
 
 def is_overdue(doc):
 	nowdate = getdate()
-	if doc.is_pos or doc.is_return or not doc.payment_schedule:
+	if doc.get('is_pos') or doc.get('is_return') or not doc.get('payment_schedule'):
 		return getdate(doc.due_date) < nowdate
 
 	outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
