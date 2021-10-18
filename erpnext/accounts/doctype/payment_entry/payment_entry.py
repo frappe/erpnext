@@ -1137,8 +1137,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 								'invoice_amount': flt(d.invoice_amount),
 								'outstanding_amount': flt(d.outstanding_amount),
 								'payment_amount': payment_term.payment_amount,
-								'payment_term': payment_term.payment_term,
-								'allocated_amount': payment_term.outstanding
+								'payment_term': payment_term.payment_term
 							}))
 
 	outstanding_invoices_after_split = []
