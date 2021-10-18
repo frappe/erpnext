@@ -126,7 +126,8 @@ class Item(WebsiteGenerator):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.update_show_in_website()	
-		self.assing_delivery_area()	
+		if self.delivery_area != None:
+			self.assing_delivery_area()	
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
