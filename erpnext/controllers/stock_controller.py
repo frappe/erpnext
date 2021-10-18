@@ -79,8 +79,15 @@ class StockController(AccountsController):
 	def clean_serial_nos(self):
 		for row in self.get("items"):
 			if hasattr(row, "serial_no") and row.serial_no:
-				# replace commas by linefeed and remove all spaces in string
-				row.serial_no = row.serial_no.replace(",", "\n").replace(" ", "")
+				# replace commas by linefeed
+				row.serial_no = row.serial_no.replace(",", "\n")
+
+				# strip preceeding and succeeding spaces for each SN
+				# (SN could have valid spaces in between e.g. SN - 123 - 2021)
+				serial_no_list = row.serial_no.split("\n")
+				serial_no_list = [sn.strip() for sn in serial_no_list]
+
+				row.serial_no = "\n".join(serial_no_list)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
