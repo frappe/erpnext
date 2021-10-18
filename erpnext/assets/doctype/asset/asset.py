@@ -194,7 +194,7 @@ class Asset(AccountsController):
 			start = self.clear_depreciation_schedule()
 
 			# value_after_depreciation - current Asset value
-			if d.value_after_depreciation:
+			if self.docstatus == 1 and d.value_after_depreciation:
 				value_after_depreciation = (flt(d.value_after_depreciation) -
 					flt(self.opening_accumulated_depreciation))
 			else:

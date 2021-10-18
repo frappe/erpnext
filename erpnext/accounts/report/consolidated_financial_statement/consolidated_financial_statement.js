@@ -103,8 +103,11 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				column.is_tree = true;
 			}
 
-			value = default_formatter(value, row, column, data);
+			if (data && data.account && column.apply_currency_formatter) {
+				data.currency = erpnext.get_currency(column.company_name);
+			}
 
+			value = default_formatter(value, row, column, data);
 			if (!data.parent_account) {
 				value = $(`<span>${value}</span>`);
 
