@@ -172,13 +172,6 @@ class Gstr1Report(object):
 		self.invoices = frappe._dict()
 		conditions = self.get_conditions()
 
-		company_gstins = get_company_gstin_number(self.filters.get('company'), all_gstins=True)
-
-		if company_gstins:
-			self.filters.update({
-				'company_gstins': company_gstins
-			})
-
 		invoice_data = frappe.db.sql("""
 			select
 				{select_columns}
@@ -242,7 +235,7 @@ class Gstr1Report(object):
 		elif self.filters.get("type_of_business") ==  "EXPORT":
 			conditions += """ AND is_return !=1 and gst_category = 'Overseas' """
 
-		conditions += " AND IFNULL(billing_address_gstin, '') NOT IN %(company_gstins)s"
+		conditions += " AND IFNULL(billing_address_gstin, '') != company_gstin"
 
 		return conditions
 
