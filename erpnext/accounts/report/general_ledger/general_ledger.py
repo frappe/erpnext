@@ -367,9 +367,10 @@ def group_by_field(group_by):
 def initialize_gle_map(gl_entries, filters):
 	gle_map = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
+	default = _dict(totals=get_totals_dict(), entries=[])
 
 	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
+		gle_map.setdefault(gle.get(group_by), default)
 	return gle_map
 
 
