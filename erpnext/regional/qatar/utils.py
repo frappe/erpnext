@@ -1,13 +1,17 @@
 from __future__ import unicode_literals
-import frappe
+
 import csv
 import itertools
 import json
-from frappe import _
-from frappe.utils import comma_and, get_link_to_form, get_datetime
 
-from erpnext.regional.doctype.salary_information_file.salary_information_file import get_company_bank_details
+import frappe
+from frappe import _
+from frappe.utils import comma_and, get_datetime, get_link_to_form
+
 from erpnext.hr.doctype.attendance.attendance import get_month_map
+from erpnext.regional.doctype.salary_information_file.salary_information_file import (
+	get_company_bank_details,
+)
 
 frequency = {
 	"Monthly": "M",

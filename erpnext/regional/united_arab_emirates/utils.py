@@ -1,16 +1,30 @@
 from __future__ import unicode_literals
-import json
-import frappe
+
 import itertools
-import erpnext
-from six import iteritems
+import json
+
+import frappe
 from frappe import _
-from frappe.utils import get_datetime
-from erpnext.hr.doctype.attendance.attendance import get_month_map
-from erpnext.regional.qatar.utils import create_and_attach_file, get_salary_slip, get_total_component_amount, set_missing_fields_data
-from frappe.utils import flt, round_based_on_smallest_currency_fraction, money_in_words
-from erpnext.regional.doctype.salary_information_file.salary_information_file import get_company_bank_details
+from frappe.utils import (
+	flt,
+	get_datetime,
+	money_in_words,
+	round_based_on_smallest_currency_fraction,
+)
+from six import iteritems
+
+import erpnext
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
+from erpnext.hr.doctype.attendance.attendance import get_month_map
+from erpnext.regional.doctype.salary_information_file.salary_information_file import (
+	get_company_bank_details,
+)
+from erpnext.regional.qatar.utils import (
+	create_and_attach_file,
+	get_salary_slip,
+	get_total_component_amount,
+	set_missing_fields_data,
+)
 
 
 def update_itemised_tax_data(doc):

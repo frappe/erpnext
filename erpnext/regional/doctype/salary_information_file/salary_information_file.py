@@ -6,6 +6,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
 
+
 class SalaryInformationFile(Document):
 	def validate(self):
 		if not self.employer_establishment_id:

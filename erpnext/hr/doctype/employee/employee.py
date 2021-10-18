@@ -12,8 +12,8 @@ from frappe.permissions import (
 )
 from frappe.utils import add_years, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
-from erpnext.accounts.doctype.bank_account.bank_account import validate_iban
 
+from erpnext.accounts.doctype.bank_account.bank_account import validate_iban
 from erpnext.utilities.transaction_base import delete_events
 
 
