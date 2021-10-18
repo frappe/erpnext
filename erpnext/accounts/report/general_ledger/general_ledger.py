@@ -434,13 +434,11 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				else:
 					update_value_in_dict(consolidated_gle, key, gle)
 
-	for key, gle_entry in consolidated_gle.items():
-		update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle_entry)
-		update_value_in_dict(totals, 'total', gle_entry)
-		update_value_in_dict(gle_map[gle_entry.get(group_by)].totals, 'closing', gle_entry)
-		update_value_in_dict(totals, 'closing', gle_entry)
-
 	for key, value in consolidated_gle.items():
+		update_value_in_dict(gle_map[value.get(group_by)].totals, 'total', value)
+		update_value_in_dict(totals, 'total', value)
+		update_value_in_dict(gle_map[value.get(group_by)].totals, 'closing', value)
+		update_value_in_dict(totals, 'closing', value)
 		entries.append(value)
 
 	return totals, entries
