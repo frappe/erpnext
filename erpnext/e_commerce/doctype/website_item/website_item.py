@@ -534,3 +534,15 @@ def make_website_item(doc, save=True):
 	insert_item_to_index(website_item)
 
 	return [website_item.name, website_item.web_item_name]
+
+@frappe.whitelist()
+def make_bulk_website_items(items):
+	if isinstance(items, str):
+		items = json.loads(items)
+
+	website_items = []
+	for item in items:
+		doc = frappe.get_cached_doc("Item", item)
+		website_item_details = make_website_item(doc)
+		website_items.append(website_item_details)
+	return website_items

@@ -14,6 +14,31 @@ frappe.listview_settings['Item'] = {
 			return [__("Variant"), "green", "variant_of,=," + doc.variant_of];
 		}
 	},
+	onload: function(me) {
+		me.page.add_action_item(__("Create Website Item(s)"), async function() {
+			const items = me.get_checked_items().map(item => item.name);
+			frappe.call({
+				method: "erpnext.e_commerce.doctype.website_item.website_item.make_bulk_website_items",
+				args: {items: items},
+				freeze: true,
+				freeze_message: __("Publishing Items ..."),
+				callback(results) {
+					results.message.forEach(result => {
+						frappe.msgprint({
+							message: __("Website Item {0} has been created.",
+								[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
+									item_encoded: encodeURIComponent(result[0]),
+									item: result[1]
+								})]
+							),
+							title: __("Published"),
+							indicator: "green"
+						});
+					});
+				}
+			});
+		});
+	},
 
 	reports: [
 		{
