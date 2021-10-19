@@ -172,13 +172,6 @@ class Gstr1Report(object):
 		self.invoices = frappe._dict()
 		conditions = self.get_conditions()
 
-		company_gstins = get_company_gstin_number(self.filters.get('company'), all_gstins=True)
-
-		if company_gstins:
-			self.filters.update({
-				'company_gstins': company_gstins
-			})
-
 		invoice_data = frappe.db.sql("""
 			select
 				{select_columns}
@@ -214,7 +207,7 @@ class Gstr1Report(object):
 
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += "AND IFNULL(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') AND is_return != 1"
+			conditions += "AND IFNULL(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') AND is_return != 1 AND is_debit_note !=1"
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
 			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
@@ -223,7 +216,7 @@ class Gstr1Report(object):
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ AND ifnull(SUBSTR(place_of_supply, 1, 2),'') != ifnull(SUBSTR(company_gstin, 1, 2),'')
-				AND grand_total > {0} AND is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
+				AND grand_total > {0} AND is_return != 1 AND is_debit_note !=1 AND gst_category ='Unregistered' """.format(flt(b2c_limit))
 
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ AND (
@@ -236,13 +229,13 @@ class Gstr1Report(object):
 		elif self.filters.get("type_of_business") == "CDNR-UNREG":
 			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
 			conditions += """ AND ifnull(SUBSTR(place_of_supply, 1, 2),'') != ifnull(SUBSTR(company_gstin, 1, 2),'')
-				AND ABS(grand_total) > {0} AND (is_return = 1 OR is_debit_note = 1)
-				AND IFNULL(gst_category, '') in ('Unregistered', 'Overseas')""".format(flt(b2c_limit))
+				AND (is_return = 1 OR is_debit_note = 1)
+				AND IFNULL(gst_category, '') in ('Unregistered', 'Overseas')"""
 
 		elif self.filters.get("type_of_business") ==  "EXPORT":
 			conditions += """ AND is_return !=1 and gst_category = 'Overseas' """
 
-		conditions += " AND IFNULL(billing_address_gstin, '') NOT IN %(company_gstins)s"
+		conditions += " AND IFNULL(billing_address_gstin, '') != company_gstin"
 
 		return conditions
 

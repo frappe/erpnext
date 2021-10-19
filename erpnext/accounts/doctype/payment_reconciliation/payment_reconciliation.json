@@ -12,15 +12,16 @@
   "receivable_payable_account",
   "col_break1",
   "from_invoice_date",
-  "to_invoice_date",
-  "minimum_invoice_amount",
-  "maximum_invoice_amount",
-  "invoice_limit",
-  "column_break_13",
   "from_payment_date",
-  "to_payment_date",
+  "minimum_invoice_amount",
   "minimum_payment_amount",
+  "column_break_11",
+  "to_invoice_date",
+  "to_payment_date",
+  "maximum_invoice_amount",
   "maximum_payment_amount",
+  "column_break_13",
+  "invoice_limit",
   "payment_limit",
   "bank_cash_account",
   "sec_break1",
@@ -79,6 +80,7 @@
   },
   {
    "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
+   "description": "If you need to reconcile particular transactions against each other, then please select accordingly. If not, all the transactions will be allocated in FIFO order.",
    "fieldname": "sec_break1",
    "fieldtype": "Section Break",
    "label": "Unreconciled Entries"
@@ -163,6 +165,7 @@
    "label": "Maximum Payment Amount"
   },
   {
+   "description": "System will fetch all the entries if limit value is zero.",
    "fieldname": "payment_limit",
    "fieldtype": "Int",
    "label": "Payment Limit"
@@ -171,13 +174,17 @@
    "fieldname": "maximum_invoice_amount",
    "fieldtype": "Currency",
    "label": "Maximum Invoice Amount"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
- "modified": "2021-08-30 13:05:51.977861",
+ "modified": "2021-10-04 20:27:11.114194",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",

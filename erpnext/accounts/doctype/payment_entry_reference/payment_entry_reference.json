@@ -93,6 +93,7 @@
    "options": "Payment Term"
   },
   {
+   "depends_on": "exchange_gain_loss",
    "fieldname": "exchange_gain_loss",
    "fieldtype": "Currency",
    "label": "Exchange Gain/Loss",
@@ -103,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-21 13:30:11.605388",
+ "modified": "2021-09-26 17:06:55.597389",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

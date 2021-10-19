@@ -196,10 +196,6 @@ def setup_user_roles(domain):
 		'Purchase Manager', 'Projects User', 'Manufacturing User', 'Manufacturing Manager',
 		'Support Team')
 
-	if domain == "Healthcare":
-		user.add_roles('Physician', 'Healthcare Administrator', 'Laboratory User',
-			'Nursing User', 'Patient')
-
 	if domain == "Education":
 		user.add_roles('Academics User')
 

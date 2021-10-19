@@ -411,7 +411,7 @@ def get_amounts(amounts, against_loan, posting_date):
 		if due_date and not final_due_date:
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
-	if against_loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
+	if against_loan_doc.status in ('Disbursed', 'Closed') or against_loan_doc.disbursed_amount >= against_loan_doc.loan_amount:
 		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid \
 			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
 	else:
