@@ -409,8 +409,6 @@ class calculate_taxes_and_totals(object):
 				self.doc.rounding_adjustment = diff
 
 	def calculate_totals(self):
-		print('BEFORE CALCULATE TAXES AND CHARGES', 'taxes:::', 'rounding adjustment:::',self.doc.rounding_adjustment, 'net total', self.doc.net_total)
-
 		if self.doc.get("taxes"):
 			self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment)
 		else:
@@ -421,8 +419,6 @@ class calculate_taxes_and_totals(object):
 			- flt(self.doc.rounding_adjustment), self.doc.precision("total_taxes_and_charges"))
 		else:
 			self.doc.total_taxes_and_charges = 0.0
-		print('AFTER assigning TAXES AND CHARGES', self.doc.grand_total, self.doc.net_total, self.doc.rounding_adjustment)
-		# frappe.throw('calculate_totals')
 
 		self._set_in_company_currency(self.doc, ["total_taxes_and_charges", "rounding_adjustment"])
 
