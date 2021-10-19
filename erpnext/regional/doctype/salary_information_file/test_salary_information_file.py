@@ -23,6 +23,9 @@ class TestSalaryInformationFile(unittest.TestCase):
 		frappe.db.sql("""delete from `tabHoliday List`""")
 		create_holiday_list()
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_csv_generation_for_qatar_region(self):
 		company = create_company("Qatar Financial", "QF", "Qatar")
 		employee = make_employee("test_employee@qatar.com", company=company.name)
