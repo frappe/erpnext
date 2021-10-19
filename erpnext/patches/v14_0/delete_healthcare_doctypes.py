@@ -19,7 +19,7 @@ def execute():
 	for print_format in print_formats:
 		frappe.delete_doc("Print Format", print_format, ignore_missing=True, force=True)
 
-	frappe.reload_doctype("Website Settings")
+	frappe.reload_doc("website", "doctype", "website_settings")
 	forms = frappe.get_all("Web Form", {"module": "healthcare", "is_standard": 1}, pluck='name')
 	for form in forms:
 		frappe.delete_doc("Web Form", form, ignore_missing=True, force=True)
@@ -32,7 +32,7 @@ def execute():
 	for dashboard in dashboards:
 		frappe.delete_doc("Dashboard Chart", dashboard, ignore_missing=True, force=True)
 
-	frappe.reload_doctype("Number Card")
+	frappe.reload_doc("desk", "doctype", "number_card")
 	cards = frappe.get_all("Number Card", {"module": "healthcare", "is_standard": 1}, pluck='name')
 	for card in cards:
 		frappe.delete_doc("Number Card", card, ignore_missing=True, force=True)
