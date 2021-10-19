@@ -25,7 +25,7 @@ context('Organizational Chart Mobile', () => {
 				cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
 				cy.get('@input')
 					.clear({ force: true })
-					.type('Test Org Chart{enter}', { force: true })
+					.type('Test Org Chart{downarrow}{enter}', { force: true })
 					.blur({ force: true });
 			});
 		});
