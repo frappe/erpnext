@@ -34,5 +34,4 @@ def execute():
 	}
 	create_custom_fields(custom_fields, update=True)
 	add_permissions()
-	
 	frappe.enqueue('erpnext.erpnext_integrations.doctype.taxjar_settings.taxjar_settings.add_product_tax_categories', now=True)
