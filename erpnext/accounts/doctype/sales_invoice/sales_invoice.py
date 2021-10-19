@@ -1419,8 +1419,12 @@ class SalesInvoice(SellingController):
 			return
 
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
-		total = "base_grand_total" if self.disable_rounded_total else "base_rounded_total"
-		total = flt(self.get(total), self.precision(total))
+		total_fieldname = (
+			"base_grand_total"
+			if self.disable_rounded_total
+			else "base_rounded_total"
+		)
+		total = flt(self.get(total_fieldname), self.precision(total_fieldname))
 
 		if not status:
 			if self.docstatus == 2:
@@ -1430,7 +1434,7 @@ class SalesInvoice(SellingController):
 					self.status = 'Internal Transfer'
 				elif is_overdue(self, total):
 					self.status = "Overdue"
-				elif 0 < abs(outstanding_amount) < abs(total):
+				elif 0 < outstanding_amount < total:
 					self.status = "Partly Paid"
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
@@ -1458,19 +1462,19 @@ class SalesInvoice(SellingController):
 			self.db_set('status', self.status, update_modified = update_modified)
 
 def is_overdue(doc, total):
-	nowdate = getdate()
-	if doc.get('is_pos') or doc.get('is_return') or not doc.get('payment_schedule'):
-		return getdate(doc.due_date) < nowdate
-
 	outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
-	if outstanding_amount == 0:
+	if outstanding_amount <= 0:
 		return
+
+	today = getdate()
+	if doc.get('is_pos') or not doc.get('payment_schedule'):
+		return getdate(doc.due_date) < today
 
 	# calculate payable amount till date
 	payable_amount = sum(
 		payment.base_payment_amount
 		for payment in doc.payment_schedule
-		if getdate(payment.due_date) < nowdate
+		if getdate(payment.due_date) < today
 	)
 
 	return (total - outstanding_amount) < payable_amount
