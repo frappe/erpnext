@@ -468,7 +468,7 @@
    "width": "100px"
   },
   {
-   "depends_on": "eval:parent.is_internal_customer",
+   "depends_on": "eval:parent.is_internal_customer || doc.target_warehouse",
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "hidden": 1,
@@ -759,7 +759,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-23 01:04:08.588104",
+ "modified": "2021-10-05 12:12:44.018872",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
