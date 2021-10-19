@@ -5,8 +5,8 @@ frappe.provide("erpnext.accounts");
 erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationController extends frappe.ui.form.Controller {
 	onload() {
 		var me = this;
-
-		this.frm.set_query("party_type", function() {
+		me.frm.disable_save();
+		me.frm.set_query("party_type", function() {
 			return {
 				"filters": {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
@@ -14,7 +14,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			}
 		});
 
-		this.frm.set_query('receivable_payable_account', function() {
+		me.frm.set_query('receivable_payable_account', function() {
 			check_mandatory(me.frm);
 			return {
 				filters: {
@@ -25,7 +25,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			};
 		});
 
-		this.frm.set_query('bank_cash_account', function() {
+		me.frm.set_query('bank_cash_account', function() {
 			check_mandatory(me.frm, true);
 			return {
 				filters:[
@@ -36,9 +36,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			};
 		});
 
-		this.frm.set_value('party_type', '');
-		this.frm.set_value('party', '');
-		this.frm.set_value('receivable_payable_account', '');
+		me.frm.set_value('party_type', '');
+		me.frm.set_value('party', '');
+		me.frm.set_value('receivable_payable_account', '');
 
 		var check_mandatory = (frm, only_company=false) => {
 			var title = __("Mandatory");
@@ -86,16 +86,21 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 	company() {
 		var me = this;
-		this.frm.set_value('receivable_payable_account', '');
-		me.frm.clear_table("allocation");
-		me.frm.clear_table("invoices");
-		me.frm.clear_table("payments");
-		me.frm.refresh_fields();
+		me.frm.set_value('receivable_payable_account', '');
+		me.frm.set_value('party_type', '');
+		me.frm.set_value('party', '');
+	}
+
+	party_type() {
+		var me = this;
+		me.frm.set_value('receivable_payable_account', '');
+		me.frm.set_value('party', '');
 		me.frm.trigger('party');
 	}
 
 	party() {
 		var me = this;
+
 		if (!me.frm.doc.receivable_payable_account && me.frm.doc.party_type && me.frm.doc.party) {
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
@@ -109,6 +114,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						me.frm.set_value("receivable_payable_account", r.message);
 					}
 					me.frm.refresh();
+					me.frm.clear_table("allocation");
+					me.frm.clear_table("invoices");
+					me.frm.clear_table("payments");
 				}
 			});
 		}
@@ -116,12 +124,19 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 	get_unreconciled_entries() {
 		var me = this;
+		me.frm.clear_table("allocation");
 		return this.frm.call({
 			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
 				if (!(me.frm.doc.payments.length || me.frm.doc.invoices.length)) {
-					frappe.throw({message: __("No invoice and payment records found for this party")});
+					frappe.throw({message: __("No unreconciled invoices and payments found for this party")});
+				}
+				else if(!(me.frm.doc.invoices.length)) {
+					frappe.throw({message: __("No outstanding invoices found for this party")});
+				}
+				else if(!(me.frm.doc.payments.length)) {
+					frappe.throw({message: __("No unreconciled payments found for this party")});
 				}
 				me.frm.refresh();
 			}
