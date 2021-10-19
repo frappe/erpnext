@@ -4,7 +4,7 @@ import frappe
 import taxjar
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
-from frappe.utils import cint
+from frappe.utils import cint, flt
 
 from erpnext import get_default_company
 
@@ -103,7 +103,7 @@ def get_tax_data(doc):
 
 	shipping = sum([tax.tax_amount for tax in doc.taxes if tax.account_head == SHIP_ACCOUNT_HEAD])
 
-	line_items = [get_line_item_dict(item) for item in doc.items]
+	line_items = [get_line_item_dict(item, doc.docstatus) for item in doc.items]
 
 	if from_shipping_state not in SUPPORTED_STATE_CODES:
 		from_shipping_state = get_state_code(from_address, 'Company')
@@ -139,13 +139,20 @@ def get_state_code(address, location):
 
 	return state_code
 
-def get_line_item_dict(item):
-	return dict(
+def get_line_item_dict(item, docstatus):
+	tax_dict = dict(
 		id = item.get('idx'),
 		quantity = item.get('qty'),
 		unit_price = item.get('rate'),
 		product_tax_code = item.get('product_tax_category')
 	)
+
+	if docstatus == 1:
+		tax_dict.update({
+			'sales_tax':item.get('tax_collectable')
+		})
+
+	return tax_dict
 
 def set_sales_tax(doc, method):
 	if not TAXJAR_CALCULATE_TAX:
@@ -163,6 +170,9 @@ def set_sales_tax(doc, method):
 		# Remove existing tax rows if address is changed from a taxable state/country
 		setattr(doc, "taxes", [tax for tax in doc.taxes if tax.account_head != TAX_ACCOUNT_HEAD])
 		return
+
+	# check if delivering within a nexus
+	check_for_nexus(doc, tax_dict)
 
 	tax_data = validate_tax_request(tax_dict)
 	if tax_data is not None:
@@ -190,6 +200,17 @@ def set_sales_tax(doc, method):
 				doc.get('items')[cint(item.id)-1].taxable_amount = item.taxable_amount
 
 			doc.run_method("calculate_taxes_and_totals")
+
+def check_for_nexus(doc, tax_dict):
+	if not frappe.db.get_value('TaxJar Nexus', {'region_code': tax_dict["to_state"]}):
+		for item in doc.get("items"):
+			item.tax_collectable = flt(0)
+			item.taxable_amount = flt(0)
+
+		for tax in doc.taxes:
+			if tax.account_head == TAX_ACCOUNT_HEAD:
+				doc.taxes.remove(tax)
+		return
 
 def check_sales_tax_exemption(doc):
 	# if the party is exempt from sales tax, then set all tax account heads to zero
