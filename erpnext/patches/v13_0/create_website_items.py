@@ -14,7 +14,7 @@ def execute():
 	item_fields = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
 		"has_variants", "variant_of", "description", "weightage"]
 	web_fields_to_map = ["route", "slideshow", "website_image_alt",
-		"website_warehouse", "web_long_description", "website_content"]
+		"website_warehouse", "web_long_description", "website_content", "thumbnail"]
 
 	item_table_fields = frappe.db.sql("desc `tabItem`", as_dict=1)
 	item_table_fields = [d.get('Field') for d in item_table_fields]
@@ -47,16 +47,26 @@ def execute():
 	for item in items:
 		if frappe.db.exists("Website Item", {"item_code": item.item_code}):
 			# if website item already exists check for empty thumbnail
-			web_item_doc = frappe.get_doc("Website Item", {"item_code": item.item_code})
-			if web_item_doc.website_image and not web_item_doc.thumbnail:
-				web_item_doc.make_thumbnail()
-				web_item_doc.save()
+			# if empty, fetch thumbnail from Item master
+			web_item_doc = frappe.db.get_values(
+				"Website Item",
+				filters={
+					"item_code": item.item_code
+				},
+				fieldname=["website_image", "thumbnail", "name"]
+			)[0]
+
+			if web_item_doc.get("website_image") and not web_item_doc.get("thumbnail"):
+				thumbnail = frappe.db.get_value("Item", item.item_code, "thumbnail")
+				frappe.db.set_value("Website Item", web_item_doc.name, "thumbnail", thumbnail)
 		else:
 			# else make new website item from item (publish item)
 			website_item = make_website_item(item, save=False)
 			website_item.ranking = item.get("weightage")
+
 			for field in web_fields_to_map:
 				website_item.update({field: item.get(field)})
+
 			website_item.save()
 
 			# move Website Item Group & Website Specification table to Website Item
