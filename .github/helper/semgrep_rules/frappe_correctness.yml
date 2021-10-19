@@ -132,7 +132,6 @@ rules:
   languages: [python]
   severity: ERROR
 
-
 - id: frappe-manual-commit
   patterns:
     - pattern: frappe.db.commit()
@@ -147,5 +146,18 @@ rules:
       exclude:
         - "**/patches/**"
         - "**/demo/**"
+  languages: [python]
+  severity: ERROR
+
+- id: frappe-using-db-sql
+  pattern-either:
+    - pattern: frappe.db.sql(...)
+    - pattern: frappe.db.sql_ddl(...)
+    - pattern: frappe.db.sql_list(...)
+  paths:
+    exclude:
+      - "test_*.py"
+  message: |
+    The PR contains a SQL query that may be re-written with frappe.qb (https://frappeframework.com/docs/user/en/api/query-builder) or the Database API (https://frappeframework.com/docs/user/en/api/database)
   languages: [python]
   severity: ERROR
