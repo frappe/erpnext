@@ -83,13 +83,14 @@
   },
   {
    "fieldname": "download_area",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Download Area",
+   "options": "Download Area",
    "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-10-18 11:27:37.872171",
+ "modified": "2021-10-19 14:54:52.287338",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download",
