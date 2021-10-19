@@ -16,6 +16,7 @@ def execute():
 	web_fields_to_map = ["route", "slideshow", "website_image_alt",
 		"website_warehouse", "web_long_description", "website_content", "thumbnail"]
 
+	# get all valid columns (fields) from Item master DB schema
 	item_table_fields = frappe.db.sql("desc `tabItem`", as_dict=1)
 	item_table_fields = [d.get('Field') for d in item_table_fields]
 
@@ -45,7 +46,10 @@ def execute():
 
 	count = 0
 	for item in items:
-		if frappe.db.exists("Website Item", {"item_code": item.item_code}):
+		web_item_exists = frappe.db.exists("Website Item", {"item_code": item.item_code})
+		thumbnail_column_exists = "thumbnail" in item_table_fields
+
+		if web_item_exists and thumbnail_column_exists:
 			# if website item already exists check for empty thumbnail
 			# if empty, fetch thumbnail from Item master
 			web_item_doc = frappe.db.get_values(
