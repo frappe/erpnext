@@ -18,8 +18,8 @@ from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_a
 
 class TestSalaryInformationFile(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("""delete from tabCompany where name="Qatar Financial""")
-		frappe.db.sql("""delete from tabCompany where name="UAE Financial""")
+		frappe.db.sql("""delete from tabCompany where name='Qatar Financial'""")
+		frappe.db.sql("""delete from tabCompany where name='UAE Financial'""")
 		frappe.db.sql("""delete from `tabBank Account`""")
 		frappe.db.sql("""delete from tabBank""")
 		frappe.db.sql("""delete from `tabHoliday List`""")
