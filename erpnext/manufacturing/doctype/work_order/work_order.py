@@ -513,7 +513,7 @@ class WorkOrder(Document):
 					from
 						`tabBOM Operation`
 					where
-						parent = %s	order by idx
+						parent = %s order by idx
 					""", bom_no, as_dict=1)
 
 			for d in data:
