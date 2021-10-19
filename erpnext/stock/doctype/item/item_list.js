@@ -15,7 +15,7 @@ frappe.listview_settings['Item'] = {
 		}
 	},
 	onload: function(me) {
-		me.page.add_action_item(__("Create Website Item(s)"), async function() {
+		me.page.add_action_item(__("Create Website Item(s)"), function() {
 			const items = me.get_checked_items().map(item => item.name);
 			frappe.call({
 				method: "erpnext.e_commerce.doctype.website_item.website_item.make_bulk_website_items",
