@@ -508,29 +508,18 @@ class WorkOrder(Document):
 			data = frappe.db.sql(
 					f"""select
 						operation, description, workstation, idx,
-						base_hour_rate as hour_rate, time_in_mins * {qty} as time_in_mins,
-						"Pending" as status, parent as bom, batch_size, sequence_id, fixed_time
-					from
-						`tabBOM Operation`
-					where
-						parent = %s
-						and fixed_time = 0
-						order by idx
-					""", bom_no, as_dict=1)
-
-			for o in frappe.db.sql(
-				f"""select
-						operation, description, workstation, idx,
 						base_hour_rate as hour_rate, time_in_mins as time_in_mins,
 						"Pending" as status, parent as bom, batch_size, sequence_id, fixed_time
 					from
 						`tabBOM Operation`
 					where
 						parent = %s
-						and fixed_time = 1
-						order by idx
-					""", bom_no, as_dict=1):
-				data.append(o)
+					order by idx
+					""", bom_no, as_dict=1)
+
+			for d in data:
+				if not d.fixed_time:
+					d.time_in_mins = flt(d.time_in_mins) * flt(self.qty)
 
 			return data
 
