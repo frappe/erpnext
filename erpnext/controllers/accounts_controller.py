@@ -1698,7 +1698,7 @@ def update_invoice_status():
 						or (
 							dt.outstanding_amount > 0
 							and (dt.base_grand_total - dt.outstanding_amount) <
-								(select sum(payment_amount) from `tabPayment Schedule` as ps
+								(select sum(base_payment_amount) from `tabPayment Schedule` as ps
 									where ps.parent = dt.name and ps.due_date < %s)
 						)
 					)
