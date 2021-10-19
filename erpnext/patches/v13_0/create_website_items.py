@@ -53,7 +53,8 @@ def execute():
 				filters={
 					"item_code": item.item_code
 				},
-				fieldname=["website_image", "thumbnail", "name"]
+				fieldname=["website_image", "thumbnail", "name"],
+				as_dict=True
 			)[0]
 
 			if web_item_doc.get("website_image") and not web_item_doc.get("thumbnail"):
