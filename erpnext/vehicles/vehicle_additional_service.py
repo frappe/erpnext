@@ -1,0 +1,6 @@
+import frappe
+from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
+
+
+class VehicleAdditionalServiceController(VehicleTransactionController):
+	pass

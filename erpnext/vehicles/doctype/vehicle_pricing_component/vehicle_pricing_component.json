@@ -1,0 +1,136 @@
+{
+ "allow_rename": 1,
+ "autoname": "field:component_name",
+ "creation": "2021-09-17 16:28:07.886297",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "component_name",
+  "component_type",
+  "sorting_index",
+  "column_break_4",
+  "booking_component_type",
+  "registration_component_type",
+  "disabled",
+  "section_break_6",
+  "price_lists"
+ ],
+ "fields": [
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "component_name",
+   "fieldtype": "Data",
+   "label": "Component Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "component_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Component Type",
+   "options": "\nRegistration\nBooking",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "999",
+   "description": "Leave zero for default sorting",
+   "fieldname": "sorting_index",
+   "fieldtype": "Int",
+   "label": "Sorting Index",
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "price_lists",
+   "fieldtype": "Table",
+   "label": "Price Lists",
+   "no_copy": 1,
+   "options": "Vehicle Pricing Price List"
+  },
+  {
+   "depends_on": "eval:doc.component_type == \"Booking\"",
+   "fieldname": "booking_component_type",
+   "fieldtype": "Select",
+   "label": "Booking Component Type",
+   "no_copy": 1,
+   "options": "\nVehicle Retail\nFreight\nWithholding Tax"
+  },
+  {
+   "depends_on": "eval:doc.component_type == \"Registration\"",
+   "fieldname": "registration_component_type",
+   "fieldtype": "Select",
+   "label": "Registration Component Type",
+   "no_copy": 1,
+   "options": "\nChoice Number\nOwnership Transfer"
+  }
+ ],
+ "modified": "2021-09-20 13:35:59.643350",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Pricing Component",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Registration User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Vehicles",
+ "sort_field": "sorting_index",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

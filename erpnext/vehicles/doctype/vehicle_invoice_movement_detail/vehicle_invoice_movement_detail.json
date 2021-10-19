@@ -1,0 +1,249 @@
+{
+ "creation": "2021-09-23 16:24:24.871554",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle",
+  "vehicle_booking_order",
+  "vehicle_registration_order",
+  "column_break_11",
+  "vehicle_invoice",
+  "bill_no",
+  "bill_date",
+  "column_break_8",
+  "current_employee",
+  "current_employee_name",
+  "current_agent",
+  "current_agent_name",
+  "vehicle_details_section",
+  "variant_of",
+  "variant_of_name",
+  "item_code",
+  "item_name",
+  "item_group",
+  "brand",
+  "column_break_21",
+  "vehicle_chassis_no",
+  "vehicle_engine_no",
+  "column_break_23",
+  "vehicle_color"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order"
+  },
+  {
+   "fieldname": "vehicle_registration_order",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Registration Order",
+   "no_copy": 1,
+   "options": "Vehicle Registration Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_invoice",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle Invoice",
+   "no_copy": 1,
+   "options": "Vehicle Invoice",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "vehicle_invoice.bill_no",
+   "fieldname": "bill_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Invoice No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "vehicle_invoice.bill_date",
+   "fieldname": "bill_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Invoice Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_invoice.employee",
+   "fieldname": "current_employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Employee (Before Movement)",
+   "no_copy": 1,
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.current_employee && doc.current_employee_name != doc.current_employee",
+   "fetch_from": "vehicle_invoice.employee_name",
+   "fieldname": "current_employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name (Before Movement)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_invoice.agent",
+   "fieldname": "current_agent",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Agent (Before Movement)",
+   "no_copy": 1,
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.current_agent && doc.current_agent_name != doc.current_agent",
+   "fetch_from": "vehicle_invoice.agent_name",
+   "fieldname": "current_agent_name",
+   "fieldtype": "Data",
+   "label": "Agent Name (Before Movement)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Variant Item Code",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Variant Item Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Brand",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "vehicle_chassis_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Chassis No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "vehicle_engine_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Engine No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_color",
+   "fieldtype": "Link",
+   "label": "Color",
+   "no_copy": 1,
+   "options": "Vehicle Color",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-09-27 00:04:23.956957",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Invoice Movement Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "restrict_to_domain": "Vehicles",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1
+}

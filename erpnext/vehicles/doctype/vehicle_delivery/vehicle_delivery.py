@@ -15,18 +15,22 @@ class VehicleDelivery(VehicleTransactionController):
 
 	def validate(self):
 		super(VehicleDelivery, self).validate()
+		self.validate_party_mandatory()
 		self.validate_return()
 		self.set_title()
+
+	def before_submit(self):
+		self.validate_vehicle_mandatory()
 
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_odometer_log()
-		self.update_vehicle_booking_order()
+		self.update_vehicle_booking_order_delivery()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.cancel_odometer_log()
-		self.update_vehicle_booking_order()
+		self.update_vehicle_booking_order_delivery()
 
 	def validate_return(self):
 		if cint(self.is_return) and self.vehicle:

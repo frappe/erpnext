@@ -17,6 +17,14 @@
   "vehicle_allocation_periodicity",
   "column_break_8",
   "dealership_code",
+  "registration_section",
+  "registration_customer_account",
+  "column_break_15",
+  "registration_agent_account",
+  "cb_17",
+  "registration_income_account",
+  "column_break_19",
+  "registration_cost_center",
   "section_break_14",
   "role_change_booking_after_payment",
   "role_change_payment_adjustment",
@@ -154,11 +162,52 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Change Booking Vehicle Price",
    "options": "Role"
+  },
+  {
+   "fieldname": "registration_section",
+   "fieldtype": "Section Break",
+   "label": "Registration"
+  },
+  {
+   "fieldname": "registration_customer_account",
+   "fieldtype": "Link",
+   "label": "Registration Customer Receivable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "registration_agent_account",
+   "fieldtype": "Link",
+   "label": "Registration Agent Payable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cb_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "registration_income_account",
+   "fieldtype": "Link",
+   "label": "Registration Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "registration_cost_center",
+   "fieldtype": "Link",
+   "label": "Registration Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-08-16 13:55:52.919378",
+ "modified": "2021-10-14 14:33:48.687005",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

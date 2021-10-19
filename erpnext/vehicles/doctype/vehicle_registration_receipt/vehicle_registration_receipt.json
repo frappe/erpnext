@@ -1,0 +1,337 @@
+{
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2021-10-14 14:45:17.495826",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image",
+  "title",
+  "naming_series",
+  "company",
+  "vehicle_booking_order",
+  "vehicle_registration_order",
+  "column_break_8",
+  "agent",
+  "agent_name",
+  "column_break_11",
+  "posting_date",
+  "amended_from",
+  "registration_details_section",
+  "vehicle_license_plate",
+  "call_date",
+  "column_break_17",
+  "remarks",
+  "vehicle_details_section",
+  "variant_of",
+  "variant_of_name",
+  "item_code",
+  "item_name",
+  "item_group",
+  "brand",
+  "column_break_21",
+  "vehicle",
+  "serial_no",
+  "vehicle_color",
+  "column_break_25",
+  "vehicle_chassis_no",
+  "vehicle_engine_no"
+ ],
+ "fields": [
+  {
+   "fetch_from": "item_code.image",
+   "fetch_if_empty": 1,
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "options": "image"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VRR-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_registration_order",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle Registration Order",
+   "options": "Vehicle Registration Order",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Received Date",
+   "no_copy": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_standard_filter": 1,
+   "label": "Remarks",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Variant Item Code",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Variant Item Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Brand",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Serial No",
+   "no_copy": 1,
+   "options": "Serial No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_color",
+   "fieldtype": "Link",
+   "label": "Color",
+   "no_copy": 1,
+   "options": "Vehicle Color",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_chassis_no",
+   "fieldtype": "Data",
+   "label": "Chassis No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Registration Receipt",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "agent",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Agent",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:doc.agent && doc.agent_name != doc.agent",
+   "fieldname": "agent_name",
+   "fieldtype": "Data",
+   "label": "Agent Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "registration_details_section",
+   "fieldtype": "Section Break",
+   "label": "Registration Details"
+  },
+  {
+   "fieldname": "vehicle_license_plate",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Registration No",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "call_date",
+   "fieldtype": "Date",
+   "label": "Call Date",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "image_field": "image",
+ "is_submittable": 1,
+ "modified": "2021-10-14 16:28:04.889395",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Registration Receipt",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Registration User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
+  }
+ ],
+ "restrict_to_domain": "Vehicles",
+ "search_fields": "vehicle_registration_order,vehicle_booking_order,agent,agent_name,item_code,item_name,posting_date",
+ "show_name_in_global_search": 1,
+ "sort_field": "posting_date",
+ "sort_order": "DESC",
+ "timeline_field": "agent",
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}

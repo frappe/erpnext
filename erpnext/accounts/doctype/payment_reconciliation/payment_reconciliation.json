@@ -7,15 +7,18 @@
   "company",
   "party_type",
   "party",
+  "get_unreconciled_entries",
+  "col_break1",
   "receivable_payable_account",
   "bank_cash_account",
-  "col_break1",
+  "filters_section",
   "from_date",
   "to_date",
+  "column_break_11",
   "minimum_amount",
   "maximum_amount",
+  "column_break_14",
   "limit",
-  "get_unreconciled_entries",
   "sec_break1",
   "payments",
   "reconcile",
@@ -122,12 +125,25 @@
    "label": "Invoices",
    "options": "Payment Reconciliation Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
  "issingle": 1,
- "modified": "2020-03-03 15:37:58.603400",
+ "modified": "2021-10-17 03:43:09.376277",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",

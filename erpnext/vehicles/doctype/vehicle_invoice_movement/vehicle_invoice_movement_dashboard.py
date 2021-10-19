@@ -3,11 +3,11 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'vehicle_invoice_receipt',
+		'fieldname': 'vehicle_invoice_movement',
 		'transactions': [
 			{
-				'label': _('Receipt'),
-				'items': ['Vehicle Invoice Delivery']
+				'label': _('Reference'),
+				'items': ['Vehicle Invoice']
 			}
 		]
 	}

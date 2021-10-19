@@ -34,12 +34,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Opportunity",
+					"name": "Lead",
+					"description": _("Lead List."),
 				},
 				{
 					"type": "doctype",
-					"name": "Lead",
-					"description": _("Lead List."),
+					"name": "Opportunity",
 				},
 			]
 		},
@@ -69,13 +69,29 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Vehicle Invoice Receipt",
-					"dependencies": ["Vehicle Booking Order"],
+					"name": "Vehicle Invoice",
 				},
 				{
 					"type": "doctype",
 					"name": "Vehicle Invoice Delivery",
-					"dependencies": ["Vehicle Booking Order"],
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Invoice Movement",
+				},
+			],
+		},
+		{
+			"label": _("Vehicle Registration"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Vehicle Registration Order",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Registration Receipt",
+					"dependencies": ["Vehicle"],
 				},
 				{
 					"type": "doctype",
@@ -167,6 +183,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicles Settings",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Pricing Component",
 				},
 				{
 					"type": "doctype",

@@ -100,24 +100,21 @@ class AccountsController(TransactionBase):
 
 	def ensure_supplier_is_not_blocked(self):
 		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
-		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order', 'Vehicle Receipt']
-		supplier = None
-		supplier_name = None
+		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order', 'Landed Cost Voucher',
+			'Vehicle Booking Order', 'Vehicle Receipt', 'Vehicle Registration Order']
 
-		if is_buying_invoice or is_supplier_payment:
-			supplier_name = self.supplier if is_buying_invoice else self.party
-			supplier = frappe.get_doc('Supplier', supplier_name)
-		elif self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order', 'Vehicle Receipt']:
-			supplier_name = self.supplier
-			is_buying_invoice = True
-		elif self.doctype == 'Landed Cost Voucher' and self.party_type == 'Supplier':
-			supplier_name = self.party
-			is_buying_invoice = True
+		supplier_name = self.get('party') if self.get('party') and self.get('party_type') == "Supplier" else self.get('supplier')
+		if self.doctype == "Vehicle Registration Order":
+			supplier_name = self.get('agent')
 
-		if supplier and supplier_name and supplier.on_hold:
-			if (is_buying_invoice and supplier.hold_type in ['All', 'Invoices']) or \
-					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
-				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
+		supplier_doc = None
+		if supplier_name:
+			supplier_doc = frappe.get_doc('Supplier', supplier_name)
+
+		if supplier_doc and supplier_name and supplier_doc.on_hold:
+			if (is_buying_invoice and supplier_doc.hold_type in ['All', 'Invoices']) or \
+					(is_supplier_payment and supplier_doc.hold_type in ['All', 'Payments']):
+				if not supplier_doc.release_date or getdate(nowdate()) <= supplier_doc.release_date:
 					frappe.msgprint(
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 

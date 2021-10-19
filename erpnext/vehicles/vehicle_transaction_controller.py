@@ -20,7 +20,7 @@ force_fields = [
 	'customer_name', 'vehicle_owner_name', 'broker_name', 'transporter_name',
 	'variant_of', 'variant_of_name',
 	'tax_id', 'tax_cnic', 'tax_strn',
-	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'territory',
 	'booking_customer_name', 'booking_address_display', 'booking_email', 'booking_mobile', 'booking_phone',
 	'booking_tax_id', 'booking_tax_cnic', 'booking_tax_strn', 'receiver_contact_cnic', 'finance_type'
 	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
@@ -50,35 +50,70 @@ class VehicleTransactionController(StockController):
 
 		self.clean_remarks()
 
-	def before_submit(self):
-		self.validate_vehicle_mandatory()
-
 	def onload(self):
 		if self.docstatus == 0:
 			self.set_missing_values()
 
-	def set_missing_values(self, for_validate=False):
-		vehicle_booking_order_details = get_vehicle_booking_order_details(self.as_dict())
+	def set_missing_values(self, doc=None, for_validate=False):
+		self.set_vehicle_booking_order_details(doc, for_validate=for_validate)
+		self.set_vehicle_details(doc, for_validate=for_validate)
+		self.set_item_details(doc, for_validate=for_validate)
+		self.set_customer_details(for_validate=for_validate)
+
+	def set_vehicle_booking_order_details(self, doc=None, for_validate=False):
+		args = self.as_dict()
+		if doc:
+			args.update(doc.as_dict())
+			args.doctype = self.doctype
+			args.name = self.name
+		else:
+			doc = self
+
+		vehicle_booking_order_details = get_vehicle_booking_order_details(args)
 		for k, v in vehicle_booking_order_details.items():
-			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
-				self.set(k, v)
+			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields):
+				doc.set(k, v)
 
-		vehicle_details = get_vehicle_details(self.as_dict(), get_vehicle_booking_order=False, warn_reserved=for_validate)
+	def set_vehicle_details(self, doc=None, for_validate=False, update=False):
+		args = self.as_dict()
+		if doc:
+			args.update(doc.as_dict())
+			args.doctype = self.doctype
+			args.name = self.name
+		else:
+			doc = self
+
+		vehicle_details = get_vehicle_details(args, get_vehicle_booking_order=False, warn_reserved=for_validate)
+		values = {}
 		for k, v in vehicle_details.items():
-			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
-				self.set(k, v)
+			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields):
+				if k == "vehicle_license_plate" and self.doctype in ["Vehicle Registration Order", "Vehicle Registration Receipt"]:
+					continue
 
+				values[k] = v
+
+		for k, v in values.items():
+			doc.set(k, v)
+
+		if update:
+			doc.db_set(values)
+
+	def set_item_details(self, doc=None, for_validate=False, force=False):
+		if not doc:
+			doc = self
+
+		if doc.get('item_code'):
+			if not doc.get('item_name') or force:
+				doc.item_name = frappe.get_cached_value("Item", doc.item_code, 'item_name')
+
+			doc.variant_of = frappe.get_cached_value("Item", doc.item_code, 'variant_of')
+			doc.variant_of_name = frappe.get_cached_value("Item", doc.variant_of, 'item_name') if doc.variant_of else None
+
+	def set_customer_details(self, for_validate=False):
 		customer_details = get_customer_details(self.as_dict())
 		for k, v in customer_details.items():
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
-
-		if self.get('item_code'):
-			if not self.get('item_name'):
-				self.item_name = frappe.get_cached_value("Item", self.item_code, 'item_name')
-
-			self.variant_of = frappe.get_cached_value("Item", self.item_code, 'variant_of')
-			self.variant_of_name = frappe.get_cached_value("Item", self.variant_of, 'item_name') if self.variant_of else None
 
 	def update_stock_ledger(self):
 		qty = 1 if self.doctype == "Vehicle Receipt" else -1
@@ -98,40 +133,55 @@ class VehicleTransactionController(StockController):
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		pass
 
-	def validate_party(self):
+	def validate_party_mandatory(self):
 		if not self.get('customer') and not self.get('supplier'):
 			frappe.throw(_("Party is mandatory"))
 
+	def validate_party(self):
 		if self.get('supplier'):
 			validate_party_frozen_disabled("Supplier", self.supplier)
+		if self.get('agent'):
+			validate_party_frozen_disabled("Supplier", self.agent)
 		elif self.get('customer'):
 			validate_party_frozen_disabled("Customer", self.customer)
 
-	def validate_vehicle_item(self):
-		item = frappe.get_cached_doc("Item", self.item_code)
+	def validate_vehicle_item(self, doc=None):
+		if not doc:
+			doc = self
+
+		item = frappe.get_cached_doc("Item", doc.item_code)
 		validate_vehicle_item(item, validate_in_vehicle_booking=False)
 
-	def validate_vehicle(self):
-		if self.vehicle:
-			vehicle_item_code = frappe.db.get_value("Vehicle", self.vehicle, "item_code")
-			if vehicle_item_code != self.item_code:
-				frappe.throw(_("Vehicle {0} is not {1}").format(self.vehicle, frappe.bold(self.item_name or self.item_code)))
+	def validate_vehicle(self, doc=None):
+		if not doc:
+			doc = self
 
-			if not self.vehicle_booking_order:
-				already_booked = frappe.db.get_value("Vehicle Booking Order", {'vehicle': self.vehicle, 'docstatus': 1})
+		if doc.get('vehicle'):
+			vehicle_item_code = frappe.db.get_value("Vehicle", doc.vehicle, "item_code")
+			if vehicle_item_code != doc.item_code:
+				frappe.throw(_("Vehicle {0} is not {1}").format(doc.vehicle, frappe.bold(doc.item_name or doc.item_code)))
+
+			if doc.meta.has_field('vehicle_booking_order') and not doc.get('vehicle_booking_order'):
+				already_booked = get_vehicle_booking_order_from_vehicle(doc.vehicle, {
+					'status': ['not in', ['Completed', 'Cancelled Booking']]
+				})
 				if already_booked:
 					frappe.throw(_("Vehicle {0} is already booked against {1}. Please set Vehicle Booking Order to use this vehicle.")
-						.format(self.vehicle, frappe.get_desk_link("Vehicle Booking Order", already_booked)))
+						.format(doc.vehicle, frappe.get_desk_link("Vehicle Booking Order", already_booked)))
 
-		self.serial_no = self.vehicle
+		if doc.meta.has_field('serial_no'):
+			doc.serial_no = doc.vehicle
 
 	def validate_vehicle_mandatory(self):
-		if not self.vehicle:
+		if self.meta.has_field('vehicle') and not self.get('vehicle'):
 			frappe.throw(_("Vehicle is mandatory"))
 
-	def validate_vehicle_booking_order(self):
-		if self.vehicle_booking_order:
-			vbo = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order, [
+	def validate_vehicle_booking_order(self, doc=None):
+		if not doc:
+			doc = self
+
+		if doc.get('vehicle_booking_order'):
+			vbo = frappe.db.get_value("Vehicle Booking Order", doc.vehicle_booking_order, [
 					'docstatus', 'status',
 					'customer', 'financer', 'supplier',
 					'item_code', 'vehicle',
@@ -139,52 +189,52 @@ class VehicleTransactionController(StockController):
 			], as_dict=1)
 
 			if not vbo:
-				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
+				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(doc.vehicle_booking_order))
 
 			if vbo.docstatus != 1:
 				frappe.throw(_("Cannot make {0} against {1} because it is not submitted")
-					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if vbo.status == "Cancelled Booking":
 				frappe.throw(_("Cannot make {0} against {1} because it is cancelled")
-					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.get('customer'):
 				# Customer must match with booking customer/financer or vehicle owner must be set (and match)
 				if self.doctype == "Vehicle Delivery":
 					if self.customer not in (vbo.customer, vbo.financer) and not self.vehicle_owner:
 						frappe.throw(_("Customer (User) does not match in {0}. Please set Vehicle Owner if the User of the Vehicle is different from the Booking Customer.")
-							.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 				elif self.doctype == 'Vehicle Transfer Letter':
 					if self.customer in (vbo.customer, vbo.financer):
 						frappe.throw(_("Customer (New Owner) cannot be the same as in {0} for transfer")
-							.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 				else:
 					if self.customer not in (vbo.customer, vbo.financer):
 						frappe.throw(_("Customer does not match in {0}")
-							.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.get('vehicle_owner'):
 				if self.vehicle_owner not in (vbo.customer, vbo.financer):
 					frappe.throw(_("Vehicle Owner does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.get('supplier'):
 				if self.supplier != vbo.supplier:
 					frappe.throw(_("Supplier does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
-			if self.get('item_code'):
-				if self.item_code != vbo.item_code:
+			if doc.get('item_code'):
+				if doc.item_code != vbo.item_code:
 					frappe.throw(_("Variant Item Code does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
-			if self.get('vehicle'):
-				if self.vehicle != vbo.vehicle:
+			if doc.meta.has_field('vehicle'):
+				if cstr(doc.get('vehicle')) != cstr(vbo.get('vehicle')):
 					frappe.throw(_("Vehicle does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.doctype == "Vehicle Transfer Letter":
 				if getdate(self.posting_date) < getdate(vbo.vehicle_received_date):
@@ -193,11 +243,11 @@ class VehicleTransactionController(StockController):
 
 			if self.doctype == "Vehicle Receipt" and not cint(self.get('is_return')) and vbo.vehicle_received_date:
 				frappe.throw(_("Cannot create Vehicle Receipt against {0} because Vehicle has already been received")
-					.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+					.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.doctype == "Vehicle Delivery" and cint(self.get('is_return')) and not vbo.vehicle_received_date:
 				frappe.throw(_("Cannot create Vehicle Delivery Return against {0} because Vehicle has not yet been received")
-					.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+					.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 	def validate_project(self):
 		if self.get('project'):
@@ -210,35 +260,215 @@ class VehicleTransactionController(StockController):
 			if self.get('customer'):
 				if project.customer and self.customer != project.customer:
 					frappe.throw(_("Customer does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Project", self.project)))
 
 			if self.get('item_code'):
 				if project.applies_to_item and self.item_code != project.applies_to_item:
 					frappe.throw(_("Variant Item Code does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Project", self.project)))
 
 			if self.get('vehicle'):
 				if project.applies_to_vehicle and self.vehicle != project.applies_to_vehicle:
 					frappe.throw(_("Vehicle does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+						.format(frappe.get_desk_link("Project", self.project)))
 
-	def update_vehicle_booking_order(self):
-		if self.get('vehicle_booking_order'):
-			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
+	def validate_vehicle_registration_order(self, doc=None):
+		if not doc:
+			doc = self
+
+		if doc.get('vehicle_registration_order'):
+			vro = frappe.db.get_value("Vehicle Registration Order", doc.vehicle_registration_order,
+				['docstatus', 'agent', 'vehicle_booking_order', 'item_code', 'vehicle'], as_dict=1)
+
+			if not vro:
+				frappe.throw(_("Vehicle Registration Order {0} does not exist").format(doc.vehicle_registration_order))
+
+			if vro.docstatus != 1:
+				frappe.throw(_("Cannot make {0} against {1} because it is not submitted")
+					.format(self.doctype,
+					frappe.get_desk_link("Vehicle Registration Order", doc.vehicle_registration_order)))
+
+			if self.meta.has_field('agent'):
+				if cstr(self.agent) != cstr(vro.agent):
+					frappe.throw(_("Agent does not match in {0}")
+						.format(frappe.get_desk_link("Vehicle Registration Order", doc.vehicle_registration_order)))
+
+			if doc.get('item_code'):
+				if doc.item_code != vro.item_code:
+					frappe.throw(_("Variant Item Code does not match in {0}")
+						.format(frappe.get_desk_link("Vehicle Registration Order", doc.vehicle_registration_order)))
+
+			if doc.get('vehicle'):
+				if doc.vehicle != cstr(vro.vehicle):
+					frappe.throw(_("Vehicle does not match in {0}")
+						.format(frappe.get_desk_link("Vehicle Registration Order", doc.vehicle_registration_order)))
+
+	def update_vehicle_booking_order_delivery(self, doc=None):
+		if not doc:
+			doc = self
+
+		if doc.get('vehicle_booking_order'):
+			vbo = frappe.get_doc("Vehicle Booking Order", doc.vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
-
-			if self.doctype in ['Vehicle Receipt', 'Vehicle Delivery']:
-				vbo.update_delivery_status(update=True)
-			elif self.doctype in ['Vehicle Invoice Receipt', 'Vehicle Invoice Delivery']:
-				vbo.update_invoice_status(update=True)
-
+			doc.validate_and_update_booking_vehicle_details(vbo, doc)
+			vbo.update_delivery_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
+
+	def update_vehicle_booking_order_invoice(self, doc=None):
+		if not doc:
+			doc = self
+
+		vehicle_booking_order = self.get_vehicle_booking_order(doc)
+		if vehicle_booking_order:
+			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+			vbo.check_cancelled(throw=True)
+			self.validate_and_update_booking_vehicle_details(vbo, doc)
+			vbo.update_invoice_status(update=True)
+			vbo.set_status(update=True)
+			vbo.notify_update()
+
+	def validate_and_update_booking_vehicle_details(self, vbo_doc, self_doc=None):
+		if not self_doc:
+			self_doc = self
+
+		if self.docstatus == 2 or not self_doc.get('vehicle'):
+			return
+
+		fields = ['vehicle_color', 'vehicle_chassis_no', 'vehicle_engine_no']
+
+		def get_changes(doc1, doc2, for_updating=False):
+			changes = {}
+			for f in fields:
+				if doc1.get(f) and (for_updating or doc2.get(f)) and doc1.get(f) != doc2.get(f):
+					if for_updating:
+						changes[f] = doc1.get(f)
+					else:
+						changes[f] = (doc1.get(f), doc2.get(f))
+
+			return changes
+
+		def raise_inconsistent_details_error(changes, doc1, doc2):
+			meta = frappe.get_meta(doc1.doctype)
+			change_error_list = []
+			for f, (doc1_val, doc2_val) in changes.items():
+				label = meta.get_label(f)
+				change_error_list.append(_("{0}: {1} in {2}, however, {3} in {4}")
+					.format(frappe.bold(label), frappe.bold(doc1_val), doc1.doctype, frappe.bold(doc2_val), doc2.doctype))
+
+			change_error_html = "".join(["<li>{0}</li>".format(d) for d in change_error_list])
+			frappe.throw(_("""Vehicle details for {0} in {1} do not match with related document {2}<ul>{3}</ul>""")
+				.format(frappe.get_desk_link('Vehicle', self_doc.vehicle),
+					frappe.get_desk_link(doc1.doctype, doc1.name),
+					frappe.get_desk_link(doc2.doctype, doc2.name),
+					change_error_html))
+
+		vehicle_receipt = frappe.get_all("Vehicle Receipt",
+			fields=['name', "'Vehicle Receipt' as doctype"] + fields, filters={
+				'vehicle': self_doc.vehicle,
+				'docstatus': 1,
+				'is_return': 0
+			}, order_by='posting_date desc, creation desc', limit=1)
+		vehicle_receipt = vehicle_receipt[0] if vehicle_receipt else None
+
+		vehicle_invoice = frappe.get_all("Vehicle Invoice",
+			fields=['name', "'Vehicle Invoice' as doctype"] + fields, filters={
+				'vehicle': self_doc.vehicle,
+				'docstatus': 1
+			}, order_by='posting_date desc, creation desc', limit=1)
+		vehicle_invoice = vehicle_invoice[0] if vehicle_invoice else None
+
+		# Difference between Vehicle Receipt and Invoice
+		if vehicle_receipt and vehicle_invoice:
+			receipt_invoice_changes = get_changes(vehicle_receipt, vehicle_invoice)
+			if receipt_invoice_changes:
+				raise_inconsistent_details_error(receipt_invoice_changes, vehicle_receipt, vehicle_invoice)
+
+		# Difference between current doc and first source document
+		if self.doctype not in ['Vehicle Receipt', 'Vehicle Invoice']:
+			validate_against = vehicle_receipt or vehicle_invoice
+			if validate_against:
+				current_doc_changes = get_changes(self_doc, validate_against)
+				if current_doc_changes:
+					raise_inconsistent_details_error(current_doc_changes, self_doc, validate_against)
+
+		if vbo_doc.status != "Completed":
+			# Update Changes in Vehicle Booking
+			vbo_changes = get_changes(self_doc, vbo_doc, for_updating=True)
+			if vbo_changes:
+				vbo_doc.db_set(vbo_changes, notify=1)
+
+			# Update Changes in Vehicle Registration
+			from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
+			vro_values = get_vehicle_registration_order(vehicle_booking_order=vbo_doc.name,
+				fields=['name'] + fields, as_dict=1)
+			if vro_values:
+				vro_changes = get_changes(self_doc, vro_values, for_updating=True)
+				if vro_changes:
+					frappe.db.set_value("Vehicle Registration Order", vro_values.name, vro_changes, None, notify=1)
+
+	def update_vehicle_booking_order_registration(self):
+		vehicle_booking_order = self.get_vehicle_booking_order()
+		if vehicle_booking_order:
+			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+			vbo.check_cancelled(throw=True)
+			vbo.update_registration_status(update=True)
+			vbo.set_status(update=True)
+			vbo.notify_update()
+
+	def update_vehicle_invoice(self, doc=None, update_vehicle=True):
+		if not doc:
+			doc = self
+
+		if doc.get('vehicle_invoice'):
+			vinvr = frappe.get_doc("Vehicle Invoice", doc.vehicle_invoice)
+			vinvr.set_status(update=True, update_vehicle=update_vehicle)
+			vinvr.notify_update()
+
+	def update_vehicle_registration_order(self, doc=None):
+		if not doc:
+			doc = self
+
+		vehicle_registration_order = self.get_vehicle_registration_order(doc)
+		if vehicle_registration_order:
+			vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
+
+			if self.doctype in ['Vehicle Invoice', 'Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
+				vro.update_invoice_status(update=True)
+			elif self.doctype == "Vehicle Registration Receipt":
+				vro.update_registration_number(update=True)
+
+			vro.set_status(update=True)
+			vro.notify_update()
+
+	def get_vehicle_booking_order(self, doc=None):
+		if not doc:
+			doc = self
+
+		vehicle_booking_order = doc.get('vehicle_booking_order')
+		if not vehicle_booking_order and doc.get('vehicle'):
+			vehicle_booking_order = get_vehicle_booking_order_from_vehicle(doc.vehicle)
+
+		return vehicle_booking_order
+
+	def get_vehicle_registration_order(self, doc=None):
+		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
+
+		if not doc:
+			doc = self
+
+		vehicle_registration_order = doc.get('vehicle_registration_order')
+		if not vehicle_registration_order and (doc.get('vehicle') or doc.get('vehicle_booking_order')):
+			vehicle_registration_order = get_vehicle_registration_order(doc.get('vehicle'),
+				doc.get('vehicle_booking_order'))
+
+		return vehicle_registration_order
 
 	def make_odometer_log(self):
 		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
 			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
-				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer, date=self.posting_date)
+				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer,
+					date=self.get('posting_date') or self.get('transaction_date'))
 				self.db_set('vehicle_log', vehicle_log)
 
 	def cancel_odometer_log(self):
@@ -261,7 +491,7 @@ def get_customer_details(args):
 	customer_details = frappe._dict()
 	if args.customer:
 		customer_details = frappe.get_cached_value("Customer", args.customer,
-			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn'], as_dict=1)
+			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'territory'], as_dict=1)
 
 	owner_details = frappe._dict()
 	if args.vehicle_owner:
@@ -295,6 +525,7 @@ def get_customer_details(args):
 		out.customer_address = get_default_address("Customer", args.customer)
 
 	out.address_display = get_address_display(out.customer_address)
+	out.territory = customer_details.territory
 
 	# Contact
 	out.contact_person = args.contact_person
@@ -361,7 +592,7 @@ def get_vehicle_booking_order_details(args):
 
 
 @frappe.whitelist()
-def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoice_receipt=False, warn_reserved=True):
+def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -384,6 +615,8 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	if vehicle_details:
 		out.item_code = vehicle_details.item_code
 
+	item_code = out.item_code or args.item_code
+
 	out.vehicle_chassis_no = vehicle_details.chassis_no
 	out.vehicle_engine_no = vehicle_details.engine_no
 	out.vehicle_license_plate = vehicle_details.license_plate
@@ -391,6 +624,9 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	out.vehicle_color = vehicle_details.color
 	out.vehicle_warranty_no = vehicle_details.warranty_no
 	out.image = vehicle_details.image
+
+	if not out.image and item_code:
+		out.image = frappe.get_cached_value("Item", item_code, 'image')
 
 	if args.vehicle:
 		out.vehicle_odometer = get_vehicle_odometer(args.vehicle, date=args.posting_date)
@@ -410,11 +646,18 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 		if vehicle_booking_order:
 			out.vehicle_booking_order = vehicle_booking_order
 
-	if cint(get_vehicle_invoice_receipt):
-		from erpnext.vehicles.doctype.vehicle_invoice_delivery.vehicle_invoice_delivery import get_vehicle_invoice_receipt,\
+	if args.doctype in ['Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
+		from erpnext.vehicles.doctype.vehicle_invoice.vehicle_invoice import get_vehicle_invoice,\
 			get_vehicle_invoice_details
-		out.vehicle_invoice_receipt = get_vehicle_invoice_receipt(args.vehicle)
-		out.update(get_vehicle_invoice_details(out.vehicle_invoice_receipt))
+		out.vehicle_invoice = get_vehicle_invoice(args.vehicle)
+		out.update(get_vehicle_invoice_details(out.vehicle_invoice))
+
+	if args.doctype == 'Vehicle Registration Receipt' or (args.doctype == 'Vehicle Invoice Movement'
+			and args.issued_for == "Registration"):
+		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order,\
+			get_vehicle_registration_order_details
+		out.vehicle_registration_order = get_vehicle_registration_order(vehicle=args.vehicle)
+		out.update(get_vehicle_registration_order_details(out.vehicle_registration_order))
 
 	if warn_reserved and args.doctype == "Vehicle Delivery":
 		warn_vehicle_reserved(args.vehicle, args.customer)
@@ -422,14 +665,16 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, get_vehicle_invoic
 	return out
 
 
-def get_vehicle_booking_order_from_vehicle(vehicle, filters=None):
-	filters = filters or {}
-	filters.update({
+def get_vehicle_booking_order_from_vehicle(vehicle, filters=None, fieldname="name", as_dict=False):
+	actual_filters = {
 		"vehicle": vehicle,
 		"docstatus": 1,
-	})
+		"status": ['!=', 'Cancelled Booking']
+	}
+	if filters:
+		actual_filters.update(filters)
 
-	return frappe.db.get_value("Vehicle Booking Order", filters)
+	return frappe.db.get_value("Vehicle Booking Order", actual_filters, fieldname, as_dict=as_dict)
 
 
 @frappe.whitelist()

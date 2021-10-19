@@ -753,6 +753,34 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			remove_vehicle_details_if_empty(d)
 
+		self.validate_vehicle_registration_order()
+
+	def validate_vehicle_registration_order(self):
+		if not self.meta.has_field('vehicle_registration_purpose'):
+			return
+
+		has_vehicle_registration_order = False
+		if self.get('vehicle_registration_order'):
+			self.validate_vehicle_registration_order_status(self.vehicle_registration_order)
+			has_vehicle_registration_order = True
+
+		for d in self.accounts:
+			if d.get('vehicle_registration_order'):
+				self.validate_vehicle_registration_order_status(d.vehicle_registration_order)
+				has_vehicle_registration_order = True
+
+		if has_vehicle_registration_order:
+			if not self.vehicle_registration_purpose:
+				frappe.throw(_("Vehicle Registration Purpose is mandatory if entry is against Vehicle Registration Order"))
+		else:
+			self.vehicle_registration_purpose = None
+
+	def validate_vehicle_registration_order_status(self, vehicle_registration_order):
+		docstatus = frappe.db.get_value("Vehicle Registration Order", vehicle_registration_order, 'docstatus', cache=1)
+		if docstatus != 1:
+			frappe.throw(_("Cannot select Vehicle Registration Order {0} because it is not submitted")
+				.format(vehicle_registration_order))
+
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
@@ -924,6 +952,7 @@ def get_payment_entry(ref_doc, args):
 
 	je.set_amounts_in_company_currency()
 	je.set_total_debit_credit()
+	je.set_party_name()
 
 	return je if args.get("journal_entry") else je.as_dict()
 

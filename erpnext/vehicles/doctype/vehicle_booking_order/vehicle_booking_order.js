@@ -9,10 +9,11 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			'Vehicle Booking Payment': 'Customer Payment',
 			'Vehicle Receipt': 'Receive Vehicle',
 			'Vehicle Delivery': 'Deliver Vehicle',
-			'Vehicle Invoice Receipt': 'Receive Invoice',
+			'Vehicle Invoice': 'Receive Invoice',
 			'Vehicle Invoice Delivery': 'Deliver Invoice',
 			'Vehicle Transfer Letter': 'Transfer Letter',
-			'Purchase Order': 'Purchase Order',
+			'Vehicle Registration Order': 'Registration Order',
+			'Vehicle Invoice Movement': 'Invoice Movement',
 		}
 	},
 
@@ -113,6 +114,12 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Payment'));
 			}
 
+			// Registration Order button
+			if (this.frm.doc.registration_status == "Not Ordered" && this.frm.doc.invoice_status != "Delivered") {
+				this.frm.add_custom_button(__('Registration Order'), () => this.make_next_document('Vehicle Registration Order'),
+					__("Registration"));
+			}
+
 			// Receive/Deliver Vehicle and Invoice
 			if (this.frm.doc.vehicle) {
 				// Vehicle Delivery/Receipt buttons
@@ -129,9 +136,9 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				// Invoice Delivery/Receipt buttons
 				if (this.frm.doc.invoice_status === "Not Received") {
 					if (this.can_change('invoice_receipt')) {
-						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
+						this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice'));
 					}
-				} else if (this.frm.doc.invoice_status === "In Hand" && this.frm.doc.delivery_status === "Delivered") {
+				} else if (this.frm.doc.invoice_status === "In Hand") {
 					if (this.can_change('invoice_delivery')) {
 						this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
 					}
@@ -140,7 +147,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				// Transfer Letter button
 				if (this.frm.doc.delivery_status === "Delivered" && !this.frm.doc.transfer_customer) {
 					if (this.can_change('vehicle_transfer')) {
-						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'));
+						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'),
+							__("Registration"));
 					}
 				}
 
@@ -311,8 +319,21 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			invoice_status_color = "blue";
 		} else if (me.frm.doc.invoice_status == "In Hand") {
 			invoice_status_color = "orange";
+		} else if (me.frm.doc.invoice_status == "Issued") {
+			invoice_status_color = "purple";
 		} else if (me.frm.doc.invoice_status == "Delivered") {
 			invoice_status_color = "green";
+		}
+
+		var registration_status_color;
+		if (me.frm.doc.registration_status == "Not Ordered") {
+			registration_status_color = "grey";
+		} else if (me.frm.doc.registration_status == "Ordered") {
+			registration_status_color = "blue";
+		} else if (me.frm.doc.registration_status == "In Process") {
+			registration_status_color = "orange";
+		} else if (me.frm.doc.registration_status == "Registered") {
+			registration_status_color = "green";
 		}
 
 		me.add_indicator_section(__("Fulfilment"), [
@@ -326,8 +347,13 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				indicator: delivery_status_color
 			},
 			{
-				contents: __('Invoice Status: {0}', [me.frm.doc.invoice_status]),
+				contents: __('Invoice Status: {0}{1}', [me.frm.doc.invoice_status,
+					me.frm.doc.invoice_status == "Issued" && me.frm.doc.invoice_issued_for ? " For " + me.frm.doc.invoice_issued_for : ""]),
 				indicator: invoice_status_color
+			},
+			{
+				contents: __('Registration Status: {0}', [me.frm.doc.registration_status]),
+				indicator: registration_status_color
 			},
 		]);
 
