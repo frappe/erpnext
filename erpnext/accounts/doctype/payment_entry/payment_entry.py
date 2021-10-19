@@ -389,7 +389,7 @@ class PaymentEntry(AccountsController):
 						invoice_paid_amount_map[invoice_key]['outstanding'] = term.outstanding
 						invoice_paid_amount_map[invoice_key]['discounted_amt'] = ref.total_amount * (term.discount / 100)
 
-		for key, allocated_amount in iteritems(invoice_payment_amount_map):
+		for idx, (key, allocated_amount) in enumerate(iteritems(invoice_payment_amount_map), 1):
 			if not invoice_paid_amount_map.get(key):
 				frappe.throw(_('Payment term {0} not used in {1}').format(key[0], key[1]))
 
@@ -407,7 +407,7 @@ class PaymentEntry(AccountsController):
 					(allocated_amount - discounted_amt, discounted_amt, allocated_amount, key[1], key[0]))
 			else:
 				if allocated_amount > outstanding:
-					frappe.throw(_('Cannot allocate more than {0} against payment term {1}').format(outstanding, key[0]))
+					frappe.throw(_('Row #{0}: Cannot allocate more than {1} against payment term {2}').format(idx, outstanding, key[0]))
 
 				if allocated_amount and outstanding:
 					frappe.db.sql("""
