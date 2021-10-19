@@ -518,7 +518,7 @@ class WorkOrder(Document):
 
 			for d in data:
 				if not d.fixed_time:
-					d.time_in_mins = flt(d.time_in_mins) * flt(self.qty)
+					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
 
 			return data
 
