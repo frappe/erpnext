@@ -18,13 +18,12 @@ from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_a
 
 class TestSalaryInformationFile(unittest.TestCase):
 	def setUp(self):
+		frappe.db.sql("""delete from tabCompany where name="Qatar Financial""")
+		frappe.db.sql("""delete from tabCompany where name="UAE Financial""")
 		frappe.db.sql("""delete from `tabBank Account`""")
 		frappe.db.sql("""delete from tabBank""")
 		frappe.db.sql("""delete from `tabHoliday List`""")
 		create_holiday_list()
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 	def test_csv_generation_for_qatar_region(self):
 		company = create_company("Qatar Financial", "QF", "Qatar")
@@ -63,18 +62,16 @@ class TestSalaryInformationFile(unittest.TestCase):
 		create_salary_information_file(company)
 
 def create_company(name, abbr, country):
-	if frappe.db.exists("Company", name):
-		return frappe.get_doc("Company", name)
-	else:
-		company = frappe.new_doc("Company")
-		company.company_name = name
-		company.abbr = abbr
-		company.country = country
-		company.default_currency = "AED"
-		company.employer_establishment_id = "3456991283"
-		if country == "United Arab Emirates":
-			company.employer_reference_number = "78903564748"
-		company.save()
+
+	company = frappe.new_doc("Company")
+	company.company_name = name
+	company.abbr = abbr
+	company.country = country
+	company.default_currency = "AED"
+	company.employer_establishment_id = "3456991283"
+	if country == "United Arab Emirates":
+		company.employer_reference_number = "78903564748"
+	company.save()
 	return company
 
 def create_salary_information_file(company):
