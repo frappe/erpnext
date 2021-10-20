@@ -65,7 +65,7 @@ class TestEmployeeTransfer(unittest.TestCase):
 	def test_employee_history(self):
 		name = frappe.get_value("Employee", {"first_name": "John", "company": "Test Company"}, "name")
 		doc = frappe.get_doc("Employee",name)
-		record_count  = len(doc.internal_work_history)
+		record_count = len(doc.internal_work_history)
 		self.assertEqual(record_count, 2)
 		data = frappe.db.get_list("Employee Transfer", filters={"employee":name}, fields=["*"])
 		doc = frappe.get_doc("Employee Transfer", data[0]["name"])
