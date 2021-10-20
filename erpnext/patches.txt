@@ -309,7 +309,7 @@ erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.validate_options_for_data_field
-erpnext.patches.v13_0.create_website_items #19-10-2021
+erpnext.patches.v13_0.create_website_items #30-09-2021
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
@@ -324,3 +324,4 @@ erpnext.patches.v13_0.set_status_in_maintenance_schedule_table
 erpnext.patches.v13_0.add_default_interview_notification_templates
 erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
 erpnext.patches.v13_0.requeue_failed_reposts
+erpnext.patches.v13_0.fetch_thumbnail_in_website_items
