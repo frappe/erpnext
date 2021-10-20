@@ -24,7 +24,7 @@ def get_data(filters):
 	}
 
 	fields = ["name", "status", "work_order", "production_item", "item_name", "posting_date",
-		"total_completed_qty", "workstation", "operation", "employee_name", "total_time_in_mins"]
+		"total_completed_qty", "workstation", "operation", "total_time_in_mins"]
 
 	for field in ["work_order", "workstation", "operation", "company"]:
 		if filters.get(field):
@@ -170,12 +170,6 @@ def get_columns(filters):
 			"fieldname": "operation",
 			"fieldtype": "Link",
 			"options": "Operation",
-			"width": 110
-		},
-		{
-			"label": _("Employee Name"),
-			"fieldname": "employee_name",
-			"fieldtype": "Data",
 			"width": 110
 		},
 		{
