@@ -1690,17 +1690,32 @@ def update_invoice_status():
 
 	for doctype in ("Sales Invoice", "Purchase Invoice"):
 		frappe.db.sql("""
-			update `tab{}` as dt set dt.status = 'Overdue'
-			where dt.docstatus = 1
-				and dt.status != 'Overdue'
-				and dt.outstanding_amount > 0
-				and (
-						(dt.is_pos and dt.due_date < %(today)s)
-						or (dt.base_grand_total - dt.outstanding_amount) <
-							(select sum(base_payment_amount) from `tabPayment Schedule` as ps
-								where ps.parent = dt.name and ps.due_date < %(today)s)
+			UPDATE `tab{}` as invoice set invoice.status = 'Overdue'
+			WHERE invoice.docstatus = 1
+				AND invoice.status in ('Unpaid', 'Partly Paid')
+				AND invoice.outstanding_amount > 0
+				AND (
+						{or_condition}
+						(
+							(
+								CASE WHEN invoice.disable_rounded_total
+									THEN invoice.base_grand_total
+									ELSE invoice.base_rounded_total
+								END
+							) - invoice.outstanding_amount
+						) < (
+								SELECT SUM(base_payment_amount)
+								FROM `tabPayment Schedule` AS ps
+								WHERE ps.parent = invoice.name
+									AND ps.due_date < %(today)s
+							)
 					)
-		""".format(doctype), {"today": today})
+		""".format(
+				doctype,
+				or_condition="invoice.is_pos AND invoice.due_date < %(today)s OR"
+				if doctype == "Sales Invoice" else ""
+			), {"today": today}
+		)
 
 @frappe.whitelist()
 def get_payment_terms(terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
