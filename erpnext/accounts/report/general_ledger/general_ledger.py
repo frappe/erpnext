@@ -341,6 +341,11 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 
 	return data
 
+# to prevent translations in a loop
+OPENING = _('Opening')
+TOTAL = _('Total')
+CLOSING_TOTAL = _('Closing (Opening + Total)')
+
 def get_totals_dict():
 	def _get_debit_credit_dict(label):
 		return _dict(
@@ -351,9 +356,9 @@ def get_totals_dict():
 			credit_in_account_currency=0.0
 		)
 	return _dict(
-		opening = _get_debit_credit_dict(_('Opening')),
-		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
+		opening = _get_debit_credit_dict(OPENING),
+		total = _get_debit_credit_dict(TOTAL),
+		closing = _get_debit_credit_dict(CLOSING_TOTAL)
 	)
 
 def group_by_field(group_by):
@@ -367,10 +372,9 @@ def group_by_field(group_by):
 def initialize_gle_map(gl_entries, filters):
 	gle_map = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
-	default = _dict(totals=get_totals_dict(), entries=[])
 
 	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), default)
+		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
 	return gle_map
 
 
