@@ -56,8 +56,6 @@
   },
   {
    "columns": 2,
-   "fetch_from": "account_head.tax_rate",
-   "fetch_if_empty": 1,
    "fieldname": "rate",
    "fieldtype": "Float",
    "in_list_view": 1,

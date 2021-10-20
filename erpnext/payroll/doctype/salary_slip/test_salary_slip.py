@@ -141,7 +141,6 @@ class TestSalarySlip(unittest.TestCase):
 			create_salary_structure_assignment,
 		)
 
-		no_of_days = self.get_no_of_days()
 		# Payroll based on attendance
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
 
@@ -167,11 +166,6 @@ class TestSalarySlip(unittest.TestCase):
 		# make salary slip and assert payment days
 		ss = make_salary_slip_for_payment_days_dependency_test("test_payment_days_based_component@salary.com", salary_structure.name)
 		self.assertEqual(ss.absent_days, 1)
-
-		days_in_month = no_of_days[0]
-		no_of_holidays = no_of_days[1]
-
-		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 1)
 
 		ss.reload()
 		payment_days_based_comp_amount = 0
@@ -994,13 +988,14 @@ def make_salary_structure_for_payment_days_based_component_dependency():
 	return salary_structure_doc
 
 def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure):
-	employee = frappe.db.get_value("Employee", {
-			"user_id": employee
-		},
+	employee = frappe.db.get_value(
+		"Employee",
+		{"user_id": employee},
 		["name", "company", "employee_name"],
-		as_dict=True)
+		as_dict=True
+	)
 
-	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": employee})})
+	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": employee.name})
 
 	if not salary_slip_name:
 		salary_slip = make_salary_slip(salary_structure, employee=employee.name)

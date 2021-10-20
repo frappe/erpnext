@@ -555,22 +555,27 @@ class StockEntry(StockController):
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
-		if not any([d.item_code for d in self.items if d.t_warehouse]):
+		if not any(d.item_code for d in self.items if d.t_warehouse):
 			self.additional_costs = []
 
-		self.total_additional_costs = sum([flt(t.base_amount) for t in self.get("additional_costs")])
+		self.total_additional_costs = sum(flt(t.base_amount) for t in self.get("additional_costs"))
 
 		if self.purpose in ("Repack", "Manufacture"):
-			incoming_items_cost = sum([flt(t.basic_amount) for t in self.get("items") if t.is_finished_item])
+			incoming_items_cost = sum(flt(t.basic_amount) for t in self.get("items") if t.is_finished_item)
 		else:
-			incoming_items_cost = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+			incoming_items_cost = sum(flt(t.basic_amount) for t in self.get("items") if t.t_warehouse)
 
-		if incoming_items_cost:
-			for d in self.get("items"):
-				if (self.purpose in ("Repack", "Manufacture") and d.is_finished_item) or d.t_warehouse:
-					d.additional_cost = (flt(d.basic_amount) / incoming_items_cost) * self.total_additional_costs
-				else:
-					d.additional_cost = 0
+		if not incoming_items_cost:
+			return
+
+		for d in self.get("items"):
+			if self.purpose in ("Repack", "Manufacture") and not d.is_finished_item:
+				d.additional_cost = 0
+				continue
+			elif not d.t_warehouse:
+				d.additional_cost = 0
+				continue
+			d.additional_cost = (flt(d.basic_amount) / incoming_items_cost) * self.total_additional_costs
 
 	def update_valuation_rate(self):
 		for d in self.get("items"):
@@ -805,7 +810,11 @@ class StockEntry(StockController):
 	def get_gl_entries(self, warehouse_account):
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
 
-		total_basic_amount = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+		if self.purpose in ("Repack", "Manufacture"):
+			total_basic_amount = sum(flt(t.basic_amount) for t in self.get("items") if t.is_finished_item)
+		else:
+			total_basic_amount = sum(flt(t.basic_amount) for t in self.get("items") if t.t_warehouse)
+
 		divide_based_on = total_basic_amount
 
 		if self.get("additional_costs") and not total_basic_amount:
@@ -816,20 +825,24 @@ class StockEntry(StockController):
 
 		for t in self.get("additional_costs"):
 			for d in self.get("items"):
-				if d.t_warehouse:
-					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
-					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, {
-						"amount": 0.0,
-						"base_amount": 0.0
-					})
+				if self.purpose in ("Repack", "Manufacture") and not d.is_finished_item:
+					continue
+				elif not d.t_warehouse:
+					continue
 
-					multiply_based_on = d.basic_amount if total_basic_amount else d.qty
+				item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
+				item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, {
+					"amount": 0.0,
+					"base_amount": 0.0
+				})
 
-					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]["amount"] += \
-						flt(t.amount * multiply_based_on) / divide_based_on
+				multiply_based_on = d.basic_amount if total_basic_amount else d.qty
 
-					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]["base_amount"] += \
-						flt(t.base_amount * multiply_based_on) / divide_based_on
+				item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]["amount"] += \
+					flt(t.amount * multiply_based_on) / divide_based_on
+
+				item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]["base_amount"] += \
+					flt(t.base_amount * multiply_based_on) / divide_based_on
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):

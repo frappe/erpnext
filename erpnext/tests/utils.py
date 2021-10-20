@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import unittest
 from contextlib import contextmanager
 from typing import Any, Dict, NewType, Optional
 
@@ -10,6 +11,21 @@ from frappe.core.doctype.report.report import get_report_module_dotted_path
 
 ReportFilters = Dict[str, Any]
 ReportName = NewType("ReportName", str)
+
+
+class ERPNextTestCase(unittest.TestCase):
+	"""A sane default test class for ERPNext tests."""
+
+
+	@classmethod
+	def setUpClass(cls) -> None:
+		frappe.db.commit()
+		return super().setUpClass()
+
+	@classmethod
+	def tearDownClass(cls) -> None:
+		frappe.db.rollback()
+		return super().tearDownClass()
 
 
 def create_test_contact_and_address():
