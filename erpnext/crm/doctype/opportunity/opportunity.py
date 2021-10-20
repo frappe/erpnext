@@ -34,6 +34,7 @@ class Opportunity(TransactionBase):
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.map_fields()
 
 		if not self.title:
 			self.title = self.customer_name
@@ -41,6 +42,35 @@ class Opportunity(TransactionBase):
 		if not self.with_items:
 			self.items = []
 
+<<<<<<< HEAD
+=======
+		else:
+			self.calculate_totals()
+
+	def map_fields(self):
+		for field in self.meta.fields:
+			if not self.get(field.fieldname):
+				try:
+					value = frappe.db.get_value(self.opportunity_from, self.party_name, field.fieldname)
+					frappe.db.set(self, field.fieldname, value)
+				except Exception:
+					continue
+
+	def calculate_totals(self):
+		total = base_total = 0
+		for item in self.get('items'):
+			item.amount = flt(item.rate) * flt(item.qty)
+			item.base_rate = flt(self.conversion_rate * item.rate)
+			item.base_amount = flt(self.conversion_rate * item.amount)
+			total += item.amount
+			base_total += item.base_amount
+
+		self.total = flt(total)
+		self.base_total = flt(base_total)
+		self.grand_total = flt(self.total) + flt(self.opportunity_amount)
+		self.base_grand_total = flt(self.base_total) + flt(self.base_opportunity_amount)
+
+>>>>>>> d81f811349 (fix: map missing fields in opportunity (#27904))
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
 		if (not self.get("party_name")) and self.contact_email:
