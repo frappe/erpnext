@@ -28,6 +28,8 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		this.frm.set_query("contact_by", function (doc, cdt, cdn) {
 			return { query: "frappe.core.doctype.user.user.user_query" }
 		});
+
+		cur_frm.trigger('set_call_and_email_stats')
 	}
 
 	refresh () {
@@ -49,6 +51,38 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		} else {
 			frappe.contacts.clear_address_and_contact(this.frm);
 		}
+	}
+
+	set_call_and_email_stats () {
+		frappe.call({
+			method: 'erpnext.crm.utils.get_call_and_email_stats',
+			args: {
+				'doctype': cur_frm.doc.doctype,
+				'docname': cur_frm.doc.name
+			},
+			callback: function(r) {
+				console.log(r.message)
+				if (r.message) {
+					let html = `<div class="row">
+							<div class="col-xs-6">
+								<span> ${__('Outgoing Calls')}: ${r.message.outgoing_calls} </span></span>
+							</div>
+							<div class="col-xs-6">
+								<span> ${__('Incoming Calls')}: ${r.message.incoming_calls} </span></span>
+							</div>
+							<div class="col-xs-6">
+								<span> ${__('Emails Sent')}: ${r.message.emails_sent} </span></span>
+							</div>
+							<div class="col-xs-6">
+								<span> ${__('Emails Received')}: ${r.message.emails_received} </span></span>
+							</div>
+							</div>` ;
+
+					cur_frm.dashboard.set_headline_alert(html)
+				}
+				
+			}
+		});
 	}
 
 	add_lead_to_prospect () {

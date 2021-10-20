@@ -148,19 +148,9 @@ def link_existing_conversations(doc, state):
 	except Exception:
 		frappe.log_error(title=_('Error during caller information update'))
 
-def get_linked_call_logs(doctype, docname):
+def get_call_logs_for_timeline(doctype, docname):
 	# content will be shown in timeline
-	logs = frappe.get_all('Dynamic Link', fields=['parent'], filters={
-		'parenttype': 'Call Log',
-		'link_doctype': doctype,
-		'link_name': docname
-	})
-
-	logs = set([log.parent for log in logs])
-
-	logs = frappe.get_all('Call Log', fields=['*'], filters={
-		'name': ['in', logs]
-	})
+	logs = get_linked_call_logs(doctype, docname)
 
 	timeline_contents = []
 	for log in logs:
@@ -174,3 +164,17 @@ def get_linked_call_logs(doctype, docname):
 		})
 
 	return timeline_contents
+
+def get_linked_call_logs(doctype, docname):
+	logs = frappe.get_all('Dynamic Link', fields=['parent'], filters={
+		'parenttype': 'Call Log',
+		'link_doctype': doctype,
+		'link_name': docname
+	})
+
+	logs = set([log.parent for log in logs])
+
+	logs = frappe.get_all('Call Log', fields=['*'], filters={
+		'name': ['in', logs]
+	})
+	return logs
