@@ -74,7 +74,6 @@ def update_employee(employee, details, date=None, cancel=False):
 					filters["from_date"] = date
 		if filters:
 			frappe.db.delete("Employee Internal Work History", filters)
-			frappe.db.commit()
 
 	return employee
 
