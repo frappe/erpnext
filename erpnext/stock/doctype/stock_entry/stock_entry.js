@@ -323,6 +323,12 @@ frappe.ui.form.on('Stock Entry', {
 		attach_bom_items(frm.doc.bom_no)
 	},
 
+	before_save: function(frm) {
+		frm.doc.items.forEach((item) => {
+			item.uom = item.uom || item.stock_uom;
+		})
+	},
+
 	stock_entry_type: function(frm){
 		frm.remove_custom_button('Bill of Materials', "Get Items From");
 		frm.events.show_bom_custom_button(frm);
