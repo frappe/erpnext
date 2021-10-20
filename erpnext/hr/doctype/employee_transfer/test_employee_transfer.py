@@ -14,12 +14,14 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 
 class TestEmployeeTransfer(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("""delete from `tabEmployee Transfer`""")
 		make_employee("employee2@transfers.com")
 		make_employee("employee3@transfers.com")
 		create_company()
 		create_employee()
 		create_employee_transfer()
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_submit_before_transfer_date(self):
 		transfer_obj = frappe.get_doc({
