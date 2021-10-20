@@ -297,6 +297,27 @@ class TestLoan(unittest.TestCase):
 		self.assertEqual(amounts[0], 11250.00)
 		self.assertEqual(amounts[1], 78303.00)
 
+	def test_repayment_schedule_update(self):
+		loan = create_loan(self.applicant2, "Personal Loan", 200000, "Repay Over Number of Periods", 4,
+			applicant_type='Customer', repayment_start_date='2021-04-30', posting_date='2021-04-01')
+
+		loan.submit()
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date='2021-04-01')
+
+		process_loan_interest_accrual_for_term_loans(posting_date='2021-05-01')
+		process_loan_interest_accrual_for_term_loans(posting_date='2021-06-01')
+
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, '2021-06-05', 120000)
+		repayment_entry.submit()
+
+		loan.load_from_db()
+
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].principal_amount, 2), 32151.83)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].interest_amount, 2), 225.06)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].total_payment, 2), 32376.89)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].balance_loan_amount, 2), 0)
+
 	def test_security_shortfall(self):
 		pledges = [{
 			"loan_security": "Test Security 2",
@@ -940,18 +961,18 @@ def create_loan_application(company, applicant, loan_type, proposed_pledges, rep
 
 
 def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_periods,
-	repayment_start_date=None, posting_date=None):
+	applicant_type=None, repayment_start_date=None, posting_date=None):
 
 	loan = frappe.get_doc({
 		"doctype": "Loan",
-		"applicant_type": "Employee",
+		"applicant_type": applicant_type or "Employee",
 		"company": "_Test Company",
 		"applicant": applicant,
 		"loan_type": loan_type,
 		"loan_amount": loan_amount,
 		"repayment_method": repayment_method,
 		"repayment_periods": repayment_periods,
-		"repayment_start_date": nowdate(),
+		"repayment_start_date": repayment_start_date or nowdate(),
 		"is_term_loan": 1,
 		"posting_date": posting_date or nowdate()
 	})

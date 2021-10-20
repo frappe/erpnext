@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate
+from frappe.utils import add_days, add_months, cint, date_diff, flt, get_datetime, getdate
 from six import iteritems
 
 import erpnext
@@ -38,10 +38,12 @@ class LoanRepayment(AccountsController):
 
 	def on_submit(self):
 		self.update_paid_amount()
+		self.update_repayment_schedule()
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.mark_as_unpaid()
+		self.update_repayment_schedule()
 		self.ignore_linked_doctypes = ['GL Entry']
 		self.make_gl_entries(cancel=1)
 
@@ -164,6 +166,10 @@ class LoanRepayment(AccountsController):
 		if loan.status == "Loan Closure Requested":
 			frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
 
+	def update_repayment_schedule(self):
+		if self.is_term_loan and self.principal_amount_paid > self.payable_principal_amount:
+			regenerate_repayment_schedule(self.against_loan)
+
 	def allocate_amounts(self, repayment_details):
 		self.set('repayment_details', [])
 		self.principal_amount_paid = 0
@@ -185,50 +191,93 @@ class LoanRepayment(AccountsController):
 
 			interest_paid -= self.total_penalty_paid
 
-		total_interest_paid = 0
-		# interest_paid = self.amount_paid - self.principal_amount_paid - self.penalty_amount
+		if self.is_term_loan:
+			interest_paid, updated_entries = self.allocate_interest_amount(interest_paid, repayment_details)
+			self.allocate_principal_amount_for_term_loans(interest_paid, repayment_details, updated_entries)
+		else:
+			interest_paid, updated_entries = self.allocate_interest_amount(interest_paid, repayment_details)
+			self.allocate_excess_payment_for_demand_loans(interest_paid, repayment_details)
+
+	def allocate_interest_amount(self, interest_paid, repayment_details):
+		updated_entries = {}
+		self.total_interest_paid = 0
+		idx = 1
 
 		if interest_paid > 0:
 			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
-				if amounts['interest_amount'] + amounts['payable_principal_amount'] <= interest_paid:
+				interest_amount = 0
+				if amounts['interest_amount'] <= interest_paid:
 					interest_amount = amounts['interest_amount']
-					paid_principal = amounts['payable_principal_amount']
-					self.principal_amount_paid += paid_principal
-					interest_paid -= (interest_amount + paid_principal)
+					self.total_interest_paid += interest_amount
+					interest_paid -= interest_amount
 				elif interest_paid:
 					if interest_paid >= amounts['interest_amount']:
 						interest_amount = amounts['interest_amount']
-						paid_principal = interest_paid - interest_amount
-						self.principal_amount_paid += paid_principal
+						self.total_interest_paid += interest_amount
 						interest_paid = 0
 					else:
 						interest_amount = interest_paid
+						self.total_interest_paid += interest_amount
 						interest_paid = 0
-						paid_principal=0
 
-				total_interest_paid += interest_amount
-				self.append('repayment_details', {
-					'loan_interest_accrual': lia,
-					'paid_interest_amount': interest_amount,
-					'paid_principal_amount': paid_principal
-				})
+				if interest_amount:
+					self.append('repayment_details', {
+						'loan_interest_accrual': lia,
+						'paid_interest_amount': interest_amount,
+						'paid_principal_amount': 0
+					})
+					updated_entries[lia] = idx
+					idx += 1
 
+		return interest_paid, updated_entries
+
+	def allocate_principal_amount_for_term_loans(self, interest_paid, repayment_details, updated_entries):
+		if interest_paid > 0:
+			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
+				paid_principal = 0
+				if amounts['payable_principal_amount'] <= interest_paid:
+					paid_principal = amounts['payable_principal_amount']
+					self.principal_amount_paid += paid_principal
+					interest_paid -= paid_principal
+				elif interest_paid:
+					if interest_paid >= amounts['payable_principal_amount']:
+						paid_principal = amounts['payable_principal_amount']
+						self.principal_amount_paid += paid_principal
+						interest_paid = 0
+					else:
+						paid_principal = interest_paid
+						self.principal_amount_paid += paid_principal
+						interest_paid = 0
+
+				if updated_entries.get(lia):
+					idx = updated_entries.get(lia)
+					self.get('repayment_details')[idx-1].paid_principal_amount += paid_principal
+				else:
+					self.append('repayment_details', {
+						'loan_interest_accrual': lia,
+						'paid_interest_amount': 0,
+						'paid_principal_amount': paid_principal
+					})
+
+		if interest_paid > 0:
+			self.principal_amount_paid += interest_paid
+
+	def allocate_excess_payment_for_demand_loans(self, interest_paid, repayment_details):
 		if repayment_details['unaccrued_interest'] and interest_paid > 0:
 			# no of days for which to accrue interest
 			# Interest can only be accrued for an entire day and not partial
 			if interest_paid > repayment_details['unaccrued_interest']:
 				interest_paid -= repayment_details['unaccrued_interest']
-				total_interest_paid += repayment_details['unaccrued_interest']
+				self.total_interest_paid += repayment_details['unaccrued_interest']
 			else:
 				# get no of days for which interest can be paid
 				per_day_interest = get_per_day_interest(self.pending_principal_amount,
 					self.rate_of_interest, self.posting_date)
 
 				no_of_days = cint(interest_paid/per_day_interest)
-				total_interest_paid += no_of_days * per_day_interest
+				self.total_interest_paid += no_of_days * per_day_interest
 				interest_paid -= no_of_days * per_day_interest
 
-		self.total_interest_paid = total_interest_paid
 		if interest_paid > 0:
 			self.principal_amount_paid += interest_paid
 
@@ -363,6 +412,54 @@ def get_penalty_details(against_loan):
 		return penalty_details[0][0], flt(penalty_details[0][1])
 	else:
 		return None, 0
+
+def regenerate_repayment_schedule(loan):
+	from erpnext.loan_management.doctype.loan.loan import get_monthly_repayment_amount
+
+	loan_doc = frappe.get_doc('Loan', loan)
+	next_accrual_date = None
+
+	for term in reversed(loan_doc.get('repayment_schedule')):
+		if not term.is_accrued:
+			next_accrual_date = term.payment_date
+
+		if not term.is_accrued:
+			loan_doc.remove(term)
+
+	loan_doc.save()
+
+	if loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
+		balance_amount = loan_doc.total_payment - loan_doc.total_principal_paid \
+			- loan_doc.total_interest_payable - loan_doc.written_off_amount
+	else:
+		balance_amount = loan_doc.disbursed_amount - loan_doc.total_principal_paid \
+			- loan_doc.total_interest_payable - loan_doc.written_off_amount
+
+	monthly_repayment_amount = get_monthly_repayment_amount(loan_doc.loan_amount,
+		loan_doc.rate_of_interest, loan_doc.repayment_periods)
+
+	payment_date = next_accrual_date
+
+	while(balance_amount > 0):
+		interest_amount = flt(balance_amount * flt(loan_doc.rate_of_interest) / (12*100))
+		principal_amount = monthly_repayment_amount - interest_amount
+		balance_amount = flt(balance_amount + interest_amount - monthly_repayment_amount)
+		if balance_amount < 0:
+			principal_amount += balance_amount
+			balance_amount = 0.0
+
+		total_payment = principal_amount + interest_amount
+		loan_doc.append("repayment_schedule", {
+			"payment_date": payment_date,
+			"principal_amount": principal_amount,
+			"interest_amount": interest_amount,
+			"total_payment": total_payment,
+			"balance_loan_amount": balance_amount
+		})
+		next_payment_date = add_months(payment_date, 1)
+		payment_date = next_payment_date
+
+	loan_doc.save()
 
 # This function returns the amounts that are payable at the time of loan repayment based on posting date
 # So it pulls all the unpaid Loan Interest Accrual Entries and calculates the penalty if applicable
