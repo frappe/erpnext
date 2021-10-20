@@ -1244,7 +1244,7 @@ class SalarySlip(TransactionBase):
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
 			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
-			filters = {'employee_name' : self.employee_name,
+			filters = {'employee' : self.employee,
 				'start_date' : ['>=', period_start_date],
 				'end_date' : ['<', period_end_date],
 				'name': ['!=', self.name],
@@ -1264,7 +1264,7 @@ class SalarySlip(TransactionBase):
 		first_day_of_the_month = get_first_day(self.start_date)
 		salary_slip_sum = frappe.get_list('Salary Slip',
 			fields = ['sum(net_pay) as sum'],
-			filters = {'employee_name' : self.employee_name,
+			filters = {'employee' : self.employee,
 				'start_date' : ['>=', first_day_of_the_month],
 				'end_date' : ['<', self.start_date],
 				'name': ['!=', self.name],
@@ -1288,13 +1288,13 @@ class SalarySlip(TransactionBase):
 					INNER JOIN `tabSalary Slip` as salary_slip
 					ON detail.parent = salary_slip.name
 					WHERE
-						salary_slip.employee_name = %(employee_name)s
+						salary_slip.employee = %(employee)s
 						AND detail.salary_component = %(component)s
 						AND salary_slip.start_date >= %(period_start_date)s
 						AND salary_slip.end_date < %(period_end_date)s
 						AND salary_slip.name != %(docname)s
 						AND salary_slip.docstatus = 1""",
-						{'employee_name': self.employee_name, 'component': component.salary_component, 'period_start_date': period_start_date,
+						{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
 							'period_end_date': period_end_date, 'docname': self.name}
 				)
 
