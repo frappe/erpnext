@@ -325,3 +325,5 @@ erpnext.patches.v13_0.set_status_in_maintenance_schedule_table
 erpnext.patches.v13_0.add_default_interview_notification_templates
 erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
 erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
+erpnext.patches.v13_0.requeue_failed_reposts
+erpnext.patches.v13_0.fetch_thumbnail_in_website_items
