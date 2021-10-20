@@ -1436,7 +1436,7 @@ class SalesInvoice(SellingController):
 					self.status = 'Internal Transfer'
 				elif is_overdue(self):
 					self.status = "Overdue"
-				elif 0 < outstanding_amount < flt(self.grand_total, self.precision("grand_total")):
+				elif 0 < outstanding_amount < (flt(self.grand_total, self.precision("grand_total")) + flt(self.rounding_adjustment, self.precision("rounding_adjustment"))):
 					self.status = "Partly Paid"
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
@@ -1470,6 +1470,7 @@ def is_overdue(doc):
 		return
 
 	grand_total = flt(doc.grand_total, doc.precision("grand_total"))
+	rounding_adjustment = flt(doc.rounding_adjustment, doc.precision("rounding_adjustment"))
 	nowdate = getdate()
 	if doc.payment_schedule:
 		# calculate payable amount till date
@@ -1479,7 +1480,7 @@ def is_overdue(doc):
 			if getdate(payment.due_date) < nowdate
 		)
 
-		if (grand_total - outstanding_amount) < payable_amount:
+		if (grand_total + rounding_adjustment - outstanding_amount) < payable_amount:
 			return True
 
 	elif getdate(doc.due_date) < nowdate:
