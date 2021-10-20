@@ -611,7 +611,7 @@ def render_docs_as_html(docs):
 
 
 @frappe.whitelist()
-def render_doc_as_html(doctype, docname, exclude_fields = []):
+def render_doc_as_html(doctype, docname, exclude_fields = None):
 	"""
 		Render document as HTML
 	"""
@@ -621,6 +621,9 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 	doc_html = section_html = section_label = html = ""
 	sec_on = has_data = False
 	col_on = 0
+
+	if exclude_fields is None:
+		exclude_fields = []
 
 	for df in meta.fields:
 		# on section break append previous section and html to doc html

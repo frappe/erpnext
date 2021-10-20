@@ -17,9 +17,10 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPurchaseReceipt(unittest.TestCase):
+class TestPurchaseReceipt(ERPNextTestCase):
 	def setUp(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
