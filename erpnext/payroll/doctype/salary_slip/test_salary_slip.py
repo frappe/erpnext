@@ -1065,9 +1065,6 @@ def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure
 	else:
 		salary_slip = frappe.get_doc("Salary Slip", salary_slip_name)
 
-<<<<<<< HEAD
-	return salary_slip
-=======
 	return salary_slip
 
 def create_recurring_additional_salary(employee, salary_component, amount, from_date, to_date, company=None):
@@ -1083,4 +1080,3 @@ def create_recurring_additional_salary(employee, salary_component, amount, from_
 		"type": "Earning",
 		"currency": erpnext.get_default_currency()
 	}).submit()
->>>>>>> 2ef4844a3c (feat: Tax for recurring additional salary (#27459))

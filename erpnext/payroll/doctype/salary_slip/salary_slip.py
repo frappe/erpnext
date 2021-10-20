@@ -703,10 +703,7 @@ class SalarySlip(TransactionBase):
 				component_row.default_amount = 0
 				component_row.additional_amount = amount
 
-<<<<<<< HEAD
-=======
 			component_row.is_recurring_additional_salary = is_recurring
->>>>>>> 2ef4844a3c (feat: Tax for recurring additional salary (#27459))
 			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date
