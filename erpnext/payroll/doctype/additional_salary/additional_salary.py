@@ -133,19 +133,20 @@ def get_additional_salaries(employee, start_date, end_date, component_type):
 	component_field = additional_sal.salary_component.as_('component')
 	overwrite_field = additional_sal.overwrite_salary_structure_amount.as_('overwrite')
 
-	additional_salary_list = (
-		frappe.qb.from_(additional_sal)
-			.select(additional_sal.name, component_field, additional_sal.type,
-				additional_sal.amount, additional_sal.is_recurring, overwrite_field,
-				additional_sal.deduct_full_tax_on_selected_payroll_date)
-			.where((additional_sal.employee == employee)
-				& (additional_sal.docstatus == 1)
-				& (additional_sal.type == comp_type))
-			.where(
-				additional_sal.payroll_date[start_date: end_date]
-				| ((additional_sal.from_date <= end_date) & (additional_sal.to_date >= end_date))
-			)
-		).run(as_dict=True)
+	additional_salary_list = frappe.qb.from_(
+		additional_sal
+	).select(
+		additional_sal.name, component_field, additional_sal.type,
+		additional_sal.amount, additional_sal.is_recurring, overwrite_field,
+		additional_sal.deduct_full_tax_on_selected_payroll_date
+	).where(
+		(additional_sal.employee == employee)
+		& (additional_sal.docstatus == 1)
+		& (additional_sal.type == comp_type)
+	).where(
+		additional_sal.payroll_date[start_date: end_date]
+		| ((additional_sal.from_date <= end_date) & (additional_sal.to_date >= end_date))
+	).run(as_dict=True)
 
 	additional_salaries = []
 	components_to_overwrite = []

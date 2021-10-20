@@ -907,7 +907,7 @@ class SalarySlip(TransactionBase):
 					if additional_amount and earning.is_recurring_additional_salary:
 						additional_income += self.get_future_recurring_additional_amount(earning.additional_salary,
 							earning.additional_amount) # Used earning.additional_amount to consider the amount for the full month
-					
+
 					if earning.deduct_full_tax_on_selected_payroll_date:
 						additional_income_with_full_tax += additional_amount
 
@@ -931,7 +931,7 @@ class SalarySlip(TransactionBase):
 			"additional_income_with_full_tax": additional_income_with_full_tax,
 			"flexi_benefits": flexi_benefits
 		})
-	
+
 	def get_future_recurring_additional_amount(self, additional_salary, monthly_additional_amount):
 		future_recurring_additional_amount = 0
 		to_date = frappe.db.get_value("Additional Salary", additional_salary, 'to_date')
