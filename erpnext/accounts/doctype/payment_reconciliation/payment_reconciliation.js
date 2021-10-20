@@ -4,7 +4,9 @@
 frappe.provide("erpnext.accounts");
 erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationController extends frappe.ui.form.Controller {
 	onload() {
-		this.frm.disable_save();
+		const default_company = frappe.defaults.get_default('company');
+		this.frm.set_value('company', default_company);
+
 		this.frm.set_query("party_type", function() {
 			return {
 				"filters": {
