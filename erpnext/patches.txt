@@ -296,7 +296,7 @@ erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v13_0.fix_invoice_statuses
-erpnext.patches.v13_0.create_website_items #19-10-2021
+erpnext.patches.v13_0.create_website_items #30-09-2021
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
@@ -323,6 +323,7 @@ erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_pan_field_for_india #2
 erpnext.patches.v14_0.delete_hub_doctypes
 erpnext.patches.v13_0.create_ksa_vat_custom_fields
+<<<<<<< HEAD
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
 erpnext.patches.v14_0.migrate_crm_settings
 erpnext.patches.v13_0.rename_ksa_qr_field
@@ -342,3 +343,6 @@ erpnext.patches.v13_0.create_website_items
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
 >>>>>>> 37a246e738 (chore: Patches for Website Item)
+=======
+erpnext.patches.v13_0.fetch_thumbnail_in_website_items
+>>>>>>> dc42c45ebb (fix: Move thumbnail updation to different patch)
