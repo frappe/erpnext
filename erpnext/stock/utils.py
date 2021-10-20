@@ -104,7 +104,7 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 			serial_nos = last_entry.get("serial_no")
 
 			if (serial_nos and
-				len(get_serial_nos_data(serial_nos)) < last_entry.qty_after_transaction):
+				len(get_serial_nos_data(serial_nos)) <= last_entry.qty_after_transaction):
 				serial_nos = get_serial_nos_data_after_transactions(args)
 
 			return ((last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
@@ -121,6 +121,7 @@ def get_serial_nos_data_after_transactions(args):
 		WHERE
 			item_code = %(item_code)s and warehouse = %(warehouse)s
 			and timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
+			and is_cancelled = 0
 			order by posting_date, posting_time asc """, args, as_dict=1)
 
 	for d in data:
