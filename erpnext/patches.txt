@@ -311,17 +311,11 @@ execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Catego
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.validate_options_for_data_field
-<<<<<<< HEAD
 erpnext.patches.v13_0.create_website_items #30-09-2021
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
-=======
-erpnext.patches.v13_0.create_gst_payment_entry_fields
-erpnext.patches.v14_0.delete_shopify_doctypes
-erpnext.patches.v13_0.fix_invoice_statuses
-erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
->>>>>>> 8d9d0987fe (fix: incorrect status being set in Invoices (#28019))
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
+erpnext.patches.v13_0.fix_invoice_statuses
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.gst_fields_for_pos_invoice
 erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
