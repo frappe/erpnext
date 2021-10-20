@@ -67,14 +67,26 @@ class TestEmployeeTransfer(unittest.TestCase):
 	def test_employee_history(self):
 		name = frappe.get_value("Employee", {"first_name": "John", "company": "Test Company"}, "name")
 		doc = frappe.get_doc("Employee",name)
-		record_count = len(doc.internal_work_history)
-		self.assertEqual(record_count, 2)
+		count = 0
+		department = ["Accounts - TC", "Management - TC"]
+		designation = ["Accountant", "Manager"]
+		dt = [getdate("01-10-2021"), date.today()]
+
+		for data in doc.internal_work_history:
+			self.assertEqual(data.department, department[count])
+			self.assertEqual(data.designation, designation[count])
+			self.assertEqual(data.from_date, dt[count])
+			count = count + 1
+
 		data = frappe.db.get_list("Employee Transfer", filters={"employee":name}, fields=["*"])
 		doc = frappe.get_doc("Employee Transfer", data[0]["name"])
 		doc.cancel()
 		employee_doc = frappe.get_doc("Employee",name)
-		record_count = len(employee_doc.internal_work_history)
-		self.assertEqual(record_count, 1)
+
+		for data in employee_doc.internal_work_history:
+			self.assertEqual(data.designation, designation[0])
+			self.assertEqual(data.department, department[0])
+			self.assertEqual(data.from_date, dt[0])
 
 def create_employee():
 	doc = frappe.get_doc({
