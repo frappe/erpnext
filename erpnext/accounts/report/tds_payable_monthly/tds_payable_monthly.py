@@ -49,7 +49,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 			}
 
 			if filters.naming_series == 'Naming Series':
-				row.update({'supplier_name': supplier_map.get(supplier).supplier_name})
+				row.update({'supplier_name': supplier_map.get(supplier, {}).get('supplier_name')})
 
 			row.update({
 				'section_code': tax_withholding_category,
