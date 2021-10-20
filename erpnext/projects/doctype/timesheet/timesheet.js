@@ -32,12 +32,12 @@ frappe.ui.form.on("Timesheet", {
 		};
 	},
 
-	onload: function(frm){
+	onload: function(frm) {
 		if (frm.doc.__islocal && frm.doc.time_logs) {
 			calculate_time_and_amount(frm);
 		}
 
-		if (frm.is_new()) {
+		if (frm.is_new() && !frm.doc.employee) {
 			set_employee_and_company(frm);
 		}
 	},
