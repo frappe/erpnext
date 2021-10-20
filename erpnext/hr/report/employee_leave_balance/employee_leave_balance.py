@@ -124,13 +124,8 @@ def get_allocated_and_expired_leaves(records, from_date, to_date):
 def get_leave_ledger_entries(from_date, to_date, employee, leave_type):
 	records= frappe.db.sql("""
 		SELECT
-<<<<<<< HEAD
-			employee, leave_type, from_date, to_date, leaves, transaction_name, transaction_type
-			is_carry_forward, is_expired
-=======
 			employee, leave_type, from_date, to_date, leaves, transaction_name,
 			transaction_type, is_carry_forward, is_expired
->>>>>>> 632f7848a3 (Update employee_leave_balance.py)
 		FROM `tabLeave Ledger Entry`
 		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
 			AND docstatus=1
