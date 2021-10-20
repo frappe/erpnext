@@ -14,8 +14,9 @@ def execute():
 	item_fields = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
 		"has_variants", "variant_of", "description", "weightage"]
 	web_fields_to_map = ["route", "slideshow", "website_image_alt",
-		"website_warehouse", "web_long_description", "website_content"]
+		"website_warehouse", "web_long_description", "website_content", "thumbnail"]
 
+	# get all valid columns (fields) from Item master DB schema
 	item_table_fields = frappe.db.sql("desc `tabItem`", as_dict=1)
 	item_table_fields = [d.get('Field') for d in item_table_fields]
 
@@ -42,37 +43,30 @@ def execute():
 		fields=item_fields,
 		or_filters=or_filters
 	)
+	total_count = len(items)
 
-	count = 0
-	for item in items:
+	for count, item in enumerate(items, start=1):
 		if frappe.db.exists("Website Item", {"item_code": item.item_code}):
-			# if website item already exists check for empty thumbnail
-			web_item_doc = frappe.get_doc("Website Item", {"item_code": item.item_code})
-			if web_item_doc.website_image and not web_item_doc.thumbnail:
-				web_item_doc.make_thumbnail()
-				web_item_doc.save()
-		else:
-			# else make new website item from item (publish item)
-			website_item = make_website_item(item, save=False)
-			website_item.ranking = item.get("weightage")
-			for field in web_fields_to_map:
-				website_item.update({field: item.get(field)})
-			website_item.save()
+			continue
 
-			# move Website Item Group & Website Specification table to Website Item
-			for doctype in ("Website Item Group", "Item Website Specification"):
-				web_item, item_code = website_item.name, item.item_code
-				frappe.db.sql(f"""
-					Update
-						`tab{doctype}`
-					set
-						parenttype = 'Website Item',
-						parent = '{web_item}'
-					where
-						parenttype = 'Item'
-						and parent = '{item_code}'
-					""")
+		# make new website item from item (publish item)
+		website_item = make_website_item(item, save=False)
+		website_item.ranking = item.get("weightage")
 
-		count += 1
+		for field in web_fields_to_map:
+			website_item.update({field: item.get(field)})
+
+		website_item.save()
+
+		# move Website Item Group & Website Specification table to Website Item
+		for doctype in ("Website Item Group", "Item Website Specification"):
+			frappe.db.set_value(
+				doctype,
+				{"parenttype": "Item", "parent": item.item_code}, # filters
+				{"parenttype": "Website Item", "parent": website_item.name} # value dict
+			)
+
 		if count % 20 == 0: # commit after every 20 items
 			frappe.db.commit()
+
+		frappe.utils.update_progress_bar('Creating Website Items', count, total_count)
