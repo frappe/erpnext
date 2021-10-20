@@ -42,8 +42,6 @@ class Opportunity(TransactionBase):
 		if not self.with_items:
 			self.items = []
 
-<<<<<<< HEAD
-=======
 		else:
 			self.calculate_totals()
 
@@ -70,7 +68,6 @@ class Opportunity(TransactionBase):
 		self.grand_total = flt(self.total) + flt(self.opportunity_amount)
 		self.base_grand_total = flt(self.base_total) + flt(self.base_opportunity_amount)
 
->>>>>>> d81f811349 (fix: map missing fields in opportunity (#27904))
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
 		if (not self.get("party_name")) and self.contact_email:
