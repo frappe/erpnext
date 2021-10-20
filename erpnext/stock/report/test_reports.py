@@ -40,6 +40,7 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("Item Variant Details", {"item": "_Test Variant Item",}),
 	("Total Stock Summary", {"group_by": "warehouse",}),
 	("Batch Item Expiry Status", {}),
+	("Process Loss Report", {}),
 	("Stock Ageing", {"range1": 30, "range2": 60, "range3": 90, "_optional": True}),
 ]
 
