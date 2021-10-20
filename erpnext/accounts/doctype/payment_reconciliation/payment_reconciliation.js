@@ -93,6 +93,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	party() {
+		var me = this;
 		this.frm.set_value('receivable_payable_account', '');
 		this.frm.clear_table("invoices");
 		this.frm.clear_table("payments");
@@ -109,34 +110,36 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 				callback: function(r) {
 					if (!r.exc && r.message) {
-						this.frm.set_value("receivable_payable_account", r.message);
+						me.frm.set_value("receivable_payable_account", r.message);
 					}
-					this.frm.refresh();
+					me.frm.refresh();
 				}
 			});
 		}
 	}
 
 	get_unreconciled_entries() {
+		var me = this;
 		this.frm.clear_table("allocation");
 		return this.frm.call({
 			doc: this.frm.doc,
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
-				if (!(this.frm.doc.payments.length || this.frm.doc.invoices.length)) {
+				if (!(me.frm.doc.payments.length || me.frm.doc.invoices.length)) {
 					frappe.throw({message: __("No Unreconciled Invoices and Payments found for this party")});
-				} else if (!(this.frm.doc.invoices.length)) {
+				} else if (!(me.frm.doc.invoices.length)) {
 					frappe.throw({message: __("No Outstanding Invoices found for this party")});
-				} else if (!(this.frm.doc.payments.length)) {
+				} else if (!(me.frm.doc.payments.length)) {
 					frappe.throw({message: __("No Unreconciled Payments found for this party")});
 				}
-				this.frm.refresh();
+				me.frm.refresh();
 			}
 		});
 
 	}
 
 	allocate() {
+		var me = this;
 		let payments = this.frm.fields_dict.payments.grid.get_selected_children();
 		if (!(payments.length)) {
 			payments = this.frm.doc.payments;
@@ -153,7 +156,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				invoices: invoices
 			},
 			callback: function() {
-				this.frm.refresh();
+				me.frm.refresh();
 			}
 		});
 	}
@@ -242,13 +245,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	reconcile_payment_entries() {
+		var me = this;
 		return this.frm.call({
 			doc: this.frm.doc,
 			method: 'reconcile',
 			callback: function(r, rt) {
-				this.frm.clear_table("allocation");
-				this.frm.refresh_fields();
-				this.frm.refresh();
+				me.frm.clear_table("allocation");
+				me.frm.refresh();
 			}
 		});
 	}
