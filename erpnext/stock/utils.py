@@ -115,14 +115,25 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 		return last_entry.qty_after_transaction if last_entry else 0.0
 
 def get_serial_nos_data_after_transactions(args):
+	from pypika import CustomFunction
+
 	serial_nos = []
-	data = frappe.db.sql(""" SELECT serial_no, actual_qty
-		FROM `tabStock Ledger Entry`
-		WHERE
-			item_code = %(item_code)s and warehouse = %(warehouse)s
-			and timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
-			and is_cancelled = 0
-			order by posting_date, posting_time asc """, args, as_dict=1)
+	args = frappe._dict(args)
+	sle = frappe.qb.DocType('Stock Ledger Entry')
+	Timestamp = CustomFunction('timestamp', ['date', 'time'])
+
+	data = frappe.qb.from_(
+		sle
+	).select(
+		'serial_no','actual_qty'
+	).where(
+		(sle.item_code == args.item_code)
+		& (sle.warehouse == args.warehouse)
+		& (Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time))
+		& (sle.is_cancelled == 0)
+	).orderby(
+		sle.posting_date, sle.posting_time
+	).run(as_dict=1)
 
 	for d in data:
 		if d.actual_qty > 0:
