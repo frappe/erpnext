@@ -88,8 +88,9 @@ def resolve_dunning(doc, state):
 				resolve = True
 				dunning = frappe.get_doc("Dunning", dunning_name)
 				for overdue_payment in dunning.overdue_payments:
-					outstanding = frappe.get_value("Payment Schedule", overdue_payment.payment_schedule, "outstanding")
-					if outstanding >= 0:
+					outstanding_inv = frappe.get_value("Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount")
+					outstanding_ps = frappe.get_value("Payment Schedule", overdue_payment.payment_schedule, "outstanding")
+					if outstanding_ps > 0 and outstanding_inv > 0:
 						resolve = False
 
 				if resolve:
