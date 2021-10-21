@@ -45,8 +45,10 @@ class DebitNoteCXP(Document):
 							self.amount_total = total_base + self.total_exempt + self.isv_18
 	
 	def calculate_isv(self):
+		self.isv_15 = 0
+		self.isv_18 = 0
 		for taxes_list in self.get("taxes"):
-			item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": taxes_list.isv})
+			item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": taxes_list.isv_template})
 			for tax_template in item_tax_template:
 				tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_template.name})
 				for tax in tax_details:
