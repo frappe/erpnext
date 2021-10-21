@@ -14,7 +14,7 @@
 {% block header_actions %}
 <div class="dropdown">
 	<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-		<span>{{ _('Actions') }}</span>
+		<span class="font-md">{{ _('Actions') }}</span>
 		<b class="caret"></b>
 	</button>
 	<ul class="dropdown-menu dropdown-menu-right" role="menu">
@@ -34,7 +34,7 @@
 
 <div class="row transaction-subheading">
 	<div class="col-6">
-		<span class="indicator-pill {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
+		<span class="font-md indicator-pill {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
 			{% if doc.doctype == "Quotation" and not doc.docstatus %}
 				{{ _("Pending") }}
 			{% else %}

@@ -459,6 +459,7 @@ body.product-page {
 		min-height: 0px;
 
 		.r-item-image {
+			min-height: 100px;
 			width: 40%;
 
 			.r-product-image {
@@ -480,6 +481,7 @@ body.product-page {
 		.r-item-info {
 			font-size: 14px;
 			padding-right: 0;
+			padding-left: 10px;
 			width: 60%;
 
 			a {
@@ -672,18 +674,6 @@ body.product-page {
 				img {
 					max-height: 112px;
 				}
-
-				.no-image-cart-item {
-					max-height: 112px;
-					display: flex; justify-content: center;
-					background-color: var(--gray-200);
-					align-items: center;
-					color: var(--gray-400);
-					margin-top: .15rem;
-					border-radius: 6px;
-					height: 100%;
-					font-size: 24px;
-				}
 			}
 
 			.cart-items {
@@ -860,6 +850,18 @@ body.product-page {
 	.t-and-c-terms {
 		font-size: 14px;
 	}
+}
+
+.no-image-cart-item {
+	max-height: 112px;
+	display: flex; justify-content: center;
+	background-color: var(--gray-200);
+	align-items: center;
+	color: var(--gray-400);
+	margin-top: .15rem;
+	border-radius: 6px;
+	height: 100%;
+	font-size: 24px;
 }
 
 .cart-empty.frappe-card {
