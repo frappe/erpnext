@@ -10,7 +10,7 @@ from frappe.model.document import Document
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 
-class CreditNoteCXP(Document):
+class SalesInvoiceWithoutItems(Document):
 	def validate(self):
 		self.calculate_total()
 		self.validate_status()
