@@ -293,7 +293,7 @@ frappe.ui.form.on("Timesheet Detail", {
 				activity_type: frm.selected_doc.activity_type,
 				currency: frm.doc.currency
 			},
-			callback: function (r){
+			callback: function (r) {
 				if (r.message) {
 					frappe.model.set_value(cdt, cdn, "billing_rate", r.message["billing_rate"]);
 					frappe.model.set_value(cdt, cdn, "costing_rate", r.message["costing_rate"]);
