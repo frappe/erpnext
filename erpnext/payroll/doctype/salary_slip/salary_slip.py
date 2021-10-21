@@ -172,7 +172,6 @@ class SalarySlip(TransactionBase):
 						and employee = %s and name != %s {0}""".format(cond),
 						(self.start_date, self.end_date, self.employee, self.name))
 			if ret_exist:
-				self.employee = ''
 				frappe.throw(_("Salary Slip of employee {0} already created for this period").format(self.employee))
 		else:
 			for data in self.timesheets:
