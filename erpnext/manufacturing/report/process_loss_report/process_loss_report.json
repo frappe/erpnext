@@ -9,9 +9,9 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2021-08-24 16:38:15.233395",
+ "modified": "2021-10-20 22:03:57.606612",
  "modified_by": "Administrator",
- "module": "Stock",
+ "module": "Manufacturing",
  "name": "Process Loss Report",
  "owner": "Administrator",
  "prepared_report": 0,
@@ -21,9 +21,6 @@
  "roles": [
   {
    "role": "Manufacturing User"
-  },
-  {
-   "role": "Stock User"
   }
  ]
 }

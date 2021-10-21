@@ -97,7 +97,7 @@ class ShiftType(Document):
 		assigned_employees = [x[0] for x in assigned_employees]
 
 		if consider_default_shift:
-			filters = {'default_shift': self.name}
+			filters = {'default_shift': self.name, 'status': ['!=', 'Inactive']}
 			default_shift_employees = frappe.get_all('Employee', 'name', filters, as_list=True)
 			default_shift_employees = [x[0] for x in default_shift_employees]
 			return list(set(assigned_employees+default_shift_employees))

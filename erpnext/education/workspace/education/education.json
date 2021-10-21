@@ -1,5 +1,4 @@
 {
- "category": "",
  "charts": [
   {
    "chart_name": "Program Enrollments",
@@ -8,18 +7,12 @@
  ],
  "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Education\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Program Enrollments\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Student\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Instructor\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Program\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Course\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fees\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Student Monthly Attendance Sheet\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Course Scheduling Tool\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Student Attendance Tool\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Student and Instructor\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Content Masters\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Admission\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Fees\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Schedule\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Attendance\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"LMS Activity\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Assessment\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Assessment Reports\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Other Reports\", \"col\": 4}}]",
  "creation": "2020-03-02 17:22:57.066401",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "education",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Education",
  "links": [
   {
@@ -699,15 +692,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:57.929275",
+ "modified": "2021-08-05 12:15:57.929276",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education",
- "onboarding": "Education",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "Education",
  "roles": [],

@@ -1,20 +1,13 @@
 {
- "category": "",
  "charts": [],
  "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Point Of Sale\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings & Configurations\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loyalty Program\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Opening & Closing\", \"col\": 4}}]",
  "creation": "2020-03-02 17:18:32.505616",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "retail",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Retail",
  "links": [
   {
@@ -108,15 +101,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:01.840988",
+ "modified": "2021-08-05 12:16:01.840989",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",
- "onboarding": "",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "Retail",
  "roles": [],
