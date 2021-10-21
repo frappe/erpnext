@@ -78,12 +78,13 @@ class DeliveryPlanning(Document):
 									soi.delivered_qty,
 									a.pincode
 
-
 									from `tabSales Order Item` soi
 									join `tabSales Order` so ON soi.parent = so.name
 									Left join `tabAddress` a  ON so.customer = a.address_title
 
 									where so.docstatus = 1
+									and so.status = "To Bill" OR so.status = "To Deliver"
+																		
 									and (soi.qty - soi.delivered_qty ) != 0
 									{conditions} """.format(conditions=conditions), as_dict=1)
 		for i in query:
@@ -96,7 +97,7 @@ class DeliveryPlanning(Document):
 			# dp_item.item_name = i.item_name
 			dp_item.item_dname = i.dname
 			# dp_item.rate = i.rate
-			if i.delivered_qty:
+			if i.delivered_qty > 0:
 				dp_item.ordered_qty = abs(i.qty - i.delivered_qty)
 				dp_item.pending_qty = 0
 				dp_item.qty_to_deliver = abs(i.qty - i.delivered_qty)
