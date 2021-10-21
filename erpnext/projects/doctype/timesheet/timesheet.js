@@ -284,7 +284,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	activity_type: function (frm, cdt, cdn) {
-		if (locals[cdt][cdn].activity_type) {
+		if (!frappe.get_doc(cdt, cdn).activity_type) return;
 			frappe.call({
 				method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 				args: {
