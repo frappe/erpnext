@@ -53,38 +53,43 @@ class TestDunning(unittest.TestCase):
 		pe = get_payment_entry("Dunning", dunning.name)
 		pe.reference_no = "1"
 		pe.reference_date = nowdate()
-		pe.paid_from_account_currency = dunning.currency
-		pe.paid_to_account_currency = dunning.currency
-		pe.source_exchange_rate = 1
-		pe.target_exchange_rate = 1
 		pe.insert()
 		pe.submit()
-		si_doc = frappe.get_doc("Sales Invoice", dunning.sales_invoice)
-		self.assertEqual(si_doc.outstanding_amount, 0)
+
+		for overdue_payment in dunning.overdue_payments:
+			outstanding_amount = frappe.get_value(
+				"Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount"
+			)
+			self.assertEqual(outstanding_amount, 0)
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Resolved")
 
 
 def create_first_dunning():
 	posting_date = add_days(today(), -20)
-	due_date = add_days(today(), -15)
 	sales_invoice = create_sales_invoice_against_cost_center(
-		posting_date=posting_date, due_date=due_date, qty=1, rate=100)
+		posting_date=posting_date, qty=1, rate=100
+	)
 	dunning = create_dunning_from_sales_invoice(sales_invoice.name)
+	dunning.income_account = "Interest Income Account - _TC"
 	dunning.save()
 
 	return dunning
 
 
 def create_second_dunning():
-	posting_date = add_days(today(), -20)
-	due_date = add_days(today(), -15)
+	posting_date = add_days(today(), -15)
 	sales_invoice = create_sales_invoice_against_cost_center(
-		posting_date=posting_date, due_date=due_date, qty=1, rate=100)
+		posting_date=posting_date, qty=1, rate=100
+	)
 	dunning = create_dunning_from_sales_invoice(sales_invoice.name)
 	dunning_type = frappe.get_doc("Dunning Type", "Second Notice")
 
 	dunning.dunning_type = dunning_type.name
 	dunning.rate_of_interest = dunning_type.rate_of_interest
 	dunning.dunning_fee = dunning_type.dunning_fee
+	dunning.income_account = "Interest Income Account - _TC"
 	dunning.save()
 
 	return dunning
@@ -101,11 +106,12 @@ def create_dunning_type(title, fee, interest, is_default):
 	dunning_type.dunning_fee = fee
 	dunning_type.rate_of_interest = interest
 	dunning_type.append(
-		"dunning_letter_text", {
+		"dunning_letter_text",
+		{
 			"language": "en",
 			"body_text": "We have still not received payment for our invoice",
-			"closing_text": "We kindly request that you pay the outstanding amount immediately, including interest and late fees."
-		}
+			"closing_text": "We kindly request that you pay the outstanding amount immediately, including interest and late fees.",
+		},
 	)
 	dunning_type.save()
 	return dunning_type
