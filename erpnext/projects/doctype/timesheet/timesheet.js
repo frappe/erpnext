@@ -294,7 +294,7 @@ frappe.ui.form.on("Timesheet Detail", {
 				currency: frm.doc.currency
 			},
 			callback: function (r){
-				if(r.message){
+				if (r.message) {
 					frappe.model.set_value(cdt, cdn, "billing_rate", r.message["billing_rate"]);
 					frappe.model.set_value(cdt, cdn, "costing_rate", r.message["costing_rate"]);
 					calculate_billing_costing_amount(frm, cdt, cdn);
