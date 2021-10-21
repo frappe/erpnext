@@ -1863,7 +1863,7 @@ def get_payment_entry(
 				pe.append("deductions", {
 					"account": doc.income_account,
 					"cost_center": doc.cost_center,
-					"amount": doc.dunning_amount,
+					"amount": -1 * doc.dunning_amount,
 					"description": _("Interest and/or dunning fee")
 				})
 			else:
@@ -1957,8 +1957,8 @@ def set_party_account_currency(dt, party_account, doc):
 
 def set_payment_type(dt, doc):
 	if (
-		dt == "Sales Order" or (dt in ("Sales Invoice", "Dunning") and doc.outstanding_amount > 0)
-	) or (dt == "Purchase Invoice" and doc.outstanding_amount < 0):
+		dt == "Sales Order" or (dt == "Sales Invoice" and doc.outstanding_amount > 0)
+	) or (dt == "Purchase Invoice" and doc.outstanding_amount < 0) or dt == "Dunning":
 		payment_type = "Receive"
 	else:
 		payment_type = "Pay"
