@@ -283,22 +283,24 @@ frappe.ui.form.on("Timesheet Detail", {
 		calculate_time_and_amount(frm);
 	},
 
-	activity_type: function(frm, cdt, cdn) {
-		frappe.call({
-			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-			args: {
-				employee: frm.doc.employee,
-				activity_type: frm.selected_doc.activity_type,
-				currency: frm.doc.currency
-			},
-			callback: function(r){
-				if(r.message){
-					frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
-					frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
-					calculate_billing_costing_amount(frm, cdt, cdn);
+	activity_type: function (frm, cdt, cdn) {
+		if (locals[cdt][cdn].activity_type) {
+			frappe.call({
+				method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+				args: {
+					employee: frm.doc.employee,
+					activity_type: frm.selected_doc.activity_type,
+					currency: frm.doc.currency
+				},
+				callback: function (r){
+					if(r.message){
+						frappe.model.set_value(cdt, cdn, "billing_rate", r.message["billing_rate"]);
+						frappe.model.set_value(cdt, cdn, "costing_rate", r.message["costing_rate"]);
+						calculate_billing_costing_amount(frm, cdt, cdn);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 });
 
