@@ -72,6 +72,7 @@ def get_job_applicant():
 	applicant = frappe.new_doc('Job Applicant')
 	applicant.applicant_name = 'Test Researcher'
 	applicant.email_id = 'test@researcher.com'
+	applicant.designation = 'Researcher'
 	applicant.status = 'Open'
 	applicant.cover_letter = 'I am a great Researcher.'
 	applicant.insert()
