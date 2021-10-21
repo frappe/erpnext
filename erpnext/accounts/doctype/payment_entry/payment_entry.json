@@ -27,10 +27,12 @@
   "payment_accounts_section",
   "party_balance",
   "paid_from",
+  "paid_from_account_type",
   "paid_from_account_currency",
   "paid_from_account_balance",
   "column_break_18",
   "paid_to",
+  "paid_to_account_type",
   "paid_to_account_currency",
   "paid_to_account_balance",
   "payment_amounts_section",
@@ -440,7 +442,8 @@
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
    "fieldtype": "Data",
-   "label": "Cheque/Reference No"
+   "label": "Cheque/Reference No",
+   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
   },
   {
    "fieldname": "column_break_23",
@@ -452,6 +455,7 @@
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "label": "Cheque/Reference Date",
+   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
    "search_index": 1
   },
   {
@@ -707,15 +711,30 @@
    "label": "Received Amount After Tax (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fetch_from": "paid_from.account_type",
+   "fieldname": "paid_from_account_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Paid From Account Type"
+  },
+  {
+   "fetch_from": "paid_to.account_type",
+   "fieldname": "paid_to_account_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Paid To Account Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-09 08:58:15.008761",
+ "modified": "2021-10-22 17:50:24.632806",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
