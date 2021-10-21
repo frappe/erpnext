@@ -262,7 +262,7 @@ erpnext.patches.v13_0.update_payment_terms_outstanding
 erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
-erpnext.patches.v12_0.update_vehicle_no_reqd_condition
+erpnext.patches.v13_0.update_vehicle_no_reqd_condition
 erpnext.patches.v12_0.add_einvoice_status_field #2021-03-17
 erpnext.patches.v12_0.add_einvoice_summary_report_permissions
 erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
@@ -313,11 +313,17 @@ erpnext.patches.v13_0.create_website_items #30-09-2021
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
+erpnext.patches.v13_0.fix_invoice_statuses
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.gst_fields_for_pos_invoice
 erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
 erpnext.patches.v13_0.create_custom_field_for_finance_book
-erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries
+erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries #2
 erpnext.patches.v13_0.fix_additional_cost_in_mfg_stock_entry
 erpnext.patches.v13_0.shopping_cart_to_ecommerce
 erpnext.patches.v13_0.set_status_in_maintenance_schedule_table
+erpnext.patches.v13_0.add_default_interview_notification_templates
+erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
+erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
+erpnext.patches.v13_0.requeue_failed_reposts
+erpnext.patches.v13_0.fetch_thumbnail_in_website_items

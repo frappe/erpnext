@@ -171,8 +171,6 @@ class TestSalarySlip(unittest.TestCase):
 		days_in_month = no_of_days[0]
 		no_of_holidays = no_of_days[1]
 
-		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 1)
-
 		ss.reload()
 		payment_days_based_comp_amount = 0
 		for component in ss.earnings:
