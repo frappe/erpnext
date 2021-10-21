@@ -71,6 +71,7 @@
   "attributes",
   "defaults",
   "item_defaults",
+  "default_company",
   "purchase_details",
   "is_purchase_item",
   "purchase_uom",
@@ -1071,6 +1072,13 @@
    "fieldtype": "Link",
    "label": "Delivery Area",
    "options": "Delivery Area"
+  },
+  {
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "has_web_view": 1,
@@ -1078,7 +1086,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-10-18 08:43:02.174480",
+ "modified": "2021-10-20 14:05:42.821882",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
