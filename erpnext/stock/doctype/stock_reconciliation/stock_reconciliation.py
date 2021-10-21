@@ -490,7 +490,8 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company, item_code=None):
+def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
+	ignore_empty_stock = cint(ignore_empty_stock)
 	items = [frappe._dict({
 		'item_code': item_code,
 		'warehouse': warehouse
@@ -504,18 +505,24 @@ def get_items(warehouse, posting_date, posting_time, company, item_code=None):
 
 	for d in items:
 		if d.item_code in itemwise_batch_data:
-			stock_bal = get_stock_balance(d.item_code, d.warehouse,
-				posting_date, posting_time, with_valuation_rate=True)
+			valuation_rate = get_stock_balance(d.item_code, d.warehouse,
+				posting_date, posting_time, with_valuation_rate=True)[1]
 
 			for row in itemwise_batch_data.get(d.item_code):
-				args = get_item_data(row, row.qty, stock_bal[1])
+				if ignore_empty_stock and not row.qty:
+					continue
+
+				args = get_item_data(row, row.qty, valuation_rate)
 				res.append(args)
 		else:
 			stock_bal = get_stock_balance(d.item_code, d.warehouse, posting_date, posting_time,
 				with_valuation_rate=True , with_serial_no=cint(d.has_serial_no))
+			qty, valuation_rate, serial_no = stock_bal[0], stock_bal[1], stock_bal[2] if cint(d.has_serial_no) else ''
 
-			args = get_item_data(d, stock_bal[0], stock_bal[1],
-				stock_bal[2] if cint(d.has_serial_no) else '')
+			if ignore_empty_stock and not stock_bal[0]:
+					continue
+
+			args = get_item_data(d, qty, valuation_rate, serial_no)
 
 			res.append(args)
 
@@ -523,23 +530,43 @@ def get_items(warehouse, posting_date, posting_time, company, item_code=None):
 
 def get_items_for_stock_reco(warehouse, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-	items = frappe.db.sql("""
-		select i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
-		from tabBin bin, tabItem i
-		where i.name=bin.item_code and IFNULL(i.disabled, 0) = 0 and i.is_stock_item = 1
-		and i.has_variants = 0 and exists(
-			select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse
-		)
-	""", (lft, rgt), as_dict=1)
+	items = frappe.db.sql(f"""
+		select
+			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
+		from
+			tabBin bin, tabItem i
+		where
+			i.name = bin.item_code
+			and IFNULL(i.disabled, 0) = 0
+			and i.is_stock_item = 1
+			and i.has_variants = 0
+			and exists(
+				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse
+			)
+	""", as_dict=1)
 
 	items += frappe.db.sql("""
-		select i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
-		from tabItem i, `tabItem Default` id
-		where i.name = id.parent
-			and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse)
-			and i.is_stock_item = 1 and i.has_variants = 0 and IFNULL(i.disabled, 0) = 0 and id.company=%s
+		select
+			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
+		from
+			tabItem i, `tabItem Default` id
+		where
+			i.name = id.parent
+			and exists(
+				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse
+			)
+			and i.is_stock_item = 1
+			and i.has_variants = 0
+			and IFNULL(i.disabled, 0) = 0
+			and id.company = %s
 		group by i.name
 	""", (lft, rgt, company), as_dict=1)
+
+	# remove duplicates
+	# check if item-warehouse key extracted from each entry exists in set iw_keys
+	# and update iw_keys
+	iw_keys = set()
+	items = [item for item in items if [(item.item_code, item.warehouse) not in iw_keys, iw_keys.add((item.item_code, item.warehouse))][0]]
 
 	return items
 

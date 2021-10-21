@@ -176,7 +176,7 @@ def generate_taxes():
 	account = create_account(company=company_name, account_name="Output Tax CGST", account_type="Tax", parent_account=parent_account)
 	return {'taxes':[{
 		"account_head": account,
-		"rate": 0,
+		"rate": 9,
 		"description": "CGST",
 		"tax_amount": 10,
 		"total": 210

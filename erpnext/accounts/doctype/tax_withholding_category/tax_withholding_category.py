@@ -203,6 +203,9 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 			# then chargeable value is "prev invoices + advances" value which cross the threshold
 			tax_amount = get_tcs_amount(parties, inv, tax_details, vouchers, advance_vouchers)
 
+	if cint(tax_details.round_off_tax_amount):
+		tax_amount = round(tax_amount)
+
 	return tax_amount, tax_deducted
 
 def get_invoice_vouchers(parties, tax_details, company, party_type='Supplier'):
@@ -321,9 +324,6 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
-
-	if cint(tax_details.round_off_tax_amount):
-		tds_amount = round(tds_amount)
 
 	return tds_amount
 
