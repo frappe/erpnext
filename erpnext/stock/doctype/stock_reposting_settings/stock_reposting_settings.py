@@ -12,7 +12,7 @@ class StockRepostingSettings(Document):
 		self.set_minimum_reposting_time_slot()
 
 	def set_minimum_reposting_time_slot(self):
-		"""Ensure that timeslot for reposting is at least 12 hours."""
+		"""Ensure that timeslot for reposting is at least 10 hours."""
 		if not self.limit_reposting_timeslot:
 			return
 
