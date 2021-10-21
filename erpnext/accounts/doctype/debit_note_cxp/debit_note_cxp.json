@@ -154,8 +154,7 @@
    "fieldname": "taxes",
    "fieldtype": "Table",
    "label": "Taxes",
-   "options": "Multiple Taxes",
-   "reqd": 1
+   "options": "Multiple Taxes"
   },
   {
    "fieldname": "section_break_3",
@@ -192,7 +191,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-21 16:25:20.213684",
+ "modified": "2021-10-21 09:57:07.094540",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXP",
