@@ -279,7 +279,7 @@ class PaymentEntry(AccountsController):
 		if self.party_type == "Student":
 			valid_reference_doctypes = ("Fees")
 		elif self.party_type == "Customer":
-			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry")
+			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
 		elif self.party_type == "Supplier":
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
 		elif self.party_type == "Employee":
@@ -1351,6 +1351,10 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("amount")
 		outstanding_amount = total_amount
 		exchange_rate = 1
+	elif reference_doctype == "Dunning":
+		total_amount = ref_doc.get("dunning_amount")
+		exchange_rate = 1
+		outstanding_amount = ref_doc.get("dunning_amount")
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
@@ -1360,7 +1364,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 	elif reference_doctype != "Journal Entry":
 		if ref_doc.doctype == "Expense Claim":
-			total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
+				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 		elif ref_doc.doctype == "Employee Advance":
 			total_amount = ref_doc.advance_amount
 			exchange_rate = ref_doc.get("exchange_rate")
@@ -1414,6 +1418,10 @@ def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_acc
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
+	elif reference_doctype == "Dunning":
+		total_amount = ref_doc.get("dunning_amount")
+		exchange_rate = 1
+		outstanding_amount = ref_doc.get("dunning_amount")
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
@@ -1607,7 +1615,7 @@ def get_bank_cash_account(doc, bank_account):
 	return bank
 
 def set_party_type(dt):
-	if dt in ("Sales Invoice", "Sales Order"):
+	if dt in ("Sales Invoice", "Sales Order", "Dunning"):
 		party_type = "Customer"
 	elif dt in ("Purchase Invoice", "Purchase Order"):
 		party_type = "Supplier"
@@ -1644,7 +1652,7 @@ def set_party_account_currency(dt, party_account, doc):
 	return party_account_currency
 
 def set_payment_type(dt, doc):
-	if (dt in ("Sales Order", "Donation") or (dt in ("Sales Invoice", "Fees") and doc.outstanding_amount > 0)) \
+	if (dt in ("Sales Order", "Donation") or (dt in ("Sales Invoice", "Fees", "Dunning") and doc.outstanding_amount > 0)) \
 		or (dt=="Purchase Invoice" and doc.outstanding_amount < 0):
 			payment_type = "Receive"
 	else:
@@ -1674,6 +1682,9 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 	elif dt == "Fees":
 		grand_total = doc.grand_total
 		outstanding_amount = doc.outstanding_amount
+	elif dt == "Dunning":
+		grand_total = doc.grand_total
+		outstanding_amount = doc.grand_total
 	elif dt == "Donation":
 		grand_total = doc.amount
 		outstanding_amount = doc.amount
