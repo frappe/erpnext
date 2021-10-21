@@ -1,7 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %}
 frappe.provide("erpnext.crm");
 
 cur_frm.email_field = "contact_email";
@@ -58,6 +57,53 @@ frappe.ui.form.on("Opportunity", {
 			frm.trigger('set_as_lost_dialog');
 		}
 
+	},
+
+	set_as_lost_dialog: function(frm) {
+		var dialog = new frappe.ui.Dialog({
+			title: __("Set as Lost"),
+			fields: [
+				{
+					"fieldtype": "Table MultiSelect",
+					"label": __("Lost Reasons"),
+					"fieldname": "lost_reasons",
+					"options": "Opportunity Lost Reason Detail",
+					"reqd": 1
+				},
+				{
+					"fieldtype": "Table MultiSelect",
+					"label": __("Competitors"),
+					"fieldname": "competitors",
+					"options": "Competitor Detail",
+					"reqd": 1
+				},
+				{
+					"fieldtype": "Small Text",
+					"label": __("Detailed Reason"),
+					"fieldname": "detailed_reason"
+				},
+			],
+			primary_action: function() {
+				let values = dialog.get_values();
+
+				frm.call({
+					doc: frm.doc,
+					method: 'declare_enquiry_lost',
+					args: {
+						'lost_reasons': values.lost_reasons,
+						'competitors': values.competitors,
+						'detailed_reason': values.detailed_reason
+					},
+					callback: function(r) {
+						dialog.hide();
+						frm.reload_doc();
+					},
+				});
+			},
+			primary_action_label: __('Declare Lost')
+		});
+
+		dialog.show();
 	},
 
 	customer_address: function(frm, cdt, cdn) {
