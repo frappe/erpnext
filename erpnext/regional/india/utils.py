@@ -29,12 +29,13 @@ def validate_gstin_for_india(doc, method):
 
 	gst_category = []
 
-	if len(doc.links):
-		link_doctype = doc.links[0].get("link_doctype")
-		link_name = doc.links[0].get("link_name")
+	if hasattr(doc, 'gst_category'):
+		if len(doc.links):
+			link_doctype = doc.links[0].get("link_doctype")
+			link_name = doc.links[0].get("link_name")
 
-		if link_doctype in ["Customer", "Supplier"]:
-			gst_category = frappe.db.get_value(link_doctype, {'name': link_name}, ['gst_category'])
+			if link_doctype in ["Customer", "Supplier"]:
+				gst_category = frappe.db.get_value(link_doctype, {'name': link_name}, ['gst_category'])
 
 	doc.gstin = doc.gstin.upper().strip()
 	if not doc.gstin or doc.gstin == 'NA':
@@ -76,12 +77,13 @@ def validate_tax_category(doc, method):
 			frappe.throw(_("Intra State tax category for GST State {0} already exists").format(doc.gst_state))
 
 def update_gst_category(doc, method):
-	for link in doc.links:
-		if link.link_doctype in ['Customer', 'Supplier']:
-			if doc.get('gstin'):
-				frappe.db.sql("""
-					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered'
-				""".format(link.link_doctype), ("Registered Regular", link.link_name)) #nosec
+	if hasattr(doc, 'gst_category'):
+		for link in doc.links:
+			if link.link_doctype in ['Customer', 'Supplier']:
+				if doc.get('gstin'):
+					frappe.db.sql("""
+						UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered'
+					""".format(link.link_doctype), ("Registered Regular", link.link_name)) #nosec
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
