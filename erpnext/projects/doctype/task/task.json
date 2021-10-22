@@ -21,6 +21,8 @@
   "parent_task",
   "completed_by",
   "completed_on",
+  "task_items_section",
+  "items",
   "sb_timeline",
   "exp_start_date",
   "expected_time",
@@ -390,6 +392,17 @@
    "fieldtype": "Date",
    "label": "Completed On",
    "mandatory_depends_on": "eval: doc.status == \"Completed\""
+  },
+  {
+   "fieldname": "task_items_section",
+   "fieldtype": "Section Break",
+   "label": "Task Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Task Item"
   }
  ],
  "icon": "fa fa-check",
@@ -397,10 +410,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-04-16 12:46:51.556741",
+ "modified": "2021-10-20 11:28:12.445128",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
+ "naming_rule": "Expression (old style)",
  "nsm_parent_field": "parent_task",
  "owner": "Administrator",
  "permissions": [
