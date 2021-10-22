@@ -853,7 +853,7 @@ class SalarySlip(TransactionBase):
 				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
 			additional_amount = flt((flt(row.additional_amount) * flt(self.payment_days)
-									 / cint(self.total_working_days)), row.precision("additional_amount"))
+									/ cint(self.total_working_days)), row.precision("additional_amount"))
 			amount = flt((flt(row.default_amount) * flt(self.payment_days)
 						  / cint(self.total_working_days)), row.precision("amount")) + additional_amount
 
@@ -904,13 +904,15 @@ class SalarySlip(TransactionBase):
 		if tax_slab.allow_tax_exemption:
 			if self.deduct_tax_for_unsubmitted_tax_exemption_proof:
 				exemption_proof = frappe.db.get_value("Employee Tax Exemption Proof Submission",
-													  {"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
+													  {"employee"      : self.employee,
+													   "payroll_period": payroll_period.name, "docstatus": 1},
 													  ["exemption_amount"])
 				if exemption_proof:
 					total_exemption_amount = exemption_proof
 			else:
 				declaration = frappe.db.get_value("Employee Tax Exemption Declaration",
-												  {"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
+												  {"employee" : self.employee, "payroll_period": payroll_period.name,
+												   "docstatus": 1},
 												  ["total_exemption_amount"])
 				if declaration:
 					total_exemption_amount = declaration
@@ -922,10 +924,10 @@ class SalarySlip(TransactionBase):
 	def get_income_form_other_sources(self, payroll_period):
 		return frappe.get_all("Employee Other Income",
 							  filters={
-								  "employee": self.employee,
+								  "employee"      : self.employee,
 								  "payroll_period": payroll_period.name,
-								  "company": self.company,
-								  "docstatus": 1
+								  "company"       : self.company,
+								  "docstatus"     : 1
 							  },
 							  fields="SUM(amount) as total_amount"
 							  )[0].total_amount
@@ -1033,17 +1035,18 @@ class SalarySlip(TransactionBase):
 	def get_loan_details(self):
 		return frappe.get_all("Loan",
 							  fields=["name", "interest_income_account", "loan_account", "loan_type"],
-							  filters = {
-								  "applicant": self.employee,
-								  "docstatus": 1,
+							  filters={
+								  "applicant"        : self.employee,
+								  "docstatus"        : 1,
 								  "repay_from_salary": 1,
-								  "company": self.company
+								  "company"          : self.company
 							  })
 
 	def make_loan_repayment_entry(self):
 		for loan in self.loans:
 			repayment_entry = create_repayment_entry(loan.loan, self.employee,
-													 self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
+													 self.company, self.posting_date, loan.loan_type, "Regular Payment",
+													 loan.interest_amount,
 													 loan.principal_amount, loan.total_payment)
 
 			repayment_entry.save()
@@ -1166,13 +1169,13 @@ class SalarySlip(TransactionBase):
 		period_start_date, period_end_date = self.get_year_to_date_period()
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
-			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
-			filters = {'employee' : self.employee,
-				'start_date' : ['>=', period_start_date],
-				'end_date' : ['<', period_end_date],
-				'name': ['!=', self.name],
-				'docstatus': 1
-			})
+										  fields=['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
+										  filters={'employee'  : self.employee,
+												   'start_date': ['>=', period_start_date],
+												   'end_date'  : ['<', period_end_date],
+												   'name'      : ['!=', self.name],
+												   'docstatus' : 1
+												   })
 
 		year_to_date = flt(salary_slip_sum[0].net_sum) if salary_slip_sum else 0.0
 		gross_year_to_date = flt(salary_slip_sum[0].gross_sum) if salary_slip_sum else 0.0
@@ -1186,13 +1189,13 @@ class SalarySlip(TransactionBase):
 		month_to_date = 0
 		first_day_of_the_month = get_first_day(self.start_date)
 		salary_slip_sum = frappe.get_list('Salary Slip',
-			fields = ['sum(net_pay) as sum'],
-			filters = {'employee' : self.employee,
-				'start_date' : ['>=', first_day_of_the_month],
-				'end_date' : ['<', self.start_date],
-				'name': ['!=', self.name],
-				'docstatus': 1
-			})
+										  fields=['sum(net_pay) as sum'],
+										  filters={'employee'  : self.employee,
+												   'start_date': ['>=', first_day_of_the_month],
+												   'end_date'  : ['<', self.start_date],
+												   'name'      : ['!=', self.name],
+												   'docstatus' : 1
+												   })
 
 		month_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
 
@@ -1217,9 +1220,11 @@ class SalarySlip(TransactionBase):
 						AND salary_slip.end_date < %(period_end_date)s
 						AND salary_slip.name != %(docname)s
 						AND salary_slip.docstatus = 1""",
-						{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
-							'period_end_date': period_end_date, 'docname': self.name}
-				)
+											  {'employee'         : self.employee,
+											   'component'        : component.salary_component,
+											   'period_start_date': period_start_date,
+											   'period_end_date'  : period_end_date, 'docname': self.name}
+											  )
 
 				year_to_date = flt(component_sum[0][0]) if component_sum else 0.0
 				year_to_date += component.amount

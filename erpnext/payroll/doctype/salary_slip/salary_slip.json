@@ -32,6 +32,7 @@
   "total_working_days",
   "unmarked_days",
   "leave_without_pay",
+  "leave_with_pay",
   "column_break_24",
   "absent_days",
   "payment_days",
@@ -641,13 +642,19 @@
    "label": "Gross Year To Date(Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "leave_with_pay",
+   "fieldtype": "Float",
+   "label": "Leave With Pay"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-08 11:47:47.098248",
+ "migration_hash": "8f9b99d1f7182ae0593a59726a1bffe6",
+ "modified": "2021-10-17 17:39:52.210769",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
