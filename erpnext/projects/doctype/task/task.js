@@ -57,5 +57,22 @@ frappe.ui.form.on("Task", {
 	validate: function (frm) {
 		frm.doc.project && frappe.model.remove_from_locals("Project",
 			frm.doc.project);
+	},
+	from_bom(frm) {
+		if (frm.doc.from_bom) {
+			frappe.db.get_doc("BOM", frm.doc.from_bom).then(bom => {
+				const {name, items} = bom;
+				erpnext.projects.task = {name, items:{}}
+				items.forEach(item => {
+					let row = frm.add_child("items");
+					row.item_code = item.item_code;
+					row.item_name = item.item_name;
+					row.uom = item.stock_uom;
+					row.qty = item.qty;
+					row.warehouse = item.source_warehouse;
+				});
+		frm.refresh_fields("items");
+			});
+		}
 	}
 });

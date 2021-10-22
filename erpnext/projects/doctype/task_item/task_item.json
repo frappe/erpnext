@@ -6,32 +6,30 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item",
+  "item_code",
   "item_name",
+  "column_break_4",
   "qty",
   "uom",
   "warehouse"
  ],
  "fields": [
   {
-   "fieldname": "item",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item",
-   "options": "Item"
-  },
-  {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty"
   },
   {
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -44,12 +42,23 @@
    "in_list_view": 1,
    "label": "Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-20 11:30:56.707793",
+ "modified": "2021-10-22 16:03:40.654341",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task Item",

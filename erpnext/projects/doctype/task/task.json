@@ -22,6 +22,7 @@
   "completed_by",
   "completed_on",
   "task_items_section",
+  "from_bom",
   "items",
   "sb_timeline",
   "exp_start_date",
@@ -403,6 +404,12 @@
    "fieldtype": "Table",
    "label": "Items",
    "options": "Task Item"
+  },
+  {
+   "fieldname": "from_bom",
+   "fieldtype": "Link",
+   "label": "From BOM",
+   "options": "BOM"
   }
  ],
  "icon": "fa fa-check",
@@ -410,7 +417,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-10-20 11:28:12.445128",
+ "modified": "2021-10-22 16:08:49.114246",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
