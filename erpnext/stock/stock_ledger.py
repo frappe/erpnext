@@ -1,9 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
-
 import copy
 import json
+from typing import Optional
 
 import frappe
 from frappe import _
@@ -912,10 +911,45 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
-	# Get valuation rate from last sle for the same item and warehouse
 	if not company:
 		company = erpnext.get_default_company()
 
+	# First attempt to get valuation rate from last ledger entry.
+	last_valuation_rate = _get_valuation_rate_from_ledger(item_code, warehouse, voucher_type, voucher_no)
+	if last_valuation_rate:
+		return last_valuation_rate
+
+	# If negative stock allowed, and item delivered without any incoming entry,
+	# system does not find any SLE, then take valuation rate defined by user.
+	valuation_rate = _get_user_defined_valuation(item_code, currency=currency)
+	if valuation_rate:
+		return valuation_rate
+
+	if not allow_zero_rate and raise_error_if_no_rate \
+			and cint(erpnext.is_perpetual_inventory_enabled(company)):
+
+		frappe.local.message_log = []
+		form_link = get_link_to_form("Item", item_code)
+
+		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)
+		message += "<br><br>" + _("Here are the options to proceed:")
+		solutions = "<li>" + _("If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table.").format(voucher_type) + "</li>"
+		solutions += "<li>" + _("If not, you can Cancel / Submit this entry") + " {0} ".format(frappe.bold("after")) + _("performing either one below:") + "</li>"
+		sub_solutions = "<ul><li>" + _("Create an incoming stock transaction for the Item.") + "</li>"
+		sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		msg = message + solutions + sub_solutions + "</li>"
+
+		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
+
+
+def _get_valuation_rate_from_ledger(
+		item_code: str,
+		warehouse:str,
+		voucher_no: str,
+		voucher_type: str
+	) -> Optional[float]:
+
+	# Get valuation rate from last sle for the same item and warehouse
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
@@ -938,36 +972,17 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0])
 
-	# If negative stock allowed, and item delivered without any incoming entry,
-	# system does not found any SLE, then take valuation rate from Item
-	valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
+
+def _get_user_defined_valuation(item_code: str, currency: Optional[str]) -> Optional[float]:
+	item = frappe.db.get_value("Item", item_code, ["valuation_rate", "standard_rate"], as_dict=True)
+	valuation_rate = flt(item.valuation_rate) or flt(item.standard_rate)
 
 	if not valuation_rate:
-		# try Item Standard rate
-		valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
+		filter = {"item_code": item_code, "buying": 1, "currency": currency}
+		valuation_rate = flt(frappe.db.get_value('Item Price', filter, 'price_list_rate'))
 
-		if not valuation_rate:
-			# try in price list
-			valuation_rate = frappe.db.get_value('Item Price',
-				dict(item_code=item_code, buying=1, currency=currency),
-				'price_list_rate')
-
-	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
-			and cint(erpnext.is_perpetual_inventory_enabled(company)):
-		frappe.local.message_log = []
-		form_link = get_link_to_form("Item", item_code)
-
-		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)
-		message += "<br><br>" + _("Here are the options to proceed:")
-		solutions = "<li>" + _("If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table.").format(voucher_type) + "</li>"
-		solutions += "<li>" + _("If not, you can Cancel / Submit this entry") + " {0} ".format(frappe.bold("after")) + _("performing either one below:") + "</li>"
-		sub_solutions = "<ul><li>" + _("Create an incoming stock transaction for the Item.") + "</li>"
-		sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
-		msg = message + solutions + sub_solutions + "</li>"
-
-		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
-
-	return valuation_rate
+	if valuation_rate:
+		return valuation_rate
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
 	"""Recalculate Qty after Transaction in future SLEs based on current SLE."""
