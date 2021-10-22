@@ -9,7 +9,7 @@ import math
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, flt, getdate, now_datetime, nowdate
+from frappe.utils import add_months, flt, get_last_day, getdate, now_datetime, nowdate
 from six import string_types
 
 import erpnext
@@ -102,7 +102,7 @@ class Loan(AccountsController):
 				"total_payment": total_payment,
 				"balance_loan_amount": balance_amount
 			})
-			next_payment_date = add_months(payment_date, 1)
+			next_payment_date = add_single_month(payment_date)
 			payment_date = next_payment_date
 
 	def set_repayment_period(self):
@@ -391,3 +391,9 @@ def get_shortfall_applicants():
 		"value": len(applicants),
 		"fieldtype": "Int"
 	}
+
+def add_single_month(date):
+	if getdate(date) == get_last_day(date):
+		return get_last_day(add_months(date, 1))
+	else:
+		return add_months(date, 1)

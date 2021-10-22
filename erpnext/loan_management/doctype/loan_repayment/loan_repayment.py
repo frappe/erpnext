@@ -414,7 +414,10 @@ def get_penalty_details(against_loan):
 		return None, 0
 
 def regenerate_repayment_schedule(loan):
-	from erpnext.loan_management.doctype.loan.loan import get_monthly_repayment_amount
+	from erpnext.loan_management.doctype.loan.loan import (
+		add_single_month,
+		get_monthly_repayment_amount,
+	)
 
 	loan_doc = frappe.get_doc('Loan', loan)
 	next_accrual_date = None
@@ -456,7 +459,7 @@ def regenerate_repayment_schedule(loan):
 			"total_payment": total_payment,
 			"balance_loan_amount": balance_amount
 		})
-		next_payment_date = add_months(payment_date, 1)
+		next_payment_date = add_single_month(payment_date)
 		payment_date = next_payment_date
 
 	loan_doc.save()
