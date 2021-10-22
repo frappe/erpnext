@@ -30,7 +30,7 @@ class TestDunning(unittest.TestCase):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_first_dunning(self):
-		dunning = create_first_dunning()
+		dunning = create_dunning(overdue_days=20)
 
 		self.assertEqual(round(dunning.total_outstanding, 2), 100.00)
 		self.assertEqual(round(dunning.total_interest, 2), 0.00)
@@ -39,7 +39,7 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(dunning.grand_total, 2), 100.00)
 
 	def test_second_dunning(self):
-		dunning = create_second_dunning()
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice")
 
 		self.assertEqual(round(dunning.total_outstanding, 2), 100.00)
 		self.assertEqual(round(dunning.total_interest, 2), 0.41)
@@ -48,7 +48,7 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(dunning.grand_total, 2), 110.41)
 
 	def test_payment_entry(self):
-		dunning = create_second_dunning()
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice")
 		dunning.submit()
 		pe = get_payment_entry("Dunning", dunning.name)
 		pe.reference_no = "1"
@@ -66,30 +66,20 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(dunning.status, "Resolved")
 
 
-def create_first_dunning():
-	posting_date = add_days(today(), -20)
+def create_dunning(overdue_days, dunning_type_name=None):
+	posting_date = add_days(today(), -1 * overdue_days)
 	sales_invoice = create_sales_invoice_against_cost_center(
 		posting_date=posting_date, qty=1, rate=100
 	)
 	dunning = create_dunning_from_sales_invoice(sales_invoice.name)
-	dunning.income_account = "Interest Income Account - _TC"
-	dunning.save()
 
-	return dunning
+	if dunning_type_name:
+		dunning_type = frappe.get_doc("Dunning Type", dunning_type_name)
+		dunning.dunning_type = dunning_type.name
+		dunning.rate_of_interest = dunning_type.rate_of_interest
+		dunning.dunning_fee = dunning_type.dunning_fee
 
-
-def create_second_dunning():
-	posting_date = add_days(today(), -15)
-	sales_invoice = create_sales_invoice_against_cost_center(
-		posting_date=posting_date, qty=1, rate=100
-	)
-	dunning = create_dunning_from_sales_invoice(sales_invoice.name)
-	dunning_type = frappe.get_doc("Dunning Type", "Second Notice")
-
-	dunning.dunning_type = dunning_type.name
-	dunning.rate_of_interest = dunning_type.rate_of_interest
-	dunning.dunning_fee = dunning_type.dunning_fee
-	dunning.income_account = "Interest Income Account - _TC"
+	dunning.income_account = get_income_account(dunning.company)
 	dunning.save()
 
 	return dunning
@@ -115,3 +105,16 @@ def create_dunning_type(title, fee, interest, is_default):
 	)
 	dunning_type.save()
 	return dunning_type
+
+
+def get_income_account(company):
+	return frappe.get_value("Company", company, "default_income_account") or frappe.get_all(
+		"Account",
+		filters={"is_group": 0, "company": company},
+		or_filters={
+			"report_type": "Profit and Loss",
+			"account_type": ("in", ("Income Account", "Temporary")),
+		},
+		limit=1,
+		pluck="name",
+	)[0]
