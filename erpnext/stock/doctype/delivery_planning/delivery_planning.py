@@ -23,11 +23,13 @@ class DeliveryPlanning(Document):
 		if self.transporter:
 			conditions += "AND so.transporter = %s" % frappe.db.escape(self.transporter)
 
-		if self.delivery_date_from:
-			conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
-
-		if self.delivery_date_to:
-			conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
+		if self.delivery_date_from and self.delivery_date_to:
+			# conditions += "AND soi.delivery_date >= '%s'" % self.delivery_date_from
+			from_date = self.delivery_date_from
+			to_date = self.delivery_date_to 
+			# conditions += "and soi.delivery_date between %(from_date)s and %(to_date)s"
+		# if self.delivery_date_to:
+		# 	conditions += "AND soi.delivery_date <= '%s'" % self.delivery_date_to
 
 		if self.pincode_from:
 			pincodefrom = self.pincode_from
@@ -83,10 +85,10 @@ class DeliveryPlanning(Document):
 									Left join `tabAddress` a  ON so.customer = a.address_title
 
 									where so.docstatus = 1
-									and so.status = "To Bill" OR so.status = "To Deliver"
-																		
+									and so.status IN ("To Bill" , "To Deliver" , "To Deliver and Bill")
+									and soi.delivery_date between '{0}' and '{1}' 									
 									and (soi.qty - soi.delivered_qty ) != 0
-									{conditions} """.format(conditions=conditions), as_dict=1)
+									{conditions} """.format(from_date, to_date, conditions=conditions), as_dict=1)
 		for i in query:
 			dp_item = frappe.new_doc("Delivery Planning Item")
 			if i.delivered_by_supplier == 0:
