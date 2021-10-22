@@ -11,7 +11,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.desk.doctype.tag.tag import DocTags
 from erpnext.stock.get_item_details import get_bin_details
 from fxnmrnth.integration_req_log import log_integration_request, log_exceptions
-
+19820
 from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.exceptions import ValidationError
 
@@ -297,6 +297,7 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 		# Hard code shipping tax
 		if invoice_doc.order_type == "On Behalf":
 			shipping_tax = 2
+			shipping_total = 20
 
 			# Depending on invoice sending option
 			if invoice_sending_option == "send receipt to clinic":
