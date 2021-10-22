@@ -50,7 +50,8 @@
   "rate",
   "is_updated",
   "company",
-  "amended_from"
+  "amended_from",
+  "full_dname"
  ],
  "fields": [
   {
@@ -370,12 +371,18 @@
    "hidden": 1,
    "label": "Company ",
    "options": "Company"
+  },
+  {
+   "fieldname": "full_dname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Full Delivery Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-22 15:50:05.272288",
+ "modified": "2021-10-21 18:43:08.258835",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
