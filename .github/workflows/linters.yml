@@ -10,12 +10,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+<<<<<<< HEAD
+=======
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install and Run Pre-commit
+        uses: pre-commit/action@v2.0.3
+
+      - name: Download Semgrep rules
+        run: git clone --depth 1 https://github.com/frappe/frappe-semgrep-rules.git
+
+>>>>>>> cc1baae5eb (ci: move semgrep rules out of repo (#28067))
       - uses: returntocorp/semgrep-action@v1
         env:
             SEMGREP_TIMEOUT: 120
         with:
             config: >-
               r/python.lang.correctness
+<<<<<<< HEAD
               .github/helper/semgrep_rules
 
       - name: Set up Python 3.8
@@ -25,3 +41,6 @@ jobs:
 
       - name: Install and Run Pre-commit
         uses: pre-commit/action@v2.0.0
+=======
+              ./frappe-semgrep-rules/rules
+>>>>>>> cc1baae5eb (ci: move semgrep rules out of repo (#28067))
