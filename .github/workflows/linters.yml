@@ -19,10 +19,13 @@ jobs:
       - name: Install and Run Pre-commit
         uses: pre-commit/action@v2.0.3
 
+      - name: Download Semgrep rules
+        run: git clone --depth 1 https://github.com/frappe/frappe-semgrep-rules.git
+
       - uses: returntocorp/semgrep-action@v1
         env:
             SEMGREP_TIMEOUT: 120
         with:
             config: >-
               r/python.lang.correctness
-              .github/helper/semgrep_rules
+              ./frappe-semgrep-rules/rules
