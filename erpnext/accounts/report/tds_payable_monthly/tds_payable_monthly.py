@@ -44,16 +44,16 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 
 		if rate and tds_deducted:
 			row = {
-				'pan' if frappe.db.has_column('Supplier', 'pan') else 'tax_id': supplier_map.get(supplier).pan,
-				'supplier': supplier_map.get(supplier).name
+				'pan' if frappe.db.has_column('Supplier', 'pan') else 'tax_id': supplier_map.get(supplier, {}).get('pan'),
+				'supplier': supplier_map.get(supplier, {}).get('name')
 			}
 
 			if filters.naming_series == 'Naming Series':
-				row.update({'supplier_name': supplier_map.get(supplier).supplier_name})
+				row.update({'supplier_name': supplier_map.get(supplier, {}).get('supplier_name')})
 
 			row.update({
 				'section_code': tax_withholding_category,
-				'entity_type': supplier_map.get(supplier).supplier_type,
+				'entity_type': supplier_map.get(supplier, {}).get('supplier_type'),
 				'tds_rate': rate,
 				'total_amount_credited': total_amount_credited,
 				'tds_deducted': tds_deducted,
