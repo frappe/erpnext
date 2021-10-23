@@ -117,7 +117,10 @@ class LoanInterestAccrual(AccountsController):
 # rate of interest is 13.5 then first loan interest accural will be on '01-10-2019'
 # which means interest will be accrued for 30 days which should be equal to 11095.89
 def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest, accrual_type):
-	from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
+	from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+		calculate_amounts,
+		get_pending_principal_amount,
+	)
 
 	no_of_days = get_no_of_days_for_interest_accural(loan, posting_date)
 	precision = cint(frappe.db.get_default("currency_precision")) or 2
@@ -125,12 +128,7 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 	if no_of_days <= 0:
 		return
 
-	if loan.status == 'Disbursed':
-		pending_principal_amount = flt(loan.total_payment) - flt(loan.total_interest_payable) \
-			- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
-	else:
-		pending_principal_amount = flt(loan.disbursed_amount) - flt(loan.total_interest_payable) \
-			- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
+	pending_principal_amount = get_pending_principal_amount(loan)
 
 	interest_per_day = get_per_day_interest(pending_principal_amount, loan.rate_of_interest, posting_date)
 	payable_interest = interest_per_day * no_of_days
@@ -168,7 +166,7 @@ def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_inte
 
 	if not open_loans:
 		open_loans = frappe.get_all("Loan",
-			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account",
+			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account", "loan_amount",
 				"is_term_loan", "status", "disbursement_date", "disbursed_amount", "applicant_type", "applicant",
 				"rate_of_interest", "total_interest_payable", "written_off_amount", "total_principal_paid", "repayment_start_date"],
 			filters=query_filters)
@@ -225,7 +223,8 @@ def get_term_loans(date, term_loan=None, loan_type=None):
 			AND l.is_term_loan =1
 			AND rs.payment_date <= %s
 			AND rs.is_accrued=0 {0}
-			AND l.status = 'Disbursed'""".format(condition), (getdate(date)), as_dict=1)
+			AND l.status = 'Disbursed'
+			ORDER BY rs.payment_date""".format(condition), (getdate(date)), as_dict=1)
 
 	return term_loans
 

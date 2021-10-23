@@ -126,7 +126,18 @@ class LoanRepayment(AccountsController):
 					})
 
 	def update_paid_amount(self):
-		loan = frappe.get_doc("Loan", self.against_loan)
+		loan = frappe.get_value("Loan", self.against_loan, ['total_amount_paid', 'total_principal_paid',
+			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'total_interest_payable',
+			'written_off_amount'], as_dict=1)
+
+		loan.update({
+			'total_amount_paid': loan.total_amount_paid + self.amount_paid,
+			'total_principal_paid': loan.total_principal_paid + self.principal_amount_paid
+		})
+
+		pending_principal_amount = get_pending_principal_amount(loan)
+		if not loan.is_secured_loan and pending_principal_amount < 0:
+			loan.update({'status': 'Loan Closure Requested'})
 
 		for payment in self.repayment_details:
 			frappe.db.sql(""" UPDATE `tabLoan Interest Accrual`
@@ -135,16 +146,30 @@ class LoanRepayment(AccountsController):
 				WHERE name = %s""",
 				(flt(payment.paid_principal_amount), flt(payment.paid_interest_amount), payment.loan_interest_accrual))
 
-		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
-			WHERE name = %s """, (loan.total_amount_paid + self.amount_paid,
-			loan.total_principal_paid + self.principal_amount_paid, self.against_loan))
+		frappe.db.sql(""" UPDATE `tabLoan`
+			SET total_amount_paid = %s, total_principal_paid = %s, status = %s
+			WHERE name = %s """, (loan.total_amount_paid, loan.total_principal_paid, loan.status,
+			self.against_loan))
 
 		update_shortfall_status(self.against_loan, self.principal_amount_paid)
 
 	def mark_as_unpaid(self):
-		loan = frappe.get_doc("Loan", self.against_loan)
+		loan = frappe.get_value("Loan", self.against_loan, ['total_amount_paid', 'total_principal_paid',
+			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'total_interest_payable',
+			'written_off_amount'], as_dict=1)
 
 		no_of_repayments = len(self.repayment_details)
+
+		loan.update({
+			'total_amount_paid': loan.total_amount_paid - self.amount_paid,
+			'total_principal_paid': loan.total_principal_paid - self.principal_amount_paid
+		})
+
+		if loan.status == 'Loan Closure Requested':
+			if loan.disbursed_amount >= loan.loan_amount:
+				loan['status'] = 'Disbursed'
+			else:
+				loan['status'] = 'Partially Disbursed'
 
 		for payment in self.repayment_details:
 			frappe.db.sql(""" UPDATE `tabLoan Interest Accrual`
@@ -159,12 +184,9 @@ class LoanRepayment(AccountsController):
 				lia_doc = frappe.get_doc('Loan Interest Accrual', payment.loan_interest_accrual)
 				lia_doc.cancel()
 
-		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
-			WHERE name = %s """, (loan.total_amount_paid - self.amount_paid,
-			loan.total_principal_paid - self.principal_amount_paid, self.against_loan))
-
-		if loan.status == "Loan Closure Requested":
-			frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
+		frappe.db.sql(""" UPDATE `tabLoan`
+			SET total_amount_paid = %s, total_principal_paid = %s, status = %s
+			WHERE name = %s """, (loan.total_amount_paid, loan.total_principal_paid, loan.status, self.against_loan))
 
 	def update_repayment_schedule(self):
 		if self.is_term_loan and self.principal_amount_paid > self.payable_principal_amount:
@@ -431,12 +453,7 @@ def regenerate_repayment_schedule(loan):
 
 	loan_doc.save()
 
-	if loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
-		balance_amount = loan_doc.total_payment - loan_doc.total_principal_paid \
-			- loan_doc.total_interest_payable - loan_doc.written_off_amount
-	else:
-		balance_amount = loan_doc.disbursed_amount - loan_doc.total_principal_paid \
-			- loan_doc.total_interest_payable - loan_doc.written_off_amount
+	balance_amount = get_pending_principal_amount(loan_doc)
 
 	monthly_repayment_amount = get_monthly_repayment_amount(loan_doc.loan_amount,
 		loan_doc.rate_of_interest, loan_doc.repayment_periods)
@@ -463,6 +480,16 @@ def regenerate_repayment_schedule(loan):
 		payment_date = next_payment_date
 
 	loan_doc.save()
+
+def get_pending_principal_amount(loan):
+	if loan.status in ('Disbursed', 'Closed') or loan.disbursed_amount >= loan.loan_amount:
+		pending_principal_amount = flt(loan.total_payment) - flt(loan.total_principal_paid) \
+			- flt(loan.total_interest_payable) - flt(loan.written_off_amount)
+	else:
+		pending_principal_amount = flt(loan.disbursed_amount) - flt(loan.total_principal_paid) \
+			- flt(loan.total_interest_payable) - flt(loan.written_off_amount)
+
+	return pending_principal_amount
 
 # This function returns the amounts that are payable at the time of loan repayment based on posting date
 # So it pulls all the unpaid Loan Interest Accrual Entries and calculates the penalty if applicable
@@ -511,12 +538,7 @@ def get_amounts(amounts, against_loan, posting_date):
 		if due_date and not final_due_date:
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
-	if against_loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
-		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid \
-			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
-	else:
-		pending_principal_amount = against_loan_doc.disbursed_amount - against_loan_doc.total_principal_paid \
-			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
+	pending_principal_amount = get_pending_principal_amount(against_loan_doc)
 
 	unaccrued_interest = 0
 	if due_date:
