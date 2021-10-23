@@ -227,12 +227,15 @@ def get_opening_balance(filters, columns, sl_entries):
 		"item_code": filters.item_code,
 		"warehouse_condition": get_warehouse_condition(filters.warehouse),
 		"posting_date": filters.from_date,
-		"posting_time": "00:00:00",
-		"operator": "<"
+		"posting_time": "00:00:00"
 	})
+
+	# check if any SLEs are actually Opening Stock Reconciliation
 	for sle in sl_entries:
-		if sle.get("date").split()[0] == filters.from_date \
-			and sle.get("voucher_type") == "Stock Reconciliation":
+		if (sle.get("voucher_type") == "Stock Reconciliation"
+			and sle.get("date").split()[0] == filters.from_date
+			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose") == "Opening Stock"
+		):
 			last_entry = sle
 			sl_entries.remove(sle)
 
