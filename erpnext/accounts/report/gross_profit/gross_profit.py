@@ -119,6 +119,28 @@ def get_columns(group_wise_columns, filters):
 
 	return columns
 
+def get_column_names():
+	return frappe._dict({
+		'parent': 'sales_invoice',
+		'customer': 'customer',
+		'customer_group': 'customer_group',
+		'posting_date': 'posting_date',
+		'item_code': 'item_code',
+		'item_name': 'item_name',
+		'item_group': 'item_group',
+		'brand': 'brand',
+		'description': 'description',
+		'warehouse': 'warehouse',
+		'qty': 'qty',
+		'base_rate': 'avg._selling_rate',
+		'buying_rate': 'valuation_rate',
+		'base_amount': 'selling_amount',
+		'buying_amount': 'buying_amount',
+		'gross_profit': 'gross_profit',
+		'gross_profit_percent': 'gross_profit_%',
+		'project': 'project'
+	})
+
 class GrossProfitGenerator(object):
 	def __init__(self, filters=None):
 		self.data = []
