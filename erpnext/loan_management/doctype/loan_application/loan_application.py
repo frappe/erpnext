@@ -130,10 +130,11 @@ class LoanApplication(Document):
 def create_loan(source_name, target_doc=None, submit=0):
 	def update_accounts(source_doc, target_doc, source_parent):
 		account_details = frappe.get_all("Loan Type",
-		 fields=["mode_of_payment", "payment_account","loan_account", "interest_income_account", "penalty_income_account"],
-		 filters = {'name': source_doc.loan_type}
-		)[0]
+			fields=["mode_of_payment", "payment_account","loan_account", "interest_income_account", "penalty_income_account"],
+			filters = {'name': source_doc.loan_type})[0]
 
+		if source_doc.is_secured_loan:
+			target_doc.maximum_loan_amount = 0
 
 		target_doc.mode_of_payment = account_details.mode_of_payment
 		target_doc.payment_account = account_details.payment_account

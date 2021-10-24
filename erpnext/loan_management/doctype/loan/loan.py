@@ -137,16 +137,23 @@ class Loan(AccountsController):
 			frappe.throw(_("Loan amount is mandatory"))
 
 	def link_loan_security_pledge(self):
-		if self.is_secured_loan:
-			loan_security_pledge = frappe.db.get_value('Loan Security Pledge', {'loan_application': self.loan_application},
-				'name')
+		if self.is_secured_loan and self.loan_application:
+			maximum_loan_value = frappe.db.get_value('Loan Security Pledge',
+				{
+					'loan_application': self.loan_application,
+					'status': 'Requested'
+				},
+				'sum(maximum_loan_value)'
+			)
 
-			if loan_security_pledge:
-				frappe.db.set_value('Loan Security Pledge', loan_security_pledge, {
-					'loan': self.name,
-					'status': 'Pledged',
-					'pledge_time': now_datetime()
-				})
+			if maximum_loan_value:
+				frappe.db.sql("""
+					UPDATE `tabLoan Security Pledge`
+					SET loan = %s, pledge_time = %s, status = 'Pledged'
+					WHERE status = 'Requested' and loan_application = %s
+				""", (self.name, now_datetime(), self.loan_application))
+
+				self.db_set('maximum_loan_amount', maximum_loan_value)
 
 	def unlink_loan_security_pledge(self):
 		pledges = frappe.get_all('Loan Security Pledge', fields=['name'], filters={'loan': self.name})
