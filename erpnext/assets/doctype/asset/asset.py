@@ -232,13 +232,15 @@ class Asset(AccountsController):
 					depreciation_amount, days, months = self.get_pro_rata_amt(d, depreciation_amount,
 						from_date, date_of_sale)
 
-					self.append("schedules", {
-						"schedule_date": date_of_sale,
-						"depreciation_amount": depreciation_amount,
-						"depreciation_method": d.depreciation_method,
-						"finance_book": d.finance_book,
-						"finance_book_id": d.idx
-					})
+					if depreciation_amount > 0:
+						self.append("schedules", {
+							"schedule_date": date_of_sale,
+							"depreciation_amount": depreciation_amount,
+							"depreciation_method": d.depreciation_method,
+							"finance_book": d.finance_book,
+							"finance_book_id": d.idx
+						})
+
 					break
 
 				# For first row
