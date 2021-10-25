@@ -199,12 +199,16 @@ class MaintenanceSchedule(TransactionBase):
 				if chk:
 					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
+	def validate_no_of_visits(self):
+		return len(self.schedules) != sum(d.no_of_visits for d in self.items)
+
 	def validate(self):
 		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
-		self.generate_schedule()
+		if not self.schedules or self.validate_no_of_visits():
+			self.generate_schedule()
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')

@@ -10,7 +10,6 @@
   "asset_category",
   "column_break_4",
   "date",
-  "date_nepal",
   "finance_book",
   "amended_from",
   "value_details_section",
@@ -121,11 +120,6 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "date_nepal",
-   "fieldtype": "Data",
-   "label": "Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

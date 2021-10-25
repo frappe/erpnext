@@ -611,7 +611,9 @@ def get_pos_reserved_serial_nos(filters):
 
 	return reserved_sr_nos
 
-def fetch_serial_numbers(filters, qty, do_not_include=[]):
+def fetch_serial_numbers(filters, qty, do_not_include=None):
+	if do_not_include is None:
+		do_not_include = []
 	batch_join_selection = ""
 	batch_no_condition = ""
 	batch_nos = filters.get("batch_no")

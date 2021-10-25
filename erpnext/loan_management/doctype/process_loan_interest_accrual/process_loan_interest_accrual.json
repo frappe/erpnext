@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
-  "posting_date_nepal",
   "loan_type",
   "loan",
   "process_type",
@@ -57,11 +56,6 @@
    "label": "Accrual Type",
    "options": "Regular\nRepayment\nDisbursement",
    "read_only": 1
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

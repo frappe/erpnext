@@ -12,7 +12,6 @@
   "purpose",
   "col1",
   "posting_date",
-  "posting_date_nepal",
   "posting_time",
   "set_posting_time",
   "sb9",
@@ -149,11 +148,6 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date (Nepal)"
   }
  ],
  "icon": "fa fa-upload-alt",

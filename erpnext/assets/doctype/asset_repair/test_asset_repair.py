@@ -22,7 +22,7 @@ class TestAssetRepair(unittest.TestCase):
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_update_status(self):
-		asset = create_asset()
+		asset = create_asset(submit=1)
 		initial_status = asset.status
 		asset_repair = create_asset_repair(asset = asset)
 
@@ -76,7 +76,7 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
 
 	def test_increase_in_asset_value_due_to_stock_consumption(self):
-		asset = create_asset(calculate_depreciation = 1)
+		asset = create_asset(calculate_depreciation = 1, submit=1)
 		initial_asset_value = get_asset_value(asset)
 		asset_repair = create_asset_repair(asset= asset, stock_consumption = 1, submit = 1)
 		asset.reload()
@@ -85,7 +85,7 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(asset_repair.stock_items[0].total_value, increase_in_asset_value)
 
 	def test_increase_in_asset_value_due_to_repair_cost_capitalisation(self):
-		asset = create_asset(calculate_depreciation = 1)
+		asset = create_asset(calculate_depreciation = 1, submit=1)
 		initial_asset_value = get_asset_value(asset)
 		asset_repair = create_asset_repair(asset= asset, capitalize_repair_cost = 1, submit = 1)
 		asset.reload()
@@ -103,7 +103,7 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(asset_repair.name, gl_entry.voucher_no)
 
 	def test_increase_in_asset_life(self):
-		asset = create_asset(calculate_depreciation = 1)
+		asset = create_asset(calculate_depreciation = 1, submit=1)
 		initial_num_of_depreciations = num_of_depreciations(asset)
 		create_asset_repair(asset= asset, capitalize_repair_cost = 1, submit = 1)
 		asset.reload()
@@ -126,7 +126,7 @@ def create_asset_repair(**args):
 	if args.asset:
 		asset = args.asset
 	else:
-		asset = create_asset(is_existing_asset = 1)
+		asset = create_asset(is_existing_asset = 1, submit=1)
 	asset_repair = frappe.new_doc("Asset Repair")
 	asset_repair.update({
 		"asset": asset.name,

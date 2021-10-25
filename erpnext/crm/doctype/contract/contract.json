@@ -21,7 +21,6 @@
   "sb_signee",
   "signee",
   "signed_on",
-  "signed_on_nepal",
   "cb_user",
   "ip_address",
   "sb_contract",
@@ -245,11 +244,6 @@
    "fieldname": "authorised_by_section",
    "fieldtype": "Section Break",
    "label": "Authorised By"
-  },
-  {
-   "fieldname": "signed_on_nepal",
-   "fieldtype": "Read Only",
-   "label": "Signed On (Nepal)"
   }
  ],
  "is_submittable": 1,

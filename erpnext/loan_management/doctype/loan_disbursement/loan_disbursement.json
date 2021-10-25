@@ -14,7 +14,6 @@
   "applicant",
   "section_break_7",
   "disbursement_date",
-  "disbursement_date_nepal",
   "column_break_8",
   "disbursed_amount",
   "accounting_dimensions_section",
@@ -23,7 +22,6 @@
   "bank_account",
   "disbursement_references_section",
   "reference_date",
-  "reference_date_nepal",
   "column_break_17",
   "reference_number",
   "amended_from"
@@ -151,16 +149,6 @@
    "fieldname": "reference_number",
    "fieldtype": "Data",
    "label": "Reference Number"
-  },
-  {
-   "fieldname": "disbursement_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Disbursement Date (Nepal)"
-  },
-  {
-   "fieldname": "reference_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Reference Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,
