@@ -175,6 +175,20 @@ frappe.ui.form.on("Salary Slip", {
 				}
 			});
 		}
+		if (frm.doc.start_date){
+			frappe.call({
+				method: 'set_days',
+				doc:frm.doc,
+				callback: function(r) {
+					frm.refresh_field("days_in_month");
+					frm.refresh_field("paid_holidays");
+					frm.refresh_field("compoff");
+					frm.refresh_field("weekly_off");
+					frm.refresh_field("present_days");
+
+				}
+			});
+		}
 		if(frm.doc.start_date){
 			frappe.call({
 				method: 'get_total_leave_in_current_month',

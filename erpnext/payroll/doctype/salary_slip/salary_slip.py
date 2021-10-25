@@ -407,8 +407,70 @@ class SalarySlip(TransactionBase):
 				days = abs(start_date-end_date).days
 				num_months=flt(days/7,precision=0)
 				return num_months
+			
+	@frappe.whitelist()
+	def set_days(self):
+		#days_in_month
+		from calendar import monthrange
+		a = getdate(self.start_date).year
+		b = getdate(self.start_date).month
+		num_days = monthrange(a, b)[1]
+		self.days_in_month = num_days
+		
+		#Paid Holidays
+		cdoc = frappe.get_doc("Employee",self.employee)
+		if cdoc.holiday_list:
+			hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)	
+			doc = frappe.db.sql("""select count(holiday_date) from `tabHoliday` 
+								where parent='{0}' and holiday_date 
+								between '{1}' and '{2}' """.format(hdoc.name,self.start_date,self.end_date),as_dict=1)
+			
+			for i in doc:
+				self.paid_holidays = i.get("count(holiday_date)")
 
+		#Comp_off
+		comp_off = frappe.db.sql("""select name from `tabCompensatory Leave Request`
+								where employee= '{0}' and  docstatus=1 and work_from_date 
+								between '{1}' and '{2}' and work_end_date between '{3}'and '{4}' """.format(self.employee,self.start_date,self.end_date,self.start_date,self.end_date),as_dict=1)
+		print("$$$$$$$$$$$$$$$$$$$$$$$",comp_off)
+		lst=[]
+		for i in comp_off: 
+			doc = frappe.get_doc("Compensatory Leave Request",i.get("name"))
+			# a=doc.work_from_date.replace('-',',')
+			# b=doc.work_end_date.replace('-',',')
+			# from datetime import date
+			# work_from_date = date(a)
+			# work_end_date = date(b)
+			# date_difference = date_diff(work_end_date,work_from_date)
+			date_difference = frappe.db.sql("""SELECT DATEDIFF(work_end_date , work_from_date) as date 
+											from `tabCompensatory Leave Request` where name = '{0}' """.format(doc.name),as_dict=1)
+			print("$$$$$$$$$$$$$$$$$$$$$$$",date_difference)
+			for i in date_difference:
+				lst.append(i.get("date"))
+		self.compoff=sum(lst)
+		
+		#Weekly_off
+		cdoc = frappe.get_doc("Employee",self.employee)
+		if cdoc.holiday_list:
+			hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)	
+			
+			import datetime
+			import calendar
+			start_date  = getdate(self.start_date )
+			end_date    = getdate(self.end_date)
+			week        = {}
+			for i in range((end_date - start_date).days):
+				day       = calendar.day_name[(start_date + datetime.timedelta(days=i+1)).weekday()]
+				week[day] = week[day] + 1 if day in week else 1
+			
+			for i in week:
+				if i ==hdoc.weekly_off:
+					self.weekly_off = week[i]
 
+		#present_days
+		self.present_days = self.days_in_month - self.weekly_off - self.paid_holidays
+				
+		
 
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
