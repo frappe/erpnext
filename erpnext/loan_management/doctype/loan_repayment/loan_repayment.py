@@ -42,8 +42,9 @@ class LoanRepayment(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		self.check_future_accruals()
+		self.update_repayment_schedule(cancel=1)
 		self.mark_as_unpaid()
-		self.update_repayment_schedule()
 		self.ignore_linked_doctypes = ['GL Entry']
 		self.make_gl_entries(cancel=1)
 
@@ -188,9 +189,16 @@ class LoanRepayment(AccountsController):
 			SET total_amount_paid = %s, total_principal_paid = %s, status = %s
 			WHERE name = %s """, (loan.total_amount_paid, loan.total_principal_paid, loan.status, self.against_loan))
 
-	def update_repayment_schedule(self):
+	def check_future_accruals(self):
+		future_accrual_date = frappe.db.get_value("Loan Interest Accrual", {"posting_date": (">", self.posting_date),
+			"docstatus": 1, "loan": self.against_loan}, 'posting_date')
+
+		if future_accrual_date:
+			frappe.throw("Cannot cancel. Interest accruals already processed till {0}".format(get_datetime(future_accrual_date)))
+
+	def update_repayment_schedule(self, cancel=0):
 		if self.is_term_loan and self.principal_amount_paid > self.payable_principal_amount:
-			regenerate_repayment_schedule(self.against_loan)
+			regenerate_repayment_schedule(self.against_loan, cancel)
 
 	def allocate_amounts(self, repayment_details):
 		self.set('repayment_details', [])
@@ -435,7 +443,7 @@ def get_penalty_details(against_loan):
 	else:
 		return None, 0
 
-def regenerate_repayment_schedule(loan):
+def regenerate_repayment_schedule(loan, cancel=0):
 	from erpnext.loan_management.doctype.loan.loan import (
 		add_single_month,
 		get_monthly_repayment_amount,
@@ -443,20 +451,34 @@ def regenerate_repayment_schedule(loan):
 
 	loan_doc = frappe.get_doc('Loan', loan)
 	next_accrual_date = None
+	accrued_entries = 0
+	last_repayment_amount = 0
+	last_balance_amount = 0
 
 	for term in reversed(loan_doc.get('repayment_schedule')):
 		if not term.is_accrued:
 			next_accrual_date = term.payment_date
-
-		if not term.is_accrued:
 			loan_doc.remove(term)
+		else:
+			accrued_entries += 1
+			if not last_repayment_amount:
+				last_repayment_amount = term.total_payment
+			if not last_balance_amount:
+				last_balance_amount = term.balance_loan_amount
 
 	loan_doc.save()
 
 	balance_amount = get_pending_principal_amount(loan_doc)
 
-	monthly_repayment_amount = get_monthly_repayment_amount(loan_doc.loan_amount,
-		loan_doc.rate_of_interest, loan_doc.repayment_periods)
+	if loan_doc.repayment_method == 'Repay Fixed Amount per Period':
+		monthly_repayment_amount = flt(balance_amount/len(loan_doc.get('repayment_schedule')) - accrued_entries)
+	else:
+		if not cancel:
+			monthly_repayment_amount = get_monthly_repayment_amount(balance_amount,
+				loan_doc.rate_of_interest, loan_doc.repayment_periods - accrued_entries)
+		else:
+			monthly_repayment_amount = last_repayment_amount
+			balance_amount = last_balance_amount
 
 	payment_date = next_accrual_date
 
