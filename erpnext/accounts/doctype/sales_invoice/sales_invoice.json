@@ -2025,13 +2025,6 @@
          "label": "Commission Based On Target Lines"
       },
       {
-         "fieldname": "ignore_default_payment_terms_template",
-         "fieldtype": "Check",
-         "hidden": 1,
-         "label": "Ignore Default Payment Terms Template",
-         "read_only": 1
-      },
-      {
          "fieldname": "total_billing_hours",
          "fieldtype": "Float",
          "label": "Total Billing Hours",
