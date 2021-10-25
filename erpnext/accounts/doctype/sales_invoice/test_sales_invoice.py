@@ -1085,8 +1085,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		actual_qty_1 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
 
-		frappe.db.commit()
-
 		self.assertEqual(actual_qty_0 - 5, actual_qty_1)
 
 		# outgoing_rate
@@ -1441,15 +1439,22 @@ class TestSalesInvoice(unittest.TestCase):
 		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
 
 		expected_itemised_tax = {
-			"999800": {
+			"_Test Item": {
 				"Service Tax": {
 					"tax_rate": 10.0,
-					"tax_amount": 1500.0
+					"tax_amount": 1000.0
+				}
+			},
+			"_Test Item 2": {
+				"Service Tax": {
+					"tax_rate": 10.0,
+					"tax_amount": 500.0
 				}
 			}
 		}
 		expected_itemised_taxable_amount = {
-			"999800": 15000.0
+			"_Test Item": 10000.0,
+			"_Test Item 2": 5000.0
 		}
 
 		self.assertEqual(itemised_tax, expected_itemised_tax)
@@ -2333,6 +2338,18 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 		si.reload()
 		self.assertEqual(si.status, "Paid")
+
+	def test_sales_invoice_submission_post_account_freezing_date(self):
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
+		si = create_sales_invoice(do_not_save=True)
+		si.posting_date = add_days(getdate(), 1)
+		si.save()
+
+		self.assertRaises(frappe.ValidationError, si.submit)
+		si.posting_date = getdate()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()

@@ -30,7 +30,6 @@
   "total_amount_reimbursed",
   "section_break_16",
   "posting_date",
-  "posting_date_nepal",
   "vehicle_log",
   "task",
   "cb1",
@@ -41,7 +40,6 @@
   "company",
   "mode_of_payment",
   "clearance_date",
-  "clearance_date_nepal",
   "column_break_24",
   "payable_account",
   "accounting_dimensions_section",
@@ -374,16 +372,6 @@
    "fieldtype": "Link",
    "label": "Delivery Trip",
    "options": "Delivery Trip"
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date (Nepal)"
-  },
-  {
-   "fieldname": "clearance_date_nepal",
-   "fieldtype": "Data",
-   "label": "Clearance Date (Nepal)"
   }
  ],
  "icon": "fa fa-money",

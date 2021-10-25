@@ -17,7 +17,6 @@
   "leave_application",
   "column_break0",
   "attendance_date",
-  "attendance_date_nepal",
   "company",
   "department",
   "attendance_request",
@@ -200,11 +199,6 @@
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "attendance_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Attendance Date (Nepal)"
   }
  ],
  "icon": "fa fa-ok",

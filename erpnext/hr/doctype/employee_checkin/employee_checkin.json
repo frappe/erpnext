@@ -12,7 +12,6 @@
   "shift",
   "column_break_4",
   "time",
-  "time_nepal",
   "device_id",
   "skip_auto_attendance",
   "attendance",
@@ -105,11 +104,6 @@
    "fieldtype": "Datetime",
    "hidden": 1,
    "label": "Shift Actual End"
-  },
-  {
-   "fieldname": "time_nepal",
-   "fieldtype": "Read Only",
-   "label": "Time (Nepal)"
   }
  ],
  "links": [],

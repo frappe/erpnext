@@ -20,9 +20,7 @@
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
   "process_attendance_after",
-  "process_attendance_after_nepal",
   "last_sync_of_checkin",
-  "last_sync_of_checkin_nepal",
   "grace_period_settings_auto_attendance_section",
   "enable_entry_grace_period",
   "late_entry_grace_period",
@@ -159,16 +157,6 @@
    "fieldname": "last_sync_of_checkin",
    "fieldtype": "Datetime",
    "label": "Last Sync of Checkin"
-  },
-  {
-   "fieldname": "process_attendance_after_nepal",
-   "fieldtype": "Data",
-   "label": "Process Attendance After (Nepal)"
-  },
-  {
-   "fieldname": "last_sync_of_checkin_nepal",
-   "fieldtype": "Read Only",
-   "label": "Last Sync of Checkin (Nepal)"
   }
  ],
  "links": [],

@@ -12,6 +12,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 	// 				});
 	// 	}
 	// },
+	
 
 	sorce_warehouse: function(frm){
 		if(frm.doc.docstatus != 1){
@@ -42,6 +43,11 @@ frappe.ui.form.on('Delivery Planning Item', {
 	// 				});
 	// 	}
 	// },
+	validate : function(frm) {
+		if (frm.doc.customer){
+			frm.doc.full_dname = frm.doc.customer+ " " + frm.doc.item_name + " " + frm.doc.qty_to_deliver + " " + frm.doc.uom
+		}
+	},
 
 	qty_to_deliver: function(frm){
 		if(frm.doc.qty_to_deliver > frm.doc.ordered_qty)

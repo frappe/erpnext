@@ -21,10 +21,8 @@
   "license_number",
   "column_break_8",
   "issuing_date",
-  "issuing_date_nepal",
   "column_break_10",
   "expiry_date",
-  "expiry_date_nepal",
   "driving_license_categories",
   "driving_license_category"
  ],
@@ -118,16 +116,6 @@
    "fieldtype": "Link",
    "label": "Address",
    "options": "Address"
-  },
-  {
-   "fieldname": "issuing_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Issuing Date (Nepal)"
-  },
-  {
-   "fieldname": "expiry_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Expiry Date (Nepal)"
   }
  ],
  "icon": "fa fa-user",
