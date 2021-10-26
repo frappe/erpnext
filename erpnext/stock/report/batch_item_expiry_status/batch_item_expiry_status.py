@@ -21,11 +21,19 @@ def execute(filters=None):
 	for item in sorted(iwb_map):
 		for wh in sorted(iwb_map[item]):
 			for batch in sorted(iwb_map[item][wh]):
-				qty_dict = iwb_map[item][wh][batch]
 
-				data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
-					frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
-				])
+				qty_dict = iwb_map[item][wh][batch]
+				date_exp = frappe.db.get_value('Batch', batch, 'expiry_date')
+				if date_exp:
+					if not filters.get('expiry_days') and date_exp <= getdate(filters["to_date"]) and date_exp >= getdate(filters["from_date"]):
+						data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
+							frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
+						])
+					else:
+						if qty_dict.expiry_status <= filters.get('expiry_days') and date_exp <= getdate(filters["to_date"]) and date_exp >= getdate(filters["from_date"]):
+							data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
+										 frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
+										 ])
 
 
 	return columns, data
