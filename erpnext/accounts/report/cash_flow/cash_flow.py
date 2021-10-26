@@ -139,9 +139,9 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
-def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters={}):
+def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters=None):
 	cond = ""
-	filters = frappe._dict(filters)
+	filters = frappe._dict(filters or {})
 
 	if filters.include_default_book_entries:
 		company_fb = frappe.db.get_value("Company", company, 'default_finance_book')
