@@ -20,6 +20,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
+
 class AssetSetup(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
