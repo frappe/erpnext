@@ -1279,7 +1279,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, so.cancel)
 
-	def test_so_cancellation_when_si_has_been_submitted(self):
+	def test_so_cancellation_after_si_submission(self):
 		"""
 			Test to check if Sales Order gets cancelled when linked Sales Invoice has been Submitted
 			Expected result: Sales Order should not get cancelled
@@ -1288,6 +1288,19 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 		si = make_sales_invoice(so.name)
 		si.submit()
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
+
+	def test_so_cancellation_after_dn_submission(self):
+		"""
+			Test to check if Sales Order gets cancelled when linked Delivery Note has been Submitted
+			Expected result: Sales Order should not get cancelled
+		"""
+		so = make_sales_order()
+		so.submit()
+		dn = make_delivery_note(so.name)
+		dn.submit()
 
 		so.load_from_db()
 		self.assertRaises(frappe.LinkExistsError, so.cancel)
