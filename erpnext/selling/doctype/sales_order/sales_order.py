@@ -227,15 +227,15 @@ class SalesOrder(SellingController):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
-		draft_rv = frappe.db.sql_list("""select distinct t1.name
+		linked_invoices = frappe.db.sql_list("""select distinct t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
 			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
 			self.name)
 
-		if draft_rv:
-			draft_rv = [get_link_to_form("Sales Invoice", si) for si in draft_rv]
+		if linked_invoices:
+			linked_invoices = [get_link_to_form("Sales Invoice", si) for si in linked_invoices]
 			frappe.throw(_("Sales Invoice {0} must be deleted before cancelling this Sales Order")
-				.format(", ".join(draft_rv)))
+				.format(", ".join(linked_invoices)))
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
