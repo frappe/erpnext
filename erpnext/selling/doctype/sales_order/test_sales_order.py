@@ -1279,6 +1279,19 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, so.cancel)
 
+	def test_so_cancellation_when_si_has_been_submitted(self):
+		"""
+			Test to check if Sales Order gets cancelled when linked Sales Invoice has been Submitted
+			Expected result: Sales Order should not get cancelled
+		"""
+		so = make_sales_order()
+		so.submit()
+		si = make_sales_invoice(so.name)
+		si.submit()
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
+
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
