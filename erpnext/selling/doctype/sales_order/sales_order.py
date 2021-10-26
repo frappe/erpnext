@@ -227,28 +227,6 @@ class SalesOrder(SellingController):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
-		# Checks Delivery Note
-		submit_dn = frappe.db.sql_list("""
-			select t1.name
-			from `tabDelivery Note` t1,`tabDelivery Note Item` t2
-			where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1""", self.name)
-
-		if submit_dn:
-			submit_dn = [get_link_to_form("Delivery Note", dn) for dn in submit_dn]
-			frappe.throw(_("Delivery Notes {0} must be cancelled before cancelling this Sales Order")
-				.format(", ".join(submit_dn)))
-
-		# Checks Sales Invoice
-		submit_rv = frappe.db.sql_list("""select t1.name
-			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""",
-			self.name)
-
-		if submit_rv:
-			submit_rv = [get_link_to_form("Sales Invoice", si) for si in submit_rv]
-			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order")
-				.format(", ".join(submit_rv)))
-
 		draft_rv = frappe.db.sql_list("""select distinct t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
 			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
