@@ -16,6 +16,12 @@ frappe.query_reports["Batch Item Expiry Status"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"default": frappe.datetime.get_today()
+		},
+		{
+			"fieldname":"expiry_days",
+			"label": __("Expire Days"),
+			"fieldtype": "Int",
+			"width": "80",
 		}
 	]
 }
