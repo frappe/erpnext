@@ -582,7 +582,7 @@ class ProductionPlan(Document):
 			fields="status",
 			pluck="status"
 		)
-		return all(map(lambda x: x == "Completed", wo_status))
+		return all(s == "Completed" for s in wo_status)
 
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):
