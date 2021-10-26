@@ -35,6 +35,14 @@ frappe.ui.form.on("Task", {
 			}
 		});
 	},
+	refresh(frm) {
+		frm.add_custom_button(__('Material Transfer'), function(){
+			frm.events.make_se_mt(frm)
+		}, __("Create"));
+		frm.add_custom_button(__('Material Issue'), function(){
+			frm.events.make_se_mi(frm)
+		}, __("Create"));
+	},
 
 	is_group: function (frm) {
 		frappe.call({
@@ -58,6 +66,18 @@ frappe.ui.form.on("Task", {
 		frm.doc.project && frappe.model.remove_from_locals("Project",
 			frm.doc.project);
 	},
+	make_se_mt: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.projects.doctype.task.task.make_stock_entry_mt',
+			frm: frm,
+		});
+	},
+	make_se_mi: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.projects.doctype.task.task.make_stock_entry_mi',
+			frm: frm,
+		});
+	},
 	from_bom(frm) {
 		if (frm.doc.from_bom) {
 			frappe.db.get_doc("BOM", frm.doc.from_bom).then(bom => {
@@ -71,6 +91,7 @@ frappe.ui.form.on("Task", {
 					row.qty = item.qty;
 					row.warehouse = item.source_warehouse;
 				});
+
 		frm.refresh_fields("items");
 			});
 		}

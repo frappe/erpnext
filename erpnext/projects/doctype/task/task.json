@@ -21,6 +21,8 @@
   "parent_task",
   "completed_by",
   "completed_on",
+  "section_break_15",
+  "project_warehouse",
   "task_items_section",
   "from_bom",
   "items",
@@ -410,6 +412,17 @@
    "fieldtype": "Link",
    "label": "From BOM",
    "options": "BOM"
+  },
+  {
+   "fieldname": "project_warehouse",
+   "fieldtype": "Link",
+   "label": "Project Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-check",
@@ -417,7 +430,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-10-22 16:08:49.114246",
+ "modified": "2021-10-26 12:33:52.741124",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

@@ -342,3 +342,46 @@ def validate_project_dates(project_end_date, task, task_start, task_end, actual_
 
 	if task.get(task_end) and date_diff(project_end_date, getdate(task.get(task_end))) < 0:
 		frappe.throw(_("Task's {0} End Date cannot be after Project's End Date.").format(actual_or_expected_date))
+
+@frappe.whitelist()
+def make_stock_entry_mt(source_name, target_doc = None):
+	def set_purpose(source, target, source_parent):
+		target.stock_entry_type = "Material Transfer"
+
+	def set_t_warehouse(source, target, source_parent):
+		target.t_warehouse = source_parent.project_warehouse
+
+	doc = get_mapped_doc("Task", source_name, {
+		"Task": {
+			"doctype": "Stock Entry",
+			"postprocess": set_purpose
+		},
+		"Task Item": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"warehouse": "s_warehouse",
+			},
+			"postprocess": set_t_warehouse
+		}
+	}, target_doc)
+	return doc
+
+@frappe.whitelist()
+def make_stock_entry_mi(source_name, target_doc = None):
+	def set_purpose(source, target, source_parent):
+		target.stock_entry_type = "Material Issue"
+
+	doc = get_mapped_doc("Task", source_name, {
+		"Task": {
+			"doctype": "Stock Entry",
+			"postprocess": set_purpose
+		},
+		"Task Item": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"warehouse": "s_warehouse",
+			},
+		}
+	}, target_doc)
+	return doc
+
