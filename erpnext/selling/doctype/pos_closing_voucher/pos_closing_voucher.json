@@ -8,20 +8,19 @@
   "period_start_date",
   "period_end_date",
   "column_break_3",
-  "posting_date",
-  "section_break_5",
   "company",
+  "posting_date",
+  "amended_from",
+  "section_break_5",
+  "user",
   "column_break_7",
   "pos_profile",
-  "user",
   "expense_details_section",
   "expense_amount",
   "custody_amount",
   "column_break_13",
   "total_amount",
   "difference",
-  "section_break_9",
-  "payment_reconciliation_details",
   "section_break_11",
   "payment_reconciliation",
   "section_break_13",
@@ -30,10 +29,10 @@
   "total_quantity",
   "column_break_16",
   "taxes",
+  "section_break_9",
+  "payment_reconciliation_details",
   "section_break_12",
-  "sales_invoices_summary",
-  "section_break_14",
-  "amended_from"
+  "sales_invoices_summary"
  ],
  "fields": [
   {
@@ -42,7 +41,6 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Period Start Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -51,7 +49,6 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Period End Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -64,6 +61,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Posting Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -86,8 +84,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "POS Profile",
-   "options": "POS Profile",
-   "reqd": 1
+   "options": "POS Profile"
   },
   {
    "fieldname": "user",
@@ -148,7 +145,6 @@
    "options": "POS Closing Voucher Details"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_13",
    "fieldtype": "Section Break",
    "label": "Details"
@@ -197,10 +193,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -211,7 +203,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:54.095412",
+ "modified": "2021-10-27 01:05:11.419722",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Closing Voucher",
@@ -241,6 +233,5 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+ "sort_order": "DESC"
 }

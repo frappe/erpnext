@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
@@ -17,21 +18,25 @@ class POSClosingVoucher(Document):
 			'from_date': self.period_start_date,
 			'to_date': self.period_end_date,
 			'company': self.company,
-			'pos_profile': self.pos_profile,
 			'user': self.user,
 			'is_pos': 1
 		}
+
+		if self.get('pos_profile'):
+			filters['pos_profile'] = self.pos_profile
 
 		invoice_list = get_invoices(filters)
 		self.set_invoice_list(invoice_list)
 
 		sales_summary = get_sales_summary(invoice_list)
 		self.set_sales_summary_values(sales_summary)
-		self.total_amount = sales_summary['grand_total']
+		self.total_amount = sales_summary['rounded_total']
 
-		if not self.get('payment_reconciliation'):
+		if self.docstatus == 0:
 			mop = get_mode_of_payment_details(invoice_list)
 			self.set_mode_of_payments(mop)
+
+		self.set_difference()
 
 		taxes = get_tax_details(invoice_list)
 		self.set_taxes(taxes)
@@ -39,6 +44,10 @@ class POSClosingVoucher(Document):
 		return self.get_payment_reconciliation_details()
 
 	def validate(self):
+		self.validate_duplicate()
+		self.set_difference()
+
+	def validate_duplicate(self):
 		user = frappe.get_all('POS Closing Voucher',
 			filters = {
 				'user': self.user,
@@ -53,13 +62,19 @@ class POSClosingVoucher(Document):
 			frappe.throw(_("POS Closing Voucher alreday exists for {0} between date {1} and {2}"
 				.format(self.user, self.period_start_date, self.period_end_date)))
 
+	def set_difference(self):
+		for d in self.payment_reconciliation:
+			d.difference = flt(d.collected_amount) - flt(d.expected_amount)
+
 	def set_invoice_list(self, invoice_list):
 		self.sales_invoices_summary = []
 		for invoice in invoice_list:
 			self.append('sales_invoices_summary', {
 				'invoice': invoice['name'],
 				'qty_of_items': invoice['pos_total_qty'],
-				'grand_total': invoice['grand_total']
+				'net_total': invoice['net_total'],
+				'grand_total': invoice['grand_total'],
+				'rounded_total': invoice['rounded_total'],
 			})
 
 	def set_sales_summary_values(self, sales_summary):
@@ -68,12 +83,29 @@ class POSClosingVoucher(Document):
 		self.total_quantity = sales_summary['total_qty']
 
 	def set_mode_of_payments(self, mop):
+		collected_amounts = {}
+		for d in self.get('payment_reconciliation'):
+			if d.mode_of_payment:
+				collected_amounts.setdefault(d.mode_of_payment, 0)
+				collected_amounts[d.mode_of_payment] += flt(d.collected_amount)
+
 		self.payment_reconciliation = []
 		for m in mop:
-			self.append('payment_reconciliation', {
+			row = self.append('payment_reconciliation', {
 				'mode_of_payment': m['name'],
 				'expected_amount': m['amount']
 			})
+
+			if m['name'] in collected_amounts:
+				row.collected_amount = collected_amounts[m['name']]
+
+		modes_of_payment = [d.mode_of_payment for d in self.payment_reconciliation]
+		for mode_of_payment, collected_amount in collected_amounts.items():
+			if mode_of_payment not in modes_of_payment:
+				self.append('payment_reconciliation', {
+					'mode_of_payment': mode_of_payment,
+					'collected_amount': collected_amount
+				})
 
 	def set_taxes(self, taxes):
 		self.taxes = []
@@ -162,27 +194,35 @@ def get_tax_details(invoice_list):
 							tax_details[itemised_tax[a][b][c]] += itemised_tax[a][b]['tax_amount']
 
 	for t in tax_details:
-		tax_breakup.append({'rate': t, 'amount': tax_details[t]})
+		if t and tax_details[t]:
+			tax_breakup.append({'rate': t, 'amount': tax_details[t]})
 
+	tax_breakup = sorted(tax_breakup, key=lambda d: d['rate'], reverse=1)
 	return tax_breakup
 
 def get_sales_summary(invoice_list):
 	net_total = sum(item['net_total'] for item in invoice_list)
 	grand_total = sum(item['grand_total'] for item in invoice_list)
+	rounded_total = sum(item['rounded_total'] for item in invoice_list)
 	total_qty = sum(item['pos_total_qty'] for item in invoice_list)
 
-	return {'net_total': net_total, 'grand_total': grand_total, 'total_qty': total_qty}
+	return {'net_total': net_total, 'grand_total': grand_total, 'rounded_total': rounded_total, 'total_qty': total_qty}
 
 def get_company_currency(doc):
 	currency = frappe.get_cached_value('Company',  doc.company,  "default_currency")
 	return frappe.get_doc('Currency', currency)
 
 def get_invoices(filters):
-	return frappe.db.sql("""select a.name, a.base_grand_total as grand_total,
-		a.base_net_total as net_total, a.pos_total_qty
+	pos_profile_condition = "and a.pos_profile = %(pos_profile)s" if filters.get('pos_profile') else ""
+	return frappe.db.sql("""
+		select a.name,
+			a.base_grand_total as grand_total,
+			a.base_rounded_total as rounded_total,
+			a.base_net_total as net_total,
+			a.pos_total_qty
 		from `tabSales Invoice` a
 		where a.docstatus = 1 and a.posting_date >= %(from_date)s
 		and a.posting_date <= %(to_date)s and a.company=%(company)s
-		and a.pos_profile = %(pos_profile)s and a.is_pos = %(is_pos)s
-		and a.owner = %(user)s""",
-		filters, as_dict=1)
+		and a.is_pos = %(is_pos)s
+		and a.owner = %(user)s {0}
+		""".format(pos_profile_condition), filters, as_dict=1)

@@ -6,20 +6,22 @@
  "field_order": [
   "invoice",
   "qty_of_items",
-  "grand_total"
+  "net_total",
+  "grand_total",
+  "rounded_total"
  ],
  "fields": [
   {
    "fieldname": "invoice",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Invoices",
+   "label": "Invoice",
    "options": "Sales Invoice",
    "read_only": 1
   },
   {
    "fieldname": "qty_of_items",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity of Items",
    "read_only": 1
@@ -29,11 +31,28 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Grand Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rounded_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rounded Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Total",
+   "options": "Company:company:default_currency",
    "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:42:01.982158",
+ "modified": "2021-10-27 01:00:10.409981",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Closing Voucher Invoices",

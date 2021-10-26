@@ -10,15 +10,6 @@ frappe.ui.form.on('POS Closing Voucher', {
 				}
 			};
 		});
-
-		frm.set_query("user", function(doc) {
-			return {
-				query: "erpnext.selling.doctype.pos_closing_voucher.pos_closing_voucher.get_cashiers",
-				filters: {
-					'parent': doc.pos_profile
-				}
-			};
-		});
 	},
 
 	total_amount: function(frm) {
@@ -31,6 +22,7 @@ frappe.ui.form.on('POS Closing Voucher', {
 		get_difference_amount(frm);
 	},
 	refresh: function(frm) {
+		erpnext.hide_company();
 		get_closing_voucher_details(frm);
 	},
 	period_start_date: function(frm) {
@@ -53,17 +45,17 @@ frappe.ui.form.on('POS Closing Voucher', {
 frappe.ui.form.on('POS Closing Voucher Details', {
 	collected_amount: function(doc, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "difference", row.collected_amount - row.expected_amount);
+		frappe.model.set_value(cdt, cdn, "difference", flt(row.collected_amount) - flt(row.expected_amount));
 	}
 });
 
 var get_difference_amount = function(frm){
-	frm.doc.difference = frm.doc.total_amount - frm.doc.custody_amount - frm.doc.expense_amount;
+	frm.doc.difference = flt(frm.doc.total_amount) - flt(frm.doc.custody_amount) - flt(frm.doc.expense_amount);
 	refresh_field("difference");
 };
 
 var get_closing_voucher_details = function(frm) {
-	if (frm.doc.period_end_date && frm.doc.period_start_date && frm.doc.company && frm.doc.pos_profile && frm.doc.user) {
+	if (frm.doc.period_end_date && frm.doc.period_start_date && frm.doc.company && frm.doc.user) {
 		frappe.call({
 			method: "get_closing_voucher_details",
 			doc: frm.doc,
