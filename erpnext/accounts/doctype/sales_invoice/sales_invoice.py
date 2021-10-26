@@ -36,7 +36,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
-	post_depreciation_entries,
+	make_depreciation_entry
 )
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
@@ -1010,7 +1010,7 @@ class SalesInvoice(SellingController):
 		asset.prepare_depreciation_data(date_of_sale=self.posting_date)
 		asset.save()
 
-		post_depreciation_entries(self.posting_date)
+		make_depreciation_entry(asset.name, self.posting_date)
 
 	def reset_depreciation_schedule(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
