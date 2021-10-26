@@ -111,7 +111,7 @@ def run_query(query_args: QueryArgs) -> Data:
 			{work_order_filter}
 		GROUP BY
 			se.work_order
-	""".format(**query_args), query_args, as_dict=1, debug=1)
+	""".format(**query_args), query_args, as_dict=1)
 
 def update_data_with_total_pl_value(data: Data) -> None:
 	for row in data:
