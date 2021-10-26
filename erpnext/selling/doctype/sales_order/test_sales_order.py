@@ -11,6 +11,12 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+	make_maintenance_schedule,
+)
+from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import (
+	make_maintenance_visit,
+)
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import (
@@ -20,12 +26,6 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	make_raw_material_request,
 	make_sales_invoice,
 	make_work_orders,
-)
-from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
-	make_maintenance_schedule,
-)
-from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import (
-	make_maintenance_visit,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
