@@ -1320,6 +1320,22 @@ class TestSalesOrder(unittest.TestCase):
 		so.load_from_db()
 		self.assertRaises(frappe.LinkExistsError, so.cancel)
 
+	def test_so_cancellation_after_maintenance_visit_submission(self):
+		"""
+			Expected result: Sales Order should not get cancelled
+		"""
+		from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import make_maintenance_visit
+
+		so = make_sales_order()
+		so.submit()
+		mv = make_maintenance_visit()
+		mv.purposes[0].prevdoc_doctype = "Sales Order"
+		mv.purposes[0].prevdoc_docname = so.name
+		mv.submit()
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
+
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
