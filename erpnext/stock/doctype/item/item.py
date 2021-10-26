@@ -127,7 +127,9 @@ class Item(WebsiteGenerator):
 		self.cant_change()
 		self.update_show_in_website()	
 		if self.delivery_area != None:
-			self.assing_delivery_area()	
+			self.assing_delivery_area()
+		else:
+			self.delete_delivery_area()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -154,6 +156,12 @@ class Item(WebsiteGenerator):
 		row.item_code = self.item_code
 		row.item_name = self.item_name
 		doc.save()
+	
+	def delete_delivery_area(self):
+		exist = frappe.get_all("Delivery Area Detail", ["name","parent"], filters={"item_code": self.item_code})
+
+		if len(exist) > 0:
+			frappe.delete_doc("Delivery Area Detail", exist[0].name)
 
 	def validate_description(self):
 		'''Clean HTML description if set'''
