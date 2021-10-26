@@ -1309,7 +1309,9 @@ class TestSalesOrder(unittest.TestCase):
 		"""
 			Expected result: Sales Order should not get cancelled
 		"""
-		from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import make_maintenance_schedule
+		from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+			make_maintenance_schedule
+		)
 
 		so = make_sales_order()
 		so.submit()
@@ -1324,7 +1326,9 @@ class TestSalesOrder(unittest.TestCase):
 		"""
 			Expected result: Sales Order should not get cancelled
 		"""
-		from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import make_maintenance_visit
+		from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import (
+			make_maintenance_visit
+		)
 
 		so = make_sales_order()
 		so.submit()
