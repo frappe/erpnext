@@ -237,39 +237,6 @@ class SalesOrder(SellingController):
 			frappe.throw(_("Sales Invoice {0} must be deleted before cancelling this Sales Order")
 				.format(", ".join(draft_rv)))
 
-		#check maintenance schedule
-		submit_ms = frappe.db.sql_list("""
-			select t1.name
-			from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
-			where t2.parent=t1.name and t2.sales_order = %s and t1.docstatus = 1""", self.name)
-
-		if submit_ms:
-			submit_ms = [get_link_to_form("Maintenance Schedule", ms) for ms in submit_ms]
-			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order")
-				.format(", ".join(submit_ms)))
-
-		# check maintenance visit
-		submit_mv = frappe.db.sql_list("""
-			select t1.name
-			from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
-			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""",self.name)
-
-		if submit_mv:
-			submit_mv = [get_link_to_form("Maintenance Visit", mv) for mv in submit_mv]
-			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order")
-				.format(", ".join(submit_mv)))
-
-		# check work order
-		pro_order = frappe.db.sql_list("""
-			select name
-			from `tabWork Order`
-			where sales_order = %s and docstatus = 1""", self.name)
-
-		if pro_order:
-			pro_order = [get_link_to_form("Work Order", po) for po in pro_order]
-			frappe.throw(_("Work Order {0} must be cancelled before cancelling this Sales Order")
-				.format(", ".join(pro_order)))
-
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" %
