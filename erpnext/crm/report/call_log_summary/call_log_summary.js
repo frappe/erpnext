@@ -44,7 +44,9 @@ frappe.query_reports["Call Log Summary"] = {
 			fieldtype: "Select",
 			options: [
 				"Monthly",
-				"Quarterly"
+				"Quarterly",
+				"Half-Yearly",
+				"Yearly"
 			],
 			default: "Monthly"
 		},
