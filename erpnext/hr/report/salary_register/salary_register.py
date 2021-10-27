@@ -34,7 +34,12 @@ def execute(filters=None):
 		
 		row = [ss.employee_name, ss.payment_days]
 
-		row += [Employee[0].base, ss.gross_pay]
+		if len(Employee) > 0:
+			row += [Employee[0].base]
+		else:
+			row += [0]
+		
+		row += [ss.gross_pay]
 
 		row += [ss.total_deduction, ss.net_pay]
 
