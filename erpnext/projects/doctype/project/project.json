@@ -21,6 +21,7 @@
   "expected_end_date",
   "priority",
   "department",
+  "project_warehouse",
   "customer_details",
   "customer",
   "column_break_14",
@@ -451,6 +452,12 @@
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "fieldname": "project_warehouse",
+   "fieldtype": "Link",
+   "label": "Project Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-puzzle-piece",
@@ -458,10 +465,11 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2021-04-28 16:36:11.654632",
+ "modified": "2021-10-27 11:08:22.614295",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -25,6 +25,7 @@
   "project_warehouse",
   "task_items_section",
   "from_bom",
+  "get_items",
   "items",
   "sb_timeline",
   "exp_start_date",
@@ -410,10 +411,11 @@
   {
    "fieldname": "from_bom",
    "fieldtype": "Link",
-   "label": "From BOM",
+   "label": "BOM No",
    "options": "BOM"
   },
   {
+   "fetch_from": "project.project_warehouse",
    "fieldname": "project_warehouse",
    "fieldtype": "Link",
    "label": "Project Warehouse",
@@ -423,6 +425,11 @@
   {
    "fieldname": "section_break_15",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items"
   }
  ],
  "icon": "fa fa-check",
@@ -430,7 +437,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-10-26 12:33:52.741124",
+ "modified": "2021-10-27 11:45:20.574923",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
