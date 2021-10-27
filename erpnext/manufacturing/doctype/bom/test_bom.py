@@ -4,13 +4,14 @@
 
 import unittest
 from collections import deque
+from functools import partial
 
 import frappe
 from frappe.test_runner import make_test_records
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.manufacturing.doctype.bom.bom import make_variant_bom
+from erpnext.manufacturing.doctype.bom.bom import item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
@@ -107,6 +108,24 @@ class TestBOM(unittest.TestCase):
 		self.assertAlmostEqual(bom.base_operating_cost, base_op_cost)
 		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
 		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
+
+	def test_bom_cost_with_batch_size(self):
+		bom = frappe.copy_doc(test_records[2])
+		bom.docstatus = 0
+		op_cost = 0.0
+		for op_row in bom.operations:
+			op_row.docstatus = 0
+			op_row.batch_size = 2
+			op_row.set_cost_based_on_bom_qty = 1
+			op_cost += op_row.operating_cost
+
+		bom.save()
+
+		for op_row in bom.operations:
+			self.assertAlmostEqual(op_row.cost_per_unit, op_row.operating_cost / 2)
+
+		self.assertAlmostEqual(bom.operating_cost, op_cost/2)
+		bom.delete()
 
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
@@ -356,6 +375,16 @@ class TestBOM(unittest.TestCase):
 		)
 		# FG Items in Scrap/Loss Table should have Is Process Loss set
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+	def test_bom_item_query(self):
+		query = partial(item_query, doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters={"is_stock_item": 1})
+
+		test_items = query(txt="_Test")
+		filtered = query(txt="_Test Item 2")
+
+		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
+		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

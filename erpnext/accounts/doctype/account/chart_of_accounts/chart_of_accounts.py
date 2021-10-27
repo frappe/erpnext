@@ -12,7 +12,7 @@ from six import iteritems
 from unidecode import unidecode
 
 
-def create_charts(company, chart_template=None, existing_company=None, custom_chart=None):
+def create_charts(company, chart_template=None, existing_company=None, custom_chart=None, from_coa_importer=None):
 	chart = custom_chart or get_chart(chart_template, existing_company)
 	if chart:
 		accounts = []
@@ -22,7 +22,7 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 				if root_account:
 					root_type = child.get("root_type")
 
-				if account_name not in ["account_number", "account_type",
+				if account_name not in ["account_name", "account_number", "account_type",
 					"root_type", "is_group", "tax_rate"]:
 
 					account_number = cstr(child.get("account_number")).strip()
@@ -35,7 +35,7 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 
 					account = frappe.get_doc({
 						"doctype": "Account",
-						"account_name": account_name,
+						"account_name": child.get('account_name') if from_coa_importer else account_name,
 						"company": company,
 						"parent_account": parent,
 						"is_group": is_group,
@@ -213,7 +213,7 @@ def validate_bank_account(coa, bank_account):
 	return (bank_account in accounts)
 
 @frappe.whitelist()
-def build_tree_from_json(chart_template, chart_data=None):
+def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=False):
 	''' get chart template from its folder and parse the json to be rendered as tree '''
 	chart = chart_data or get_chart(chart_template)
 
@@ -226,8 +226,11 @@ def build_tree_from_json(chart_template, chart_data=None):
 		''' recursively called to form a parent-child based list of dict from chart template '''
 		for account_name, child in iteritems(children):
 			account = {}
-			if account_name in ["account_number", "account_type",\
+			if account_name in ["account_name", "account_number", "account_type",\
 				"root_type", "is_group", "tax_rate"]: continue
+
+			if from_coa_importer:
+				account_name = child['account_name']
 
 			account['parent_account'] = parent
 			account['expandable'] = True if identify_is_group(child) else False

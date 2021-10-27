@@ -140,11 +140,6 @@ class Asset(AccountsController):
 		if self.is_existing_asset:
 			return
 
-		docname = self.purchase_receipt or self.purchase_invoice
-		if docname:
-			doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
-			date = frappe.db.get_value(doctype, docname, 'posting_date')
-
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
@@ -199,7 +194,7 @@ class Asset(AccountsController):
 			start = self.clear_depreciation_schedule()
 
 			# value_after_depreciation - current Asset value
-			if d.value_after_depreciation:
+			if self.docstatus == 1 and d.value_after_depreciation:
 				value_after_depreciation = (flt(d.value_after_depreciation) -
 					flt(self.opening_accumulated_depreciation))
 			else:
@@ -394,10 +389,6 @@ class Asset(AccountsController):
 			if cint(self.number_of_depreciations_booked) > cint(row.total_number_of_depreciations):
 				frappe.throw(_("Number of Depreciations Booked cannot be greater than Total Number of Depreciations"))
 
-		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(nowdate()):
-			frappe.msgprint(_("Depreciation Row {0}: Depreciation Start Date is entered as past date")
-				.format(row.idx), title=_('Warning'), indicator='red')
-
 		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(self.purchase_date):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date")
 				.format(row.idx))
@@ -444,9 +435,10 @@ class Asset(AccountsController):
 			if accumulated_depreciation_after_full_schedule:
 				accumulated_depreciation_after_full_schedule = max(accumulated_depreciation_after_full_schedule)
 
-				asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
-					flt(accumulated_depreciation_after_full_schedule),
-					self.precision('gross_purchase_amount'))
+				asset_value_after_full_schedule = flt(
+					flt(self.gross_purchase_amount) -
+					flt(self.opening_accumulated_depreciation) -
+					flt(accumulated_depreciation_after_full_schedule), self.precision('gross_purchase_amount'))
 
 				if (row.expected_value_after_useful_life and
 					row.expected_value_after_useful_life < asset_value_after_full_schedule):
