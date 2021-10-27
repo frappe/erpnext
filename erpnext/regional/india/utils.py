@@ -63,7 +63,7 @@ def validate_gstin_for_india(doc, method):
 				.format(doc.gst_state_number), title=_("Invalid GSTIN"))
 
 def validate_pan_for_india(doc, method):
-	if doc.get('country') != 'India' or not doc.pan:
+	if doc.get('country') != 'India' or not doc.get('pan'):
 		return
 
 	if not PAN_NUMBER_FORMAT.match(doc.pan):
