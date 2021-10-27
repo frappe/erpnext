@@ -10,22 +10,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.setup_posting_date_time_check();
 		this._super(doc);
 	},
+
 	company: function() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
-<<<<<<< HEAD
-	},
-	onload: function() {
-=======
-
 		let me = this;
 		if (this.frm.doc.company) {
 			frappe.db.get_value('Company', this.frm.doc.company, 'default_receivable_account', (r) => {
 				me.frm.set_value('debit_to', r.default_receivable_account);
 			});
 		}
-	}
-	onload() {
->>>>>>> 65025fb628 (fix: Update receivable/payable account on company change)
+	},
+
+	onload: function() {
 		var me = this;
 		this._super();
 
