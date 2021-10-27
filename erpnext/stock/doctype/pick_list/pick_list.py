@@ -2,10 +2,8 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
 import json
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _
@@ -126,27 +124,29 @@ class PickList(Document):
 			self.group_similar_items()
 
 	def group_similar_items(self):
-		group_item_qty = {}
-		group_picked_qty = {}
-		count = 0
+		group_item_qty = defaultdict(float)
+		group_picked_qty = defaultdict(float)
 
 		for item in self.locations:
-			group_item_qty[(item.item_code, item.warehouse)] = group_item_qty.get((item.item_code,item.warehouse), 0) + item.qty
-			group_picked_qty[(item.item_code, item.warehouse)] = group_picked_qty.get((item.item_code,item.warehouse), 0) + item.picked_qty
+			group_item_qty[(item.item_code, item.warehouse)] +=  item.qty
+			group_picked_qty[(item.item_code, item.warehouse)] += item.picked_qty
 
 		duplicate_list = []
 		for item in self.locations:
 			if (item.item_code, item.warehouse) in group_item_qty:
-				count += 1
 				item.qty = group_item_qty[(item.item_code, item.warehouse)]
 				item.picked_qty = group_picked_qty[(item.item_code, item.warehouse)]
 				item.stock_qty = group_item_qty[(item.item_code, item.warehouse)]
-				item.idx = count
 				del group_item_qty[(item.item_code, item.warehouse)]
 			else:
 				duplicate_list.append(item)
+
 		for item in duplicate_list:
 			self.remove(item)
+
+		for idx, item in enumerate(self.locations, start=1):
+			item.idx = idx
+
 
 def validate_item_locations(pick_list):
 	if not pick_list.locations:
