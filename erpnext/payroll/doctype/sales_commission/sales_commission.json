@@ -130,7 +130,6 @@
    "depends_on": "calculate_commission_manually",
    "fieldname": "commission_rate",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Commission Rate"
   },
   {
@@ -223,7 +222,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-27 16:07:57.409040",
+ "modified": "2021-10-27 16:32:19.283507",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Sales Commission",
