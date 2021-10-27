@@ -434,17 +434,12 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-<<<<<<< HEAD
-			shipping_details = get_party_details(invoice.shipping_address_name, is_shipping_address=True)
-	
-=======
 			shipping_details = get_party_details(invoice.shipping_address_name, skip_gstin_validation=True)
 
 	dispatch_details = frappe._dict({})
 	if invoice.dispatch_address_name:
 		dispatch_details = get_party_details(invoice.dispatch_address_name, skip_gstin_validation=True)
 
->>>>>>> cb97e950e6 (feat(e-invoicing): dispatch address (#28084))
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 	
