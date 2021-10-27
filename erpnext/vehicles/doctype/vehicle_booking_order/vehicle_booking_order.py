@@ -621,6 +621,7 @@ def get_vehicle_registration_order(source):
 	target = frappe.new_doc("Vehicle Registration Order")
 	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
+	target.run_method("calculate_totals")
 	return target
 
 

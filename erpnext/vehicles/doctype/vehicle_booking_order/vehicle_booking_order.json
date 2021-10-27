@@ -1095,6 +1095,7 @@
    "label": "Registration Status",
    "no_copy": 1,
    "options": "Not Ordered\nOrdered\nIn Process\nRegistered",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -1110,7 +1111,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-30 13:58:33.648626",
+ "modified": "2021-10-20 12:22:45.176296",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

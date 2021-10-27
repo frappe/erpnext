@@ -463,10 +463,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			if self.customer_outstanding > 0:
 				self.status = "To Receive Payment"
 
-			elif self.authority_outstanding > 0:
-				self.status = "To Pay Authority"
-
 			elif not self.vehicle_license_plate:
+				if self.authority_outstanding > 0:
+					self.status = "To Pay Authority"
+
 				if self.invoice_status == "In Hand":
 					self.status = "To Issue Invoice"
 
@@ -476,7 +476,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				else:
 					self.status = "To Receive Invoice"
 			else:
-				if self.invoice_status == "Issued":
+				if self.authority_outstanding > 0:
+					self.status = "To Pay Authority"
+
+				elif self.invoice_status == "Issued":
 					self.status = "To Retrieve Invoice"
 
 				elif self.agent_balance > 0:
