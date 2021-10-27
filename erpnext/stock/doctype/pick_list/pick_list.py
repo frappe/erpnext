@@ -2,10 +2,8 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
 import json
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _
@@ -120,6 +118,34 @@ class PickList(Document):
 		if self.purpose == "Material Transfer for Manufacture" \
 				and (self.for_qty is None or self.for_qty == 0):
 			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
+
+	def before_print(self, settings=None):
+		if self.get("group_same_items"):
+			self.group_similar_items()
+
+	def group_similar_items(self):
+		group_item_qty = defaultdict(float)
+		group_picked_qty = defaultdict(float)
+
+		for item in self.locations:
+			group_item_qty[(item.item_code, item.warehouse)] +=  item.qty
+			group_picked_qty[(item.item_code, item.warehouse)] += item.picked_qty
+
+		duplicate_list = []
+		for item in self.locations:
+			if (item.item_code, item.warehouse) in group_item_qty:
+				item.qty = group_item_qty[(item.item_code, item.warehouse)]
+				item.picked_qty = group_picked_qty[(item.item_code, item.warehouse)]
+				item.stock_qty = group_item_qty[(item.item_code, item.warehouse)]
+				del group_item_qty[(item.item_code, item.warehouse)]
+			else:
+				duplicate_list.append(item)
+
+		for item in duplicate_list:
+			self.remove(item)
+
+		for idx, item in enumerate(self.locations, start=1):
+			item.idx = idx
 
 
 def validate_item_locations(pick_list):
