@@ -233,6 +233,7 @@
   },
   {
    "default": "0",
+   "description": "If unchecked, Purchase Receipt/Invoice needs to be entered in the Purchase Details section",
    "fieldname": "is_existing_asset",
    "fieldtype": "Check",
    "label": "Is Existing Asset"
@@ -502,10 +503,11 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-06-24 14:58:51.097908",
+ "modified": "2021-10-28 03:04:39.534503",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
