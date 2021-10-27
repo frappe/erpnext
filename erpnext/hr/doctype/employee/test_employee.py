@@ -55,6 +55,7 @@ def make_employee(user, company=None, **kwargs):
 			"email": user,
 			"first_name": user,
 			"new_password": "password",
+			"send_welcome_email": 0,
 			"roles": [{"doctype": "Has Role", "role": "Employee"}]
 		}).insert()
 

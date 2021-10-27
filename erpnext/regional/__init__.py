@@ -31,3 +31,4 @@ def create_transaction_log(doc, method):
 		"document_name": doc.name,
 		"data": data
 	}).insert(ignore_permissions=True)
+

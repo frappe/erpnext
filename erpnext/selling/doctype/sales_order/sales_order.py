@@ -110,7 +110,7 @@ class SalesOrder(SellingController):
 		if self.order_type == 'Sales' and not self.skip_delivery_note:
 			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
 			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
-			if not self.delivery_date:
+			if (max_delivery_date and not self.delivery_date) or (max_delivery_date and getdate(self.delivery_date) != getdate(max_delivery_date)):
 				self.delivery_date = max_delivery_date
 			if self.delivery_date:
 				for d in self.get("items"):
@@ -119,8 +119,6 @@ class SalesOrder(SellingController):
 					if getdate(self.transaction_date) > getdate(d.delivery_date):
 						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
 							indicator='orange', title=_('Warning'))
-				if getdate(self.delivery_date) != getdate(max_delivery_date):
-					self.delivery_date = max_delivery_date
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
 
