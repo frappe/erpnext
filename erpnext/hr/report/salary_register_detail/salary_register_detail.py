@@ -19,8 +19,13 @@ def execute(filters=None):
 		Employee = frappe.get_all("Salary Structure Assignment", ["name", "employee","employee_name", "base"], filters = {"employee": ss.employee})
 
 		salary_detail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"parent":ss.name})
-		
-		row = [ss.employee_name, ss.payment_days, Employee[0].base]
+
+		row = [ss.employee_name, ss.payment_days]
+
+		if len(Employee) > 0:		
+			row += [Employee[0].base]
+		else:
+			row += [0]
 
 		for sc in salary_components_Earning:
 			salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":sc.name})
