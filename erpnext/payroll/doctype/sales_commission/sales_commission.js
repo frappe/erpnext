@@ -18,6 +18,11 @@ frappe.ui.form.on('Sales Commission', {
 		}
 	},
 
+	sales_person: function (frm) {
+		frm.clear_table('contributions');
+		frm.refresh();
+	},
+
 	get_contributions: function (frm) {
 		frm.clear_table("contributions");
 		return frappe.call({
