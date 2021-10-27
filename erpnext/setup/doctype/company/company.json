@@ -137,6 +137,7 @@
    "label": "Is Group"
   },
   {
+   "depends_on": "enable_finance_books",
    "fieldname": "default_finance_book",
    "fieldtype": "Link",
    "label": "Default Finance Book",
@@ -756,7 +757,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-10-04 12:09:25.833133",
+ "modified": "2021-10-27 05:33:37.946672",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
