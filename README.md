@@ -39,6 +39,12 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
 
 ---
 
+<div align="center">
+    <a href="https://frappecloud.com/deploy?apps=frappe,erpnext&source=erpnext_readme">
+        <img src=".github/try-on-f-cloud-button.svg" height="40">
+    </a>
+</div>
+
 ### Containerized Installation
 
 Use docker to deploy ERPNext in production or for development of [Frappe](https://github.com/frappe/frappe) apps. See https://github.com/frappe/frappe_docker for more details.
@@ -48,14 +54,6 @@ Use docker to deploy ERPNext in production or for development of [Frappe](https:
 The Easy Way: our install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench for more details.
 
 New passwords will be created for the ERPNext "Administrator" user, the MariaDB root user, and the frappe user (the script displays the passwords and saves them to ~/frappe_passwords.txt).
-
-### Virtual Image
-
-You can download a virtual image to run ERPNext in a virtual machine on your local system.
-
-- [ERPNext Download](http://erpnext.com/download)
-
-System and user credentials are listed on the download page.
 
 ---
 
