@@ -155,7 +155,6 @@ def get_gl_entries(filters, accounting_dimensions):
 
 	if filters.get("group_by") == "Group by Voucher":
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
-		
 	if filters.get("group_by") == "Group by Account":
 		order_by_statement = "order by account, posting_date, creation"
 
