@@ -44,7 +44,6 @@ class TestShoppingCartSettings(unittest.TestCase):
 
 	def test_tax_rule_validation(self):
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 0")
-		frappe.db.commit()
 
 		cart_settings = self.get_cart_settings()
 		cart_settings.enabled = 1

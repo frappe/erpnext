@@ -155,6 +155,8 @@ def get_gl_entries(filters, accounting_dimensions):
 
 	if filters.get("group_by") == "Group by Voucher":
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
+	if filters.get("group_by") == "Group by Account":
+		order_by_statement = "order by account, posting_date, creation"
 
 	if filters.get("include_default_book_entries"):
 		filters['company_fb'] = frappe.db.get_value("Company",
@@ -421,8 +423,6 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 			update_value_in_dict(totals, 'closing', gle)
 
 		elif gle.posting_date <= to_date:
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
-			update_value_in_dict(totals, 'total', gle)
 			if filters.get("group_by") != 'Group by Voucher (Consolidated)':
 				gle_map[gle.get(group_by)].entries.append(gle)
 			elif filters.get("group_by") == 'Group by Voucher (Consolidated)':
@@ -436,10 +436,11 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				else:
 					update_value_in_dict(consolidated_gle, key, gle)
 
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
-			update_value_in_dict(totals, 'closing', gle)
-
 	for key, value in consolidated_gle.items():
+		update_value_in_dict(gle_map[value.get(group_by)].totals, 'total', value)
+		update_value_in_dict(totals, 'total', value)
+		update_value_in_dict(gle_map[value.get(group_by)].totals, 'closing', value)
+		update_value_in_dict(totals, 'closing', value)
 		entries.append(value)
 
 	return totals, entries

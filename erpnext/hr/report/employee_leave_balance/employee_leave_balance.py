@@ -182,10 +182,11 @@ def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
 	records= frappe.db.sql("""
 		SELECT
 			employee, leave_type, from_date, to_date, leaves, transaction_name,
-			is_carry_forward, is_expired
+			transaction_type, is_carry_forward, is_expired
 		FROM `tabLeave Ledger Entry`
 		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
 			AND docstatus=1
+			AND transaction_type = 'Leave Allocation'
 			AND (from_date between %(from_date)s AND %(to_date)s
 				OR to_date between %(from_date)s AND %(to_date)s
 				OR (from_date < %(from_date)s AND to_date > %(to_date)s))
