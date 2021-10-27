@@ -22,8 +22,7 @@ class SalesCommission(Document):
 			frappe.throw(_("Total Commission Amount should be greater than 0"))
 
 	def validate_salary_component(self):
-		if self.pay_via_salary and not frappe.db.get_single_value(
-		    "Payroll Settings", "salary_component_for_sales_commission"):
+		if self.pay_via_salary and not frappe.db.get_single_value("Payroll Settings", "salary_component_for_sales_commission"):
 			frappe.throw(_("Please set {0} in {1}").format(frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
 
 	def on_submit(self):
@@ -121,12 +120,12 @@ class SalesCommission(Document):
 
 	def add_references(self, doc):
 		reference = {
-		    'reference_doctype': 'Sales Commission',
-		    'reference_name': self.name,
-		    'due_date': self.to_date,
-		    'total_amount': self.total_commission_amount,
-		    'outstanding_amount': self.total_commission_amount,
-		    'allocated_amount': self.total_commission_amount,
+			'reference_doctype': 'Sales Commission',
+			'reference_name': self.name,
+			'due_date': self.to_date,
+			'total_amount': self.total_commission_amount,
+			'outstanding_amount': self.total_commission_amount,
+			'allocated_amount': self.total_commission_amount,
 		}
 		doc.append("references", reference)
 
