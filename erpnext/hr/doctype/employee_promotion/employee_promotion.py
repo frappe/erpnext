@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
-from erpnext.hr.utils import update_employee, validate_active_employee
+from erpnext.hr.utils import update_employee_work_history, validate_active_employee
 
 
 class EmployeePromotion(Document):
@@ -23,10 +23,10 @@ class EmployeePromotion(Document):
 
 	def on_submit(self):
 		employee = frappe.get_doc("Employee", self.employee)
-		employee = update_employee(employee, self.promotion_details, date=self.promotion_date)
+		employee = update_employee_work_history(employee, self.promotion_details, date=self.promotion_date)
 		employee.save()
 
 	def on_cancel(self):
 		employee = frappe.get_doc("Employee", self.employee)
-		employee = update_employee(employee, self.promotion_details, cancel=True)
+		employee = update_employee_work_history(employee, self.promotion_details, cancel=True)
 		employee.save()

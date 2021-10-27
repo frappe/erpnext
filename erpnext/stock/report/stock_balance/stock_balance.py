@@ -202,7 +202,9 @@ def get_item_warehouse_map(filters, sle):
 
 		value_diff = flt(d.stock_value_difference)
 
-		if d.posting_date < from_date:
+		if d.posting_date < from_date or (d.posting_date == from_date
+			and d.voucher_type == "Stock Reconciliation" and
+			frappe.db.get_value("Stock Reconciliation", d.voucher_no, "purpose") == "Opening Stock"):
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
 

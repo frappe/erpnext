@@ -16,7 +16,6 @@
   "customer_name",
   "gender",
   "customer_type",
-  "pan",
   "tax_withholding_category",
   "default_bank_account",
   "lead_name",
@@ -487,11 +486,6 @@
    "label": "Allow Sales Invoice Creation Without Delivery Note"
   },
   {
-   "fieldname": "pan",
-   "fieldtype": "Data",
-   "label": "PAN"
-  },
-  {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
@@ -517,11 +511,12 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-09-06 17:38:54.196663",
+ "modified": "2021-10-20 22:07:52.485809",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
