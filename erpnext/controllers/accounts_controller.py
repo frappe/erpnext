@@ -1354,8 +1354,8 @@ class AccountsController(TransactionBase):
 			total = 0
 			base_total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount)
-				base_total += flt(d.base_payment_amount)
+				total += flt(d.payment_amount, d.precision("payment_amount"))
+				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
 			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -1371,8 +1371,9 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-			if total != flt(grand_total, self.precision("grand_total")) or \
-				base_total != flt(base_grand_total, self.precision("base_grand_total")):
+
+			if flt(total, self.precision("grand_total")) != flt(grand_total, self.precision("grand_total")) or \
+				flt(base_total, self.precision("base_grand_total")) != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
