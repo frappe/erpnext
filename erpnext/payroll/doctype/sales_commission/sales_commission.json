@@ -130,11 +130,13 @@
    "depends_on": "calculate_commission_manually",
    "fieldname": "commission_rate",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Commission Rate"
   },
   {
    "fieldname": "total_commission_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total Commission Amount",
    "read_only": 1
   },
@@ -193,6 +195,7 @@
   {
    "fieldname": "sales_person",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Sales Person",
    "options": "Sales Person"
   },
@@ -220,7 +223,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-30 15:52:00.814442",
+ "modified": "2021-10-27 16:07:57.409040",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Sales Commission",
