@@ -685,7 +685,7 @@ def check_registration_order_exists(vbo_doc, throw=False):
 	vehicle_registration_order = vbo_doc.get('_has_vehicle_registration_order')
 	if vehicle_registration_order:
 		if throw:
-			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Registration Order is exists against booking")
+			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Registration Order exists against booking")
 				.format(frappe.bold(vbo_doc.name)))
 		return True
 

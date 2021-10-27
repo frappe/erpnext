@@ -208,7 +208,7 @@
    "in_standard_filter": 1,
    "label": "Against Document Type",
    "no_copy": 1,
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting"
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nVehicle Registration Order"
   },
   {
    "fieldname": "reference_name",
@@ -319,7 +319,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-19 04:33:19.426858",
+ "modified": "2021-10-27 15:04:31.049407",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

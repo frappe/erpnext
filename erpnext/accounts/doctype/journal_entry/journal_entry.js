@@ -233,8 +233,28 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if(jvd.reference_type == "Employee Advance") {
 				party_account_field = "advance_account";
 				out.filters.push([jvd.reference_type, "status", "in", ['Unpaid', 'Unclaimed']]);
-			} else if (jvd.reference_type == "Loan") {
+			}
+
+			if (jvd.reference_type == "Loan") {
 				party_account_field = "loan_account";
+			}
+
+			if (jvd.reference_type == "Vehicle Registration Order") {
+				if (jvd.party_type == "Customer") {
+					party_account_field = "customer_account";
+
+					if (me.frm.doc.vehicle_registration_purpose == "Customer Payment") {
+						out.filters.push([jvd.reference_type, "customer_outstanding", "!=", 0]);
+					} else if (me.frm.doc.vehicle_registration_purpose == "Authority Payment") {
+						out.filters.push([jvd.reference_type, "authority_outstanding", "!=", 0]);
+					}
+				} else if (jvd.party_type == "Supplier") {
+					party_account_field = "agent_account";
+
+					if (me.frm.doc.vehicle_registration_purpose == "Agent Payment") {
+						out.filters.push([jvd.reference_type, "agent_balance", "!=", 0]);
+					}
+				}
 			}
 
 			if(party_account_field) {
@@ -246,19 +266,30 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				if(jvd.reference_type == "Landed Cost Voucher") {
 					out.filters.push([jvd.reference_type, "party_type", "=", jvd.party_type]);
 					party_field = "party"
+
 				} else if(jvd.reference_type.indexOf("Sales")===0) {
 					if (jvd.reference_type == "Sales Invoice") {
 						party_field = "bill_to";
 					} else {
 						party_field = "customer";
 					}
+
 				} else if (jvd.reference_type.indexOf("Purchase")===0) {
 					party_field = "supplier";
+
 				} else if (jvd.reference_type == "Loan") {
 					out.filters.push([jvd.reference_type, "applicant_type", "=", jvd.party_type]);
 					party_field = "applicant";
-				} else if (['Employee Advance', 'Expense Claim'.includes(jvd.reference_type)]) {
+
+				} else if (['Employee Advance', 'Expense Claim'].includes(jvd.reference_type)) {
 					party_field = "employee";
+
+				} else if (jvd.reference_type == "Vehicle Registration Order") {
+					if (jvd.party_type == "Customer") {
+						party_field = "customer";
+					} else if (jvd.party_type == "Supplier") {
+						party_field = "agent";
+					}
 				}
 
 				if (party_field) {

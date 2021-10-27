@@ -84,7 +84,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 	def agent_gl_entry_exists(self):
 		if not hasattr(self, '_agent_gl_entry_exists'):
 			self._agent_gl_entry_exists = frappe.db.exists("GL Entry", {
-				'vehicle_registration_order': self.name,
+				'reference_type': self.doctype,
+				'reference_name': self.name,
 				'party_type': 'Supplier',
 				'account': self.agent_account
 			})
@@ -227,7 +228,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			left join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
 			left join `tabPayment Entry` pe on gle.voucher_type = 'Payment Entry' and gle.voucher_no = pe.name
 			where (jv.vehicle_registration_purpose = 'Customer Payment' or pe.payment_type = 'Receive')
-				and gle.vehicle_registration_order = %(vehicle_registration_order)s
+				and gle.against_voucher_type = 'Vehicle Registration Order'
+				and gle.against_voucher = %(vehicle_registration_order)s
 				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
 		""", args)
 		customer_payment = flt(customer_payment[0][0]) if customer_payment else 0
@@ -237,7 +239,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			from `tabGL Entry` gle
 			inner join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
 			where jv.vehicle_registration_purpose = 'Authority Payment'
-				and gle.vehicle_registration_order = %(vehicle_registration_order)s
+				and gle.against_voucher_type = 'Vehicle Registration Order'
+				and gle.against_voucher = %(vehicle_registration_order)s
 				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
 		""", args)
 		authority_payment = flt(authority_payment[0][0]) if authority_payment else 0
@@ -247,7 +250,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			from `tabGL Entry` gle
 			inner join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
 			where jv.vehicle_registration_purpose = 'Closing Entry'
-				and gle.vehicle_registration_order = %(vehicle_registration_order)s
+				and gle.against_voucher_type = 'Vehicle Registration Order'
+				and gle.against_voucher = %(vehicle_registration_order)s
 				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
 		""", args)
 		customer_closed_amount = flt(customer_closed_amount[0][0]) if customer_closed_amount else 0
@@ -259,7 +263,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				left join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
 				left join `tabPayment Entry` pe on gle.voucher_type = 'Payment Entry' and gle.voucher_no = pe.name
 				where (jv.vehicle_registration_purpose = 'Agent Payment' or pe.payment_type = 'Pay')
-					and gle.vehicle_registration_order = %(vehicle_registration_order)s
+					and gle.against_voucher_type = 'Vehicle Registration Order'
+					and gle.against_voucher = %(vehicle_registration_order)s
 					and gle.account = %(agent_account)s and gle.party_type = 'Supplier' and gle.party = %(agent)s
 			""", args)
 			agent_payment = flt(agent_payment[0][0]) if agent_payment else 0
@@ -267,7 +272,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			agent_balance = frappe.db.sql("""
 				select sum(gle.credit-gle.debit) as amount
 				from `tabGL Entry` gle
-				where gle.vehicle_registration_order = %(vehicle_registration_order)s
+				where gle.against_voucher_type = 'Vehicle Registration Order'
+					and gle.against_voucher = %(vehicle_registration_order)s
 					and gle.account = %(agent_account)s and gle.party_type = 'Supplier' and gle.party = %(agent)s
 			""", args)
 			agent_balance = flt(agent_balance[0][0]) if agent_balance else 0
@@ -277,7 +283,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				from `tabGL Entry` gle
 				inner join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
 				where jv.vehicle_registration_purpose = 'Closing Entry'
-					and gle.vehicle_registration_order = %(vehicle_registration_order)s
+					and gle.against_voucher_type = 'Vehicle Registration Order'
+					and gle.against_voucher = %(vehicle_registration_order)s
 					and gle.account = %(agent_account)s and gle.party_type = 'Supplier' and gle.party = %(agent)s
 			""", args)
 			agent_closed_amount = flt(agent_closed_amount[0][0]) if agent_closed_amount else 0
@@ -379,75 +386,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				"call_date": self.call_date,
 			})
 
-	def set_journal_entry_against_voucher_reference(self):
-		unallocated_vouchers = frappe.db.sql("""
-			select distinct gle.voucher_type, gle.voucher_no
-			from `tabGL Entry` gle
-			where gle.vehicle_registration_order = %s
-				and ifnull(gle.party_type, '') != '' and ifnull(gle.party, '') != ''
-				and ifnull(gle.against_voucher_type, '') = '' and ifnull(gle.against_voucher, '') = ''
-			order by gle.posting_date, gle.creation
-		""", self.name)
-
-		self.reconcile_accounting_entries(unallocated_vouchers, 'Customer', self.customer, self.customer_account)
-		if self.agent and self.agent_account:
-			self.reconcile_accounting_entries(unallocated_vouchers, 'Supplier', self.agent, self.agent_account)
-
-	def reconcile_accounting_entries(self, unallocated_vouchers, party_type, party, account):
-		billing_entries = []
-		payment_entries = []
-		for voucher_type, voucher_no in unallocated_vouchers:
-			entry_details = self.get_accounting_entry_details(voucher_type, voucher_no, party_type, party, account)
-			if entry_details.balance > 0 and entry_details.voucher_type != 'Payment Entry':
-				billing_entries.append(entry_details)
-			elif entry_details.balance < 0:
-				entry_details.balance = abs(entry_details.balance)
-				payment_entries.append(entry_details)
-
-		reconciliation_list = []
-		for billing_entry in billing_entries:
-			for payment_entry in payment_entries:
-				allocated_amount = min(billing_entry.balance, payment_entry.balance)
-				if allocated_amount:
-					dr_or_cr = 'credit_in_account_currency' if party_type == "Customer" else 'debit_in_account_currency'
-					reconciliation_details = frappe._dict({
-						'voucher_type': payment_entry.voucher_type,
-						'voucher_no': payment_entry.voucher_no,
-						'against_voucher_type': billing_entry.voucher_type,
-						'against_voucher': billing_entry.voucher_no,
-						'account': billing_entry.account,
-						'party_type': billing_entry.party_type,
-						'party': billing_entry.party,
-						'dr_or_cr': dr_or_cr,
-						'unadjusted_amount': flt(payment_entry.balance),
-						'allocated_amount': flt(allocated_amount)
-					})
-
-					billing_entry.balance -= allocated_amount
-					payment_entry.balance -= allocated_amount
-
-					reconciliation_list.append(reconciliation_details)
-
-		if reconciliation_list:
-			from erpnext.accounts.utils import reconcile_against_document
-			reconcile_against_document(reconciliation_list)
-
-	def get_accounting_entry_details(self, voucher_type, voucher_no, party_type, party, account):
-		dr_or_cr = 'debit_in_account_currency - credit_in_account_currency' if party_type == "Customer" else\
-			'credit_in_account_currency - debit_in_account_currency'
-
-		entry_details = frappe._dict()
-		entry_details.voucher_type = voucher_type
-		entry_details.voucher_no = voucher_no
-		entry_details.party_type = party_type
-		entry_details.party = party
-		entry_details.account = account
-		entry_details.balance = get_balance_on_voucher(voucher_type, voucher_no,
-			entry_details.party_type, entry_details.party, entry_details.account,
-			dr_or_cr=dr_or_cr)
-
-		return entry_details
-
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
@@ -467,7 +405,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				if self.authority_outstanding > 0:
 					self.status = "To Pay Authority"
 
-				if self.invoice_status == "In Hand":
+				elif self.invoice_status == "In Hand":
 					self.status = "To Issue Invoice"
 
 				elif self.invoice_status == "Delivered" or (self.invoice_status == "Issued" and self.invoice_issued_for == "Registration"):
@@ -550,6 +488,10 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		row.party_type = party_type
 		row.party = party
 
+		if row.party_type:
+			row.reference_type = "Vehicle Registration Order"
+			row.reference_name = vro.name
+
 	vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
 
 	if vro.docstatus != 1:
@@ -557,11 +499,9 @@ def get_journal_entry(vehicle_registration_order, purpose):
 
 	jv = frappe.new_doc("Journal Entry")
 	jv.company = vro.company
-	jv.is_advance = 1
 	jv.cost_center = frappe.get_cached_value("Vehicles Settings", None, 'registration_cost_center')\
 		or erpnext.get_default_cost_center(vro.company)
 
-	jv.vehicle_registration_order = vro.name
 	jv.vehicle_booking_order = vro.vehicle_booking_order
 	jv.applies_to_vehicle = vro.vehicle
 

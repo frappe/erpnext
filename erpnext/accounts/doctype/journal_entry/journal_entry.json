@@ -24,6 +24,7 @@
   "2_add_edit_gl_entries",
   "accounts",
   "reference_section",
+  "vehicle_registration_purpose",
   "expense_entry_name",
   "cheque_no",
   "cheque_date",
@@ -533,12 +534,19 @@
   {
    "fieldname": "reference_section",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:(doc.accounts || []).filter(d => d.reference_type == \"Vehicle Registration Order\").length",
+   "fieldname": "vehicle_registration_purpose",
+   "fieldtype": "Select",
+   "label": "Vehicle Registration Purpose",
+   "options": "\nCustomer Payment\nAuthority Payment\nAgent Payment\nClosing Entry"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2021-10-04 15:14:53.210450",
+ "modified": "2021-10-27 15:08:14.666685",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

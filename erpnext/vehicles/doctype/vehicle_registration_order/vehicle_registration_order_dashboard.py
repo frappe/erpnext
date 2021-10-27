@@ -4,6 +4,10 @@ from frappe import _
 def get_data():
 	return {
 		'fieldname': 'vehicle_registration_order',
+		'non_standard_fieldnames': {
+			'Journal Entry': 'reference_name',
+			'Payment Entry': 'reference_name',
+		},
 		'transactions': [
 			{
 				'label': _('Payment'),

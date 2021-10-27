@@ -61,6 +61,7 @@ class JournalEntry(AccountsController):
 		self.validate_inter_company_accounts()
 		self.set_original_reference()
 		self.validate_vehicle_accounting_dimensions()
+		self.validate_vehicle_registration_purpose()
 
 		if not self.title:
 			self.title = self.get_title()
@@ -254,6 +255,43 @@ class JournalEntry(AccountsController):
 
 			self.jv_party_references[d.reference_name][acc_tuple] += d.debit_in_account_currency - d.credit_in_account_currency
 
+	def validate_against_vehicle_registration_order(self, d):
+		vro = frappe.db.get_value("Vehicle Registration Order", d.reference_name,
+			['name', 'docstatus', 'customer_account', 'agent_account', 'customer', 'agent'], as_dict=1)
+
+		if not vro:
+			frappe.throw(_("Row #{0}: Vehicle Registration Order {0} does not exist").format(d.idx, vro.name))
+
+		if vro.docstatus != 1:
+			frappe.throw(_("Row #{0}: Cannot select Vehicle Registration Order {0} because it is not submitted")
+				.format(d.idx, vro.name))
+
+		if d.party_type == "Customer":
+			if d.party and d.party != vro.customer:
+				frappe.throw(_("Row #{0}: Customer {1} does not match Customer {2} in Vehicle Registration Order {3}")
+					.format(d.idx, d.party, vro.customer, vro.name))
+
+			if d.account and d.account != vro.customer_account:
+				frappe.throw(_("Row #{0}: Account {1} does not match Customer Account {2} in Vehicle Registration Order {3}")
+					.format(d.idx, d.account, vro.customer_account, vro.name))
+
+		elif d.party_type == "Supplier":
+			if not vro.agent:
+				frappe.throw(_("Row #{0}: Cannot make entry against Supplier because Agent is not set in Vehicle Registration Order {1}")
+					.format(d.idx, vro.name))
+
+			if d.party and d.party != vro.agent:
+				frappe.throw(_("Row #{0}: Supplier {1} does not match Agent {2} in Vehicle Registration Order {3}")
+					.format(d.idx, d.party, vro.agent, vro.name))
+
+			if d.account and d.account != vro.agent_account:
+				frappe.throw(_("Row #{0}: Account {1} does not match Agent Account {2} in Vehicle Registration Order {3}")
+					.format(d.idx, d.account, vro.agent_account, vro.name))
+
+		elif d.party_type:
+			frappe.throw(_("Row #{0}: Party Type can not be {1} against Vehicle Registration Order {2}")
+				.format(d.idx, d.party_type, vro.name))
+
 	def validate_reference_doc(self):
 		"""Validates reference document"""
 		field_dict = {
@@ -327,6 +365,9 @@ class JournalEntry(AccountsController):
 						if against_voucher != d.party:
 							frappe.throw(_("Row {0}: {1} {2} does not match with {3}") \
 								.format(d.idx, d.party_type, d.party, d.reference_type))
+
+				elif d.reference_type == "Vehicle Registration Order":
+					self.validate_against_vehicle_registration_order(d)
 
 				elif d.reference_type == "Journal Entry":
 					self.validate_against_jv(d)
@@ -753,33 +794,18 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			remove_vehicle_details_if_empty(d)
 
-		self.validate_vehicle_registration_order()
-
-	def validate_vehicle_registration_order(self):
-		if not self.meta.has_field('vehicle_registration_purpose'):
-			return
-
+	def validate_vehicle_registration_purpose(self):
 		has_vehicle_registration_order = False
-		if self.get('vehicle_registration_order'):
-			self.validate_vehicle_registration_order_status(self.vehicle_registration_order)
-			has_vehicle_registration_order = True
-
 		for d in self.accounts:
-			if d.get('vehicle_registration_order'):
-				self.validate_vehicle_registration_order_status(d.vehicle_registration_order)
+			if d.reference_type == "Vehicle Registration Order":
 				has_vehicle_registration_order = True
+				break
 
 		if has_vehicle_registration_order:
 			if not self.vehicle_registration_purpose:
 				frappe.throw(_("Vehicle Registration Purpose is mandatory if entry is against Vehicle Registration Order"))
 		else:
 			self.vehicle_registration_purpose = None
-
-	def validate_vehicle_registration_order_status(self, vehicle_registration_order):
-		docstatus = frappe.db.get_value("Vehicle Registration Order", vehicle_registration_order, 'docstatus', cache=1)
-		if docstatus != 1:
-			frappe.throw(_("Cannot select Vehicle Registration Order {0} because it is not submitted")
-				.format(vehicle_registration_order))
 
 
 @frappe.whitelist()

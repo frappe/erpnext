@@ -59,10 +59,8 @@ accounting_dimension_fields = [
 	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_1", "fieldtype": "Column Break",
 		"insert_after": "vehicle_booking_order"},
 
-	{"label": "Vehicle Registration Order", "fieldname": "vehicle_registration_order", "fieldtype": "Link", "options": "Vehicle Registration Order",
-		"insert_after": "vehicle_accounting_dimensions_cb_1", "in_standard_filter": 1},
 	{"label": "Vehicle Item Name", "fieldname": "applies_to_item_name", "fieldtype": "Data",
-		"insert_after": "vehicle_registration_order", "read_only": 1, "fetch_from": "applies_to_vehicle.item_name"},
+		"insert_after": "vehicle_accounting_dimensions_cb_1", "read_only": 1, "fetch_from": "applies_to_vehicle.item_name"},
 
 	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_2", "fieldtype": "Column Break",
 		"insert_after": "applies_to_item_name"},
@@ -74,12 +72,6 @@ accounting_dimension_fields = [
 	{"label": "License Plate", "fieldname": "vehicle_license_plate", "fieldtype": "Data", "depends_on": "eval:!doc.vehicle_unregistered",
 		"insert_after": "vehicle_engine_no", "read_only": 1, "fetch_from": "applies_to_vehicle.license_plate"},
 ]
-
-vehicle_registration_purpose_fields = [{
-	"label": "Vehicle Registration Purpose", "fieldname": "vehicle_registration_purpose", "fieldtype": "Select",
-	"options": "\nCustomer Payment\nAuthority Payment\nAgent Payment\nClosing Entry",
-	"insert_after": "reference_section", "depends_on": "vehicle_registration_order",
-}]
 
 accounting_dimension_table_fields = deepcopy(accounting_dimension_fields)
 for d in accounting_dimension_table_fields:
@@ -95,8 +87,6 @@ for d in service_person_fields:
 for d in accounting_dimension_fields:
 	d['translatable'] = 0
 for d in accounting_dimension_table_fields:
-	d['translatable'] = 0
-for d in vehicle_registration_purpose_fields:
 	d['translatable'] = 0
 
 common_properties = [
@@ -157,7 +147,7 @@ data = {
 		"Purchase Receipt": applies_to_fields,
 		"Purchase Invoice": applies_to_fields,
 		"Project": applies_to_project_fields + service_person_fields,
-		"Journal Entry": vehicle_registration_purpose_fields + accounting_dimension_fields,
+		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
 	},

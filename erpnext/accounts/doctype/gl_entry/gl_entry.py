@@ -216,35 +216,42 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 
 	dr_or_cr = None
 	include_original_references = False
+	outstanding_fieldname = None
 
 	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Fees", "Expense Claim"]:
-		fieldname = "outstanding_amount"
+		outstanding_fieldname = "outstanding_amount"
 	elif voucher_type == "Employee Advance":
-		fieldname = "balance_amount"
+		outstanding_fieldname = "balance_amount"
 		include_original_references = True
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 	elif voucher_type in ("Sales Order", "Purchase Order"):
-		fieldname = "advance_paid"
+		outstanding_fieldname = "advance_paid"
 		include_original_references = True
 		if voucher_type == "Sales Order":
 			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		else:
 			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+	elif voucher_type == "Vehicle Registration Order":
+		pass
 	else:
 		return
 
-	if voucher_type == "Sales Invoice":
-		receivable_accounts = get_all_sales_invoice_receivable_accounts(voucher_no)
-		if receivable_accounts:
-			account = list(set([account] + receivable_accounts))
-
-	bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
-		dr_or_cr=dr_or_cr, include_original_references=include_original_references)
 	ref_doc = frappe.get_doc(voucher_type, voucher_no)
-	ref_doc.db_set(fieldname, bal)
+
+	if outstanding_fieldname:
+		if voucher_type == "Sales Invoice":
+			receivable_accounts = get_all_sales_invoice_receivable_accounts(voucher_no)
+			if receivable_accounts:
+				account = list(set([account] + receivable_accounts))
+
+		bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
+			dr_or_cr=dr_or_cr, include_original_references=include_original_references)
+		ref_doc.db_set(outstanding_fieldname, bal)
 
 	if voucher_type == "Employee Advance":
 		ref_doc.set_payment_and_claimed_amount(update=True)
+	elif voucher_type == "Vehicle Registration Order":
+		ref_doc.update_payment_status(update=True)
 
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()

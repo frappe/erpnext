@@ -132,7 +132,6 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	round_off_debit_credit(gl_map)
 
 	reference_documents_for_update = set()
-	vehicle_registration_for_update = set()
 	for entry in gl_map:
 		make_entry(entry, adv_adj, from_repost)
 
@@ -142,15 +141,10 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 		if update_outstanding and not from_repost and entry.get("party_type") and entry.get("party"):
 			add_to_reference_documents_for_update(reference_documents_for_update, entry)
-			add_to_vehicle_registration_for_update(vehicle_registration_for_update, entry)
 
 	from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 	for voucher_type, voucher_no, account, party_type, party in reference_documents_for_update:
 		update_outstanding_amt(voucher_type, voucher_no, account, party_type, party)
-
-	from erpnext.vehicles.vehicle_accounting_dimensions import update_vehicle_registration_order_payment
-	for vehicle_registration_order in vehicle_registration_for_update:
-		update_vehicle_registration_order_payment(vehicle_registration_order)
 
 def make_entry(args, adv_adj, from_repost=False):
 	gle = frappe.new_doc("GL Entry")
@@ -319,7 +313,6 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
 
 	reference_documents_for_update = set()
-	vehicle_registration_for_update = set()
 	for entry in gl_entries:
 		validate_frozen_account(entry["account"], adv_adj)
 		validate_balance_type(entry["account"], adv_adj)
@@ -328,14 +321,9 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 		if update_outstanding and not adv_adj and entry.get("party_type") and entry.get("party"):
 			add_to_reference_documents_for_update(reference_documents_for_update, entry)
-			add_to_vehicle_registration_for_update(vehicle_registration_for_update, entry)
 
 	for voucher_type, voucher_no, account, party_type, party in reference_documents_for_update:
 		update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=True)
-
-	from erpnext.vehicles.vehicle_accounting_dimensions import update_vehicle_registration_order_payment
-	for vehicle_registration_order in vehicle_registration_for_update:
-		update_vehicle_registration_order_payment(vehicle_registration_order)
 
 
 def add_to_reference_documents_for_update(reference_documents_for_update, entry):
@@ -350,8 +338,3 @@ def add_to_reference_documents_for_update(reference_documents_for_update, entry)
 			and entry.get("original_against_voucher_type") in ('Sales Order', 'Purchase Order', 'Employee Advance'):
 		reference_documents_for_update.add((entry.get("original_against_voucher_type"), entry.get("original_against_voucher"),
 			entry.get("account"), entry.get("party_type"), entry.get("party")))
-
-
-def add_to_vehicle_registration_for_update(vehicle_registration_for_update, entry):
-	if entry.get("vehicle_registration_order"):
-		vehicle_registration_for_update.add(entry.get("vehicle_registration_order"))
