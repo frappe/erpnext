@@ -25,19 +25,29 @@ class ItemAlternative(Document):
 			frappe.throw(_("Alternative item must not be same as item code"))
 
 		item_meta = frappe.get_meta("Item")
-		fields = ["is_stock_item", "include_item_in_manufacturing","has_serial_no","has_batch_no"]
-		item_data = frappe.db.get_values("Item", self.item_code, fields, as_dict=1)
-		alternative_item_data = frappe.db.get_values("Item", self.alternative_item_code, fields, as_dict=1)
+		fields = ["is_stock_item", "include_item_in_manufacturing","has_serial_no", "has_batch_no", "allow_alternative_item"]
+		item_data = frappe.db.get_value("Item", self.item_code, fields, as_dict=1)
+		alternative_item_data = frappe.db.get_value("Item", self.alternative_item_code, fields, as_dict=1)
 
 		for field in fields:
-			if  item_data[0].get(field) != alternative_item_data[0].get(field):
+			if  item_data.get(field) != alternative_item_data.get(field):
 				raise_exception, alert = [1, False] if field == "is_stock_item" else [0, True]
 
 				frappe.msgprint(_("The value of {0} differs between Items {1} and {2}") \
 					.format(frappe.bold(item_meta.get_label(field)),
 							frappe.bold(self.alternative_item_code),
 							frappe.bold(self.item_code)),
-					alert=alert, raise_exception=raise_exception)
+					alert=alert, raise_exception=raise_exception, indicator="Orange")
+
+		alternate_item_check_msg = _("Allow Alternative Item must be checked on Item {}")
+
+		if not item_data.allow_alternative_item:
+			frappe.throw(alternate_item_check_msg.format(self.item_code))
+		if self.two_way and not alternative_item_data.allow_alternative_item:
+			frappe.throw(alternate_item_check_msg.format(self.item_code))
+
+
+
 
 	def validate_duplicate(self):
 		if frappe.db.get_value("Item Alternative", {'item_code': self.item_code,
