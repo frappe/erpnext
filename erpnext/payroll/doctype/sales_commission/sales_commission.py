@@ -10,7 +10,7 @@ from frappe.utils import get_link_to_form
 class SalesCommission(Document):
 	def validate(self):
 		self.validate_from_to_dates()
-		self.validate_amount()
+
 		self.validate_salary_component()
 		self.calculate_total_contribution_and_total_commission_amount()
 
@@ -27,6 +27,7 @@ class SalesCommission(Document):
 			frappe.throw(_("Please set {0} in {1}").format(frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
 
 	def on_submit(self):
+		self.validate_amount()
 		self.db_set("status", "Unpaid")
 
 	@frappe.whitelist()
