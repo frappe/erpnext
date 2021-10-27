@@ -7,7 +7,7 @@ from datetime import date
 
 import frappe
 
-from erpnext.regional.report.gstr_1.gstr_1 import Gstr1Report
+from erpnext.regional.report.gstr_1.gstr_1 import Gstr1Report, get_company_gstin_number
 
 
 def execute(filters=None):
@@ -44,6 +44,7 @@ class Gstr2Report(Gstr1Report):
 		"""
 
 	def get_data(self):
+		gstin = get_company_gstin_number(self.filters.get("company"))
 		self.get_igst_invoices()
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
@@ -62,21 +63,26 @@ class Gstr2Report(Gstr1Report):
 					row += [
 						self.invoice_cess.get(inv),
 						invoice_details.get('eligibility_for_itc'),
-						invoice_details.get('itc_integrated_tax'),
-						invoice_details.get('itc_central_tax'),
-						invoice_details.get('itc_state_tax'),
-						invoice_details.get('itc_cess_amount')
+						abs(invoice_details.get('itc_integrated_tax')),
+						abs(invoice_details.get('itc_central_tax')),
+						abs(invoice_details.get('itc_state_tax')),
+						abs(invoice_details.get('itc_cess_amount'))
 					]
 					if self.filters.get("type_of_business") ==  "CDNR":
 						row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
 						row.append("C" if invoice_details.return_against else "R")
+						supply_type = "Intra-State" if gstin[0:2] == invoice_details.get("place_of_supply").split('-')[0] else "Inter-State"
+						row[6] = supply_type
+						if invoice_details.return_against:
+							return_voucher_date = frappe.db.get_value(self.doctype, {"name": invoice_details.return_against}, fieldname="posting_date")
+							row[4] = return_voucher_date
 
 					self.data.append(row)
 
 	def get_igst_invoices(self):
 		self.igst_invoices = []
 		for d in self.tax_details:
-			is_igst = True if d[1] in self.gst_accounts.igst_account else False
+			is_igst = d[1] in self.gst_accounts.igst_account
 			if is_igst and d[0] not in self.igst_invoices:
 				self.igst_invoices.append(d[0])
 
@@ -242,7 +248,7 @@ class Gstr2Report(Gstr1Report):
 					"width": 120
 				},
 				{
-					"fieldname": "posting_date",
+					"fieldname": "return_voucher_date",
 					"label": "Invoice/Advance Payment Voucher date",
 					"fieldtype": "Date",
 					"width": 120
