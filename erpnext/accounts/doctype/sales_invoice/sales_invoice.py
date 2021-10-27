@@ -1048,6 +1048,7 @@ class SalesInvoice(SellingController):
 					frappe.flags.is_reverse_depr_entry = True
 					reverse_journal_entry.submit()
 
+					frappe.flags.is_reverse_depr_entry = False
 					asset.flags.ignore_validate_update_after_submit = True
 					schedule.journal_entry = None
 					asset.save()
