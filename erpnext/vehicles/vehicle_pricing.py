@@ -56,11 +56,17 @@ def get_pricing_components(component_type, args, get_selling_components=True, ge
 		component_doc = frappe.get_cached_doc("Vehicle Pricing Component", component_name)
 
 		force = False
-		if component_doc.component_type == "Registration" and component_doc.registration_component_type == "Choice Number":
-			if cint(args.choice_number_required):
-				force = True
-			else:
-				continue
+		if component_doc.component_type == "Registration":
+			if component_doc.registration_component_type == "Choice Number":
+				if cint(args.choice_number_required):
+					force = True
+				else:
+					continue
+			if component_doc.registration_component_type == "Ownership Transfer":
+				if cint(args.ownership_transfer_required):
+					force = True
+				else:
+					continue
 
 		if get_selling_components:
 			selling_component = get_component_details(component_name, args, "selling")
@@ -115,6 +121,9 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 
 		if component_doc.registration_component_type == "Choice Number":
 			out.doc.choice_number_required = 1
+
+		if component_doc.registration_component_type == "Ownership Transfer":
+			out.doc.ownership_transfer_required = 1
 
 	return out
 

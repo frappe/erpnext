@@ -62,6 +62,7 @@
   "choice_number_required",
   "choice_number_details",
   "column_break_55",
+  "ownership_transfer_required",
   "call_date",
   "pricing_section",
   "customer_charges",
@@ -746,6 +747,15 @@
    "label": "Call Date",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "ownership_transfer_required",
+   "fieldtype": "Check",
+   "label": "Ownership Transfer Required",
+   "no_copy": 1
+  },
   }
  ],
  "icon": "fa fa-file-text",

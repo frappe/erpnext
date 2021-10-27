@@ -209,6 +209,30 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		}
 	},
 
+	ownership_transfer_required: function () {
+		var me = this;
+		if (cint(me.frm.doc.ownership_transfer_required)) {
+			return erpnext.vehicles.pricing.get_pricing_components({
+				frm: me.frm,
+				component_type: "Registration",
+				get_selling_components: true,
+				get_buying_components: true,
+				selling_components_field: 'customer_charges',
+				buying_components_field: 'authority_charges',
+				filters: {
+					registration_component_type: 'Ownership Transfer'
+				},
+				callback: function () {
+					me.calculate_totals();
+				}
+			});
+		} else {
+			var filters = d => cint(d.is_ownership_transfer);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+		}
+	},
+
 	component_amount: function () {
 		this.calculate_totals();
 	},
