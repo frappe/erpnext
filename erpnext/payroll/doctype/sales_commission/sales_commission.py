@@ -10,16 +10,21 @@ from frappe.utils import get_link_to_form
 class SalesCommission(Document):
 	def validate(self):
 		self.validate_from_to_dates()
+		self.validate_amount()
 		self.validate_salary_component()
 		self.calculate_total_contribution_and_total_commission_amount()
 
 	def validate_from_to_dates(self):
 		return super().validate_from_to_dates("from_date", "to_date")
 
+	def validate_amount(self):
+		if self.total_commission_amount <= 0:
+			frappe.throw(_("Total Commission Amount should be greater than 0"))
+
 	def validate_salary_component(self):
-		if self.pay_via_salary:
-			if not frappe.db.get_single_value("Payroll Settings", "salary_component_for_sales_commission"):
-				frappe.throw(_("Please set {0} in {1}").format(frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
+		if self.pay_via_salary and not frappe.db.get_single_value(
+		    "Payroll Settings", "salary_component_for_sales_commission"):
+			frappe.throw(_("Please set {0} in {1}").format(frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
 
 	def on_submit(self):
 		self.db_set("status", "Unpaid")
@@ -114,13 +119,14 @@ class SalesCommission(Document):
 		self.db_set("status", "Paid")
 
 	def add_references(self, doc):
-		reference = {}
-		reference['reference_doctype'] = "Sales Commission"
-		reference['reference_name'] = self.name
-		reference['due_date'] = self.to_date
-		reference['total_amount'] = self.total_commission_amount
-		reference['outstanding_amount'] = self.total_commission_amount
-		reference['allocated_amount'] = self.total_commission_amount
+		reference = {
+		    'reference_doctype': 'Sales Commission',
+		    'reference_name': self.name,
+		    'due_date': self.to_date,
+		    'total_amount': self.total_commission_amount,
+		    'outstanding_amount': self.total_commission_amount,
+		    'allocated_amount': self.total_commission_amount,
+		}
 		doc.append("references", reference)
 
 def add(record, sales_person):
