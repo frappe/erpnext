@@ -1032,7 +1032,7 @@ class AccountsController(TransactionBase):
 
 		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
 			frappe.msgprint(_("Overbilling of {} ignored because you have {} role.")
-					.format(total_overbilled_amt, role_allowed_to_over_bill), title=_("Warning"), indicator="orange")
+					.format(total_overbilled_amt, role_allowed_to_over_bill), indicator="orange", alert=True)
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
