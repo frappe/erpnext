@@ -980,13 +980,13 @@ def get_cdnr_unreg_json(res, gstin):
 
 	for invoice, items in iteritems(res):
 		inv_item = {
-		    "nt_num": items[0]["invoice_number"],
-		    "nt_dt": getdate(items[0]["posting_date"]).strftime('%d-%m-%Y'),
-		    "val": abs(flt(items[0]["invoice_value"])),
-		    "ntty": items[0]["document_type"],
-		    "pos": "%02d" % int(items[0]["place_of_supply"].split('-')[0]),
-		    "typ": get_invoice_type_for_cdnrur(items[0]),
-		    "itms": [],
+			"nt_num": items[0]["invoice_number"],
+			"nt_dt": getdate(items[0]["posting_date"]).strftime('%d-%m-%Y'),
+			"val": abs(flt(items[0]["invoice_value"])),
+			"ntty": items[0]["document_type"],
+			"pos": "%02d" % int(items[0]["place_of_supply"].split('-')[0]),
+			"typ": get_invoice_type_for_cdnrur(items[0]),
+			"itms": [],
 		}
 
 		for item in items:
@@ -1052,10 +1052,10 @@ def get_rate_and_tax_details(row, gstin, report_name):
 	if row.get("customer_gstin") and gstin[0:2] == row["customer_gstin"][0:2]:
 		itm_det.update({"camt": flt(tax/2.0, 2), "samt": flt(tax/2.0, 2)})
 	elif row.get("supplier_gstin") and gstin[0:2] == row["supplier_gstin"][0:2]:
-			itm_det.update({"camt": tax, "samt": tax, "rt": rate*2})
-			itc.update({"tx_c": row.get("itc_central_tax"), "tx_s": row.get("itc_state_tax")})
-			if report_name == "GSTR-2":
-				rate = rate*2
+		itm_det.update({"camt": tax, "samt": tax, "rt": rate*2})
+		itc.update({"tx_c": row.get("itc_central_tax"), "tx_s": row.get("itc_state_tax")})
+		if report_name == "GSTR-2":
+			rate = rate*2
 	else:
 		itm_det.update({"iamt": tax})
 		if report_name == "GSTR-2":
