@@ -67,6 +67,7 @@
   "column_break_57",
   "invoice_issue_date",
   "invoice_return_date",
+  "cb_60",
   "registration_receipt_date",
   "call_date",
   "pricing_section",
@@ -823,7 +824,7 @@
    "collapsible_depends_on": "customer_authority_instruments",
    "fieldname": "customer_pay_orders_section",
    "fieldtype": "Section Break",
-   "label": "Customer Pay Orders For Authority"
+   "label": "Pay Orders Received From Customer"
   },
   {
    "allow_on_submit": 1,
@@ -838,15 +839,19 @@
    "allow_on_submit": 1,
    "fieldname": "customer_authority_instruments",
    "fieldtype": "Table",
-   "label": "Pay Orders",
+   "label": "Customer Pay Orders",
    "no_copy": 1,
    "options": "Vehicle Registration Order Payment"
+  },
+  {
+   "fieldname": "cb_60",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-28 18:17:07.212924",
+ "modified": "2021-10-28 23:47:30.984272",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",
