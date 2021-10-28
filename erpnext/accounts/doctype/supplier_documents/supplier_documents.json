@@ -36,7 +36,7 @@
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "SAL-INV-WIT-ITE-.YYYY.-",
+   "options": "SUP-DOC-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -188,7 +188,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Sales Invoice Without Items",
+   "options": "Supplier Documents",
    "print_hide": 1,
    "read_only": 1
   },
@@ -197,16 +197,16 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Sales Invoice Without Items",
+   "options": "Supplier Documents",
    "print_hide": 1,
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-10-21 13:43:31.433133",
+ "modified": "2021-10-28 10:40:06.966983",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Sales Invoice Without Items",
+ "name": "Supplier Documents",
  "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
