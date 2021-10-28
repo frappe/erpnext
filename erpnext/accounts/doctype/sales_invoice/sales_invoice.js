@@ -969,7 +969,7 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 
 		if (frm.doc.is_debit_note) {
-			frm.set_df_property('return_against', 'label', 'Adjustment Against');
+			frm.set_df_property('return_against', 'label', __('Adjustment Against'));
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {
