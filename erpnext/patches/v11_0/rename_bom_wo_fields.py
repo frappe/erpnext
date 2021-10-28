@@ -6,6 +6,9 @@ import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
+    # updating column value to handle field change from Data to Currency
+    frappe.db.sql("update `tabBOM` set base_scrap_material_cost = '0' where trim(coalesce(base_scrap_material_cost, ''))= ''")
+
     for doctype in ['BOM Explosion Item', 'BOM Item', 'Work Order Item', 'Item']:
         if frappe.db.has_column(doctype, 'allow_transfer_for_manufacture'):
             if doctype != 'Item':

@@ -122,11 +122,6 @@ class Asset(AccountsController):
 		if self.is_existing_asset:
 			return
 
-		docname = self.purchase_receipt or self.purchase_invoice
-		if docname:
-			doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
-			date = frappe.db.get_value(doctype, docname, 'posting_date')
-
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 	
@@ -404,9 +399,10 @@ class Asset(AccountsController):
 			if accumulated_depreciation_after_full_schedule:
 				accumulated_depreciation_after_full_schedule = max(accumulated_depreciation_after_full_schedule)
 
-				asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
-					flt(accumulated_depreciation_after_full_schedule),
-					self.precision('gross_purchase_amount'))
+				asset_value_after_full_schedule = flt(
+					flt(self.gross_purchase_amount) -
+					flt(self.opening_accumulated_depreciation) -
+					flt(accumulated_depreciation_after_full_schedule), self.precision('gross_purchase_amount'))
 
 				if (row.expected_value_after_useful_life and
 					row.expected_value_after_useful_life < asset_value_after_full_schedule):
