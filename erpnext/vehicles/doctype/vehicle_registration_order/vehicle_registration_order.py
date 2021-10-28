@@ -343,28 +343,54 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 	def update_invoice_status(self, update=False):
 		vehicle_invoice = None
+		vehicle_invoice_issue = None
+		vehicle_invoice_return = None
 
 		if self.vehicle:
 			vehicle_invoice = frappe.db.get_all("Vehicle Invoice", {"vehicle": self.vehicle, "docstatus": 1},
 				['name', 'status', 'issued_for'], order_by="posting_date desc, creation desc")
 
+			vehicle_invoice_issue = frappe.db.sql("""
+				select m.name, m.posting_date
+				from `tabVehicle Invoice Movement Detail` d
+				inner join `tabVehicle Invoice Movement` m
+				where m.docstatus = 1 and d.vehicle = %s and m.purpose = 'Issue' and m.issued_for = 'Registration'
+				order by m.posting_date desc, m.creation desc
+			""", self.vehicle, as_dict=1)
+
+			vehicle_invoice_return = frappe.db.sql("""
+				select m.name, m.posting_date
+				from `tabVehicle Invoice Movement Detail` d
+				inner join `tabVehicle Invoice Movement` m
+				where m.docstatus = 1 and d.vehicle = %s and m.purpose = 'Return' and m.issued_for = 'Registration'
+				order by m.posting_date desc, m.creation desc
+			""", self.vehicle, as_dict=1)
+
 		vehicle_invoice = vehicle_invoice[0] if vehicle_invoice else frappe._dict()
+		vehicle_invoice_issue = vehicle_invoice_issue[0] if vehicle_invoice_issue else frappe._dict()
+		vehicle_invoice_return = vehicle_invoice_return[0] if vehicle_invoice_return else frappe._dict()
 
 		if vehicle_invoice:
 			self.invoice_status = vehicle_invoice.status
 			self.invoice_issued_for = vehicle_invoice.issued_for if vehicle_invoice.status == "Issued" else None
+			self.invoice_issue_date = vehicle_invoice_issue.posting_date
+			self.invoice_return_date = vehicle_invoice_return.posting_date
 		else:
 			self.invoice_status = "Not Received"
 			self.invoice_issued_for = None
+			self.invoice_issue_date = None
+			self.invoice_return_date = None
 
 		if update:
 			self.db_set({
 				"invoice_status": self.invoice_status,
 				"invoice_issued_for": self.invoice_issued_for,
+				"invoice_issue_date": self.invoice_issue_date,
+				"invoice_return_date": self.invoice_return_date,
 			})
 
 	def update_registration_number(self, update=False):
-		fields = ['name', 'vehicle_license_plate', 'call_date']
+		fields = ['name', 'vehicle_license_plate', 'posting_date', 'call_date']
 
 		registration_receipt = frappe.db.get_all("Vehicle Registration Receipt",
 			{"vehicle_registration_order": self.name, "docstatus": 1}, fields,
@@ -378,12 +404,14 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		registration_receipt = registration_receipt[0] if registration_receipt else frappe._dict()
 
 		self.vehicle_license_plate = registration_receipt.vehicle_license_plate
+		self.registration_receipt_date = registration_receipt.posting_date
 		self.call_date = registration_receipt.call_date
 
 		if update:
 			self.db_set({
 				"vehicle_license_plate": self.vehicle_license_plate,
 				"call_date": self.call_date,
+				"registration_receipt_date": self.registration_receipt_date,
 			})
 
 	def set_status(self, update=False, status=None, update_modified=True):
