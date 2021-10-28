@@ -45,6 +45,8 @@ def get_filters(report_filters, operations):
 
 	return filters
 
+# Check PR #28123 as to why this is commented
+
 # def update_raw_material_cost(row, filters):
 # 	row.rm_cost = 0.0
 # 	for data in frappe.get_all("Job Card Item", fields = ["amount"],
