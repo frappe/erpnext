@@ -19,8 +19,7 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	nowdate,
-	now,
-	today
+	today,
 )
 from six import text_type
 
