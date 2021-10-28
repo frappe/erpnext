@@ -23,7 +23,8 @@ class SalesCommission(Document):
 
 	def validate_salary_component(self):
 		if self.pay_via_salary and not frappe.db.get_single_value("Payroll Settings", "salary_component_for_sales_commission"):
-			frappe.throw(_("Please set {0} in {1}").format(frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
+			frappe.throw(_("Please set {0} in {1}").format(
+				frappe.bold("Salary Component for Sales Commission"), get_link_to_form("Payroll Settings", "Payroll Settings")))
 
 	def on_submit(self):
 		self.validate_amount()
@@ -33,12 +34,18 @@ class SalesCommission(Document):
 	def add_contributions(self):
 		self.set("contributions", [])
 		filter_date = "transaction_date" if self.commission_based_on=="Sales Order" else "posting_date"
-		records = [entry.name for entry in frappe.db.get_all(self.commission_based_on, filters={"company": self.company, "docstatus":1, filter_date: ('between', [self.from_date, self.to_date])})]
-		sales_persons_details = frappe.get_all("Sales Team", filters={"parent": ['in', records], "sales_person": self.sales_person}, fields=["sales_person", "commission_rate", "incentives", "allocated_percentage", "allocated_amount", "parent"])
+		records = [entry.name for entry in frappe.db.get_all(
+			self.commission_based_on,
+			filters={"company": self.company, "docstatus":1, filter_date: ('between', [self.from_date, self.to_date])})]
+		sales_persons_details = frappe.get_all(
+			"Sales Team", filters={"parent": ['in', records], "sales_person": self.sales_person},
+			fields=["sales_person", "commission_rate", "incentives", "allocated_percentage", "allocated_amount", "parent"])
 		if sales_persons_details:
 			for record in sales_persons_details:
-				if add(record, self.sales_person):
-					record_details = frappe.db.get_value(self.commission_based_on, filters={"name": record["parent"]}, fieldname=["customer", filter_date], as_dict=True)
+				if add_record(record, self.sales_person):
+					record_details = frappe.db.get_value(
+						self.commission_based_on, filters={"name": record["parent"]},
+						fieldname=["customer", filter_date], as_dict=True)
 					contribution = {
 						"document_type": self.commission_based_on,
 						"order_or_invoice": record["parent"],
@@ -71,7 +78,9 @@ class SalesCommission(Document):
 		if mode_of_payment:
 			paid_from = get_bank_cash_account(mode_of_payment, self.company).get("account")
 
-		paid_to = frappe.db.get_value("Company", filters={"name":self.company}, fieldname=['default_payable_account'], as_dict=True)['default_payable_account']
+		paid_to = frappe.db.get_value(
+			"Company", filters={"name":self.company},
+			fieldname=['default_payable_account'], as_dict=True)['default_payable_account']
 		if not paid_to:
 			frappe.throw(_("Please set Default Payable Account in {}").format(get_link_to_form("Company", self.company)))
 		if self.pay_via_salary:
@@ -129,8 +138,8 @@ class SalesCommission(Document):
 		}
 		doc.append("references", reference)
 
-def add(record, sales_person):
-	previous_contibutions = frappe.get_all("Contributions", filters={"order_or_invoice":record["parent"], "docstatus":["!=", 2]}, fields=["parent"])
+def add_record(record, sales_person):
+	previous_contibutions = frappe.get_all("Contributions", filters={"order_or_invoice":record["parent"], "docstatus": 1}, fields=["parent"])
 	if previous_contibutions:
 		for contributions in previous_contibutions:
 			if frappe.db.get_value("Sales Commission", {"name":contributions["parent"]}, fieldname=["sales_person"]) == sales_person:
