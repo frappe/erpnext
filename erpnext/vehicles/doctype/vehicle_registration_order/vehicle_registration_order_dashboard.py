@@ -10,12 +10,16 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Payment'),
+				'label': _('Accounting'),
 				'items': ['Journal Entry', 'Payment Entry']
 			},
 			{
-				'label': _('Reference'),
-				'items': ['Vehicle Invoice Movement', 'Vehicle Registration Receipt']
+				'label': _('Registration'),
+				'items': ['Vehicle Registration Receipt', 'Vehicle Transfer Letter']
+			},
+			{
+				'label': _('Invoice'),
+				'items': ['Vehicle Invoice Movement']
 			},
 		]
 	}

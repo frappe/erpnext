@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, cstr
 from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
-from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
 import re
 
 
@@ -49,9 +48,6 @@ class VehicleRegistrationReceipt(VehicleTransactionController):
 			frappe.throw(_("Registration Receipt for {0} has already been received in {1}")
 				.format(frappe.get_desk_link("Vehicle", self.vehicle),
 				frappe.get_desk_link("Vehicle Registration Receipt", registration_receipt)))
-
-	def set_vehicle_registration_order(self):
-		self.vehicle_registration_order = get_vehicle_registration_order(vehicle=self.vehicle)
 
 	def validate_registration_number(self):
 		self.vehicle_license_plate = re.sub(r"\s+", "", cstr(self.vehicle_license_plate).upper())

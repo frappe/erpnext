@@ -19,7 +19,7 @@ frappe.listview_settings['Vehicle Registration Order'] = {
 		listview.page.fields_dict.customer.get_query = () => {
 			return erpnext.queries.customer();
 		}
-		listview.page.fields_dict.vehicle_owner.get_query = () => {
+		listview.page.fields_dict.transfer_customer.get_query = () => {
 			return erpnext.queries.customer();
 		}
 

@@ -9,6 +9,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		this.frm.custom_make_buttons = {
 			'Vehicle Invoice Movement': 'Issue Invoice',
 			'Vehicle Registration Receipt': 'Registration Receipt',
+			'Vehicle Transfer Letter': 'Transfer Letter'
 		}
 	},
 
@@ -112,6 +113,12 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			}
 
 			if (this.frm.doc.vehicle) {
+				// Transfer Letter
+				var transfer_letter_exists = this.frm.doc.__onload && this.frm.doc.__onload.transfer_letter_exists;
+				if (this.frm.doc.ownership_transfer_required && !transfer_letter_exists) {
+					this.frm.add_custom_button(__('Transfer Letter'), () => this.make_transfer_letter());
+				}
+
 				// Invoice
 				if (this.frm.doc.invoice_status == "In Hand" && !this.frm.doc.vehicle_license_plate) {
 					this.frm.add_custom_button(__('Issue Invoice'), () => this.make_invoice_movement('Issue'));
@@ -233,6 +240,8 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			var filters = d => cint(d.component_type == "Ownership Transfer");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+
+			me.frm.set_value('transfer_customer', null);
 		}
 	},
 
@@ -393,6 +402,21 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 	make_invoice_delivery: function() {
 		return frappe.call({
 			method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.get_invoice_delivery",
+			args: {
+				"vehicle_registration_order": this.frm.doc.name
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	},
+
+	make_transfer_letter: function() {
+		return frappe.call({
+			method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.get_transfer_letter",
 			args: {
 				"vehicle_registration_order": this.frm.doc.name
 			},

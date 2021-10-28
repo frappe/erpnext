@@ -144,6 +144,10 @@ class VehicleTransactionController(StockController):
 			validate_party_frozen_disabled("Supplier", self.agent)
 		elif self.get('customer'):
 			validate_party_frozen_disabled("Customer", self.customer)
+		elif self.get('vehicle_owner'):
+			validate_party_frozen_disabled("Customer", self.vehicle_owner)
+		elif self.get('transfer_customer'):
+			validate_party_frozen_disabled("Customer", self.transfer_customer)
 
 	def validate_vehicle_item(self, doc=None):
 		if not doc:
@@ -302,6 +306,10 @@ class VehicleTransactionController(StockController):
 				if doc.vehicle != cstr(vro.vehicle):
 					frappe.throw(_("Vehicle does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Registration Order", doc.vehicle_registration_order)))
+
+	def set_vehicle_registration_order(self):
+		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
+		self.vehicle_registration_order = get_vehicle_registration_order(vehicle=self.vehicle)
 
 	def update_vehicle_booking_order_delivery(self, doc=None):
 		if not doc:
@@ -652,7 +660,7 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 		out.vehicle_invoice = get_vehicle_invoice(args.vehicle)
 		out.update(get_vehicle_invoice_details(out.vehicle_invoice))
 
-	if args.doctype == 'Vehicle Registration Receipt' or (args.doctype == 'Vehicle Invoice Movement'
+	if args.doctype in ['Vehicle Registration Receipt', 'Vehicle Transfer Letter'] or (args.doctype == 'Vehicle Invoice Movement'
 			and args.issued_for == "Registration"):
 		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order,\
 			get_vehicle_registration_order_details

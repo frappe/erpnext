@@ -16,6 +16,7 @@ class VehicleTransferLetter(VehicleTransactionController):
 	def validate(self):
 		super(VehicleTransferLetter, self).validate()
 		self.validate_same_owner()
+		self.set_vehicle_registration_order()
 
 		self.set_title()
 
@@ -25,10 +26,12 @@ class VehicleTransferLetter(VehicleTransactionController):
 	def on_submit(self):
 		self.update_vehicle_party_details()
 		self.update_vehicle_booking_order()
+		self.update_vehicle_registration_order()
 
 	def on_cancel(self):
 		self.update_vehicle_party_details()
 		self.update_vehicle_booking_order()
+		self.update_vehicle_registration_order()
 
 	def validate_same_owner(self):
 		if self.customer == self.vehicle_owner:
@@ -46,6 +49,12 @@ class VehicleTransferLetter(VehicleTransactionController):
 			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
 			vbo.update_transfer_customer(update=True)
 			vbo.notify_update()
+
+	def update_vehicle_registration_order(self, doc=None):
+		if self.get('vehicle_registration_order'):
+			vro = frappe.get_doc("Vehicle Registration Order", self.vehicle_registration_order)
+			vro.update_transfer_customer(update=True)
+			vro.notify_update()
 
 	def set_title(self):
 		self.title = "{0} ({1})".format(self.customer_name or self.customer, self.get_previous_owner_name())

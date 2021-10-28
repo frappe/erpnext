@@ -14,8 +14,6 @@
   "customer",
   "customer_name",
   "column_break_8",
-  "vehicle_owner",
-  "vehicle_owner_name",
   "booking_customer_name",
   "column_break_11",
   "amended_from",
@@ -58,8 +56,8 @@
   "vehicle_color",
   "vehicle_license_plate",
   "registration_details_section",
-  "choice_number_required",
   "ownership_transfer_required",
+  "choice_number_required",
   "custom_license_plate_required",
   "custom_license_plate_by_agent",
   "column_break_55",
@@ -70,6 +68,10 @@
   "cb_60",
   "registration_receipt_date",
   "call_date",
+  "section_break_62",
+  "transfer_customer",
+  "column_break_64",
+  "transfer_customer_name",
   "pricing_section",
   "customer_charges",
   "column_break_54",
@@ -167,22 +169,6 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "vehicle_owner",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Vehicle Owner",
-   "no_copy": 1,
-   "options": "Customer"
-  },
-  {
-   "depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner",
-   "fieldname": "vehicle_owner_name",
-   "fieldtype": "Data",
-   "label": "Vehicle Owner Name",
-   "no_copy": 1,
-   "read_only": 1
   },
   {
    "fieldname": "column_break_11",
@@ -753,7 +739,8 @@
    "default": "0",
    "fieldname": "ownership_transfer_required",
    "fieldtype": "Check",
-   "label": "Ownership Transfer Required"
+   "label": "Ownership Transfer Required",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_57",
@@ -846,12 +833,41 @@
   {
    "fieldname": "cb_60",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.ownership_transfer_required || doc.transfer_customer",
+   "fieldname": "transfer_customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Transfer Customer",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.transfer_customer && doc.transfer_customer_name != doc.transfer_customer",
+   "fetch_from": "transfer_customer.customer_name",
+   "fetch_if_empty": 1,
+   "fieldname": "transfer_customer_name",
+   "fieldtype": "Data",
+   "label": "Transfer Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_62",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_64",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-28 23:47:30.984272",
+ "modified": "2021-10-29 00:58:59.643558",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

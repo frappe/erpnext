@@ -23,6 +23,7 @@
   "section_break_18",
   "vehicle_booking_order",
   "finance_type",
+  "vehicle_registration_order",
   "column_break_20",
   "project",
   "address_and_contact_section",
@@ -384,12 +385,21 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_registration_order",
+   "fieldtype": "Link",
+   "label": "Vehicle Registration Order",
+   "no_copy": 1,
+   "options": "Vehicle Registration Order",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-05-25 22:35:45.891545",
+ "modified": "2021-10-29 00:01:35.191809",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Transfer Letter",
