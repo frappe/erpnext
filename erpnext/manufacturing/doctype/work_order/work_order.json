@@ -182,6 +182,7 @@
    "reqd": 1
   },
   {
+   "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Qty To Manufacture",
@@ -572,10 +573,11 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-24 15:14:03.844937",
+ "modified": "2021-10-27 19:21:35.139888",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
+ "naming_rule": "By \"Naming Series\" field",
  "nsm_parent_field": "parent_work_order",
  "owner": "Administrator",
  "permissions": [
