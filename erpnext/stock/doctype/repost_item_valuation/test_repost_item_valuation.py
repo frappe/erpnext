@@ -5,6 +5,8 @@ import unittest
 
 import frappe
 
+from erpnext.controllers.stock_controller import create_item_wise_repost_entries
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
 )
@@ -70,3 +72,15 @@ class TestRepostItemValuation(unittest.TestCase):
 				in_configured_timeslot(repost_settings, case.get("current_time")),
 				msg=f"Exepcted false from : {case}",
 			)
+
+	def test_create_item_wise_repost_item_valuation_entries(self):
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory",
+			warehouse = "Stores - TCP1", get_multiple_items = True)
+
+		rivs = create_item_wise_repost_entries(pr.doctype, pr.name)
+		self.assertGreaterEqual(len(rivs), 2)
+		self.assertIn("_Test Item", [d.item_code for d in rivs])
+
+		for riv in rivs:
+			self.assertEqual(riv.company, "_Test Company with perpetual inventory")
+			self.assertEqual(riv.warehouse, "Stores - TCP1")
