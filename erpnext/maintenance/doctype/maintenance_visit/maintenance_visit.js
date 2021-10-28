@@ -27,6 +27,9 @@ frappe.ui.form.on('Maintenance Visit', {
 		if (frm.doc.__islocal) {
 			frm.set_value({mntc_date: frappe.datetime.get_today()});
 		}
+		if (frm.doc.purposes.length && frm.doc.purposes[0].item_name == undefined) {
+			frm.clear_table("purposes");
+		}
 	},
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm);
