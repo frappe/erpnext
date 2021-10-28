@@ -73,6 +73,12 @@ accounting_dimension_fields = [
 		"insert_after": "vehicle_engine_no", "read_only": 1, "fetch_from": "applies_to_vehicle.license_plate"},
 ]
 
+item_fields = [
+	{"label": "Vehicle Allocation Required From Delivery Period", "fieldname": "vehicle_allocation_required_from_delivery_period",
+		"fieldtype": "Link", "options": "Vehicle Allocation Period",
+		"insert_after": "vehicle_allocation_required", "depends_on": "vehicle_allocation_required", "ignore_user_permissions": 1},
+]
+
 accounting_dimension_table_fields = deepcopy(accounting_dimension_fields)
 for d in accounting_dimension_table_fields:
 	if 'in_standard_filter' in d:
@@ -87,6 +93,8 @@ for d in service_person_fields:
 for d in accounting_dimension_fields:
 	d['translatable'] = 0
 for d in accounting_dimension_table_fields:
+	d['translatable'] = 0
+for d in item_fields:
 	d['translatable'] = 0
 
 common_properties = [
@@ -139,6 +147,7 @@ data = {
 		{"doctype": "Transaction Type", "fieldname": "vehicle_booking_defaults_section", "property": "hidden", "value": 0},
 	],
 	'custom_fields': {
+		"Item": item_fields,
 		"Sales Invoice": applies_to_fields + service_person_fields,
 		"Delivery Note": applies_to_fields + service_person_fields,
 		"Sales Order": applies_to_fields + service_person_fields,

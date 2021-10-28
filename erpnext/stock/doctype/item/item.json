@@ -51,7 +51,6 @@
   "default_quotation_terms",
   "column_break_37",
   "vehicle_allocation_required",
-  "vehicle_allocation_required_from_delivery_period",
   "exempt_from_vehicle_withholding_tax",
   "commission_item_code",
   "section_break_31",
@@ -1268,13 +1267,6 @@
    "fieldname": "quotation_validity_days",
    "fieldtype": "Int",
    "label": "Quotation Validity Days"
-  },
-  {
-   "depends_on": "vehicle_allocation_required",
-   "fieldname": "vehicle_allocation_required_from_delivery_period",
-   "fieldtype": "Link",
-   "label": "Vehicle Allocation Required From Delivery Period",
-   "options": "Vehicle Allocation Period"
   }
  ],
  "has_web_view": 1,
@@ -1282,7 +1274,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-10-11 23:32:28.318428",
+ "modified": "2021-10-28 11:46:30.185893",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
