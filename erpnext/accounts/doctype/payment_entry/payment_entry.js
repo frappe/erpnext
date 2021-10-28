@@ -88,9 +88,9 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("reference_doctype", "references", function() {
 			if (frm.doc.party_type=="Customer") {
-				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC"];
+				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC", 'Customer Documents'];
 			} else if (frm.doc.party_type=="Supplier") {
-				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry", "Credit Note CXP"];
+				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry", "Credit Note CXP", 'Supplier Documents'];
 			} else if (frm.doc.party_type=="Employee") {
 				var doctypes = ["Expense Claim", "Journal Entry"];
 			} else if (frm.doc.party_type=="Student") {
@@ -108,7 +108,7 @@ frappe.ui.form.on('Payment Entry', {
 			const child = locals[cdt][cdn];
 			var filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
-				'Purchase Order', 'Expense Claim', 'Fees', 'Debit Note CXC', 'Credit Note CXP'];
+				'Purchase Order', 'Expense Claim', 'Fees', 'Debit Note CXC', 'Credit Note CXP', 'Customer Documents'];
 			if(child.reference_doctype == "Sales Invoice" || child.reference_doctype == "Purchase Invoice"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]]};
 			}
@@ -641,7 +641,7 @@ frappe.ui.form.on('Payment Entry', {
 						} else {
 							c.exchange_rate = 1;
 						}
-						if (in_list(['Sales Invoice', 'Purchase Invoice', 'Debit Note CXC', "Expense Claim", "Fees"], d.reference_doctype)){
+						if (in_list(['Sales Invoice', 'Purchase Invoice', 'Debit Note CXC', "Customer Documents", "Expense Claim", "Fees"], d.reference_doctype)){
 							c.due_date = d.due_date;
 						}
 					});
@@ -826,7 +826,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			if(frm.doc.party_type=="Customer" &&
-				!in_list(["Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC"], row.reference_doctype)
+				!in_list(["Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC", 'Customer Documents'], row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "reference_doctype", null);
 				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice or Journal Entry", [row.idx]));

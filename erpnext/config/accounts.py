@@ -45,6 +45,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Customer Documents",
+					"description": _("Customer Documents"),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Customer Retention",
 					"description": _("Customer Retention Database."),
 					"onboard": 1,
@@ -122,6 +128,12 @@ def get_data():
 					"type": "doctype",
 					"name": "Credit Note CXP",
 					"description": _("Credit Note Database."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Documents",
+					"description": _("Supplier Documents"),
 					"onboard": 1,
 				},
 				{
