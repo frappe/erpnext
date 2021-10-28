@@ -203,7 +203,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				}
 			});
 		} else {
-			var filters = d => cint(d.is_choice_number);
+			var filters = d => cint(d.component_type == "Choice Number");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
 		}
@@ -227,7 +227,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				}
 			});
 		} else {
-			var filters = d => cint(d.is_ownership_transfer);
+			var filters = d => cint(d.component_type == "Ownership Transfer");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
 		}
@@ -250,7 +250,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				}
 			});
 		} else {
-			var filters = d => cint(d.is_license_plate);
+			var filters = d => cint(d.component_type == "License Plate");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
 			me.frm.set_value('agent_license_plate_charges', 0);

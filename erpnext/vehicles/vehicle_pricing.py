@@ -7,8 +7,7 @@ from six import string_types
 
 
 pricing_force_fields = [
-	'is_vehicle_retail', 'is_freight', 'is_withholding_tax',
-	'is_choice_number', 'is_ownership_transfer'
+	'component_type'
 ]
 
 
@@ -76,13 +75,15 @@ def get_pricing_components(component_type, args, get_selling_components=True, ge
 		if get_selling_components:
 			selling_component = get_component_details(component_name, args, "selling")
 			if force or selling_component.component.price_list or selling_component.component.component_amount:
-				out.selling.append(selling_component.component)
+				if not selling_component.component.do_not_append:
+					out.selling.append(selling_component.component)
 				out.doc.update(selling_component.doc)
 
 		if get_buying_components:
 			buying_component = get_component_details(component_name, args, "buying")
 			if force or buying_component.component.price_list or buying_component.component.component_amount:
-				out.buying.append(buying_component.component)
+				if not buying_component.component.do_not_append:
+					out.buying.append(buying_component.component)
 				out.doc.update(buying_component.doc)
 
 	return out
@@ -119,24 +120,20 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 			out.component.component_amount = get_default_price(price_list_row, selling_or_buying)
 
 	if component_doc.component_type == "Booking":
-		out.component.is_vehicle_retail = cint(component_doc.booking_component_type == "Vehicle Retail")
-		out.component.is_freight = cint(component_doc.booking_component_type == "Freight")
-		out.component.is_withholding_tax = cint(component_doc.booking_component_type == "Withholding Tax")
+		out.component.component_type = component_doc.booking_component_type
 
 	elif component_doc.component_type == "Registration":
-		out.component.is_choice_number = cint(component_doc.registration_component_type == "Choice Number")
-		out.component.is_ownership_transfer = cint(component_doc.registration_component_type == "Ownership Transfer")
-		out.component.is_license_plate = cint(component_doc.registration_component_type == "License Plate")
+		out.component.component_type = component_doc.registration_component_type
 
 		if component_doc.registration_component_type == "Choice Number":
 			out.doc.choice_number_required = 1
-
 		if component_doc.registration_component_type == "Ownership Transfer":
 			out.doc.ownership_transfer_required = 1
-
 		if component_doc.registration_component_type == "License Plate":
-			if selling_or_buying == "buying" and cint(args.custom_license_plate_required) and cint(args.custom_license_plate_by_agent):
-				out.doc.agent_license_plate_charges = out.component.component_amount
+			if selling_or_buying == "buying":
+				out.component.do_not_append = True
+				if cint(args.custom_license_plate_required) and cint(args.custom_license_plate_by_agent):
+					out.doc.agent_license_plate_charges = out.component.component_amount
 
 	return out
 
