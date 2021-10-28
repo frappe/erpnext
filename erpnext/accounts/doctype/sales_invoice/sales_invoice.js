@@ -12,6 +12,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 	company() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+
+		let me = this;
+		if (this.frm.doc.company) {
+			frappe.db.get_value('Company', this.frm.doc.company, 'default_receivable_account', (r) => {
+				me.frm.set_value('debit_to', r.default_receivable_account);
+			});
+		}
 	}
 	onload() {
 		var me = this;
