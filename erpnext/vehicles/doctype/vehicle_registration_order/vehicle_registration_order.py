@@ -12,7 +12,6 @@ from erpnext.vehicles.vehicle_additional_service import VehicleAdditionalService
 from erpnext.vehicles.vehicle_pricing import calculate_total_price, validate_duplicate_components,\
 	validate_component_type, validate_disabled_component, get_pricing_components, get_component_details,\
 	pricing_force_fields
-from erpnext.accounts.utils import get_balance_on_voucher
 
 
 class VehicleRegistrationOrder(VehicleAdditionalServiceController):
@@ -36,21 +35,33 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 	def before_update_after_submit(self):
 		self.get_disallow_on_submit_fields()
 		self.validate_common()
+		self.validate_agent_mandatory()
 
 	def validate_common(self):
-		self.validate_choice_number()
-
 		self.validate_pricing_components()
+		self.validate_agent_license_plate_charges()
 		self.calculate_totals()
 		self.calculate_outstanding_amount()
 
-		self.validate_agent_mandatory()
 		self.set_missing_accounts()
 
 		self.update_payment_status()
 		self.update_invoice_status()
 		self.update_registration_number()
 		self.set_status()
+
+	def before_submit(self):
+		if not self.vehicle and not self.vehicle_booking_order:
+			frappe.throw(_("Please set either Vehicle Booking Order or Vehicle"))
+
+		self.validate_agent_mandatory()
+		self.validate_account_mandatory()
+
+	def on_submit(self):
+		self.update_vehicle_booking_order_registration()
+
+	def on_cancel(self):
+		self.update_vehicle_booking_order_registration()
 
 	def get_disallow_on_submit_fields(self):
 		if self.is_new():
@@ -63,6 +74,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			excluding_fields = []
 			if self.status != "Completed":
 				excluding_fields.append('agent_commission')
+				excluding_fields.append('agent_license_plate_charges')
 				excluding_fields.append('margin_amount')
 				excluding_fields.append('status')
 
@@ -91,18 +103,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			})
 
 		return self._agent_gl_entry_exists
-
-	def before_submit(self):
-		if not self.vehicle and not self.vehicle_booking_order:
-			frappe.throw(_("Please set either Vehicle Booking Order or Vehicle"))
-
-		self.validate_account_mandatory()
-
-	def on_submit(self):
-		self.update_vehicle_booking_order_registration()
-
-	def on_cancel(self):
-		self.update_vehicle_booking_order_registration()
 
 	def set_title(self):
 		self.title = self.customer_name or self.customer
@@ -159,10 +159,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				frappe.throw(_("{0} is already registered: {1}")
 					.format(frappe.get_desk_link("Vehicle", self.vehicle), license_plate))
 
-	def validate_choice_number(self):
-		if not cint(self.choice_number_required):
-			self.choice_number_details = ""
-
 	def validate_pricing_components(self):
 		validate_disabled_component(self.get('customer_charges'))
 		validate_disabled_component(self.get('authority_charges'))
@@ -174,7 +170,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		validate_component_type("Registration", self.get('authority_charges'))
 
 	def validate_agent_mandatory(self):
-		if flt(self.agent_commission) and not self.agent:
+		if flt(self.agent_total) and not self.agent:
 			frappe.throw(_("Registration Agent is mandatory for Registration Agent Commission"))
 
 	def validate_account_mandatory(self):
@@ -189,13 +185,18 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		if not self.agent_account:
 			self.agent_account = frappe.get_cached_value("Vehicles Settings", None, "registration_agent_account")
 
+	def validate_agent_license_plate_charges(self):
+		if not self.custom_license_plate_required or not self.custom_license_plate_by_agent:
+			self.agent_license_plate_charges = 0
+
 	def calculate_totals(self):
 		calculate_total_price(self, 'customer_charges', 'customer_total')
 		calculate_total_price(self, 'authority_charges', 'authority_total')
 
-		self.round_floats_in(self, ['agent_commission'])
+		self.round_floats_in(self, ['agent_commission', 'agent_license_plate_charges'])
+		self.agent_total = flt(self.agent_commission + self.agent_license_plate_charges, self.precision('agent_total'))
 
-		self.margin_amount = flt(self.customer_total - self.authority_total - self.agent_commission,
+		self.margin_amount = flt(self.customer_total - self.authority_total - self.agent_total,
 			self.precision('margin_amount'))
 
 	def calculate_outstanding_amount(self):
@@ -310,8 +311,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		return unclosed_customer_amount
 
 	def get_unclosed_agent_amount(self):
-		unclosed_agent_amount = flt(flt(self.agent_commission) - flt(self.agent_closed_amount),
-			self.precision('agent_commission'))
+		unclosed_agent_amount = flt(flt(self.agent_total) - flt(self.agent_closed_amount),
+			self.precision('agent_total'))
 		return unclosed_agent_amount
 
 	def get_unclosed_income_amount(self):

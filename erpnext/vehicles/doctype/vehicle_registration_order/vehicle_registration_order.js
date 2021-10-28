@@ -120,8 +120,8 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				precision('customer_total'));
 			var unclosed_customer_amount = flt(customer_margin - flt(this.frm.doc.customer_closed_amount),
 				precision('customer_total'));
-			var unclosed_agent_amount = flt(flt(this.frm.doc.agent_commission) - flt(this.frm.doc.agent_closed_amount),
-				precision('agent_commission'));
+			var unclosed_agent_amount = flt(flt(this.frm.doc.agent_total) - flt(this.frm.doc.agent_closed_amount),
+				precision('agent_total'));
 			if (unclosed_customer_amount || (this.frm.doc.agent && unclosed_agent_amount)) {
 				this.frm.add_custom_button(__('Closing Entry'), () => this.make_journal_entry('Closing Entry'));
 			}
@@ -233,6 +233,54 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		}
 	},
 
+	custom_license_plate_required: function () {
+		var me = this;
+		if (cint(me.frm.doc.custom_license_plate_required)) {
+			return erpnext.vehicles.pricing.get_pricing_components({
+				frm: me.frm,
+				component_type: "Registration",
+				get_selling_components: true,
+				get_buying_components: true,
+				selling_components_field: 'customer_charges',
+				filters: {
+					registration_component_type: 'License Plate'
+				},
+				callback: function () {
+					me.calculate_totals();
+				}
+			});
+		} else {
+			var filters = d => cint(d.is_license_plate);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+			me.frm.set_value('agent_license_plate_charges', 0);
+		}
+	},
+
+	custom_license_plate_by_agent: function () {
+		var me = this;
+
+		if (!cint(me.frm.doc.custom_license_plate_required)) {
+			return;
+		}
+
+		if (cint(me.frm.doc.custom_license_plate_by_agent)) {
+			return erpnext.vehicles.pricing.get_pricing_components({
+				frm: me.frm,
+				component_type: "Registration",
+				get_buying_components: true,
+				filters: {
+					registration_component_type: 'License Plate'
+				},
+				callback: function () {
+					me.calculate_totals();
+				}
+			});
+		} else {
+			me.frm.set_value('agent_license_plate_charges', 0);
+		}
+	},
+
 	component_amount: function () {
 		this.calculate_totals();
 	},
@@ -249,14 +297,20 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		this.calculate_totals();
 	},
 
+	agent_license_plate_charges: function () {
+		this.calculate_totals();
+	},
+
 	calculate_totals: function () {
 		erpnext.vehicles.pricing.calculate_total_price(this.frm, 'customer_charges', 'customer_total');
 		erpnext.vehicles.pricing.calculate_total_price(this.frm, 'authority_charges', 'authority_total');
 
-		frappe.model.round_floats_in(this.frm.doc, ['agent_commission']);
+		frappe.model.round_floats_in(this.frm.doc, ['agent_commission', 'agent_license_plate_charges']);
+		this.frm.doc.agent_total = flt(this.frm.doc.agent_commission + this.frm.doc.agent_license_plate_charges,
+			precision('agent_total'));
 
 		this.frm.doc.margin_amount = flt(this.frm.doc.customer_total - this.frm.doc.authority_total
-			- this.frm.doc.agent_commission, precision('margin_amount'));
+			- this.frm.doc.agent_total, precision('margin_amount'));
 
 		this.reset_outstanding_amount();
 

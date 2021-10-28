@@ -4,13 +4,16 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "territory",
   "is_default",
+  "territory",
+  "selling_price",
   "selling_price_list",
+  "buying_price",
   "buying_price_list"
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "territory",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -19,6 +22,7 @@
    "options": "Territory"
   },
   {
+   "columns": 2,
    "fieldname": "selling_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -27,6 +31,7 @@
    "options": "Price List"
   },
   {
+   "columns": 2,
    "fieldname": "buying_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -35,15 +40,30 @@
    "options": "Price List"
   },
   {
+   "columns": 1,
    "default": "0",
    "fieldname": "is_default",
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Is Default"
+  },
+  {
+   "columns": 1,
+   "fieldname": "selling_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Selling Price"
+  },
+  {
+   "columns": 1,
+   "fieldname": "buying_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Buying Price"
   }
  ],
  "istable": 1,
- "modified": "2021-09-20 12:44:15.307205",
+ "modified": "2021-10-28 12:40:07.053902",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Pricing Price List",

@@ -182,6 +182,8 @@ $.extend(erpnext.vehicles.pricing, {
 		if (frm.doc.doctype == "Vehicle Registration Order") {
 			args['choice_number_required'] = cint(frm.doc.choice_number_required);
 			args['ownership_transfer_required'] = cint(frm.doc.ownership_transfer_required);
+			args['custom_license_plate_required'] = cint(frm.doc.custom_license_plate_required);
+			args['custom_license_plate_by_agent'] = cint(frm.doc.custom_license_plate_by_agent);
 		}
 
 		return args;

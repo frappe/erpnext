@@ -13,11 +13,10 @@
   "company",
   "customer",
   "customer_name",
+  "column_break_8",
   "vehicle_owner",
   "vehicle_owner_name",
-  "column_break_8",
   "booking_customer_name",
-  "remarks",
   "column_break_11",
   "amended_from",
   "transaction_date",
@@ -60,13 +59,14 @@
   "vehicle_license_plate",
   "registration_details_section",
   "choice_number_required",
-  "choice_number_details",
-  "column_break_55",
   "ownership_transfer_required",
+  "custom_license_plate_required",
+  "custom_license_plate_by_agent",
+  "column_break_55",
+  "remarks",
   "column_break_57",
   "invoice_issue_date",
   "invoice_return_date",
-  "cb_60",
   "registration_receipt_date",
   "call_date",
   "pricing_section",
@@ -78,11 +78,13 @@
   "column_break_58",
   "authority_total",
   "commission_section",
-  "agent_commission",
-  "column_break_60",
   "agent",
   "agent_name",
-  "col_break62",
+  "column_break_60",
+  "agent_commission",
+  "agent_license_plate_charges",
+  "column_break_75",
+  "agent_total",
   "margin_amount",
   "status_section",
   "customer_payment",
@@ -137,7 +139,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Customer (User)",
+   "label": "Customer",
    "options": "Customer",
    "reqd": 1
   },
@@ -566,7 +568,7 @@
   {
    "fieldname": "commission_section",
    "fieldtype": "Section Break",
-   "label": "Commission and Margin"
+   "label": "Registration Agent"
   },
   {
    "allow_on_submit": 1,
@@ -578,10 +580,6 @@
   },
   {
    "fieldname": "column_break_60",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "col_break62",
    "fieldtype": "Column Break"
   },
   {
@@ -622,16 +620,7 @@
    "default": "0",
    "fieldname": "choice_number_required",
    "fieldtype": "Check",
-   "label": "Choice Number Required",
-   "no_copy": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "choice_number_required",
-   "fieldname": "choice_number_details",
-   "fieldtype": "Small Text",
-   "label": "Choice Number Details",
-   "no_copy": 1
+   "label": "Choice Number Required"
   },
   {
    "default": "Not Received",
@@ -714,7 +703,7 @@
    "fieldname": "agent_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "label": "Agent Payable Account",
+   "label": "Registration Agent Payable Account",
    "options": "Account"
   },
   {
@@ -760,8 +749,7 @@
    "default": "0",
    "fieldname": "ownership_transfer_required",
    "fieldtype": "Check",
-   "label": "Ownership Transfer Required",
-   "no_copy": 1
+   "label": "Ownership Transfer Required"
   },
   {
    "fieldname": "column_break_57",
@@ -792,14 +780,46 @@
    "read_only": 1
   },
   {
-   "fieldname": "cb_60",
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "custom_license_plate_required",
+   "fieldtype": "Check",
+   "label": "Custom License Plate Required"
+  },
+  {
+   "fieldname": "column_break_75",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "depends_on": "custom_license_plate_required",
+   "fieldname": "custom_license_plate_by_agent",
+   "fieldtype": "Check",
+   "label": "Custom License Plate Provided By Agent"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.custom_license_plate_required && doc.custom_license_plate_by_agent",
+   "fieldname": "agent_license_plate_charges",
+   "fieldtype": "Currency",
+   "label": "Agent License Plate Charges",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "agent_total",
+   "fieldtype": "Currency",
+   "label": "Agent Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-28 01:19:01.970718",
+ "modified": "2021-10-28 16:39:45.517187",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

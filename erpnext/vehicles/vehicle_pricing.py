@@ -67,6 +67,11 @@ def get_pricing_components(component_type, args, get_selling_components=True, ge
 					force = True
 				else:
 					continue
+			if component_doc.registration_component_type == "License Plate":
+				if cint(args.custom_license_plate_required):
+					force = True
+				else:
+					continue
 
 		if get_selling_components:
 			selling_component = get_component_details(component_name, args, "selling")
@@ -92,9 +97,10 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 	})
 
 	component_doc = frappe.get_cached_doc("Vehicle Pricing Component", component_name)
-
-	price_list = get_applicable_price_list(component_doc, territory=args.territory, selling_or_buying=selling_or_buying)
 	out.component.component = component_doc.name
+
+	price_list_row = get_applicable_price_list_row(component_doc, territory=args.territory)
+	price_list = get_price_list(price_list_row, selling_or_buying)
 
 	if component_doc.component_type == "Booking" and component_doc.booking_component_type == "Withholding Tax":
 		out.component.price_list = None
@@ -103,12 +109,14 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 				args.tax_status, args.company)
 		else:
 			out.component.component_amount = 0
-	elif price_list:
-		out.component.price_list = price_list
-		out.component.component_amount = get_item_price(args.item_code, price_list, args.transaction_date)
 	else:
-		out.component.price_list = None
+		out.component.price_list = price_list
 		out.component.component_amount = 0
+
+		if price_list:
+			out.component.component_amount = get_item_price(args.item_code, price_list, args.transaction_date)
+		if not out.component.component_amount:
+			out.component.component_amount = get_default_price(price_list_row, selling_or_buying)
 
 	if component_doc.component_type == "Booking":
 		out.component.is_vehicle_retail = cint(component_doc.booking_component_type == "Vehicle Retail")
@@ -118,6 +126,7 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 	elif component_doc.component_type == "Registration":
 		out.component.is_choice_number = cint(component_doc.registration_component_type == "Choice Number")
 		out.component.is_ownership_transfer = cint(component_doc.registration_component_type == "Ownership Transfer")
+		out.component.is_license_plate = cint(component_doc.registration_component_type == "License Plate")
 
 		if component_doc.registration_component_type == "Choice Number":
 			out.doc.choice_number_required = 1
@@ -125,12 +134,31 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 		if component_doc.registration_component_type == "Ownership Transfer":
 			out.doc.ownership_transfer_required = 1
 
+		if component_doc.registration_component_type == "License Plate":
+			if selling_or_buying == "buying" and cint(args.custom_license_plate_required) and cint(args.custom_license_plate_by_agent):
+				out.doc.agent_license_plate_charges = out.component.component_amount
+
 	return out
 
 
-def get_applicable_price_list(component, territory=None, selling_or_buying="selling"):
+def get_applicable_price_list_row(component, territory=None):
 	if isinstance(component, string_types):
 		component = frappe.get_cached_doc("Vehicle Pricing Component", component)
+
+	default_price_list = component.get_default_price_list_row()
+	if not territory and default_price_list:
+		return default_price_list
+
+	territory_price_lists = [d for d in component.price_lists if cstr(territory) == cstr(d.territory)]
+	if territory_price_lists:
+		return territory_price_lists[0]
+
+	return default_price_list
+
+
+def get_price_list(row, selling_or_buying):
+	if not row:
+		return None
 
 	if selling_or_buying == "selling":
 		fieldname = "selling_price_list"
@@ -139,15 +167,21 @@ def get_applicable_price_list(component, territory=None, selling_or_buying="sell
 	else:
 		fieldname = selling_or_buying
 
-	default_price_list = component.get_default_price_list_row()
-	if not territory and default_price_list:
-		return default_price_list.get(fieldname)
+	return row.get(fieldname)
 
-	territory_price_lists = [d for d in component.price_lists if cstr(territory) == cstr(d.territory)]
-	if territory_price_lists:
-		return territory_price_lists[0].get(fieldname)
 
-	return default_price_list.get(fieldname) if default_price_list else None
+def get_default_price(row, selling_or_buying):
+	if not row:
+		return None
+
+	if selling_or_buying == "selling":
+		fieldname = "selling_price"
+	elif selling_or_buying == "buying":
+		fieldname = "buying_price"
+	else:
+		fieldname = selling_or_buying
+
+	return flt(row.get(fieldname))
 
 
 def get_item_price(item_code, price_list, transaction_date=None):

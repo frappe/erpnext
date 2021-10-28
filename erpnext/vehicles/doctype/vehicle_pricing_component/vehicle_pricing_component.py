@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, flt
 from frappe.model.document import Document
 
 
@@ -45,8 +45,8 @@ class VehiclePricingComponent(Document):
 
 	def validate_price_list_mandatory(self):
 		for d in self.price_lists:
-			if not d.selling_price_list or not d.buying_price_list:
-				frappe.throw(_("Row #{0}: Please set either Selling Price List or Buying Price List or remove the row")
+			if not d.selling_price_list and not d.buying_price_list and not flt(d.selling_price) and not flt(d.buying_price):
+				frappe.throw(_("Row #{0}: Please set either Selling Price or Buying Price or remove the row")
 					.format(d.idx))
 
 	def validate_duplicate_territory(self):
