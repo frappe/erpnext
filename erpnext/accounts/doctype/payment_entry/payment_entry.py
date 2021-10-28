@@ -229,7 +229,7 @@ class PaymentEntry(AccountsController):
 		if self.party_type == "Student":
 			valid_reference_doctypes = ("Fees")
 		elif self.party_type == "Customer":
-			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC")
+			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC", "Customer Documents")
 		elif self.party_type == "Supplier":
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
 		elif self.party_type == "Employee":
@@ -864,9 +864,11 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			elif ref_doc.doctype == "Employee Advance":
 				total_amount = ref_doc.advance_amount
 			elif ref_doc.doctype == "Debit Note CXC":
-				total_amount = ref_doc.amount
+				total_amount = ref_doc.total
+			elif ref_doc.doctype == "Customer Documents":
+				total_amount = ref_doc.total
 			elif ref_doc.doctype == "Credit Note CXP":
-				total_amount = ref_doc.amount
+				total_amount = ref_doc.total
 			else:
 				total_amount = ref_doc.base_grand_total
 			exchange_rate = 1
@@ -878,7 +880,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Credit Note CXP"):
+		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Customer Documents", "Credit Note CXP"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
 			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":
