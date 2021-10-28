@@ -174,6 +174,7 @@ def get_lower_deduction_certificate(tax_details, pan_no):
 	ldc_name = frappe.db.get_value('Lower Deduction Certificate',
 		{
 			'pan_no': pan_no,
+			'tax_withholding_category': tax_details.tax_withholding_category,
 			'valid_from': ('>=', tax_details.from_date),
 			'valid_upto': ('<=', tax_details.to_date)
 		}, 'name')
