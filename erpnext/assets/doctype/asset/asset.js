@@ -150,6 +150,8 @@ frappe.ui.form.on('Asset', {
 		else if (frm.doc.is_existing_asset) {
 			frm.toggle_reqd('purchase_receipt', 0);
 			frm.toggle_reqd('purchase_invoice', 0);
+			frm.toggle_display('purchase_receipt', 0);
+ 			frm.toggle_display('purchase_invoice', 0);
 		}
 		else if (frm.doc.purchase_receipt) {
 			// if purchase receipt link is set then set PI disabled
@@ -164,8 +166,10 @@ frappe.ui.form.on('Asset', {
 		else {
 			frm.toggle_reqd('purchase_receipt', 1);
 			frm.set_df_property('purchase_receipt', 'read_only', 0);
+			frm.toggle_display('purchase_receipt', 1);
 			frm.toggle_reqd('purchase_invoice', 1);
 			frm.set_df_property('purchase_invoice', 'read_only', 0);
+			frm.toggle_display('purchase_invoice', 1);
 		}
 	},
 
