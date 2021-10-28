@@ -13,6 +13,7 @@ from frappe.utils import cint, getdate
 class TaxWithholdingCategory(Document):
 	def validate(self):
 		self.validate_dates()
+		self.validate_accounts()
 		self.validate_thresholds()
 
 	def validate_dates(self):
@@ -24,6 +25,14 @@ class TaxWithholdingCategory(Document):
 			# validate overlapping of dates
 			if last_date and getdate(d.to_date) < getdate(last_date):
 				frappe.throw(_("Row #{0}: Dates overlapping with other row").format(d.idx))
+
+	def validate_accounts(self):
+		existing_accounts = []
+		for d in self.get('accounts'):
+			if d.get('account') in existing_accounts:
+				frappe.throw(_("Account {0} added multiple times").format(frappe.bold(d.get('account'))))
+
+			existing_accounts.append(d.get('account'))
 
 	def validate_thresholds(self):
 		for d in self.get('rates'):
@@ -100,6 +109,7 @@ def get_tax_withholding_details(tax_withholding_category, posting_date, company)
 	for account_detail in tax_withholding.accounts:
 		if company == account_detail.company:
 			return frappe._dict({
+				"tax_withholding_category": tax_withholding_category,
 				"account_head": account_detail.account,
 				"rate": tax_rate_detail.tax_withholding_rate,
 				"from_date": tax_rate_detail.from_date,
@@ -202,22 +212,46 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 			# then chargeable value is "prev invoices + advances" value which cross the threshold
 			tax_amount = get_tcs_amount(parties, inv, tax_details, vouchers, advance_vouchers)
 
+	if cint(tax_details.round_off_tax_amount):
+		tax_amount = round(tax_amount)
+
 	return tax_amount, tax_deducted
 
 def get_invoice_vouchers(parties, tax_details, company, party_type='Supplier'):
 	dr_or_cr = 'credit' if party_type == 'Supplier' else 'debit'
+	doctype = 'Purchase Invoice' if party_type == 'Supplier' else 'Sales Invoice'
 
 	filters = {
-		dr_or_cr: ['>', 0],
 		'company': company,
-		'party_type': party_type,
-		'party': ['in', parties],
+		frappe.scrub(party_type): ['in', parties],
 		'posting_date': ['between', (tax_details.from_date, tax_details.to_date)],
 		'is_opening': 'No',
-		'is_cancelled': 0
+		'docstatus': 1
 	}
 
-	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck="voucher_no") or [""]
+	if not tax_details.get('consider_party_ledger_amount') and doctype != "Sales Invoice":
+		filters.update({
+			'apply_tds': 1,
+			'tax_withholding_category': tax_details.get('tax_withholding_category')
+		})
+
+	invoices = frappe.get_all(doctype, filters=filters, pluck="name") or [""]
+
+	journal_entries = frappe.db.sql("""
+		SELECT j.name
+			FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
+		WHERE
+			j.docstatus = 1
+			AND j.is_opening = 'No'
+			AND j.posting_date between %s and %s
+			AND ja.{dr_or_cr} > 0
+			AND ja.party in %s
+	""".format(dr_or_cr=dr_or_cr), (tax_details.from_date, tax_details.to_date, tuple(parties)), as_list=1)
+
+	if journal_entries:
+		journal_entries = journal_entries[0]
+
+	return invoices + journal_entries
 
 def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, party_type='Supplier'):
 	# for advance vouchers, debit and credit is reversed
@@ -299,9 +333,6 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
-
-	if cint(tax_details.round_off_tax_amount):
-		tds_amount = round(tds_amount)
 
 	return tds_amount
 

@@ -246,7 +246,10 @@ def get_invoice_customer_map(pos_invoices):
 	return pos_invoice_customer_map
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
-	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
+	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions'))
+	if frappe.flags.in_test and not invoices:
+		invoices = get_all_unconsolidated_invoices()
+
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 10 and closing_entry:
