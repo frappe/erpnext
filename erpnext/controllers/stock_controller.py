@@ -691,7 +691,6 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 		group_by="item_code, warehouse"
 	)
 	distinct_item_warehouses = set()
-
 	repost_entries = []
 
 	for sle in stock_ledger_entries:
