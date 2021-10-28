@@ -1,0 +1,34 @@
+{% macro render_row(label, value) %}
+<div class="field row">
+	<div class="col-7 {%- if doc.align_labels_right %} text-right{%- endif -%}">
+		<div class="label">{{ label }}</div>
+	</div>
+	<div class="text-right col-5">
+		{{ value }}
+	</div>
+</div>
+{% endmacro %}
+
+{%- macro render_discount_amount(doc) -%}
+	{%- if doc.discount_amount -%}
+	{{ render_row(_(doc.meta.get_label('discount_amount')), '- ' + doc.get_formatted("discount_amount", doc)) }}
+	{%- endif -%}
+{%- endmacro -%}
+
+<div class="row">
+    <div class="col"></div>
+	<div class="col">
+		{%- if doc.apply_discount_on == "Net Total" -%}
+			{{ render_discount_amount(doc) }}
+		{%- endif -%}
+		{%- for charge in doc.taxes -%}
+			{%- if (charge.tax_amount or print_settings.print_taxes_with_zero_amount) and (not charge.included_in_print_rate or doc.flags.show_inclusive_tax_in_print) -%}
+			{{ render_row(charge.get_formatted("description"), charge.get_formatted('tax_amount', doc)) }}
+			{%- endif -%}
+		{%- endfor -%}
+		{%- if doc.apply_discount_on == "Grand Total" -%}
+			{{ render_discount_amount(doc) }}
+		{%- endif -%}
+	</div>
+</div>
+
