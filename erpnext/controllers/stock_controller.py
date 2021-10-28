@@ -17,7 +17,7 @@ from erpnext.accounts.general_ledger import (
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.stock_ledger import get_items_to_be_repost, get_valuation_rate
 
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
@@ -684,12 +684,8 @@ def create_repost_item_valuation_entry(args):
 def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=False):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
-	stock_ledger_entries = frappe.db.get_all("Stock Ledger Entry",
-		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-		fields=["item_code", "warehouse", "posting_date", "posting_time", "creation", "company"],
-		order_by="creation asc",
-		group_by="item_code, warehouse"
-	)
+	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
+
 	distinct_item_warehouses = set()
 	repost_entries = []
 
