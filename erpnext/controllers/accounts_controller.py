@@ -820,13 +820,9 @@ class AccountsController(TransactionBase):
 				self.unlink_ref_doc_from_po()
 
 	def unlink_ref_doc_from_po(self):
-		print("\n"*5, "*"*50, "\n"*5)
-
 		so_items = []
 		for item in self.items:
 			so_items.append(item.name)
-
-		print("SO Items: ", so_items)
 
 		linked_po = frappe.get_all(
 			'Purchase Order Item',
@@ -837,8 +833,6 @@ class AccountsController(TransactionBase):
 			},
 			pluck='parent'
 		)
-
-		print("Before unlinking: ", linked_po)
 
 		if linked_po:
 			frappe.db.set_value(
@@ -853,19 +847,6 @@ class AccountsController(TransactionBase):
 			)
 
 			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
-
-		linked_po = frappe.get_all(
-			'Purchase Order Item',
-			filters = {
-				'sales_order': self.name,
-				'sales_order_item': ['in', so_items],
-				'docstatus': ['<', 2]
-			},
-			pluck='parent'
-		)
-		print("After unlinking: ", linked_po)
-
-		print("\n"*5, "*"*50, "\n"*5)
 
 	def get_tax_map(self):
 		tax_map = {}
