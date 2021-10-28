@@ -86,6 +86,9 @@
   "column_break_75",
   "agent_total",
   "margin_amount",
+  "customer_pay_orders_section",
+  "customer_authority_instruments",
+  "customer_authority_payment",
   "status_section",
   "customer_payment",
   "customer_closed_amount",
@@ -814,12 +817,36 @@
    "label": "Agent Total",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "customer_authority_instruments",
+   "fieldname": "customer_pay_orders_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Pay Orders For Authority"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_authority_payment",
+   "fieldtype": "Currency",
+   "label": "Customer Pay Order Total",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_authority_instruments",
+   "fieldtype": "Table",
+   "label": "Pay Orders",
+   "no_copy": 1,
+   "options": "Vehicle Registration Order Payment"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-28 16:39:45.517187",
+ "modified": "2021-10-28 18:17:07.212924",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

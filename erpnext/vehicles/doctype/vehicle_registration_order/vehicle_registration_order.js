@@ -301,16 +301,34 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		this.calculate_totals();
 	},
 
-	calculate_totals: function () {
-		erpnext.vehicles.pricing.calculate_total_price(this.frm, 'customer_charges', 'customer_total');
-		erpnext.vehicles.pricing.calculate_total_price(this.frm, 'authority_charges', 'authority_total');
+	instrument_amount: function () {
+		this.calculate_totals();
+	},
 
-		frappe.model.round_floats_in(this.frm.doc, ['agent_commission', 'agent_license_plate_charges']);
-		this.frm.doc.agent_total = flt(this.frm.doc.agent_commission + this.frm.doc.agent_license_plate_charges,
+	customer_authority_instruments_remove: function () {
+		this.calculate_totals();
+	},
+
+	calculate_totals: function () {
+		var me = this;
+
+		erpnext.vehicles.pricing.calculate_total_price(me.frm, 'customer_charges', 'customer_total');
+		erpnext.vehicles.pricing.calculate_total_price(me.frm, 'authority_charges', 'authority_total');
+
+		frappe.model.round_floats_in(me.frm.doc, ['agent_commission', 'agent_license_plate_charges']);
+		me.frm.doc.agent_total = flt(me.frm.doc.agent_commission + me.frm.doc.agent_license_plate_charges,
 			precision('agent_total'));
 
-		this.frm.doc.margin_amount = flt(this.frm.doc.customer_total - this.frm.doc.authority_total
-			- this.frm.doc.agent_total, precision('margin_amount'));
+		me.frm.doc.margin_amount = flt(me.frm.doc.customer_total - me.frm.doc.authority_total
+			- me.frm.doc.agent_total, precision('margin_amount'));
+
+		me.frm.doc.customer_authority_payment = 0;
+		$.each(me.frm.doc.customer_authority_instruments || [], function (i, d) {
+			frappe.model.round_floats_in(d, ['instrument_amount']);
+			me.frm.doc.customer_authority_payment += d.instrument_amount;
+		});
+		me.frm.doc.customer_authority_payment = flt(me.frm.doc.customer_authority_payment,
+			precision('customer_authority_payment'));
 
 		this.reset_outstanding_amount();
 
@@ -325,10 +343,10 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			this.frm.doc.agent_payment = 0;
 			this.frm.doc.agent_balance = 0;
 			this.frm.doc.agent_closed_amount = 0;
-
-			this.frm.doc.customer_outstanding = flt(this.frm.doc.customer_total) - flt(this.frm.doc.customer_payment);
-			this.frm.doc.authority_outstanding = flt(this.frm.doc.authority_total) - flt(this.frm.doc.authority_payment);
 		}
+
+		this.frm.doc.customer_outstanding = flt(this.frm.doc.customer_total) - flt(this.frm.doc.customer_payment) - flt(this.frm.doc.customer_authority_payment);
+		this.frm.doc.authority_outstanding = flt(this.frm.doc.authority_total) - flt(this.frm.doc.authority_payment) - flt(this.frm.doc.customer_authority_payment);
 	},
 
 	make_journal_entry: function(purpose) {

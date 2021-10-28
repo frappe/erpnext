@@ -1,0 +1,74 @@
+{
+ "creation": "2021-10-28 17:59:14.429203",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "instrument_type",
+  "instrument_date",
+  "instrument_no",
+  "bank",
+  "instrument_amount"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "instrument_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "\nPay Order\nCheque\nDemand Draft",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "instrument_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "instrument_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Instrument No",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank",
+   "options": "Bank"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "instrument_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-10-28 18:08:13.387533",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Registration Order Payment",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "restrict_to_domain": "Vehicles",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

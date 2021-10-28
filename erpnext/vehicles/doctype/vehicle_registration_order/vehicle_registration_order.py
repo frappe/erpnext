@@ -42,6 +42,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.validate_agent_license_plate_charges()
 		self.calculate_totals()
 		self.calculate_outstanding_amount()
+		self.validate_amounts()
 
 		self.set_missing_accounts()
 
@@ -199,6 +200,12 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.margin_amount = flt(self.customer_total - self.authority_total - self.agent_total,
 			self.precision('margin_amount'))
 
+		self.customer_authority_payment = 0
+		for d in self.customer_authority_instruments:
+			self.round_floats_in(d, ['instrument_amount'])
+			self.customer_authority_payment = d.instrument_amount
+		self.customer_authority_payment = flt(self.customer_authority_payment, self.precision('customer_authority_payment'))
+
 	def calculate_outstanding_amount(self):
 		if self.docstatus == 0:
 			self.customer_payment = 0
@@ -211,8 +218,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			gl_values = self.get_values_from_gl_entries()
 			self.update(gl_values)
 
-		self.customer_outstanding = flt(self.customer_total) - flt(self.customer_payment)
-		self.authority_outstanding = flt(self.authority_total) - flt(self.authority_payment)
+		self.customer_outstanding = flt(self.customer_total) - flt(self.customer_payment) - flt(self.customer_authority_payment)
+		self.authority_outstanding = flt(self.authority_total) - flt(self.authority_payment) - flt(self.customer_authority_payment)
 
 	def get_values_from_gl_entries(self):
 		args = {
@@ -302,6 +309,13 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			'agent_balance': agent_balance,
 			'agent_closed_amount': agent_closed_amount,
 		})
+
+	def validate_amounts(self):
+		for field in ['agent_commission', 'agent_license_plate_charges', 'customer_total', 'authority_total']:
+			self.validate_value(field, '>=', 0)
+
+		for d in self.customer_authority_instruments:
+			d.validate_value('instrument_amount', '>', 0)
 
 	def get_unclosed_customer_amount(self):
 		customer_margin = flt(flt(self.customer_total) - flt(self.authority_total),
@@ -430,23 +444,20 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			if self.customer_outstanding > 0:
 				self.status = "To Receive Payment"
 
-			elif not self.vehicle_license_plate:
-				if self.authority_outstanding > 0:
+			elif self.authority_outstanding > 0:
 					self.status = "To Pay Authority"
 
-				elif self.invoice_status == "In Hand":
+			elif not self.vehicle_license_plate:
+				if self.invoice_status == "Not Received":
+					self.status = "To Receive Invoice"
+
+				elif self.invoice_status == "In Hand" and not self.invoice_issue_date:
 					self.status = "To Issue Invoice"
 
-				elif self.invoice_status == "Delivered" or (self.invoice_status == "Issued" and self.invoice_issued_for == "Registration"):
-					self.status = "To Receive Receipt"
-
 				else:
-					self.status = "To Receive Invoice"
+					self.status = "To Receive Receipt"
 			else:
-				if self.authority_outstanding > 0:
-					self.status = "To Pay Authority"
-
-				elif self.invoice_status == "Issued":
+				if self.invoice_status == "Issued":
 					self.status = "To Retrieve Invoice"
 
 				elif self.agent_balance > 0:
