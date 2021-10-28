@@ -202,7 +202,6 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Student", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Donor", "account_type": "Receivable"},
 
-		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},
 		{'doctype': "Opportunity Type", "name": _("Support")},
 		{'doctype': "Opportunity Type", "name": _("Maintenance")},

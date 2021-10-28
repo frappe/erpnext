@@ -1032,7 +1032,7 @@ class AccountsController(TransactionBase):
 
 		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
 			frappe.msgprint(_("Overbilling of {} ignored because you have {} role.")
-					.format(total_overbilled_amt, role_allowed_to_over_bill), title=_("Warning"), indicator="orange")
+					.format(total_overbilled_amt, role_allowed_to_over_bill), indicator="orange", alert=True)
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
@@ -1354,8 +1354,8 @@ class AccountsController(TransactionBase):
 			total = 0
 			base_total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount)
-				base_total += flt(d.base_payment_amount)
+				total += flt(d.payment_amount, d.precision("payment_amount"))
+				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
 			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -1371,8 +1371,9 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-			if total != flt(grand_total, self.precision("grand_total")) or \
-				base_total != flt(base_grand_total, self.precision("base_grand_total")):
+
+			if flt(total, self.precision("grand_total")) != flt(grand_total, self.precision("grand_total")) or \
+				flt(base_total, self.precision("base_grand_total")) != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
