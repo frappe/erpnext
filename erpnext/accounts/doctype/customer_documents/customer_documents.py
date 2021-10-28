@@ -10,7 +10,7 @@ from frappe.model.document import Document
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 
-class DebitNoteCXC(Document):
+class CustomerDocuments(Document):
 	def validate(self):
 		self.calculate_total()
 		self.validate_status()
@@ -43,8 +43,6 @@ class DebitNoteCXC(Document):
 				elif self.isv_18 != None:
 					self.total = total_base + self.total_exempt + self.isv_15
 					self.outstanding_amount = total_base + self.total_exempt + self.isv_15
-
-
 
 	def calculate_isv(self):
 		tx_base = 0

@@ -1,7 +1,7 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Sales Invoice Without Items', {
+frappe.ui.form.on('Supplier Documents', {
 	// refresh: function(frm) {
 
 	// }
