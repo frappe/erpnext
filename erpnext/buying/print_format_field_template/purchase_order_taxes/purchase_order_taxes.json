@@ -1,0 +1,16 @@
+{
+ "creation": "2021-10-19 18:07:19.253457",
+ "docstatus": 0,
+ "doctype": "Print Format Field Template",
+ "document_type": "Purchase Order",
+ "field": "taxes",
+ "idx": 0,
+ "modified": "2021-10-19 18:07:19.253457",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Purchase Order Taxes",
+ "owner": "Administrator",
+ "standard": 1,
+ "template": "",
+ "template_file": "templates/print_formats/includes/taxes_and_charges.html"
+}

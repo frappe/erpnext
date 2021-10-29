@@ -89,7 +89,13 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		out.update(get_bin_details(args.item_code, out.warehouse, args.company))
+		if doc and doc.get('doctype') == 'Purchase Order':
+			# calculate company_total_stock only for po
+			bin_details = get_bin_details(args.item_code, out.warehouse, args.company)
+		else:
+			bin_details = get_bin_details(args.item_code, out.warehouse)
+
+		out.update(bin_details)
 
 	# update args with out, if key or value not exists
 	for key, value in iteritems(out):
@@ -485,8 +491,9 @@ def get_item_tax_template(args, item, out):
 			"item_tax_template": None
 		}
 	"""
-	item_tax_template = args.get("item_tax_template")
-	item_tax_template = _get_item_tax_template(args, item.taxes, out)
+	item_tax_template = None
+	if item.taxes:
+		item_tax_template = _get_item_tax_template(args, item.taxes, out)
 
 	if not item_tax_template:
 		item_group = item.item_group
@@ -502,17 +509,17 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		tax_company = frappe.get_value("Item Tax Template", tax.item_tax_template, 'company')
-		if (tax.valid_from or tax.maximum_net_rate) and tax_company == args['company']:
-			# In purchase Invoice first preference will be given to supplier invoice date
-			# if supplier date is not present then posting date
-			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
+		tax_company = frappe.get_cached_value("Item Tax Template", tax.item_tax_template, 'company')
+		if tax_company == args['company']:
+			if (tax.valid_from or tax.maximum_net_rate):
+				# In purchase Invoice first preference will be given to supplier invoice date
+				# if supplier date is not present then posting date
+				validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
 
-			if getdate(tax.valid_from) <= getdate(validation_date) \
-				and is_within_valid_range(args, tax):
-				taxes_with_validity.append(tax)
-		else:
-			if tax_company == args['company']:
+				if getdate(tax.valid_from) <= getdate(validation_date) \
+					and is_within_valid_range(args, tax):
+					taxes_with_validity.append(tax)
+			else:
 				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
@@ -890,8 +897,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_bin_details(args.item_code,
-				res.warehouse).get("actual_qty")
+			res.actual_qty = get_bin_details(args.item_code, res.warehouse).get("actual_qty")
 
 	return res
 
