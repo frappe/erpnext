@@ -128,7 +128,7 @@ def get_serial_nos_data_after_transactions(args):
 		& (Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time))
 		& (sle.is_cancelled == 0)
 	).orderby(
-		sle.posting_date, sle.posting_time
+		sle.posting_date, sle.posting_time, sle.creation
 	).run(as_dict=1)
 
 	for stock_ledger_entry in stock_ledger_entries:
