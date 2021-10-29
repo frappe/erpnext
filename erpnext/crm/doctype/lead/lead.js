@@ -61,7 +61,6 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 				'docname': cur_frm.doc.name
 			},
 			callback: function(r) {
-				console.log(r.message)
 				if (r.message) {
 					let html = `<div class="row">
 							<div class="col-xs-6">

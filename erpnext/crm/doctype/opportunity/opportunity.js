@@ -224,7 +224,38 @@ frappe.ui.form.on("Opportunity", {
 			'grand_total': flt(grand_total),
 			'base_grand_total': flt(base_grand_total)
 		});
-	}
+	},
+
+	set_call_and_email_stats (frm) {
+		frappe.call({
+			method: 'erpnext.crm.utils.get_call_and_email_stats',
+			args: {
+				'doctype': frm.doc.doctype,
+				'docname': frm.doc.name
+			},
+			callback: function(r) {
+				if (r.message) {
+					let html = `<div class="row">
+							<div class="col-xs-6">
+								<span> ${__('Outgoing Calls')}: ${r.message.outgoing_calls} </span></span>
+							</div>
+							<div class="col-xs-6">
+								<span> ${__('Incoming Calls')}: ${r.message.incoming_calls} </span></span>
+							</div>
+							<div class="col-xs-6">
+								<span> ${__('Emails Sent')}: ${r.message.emails_sent} </span></span>
+							</div>
+							<div class="col-xs-6">
+								<span> ${__('Emails Received')}: ${r.message.emails_received} </span></span>
+							</div>
+							</div>` ;
+
+					cur_frm.dashboard.set_headline_alert(html)
+				}
+				
+			}
+		});
+	}	
 
 });
 frappe.ui.form.on("Opportunity Item", {
@@ -259,6 +290,7 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 
 		this.setup_queries();
 		this.frm.trigger('currency');
+		this.frm.trigger('set_call_and_email_stats');
 	}
 
 	setup_queries() {
