@@ -35,7 +35,7 @@ class VehicleBookingDetailsReport(object):
 		filter_conditions = self.get_conditions()
 
 		self.data = frappe.db.sql("""
-			select m.name, m.transaction_date, m.vehicle_delivered_date,
+			select m.name, m.transaction_date, m.vehicle_delivered_date, m.vehicle_received_date,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic, m.supplier,
 				m.item_code, m.item_name, m.previous_item_code, item.variant_of, item.item_group, item.brand,
 				m.vehicle, m.vehicle_chassis_no, m.vehicle_engine_no,
@@ -245,6 +245,7 @@ class VehicleBookingDetailsReport(object):
 			{"label": _("Booked"), "fieldname": "qty_booked", "fieldtype": "Float", "width": 65, "precision": "1" if self.filters.sales_person else "0"},
 			{"label": _("Delivered"), "fieldname": "qty_delivered", "fieldtype": "Float", "width": 75, "precision": "1" if self.filters.sales_person else "0"},
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
+			{"label": _("Received Date"), "fieldname": "vehicle_received_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Delivery Date"), "fieldname": "vehicle_delivered_date", "fieldtype": "Date", "width": 100},
 			# {"label": _("Customer (User)"), "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 100},
 			# {"label": _("Financer"), "fieldname": "financer", "fieldtype": "Link", "options": "Customer", "width": 100},

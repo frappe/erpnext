@@ -50,7 +50,7 @@ class VehicleAllocationRegisterReport(object):
 		booking_data = frappe.db.sql("""
 			select m.name as vehicle_booking_order, m.item_code, m.previous_item_code,
 				m.supplier, m.allocation_period, m.delivery_period, m.vehicle_allocation, m.priority,
-				m.transaction_date, m.vehicle_delivered_date, m.status,
+				m.transaction_date, m.vehicle_delivered_date, m.vehicle_received_date, m.status,
 				m.color_1, m.color_2, m.color_3, m.vehicle_color, m.previous_color,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
@@ -307,6 +307,7 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
+			{"label": _("Received Date"), "fieldname": "vehicle_received_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Delivery Date"), "fieldname": "vehicle_delivered_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Sales Person"), "fieldtype": "Data", "fieldname": "sales_person", "width": 150},
 			{"label": _("Chassis No"), "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "width": 150},
