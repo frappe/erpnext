@@ -828,7 +828,7 @@ class AccountsController(TransactionBase):
 		for item in self.items:
 			so_items.append(item.name)
 
-		linked_po = frappe.get_all(
+		linked_po = list(set(frappe.get_all(
 			'Purchase Order Item',
 			filters = {
 				'sales_order': self.name,
@@ -836,7 +836,7 @@ class AccountsController(TransactionBase):
 				'docstatus': ['<', 2]
 			},
 			pluck='parent'
-		)
+		)))
 
 		if linked_po:
 			frappe.db.set_value(
