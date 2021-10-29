@@ -211,7 +211,8 @@
   "update_auto_repeat_reference",
   "against_income_account",
   "pos_total_qty",
-  "creation_date"
+  "creation_date",
+  "total_with_discount"
  ],
  "fields": [
   {
@@ -1767,12 +1768,18 @@
    "fieldtype": "Select",
    "label": "Type",
    "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity"
+  },
+  {
+   "fieldname": "total_with_discount",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Total With Discount"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-08-05 15:27:25.360136",
+ "modified": "2021-10-28 23:20:34.804265",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

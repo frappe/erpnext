@@ -27,6 +27,7 @@
   "report_preference",
   "mobile",
   "email",
+  "cologne",
   "phone",
   "disabled",
   "sb_relation",
@@ -104,7 +105,6 @@
    "reqd": 1
   },
   {
-   "bold": 1,
    "fieldname": "blood_group",
    "fieldtype": "Select",
    "label": "Blood Group",
@@ -356,12 +356,19 @@
    "label": "DNI",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "cologne",
+   "fieldtype": "Link",
+   "label": "Cologne",
+   "options": "Cologne"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2021-10-18 12:12:54.799345",
+ "modified": "2021-10-28 23:32:25.254451",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
