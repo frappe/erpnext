@@ -484,7 +484,8 @@ class JobCard(Document):
 						'docstatus': ('!=', 2)}, fields = 'sum(transferred_qty) as qty', group_by='operation_id')
 
 					if job_cards:
-						qty = min(d.qty for d in job_cards)
+						transferred_qtys = [d.qty for d in job_cards if d.qty > 0]
+						qty = min(transferred_qtys) if transferred_qtys else 0
 
 			doc.db_set('material_transferred_for_manufacturing', qty)
 
