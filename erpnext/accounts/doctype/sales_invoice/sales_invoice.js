@@ -10,6 +10,12 @@ cur_frm.pformat.print_heading = 'Invoice';
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	setup: function(doc) {
+		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+			return {
+				filters:{"default_company": doc.company}
+			};
+		});
+		
 		this.setup_posting_date_time_check();
 		this._super(doc);
 	},

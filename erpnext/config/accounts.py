@@ -604,6 +604,12 @@ def get_data():
 					"doctype": "Address"
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Discount Per Invoice",
+					"doctype": "Sales Invoice"
+				},
+				{
 					"type": "doctype",
 					"name": "Cash Report",
 				}
