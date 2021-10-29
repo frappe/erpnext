@@ -10,6 +10,12 @@ frappe.ui.form.on('Quotation', {
 			'Sales Order': 'Make Sales Order'
 		},
 
+		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+			return {
+				filters:{"default_company": doc.company}
+			};
+		});
+
 		frm.set_query("quotation_to", function() {
 			return{
 				"filters": {
@@ -17,7 +23,6 @@ frappe.ui.form.on('Quotation', {
 				}
 			}
 		});
-
 	},
 
 	refresh: function(frm) {
@@ -42,6 +47,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this._super(doc, dt, dn);
 
 	},
+
 	party_name: function() {
 		var me = this;
 		erpnext.utils.get_party_details(this.frm, null, null, function() {

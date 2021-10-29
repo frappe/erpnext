@@ -1867,19 +1867,19 @@ class Payment {
 					});
 				}
 			},
-			{
-				fieldtype: 'Currency',
-				label: __("Additional Discount Percentage"),
-				options: me.frm.doc.currency,
-				fieldname: "additional_discount_percentage",
-				default: me.frm.doc.additional_discount_percentage,
-				onchange: () => {
-					me.update_cur_frm_value('additional_discount_percentage', () => {
-						frappe.flags.additional_discount_percentage = false;
-						me.update_additional_discount_percentage()
-					});
-				}
-			},
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("Additional Discount Percentage"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "additional_discount_percentage",
+			// 	default: me.frm.doc.additional_discount_percentage,
+			// 	onchange: () => {
+			// 		me.update_cur_frm_value('additional_discount_percentage', () => {
+			// 			frappe.flags.additional_discount_percentage = false;
+			// 			me.update_additional_discount_percentage()
+			// 		});
+			// 	}
+			// },
 			{
 				fieldtype: 'Column Break',
 			},
@@ -1905,6 +1905,18 @@ class Payment {
 				onchange: () => {
 					me.update_cur_frm_value('discount_reason', () => {
 						frappe.flags.discount_reason = false;
+					});
+				}
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Total With Discount"),
+				options: me.frm.doc.currency,
+				fieldname: "total_with_discount",
+				default: me.frm.doc.currency,
+				onchange: () => {
+					me.update_cur_frm_value('total_with_discount', () => {
+						frappe.flags.total_with_discount = false;
 					});
 				}
 			},
@@ -1976,6 +1988,7 @@ class Payment {
 		frappe.flags.discount_amount = true;
 		frappe.flags.discount_reason = true;
 		frappe.flags.additional_discount_percentage = true;
+		frappe.flags.total_with_discount = true;
 	}
 
 	update_cur_frm_value(fieldname, callback) {
@@ -2005,6 +2018,7 @@ class Payment {
 
 	update_discount_amount() {
 		this.dialog.set_value("discount_amount", this.frm.doc.discount_amount);
+		this.update_total_with_discount();
 		this.update_change_amount();
 	}
 
@@ -2021,6 +2035,11 @@ class Payment {
 	update_write_off_amount() {
 		this.dialog.set_value("write_off_amount", this.frm.doc.write_off_amount);
 	}
+
+	update_total_with_discount() {
+		this.dialog.set_value("total_with_discount", this.frm.doc.paid_amount);
+	}
+
 
 	show_paid_amount() {
 		this.dialog.set_value("paid_amount", this.frm.doc.paid_amount);
