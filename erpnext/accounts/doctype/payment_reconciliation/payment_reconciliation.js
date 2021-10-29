@@ -107,7 +107,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		}
 	}
 
-	receivable_payable_account(){
+	receivable_payable_account() {
 		this.frm.trigger("clear_child_tables");
 		this.frm.refresh();
 	}
@@ -124,7 +124,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		return this.frm.call({
 			doc: this.frm.doc,
 			method: 'get_unreconciled_entries',
-			callback: (r, rt) => {
+			callback: () => {
 				if (!(this.frm.doc.payments.length || this.frm.doc.invoices.length)) {
 					frappe.throw({message: __("No Unreconciled Invoices and Payments found for this party and account")});
 				} else if (!(this.frm.doc.invoices.length)) {
@@ -247,7 +247,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		return this.frm.call({
 			doc: this.frm.doc,
 			method: 'reconcile',
-			callback: (r, rt) => {
+			callback: () => {
 				this.frm.clear_table("allocation");
 				this.frm.refresh();
 			}
