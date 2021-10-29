@@ -24,6 +24,7 @@ class VehicleDelivery(VehicleTransactionController):
 
 	def on_submit(self):
 		self.update_stock_ledger()
+		self.update_vehicle_warranty_no()
 		self.make_odometer_log()
 		self.update_vehicle_booking_order_delivery()
 

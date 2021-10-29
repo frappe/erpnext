@@ -472,6 +472,11 @@ class VehicleTransactionController(StockController):
 
 		return vehicle_registration_order
 
+	def update_vehicle_warranty_no(self):
+		if self.get('vehicle_warranty_no'):
+			if frappe.db.get_value("Vehicle", self.vehicle, "warranty_no") != self.get('vehicle_warranty_no'):
+				frappe.db.set_value("Vehicle", self.vehicle, "warranty_no", self.vehicle_warranty_no, notify=1)
+
 	def make_odometer_log(self):
 		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
 			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
