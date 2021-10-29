@@ -1,11 +1,17 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # License: MIT. See LICENSE
 
-import frappe, math, json, datetime
+import frappe
 from frappe import _
-from frappe.utils import getdate, cint, add_months, add_days, formatdate, get_datetime
-from datetime import date
-from dateutil.relativedelta import relativedelta
+from frappe.utils import (getdate, 
+	cint, 
+	add_months, 
+	add_days, 
+	formatdate
+)
+import math
+import json
+import datetime
 
 def execute(filters=None):
 	return CallLogSummary(filters).run()
@@ -22,12 +28,12 @@ class CallLogSummary():
 		data = prepare_data(columns, self.get_data())
 		chart = get_chart_data(columns, data)
 		columns.insert(0, {
-            'fieldname': 'user',
-            'label': _('{0} Owner').format(self.filters.reference_document_type),
-            'fieldtype': 'Link',
-            'options': 'User',
+			'fieldname': 'user',
+			'label': _('{0} Owner').format(self.filters.reference_document_type),
+			'fieldtype': 'Link',
+			'options': 'User',
 			'width': 200
-        })
+		})
 
 		return columns, data, None, chart
 
@@ -65,32 +71,32 @@ class CallLogSummary():
 			DATE(cl.creation) as creation, 
 			dt._assign as assign, 
 			dt.name as name
-    		FROM ((`tabDynamic Link` dl 
+			FROM ((`tabDynamic Link` dl 
 			INNER JOIN `tabCall Log` cl ON {0})
-    		INNER JOIN `tab{1}` dt ON {2})
+			INNER JOIN `tab{1}` dt ON {2})
 			""".format(join_field, filters.reference_document_type, join)
 
 		return query
 
 def get_chart_data(columns, data):
-		labels = []
-		datasets = []
-		for column in columns:
-			labels.append(column['label'])
-			count = 0
-			for row in data:
-				count += row[column.fieldname]
-			datasets.append(count)
+	labels = []
+	datasets = []
+	for column in columns:
+		labels.append(column['label'])
+		count = 0
+		for row in data:
+			count += row[column.fieldname]
+		datasets.append(count)
 
-		chart = {
-			'data':{
-				'labels': labels,
-				'datasets': [{'values': datasets}]
-			},
-			'type':'bar'
-		}
+	chart = {
+		'data':{
+			'labels': labels,
+			'datasets': [{'values': datasets}]
+		},
+		'type':'bar'
+	}
 
-		return chart
+	return chart
 
 def prepare_data(columns, data):
 	period_dict = dict()

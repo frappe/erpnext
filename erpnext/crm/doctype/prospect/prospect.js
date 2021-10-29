@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Prospect', {
 	onload (frm) {
-		frm.trigger('set_call_and_email_stats')
+		frm.trigger('set_call_and_email_stats');
 	},
 
 	refresh (frm) {
@@ -55,7 +55,7 @@ frappe.ui.form.on('Prospect', {
 							</div>
 							</div>` ;
 
-					cur_frm.dashboard.set_headline_alert(html)
+					cur_frm.dashboard.set_headline_alert(html);
 				}
 				
 			}

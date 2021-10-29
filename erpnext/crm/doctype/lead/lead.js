@@ -29,7 +29,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			return { query: "frappe.core.doctype.user.user.user_query" }
 		});
 
-		cur_frm.trigger('set_call_and_email_stats')
+		cur_frm.trigger('set_call_and_email_stats');
 	}
 
 	refresh () {
@@ -77,7 +77,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 							</div>
 							</div>` ;
 
-					cur_frm.dashboard.set_headline_alert(html)
+					cur_frm.dashboard.set_headline_alert(html);
 				}
 				
 			}

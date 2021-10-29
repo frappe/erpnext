@@ -1,5 +1,4 @@
 import frappe
-from erpnext.telephony.doctype.call_log.call_log import get_linked_call_logs
 
 def update_lead_phone_numbers(contact, method):
 	if contact.phone_nos:
