@@ -2,11 +2,22 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.accounts");
+<<<<<<< HEAD
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
 	onload: function() {
 		var me = this;
+=======
+erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationController extends frappe.ui.form.Controller {
+	onload() {
+		const default_company = frappe.defaults.get_default('company');
+		this.frm.set_value('company', default_company);
+>>>>>>> 1a6e98ed48 (fix(Payment Reconciliation): clear child tables on company/party change (#28008))
 
-		this.frm.set_query("party_type", function() {
+		this.frm.set_value('party_type', '');
+		this.frm.set_value('party', '');
+		this.frm.set_value('receivable_payable_account', '');
+
+		this.frm.set_query("party_type", () => {
 			return {
 				"filters": {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
@@ -14,27 +25,26 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			}
 		});
 
-		this.frm.set_query('receivable_payable_account', function() {
-			check_mandatory(me.frm);
+		this.frm.set_query('receivable_payable_account', () => {
 			return {
 				filters: {
-					"company": me.frm.doc.company,
+					"company": this.frm.doc.company,
 					"is_group": 0,
-					"account_type": frappe.boot.party_account_types[me.frm.doc.party_type]
+					"account_type": frappe.boot.party_account_types[this.frm.doc.party_type]
 				}
 			};
 		});
 
-		this.frm.set_query('bank_cash_account', function() {
-			check_mandatory(me.frm, true);
+		this.frm.set_query('bank_cash_account', () => {
 			return {
 				filters:[
-					['Account', 'company', '=', me.frm.doc.company],
+					['Account', 'company', '=', this.frm.doc.company],
 					['Account', 'is_group', '=', 0],
 					['Account', 'account_type', 'in', ['Bank', 'Cash']]
 				]
 			};
 		});
+<<<<<<< HEAD
 
 		this.frm.set_value('party_type', '');
 		this.frm.set_value('party', '');
@@ -49,9 +59,13 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			}
 		};
 	},
+=======
+	}
+>>>>>>> 1a6e98ed48 (fix(Payment Reconciliation): clear child tables on company/party change (#28008))
 
 	refresh: function() {
 		this.frm.disable_save();
+
 		this.frm.set_df_property('invoices', 'cannot_delete_rows', true);
 		this.frm.set_df_property('payments', 'cannot_delete_rows', true);
 		this.frm.set_df_property('allocation', 'cannot_delete_rows', true);
@@ -84,6 +98,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		}
 	},
 
+<<<<<<< HEAD
 	company: function() {
 		var me = this;
 		this.frm.set_value('receivable_payable_account', '');
@@ -97,64 +112,112 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 	party: function() {
 		var me = this;
 		if (!me.frm.doc.receivable_payable_account && me.frm.doc.party_type && me.frm.doc.party) {
+=======
+	company() {
+		this.frm.set_value('party', '');
+		this.frm.set_value('receivable_payable_account', '');
+	}
+
+	party_type() {
+		this.frm.set_value('party', '');
+	}
+
+	party() {
+		this.frm.set_value('receivable_payable_account', '');
+		this.frm.trigger("clear_child_tables");
+
+		if (!this.frm.doc.receivable_payable_account && this.frm.doc.party_type && this.frm.doc.party) {
+>>>>>>> 1a6e98ed48 (fix(Payment Reconciliation): clear child tables on company/party change (#28008))
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
-					company: me.frm.doc.company,
-					party_type: me.frm.doc.party_type,
-					party: me.frm.doc.party
+					company: this.frm.doc.company,
+					party_type: this.frm.doc.party_type,
+					party: this.frm.doc.party
 				},
-				callback: function(r) {
+				callback: (r) => {
 					if (!r.exc && r.message) {
-						me.frm.set_value("receivable_payable_account", r.message);
+						this.frm.set_value("receivable_payable_account", r.message);
 					}
-					me.frm.refresh();
+					this.frm.refresh();
+
 				}
 			});
 		}
 	},
 
+<<<<<<< HEAD
 	get_unreconciled_entries: function() {
 		var me = this;
+=======
+	receivable_payable_account() {
+		this.frm.trigger("clear_child_tables");
+		this.frm.refresh();
+	}
+
+	clear_child_tables() {
+		this.frm.clear_table("invoices");
+		this.frm.clear_table("payments");
+		this.frm.clear_table("allocation");
+		this.frm.refresh_fields();
+	}
+
+	get_unreconciled_entries() {
+		this.frm.clear_table("allocation");
+>>>>>>> 1a6e98ed48 (fix(Payment Reconciliation): clear child tables on company/party change (#28008))
 		return this.frm.call({
-			doc: me.frm.doc,
+			doc: this.frm.doc,
 			method: 'get_unreconciled_entries',
-			callback: function(r, rt) {
-				if (!(me.frm.doc.payments.length || me.frm.doc.invoices.length)) {
-					frappe.throw({message: __("No invoice and payment records found for this party")});
+			callback: () => {
+				if (!(this.frm.doc.payments.length || this.frm.doc.invoices.length)) {
+					frappe.throw({message: __("No Unreconciled Invoices and Payments found for this party and account")});
+				} else if (!(this.frm.doc.invoices.length)) {
+					frappe.throw({message: __("No Outstanding Invoices found for this party")});
+				} else if (!(this.frm.doc.payments.length)) {
+					frappe.throw({message: __("No Unreconciled Payments found for this party")});
 				}
-				me.frm.refresh();
+				this.frm.refresh();
 			}
 		});
 
 	},
 
+<<<<<<< HEAD
 	allocate: function() {
 		var me = this;
 		let payments = me.frm.fields_dict.payments.grid.get_selected_children();
+=======
+	allocate() {
+		let payments = this.frm.fields_dict.payments.grid.get_selected_children();
+>>>>>>> 1a6e98ed48 (fix(Payment Reconciliation): clear child tables on company/party change (#28008))
 		if (!(payments.length)) {
-			payments = me.frm.doc.payments;
+			payments = this.frm.doc.payments;
 		}
-		let invoices = me.frm.fields_dict.invoices.grid.get_selected_children();
+		let invoices = this.frm.fields_dict.invoices.grid.get_selected_children();
 		if (!(invoices.length)) {
-			invoices = me.frm.doc.invoices;
+			invoices = this.frm.doc.invoices;
 		}
-		return me.frm.call({
-			doc: me.frm.doc,
+		return this.frm.call({
+			doc: this.frm.doc,
 			method: 'allocate_entries',
 			args: {
 				payments: payments,
 				invoices: invoices
 			},
-			callback: function() {
-				me.frm.refresh();
+			callback: () => {
+				this.frm.refresh();
 			}
 		});
 	},
 
+<<<<<<< HEAD
 	reconcile: function() {
 		var me = this;
 		var show_dialog = me.frm.doc.allocation.filter(d => d.difference_amount && !d.difference_account);
+=======
+	reconcile() {
+		var show_dialog = this.frm.doc.allocation.filter(d => d.difference_amount && !d.difference_account);
+>>>>>>> 1a6e98ed48 (fix(Payment Reconciliation): clear child tables on company/party change (#28008))
 
 		if (show_dialog && show_dialog.length) {
 
@@ -186,10 +249,10 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 							label: __("Difference Account"),
 							fieldname: 'difference_account',
 							reqd: 1,
-							get_query: function() {
+							get_query: () => {
 								return {
 									filters: {
-										company: me.frm.doc.company,
+										company: this.frm.doc.company,
 										is_group: 0
 									}
 								}
@@ -203,7 +266,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 						}]
 					},
 				],
-				primary_action: function() {
+				primary_action: () => {
 					const args = dialog.get_values()["allocation"];
 
 					args.forEach(d => {
@@ -211,7 +274,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 							"difference_account", d.difference_account);
 					});
 
-					me.reconcile_payment_entries();
+					this.reconcile_payment_entries();
 					dialog.hide();
 				},
 				primary_action_label: __('Reconcile Entries')
@@ -236,16 +299,19 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		}
 	},
 
+<<<<<<< HEAD
 	reconcile_payment_entries: function() {
 		var me = this;
 
+=======
+	reconcile_payment_entries() {
+>>>>>>> 1a6e98ed48 (fix(Payment Reconciliation): clear child tables on company/party change (#28008))
 		return this.frm.call({
-			doc: me.frm.doc,
+			doc: this.frm.doc,
 			method: 'reconcile',
-			callback: function(r, rt) {
-				me.frm.clear_table("allocation");
-				me.frm.refresh_fields();
-				me.frm.refresh();
+			callback: () => {
+				this.frm.clear_table("allocation");
+				this.frm.refresh();
 			}
 		});
 	}
