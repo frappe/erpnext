@@ -67,6 +67,11 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 	def on_cancel(self):
 		self.update_vehicle_booking_order_registration()
 
+	def before_print(self):
+		super(VehicleRegistrationOrder, self).before_print()
+		self.customer_total_in_words = frappe.utils.money_in_words(self.customer_total, erpnext.get_company_currency(self.company))
+		self.get_customer_payments()
+
 	def get_disallow_on_submit_fields(self):
 		if self.is_new():
 			return []
@@ -328,6 +333,35 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			'agent_balance': agent_balance,
 			'agent_closed_amount': agent_closed_amount,
 		})
+
+	def get_customer_payments(self):
+		args = {
+			'vehicle_registration_order': self.name,
+			'customer': self.customer,
+			'customer_account': self.customer_account,
+		}
+
+		self.customer_payments = frappe.db.sql("""
+			select gle.posting_date as date, gle.credit-gle.debit as amount, gle.reference_no
+			from `tabGL Entry` gle
+			left join `tabJournal Entry` jv on gle.voucher_type = 'Journal Entry' and gle.voucher_no = jv.name
+			left join `tabPayment Entry` pe on gle.voucher_type = 'Payment Entry' and gle.voucher_no = pe.name
+			where (jv.vehicle_registration_purpose = 'Customer Payment' or pe.payment_type = 'Receive')
+				and gle.against_voucher_type = 'Vehicle Registration Order'
+				and gle.against_voucher = %(vehicle_registration_order)s
+				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
+			order by gle.posting_date
+		""", args, as_dict=1)
+
+		self.all_customer_payments = self.customer_payments.copy()
+		for d in self.customer_authority_instruments:
+			self.all_customer_payments.append(frappe._dict({
+				'date': d.instrument_date,
+				'amount': d.instrument_amount,
+				'reference_no': d.instrument_no,
+			}))
+
+		self.all_customer_payments = sorted(self.all_customer_payments, key=lambda d: getdate(d.date))
 
 	def validate_amounts(self):
 		for field in ['agent_commission', 'agent_license_plate_charges', 'customer_total', 'authority_total']:
