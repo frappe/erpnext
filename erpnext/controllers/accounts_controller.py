@@ -815,6 +815,38 @@ class AccountsController(TransactionBase):
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self)
 
+			if self.doctype == "Sales Order":
+				self.unlink_ref_doc_from_po()
+
+	def unlink_ref_doc_from_po(self):
+		so_items = []
+		for item in self.items:
+			so_items.append(item.name)
+
+		linked_po = list(set(frappe.get_all(
+			'Purchase Order Item',
+			filters = {
+				'sales_order': self.name,
+				'sales_order_item': ['in', so_items],
+				'docstatus': ['<', 2]
+			},
+			pluck='parent'
+		)))
+
+		if linked_po:
+			frappe.db.set_value(
+				'Purchase Order Item', {
+					'sales_order': self.name,
+					'sales_order_item': ['in', so_items],
+					'docstatus': ['<', 2]
+				},{
+					'sales_order': None,
+					'sales_order_item': None
+				}
+			)
+
+			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+
 	def get_tax_map(self):
 		tax_map = {}
 		for tax in self.get('taxes'):
