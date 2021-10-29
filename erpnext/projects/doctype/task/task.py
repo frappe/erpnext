@@ -215,6 +215,25 @@ class Task(NestedSet):
 				self.db_set('status', 'Overdue', update_modified=False)
 				self.update_project()
 
+	@frappe.whitelist()
+	def get_items(self):
+		def get_default_source_warehouse(item_code, company):
+			return frappe.db.get_value('Item Default',
+			{'parent': item_code, 'company': company},
+			['default_warehouse'])
+
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+
+		# item dict = { item_code: {qty, description, stock_uom} }
+		item_dict = get_bom_items_as_dict(self.from_bom, self.company, qty=self.qty,
+			fetch_exploded = self.use_multi_level_bom, fetch_qty_in_stock_uom=False)
+
+		for key, item in item_dict.items():
+			if not item.source_warehouse:
+				item.source_warehouse = get_default_source_warehouse(item.item_code, self.company)
+
+		return item_dict
+
 @frappe.whitelist()
 def check_if_child_exists(name):
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
@@ -384,4 +403,6 @@ def make_stock_entry_mi(source_name, target_doc = None):
 		}
 	}, target_doc)
 	return doc
+
+
 

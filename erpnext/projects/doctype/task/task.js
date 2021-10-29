@@ -36,12 +36,14 @@ frappe.ui.form.on("Task", {
 		});
 	},
 	refresh(frm) {
-		frm.add_custom_button(__('Material Transfer'), function(){
-			frm.events.make_se_mt(frm)
-		}, __("Create"));
-		frm.add_custom_button(__('Material Issue'), function(){
-			frm.events.make_se_mi(frm)
-		}, __("Create"));
+		if (frm.doc.items.length) {
+			frm.add_custom_button(__('Material Transfer'), function(){
+				frm.events.make_se_mt(frm)
+			}, __("Create"));
+			frm.add_custom_button(__('Material Issue'), function(){
+				frm.events.make_se_mi(frm)
+			}, __("Create"));
+		}
 	},
 
 	is_group: function (frm) {
@@ -78,22 +80,25 @@ frappe.ui.form.on("Task", {
 			frm: frm,
 		});
 	},
-	from_bom(frm) {
-		if (frm.doc.from_bom) {
-			frappe.db.get_doc("BOM", frm.doc.from_bom).then(bom => {
-				const {name, items} = bom;
-				erpnext.projects.task = {name, items:{}}
-				items.forEach(item => {
+	get_items(frm) {
+		if (!frm.doc.qty || !frm.doc.from_bom) {
+			frappe.throw(__('BOM and Quantity is required to fetch items.'));
+		}
+	 	frappe.call({
+			doc: frm.doc,
+			method: 'get_items',
+			callback: (response) => {
+				const items = response.message;
+				for (const [key, item] of Object.entries(items)) {
 					let row = frm.add_child("items");
 					row.item_code = item.item_code;
 					row.item_name = item.item_name;
 					row.uom = item.stock_uom;
 					row.qty = item.qty;
 					row.warehouse = item.source_warehouse;
-				});
-
-		frm.refresh_fields("items");
-			});
-		}
+				  }
+			frm.refresh_fields("items");
+			}
+		});
 	}
 });
