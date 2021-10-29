@@ -250,7 +250,7 @@ frappe.ui.form.on("Opportunity", {
 							</div>
 							</div>` ;
 
-					cur_frm.dashboard.set_headline_alert(html)
+					cur_frm.dashboard.set_headline_alert(html);
 				}
 				
 			}
