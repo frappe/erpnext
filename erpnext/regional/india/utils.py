@@ -81,9 +81,9 @@ def update_gst_category(doc, method):
 		for link in doc.links:
 			if link.link_doctype in ['Customer', 'Supplier']:
 				if doc.get('gstin'):
-					frappe.db.sql("""
-						UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered' """
-						.format(link.link_doctype), ("Registered Regular", link.link_name)) #nosec
+					gst_category = frappe.db.get_value(link.link_doctype, link.link_name, 'gst_category')
+					if gst_category == 'Unregistered':
+						frappe.db.set_value(link.link_doctype, link.link_name, 'gst_category', 'Registered Regular')
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
