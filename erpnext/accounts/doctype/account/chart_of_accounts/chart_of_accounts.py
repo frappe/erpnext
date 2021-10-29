@@ -81,7 +81,7 @@ def add_suffix_if_duplicate(account_name, account_number, accounts):
 def identify_is_group(child):
 	if child.get("is_group"):
 		is_group = child.get("is_group")
-	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate", "account_number"])):
+	elif len(set(child.keys()) - set(["account_name", "account_type", "root_type", "is_group", "tax_rate", "account_number"])):
 		is_group = 1
 	else:
 		is_group = 0
