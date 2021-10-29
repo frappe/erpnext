@@ -17,14 +17,36 @@ from erpnext.regional.india import state_numbers
 
 
 class GSTR3BReport(Document):
+
 	def validate(self):
 		self.get_data()
 
 	def get_data(self):
+		
 		self.report_dict = json.loads(get_json('gstr_3b_report_template'))
 
 		self.gst_details = self.get_company_gst_details()
-		self.report_dict["gstin"] = self.gst_details.get("gstin")
+		# print("******* self.gst_details ==*********", self.gst_details)
+		if self.company_address:
+			self.report_dict["gstin"] = self.gst_details.get("gstin")
+		else:
+			self.agroup = []
+			self.astate = []
+			aname = frappe.db.get_all("Address Group Item", fields = ["address"], filters = {"parent" : self.address_group})
+			# print("aname", aname)
+
+			for add in aname:
+				a =  frappe.get_all("Address",
+					fields=["gstin","state"],
+					filters={
+						"name":add.address
+					})
+
+				self.agroup.append(a[0]['gstin'])
+				self.astate.append(a[0]['state'])		
+
+			self.report_dict["gstin"] = self.gst_details
+
 		self.report_dict["ret_period"] = get_period(self.month, self.year)
 		self.month_no = get_period(self.month)
 		self.account_heads = self.get_account_heads()
@@ -38,7 +60,12 @@ class GSTR3BReport(Document):
 		itc_details = self.get_itc_details()
 		self.set_itc_details(itc_details)
 		self.get_itc_reversal_entries()
-		inward_nil_exempt = self.get_inward_nil_exempt(self.gst_details.get("gst_state"))
+
+		if self.company_address:
+			inward_nil_exempt = self.get_inward_nil_exempt(self.gst_details.get("gst_state"))
+		else :
+			inward_nil_exempt = self.get_inward_nil_exempt("abc")	
+
 		self.set_inward_nil_exempt(inward_nil_exempt)
 
 		self.missing_field_invoices = self.get_missing_field_invoices()
@@ -78,17 +105,38 @@ class GSTR3BReport(Document):
 				d[key] = flt(itc_details.get(itc_type, {}).get(key))
 
 	def get_itc_reversal_entries(self):
-		reversal_entries = frappe.db.sql("""
-			SELECT ja.account, j.reversal_type, sum(credit_in_account_currency) as amount
-			FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
-			where j.docstatus = 1
-			and j.is_opening = 'No'
-			and ja.parent = j.name
-			and j.voucher_type = 'Reversal Of ITC'
-			and month(j.posting_date) = %s and year(j.posting_date) = %s
-			and j.company = %s and j.company_gstin = %s
-			GROUP BY ja.account, j.reversal_type""", (self.month_no, self.year, self.company,
-			self.gst_details.get("gstin")), as_dict=1)
+
+		reversal_entries = {}
+
+		if self.company_address:
+			reversal_entries = frappe.db.sql("""
+				SELECT ja.account, j.reversal_type, sum(credit_in_account_currency) as amount
+				FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
+				where j.docstatus = 1
+				and j.is_opening = 'No'
+				and ja.parent = j.name
+				and j.voucher_type = 'Reversal Of ITC'
+				and month(j.posting_date) = %s and year(j.posting_date) = %s
+				and j.company = %s and j.company_gstin = %s
+				GROUP BY ja.account, j.reversal_type""", (self.month_no, self.year, self.company,
+				self.gst_details.get("gstin")), as_dict=1)
+	
+		# new query for address group
+		else:	
+			abc  = 	str(tuple(self.agroup))
+			# print(" reversal hhhhhhhh abc", abc) 
+			
+			reversal_entries = frappe.db.sql("""
+				SELECT ja.account, j.reversal_type, sum(credit_in_account_currency) as amount
+				FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
+				where j.docstatus = 1
+				and j.is_opening = 'No'
+				and ja.parent = j.name
+				and j.voucher_type = 'Reversal Of ITC'
+				and month(j.posting_date) = %s and year(j.posting_date) = %s
+				and j.company = %s and j.company_gstin in {abc}
+				GROUP BY ja.account, j.reversal_type""".format(abc = abc), (self.month_no, self.year, self.company), as_dict=1)
+
 
 		net_itc = self.report_dict["itc_elg"]["itc_net"]
 
@@ -104,18 +152,40 @@ class GSTR3BReport(Document):
 					net_itc[key] -= flt(entry.amount)
 
 	def get_itc_details(self):
-		itc_amounts = frappe.db.sql("""
-			SELECT eligibility_for_itc, sum(itc_integrated_tax) as itc_integrated_tax,
-			sum(itc_central_tax) as itc_central_tax,
-			sum(itc_state_tax) as itc_state_tax,
-			sum(itc_cess_amount) as itc_cess_amount
-			FROM `tabPurchase Invoice`
-			WHERE docstatus = 1
-			and is_opening = 'No'
-			and month(posting_date) = %s and year(posting_date) = %s and company = %s
-			and company_gstin = %s
-			GROUP BY eligibility_for_itc
-		""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+
+		itc_amounts = {}
+		if self.company_address:
+			itc_amounts = frappe.db.sql("""
+				SELECT eligibility_for_itc, sum(itc_integrated_tax) as itc_integrated_tax,
+				sum(itc_central_tax) as itc_central_tax,
+				sum(itc_state_tax) as itc_state_tax,
+				sum(itc_cess_amount) as itc_cess_amount
+				FROM `tabPurchase Invoice`
+				WHERE docstatus = 1
+				and is_opening = 'No'
+				and month(posting_date) = %s and year(posting_date) = %s and company = %s
+				and company_gstin = %s
+				GROUP BY eligibility_for_itc
+			""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+		# new query for address group
+		else:	
+			abc  = 	str(tuple(self.agroup))
+			# print("hhhhhhhh abc", abc) 
+
+			itc_amounts = frappe.db.sql("""
+				SELECT eligibility_for_itc, sum(itc_integrated_tax) as itc_integrated_tax,
+				sum(itc_central_tax) as itc_central_tax,
+				sum(itc_state_tax) as itc_state_tax,
+				sum(itc_cess_amount) as itc_cess_amount
+				FROM `tabPurchase Invoice`
+				WHERE docstatus = 1
+				and is_opening = 'No'
+				and month(posting_date) = %s and year(posting_date) = %s and company = %s
+				and company_gstin in {abc}
+				GROUP BY eligibility_for_itc
+			""".format(abc =abc)
+			, (self.month_no, self.year, self ), as_dict=1)
+	
 
 		itc_details = {}
 		for d in itc_amounts:
@@ -129,41 +199,91 @@ class GSTR3BReport(Document):
 		return itc_details
 
 	def get_inward_nil_exempt(self, state):
-		inward_nil_exempt = frappe.db.sql("""
-			SELECT p.place_of_supply, sum(i.base_amount) as base_amount, i.is_nil_exempt, i.is_non_gst
-			FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
-			WHERE p.docstatus = 1 and p.name = i.parent
-			and p.is_opening = 'No'
-			and p.gst_category != 'Registered Composition'
-			and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_category = 'Registered Composition') and
-			month(p.posting_date) = %s and year(p.posting_date) = %s
-			and p.company = %s and p.company_gstin = %s
-			GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst""",
-			(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
-		inward_nil_exempt_details = {
-			"gst": {
-				"intra": 0.0,
-				"inter": 0.0
-			},
-			"non_gst": {
-				"intra": 0.0,
-				"inter": 0.0
+		# print("  = = = = state  * * * " , state, type(state))
+
+		inward_nil_exempt_details = {}
+
+		if self.company_address:
+			
+			inward_nil_exempt = frappe.db.sql("""
+				SELECT p.place_of_supply, sum(i.base_amount) as base_amount, i.is_nil_exempt, i.is_non_gst
+				FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
+				WHERE p.docstatus = 1 and p.name = i.parent
+				and p.is_opening = 'No'
+				and p.gst_category != 'Registered Composition'
+				and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_category = 'Registered Composition') and
+				month(p.posting_date) = %s and year(p.posting_date) = %s
+				and p.company = %s and p.company_gstin = %s
+				GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst""",
+				(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+
+			inward_nil_exempt_details = {
+				"gst": {
+					"intra": 0.0,
+					"inter": 0.0
+				},
+				"non_gst": {
+					"intra": 0.0,
+					"inter": 0.0
+				}
 			}
-		}
 
-		for d in inward_nil_exempt:
-			if d.place_of_supply:
-				if (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
-					and state == d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["gst"]["intra"] += d.base_amount
-				elif (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
-					and state != d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["gst"]["inter"] += d.base_amount
-				elif d.is_non_gst == 1 and state == d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
-				elif d.is_non_gst == 1 and state != d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
+			for d in inward_nil_exempt:
+				if d.place_of_supply:
+					if (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
+						and state == d.place_of_supply.split("-")[1]:
+						inward_nil_exempt_details["gst"]["intra"] += d.base_amount
+					elif (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
+						and state != d.place_of_supply.split("-")[1]:
+						inward_nil_exempt_details["gst"]["inter"] += d.base_amount
+					elif d.is_non_gst == 1 and state == d.place_of_supply.split("-")[1]:
+						inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
+					elif d.is_non_gst == 1 and state != d.place_of_supply.split("-")[1]:
+						inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount	
+		# new query for address group
+		else :
+			abc  = 	str(tuple(self.agroup))
+			# print("hhhhhhhh abc", abc)
+
+			inward_nil_exempt = frappe.db.sql("""
+				SELECT p.place_of_supply, sum(i.base_amount) as base_amount, i.is_nil_exempt, i.is_non_gst
+				FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
+				WHERE p.docstatus = 1 and p.name = i.parent
+				and p.is_opening = 'No'
+				and p.gst_category != 'Registered Composition'
+				and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_category = 'Registered Composition') and
+				month(p.posting_date) = %s and year(p.posting_date) = %s
+				and p.company = %s and p.company_gstin in {abc}
+				GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst""".format(abc= abc),
+				(self.month_no, self.year, self.company), as_dict=1)
+
+				
+			inward_nil_exempt_details = {
+				"gst": {
+					"intra": 0.0,
+					"inter": 0.0
+				},
+				"non_gst": {
+					"intra": 0.0,
+					"inter": 0.0
+				}
+			}
+
+			for s in self.astate:
+				# print(" _---- 000 state ---- _", s)
+				for d in inward_nil_exempt:
+					if d.place_of_supply:
+						if (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
+							and s == d.place_of_supply.split("-")[1]:
+							inward_nil_exempt_details["gst"]["intra"] += d.base_amount
+						elif (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
+							and s != d.place_of_supply.split("-")[1]:
+							inward_nil_exempt_details["gst"]["inter"] += d.base_amount
+						elif d.is_non_gst == 1 and s == d.place_of_supply.split("-")[1]:
+							inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
+						elif d.is_non_gst == 1 and s != d.place_of_supply.split("-")[1]:
+							inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
 
 		return inward_nil_exempt_details
 
@@ -177,25 +297,50 @@ class GSTR3BReport(Document):
 		self.invoice_detail_map = {}
 		condition = ''
 
+		
+
 		if reverse_charge:
 			condition += "AND reverse_charge = 'Y'"
 
-		invoice_details = frappe.db.sql("""
-			SELECT
-				name, gst_category, export_type, place_of_supply
-			FROM
-				`tab{doctype}`
-			WHERE
-				docstatus = 1
-				AND month(posting_date) = %s
-				AND year(posting_date) = %s
-				AND company = %s
-				AND company_gstin = %s
-				AND is_opening = 'No'
-				{reverse_charge}
-			ORDER BY name
-		""".format(doctype=doctype, reverse_charge=condition), (self.month_no, self.year,
-			self.company, self.gst_details.get("gstin")), as_dict=1)
+		if self.company_address:
+			invoice_details = frappe.db.sql("""
+				SELECT
+					name, gst_category, export_type, place_of_supply
+				FROM
+					`tab{doctype}`
+				WHERE
+					docstatus = 1
+					AND month(posting_date) = %s
+					AND year(posting_date) = %s
+					AND company = %s
+					AND company_gstin = %s
+					AND is_opening = 'No'
+					{reverse_charge}
+				ORDER BY name
+			""".format(doctype=doctype, reverse_charge=condition), (self.month_no, self.year,
+				self.company, self.gst_details.get("gstin")), as_dict=1)
+
+		else:	
+			abc  = 	str(tuple(self.agroup))
+			# print("hhhhhhhh abc", abc) 
+
+			invoice_details = frappe.db.sql("""
+				SELECT
+					name, gst_category, export_type, place_of_supply
+				FROM
+					`tab{doctype}`
+				WHERE
+					docstatus = 1
+					AND month(posting_date) = %s
+					AND year(posting_date) = %s
+					AND company = %s
+					
+					AND is_opening = 'No'
+					{reverse_charge}
+					AND company_gstin in {abc}
+				ORDER BY name
+			""".format(doctype=doctype, reverse_charge=condition, abc = abc), (self.month_no, self.year,
+				self.company), as_dict=1)	
 
 		for d in invoice_details:
 			self.invoice_detail_map.setdefault(d.name, d)
@@ -362,17 +507,51 @@ class GSTR3BReport(Document):
 				self.report_dict["inter_sup"]["uin_details"].append(value)
 
 	def get_company_gst_details(self):
-		gst_details =  frappe.get_all("Address",
-			fields=["gstin", "gst_state", "gst_state_number"],
-			filters={
-				"name":self.company_address
-			})
+		if self.company_address:
+			gst_details =  frappe.get_all("Address",
+				fields=["gstin", "gst_state", "gst_state_number"],
+				filters={
+					"name":self.company_address
+				})
 
-		if gst_details:
-			return gst_details[0]
-		else:
-			frappe.throw(_("Please enter GSTIN and state for the Company Address {0}").format(self.company_address))
+			# print(" ===== gst_details ==== ", gst_details)	
 
+			if gst_details:
+				return gst_details[0]
+			else:
+				frappe.throw(_("Please enter GSTIN and state for the Company Address {0}").format(self.company_address))
+
+		if self.address_group:
+			aname = frappe.get_all("Address Group Item", fields = ["address"], filters = {"parent" : self.address_group})
+		
+			# print("aname", aname)
+			d =[]
+			for add in aname:
+				a =  frappe.get_all("Address",
+					fields=["gstin", "gst_state", "gst_state_number"],
+					filters={
+						"name":add.address
+					})
+
+				d.append(a)	
+			new_gstin = ""
+			n = 0
+			for i in d:	
+				# print( "++++++++++gst_details ++++++++" , i[0]['gstin'] , n, len(i))
+				new_gstin += i[0]['gstin']
+				n += 1
+				if len(i)!=0 :
+					if n > 0 and n < len(i)+1 :
+				 		new_gstin += " , "
+
+
+
+			# print('new_gstin', new_gstin)
+			if new_gstin:
+				return new_gstin
+			else:
+				frappe.throw(_("Please enter GSTIN and state for the Company Address {0}").format(self.company_address))
+		
 	def get_account_heads(self):
 		account_map = {
 			'sgst_account': 'samt',
