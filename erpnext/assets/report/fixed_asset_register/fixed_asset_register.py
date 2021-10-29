@@ -45,12 +45,13 @@ def get_conditions(filters):
 	if filters.get('cost_center'):
 		conditions["cost_center"] = filters.get('cost_center')
 
-	# In Store assets are those that are not sold or scrapped
-	operand = 'not in'
-	if status not in 'In Location':
-		operand = 'in'
+	if status:
+		# In Store assets are those that are not sold or scrapped
+		operand = 'not in'
+		if status not in 'In Location':
+			operand = 'in'
 
-	conditions['status'] = (operand, ['Sold', 'Scrapped'])
+		conditions['status'] = (operand, ['Sold', 'Scrapped'])
 
 	return conditions
 
