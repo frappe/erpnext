@@ -113,12 +113,12 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 def get_serial_nos_data_after_transactions(args):
 	from pypika import CustomFunction
 
-	serial_nos = []
+	serial_nos = set()
 	args = frappe._dict(args)
 	sle = frappe.qb.DocType('Stock Ledger Entry')
 	Timestamp = CustomFunction('timestamp', ['date', 'time'])
 
-	data = frappe.qb.from_(
+	stock_ledger_entries = frappe.qb.from_(
 		sle
 	).select(
 		'serial_no','actual_qty'
@@ -131,11 +131,12 @@ def get_serial_nos_data_after_transactions(args):
 		sle.posting_date, sle.posting_time
 	).run(as_dict=1)
 
-	for d in data:
-		if d.actual_qty > 0:
-			serial_nos.extend(get_serial_nos_data(d.serial_no))
+	for stock_ledger_entry in stock_ledger_entries:
+		changed_serial_no = get_serial_nos_data(stock_ledger_entry.serial_no)
+		if stock_ledger_entry.actual_qty > 0:
+			serial_nos.update(changed_serial_no)
 		else:
-			serial_nos = list(set(serial_nos) - set(get_serial_nos_data(d.serial_no)))
+			serial_nos.difference_update(changed_serial_no)
 
 	return '\n'.join(serial_nos)
 
