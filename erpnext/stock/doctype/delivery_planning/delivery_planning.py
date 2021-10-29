@@ -86,7 +86,7 @@ class DeliveryPlanning(Document):
 
 									where so.docstatus = 1
 									and so.status IN ("To Deliver" , "To Deliver and Bill")
-                                    and so.delivery_status NOT IN ("Partly Delivered","Closed")	
+                                    and so.delivery_status NOT IN ("Fully Delivered","Closed")	
 									and soi.delivery_date between '{0}' and '{1}' 									
 									and (soi.qty - soi.delivered_qty ) != 0
 									{conditions} """.format(from_date, to_date, conditions=conditions), as_dict=1)
