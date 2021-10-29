@@ -1,11 +1,9 @@
-# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # License: MIT. See LICENSE
 
-import frappe
+import frappe, math, json, datetime
 from frappe import _
 from frappe.utils import getdate, cint, add_months, add_days, formatdate, get_datetime
-import math
-import json
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -19,10 +17,10 @@ class CallLogSummary():
 		self.filters = frappe._dict(filters or {})
 
 	def run(self):
-		self.validate_filters()
+		validate_filters(self.filters.from_date, self.filters.to_date)
 		columns = self.get_columns()
-		data = self.prepare_data_and_column(columns, self.get_data())
-		chart = self.get_chart_data(columns, data)
+		data = prepare_data(columns, self.get_data())
+		chart = get_chart_data(columns, data)
 		columns.insert(0, {
             'fieldname': 'user',
             'label': _('{0} Owner').format(self.filters.reference_document_type),
@@ -31,30 +29,13 @@ class CallLogSummary():
 			'width': 200
         })
 
-		print("``````````````````````````````")
-		print(chart)
-		print("``````````````````````````````")
 		return columns, data, None, chart
 
 	def get_columns(self):
-		return self.get_period_list()
+		return get_period_list(self.filters.from_date, self.filters.to_date, self.filters.frequency)
 
 	def get_data(self):
 		return frappe.db.sql(self.get_query(), as_dict=True)
-
-	def get_chart_data(self, columns, data):
-		labels = ['Jan', 'Feb', 'Mar']
-		datasets = [
-			{ 'values': [18, 40, 30] }
-		]
-		chart = {
-			'data':{
-				'labels': labels,
-				'datasets': datasets
-			},
-			'type':'bar'
-		}
-		return chart
 
 	def get_query(self):
 		filters = self.filters
@@ -91,105 +72,119 @@ class CallLogSummary():
 
 		return query
 
-	def prepare_data_and_column(self, columns, data):
-		period_dict = dict()
+def get_chart_data(columns, data):
+		labels = []
+		datasets = []
 		for column in columns:
-			period_dict[column.fieldname] = 0
+			labels.append(column['label'])
+			count = 0
+			for row in data:
+				count += row[column.fieldname]
+			datasets.append(count)
 
-		prepared_data = frappe._dict()
-		
-		for row in data:
-			for user in json.loads(row.assign):
-				if user not in prepared_data:
-					prepared_data[user] = period_dict.copy()
-					prepared_data[user]['user'] = user
-				for column in columns:
-					if column.from_date <= row.creation <= column.to_date:
-						prepared_data[user][column.fieldname] = prepared_data[user][column.fieldname] + 1 
-						break
+		chart = {
+			'data':{
+				'labels': labels,
+				'datasets': [{'values': datasets}]
+			},
+			'type':'bar'
+		}
 
-		data = []
-		for row in prepared_data:
-			data.append(prepared_data[row])
-		# print(data)
-		return data
+		return chart
 
-	def validate_filters(self):
-		if not self.filters.from_date or not self.filters.to_date:
-			frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold("From Date"), frappe.bold("To Date")))
+def prepare_data(columns, data):
+	period_dict = dict()
+	for column in columns:
+		period_dict[column.fieldname] = 0
 
-		if self.filters.to_date < self.filters.from_date:
-			frappe.throw(_("{0} cannot be less than {1}").format(frappe.bold("To Date"), frappe.bold("From Date")))
+	prepared_data = frappe._dict()
+	
+	for row in data:
+		for user in json.loads(row.assign):
+			if user not in prepared_data:
+				prepared_data[user] = period_dict.copy()
+				prepared_data[user]['user'] = user
+			for column in columns:
+				if column.from_date <= row.creation <= column.to_date:
+					prepared_data[user][column.fieldname] = prepared_data[user][column.fieldname] + 1 
+					break
 
-	def get_period_list(self):
-		year_start_date = getdate(self.filters.from_date)
-		year_end_date = getdate(self.filters.to_date)
+	data = []
+	for row in prepared_data:
+		data.append(prepared_data[row])
 
-		months_to_add = {
-			"Yearly": 12,
-			"Half-Yearly": 6,
-			"Quarterly": 3,
-			"Monthly": 1
-		}[self.filters.frequency]
+	return data
 
-		period_list = []
+def validate_filters(from_date, to_date):
+	if not from_date or not to_date:
+		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold("From Date"), frappe.bold("To Date")))
 
-		start_date = year_start_date
-		months = self.get_months(year_start_date, year_end_date)
+	if to_date < from_date:
+		frappe.throw(_("{0} cannot be less than {1}").format(frappe.bold("To Date"), frappe.bold("From Date")))
 
-		for i in range(cint(math.ceil(months / months_to_add))):
-			period = frappe._dict({
-				"from_date": start_date
-			})
+def get_period_list(from_date, to_date, frequency):
+	year_start_date = getdate(from_date)
+	year_end_date = getdate(to_date)
 
-			to_date = add_months(start_date, months_to_add)
-			start_date = to_date
+	if frequency == "Monthly":
+		year_end_date = getdate(datetime.date(year_end_date.year + year_end_date.month // 12, year_end_date.month % 12 + 1, 1) - datetime.timedelta(1))
 
-			to_date = add_days(to_date, -1)
+	months_to_add = {
+		"Yearly": 12,
+		"Half-Yearly": 6,
+		"Quarterly": 3,
+		"Monthly": 1
+	}[frequency]
 
-			if to_date <= year_end_date:
-				period.to_date = to_date
-				period_list.append(period)
+	period_list = []
 
-		# updating column fields
-		for opts in period_list:
-			fieldname = opts.to_date.strftime("%b_%Y").lower()
-			if self.filters.frequency == "Monthly":
-				label = formatdate(opts.to_date, "MMM YYYY")
-			else:
-				label = self.get_label(self.filters.frequency, opts.from_date, opts.to_date)
+	start_date = year_start_date
+	months = get_months(year_start_date, year_end_date)
 
-			opts.update({
-				"fieldname": fieldname.replace(" ", "_").replace("-", "_"),
-				"label": label,
-				"year_start_date": year_start_date,
-				"year_end_date": year_end_date
-			})
+	for i in range(cint(math.ceil(months / months_to_add))):
+		period = frappe._dict({
+			"from_date": start_date
+		})
 
-		return period_list
-
-	def get_label(self, frequency, from_date, to_date):
-		if frequency == "Yearly":
-			if formatdate(from_date, "YYYY") == formatdate(to_date, "YYYY"):
-				label = formatdate(from_date, "YYYY")
-			else:
-				label = formatdate(from_date, "YYYY") + "-" + formatdate(to_date, "YYYY")
+		if frequency == "Monthly":
+			to_date = datetime.date(start_date.year + start_date.month // 12, start_date.month % 12 + 1, 1) - datetime.timedelta(1)
 		else:
-			label = formatdate(from_date, "MMM YY") + "-" + formatdate(to_date, "MMM YY")
+			to_date = add_months(start_date, months_to_add)
 
-		return label
+		start_date = add_days(to_date, 1)
 
-	def get_months(self, start_date, end_date):
-		diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
-		return diff + 1
+		if to_date <= year_end_date:
+			period.to_date = to_date
+			period_list.append(period)
 
-	def get_month_list(self):
-		month_list= []
-		current_date = date.today()
-		month_number = date.today().month
+	# updating column fields
+	for opts in period_list:
+		fieldname = opts.to_date.strftime("%b_%Y").lower()
+		if frequency == "Monthly":
+			label = formatdate(opts.to_date, "MMM YYYY")
+		else:
+			label = get_label(frequency, opts.from_date, opts.to_date)
 
-		for month in range(month_number,13):
-			month_list.append(current_date.strftime('%B'))
-			current_date = current_date + relativedelta(months=1)
+		opts.update({
+			"fieldname": fieldname.replace(" ", "_").replace("-", "_"),
+			"label": label,
+			"year_start_date": year_start_date,
+			"year_end_date": year_end_date
+		})
 
-		return month_list
+	return period_list
+
+def get_label(frequency, from_date, to_date):
+	if frequency == "Yearly":
+		if formatdate(from_date, "YYYY") == formatdate(to_date, "YYYY"):
+			label = formatdate(from_date, "YYYY")
+		else:
+			label = formatdate(from_date, "YYYY") + "-" + formatdate(to_date, "YYYY")
+	else:
+		label = formatdate(from_date, "MMM YY") + "-" + formatdate(to_date, "MMM YY")
+
+	return label
+
+def get_months(start_date, end_date):
+	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
+	return diff + 1
