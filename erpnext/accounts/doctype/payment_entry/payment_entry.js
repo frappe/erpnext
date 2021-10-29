@@ -834,7 +834,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			if(frm.doc.party_type=="Supplier" &&
-				!in_list(["Purchase Order", "Purchase Invoice", "Journal Entry", "Credit Note CXP"], row.reference_doctype)
+				!in_list(["Purchase Order", "Purchase Invoice", "Journal Entry", "Credit Note CXP", 'Supplier Documents'], row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", null);
 				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry", [row.idx]));
