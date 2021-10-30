@@ -2026,22 +2026,23 @@ def update_multi_mode_option(doc, pos_profile):
 	def append_payment(payment_mode):
 		payment = doc.append('payments', {})
 		payment.default = payment_mode.default
-		payment.mode_of_payment = payment_mode.parent
+		payment.mode_of_payment = payment_mode.mop
 		payment.account = payment_mode.default_account
 		payment.type = payment_mode.type
 
 	doc.set('payments', [])
 	invalid_modes = []
-	for pos_payment_method in pos_profile.get('payments'):
-		pos_payment_method = pos_payment_method.as_dict()
+	mode_of_payments = [d.mode_of_payment for d in pos_profile.get('payments')]
+	mode_of_payments_info = get_mode_of_payments_info(mode_of_payments, doc.company)
 
-		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
+	for row in pos_profile.get('payments'):
+		payment_mode = mode_of_payments_info.get(row.mode_of_payment)
 		if not payment_mode:
-			invalid_modes.append(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment))
+			invalid_modes.append(get_link_to_form("Mode of Payment", row.mode_of_payment))
 			continue
 
-		payment_mode[0].default = pos_payment_method.default
-		append_payment(payment_mode[0])
+		payment_mode.default = row.default
+		append_payment(payment_mode)
 
 	if invalid_modes:
 		if invalid_modes == 1:
@@ -2056,6 +2057,24 @@ def get_all_mode_of_payments(doc):
 		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
 	{'company': doc.company}, as_dict=1)
+
+def get_mode_of_payments_info(mode_of_payments, company):
+	data = frappe.db.sql(
+		"""
+		select
+			mpa.default_account, mpa.parent as mop, mp.type as type
+		from
+			`tabMode of Payment Account` mpa,`tabMode of Payment` mp
+		where
+			mpa.parent = mp.name and
+			mpa.company = %s and
+			mp.enabled = 1 and
+			mp.name in (%s)
+		group by
+			mp.name
+		""", (company, mode_of_payments), as_dict=1)
+
+	return {row.get('mop'): row for row in data}
 
 def get_mode_of_payment_info(mode_of_payment, company):
 	return frappe.db.sql("""

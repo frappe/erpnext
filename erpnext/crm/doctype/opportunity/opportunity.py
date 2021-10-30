@@ -305,6 +305,8 @@ def make_request_for_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		target.opportunity_name = source.name
+
 		if source.opportunity_from == "Lead":
 			target.lead_name = source.party_name
 
