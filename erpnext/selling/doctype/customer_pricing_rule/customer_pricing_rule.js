@@ -31,6 +31,38 @@ frappe.ui.form.on('Customer Pricing Rule', {
 		var df = frappe.meta.get_docfield("Customer Pricing Rule Item","additional_price",frm.doc.name);
 		df.read_only = 1;
 		frm.refresh_fields();
+	},
+
+	onload: function(frm){
+		frm.call({
+				doc:frm.doc,
+				method: 'onload_customer_pricing',
+				callback: function(r){
+					if(r.message){
+						console.log("Item stock Updated")
+					}
+				}
+		});
+	},
+
+	update_base_price: function(frm){
+		frm.call({
+			doc:frm.doc,
+			method: 'onload_customer_pricing',
+			callback: function(r){
+				if(r.message){
+					console.log("Item stock Updated")
+					frappe.msgprint({
+						title: __('Notification'),
+						indicator: 'green',
+						message: __('Base price of all items updated')
+						});
+						
+						frm.refresh_fields('item_details')
+				
+					}
+			}
+	});
 	}
 });
 
