@@ -877,40 +877,113 @@ frappe.ui.form.on('Sales Invoice', {
 		});
 	},
 
-	set_timesheet_data: function(frm, timesheets) {
-		frm.clear_table("timesheets")
-		timesheets.forEach(timesheet => {
-			if (frm.doc.currency != timesheet.currency) {
-				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
-					args: {
-						from_currency: timesheet.currency,
+	async set_timesheet_data(frm, time_logs) {
+		frm.clear_table("timesheets");
+		for (const time_log of time_logs) {
+			if (frm.doc.currency != time_log.currency) {
+				const exchange_rate = await frappe.xcall(
+					"erpnext.setup.utils.get_exchange_rate",
+					{
+						from_currency: time_log.currency,
 						to_currency: frm.doc.currency
-					},
-					callback: function(r) {
-						if (r.message) {
-							exchange_rate = r.message;
-							frm.events.append_time_log(frm, timesheet, exchange_rate);
-						}
 					}
-				});
-			} else {
-				frm.events.append_time_log(frm, timesheet, 1.0);
+				);
+
+				time_log.billing_amount = (
+					flt(time_log.billing_amount) * (flt(exchange_rate) || 1)
+				);
 			}
-		});
+
+			frm.events.append_time_log(frm, time_log);
+		}
+
+		frm.events.update_items_from_timesheets(frm, time_logs);
 	},
 
-	append_time_log: function(frm, time_log, exchange_rate) {
+	async update_items_from_timesheets(frm, time_logs) {
+		if (!time_logs || !time_logs.length) return;
+
+		const items_to_update = time_logs.some(time_log => time_log.item_code);
+		if (!items_to_update) return;
+
+		const activities_without_item = new Set();
+		const item_map = {};
+
+		for (const time_log of time_logs) {
+			if (!time_log.item) {
+				activities_without_item.add(time_log.activity_type);
+				continue;
+			}
+
+			const values = item_map.setDefault(time_log.item, {
+				qty: 0,
+				amount: 0,
+			});
+
+			if (!time_log.billing_hours) continue;
+
+			values.qty += time_log.billing_hours;
+			values.amount += time_log.billing_amount;
+		}
+
+		const items_to_keep = frm.doc.items.filter(
+			item => !items_to_update.has(item.item_code)
+		);
+
+		await new Promise(resolve => {
+			if (items_to_keep.length == frm.doc.items.length) resolve();
+
+			frappe.confirm(
+				"Existing items will be overwritten. Are you sure you want to continue?",
+				() => {
+					frm.doc.items = items_to_keep;
+					resolve();
+				}
+			);
+		});
+
+		// show warning
+		if (activities_without_item.size) {
+			let warning_message = _(
+				"Following Activity Types don't have a linked item:"
+			) + "<br><ul>";
+
+			for (const activity of activities_without_item) {
+				warning_message += `<li>${activity}</li>`;
+			}
+
+			warning_message += "</ul>";
+			warning_message += _("Please add the corresponding items manually.");
+			frappe.show_alert({ message: warning_message, indicator: "yellow" });
+		}
+
+		// add items
+		for (const [item_code, values] of Object.entries(item_map)) {
+			const row = frm.add_child("items");
+			frappe.model.set_value(row.doctype, row.name, "item_code", item_code);
+			frappe.model.set_value(row.doctype, row.name, {
+				qty: values.qty,
+				rate: flt(values.amount / values.qty),
+			})
+		}
+	},
+
+	append_time_log: function(frm, time_log) {
 		const row = frm.add_child("timesheets");
-		row.activity_type = time_log.activity_type;
-		row.description = time_log.description;
-		row.time_sheet = time_log.time_sheet;
-		row.from_time = time_log.from_time;
-		row.to_time = time_log.to_time;
-		row.billing_hours = time_log.billing_hours;
-		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
+		for (const key of [
+			"activity_type",
+			"description",
+			"time_sheet",
+			"from_time",
+			"to_time",
+			"billing_hours",
+			"billing_amount",
+			"project_name"
+		]) {
+			row[key] = time_log[key];
+		}
+
 		row.timesheet_detail = time_log.name;
-    row.project_name = time_log.project_name;
 
 		frm.refresh_field("timesheets");
 		frm.trigger("calculate_timesheet_totals");
