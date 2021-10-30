@@ -4,18 +4,13 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _
+from frappe.handler import get_whitelisted_method
 
 
 @frappe.whitelist()
 def get_all_nodes(method, company):
 	'''Recursively gets all data from nodes'''
-	method = frappe.get_attr(method)
-
-	if method not in frappe.whitelisted:
-		frappe.throw(_('Not Permitted'), frappe.PermissionError)
-
-	root_nodes = method(company=company)
+	root_nodes = get_whitelisted_method(method)(company=company)
 	result = []
 	nodes_to_expand = []
 
