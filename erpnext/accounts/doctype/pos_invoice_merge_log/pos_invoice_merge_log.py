@@ -114,6 +114,8 @@ class POSInvoiceMergeLog(Document):
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes = [], [], []
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
+		rounding_adjustment, base_rounding_adjustment = 0, 0
+		rounded_total, base_rounded_total = 0, 0
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
 
@@ -162,6 +164,11 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					payments.append(payment)
+			rounding_adjustment += doc.rounding_adjustment
+			rounded_total += doc.rounded_total
+			base_rounding_adjustment += doc.rounding_adjustment
+			base_rounded_total += doc.rounded_total
+
 
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
@@ -171,6 +178,10 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('items', items)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
+		invoice.set('rounding_adjustment',rounding_adjustment)
+		invoice.set('rounding_adjustment',base_rounding_adjustment)
+		invoice.set('base_rounded_total',base_rounded_total)
+		invoice.set('rounded_total',rounded_total)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
@@ -246,7 +257,10 @@ def get_invoice_customer_map(pos_invoices):
 	return pos_invoice_customer_map
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
-	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
+	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions'))
+	if frappe.flags.in_test and not invoices:
+		invoices = get_all_unconsolidated_invoices()
+
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 10 and closing_entry:

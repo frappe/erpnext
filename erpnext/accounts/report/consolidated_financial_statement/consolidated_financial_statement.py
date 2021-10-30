@@ -114,8 +114,9 @@ def prepare_companywise_opening_balance(asset_data, liability_data, equity_data,
 
 		# opening_value = Aseet - liability - equity
 		for data in [asset_data, liability_data, equity_data]:
-			account_name = get_root_account_name(data[0].root_type, company)
-			opening_value += get_opening_balance(account_name, data, company)
+			if data:
+				account_name = get_root_account_name(data[0].root_type, company)
+				opening_value += (get_opening_balance(account_name, data, company) or 0.0)
 
 		opening_balance[company] = opening_value
 
