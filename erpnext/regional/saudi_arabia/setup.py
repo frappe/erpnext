@@ -13,7 +13,7 @@ def setup(company=None, patch=True):
 	add_print_formats()
 	add_permissions()
 	create_ksa_vat_setting(company)
-	make_qrcode_field()
+	make_custom_fields()
 
 def add_permissions():
 	"""Add Permissions for KSA VAT Setting."""
@@ -26,12 +26,34 @@ def add_permissions():
 	"""Enable KSA VAT Report"""
 	frappe.db.set_value('Report', 'KSA VAT', 'disabled', 0)
 
-def make_qrcode_field():
-	"""Created QR code Image file"""
-	qr_code_field = dict(
+def make_custom_fields():
+	"""Create Custom fields
+	- QR code Image file
+	- Company Name in Arabic
+	- Address in Arabic
+	"""
+	qr_code = dict(
 		fieldname='qr_code',
 		label='QR Code',
 		fieldtype='Attach Image',
 		read_only=1, no_copy=1, hidden=1)
 
-	create_custom_field('Sales Invoice', qr_code_field)
+	create_custom_field('Sales Invoice', qr_code)
+
+	company_name_in_arabic = dict(
+		fieldname='company_name_in_arabic',
+		label='Company Name In Arabic',
+		fieldtype='Data',
+		insert_after='company_name'
+	)
+
+	create_custom_field('Company', company_name_in_arabic)
+
+	address_in_arabic = dict(
+		fieldname='address_in_arabic',
+		label='Address in Arabic',
+		fieldtype='Data',
+		insert_after='address_line2'
+	)
+
+	create_custom_field('Address', address_in_arabic)
