@@ -505,12 +505,13 @@ class PaymentEntry(AccountsController):
 
 	def validate_received_amount(self):
 		if self.paid_from_account_currency == self.paid_to_account_currency:
-			if self.paid_amount != self.received_amount:
+			if self.paid_amount < self.received_amount:
 				frappe.throw(_("Received Amount cannot be greater than Paid Amount"))
 
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
-		if self.paid_from_account_currency == self.paid_to_account_currency:
+		if self.paid_from_account_currency == self.paid_to_account_currency \
+			and not self.payment_type == 'Internal Transfer':
 			self.received_amount = self.paid_amount
 
 	def set_amounts_after_tax(self):
@@ -712,10 +713,14 @@ class PaymentEntry(AccountsController):
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
 			for d in self.get("references"):
+				cost_center = self.cost_center
+				if d.reference_doctype == "Sales Invoice" and not cost_center:
+					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
 				gle = party_gl_dict.copy()
 				gle.update({
 					"against_voucher_type": d.reference_doctype,
-					"against_voucher": d.reference_name
+					"against_voucher": d.reference_name,
+					"cost_center": cost_center
 				})
 
 				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
