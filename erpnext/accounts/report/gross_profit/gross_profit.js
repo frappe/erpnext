@@ -36,5 +36,20 @@ frappe.query_reports["Gross Profit"] = {
 			"options": "Invoice\nItem Code\nItem Group\nBrand\nWarehouse\nCustomer\nCustomer Group\nTerritory\nSales Person\nProject",
 			"default": "Invoice"
 		},
-	]
+	],
+	"tree": true,
+	"name_field": "parent",
+	"parent_field": "parent_invoice",
+	"initial_depth": 3,
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (data && data.indent == 0.0) {
+			value = $(`<span>${value}</span>`);
+			var $value = $(value).css("font-weight", "bold");
+			value = $value.wrap("<p></p>").parent().html();
+		}
+
+		return value;
+	},
 }
