@@ -491,6 +491,8 @@ class SalesInvoice(SellingController):
 	def assign_cai(self):
 		user = frappe.session.user
 
+		# user_name = frappe.get_all("User", ["first_name"], filters = {"email": user})
+
 		cai = frappe.get_all("CAI", ["initial_number", "final_number", "name_cai", "cai", "issue_deadline", "prefix"], filters = { "status": "Active", "prefix": self.naming_series})
 
 		if len(cai) == 0:

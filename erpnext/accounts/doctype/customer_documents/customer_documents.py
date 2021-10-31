@@ -187,9 +187,9 @@ class CustomerDocuments(Document):
 			return(str(number))
 	
 
-	def before_naming(self):
-		if self.docstatus == 0:
-			self.assign_cai()
+	# def before_naming(self):
+	# 	if self.docstatus == 0:
+	# 		self.assign_cai()
 	
 	def alerts(self, date, amount):
 		gcai_setting = frappe.get_all("Cai Settings", ["expired_days", "expired_amount"])

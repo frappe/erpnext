@@ -674,6 +674,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('Cash Withdrawal'), function() {
 			frappe.set_route('List', 'Cash Withdrawal');
 		});
+		this.page.add_menu_item(__('Payment Of Hospital Bill Advances'), function() {
+			frappe.set_route('List', 'Advance Statement/');
+		});
+
 
 		this.page.add_menu_item(__('Close the POS'), function() {
 			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
@@ -1867,19 +1871,19 @@ class Payment {
 					});
 				}
 			},
-			// {
-			// 	fieldtype: 'Currency',
-			// 	label: __("Additional Discount Percentage"),
-			// 	options: me.frm.doc.currency,
-			// 	fieldname: "additional_discount_percentage",
-			// 	default: me.frm.doc.additional_discount_percentage,
-			// 	onchange: () => {
-			// 		me.update_cur_frm_value('additional_discount_percentage', () => {
-			// 			frappe.flags.additional_discount_percentage = false;
-			// 			me.update_additional_discount_percentage()
-			// 		});
-			// 	}
-			// },
+			{
+				fieldtype: 'Currency',
+				label: __("Additional Discount Percentage"),
+				options: me.frm.doc.currency,
+				fieldname: "additional_discount_percentage",
+				default: me.frm.doc.additional_discount_percentage,
+				onchange: () => {
+					me.update_cur_frm_value('additional_discount_percentage', () => {
+						frappe.flags.additional_discount_percentage = false;
+						me.update_additional_discount_percentage()
+					});
+				}
+			},
 			{
 				fieldtype: 'Column Break',
 			},
@@ -2018,7 +2022,6 @@ class Payment {
 
 	update_discount_amount() {
 		this.dialog.set_value("discount_amount", this.frm.doc.discount_amount);
-		this.update_total_with_discount();
 		this.update_change_amount();
 	}
 
@@ -2030,6 +2033,7 @@ class Payment {
 	update_change_amount() {
 		this.dialog.set_value("change_amount", this.frm.doc.change_amount);
 		this.show_paid_amount();
+		this.update_total_with_discount()
 	}
 
 	update_write_off_amount() {
@@ -2042,7 +2046,6 @@ class Payment {
 
 
 	show_paid_amount() {
-		this.dialog.set_value("paid_amount", this.frm.doc.paid_amount);
 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
 	}
 
