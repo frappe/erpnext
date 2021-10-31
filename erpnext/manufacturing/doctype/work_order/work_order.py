@@ -1015,7 +1015,7 @@ def close_work_order(work_order, status):
 			filters={
 				"work_order": work_order.name,
 				"status": "Work In Progress"
-		}, pluck='name')
+			}, pluck='name')
 
 		if job_cards:
 			job_cards = ", ".join(job_cards)
