@@ -520,9 +520,12 @@ erpnext.work_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
 		if (doc.docstatus === 1 && doc.status != "Closed") {
-			console.log("check");
 			frm.add_custom_button(__('Close'), function() {
-				erpnext.work_order.change_work_order_status(frm, "Closed");
+				frappe.confirm(__("Once the Work Order is Closed. It can't be resumed."),
+					() => {
+						erpnext.work_order.change_work_order_status(frm, "Closed");
+					}
+				);
 			}, __("Status"));
 
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
