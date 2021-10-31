@@ -7,6 +7,7 @@
  "field_order": [
   "naming_series",
   "status",
+  "document_number",
   "customer",
   "rtn",
   "column_break_1",
@@ -91,23 +92,27 @@
    "collapsible": 1,
    "fieldname": "cai_info_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "CAI Info"
   },
   {
    "fieldname": "cai",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Cai",
    "read_only": 1
   },
   {
    "fieldname": "due_date_cai",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Due Date CAI",
    "read_only": 1
   },
   {
    "fieldname": "authorized_range",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Authorized Range",
    "read_only": 1
   },
@@ -140,7 +145,6 @@
    "label": "Company",
    "options": "Company",
    "print_hide": 1,
-   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
   },
@@ -211,10 +215,16 @@
    "fieldtype": "Link",
    "label": "Type Transaction",
    "options": "Type Transaction For Entering Vendor Document"
+  },
+  {
+   "fieldname": "document_number",
+   "fieldtype": "Data",
+   "label": "Document number",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-10-28 10:39:25.169442",
+ "modified": "2021-10-31 10:42:22.489462",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Customer Documents",
