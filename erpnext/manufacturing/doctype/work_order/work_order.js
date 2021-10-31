@@ -145,12 +145,12 @@ frappe.ui.form.on("Work Order", {
 				&& frm.doc.operations && frm.doc.operations.length) {
 
 				const not_completed = frm.doc.operations.filter(d => {
-					if(d.status != 'Completed') {
+					if (d.status != 'Completed') {
 						return true;
 					}
 				});
 
-				if(not_completed && not_completed.length) {
+				if (not_completed && not_completed.length) {
 					frm.add_custom_button(__('Create Job Card'), () => {
 						frm.trigger("make_job_card");
 					}).addClass('btn-primary');
