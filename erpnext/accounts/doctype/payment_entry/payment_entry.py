@@ -64,6 +64,8 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.paid_supplier_documents()
+			self.paid_customer_documents()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -87,6 +89,22 @@ class PaymentEntry(AccountsController):
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
+
+	def paid_supplier_documents(self):
+		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Supplier Documents":
+				doc = frappe.get_doc("Supplier Documents", document.reference_name)
+				doc.db_set('status', "Paid", update_modified=False)
+	
+	def paid_customer_documents(self):
+		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Customer Documents":
+				doc = frappe.get_doc("Customer Documents", document.reference_name)
+				doc.db_set('status', "Paid", update_modified=False)
 
 	def update_accounts_status(self):
 		if self.party_type == "Customer":
@@ -231,7 +249,7 @@ class PaymentEntry(AccountsController):
 		elif self.party_type == "Customer":
 			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC", "Customer Documents")
 		elif self.party_type == "Supplier":
-			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry", 'Supplier Documents')
+			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry", "Supplier Documents", "Credit Note CXP")
 		elif self.party_type == "Employee":
 			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
 
