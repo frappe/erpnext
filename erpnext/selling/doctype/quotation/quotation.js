@@ -79,7 +79,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 			if(doc.status!=="Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {
-						this.set_as_lost_dialog();
+						this.frm.trigger('set_as_lost_dialog');
 					});
 				}
 
@@ -201,54 +201,6 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				}
 			}
 		})
-	}
-
-	set_as_lost_dialog() {
-		let me = this;
-		var dialog = new frappe.ui.Dialog({
-			title: __("Set as Lost"),
-			fields: [
-				{
-					"fieldtype": "Table MultiSelect",
-					"label": __("Lost Reasons"),
-					"fieldname": "lost_reason",
-					"options": "Quotation Lost Reason Detail",
-					"reqd": 1
-				},
-				{
-					"fieldtype": "Table MultiSelect",
-					"label": __("Competitors"),
-					"fieldname": "competitors",
-					"options": "Competitor Detail",
-					"reqd": 1
-				},
-				{
-					"fieldtype": "Small Text",
-					"label": __("Detailed Reason"),
-					"fieldname": "detailed_reason"
-				},
-			],
-			primary_action: function() {
-				let values = dialog.get_values();
-
-				me.frm.call({
-					doc: me.frm.doc,
-					method: 'declare_enquiry_lost',
-					args: {
-						'lost_reasons_list': values.lost_reason,
-						'competitors': values.competitors,
-						'detailed_reason': values.detailed_reason
-					},
-					callback: function(r) {
-						dialog.hide();
-						me.frm.reload_doc();
-					},
-				});
-			},
-			primary_action_label: __('Declare Lost')
-		});
-
-		dialog.show();
 	}
 };
 

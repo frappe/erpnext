@@ -117,7 +117,7 @@ class Opportunity(TransactionBase):
 			self.party_name = lead_name
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons, competitors, detailed_reason=None):
+	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
 		if not self.has_active_quotation():
 			self.status = 'Lost'
 			self.lost_reasons = self.competitors = []
@@ -125,7 +125,7 @@ class Opportunity(TransactionBase):
 			if detailed_reason:
 				self.order_lost_reason = detailed_reason
 
-			for reason in lost_reasons:
+			for reason in lost_reasons_list:
 				self.append('lost_reasons', reason)
 
 			for competitor in competitors:
