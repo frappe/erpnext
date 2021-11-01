@@ -911,10 +911,11 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
-	# Get valuation rate from last sle for the same item and warehouse
-	if not company:
-		company = erpnext.get_default_company()
 
+	if not company:
+		company =  frappe.get_cached_value("Warehouse", warehouse, "company")
+
+	# Get valuation rate from last sle for the same item and warehouse
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
