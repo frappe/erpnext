@@ -881,7 +881,7 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.clear_table("timesheets");
 		for (const time_log of time_logs) {
 			if (frm.doc.currency != time_log.currency) {
-				const exchange_rate = await frappe.xcall(
+				const exchange_rate = await frappe.call(
 					"erpnext.setup.utils.get_exchange_rate",
 					{
 						from_currency: time_log.currency,
@@ -901,10 +901,11 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	async update_items_from_timesheets(frm, time_logs) {
-		if (!time_logs || !time_logs.length) return;
-
-		const items_to_update = time_logs.some(time_log => time_log.item_code);
-		if (!items_to_update) return;
+		if (
+			!time_logs
+			|| !time_logs.length
+			|| !time_logs.some(time_log => time_log.item)
+		) return;
 
 		const activities_without_item = new Set();
 		const item_map = {};
@@ -926,16 +927,18 @@ frappe.ui.form.on('Sales Invoice', {
 			values.amount += time_log.billing_amount;
 		}
 
+		const timesheet_items = Object.keys(item_map);
 		const items_to_keep = frm.doc.items.filter(
-			item => !items_to_update.has(item.item_code)
+			item => !timesheet_items.includes(item.item_code)
 		);
 
 		await new Promise(resolve => {
 			if (items_to_keep.length == frm.doc.items.length) resolve();
 
 			frappe.confirm(
-				"Existing items will be overwritten. Are you sure you want to continue?",
+				__("Existing items will be overwritten. Are you sure you want to continue?"),
 				() => {
+					items_to_keep.forEach((row, index) => row.idx = index + 1);
 					frm.doc.items = items_to_keep;
 					resolve();
 				}
@@ -944,7 +947,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 		// show warning
 		if (activities_without_item.size) {
-			let warning_message = _(
+			let warning_message = __(
 				"Following Activity Types don't have a linked item:"
 			) + "<br><ul>";
 
@@ -953,18 +956,18 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 
 			warning_message += "</ul>";
-			warning_message += _("Please add the corresponding items manually.");
+			warning_message += __("Please add the corresponding items manually.");
 			frappe.show_alert({ message: warning_message, indicator: "yellow" });
 		}
 
 		// add items
 		for (const [item_code, values] of Object.entries(item_map)) {
 			const row = frm.add_child("items");
-			frappe.model.set_value(row.doctype, row.name, "item_code", item_code);
+			await frappe.model.set_value(row.doctype, row.name, "item_code", item_code);
 			frappe.model.set_value(row.doctype, row.name, {
 				qty: values.qty,
 				rate: flt(values.amount / values.qty),
-			})
+			});
 		}
 	},
 

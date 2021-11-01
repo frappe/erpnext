@@ -233,10 +233,10 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 			tsd.description as description,
 			ts.currency as currency,
 			tsd.project_name as project_name,
-			at.item,
+			at.item
 		FROM `tabTimesheet Detail` tsd
 			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent
-			LEFT JOIN `tabActivty Type` at ON tsd.activity_type = at.name
+			LEFT JOIN `tabActivity Type` at ON tsd.activity_type = at.name
 		WHERE
 			tsd.parenttype = 'Timesheet'
 			AND tsd.docstatus = 1
