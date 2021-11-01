@@ -5,7 +5,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 import json
 
 import frappe
@@ -159,6 +159,8 @@ class MaterialRequest(BuyingController):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		# under tetsing create stock entry
+		self.create_stock_entry()
 		if self.material_request_type == 'Purchase':
 			self.validate_budget()
 
@@ -190,7 +192,7 @@ class MaterialRequest(BuyingController):
 
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))
-	
+
 	def update_status(self, status):
 		self.check_modified_date()
 		self.status_can_change(status)
@@ -311,6 +313,30 @@ class MaterialRequest(BuyingController):
 			doc = frappe.get_doc('Production Plan', production_plan)
 			doc.set_status()
 			doc.db_set('status', doc.status)
+
+	def create_stock_entry(self):
+		stock_entry = frappe.new_doc('Stock Entry')
+		stock_entry.purpose = self.material_request_type
+		stock_entry.set_stock_entry_type()
+		stock_entry.from_warehouse = self.set_warehouse
+		stock_entry.company = self.company
+		# cost_center = frappe.get_cached_value('Company', self.company, 'cost_center')
+		# expense_account = get_account(None, 'expense_account', 'Healthcare Settings', self.company)
+		for row in self.items:
+			se_child = stock_entry.append('items')
+			se_child.item_code = row.item_code
+			se_child.item_name = frappe.db.get_value('Item', row.item_code, 'item_name')
+			se_child.uom = frappe.db.get_value('Item', row.item_code, 'stock_uom')
+			se_child.stock_uom = se_child.uom
+			se_child.qty = row.qty
+			# in stock uom
+			se_child.conversion_factor = 1
+			se_child.cost_center = row.cost_center
+			se_child.expense_account = row.expense_account
+			# references
+			# se_child.patient = entry.patient
+			# se_child.inpatient_medication_entry_child = entry.name
+		# stock_entry.save(ignore_permissions=True)
 	@frappe.whitelist()
 	def set_target_warehouse(self):
 		q = "select staging_material_request_warehouse from `tabStaging Details` where company = '{0}'".format(self.company)
@@ -701,15 +727,38 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 			staging_warhouse = frappe.get_value("Staging Details",{'company':company},'staging_material_request_warehouse')
 			if staging_warhouse:
 				projected_qty = frappe.get_value('Bin', {'warehouse':staging_warhouse,'item_code':itm.item_code},'projected_qty')
+				print("--------projected_qty--", projected_qty)
+				# ujjwal  Code
+				# if projected_qty:
+				# 	qty = flt(itm.get('transferred_qty')) - flt(itm.get("consumed_qty")) - projected_qty
+				# 	item=frappe.get_doc("Item",itm.get('item_code'))
+				# 	if item.allowed_in_wo_staging=="Yes" and item.staging_multiple > 0:
+				# 		sqty=math.ceil(qty/item.staging_multiple)
+				# 		final_qty=item.staging_multiple*sqty
+				# 		if final_qty > 0:
+				# 			target.qty = final_qty
 				if projected_qty:
-					qty = flt(itm.get('transferred_qty')) - flt(itm.get("consumed_qty")) - projected_qty
-					item=frappe.get_doc("Item",itm.get('item_code'))
-					if item.allowed_in_wo_staging=="Yes" and item.staging_multiple > 0:
-						sqty=math.ceil(qty/item.staging_multiple)
-						final_qty=item.staging_multiple*sqty
-						if final_qty > 0:
-							target.qty = final_qty
-		
+					item = frappe.get_doc("Item", itm.get('item_code'))
+					if item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
+						and projected_qty < qty :
+						result_qty = (qty - projected_qty)/item.staging_multiple
+						print("--------",qty,projected_qty,item.staging_multiple)
+						if result_qty > 0:
+							qty = result_qty
+							target.qty = result_qty
+					elif item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
+						and projected_qty >  qty :
+						qty = 0
+						target.qty = 0
+					elif item.allowed_in_wo_staging == "Yes" and not item.staging_multiple > 0 \
+						and projected_qty < qty :
+						result_qty = (qty - projected_qty)
+						qty = result_qty
+						target.qty = result_qty
+					elif item.allowed_in_wo_staging == "Yes" and not item.staging_multiple > 0 \
+						and projected_qty > qty :
+						qty = 0
+						target.qty = 0
 		if qty < 0:
 			qty = 0
 		target.qty = qty
@@ -718,7 +767,7 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 
 	doclist = get_mapped_doc("Work Order", source_name, {
 		"Work Order": {
-			"doctype": "Material Request",
+			"doctype": "Material Request"
 		},
 		"Work Order Item": {
 			"doctype": "Material Request Item",
@@ -727,11 +776,12 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 				"parent": "work_order",
 			},
 			"postprocess": update_item,
-			# "condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
+			"condition": lambda doc: frappe.db.exists("Item",{'name':doc.item_code,"allowed_in_wo_staging":"Yes"})
 			#"condition": non_zero_qty,
 		},
-		
+
 	}, target_doc, ignore_permissions=ignore_permissions)
+
 	return doclist
 
 
