@@ -933,7 +933,7 @@ frappe.ui.form.on('Sales Invoice', {
 		);
 
 		await new Promise(resolve => {
-			if (items_to_keep.length == frm.doc.items.length) resolve();
+			if (items_to_keep.length == frm.doc.items.length) return resolve();
 
 			frappe.confirm(
 				__("Existing items will be overwritten. Are you sure you want to continue?"),
