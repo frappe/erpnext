@@ -600,7 +600,7 @@ class update_entries_after(object):
 			if not allow_zero_rate:
 				self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-					currency=erpnext.get_company_currency(sle.company))
+					currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -667,7 +667,7 @@ class update_entries_after(object):
 				if not allow_zero_valuation_rate:
 					self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-						currency=erpnext.get_company_currency(sle.company))
+						currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -700,7 +700,7 @@ class update_entries_after(object):
 					if not allow_zero_valuation_rate:
 						_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 							sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-							currency=erpnext.get_company_currency(sle.company))
+							currency=erpnext.get_company_currency(sle.company), company=sle.company)
 					else:
 						_rate = 0
 
