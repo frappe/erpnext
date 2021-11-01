@@ -159,13 +159,14 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "migration_hash": "02bd89714f0f1f1acd368fc01b024d26",
- "modified": "2021-10-29 13:41:31.998609",
+ "migration_hash": "f39fb8f4e18a0e7fd391f0b4b52d8375",
+ "modified": "2021-11-01 13:10:36.759249",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",
