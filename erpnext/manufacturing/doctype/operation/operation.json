@@ -9,6 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "workstation",
+  "quality_inspection_template",
   "data_2",
   "is_corrective_operation",
   "job_card_section",
@@ -92,12 +93,18 @@
    "fieldname": "is_corrective_operation",
    "fieldtype": "Check",
    "label": "Is Corrective Operation"
+  },
+  {
+   "fieldname": "quality_inspection_template",
+   "fieldtype": "Link",
+   "label": "Quality Inspection Template",
+   "options": "Quality Inspection Template"
   }
  ],
  "icon": "fa fa-wrench",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-12 15:09:23.593338",
+ "modified": "2021-11-01 15:13:35.911144",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Operation",
