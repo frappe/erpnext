@@ -8,7 +8,6 @@
  "field_order": [
   "company",
   "company_address",
-  "address_group",
   "year",
   "month",
   "json_output",
@@ -48,16 +47,10 @@
    "fieldtype": "Small Text",
    "label": "Invoices with no Place Of Supply",
    "read_only": 1
-  },
-  {
-   "fieldname": "address_group",
-   "fieldtype": "Link",
-   "label": "Address Group",
-   "options": "Address Group"
   }
  ],
  "links": [],
- "modified": "2021-10-29 11:16:25.723763",
+ "modified": "2021-11-01 10:31:03.274586",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "GSTR 3B Report",
