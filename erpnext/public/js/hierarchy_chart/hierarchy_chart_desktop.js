@@ -334,10 +334,12 @@ erpnext.HierarchyChart = class {
 
 			if (child_nodes) {
 				$.each(child_nodes, (_i, data) => {
-					this.add_node(node, data);
-					setTimeout(() => {
-						this.add_connector(node.id, data.id);
-					}, 250);
+					if (!$(`[id="${data.id}"]`).length) {
+						this.add_node(node, data);
+						setTimeout(() => {
+							this.add_connector(node.id, data.id);
+						}, 250);
+					}
 				});
 			}
 		}

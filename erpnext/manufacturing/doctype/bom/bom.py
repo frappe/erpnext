@@ -307,6 +307,9 @@ class BOM(WebsiteGenerator):
 		existing_bom_cost = self.total_cost
 
 		for d in self.get("items"):
+			if not d.item_code:
+				continue
+
 			rate = self.get_rm_rate({
 				"company": self.company,
 				"item_code": d.item_code,
@@ -599,7 +602,7 @@ class BOM(WebsiteGenerator):
 		for d in self.get('items'):
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.stock_qty)
-			else:
+			elif d.item_code:
 				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'		: d.item_code,
 					'item_name'		: d.item_name,
@@ -1133,8 +1136,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			query_filters["has_variants"] = 0
 
 	if filters and filters.get("is_stock_item"):
-		or_cond_filters["is_stock_item"] = 1
-		or_cond_filters["has_variants"] = 1
+		query_filters["is_stock_item"] = 1
 
 	return frappe.get_list("Item",
 		fields = fields, filters=query_filters,

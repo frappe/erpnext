@@ -20,7 +20,6 @@ Agriculture
 ERPNext Integrations
 Non Profit
 Hotels
-Hub Node
 Quality Management
 Communication
 Loan Management

@@ -125,7 +125,8 @@
    "label": "Abbr",
    "oldfieldname": "abbr",
    "oldfieldtype": "Data",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "bold": 1,
@@ -747,10 +748,11 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-07-12 11:27:06.353860",
+ "modified": "2021-10-04 12:09:25.833133",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_company",
  "owner": "Administrator",
  "permissions": [

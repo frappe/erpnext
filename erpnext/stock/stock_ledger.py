@@ -13,8 +13,8 @@ from six import iteritems
 
 import erpnext
 from erpnext.stock.utils import (
-	get_bin,
 	get_incoming_outgoing_rate_for_cancel,
+	get_or_make_bin,
 	get_valuation_method,
 )
 
@@ -123,12 +123,11 @@ def set_as_cancel(voucher_type, voucher_no):
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	args.update({"doctype": "Stock Ledger Entry"})
+	args["doctype"] = "Stock Ledger Entry"
 	sle = frappe.get_doc(args)
 	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock=allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
-	sle.insert()
 	sle.submit()
 	return sle
 
@@ -601,7 +600,7 @@ class update_entries_after(object):
 			if not allow_zero_rate:
 				self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-					currency=erpnext.get_company_currency(sle.company))
+					currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -668,7 +667,7 @@ class update_entries_after(object):
 				if not allow_zero_valuation_rate:
 					self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-						currency=erpnext.get_company_currency(sle.company))
+						currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -701,7 +700,7 @@ class update_entries_after(object):
 					if not allow_zero_valuation_rate:
 						_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 							sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-							currency=erpnext.get_company_currency(sle.company))
+							currency=erpnext.get_company_currency(sle.company), company=sle.company)
 					else:
 						_rate = 0
 
@@ -805,14 +804,13 @@ class update_entries_after(object):
 	def update_bin(self):
 		# update bin for each warehouse
 		for warehouse, data in iteritems(self.data):
-			bin_doc = get_bin(self.item_code, warehouse)
-			bin_doc.update({
+			bin_record = get_or_make_bin(self.item_code, warehouse)
+
+			frappe.db.set_value('Bin', bin_record, {
 				"valuation_rate": data.valuation_rate,
 				"actual_qty": data.qty_after_transaction,
 				"stock_value": data.stock_value
 			})
-			bin_doc.flags.via_stock_ledger_entry = True
-			bin_doc.save(ignore_permissions=True)
 
 
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
@@ -913,12 +911,13 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
-	# Get valuation rate from last sle for the same item and warehouse
-	if not company:
-		company = erpnext.get_default_company()
 
+	if not company:
+		company =  frappe.get_cached_value("Warehouse", warehouse, "company")
+
+	# Get valuation rate from last sle for the same item and warehouse
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
 			item_code = %s
 			AND warehouse = %s
@@ -929,7 +928,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry`
+			from `tabStock Ledger Entry` force index (item_code)
 			where
 				item_code = %s
 				AND valuation_rate > 0

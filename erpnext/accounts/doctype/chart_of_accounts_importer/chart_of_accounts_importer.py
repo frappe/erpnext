@@ -25,7 +25,9 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 
 
 class ChartofAccountsImporter(Document):
-	pass
+	def validate(self):
+		if self.import_file:
+			get_coa('Chart of Accounts Importer', 'All Accounts', file_name=self.import_file, for_validate=1)
 
 def validate_columns(data):
 	if not data:
@@ -34,7 +36,8 @@ def validate_columns(data):
 	no_of_columns = max([len(d) for d in data])
 
 	if no_of_columns > 7:
-		frappe.throw(_('More columns found than expected. Please compare the uploaded file with standard template'))
+		frappe.throw(_('More columns found than expected. Please compare the uploaded file with standard template'),
+			title=(_("Wrong Template")))
 
 @frappe.whitelist()
 def validate_company(company):
@@ -66,7 +69,7 @@ def import_coa(file_name, company):
 
 	frappe.local.flags.ignore_root_company_validation = True
 	forest = build_forest(data)
-	create_charts(company, custom_chart=forest)
+	create_charts(company, custom_chart=forest, from_coa_importer=True)
 
 	# trigger on_update for company to reset default accounts
 	set_default_accounts(company)
@@ -145,7 +148,7 @@ def get_coa(doctype, parent, is_root=False, file_name=None, for_validate=0):
 
 	if not for_validate:
 		forest = build_forest(data)
-		accounts = build_tree_from_json("", chart_data=forest) # returns a list of dict in a tree render-able form
+		accounts = build_tree_from_json("", chart_data=forest, from_coa_importer=True) # returns a list of dict in a tree render-able form
 
 		# filter out to show data for the selected node only
 		accounts = [d for d in accounts if d['parent_account']==parent]
@@ -209,11 +212,14 @@ def build_forest(data):
 		if not account_name:
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
 
+		name = account_name
 		if account_number:
 			account_number = cstr(account_number).strip()
 			account_name = "{} - {}".format(account_number, account_name)
 
 		charts_map[account_name] = {}
+		charts_map[account_name]['account_name'] = name
+		if account_number: charts_map[account_name]["account_number"] = account_number
 		if cint(is_group) == 1: charts_map[account_name]["is_group"] = is_group
 		if account_type: charts_map[account_name]["account_type"] = account_type
 		if root_type: charts_map[account_name]["root_type"] = root_type

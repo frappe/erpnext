@@ -232,9 +232,6 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		if self.update_stock == 1:
-			self.repost_future_sle_and_gle()
-
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
@@ -1287,12 +1284,20 @@ class SalesInvoice(SellingController):
 
 			serial_nos = item.serial_no or ""
 			si_serial_nos = set(get_serial_nos(serial_nos))
+			serial_no_diff = si_serial_nos - dn_serial_nos
 
-			if si_serial_nos - dn_serial_nos:
-				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note").format(item.idx))
+			if serial_no_diff:
+				dn_link = frappe.utils.get_link_to_form("Delivery Note", item.delivery_note)
+				serial_no_msg = ", ".join(frappe.bold(d) for d in serial_no_diff)
+
+				msg = _("Row #{0}: The following Serial Nos are not present in Delivery Note {1}:").format(
+					item.idx, dn_link)
+				msg += " " + serial_no_msg
+
+				frappe.throw(msg=msg, title=_("Serial Nos Mismatch"))
 
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
-				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
+				frappe.throw(_("Row #{0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
 					item.idx, item.qty, item.item_code, len(si_serial_nos)))
 
 	def update_project(self):
@@ -1422,6 +1427,7 @@ class SalesInvoice(SellingController):
 			return
 
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
+		total = get_total_in_party_account_currency(self)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1429,9 +1435,9 @@ class SalesInvoice(SellingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif is_overdue(self):
+				elif is_overdue(self, total):
 					self.status = "Overdue"
-				elif 0 < outstanding_amount < flt(self.grand_total, self.precision("grand_total")):
+				elif 0 < outstanding_amount < total:
 					self.status = "Partly Paid"
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
@@ -1458,27 +1464,42 @@ class SalesInvoice(SellingController):
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
 
-def is_overdue(doc):
-	outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
 
+def get_total_in_party_account_currency(doc):
+	total_fieldname = (
+		"grand_total"
+		if doc.disable_rounded_total
+		else "rounded_total"
+	)
+	if doc.party_account_currency != doc.currency:
+		total_fieldname = "base_" + total_fieldname
+
+	return flt(doc.get(total_fieldname), doc.precision(total_fieldname))
+
+def is_overdue(doc, total):
+	outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
 	if outstanding_amount <= 0:
 		return
 
-	grand_total = flt(doc.grand_total, doc.precision("grand_total"))
-	nowdate = getdate()
-	if doc.payment_schedule:
-		# calculate payable amount till date
-		payable_amount = sum(
-			payment.payment_amount
-			for payment in doc.payment_schedule
-			if getdate(payment.due_date) < nowdate
-		)
+	today = getdate()
+	if doc.get('is_pos') or not doc.get('payment_schedule'):
+		return getdate(doc.due_date) < today
 
-		if (grand_total - outstanding_amount) < payable_amount:
-			return True
+	# calculate payable amount till date
+	payment_amount_field = (
+		"base_payment_amount"
+		if doc.party_account_currency != doc.currency
+		else "payment_amount"
+	)
 
-	elif getdate(doc.due_date) < nowdate:
-		return True
+	payable_amount = sum(
+		payment.get(payment_amount_field)
+		for payment in doc.payment_schedule
+		if getdate(payment.due_date) < today
+	)
+
+	return (total - outstanding_amount) < payable_amount
+
 
 def get_discounting_status(sales_invoice):
 	status = None
@@ -1954,22 +1975,23 @@ def update_multi_mode_option(doc, pos_profile):
 	def append_payment(payment_mode):
 		payment = doc.append('payments', {})
 		payment.default = payment_mode.default
-		payment.mode_of_payment = payment_mode.parent
+		payment.mode_of_payment = payment_mode.mop
 		payment.account = payment_mode.default_account
 		payment.type = payment_mode.type
 
 	doc.set('payments', [])
 	invalid_modes = []
-	for pos_payment_method in pos_profile.get('payments'):
-		pos_payment_method = pos_payment_method.as_dict()
+	mode_of_payments = [d.mode_of_payment for d in pos_profile.get('payments')]
+	mode_of_payments_info = get_mode_of_payments_info(mode_of_payments, doc.company)
 
-		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
+	for row in pos_profile.get('payments'):
+		payment_mode = mode_of_payments_info.get(row.mode_of_payment)
 		if not payment_mode:
-			invalid_modes.append(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment))
+			invalid_modes.append(get_link_to_form("Mode of Payment", row.mode_of_payment))
 			continue
 
-		payment_mode[0].default = pos_payment_method.default
-		append_payment(payment_mode[0])
+		payment_mode.default = row.default
+		append_payment(payment_mode)
 
 	if invalid_modes:
 		if invalid_modes == 1:
@@ -1984,6 +2006,24 @@ def get_all_mode_of_payments(doc):
 		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
 	{'company': doc.company}, as_dict=1)
+
+def get_mode_of_payments_info(mode_of_payments, company):
+	data = frappe.db.sql(
+		"""
+		select
+			mpa.default_account, mpa.parent as mop, mp.type as type
+		from
+			`tabMode of Payment Account` mpa,`tabMode of Payment` mp
+		where
+			mpa.parent = mp.name and
+			mpa.company = %s and
+			mp.enabled = 1 and
+			mp.name in (%s)
+		group by
+			mp.name
+		""", (company, mode_of_payments), as_dict=1)
+
+	return {row.get('mop'): row for row in data}
 
 def get_mode_of_payment_info(mode_of_payment, company):
 	return frappe.db.sql("""
