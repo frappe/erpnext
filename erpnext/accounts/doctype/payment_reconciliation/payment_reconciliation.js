@@ -6,7 +6,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	onload() {
 		const default_company = frappe.defaults.get_default('company');
 		this.frm.set_value('company', default_company);
-		
+
 		this.frm.set_value('party_type', '');
 		this.frm.set_value('party', '');
 		this.frm.set_value('receivable_payable_account', '');
@@ -140,7 +140,6 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 	allocate() {
 		let payments = this.frm.fields_dict.payments.grid.get_selected_children();
-
 		if (!(payments.length)) {
 			payments = this.frm.doc.payments;
 		}
@@ -256,4 +255,4 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 };
 
-$.extend(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({frm: cur_frm}));
