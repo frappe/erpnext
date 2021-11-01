@@ -8,6 +8,7 @@
   "customer_section",
   "title",
   "naming_series",
+  "dni_patient",
   "customer",
   "customer_name",
   "client_name",
@@ -1774,12 +1775,19 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Total With Discount"
+  },
+  {
+   "fetch_from": "patient.dni",
+   "fieldname": "dni_patient",
+   "fieldtype": "Data",
+   "label": "DNI Patient",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-10-28 23:20:34.804265",
+ "modified": "2021-11-01 12:06:42.271690",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
