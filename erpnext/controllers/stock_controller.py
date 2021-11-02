@@ -544,7 +544,12 @@ class StockController(AccountsController):
 			"company": self.company
 		})
 		if future_sle_exists(args):
-			create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
+			item_based_reposting =  cint(frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting"))
+			if item_based_reposting:
+				create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
+			else:
+				create_repost_item_valuation_entry(args)
+
 
 @frappe.whitelist()
 def make_quality_inspections(doctype, docname, items):
