@@ -1030,6 +1030,7 @@ def create_asset(**args):
 
 	if asset.calculate_depreciation:
 		asset.append("finance_books", {
+			"finance_book": args.finance_book,
 			"depreciation_method": args.depreciation_method or "Straight Line",
 			"frequency_of_depreciation": args.frequency_of_depreciation or 12,
 			"total_number_of_depreciations": args.total_number_of_depreciations or 5,
