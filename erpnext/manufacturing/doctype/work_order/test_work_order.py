@@ -12,9 +12,9 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	ItemHasVariantError,
 	OverProductionError,
 	StockOverProductionError,
+	close_work_order,
 	make_stock_entry,
 	stop_unstop,
-	close_work_order,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
