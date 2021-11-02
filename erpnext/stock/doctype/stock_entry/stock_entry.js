@@ -88,6 +88,8 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				}
 
+				// User could want to select a manually created empty batch (no warehouse)
+				// or a pre-existing batch
 				if (frm.doc.purpose != "Material Receipt") {
 					filters["warehouse"] = item.s_warehouse || item.t_warehouse;
 				}
