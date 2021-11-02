@@ -34,6 +34,7 @@
   "leave_without_pay",
   "days_in_month",
   "weekly_off",
+  "encashment_days",
   "leave",
   "column_break_24",
   "absent_days",
@@ -686,13 +687,18 @@
    "fieldtype": "Int",
    "label": "Present Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "encashment_days",
+   "fieldtype": "Int",
+   "label": "Encashment Days"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-08 11:48:47.098248",
+ "modified": "2021-10-27 15:37:07.238483",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
