@@ -59,7 +59,7 @@ class RepostItemValuation(Document):
 
 	def on_submit(self):
 		self.deduplicate_similar_repost()
-		if not frappe.flags.in_test:
+		if not frappe.flags.in_test or self.flags.dont_run_in_test:
 			return
 
 		frappe.enqueue(repost, timeout=1800, queue='long',
