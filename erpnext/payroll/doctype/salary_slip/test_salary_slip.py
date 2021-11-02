@@ -126,6 +126,7 @@ class TestSalarySlip(unittest.TestCase):
 
 
 		self.assertEqual(ss.leave_without_pay, 4)
+		self.assertEqual(ss.leave_with_pay, 1)
 
 		days_in_month = no_of_days[0]
 		no_of_holidays = no_of_days[1]

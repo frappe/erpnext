@@ -355,10 +355,11 @@ def calculate_lwp_or_ppl_based_on_leave_application(employee, holidays, start_da
 			is_partially_paid_leave = cint(leave[0][2])
 			fraction_of_daily_salary_per_leave = flt(leave[0][3])
 
-			equivalent_lwp_count =  (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+			equivalent_lwp_count = (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
 
 			if is_partially_paid_leave:
-				partial_pay = equivalent_lwp_count * (fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
+				partial_pay = equivalent_lwp_count * (
+					fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
 				ppl += partial_pay
 				lwp += 1 - partial_pay
 			else:
@@ -375,8 +376,9 @@ def calculate_lwp_ppl_and_absent_days_based_on_attendance(employee, holidays, st
 		flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
 	leave_types = frappe.get_all("Leave Type",
-								 or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
-								 fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"])
+									or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
+									fields =["name", "is_lwp", "is_ppl",
+											"fraction_of_daily_salary_per_leave", "include_holiday"])
 
 	leave_type_map = {}
 	for leave_type in leave_types:
@@ -405,17 +407,19 @@ def calculate_lwp_ppl_and_absent_days_based_on_attendance(employee, holidays, st
 			fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type]["fraction_of_daily_salary_per_leave"]
 
 		if d.status == "Half Day":
-			equivalent_lwp =  (1 - daily_wages_fraction_for_half_day)
+			equivalent_lwp = (1 - daily_wages_fraction_for_half_day)
 
 			if d.leave_type in leave_type_map.keys() and leave_type_map[d.leave_type]["is_ppl"]:
-				equivalent_ppl = equivalent_lwp * (fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
+				equivalent_ppl = equivalent_lwp * (
+					fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
 				equivalent_lwp = 1 - equivalent_ppl
 				ppl += equivalent_ppl
 			lwp += equivalent_lwp
 		elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
 			equivalent_lwp = 1
 			if leave_type_map[d.leave_type]["is_ppl"]:
-				equivalent_ppl = equivalent_lwp * (fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
+				equivalent_ppl = equivalent_lwp * (
+					fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
 				equivalent_lwp = 1 - equivalent_ppl
 				ppl += equivalent_ppl
 			lwp += equivalent_lwp

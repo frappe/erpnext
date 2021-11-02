@@ -26,13 +26,14 @@ def execute(filters=None):
 	data = []
 	for ss in salary_slips:
 		row = [ss.name, ss.employee, ss.employee_name, doj_map.get(ss.employee), ss.branch, ss.department, ss.designation,
-			ss.company, ss.start_date, ss.end_date, ss.leave_without_pay, ss.payment_days]
+				ss.company, ss.start_date, ss.end_date, ss.leave_without_pay, ss.leave_with_pay, ss.payment_days]
 
 		if ss.branch is not None: columns[3] = columns[3].replace('-1','120')
 		if ss.department is not None: columns[4] = columns[4].replace('-1','120')
 		if ss.designation is not None: columns[5] = columns[5].replace('-1','120')
 		if ss.leave_without_pay is not None: columns[9] = columns[9].replace('-1','130')
-
+		if ss.leave_with_pay is not None:
+			columns[9] = columns[9].replace('-1', '130')
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -70,6 +71,7 @@ def get_columns(salary_slips):
 		_("Start Date") + "::80",
 		_("End Date") + "::80",
 		_("Leave Without Pay") + ":Float:130",
+		_("Leave With Pay") + ":Float:130",
 		_("Payment Days") + ":Float:120",
 		_("Currency") + ":Link/Currency:80"
 	]
@@ -78,7 +80,8 @@ def get_columns(salary_slips):
 		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140",
 		_("Date of Joining") + "::80", _("Branch") + ":Link/Branch:-1", _("Department") + ":Link/Department:-1",
 		_("Designation") + ":Link/Designation:120", _("Company") + ":Link/Company:120", _("Start Date") + "::80",
-		_("End Date") + "::80", _("Leave Without Pay") + ":Float:50", _("Payment Days") + ":Float:120"
+		_("End Date") + "::80", _("Leave Without Pay") + ":Float:50", _("Leave With Pay") + ":Float:50",
+		_("Payment Days") + ":Float:120"
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}

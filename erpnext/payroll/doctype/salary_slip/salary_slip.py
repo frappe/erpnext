@@ -24,7 +24,8 @@ from frappe.utils.background_jobs import enqueue
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee, calculate_lwp_or_ppl_based_on_leave_application, calculate_lwp_ppl_and_absent_days_based_on_attendance
+from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee, \
+	calculate_lwp_or_ppl_based_on_leave_application, calculate_lwp_ppl_and_absent_days_based_on_attendance
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	calculate_amounts,
 	create_repayment_entry,
@@ -263,7 +264,7 @@ class SalarySlip(TransactionBase):
 
 		make_salary_slip(self._salary_structure_doc.name, self)
 
-	def get_working_days_details(self, joining_date=None, relieving_date=None, lwp=None, for_preview=0):
+	def get_working_days_details(self, joining_date=None, relieving_date=None, lwp=None, ppl=None, for_preview=0):
 		payroll_based_on = frappe.db.get_value("Payroll Settings", None, "payroll_based_on")
 		include_holidays_in_total_working_days = frappe.db.get_single_value("Payroll Settings", "include_holidays_in_total_working_days")
 
@@ -289,12 +290,19 @@ class SalarySlip(TransactionBase):
 		else:
 			actual_lwp, actual_ppl = calculate_lwp_or_ppl_based_on_leave_application(self.employee, holidays, self.start_date, self.end_date)
 
+		if not ppl:
+			ppl = actual_ppl
+		elif ppl != actual_ppl:
+			frappe.msgprint(_("Leave WITH Pay does not match with approved {} records")
+							.format(payroll_based_on))
+
 		if not lwp:
 			lwp = actual_lwp
 		elif lwp != actual_lwp:
 			frappe.msgprint(_("Leave Without Pay does not match with approved {} records")
 				.format(payroll_based_on))
 
+		self.leave_with_pay = ppl
 		self.leave_without_pay = lwp
 		self.total_working_days = working_days
 
@@ -310,11 +318,11 @@ class SalarySlip(TransactionBase):
 		consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, "consider_unmarked_attendance_as") or "Present"
 
 		if payroll_based_on == "Attendance" and consider_unmarked_attendance_as =="Absent":
-			self.absent_days += unmarked_days #will be treated as absent
+			self.absent_days += unmarked_days # will be treated as absent
 			self.payment_days -= unmarked_days
 			if include_holidays_in_total_working_days:
 				for holiday in holidays:
-					if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1 }):
+					if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1}):
 						self.payment_days += 1
 
 
