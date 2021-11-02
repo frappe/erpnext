@@ -58,6 +58,11 @@ class RepostItemValuation(Document):
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=True, doc=self)
 
+
+def on_doctype_update():
+	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
+
+
 def repost(doc):
 	try:
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
