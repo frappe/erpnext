@@ -49,6 +49,7 @@ class Gstr1Report(object):
 		self.get_columns()
 		self.gst_accounts = get_gst_accounts(self.filters.company, only_non_reverse_charge=1)
 		self.get_invoice_data()
+	
 
 		if self.invoices:
 			self.get_invoice_items()
@@ -211,8 +212,7 @@ class Gstr1Report(object):
 			("address_group", " and company_address in {0}".format(tuple(add_lst)))):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
-					# print(";dfj self filter 214", opts,"== opts1-- ", opts[1], "-  opts[0]  -",opts[0])
-
+					
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			conditions += "AND IFNULL(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') AND is_return != 1 AND is_debit_note !=1"
@@ -245,24 +245,23 @@ class Gstr1Report(object):
 
 		conditions += " AND IFNULL(billing_address_gstin, '') != company_gstin"
 
-		# print("Ciodnutinb  ======",conditions)
+		
 		return conditions
 
 	def get_invoice_items(self):
 		self.invoice_items = frappe._dict()
 		self.item_tax_rate = frappe._dict()
-
+	
 		items = frappe.db.sql("""
-			select item_code, parent, taxable_value, base_net_amount, item_tax_rate
+			select idx ,item_code, parent, taxable_value, base_net_amount, item_tax_rate
 			from `tab%s Item`
 			where parent in (%s)
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
-
+		
 		for d in items:
-			if d.item_code not in self.invoice_items.get(d.parent, {}):
+			if str(d.item_code)+str(d.idx) not in self.invoice_items.get(d.parent, {}):
 				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
 				self.invoice_items[d.parent][d.item_code] += d.get('taxable_value', 0) or d.get('base_net_amount', 0)
-
 				item_tax_rate = {}
 
 				if d.item_tax_rate:

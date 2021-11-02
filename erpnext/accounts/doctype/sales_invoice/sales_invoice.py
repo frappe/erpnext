@@ -287,10 +287,12 @@ class SalesInvoice(SellingController):
 				for i in self.items:
 					for j in doc.item_target_details:
 						if i.item_code==j.item_code:
-							if j.commision_formula:
-								data=eval(j.commision_formula)
-								tot.append(data)
-								self.total_commission=sum(tot)	
+							if self.customer_name==j.customer_name:
+								if j.commision_formula:
+									data=eval(j.commision_formula)
+									tot.append(data)
+									self.total_commission=sum(tot)			
+
 
 		self.process_common_party_accounting()
 
