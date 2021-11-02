@@ -1011,6 +1011,7 @@ def close_work_order(work_order, status):
 
 	work_order = frappe.get_doc("Work Order", work_order)
 	if work_order.get("operations"):
+
 		job_cards = frappe.get_list("Job Card", 
 			filters={
 				"work_order": work_order.name,
