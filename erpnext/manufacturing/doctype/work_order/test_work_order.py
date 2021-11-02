@@ -802,7 +802,7 @@ class TestWorkOrder(unittest.TestCase):
 				self.assertEqual(row.qty, 1)
 
 	def test_close_work_order(self):
-		close_work_order(self.wo_order.name, "Stopped")
+		close_work_order(self.wo_order.name, "Closed")
 		self.assertEqual(self.wo_order.status, "Closed")
 
 def update_job_card(job_card):
