@@ -19,7 +19,7 @@ from six import string_types
 force_fields = [
 	'customer_name', 'vehicle_owner_name', 'broker_name', 'transporter_name',
 	'variant_of', 'variant_of_name',
-	'tax_id', 'tax_cnic', 'tax_strn',
+	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'territory',
 	'booking_customer_name', 'booking_address_display', 'booking_email', 'booking_mobile', 'booking_phone',
 	'booking_tax_id', 'booking_tax_cnic', 'booking_tax_strn', 'receiver_contact_cnic', 'finance_type'
@@ -504,7 +504,7 @@ def get_customer_details(args):
 	customer_details = frappe._dict()
 	if args.customer:
 		customer_details = frappe.get_cached_value("Customer", args.customer,
-			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'territory'], as_dict=1)
+			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'territory'], as_dict=1)
 
 	owner_details = frappe._dict()
 	if args.vehicle_owner:
@@ -531,6 +531,7 @@ def get_customer_details(args):
 	out.tax_id = customer_details.tax_id
 	out.tax_cnic = customer_details.tax_cnic
 	out.tax_strn = customer_details.tax_strn
+	out.tax_status = customer_details.tax_status
 
 	# Customer Address
 	out.customer_address = args.customer_address

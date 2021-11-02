@@ -293,6 +293,30 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		}
 	},
 
+	tax_status: function () {
+		var me = this;
+		if (me.frm.doc.tax_status == "Non Filer") {
+			return erpnext.vehicles.pricing.get_pricing_components({
+				frm: me.frm,
+				component_type: "Registration",
+				get_selling_components: true,
+				get_buying_components: true,
+				selling_components_field: 'customer_charges',
+				buying_components_field: 'authority_charges',
+				filters: {
+					registration_component_type: 'Withholding Tax'
+				},
+				callback: function () {
+					me.calculate_totals();
+				}
+			});
+		} else {
+			var filters = d => cint(d.component_type == "Withholding Tax");
+			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+		}
+	},
+
 	component_amount: function () {
 		this.calculate_totals();
 	},

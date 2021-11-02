@@ -71,6 +71,11 @@ def get_pricing_components(component_type, args, get_selling_components=True, ge
 					force = True
 				else:
 					continue
+			if component_doc.registration_component_type == "Withholding Tax":
+				if args.tax_status == "Non Filer":
+					force = True
+				else:
+					continue
 
 		if get_selling_components:
 			selling_component = get_component_details(component_name, args, "selling")

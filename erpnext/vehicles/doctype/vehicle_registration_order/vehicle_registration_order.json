@@ -31,6 +31,7 @@
   "tax_id",
   "tax_cnic",
   "tax_strn",
+  "tax_status",
   "column_break_32",
   "booking_address_display",
   "booking_email",
@@ -862,12 +863,20 @@
   {
    "fieldname": "column_break_64",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tax_status",
+   "fieldtype": "Select",
+   "label": "Income Tax Status",
+   "options": "\nFiler\nNon Filer",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-29 00:58:59.643558",
+ "modified": "2021-10-30 12:02:49.544034",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",
