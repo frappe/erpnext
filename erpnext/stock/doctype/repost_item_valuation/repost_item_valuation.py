@@ -27,15 +27,12 @@ class RepostItemValuation(Document):
 		if self.based_on == 'Transaction':
 			self.item_code = None
 			self.warehouse = None
-		else:
-			self.voucher_type = None
-			self.voucher_no = None
 
 		self.allow_negative_stock = self.allow_negative_stock or \
 				cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 
 	def set_company(self):
-		if self.voucher_type and self.voucher_no:
+		if self.based_on == "Transaction":
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
 		elif self.warehouse:
 			self.company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
