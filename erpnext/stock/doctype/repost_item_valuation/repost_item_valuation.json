@@ -64,7 +64,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Queued\nIn Progress\nCompleted\nFailed",
+   "options": "Queued\nIn Progress\nCompleted\nSkipped\nFailed",
    "read_only": 1
   },
   {
