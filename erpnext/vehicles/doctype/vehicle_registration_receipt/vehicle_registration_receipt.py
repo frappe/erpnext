@@ -62,3 +62,15 @@ class VehicleRegistrationReceipt(VehicleTransactionController):
 		vehicle_doc.unregistered = 0
 		vehicle_doc.license_plate = self.vehicle_license_plate
 		vehicle_doc.save(ignore_permissions=True)
+
+
+def get_vehicle_registration_receipt(vehicle=None, fields='name', as_dict=False):
+	vehicle_registration_receipt = None
+
+	if vehicle:
+		vehicle_registration_receipt = frappe.db.get_value("Vehicle Registration Receipt", filters={
+			'vehicle': vehicle,
+			'docstatus': 1
+		}, fieldname=fields, as_dict=as_dict)
+
+	return vehicle_registration_receipt
