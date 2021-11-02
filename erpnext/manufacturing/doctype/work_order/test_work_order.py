@@ -14,6 +14,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	StockOverProductionError,
 	make_stock_entry,
 	stop_unstop,
+	close_work_order,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
@@ -799,6 +800,10 @@ class TestWorkOrder(unittest.TestCase):
 		for row in stock_entry.items:
 			if row.is_scrap_item:
 				self.assertEqual(row.qty, 1)
+
+	def test_close_work_order(self):
+		close_work_order(self.wo_order.name, "Stopped")
+		self.assertEqual(self.wo_order.status, "Closed")
 
 def update_job_card(job_card):
 	job_card_doc = frappe.get_doc('Job Card', job_card)
