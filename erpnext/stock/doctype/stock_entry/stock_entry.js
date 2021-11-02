@@ -88,7 +88,9 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				}
 
-				filters["warehouse"] = item.s_warehouse || item.t_warehouse;
+				if (frm.doc.purpose != "Material Receipt") {
+					filters["warehouse"] = item.s_warehouse || item.t_warehouse;
+				}
 
 				return {
 					query : "erpnext.controllers.queries.get_batch_no",
