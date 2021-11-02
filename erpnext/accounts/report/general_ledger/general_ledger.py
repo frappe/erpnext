@@ -19,6 +19,8 @@ from erpnext.accounts.report.financial_statements import get_cost_centers_with_c
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_account_currency
 
+# to cache translations
+TRANSLATIONS = frappe._dict()
 
 def execute(filters=None):
 	if not filters:
@@ -44,10 +46,20 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 
+	update_translations()
+
 	res = get_result(filters, account_details)
 
 	return columns, res
 
+def update_translations():
+	TRANSLATIONS.update(
+		dict(
+			OPENING = _('Opening'),
+			TOTAL = _('Total'),
+			CLOSING_TOTAL = _('Closing (Opening + Total)')
+		)
+	)
 
 def validate_filters(filters, account_details):
 	if not filters.get("company"):
@@ -341,11 +353,6 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 
 	return data
 
-# to prevent translations in a loop
-OPENING = _('Opening')
-TOTAL = _('Total')
-CLOSING_TOTAL = _('Closing (Opening + Total)')
-
 def get_totals_dict():
 	def _get_debit_credit_dict(label):
 		return _dict(
@@ -356,9 +363,9 @@ def get_totals_dict():
 			credit_in_account_currency=0.0
 		)
 	return _dict(
-		opening = _get_debit_credit_dict(OPENING),
-		total = _get_debit_credit_dict(TOTAL),
-		closing = _get_debit_credit_dict(CLOSING_TOTAL)
+		opening = _get_debit_credit_dict(TRANSLATIONS.OPENING),
+		total = _get_debit_credit_dict(TRANSLATIONS.TOTAL),
+		closing = _get_debit_credit_dict(TRANSLATIONS.CLOSING_TOTAL)
 	)
 
 def group_by_field(group_by):
