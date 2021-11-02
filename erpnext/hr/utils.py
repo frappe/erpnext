@@ -5,8 +5,10 @@ import frappe
 from frappe import _
 from frappe.utils import (
 	add_days,
+	cint,
 	cstr,
 	flt,
+	date_diff,
 	format_datetime,
 	formatdate,
 	get_datetime,
@@ -317,6 +319,109 @@ def create_additional_leave_ledger_entry(allocation, leaves, date):
 	allocation.from_date = date
 	allocation.unused_leaves = 0
 	allocation.create_leave_ledger_entry()
+
+def calculate_lwp_or_ppl_based_on_leave_application(employee, holidays, start_date, end_date):
+	lwp = 0
+	ppl = 0
+	holidays = "','".join(holidays)
+	daily_wages_fraction_for_half_day = \
+		flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
+
+	for d in range(date_diff(end_date, start_date) + 1):
+		dt = add_days(cstr(getdate(start_date)), d)
+		leave = frappe.db.sql("""
+				SELECT t1.name,
+					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
+					THEN t1.half_day else 0 END,
+					t2.is_ppl,
+					t2.fraction_of_daily_salary_per_leave
+				FROM `tabLeave Application` t1, `tabLeave Type` t2
+				WHERE t2.name = t1.leave_type
+				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
+				AND t1.docstatus = 1
+				AND t1.employee = %(employee)s
+				AND ifnull(t1.salary_slip, '') = ''
+				AND CASE
+					WHEN t2.include_holiday != 1
+						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
+					WHEN t2.include_holiday
+						THEN %(dt)s between from_date and to_date
+					END
+				""".format(holidays), {"employee": employee, "dt": dt})
+
+		if leave:
+			equivalent_lwp_count = 0
+			is_half_day_leave = cint(leave[0][1])
+			is_partially_paid_leave = cint(leave[0][2])
+			fraction_of_daily_salary_per_leave = flt(leave[0][3])
+
+			equivalent_lwp_count =  (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+
+			if is_partially_paid_leave:
+				partial_pay = equivalent_lwp_count * (fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
+				ppl += partial_pay
+				lwp += 1 - partial_pay
+			else:
+				lwp += equivalent_lwp_count
+
+	return lwp, ppl
+
+def calculate_lwp_ppl_and_absent_days_based_on_attendance(employee, holidays, start_date, end_date):
+	lwp = 0
+	ppl = 0
+	absent = 0
+
+	daily_wages_fraction_for_half_day = \
+		flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
+
+	leave_types = frappe.get_all("Leave Type",
+								 or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
+								 fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"])
+
+	leave_type_map = {}
+	for leave_type in leave_types:
+		leave_type_map[leave_type.name] = leave_type
+
+	attendances = frappe.db.sql('''
+			SELECT attendance_date, status, leave_type
+			FROM `tabAttendance`
+			WHERE
+				status in ("Absent", "Half Day", "On leave")
+				AND employee = %s
+				AND docstatus = 1
+				AND attendance_date between %s and %s
+		''', values=(employee, start_date, end_date), as_dict=1)
+
+	for d in attendances:
+		if d.status in ('Half Day', 'On Leave') and d.leave_type and d.leave_type not in leave_type_map.keys():
+			continue
+
+		if formatdate(d.attendance_date, "yyyy-mm-dd") in holidays:
+			if d.status == "Absent" or \
+				(d.leave_type and d.leave_type in leave_type_map.keys() and not leave_type_map[d.leave_type]['include_holiday']):
+				continue
+
+		if d.leave_type:
+			fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type]["fraction_of_daily_salary_per_leave"]
+
+		if d.status == "Half Day":
+			equivalent_lwp =  (1 - daily_wages_fraction_for_half_day)
+
+			if d.leave_type in leave_type_map.keys() and leave_type_map[d.leave_type]["is_ppl"]:
+				equivalent_ppl = equivalent_lwp * (fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
+				equivalent_lwp = 1 - equivalent_ppl
+				ppl += equivalent_ppl
+			lwp += equivalent_lwp
+		elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
+			equivalent_lwp = 1
+			if leave_type_map[d.leave_type]["is_ppl"]:
+				equivalent_ppl = equivalent_lwp * (fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 0)
+				equivalent_lwp = 1 - equivalent_ppl
+				ppl += equivalent_ppl
+			lwp += equivalent_lwp
+		elif d.status == "Absent":
+			absent += 1
+	return lwp, ppl, absent
 
 def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining_date):
 	import calendar
