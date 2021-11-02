@@ -559,7 +559,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-02 16:22:23.155722",
+ "modified": "2021-11-02 16:29:35.223732",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",
@@ -596,13 +596,19 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Vehicle Registration User",
-   "share": 1
+   "share": 1,
+   "submit": 1,
+   "write": 1
   },
   {
    "email": 1,

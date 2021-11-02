@@ -8,8 +8,9 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		this._super();
 		this.frm.custom_make_buttons = {
 			'Vehicle Invoice Movement': 'Issue Invoice',
+			'Vehicle Invoice Delivery': 'Deliver Invoice',
 			'Vehicle Registration Receipt': 'Registration Receipt',
-			'Vehicle Transfer Letter': 'Transfer Letter'
+			'Vehicle Transfer Letter': 'Transfer Letter',
 		}
 	},
 

@@ -22,6 +22,8 @@ class VehicleInvoiceDelivery(VehicleTransactionController):
 		self.validate_duplicate_invoice_delivery()
 		self.set_vehicle_invoice_details()
 		self.validate_vehicle_invoice()
+		self.set_vehicle_registration_order()
+		self.validate_vehicle_registration_order()
 		self.set_title()
 
 	def before_submit(self):

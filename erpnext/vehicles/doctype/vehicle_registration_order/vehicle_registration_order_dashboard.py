@@ -19,7 +19,7 @@ def get_data():
 			},
 			{
 				'label': _('Invoice'),
-				'items': ['Vehicle Invoice Movement']
+				'items': ['Vehicle Invoice Movement', 'Vehicle Invoice Delivery']
 			},
 		]
 	}

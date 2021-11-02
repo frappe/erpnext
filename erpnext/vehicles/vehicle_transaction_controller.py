@@ -666,8 +666,9 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 		out.vehicle_invoice = get_vehicle_invoice(args.vehicle)
 		out.update(get_vehicle_invoice_details(out.vehicle_invoice))
 
-	if args.doctype in ['Vehicle Registration Receipt', 'Vehicle Transfer Letter'] or (args.doctype == 'Vehicle Invoice Movement'
-			and args.issued_for == "Registration"):
+	get_registration = args.doctype in ['Vehicle Registration Receipt', 'Vehicle Transfer Letter', 'Vehicle Invoice Delivery']\
+		or (args.doctype == 'Vehicle Invoice Movement' and args.issued_for == "Registration")
+	if get_registration:
 		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order,\
 			get_vehicle_registration_order_details
 		out.vehicle_registration_order = get_vehicle_registration_order(vehicle=args.vehicle)
