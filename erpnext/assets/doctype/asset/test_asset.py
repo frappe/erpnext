@@ -563,10 +563,16 @@ class TestDepreciationMethods(AssetSetup):
 		company_flag = frappe.flags.company
 		frappe.flags.company = "_Test Company"
 
+		finance_book = frappe.new_doc("Finance Book")
+		finance_book.finance_book_name = "Income Tax"
+		finance_book.for_income_tax = 1
+		finance_book.insert(ignore_if_duplicate = True)
+
 		asset = create_asset(
 			calculate_depreciation = 1,
 			available_for_use_date = "2030-07-12",
 			purchase_date = "2030-01-01",
+			finance_book = finance_book.name,
 			depreciation_method = "Written Down Value",
 			expected_value_after_useful_life = 12500,
 			depreciation_start_date = "2030-12-31",
