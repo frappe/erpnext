@@ -325,10 +325,12 @@
    "label": "Expected Delivery Date"
   },
   {
+   "collapsible": 1,
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
-   "options": "fa fa-wrench"
+   "options": "fa fa-wrench",
+   "set_only_once": 1
   },
   {
    "default": "Work Order",
@@ -336,7 +338,7 @@
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
-   "options": "\nWork Order\nJob Card"
+   "options": "Work Order\nJob Card"
   },
   {
    "fieldname": "operations",
@@ -572,10 +574,11 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-24 15:14:03.844937",
+ "modified": "2021-11-03 11:02:58.427166",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
+ "naming_rule": "By \"Naming Series\" field",
  "nsm_parent_field": "parent_work_order",
  "owner": "Administrator",
  "permissions": [

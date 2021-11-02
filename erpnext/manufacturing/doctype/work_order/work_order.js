@@ -119,6 +119,10 @@ frappe.ui.form.on("Work Order", {
 			});
 			erpnext.work_order.set_default_warehouse(frm);
 		}
+
+		if(frm.fields_dict["operations"].get_value().length == 0){
+			frm.fields_dict["operations_section"].collapse();
+		}
 	},
 
 	source_warehouse: function(frm) {
@@ -440,6 +444,18 @@ frappe.ui.form.on("Work Order", {
 	additional_operating_cost: function(frm) {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
+	},
+
+	onload_post_render: function(frm){
+		if(frm.doc.transfer_material_against == "Job Card"){
+			frappe.msgprint(__("Please add an operation in required items table"));
+		}
+	},
+
+	transfer_material_against: function(frm){
+		if(frm.doc.transfer_material_against == "Job Card"){
+			frappe.msgprint(__("Please add an operation in required items table"));
+		}
 	}
 });
 
