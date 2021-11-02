@@ -27,7 +27,9 @@
   "vehicle_chassis_no",
   "vehicle_engine_no",
   "column_break_23",
-  "vehicle_color"
+  "vehicle_color",
+  "vehicle_license_plate",
+  "vehicle_unregistered"
  ],
  "fields": [
   {
@@ -232,10 +234,26 @@
   {
    "fieldname": "column_break_23",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.vehicle_license_plate || doc.vehicle_unregistered",
+   "fieldname": "vehicle_unregistered",
+   "fieldtype": "Check",
+   "label": "Is Unregistered",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-09-27 00:04:23.956957",
+ "modified": "2021-11-02 15:31:37.861543",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Movement Detail",

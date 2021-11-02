@@ -13,9 +13,9 @@
   "company",
   "customer",
   "customer_name",
-  "vehicle_booking_order",
+  "booking_customer_name",
   "column_break_8",
-  "vehicle_invoice",
+  "remarks",
   "current_employee",
   "current_employee_name",
   "column_break_11",
@@ -23,8 +23,32 @@
   "posting_date",
   "bill_no",
   "bill_date",
-  "remarks_section",
-  "remarks",
+  "section_break_14",
+  "vehicle_booking_order",
+  "column_break_16",
+  "vehicle_invoice",
+  "column_break_18",
+  "vehicle_registration_order",
+  "address_and_contact_section",
+  "customer_address",
+  "address_display",
+  "col_break_21",
+  "contact_person",
+  "contact_display",
+  "contact_email",
+  "contact_mobile",
+  "contact_phone",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
+  "column_break_32",
+  "booking_address_display",
+  "booking_email",
+  "booking_mobile",
+  "booking_phone",
+  "booking_tax_id",
+  "booking_tax_cnic",
+  "booking_tax_strn",
   "vehicle_details_section",
   "variant_of",
   "variant_of_name",
@@ -38,7 +62,17 @@
   "vehicle_color",
   "column_break_25",
   "vehicle_chassis_no",
-  "vehicle_engine_no"
+  "vehicle_engine_no",
+  "vehicle_license_plate",
+  "vehicle_unregistered",
+  "received_by_section",
+  "receiver_contact",
+  "receiver_contact_display",
+  "column_break_37",
+  "receiver_contact_mobile",
+  "receiver_contact_phone",
+  "receiver_contact_email",
+  "receiver_contact_cnic"
  ],
  "fields": [
   {
@@ -288,17 +322,244 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "remarks",
-   "fieldname": "remarks_section",
+   "fieldname": "vehicle_license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.vehicle_license_plate || doc.vehicle_unregistered",
+   "fieldname": "vehicle_unregistered",
+   "fieldtype": "Check",
+   "label": "Is Unregistered",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_by_section",
    "fieldtype": "Section Break",
-   "label": "Remarks"
+   "label": "Received By"
+  },
+  {
+   "fieldname": "receiver_contact",
+   "fieldtype": "Link",
+   "label": "Receiver Contact",
+   "no_copy": 1,
+   "options": "Contact"
+  },
+  {
+   "fieldname": "receiver_contact_display",
+   "fieldtype": "Data",
+   "label": "Receiver Contact Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "receiver_contact_mobile",
+   "fieldtype": "Data",
+   "label": "Receiver Mobile No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "receiver_contact_phone",
+   "fieldtype": "Data",
+   "label": "Receiver Phone",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "receiver_contact_email",
+   "fieldtype": "Data",
+   "label": "Receiver Email",
+   "no_copy": 1,
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receiver_contact_cnic",
+   "fieldtype": "Data",
+   "label": "Receiver CNIC",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.customer_name",
+   "fetch_from": "vehicle_booking_order.customer_name",
+   "fieldname": "booking_customer_name",
+   "fieldtype": "Data",
+   "label": "Booking Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Link",
+   "label": "Customer Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Customer Address Display",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Customer Contact Person",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "contact_display",
+   "fieldtype": "Data",
+   "label": "Customer Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Customer Email",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Customer Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Customer Phone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Tax ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "STRN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_booking_order.address_display",
+   "fieldname": "booking_address_display",
+   "fieldtype": "Small Text",
+   "label": "Booking Address Display",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_email",
+   "fieldname": "booking_email",
+   "fieldtype": "Data",
+   "label": "Booking Email",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_mobile",
+   "fieldname": "booking_mobile",
+   "fieldtype": "Data",
+   "label": "Booking Mobile No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_phone",
+   "fieldname": "booking_phone",
+   "fieldtype": "Data",
+   "label": "Booking Phone No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_id",
+   "fieldname": "booking_tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking Tax ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_cnic",
+   "fieldname": "booking_tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking CNIC",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_strn",
+   "fieldname": "booking_tax_strn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking STRN",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_registration_order",
+   "fieldtype": "Link",
+   "label": "Vehicle Registration Order",
+   "no_copy": 1,
+   "options": "Vehicle Registration Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-09-23 16:18:28.285404",
+ "modified": "2021-11-02 16:22:23.155722",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",
