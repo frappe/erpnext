@@ -20,6 +20,7 @@
   "website",
   "column_break_13",
   "prospect_owner",
+  "company",
   "leads_section",
   "prospect_lead",
   "address_and_contact_section",
@@ -153,14 +154,23 @@
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-27 16:24:42.961967",
+ "migration_hash": "f39fb8f4e18a0e7fd391f0b4b52d8375",
+ "modified": "2021-11-01 13:10:36.759249",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
