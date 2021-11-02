@@ -676,6 +676,8 @@ class Item(WebsiteGenerator):
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
 			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+			frappe.msgprint(_("It can take upto few hours for accurate stock values to be visible after merging items."),
+					indicator="orange", title="Note")
 
 		if self.route:
 			invalidate_cache_for_item(self)
