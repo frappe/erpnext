@@ -94,6 +94,11 @@ def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
 
 
+
+def on_doctype_update():
+	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
+
+
 def repost(doc):
 	try:
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
