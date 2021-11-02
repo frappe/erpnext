@@ -52,6 +52,9 @@ class SupplierRetention(Document):
 			frappe.throw(_("This secuence no assing cai"))
 		current_value = self.get_current(cai[0].prefix)
 
+		if current_value == None:
+			current_value = 0
+
 		now = datetime.now()
 
 		date = now.date()
