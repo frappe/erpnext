@@ -504,13 +504,11 @@ class JobCard(Document):
 			self.status = 'Work In Progress'
 
 		if (self.docstatus == 1 and
-			(self.for_quantity <= self.transferred_qty or not self.items)):
-			# consider excess transfer
-			# completed qty is checked via separate validation
+			(self.for_quantity <= self.total_completed_qty or not self.items)):
 			self.status = 'Completed'
 
 		if self.status != 'Completed':
-			if self.for_quantity == self.transferred_qty:
+			if self.for_quantity <= self.transferred_qty:
 				self.status = 'Material Transferred'
 
 		if update_status:
