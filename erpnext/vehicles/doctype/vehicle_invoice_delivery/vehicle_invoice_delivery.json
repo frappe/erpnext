@@ -96,7 +96,8 @@
    "hidden": 1,
    "label": "Series",
    "options": "VINVD-",
-   "read_only": 1
+   "read_only": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "company",
@@ -559,7 +560,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-02 16:29:35.223732",
+ "modified": "2021-11-03 13:09:21.233833",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",

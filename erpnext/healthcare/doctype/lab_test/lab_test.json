@@ -71,7 +71,8 @@
    "label": "Series",
    "options": "LP-",
    "print_hide": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -425,7 +426,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:15:05.201713",
+ "modified": "2021-11-03 13:09:22.516092",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

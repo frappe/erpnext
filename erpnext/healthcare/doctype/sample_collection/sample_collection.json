@@ -45,7 +45,8 @@
    "label": "Series",
    "no_copy": 1,
    "options": "HLC-SC-",
-   "print_hide": 1
+   "print_hide": 1,
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -165,7 +166,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:15:03.929623",
+ "modified": "2021-11-03 13:09:24.455521",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

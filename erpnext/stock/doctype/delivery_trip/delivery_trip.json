@@ -34,7 +34,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "MAT-DT-"
+   "options": "MAT-DT-",
+   "set_only_once": 1
   },
   {
    "fieldname": "company",
@@ -172,7 +173,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:01.679829",
+ "modified": "2021-11-03 13:09:19.858070",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",

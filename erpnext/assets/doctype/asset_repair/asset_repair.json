@@ -43,7 +43,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "ACC-ASR-"
+   "options": "ACC-ASR-",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_2",
@@ -159,7 +160,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:08.312341",
+ "modified": "2021-11-03 13:09:24.143756",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

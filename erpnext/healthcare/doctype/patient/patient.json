@@ -80,7 +80,8 @@
    "label": "Patient ID",
    "options": "HLC-PAT-.YYYY.-",
    "print_hide": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "set_only_once": 1
   },
   {
    "bold": 1,
@@ -335,7 +336,7 @@
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2020-01-29 11:22:40.698125",
+ "modified": "2021-11-03 13:09:22.286835",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

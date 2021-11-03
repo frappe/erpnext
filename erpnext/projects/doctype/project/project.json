@@ -460,7 +460,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "PROJ-"
+   "options": "PROJ-",
+   "set_only_once": 1
   },
   {
    "default": "{customer_name}",
@@ -606,7 +607,7 @@
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2021-05-29 23:25:36.268490",
+ "modified": "2021-11-03 13:09:25.612319",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

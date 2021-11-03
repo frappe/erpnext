@@ -29,7 +29,8 @@
    "in_standard_filter": 1,
    "label": "Series",
    "options": "POS-CLO-",
-   "read_only": 1
+   "read_only": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "user",
@@ -124,7 +125,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:01.339514",
+ "modified": "2021-11-03 13:09:18.253988",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cashier Closing",

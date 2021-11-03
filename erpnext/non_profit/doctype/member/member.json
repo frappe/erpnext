@@ -29,7 +29,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "NPO-MEM-"
+   "options": "NPO-MEM-",
+   "set_only_once": 1
   },
   {
    "fieldname": "member_name",
@@ -125,7 +126,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-10-31 02:15:25.247747",
+ "modified": "2021-11-03 13:09:22.126974",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",

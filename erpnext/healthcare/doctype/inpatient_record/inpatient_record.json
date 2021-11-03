@@ -44,7 +44,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "HLC-INP-"
+   "options": "HLC-INP-",
+   "set_only_once": 1
   },
   {
    "fieldname": "patient",
@@ -208,7 +209,7 @@
    "fieldtype": "Text Editor"
   }
  ],
- "modified": "2020-03-03 16:08:38.067199",
+ "modified": "2021-11-03 13:09:24.820738",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",

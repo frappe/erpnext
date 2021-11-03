@@ -40,7 +40,8 @@
    "hidden": 1,
    "label": "Series",
    "options": "VINVM-",
-   "read_only": 1
+   "read_only": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "company",
@@ -174,7 +175,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-10-15 01:08:08.672415",
+ "modified": "2021-11-03 13:09:26.321281",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Movement",

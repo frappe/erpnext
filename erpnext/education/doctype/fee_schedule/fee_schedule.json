@@ -64,7 +64,8 @@
    "hidden": 1,
    "label": "Naming Series",
    "no_copy": 1,
-   "options": "EDU-FSH-"
+   "options": "EDU-FSH-",
+   "set_only_once": 1
   },
   {
    "fieldname": "fee_creation_status",
@@ -263,7 +264,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:04.802283",
+ "modified": "2021-11-03 13:09:19.248414",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Fee Schedule",

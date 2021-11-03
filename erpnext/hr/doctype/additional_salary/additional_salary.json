@@ -27,7 +27,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "HR-ADS-.YY.-.MM.-"
+   "options": "HR-ADS-.YY.-.MM.-",
+   "set_only_once": 1
   },
   {
    "fieldname": "employee",
@@ -130,7 +131,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-06-27 03:58:56.263346",
+ "modified": "2021-11-03 13:09:19.704471",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Additional Salary",

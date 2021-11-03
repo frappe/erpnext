@@ -174,7 +174,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "VBP-"
+   "options": "VBP-",
+   "set_only_once": 1
   },
   {
    "fieldname": "company",
@@ -191,7 +192,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-04-28 01:28:33.415527",
+ "modified": "2021-11-03 13:09:23.628929",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Payment",

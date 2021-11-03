@@ -92,7 +92,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "V-"
+   "options": "V-",
+   "set_only_once": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -653,7 +654,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-09-29 14:17:06.633892",
+ "modified": "2021-11-03 13:09:23.814142",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

@@ -48,7 +48,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "HLC-CPR-"
+   "options": "HLC-CPR-",
+   "set_only_once": 1
   },
   {
    "fieldname": "appointment",
@@ -224,7 +225,7 @@
    "options": "Draft\nIn Progress\nCompleted\nPending\nCancelled"
   }
  ],
- "modified": "2020-03-03 16:14:06.750971",
+ "modified": "2021-11-03 13:09:19.458212",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",

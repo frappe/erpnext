@@ -26,7 +26,8 @@
    "label": "Series",
    "no_copy": 1,
    "options": "PMO-",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "company",
@@ -107,7 +108,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-04-06 18:00:56.022642",
+ "modified": "2021-11-03 13:09:18.448338",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order",
