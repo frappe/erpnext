@@ -111,7 +111,7 @@ class Lead(SellingController):
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			if not frappe.db.get_single_value('CRM Settings', 'allow_creation_of_leads_form_a_email'):
+			if not frappe.db.get_single_value('CRM Settings', 'allow_lead_duplication_based_on_emails'):
 				duplicate_leads = frappe.get_all("Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]})
 				duplicate_leads = [frappe.bold(get_link_to_form('Lead', lead.name)) for lead in duplicate_leads]
 

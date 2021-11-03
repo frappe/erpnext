@@ -6,16 +6,18 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
-  "campaign_naming_by",
-  "column_break_9",
-  "default_valid_till",
   "section_break_5",
+  "campaign_naming_by",
   "allow_lead_duplication_based_on_emails",
-  "auto_creation_of_contact",
+  "column_break_4",
   "create_event_on_next_contact_date",
+  "auto_creation_of_contact",
   "opportunity_section",
   "close_opportunity_after_days",
-  "create_event_on_next_contact_date_opportunity"
+  "column_break_9",
+  "create_event_on_next_contact_date_opportunity",
+  "quotation_section",
+  "default_valid_till"
  ],
  "fields": [
   {
@@ -26,25 +28,30 @@
    "options": "Campaign Name\nNaming Series"
   },
   {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "default_valid_till",
    "fieldtype": "Data",
    "label": "Default Quotation Validity Days"
   },
   {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "15",
-   "description": "Auto close Opportunity Replied after the no. of days mentioned above",
-   "fieldname": "close_opportunity_after_days",
-   "fieldtype": "Int",
-   "label": "Close Replied Opportunity After Days"
-  },
-  {
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
    "label": "Lead"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_lead_duplication_based_on_emails",
+   "fieldtype": "Check",
+   "label": "Allow Lead Duplication based on Emails"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_creation_of_contact",
+   "fieldtype": "Check",
+   "label": "Auto Creation of Contact"
   },
   {
    "default": "1",
@@ -58,22 +65,26 @@
    "label": "Opportunity"
   },
   {
+   "default": "15",
+   "description": "Auto close Opportunity Replied after the no. of days mentioned above",
+   "fieldname": "close_opportunity_after_days",
+   "fieldtype": "Int",
+   "label": "Close Replied Opportunity After Days"
+  },
+  {
    "default": "1",
    "fieldname": "create_event_on_next_contact_date_opportunity",
    "fieldtype": "Check",
    "label": "Create Event on Next Contact Date"
   },
   {
-   "default": "1",
-   "fieldname": "auto_creation_of_contact",
-   "fieldtype": "Check",
-   "label": "Auto Creation of Contact"
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "allow_lead_duplication_based_on_emails",
-   "fieldtype": "Check",
-   "label": "Allow Lead Duplication based on Emails"
+   "fieldname": "quotation_section",
+   "fieldtype": "Section Break",
+   "label": "Quotation"
   }
  ],
  "icon": "fa fa-cog",
@@ -81,9 +92,9 @@
  "issingle": 1,
  "links": [],
  "migration_hash": "3ae78b12dd1c64d551736c6e82092f90",
- "modified": "2021-11-02 20:54:49.515194",
+ "modified": "2021-11-03 09:00:36.883496",
  "modified_by": "Administrator",
- "module": "Selling",
+ "module": "CRM",
  "name": "CRM Settings",
  "owner": "Administrator",
  "permissions": [
