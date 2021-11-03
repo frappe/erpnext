@@ -49,15 +49,24 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	pan_no = ''
 	parties = []
 	party_type, party = get_party_details(inv)
+	has_pan_field = frappe.get_meta(party_type).has_field("pan")
 
 	if not tax_withholding_category:
-		tax_withholding_category, pan_no = frappe.db.get_value(party_type, party, ['tax_withholding_category', 'pan'])
+		if has_pan_field:
+			fields = ['tax_withholding_category', 'pan']
+		else:
+			fields = ['tax_withholding_category']
+
+		tax_withholding_details = frappe.db.get_value(party_type, party, fields, as_dict=1)
+
+		tax_withholding_category = tax_withholding_details.get('tax_withholding_category')
+		pan_no = tax_withholding_details.get('pan')
 
 	if not tax_withholding_category:
 		return
 
 	# if tax_withholding_category passed as an argument but not pan_no
-	if not pan_no:
+	if not pan_no and has_pan_field:
 		pan_no = frappe.db.get_value(party_type, party, 'pan')
 
 	# Get others suppliers with the same PAN No
@@ -165,6 +174,7 @@ def get_lower_deduction_certificate(tax_details, pan_no):
 	ldc_name = frappe.db.get_value('Lower Deduction Certificate',
 		{
 			'pan_no': pan_no,
+			'tax_withholding_category': tax_details.tax_withholding_category,
 			'valid_from': ('>=', tax_details.from_date),
 			'valid_upto': ('<=', tax_details.to_date)
 		}, 'name')

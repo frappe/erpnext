@@ -260,7 +260,9 @@ class calculate_taxes_and_totals(object):
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
 	def calculate_taxes(self):
-		self.doc.rounding_adjustment = 0
+		if not self.doc.get('is_consolidated'):
+			self.doc.rounding_adjustment = 0
+
 		# maintain actual tax rate based on idx
 		actual_tax_dict = dict([[tax.idx, flt(tax.tax_amount, tax.precision("tax_amount"))]
 			for tax in self.doc.get("taxes") if tax.charge_type == "Actual"])
@@ -312,7 +314,9 @@ class calculate_taxes_and_totals(object):
 
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
-						and self.doc.discount_amount and self.doc.apply_discount_on == "Grand Total":
+						and self.doc.discount_amount \
+						and self.doc.apply_discount_on == "Grand Total" \
+						and not self.doc.get('is_consolidated'):
 							self.doc.rounding_adjustment = flt(self.doc.grand_total
 								- flt(self.doc.discount_amount) - tax.total,
 								self.doc.precision("rounding_adjustment"))
@@ -405,11 +409,16 @@ class calculate_taxes_and_totals(object):
 				self.doc.rounding_adjustment = diff
 
 	def calculate_totals(self):
-		self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment) \
-			if self.doc.get("taxes") else flt(self.doc.net_total)
+		if self.doc.get("taxes"):
+			self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment)
+		else:
+			self.doc.grand_total = flt(self.doc.net_total)
 
-		self.doc.total_taxes_and_charges = flt(self.doc.grand_total - self.doc.net_total
+		if self.doc.get("taxes"):
+			self.doc.total_taxes_and_charges = flt(self.doc.grand_total - self.doc.net_total
 			- flt(self.doc.rounding_adjustment), self.doc.precision("total_taxes_and_charges"))
+		else:
+			self.doc.total_taxes_and_charges = 0.0
 
 		self._set_in_company_currency(self.doc, ["total_taxes_and_charges", "rounding_adjustment"])
 
@@ -446,19 +455,20 @@ class calculate_taxes_and_totals(object):
 					self.doc.total_net_weight += d.total_weight
 
 	def set_rounded_total(self):
-		if self.doc.meta.get_field("rounded_total"):
-			if self.doc.is_rounded_total_disabled():
-				self.doc.rounded_total = self.doc.base_rounded_total = 0
-				return
+		if not self.doc.get('is_consolidated'):
+			if self.doc.meta.get_field("rounded_total"):
+				if self.doc.is_rounded_total_disabled():
+					self.doc.rounded_total = self.doc.base_rounded_total = 0
+					return
 
-			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
-				self.doc.currency, self.doc.precision("rounded_total"))
+				self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
+					self.doc.currency, self.doc.precision("rounded_total"))
 
-			#if print_in_rate is set, we would have already calculated rounding adjustment
-			self.doc.rounding_adjustment += flt(self.doc.rounded_total - self.doc.grand_total,
-				self.doc.precision("rounding_adjustment"))
+				#if print_in_rate is set, we would have already calculated rounding adjustment
+				self.doc.rounding_adjustment += flt(self.doc.rounded_total - self.doc.grand_total,
+					self.doc.precision("rounding_adjustment"))
 
-			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
+				self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
 	def _cleanup(self):
 		if not self.doc.get('is_consolidated'):

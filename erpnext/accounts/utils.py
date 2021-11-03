@@ -450,7 +450,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# new row with references
 	new_row = journal_entry.append("accounts")
-	new_row.update(jv_detail.as_dict().copy())
+
+	new_row.update((frappe.copy_doc(jv_detail)).as_dict())
 
 	new_row.set(d["dr_or_cr"], d["allocated_amount"])
 	new_row.set('debit' if d['dr_or_cr'] == 'debit_in_account_currency' else 'credit',
@@ -579,10 +580,10 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
-def get_company_default(company, fieldname):
-	value = frappe.get_cached_value('Company',  company,  fieldname)
+def get_company_default(company, fieldname, ignore_validation=False):
+	value = frappe.get_cached_value('Company', company, fieldname)
 
-	if not value:
+	if not ignore_validation and not value:
 		throw(_("Please set default {0} in Company {1}")
 			.format(frappe.get_meta("Company").get_label(fieldname), company))
 

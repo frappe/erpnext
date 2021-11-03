@@ -332,7 +332,21 @@ class TestPurchaseReceipt(ERPNextTestCase):
 
 		pr1.submit()
 		self.assertRaises(frappe.ValidationError, pr2.submit)
-		frappe.db.rollback()
+
+		pr1.cancel()
+		se.cancel()
+		se1.cancel()
+		se2.cancel()
+		se3.cancel()
+		po.reload()
+		pr2.load_from_db()
+
+		if pr2.docstatus == 1 and frappe.db.get_value('Stock Ledger Entry',
+			{'voucher_no': pr2.name, 'is_cancelled': 0}, 'name'):
+			pr2.cancel()
+
+			po.load_from_db()
+			po.cancel()
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -1070,6 +1084,7 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		)
 
 		automatically_fetch_payment_terms()
+
 
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
