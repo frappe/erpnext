@@ -826,7 +826,6 @@ class TestWorkOrder(unittest.TestCase):
 
 		wo_order = make_wo_order_test_record(item=item, company=company, planned_start_date=now(), qty=20, skip_transfer=1)
 		job_cards = frappe.db.get_value('Job Card', {'work_order': wo_order.name}, 'name')
-		
 		for jc in job_cards:
 			job_card_doc = frappe.get_doc('Job Card', jc)
 			job_card_doc.append('time_logs', {
