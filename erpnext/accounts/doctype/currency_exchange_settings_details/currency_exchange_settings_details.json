@@ -1,11 +1,12 @@
 {
  "actions": [],
- "creation": "2021-09-03 13:17:22.088259",
+ "creation": "2021-09-02 14:54:49.033512",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "key"
+  "key",
+  "value"
  ],
  "fields": [
   {
@@ -14,15 +15,22 @@
    "in_list_view": 1,
    "label": "Key",
    "reqd": 1
+  },
+  {
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Value",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-04 17:49:33.858070",
+ "modified": "2021-11-03 19:14:55.889037",
  "modified_by": "Administrator",
- "module": "Setup",
- "name": "Currency Exchange Settings Result",
+ "module": "Accounts",
+ "name": "Currency Exchange Settings Details",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
