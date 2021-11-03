@@ -6,9 +6,12 @@
  "engine": "InnoDB",
  "field_order": [
   "sale_invoice",
-  "customer",
   "delivery_area",
   "creation_date",
+  "column",
+  "patient_name",
+  "customer",
+  "section",
   "items",
   "status",
   "amended_from",
@@ -93,10 +96,25 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "sale_invoice.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-08-26 13:57:12.969986",
+ "modified": "2021-11-03 09:28:24.884914",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Dispatch Control",
