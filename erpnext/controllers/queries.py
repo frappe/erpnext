@@ -566,7 +566,7 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 
 		query_filters.append(['name', query_selector, dimensions])
 
-	output = frappe.get_all(doctype, filters=query_filters)
+	output = frappe.get_list(doctype, filters=query_filters)
 	result = [d.name for d in output]
 
 	return [(d,) for d in set(result)]
