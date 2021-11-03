@@ -132,7 +132,8 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select {field} from `tabSupplier`
 		where docstatus < 2
 			and ({key} like %(txt)s
-				or supplier_name like %(txt)s) and disabled=0
+			or supplier_name like %(txt)s) and disabled=0
+			and (on_hold = 0 or (on_hold = 1 and CURDATE() > release_date))
 			{mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -565,7 +566,7 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 
 		query_filters.append(['name', query_selector, dimensions])
 
-	output = frappe.get_all(doctype, filters=query_filters)
+	output = frappe.get_list(doctype, filters=query_filters)
 	result = [d.name for d in output]
 
 	return [(d,) for d in set(result)]

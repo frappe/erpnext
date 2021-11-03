@@ -685,9 +685,7 @@ class WorkOrder(Document):
 					if not d.operation:
 						d.operation = operation
 			else:
-				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
-				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
-				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
+				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or float('inf')):
 					self.append('required_items', {
 						'rate': item.rate,
 						'amount': item.rate * item.qty,

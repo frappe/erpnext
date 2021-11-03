@@ -182,6 +182,7 @@
    "reqd": 1
   },
   {
+   "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Qty To Manufacture",
