@@ -22,19 +22,11 @@ frappe.listview_settings['Item'] = {
 				args: {items: items},
 				freeze: true,
 				freeze_message: __("Publishing Items ..."),
-				callback(results) {
-					results.message.forEach(result => {
-						frappe.msgprint({
-							message: __("Website Item {0} has been created.",
-								[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
-									item_encoded: encodeURIComponent(result[0]),
-									item: result[1]
-								})]
-							),
-							title: __("Published"),
-							indicator: "green"
-						});
-					});
+				callback(response) {
+					frappe.show_alert({
+						message: __(`Created ${response.message.length} Website Items`),
+						indicator: "green"
+					})
 				}
 			});
 		});
