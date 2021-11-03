@@ -15,7 +15,7 @@ from erpnext.accounts.utils import get_fiscal_year
 class LowerDeductionCertificate(Document):
 	def validate(self):
 		self.validate_dates()
-		self.validate_supplier_against_section_code()
+		self.validate_supplier_against_tax_category()
 
 	def validate_dates(self):
 		if getdate(self.valid_upto) < getdate(self.valid_from):
@@ -31,12 +31,14 @@ class LowerDeductionCertificate(Document):
 			<= fiscal_year.year_end_date):
 			frappe.throw(_("Valid Upto date not in Fiscal Year {0}").format(frappe.bold(self.fiscal_year)))
 
-	def validate_supplier_against_section_code(self):
-		duplicate_certificate = frappe.db.get_value('Lower Deduction Certificate', {'supplier': self.supplier, 'section_code': self.section_code}, ['name', 'valid_from', 'valid_upto'], as_dict=True)
+	def validate_supplier_against_tax_category(self):
+		duplicate_certificate = frappe.db.get_value('Lower Deduction Certificate',
+			{'supplier': self.supplier, 'tax_withholding_category': self.tax_withholding_category, 'name': ("!=", self.name)},
+			['name', 'valid_from', 'valid_upto'], as_dict=True)
 		if duplicate_certificate and self.are_dates_overlapping(duplicate_certificate):
 			certificate_link = get_link_to_form('Lower Deduction Certificate', duplicate_certificate.name)
-			frappe.throw(_("There is already a valid Lower Deduction Certificate {0} for Supplier {1} against Section Code {2} for this time period.")
-				.format(certificate_link, frappe.bold(self.supplier), frappe.bold(self.section_code)))
+			frappe.throw(_("There is already a valid Lower Deduction Certificate {0} for Supplier {1} against category {2} for this time period.")
+				.format(certificate_link, frappe.bold(self.supplier), frappe.bold(self.tax_withholding_category)))
 
 	def are_dates_overlapping(self,duplicate_certificate):
 		valid_from = duplicate_certificate.valid_from
