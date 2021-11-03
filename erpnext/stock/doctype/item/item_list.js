@@ -17,6 +17,13 @@ frappe.listview_settings['Item'] = {
 	onload: function(me) {
 		me.page.add_action_item(__("Publish in Website"), function() {
 			const items = me.get_checked_items().map(item => item.name);
+			frappe.realtime.on("website_item_creation_progress", function (data) {
+				if(data.progress) {
+					frappe.hide_msgprint(true);
+					frappe.show_progress(__("Creating Website Item"), data.progress[1], data.progress[2], data.progress[0]);
+				}
+			});
+
 			frappe.call({
 				method: "erpnext.e_commerce.doctype.website_item.website_item.make_bulk_website_items",
 				args: {items: items},

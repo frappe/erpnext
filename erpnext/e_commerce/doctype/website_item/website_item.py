@@ -541,7 +541,8 @@ def make_bulk_website_items(items):
 		items = json.loads(items)
 
 	website_items = []
-	for item in items:
+	for idx, item in enumerate(items):
+		frappe.publish_realtime("website_item_creation_progress", {"progress": [item, idx + 1, len(items)]}, user=frappe.session.user)
 		doc = frappe.get_cached_doc("Item", item)
 		website_item_details = make_website_item(doc)
 		website_items.append(website_item_details)
