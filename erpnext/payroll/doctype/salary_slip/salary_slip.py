@@ -1375,36 +1375,48 @@ class SalarySlip(TransactionBase):
 	def leave_type_encasement_days(self):
 		if self.employee and self.start_date and self.end_date:
 			doc = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
-			encashment_date between '{1}' and '{2}' and docstatus=1 """.format(self.employee,self.start_date,self.end_date))
+			encashment_date between '{1}' and '{2}' and docstatus=1 """.format(self.employee,self.start_date,self.end_date), as_dict = 1)
+			
 			sick_leave = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
-			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Sick Leave" """.format(self.employee,self.start_date,self.end_date))
+			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Sick Leave" """.format(self.employee,self.start_date,self.end_date), as_dict=1)
+			
 			earned_leave = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
-			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Earned Leave" """.format(self.employee,self.start_date,self.end_date))
+			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Earned Leave" """.format(self.employee,self.start_date,self.end_date),as_dict=1)
 			casual_leave = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
-			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Casual Leave" """.format(self.employee,self.start_date,self.end_date))
+			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Casual Leave" """.format(self.employee,self.start_date,self.end_date),as_dict=1)
 			for i in self.leave_details:
 				if i.leave_type == "Sick Leave":
-					i.encashment_days = sick_leave
+					for j in sick_leave:
+						i.encashment_days = j.get("sum(encashable_days)")
 				if i.leave_type == "Earned Leave":
-					i.encashment_days = earned_leave
+					for j in earned_leave:
+						i.encashment_days = j.get("sum(encashable_days)")
+
 				if i.leave_type == "Casual Leave":
-					i.encashment_days = casual_leave
+					for j in casual_leave:
+						i.encashment_days = j.get("sum(encashable_days)")
+
 			
 			sdoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
-			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Sick Leave" """.format(self.employee,self.start_date))
+			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Sick Leave" """.format(self.employee,self.start_date),as_dict=1)
 			edoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
-			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Earned Leave" """.format(self.employee,self.start_date))
+			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Earned Leave" """.format(self.employee,self.start_date),as_dict=1)
 			cdoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
-			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Casual Leave" """.format(self.employee,self.start_date))
+			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Casual Leave" """.format(self.employee,self.start_date),as_dict=1)
 			for f in self.leave_details:
 				if f.leave_type == "Sick Leave":
-					f.balance = sdoc
+					for p in sdoc:
+						f.balance = p.get("day")
+
 				if f.leave_type == "Earned Leave":
-					f.balance = edoc
+					for p in edoc:
+						f.balance = p.get("day")
+					
 				if f.leave_type == "Casual Leave":
-					f.balance = cdoc
-			
-			return doc
+					for p in cdoc:
+						f.balance = p.get("day")
+			for g in doc:
+				return g.get("sum(encashable_days)")
 
 
 
