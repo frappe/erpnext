@@ -1047,22 +1047,22 @@ class AccountsController(TransactionBase):
 
 		result = (
 			frappe.qb.from_(item_doctype)
-				.select(Sum(based_on_field))
-				.where(
-					join_field == item.get(item_ref_dn)
-				).where(
-					Criterion.any([ # select all items from other invoices OR current invoices
-						Criterion.all([ # for selecting items from other invoices
-							item_doctype.docstatus == 1,
-							item_doctype.parent != self.name
-						]),
-						Criterion.all([ # for selecting items from current invoice, that are linked to same reference
-							item_doctype.docstatus == 0,
-							item_doctype.parent == self.name,
-							item_doctype.name != item.name
-						])
+			.select(Sum(based_on_field))
+			.where(
+				join_field == item.get(item_ref_dn)
+			).where(
+				Criterion.any([ # select all items from other invoices OR current invoices
+					Criterion.all([ # for selecting items from other invoices
+						item_doctype.docstatus == 1,
+						item_doctype.parent != self.name
+					]),
+					Criterion.all([ # for selecting items from current invoice, that are linked to same reference
+						item_doctype.docstatus == 0,
+						item_doctype.parent == self.name,
+						item_doctype.name != item.name
 					])
-				)
+				])
+			)
 		).run()
 
 		return result[0][0] if result else 0
