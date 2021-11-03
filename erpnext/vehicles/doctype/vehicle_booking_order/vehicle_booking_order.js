@@ -145,7 +145,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				}
 
 				// Transfer Letter button
-				if (this.frm.doc.delivery_status === "Delivered" && !this.frm.doc.transfer_customer) {
+				if (['In Stock', 'Delivered'].includes(this.frm.doc.delivery_status) && !this.frm.doc.transfer_customer) {
 					if (this.can_change('vehicle_transfer')) {
 						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'),
 							__("Registration"));

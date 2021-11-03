@@ -49,7 +49,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 		self.update_payment_status()
 		self.update_invoice_status()
-		self.update_registration_number()
+		self.update_registration_receipt_details()
 		self.set_status()
 
 	def before_submit(self):
@@ -82,6 +82,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			if self.status != "Completed":
 				excluding_fields.append('agent_commission')
 				excluding_fields.append('agent_license_plate_charges')
+				excluding_fields.append('agent_total')
 				excluding_fields.append('margin_amount')
 				excluding_fields.append('status')
 
@@ -96,9 +97,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		else:
 			if self.agent_gl_entry_exists():
 				disallowed_fields.append(('agent', None))
-
-			if self.transfer_letter_exists():
-				disallowed_fields.append(('registration_customer', None))
 
 		self.flags.disallow_on_submit = disallowed_fields
 		return disallowed_fields
@@ -384,9 +382,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.precision('margin_amount'))
 		return unclosed_income_amount
 
-	def is_unclosed(self):
+	def is_unclosed(self, ignore_agent_balance=False):
 		return self.get_unclosed_customer_amount() or self.get_unclosed_agent_amount() or self.get_unclosed_income_amount()\
-			or self.customer_outstanding or self.authority_outstanding or self.agent_balance
+			or self.customer_outstanding or self.authority_outstanding or (self.agent_balance and not ignore_agent_balance)
 
 	def update_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
@@ -451,8 +449,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				"invoice_return_date": self.invoice_return_date,
 			})
 
-	def update_registration_number(self, update=False):
-		fields = ['name', 'vehicle_license_plate', 'posting_date', 'call_date']
+	def update_registration_receipt_details(self, update=False):
+		fields = ['name', 'vehicle_license_plate', 'customer', 'customer_name', 'posting_date', 'call_date']
 
 		registration_receipt = frappe.db.get_all("Vehicle Registration Receipt",
 			{"vehicle_registration_order": self.name, "docstatus": 1}, fields,
@@ -465,12 +463,18 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 		registration_receipt = registration_receipt[0] if registration_receipt else frappe._dict()
 
+		if registration_receipt.customer:
+			self.registration_customer = registration_receipt.customer
+			self.registration_customer_name = registration_receipt.customer_name
+
 		self.vehicle_license_plate = registration_receipt.vehicle_license_plate
 		self.registration_receipt_date = registration_receipt.posting_date
 		self.call_date = registration_receipt.call_date
 
 		if update:
 			self.db_set({
+				"registration_customer": self.registration_customer,
+				"registration_customer_name": self.registration_customer_name,
 				"vehicle_license_plate": self.vehicle_license_plate,
 				"call_date": self.call_date,
 				"registration_receipt_date": self.registration_receipt_date,
@@ -507,14 +511,14 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				if self.invoice_status == "Issued":
 					self.status = "To Retrieve Invoice"
 
-				elif self.agent_balance > 0:
-					self.status = "To Pay Agent"
-
-				elif self.is_unclosed():
+				elif self.is_unclosed(ignore_agent_balance=True):
 					self.status = "To Close Accounts"
 
 				elif self.invoice_status == "In Hand":
 					self.status = "To Deliver Invoice"
+
+				elif self.agent_balance > 0:
+					self.status = "To Pay Agent"
 
 				else:
 					self.status = "Completed"
@@ -553,12 +557,14 @@ def get_vehicle_registration_order_details(vehicle_registration_order):
 	details = frappe._dict()
 	if vehicle_registration_order:
 		details = frappe.db.get_value("Vehicle Registration Order", vehicle_registration_order, [
-			'agent', 'agent_name',
+			'agent', 'agent_name', 'customer', 'customer_name', 'registration_customer', 'registration_customer_name'
 		], as_dict=1) or frappe._dict()
 
 	out = frappe._dict()
 
 	if details.agent:
+		out.customer = details.registration_customer or details.customer
+		out.customer_name = details.registration_customer_name if details.registration_customer else details.customer_name
 		out.agent = details.agent
 		out.agent_name = details.agent_name
 
@@ -700,6 +706,7 @@ def get_registration_receipt(vehicle_registration_order):
 	receipt = frappe.new_doc("Vehicle Registration Receipt")
 	receipt.company = vro.company
 	receipt.vehicle_registration_order = vro.name
+	receipt.customer = vro.registration_customer or vro.customer
 	receipt.agent = vro.agent
 	receipt.vehicle = vro.vehicle
 	receipt.vehicle_booking_order = vro.vehicle_booking_order

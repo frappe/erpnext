@@ -12,7 +12,7 @@ import re
 
 class VehicleRegistrationReceipt(VehicleTransactionController):
 	def get_feed(self):
-		return _("For {0} | {1}").format(self.get("item_name") or self.get('item_code'), self.get("vehicle_license_plate"))
+		return _("For {0} | {1}").format(self.get("customer_name") or self.get('customer'), self.get("vehicle_license_plate"))
 
 	def validate(self):
 		super(VehicleRegistrationReceipt, self).validate()
@@ -29,16 +29,20 @@ class VehicleRegistrationReceipt(VehicleTransactionController):
 
 	def on_submit(self):
 		self.update_vehicle_details()
+		self.update_vehicle_party_details()
 		self.update_vehicle_registration_order()
 		self.update_vehicle_booking_order_registration()
+		self.update_vehicle_booking_order_transfer_customer()
 
 	def on_cancel(self):
+		self.update_vehicle_party_details()
 		self.update_vehicle_registration_order()
 		self.update_vehicle_booking_order_registration()
+		self.update_vehicle_booking_order_transfer_customer()
 
 	def set_title(self):
 		self.title = "{0}{1}".format(self.get('vehicle_license_plate'),
-			" ({0})".format(self.get('agent_name') or self.get('agent')) if self.get('agent') else "")
+			" ({0})".format(self.get('customer_name') or self.get('customer')))
 
 	def validate_duplicate_registration_receipt(self):
 		registration_receipt = frappe.db.get_value("Vehicle Registration Receipt",

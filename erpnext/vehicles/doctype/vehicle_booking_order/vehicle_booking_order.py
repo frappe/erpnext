@@ -446,16 +446,24 @@ class VehicleBookingOrder(VehicleBookingController):
 			})
 
 	def update_transfer_customer(self, update=False):
-		vehicle_transfer_letter = None
+		vehicle_transfer_letter = []
+		vehicle_registration_receipt = []
 
 		if self.docstatus != 0:
 			vehicle_transfer_letter = frappe.db.get_all("Vehicle Transfer Letter", {"vehicle_booking_order": self.name, "docstatus": 1},
-				['customer', 'customer_name'], order_by="posting_date desc, creation desc", limit=1)
+				['customer', 'customer_name', 'posting_date', 'creation'], order_by="posting_date desc, creation desc", limit=1)
+			vehicle_registration_receipt = frappe.db.get_all("Vehicle Registration Receipt", {"vehicle_booking_order": self.name, "docstatus": 1},
+				['customer', 'customer_name', 'posting_date', 'creation'], order_by="posting_date desc, creation desc", limit=1)
 
-		vehicle_transfer_letter = vehicle_transfer_letter[0] if vehicle_transfer_letter else frappe._dict()
+		transfer_transactions = vehicle_transfer_letter + vehicle_registration_receipt
+		transfer_details = max(transfer_transactions, key=lambda d: (d.posting_date, d.creation)) if transfer_transactions else None
 
-		self.transfer_customer = vehicle_transfer_letter.customer
-		self.transfer_customer_name = vehicle_transfer_letter.customer_name
+		if transfer_details and transfer_details.customer not in [self.customer, self.financer]:
+			self.transfer_customer = transfer_details.customer
+			self.transfer_customer_name = transfer_details.customer_name
+		else:
+			self.transfer_customer = None
+			self.transfer_customer_name = None
 
 		if update:
 			self.db_set({

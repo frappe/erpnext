@@ -215,7 +215,7 @@ class VehicleTransactionController(StockController):
 						frappe.throw(_("Customer (New Owner) cannot be the same as in {0} for transfer")
 							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
-				elif self.doctype == 'Vehicle Registration Order':
+				elif self.doctype in ['Vehicle Registration Order', 'Vehicle Registration Receipt']:
 					pass
 
 				else:
@@ -418,13 +418,22 @@ class VehicleTransactionController(StockController):
 				if vro_changes:
 					frappe.db.set_value("Vehicle Registration Order", vro_values.name, vro_changes, None, notify=1)
 
-	def update_vehicle_booking_order_registration(self):
-		vehicle_booking_order = self.get_vehicle_booking_order()
+	def update_vehicle_booking_order_registration(self, doc=None):
+		if not doc:
+			doc = self
+
+		vehicle_booking_order = self.get_vehicle_booking_order(doc)
 		if vehicle_booking_order:
 			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
 			vbo.update_registration_status(update=True)
 			vbo.set_status(update=True)
+			vbo.notify_update()
+
+	def update_vehicle_booking_order_transfer_customer(self):
+		if self.get('vehicle_booking_order'):
+			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
+			vbo.update_transfer_customer(update=True)
 			vbo.notify_update()
 
 	def update_vehicle_invoice(self, doc=None, update_vehicle=True):
@@ -447,10 +456,17 @@ class VehicleTransactionController(StockController):
 			if self.doctype in ['Vehicle Invoice', 'Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
 				vro.update_invoice_status(update=True)
 			elif self.doctype == "Vehicle Registration Receipt":
-				vro.update_registration_number(update=True)
+				vro.update_registration_receipt_details(update=True)
 
 			vro.set_status(update=True)
 			vro.notify_update()
+
+	def update_vehicle_party_details(self):
+		if self.get('vehicle'):
+			sr_no = frappe.get_doc("Serial No", self.vehicle)
+			last_sle = sr_no.get_last_sle()
+			sr_no.set_party_details(last_sle.get("purchase_sle"), last_sle.get("delivery_sle"))
+			sr_no.save(ignore_permissions=True)
 
 	def get_vehicle_booking_order(self, doc=None):
 		if not doc:

@@ -11,14 +11,18 @@
   "title",
   "naming_series",
   "company",
-  "vehicle_booking_order",
-  "vehicle_registration_order",
+  "customer",
+  "customer_name",
   "column_break_8",
   "agent",
   "agent_name",
   "column_break_11",
   "posting_date",
   "amended_from",
+  "section_break_13",
+  "vehicle_booking_order",
+  "column_break_15",
+  "vehicle_registration_order",
   "registration_details_section",
   "vehicle_license_plate",
   "call_date",
@@ -272,12 +276,36 @@
   {
    "fieldname": "column_break_17",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Registration Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Registration Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-03 13:09:21.763798",
+ "modified": "2021-11-03 14:59:33.404838",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Receipt",

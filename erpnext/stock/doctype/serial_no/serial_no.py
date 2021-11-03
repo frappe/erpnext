@@ -178,11 +178,20 @@ class SerialNo(StockController):
 			if self.purchase_date:
 				filters['posting_date'] = ['>=', self.purchase_date]
 
-			transfer_letter_details = frappe.get_all("Vehicle Transfer Letter", fields=['customer', 'customer_name'],
+			transfer_letter_details = frappe.get_all("Vehicle Transfer Letter",
+				fields=['customer', 'customer_name', 'posting_date', 'creation'],
 				filters=filters, order_by="posting_date desc, creation desc", limit=1)
 
-			if transfer_letter_details:
-				self.update(transfer_letter_details[0])
+			registration_receipt_details = frappe.get_all("Vehicle Registration Receipt",
+				fields=['customer', 'customer_name', 'posting_date', 'creation'],
+				filters=filters, order_by="posting_date desc, creation desc", limit=1)
+
+			name_change_transactions = transfer_letter_details + registration_receipt_details
+			name_change_details = max(name_change_transactions, key=lambda d: (d.posting_date, d.creation)) if name_change_transactions else None
+
+			if name_change_details:
+				self.customer = name_change_details.get('customer')
+				self.customer_name = name_change_details.get('customer_name')
 				self.vehicle_owner = None
 				self.vehicle_owner_name = None
 

@@ -35,6 +35,7 @@ class VehicleInvoiceMovement(VehicleTransactionController):
 	def on_submit(self):
 		self.update_vehicle_invoice()
 		self.update_vehicle_booking_order_invoice()
+		self.update_vehicle_booking_order_registration()
 		self.update_vehicle_registration_order()
 
 	def on_cancel(self):
@@ -187,6 +188,13 @@ class VehicleInvoiceMovement(VehicleTransactionController):
 
 		for d in self.invoices:
 			super(VehicleInvoiceMovement, self).update_vehicle_booking_order_invoice(d)
+
+	def update_vehicle_booking_order_registration(self, doc=None):
+		if self.issued_for != "Registration":
+			return
+
+		for d in self.invoices:
+			super(VehicleInvoiceMovement, self).update_vehicle_booking_order_registration(d)
 
 	def update_vehicle_registration_order(self, doc=None):
 		if self.purpose in ['Transfer', 'Receive']:
