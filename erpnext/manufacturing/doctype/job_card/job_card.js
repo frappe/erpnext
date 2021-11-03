@@ -30,7 +30,7 @@ frappe.ui.form.on('Job Card', {
 
 		if (frm.doc.__onload.work_order_stopped) {
 			frm.disable_save();
-			return
+			return;
 		}
 
 		if (!frm.doc.__islocal && has_items && frm.doc.docstatus < 2) {
