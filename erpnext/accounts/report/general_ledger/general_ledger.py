@@ -441,6 +441,8 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 			if not group_by_voucher_consolidated:
 				update_value_in_dict(gle_map[group_by_value].totals, 'total', gle)
 				update_value_in_dict(gle_map[group_by_value].totals, 'closing', gle)
+				update_value_in_dict(totals, 'total', gle)
+				update_value_in_dict(totals, 'closing', gle)
 
 				gle_map[group_by_value].entries.append(gle)
 
@@ -455,10 +457,9 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				else:
 					update_value_in_dict(consolidated_gle, key, gle)
 
-			update_value_in_dict(totals, 'total', gle)
-			update_value_in_dict(totals, 'closing', gle)
-
 	for key, value in consolidated_gle.items():
+		update_value_in_dict(totals, 'total', value)
+		update_value_in_dict(totals, 'closing', value)
 		entries.append(value)
 
 	return totals, entries
