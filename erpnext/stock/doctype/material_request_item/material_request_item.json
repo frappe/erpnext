@@ -450,6 +450,8 @@
    "fieldname": "job_card_item",
    "fieldtype": "Data",
    "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
    "label": "Job Card Item"
   }
  ],
