@@ -1464,28 +1464,59 @@ class StockEntry(StockController):
 		return item_dict
 
 	def get_pro_order_required_items(self, backflush_based_on=None):
-		item_dict = frappe._dict()
-		pro_order = frappe.get_doc("Work Order", self.work_order)
-		if not frappe.db.get_value("Warehouse", pro_order.wip_warehouse, "is_group"):
-			wip_warehouse = pro_order.wip_warehouse
+		"""
+			Gets Work Order Required Items only if Stock Entry purpose is **Material Transferred for Manufacture**.
+		"""
+		item_dict, job_card_items = frappe._dict(), []
+		work_order = frappe.get_doc("Work Order", self.work_order)
+
+		consider_job_card = work_order.transfer_material_against == "Job Card" and self.get("job_card")
+		if consider_job_card:
+			job_card_items = self.get_job_card_item_codes(self.get("job_card"))
+
+		if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
+			wip_warehouse = work_order.wip_warehouse
 		else:
 			wip_warehouse = None
 
-		for d in pro_order.get("required_items"):
-			if ( ((flt(d.required_qty) > flt(d.transferred_qty)) or
-				(backflush_based_on == "Material Transferred for Manufacture")) and
-				(d.include_item_in_manufacturing or self.purpose != "Material Transfer for Manufacture")):
+		for d in work_order.get("required_items"):
+			if consider_job_card and (d.item_code not in job_card_items):
+				continue
+
+			transfer_pending = flt(d.required_qty) > flt(d.transferred_qty)
+			can_transfer = transfer_pending or (backflush_based_on == "Material Transferred for Manufacture")
+
+			if not can_transfer:
+				continue
+
+			if d.include_item_in_manufacturing:
 				item_row = d.as_dict()
+				item_row["idx"] = len(item_dict) + 1
+
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 					item_row["from_warehouse"] = d.source_warehouse
 
 				item_row["to_warehouse"] = wip_warehouse
 				if item_row["allow_alternative_item"]:
-					item_row["allow_alternative_item"] = pro_order.allow_alternative_item
+					item_row["allow_alternative_item"] = work_order.allow_alternative_item
 
 				item_dict.setdefault(d.item_code, item_row)
 
 		return item_dict
+
+	def get_job_card_item_codes(self, job_card=None):
+		if not job_card:
+			return []
+
+		job_card_items = frappe.get_all(
+			"Job Card Item",
+			filters={
+				"parent": job_card
+			},
+			fields=["item_code"],
+			distinct=True
+		)
+		return [d.item_code for d in job_card_items]
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		for d in item_dict:
