@@ -311,7 +311,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.total_produced_qty >= self.total_planned_qty:
+			if self.check_have_work_orders_completed():
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -424,7 +424,7 @@ class ProductionPlan(Document):
 			po = frappe.new_doc('Purchase Order')
 			po.supplier = supplier
 			po.schedule_date = getdate(po_list[0].schedule_date) if po_list[0].schedule_date else nowdate()
-			po.is_subcontracted_item = 'Yes'
+			po.is_subcontracted = 'Yes'
 			for row in po_list:
 				args = {
 					'item_code': row.production_item,
@@ -574,6 +574,15 @@ class ProductionPlan(Document):
 				else "In House")
 
 			self.append("sub_assembly_items", data)
+
+	def check_have_work_orders_completed(self):
+		wo_status = frappe.db.get_list(
+			"Work Order",
+			filters={"production_plan": self.name},
+			fields="status",
+			pluck="status"
+		)
+		return all(s == "Completed" for s in wo_status)
 
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):

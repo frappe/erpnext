@@ -1195,7 +1195,7 @@
 			"*": {
 				"item_tax_templates": [
 					{
-						"title": "GST 9%",
+						"title": "GST 18%",
 						"taxes": [
 							{
 								"tax_type": {
