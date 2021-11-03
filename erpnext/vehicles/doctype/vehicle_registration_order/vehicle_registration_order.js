@@ -241,8 +241,6 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			var filters = d => cint(d.component_type == "Ownership Transfer");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
-
-			me.frm.set_value('transfer_customer', null);
 		}
 	},
 

@@ -39,7 +39,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.validate_agent_mandatory()
 
 	def validate_common(self):
-		self.validate_transfer_customer()
 		self.validate_pricing_components()
 		self.validate_agent_license_plate_charges()
 		self.calculate_totals()
@@ -51,7 +50,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.update_payment_status()
 		self.update_invoice_status()
 		self.update_registration_number()
-		self.update_transfer_customer()
 		self.set_status()
 
 	def before_submit(self):
@@ -100,7 +98,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				disallowed_fields.append(('agent', None))
 
 			if self.transfer_letter_exists():
-				disallowed_fields.append(('transfer_customer', None))
+				disallowed_fields.append(('registration_customer', None))
 
 		self.flags.disallow_on_submit = disallowed_fields
 		return disallowed_fields
@@ -153,10 +151,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 									d.set(k, v)
 								elif not d.get(k) or k in pricing_force_fields:
 									d.set(k, v)
-
-	def validate_transfer_customer(self):
-		if not self.transfer_customer:
-			self.transfer_customer_name = None
 
 	def validate_duplicate_registration_order(self):
 		if self.vehicle:
@@ -482,25 +476,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				"registration_receipt_date": self.registration_receipt_date,
 			})
 
-	def update_transfer_customer(self, update=False):
-		vehicle_transfer_letter = None
-
-		if self.docstatus != 0:
-			vehicle_transfer_letter = frappe.db.get_all("Vehicle Transfer Letter", {"vehicle_registration_order": self.name, "docstatus": 1},
-				['customer', 'customer_name'], order_by="posting_date desc, creation desc", limit=1)
-
-		vehicle_transfer_letter = vehicle_transfer_letter[0] if vehicle_transfer_letter else frappe._dict()
-
-		if vehicle_transfer_letter:
-			self.transfer_customer = vehicle_transfer_letter.customer
-			self.transfer_customer_name = vehicle_transfer_letter.customer_name
-
-			if update:
-				self.db_set({
-					"transfer_customer": self.transfer_customer,
-					"transfer_customer_name": self.transfer_customer_name
-				})
-
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
@@ -708,7 +683,7 @@ def get_transfer_letter(vehicle_registration_order):
 	transfer.vehicle_registration_order = vro.name
 	transfer.vehicle = vro.vehicle
 	transfer.vehicle_booking_order = vro.vehicle_booking_order
-	transfer.customer = vro.transfer_customer
+	transfer.customer = vro.registration_customer or vro.customer
 
 	transfer.run_method("set_missing_values")
 

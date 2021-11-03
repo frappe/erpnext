@@ -14,6 +14,8 @@
   "customer",
   "customer_name",
   "column_break_8",
+  "registration_customer",
+  "registration_customer_name",
   "booking_customer_name",
   "column_break_11",
   "amended_from",
@@ -69,10 +71,6 @@
   "cb_60",
   "registration_receipt_date",
   "call_date",
-  "section_break_62",
-  "transfer_customer",
-  "column_break_64",
-  "transfer_customer_name",
   "pricing_section",
   "customer_charges",
   "column_break_54",
@@ -146,7 +144,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Customer",
+   "label": "Payment Customer",
    "options": "Customer",
    "reqd": 1
   },
@@ -155,7 +153,7 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name",
+   "label": "Payment Customer Name",
    "read_only": 1
   },
   {
@@ -213,12 +211,14 @@
    "label": "Address and Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "label": "Customer Address",
    "options": "Address"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Customer Address Display",
@@ -229,18 +229,21 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Customer Contact Person",
    "options": "Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Data",
    "label": "Customer Contact Name",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Customer Email",
@@ -248,18 +251,21 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
    "label": "Customer Mobile No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_phone",
    "fieldtype": "Data",
    "label": "Customer Phone",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "hidden": 1,
@@ -267,6 +273,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
    "hidden": 1,
@@ -274,6 +281,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tax_strn",
    "fieldtype": "Data",
    "hidden": 1,
@@ -595,6 +603,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "territory",
    "fieldtype": "Link",
    "label": "Territory",
@@ -837,46 +846,38 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:doc.ownership_transfer_required || doc.transfer_customer",
-   "fieldname": "transfer_customer",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Transfer Customer",
-   "no_copy": 1,
-   "options": "Customer"
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval:doc.transfer_customer && doc.transfer_customer_name != doc.transfer_customer",
-   "fetch_from": "transfer_customer.customer_name",
-   "fetch_if_empty": 1,
-   "fieldname": "transfer_customer_name",
-   "fieldtype": "Data",
-   "label": "Transfer Customer Name",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_62",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_64",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "tax_status",
    "fieldtype": "Select",
    "label": "Income Tax Status",
    "options": "\nFiler\nNon Filer",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "registration_customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Registration Customer",
+   "no_copy": 1,
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.registration_customer && doc.registration_customer_name != doc.registration_customer",
+   "fetch_from": "transfer_customer.customer_name",
+   "fetch_if_empty": 1,
+   "fieldname": "registration_customer_name",
+   "fieldtype": "Data",
+   "label": "Registration Customer Name",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-10-30 12:02:49.544034",
+ "modified": "2021-11-03 12:53:25.988394",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

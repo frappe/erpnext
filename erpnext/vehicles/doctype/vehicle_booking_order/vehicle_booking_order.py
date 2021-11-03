@@ -683,6 +683,10 @@ def set_next_document_values(source, target):
 			target.customer = source.customer
 			target.customer_name = source.customer_name
 
+		if target.meta.has_field('registration_customer'):
+			target.registration_customer = source.customer
+			target.registration_customer_name = source.customer_name
+
 		if target.meta.has_field('customer_address'):
 			target.customer_address = source.customer_address
 

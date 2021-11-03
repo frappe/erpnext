@@ -17,7 +17,7 @@ from six import string_types
 
 
 force_fields = [
-	'customer_name', 'vehicle_owner_name', 'broker_name', 'transporter_name',
+	'customer_name', 'vehicle_owner_name', 'broker_name', 'transporter_name', 'registration_customer_name',
 	'variant_of', 'variant_of_name',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'territory',
@@ -214,6 +214,9 @@ class VehicleTransactionController(StockController):
 					if self.customer in (vbo.customer, vbo.financer):
 						frappe.throw(_("Customer (New Owner) cannot be the same as in {0} for transfer")
 							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
+
+				elif self.doctype == 'Vehicle Registration Order':
+					pass
 
 				else:
 					if self.customer not in (vbo.customer, vbo.financer):
@@ -501,31 +504,34 @@ def get_customer_details(args):
 	args = frappe._dict(args)
 	out = frappe._dict()
 
-	customer_details = frappe._dict()
+	customer = frappe._dict()
 	if args.customer:
-		customer_details = frappe.get_cached_value("Customer", args.customer,
-			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'territory'], as_dict=1)
+		customer = frappe.get_cached_doc("Customer", args.customer)
 
-	owner_details = frappe._dict()
+	vehicle_owner = frappe._dict()
 	if args.vehicle_owner:
-		owner_details = frappe.get_cached_value("Customer", args.vehicle_owner,
-			['customer_name'], as_dict=1)
+		vehicle_owner = frappe.get_cached_doc("Customer", args.vehicle_owner)
 
-	broker_details = frappe._dict()
+	broker = frappe._dict()
 	if args.broker:
-		broker_details = frappe.get_cached_value("Customer", args.broker,
-			['customer_name'], as_dict=1)
+		broker = frappe.get_cached_doc("Customer", args.broker)
 
-	transporter_details = frappe._dict()
+	registration_customer = frappe._dict()
+	if args.registration_customer:
+		registration_customer = frappe.get_cached_doc("Customer", args.registration_customer)
+
+	transporter = frappe._dict()
 	if args.transporter:
-		transporter_details = frappe.get_cached_value("Supplier", args.transporter,
-			['supplier_name'], as_dict=1)
+		transporter = frappe.get_cached_doc("Supplier", args.transporter)
 
 	# Customer Name
-	out.customer_name = customer_details.customer_name
-	out.vehicle_owner_name = owner_details.customer_name
-	out.broker_name = broker_details.customer_name
-	out.transporter_name = transporter_details.supplier_name
+	out.customer_name = customer.customer_name
+	out.vehicle_owner_name = vehicle_owner.customer_name
+	out.broker_name = broker.customer_name
+	out.registration_customer_name = registration_customer.customer_name
+	out.transporter_name = transporter.supplier_name
+
+	customer_details = registration_customer or customer
 
 	# Tax IDs
 	out.tax_id = customer_details.tax_id
@@ -535,16 +541,16 @@ def get_customer_details(args):
 
 	# Customer Address
 	out.customer_address = args.customer_address
-	if not out.customer_address and args.customer:
-		out.customer_address = get_default_address("Customer", args.customer)
+	if not out.customer_address and customer_details.name:
+		out.customer_address = get_default_address("Customer", customer_details.name)
 
 	out.address_display = get_address_display(out.customer_address)
 	out.territory = customer_details.territory
 
 	# Contact
 	out.contact_person = args.contact_person
-	if not out.contact_person and args.customer:
-		out.contact_person = get_default_contact("Customer", args.customer)
+	if not out.contact_person and customer_details.name:
+		out.contact_person = get_default_contact("Customer", customer_details.name)
 
 	out.update(get_contact_details(out.contact_person))
 
@@ -578,6 +584,9 @@ def get_vehicle_booking_order_details(args):
 				else booking_details.customer
 		else:
 			out.customer = booking_details.customer
+
+		if args.doctype == "Vehicle Registration Order":
+			out.registration_customer = booking_details.customer
 
 		out.supplier = booking_details.supplier
 		out.item_code = booking_details.item_code
