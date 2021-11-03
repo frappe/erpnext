@@ -8,6 +8,7 @@
  "field_order": [
   "address_name",
   "company",
+  "state",
   "address_group_item"
  ],
  "fields": [
@@ -33,11 +34,17 @@
    "label": "Address Group Item",
    "options": "Address Group Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Select",
+   "label": "State",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-10-04 15:58:06.925974",
+ "modified": "2021-11-01 10:52:00.389794",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Address Group",
