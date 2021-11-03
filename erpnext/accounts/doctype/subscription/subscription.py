@@ -502,9 +502,11 @@ class Subscription(Document):
 		# Check invoice dates and make sure it doesn't have outstanding invoices
 		return getdate() >= getdate(self.current_invoice_start)
 
-	def is_current_invoice_generated(self):
+	def is_current_invoice_generated(self, _current_start_date=None, _current_end_date=None):
 		invoice = self.get_current_invoice()
-		_current_start_date, _current_end_date = self.update_subscription_period(date=add_days(self.current_invoice_end, 1), return_date=True)
+
+		if not (_current_start_date and _current_end_date):
+			_current_start_date, _current_end_date = self.update_subscription_period(date=add_days(self.current_invoice_end, 1), return_date=True)
 
 		if invoice and getdate(_current_start_date) <= getdate(invoice.posting_date) <= getdate(_current_end_date):
 			return True
@@ -523,7 +525,9 @@ class Subscription(Document):
 		if getdate() > getdate(self.current_invoice_end) and self.is_prepaid_to_invoice():
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
-		if not self.is_current_invoice_generated() and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
+		if not self.is_current_invoice_generated(self.current_invoice_start, self.current_invoice_end) \
+			and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
+
 			prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
 			self.generate_invoice(prorate)
 
@@ -559,14 +563,17 @@ class Subscription(Document):
 			else:
 				self.set_status_grace_period()
 
+			if getdate() > getdate(self.current_invoice_end):
+				self.update_subscription_period(add_days(self.current_invoice_end, 1))
+
 			# Generate invoices periodically even if current invoice are unpaid
-			if self.generate_new_invoices_past_due_date and not self.is_current_invoice_generated() and (self.is_postpaid_to_invoice()
-				or self.is_prepaid_to_invoice()):
+			if self.generate_new_invoices_past_due_date and not \
+				self.is_current_invoice_generated(self.current_invoice_start, self.current_invoice_end) \
+				and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
+
 				prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
 				self.generate_invoice(prorate)
 
-			if getdate() > getdate(self.current_invoice_end):
-				self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 	@staticmethod
 	def is_paid(invoice):

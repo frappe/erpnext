@@ -101,11 +101,7 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 
 	if with_valuation_rate:
 		if with_serial_no:
-			serial_nos = last_entry.get("serial_no")
-
-			if (serial_nos and
-				len(get_serial_nos_data(serial_nos)) < last_entry.qty_after_transaction):
-				serial_nos = get_serial_nos_data_after_transactions(args)
+			serial_nos = get_serial_nos_data_after_transactions(args)
 
 			return ((last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
 				if last_entry else (0.0, 0.0, 0.0))
@@ -115,19 +111,32 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 		return last_entry.qty_after_transaction if last_entry else 0.0
 
 def get_serial_nos_data_after_transactions(args):
-	serial_nos = []
-	data = frappe.db.sql(""" SELECT serial_no, actual_qty
-		FROM `tabStock Ledger Entry`
-		WHERE
-			item_code = %(item_code)s and warehouse = %(warehouse)s
-			and timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
-			order by posting_date, posting_time asc """, args, as_dict=1)
+	from pypika import CustomFunction
 
-	for d in data:
-		if d.actual_qty > 0:
-			serial_nos.extend(get_serial_nos_data(d.serial_no))
+	serial_nos = set()
+	args = frappe._dict(args)
+	sle = frappe.qb.DocType('Stock Ledger Entry')
+	Timestamp = CustomFunction('timestamp', ['date', 'time'])
+
+	stock_ledger_entries = frappe.qb.from_(
+		sle
+	).select(
+		'serial_no','actual_qty'
+	).where(
+		(sle.item_code == args.item_code)
+		& (sle.warehouse == args.warehouse)
+		& (Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time))
+		& (sle.is_cancelled == 0)
+	).orderby(
+		sle.posting_date, sle.posting_time, sle.creation
+	).run(as_dict=1)
+
+	for stock_ledger_entry in stock_ledger_entries:
+		changed_serial_no = get_serial_nos_data(stock_ledger_entry.serial_no)
+		if stock_ledger_entry.actual_qty > 0:
+			serial_nos.update(changed_serial_no)
 		else:
-			serial_nos = list(set(serial_nos) - set(get_serial_nos_data(d.serial_no)))
+			serial_nos.difference_update(changed_serial_no)
 
 	return '\n'.join(serial_nos)
 
