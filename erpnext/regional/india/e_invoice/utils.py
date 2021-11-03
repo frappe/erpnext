@@ -924,7 +924,7 @@ class GSPConnector():
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
 		else:
-			link_to_error_list = '<a href="desk#List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
+			link_to_error_list = '<a href="/app/error-log">Error Log</a>'
 			frappe.msgprint(
 				_('An error occurred while making e-invoicing request. Please check {} for more information.').format(link_to_error_list),
 				title=title,
