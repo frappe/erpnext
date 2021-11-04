@@ -337,6 +337,9 @@ def calculate_opening_closing(filters, gl_entries, group_field, group_value, gro
 	return totals
 
 def postprocess_group(filters, group_object, grouped_by):
+	no_total_row_general_ledger = frappe.get_cached_value("Accounts Settings", None, "no_total_row_general_ledger")
+	no_opening_total_general_ledger = frappe.get_cached_value("Accounts Settings", None, "no_opening_total_general_ledger")
+
 	if group_object.rows:
 		if 'party' in grouped_by:
 			if group_object.rows[0].party_type == "Customer":
@@ -355,7 +358,8 @@ def postprocess_group(filters, group_object, grouped_by):
 		if 'voucher_no' not in grouped_by:
 			group_object.rows.insert(0, group_object.totals.opening)
 
-		# group_object.rows.append(group_object.totals.total)
+		if not no_total_row_general_ledger:
+			group_object.rows.append(group_object.totals.total)
 
 		if 'voucher_no' not in grouped_by:
 			group_object.rows.append(group_object.totals.closing)
@@ -372,10 +376,13 @@ def postprocess_group(filters, group_object, grouped_by):
 			d['account_currency'] = filters.account_currency
 			d['currency'] = filters.presentation_currency or filters.company_currency
 
-		group_object.totals.opening.debit = 0
-		group_object.totals.opening.credit = 0
-		group_object.totals.closing.debit = group_object.totals.total.debit
-		group_object.totals.closing.credit = group_object.totals.total.credit
+		if no_opening_total_general_ledger:
+			group_object.totals.opening.debit = 0
+			group_object.totals.opening.credit = 0
+
+		if no_total_row_general_ledger:
+			group_object.totals.closing.debit = group_object.totals.total.debit
+			group_object.totals.closing.credit = group_object.totals.total.credit
 
 	# Do not show totals as they have already been added as rows
 	del group_object['totals']

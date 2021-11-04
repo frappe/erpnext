@@ -6,27 +6,31 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "auto_accounting_for_stock",
   "acc_frozen_upto",
   "frozen_accounts_modifier",
-  "determine_address_tax_category_from",
-  "over_billing_allowance",
-  "validate_over_billing_in_sales_invoice",
-  "validate_over_billing_in_purchase_invoice",
-  "column_break_4",
-  "restrict_unlink_payments_to_role",
+  "column_break_3",
+  "auto_accounting_for_stock",
+  "allow_cost_center_in_entry_of_bs_account",
+  "allow_project_in_entry_of_bs_account",
+  "book_asset_depreciation_entry_automatically",
+  "section_break_5",
   "credit_controller",
-  "check_supplier_invoice_uniqueness",
+  "over_billing_allowance",
+  "restrict_unlink_payments_to_role",
+  "column_break_10",
+  "allow_invoicing_without_updating_stock",
   "make_payment_via_journal_entry",
   "unlink_payment_on_cancellation_of_invoice",
   "unlink_advance_payment_on_cancelation_of_order",
-  "book_asset_depreciation_entry_automatically",
-  "allow_cost_center_in_entry_of_bs_account",
-  "allow_project_in_entry_of_bs_account",
-  "add_taxes_from_item_tax_template",
-  "allow_invoicing_without_updating_stock",
-  "restrict_sales_tax_invoice_without_tax_id",
+  "validate_over_billing_in_sales_invoice",
+  "validate_over_billing_in_purchase_invoice",
+  "check_supplier_invoice_uniqueness",
   "automatically_fetch_payment_terms",
+  "section_break_18",
+  "determine_address_tax_category_from",
+  "column_break_22",
+  "add_taxes_from_item_tax_template",
+  "restrict_sales_tax_invoice_without_tax_id",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -35,6 +39,9 @@
   "allow_stale",
   "stale_days",
   "report_settings_sb",
+  "no_total_row_general_ledger",
+  "no_opening_total_general_ledger",
+  "column_break_36",
   "use_custom_cash_flow"
  ],
  "fields": [
@@ -43,9 +50,9 @@
    "description": "If enabled, the system will post accounting entries for inventory automatically.",
    "fieldname": "auto_accounting_for_stock",
    "fieldtype": "Check",
-   "hidden": 1,
    "in_list_view": 1,
-   "label": "Make Accounting Entry For Every Stock Movement"
+   "label": "Make Accounting Entry For Every Stock Movement",
+   "read_only": 1
   },
   {
    "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",
@@ -69,10 +76,6 @@
    "fieldtype": "Select",
    "label": "Determine Address Tax Category From",
    "options": "Billing Address\nShipping Address"
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
   },
   {
    "description": "Role that is allowed to submit transactions that exceed credit limits set.",
@@ -179,7 +182,7 @@
   {
    "description": "Percentage you are allowed to bill more against the amount ordered. For example: If the order value is $100 for an item and tolerance is set as 10% then you are allowed to bill for $110.",
    "fieldname": "over_billing_allowance",
-   "fieldtype": "Currency",
+   "fieldtype": "Percent",
    "label": "Over Billing Allowance (%)"
   },
   {
@@ -223,12 +226,50 @@
    "fieldname": "restrict_sales_tax_invoice_without_tax_id",
    "fieldtype": "Check",
    "label": "Restrict Sales Tax Invoice Without Customer Tax ID"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Billing and Payments"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "label": "Taxes"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_total_row_general_ledger",
+   "fieldtype": "Check",
+   "label": "Do Not Show Total Row in General Ledger"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_opening_total_general_ledger",
+   "fieldtype": "Check",
+   "label": "Do Not Show Opening Totals In General Ledger"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2021-08-19 23:35:11.170172",
+ "modified": "2021-11-04 11:32:59.344396",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
