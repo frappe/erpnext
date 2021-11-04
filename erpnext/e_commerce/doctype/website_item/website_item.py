@@ -274,7 +274,6 @@ class WebsiteItem(WebsiteGenerator):
 		if self.slideshow and context.variant and context.variant.slideshow:
 			context.update(get_slideshow(context.variant))
 
-
 	def set_attribute_context(self, context):
 		if not self.has_variants:
 			return
@@ -535,15 +534,25 @@ def make_website_item(doc, save=True):
 
 	return [website_item.name, website_item.web_item_name]
 
+def enqueue_make_bulk_website_items(items):
+	if isinstance(items, str):
+		items = json.loads(items)
+
+	for item in items:
+		doc = frappe.get_cached_doc("Item", item)
+		make_website_item(doc)
+
 @frappe.whitelist()
 def make_bulk_website_items(items):
 	if isinstance(items, str):
 		items = json.loads(items)
 
-	website_items = []
-	for idx, item in enumerate(items):
-		frappe.publish_realtime("website_item_creation_progress", {"progress": [item, idx + 1, len(items)]}, user=frappe.session.user)
-		doc = frappe.get_cached_doc("Item", item)
-		website_item_details = make_website_item(doc)
-		website_items.append(website_item_details)
-	return website_items
+	if len(items) > 50:
+		frappe.enqueue("erpnext.e_commerce.doctype.website_item.website_item.enqueue_make_bulk_website_items", items=items)
+		return "queued"
+	else:
+		for idx, item in enumerate(items):
+			frappe.publish_progress(float(idx + 1) * 100 / len(items), title=_("Publishing Website Items"))
+			doc = frappe.get_cached_doc("Item", item)
+			make_website_item(doc)
+		return len(items)

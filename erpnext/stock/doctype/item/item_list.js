@@ -17,12 +17,6 @@ frappe.listview_settings['Item'] = {
 	onload: function(me) {
 		me.page.add_action_item(__("Publish in Website"), function() {
 			const items = me.get_checked_items().map(item => item.name);
-			frappe.realtime.on("website_item_creation_progress", function (data) {
-				if(data.progress) {
-					frappe.hide_msgprint(true);
-					frappe.show_progress(__("Creating Website Item"), data.progress[1], data.progress[2], data.progress[0]);
-				}
-			});
 
 			frappe.call({
 				method: "erpnext.e_commerce.doctype.website_item.website_item.make_bulk_website_items",
@@ -30,10 +24,15 @@ frappe.listview_settings['Item'] = {
 				freeze: true,
 				freeze_message: __("Publishing Items ..."),
 				callback(response) {
-					frappe.show_alert({
-						message: __(`Created ${response.message.length} Website Items`),
-						indicator: "green"
-					})
+					if(response.message === "queued") {
+						frappe.msgprint(__("You've selected too many items to publish right now. We're working on it in the background."));
+					}
+					else {
+						frappe.show_alert({
+							message: __(`${response.message} website items created.`),
+							indicator: "green"
+						});
+					}
 				}
 			});
 		});
