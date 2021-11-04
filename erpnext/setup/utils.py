@@ -122,11 +122,11 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
 
-def format_ces_api(data="", param={}):
+def format_ces_api(data, param):
 	return data.format(
-		transaction_date=param["transaction_date"],
-		to_currency=param["to_currency"],
-		from_currency=param["from_currency"]
+		transaction_date=param.get("transaction_date"),
+		to_currency=param.get("to_currency"),
+		from_currency=param.get("from_currency")
 	)
 
 def enable_all_roles_and_domains():
