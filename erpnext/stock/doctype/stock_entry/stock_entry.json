@@ -40,6 +40,8 @@
   "to_warehouse",
   "target_warehouse_address",
   "target_address_display",
+  "patient",
+  "patient_name",
   "sb0",
   "scan_barcode",
   "items",
@@ -644,12 +646,26 @@
    "in_standard_filter": 1,
    "label": "Reference",
    "options": "Requisition Reference"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Patient Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-10-14 14:06:18.007081",
+ "modified": "2021-11-04 10:35:16.176642",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
