@@ -174,6 +174,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(actual_gle, expected_gle)
 
 		# Cancel Asset Capitalization and make test entries and status are reversed
+		asset_capitalization.reload()
 		asset_capitalization.cancel()
 		self.assertEqual(consumed_asset.db_get('status'), 'Partially Depreciated')
 		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))

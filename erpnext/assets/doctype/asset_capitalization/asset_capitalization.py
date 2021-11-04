@@ -371,6 +371,7 @@ class AssetCapitalization(StockController):
 				self.set_consumed_asset_status(asset)
 
 				if asset.calculate_depreciation:
+					self.reverse_depreciation_entry_made_after_disposal(asset)
 					self.reset_depreciation_schedule(asset)
 			else:
 				if asset.calculate_depreciation:
