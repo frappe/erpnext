@@ -122,7 +122,14 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		return self._transfer_letter_exists
 
 	def set_title(self):
-		self.title = self.customer_name or self.customer
+		names = []
+
+		if self.registration_customer_name:
+			names.append(self.registration_customer_name)
+		if self.customer_name and self.customer != self.registration_customer:
+			names.append(self.customer_name)
+
+		self.title = " / ".join(names)
 
 	def set_missing_values(self, doc=None, for_validate=False):
 		super(VehicleRegistrationOrder, self).set_missing_values(doc, for_validate)
