@@ -41,9 +41,12 @@ def get_conditions(filters):
 	if filters.get("from_date") and filters.get("to_date"):
 		conditions += " and po.transaction_date between %(from_date)s and %(to_date)s"
 
-	for field in ['company', 'name', 'status']:
+	for field in ['company', 'name']:
 		if filters.get(field):
 			conditions += f" and po.{field} = %({field})s"
+
+	if filters.get('status'):
+		conditions += " and po.status in %(status)s"
 
 	if filters.get('project'):
 		conditions += " and poi.project = %(project)s"
