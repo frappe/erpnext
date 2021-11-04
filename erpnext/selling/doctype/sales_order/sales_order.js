@@ -78,6 +78,8 @@ frappe.ui.form.on("Sales Order", {
 		});
 
 		erpnext.queries.setup_warehouse_query(frm);
+
+		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
 
 	delivery_date: function(frm) {

@@ -170,7 +170,7 @@
    "default": "0",
    "fieldname": "repay_unclaimed_amount_from_salary",
    "fieldtype": "Check",
-   "label": "Repay unclaimed amount from salary"
+   "label": "Repay Unclaimed Amount from Salary"
   },
   {
    "depends_on": "eval:cur_frm.doc.employee",
@@ -200,10 +200,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:31:53.746659",
+ "modified": "2021-09-11 18:38:38.617478",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

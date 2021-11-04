@@ -27,7 +27,7 @@ def get_context(context):
 	filter_engine = ProductFiltersBuilder()
 
 	context.field_filters = filter_engine.get_field_filters()
-	context.attribute_filters = filter_engine.get_attribute_fitlers()
+	context.attribute_filters = filter_engine.get_attribute_filters()
 
 	context.product_settings = product_settings
 	context.body_class = "product-page"

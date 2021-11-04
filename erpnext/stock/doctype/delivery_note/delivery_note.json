@@ -395,8 +395,7 @@
    "fieldtype": "Link",
    "label": "Billing Address Name",
    "options": "Address",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "tax_id",
@@ -1277,6 +1276,7 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -1308,7 +1308,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 20:14:40.215231",
+ "modified": "2021-10-08 14:29:13.428984",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

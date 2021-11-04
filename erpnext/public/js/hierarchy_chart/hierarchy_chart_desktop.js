@@ -63,7 +63,7 @@ erpnext.HierarchyChart = class {
 		});
 
 		node.parent.append(node_card);
-		node.$link = $(`#${node.id}`);
+		node.$link = $(`[id="${node.id}"]`);
 	}
 
 	show() {
@@ -223,7 +223,7 @@ erpnext.HierarchyChart = class {
 				let node = undefined;
 
 				$.each(r.message, (_i, data) => {
-					if ($(`#${data.id}`).length)
+					if ($(`[id="${data.id}"]`).length)
 						return;
 
 					node = new me.Node({
@@ -263,7 +263,7 @@ erpnext.HierarchyChart = class {
 			this.refresh_connectors(node.parent_id);
 
 			// rebuild incoming connections
-			let grandparent = $(`#${node.parent_id}`).attr('data-parent');
+			let grandparent = $(`[id="${node.parent_id}"]`).attr('data-parent');
 			this.refresh_connectors(grandparent);
 		}
 
@@ -282,7 +282,7 @@ erpnext.HierarchyChart = class {
 
 	show_active_path(node) {
 		// mark node parent on active path
-		$(`#${node.parent_id}`).addClass('active-path');
+		$(`[id="${node.parent_id}"]`).addClass('active-path');
 	}
 
 	load_children(node, deep=false) {
@@ -317,7 +317,7 @@ erpnext.HierarchyChart = class {
 
 	render_child_nodes(node, child_nodes) {
 		const last_level = this.$hierarchy.find('.level:last').index();
-		const current_level = $(`#${node.id}`).parent().parent().parent().index();
+		const current_level = $(`[id="${node.id}"]`).parent().parent().parent().index();
 
 		if (last_level === current_level) {
 			this.$hierarchy.append(`
@@ -334,10 +334,12 @@ erpnext.HierarchyChart = class {
 
 			if (child_nodes) {
 				$.each(child_nodes, (_i, data) => {
-					this.add_node(node, data);
-					setTimeout(() => {
-						this.add_connector(node.id, data.id);
-					}, 250);
+					if (!$(`[id="${data.id}"]`).length) {
+						this.add_node(node, data);
+						setTimeout(() => {
+							this.add_connector(node.id, data.id);
+						}, 250);
+					}
 				});
 			}
 		}
@@ -382,7 +384,7 @@ erpnext.HierarchyChart = class {
 		node.$children = $('<ul class="node-children"></ul>');
 
 		const last_level = this.$hierarchy.find('.level:last').index();
-		const node_level = $(`#${node.id}`).parent().parent().parent().index();
+		const node_level = $(`[id="${node.id}"]`).parent().parent().parent().index();
 
 		if (last_level === node_level) {
 			this.$hierarchy.append(`
@@ -489,7 +491,7 @@ erpnext.HierarchyChart = class {
 	set_path_attributes(path, parent_id, child_id) {
 		path.setAttribute("data-parent", parent_id);
 		path.setAttribute("data-child", child_id);
-		const parent = $(`#${parent_id}`);
+		const parent = $(`[id="${parent_id}"]`);
 
 		if (parent.hasClass('active')) {
 			path.setAttribute("class", "active-connector");
@@ -513,7 +515,7 @@ erpnext.HierarchyChart = class {
 	}
 
 	collapse_previous_level_nodes(node) {
-		let node_parent = $(`#${node.parent_id}`);
+		let node_parent = $(`[id="${node.parent_id}"]`);
 		let previous_level_nodes = node_parent.parent().parent().children('li');
 		let node_card = undefined;
 
@@ -545,7 +547,7 @@ erpnext.HierarchyChart = class {
 
 	setup_node_click_action(node) {
 		let me = this;
-		let node_element = $(`#${node.id}`);
+		let node_element = $(`[id="${node.id}"]`);
 
 		node_element.click(function() {
 			const is_sibling = me.selected_node.parent_id === node.parent_id;
@@ -563,7 +565,7 @@ erpnext.HierarchyChart = class {
 	}
 
 	setup_edit_node_action(node) {
-		let node_element = $(`#${node.id}`);
+		let node_element = $(`[id="${node.id}"]`);
 		let me = this;
 
 		node_element.find('.btn-edit-node').click(function() {
@@ -572,7 +574,7 @@ erpnext.HierarchyChart = class {
 	}
 
 	remove_levels_after_node(node) {
-		let level = $(`#${node.id}`).parent().parent().parent().index();
+		let level = $(`[id="${node.id}"]`).parent().parent().parent().index();
 
 		level = $('.hierarchy > li:eq('+ level + ')');
 		level.nextAll('li').remove();
@@ -595,7 +597,7 @@ erpnext.HierarchyChart = class {
 			const parent = $(path).data('parent');
 			const child = $(path).data('child');
 
-			if ($(`#${parent}`).length && $(`#${child}`).length)
+			if ($(`[id="${parent}"]`).length && $(`[id="${child}"]`).length)
 				return;
 
 			$(path).remove();
