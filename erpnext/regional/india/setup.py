@@ -615,10 +615,16 @@ def get_custom_fields():
 		],
 		'Supplier': [
 			{
+				'fieldname': 'pan',
+				'label': 'PAN',
+				'fieldtype': 'Data',
+				'insert_after': 'supplier_type'
+			},
+			{
 				'fieldname': 'gst_transporter_id',
 				'label': 'GST Transporter ID',
 				'fieldtype': 'Data',
-				'insert_after': 'supplier_type',
+				'insert_after': 'pan',
 				'depends_on': 'eval:doc.is_transporter'
 			},
 			{
@@ -641,10 +647,16 @@ def get_custom_fields():
 		],
 		'Customer': [
 			{
+				'fieldname': 'pan',
+				'label': 'PAN',
+				'fieldtype': 'Data',
+				'insert_after': 'customer_type'
+			},
+			{
 				'fieldname': 'gst_category',
 				'label': 'GST Category',
 				'fieldtype': 'Select',
-				'insert_after': 'customer_type',
+				'insert_after': 'pan',
 				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
 				'default': 'Unregistered'
 			},
