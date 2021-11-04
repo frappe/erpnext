@@ -35,5 +35,22 @@ frappe.listview_settings['Vehicle Registration Order'] = {
 			}
 			return erpnext.queries.item(filters);
 		}
+
+		listview.page.add_action_item(__("Create Agent Payment"), function () {
+			var names = listview.get_checked_items(true);
+
+			if (names && names.length) {
+				return frappe.call({
+					method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.get_agent_payment_voucher",
+					args: {
+						"names": names
+					},
+					callback: function (r) {
+						var doclist = frappe.model.sync(r.message);
+						frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+					}
+				});
+			}
+		});
 	}
 };

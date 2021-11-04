@@ -12,6 +12,8 @@ from erpnext.vehicles.vehicle_additional_service import VehicleAdditionalService
 from erpnext.vehicles.vehicle_pricing import calculate_total_price, validate_duplicate_components,\
 	validate_component_type, validate_disabled_component, get_pricing_components, get_component_details,\
 	pricing_force_fields
+from six import string_types
+import json
 
 
 class VehicleRegistrationOrder(VehicleAdditionalServiceController):
@@ -580,18 +582,6 @@ def get_vehicle_registration_order_details(vehicle_registration_order):
 
 @frappe.whitelist()
 def get_journal_entry(vehicle_registration_order, purpose):
-	def add_row(amount, account=None, party_type=None, party=None):
-		row = jv.append('accounts')
-		row.account = account
-		row.debit_in_account_currency = flt(amount) if flt(amount) > 0 else 0
-		row.credit_in_account_currency = -flt(amount) if flt(amount) < 0 else 0
-		row.party_type = party_type
-		row.party = party
-
-		if row.party_type:
-			row.reference_type = "Vehicle Registration Order"
-			row.reference_name = vro.name
-
 	vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
 
 	if vro.docstatus != 1:
@@ -610,26 +600,26 @@ def get_journal_entry(vehicle_registration_order, purpose):
 	jv.vehicle_registration_purpose = purpose
 
 	if purpose == "Customer Payment":
-		add_row(vro.customer_outstanding)
-		add_row(-1 * vro.customer_outstanding, vro.customer_account, 'Customer', vro.customer)
+		add_journal_entry_row(jv, vro.customer_outstanding)
+		add_journal_entry_row(jv, -1 * vro.customer_outstanding, vro.customer_account, 'Customer', vro.customer, vro.name)
 	elif purpose == "Authority Payment":
-		add_row(vro.authority_outstanding, vro.customer_account, 'Customer', vro.customer)
-		add_row(-1 * vro.authority_outstanding)
+		add_journal_entry_row(jv, vro.authority_outstanding, vro.customer_account, 'Customer', vro.customer, vro.name)
+		add_journal_entry_row(jv, -1 * vro.authority_outstanding)
 	elif purpose == "Agent Payment":
-		add_row(vro.agent_balance, vro.agent_account, 'Supplier', vro.agent)
-		add_row(-1 * vro.agent_balance)
+		add_journal_entry_row(jv, vro.agent_balance, vro.agent_account, 'Supplier', vro.agent, vro.name)
+		add_journal_entry_row(jv, -1 * vro.agent_balance)
 	elif purpose == "Closing Entry":
 		unclosed_customer_amount = vro.get_unclosed_customer_amount()
 		unclosed_agent_amount = vro.get_unclosed_agent_amount()
 		unclosed_income_amount = vro.get_unclosed_income_amount()
 
 		if unclosed_customer_amount:
-			add_row(unclosed_customer_amount, vro.customer_account, 'Customer', vro.customer)
+			add_journal_entry_row(jv, unclosed_customer_amount, vro.customer_account, 'Customer', vro.customer, vro.name)
 		if unclosed_agent_amount:
-			add_row(-1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent)
+			add_journal_entry_row(jv, -1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent, vro.name)
 		if unclosed_income_amount:
 			registration_income_account = frappe.get_cached_value("Vehicles Settings", None, 'registration_income_account')
-			add_row(-1 * unclosed_income_amount, registration_income_account)
+			add_journal_entry_row(jv, -1 * unclosed_income_amount, registration_income_account)
 	else:
 		frappe.throw(_("Invalid Purpose"))
 
@@ -638,6 +628,71 @@ def get_journal_entry(vehicle_registration_order, purpose):
 	jv.set_party_name()
 
 	return jv
+
+
+@frappe.whitelist()
+def get_agent_payment_voucher(names):
+	if not frappe.has_permission("Journal Entry", "write"):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
+	if isinstance(names, string_types):
+		names = json.loads(names)
+
+	total_amount = 0
+	company = None
+
+	jv = frappe.new_doc("Journal Entry")
+	jv.posting_date = frappe.utils.nowdate()
+	jv.vehicle_registration_purpose = 'Agent Payment'
+
+	for name in names:
+		vro = frappe.get_doc("Vehicle Registration Order", name)
+
+		if vro.docstatus != 1 or not vro.agent or not flt(vro.agent_balance):
+			continue
+
+		if not company:
+			company = vro.company
+			jv.company = company
+		elif vro.company != company:
+			continue
+
+		row = add_journal_entry_row(jv, vro.agent_balance, vro.agent_account, 'Supplier', vro.agent, vro.name)
+		row.vehicle_booking_order = vro.vehicle_booking_order
+		row.applies_to_vehicle = vro.vehicle
+		row.update(get_fetch_values(row.doctype, "applies_to_vehicle", row.applies_to_vehicle))
+
+		total_amount += flt(vro.agent_balance)
+
+	if not total_amount:
+		frappe.throw(_("No Agent payable Vehicle Registration Order selected"))
+
+	add_journal_entry_row(jv, -1 * total_amount)
+
+	jv.cost_center = frappe.get_cached_value("Vehicles Settings", None, 'registration_cost_center')
+	if not jv.cost_center and company:
+		jv.cost_center = erpnext.get_default_cost_center(company)
+
+	jv.set_amounts_in_company_currency()
+	jv.set_total_debit_credit()
+	jv.set_party_name()
+
+	return jv
+
+
+def add_journal_entry_row(jv, amount, account=None, party_type=None, party=None, vehicle_registration_order=None):
+	row = jv.append('accounts')
+	row.account = account
+	row.debit_in_account_currency = flt(amount) if flt(amount) > 0 else 0
+	row.credit_in_account_currency = -flt(amount) if flt(amount) < 0 else 0
+	row.party_type = party_type
+	row.party = party
+
+	if vehicle_registration_order:
+		row.reference_type = "Vehicle Registration Order"
+		row.reference_name = vehicle_registration_order
+
+	return row
 
 
 @frappe.whitelist()

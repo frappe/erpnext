@@ -203,4 +203,8 @@ def make_multiple_bank_entries(names):
 		"account_type": payment_account.account_type
 	})
 
+	je.set_amounts_in_company_currency()
+	je.set_total_debit_credit()
+	je.set_party_name()
+
 	return je.as_dict()
