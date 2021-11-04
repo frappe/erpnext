@@ -29,7 +29,7 @@ frappe.listview_settings['Item'] = {
 					}
 					else {
 						frappe.show_alert({
-							message: __(`${response.message} website items created.`),
+							message: __(`${response.message} website items published.`),
 							indicator: "green"
 						});
 					}
