@@ -447,9 +447,13 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 			$(this.frm.msgbox.body).find('.btn-default').on('click', () => {
 				this.frm.msgbox.hide();
-				this.make_new_invoice();
+				this.refresh_invoice();
 			})
 		}
+	}
+
+	refresh_invoice() {
+		location.reload();
 	}
 
 	change_pos_profile() {
@@ -706,7 +710,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 		if (this.frm.doc.docstatus == 1) {
 			this.page.set_primary_action(__("New"), () => {
-				this.make_new_invoice();
+				this.refresh_invoice();
 			});
 			this.page.add_menu_item(__("Email"), () => {
 				this.frm.email_doc();
@@ -732,6 +736,7 @@ class POSCart {
 		this.make_customer_field();
 		if (frappe.boot.active_domains.includes("Healthcare")){
 			this.make_patient_field()
+			this.make_patient_name_field()
 		}
 		this.make_loyalty_points();
 		this.make_numpad();
@@ -743,6 +748,8 @@ class POSCart {
 				<div class="customer-field">
 				</div>
 				<div class="patient-field">
+				</div>
+				<div class="patient-name-field">
 				</div>
 				<div class="cart-wrapper">
 					<div class="list-item-table">
@@ -996,6 +1003,7 @@ class POSCart {
 				onchange: () => {
 					this.events.on_patient_change(this.patient_field.get_value());
 					this.events.get_loyalty_details();
+					this.add_patient_name();
 				}
 			},
 			parent: this.wrapper.find('.patient-field'),
@@ -1003,6 +1011,25 @@ class POSCart {
 		});
 
 		this.patient_field.set_value(this.frm.doc.patient);
+		// this.patient_name.set_value(this.frm.doc.patient_name);
+	}
+
+	make_patient_name_field() {
+		this.patient_name = frappe.ui.form.make_control({
+			df: {
+				fetch_from: "patient.patient_name",
+				fieldtype: 'Data',
+				label: 'Patient Name',
+				fieldname: 'patient_name',
+				read_only: 1
+			},
+			parent: this.wrapper.find('.patient-name-field'),
+			render_input: true
+		});
+	}
+
+	add_patient_name() {
+		this.patient_name.set_value(this.frm.doc.patient_name);
 	}
 
 	make_loyalty_points() {
