@@ -75,12 +75,12 @@ class Asset(AccountsController):
 		if self.is_existing_asset and self.purchase_invoice:
 			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
 
-	def prepare_depreciation_data(self, date_of_sale=None, date_of_return=None):
+	def prepare_depreciation_data(self, date_of_disposal=None, date_of_return=None):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
-			self.make_depreciation_schedule(date_of_sale)
-			self.set_accumulated_depreciation(date_of_sale, date_of_return)
+			self.make_depreciation_schedule(date_of_disposal)
+			self.set_accumulated_depreciation(date_of_disposal, date_of_return)
 		else:
 			self.finance_books = []
 			self.value_after_depreciation = (flt(self.gross_purchase_amount) -
@@ -181,7 +181,7 @@ class Asset(AccountsController):
 			d.rate_of_depreciation = flt(self.get_depreciation_rate(d, on_validate=True),
 				d.precision("rate_of_depreciation"))
 
-	def make_depreciation_schedule(self, date_of_sale):
+	def make_depreciation_schedule(self, date_of_disposal):
 		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.get('schedules'):
 			self.schedules = []
 
@@ -227,14 +227,14 @@ class Asset(AccountsController):
 					monthly_schedule_date = add_months(schedule_date, - d.frequency_of_depreciation + 1)
 
 				# if asset is being sold
-				if date_of_sale:
+				if date_of_disposal:
 					from_date = self.get_from_date(d.finance_book)
 					depreciation_amount, days, months = self.get_pro_rata_amt(d, depreciation_amount,
-						from_date, date_of_sale)
+						from_date, date_of_disposal)
 
 					if depreciation_amount > 0:
 						self.append("schedules", {
-							"schedule_date": date_of_sale,
+							"schedule_date": date_of_disposal,
 							"depreciation_amount": depreciation_amount,
 							"depreciation_method": d.depreciation_method,
 							"finance_book": d.finance_book,

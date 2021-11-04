@@ -375,8 +375,8 @@ class AssetCapitalization(StockController):
 			else:
 				if asset.calculate_depreciation:
 					self.depreciate_asset(asset)
+					asset.reload()
 
-				asset.reload()
 				fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
 					item.asset_value, item.get('finance_book') or self.get('finance_book'))
 				asset.db_set("disposal_date", self.posting_date)

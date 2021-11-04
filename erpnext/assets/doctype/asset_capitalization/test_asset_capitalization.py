@@ -118,11 +118,11 @@ class TestAssetCapitalization(unittest.TestCase):
 		depreciation_before_disposal_amount = 15_000
 		accumulated_depreciation = 45_000
 
-		# to accomodate for depreciation on disposal calculation bugs TODO remove this when bug is fixed
-		consumed_asset_value_before_disposal = 60_082.19
-		target_incoming_rate = 6008.219
-		depreciation_before_disposal_amount = 9917.81
-		accumulated_depreciation = 39_917.81
+		# to accomodate for depreciation on disposal calculation minor difference
+		consumed_asset_value_before_disposal = 55_123.29
+		target_incoming_rate = 5512.329
+		depreciation_before_disposal_amount = 14_876.71
+		accumulated_depreciation = 44_876.71
 
 		# Create assets
 		consumed_asset = create_depreciation_asset(
