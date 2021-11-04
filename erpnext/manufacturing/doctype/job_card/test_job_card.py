@@ -19,8 +19,17 @@ class TestJobCard(unittest.TestCase):
 
 	def setUp(self):
 		transfer_material_against, source_warehouse = None, None
-		tests_that_transfer_against_jc = ("test_job_card_multiple_materials_transfer",
-			"test_job_card_excess_material_transfer")
+
+		tests_that_skip_setup = (
+			"test_job_card_material_transfer_correctness"
+		)
+		tests_that_transfer_against_jc = (
+			"test_job_card_multiple_materials_transfer",
+			"test_job_card_excess_material_transfer"
+		)
+
+		if self._testMethodName in tests_that_skip_setup:
+			return
 
 		if self._testMethodName in tests_that_transfer_against_jc:
 			transfer_material_against = "Job Card"
@@ -192,3 +201,87 @@ class TestJobCard(unittest.TestCase):
 
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
+
+	def test_job_card_material_transfer_correctness(self):
+		"""
+			1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
+			2. Test impact of changing 'For Qty' in such a Stock Entry
+		"""
+		bom = create_bom_with_multiple_operations()
+		work_order = make_wo_with_transfer_against_jc()
+
+		job_card_name = frappe.db.get_value(
+			"Job Card",
+			{"work_order": work_order.name,"operation": "Test Operation A"}
+		)
+		job_card = frappe.get_doc("Job Card", job_card_name)
+
+		self.assertEqual(len(job_card.items), 1)
+		self.assertEqual(job_card.items[0].item_code, "_Test Item")
+
+		# check if right items are mapped in transfer entry
+		transfer_entry = make_stock_entry_from_jc(job_card_name)
+		transfer_entry.insert()
+
+		self.assertEqual(len(transfer_entry.items), 1)
+		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
+		self.assertEqual(transfer_entry.items[0].qty, 4)
+
+		# change 'For Qty' and check impact on items table
+		# no.of items should be the same with qty change
+		transfer_entry.fg_completed_qty = 2
+		transfer_entry.get_items()
+
+		self.assertEqual(len(transfer_entry.items), 1)
+		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
+		self.assertEqual(transfer_entry.items[0].qty, 2)
+
+		# teardown
+		transfer_entry.delete()
+		frappe.db.delete("Job Card", {"work_order": work_order.name})
+		work_order.cancel()
+		bom.cancel()
+
+
+def create_bom_with_multiple_operations():
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+	test_record = frappe.get_test_records("BOM")[2]
+	bom_doc = frappe.get_doc(test_record)
+
+	make_operation({
+		"operation": "Test Operation A",
+		"workstation": "_Test Workstation A",
+		"hour_rate_rent": 300,
+		"time_in_mins": 60
+	})
+
+	bom_doc.append("operations", {
+		"operation": "Test Operation A",
+		"description": "Test Operation A",
+		"workstation": "_Test Workstation A",
+		"hour_rate": 300,
+		"time_in_mins": 60,
+		"operating_cost": 100
+	})
+
+	bom_doc.save()
+	bom_doc.submit()
+
+	return bom_doc
+
+def make_wo_with_transfer_against_jc():
+	"Create a WO with multiple operations and Material Transfer against Job Card"
+
+	work_order = make_wo_order_test_record(
+		item="_Test FG Item 2",
+		qty=4,
+		transfer_material_against="Job Card",
+		source_warehouse="Stores - _TC",
+		do_not_submit=True
+	)
+	work_order.required_items[0].operation = "Test Operation A"
+	work_order.required_items[1].operation = "_Test Operation 1"
+	work_order.submit()
+
+	return work_order
