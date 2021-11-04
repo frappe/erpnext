@@ -10,7 +10,6 @@ from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 from frappe.utils.nestedset import get_root_of
-from past.builtins import cmp
 from six import iteritems
 
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
@@ -169,6 +168,10 @@ def get_tax_template(posting_date, args):
 		rule.no_of_keys_matched = 0
 		for key in args:
 			if rule.get(key): rule.no_of_keys_matched += 1
+
+	def cmp(a, b):
+		# refernce: https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons
+		return int(a > b) - int(a < b)
 
 	rule = sorted(tax_rule,
 		key = functools.cmp_to_key(lambda b, a:
