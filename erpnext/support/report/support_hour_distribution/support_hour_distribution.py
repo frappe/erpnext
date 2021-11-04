@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, get_datetime, getdate
-from six import iteritems
 
 time_slots = {
 	'12AM - 3AM': '00:00:00-03:00:00',
@@ -34,7 +33,7 @@ def get_data(filters):
 	time_slot_wise_total_count = {}
 	while(start_date <= getdate(filters.to_date)):
 		hours_count = {'date': start_date}
-		for key, value in iteritems(time_slots):
+		for key, value in time_slots.items():
 			start_time, end_time = value.split('-')
 			start_time = get_datetime("{0} {1}".format(start_date.strftime("%Y-%m-%d"), start_time))
 			end_time = get_datetime("{0} {1}".format(start_date.strftime("%Y-%m-%d"), end_time))

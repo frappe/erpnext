@@ -3,7 +3,6 @@
 
 
 import frappe
-from six import iteritems
 
 from erpnext.setup.install import add_non_standard_user_types
 
@@ -15,7 +14,7 @@ def execute():
 		'hr': ['Employee', 'Expense Claim', 'Leave Application', 'Attendance Request', 'Compensatory Leave Request']
 	}
 
-	for module, doctypes in iteritems(doctype_dict):
+	for module, doctypes in doctype_dict.items():
 		for doctype in doctypes:
 			frappe.reload_doc(module, 'doctype', doctype)
 

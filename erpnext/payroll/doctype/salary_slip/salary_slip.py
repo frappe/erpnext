@@ -21,7 +21,6 @@ from frappe.utils import (
 	rounded,
 )
 from frappe.utils.background_jobs import enqueue
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
@@ -1342,7 +1341,7 @@ class SalarySlip(TransactionBase):
 			from erpnext.hr.doctype.leave_application.leave_application import get_leave_details
 			leave_details = get_leave_details(self.employee, self.end_date)
 
-			for leave_type, leave_values in iteritems(leave_details['leave_allocation']):
+			for leave_type, leave_values in leave_details['leave_allocation'].items():
 				self.append('leave_details', {
 					'leave_type': leave_type,
 					'total_allocated_leaves': flt(leave_values.get('total_leaves')),

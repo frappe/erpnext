@@ -1,4 +1,3 @@
-
 from frappe import _
 
 doctype_list = [

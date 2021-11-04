@@ -1,4 +1,3 @@
-
 import frappe
 
 from erpnext.regional.india.setup import make_custom_fields

@@ -1,4 +1,3 @@
-
 from frappe import _
 
 app_name = "erpnext"

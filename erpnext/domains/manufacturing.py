@@ -1,4 +1,3 @@
-
 data = {
 	'desktop_icons': [
 		'Item',

@@ -9,7 +9,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, flt
-from six import iteritems
 
 from erpnext.regional.india import state_numbers
 
@@ -281,7 +280,7 @@ class GSTR3BReport(Document):
 
 		if self.get('invoice_items'):
 			# Build itemised tax for export invoices, nil and exempted where tax table is blank
-			for invoice, items in iteritems(self.invoice_items):
+			for invoice, items in self.invoice_items.items():
 				if invoice not in self.items_based_on_tax_rate and self.invoice_detail_map.get(invoice, {}).get('export_type') \
 					== "Without Payment of Tax" and self.invoice_detail_map.get(invoice, {}).get('gst_category') == "Overseas":
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
@@ -349,7 +348,7 @@ class GSTR3BReport(Document):
 							self.report_dict['sup_details']['isup_rev']['txval'] += taxable_value
 
 	def set_inter_state_supply(self, inter_state_supply):
-		for key, value in iteritems(inter_state_supply):
+		for key, value in inter_state_supply.items():
 			if key[0] == "Unregistered":
 				self.report_dict["inter_sup"]["unreg_details"].append(value)
 

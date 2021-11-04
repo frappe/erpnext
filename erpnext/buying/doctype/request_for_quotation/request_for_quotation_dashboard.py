@@ -1,5 +1,3 @@
-
-
 def get_data():
 	return {
 		'docstatus': 1,

@@ -1,4 +1,3 @@
-
 import unittest
 
 from frappe.test_runner import make_test_objects

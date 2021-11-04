@@ -1,4 +1,3 @@
-
 # import frappe
 from erpnext.setup.install import add_standard_navbar_items
 

@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Provide a report and downloadable CSV according to the German DATEV format.
 
@@ -12,7 +11,6 @@ import json
 
 import frappe
 from frappe import _
-from six import string_types
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.regional.germany.utils.datev.datev_constants import (
@@ -545,7 +543,7 @@ def download_datev_csv(filters):
 	Arguments / Params:
 	filters -- dict of filters to be passed to the sql query
 	"""
-	if isinstance(filters, string_types):
+	if isinstance(filters, str):
 		filters = json.loads(filters)
 
 	validate(filters)

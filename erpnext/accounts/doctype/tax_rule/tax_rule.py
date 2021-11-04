@@ -10,7 +10,6 @@ from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 from frappe.utils.nestedset import get_root_of
-from six import iteritems
 
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 
@@ -148,7 +147,7 @@ def get_tax_template(posting_date, args):
 	if 'tax_category' in args.keys():
 		del args['tax_category']
 
-	for key, value in iteritems(args):
+	for key, value in args.items():
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
 		elif key == 'customer_group':

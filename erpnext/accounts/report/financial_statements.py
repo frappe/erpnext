@@ -1,4 +1,3 @@
-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -10,7 +9,6 @@ import re
 import frappe
 from frappe import _
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
-from six import itervalues
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -188,7 +186,7 @@ def get_appropriate_currency(company, filters=None):
 
 def calculate_values(
 		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
-	for entries in itervalues(gl_entries_by_account):
+	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
 			if not d:

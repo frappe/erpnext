@@ -1,4 +1,3 @@
-
 import frappe
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (

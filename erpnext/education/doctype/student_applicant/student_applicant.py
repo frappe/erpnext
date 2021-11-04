@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-777777yyy
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 

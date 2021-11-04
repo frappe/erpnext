@@ -1,5 +1,3 @@
-
-
 def pre_process(milestone):
 	return {
 		'title': milestone.title,

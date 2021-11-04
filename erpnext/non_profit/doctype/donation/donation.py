@@ -5,7 +5,6 @@
 import json
 
 import frappe
-import six
 from frappe import _
 from frappe.email import sendmail_to_system_managers
 from frappe.model.document import Document
@@ -83,7 +82,7 @@ def capture_razorpay_donations(*args, **kwargs):
 		notify_failure(log)
 		return { 'status': 'Failed', 'reason': e }
 
-	if isinstance(data, six.string_types):
+	if isinstance(data, str):
 		data = json.loads(data)
 	data = frappe._dict(data)
 

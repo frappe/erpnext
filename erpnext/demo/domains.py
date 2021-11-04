@@ -1,4 +1,3 @@
-
 data = {
 	'Manufacturing': {
 		'company_name': 'Wind Power LLC'

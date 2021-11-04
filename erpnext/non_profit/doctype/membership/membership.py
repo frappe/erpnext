@@ -6,7 +6,6 @@ import json
 from datetime import datetime
 
 import frappe
-import six
 from frappe import _
 from frappe.email import sendmail_to_system_managers
 from frappe.model.document import Document
@@ -343,7 +342,7 @@ def process_request_data(data):
 		notify_failure(log)
 		return {"status": "Failed", "reason": e}
 
-	if isinstance(data, six.string_types):
+	if isinstance(data, str):
 		data = json.loads(data)
 	data = frappe._dict(data)
 
