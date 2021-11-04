@@ -3,8 +3,9 @@
 
 import frappe
 from frappe import _
-from frappe.utils import nowdate
 from frappe.model.document import Document
+from frappe.utils import nowdate
+
 
 class CurrencyExchangeSettings(Document):
 	def validate(self):
