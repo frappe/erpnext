@@ -1,0 +1,28 @@
+{
+ "add_total_row": 0,
+ "creation": "2021-11-05 12:56:06.333964",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "Hyundai South",
+ "modified": "2021-11-05 12:56:06.333964",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Registration Register",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Vehicle Registration Order",
+ "report_name": "Vehicle Registration Register",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Vehicle Registration User"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ]
+}

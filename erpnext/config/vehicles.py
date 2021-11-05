@@ -152,9 +152,9 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Vehicle Booking Deposit Summary",
-					"doctype": "Vehicle Booking Payment",
-					"dependencies": ["Vehicle Booking Payment"],
+					"name": "Vehicle Registration Register",
+					"doctype": "Vehicle Registration Order",
+					"dependencies": ["Vehicle Registration Order"],
 				},
 			]
 		},
@@ -173,6 +173,13 @@ def get_data():
 					"name": "Vehicle Booking Analytics",
 					"doctype": "Vehicle Booking Order",
 					"dependencies": ["Vehicle Booking Order"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Booking Deposit Summary",
+					"doctype": "Vehicle Booking Payment",
+					"dependencies": ["Vehicle Booking Payment"],
 				},
 			]
 		},

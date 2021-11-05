@@ -68,6 +68,7 @@
   "column_break_57",
   "invoice_issue_date",
   "invoice_return_date",
+  "invoice_delivered_date",
   "cb_60",
   "registration_receipt_date",
   "call_date",
@@ -130,7 +131,8 @@
    "hidden": 1,
    "label": "Series",
    "options": "VRO-",
-   "read_only": 1
+   "read_only": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "company",
@@ -872,12 +874,20 @@
    "label": "Registration Customer Name",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "invoice_delivered_date",
+   "fieldtype": "Date",
+   "label": "Invoice Delivered Date",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-03 12:53:25.988394",
+ "modified": "2021-11-05 13:59:02.156687",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",
@@ -927,7 +937,7 @@
   }
  ],
  "restrict_to_domain": "Vehicles",
- "search_fields": "customer,item_code,item_name,transaction_date,vehicle_booking_order,vehicle_chassis_no,vehicle_engine_no,vehicle_license_plate",
+ "search_fields": "vehicle_booking_order,customer,customer_name,item_code,item_name,transaction_date,vehicle_chassis_no,vehicle_engine_no,vehicle_license_plate",
  "show_name_in_global_search": 1,
  "sort_field": "transaction_date",
  "sort_order": "DESC",

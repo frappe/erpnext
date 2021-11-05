@@ -414,10 +414,14 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		vehicle_invoice = None
 		vehicle_invoice_issue = None
 		vehicle_invoice_return = None
+		vehicle_invoice_delivery = None
 
 		if self.vehicle:
 			vehicle_invoice = frappe.db.get_all("Vehicle Invoice", {"vehicle": self.vehicle, "docstatus": 1},
 				['name', 'status', 'issued_for'], order_by="posting_date desc, creation desc")
+
+			vehicle_invoice_delivery = frappe.db.get_all("Vehicle Invoice Delivery", {"vehicle": self.vehicle, "docstatus": 1},
+				['name', 'posting_date'], order_by="posting_date desc, creation desc")
 
 			vehicle_invoice_issue = frappe.db.sql("""
 				select m.name, m.posting_date
@@ -438,17 +442,20 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		vehicle_invoice = vehicle_invoice[0] if vehicle_invoice else frappe._dict()
 		vehicle_invoice_issue = vehicle_invoice_issue[0] if vehicle_invoice_issue else frappe._dict()
 		vehicle_invoice_return = vehicle_invoice_return[0] if vehicle_invoice_return else frappe._dict()
+		vehicle_invoice_delivery = vehicle_invoice_delivery[0] if vehicle_invoice_delivery else frappe._dict()
 
 		if vehicle_invoice:
 			self.invoice_status = vehicle_invoice.status
 			self.invoice_issued_for = vehicle_invoice.issued_for if vehicle_invoice.status == "Issued" else None
 			self.invoice_issue_date = vehicle_invoice_issue.posting_date
 			self.invoice_return_date = vehicle_invoice_return.posting_date
+			self.invoice_delivered_date = vehicle_invoice_delivery.posting_date
 		else:
 			self.invoice_status = "Not Received"
 			self.invoice_issued_for = None
 			self.invoice_issue_date = None
 			self.invoice_return_date = None
+			self.invoice_delivered_date = None
 
 		if update:
 			self.db_set({
@@ -456,6 +463,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				"invoice_issued_for": self.invoice_issued_for,
 				"invoice_issue_date": self.invoice_issue_date,
 				"invoice_return_date": self.invoice_return_date,
+				"invoice_delivered_date": self.invoice_delivered_date,
 			})
 
 	def update_registration_receipt_details(self, update=False):
