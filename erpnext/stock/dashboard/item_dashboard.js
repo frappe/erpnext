@@ -352,14 +352,23 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 
 	// Parse boi_results
 	const boi_number_data = boi_results.map( r=> r.qty )
-	const boi_label_data = boi_results.map( r=> `${r.parent} | ${(r.customer_name)? (r.customer_name): "Customer Name Unset!"} | ${r.added_time}`)
+
+	// const boi_label_data = boi_results.map( r=> `${r.parent} | ${(r.customer_name)? (r.customer_name): "Customer Name Unset!"} | ${r.added_time} | Stock Required: {}`)
+
 	const boi_total_number =  boi_results.reduce((total, r)=>{
 		return total + r.qty
 	}, 0)
 	const boi_backgroundColor = []
+	const boi_label_data = []
+	var stockRequired = 0
 	for (let i = 0; i < boi_results.length; i++) {
 		const colorIndex = (i+5) % Object.keys(CHART_COLORS).length;
 		boi_backgroundColor.push(Object.values(CHART_COLORS)[colorIndex])
+
+		stockRequired += boi_results[i].qty
+
+		boi_label_data.push(`${boi_results[i].parent} | ${(boi_results[i].customer_name)? (boi_results[i].customer_name): "Customer Name Unset!"} | ${boi_results[i].added_time} |  Stock Required: ${stockRequired} | BO Qty`)
+
 	}
 
 
