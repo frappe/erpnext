@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import json
 import os
@@ -8,7 +7,6 @@ import os
 import frappe
 from frappe.utils import cstr
 from frappe.utils.nestedset import rebuild_tree
-from six import iteritems
 from unidecode import unidecode
 
 
@@ -18,7 +16,7 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 		accounts = []
 
 		def _import_accounts(children, parent, root_type, root_account=False):
-			for account_name, child in iteritems(children):
+			for account_name, child in children.items():
 				if root_account:
 					root_type = child.get("root_type")
 
@@ -201,7 +199,7 @@ def validate_bank_account(coa, bank_account):
 
 	if chart:
 		def _get_account_names(account_master):
-			for account_name, child in iteritems(account_master):
+			for account_name, child in account_master.items():
 				if account_name not in ["account_number", "account_type",
 					"root_type", "is_group", "tax_rate"]:
 					accounts.append(account_name)
@@ -224,7 +222,7 @@ def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=Fals
 	accounts = []
 	def _import_accounts(children, parent):
 		''' recursively called to form a parent-child based list of dict from chart template '''
-		for account_name, child in iteritems(children):
+		for account_name, child in children.items():
 			account = {}
 			if account_name in ["account_name", "account_number", "account_type",\
 				"root_type", "is_group", "tax_rate"]: continue

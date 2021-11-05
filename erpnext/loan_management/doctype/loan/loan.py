@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 import math
@@ -10,7 +8,6 @@ import math
 import frappe
 from frappe import _
 from frappe.utils import add_months, flt, getdate, now_datetime, nowdate
-from six import string_types
 
 import erpnext
 from erpnext.controllers.accounts_controller import AccountsController
@@ -323,7 +320,7 @@ def make_loan_write_off(loan, company=None, posting_date=None, amount=0, as_dict
 @frappe.whitelist()
 def unpledge_security(loan=None, loan_security_pledge=None, security_map=None, as_dict=0, save=0, submit=0, approve=0):
 	# if no security_map is passed it will be considered as full unpledge
-	if security_map and isinstance(security_map, string_types):
+	if security_map and isinstance(security_map, str):
 		security_map = json.loads(security_map)
 
 	if loan:

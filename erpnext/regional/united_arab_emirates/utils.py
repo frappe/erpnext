@@ -1,9 +1,6 @@
-from __future__ import unicode_literals
-
 import frappe
 from frappe import _
 from frappe.utils import flt, money_in_words, round_based_on_smallest_currency_fraction
-from six import iteritems
 
 import erpnext
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
@@ -24,7 +21,7 @@ def update_itemised_tax_data(doc):
 		# First check if tax rate is present
 		# If not then look up in item_wise_tax_detail
 		if item_tax_rate:
-			for account, rate in iteritems(item_tax_rate):
+			for account, rate in item_tax_rate.items():
 				tax_rate += rate
 		elif row.item_code and itemised_tax.get(row.item_code):
 			tax_rate = sum([tax.get('tax_rate', 0) for d, tax in itemised_tax.get(row.item_code).items()])

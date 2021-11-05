@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
-from six import string_types
 
 import erpnext
 
@@ -217,7 +215,7 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	in_rate = 0
