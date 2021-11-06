@@ -22,6 +22,8 @@
   "base",
   "column_break_9",
   "variable",
+  "column_break_16",
+  "hour_rate",
   "amended_from"
  ],
  "fields": [
@@ -141,14 +143,26 @@
    "fieldtype": "Link",
    "label": "Payroll Payable Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hour_rate",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Hour Rate",
+   "options": "currency"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:44:46.267974",
+ "modified": "2021-11-05 20:31:43.110820",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

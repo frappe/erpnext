@@ -71,5 +71,13 @@ frappe.ui.form.on('Salary Structure Assignment', {
 				frm.set_value("payroll_payable_account", r.default_payroll_payable_account);
 			});
 		}
+	},
+
+	salary_structure: function (frm) {
+		if (frm.doc.salary_structure) {
+			frappe.db.get_value("Salary Structure", frm.doc.salary_structure, "salary_slip_based_on_timesheet", (r) => {
+				frm.toggle_display("hour_rate", r.salary_slip_based_on_timesheet);
+			});
+		}
 	}
 });
