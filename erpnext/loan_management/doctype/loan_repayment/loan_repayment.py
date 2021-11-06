@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -189,7 +186,7 @@ class LoanRepayment(AccountsController):
 		# interest_paid = self.amount_paid - self.principal_amount_paid - self.penalty_amount
 
 		if interest_paid > 0:
-			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
+			for lia, amounts in repayment_details.get('pending_accrual_entries', []).items():
 				if amounts['interest_amount'] + amounts['payable_principal_amount'] <= interest_paid:
 					interest_amount = amounts['interest_amount']
 					paid_principal = amounts['payable_principal_amount']

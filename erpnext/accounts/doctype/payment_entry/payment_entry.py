@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import ValidationError, _, scrub, throw
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
-from six import iteritems, string_types
 
 import erpnext
 from erpnext.accounts.doctype.bank_account.bank_account import (
@@ -205,7 +202,7 @@ class PaymentEntry(AccountsController):
 				ref_details = get_reference_details(d.reference_doctype,
 					d.reference_name, self.party_account_currency)
 
-				for field, value in iteritems(ref_details):
+				for field, value in ref_details.items():
 					if d.exchange_gain_loss:
 						# for cases where gain/loss is booked into invoice
 						# exchange_gain_loss is calculated from invoice & populated
@@ -389,7 +386,7 @@ class PaymentEntry(AccountsController):
 						invoice_paid_amount_map[invoice_key]['outstanding'] = term.outstanding
 						invoice_paid_amount_map[invoice_key]['discounted_amt'] = ref.total_amount * (term.discount / 100)
 
-		for idx, (key, allocated_amount) in enumerate(iteritems(invoice_payment_amount_map), 1):
+		for idx, (key, allocated_amount) in enumerate(invoice_payment_amount_map.items(), 1):
 			if not invoice_paid_amount_map.get(key):
 				frappe.throw(_('Payment term {0} not used in {1}').format(key[0], key[1]))
 
@@ -914,7 +911,7 @@ class PaymentEntry(AccountsController):
 		self.paid_amount_after_tax = self.paid_amount
 
 	def determine_exclusive_rate(self):
-		if not any((cint(tax.included_in_paid_amount) for tax in self.get("taxes"))):
+		if not any(cint(tax.included_in_paid_amount) for tax in self.get("taxes")):
 			return
 
 		cumulated_tax_fraction = 0
@@ -1034,7 +1031,7 @@ def validate_inclusive_tax(tax, doc):
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
 
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	if args.get('party_type') == 'Member':
