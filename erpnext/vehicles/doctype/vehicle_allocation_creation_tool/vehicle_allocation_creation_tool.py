@@ -25,7 +25,7 @@ class VehicleAllocationCreationTool(Document):
 			doc.code = d.code
 			doc.sr_no = d.sr_no
 			doc.is_additional = self.is_additional
-			doc.booking_price = d.booking_price
+			doc.booking_price = d.booking_price or 'Standard'
 			doc.vehicle_color = d.vehicle_color
 
 			doc.insert()
