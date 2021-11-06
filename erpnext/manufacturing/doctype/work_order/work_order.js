@@ -120,7 +120,7 @@ frappe.ui.form.on("Work Order", {
 			erpnext.work_order.set_default_warehouse(frm);
 		}
 
-		if(frm.fields_dict["operations"].get_value().length == 0){
+		if (frm.fields_dict["operations"].get_value().length == 0) {
 			frm.fields_dict["operations_section"].collapse();
 		}
 	},
@@ -446,14 +446,14 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.calculate_total_cost(frm);
 	},
 
-	onload_post_render: function(frm){
-		if(frm.doc.transfer_material_against == "Job Card"){
+	onload_post_render: function(frm) {
+		if (frm.doc.transfer_material_against == "Job Card") {
 			frappe.msgprint(__("Please add an operation in required items table"));
 		}
 	},
 
-	transfer_material_against: function(frm){
-		if(frm.doc.transfer_material_against == "Job Card"){
+	transfer_material_against: function(frm) {
+		if (frm.doc.transfer_material_against == "Job Card") {
 			frappe.msgprint(__("Please add an operation in required items table"));
 		}
 	}

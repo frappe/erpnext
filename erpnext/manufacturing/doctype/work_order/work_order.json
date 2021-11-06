@@ -182,7 +182,6 @@
    "reqd": 1
   },
   {
-   "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Qty To Manufacture",
@@ -330,8 +329,7 @@
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
-   "options": "fa fa-wrench",
-   "set_only_once": 1
+   "options": "fa fa-wrench"
   },
   {
    "default": "Work Order",
@@ -575,7 +573,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-03 11:02:58.427166",
+ "modified": "2021-11-06 14:53:34.321216",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
