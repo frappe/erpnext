@@ -170,9 +170,10 @@ class PaymentEntry(AccountsController):
 
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
-
-			_party_name = "title" if self.party_type in ("Student", "Shareholder") else self.party_type.lower() + "_name"
-			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
+			
+			if not self.party_name:
+				_party_name = "title" if self.party_type in ("Student", "Shareholder") else self.party_type.lower() + "_name"
+				self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
 			if not self.party_balance:
