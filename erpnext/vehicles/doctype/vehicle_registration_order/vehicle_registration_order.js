@@ -137,10 +137,9 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			}
 
 			// Primary Button
-			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.authority_outstanding) > 0
-				|| flt(this.frm.doc.agent_balance) > 0;
+			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.authority_outstanding) > 0;
 
-			if (unpaid) {
+			if (unpaid || this.frm.doc.status == "To Pay Agent") {
 				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
 			} else if (this.frm.doc.status == "To Issue Invoice" && this.frm.doc.vehicle) {
 				this.frm.custom_buttons[__('Issue Invoice')] && this.frm.custom_buttons[__('Issue Invoice')].addClass('btn-primary');
