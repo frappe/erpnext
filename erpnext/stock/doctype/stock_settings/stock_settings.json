@@ -294,6 +294,7 @@
   },
   {
    "default": "0",
+   "depends_on": "auto_insert_price_list_rate_if_missing",
    "fieldname": "update_existing_price_list_rate",
    "fieldtype": "Check",
    "label": "Update Existing Price List Rate"
