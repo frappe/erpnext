@@ -508,27 +508,27 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.status = "Cancelled"
 
 		elif self.docstatus == 1:
-			if self.customer_outstanding > 0:
+			if self.invoice_status == "Not Received":
+				self.status = "To Receive Invoice"
+
+			elif self.customer_outstanding > 0:
 				self.status = "To Receive Payment"
 
 			elif self.authority_outstanding > 0:
-					self.status = "To Pay Authority"
+				self.status = "To Pay Authority"
 
 			elif not self.vehicle_license_plate:
-				if self.invoice_status == "Not Received":
-					self.status = "To Receive Invoice"
-
-				elif self.invoice_status == "In Hand" and not self.invoice_issue_date:
+				if self.invoice_status == "In Hand" and not self.invoice_issue_date:
 					self.status = "To Issue Invoice"
 
 				else:
 					self.status = "To Receive Receipt"
 			else:
-				if self.invoice_status == "Issued":
-					self.status = "To Retrieve Invoice"
-
-				elif self.is_unclosed(ignore_agent_balance=True):
+				if self.is_unclosed(ignore_agent_balance=True):
 					self.status = "To Close Accounts"
+
+				elif self.invoice_status == "Issued":
+					self.status = "To Retrieve Invoice"
 
 				elif self.invoice_status == "In Hand":
 					self.status = "To Deliver Invoice"
