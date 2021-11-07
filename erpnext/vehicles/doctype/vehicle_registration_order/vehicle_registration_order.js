@@ -120,9 +120,11 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				}
 
 				// Invoice
-				if (this.frm.doc.invoice_status == "In Hand" && !this.frm.doc.vehicle_license_plate) {
+				if (this.frm.doc.invoice_status == "In Hand") {
 					this.frm.add_custom_button(__('Issue Invoice'), () => this.make_invoice_movement('Issue'));
-				} else if (this.frm.doc.invoice_status == "Issued") {
+				}
+
+				if (this.frm.doc.invoice_status == "Issued") {
 					this.frm.add_custom_button(__('Retrieve Invoice'), () => this.make_invoice_movement('Return'));
 				} else if (this.frm.doc.invoice_status === "In Hand" && this.frm.doc.vehicle_license_plate) {
 					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_invoice_delivery());
