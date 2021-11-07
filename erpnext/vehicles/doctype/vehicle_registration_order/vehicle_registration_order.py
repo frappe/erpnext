@@ -29,7 +29,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 	def validate(self):
 		super(VehicleRegistrationOrder, self).validate()
 		self.validate_duplicate_registration_order()
-		self.validate_vehicle_unregistered()
 
 		self.validate_common()
 

@@ -44,7 +44,6 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			if (me.frm.doc.item_code) {
 				filters['item_code'] = me.frm.doc.item_code;
 			}
-			filters['license_plate'] = ['is', 'not set'];
 
 			return {
 				filters: filters
