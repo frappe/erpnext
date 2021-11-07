@@ -1,0 +1,39 @@
+{
+ "creation": "2021-11-07 23:19:45.536030",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_name",
+  "is_included"
+ ],
+ "fields": [
+  {
+   "columns": 8,
+   "fieldname": "document_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Document Name",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "default": "1",
+   "fieldname": "is_included",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Included"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-11-07 23:24:34.214357",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Invoice Document",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

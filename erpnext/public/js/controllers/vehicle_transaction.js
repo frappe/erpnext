@@ -247,7 +247,11 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 			},
 			callback: function (r) {
 				if (r.message && !r.exc) {
-					frappe.model.set_value(doc.doctype, doc.name, r.message);
+					if (doc == me.frm.doc) {
+						me.frm.set_value(r.message);
+					} else {
+						frappe.model.set_value(doc.doctype, doc.name, r.message);
+					}
 				}
 			}
 		});

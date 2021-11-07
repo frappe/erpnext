@@ -1,0 +1,48 @@
+{
+ "creation": "2021-11-07 23:40:23.696371",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_name",
+  "is_included",
+  "if_registered"
+ ],
+ "fields": [
+  {
+   "columns": 8,
+   "fieldname": "document_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Document Name",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "default": "1",
+   "fieldname": "is_included",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Included"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "if_registered",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "If Registered"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-11-07 23:40:59.561061",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Invoice Document Template",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

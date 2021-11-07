@@ -71,3 +71,21 @@ class VehicleInvoiceDelivery(VehicleTransactionController):
 		if not self.vehicle_invoice:
 			frappe.throw(_("Invoice for {0} has not yet been received")
 				.format(frappe.get_desk_link('Vehicle', self.vehicle)))
+
+
+@frappe.whitelist()
+def get_default_documents(vehicle_details):
+	out = []
+
+	settings = frappe.get_cached_doc("Vehicles Settings", None)
+	for d in settings.get('invoice_documents'):
+		row = frappe._dict({
+			'document_name': d.document_name,
+			'is_included': d.is_included,
+		})
+		if d.if_registered and not vehicle_details.license_plate:
+			row.is_included = 0
+
+		out.append(row)
+
+	return out

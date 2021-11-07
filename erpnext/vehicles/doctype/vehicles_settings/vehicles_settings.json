@@ -35,7 +35,9 @@
   "role_cancel_booking",
   "column_break_14",
   "minimum_lead_time_days",
-  "maximum_payment_adjustment"
+  "maximum_payment_adjustment",
+  "default_vehicle_invoice_documents_section",
+  "invoice_documents"
  ],
  "fields": [
   {
@@ -203,11 +205,22 @@
   {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_vehicle_invoice_documents_section",
+   "fieldtype": "Section Break",
+   "label": "Default Vehicle Invoice Documents"
+  },
+  {
+   "fieldname": "invoice_documents",
+   "fieldtype": "Table",
+   "label": "Invoice Documents",
+   "options": "Vehicle Invoice Document Template"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-10-14 14:33:48.687005",
+ "modified": "2021-11-07 23:40:47.181534",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

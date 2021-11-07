@@ -699,6 +699,10 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 		out.vehicle_registration_order = get_vehicle_registration_order(vehicle=args.vehicle)
 		out.update(get_vehicle_registration_order_details(out.vehicle_registration_order))
 
+	if args.doctype == "Vehicle Invoice Delivery":
+		from erpnext.vehicles.doctype.vehicle_invoice_delivery.vehicle_invoice_delivery import get_default_documents
+		out.documents = get_default_documents(vehicle_details)
+
 	if warn_reserved and args.doctype == "Vehicle Delivery":
 		warn_vehicle_reserved(args.vehicle, args.customer)
 
