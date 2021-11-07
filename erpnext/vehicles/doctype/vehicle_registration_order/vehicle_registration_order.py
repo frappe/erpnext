@@ -623,13 +623,19 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		if unclosed_customer_amount:
 			add_journal_entry_row(jv, unclosed_customer_amount, vro.customer_account, 'Customer', vro.customer, vro.name)
 		if unclosed_agent_amount:
-			add_journal_entry_row(jv, -1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent, vro.name)
+			if not flt(vro.agent_closed_amount):
+				add_journal_entry_row(jv, -1 * vro.agent_commission, vro.agent_account, 'Supplier', vro.agent, vro.name)
+				add_journal_entry_row(jv, -1 * vro.agent_license_plate_charges, vro.agent_account, 'Supplier', vro.agent,
+					vro.name, remarks=_("Number Plate Charges"))
+			else:
+				add_journal_entry_row(jv, -1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent, vro.name)
 		if unclosed_income_amount:
 			registration_income_account = frappe.get_cached_value("Vehicles Settings", None, 'registration_income_account')
 			add_journal_entry_row(jv, -1 * unclosed_income_amount, registration_income_account)
 	else:
 		frappe.throw(_("Invalid Purpose"))
 
+	jv.set_exchange_rate()
 	jv.set_amounts_in_company_currency()
 	jv.set_total_debit_credit()
 	jv.set_party_name()
@@ -687,13 +693,15 @@ def get_agent_payment_voucher(names):
 	return jv
 
 
-def add_journal_entry_row(jv, amount, account=None, party_type=None, party=None, vehicle_registration_order=None):
+def add_journal_entry_row(jv, amount, account=None, party_type=None, party=None, vehicle_registration_order=None,
+		remarks=None):
 	row = jv.append('accounts')
 	row.account = account
 	row.debit_in_account_currency = flt(amount) if flt(amount) > 0 else 0
 	row.credit_in_account_currency = -flt(amount) if flt(amount) < 0 else 0
 	row.party_type = party_type
 	row.party = party
+	row.user_remark = remarks
 
 	if vehicle_registration_order:
 		row.reference_type = "Vehicle Registration Order"
