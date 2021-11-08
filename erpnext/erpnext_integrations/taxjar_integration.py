@@ -19,6 +19,8 @@ SUPPORTED_STATE_CODES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', '
 	'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE',
 	'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD',
 	'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+USA_COMPANIES = frappe.get_all('Company', filters = {'country': 'United States'}, fields=['name'], pluck='name')
+
 
 
 def get_client():
@@ -156,6 +158,10 @@ def get_line_item_dict(item, docstatus):
 
 def set_sales_tax(doc, method):
 	if not TAXJAR_CALCULATE_TAX:
+		return
+
+	taxjar_settings_company = frappe.db.get_single_value('TaxJar Settings','current_company')
+	if taxjar_settings_company not in USA_COMPANIES:
 		return
 
 	if not doc.items:
