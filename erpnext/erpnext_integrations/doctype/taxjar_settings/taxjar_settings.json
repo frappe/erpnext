@@ -14,7 +14,6 @@
   "cb_keys",
   "sandbox_api_key",
   "configuration",
-  "current_company",
   "column_break_10",
   "tax_account_head",
   "configuration_cb",
@@ -104,12 +103,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "current_company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company"
-  },
-  {
    "fieldname": "configuration_cb",
    "fieldtype": "Column Break"
   },
@@ -120,7 +113,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-11-08 14:40:15.684224",
+ "modified": "2021-11-08 17:57:17.323275",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "TaxJar Settings",
