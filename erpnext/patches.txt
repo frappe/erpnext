@@ -283,12 +283,8 @@ erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.einvoicing_deprecation_warning
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
-<<<<<<< HEAD
-erpnext.patches.v13_0.custom_fields_for_taxjar_integration
 erpnext.patches.v14_0.delete_einvoicing_doctypes
-=======
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
->>>>>>> 7f2d304f32 (fix: fixed company field, updated patch)
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.create_gst_payment_entry_fields
