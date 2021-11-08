@@ -159,7 +159,7 @@ def set_sales_tax(doc, method):
 	if not TAXJAR_CALCULATE_TAX:
 		return
 
-	if get_region(doc.company):
+	if get_region(doc.company) != 'United States':
 		return
 
 	if not doc.items:
