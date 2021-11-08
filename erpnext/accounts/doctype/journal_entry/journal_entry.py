@@ -521,7 +521,7 @@ class JournalEntry(AccountsController):
 
 	def set_exchange_rate(self):
 		for d in self.get("accounts"):
-			if d.account_currency == self.company_currency:
+			if d.account_currency == self.company_currency or not d.account:
 				d.exchange_rate = 1
 			elif not d.exchange_rate or d.exchange_rate == 1 \
 				or (d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name and self.posting_date) \
