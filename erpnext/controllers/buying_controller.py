@@ -361,17 +361,12 @@ class BuyingController(StockController, Subcontracting):
 	def validate_accepted_rejected_qty(self):
 		for d in self.get("items"):
 			self.validate_negative_quantity(d, ["received_qty","qty", "rejected_qty"])
-			if not flt(d.received_qty) and flt(d.qty):
-				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
 
-			elif not flt(d.qty) and flt(d.rejected_qty):
-				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
+			if not flt(d.received_qty) and (flt(d.qty) or flt(d.rejected_qty)):
+				d.received_qty = flt(d.qty) + flt(d.rejected_qty)
 
-			elif not flt(d.rejected_qty):
-				d.rejected_qty = flt(d.received_qty) -  flt(d.qty)
-
-			val  = flt(d.qty) + flt(d.rejected_qty)
 			# Check Received Qty = Accepted Qty + Rejected Qty
+			val  = flt(d.qty) + flt(d.rejected_qty)
 			if (flt(val, d.precision("received_qty")) != flt(d.received_qty, d.precision("received_qty"))):
 				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
 
