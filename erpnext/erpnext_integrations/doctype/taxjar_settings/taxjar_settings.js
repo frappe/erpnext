@@ -11,14 +11,14 @@ frappe.ui.form.on('TaxJar Settings', {
 		frm.set_query('shipping_account_head', function() {
 			return {
 				filters: {
-					'company': frm.doc.current_company
+					'company': frm.doc.company
 				}
 			};
 		});
 		frm.set_query('tax_account_head', function() {
 			return {
 				filters: {
-					'company': frm.doc.current_company
+					'company': frm.doc.company
 				}
 			};
 		});

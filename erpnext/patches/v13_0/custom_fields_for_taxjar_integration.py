@@ -30,7 +30,7 @@ def execute():
 				label='Product Tax Category')
 		],
 		'TaxJar Settings': [
-			dict(fieldname='current_company', fieldtype='Link', insert_after='configuration', options='Company',
+			dict(fieldname='company', fieldtype='Link', insert_after='configuration', options='Company',
 				label='Company')
 		]
 	}
