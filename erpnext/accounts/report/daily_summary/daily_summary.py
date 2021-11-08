@@ -26,7 +26,7 @@ def return_data(filters):
 			register = salary_slip.creation_date
 			dates.append(register)
 		else:
-			new_date = False
+			new_date = False	
 			if salary_slip.creation_date in dates:
 				new_date = False
 			else:
@@ -283,7 +283,7 @@ def return_filters(filters, from_date, to_date):
 	conditions = ''	
 
 	conditions += "{"
-	conditions += '"creation_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += '}'
 
