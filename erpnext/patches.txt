@@ -331,3 +331,9 @@ erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v12_0.update_production_plan_status
 erpnext.patches.v13_0.update_category_in_ltds_certificate
+<<<<<<< HEAD
+=======
+erpnext.patches.v13_0.create_pan_field_for_india #2
+erpnext.patches.v14_0.delete_hub_doctypes
+erpnext.patches.v13_0.create_ksa_vat_custom_fields
+>>>>>>> 508832e90a (fix: Add patch to make custom fields)
