@@ -28,6 +28,10 @@ def execute():
 		'Item': [
 			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='item_group', options='Product Tax Category',
 				label='Product Tax Category')
+		],
+		'TaxJar Settings': [
+			dict(fieldname='current_company', fieldtype='Link', insert_after='configuration', options='Company',
+				label='Company')
 		]
 	}
 	create_custom_fields(custom_fields, update=True)
