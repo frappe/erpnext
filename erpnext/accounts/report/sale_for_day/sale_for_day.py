@@ -55,7 +55,7 @@ def return_data(filters):
 		cont = 0
 
 		for salary_slip in salary_slips:
-			date_validate = salary_slip.creation_date.strftime('%Y-%m-%d')
+			date_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
 			if date == date_validate and salary_slip.status != "Return":
 				if cont == 0:
 					split_initial_range = salary_slip.name.split("-")

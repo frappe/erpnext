@@ -23,14 +23,14 @@ def return_data(filters):
 
 	for salary_slip in salary_slips:
 		if len(dates) == 0:
-			register = salary_slip.creation_date
+			register = salary_slip.posting_date
 			dates.append(register)
 		else:
 			new_date = False	
-			if salary_slip.creation_date in dates:
+			if salary_slip.posting_date in dates:
 				new_date = False
 			else:
-				register = salary_slip.creation_date
+				register = salary_slip.posting_date
 				dates.append(register)
 
 	dates_reverse = sorted(dates, reverse=False)
@@ -55,7 +55,7 @@ def return_data(filters):
 			split_serie = salary_slip.naming_series.split('-')
 			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
 				
-			if date == salary_slip.creation_date and serie_number == serie and salary_slip.status != "Return":
+			if date == salary_slip.posting_date and serie_number == serie and salary_slip.status != "Return":
 				if cont == 0:
 					split_initial_range = salary_slip.name.split("-")
 					initial_range = split_initial_range[3]
