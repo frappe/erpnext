@@ -21,9 +21,9 @@ def execute():
 			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='description', options='Product Tax Category',
 				label='Product Tax Category', fetch_from='item_code.product_tax_category'),
 			dict(fieldname='tax_collectable', fieldtype='Currency', insert_after='net_amount',
-				label='Tax Collectable', read_only=1),
+				label='Tax Collectable', read_only=1, options='currency'),
 			dict(fieldname='taxable_amount', fieldtype='Currency', insert_after='tax_collectable',
-				label='Taxable Amount', read_only=1)
+				label='Taxable Amount', read_only=1, options='currency')
 		],
 		'Item': [
 			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='item_group', options='Product Tax Category',
