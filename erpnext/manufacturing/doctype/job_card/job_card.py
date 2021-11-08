@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
@@ -605,7 +604,8 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"required_qty": "qty",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"name": "job_card_item"
 			},
 			"postprocess": update_item,
 		}

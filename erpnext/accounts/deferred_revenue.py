@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import frappe
 from frappe import _
 from frappe.email import sendmail_to_system_managers
