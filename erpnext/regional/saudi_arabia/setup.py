@@ -6,13 +6,12 @@ import frappe
 from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.united_arab_emirates.setup import make_custom_fields as uae_custom_fields, add_print_formats
 from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import create_ksa_vat_setting
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def setup(company=None, patch=True):
 	uae_custom_fields()
 	add_print_formats()
 	add_permissions()
-	create_ksa_vat_setting(company)
 	make_custom_fields()
 
 def add_permissions():
@@ -32,28 +31,34 @@ def make_custom_fields():
 	- Company Name in Arabic
 	- Address in Arabic
 	"""
-	qr_code = dict(
-		fieldname='qr_code',
-		label='QR Code',
-		fieldtype='Attach Image',
-		read_only=1, no_copy=1, hidden=1)
+	custom_fields = {
+		'Sales Invoice': [
+			dict(
+				fieldname='qr_code',
+				label='QR Code',
+				fieldtype='Attach Image',
+				read_only=1, no_copy=1, hidden=1
+			)
+		],
+		'Address': [
+			dict(
+				fieldname='address_in_arabic',
+				label='Address in Arabic',
+				fieldtype='Data',
+				insert_after='address_line2'
+			)
+		],
+		'Company': [
+			dict(
+				fieldname='company_name_in_arabic',
+				label='Company Name In Arabic',
+				fieldtype='Data',
+				insert_after='company_name'
+			)
+		]
+	}
 
-	create_custom_field('Sales Invoice', qr_code)
+	create_custom_fields(custom_fields, update=True)
 
-	company_name_in_arabic = dict(
-		fieldname='company_name_in_arabic',
-		label='Company Name In Arabic',
-		fieldtype='Data',
-		insert_after='company_name'
-	)
-
-	create_custom_field('Company', company_name_in_arabic)
-
-	address_in_arabic = dict(
-		fieldname='address_in_arabic',
-		label='Address in Arabic',
-		fieldtype='Data',
-		insert_after='address_line2'
-	)
-
-	create_custom_field('Address', address_in_arabic)
+def update_regional_tax_settings(country, company):
+	create_ksa_vat_setting(company)
