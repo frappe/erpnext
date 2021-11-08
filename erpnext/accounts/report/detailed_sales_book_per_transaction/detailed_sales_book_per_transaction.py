@@ -21,7 +21,7 @@ def return_data(filters):
 	salary_slips = frappe.get_all("Sales Invoice", ["name", "status","creation_date", "rtn", "client_name", "cai", "naming_series", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = conditions, order_by = "name asc")	
 
 	for salary_slip in salary_slips:
-		split_date = str(salary_slip.creation_date).split("T")[0].split("-")
+		split_date = str(salary_slip.posting_date).split("T")[0].split("-")
 		posting_date = "-".join(reversed(split_date))
 		serie_number = filters.get("prefix")	
 		type_transaction = "FAC"
@@ -57,7 +57,7 @@ def return_data(filters):
 			data.append(row)
 	
 	for salary_slip in salary_slips:
-		split_date = str(salary_slip.creation_date).split("T")[0].split("-")
+		split_date = str(salary_slip.posting_date).split("T")[0].split("-")
 		posting_date = "-".join(reversed(split_date))
 		serie_number = filters.get("prefix")	
 		type_transaction = "DEV"
