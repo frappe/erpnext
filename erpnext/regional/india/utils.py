@@ -443,7 +443,7 @@ def get_ewb_data(dt, dn):
 		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
 		data.itemList = []
-		data.totalValue = doc.total
+		data.totalValue = doc.net_total
 
 		data = get_item_list(data, doc, hsn_wise=True)
 
