@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
-import six
 from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
@@ -284,7 +281,7 @@ def unconsolidate_pos_invoices(closing_entry):
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	try:
-		for customer, invoices in six.iteritems(invoice_by_customer):
+		for customer, invoices in invoice_by_customer.items():
 			merge_log = frappe.new_doc('POS Invoice Merge Log')
 			merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
 			merge_log.customer = customer

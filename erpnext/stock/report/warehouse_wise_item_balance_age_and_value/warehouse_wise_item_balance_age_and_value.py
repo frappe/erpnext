@@ -4,12 +4,10 @@
 # Copyright (c) 2013, Tristar Enterprises and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import flt
-from six import iteritems
 
 from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
 from erpnext.stock.report.stock_balance.stock_balance import (
@@ -57,7 +55,7 @@ def execute(filters=None):
 
 
 	# sum bal_qty by item
-	for (item, item_group), wh_balance in iteritems(item_balance):
+	for (item, item_group), wh_balance in item_balance.items():
 		if not item_ageing.get(item):  continue
 
 		total_stock_value = sum(item_value[(item, item_group)])
