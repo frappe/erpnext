@@ -262,7 +262,7 @@ def get_shipping_address_details(doc):
 	if doc.shipping_address_name:
 		shipping_address = frappe.get_doc("Address", doc.shipping_address_name)
 	elif doc.customer_address:
-		shipping_address = frappe.get_doc("Address", doc.customer_address_name)
+		shipping_address = frappe.get_doc("Address", doc.customer_address)
 	else:
 		shipping_address = get_company_address_details(doc)
 
