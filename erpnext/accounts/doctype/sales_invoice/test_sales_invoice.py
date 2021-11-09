@@ -815,6 +815,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 60})
 
 		pos.change_amount = 5.0
+		pos.write_off_outstanding_amount_automatically = 1
 		pos.insert()
 		pos.submit()
 
