@@ -1491,6 +1491,16 @@ class StockEntry(StockController):
 				item_row = d.as_dict()
 				item_row["idx"] = len(item_dict) + 1
 
+				if consider_job_card:
+					job_card_item = frappe.db.get_value(
+						"Job Card Item",
+						{
+							"item_code": d.item_code,
+							"parent": self.get("job_card")
+						}
+					)
+					item_row["job_card_item"] = job_card_item or None
+
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 					item_row["from_warehouse"] = d.source_warehouse
 
@@ -1518,27 +1528,28 @@ class StockEntry(StockController):
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		for d in item_dict:
-			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
+			item_row = item_dict[d]
+			stock_uom = item_row.get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
 
 			se_child = self.append('items')
-			se_child.s_warehouse = item_dict[d].get("from_warehouse")
-			se_child.t_warehouse = item_dict[d].get("to_warehouse")
-			se_child.item_code = item_dict[d].get('item_code') or cstr(d)
-			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
+			se_child.s_warehouse = item_row.get("from_warehouse")
+			se_child.t_warehouse = item_row.get("to_warehouse")
+			se_child.item_code = item_row.get('item_code') or cstr(d)
+			se_child.uom = item_row["uom"] if item_row.get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
-			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
-			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
-			se_child.subcontracted_item = item_dict[d].get("main_item_code")
-			se_child.cost_center = (item_dict[d].get("cost_center") or
-				get_default_cost_center(item_dict[d], company = self.company))
-			se_child.is_finished_item = item_dict[d].get("is_finished_item", 0)
-			se_child.is_scrap_item = item_dict[d].get("is_scrap_item", 0)
-			se_child.is_process_loss = item_dict[d].get("is_process_loss", 0)
+			se_child.qty = flt(item_row["qty"], se_child.precision("qty"))
+			se_child.allow_alternative_item = item_row.get("allow_alternative_item", 0)
+			se_child.subcontracted_item = item_row.get("main_item_code")
+			se_child.cost_center = (item_row.get("cost_center") or
+				get_default_cost_center(item_row, company = self.company))
+			se_child.is_finished_item = item_row.get("is_finished_item", 0)
+			se_child.is_scrap_item = item_row.get("is_scrap_item", 0)
+			se_child.is_process_loss = item_row.get("is_process_loss", 0)
 
 			for field in ["idx", "po_detail", "original_item", "expense_account",
 				"description", "item_name", "serial_no", "batch_no", "allow_zero_valuation_rate"]:
-				if item_dict[d].get(field):
-					se_child.set(field, item_dict[d].get(field))
+				if item_row.get(field):
+					se_child.set(field, item_row.get(field))
 
 			if se_child.s_warehouse==None:
 				se_child.s_warehouse = self.from_warehouse
@@ -1546,12 +1557,11 @@ class StockEntry(StockController):
 				se_child.t_warehouse = self.to_warehouse
 
 			# in stock uom
-			se_child.conversion_factor = flt(item_dict[d].get("conversion_factor")) or 1
-			se_child.transfer_qty = flt(item_dict[d]["qty"]*se_child.conversion_factor, se_child.precision("qty"))
+			se_child.conversion_factor = flt(item_row.get("conversion_factor")) or 1
+			se_child.transfer_qty = flt(item_row["qty"]*se_child.conversion_factor, se_child.precision("qty"))
 
-
-			# to be assigned for finished item
-			se_child.bom_no = bom_no
+			se_child.bom_no = bom_no # to be assigned for finished item
+			se_child.job_card_item = item_row.get("job_card_item") if self.get("job_card") else None
 
 	def validate_with_material_request(self):
 		for item in self.get("items"):
