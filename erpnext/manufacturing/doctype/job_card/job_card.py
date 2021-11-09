@@ -45,7 +45,6 @@ class JobCard(Document):
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
-		self.set_quality_inspection_template()
 
 	def set_sub_operations(self):
 		if self.operation:
@@ -292,10 +291,6 @@ class JobCard(Document):
 				row.status = 'Pending'
 				row.completed_time = 0.0
 				row.completed_qty = 0.0
-
-	def set_quality_inspection_template(self):
-		qi_template = frappe.db.get_value('Operation',  self.operation,  'quality_inspection_template')
-		self.quality_inspection_template = qi_template
 
 	def update_time_logs(self, row):
 		self.append("time_logs", {

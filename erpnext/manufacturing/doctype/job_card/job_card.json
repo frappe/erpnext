@@ -410,6 +410,7 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "operation.quality_inspection_template",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
    "label": "Quality Inspection Template",
@@ -418,7 +419,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-03 13:46:06.557348",
+ "modified": "2021-11-09 14:07:20.290306",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
