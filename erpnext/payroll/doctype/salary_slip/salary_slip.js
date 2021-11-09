@@ -175,6 +175,18 @@ frappe.ui.form.on("Salary Slip", {
 				}
 			});
 		}
+		if(frm.doc.start_date){
+			frappe.call({
+				method: 'leave_type_encasement_days',
+				doc:frm.doc,
+				callback: function(r) {
+					if(r.message) {
+					frm.set_value('encashment_days', r.message);
+					frm.refresh_field("encashment_days");
+					}
+				}
+			});
+		}
 		if (frm.doc.start_date){
 			frappe.call({
 				method: 'set_days',
