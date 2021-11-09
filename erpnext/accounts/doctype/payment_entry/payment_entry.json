@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-06-01 14:38:51.012597",
@@ -23,6 +22,7 @@
   "party_bank_account",
   "contact_person",
   "contact_email",
+  "reconciled",
   "payment_accounts_section",
   "party_balance",
   "paid_from",
@@ -573,11 +573,17 @@
    "label": "Status",
    "options": "\nDraft\nSubmitted\nCancelled",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reconciled",
+   "fieldtype": "Check",
+   "label": "Reconciled",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-03-26 22:32:30.625920",
+ "modified": "2021-11-09 15:52:50.473958",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
