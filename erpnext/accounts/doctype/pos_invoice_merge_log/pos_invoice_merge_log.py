@@ -235,19 +235,24 @@ def get_all_unconsolidated_invoices():
 
 	return pos_invoices
 
-def get_invoice_customer_map(pos_invoices):
-	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Customer 2' : [{}] }
-	pos_invoice_customer_map = {}
-	for invoice in pos_invoices:
-		customer = invoice.get('customer')
-		pos_invoice_customer_map.setdefault(customer, [])
-		pos_invoice_customer_map[customer].append(invoice)
+def get_invoice_customer_map(pos_invoices, customer = None):
+	if customer:
+		pos_invoice_customer_map = {
+		customer: pos_invoices
+	}
+	else:
+		pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Customer 2' : [{}] }
+		pos_invoice_customer_map = {}
+		for invoice in pos_invoices:
+			customer = invoice.get('customer')
+			pos_invoice_customer_map.setdefault(customer, [])
+			pos_invoice_customer_map[customer].append(invoice)
 
 	return pos_invoice_customer_map
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
 	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
-	invoice_by_customer = get_invoice_customer_map(invoices)
+	invoice_by_customer = get_invoice_customer_map(invoices, frappe.get_doc("POS Profile", closing_entry.pos_profile).customer)
 
 	if len(invoices) >= 10 and closing_entry:
 		closing_entry.set_status(update=True, status='Queued')
