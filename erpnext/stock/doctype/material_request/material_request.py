@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 import json
-
+import math
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
@@ -729,7 +729,7 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 					item = frappe.get_doc("Item", itm.get('item_code'))
 					if item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
 						and projected_qty < qty :
-						result_qty = (qty - projected_qty)/item.staging_multiple
+						result_qty = math.ceil((qty - projected_qty)/item.staging_multiple)
 						if result_qty > 0:
 							qty = result_qty
 							target.qty = result_qty
