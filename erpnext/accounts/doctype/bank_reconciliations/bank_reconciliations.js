@@ -13,5 +13,13 @@ frappe.ui.form.on('Bank reconciliations', {
 				filters: filters
 			};
 		});
+
+		frm.set_query("payment_entry", "payment_entry_detail", function(doc) {
+			var filters = {"docstatus": 1, "bank_account": doc.bank_account, "reconciled": 0};
+
+			return {
+				filters: filters
+			};
+		});
 	},
 });

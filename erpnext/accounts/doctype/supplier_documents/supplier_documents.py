@@ -17,6 +17,8 @@ class SupplierDocuments(Document):
 		self.set_status()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.grand_total = self.outstanding_amount
+			self.db_set('grand_total', self.outstanding_amount, update_modified=False)
 		
 	def on_load(self):
 		self.validate_status()
