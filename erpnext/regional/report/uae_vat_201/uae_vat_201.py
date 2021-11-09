@@ -122,7 +122,7 @@ def get_total_emiratewise(filters):
 	try:
 		return frappe.db.sql("""
 			select
-				s.vat_emirate as emirate, sum(i.base_amount) as total, sum(s.total_taxes_and_charges)
+				s.vat_emirate as emirate, sum(i.base_amount) as total, sum(i.tax_amount)
 			from
 				`tabSales Invoice Item` i inner join `tabSales Invoice` s
 			on

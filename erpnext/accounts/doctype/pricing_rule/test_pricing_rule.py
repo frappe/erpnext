@@ -19,6 +19,7 @@ from erpnext.stock.get_item_details import get_item_details
 class TestPricingRule(unittest.TestCase):
 	def setUp(self):
 		delete_existing_pricing_rules()
+		setup_pricing_rule_data()
 
 	def tearDown(self):
 		delete_existing_pricing_rules()
@@ -561,6 +562,8 @@ class TestPricingRule(unittest.TestCase):
 		for doc in [si, si1]:
 			doc.delete()
 
+test_dependencies = ["Campaign"]
+
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
 
@@ -607,6 +610,13 @@ def make_pricing_rule(**args):
 	if args.get(applicable_for):
 		doc.db_set(applicable_for, args.get(applicable_for))
 
+def setup_pricing_rule_data():
+	if not frappe.db.exists('Campaign', '_Test Campaign'):
+		frappe.get_doc({
+			'doctype': 'Campaign',
+			'campaign_name': '_Test Campaign',
+			'name': '_Test Campaign'
+		}).insert()
 
 def delete_existing_pricing_rules():
 	for doctype in ["Pricing Rule", "Pricing Rule Item Code",
