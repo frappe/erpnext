@@ -110,6 +110,10 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		this.frm.refresh_field("base_paid_amount");
 	}
 
+	paid_amount(){
+		this.write_off_outstanding_amount_automatically()
+	}
+
 	write_off_outstanding_amount_automatically() {
 		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);

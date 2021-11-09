@@ -116,6 +116,8 @@ class POSInvoiceMergeLog(Document):
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
 		rounding_adjustment, base_rounding_adjustment = 0, 0
 		rounded_total, base_rounded_total = 0, 0
+		write_off_amount, base_write_off_amount = 0, 0
+
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
 
@@ -147,6 +149,7 @@ class POSInvoiceMergeLog(Document):
 						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
 						update_item_wise_tax_detail(t, tax)
 						found = True
+
 				if not found:
 					tax.charge_type = 'Actual'
 					tax.included_in_print_rate = 0
@@ -162,13 +165,17 @@ class POSInvoiceMergeLog(Document):
 						pay.amount = flt(pay.amount) + flt(payment.amount)
 						pay.base_amount = flt(pay.base_amount) + flt(payment.base_amount)
 						found = True
+
 				if not found:
 					payments.append(payment)
-			rounding_adjustment += doc.rounding_adjustment
-			rounded_total += doc.rounded_total
-			base_rounding_adjustment += doc.rounding_adjustment
-			base_rounded_total += doc.rounded_total
 
+			rounding_adjustment += flt(doc.rounding_adjustment)
+			rounded_total += flt(doc.rounded_total)
+			base_rounding_adjustment += flt(doc.base_rounding_adjustment)
+			base_rounded_total += flt(doc.base_rounded_total)
+
+			write_off_amount += flt(doc.write_off_amount)
+			base_write_off_amount += flt(doc.base_write_off_amount)
 
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
@@ -178,10 +185,18 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('items', items)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
-		invoice.set('rounding_adjustment',rounding_adjustment)
-		invoice.set('rounding_adjustment',base_rounding_adjustment)
-		invoice.set('base_rounded_total',base_rounded_total)
-		invoice.set('rounded_total',rounded_total)
+		invoice.set('rounding_adjustment', rounding_adjustment)
+		invoice.set('rounding_adjustment', base_rounding_adjustment)
+		invoice.set('base_rounded_total', base_rounded_total)
+		invoice.set('rounded_total', rounded_total)
+
+
+		invoice.set('write_off_outstanding_amount_automatically', 1)
+		invoice.set('write_off_amount', write_off_amount)
+		invoice.set('base_write_off_amount', base_write_off_amount)
+		invoice.set('write_off_account', doc.write_off_account)
+		invoice.set('write_off_cost_center', doc.write_off_cost_center)
+
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None

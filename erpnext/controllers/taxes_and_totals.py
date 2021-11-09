@@ -654,10 +654,14 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_write_off_amount(self):
 		if cint(self.doc.get('write_off_outstanding_amount_automatically')):
-			self.doc.write_off_amount = flt(self.doc.grand_total - self.doc.paid_amount
-				+ self.doc.change_amount, self.doc.precision("write_off_amount"))
-			self.doc.base_write_off_amount = flt(self.doc.write_off_amount * self.doc.conversion_rate,
-				self.doc.precision("base_write_off_amount"))
+			self.doc.write_off_amount = flt(
+				flt(self.doc.grand_total)
+				- flt(self.doc.paid_amount)
+				+ flt(self.doc.change_amount), self.doc.precision("write_off_amount"))
+
+			self.doc.base_write_off_amount = flt(
+				flt(self.doc.write_off_amount)
+				* flt(self.doc.conversion_rate), self.doc.precision("base_write_off_amount"))
 
 	def calculate_margin(self, item):
 		rate_with_margin = 0.0
