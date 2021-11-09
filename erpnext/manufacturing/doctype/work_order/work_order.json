@@ -99,7 +99,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nCancelled",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nClosed\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
