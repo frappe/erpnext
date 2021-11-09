@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -177,7 +176,7 @@ class calculate_taxes_and_totals(object):
 			self.doc.round_floats_in(tax)
 
 	def determine_exclusive_rate(self):
-		if not any((cint(tax.included_in_print_rate) for tax in self.doc.get("taxes"))):
+		if not any(cint(tax.included_in_print_rate) for tax in self.doc.get("taxes")):
 			return
 
 		for item in self.doc.get("items"):

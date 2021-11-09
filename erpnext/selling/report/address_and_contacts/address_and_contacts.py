@@ -1,11 +1,8 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
-from six import iteritems
-from six.moves import range
 
 field_map = {
 	"Contact": [ "first_name", "last_name", "phone", "mobile_no", "email_id", "is_primary_contact" ],
@@ -67,7 +64,7 @@ def get_party_addresses_and_contact(party_type, party, party_group):
 	party_details = get_party_details(party_type, party_list, "Address", party_details)
 	party_details = get_party_details(party_type, party_list, "Contact", party_details)
 
-	for party, details in iteritems(party_details):
+	for party, details in party_details.items():
 		addresses = details.get("address", [])
 		contacts  = details.get("contact", [])
 		if not any([addresses, contacts]):
