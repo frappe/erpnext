@@ -45,14 +45,7 @@ class JobCard(Document):
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
-<<<<<<< HEAD
-<<<<<<< HEAD
 		self.validate_work_order()
-=======
-		self.set_quality_inspection_template()
->>>>>>> 6c45f8b2c4 (feat: provision to have limited parameters for in-process quality inspection)
-=======
->>>>>>> 467324c87f (refactor: use fetch from property for qi template on job card)
 
 	def set_sub_operations(self):
 		if self.operation:
