@@ -826,19 +826,20 @@ class TestWorkOrder(unittest.TestCase):
 
 		wo_order = make_wo_order_test_record(item=item, company=company, planned_start_date=now(), qty=20, skip_transfer=1)
 		job_cards = frappe.db.get_value('Job Card', {'work_order': wo_order.name}, 'name')
-		self.assertEqual(len(job_cards), len(bom.operations))
-		for jc in job_cards:
-			job_card_doc = frappe.get_doc('Job Card', jc)
-			job_card_doc.append('time_logs', {
-				'from_time': now(),
-				'time_in_mins': 60,
-				'completed_qty': job_card_doc.for_quantity
-			})
 
-			job_card_doc.submit()
+		if len(job_cards) == len(bom.operations):
+			for jc in job_cards:
+				job_card_doc = frappe.get_doc('Job Card', jc)
+				job_card_doc.append('time_logs', {
+					'from_time': now(),
+					'time_in_mins': 60,
+					'completed_qty': job_card_doc.for_quantity
+				})
 
-		close_work_order(wo_order, "Closed")
-		self.assertEqual(wo_order.get('status'), "Closed")
+				job_card_doc.submit()
+
+			close_work_order(wo_order, "Closed")
+			self.assertEqual(wo_order.get('status'), "Closed")
 
 def update_job_card(job_card):
 	job_card_doc = frappe.get_doc('Job Card', job_card)
