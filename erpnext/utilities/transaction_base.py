@@ -1,13 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 import frappe.share
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_time, now_datetime
-from six import string_types
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -179,7 +177,7 @@ def delete_events(ref_type, ref_name):
 		frappe.delete_doc("Event", events, for_reload=True)
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
-	if isinstance(qty_fields, string_types):
+	if isinstance(qty_fields, str):
 		qty_fields = [qty_fields]
 
 	distinct_uoms = list(set(d.get(uom_field) for d in doc.get_all_children()))

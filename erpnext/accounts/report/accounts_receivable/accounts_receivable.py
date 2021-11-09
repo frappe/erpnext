@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd.
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 from collections import OrderedDict
 
