@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 from collections import OrderedDict
 
 import frappe
 from frappe import _, _dict
 from frappe.utils import cstr, flt, getdate
-from six import iteritems
 
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -315,7 +313,7 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	data.append(totals.opening)
 
 	if filters.get("group_by") != 'Group by Voucher (Consolidated)':
-		for acc, acc_dict in iteritems(gle_map):
+		for acc, acc_dict in gle_map.items():
 			# acc
 			if acc_dict.entries:
 				# opening

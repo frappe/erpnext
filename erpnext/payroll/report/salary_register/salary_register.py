@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -135,11 +134,11 @@ def get_ss_earning_map(salary_slips, currency, company_currency):
 
 	ss_earning_map = {}
 	for d in ss_earnings:
-		ss_earning_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
+		ss_earning_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, 0.0)
 		if currency == company_currency:
-			ss_earning_map[d.parent][d.salary_component] = flt(d.amount) * flt(d.exchange_rate if d.exchange_rate else 1)
+			ss_earning_map[d.parent][d.salary_component] += flt(d.amount) * flt(d.exchange_rate if d.exchange_rate else 1)
 		else:
-			ss_earning_map[d.parent][d.salary_component] = flt(d.amount)
+			ss_earning_map[d.parent][d.salary_component] += flt(d.amount)
 
 	return ss_earning_map
 
@@ -150,10 +149,10 @@ def get_ss_ded_map(salary_slips, currency, company_currency):
 
 	ss_ded_map = {}
 	for d in ss_deductions:
-		ss_ded_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
+		ss_ded_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, 0.0)
 		if currency == company_currency:
-			ss_ded_map[d.parent][d.salary_component] = flt(d.amount) * flt(d.exchange_rate if d.exchange_rate else 1)
+			ss_ded_map[d.parent][d.salary_component] += flt(d.amount) * flt(d.exchange_rate if d.exchange_rate else 1)
 		else:
-			ss_ded_map[d.parent][d.salary_component] = flt(d.amount)
+			ss_ded_map[d.parent][d.salary_component] += flt(d.amount)
 
 	return ss_ded_map
