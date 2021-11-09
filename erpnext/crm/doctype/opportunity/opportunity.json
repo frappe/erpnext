@@ -493,7 +493,7 @@
   {
    "fieldname": "lost_detail_section",
    "fieldtype": "Section Break",
-   "label": "Lost Detail"
+   "label": "Lost Reasons"
   },
   {
    "fieldname": "column_break_56",
