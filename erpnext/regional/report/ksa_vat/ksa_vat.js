@@ -49,7 +49,6 @@ frappe.query_reports["KSA VAT"] = {
 				value = $(`<span>${value}</span>`);
 				var $value = $(value).css("font-weight", "bold");
 				value = $value.wrap("<p></p>").parent().html();
-				console.log($value)
 				return value
 			}
 		}else{
