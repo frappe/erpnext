@@ -284,11 +284,17 @@ class TestPOSInvoice(unittest.TestCase):
 		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 50})
 		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 60, 'default': 1})
 
-		pos.insert()
-		pos.submit()
+		pos.save()
 
 		self.assertEqual(pos.grand_total, 105.0)
 		self.assertEqual(pos.change_amount, 5.0)
+
+		pos.change_amount = 0
+		pos.write_off_outstanding_amount_automatically = 1
+		pos.save()
+
+		self.assertEqual(pos.change_amount, 0.0)
+		self.assertEqual(pos.write_off_amount, -5.0)
 
 	def test_without_payment(self):
 		inv = create_pos_invoice(do_not_save=1)
