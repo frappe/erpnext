@@ -172,7 +172,6 @@ class SalarySlip(TransactionBase):
 						and employee = %s and name != %s {0}""".format(cond),
 						(self.start_date, self.end_date, self.employee, self.name))
 			if ret_exist:
-				self.employee = ''
 				frappe.throw(_("Salary Slip of employee {0} already created for this period").format(self.employee))
 		else:
 			for data in self.timesheets:
@@ -630,7 +629,8 @@ class SalarySlip(TransactionBase):
 				get_salary_component_data(additional_salary.component),
 				additional_salary.amount,
 				component_type,
-				additional_salary
+				additional_salary,
+				is_recurring = additional_salary.is_recurring
 			)
 
 	def add_tax_components(self, payroll_period):
@@ -651,7 +651,7 @@ class SalarySlip(TransactionBase):
 			tax_row = get_salary_component_data(d)
 			self.update_component_row(tax_row, tax_amount, "deductions")
 
-	def update_component_row(self, component_data, amount, component_type, additional_salary=None):
+	def update_component_row(self, component_data, amount, component_type, additional_salary=None, is_recurring = 0):
 		component_row = None
 		for d in self.get(component_type):
 			if d.salary_component != component_data.salary_component:
@@ -702,6 +702,7 @@ class SalarySlip(TransactionBase):
 				component_row.default_amount = 0
 				component_row.additional_amount = amount
 
+			component_row.is_recurring_additional_salary = is_recurring
 			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date
@@ -898,25 +899,33 @@ class SalarySlip(TransactionBase):
 					amount, additional_amount = earning.default_amount, earning.additional_amount
 
 			if earning.is_tax_applicable:
-				if additional_amount:
-					taxable_earnings += (amount - additional_amount)
-					additional_income += additional_amount
-					if earning.deduct_full_tax_on_selected_payroll_date:
-						additional_income_with_full_tax += additional_amount
-					continue
-
 				if earning.is_flexible_benefit:
 					flexi_benefits += amount
 				else:
-					taxable_earnings += amount
+					taxable_earnings += (amount - additional_amount)
+					additional_income += additional_amount
+
+					# Get additional amount based on future recurring additional salary
+					if additional_amount and earning.is_recurring_additional_salary:
+						additional_income += self.get_future_recurring_additional_amount(earning.additional_salary,
+							earning.additional_amount) # Used earning.additional_amount to consider the amount for the full month
+
+					if earning.deduct_full_tax_on_selected_payroll_date:
+						additional_income_with_full_tax += additional_amount
 
 		if allow_tax_exemption:
 			for ded in self.deductions:
 				if ded.exempted_from_income_tax:
-					amount = ded.amount
+					amount, additional_amount = ded.amount, ded.additional_amount
 					if based_on_payment_days:
-						amount = self.get_amount_based_on_payment_days(ded, joining_date, relieving_date)[0]
-					taxable_earnings -= flt(amount)
+						amount, additional_amount = self.get_amount_based_on_payment_days(ded, joining_date, relieving_date)
+
+					taxable_earnings -= flt(amount - additional_amount)
+					additional_income -= additional_amount
+
+					if additional_amount and ded.is_recurring_additional_salary:
+						additional_income -= self.get_future_recurring_additional_amount(ded.additional_salary,
+							ded.additional_amount) # Used ded.additional_amount to consider the amount for the full month
 
 		return frappe._dict({
 			"taxable_earnings": taxable_earnings,
@@ -925,11 +934,21 @@ class SalarySlip(TransactionBase):
 			"flexi_benefits": flexi_benefits
 		})
 
+	def get_future_recurring_additional_amount(self, additional_salary, monthly_additional_amount):
+		future_recurring_additional_amount = 0
+		to_date = frappe.db.get_value("Additional Salary", additional_salary, 'to_date')
+		# future month count excluding current
+		future_recurring_period = (getdate(to_date).month - getdate(self.start_date).month)
+		if future_recurring_period > 0:
+			future_recurring_additional_amount = monthly_additional_amount * future_recurring_period # Used earning.additional_amount to consider the amount for the full month
+		return future_recurring_additional_amount
+
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		amount, additional_amount = row.amount, row.additional_amount
 		if (self.salary_structure and
-			cint(row.depends_on_payment_days) and cint(self.total_working_days) and
-			(not self.salary_slip_based_on_timesheet or
+			cint(row.depends_on_payment_days) and cint(self.total_working_days)
+			and not (row.additional_salary and row.default_amount) # to identify overwritten additional salary
+			and (not self.salary_slip_based_on_timesheet or
 				getdate(self.start_date) < joining_date or
 				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
@@ -1248,7 +1267,7 @@ class SalarySlip(TransactionBase):
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
 			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
-			filters = {'employee_name' : self.employee_name,
+			filters = {'employee' : self.employee,
 				'start_date' : ['>=', period_start_date],
 				'end_date' : ['<', period_end_date],
 				'name': ['!=', self.name],
@@ -1268,7 +1287,7 @@ class SalarySlip(TransactionBase):
 		first_day_of_the_month = get_first_day(self.start_date)
 		salary_slip_sum = frappe.get_list('Salary Slip',
 			fields = ['sum(net_pay) as sum'],
-			filters = {'employee_name' : self.employee_name,
+			filters = {'employee' : self.employee,
 				'start_date' : ['>=', first_day_of_the_month],
 				'end_date' : ['<', self.start_date],
 				'name': ['!=', self.name],
@@ -1292,13 +1311,13 @@ class SalarySlip(TransactionBase):
 					INNER JOIN `tabSalary Slip` as salary_slip
 					ON detail.parent = salary_slip.name
 					WHERE
-						salary_slip.employee_name = %(employee_name)s
+						salary_slip.employee = %(employee)s
 						AND detail.salary_component = %(component)s
 						AND salary_slip.start_date >= %(period_start_date)s
 						AND salary_slip.end_date < %(period_end_date)s
 						AND salary_slip.name != %(docname)s
 						AND salary_slip.docstatus = 1""",
-						{'employee_name': self.employee_name, 'component': component.salary_component, 'period_start_date': period_start_date,
+						{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
 							'period_end_date': period_end_date, 'docname': self.name}
 				)
 
