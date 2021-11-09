@@ -1,0 +1,57 @@
+{
+ "creation": "2021-11-09 16:00:08.567981",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_entry",
+  "type",
+  "date",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fetch_from": "payment_entry.payment_type",
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payment_entry.posting_date",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payment_entry.paid_amount",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payment Entry",
+   "options": "Payment Entry"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-11-09 16:13:53.333204",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank reconciliations payment entry Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

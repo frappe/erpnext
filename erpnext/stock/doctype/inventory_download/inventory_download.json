@@ -90,13 +90,15 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-05 11:54:51.183908",
+ "modified": "2021-11-09 09:27:00.192188",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -106,6 +108,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -118,6 +121,7 @@
    "report": 1,
    "role": "Descarga de inventario",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

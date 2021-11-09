@@ -66,6 +66,29 @@ class PaymentEntry(AccountsController):
 			self.update_accounts_status()
 			self.paid_supplier_documents()
 			self.paid_customer_documents()
+			self.calculate_diferred_account()
+
+	def calculate_diferred_account(self):
+		doc = frappe.get_doc("Bank Account", self.bank_account)
+		if self.payment_type == "Receive":
+			doc.deferred_credits += self.paid_amount
+		if self.payment_type == "Pay":
+			doc.deferred_debits += self.paid_amount
+		
+		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+		
+		doc.save()
+	
+	def calculate_diferred_account_cancel(self):
+		doc = frappe.get_doc("Bank Account", self.bank_account)
+		if self.payment_type == "Receive":
+			doc.deferred_credits -= self.paid_amount
+		if self.payment_type == "Pay":
+			doc.deferred_debits -= self.paid_amount
+		
+		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+		
+		doc.save()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -86,6 +109,7 @@ class PaymentEntry(AccountsController):
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
 		self.set_status()
+		self.calculate_diferred_account_cancel()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
