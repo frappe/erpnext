@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
-from six import iteritems, string_types
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -117,7 +115,7 @@ class JournalEntry(AccountsController):
 				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
-		for voucher_type, order_list in iteritems(advance_paid):
+		for voucher_type, order_list in advance_paid.items():
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
@@ -432,7 +430,7 @@ class JournalEntry(AccountsController):
 
 	def validate_orders(self):
 		"""Validate totals, closed and docstatus for orders"""
-		for reference_name, total in iteritems(self.reference_totals):
+		for reference_name, total in self.reference_totals.items():
 			reference_type = self.reference_types[reference_name]
 			account = self.reference_accounts[reference_name]
 
@@ -463,7 +461,7 @@ class JournalEntry(AccountsController):
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
-		for reference_name, total in iteritems(self.reference_totals):
+		for reference_name, total in self.reference_totals.items():
 			reference_type = self.reference_types[reference_name]
 
 			if (reference_type in ("Sales Invoice", "Purchase Invoice") and
@@ -1008,7 +1006,7 @@ def get_outstanding(args):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	company_currency = erpnext.get_company_currency(args.get("company"))

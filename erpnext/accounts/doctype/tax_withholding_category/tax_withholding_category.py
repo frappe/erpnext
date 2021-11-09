@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -380,7 +378,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	current_invoice_total = get_invoice_total_without_tcs(inv, tax_details)
 	total_invoiced_amt = current_invoice_total + invoiced_amt + advance_amt - credit_note_amt
 
-	if ((cumulative_threshold and total_invoiced_amt >= cumulative_threshold)):
+	if (cumulative_threshold and total_invoiced_amt >= cumulative_threshold):
 		chargeable_amt = total_invoiced_amt - cumulative_threshold
 		tcs_amount = chargeable_amt * tax_details.rate / 100 if chargeable_amt > 0 else 0
 
