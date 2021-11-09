@@ -25,7 +25,8 @@ class TestJobCard(unittest.TestCase):
 		)
 		tests_that_transfer_against_jc = (
 			"test_job_card_multiple_materials_transfer",
-			"test_job_card_excess_material_transfer"
+			"test_job_card_excess_material_transfer",
+			"test_job_card_partial_material_transfer"
 		)
 
 		if self._testMethodName in tests_that_skip_setup:
@@ -202,6 +203,42 @@ class TestJobCard(unittest.TestCase):
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
 
+	def test_job_card_partial_material_transfer(self):
+		"Test partial material transfer against Job Card"
+
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC",
+			qty=25, basic_rate=100)
+		make_stock_entry(item_code="_Test Item Home Desktop Manufactured",
+			target="Stores - _TC", qty=15, basic_rate=100)
+
+		job_card_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
+		job_card = frappe.get_doc("Job Card", job_card_name)
+
+		# partially transfer
+		transfer_entry = make_stock_entry_from_jc(job_card_name)
+		transfer_entry.fg_completed_qty = 1
+		transfer_entry.get_items()
+		transfer_entry.insert()
+		transfer_entry.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 1)
+		self.assertEqual(transfer_entry.items[0].qty, 5)
+		self.assertEqual(transfer_entry.items[1].qty, 3)
+
+		# transfer remaining
+		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
+
+		self.assertEqual(transfer_entry_2.fg_completed_qty, 1)
+		self.assertEqual(transfer_entry_2.items[0].qty, 5)
+		self.assertEqual(transfer_entry_2.items[1].qty, 3)
+
+		transfer_entry_2.insert()
+		transfer_entry_2.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 2)
+
 	def test_job_card_material_transfer_correctness(self):
 		"""
 			1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
@@ -249,12 +286,14 @@ def create_bom_with_multiple_operations():
 	test_record = frappe.get_test_records("BOM")[2]
 	bom_doc = frappe.get_doc(test_record)
 
-	make_operation({
+	row = {
 		"operation": "Test Operation A",
 		"workstation": "_Test Workstation A",
 		"hour_rate_rent": 300,
 		"time_in_mins": 60
-	})
+	}
+	make_workstation(row)
+	make_operation(row)
 
 	bom_doc.append("operations", {
 		"operation": "Test Operation A",
