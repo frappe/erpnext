@@ -820,6 +820,38 @@ class AccountsController(TransactionBase):
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self)
 
+			if self.doctype == "Sales Order":
+				self.unlink_ref_doc_from_po()
+
+	def unlink_ref_doc_from_po(self):
+		so_items = []
+		for item in self.items:
+			so_items.append(item.name)
+
+		linked_po = list(set(frappe.get_all(
+			'Purchase Order Item',
+			filters = {
+				'sales_order': self.name,
+				'sales_order_item': ['in', so_items],
+				'docstatus': ['<', 2]
+			},
+			pluck='parent'
+		)))
+
+		if linked_po:
+			frappe.db.set_value(
+				'Purchase Order Item', {
+					'sales_order': self.name,
+					'sales_order_item': ['in', so_items],
+					'docstatus': ['<', 2]
+				},{
+					'sales_order': None,
+					'sales_order_item': None
+				}
+			)
+
+			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+
 	def get_tax_map(self):
 		tax_map = {}
 		for tax in self.get('taxes'):
@@ -1043,9 +1075,9 @@ class AccountsController(TransactionBase):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 			.format(item.item_code, item.idx, max_allowed_amt))
 
-	def get_company_default(self, fieldname):
+	def get_company_default(self, fieldname, ignore_validation=False):
 		from erpnext.accounts.utils import get_company_default
-		return get_company_default(self.company, fieldname)
+		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
 		stock_items = []
