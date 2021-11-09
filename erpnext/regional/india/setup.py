@@ -12,7 +12,7 @@ from frappe.utils import today
 
 def setup(company=None, patch=True):
 	# Company independent fixtures should be called only once at the first company setup
-	if frappe.db.count('Company', {'country': 'India'}) <=1:
+	if patch or frappe.db.count('Company', {'country': 'India'}) <=1:
 		setup_company_independent_fixtures(patch=patch)
 
 	if not patch:
