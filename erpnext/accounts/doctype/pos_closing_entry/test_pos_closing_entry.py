@@ -33,12 +33,14 @@ class TestPOSClosingEntry(unittest.TestCase):
 		pos_inv1.append('payments', {
 			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3500
 		})
+		pos_inv1.save()
 		pos_inv1.submit()
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
 		pos_inv2.append('payments', {
 			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3200
 		})
+		pos_inv2.save()
 		pos_inv2.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
@@ -50,6 +52,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 			if d.mode_of_payment == 'Cash':
 				d.closing_amount = 6700
 
+		pcv_doc.save()
 		pcv_doc.submit()
 
 		self.assertEqual(pcv_doc.total_quantity, 2)
@@ -60,15 +63,19 @@ class TestPOSClosingEntry(unittest.TestCase):
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
+		pos_inv1.payments = []
 		pos_inv1.append('payments', {
 			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3500
 		})
+		pos_inv1.save()
 		pos_inv1.submit()
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2.payments = []
 		pos_inv2.append('payments', {
 			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3200
 		})
+		pos_inv2.save()
 		pos_inv2.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
@@ -80,6 +87,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 			if d.mode_of_payment == 'Cash':
 				d.closing_amount = 6700
 
+		pcv_doc.save()
 		pcv_doc.submit()
 
 		pos_inv1.load_from_db()
