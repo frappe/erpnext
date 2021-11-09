@@ -4,7 +4,7 @@
 frappe.ui.form.on('Supplier Retention', {
 	setup: function(frm) {
         frm.set_query("reference_doctype", "references", function() {
-			var doctypes = ["Purchase Invoice"];
+			var doctypes = ["Purchase Invoice", "Supplier Documents"];
 
 			return {
 				filters: { "name": ["in", doctypes] }

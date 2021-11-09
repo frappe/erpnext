@@ -17,6 +17,7 @@ class Bankreconciliations(Document):
 			self.conciliation_transactions()
 			self.create_reconciled_balance()
 			self.modified_total_reconcilitiation_account()
+			self.mark_reconciled_payment_entry()
 
 	def on_update(self):
 		self.update_amount()
@@ -24,9 +25,16 @@ class Bankreconciliations(Document):
 	def update_amount(self):
 		details = frappe.get_all("Bank reconciliations Table", ["amount"], filters = {"parent": self.name})
 
+		details_payment = frappe.get_all("Bank reconciliations payment entry Table", ["amount"], filters = {"parent": self.name})
+
 		self.transaction_amount = 0
+
 		for detail in details:
 			self.transaction_amount += detail.amount
+		
+		for detail_payment in details_payment:
+			self.transaction_amount += detail_payment.amount
+
 		if self.bank_amount == None:
 			self.bank_amount = 0
 			
@@ -43,6 +51,14 @@ class Bankreconciliations(Document):
 			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
 			doc.docstatus = 5
 			doc.status = "Reconciled"
+			doc.save()
+	
+	def mark_reconciled_payment_entry(self):
+		details = frappe.get_all("Bank reconciliations payment entry Table", ["payment_entry"], filters = {"parent": self.name})
+
+		for detail in details:
+			doc = frappe.get_doc("Payment Entry", detail.payment_entry)
+			doc.db_set('reconciled', 1, update_modified=False)
 			doc.save()
 	
 	def create_reconciled_balance(self):
