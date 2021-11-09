@@ -29,8 +29,15 @@ def get_production_plan_item_details(filters, data, order_details):
 
 	production_plan_doc = frappe.get_cached_doc("Production Plan", filters.get("production_plan"))
 	for row in production_plan_doc.po_items:
-		work_order = frappe.get_cached_value("Work Order", {"production_plan_item": row.name,
-			"bom_no": row.bom_no, "production_item": row.item_code}, "name")
+		work_order = frappe.get_value(
+			"Work Order",
+			{
+				"production_plan_item": row.name,
+				"bom_no": row.bom_no,
+				"production_item": row.item_code
+			},
+			"name"
+		)
 
 		if row.item_code not in itemwise_indent:
 			itemwise_indent.setdefault(row.item_code, {})
@@ -41,10 +48,10 @@ def get_production_plan_item_details(filters, data, order_details):
 			"item_name": frappe.get_cached_value("Item", row.item_code, "item_name"),
 			"qty": row.planned_qty,
 			"document_type": "Work Order",
-			"document_name": work_order,
+			"document_name": work_order or "",
 			"bom_level": frappe.get_cached_value("BOM", row.bom_no, "bom_level"),
-			"produced_qty": order_details.get((work_order, row.item_code)).get("produced_qty"),
-			"pending_qty": flt(row.planned_qty) - flt(order_details.get((work_order, row.item_code)).get("produced_qty"))
+			"produced_qty": order_details.get((work_order, row.item_code), {}).get("produced_qty", 0),
+			"pending_qty": flt(row.planned_qty) - flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0))
 		})
 
 		get_production_plan_sub_assembly_item_details(filters, row, production_plan_doc, data, order_details)
@@ -55,11 +62,23 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 			subcontracted_item = (item.type_of_manufacturing == 'Subcontract')
 
 			if subcontracted_item:
-				docname = frappe.get_cached_value("Purchase Order Item",
-					{"production_plan_sub_assembly_item": item.name, "docstatus": ("<", 2)}, "parent")
+				docname = frappe.get_value(
+					"Purchase Order Item",
+					{
+						"production_plan_sub_assembly_item": item.name,
+						"docstatus": ("<", 2)
+					},
+					"parent"
+				)
 			else:
-				docname = frappe.get_cached_value("Work Order",
-					{"production_plan_sub_assembly_item": item.name, "docstatus": ("<", 2)}, "name")
+				docname = frappe.get_value(
+					"Work Order",
+					{
+						"production_plan_sub_assembly_item": item.name,
+						"docstatus": ("<", 2)
+					},
+					"name"
+				)
 
 			data.append({
 				"indent": 1,
@@ -67,10 +86,10 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 				"item_name": item.item_name,
 				"qty": item.qty,
 				"document_type": "Work Order" if not subcontracted_item else "Purchase Order",
-				"document_name": docname,
+				"document_name": docname or "",
 				"bom_level": item.bom_level,
-				"produced_qty": order_details.get((docname, item.production_item)).get("produced_qty"),
-				"pending_qty": flt(item.qty) - flt(order_details.get((docname, item.production_item)).get("produced_qty"))
+				"produced_qty": order_details.get((docname, item.production_item), {}).get("produced_qty", 0),
+				"pending_qty": flt(item.qty) - flt(order_details.get((docname, item.production_item), {}).get("produced_qty", 0))
 			})
 
 def get_work_order_details(filters, order_details):
