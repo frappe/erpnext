@@ -18,7 +18,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -58,20 +57,20 @@
   {
    "fieldname": "qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Qty"
   },
   {
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Read Only",
-   "in_list_view": 1,
    "label": "Item Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-21 12:50:13.906088",
+ "modified": "2021-11-09 13:02:19.188512",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Work Order",
