@@ -28,6 +28,11 @@ frappe.ui.form.on('Job Card', {
 		frappe.flags.resume_job = 0;
 		let has_items = frm.doc.items && frm.doc.items.length;
 
+		if (frm.doc.__onload.work_order_stopped) {
+			frm.disable_save();
+			return;
+		}
+
 		if (!frm.doc.__islocal && has_items && frm.doc.docstatus < 2) {
 			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
 			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
