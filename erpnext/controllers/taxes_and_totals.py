@@ -259,6 +259,10 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
+		if hasattr(self.doc, "shipping_rule"):
+			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
+			shipping_rule.apply(self.doc)
+
 	def calculate_taxes(self):
 		self.doc.rounding_adjustment = 0
 		# maintain actual tax rate based on idx
