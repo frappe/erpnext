@@ -220,9 +220,9 @@ class SerialNo(StockController):
 		self.set_status()
 
 def process_serial_no(sle):
-	item_det = get_item_details(sle.item_code)
-	validate_serial_no(sle, item_det)
-	update_serial_nos(sle, item_det)
+	item_details = get_item_details(sle.item_code)
+	validate_serial_no(sle, item_details)
+	update_serial_nos(sle, item_details)
 
 def validate_serial_no(sle, item_det):
 	serial_nos = get_serial_nos(sle.serial_no) if sle.serial_no else []
@@ -466,9 +466,9 @@ def get_items_html(serial_nos, item_code):
 
 
 def get_item_details(item_code):
-	return frappe.db.sql("""select name, has_batch_no, docstatus,
-		is_stock_item, has_serial_no, serial_no_series
-		from tabItem where name=%s""", item_code, as_dict=True)[0]
+	return frappe.db.get_value("Item", item_code, ["name", "has_batch_no", "docstatus",
+		"is_stock_item", "has_serial_no", "serial_no_series"], as_dict=True)
+
 
 def get_serial_nos(serial_no: str) -> List[str]:
 	if isinstance(serial_no, list):
